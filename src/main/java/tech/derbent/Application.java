@@ -13,6 +13,8 @@ import com.vaadin.flow.theme.Theme;
 @Theme("default")
 public class Application implements AppShellConfigurator {
 
+	private static final long serialVersionUID = 1L;
+
 	public static void main(final String[] args) {
 		SpringApplication.run(Application.class, args);
 	}
