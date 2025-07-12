@@ -1,0 +1,17 @@
+Code Organizing
+	Remove trailing whitespace->all lines
+
+Code Style
+	Use paranthesis in expression->Always
+
+Use modifier final where possible
+	Yes
+		private fields, parameter, local vars Yes
+
+Missing Code
+	Add missin annotations->select all
+
+Unnecassary Code
+	remove unused imports
+	
+
