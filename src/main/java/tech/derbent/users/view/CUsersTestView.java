@@ -1,14 +1,12 @@
 package tech.derbent.users.view;
 
-import static com.vaadin.flow.spring.data.VaadinSpringDataHelpers.toSpringPageRequest;
-
 import java.time.Clock;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.Menu;
@@ -26,23 +24,20 @@ import tech.derbent.users.service.CUserService;
 @PageTitle("User List View")
 @Menu(order = 0, icon = "vaadin:clipboard-check", title = "Settings.User Test")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CUsersTestView extends CAbstractMDPage {
+public class CUsersTestView extends CAbstractMDPage<CUser> {
 
 	private static final long serialVersionUID = 1L;
-	private final CUserService service;
+	// private final CUserService service;
 	TextField name;
-	Grid<CUser> grid;
+	// Grid<CUser> grid;
 	Clock clock;
 	Button createBtn;
 
 	public CUsersTestView(final CUserService service, final Clock clock) {
-		super();
+		super(CUser.class, service);
 		this.clock = clock;
-		this.service = service;
-		grid = new Grid<>();
-		grid.setItems(query -> service.list(toSpringPageRequest(query)).stream());
-		grid.addColumn(CUser::getName).setHeader("Description");
-		grid.setSizeFull();
+		// this.service = service; grid = new Grid<>(); grid.setItems(query ->
+		// service.list(toSpringPageRequest(query)).stream()); grid.setSizeFull();
 		add(grid);
 	}
 
@@ -51,11 +46,31 @@ public class CUsersTestView extends CAbstractMDPage {
 		// TODO Auto-generated method stub
 	}
 
+	@Override
+	protected void createDetailsLayout(final SplitLayout splitLayout) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	protected void createGridForEntity() {
+		grid.addColumn(CUser::getName).setHeader("Description");
+	}
+
 	private void createTask() {
-		service.createEntity(name.getValue());
+		((CUserService) entityService).createEntity(name.getValue());
 		grid.getDataProvider().refreshAll();
 		name.clear();
 		Notification.show("Entity added", 3000, Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+	}
+
+	@Override
+	protected String getEntityRouteIdField() { // TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	protected String getEntityRouteTemplateEdit() { // TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
