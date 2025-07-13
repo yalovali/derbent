@@ -10,6 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.users.domain.CUser;
+/*
+ * This service is responsible for managing CUser entities.
+ */
 
 @Service
 @PreAuthorize("isAuthenticated()")
