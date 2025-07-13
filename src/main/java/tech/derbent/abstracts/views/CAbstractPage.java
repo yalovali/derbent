@@ -1,9 +1,10 @@
 package tech.derbent.abstracts.views;
 
 import com.vaadin.flow.component.html.Main;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
-public abstract class CAbstractPage extends Main {
+public abstract class CAbstractPage extends Main implements BeforeEnterObserver {
 
 	private static final long serialVersionUID = 1L;
 

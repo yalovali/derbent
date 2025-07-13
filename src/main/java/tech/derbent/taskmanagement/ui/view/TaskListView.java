@@ -14,6 +14,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -56,6 +57,11 @@ public class TaskListView extends CAbstractPage {
 		taskGrid.addColumn(task -> dateTimeFormatter.format(task.getCreationDate())).setHeader("Creation Date");
 		taskGrid.setSizeFull();
 		add(taskGrid);
+	}
+
+	@Override
+	public void beforeEnter(final BeforeEnterEvent event) {
+		// TODO Auto-generated method stub
 	}
 
 	private void createTask() {
