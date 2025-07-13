@@ -1,4 +1,4 @@
-package views;
+package tech.derbent.abstracts.views;
 
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.theme.lumo.LumoUtility;

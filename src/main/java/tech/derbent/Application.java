@@ -8,6 +8,17 @@ import org.springframework.context.annotation.Bean;
 
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.theme.Theme;
+/* build dizini altinda degilse, sprintboot app ilgili classlari gezip sistemleri yaratmiyor.
+ *
+ * Bu durumda, build dizini altinda olmasi icin, src/main/java/tech/derbent/Application.java
+ * olarak konumlandirildi.
+ *
+ * yada su sekilde tanimlar yapilmali:
+@ComponentScan(basePackages = "users.service")
+@EnableJpaRepositories(basePackages = "users.service")
+@EntityScan(basePackages = "users.domain")
+ *
+ */
 
 @SpringBootApplication
 @Theme("default")

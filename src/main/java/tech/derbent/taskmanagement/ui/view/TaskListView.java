@@ -19,14 +19,14 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.abstracts.views.CAbstractPage;
 import tech.derbent.base.ui.component.ViewToolbar;
 import tech.derbent.taskmanagement.domain.Task;
 import tech.derbent.taskmanagement.service.TaskService;
-import views.CAbstractPage;
 
 @Route("task-list")
 @PageTitle("Task List")
-@Menu(order = 0, icon = "vaadin:clipboard-check", title = "Task List")
+@Menu(order = 0, icon = "vaadin:clipboard-check", title = "Tasks.		Task List")
 @PermitAll // When security is enabled, allow all authenticated users
 public class TaskListView extends CAbstractPage {
 

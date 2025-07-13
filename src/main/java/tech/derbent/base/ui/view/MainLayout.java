@@ -57,19 +57,51 @@ public final class MainLayout extends AppLayout {
 		return header;
 	}
 
+	/**
+	 * Creates the side navigation menu. The navigation menu is dynamically
+	 * populated with menu entries from `MenuConfiguration`. Each entry is
+	 * represented as a `SideNavItem` with optional icons.
+	 * @return A `SideNav` component containing the navigation items.
+	 */
 	private SideNav createSideNav() {
-		final var nav = new SideNav();
-		nav.addClassNames(Margin.Horizontal.MEDIUM);
-		MenuConfiguration.getMenuEntries().forEach(entry -> nav.addItem(createSideNavItem(entry)));
+		final var nav = new SideNav(); // Create the side navigation
+		nav.addClassNames(Margin.Horizontal.MEDIUM); // Style the navigation
+		MenuConfiguration.getMenuEntries().forEach(entry -> createSideNavItem(nav, entry)); // Add menu entries
 		return nav;
 	}
 
-	private SideNavItem createSideNavItem(final MenuEntry menuEntry) {
-		if (menuEntry.icon() != null) {
-			return new SideNavItem(menuEntry.title(), menuEntry.path(), new Icon(menuEntry.icon()));
+	/**
+	 * Creates a side navigation item for a given menu entry. Each menu entry is
+	 * represented as a `SideNavItem` with optional icons.
+	 * @param menuEntry The menu entry to create a navigation item for.
+	 * @return A `SideNavItem` representing the menu entry.
+	 */
+	private void createSideNavItem(final SideNav nav, final MenuEntry menuEntry) {
+		if (menuEntry == null) {
+			return; // Return null if the menu entry is null
+		}
+		// read the menu entry properties
+		String title = menuEntry.title();
+		final String path = menuEntry.path();
+		final String icon = menuEntry.icon();
+		// if title contains a dot, it is a sub-menu entry
+		if (title.contains(".")) {
+			final var parts = title.split("\\.");
+			title = parts[parts.length - 1]; // Use the last part as the title
+			final String parent_title = parts[0]; // Use the first part as the parent title
+			// find the parent menu entry
+			SideNavItem parentItem = nav.getItems().stream().filter(item -> item.getLabel().equals(parent_title)).findFirst().orElse(null);
+			if (parentItem == null) {
+				parentItem = new SideNavItem(parent_title);
+				parentItem.setPrefixComponent(new Icon(icon)); // Set the icon for the parent item
+				nav.addItem(parentItem); // Add the parent item to the navigation
+			}
+			// Create a sub-menu item under the parent entry
+			parentItem.addItem(new SideNavItem(title, path, new Icon(icon)));
 		}
 		else {
-			return new SideNavItem(menuEntry.title(), menuEntry.path());
+			// Create a top-level menu item
+			nav.addItem(new SideNavItem(title, path, new Icon(icon))); // Create item with
 		}
 	}
 
