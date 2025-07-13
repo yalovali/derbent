@@ -3,17 +3,21 @@ package tech.derbent.abstracts.domains;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.util.ProxyUtils;
 
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
-import tech.derbent.base.domain.AbstractEntity;
 
 @MappedSuperclass
-public abstract class CEntityDB<ID> extends CEntity {
+public abstract class CEntityDB extends CEntity {
 
 	public static final int MAX_LENGTH_DESCRIPTION = 255;
 	public static final int MAX_LENGTH_NAME = 100;
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+	private Long id;
 
-	@Override
-	public boolean equals(final Object obj) {
+	public boolean equals(final CEntityDB obj) {
 		if (obj == null) {
 			return false;
 		}
@@ -26,10 +30,11 @@ public abstract class CEntityDB<ID> extends CEntity {
 			return false;
 		}
 		final var id = getId();
-		return (id != null) && id.equals(((AbstractEntity<?>) obj).getId());
+		return (id != null) && id.equals(obj.getId());
 	}
 
-	public abstract @Nullable ID getId();
+	@Nullable
+	public Long getId() { return id; }
 
 	@Override
 	public int hashCode() {

@@ -1,28 +1,29 @@
 package tech.derbent.users.service;
 
 import java.time.Clock;
-import java.util.List;
+import java.util.Optional;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.users.domain.CUser;
-/*
- * This service is responsible for managing CUser entities.
- */
 
 @Service
 @PreAuthorize("isAuthenticated()")
-public class CUserService extends CAbstractService {
-
-	private final CUserRepository repository;
+public class CUserService extends CAbstractService<CUser> {
 
 	CUserService(final CUserRepository repository, final Clock clock) {
-		super(clock);
-		this.repository = repository;
+		super(repository, clock);
+	}
+
+	public int count() {
+		return (int) repository.count();
 	}
 
 	@Transactional
@@ -35,8 +36,27 @@ public class CUserService extends CAbstractService {
 		repository.saveAndFlush(entity);
 	}
 
-	@Transactional(readOnly = true)
-	public List<CUser> list(final Pageable pageable) {
-		return repository.findAllBy(pageable).toList();
+	public void delete(final Long id) {
+		repository.deleteById(id);
+	}
+
+	public Optional<CUser> get(final Long id) {
+		return repository.findById(id);
+	}
+
+	/*
+	 * @Transactional(readOnly = true) public List<CUser> list(final Pageable
+	 * pageable) { return repository.findAllBy(pageable).toList(); }
+	 */
+	public Page<CUser> list(final Pageable pageable) {
+		return repository.findAll(pageable);
+	}
+
+	public Page<CUser> list(final Pageable pageable, final Specification<CUser> filter) {
+		return repository.findAll(filter, pageable);
+	}
+
+	public CEntityDB save(final CUser entity) {
+		return repository.save(entity);
 	}
 }

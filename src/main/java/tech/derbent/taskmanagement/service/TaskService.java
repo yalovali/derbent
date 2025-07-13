@@ -29,13 +29,11 @@ import tech.derbent.taskmanagement.domain.TaskRepository;
  */
 @Service // TaskService.java
 @PreAuthorize("isAuthenticated()") // Ensures that only authenticated users can access the methods of this service
-public class TaskService extends CAbstractService {
+public class TaskService extends CAbstractService<Task> {
+	// private final TaskRepository taskRepository;
 
-	private final TaskRepository taskRepository;
-
-	TaskService(final TaskRepository taskRepository, final Clock clock) {
-		super(clock);
-		this.taskRepository = taskRepository;
+	TaskService(final TaskRepository repository, final Clock clock) {
+		super(repository, clock);
 	}
 
 	@Transactional
@@ -47,11 +45,11 @@ public class TaskService extends CAbstractService {
 		task.setDescription(description);
 		task.setCreationDate(clock.instant());
 		task.setDueDate(dueDate);
-		taskRepository.saveAndFlush(task);
+		repository.saveAndFlush(task);
 	}
 
 	@Transactional(readOnly = true)
 	public List<Task> list(final Pageable pageable) {
-		return taskRepository.findAllBy(pageable).toList();
+		return repository.findAllBy(pageable).toList();
 	}
 }

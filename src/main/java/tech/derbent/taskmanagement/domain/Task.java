@@ -5,24 +5,19 @@ import java.time.LocalDate;
 
 import org.jspecify.annotations.Nullable;
 
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
-import tech.derbent.base.domain.AbstractEntity;
+import tech.derbent.abstracts.domains.CEntityDB;
 
 @Entity
 @Table(name = "task")
-public class Task extends AbstractEntity<Long> {
+@AttributeOverride(name = "id", column = @Column(name = "task_id")) // Override the default column name for the ID field
+public class Task extends CEntityDB {
 
 	public static final int DESCRIPTION_MAX_LENGTH = 255;
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	@Column(name = "task_id")
-	private Long id;
 	@Column(name = "description", nullable = false, length = DESCRIPTION_MAX_LENGTH)
 	@Size(max = DESCRIPTION_MAX_LENGTH)
 	private String description;
@@ -37,9 +32,6 @@ public class Task extends AbstractEntity<Long> {
 	public String getDescription() { return description; }
 
 	public @Nullable LocalDate getDueDate() { return dueDate; }
-
-	@Override
-	public @Nullable Long getId() { return id; }
 
 	public void setCreationDate(final Instant creationDate) { this.creationDate = creationDate; }
 

@@ -16,6 +16,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.views.CAbstractMDPage;
 import tech.derbent.base.ui.component.ViewToolbar;
 import tech.derbent.users.domain.CUser;
@@ -74,7 +75,7 @@ public class CUsersTestView extends CAbstractMDPage {
 		name = new TextField();
 		name.setPlaceholder("name please?");
 		name.setAriaLabel("Entity name");
-		name.setMaxLength(CUser.MAX_LENGTH_NAME);
+		name.setMaxLength(CEntityDB.MAX_LENGTH_NAME);
 		name.setMinWidth("20em");
 		createBtn = new Button("Create", event -> createTask());
 		createBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
