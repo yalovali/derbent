@@ -25,6 +25,10 @@ public abstract class CAbstractService<EntityClass extends CEntityDB> {
 		return (int) repository.count();
 	}
 
+	public void delete(final EntityClass entity) {
+		repository.delete(entity);
+	}
+
 	public void delete(final Long id) {
 		repository.deleteById(id);
 	}

@@ -13,13 +13,12 @@ import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.services.CAbstractService;
-import tech.derbent.users.view.CUsersView;
 
 public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAbstractPage {
 
 	private static final long serialVersionUID = 1L;
 	private final Class<EntityClass> entityClass;
-	protected Grid<EntityClass> grid;// = new Grid<>(CUser.class, false);
+	protected Grid<EntityClass> grid;// = new Grid<>(CProject.class, false);
 	protected BeanValidationBinder<EntityClass> binder;
 	protected SplitLayout splitLayout = new SplitLayout();
 	protected EntityClass currentEntity;
@@ -53,7 +52,7 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 				Notification.show(String.format("The requested samplePerson was not found, ID = %s", entityID.get()), 3000, Notification.Position.BOTTOM_START);
 				// when a row is selected but the data is no longer available, refresh grid
 				refreshGrid();
-				event.forwardTo(CUsersView.class);
+				// event.forwardTo(CProjectsView.class);
 			}
 		}
 	}
