@@ -4,6 +4,8 @@ import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -15,8 +17,10 @@ public abstract class CAbstractService<EntityClass extends CEntityDB> {
 
 	protected final Clock clock;
 	protected final CAbstractRepository<EntityClass> repository;
+	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	public CAbstractService(final CAbstractRepository<EntityClass> repository, final Clock clock) {
+		LOGGER.info("CAbstractService constructor called for {}", getClass().getSimpleName());
 		this.clock = clock;
 		this.repository = repository;
 	}

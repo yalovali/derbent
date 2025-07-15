@@ -17,6 +17,10 @@ public abstract class CEntityDB extends CEntity {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private Long id;
 
+	public CEntityDB() {
+		super();
+	}
+
 	public boolean equals(final CEntityDB obj) {
 		if (obj == null) {
 			return false;
