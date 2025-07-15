@@ -25,7 +25,7 @@ public class CActivity extends CEntityDB {
 	private CProject project;
 
 	public CActivity() {
-		this.project = new CProject();
+		// Default constructor - project will be set later
 	}
 
 	public CActivity(final String name, final CProject project) {
