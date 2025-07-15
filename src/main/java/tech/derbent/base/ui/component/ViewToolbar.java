@@ -42,6 +42,7 @@ public final class ViewToolbar extends Composite<Header> {
 	}
 
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+	private final H1 title;
 
 	/**
 	 * Constructs a ViewToolbar with a title and optional components.
@@ -54,8 +55,7 @@ public final class ViewToolbar extends Composite<Header> {
 		// this is a button that toggles the drawer in the app layout
 		final var drawerToggle = new DrawerToggle();
 		drawerToggle.addClassNames(Margin.NONE);
-		// title
-		final var title = new H1(viewTitle);
+		title = new H1(viewTitle);
 		title.addClassNames(FontSize.XLARGE, Margin.NONE, FontWeight.LIGHT);
 		// put them together
 		final var toggleAndTitle = new Div(drawerToggle, title);
@@ -73,5 +73,9 @@ public final class ViewToolbar extends Composite<Header> {
 		multiSelectComboBox.setItems("Project A", "Project B", "Project C", "Project D", "Project E");
 		getContent().add(new Div("Select projects:"));
 		getContent().add(multiSelectComboBox);
+	}
+
+	public void setPageTitle(final String title) {
+		this.title.setText(title);
 	}
 }

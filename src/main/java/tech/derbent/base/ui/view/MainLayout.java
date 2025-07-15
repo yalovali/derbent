@@ -57,6 +57,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	private final CurrentUser currentUser;
 	private final AuthenticationContext authenticationContext;
+	private ViewToolbar mainToolbar;
 
 	MainLayout(final CurrentUser currentUser, final AuthenticationContext authenticationContext) {
 		LOGGER.info("Creating MainLayout");
@@ -72,7 +73,9 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		LOGGER.debug("After navigation in MainLayout");
 		// Update the view title in the toolbar after navigation
 		final String pageTitle = MenuConfiguration.getPageHeader(getContent()).orElse("Main Layout");
-		addToNavbar(true, new ViewToolbar(pageTitle)); // Add the toolbar with the page title
+		mainToolbar.setPageTitle(pageTitle); // Set the page title in the toolbar
+		// addToNavbar(true, new ViewToolbar(pageTitle)); // Add the toolbar with the
+		// page title
 		/*
 		 * Component content = getContent(); if (content instanceof HasDynamicTitle) {
 		 * String title = ((HasDynamicTitle) content).getPageTitle();
@@ -96,7 +99,8 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		final Div navBar = new Div("by oflova");
 		// dont add any other compoents to the navbar, just the toolbar otherwise call
 		// it with ,xyz,xyz etc..
-		navBar.add(new ViewToolbar("Main Layout"));
+		mainToolbar = new ViewToolbar("Main Layout");
+		navBar.add(mainToolbar);
 		return navBar;
 	}
 
