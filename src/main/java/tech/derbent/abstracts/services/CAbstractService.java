@@ -20,7 +20,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB> {
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	public CAbstractService(final CAbstractRepository<EntityClass> repository, final Clock clock) {
-		LOGGER.info("CAbstractService constructor called for {}", getClass().getSimpleName());
+		LOGGER.debug("CAbstractService constructor called for {}", getClass().getSimpleName());
 		this.clock = clock;
 		this.repository = repository;
 	}

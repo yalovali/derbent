@@ -20,7 +20,6 @@ import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.views.CAbstractMDPage;
-import tech.derbent.abstracts.views.CEntityFormBuilder;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.service.CUserService;
 
@@ -111,7 +110,7 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 		editorDiv.add(formLayout);
 		editorDiv.add(new Div("Hi!!!"));
 		// birazdan ucuyoruz !!!!!!!!!!!!!!!!!!
-		editorDiv.add(CEntityFormBuilder.buildForm(CUser.class));
+		// editorDiv.add(CEntityFormBuilder.buildForm(CUser.class));
 		createButtonLayout(editorLayoutDiv);
 		splitLayout.addToSecondary(editorLayoutDiv);
 	}

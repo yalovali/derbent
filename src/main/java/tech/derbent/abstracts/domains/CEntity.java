@@ -9,6 +9,6 @@ public abstract class CEntity {
 	// protected final String className = getClass().getSimpleName();
 
 	public CEntity() {
-		LOGGER.info("CEntity constructor called for {}", getClass().getSimpleName());
+		LOGGER.debug("CEntity constructor called for {}", getClass().getSimpleName());
 	}
 }

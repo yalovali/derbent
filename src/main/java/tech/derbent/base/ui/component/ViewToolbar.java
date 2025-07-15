@@ -1,5 +1,8 @@
 package tech.derbent.base.ui.component;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.applayout.DrawerToggle;
@@ -16,26 +19,53 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 
+/* ViewToolbar.java
+ *
+ * This class defines a toolbar for views in the application, providing a
+ * consistent header with a title and optional action components.
+ *
+ * It extends Composite to allow for easy composition of the toolbar's content.
+ */
 public final class ViewToolbar extends Composite<Header> {
 
 	private static final long serialVersionUID = 1L;
 
+	/*
+	 * just used to create a group of components with nice styling. Not related to a
+	 * toolbar
+	 */
 	public static Component group(final Component... components) {
 		final var group = new Div(components);
 		group.addClassNames(Display.FLEX, FlexDirection.COLUMN, AlignItems.STRETCH, Gap.SMALL, FlexDirection.Breakpoint.Medium.ROW, AlignItems.Breakpoint.Medium.CENTER);
 		return group;
 	}
 
+	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+
+	/**
+	 * Constructs a ViewToolbar with a title and optional components.
+	 * @param viewTitle  The title of the view to be displayed in the toolbar.
+	 * @param components Optional components to be added to the toolbar.
+	 */
 	public ViewToolbar(final String viewTitle, final Component... components) {
+		LOGGER.debug("Creating ViewToolbar for {}", viewTitle);
 		addClassNames(Display.FLEX, FlexDirection.COLUMN, JustifyContent.BETWEEN, AlignItems.STRETCH, Gap.MEDIUM, FlexDirection.Breakpoint.Medium.ROW, AlignItems.Breakpoint.Medium.CENTER);
+		// this is a button that toggles the drawer in the app layout
 		final var drawerToggle = new DrawerToggle();
 		drawerToggle.addClassNames(Margin.NONE);
+		// title
 		final var title = new H1(viewTitle);
 		title.addClassNames(FontSize.XLARGE, Margin.NONE, FontWeight.LIGHT);
+		// put them together
 		final var toggleAndTitle = new Div(drawerToggle, title);
 		toggleAndTitle.addClassNames(Display.FLEX, AlignItems.CENTER);
+		// add them to the content of the header
 		getContent().add(toggleAndTitle);
+		// add some test content to the toolbar
+		getContent().add(new Div("Hi there! This is a toolbar for the " + viewTitle + " view."));
+		// add more if passed as a parameter
 		if (components.length > 0) {
+			// If there are additional components, add them to the toolbar
 			final var actions = new Div(components);
 			actions.addClassNames(Display.FLEX, FlexDirection.COLUMN, JustifyContent.BETWEEN, Flex.GROW, Gap.SMALL, FlexDirection.Breakpoint.Medium.ROW);
 			getContent().add(actions);
