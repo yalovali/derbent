@@ -91,6 +91,6 @@ public class TaskListView extends CAbstractPage {
 		dueDate.setAriaLabel("Due date");
 		createBtn = new Button("Create", event -> createTask());
 		createBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		add(new ViewToolbar("Task List", ViewToolbar.group(description, dueDate, createBtn)));
+		add(ViewToolbar.group(description, dueDate, createBtn));
 	}
 }

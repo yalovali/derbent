@@ -1,4 +1,4 @@
-package tech.derbent.users.view;
+package tech.derbent.activities.view;
 
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
@@ -20,33 +20,29 @@ import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.views.CAbstractMDPage;
-import tech.derbent.users.domain.CUser;
-import tech.derbent.users.service.CUserService;
+import tech.derbent.activities.domain.CActivity;
+import tech.derbent.activities.service.CActivityService;
 
-@Route("users/:user_id?/:action?(edit)")
-@PageTitle("User Master Detail")
-@Menu(order = 0, icon = "vaadin:clipboard-check", title = "Settings.Users")
+@Route("activities/:activity_id?/:action?(edit)")
+@PageTitle("Activity Master Detail")
+@Menu(order = 0, icon = "vaadin:clipboard-check", title = "Settings.Activities")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CUsersView extends CAbstractMDPage<CUser> {
+public class CActivitiesView extends CAbstractMDPage<CActivity> {
 
 	private static final long serialVersionUID = 1L;
-	private final String ENTITY_ID_FIELD = "user_id";
-	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "users/%s/edit";
+	private final String ENTITY_ID_FIELD = "project_id";
+	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "projects/%s/edit";
 	private TextField name;
-	private TextField lastName;
-	private TextField email;
-	private TextField phone;
-	private TextField login;
 	private Button cancel;
 	private Button save;
 	private Button delete;
-	// private final BeanValidationBinder<CUser> binder; private final CUserService
-	// userService; private final Grid<CUser> grid;// = new Grid<>(CUser.class,
-	// false);
+	// private final BeanValidationBinder<CProject> binder; private final
+	// CProjectService userService; private final Grid<CProject> grid;// = new
+	// Grid<>(CProject.class, false);
 
-	public CUsersView(final CUserService entityService) {
-		super(CUser.class, entityService);
-		addClassNames("users-view");
+	public CActivitiesView(final CActivityService entityService) {
+		super(CActivity.class, entityService);
+		addClassNames("projects-view");
 		// Configure Form Bind fields. This is where you'd define e.g. validation rules
 		binder.bindInstanceFields(this);
 	}
@@ -56,29 +52,29 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 		buttonLayout.setClassName("button-layout");
 		cancel = new Button("Cancel");
 		save = new Button("Save");
-		cancel.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-		save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		delete = new Button("Delete");
 		delete.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-		delete.addClickListener(e -> {
-			entityService.delete(currentEntity);
-			refreshGrid();
-		});
+		cancel.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+		save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		cancel.addClickListener(e -> {
 			clearForm();
+			refreshGrid();
+		});
+		delete.addClickListener(e -> {
+			entityService.delete(currentEntity);
 			refreshGrid();
 		});
 		save.addClickListener(e -> {
 			try {
 				if (currentEntity == null) {
-					currentEntity = new CUser();
+					currentEntity = new CActivity();
 				}
 				binder.writeBean(currentEntity);
 				entityService.save(currentEntity);
 				clearForm();
 				refreshGrid();
 				Notification.show("Data updated");
-				UI.getCurrent().navigate(CUsersView.class);
+				UI.getCurrent().navigate(CActivitiesView.class);
 			} catch (final ObjectOptimisticLockingFailureException exception) {
 				final Notification n = Notification.show("Error updating the data. Somebody else has updated the record while you were making changes.");
 				n.setPosition(Position.MIDDLE);
@@ -99,25 +95,16 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 		editorDiv.setClassName("editor");
 		editorLayoutDiv.add(editorDiv);
 		final FormLayout formLayout = new FormLayout();
-		name = new TextField("First Name");
-		lastName = new TextField("Last Name");
-		email = new TextField("Email");
-		login = new TextField("Login");
-		phone = new TextField("Phone");
-		// formLayout.add(firstName, lastName, email, phone, dateOfBirth, occupation,
-		// role, important);
-		formLayout.add(name, lastName, email, login, phone);
+		name = new TextField("Name");
+		formLayout.add(name);
 		editorDiv.add(formLayout);
-		editorDiv.add(new Div("Hi!!!"));
-		// birazdan ucuyoruz !!!!!!!!!!!!!!!!!!
-		// editorDiv.add(CEntityFormBuilder.buildForm(CUser.class));
 		createButtonLayout(editorLayoutDiv);
 		splitLayout.addToSecondary(editorLayoutDiv);
 	}
 
 	@Override
 	protected void createGridForEntity() {
-		// property name must match the field name in CUser
+		// property name must match the field name in CProject
 		grid.addColumn("name").setAutoWidth(true);
 		// when a row is selected or deselected, populate form
 		grid.asSingleSelect().addValueChangeListener(event -> {
@@ -126,7 +113,7 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 			}
 			else {
 				clearForm();
-				UI.getCurrent().navigate(CUsersView.class);
+				UI.getCurrent().navigate(CActivitiesView.class);
 			}
 		});
 	}

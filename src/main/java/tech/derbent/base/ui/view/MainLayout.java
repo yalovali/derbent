@@ -1,5 +1,8 @@
 package tech.derbent.base.ui.view;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
@@ -14,6 +17,8 @@ import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
+import com.vaadin.flow.router.AfterNavigationEvent;
+import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.Layout;
 import com.vaadin.flow.server.menu.MenuConfiguration;
 import com.vaadin.flow.server.menu.MenuEntry;
@@ -29,21 +34,53 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.base.ui.component.ViewToolbar;
 import tech.derbent.security.CurrentUser;
 
+/**
+ * The main layout is a top-level placeholder for other views. It provides a
+ * side navigation menu and a user menu.
+ */
+// vaadin applayout is used to create a layout with a side navigation menu it
+// consists of a header, a side navigation, and a user menu the side navigation
+// is dynamically populated with menu entries from `MenuConfiguration`. Each
+// entry is represented as a `SideNavItem` with With Flow, the root layout can
+// be defined using the @Layout annotation, which tells the router to render all
+// routes or views inside of it. use these functions to add content to 3
+// sections:addToNavBar addToDrawer addToHeader added afterNavigationObserver to
+// the layout to handle navigation events
 @Layout
 @PermitAll // When security is enabled, allow all authenticated users
-public final class MainLayout extends AppLayout {
+public final class MainLayout extends AppLayout implements AfterNavigationObserver {
 
 	private static final long serialVersionUID = 1L;
+	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	private final CurrentUser currentUser;
 	private final AuthenticationContext authenticationContext;
+	private ViewToolbar mainToolbar;
 
 	MainLayout(final CurrentUser currentUser, final AuthenticationContext authenticationContext) {
+		LOGGER.info("Creating MainLayout");
 		this.currentUser = currentUser;
 		this.authenticationContext = authenticationContext;
 		setPrimarySection(Section.DRAWER);
 		addToDrawer(createHeader(), new Scroller(createSideNav()), createUserMenu());
+		addToNavbar(true, createNavBar()); // Add the toggle button to the navbar
+	}
+
+	@Override
+	public void afterNavigation(final AfterNavigationEvent event) {
+		LOGGER.debug("After navigation in MainLayout");
+		// Update the view title in the toolbar after navigation
+		final String pageTitle = MenuConfiguration.getPageHeader(getContent()).orElse("Main Layout");
+		mainToolbar.setPageTitle(pageTitle); // Set the page title in the toolbar
+		// addToNavbar(true, new ViewToolbar(pageTitle)); // Add the toolbar with the
+		// page title
+		/*
+		 * Component content = getContent(); if (content instanceof HasDynamicTitle) {
+		 * String title = ((HasDynamicTitle) content).getPageTitle();
+		 * viewTitle.setText(title); } else { viewTitle.setText(""); }
+		 */
 	}
 
 	private Div createHeader() {
@@ -52,9 +89,19 @@ public final class MainLayout extends AppLayout {
 		appLogo.addClassNames(TextColor.PRIMARY, IconSize.LARGE);
 		final var appName = new Span("Derbent");
 		appName.addClassNames(FontWeight.SEMIBOLD, FontSize.LARGE);
-		final var header = new Div(appLogo, appName);
+		final Div someMessage = new Div("Welcome to the Derbent application!");
+		final var header = new Div(appLogo, appName, someMessage);
 		header.addClassNames(Display.FLEX, Padding.MEDIUM, Gap.MEDIUM, AlignItems.CENTER);
 		return header;
+	}
+
+	private Div createNavBar() {
+		final Div navBar = new Div("by oflova");
+		// dont add any other compoents to the navbar, just the toolbar otherwise call
+		// it with ,xyz,xyz etc..
+		mainToolbar = new ViewToolbar("Main Layout");
+		navBar.add(mainToolbar);
+		return navBar;
 	}
 
 	/**
