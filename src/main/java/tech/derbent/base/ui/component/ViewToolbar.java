@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.applayout.DrawerToggle;
+import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Header;
@@ -61,8 +62,6 @@ public final class ViewToolbar extends Composite<Header> {
 		toggleAndTitle.addClassNames(Display.FLEX, AlignItems.CENTER);
 		// add them to the content of the header
 		getContent().add(toggleAndTitle);
-		// add some test content to the toolbar
-		getContent().add(new Div("Hi there! This is a toolbar for the " + viewTitle + " view."));
 		// add more if passed as a parameter
 		if (components.length > 0) {
 			// If there are additional components, add them to the toolbar
@@ -70,5 +69,9 @@ public final class ViewToolbar extends Composite<Header> {
 			actions.addClassNames(Display.FLEX, FlexDirection.COLUMN, JustifyContent.BETWEEN, Flex.GROW, Gap.SMALL, FlexDirection.Breakpoint.Medium.ROW);
 			getContent().add(actions);
 		}
+		final MultiSelectComboBox<String> multiSelectComboBox = new MultiSelectComboBox<String>();
+		multiSelectComboBox.setItems("Project A", "Project B", "Project C", "Project D", "Project E");
+		getContent().add(new Div("Select projects:"));
+		getContent().add(multiSelectComboBox);
 	}
 }

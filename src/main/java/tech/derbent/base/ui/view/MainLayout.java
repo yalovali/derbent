@@ -17,6 +17,8 @@ import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
+import com.vaadin.flow.router.AfterNavigationEvent;
+import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.Layout;
 import com.vaadin.flow.server.menu.MenuConfiguration;
 import com.vaadin.flow.server.menu.MenuEntry;
@@ -45,10 +47,11 @@ import tech.derbent.security.CurrentUser;
 // entry is represented as a `SideNavItem` with With Flow, the root layout can
 // be defined using the @Layout annotation, which tells the router to render all
 // routes or views inside of it. use these functions to add content to 3
-// sections:addToNavBar addToDrawer addToHeader
+// sections:addToNavBar addToDrawer addToHeader added afterNavigationObserver to
+// the layout to handle navigation events
 @Layout
 @PermitAll // When security is enabled, allow all authenticated users
-public final class MainLayout extends AppLayout {
+public final class MainLayout extends AppLayout implements AfterNavigationObserver {
 
 	private static final long serialVersionUID = 1L;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
@@ -64,6 +67,19 @@ public final class MainLayout extends AppLayout {
 		addToNavbar(true, createNavBar()); // Add the toggle button to the navbar
 	}
 
+	@Override
+	public void afterNavigation(final AfterNavigationEvent event) {
+		LOGGER.debug("After navigation in MainLayout");
+		// Update the view title in the toolbar after navigation
+		final String pageTitle = MenuConfiguration.getPageHeader(getContent()).orElse("Main Layout");
+		addToNavbar(true, new ViewToolbar(pageTitle)); // Add the toolbar with the page title
+		/*
+		 * Component content = getContent(); if (content instanceof HasDynamicTitle) {
+		 * String title = ((HasDynamicTitle) content).getPageTitle();
+		 * viewTitle.setText(title); } else { viewTitle.setText(""); }
+		 */
+	}
+
 	private Div createHeader() {
 		// TODO Replace with real application logo and name
 		final var appLogo = VaadinIcon.CUBES.create();
@@ -77,7 +93,7 @@ public final class MainLayout extends AppLayout {
 	}
 
 	private Div createNavBar() {
-		final Div navBar = new Div("This is Navigation bar of the mainlayour!");
+		final Div navBar = new Div("by oflova");
 		// dont add any other compoents to the navbar, just the toolbar otherwise call
 		// it with ,xyz,xyz etc..
 		navBar.add(new ViewToolbar("Main Layout"));
