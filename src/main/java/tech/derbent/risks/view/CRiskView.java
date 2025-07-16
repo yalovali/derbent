@@ -7,7 +7,6 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.router.Menu;
@@ -16,13 +15,12 @@ import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.views.CAbstractMDPage;
-import tech.derbent.base.ui.view.MainLayout;
 import tech.derbent.risks.domain.CRisk;
 import tech.derbent.risks.domain.ERiskSeverity;
 import tech.derbent.risks.service.CRiskService;
 
 @PageTitle("Project Risks")
-@Route(value = "risks", layout = MainLayout.class)
+@Route("risks/:risk_id?/:action?(edit)")
 @Menu(order = 2, icon = "vaadin:clipboard-check", title = "Settings.Risks")
 @PermitAll
 public class CRiskView extends CAbstractMDPage<CRisk> {
@@ -40,8 +38,6 @@ public class CRiskView extends CAbstractMDPage<CRisk> {
         super(CRisk.class, entityService);
         addClassNames("risk-view");
         System.out.println("binder initialized? " + (this.binder != null));
-        // Initialize the binder for the CRisk entity
-        //binder = new BeanValidationBinder<>(CRisk.class);
         // Configure Form Bind fields. This is where you'd define e.g. validation rules
         binder.bindInstanceFields(this);
     }
@@ -77,7 +73,7 @@ public class CRiskView extends CAbstractMDPage<CRisk> {
                 binder.setBean(event.getValue());
                 currentEntity = event.getValue();
                 // Optionally navigate to the edit view for the selected risk
-                //UI.getCurrent().navigate(String.format(ENTITY_ROUTE_TEMPLATE_EDIT, event.getValue().getId()));
+                UI.getCurrent().navigate(String.format(ENTITY_ROUTE_TEMPLATE_EDIT, event.getValue().getId()));
             } else {
                 clearForm();
                 UI.getCurrent().navigate("risks");
@@ -94,7 +90,7 @@ public class CRiskView extends CAbstractMDPage<CRisk> {
             binder.writeBean(risk);
             entityService.save(risk);
             clearForm();
-            grid.getDataProvider().refreshAll();
+            refreshGrid();
             Notification.show("Risk saved successfully", 3000, Notification.Position.MIDDLE);
 
         } catch (ValidationException e) {
@@ -109,7 +105,7 @@ public class CRiskView extends CAbstractMDPage<CRisk> {
         CRisk selected = grid.asSingleSelect().getValue();
         if (selected != null) {
             entityService.delete(selected);
-            grid.getDataProvider().refreshAll();
+            refreshGrid();
             clearForm();
             Notification.show("Risk deleted", 3000, Notification.Position.MIDDLE);
         } else {
