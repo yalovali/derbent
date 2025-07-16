@@ -6,6 +6,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.EntityNotFoundException;
 import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.users.domain.CUser;
 
@@ -25,5 +26,9 @@ public class CUserService extends CAbstractService<CUser> {
 		final var entity = new CUser();
 		entity.setName(name);
 		repository.saveAndFlush(entity);
+	}
+
+	public CUser getUserWithProjects(final Long id) {
+		return ((CUserRepository) repository).findByIdWithProjects(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
 	}
 }

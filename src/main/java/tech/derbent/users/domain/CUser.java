@@ -1,12 +1,19 @@
 package tech.derbent.users.domain;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.MetaData;
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.projects.domain.CProject;
 
 @Entity
 @Table(name = "cuser") // table name for the entity as the default is the class name in lowercase
@@ -33,6 +40,9 @@ public class CUser extends CEntityDB {
 	@Column(name = "phone", nullable = true, length = MAX_LENGTH_NAME, unique = false)
 	@Size(max = MAX_LENGTH_NAME)
 	private String phone;
+	@ManyToMany
+	@JoinTable(name = "cuser_project", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "project_id"))
+	private Set<CProject> projects = new HashSet<>();
 
 	public String getEmail() { return email; }
 
@@ -44,6 +54,8 @@ public class CUser extends CEntityDB {
 
 	public String getPhone() { return phone; }
 
+	public Set<CProject> getProjects() { return projects; }
+
 	public void setEmail(final String email) { this.email = email; }
 
 	public void setLastname(final String lastname) { this.lastname = lastname; }
@@ -53,4 +65,6 @@ public class CUser extends CEntityDB {
 	public void setName(final String name) { this.name = name; }
 
 	public void setPhone(final String phone) { this.phone = phone; }
+
+	public void setProjects(final Set<CProject> projects) { this.projects = projects; }
 }
