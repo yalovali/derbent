@@ -51,9 +51,4 @@ public class CLoginSecurityConfig {
     public UserDetailsService userDetailsService(CLoginUserDetailsService cLoginUserDetailsService) {
         return cLoginUserDetailsService;
     }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-    }
 }
