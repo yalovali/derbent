@@ -1,15 +1,12 @@
 package tech.derbent.users.domain;
 
 import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.MetaData;
 import tech.derbent.abstracts.domains.CEntityDB;
-import tech.derbent.security.domain.CLogin;
 
 @Entity
 @Table(name = "cuser") // table name for the entity as the default is the class name in lowercase
@@ -37,10 +34,6 @@ public class CUser extends CEntityDB {
 	@Size(max = MAX_LENGTH_NAME)
 	private String phone;
 
-	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-	@MetaData(displayName = "Login", required = false, readOnly = false, defaultValue = "", description = "Login credentials", hidden = false)
-	private CLogin loginCredentials;
-
 	public String getEmail() { return email; }
 
 	public String getLastname() { return lastname; }
@@ -60,8 +53,4 @@ public class CUser extends CEntityDB {
 	public void setName(final String name) { this.name = name; }
 
 	public void setPhone(final String phone) { this.phone = phone; }
-
-	public CLogin getLoginCredentials() { return loginCredentials; }
-
-	public void setLoginCredentials(final CLogin loginCredentials) { this.loginCredentials = loginCredentials; }
 }

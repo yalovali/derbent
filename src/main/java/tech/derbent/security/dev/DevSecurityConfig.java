@@ -8,7 +8,6 @@ import com.vaadin.flow.spring.security.VaadinSecurityConfigurer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -48,7 +47,6 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @Import({ VaadinAwareSecurityContextHolderStrategyConfiguration.class })
 @ConditionalOnMissingBean(ControlCenterSecurityConfig.class)
-@ConditionalOnProperty(name = "application.security.use-clogin", havingValue = "false", matchIfMissing = true)
 class DevSecurityConfig {
 
     private static final Logger log = LoggerFactory.getLogger(DevSecurityConfig.class);

@@ -153,13 +153,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	}
 
 	private Component createUserMenu() {
-		final var optionalUser = currentUser.get();
-		if (optionalUser.isEmpty()) {
-			// Return empty component when user is not authenticated
-			return new Div();
-		}
-		
-		final var user = optionalUser.get();
+		final var user = currentUser.require();
 		final var avatar = new Avatar(user.getFullName(), user.getPictureUrl());
 		avatar.addThemeVariants(AvatarVariant.LUMO_XSMALL);
 		avatar.addClassNames(Margin.Right.SMALL);
