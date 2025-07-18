@@ -2,6 +2,7 @@ package tech.derbent.base.ui.view;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.userdetails.User;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
@@ -35,7 +36,6 @@ import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.base.ui.component.ViewToolbar;
-import tech.derbent.security.CurrentUser;
 
 /**
  * The main layout is a top-level placeholder for other views. It provides a
@@ -55,14 +55,14 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 
 	private static final long serialVersionUID = 1L;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
-	private final CurrentUser currentUser;
+	private final User currentUser;
 	private final AuthenticationContext authenticationContext;
 	private ViewToolbar mainToolbar;
 
-	MainLayout(final CurrentUser currentUser, final AuthenticationContext authenticationContext) {
+	MainLayout(final AuthenticationContext authenticationContext) {
 		LOGGER.info("Creating MainLayout");
-		this.currentUser = currentUser;
 		this.authenticationContext = authenticationContext;
+		this.currentUser = authenticationContext.getAuthenticatedUser(User.class).orElse(null);
 		setPrimarySection(Section.DRAWER);
 		addToDrawer(createHeader(), new Scroller(createSideNav()), createUserMenu());
 		addToNavbar(true, createNavBar()); // Add the toggle button to the navbar
@@ -153,8 +153,8 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	}
 
 	private Component createUserMenu() {
-		final var user = currentUser.require();
-		final var avatar = new Avatar(user.getFullName(), user.getPictureUrl());
+		final var user = currentUser;
+		final var avatar = new Avatar(user.toString(), "XYZ");
 		avatar.addThemeVariants(AvatarVariant.LUMO_XSMALL);
 		avatar.addClassNames(Margin.Right.SMALL);
 		avatar.setColorIndex(5);
@@ -162,10 +162,8 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		userMenu.addThemeVariants(MenuBarVariant.LUMO_TERTIARY_INLINE);
 		userMenu.addClassNames(Margin.MEDIUM);
 		final var userMenuItem = userMenu.addItem(avatar);
-		userMenuItem.add(user.getFullName());
-		if (user.getProfileUrl() != null) {
-			userMenuItem.getSubMenu().addItem("View Profile", event -> UI.getCurrent().getPage().open(user.getProfileUrl()));
-		}
+		userMenuItem.add(user.getUsername());
+		userMenuItem.getSubMenu().addItem("View Profile", event -> UI.getCurrent().getPage().open(user.getUsername()));
 		// TODO Add additional items to the user menu if needed
 		userMenuItem.getSubMenu().addItem("Logout", event -> authenticationContext.logout());
 		return userMenu;
