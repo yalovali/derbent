@@ -18,6 +18,7 @@ import tech.derbent.projects.service.CProjectService;
 
 public class CEntityProjectsGrid<T extends CEntityDB> extends VerticalLayout {
 
+	private static final long serialVersionUID = 1L;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	private final Grid<CProject> grid = new Grid<>(CProject.class, false);
 	private Supplier<Set<CProject>> getProjects;

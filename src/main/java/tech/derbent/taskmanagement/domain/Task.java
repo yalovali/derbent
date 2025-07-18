@@ -5,7 +5,6 @@ import java.time.LocalDate;
 
 import org.jspecify.annotations.Nullable;
 
-import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -14,7 +13,6 @@ import tech.derbent.abstracts.domains.CEntityDB;
 
 @Entity
 @Table(name = "task")
-@AttributeOverride(name = "id", column = @Column(name = "task_id")) // Override the default column name for the ID field
 public class Task extends CEntityDB {
 
 	public static final int DESCRIPTION_MAX_LENGTH = 255;
