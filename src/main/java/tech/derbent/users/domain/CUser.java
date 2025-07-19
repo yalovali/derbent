@@ -1,19 +1,18 @@
 package tech.derbent.users.domain;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.MetaData;
 import tech.derbent.abstracts.domains.CEntityDB;
-import tech.derbent.projects.domain.CProject;
 
 @Entity
 @Table(name = "cuser") // table name for the entity as the default is the class name in lowercase
@@ -48,9 +47,6 @@ public class CUser extends CEntityDB {
 	@Size(max = 255)
 	@MetaData(displayName = "Roles", required = true, readOnly = false, defaultValue = "USER", description = "User roles (comma-separated)", hidden = false)
 	private String roles = "USER";
-	@ManyToMany
-	@JoinTable(name = "cuser_project", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "project_id"))
-	private Set<CProject> projects = new HashSet<>();
 	/**
 	 * Password field for authentication. Stored as encoded hash (never plain text).
 	 * Uses BCrypt encoding for security.
@@ -66,6 +62,9 @@ public class CUser extends CEntityDB {
 	private LocalDateTime created_date;
 	@Column(name = "updated_date", nullable = true)
 	private LocalDateTime updated_date;
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinTable(name = "cuser_project_settings", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "project_id"))
+	private List<CUserProjectSettings> projectSettings;
 
 	public CUser() {
 		super();
@@ -86,12 +85,6 @@ public class CUser extends CEntityDB {
 		this.email = email;
 		this.setPassword(password);
 		this.setRoles(roles);
-	}
-
-	public void addProject(final CProject project) {
-		if (project != null) {
-			this.projects.add(project);
-		}
 	}
 
 	@Override
@@ -121,7 +114,8 @@ public class CUser extends CEntityDB {
 
 	public String getPhone() { return phone; }
 
-	public Set<CProject> getProjects() { return projects; }
+	// Getter and setter
+	public List<CUserProjectSettings> getProjectSettings() { return projectSettings; }
 
 	public String getRoles() { return roles; }
 
@@ -131,12 +125,6 @@ public class CUser extends CEntityDB {
 
 	public boolean isEnabled() {
 		return enabled; // Return the enabled status
-	}
-
-	public void removeProject(final CProject project) {
-		if (project != null) {
-			this.projects.remove(project);
-		}
 	}
 
 	public void setEmail(final String email) { this.email = email; }
@@ -158,13 +146,13 @@ public class CUser extends CEntityDB {
 
 	public void setPhone(final String phone) { this.phone = phone; }
 
-	public void setProjects(final Set<CProject> projects) { this.projects = projects; }
+	public void setProjectSettings(final List<CUserProjectSettings> projectSettings) { this.projectSettings = projectSettings; }
 
 	public void setRoles(final String roles) { this.roles = roles != null ? roles : "USER"; }
 
 	@Override
 	public String toString() {
 		return "CUser{" + "name='" + name + '\'' + ", lastname='" + lastname + '\'' + ", login='" + login + '\'' + ", email='" + email + '\'' + ", phone='" + phone + '\'' + ", roles='" + roles + '\''
-			+ ", projects=" + projects + ", enabled=" + enabled + '}';
+			+ ", enabled=" + enabled + '}';
 	}
 }

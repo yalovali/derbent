@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -14,6 +15,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
@@ -31,6 +33,7 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	protected Grid<EntityClass> grid;// = new Grid<>(CProject.class, false);
 	private final BeanValidationBinder<EntityClass> binder;
 	protected SplitLayout splitLayout = new SplitLayout();
+	VerticalLayout detailsLayout = new VerticalLayout();
 	protected EntityClass currentEntity;
 	protected final CAbstractService<EntityClass> entityService;
 
@@ -45,11 +48,11 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		splitLayout.setSizeFull();
 		splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
 		// Create UI
-		createGridLayout(splitLayout);
-		createDetailsLayout(splitLayout);
+		createGridLayout();
+		splitLayout.addToSecondary(detailsLayout);
+		detailsLayout.add(createDetailsLayout());
 		createGridForEntity();
 		// binder = new BeanValidationBinder<>(entityClass
-		setupContent();
 		add(splitLayout);
 	}
 
@@ -111,11 +114,11 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		return delete;
 	}
 
-	protected abstract void createDetailsLayout(final SplitLayout splitLayout);
+	protected abstract Component createDetailsLayout();
 
 	protected abstract void createGridForEntity();
 
-	protected void createGridLayout(final SplitLayout splitLayout) {
+	protected void createGridLayout() {
 		grid = new Grid<>(entityClass, false);
 		grid.getColumns().forEach(grid::removeColumn);
 		grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
@@ -123,8 +126,8 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		grid.addColumn(entity -> entity.getId().toString()).setHeader("ID").setKey("id");
 		final Div wrapper = new Div();
 		wrapper.setClassName("grid-wrapper");
-		splitLayout.addToPrimary(wrapper);
 		wrapper.add(grid);
+		splitLayout.addToPrimary(wrapper);
 	}
 
 	protected Button createSaveButton(final String buttonText) {
@@ -159,12 +162,6 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 
 	protected abstract String getEntityRouteTemplateEdit();
 
-	/**
-	 * Initializes the page with necessary components and layout.
-	 */
-	@Override
-	protected abstract void initPage();
-
 	protected abstract EntityClass newEntity();
 
 	protected void populateForm(final EntityClass value) {
@@ -176,11 +173,6 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		grid.select(null);
 		grid.getDataProvider().refreshAll();
 	}
-
-	/**
-	 * Sets up the main content area of the page.
-	 */
-	protected abstract void setupContent();
 
 	/**
 	 * Sets up the toolbar for the page.

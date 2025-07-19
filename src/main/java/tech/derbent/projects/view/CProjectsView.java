@@ -1,9 +1,9 @@
 package tech.derbent.projects.view;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
@@ -33,7 +33,7 @@ public class CProjectsView extends CAbstractMDPage<CProject> {
 	}
 
 	@Override
-	protected void createDetailsLayout(final SplitLayout splitLayout) {
+	protected Component createDetailsLayout() {
 		final Div editorLayoutDiv = new Div();
 		editorLayoutDiv.setClassName("editor-layout");
 		final Div editorDiv = new Div();
@@ -44,7 +44,7 @@ public class CProjectsView extends CAbstractMDPage<CProject> {
 		formLayout.add(name);
 		editorDiv.add(formLayout);
 		createButtonLayout(editorLayoutDiv);
-		splitLayout.addToSecondary(editorLayoutDiv);
+		return editorLayoutDiv;
 	}
 
 	@Override
@@ -82,11 +82,6 @@ public class CProjectsView extends CAbstractMDPage<CProject> {
 	@Override
 	protected CProject newEntity() {
 		return new CProject();
-	}
-
-	@Override
-	protected void setupContent() {
-		// TODO Auto-generated method stub
 	}
 
 	@Override

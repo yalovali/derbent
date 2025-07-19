@@ -1,12 +1,12 @@
 package tech.derbent.risks.view;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.Menu;
@@ -47,7 +47,7 @@ public class CRiskView extends CAbstractMDPage<CRisk> {
 	}
 
 	@Override
-	protected void createDetailsLayout(final SplitLayout splitLayout) {
+	protected Component createDetailsLayout() {
 		final FormLayout formLayout = new FormLayout();
 		nameField = new TextField("Risk Name");
 		severityBox = new ComboBox<>("Severity", ERiskSeverity.values());
@@ -58,7 +58,10 @@ public class CRiskView extends CAbstractMDPage<CRisk> {
 		deleteButton = new Button("Delete", e -> deleteRisk());
 		final HorizontalLayout buttonLayout = new HorizontalLayout(saveButton, deleteButton);
 		formLayout.add(buttonLayout);
-		splitLayout.addToSecondary(formLayout);
+		// Initialize the binder for the CRisk entity
+		getBinder().bind(nameField, CRisk::getName, CRisk::setName);
+		getBinder().bind(severityBox, CRisk::getRiskSeverity, CRisk::setRiskSeverity);
+		return formLayout;
 	}
 
 	@Override
@@ -123,13 +126,6 @@ public class CRiskView extends CAbstractMDPage<CRisk> {
 			Notification.show("An unexpected error occurred: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
 			e.printStackTrace();
 		}
-	}
-
-	@Override
-	protected void setupContent() {
-		// Initialize the binder for the CRisk entity
-		getBinder().bind(nameField, CRisk::getName, CRisk::setName);
-		getBinder().bind(severityBox, CRisk::getRiskSeverity, CRisk::setRiskSeverity);
 	}
 
 	@Override

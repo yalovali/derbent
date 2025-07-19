@@ -51,8 +51,6 @@ public class CLoginView extends Main implements BeforeEnterObserver {
 		// Apply CSS classes for centering the login form
 		addClassNames(LumoUtility.Display.FLEX, LumoUtility.JustifyContent.CENTER, LumoUtility.AlignItems.CENTER);
 		setSizeFull();
-		// login = new LoginForm(); Create login form component final LoginOverlay
-		// loginOverlay = new LoginOverlay(); Welcome and password hint text
 		final Paragraph passwordHint = new Paragraph("Default username: user\nDefault password: test123");
 		passwordHint.addClassName(LumoUtility.TextAlignment.CENTER);
 		final Paragraph text = new Paragraph("[spring.jpa.hibernate.ddl-auto = create] to init db");
