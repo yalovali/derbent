@@ -1,5 +1,7 @@
 package tech.derbent.risks.view;
 
+import java.util.List;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -14,16 +16,18 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.views.CAbstractMDPage;
+import tech.derbent.abstracts.views.CProjectAwareMDPage;
+import tech.derbent.projects.domain.CProject;
 import tech.derbent.risks.domain.CRisk;
 import tech.derbent.risks.domain.ERiskSeverity;
 import tech.derbent.risks.service.CRiskService;
+import tech.derbent.session.service.SessionService;
 
 @PageTitle("Project Risks")
 @Route("risks/:risk_id?/:action?(edit)")
 @Menu(order = 2, icon = "vaadin:clipboard-check", title = "Settings.Risks")
 @PermitAll
-public class CRiskView extends CAbstractMDPage<CRisk> {
+public class CRiskView extends CProjectAwareMDPage<CRisk> {
 
 	private static final long serialVersionUID = 1L;
 	private static final String ENTITY_ID_FIELD = "risk_id";
@@ -33,8 +37,8 @@ public class CRiskView extends CAbstractMDPage<CRisk> {
 	private Button saveButton;
 	private Button deleteButton;
 
-	public CRiskView(final CRiskService entityService) {
-		super(CRisk.class, entityService);
+	public CRiskView(final CRiskService entityService, final SessionService sessionService) {
+		super(CRisk.class, entityService, sessionService);
 		addClassNames("risk-view");
 		System.out.println("binder initialized? " + (this.getBinder() != null));
 		// Configure Form Bind fields. This is where you'd define e.g. validation rules
@@ -82,6 +86,11 @@ public class CRiskView extends CAbstractMDPage<CRisk> {
 		});
 	}
 
+	@Override
+	protected CRisk createNewEntityInstance() {
+		return new CRisk();
+	}
+
 	private void deleteRisk() {
 		final CRisk selected = grid.asSingleSelect().getValue();
 		if (selected != null) {
@@ -102,18 +111,23 @@ public class CRiskView extends CAbstractMDPage<CRisk> {
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
 
 	@Override
+	protected List<CRisk> getProjectFilteredData(final CProject project, final org.springframework.data.domain.Pageable pageable) {
+		return ((CRiskService) entityService).listByProject(project, pageable).getContent();
+	}
+
+	@Override
 	protected void initPage() {}
 
 	@Override
 	protected CRisk newEntity() {
-		return new CRisk();
+		return super.newEntity(); // Uses the project-aware implementation from parent
 	}
 
 	private void saveRisk() {
 		try {
 			CRisk risk = currentEntity; // currentEntity is set by the grid selection
 			if (risk == null) {
-				risk = new CRisk();
+				risk = newEntity(); // Use the project-aware newEntity method
 			}
 			getBinder().writeBean(risk);
 			entityService.save(risk);
@@ -126,6 +140,11 @@ public class CRiskView extends CAbstractMDPage<CRisk> {
 			Notification.show("An unexpected error occurred: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	protected void setProjectForEntity(final CRisk entity, final CProject project) {
+		entity.setProject(project);
 	}
 
 	@Override

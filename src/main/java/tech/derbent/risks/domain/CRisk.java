@@ -30,6 +30,16 @@ public class CRisk extends CEntityDB {
 	@JoinColumn(name = "project_id", nullable = false)
 	private CProject project;
 
+	public CRisk() {
+		// Default constructor - project will be set later
+	}
+
+	public CRisk(final String name, final ERiskSeverity riskSeverity, final CProject project) {
+		this.name = name;
+		this.riskSeverity = riskSeverity;
+		this.project = project;
+	}
+
 	public String getName() { return name; }
 
 	public CProject getProject() { return project; }

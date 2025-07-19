@@ -69,7 +69,7 @@ public class SessionService {
 			LOGGER.info("Active project set to: {}", project != null ? project.getName() : "null");
 			
 			// Trigger UI refresh for all open UIs
-			refreshUI();
+			refreshProjectAwareComponents();
 		}
 	}
 
@@ -119,8 +119,24 @@ public class SessionService {
 	}
 
 	/**
-	 * Triggers UI refresh to update components when project changes.
+	 * Triggers refresh of project-aware components when project changes.
 	 */
+	private void refreshProjectAwareComponents() {
+		final UI ui = UI.getCurrent();
+		if (ui != null) {
+			ui.access(() -> {
+				// Broadcast a project change event that project-aware components can listen to
+				ui.getSession().setAttribute("projectChanged", System.currentTimeMillis());
+				LOGGER.debug("Project change event broadcasted");
+			});
+		}
+	}
+
+	/**
+	 * Triggers UI refresh to update components when project changes.
+	 * @deprecated Use refreshProjectAwareComponents() instead for better performance
+	 */
+	@Deprecated
 	private void refreshUI() {
 		final UI ui = UI.getCurrent();
 		if (ui != null) {
