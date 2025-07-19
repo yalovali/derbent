@@ -2,6 +2,8 @@ package tech.derbent.session.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +13,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 
+import tech.derbent.abstracts.interfaces.CProjectChangeListener;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
@@ -26,6 +29,9 @@ public class SessionService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SessionService.class);
 	private static final String ACTIVE_PROJECT_KEY = "activeProject";
 	private static final String ACTIVE_USER_KEY = "activeUser";
+	
+	// Thread-safe set to store project change listeners
+	private final Set<CProjectChangeListener> projectChangeListeners = ConcurrentHashMap.newKeySet();
 
 	private final AuthenticationContext authenticationContext;
 	private final CUserService userService;
@@ -68,8 +74,8 @@ public class SessionService {
 			session.setAttribute(ACTIVE_PROJECT_KEY, project);
 			LOGGER.info("Active project set to: {}", project != null ? project.getName() : "null");
 			
-			// Trigger UI refresh for all open UIs
-			refreshProjectAwareComponents();
+			// Notify all registered project change listeners
+			notifyProjectChangeListeners(project);
 		}
 	}
 
@@ -119,31 +125,52 @@ public class SessionService {
 	}
 
 	/**
-	 * Triggers refresh of project-aware components when project changes.
+	 * Registers a component to receive notifications when the active project changes.
+	 * Components should call this method when they are attached to the UI.
+	 * 
+	 * @param listener The component that wants to be notified of project changes
 	 */
-	private void refreshProjectAwareComponents() {
-		final UI ui = UI.getCurrent();
-		if (ui != null) {
-			ui.access(() -> {
-				// Broadcast a project change event that project-aware components can listen to
-				ui.getSession().setAttribute("projectChanged", System.currentTimeMillis());
-				LOGGER.debug("Project change event broadcasted");
-			});
+	public void addProjectChangeListener(final CProjectChangeListener listener) {
+		if (listener != null) {
+			projectChangeListeners.add(listener);
+			LOGGER.debug("Project change listener registered: {}", listener.getClass().getSimpleName());
 		}
 	}
 
 	/**
-	 * Triggers UI refresh to update components when project changes.
-	 * @deprecated Use refreshProjectAwareComponents() instead for better performance
+	 * Unregisters a component from receiving project change notifications.
+	 * Components should call this method when they are detached from the UI.
+	 * 
+	 * @param listener The component to unregister
 	 */
-	@Deprecated
-	private void refreshUI() {
+	public void removeProjectChangeListener(final CProjectChangeListener listener) {
+		if (listener != null) {
+			projectChangeListeners.remove(listener);
+			LOGGER.debug("Project change listener unregistered: {}", listener.getClass().getSimpleName());
+		}
+	}
+
+	/**
+	 * Notifies all registered project change listeners about a project change.
+	 * This method safely handles UI access for components that may be in different UIs.
+	 * 
+	 * @param newProject The newly selected project
+	 */
+	private void notifyProjectChangeListeners(final CProject newProject) {
+		LOGGER.debug("Notifying {} project change listeners of project change", projectChangeListeners.size());
+		
+		// Use UI.access to safely notify listeners that may be in different UI contexts
 		final UI ui = UI.getCurrent();
 		if (ui != null) {
 			ui.access(() -> {
-				// Trigger a navigation to the current route to refresh components
-				ui.getPage().getHistory().replaceState(null, "");
-				ui.getPage().reload();
+				projectChangeListeners.forEach(listener -> {
+					try {
+						listener.onProjectChanged(newProject);
+						LOGGER.debug("Notified listener: {}", listener.getClass().getSimpleName());
+					} catch (final Exception e) {
+						LOGGER.error("Error notifying project change listener: {}", listener.getClass().getSimpleName(), e);
+					}
+				});
 			});
 		}
 	}
@@ -158,5 +185,9 @@ public class SessionService {
 			session.setAttribute(ACTIVE_USER_KEY, null);
 			LOGGER.info("Session data cleared");
 		}
+		
+		// Clear all project change listeners when session is cleared
+		projectChangeListeners.clear();
+		LOGGER.debug("Project change listeners cleared");
 	}
 }
