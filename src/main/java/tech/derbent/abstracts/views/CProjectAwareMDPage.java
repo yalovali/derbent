@@ -4,25 +4,27 @@ import java.util.Collections;
 import java.util.Optional;
 
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.interfaces.CProjectChangeListener;
 import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.SessionService;
 
 /**
  * Abstract project-aware MD page that filters entities by the currently active
- * project.
+ * project. Implements CProjectChangeListener to receive immediate notifications
+ * when the active project changes.
  */
-public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB> extends CAbstractMDPage<EntityClass> {
+public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB> extends CAbstractMDPage<EntityClass> implements CProjectChangeListener {
 
 	private static final long serialVersionUID = 1L;
 	protected final SessionService sessionService;
-	private Long lastProjectChangeTime = 0L;
 
 	protected CProjectAwareMDPage(final Class<EntityClass> entityClass, final CAbstractService<EntityClass> entityService, final SessionService sessionService) {
 		super(entityClass, entityService);
@@ -32,23 +34,15 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB> extends
 	}
 
 	/**
-	 * Checks for project changes and refreshes if needed. This method is called
-	 * when the view is attached to the UI. It checks the Vaadin session for a
-	 * "projectChanged" attribute and compares it with the last known change time.
-	 * If the project has changed, it updates the last change time and refreshes the
-	 * grid with the new project data.
+	 * Implementation of CProjectChangeListener interface.
+	 * Called when the active project changes via the SessionService.
+	 * 
+	 * @param newProject The newly selected project
 	 */
-	private void checkForProjectChanges() {
-		LOGGER.debug("Checking for project changes in session");
-		final VaadinSession session = VaadinSession.getCurrent();
-		if (session != null) {
-			final Long projectChangeTime = (Long) session.getAttribute("projectChanged");
-			if ((projectChangeTime != null) && (projectChangeTime > lastProjectChangeTime)) {
-				LOGGER.debug("Project change detected at time: {}", projectChangeTime);
-				lastProjectChangeTime = projectChangeTime;
-				refreshProjectAwareGrid();
-			}
-		}
+	@Override
+	public void onProjectChanged(final CProject newProject) {
+		LOGGER.debug("Project change notification received: {}", newProject != null ? newProject.getName() : "null");
+		refreshProjectAwareGrid();
 	}
 
 	@Override
@@ -92,8 +86,21 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB> extends
 	@Override
 	protected void onAttach(final AttachEvent attachEvent) {
 		super.onAttach(attachEvent);
-		// Check for project changes when view is attached
-		checkForProjectChanges();
+		// Register this component to receive project change notifications
+		sessionService.addProjectChangeListener(this);
+		LOGGER.debug("Registered project change listener for: {}", getClass().getSimpleName());
+	}
+
+	/**
+	 * Called when the component is detached from the UI.
+	 * Unregisters the project change listener to prevent memory leaks.
+	 */
+	@Override
+	protected void onDetach(final DetachEvent detachEvent) {
+		super.onDetach(detachEvent);
+		// Unregister this component to prevent memory leaks
+		sessionService.removeProjectChangeListener(this);
+		LOGGER.debug("Unregistered project change listener for: {}", getClass().getSimpleName());
 	}
 
 	@Override
