@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityNotFoundException;
 import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.users.domain.CUser;
+import tech.derbent.users.domain.CUserProjectSettings;
 
 @Service
 @PreAuthorize("isAuthenticated()")
@@ -104,6 +105,64 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 
 	public CUser getUserWithProjects(final Long id) {
 		return ((CUserRepository) repository).findByIdWithProjects(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
+	}
+
+	/**
+	 * Adds or updates a project setting for a user.
+	 * @param userProjectSetting the project setting to save
+	 * @return the saved project setting
+	 */
+	@Transactional
+	public CUserProjectSettings saveUserProjectSetting(final CUserProjectSettings userProjectSetting) {
+		logger.info("Saving user project setting for user ID: {} and project ID: {}", 
+			userProjectSetting.getUser().getId(), userProjectSetting.getProjectId());
+		
+		// Ensure the user exists and reload with project settings
+		CUser user = getUserWithProjects(userProjectSetting.getUser().getId());
+		
+		// Initialize project settings list if null
+		if (user.getProjectSettings() == null) {
+			user.setProjectSettings(new java.util.ArrayList<>());
+		}
+		
+		// Check if this setting already exists (update case)
+		boolean updated = false;
+		for (int i = 0; i < user.getProjectSettings().size(); i++) {
+			CUserProjectSettings existing = user.getProjectSettings().get(i);
+			if (existing.getProjectId().equals(userProjectSetting.getProjectId())) {
+				existing.setRoles(userProjectSetting.getRoles());
+				existing.setPermissions(userProjectSetting.getPermissions());
+				updated = true;
+				break;
+			}
+		}
+		
+		if (!updated) {
+			userProjectSetting.setUser(user);
+			user.getProjectSettings().add(userProjectSetting);
+		}
+		
+		CUser savedUser = repository.saveAndFlush(user);
+		
+		// Return the saved project setting
+		return userProjectSetting;
+	}
+
+	/**
+	 * Removes a project setting for a user.
+	 * @param userId the user ID
+	 * @param projectId the project ID
+	 */
+	@Transactional
+	public void removeUserProjectSetting(final Long userId, final Long projectId) {
+		logger.info("Removing user project setting for user ID: {} and project ID: {}", userId, projectId);
+		
+		CUser user = getUserWithProjects(userId);
+		
+		if (user.getProjectSettings() != null) {
+			user.getProjectSettings().removeIf(setting -> setting.getProjectId().equals(projectId));
+			repository.saveAndFlush(user);
+		}
 	}
 
 	/**

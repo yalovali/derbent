@@ -18,7 +18,7 @@ public interface CUserRepository extends CAbstractRepository<CUser> {
 	@Query("SELECT u FROM CUser u WHERE u.enabled = :enabled")
 	java.util.List<CUser> findByEnabled(@Param("enabled") boolean enabled);
 
-	@Query("SELECT u FROM CUser u LEFT JOIN FETCH u.projects WHERE u.id = :id")
+	@Query("SELECT u FROM CUser u LEFT JOIN FETCH u.projectSettings WHERE u.id = :id")
 	Optional<CUser> findByIdWithProjects(@Param("id") Long id);
 
 	/**
@@ -40,6 +40,6 @@ public interface CUserRepository extends CAbstractRepository<CUser> {
 	 * @param username the username to search for
 	 * @return Optional containing the CUser with projects if found, empty otherwise
 	 */
-	@Query("SELECT u FROM CUser u LEFT JOIN FETCH u.projects WHERE u.login = :username")
+	@Query("SELECT u FROM CUser u LEFT JOIN FETCH u.projectSettings WHERE u.login = :username")
 	Optional<CUser> findByUsernameWithProjects(@Param("username") String username);
 }

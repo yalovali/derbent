@@ -1,5 +1,6 @@
 -- delete everything is table
 DELETE FROM cuser;
+DELETE FROM cproject;
 
 -- check application.java to see WHEN this file is run
 -- Insert a sample login user into cloginuser table
@@ -50,3 +51,9 @@ INSERT INTO cuser (
     'USER2',
     '2025-07-18 15:58:12.244818'
 );
+
+-- Insert sample projects
+INSERT INTO cproject (name) VALUES 
+('Derbent Project'),
+('Website Redesign'),
+('Mobile App Development');

@@ -9,7 +9,6 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.views.CAbstractMDPage;
-import tech.derbent.abstracts.views.CEntityProjectsGrid;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.service.CUserService;
@@ -23,13 +22,13 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 	private static final long serialVersionUID = 1L;
 	private final String ENTITY_ID_FIELD = "user_id";
 	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "users/%s/edit";
-	private final CEntityProjectsGrid<CUser> projectsGrid;
+	private final CUserProjectSettingsGrid projectSettingsGrid;
 
 	public CUsersView(final CUserService entityService, final CProjectService projectService) {
 		super(CUser.class, entityService);
 		addClassNames("users-view");
-		projectsGrid = new CEntityProjectsGrid<CUser>(projectService);
-		add(projectsGrid);
+		projectSettingsGrid = new CUserProjectSettingsGrid(projectService);
+		add(projectSettingsGrid);
 	}
 
 	@Override
@@ -46,12 +45,12 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 	protected void createGridForEntity() {}
 
 	@Override
-	protected String getEntityRouteIdField() { // TODO Auto-generated method stub
+	protected String getEntityRouteIdField() {
 		return ENTITY_ID_FIELD;
 	}
 
 	@Override
-	protected String getEntityRouteTemplateEdit() { // TODO Auto-generated method stub
+	protected String getEntityRouteTemplateEdit() {
 		return ENTITY_ROUTE_TEMPLATE_EDIT;
 	}
 
@@ -63,6 +62,42 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 	@Override
 	protected CUser newEntity() {
 		return new CUser();
+	}
+
+	@Override
+	protected void populateForm(CUser value) {
+		super.populateForm(value);
+		
+		// Update the project settings grid when a user is selected
+		if (value != null) {
+			// Load user with project settings to avoid lazy initialization issues
+			CUser userWithSettings = ((CUserService) entityService).getUserWithProjects(value.getId());
+			projectSettingsGrid.setCurrentUser(userWithSettings);
+			projectSettingsGrid.setProjectSettingsAccessors(
+				() -> userWithSettings.getProjectSettings() != null ? userWithSettings.getProjectSettings() : java.util.Collections.emptyList(),
+				(settings) -> {
+					userWithSettings.setProjectSettings(settings);
+					// Save the user when project settings are updated
+					((CUserService) entityService).save(userWithSettings);
+				},
+				() -> {
+					// Refresh the current entity after save
+					try {
+						CUser refreshedUser = ((CUserService) entityService).getUserWithProjects(userWithSettings.getId());
+						populateForm(refreshedUser);
+					} catch (Exception e) {
+						LOGGER.error("Error refreshing user after project settings update", e);
+					}
+				}
+			);
+		} else {
+			projectSettingsGrid.setCurrentUser(null);
+			projectSettingsGrid.setProjectSettingsAccessors(
+				() -> java.util.Collections.emptyList(),
+				(settings) -> {},
+				() -> {}
+			);
+		}
 	}
 
 	@Override
