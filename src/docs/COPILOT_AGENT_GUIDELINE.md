@@ -1,8 +1,7 @@
 # Copilot Agent Guideline for Vaadin Java Projects (MVC Design)
 
-This guideline provides structured best practices for implementing and using GitHub Copilot agents when developing Vaadin applications in Java, with a strong emphasis on Model-View-Controller (MVC) architecture. It includes detailed comments and reminders to perform Java checks before submissions.
+this is a project for maintaining work flows, tasks, managerial targets, procedures, methodolgies of a product or project within a company.
 
-_Last Updated: 2025-07-19_
 
 ---
 
@@ -116,6 +115,9 @@ After accepting Copilot suggestions, manually review for:
 - always try to use base classes.
 - every important function should have a logger at the start of function, no need to log at end of functions.
 - try to catch exceptions and handle them in vaadin ui always nicely
+- use vaadin ui components to display exception if possible.
+- try to use MetaData.java and CEntityFormBuilder.java to bind and generate forms for entities if possible.
+- extend these base classes or add new ones or add more features, if necessary to increase modularity of the code.
 
 
 ---
