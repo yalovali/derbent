@@ -13,6 +13,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
@@ -71,6 +72,15 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 
 	protected void clearForm() {
 		populateForm(null);
+	}
+
+	protected void createButtonLayout(final Div layout) {
+		LOGGER.info("Creating button layout for CUsersView");
+		// Create a horizontal layout for buttons
+		final HorizontalLayout buttonLayout = new HorizontalLayout();
+		buttonLayout.setClassName("button-layout");
+		buttonLayout.add(createSaveButton("Save"), createCancelButton("Cancel"), createDeleteButton("Delete"));
+		layout.add(buttonLayout);
 	}
 
 	protected Button createCancelButton(final String buttonText) {

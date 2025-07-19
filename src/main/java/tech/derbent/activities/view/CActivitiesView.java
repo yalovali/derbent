@@ -1,19 +1,10 @@
 package tech.derbent.activities.view;
 
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
-
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.Notification.Position;
-import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -33,55 +24,12 @@ public class CActivitiesView extends CAbstractMDPage<CActivity> {
 	private final String ENTITY_ID_FIELD = "project_id";
 	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "projects/%s/edit";
 	private TextField name;
-	private Button cancel;
-	private Button save;
-	private Button delete;
 
 	public CActivitiesView(final CActivityService entityService) {
 		super(CActivity.class, entityService);
 		addClassNames("projects-view");
 		// Configure Form Bind fields. This is where you'd define e.g. validation rules
 		getBinder().bindInstanceFields(this);
-	}
-
-	private void createButtonLayout(final Div editorLayoutDiv) {
-		final HorizontalLayout buttonLayout = new HorizontalLayout();
-		buttonLayout.setClassName("button-layout");
-		cancel = new Button("Cancel");
-		save = new Button("Save");
-		delete = new Button("Delete");
-		delete.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-		cancel.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-		save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		cancel.addClickListener(e -> {
-			clearForm();
-			refreshGrid();
-		});
-		delete.addClickListener(e -> {
-			entityService.delete(currentEntity);
-			refreshGrid();
-		});
-		save.addClickListener(e -> {
-			try {
-				if (currentEntity == null) {
-					currentEntity = new CActivity();
-				}
-				getBinder().writeBean(currentEntity);
-				entityService.save(currentEntity);
-				clearForm();
-				refreshGrid();
-				Notification.show("Data updated");
-				UI.getCurrent().navigate(CActivitiesView.class);
-			} catch (final ObjectOptimisticLockingFailureException exception) {
-				final Notification n = Notification.show("Error updating the data. Somebody else has updated the record while you were making changes.");
-				n.setPosition(Position.MIDDLE);
-				n.addThemeVariants(NotificationVariant.LUMO_ERROR);
-			} catch (final ValidationException validationException) {
-				Notification.show("Failed to update the data. Check again that all values are valid");
-			}
-		});
-		buttonLayout.add(save, cancel, delete);
-		editorLayoutDiv.add(buttonLayout);
 	}
 
 	@Override

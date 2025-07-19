@@ -1,10 +1,7 @@
 package tech.derbent.users.view;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
@@ -27,7 +24,6 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 	private static final long serialVersionUID = 1L;
 	private final String ENTITY_ID_FIELD = "user_id";
 	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "users/%s/edit";
-	private Button delete;
 	private final CEntityProjectsGrid<CUser> projectsGrid;
 	// private final BeanValidationBinder<CUser> binder; private final CUserService
 	// userService; private final Grid<CUser> grid;// = new Grid<>(CUser.class,
@@ -42,28 +38,12 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 		add(projectsGrid);
 	}
 
-	private void createButtonLayout(final Div editorLayoutDiv) {
-		LOGGER.info("Creating button layout for CUsersView");
-		// Create a horizontal layout for buttons
-		final HorizontalLayout buttonLayout = new HorizontalLayout();
-		buttonLayout.setClassName("button-layout");
-		buttonLayout.add(createSaveButton("Save"), createCancelButton("Cancel"), createDeleteButton("Delete"));
-		editorLayoutDiv.add(buttonLayout);
-	}
-
 	@Override
 	protected void createDetailsLayout(final SplitLayout splitLayout) {
 		LOGGER.info("Creating details layout for CUsersView");
 		final Div editorLayoutDiv = new Div();
 		editorLayoutDiv.setClassName("editor-layout");
-		final Div editorDiv = new Div();
-		editorDiv.setClassName("editor");
-		editorLayoutDiv.add(editorDiv);
-		final FormLayout formLayout = new FormLayout();
-		editorDiv.add(formLayout);
-		editorDiv.add(new Div("Assigned Projects:"));
-		// birazdan ucuyoruz !!!!!!!!!!!!!!!!!!
-		editorDiv.add(CEntityFormBuilder.buildForm(CUser.class, getBinder()));
+		editorLayoutDiv.add(CEntityFormBuilder.buildForm(CUser.class, getBinder()));
 		createButtonLayout(editorLayoutDiv);
 		splitLayout.addToSecondary(editorLayoutDiv);
 	}

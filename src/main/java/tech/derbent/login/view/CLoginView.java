@@ -1,14 +1,20 @@
 package tech.derbent.login.view;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.login.LoginOverlay;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+
+import tech.derbent.base.data.DatabaseResetService;
 
 /**
  * Login view for user authentication. This view presents a login form for users
@@ -33,6 +39,8 @@ public class CLoginView extends Main implements BeforeEnterObserver {
 
 	private static final long serialVersionUID = 1L;
 	private final LoginOverlay loginOverlay = new LoginOverlay();
+	@Autowired
+	private DatabaseResetService databaseResetService;
 
 	/**
 	 * Constructor sets up the login form and page layout. Form Configuration: -
@@ -51,13 +59,20 @@ public class CLoginView extends Main implements BeforeEnterObserver {
 		text.addClassName(LumoUtility.TextAlignment.CENTER);
 		loginOverlay.getFooter().add(passwordHint, text);
 		// Show the overlay what !!!!!!
-		loginOverlay.setOpened(true);
 		loginOverlay.setTitle("Wellcome to Derbent");
 		loginOverlay.setDescription("Please enter your credentials to continue.");
 		// Set form action to Spring Security's login processing endpoint This tells the
 		// form to POST credentials to /login for authentication
 		loginOverlay.setAction("login"); // Set action to /login for Spring Security processing
+		final Button resetDbButton = new Button("Reset Database", event -> {
+			databaseResetService.resetDatabase();
+			Notification.show("Database reset from data.sql");
+		});
+		resetDbButton.addClassName(LumoUtility.Margin.Top.SMALL);
+		loginOverlay.getFooter().add(resetDbButton);
 		add(loginOverlay);
+		// cannot add components after the overlay is opened, so we set it up first
+		loginOverlay.setOpened(true);
 	}
 
 	/**

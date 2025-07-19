@@ -1,3 +1,6 @@
+-- delete everything is table
+DELETE FROM cuser;
+
 -- check application.java to see WHEN this file is run
 -- Insert a sample login user into cloginuser table
 INSERT INTO cuser (
