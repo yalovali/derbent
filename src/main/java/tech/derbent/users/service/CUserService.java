@@ -12,6 +12,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,7 +26,7 @@ import tech.derbent.users.domain.CUser;
 @Service
 @PreAuthorize("isAuthenticated()")
 @Transactional(readOnly = true) // Default to read-only transactions for better performance
-public class CUserService extends CAbstractService<CUser> {
+public class CUserService extends CAbstractService<CUser> implements UserDetailsService {
 
 	private static final Logger logger = LoggerFactory.getLogger(CUserService.class);
 	private final PasswordEncoder passwordEncoder;
