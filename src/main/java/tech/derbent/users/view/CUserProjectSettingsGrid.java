@@ -102,6 +102,10 @@ public class CUserProjectSettingsGrid extends VerticalLayout {
 			LOGGER.warn("Cannot add project settings - current user is null");
 			return;
 		}
+		if (projectService == null) {
+			LOGGER.warn("Cannot add project settings - project service is not initialized");
+			return;
+		}
 		final CUserProjectSettingsDialog dialog = new CUserProjectSettingsDialog(projectService, null, // null for new settings
 			currentUser, this::onSettingsSaved);
 		dialog.open();

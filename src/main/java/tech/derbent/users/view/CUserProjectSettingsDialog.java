@@ -3,57 +3,45 @@ package tech.derbent.users.view;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 
+import tech.derbent.abstracts.views.CDialog;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserProjectSettings;
 
-public class CUserProjectSettingsDialog extends Dialog {
+/**
+ * Dialog for assigning a user to a project. Inherits generic dialog logic from
+ * CDialog.
+ */
+public class CUserProjectSettingsDialog extends CDialog<CUserProjectSettings> {
 
 	private static final long serialVersionUID = 1L;
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	private final CProjectService projectService;
-	private final CUserProjectSettings settings;
 	private final CUser user;
-	private final Consumer<CUserProjectSettings> onSave;
-	private final boolean isNew;
 	// Form components
 	private ComboBox<CProject> projectComboBox;
 	private TextField rolesField;
 	private TextField permissionsField;
 
 	public CUserProjectSettingsDialog(final CProjectService projectService, final CUserProjectSettings settings, final CUser user, final Consumer<CUserProjectSettings> onSave) {
+		// Call parent constructor with provided settings or new instance if null Use
+		// new CUserProjectSettings() if settings is null to ensure non-null data This
+		// allows the dialog to handle both new assignments and edits without requiring
+		// a separate constructor for new assignments.
+		super(settings != null ? settings : new CUserProjectSettings(), onSave, settings == null);
 		this.projectService = projectService;
-		this.settings = settings != null ? settings : new CUserProjectSettings();
 		this.user = user;
-		this.onSave = onSave;
-		this.isNew = settings == null;
-		setupDialog();
-		setupForm();
-		setupButtons();
-		populateForm();
+		populateForm(); // Call after fields are initialized
 	}
 
+	/** Returns available projects for selection. */
 	private List<CProject> getAvailableProjects() {
-		// Get all projects
 		final List<CProject> allProjects = projectService.findAll();
-		// If editing existing, we should include the current project
-		if (!isNew && (settings.getProjectId() != null)) {
-			projectService.get(settings.getProjectId()).ifPresent(project -> {
+		if (!isNew && (data.getProjectId() != null)) {
+			projectService.get(data.getProjectId()).ifPresent(project -> {
 				if (!allProjects.contains(project)) {
 					allProjects.add(project);
 				}
@@ -62,77 +50,31 @@ public class CUserProjectSettingsDialog extends Dialog {
 		return allProjects;
 	}
 
-	private void populateForm() {
-		if (!isNew) {
-			// Populate existing settings
-			if (settings.getProjectId() != null) {
-				projectService.get(settings.getProjectId()).ifPresent(projectComboBox::setValue);
-			}
-			if (settings.getRole() != null) {
-				rolesField.setValue(settings.getRole());
-			}
-			if (settings.getPermission() != null) {
-				permissionsField.setValue(settings.getPermission());
-			}
+	@Override
+	protected String getFormTitle() { return isNew ? "Assign User to Project" : "Edit Project Assignment"; }
+
+	@Override
+	public String getHeaderTitle() { return isNew ? "Add Project Assignment" : "Edit Project Assignment"; }
+
+	@Override
+	protected String getSuccessCreateMessage() { return "Project assignment created successfully"; }
+
+	@Override
+	protected String getSuccessUpdateMessage() { return "Project assignment updated successfully"; }
+
+	/** Populates form fields from data. */
+	@Override
+	protected void populateForm() {
+		LOGGER.debug("Populating form for {}", getClass().getSimpleName());
+		if ((projectService == null) || (user == null)) {
+			throw new IllegalStateException("ProjectService and User must be initialized before populating form");
 		}
-	}
-
-	private void save() {
-		try {
-			validateForm();
-			// Set user
-			settings.setUser(user);
-			// Set project
-			final CProject selectedProject = projectComboBox.getValue();
-			if (selectedProject != null) {
-				settings.setProjectId(selectedProject.getId());
-			}
-			// Set roles
-			settings.setRole(rolesField.getValue());
-			// Set permissions
-			settings.setPermission(permissionsField.getValue());
-			// Notify parent and close
-			if (onSave != null) {
-				onSave.accept(settings);
-			}
-			close();
-			Notification.show(isNew ? "Project assignment created successfully" : "Project assignment updated successfully");
-		} catch (final Exception e) {
-			LOGGER.error("Error saving project settings", e);
-			Notification.show("Error saving project assignment: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
-		}
-	}
-
-	private void setupButtons() {
-		final Button saveButton = new Button("Save", e -> save());
-		saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		final Button cancelButton = new Button("Cancel", e -> close());
-		final HorizontalLayout buttonLayout = new HorizontalLayout(saveButton, cancelButton);
-		buttonLayout.setJustifyContentMode(HorizontalLayout.JustifyContentMode.END);
-		getFooter().add(buttonLayout);
-	}
-
-	private void setupDialog() {
-		setHeaderTitle(isNew ? "Add Project Assignment" : "Edit Project Assignment");
-		setModal(true);
-		setCloseOnEsc(true);
-		setCloseOnOutsideClick(false);
-		setWidth("500px");
-	}
-
-	private void setupForm() {
-		final VerticalLayout layout = new VerticalLayout();
-		layout.setPadding(false);
-		layout.setSpacing(true);
-		final H3 title = new H3(isNew ? "Assign User to Project" : "Edit Project Assignment");
-		layout.add(title);
-		final FormLayout formLayout = new FormLayout();
 		// Project selection
 		projectComboBox = new ComboBox<>("Project");
 		projectComboBox.setItemLabelGenerator(CProject::getName);
 		projectComboBox.setItems(getAvailableProjects());
 		projectComboBox.setRequired(true);
-		projectComboBox.setEnabled(isNew); // Only allow changing project for new assignments
+		projectComboBox.setEnabled(isNew);
 		// Roles field
 		rolesField = new TextField("Roles");
 		rolesField.setPlaceholder("Enter roles separated by commas (e.g., DEVELOPER, MANAGER)");
@@ -142,13 +84,32 @@ public class CUserProjectSettingsDialog extends Dialog {
 		permissionsField.setPlaceholder("Enter permissions separated by commas (e.g., READ, WRITE, DELETE)");
 		permissionsField.setHelperText("Comma-separated list of permissions for this project");
 		formLayout.add(projectComboBox, rolesField, permissionsField);
-		layout.add(formLayout);
-		add(layout);
+		if (!isNew) {
+			if (data.getProjectId() != null) {
+				projectService.get(data.getProjectId()).ifPresent(projectComboBox::setValue);
+			}
+			if (data.getRole() != null) {
+				rolesField.setValue(data.getRole());
+			}
+			if (data.getPermission() != null) {
+				permissionsField.setValue(data.getPermission());
+			}
+		}
 	}
 
-	private void validateForm() {
+	/** Validates form fields. Throws exception if invalid. */
+	@Override
+	protected void validateForm() {
 		if (projectComboBox.getValue() == null) {
 			throw new IllegalArgumentException("Please select a project");
 		}
+		// Set user and project
+		data.setUser(user);
+		final CProject selectedProject = projectComboBox.getValue();
+		if (selectedProject != null) {
+			data.setProjectId(selectedProject.getId());
+		}
+		data.setRole(rolesField.getValue());
+		data.setPermission(permissionsField.getValue());
 	}
 }
