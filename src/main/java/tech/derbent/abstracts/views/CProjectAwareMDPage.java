@@ -27,6 +27,8 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB> extends
 	protected CProjectAwareMDPage(final Class<EntityClass> entityClass, final CAbstractService<EntityClass> entityService, final SessionService sessionService) {
 		super(entityClass, entityService);
 		this.sessionService = sessionService;
+		// Now that sessionService is set, we can populate the grid
+		refreshProjectAwareGrid();
 	}
 
 	@Override
@@ -42,8 +44,8 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB> extends
 		grid.getColumns().forEach(grid::removeColumn);
 		grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 		
-		// Set items with project filtering
-		refreshProjectAwareGrid();
+		// Initially set empty items - will be populated after view is fully initialized
+		grid.setItems(Collections.emptyList());
 		
 		grid.addColumn(entity -> entity.getId().toString()).setHeader("ID").setKey("id");
 		// Add selection listener to the grid
@@ -60,6 +62,11 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB> extends
 	 * Refreshes the grid with project-aware data.
 	 */
 	protected void refreshProjectAwareGrid() {
+		if (sessionService == null || grid == null) {
+			// Not fully initialized yet
+			return;
+		}
+		
 		final Optional<CProject> activeProject = sessionService.getActiveProject();
 		if (activeProject.isPresent()) {
 			grid.setItems(query -> getProjectFilteredData(activeProject.get(), VaadinSpringDataHelpers.toSpringPageRequest(query)).stream());
