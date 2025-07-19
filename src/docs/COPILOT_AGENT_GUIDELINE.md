@@ -110,6 +110,13 @@ After accepting Copilot suggestions, manually review for:
 - Use as much as final etc keywords
 - If you thing a similar features can use a base class create an abstract base class with abstract fields and methods
 - always start a class with capital C. Like CUser CSettings etc. 
+- Ensure always PostgreSQL-only configuration. Always update data.sql to have proper sample database initial values
+- always check lazy loading issues using best practices, give comments.
+- always check nullpointers and null values, if necassary check empty strings.
+- always try to use base classes.
+- every important function should have a logger at the start of function, no need to log at end of functions.
+- try to catch exceptions and handle them in vaadin ui always nicely
+
 
 ---
 
