@@ -1,4 +1,4 @@
-package tech.derbent.login;
+package tech.derbent.login.view;
 
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.Paragraph;

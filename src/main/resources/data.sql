@@ -1,5 +1,5 @@
 -- Insert a sample login user into cloginuser table
-INSERT INTO cloginuser (
+INSERT INTO cuser (
     created_date,        -- Timestamp when the user was created
     email,               -- User's email address
     enabled,             -- Account enabled status (boolean)
