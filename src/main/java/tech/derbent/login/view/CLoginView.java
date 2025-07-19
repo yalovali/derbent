@@ -45,18 +45,15 @@ public class CLoginView extends Main implements BeforeEnterObserver {
 		setSizeFull();
 		// login = new LoginForm(); Create login form component final LoginOverlay
 		// loginOverlay = new LoginOverlay(); Welcome and password hint text
-		final Paragraph welcomeText = new Paragraph("Welcome to the secure area! Please log in to continue.\n" + "If you are a new user, use the default credentials below.");
-		welcomeText.addClassName(LumoUtility.TextAlignment.CENTER);
-		final Paragraph passwordHint = new Paragraph("Default username: user\nDefault password: test123\n" + "Never share your password with anyone.");
+		final Paragraph passwordHint = new Paragraph("Default username: user\nDefault password: test123");
 		passwordHint.addClassName(LumoUtility.TextAlignment.CENTER);
-		loginOverlay.getFooter().add(welcomeText, passwordHint);
-		final Paragraph text = new Paragraph("check:spring.jpa.hibernate.ddl-auto = create to create default user");
+		final Paragraph text = new Paragraph("[spring.jpa.hibernate.ddl-auto = create] to init db");
 		text.addClassName(LumoUtility.TextAlignment.CENTER);
-		loginOverlay.getFooter().add(text);
+		loginOverlay.getFooter().add(passwordHint, text);
 		// Show the overlay what !!!!!!
 		loginOverlay.setOpened(true);
-		loginOverlay.setTitle("Login to Secure Area");
-		loginOverlay.setDescription("Please enter your credentials to access the secure area.");
+		loginOverlay.setTitle("Wellcome to Derbent");
+		loginOverlay.setDescription("Please enter your credentials to continue.");
 		// Set form action to Spring Security's login processing endpoint This tells the
 		// form to POST credentials to /login for authentication
 		loginOverlay.setAction("login"); // Set action to /login for Spring Security processing
