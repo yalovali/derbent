@@ -97,6 +97,16 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 	}
 
 	/**
+	 * Finds a user by login username.
+	 * @param login the login username
+	 * @return the CUser if found, null otherwise
+	 */
+	public CUser findByLogin(final String login) {
+		logger.debug("Finding user by login: {}", login);
+		return ((CUserRepository) repository).findByUsername(login).orElse(null);
+	}
+
+	/**
 	 * Gets the password encoder used by this service. Useful for external password
 	 * operations.
 	 * @return the PasswordEncoder instance

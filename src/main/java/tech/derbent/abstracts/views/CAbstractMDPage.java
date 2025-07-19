@@ -29,7 +29,7 @@ import tech.derbent.users.view.CUsersView;
 public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAbstractPage {
 
 	private static final long serialVersionUID = 1L;
-	private final Class<EntityClass> entityClass;
+	protected final Class<EntityClass> entityClass;
 	protected Grid<EntityClass> grid;// = new Grid<>(CProject.class, false);
 	private final BeanValidationBinder<EntityClass> binder;
 	protected SplitLayout splitLayout = new SplitLayout();
