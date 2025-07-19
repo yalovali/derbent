@@ -1,4 +1,3 @@
-# Bismillah Her Hayrin Basidir
 # Derbent README
 
 - [ ] TODO Replace or update this README with instructions relevant to your application

@@ -2,7 +2,6 @@ package tech.derbent.login.view;
 
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.component.login.LoginOverlay;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
@@ -30,11 +29,10 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 @Route(value = "login", autoLayout = false)
 @PageTitle("Login")
 @AnonymousAllowed // Allows anonymous access so users can access the login page without
-					// authentication.
 public class CLoginView extends Main implements BeforeEnterObserver {
 
 	private static final long serialVersionUID = 1L;
-	private final LoginForm login;
+	private final LoginOverlay loginOverlay = new LoginOverlay();
 
 	/**
 	 * Constructor sets up the login form and page layout. Form Configuration: -
@@ -45,10 +43,8 @@ public class CLoginView extends Main implements BeforeEnterObserver {
 		// Apply CSS classes for centering the login form
 		addClassNames(LumoUtility.Display.FLEX, LumoUtility.JustifyContent.CENTER, LumoUtility.AlignItems.CENTER);
 		setSizeFull();
-		login = new LoginForm();
-		// Create login form component
-		final LoginOverlay loginOverlay = new LoginOverlay();
-		// Welcome and password hint text
+		// login = new LoginForm(); Create login form component final LoginOverlay
+		// loginOverlay = new LoginOverlay(); Welcome and password hint text
 		final Paragraph welcomeText = new Paragraph("Welcome to the secure area! Please log in to continue.\n" + "If you are a new user, use the default credentials below.");
 		welcomeText.addClassName(LumoUtility.TextAlignment.CENTER);
 		final Paragraph passwordHint = new Paragraph("Default username: user\nDefault password: test123\n" + "Never share your password with anyone.");
@@ -57,13 +53,14 @@ public class CLoginView extends Main implements BeforeEnterObserver {
 		final Paragraph text = new Paragraph("check:spring.jpa.hibernate.ddl-auto = create to create default user");
 		text.addClassName(LumoUtility.TextAlignment.CENTER);
 		loginOverlay.getFooter().add(text);
-		// Set form action to Spring Security's login processing endpoint This tells the
-		// form to POST credentials to /login for authentication
-		login.setAction("login");
-		login.setForgotPasswordButtonVisible(false); // Hide forgot password button
 		// Show the overlay what !!!!!!
 		loginOverlay.setOpened(true);
-		add(login);
+		loginOverlay.setTitle("Login to Secure Area");
+		loginOverlay.setDescription("Please enter your credentials to access the secure area.");
+		// Set form action to Spring Security's login processing endpoint This tells the
+		// form to POST credentials to /login for authentication
+		loginOverlay.setAction("login"); // Set action to /login for Spring Security processing
+		add(loginOverlay);
 	}
 
 	/**
@@ -80,7 +77,7 @@ public class CLoginView extends Main implements BeforeEnterObserver {
 		if (event.getLocation().getQueryParameters().getParameters().containsKey("error")) {
 			// Show error state in login form This provides visual feedback that
 			// authentication failed
-			login.setError(true);
+			loginOverlay.setError(true);
 		}
 	}
 }
