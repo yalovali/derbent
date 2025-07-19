@@ -36,15 +36,12 @@ public class CActivitiesView extends CAbstractMDPage<CActivity> {
 	private Button cancel;
 	private Button save;
 	private Button delete;
-	// private final BeanValidationBinder<CProject> binder; private final
-	// CProjectService userService; private final Grid<CProject> grid;// = new
-	// Grid<>(CProject.class, false);
 
 	public CActivitiesView(final CActivityService entityService) {
 		super(CActivity.class, entityService);
 		addClassNames("projects-view");
 		// Configure Form Bind fields. This is where you'd define e.g. validation rules
-		binder.bindInstanceFields(this);
+		getBinder().bindInstanceFields(this);
 	}
 
 	private void createButtonLayout(final Div editorLayoutDiv) {
@@ -69,7 +66,7 @@ public class CActivitiesView extends CAbstractMDPage<CActivity> {
 				if (currentEntity == null) {
 					currentEntity = new CActivity();
 				}
-				binder.writeBean(currentEntity);
+				getBinder().writeBean(currentEntity);
 				entityService.save(currentEntity);
 				clearForm();
 				refreshGrid();
@@ -132,6 +129,14 @@ public class CActivitiesView extends CAbstractMDPage<CActivity> {
 	protected void initPage() {
 		// Initialize the page components and layout This method can be overridden to
 		// set up the view's components
+	}
+
+	// private final BeanValidationBinder<CProject> binder; private final
+	// CProjectService userService; private final Grid<CProject> grid;// = new
+	// Grid<>(CProject.class, false);
+	@Override
+	protected CActivity newEntity() {
+		return new CActivity();
 	}
 
 	@Override

@@ -57,7 +57,7 @@ public class CUser extends CEntityDB {
 	 */
 	@Column(name = "password", nullable = false, length = 255)
 	@Size(max = 255)
-	@MetaData(displayName = "Password", required = true, readOnly = false, description = "User password (stored as hash)", hidden = true)
+	@MetaData(displayName = "Password", required = false, readOnly = false, description = "User password (stored as hash)", hidden = true)
 	private String password; // Encoded password
 	@MetaData(displayName = "Enabled", required = true, readOnly = false, defaultValue = "true", description = "Is user account enabled?", hidden = false)
 	@Column(name = "enabled", nullable = false)
@@ -104,7 +104,7 @@ public class CUser extends CEntityDB {
 		}
 		final CUser cUser = (CUser) o;
 		return (enabled == cUser.enabled) && name.equals(cUser.name) && lastname.equals(cUser.lastname) && login.equals(cUser.login) && email.equals(cUser.email) && phone.equals(cUser.phone)
-			&& roles.equals(cUser.roles) && projects.equals(cUser.projects);
+			&& roles.equals(cUser.roles);
 	}
 
 	public String getEmail() { return email; }
@@ -160,9 +160,7 @@ public class CUser extends CEntityDB {
 
 	public void setProjects(final Set<CProject> projects) { this.projects = projects; }
 
-	public void setRoles(final String roles) {
-		this.roles = roles != null ? roles : "USER";
-	}
+	public void setRoles(final String roles) { this.roles = roles != null ? roles : "USER"; }
 
 	@Override
 	public String toString() {

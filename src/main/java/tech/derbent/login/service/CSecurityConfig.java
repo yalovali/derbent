@@ -20,10 +20,10 @@ import tech.derbent.users.service.CUserService;
  * authentication using CUser entities. Security Flow: 1. User accesses
  * protected resource 2. If not authenticated, redirected to CLoginView 3. User
  * enters credentials in login form 4. Form posts to /login endpoint (handled by
- * Spring Security) 5. Spring Security calls
- * CLoginUserService.loadUserByUsername() 6. Password is verified using
- * BCryptPasswordEncoder 7. If successful, user is authenticated and granted
- * access 8. User roles determine what resources they can access
+ * Spring Security) 5. Spring Security calls CUserService.loadUserByUsername()
+ * 6. Password is verified using BCryptPasswordEncoder 7. If successful, user is
+ * authenticated and granted access 8. User roles determine what resources they
+ * can access
  */
 @EnableWebSecurity
 @Configuration
@@ -76,8 +76,8 @@ class CSecurityConfig extends VaadinWebSecurity {
 	}
 
 	/**
-	 * Provides UserDetailsService bean for authentication.
-	 * This exposes the CUserService as the UserDetailsService for Spring Security.
+	 * Provides UserDetailsService bean for authentication. This exposes the
+	 * CUserService as the UserDetailsService for Spring Security.
 	 * @return CUserService instance configured as UserDetailsService
 	 */
 	@Bean

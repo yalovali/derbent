@@ -81,6 +81,11 @@ public class CUsersTestView extends CAbstractMDPage<CUser> {
 	}
 
 	@Override
+	protected CUser newEntity() {
+		return new CUser();
+	}
+
+	@Override
 	protected void setupContent() {
 		// TODO Auto-generated method stub
 	}

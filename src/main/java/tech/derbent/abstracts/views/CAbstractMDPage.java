@@ -2,24 +2,33 @@ package tech.derbent.abstracts.views;
 
 import java.util.Optional;
 
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.Notification.Position;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
+import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.services.CAbstractService;
+import tech.derbent.users.view.CUsersView;
 
 public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAbstractPage {
 
 	private static final long serialVersionUID = 1L;
 	private final Class<EntityClass> entityClass;
 	protected Grid<EntityClass> grid;// = new Grid<>(CProject.class, false);
-	protected BeanValidationBinder<EntityClass> binder;
+	private final BeanValidationBinder<EntityClass> binder;
 	protected SplitLayout splitLayout = new SplitLayout();
 	protected EntityClass currentEntity;
 	protected final CAbstractService<EntityClass> entityService;
@@ -28,14 +37,17 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		super();
 		this.entityClass = entityClass;
 		this.entityService = entityService;
+		binder = new BeanValidationBinder<>(entityClass);
 		addClassNames("md-page");
 		setSizeFull();
+		// create a split layout for the main content, vertical split
+		splitLayout.setSizeFull();
+		splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
 		// Create UI
 		createGridLayout(splitLayout);
 		createDetailsLayout(splitLayout);
 		createGridForEntity();
 		// binder = new BeanValidationBinder<>(entityClass
-		binder = new BeanValidationBinder<>(entityClass);
 		setupContent();
 		add(splitLayout);
 	}
@@ -61,6 +73,34 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		populateForm(null);
 	}
 
+	protected Button createCancelButton(final String buttonText) {
+		final Button cancel = new Button(buttonText);
+		cancel.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+		cancel.addClickListener(e -> {
+			clearForm();
+			refreshGrid();
+		});
+		return cancel;
+	}
+
+	protected Button createDeleteButton(final String buttonText) {
+		LOGGER.info("Creating delete button for CUsersView");
+		final Button delete = new Button(buttonText);
+		delete.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+		delete.addClickListener(e -> {
+			if (currentEntity != null) {
+				entityService.delete(currentEntity);
+				clearForm();
+				refreshGrid();
+				// .EntityClass.UI.getCurrent().navigate(CUsersView.class);
+			}
+			else {
+				Notification.show("No entity selected for deletion", 3000, Position.BOTTOM_START).addThemeVariants(NotificationVariant.LUMO_ERROR);
+			}
+		});
+		return delete;
+	}
+
 	protected abstract void createDetailsLayout(final SplitLayout splitLayout);
 
 	protected abstract void createGridForEntity();
@@ -77,6 +117,34 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		wrapper.add(grid);
 	}
 
+	protected Button createSaveButton(final String buttonText) {
+		LOGGER.info("Creating save button for CUsersView");
+		final Button save = new Button(buttonText);
+		save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		save.addClickListener(e -> {
+			try {
+				if (currentEntity == null) {
+					currentEntity = newEntity();
+				}
+				getBinder().writeBean(currentEntity);
+				entityService.save(currentEntity);
+				clearForm();
+				refreshGrid();
+				Notification.show("Data updated");
+				UI.getCurrent().navigate(CUsersView.class);
+			} catch (final ObjectOptimisticLockingFailureException exception) {
+				final Notification n = Notification.show("Error updating the data. Somebody else has updated the record while you were making changes.");
+				n.setPosition(Position.MIDDLE);
+				n.addThemeVariants(NotificationVariant.LUMO_ERROR);
+			} catch (final ValidationException validationException) {
+				Notification.show("Failed to update the data. Check again that all values are valid");
+			}
+		});
+		return save;
+	}
+
+	public BeanValidationBinder<EntityClass> getBinder() { return binder; }
+
 	protected abstract String getEntityRouteIdField();
 
 	protected abstract String getEntityRouteTemplateEdit();
@@ -86,6 +154,8 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	 */
 	@Override
 	protected abstract void initPage();
+
+	protected abstract EntityClass newEntity();
 
 	protected void populateForm(final EntityClass value) {
 		currentEntity = value;

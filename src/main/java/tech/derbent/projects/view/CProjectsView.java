@@ -44,7 +44,7 @@ public class CProjectsView extends CAbstractMDPage<CProject> {
 		super(CProject.class, entityService);
 		addClassNames("projects-view");
 		// Configure Form Bind fields. This is where you'd define e.g. validation rules
-		binder.bindInstanceFields(this);
+		getBinder().bindInstanceFields(this);
 	}
 
 	private void createButtonLayout(final Div editorLayoutDiv) {
@@ -69,7 +69,7 @@ public class CProjectsView extends CAbstractMDPage<CProject> {
 				if (currentEntity == null) {
 					currentEntity = new CProject();
 				}
-				binder.writeBean(currentEntity);
+				getBinder().writeBean(currentEntity);
 				entityService.save(currentEntity);
 				clearForm();
 				refreshGrid();
@@ -132,6 +132,11 @@ public class CProjectsView extends CAbstractMDPage<CProject> {
 	protected void initPage() {
 		// Initialize the page components and layout This method can be overridden to
 		// set up the view's components
+	}
+
+	@Override
+	protected CProject newEntity() {
+		return new CProject();
 	}
 
 	@Override

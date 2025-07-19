@@ -96,7 +96,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	}
 
 	private Div createNavBar() {
-		final Div navBar = new Div("by oflova");
+		final Div navBar = new Div();
 		// dont add any other compoents to the navbar, just the toolbar otherwise call
 		// it with ,xyz,xyz etc..
 		mainToolbar = new ViewToolbar("Main Layout");
