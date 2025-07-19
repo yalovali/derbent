@@ -105,6 +105,12 @@ After accepting Copilot suggestions, manually review for:
 - Performance and scalability.
 - Proper exception handling.
 
+## 8. Coding styles
+
+- Use as much as final etc keywords
+- If you thing a similar features can use a base class create an abstract base class with abstract fields and methods
+- always start a class with capital C. Like CUser CSettings etc. 
+
 ---
 
 **How to Use:**  
