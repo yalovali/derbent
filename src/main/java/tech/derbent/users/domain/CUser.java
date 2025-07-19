@@ -47,7 +47,7 @@ public class CUser extends CEntityDB {
 	@Column(name = "roles", nullable = false, length = 255)
 	@Size(max = 255)
 	@MetaData(displayName = "Roles", required = true, readOnly = false, defaultValue = "USER", description = "User roles (comma-separated)", hidden = false)
-	private final String roles = "USER";
+	private String roles = "USER";
 	@ManyToMany
 	@JoinTable(name = "cuser_project", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "project_id"))
 	private Set<CProject> projects = new HashSet<>();
@@ -77,6 +77,15 @@ public class CUser extends CEntityDB {
 		this.name = name;
 		this.email = email;
 		this.setPassword(password);
+	}
+
+	public CUser(final String username, final String password, final String name, final String email, final String roles) {
+		super();
+		this.login = username;
+		this.name = name;
+		this.email = email;
+		this.setPassword(password);
+		this.setRoles(roles);
 	}
 
 	public void addProject(final CProject project) {
@@ -152,8 +161,7 @@ public class CUser extends CEntityDB {
 	public void setProjects(final Set<CProject> projects) { this.projects = projects; }
 
 	public void setRoles(final String roles) {
-		// Roles are final and should not be changed after creation
-		throw new UnsupportedOperationException("Roles cannot be modified after creation");
+		this.roles = roles != null ? roles : "USER";
 	}
 
 	@Override

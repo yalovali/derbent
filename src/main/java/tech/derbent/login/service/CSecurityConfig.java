@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -55,6 +56,8 @@ class CSecurityConfig extends VaadinWebSecurity {
 		// Set our custom login view When users need to authenticate, they'll be
 		// redirected to CLoginView
 		setLoginView(http, CLoginView.class);
+		// Configure the UserDetailsService for authentication
+		http.userDetailsService(loginUserService);
 		logger.info("HTTP security configured successfully");
 	}
 
@@ -70,5 +73,16 @@ class CSecurityConfig extends VaadinWebSecurity {
 	public PasswordEncoder passwordEncoder() {
 		logger.debug("Creating BCrypt password encoder bean");
 		return new BCryptPasswordEncoder();
+	}
+
+	/**
+	 * Provides UserDetailsService bean for authentication.
+	 * This exposes the CUserService as the UserDetailsService for Spring Security.
+	 * @return CUserService instance configured as UserDetailsService
+	 */
+	@Bean
+	public UserDetailsService userDetailsService() {
+		logger.debug("Creating UserDetailsService bean");
+		return loginUserService;
 	}
 }
