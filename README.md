@@ -2,18 +2,9 @@
 
 - [ ] TODO Replace or update this README with instructions relevant to your application
 
-To start the application in development mode, import it into your IDE and run the `Application` class. 
-You can also start the application from the command line by running: 
+“See docs/COPILOT_AGENT_GUIDELINE.md for coding and Copilot usage standards.”
 
-```bash
-./mvnw
-```
 
-To build the application in production mode, run:
-
-```bash
-./mvnw -Pproduction package
-```
 
 ## Getting Started
 

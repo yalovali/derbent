@@ -23,12 +23,15 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 	private final String ENTITY_ID_FIELD = "user_id";
 	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "users/%s/edit";
 	private final CUserProjectSettingsGrid projectSettingsGrid;
+	// private final TextField name;
 
 	public CUsersView(final CUserService entityService, final CProjectService projectService) {
 		super(CUser.class, entityService);
 		addClassNames("users-view");
 		projectSettingsGrid = new CUserProjectSettingsGrid(projectService);
 		add(projectSettingsGrid);
+		// name = new TextField("Name"); getBinder().bind(name, CUser::getName,
+		// CUser::setName); add(name);
 	}
 
 	@Override
@@ -45,14 +48,10 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 	protected void createGridForEntity() {}
 
 	@Override
-	protected String getEntityRouteIdField() {
-		return ENTITY_ID_FIELD;
-	}
+	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
 
 	@Override
-	protected String getEntityRouteTemplateEdit() {
-		return ENTITY_ROUTE_TEMPLATE_EDIT;
-	}
+	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
 
 	@Override
 	protected void initPage() {
@@ -65,38 +64,31 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 	}
 
 	@Override
-	protected void populateForm(CUser value) {
+	protected void populateForm(final CUser value) {
 		super.populateForm(value);
-		
 		// Update the project settings grid when a user is selected
 		if (value != null) {
 			// Load user with project settings to avoid lazy initialization issues
-			CUser userWithSettings = ((CUserService) entityService).getUserWithProjects(value.getId());
+			final CUser userWithSettings = ((CUserService) entityService).getUserWithProjects(value.getId());
 			projectSettingsGrid.setCurrentUser(userWithSettings);
-			projectSettingsGrid.setProjectSettingsAccessors(
-				() -> userWithSettings.getProjectSettings() != null ? userWithSettings.getProjectSettings() : java.util.Collections.emptyList(),
+			projectSettingsGrid.setProjectSettingsAccessors(() -> userWithSettings.getProjectSettings() != null ? userWithSettings.getProjectSettings() : java.util.Collections.emptyList(),
 				(settings) -> {
 					userWithSettings.setProjectSettings(settings);
 					// Save the user when project settings are updated
-					((CUserService) entityService).save(userWithSettings);
-				},
-				() -> {
+					entityService.save(userWithSettings);
+				}, () -> {
 					// Refresh the current entity after save
 					try {
-						CUser refreshedUser = ((CUserService) entityService).getUserWithProjects(userWithSettings.getId());
+						final CUser refreshedUser = ((CUserService) entityService).getUserWithProjects(userWithSettings.getId());
 						populateForm(refreshedUser);
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						LOGGER.error("Error refreshing user after project settings update", e);
 					}
-				}
-			);
-		} else {
+				});
+		}
+		else {
 			projectSettingsGrid.setCurrentUser(null);
-			projectSettingsGrid.setProjectSettingsAccessors(
-				() -> java.util.Collections.emptyList(),
-				(settings) -> {},
-				() -> {}
-			);
+			projectSettingsGrid.setProjectSettingsAccessors(() -> java.util.Collections.emptyList(), (settings) -> {}, () -> {});
 		}
 	}
 

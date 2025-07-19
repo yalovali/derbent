@@ -124,6 +124,10 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 		grid.setItems(query -> entityService.list(VaadinSpringDataHelpers.toSpringPageRequest(query)).stream());
 		grid.addColumn(entity -> entity.getId().toString()).setHeader("ID").setKey("id");
+		// Add selection listener to the grid
+		grid.asSingleSelect().addValueChangeListener(event -> {
+			populateForm(event.getValue());
+		});
 		final Div wrapper = new Div();
 		wrapper.setClassName("grid-wrapper");
 		wrapper.add(grid);

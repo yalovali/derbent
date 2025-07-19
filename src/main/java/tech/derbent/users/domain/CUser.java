@@ -6,8 +6,6 @@ import java.util.List;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
@@ -39,19 +37,11 @@ public class CUser extends CEntityDB {
 	@Column(name = "phone", nullable = true, length = MAX_LENGTH_NAME, unique = false)
 	@Size(max = MAX_LENGTH_NAME)
 	private String phone;
-	/**
-	 * User roles for authorization (e.g., "USER", "ADMIN"). Comma-separated string
-	 * of roles for simplicity. Used by Spring Security for access control.
-	 */
 	@Column(name = "roles", nullable = false, length = 255)
 	@Size(max = 255)
 	@MetaData(displayName = "Roles", required = true, readOnly = false, defaultValue = "USER", description = "User roles (comma-separated)", hidden = false)
 	private String roles = "USER";
-	/**
-	 * Password field for authentication. Stored as encoded hash (never plain text).
-	 * Uses BCrypt encoding for security.
-	 */
-	@Column(name = "password", nullable = false, length = 255)
+	@Column(name = "password", nullable = true, length = 255)
 	@Size(max = 255)
 	@MetaData(displayName = "Password", required = false, readOnly = false, description = "User password (stored as hash)", hidden = true)
 	private String password; // Encoded password

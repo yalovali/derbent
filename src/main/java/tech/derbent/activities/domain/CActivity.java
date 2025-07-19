@@ -8,6 +8,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
+import tech.derbent.abstracts.annotations.MetaData;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.projects.domain.CProject;
 
@@ -18,6 +19,7 @@ public class CActivity extends CEntityDB {
 
 	@Column(name = "name", nullable = false, length = MAX_LENGTH_NAME, unique = true)
 	@Size(max = MAX_LENGTH_NAME)
+	@MetaData(displayName = "Activity Name", required = true, readOnly = false, defaultValue = "-", description = "Activity name", hidden = false)
 	private String name;
 	// Many activities belong to one project
 	@ManyToOne(fetch = FetchType.LAZY)

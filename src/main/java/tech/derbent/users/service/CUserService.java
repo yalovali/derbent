@@ -108,64 +108,6 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 	}
 
 	/**
-	 * Adds or updates a project setting for a user.
-	 * @param userProjectSetting the project setting to save
-	 * @return the saved project setting
-	 */
-	@Transactional
-	public CUserProjectSettings saveUserProjectSetting(final CUserProjectSettings userProjectSetting) {
-		logger.info("Saving user project setting for user ID: {} and project ID: {}", 
-			userProjectSetting.getUser().getId(), userProjectSetting.getProjectId());
-		
-		// Ensure the user exists and reload with project settings
-		CUser user = getUserWithProjects(userProjectSetting.getUser().getId());
-		
-		// Initialize project settings list if null
-		if (user.getProjectSettings() == null) {
-			user.setProjectSettings(new java.util.ArrayList<>());
-		}
-		
-		// Check if this setting already exists (update case)
-		boolean updated = false;
-		for (int i = 0; i < user.getProjectSettings().size(); i++) {
-			CUserProjectSettings existing = user.getProjectSettings().get(i);
-			if (existing.getProjectId().equals(userProjectSetting.getProjectId())) {
-				existing.setRoles(userProjectSetting.getRoles());
-				existing.setPermissions(userProjectSetting.getPermissions());
-				updated = true;
-				break;
-			}
-		}
-		
-		if (!updated) {
-			userProjectSetting.setUser(user);
-			user.getProjectSettings().add(userProjectSetting);
-		}
-		
-		CUser savedUser = repository.saveAndFlush(user);
-		
-		// Return the saved project setting
-		return userProjectSetting;
-	}
-
-	/**
-	 * Removes a project setting for a user.
-	 * @param userId the user ID
-	 * @param projectId the project ID
-	 */
-	@Transactional
-	public void removeUserProjectSetting(final Long userId, final Long projectId) {
-		logger.info("Removing user project setting for user ID: {} and project ID: {}", userId, projectId);
-		
-		CUser user = getUserWithProjects(userId);
-		
-		if (user.getProjectSettings() != null) {
-			user.getProjectSettings().removeIf(setting -> setting.getProjectId().equals(projectId));
-			repository.saveAndFlush(user);
-		}
-	}
-
-	/**
 	 * Implementation of UserDetailsService.loadUserByUsername(). This is the core
 	 * method called by Spring Security during authentication. Authentication Flow
 	 * Step: 1. Spring Security calls this method with username from login form 2.
@@ -177,6 +119,7 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 	 * @return UserDetails object containing user authentication info
 	 * @throws UsernameNotFoundException if user not found in database
 	 */
+	@Override
 	public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
 		logger.debug("Attempting to load user by username: {}", username);
 		// Step 1: Query database for user by username
@@ -192,6 +135,55 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 		return User.builder().username(loginUser.getUsername()).password(loginUser.getPassword()) // Already encoded password from database
 			.authorities(authorities).accountExpired(false).accountLocked(false).credentialsExpired(false).disabled(!loginUser.isEnabled()) // Convert enabled flag to disabled flag
 			.build();
+	}
+
+	/**
+	 * Removes a project setting for a user.
+	 * @param userId    the user ID
+	 * @param projectId the project ID
+	 */
+	@Transactional
+	public void removeUserProjectSetting(final Long userId, final Long projectId) {
+		logger.info("Removing user project setting for user ID: {} and project ID: {}", userId, projectId);
+		final CUser user = getUserWithProjects(userId);
+		if (user.getProjectSettings() != null) {
+			user.getProjectSettings().removeIf(setting -> setting.getProjectId().equals(projectId));
+			repository.saveAndFlush(user);
+		}
+	}
+
+	/**
+	 * Adds or updates a project setting for a user.
+	 * @param userProjectSetting the project setting to save
+	 * @return the saved project setting
+	 */
+	@Transactional
+	public CUserProjectSettings saveUserProjectSetting(final CUserProjectSettings userProjectSetting) {
+		logger.info("Saving user project setting for user ID: {} and project ID: {}", userProjectSetting.getUser().getId(), userProjectSetting.getProjectId());
+		// Ensure the user exists and reload with project settings
+		final CUser user = getUserWithProjects(userProjectSetting.getUser().getId());
+		// Initialize project settings list if null
+		if (user.getProjectSettings() == null) {
+			user.setProjectSettings(new java.util.ArrayList<>());
+		}
+		// Check if this setting already exists (update case)
+		boolean updated = false;
+		for (int i = 0; i < user.getProjectSettings().size(); i++) {
+			final CUserProjectSettings existing = user.getProjectSettings().get(i);
+			if (existing.getProjectId().equals(userProjectSetting.getProjectId())) {
+				existing.setRole(userProjectSetting.getRole());
+				existing.setPermission(userProjectSetting.getPermission());
+				updated = true;
+				break;
+			}
+		}
+		if (!updated) {
+			userProjectSetting.setUser(user);
+			user.getProjectSettings().add(userProjectSetting);
+		}
+		final CUser savedUser = repository.saveAndFlush(user);
+		// Return the saved project setting
+		return userProjectSetting;
 	}
 
 	/**
