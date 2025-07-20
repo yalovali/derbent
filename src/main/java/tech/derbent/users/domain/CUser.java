@@ -60,7 +60,7 @@ public class CUser extends CEntityDB {
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<CUserProjectSettings> projectSettings;
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_type_id", nullable = true)
+	@JoinColumn(name = "cusertype_id", nullable = true)
 	@MetaData(displayName = "User Type", required = false, readOnly = false, description = "Type category of the user", hidden = false, order = 8)
 	private CUserType userType;
 

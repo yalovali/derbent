@@ -34,7 +34,7 @@ INSERT INTO cuser (
     phone,               -- User's phone number
     roles,               -- User roles (e.g., 'USER')
     updated_date,        -- Timestamp when the user was last updated
-    user_type_id         -- Reference to user type
+    cusertype_id         -- Reference to user type (updated to match new classname_id convention)
 ) VALUES (
     '2025-07-18 15:58:12.244818',
     'test@example.com',
@@ -60,7 +60,7 @@ INSERT INTO cuser (
     phone,               -- User's phone number
     roles,               -- User roles (e.g., 'USER')
     updated_date,        -- Timestamp when the user was last updated
-    user_type_id         -- Reference to user type
+    cusertype_id         -- Reference to user type (updated to match new classname_id convention)
 ) VALUES (
     '2025-07-18 15:58:12.244818',
     'test@example.com',
