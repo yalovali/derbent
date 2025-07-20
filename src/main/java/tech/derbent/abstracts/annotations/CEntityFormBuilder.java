@@ -1,6 +1,9 @@
 package tech.derbent.abstracts.annotations;
 
 import java.lang.reflect.Field;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -12,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -97,6 +102,10 @@ public final class CEntityFormBuilder {
 				   fieldType == Double.class || fieldType == double.class ||
 				   fieldType == Float.class || fieldType == float.class) {
 			return createNumberField(field, meta, binder);
+		} else if (fieldType == LocalDate.class) {
+			return createDatePicker(field, meta, binder);
+		} else if (fieldType == LocalDateTime.class || fieldType == Instant.class) {
+			return createDateTimePicker(field, meta, binder);
 		} else if (fieldType.isEnum()) {
 			return createEnumComponent(field, meta, binder);
 		} else if (CEntityDB.class.isAssignableFrom(fieldType) && dataProvider != null) {
@@ -197,6 +206,47 @@ public final class CEntityFormBuilder {
 		setComponentWidth(numberField, meta);
 		binder.bind(numberField, field.getName());
 		return numberField;
+	}
+
+	private static DatePicker createDatePicker(final Field field, final MetaData meta, final BeanValidationBinder<?> binder) {
+		final DatePicker datePicker = new DatePicker();
+		datePicker.setRequiredIndicatorVisible(meta.required());
+		datePicker.setReadOnly(meta.readOnly());
+		
+		if (!meta.description().isEmpty()) {
+			datePicker.setHelperText(meta.description());
+		}
+		
+		datePicker.setClassName("form-field-date");
+		setComponentWidth(datePicker, meta);
+		binder.bind(datePicker, field.getName());
+		return datePicker;
+	}
+
+	private static DateTimePicker createDateTimePicker(final Field field, final MetaData meta, final BeanValidationBinder<?> binder) {
+		final DateTimePicker dateTimePicker = new DateTimePicker();
+		dateTimePicker.setRequiredIndicatorVisible(meta.required());
+		dateTimePicker.setReadOnly(meta.readOnly());
+		
+		if (!meta.description().isEmpty()) {
+			dateTimePicker.setHelperText(meta.description());
+		}
+		
+		dateTimePicker.setClassName("form-field-datetime");
+		setComponentWidth(dateTimePicker, meta);
+		
+		// For Instant fields, we need a custom converter
+		if (field.getType() == Instant.class) {
+			binder.forField(dateTimePicker)
+				.withConverter(
+					localDateTime -> localDateTime != null ? localDateTime.atZone(java.time.ZoneId.systemDefault()).toInstant() : null,
+					instant -> instant != null ? instant.atZone(java.time.ZoneId.systemDefault()).toLocalDateTime() : null)
+				.bind(field.getName());
+		} else {
+			binder.bind(dateTimePicker, field.getName());
+		}
+		
+		return dateTimePicker;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
