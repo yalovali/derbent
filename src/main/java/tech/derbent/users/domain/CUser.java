@@ -6,6 +6,9 @@ import java.util.List;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
@@ -54,6 +57,11 @@ public class CUser extends CEntityDB {
 	private LocalDateTime updated_date;
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<CUserProjectSettings> projectSettings;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_type_id", nullable = true)
+	@MetaData(displayName = "User Type", required = false, readOnly = false, description = "Type category of the user", hidden = false)
+	private CUserType userType;
 
 	public CUser() {
 		super();
@@ -136,6 +144,10 @@ public class CUser extends CEntityDB {
 	public void setPhone(final String phone) { this.phone = phone; }
 
 	public void setProjectSettings(final List<CUserProjectSettings> projectSettings) { this.projectSettings = projectSettings; }
+
+	public CUserType getUserType() { return userType; }
+
+	public void setUserType(final CUserType userType) { this.userType = userType; }
 
 	public void setRoles(final String roles) { this.roles = roles != null ? roles : "USER"; }
 
