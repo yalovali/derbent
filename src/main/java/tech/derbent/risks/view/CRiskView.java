@@ -17,9 +17,8 @@ import tech.derbent.risks.service.CRiskService;
 import tech.derbent.session.service.SessionService;
 
 /**
- * CRiskView - View for managing project risks.
- * Layer: View (MVC)
- * Provides CRUD operations for risks using the project-aware master-detail pattern.
+ * CRiskView - View for managing project risks. Layer: View (MVC) Provides CRUD
+ * operations for risks using the project-aware master-detail pattern.
  */
 @PageTitle("Project Risks")
 @Route("risks/:risk_id?/:action?(edit)")
@@ -68,14 +67,10 @@ public class CRiskView extends CProjectAwareMDPage<CRisk> {
 	}
 
 	@Override
-	protected String getEntityRouteIdField() { 
-		return ENTITY_ID_FIELD; 
-	}
+	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
 
 	@Override
-	protected String getEntityRouteTemplateEdit() { 
-		return ENTITY_ROUTE_TEMPLATE_EDIT; 
-	}
+	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
 
 	@Override
 	protected List<CRisk> getProjectFilteredData(final CProject project, final org.springframework.data.domain.Pageable pageable) {

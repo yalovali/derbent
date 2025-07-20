@@ -26,7 +26,7 @@ import tech.derbent.session.service.SessionService;
 public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 
 	private static final long serialVersionUID = 1L;
-	private final String ENTITY_ID_FIELD = "project_id";
+	private final String ENTITY_ID_FIELD = "activity_id";
 	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "activities/%s/edit";
 	private final CActivityTypeService activityTypeService;
 
@@ -35,7 +35,6 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 		addClassNames("activities-view");
 		this.activityTypeService = activityTypeService;
 		createDetailsLayout();
-		LOGGER.info("CActivitiesView initialized successfully");
 	}
 
 	@Override
@@ -43,9 +42,9 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 		LOGGER.info("Creating details layout for CActivitiesView");
 		final Div editorLayoutDiv = new Div();
 		editorLayoutDiv.setClassName("editor-layout");
-		
 		// Create data provider for ComboBoxes
 		final CEntityFormBuilder.ComboBoxDataProvider dataProvider = new CEntityFormBuilder.ComboBoxDataProvider() {
+
 			@Override
 			@SuppressWarnings("unchecked")
 			public <T extends CEntityDB> java.util.List<T> getItems(final Class<T> entityType) {
@@ -55,7 +54,6 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 				return java.util.Collections.emptyList();
 			}
 		};
-		
 		// Use CEntityFormBuilder for automatic form generation
 		editorLayoutDiv.add(CEntityFormBuilder.buildForm(CActivity.class, getBinder(), dataProvider));
 		createButtonLayout(editorLayoutDiv);

@@ -118,6 +118,9 @@ After accepting Copilot suggestions, manually review for:
 - use vaadin ui components to display exception if possible.
 - try to use MetaData.java and CEntityFormBuilder.java to bind and generate forms for entities if possible.
 - extend these base classes or add new ones or add more features, if necessary to increase modularity of the code.
+- Always use apropriate icons for views
+- for delete operations always use user approval
+- selective combobox's are selection only. user should not be able to input text
 
 
 ---

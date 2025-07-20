@@ -3,6 +3,7 @@ package tech.derbent.users.domain;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,6 +18,7 @@ import tech.derbent.abstracts.domains.CEntityDB;
 
 @Entity
 @Table(name = "cuser") // table name for the entity as the default is the class name in lowercase
+@AttributeOverride(name = "id", column = @Column(name = "user_id")) // Override the default column name for the ID field
 public class CUser extends CEntityDB {
 
 	public static final int MAX_LENGTH_NAME = 255; // Define maximum length for name fields
@@ -57,7 +59,6 @@ public class CUser extends CEntityDB {
 	private LocalDateTime updated_date;
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<CUserProjectSettings> projectSettings;
-	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_type_id", nullable = true)
 	@MetaData(displayName = "User Type", required = false, readOnly = false, description = "Type category of the user", hidden = false, order = 8)
@@ -120,6 +121,8 @@ public class CUser extends CEntityDB {
 		return getLogin(); // Convenience method to get username for authentication
 	}
 
+	public CUserType getUserType() { return userType; }
+
 	public boolean isEnabled() {
 		return enabled; // Return the enabled status
 	}
@@ -145,11 +148,9 @@ public class CUser extends CEntityDB {
 
 	public void setProjectSettings(final List<CUserProjectSettings> projectSettings) { this.projectSettings = projectSettings; }
 
-	public CUserType getUserType() { return userType; }
+	public void setRoles(final String roles) { this.roles = roles != null ? roles : "USER"; }
 
 	public void setUserType(final CUserType userType) { this.userType = userType; }
-
-	public void setRoles(final String roles) { this.roles = roles != null ? roles : "USER"; }
 
 	@Override
 	public String toString() {

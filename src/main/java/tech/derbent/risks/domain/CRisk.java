@@ -1,5 +1,6 @@
 package tech.derbent.risks.domain;
 
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -11,6 +12,7 @@ import tech.derbent.projects.domain.CProject;
 
 @Entity
 @Table(name = "crisk") // table name for the entity as the default is the class name in lowercase
+@AttributeOverride(name = "id", column = @Column(name = "risk_id")) // Override the default column name for the ID field
 public class CRisk extends CEntityOfProject {
 
 	@Enumerated(EnumType.STRING)
