@@ -12,9 +12,13 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.abstracts.annotations.CEntityFormBuilder;
+import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.activities.domain.CActivity;
+import tech.derbent.activities.domain.CActivityType;
 import tech.derbent.activities.service.CActivityService;
+import tech.derbent.activities.service.CActivityTypeService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.SessionService;
 
@@ -27,26 +31,47 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 	private static final long serialVersionUID = 1L;
 	private final String ENTITY_ID_FIELD = "project_id";
 	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "projects/%s/edit";
+	private final CActivityTypeService activityTypeService;
 	private TextField name;
 
-	public CActivitiesView(final CActivityService entityService, final SessionService sessionService) {
+	public CActivitiesView(final CActivityService entityService, final SessionService sessionService, final CActivityTypeService activityTypeService) {
 		super(CActivity.class, entityService, sessionService);
 		addClassNames("projects-view");
+		this.activityTypeService = activityTypeService;
 		// Configure Form Bind fields. This is where you'd define e.g. validation rules
 		getBinder().bindInstanceFields(this);
 	}
 
 	@Override
 	protected Component createDetailsLayout() {
+		LOGGER.info("Creating details layout for CActivitiesView");
 		final Div editorLayoutDiv = new Div();
 		editorLayoutDiv.setClassName("editor-layout");
 		final Div editorDiv = new Div();
 		editorDiv.setClassName("editor");
 		editorLayoutDiv.add(editorDiv);
+		
+		// Create data provider for ComboBoxes
+		final CEntityFormBuilder.ComboBoxDataProvider dataProvider = new CEntityFormBuilder.ComboBoxDataProvider() {
+			@Override
+			@SuppressWarnings("unchecked")
+			public <T extends CEntityDB> java.util.List<T> getItems(final Class<T> entityType) {
+				if (entityType == CActivityType.class) {
+					return (java.util.List<T>) activityTypeService.list(org.springframework.data.domain.Pageable.unpaged());
+				}
+				return java.util.Collections.emptyList();
+			}
+		};
+		
+		// Use CEntityFormBuilder for automatic form generation
+		editorDiv.add(CEntityFormBuilder.buildForm(CActivity.class, getBinder(), dataProvider));
+		
+		// Also add the manual name field for compatibility
 		final FormLayout formLayout = new FormLayout();
 		name = new TextField("Name");
 		formLayout.add(name);
 		editorDiv.add(formLayout);
+		
 		createButtonLayout(editorLayoutDiv);
 		return editorLayoutDiv;
 	}
