@@ -23,7 +23,6 @@ import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.services.CAbstractService;
-import tech.derbent.users.view.CUsersView;
 
 public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAbstractPage {
 
@@ -146,7 +145,8 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 				clearForm();
 				refreshGrid();
 				Notification.show("Data updated");
-				UI.getCurrent().navigate(CUsersView.class);
+				// Navigate back to the current view (list mode)
+				UI.getCurrent().navigate(getClass());
 			} catch (final ObjectOptimisticLockingFailureException exception) {
 				final Notification n = Notification.show("Error updating the data. Somebody else has updated the record while you were making changes.");
 				n.setPosition(Position.MIDDLE);

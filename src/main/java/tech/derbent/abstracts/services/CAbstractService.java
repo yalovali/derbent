@@ -89,6 +89,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB> {
 	/**
 	 * Initializes lazy fields for an entity to prevent LazyInitializationException.
 	 * Subclasses can override this method to specify which fields need initialization.
+	 * This base implementation automatically handles CEntityOfProject entities.
 	 * @param entity the entity to initialize
 	 */
 	protected void initializeLazyFields(final EntityClass entity) {
@@ -99,9 +100,34 @@ public abstract class CAbstractService<EntityClass extends CEntityDB> {
 		try {
 			// Default implementation - just initialize the entity itself
 			CSpringAuxillaries.initializeLazily(entity);
+			
+			// Automatically handle CEntityOfProject's lazy project relationship
+			if (entity instanceof tech.derbent.abstracts.domains.CEntityOfProject) {
+				final tech.derbent.abstracts.domains.CEntityOfProject projectEntity = 
+					(tech.derbent.abstracts.domains.CEntityOfProject) entity;
+				initializeLazyRelationship(projectEntity.getProject(), "project");
+			}
+			
+			LOGGER.debug("Initialized lazy fields for entity: {}", entity.getClass().getSimpleName());
 		} catch (final Exception e) {
 			LOGGER.warn("Error initializing lazy fields for entity: {}", 
 				CSpringAuxillaries.safeToString(entity), e);
+		}
+	}
+
+	/**
+	 * Helper method to safely initialize a specific lazy relationship.
+	 * @param relationshipEntity the related entity to initialize
+	 * @param relationshipName the name of the relationship (for logging)
+	 */
+	protected void initializeLazyRelationship(final Object relationshipEntity, final String relationshipName) {
+		if (relationshipEntity != null) {
+			boolean success = CSpringAuxillaries.initializeLazily(relationshipEntity);
+			if (success) {
+				LOGGER.debug("Initialized lazy relationship: {}", relationshipName);
+			} else {
+				LOGGER.warn("Failed to initialize lazy relationship: {}", relationshipName);
+			}
 		}
 	}
 

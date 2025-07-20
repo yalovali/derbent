@@ -92,10 +92,7 @@ public class CActivityService extends CAbstractService<CActivity> {
 			super.initializeLazyFields(entity);
 			
 			// Initialize the lazy-loaded CActivityType relationship
-			if (entity.getActivityType() != null) {
-				tech.derbent.abstracts.annotations.CSpringAuxillaries.initializeLazily(entity.getActivityType());
-				LOGGER.debug("Initialized CActivityType for CActivity ID: {}", entity.getId());
-			}
+			initializeLazyRelationship(entity.getActivityType(), "CActivityType");
 		} catch (final Exception e) {
 			LOGGER.warn("Error initializing lazy fields for CActivity with ID: {}", 
 				entity.getId(), e);
