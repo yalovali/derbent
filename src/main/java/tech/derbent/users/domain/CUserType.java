@@ -20,12 +20,12 @@ public class CUserType extends CTypeEntity {
 
     @Column(name = "name", nullable = false, length = MAX_LENGTH_NAME, unique = true)
     @Size(max = MAX_LENGTH_NAME)
-    @MetaData(displayName = "Type Name", required = true, readOnly = false, defaultValue = "-", description = "Name of the user type", hidden = false)
+    @MetaData(displayName = "Type Name", required = true, readOnly = false, defaultValue = "", description = "Name of the user type", hidden = false, order = 1, maxLength = MAX_LENGTH_NAME)
     private String name;
 
     @Column(name = "description", nullable = true, length = MAX_LENGTH_DESCRIPTION)
     @Size(max = MAX_LENGTH_DESCRIPTION)
-    @MetaData(displayName = "Description", required = false, readOnly = false, defaultValue = "", description = "Description of the user type", hidden = false)
+    @MetaData(displayName = "Description", required = false, readOnly = false, defaultValue = "", description = "Description of the user type", hidden = false, order = 2, maxLength = MAX_LENGTH_DESCRIPTION)
     private String description;
 
     /**

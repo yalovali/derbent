@@ -18,7 +18,7 @@ public class CEntityOfProject extends CEntityDB {
 	private CProject project;
 	@Column(name = "name", nullable = false, length = MAX_LENGTH_NAME, unique = true)
 	@Size(max = MAX_LENGTH_NAME)
-	@MetaData(displayName = "Activity Name", required = true, readOnly = false, defaultValue = "-", description = "Activity name", hidden = false)
+	@MetaData(displayName = "Name", required = true, readOnly = false, defaultValue = "", description = "Name of the entity", hidden = false, order = 1, maxLength = MAX_LENGTH_NAME)
 	private String name;
 
 	// Default constructor for JPA

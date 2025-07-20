@@ -1,6 +1,13 @@
 package tech.derbent.abstracts.annotations;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -10,13 +17,25 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import tech.derbent.abstracts.domains.CEntityDB;
 
-public class CEntityFormBuilder {
+/**
+ * CEntityFormBuilder - Utility class for building forms from entity classes using MetaData annotations.
+ * Supports automatic form generation for various field types including text, boolean, enum, numeric, and entity references.
+ * Layer: Utility (MVC)
+ */
+public final class CEntityFormBuilder {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityFormBuilder.class);
 	protected static final String LabelMinWidth_210PX = "210px";
+
+	private CEntityFormBuilder() {
+		// Utility class - prevent instantiation
+	}
 
 	public static <EntityClass> Div buildForm(final Class<?> entityClass, final BeanValidationBinder<EntityClass> binder) {
 		return buildForm(entityClass, binder, null);
@@ -24,82 +43,197 @@ public class CEntityFormBuilder {
 
 	public static <EntityClass> Div buildForm(final Class<?> entityClass, final BeanValidationBinder<EntityClass> binder, 
 			final ComboBoxDataProvider dataProvider) {
+		LOGGER.info("Building form for entity class: {}", entityClass.getSimpleName());
+		
 		if (entityClass == null) {
 			throw new IllegalArgumentException("Entity class cannot be null");
 		}
 		if (binder == null) {
 			throw new IllegalArgumentException("Binder cannot be null");
 		}
+		
 		final Div panel = new Div();
 		panel.setClassName("editor-layout");
 		final FormLayout formLayout = new FormLayout();
-		for (final Field field : entityClass.getDeclaredFields()) {
+		
+		// Get all fields and sort by MetaData order
+		final List<Field> sortedFields = Arrays.stream(entityClass.getDeclaredFields())
+			.filter(field -> !java.lang.reflect.Modifier.isStatic(field.getModifiers()))
+			.filter(field -> field.getAnnotation(MetaData.class) != null)
+			.filter(field -> !field.getAnnotation(MetaData.class).hidden())
+			.sorted(Comparator.comparingInt(field -> field.getAnnotation(MetaData.class).order()))
+			.collect(Collectors.toList());
+		
+		for (final Field field : sortedFields) {
 			final MetaData meta = field.getAnnotation(MetaData.class);
-			if (java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
-				continue;
+			
+			try {
+				Component component = createComponentForField(field, meta, binder, dataProvider);
+				if (component != null) {
+					final HorizontalLayout horizontalLayout = createFieldLayout(meta, component);
+					formLayout.add(horizontalLayout);
+				}
+			} catch (final Exception e) {
+				LOGGER.error("Error creating component for field: {}", field.getName(), e);
 			}
-			if ((meta == null) || meta.hidden()) {
-				continue; // Skip fields without MetaData or hidden fields
-			}
-			Component component = null;
-			if ((field.getType() == Boolean.class) || (field.getType() == boolean.class)) {
-				component = createCheckbox(field, meta, binder);
-			}
-			else if ((field.getType() == String.class) || (field.getType() == char.class)) {
-				component = createTextField(field, meta, binder);
-			}
-			else if (CEntityDB.class.isAssignableFrom(field.getType()) && dataProvider != null) {
-				component = createComboBox(field, meta, binder, dataProvider);
-			}
-			else {
-				// Handle other field types as needed
-				throw new UnsupportedOperationException("Unsupported field type: " + field.getType());
-			}
-			final HorizontalLayout horizantalLayout = new HorizontalLayout();
-			horizantalLayout.setPadding(false);
-			horizantalLayout.setSpacing(false);
-			horizantalLayout.setMargin(false);
-			horizantalLayout.setJustifyContentMode(JustifyContentMode.START);
-			horizantalLayout.setAlignItems(FlexComponent.Alignment.BASELINE);
-			final Div div = new Div(meta.displayName());
-			div.setMinWidth(LabelMinWidth_210PX);
-			horizantalLayout.add(div);
-			horizantalLayout.add(component);
-			formLayout.add(horizantalLayout);
-			// formLayout.add(txtField);
 		}
+		
 		panel.add(formLayout);
 		return panel;
 	}
 
+	private static Component createComponentForField(final Field field, final MetaData meta, 
+			final BeanValidationBinder<?> binder, final ComboBoxDataProvider dataProvider) {
+		
+		final Class<?> fieldType = field.getType();
+		
+		// Handle different field types
+		if (fieldType == Boolean.class || fieldType == boolean.class) {
+			return createCheckbox(field, meta, binder);
+		} else if (fieldType == String.class) {
+			return createTextField(field, meta, binder);
+		} else if (fieldType == Integer.class || fieldType == int.class || 
+				   fieldType == Long.class || fieldType == long.class ||
+				   fieldType == Double.class || fieldType == double.class ||
+				   fieldType == Float.class || fieldType == float.class) {
+			return createNumberField(field, meta, binder);
+		} else if (fieldType.isEnum()) {
+			return createEnumComponent(field, meta, binder);
+		} else if (CEntityDB.class.isAssignableFrom(fieldType) && dataProvider != null) {
+			return createComboBox(field, meta, binder, dataProvider);
+		} else {
+			LOGGER.warn("Unsupported field type: {} for field: {}", fieldType, field.getName());
+			return null;
+		}
+	}
+
+	private static HorizontalLayout createFieldLayout(final MetaData meta, final Component component) {
+		final HorizontalLayout horizontalLayout = new HorizontalLayout();
+		horizontalLayout.setPadding(false);
+		horizontalLayout.setSpacing(false);
+		horizontalLayout.setMargin(false);
+		horizontalLayout.setJustifyContentMode(JustifyContentMode.START);
+		horizontalLayout.setAlignItems(FlexComponent.Alignment.BASELINE);
+		
+		final Div labelDiv = new Div(meta.displayName());
+		labelDiv.setMinWidth(LabelMinWidth_210PX);
+		if (meta.required()) {
+			labelDiv.getStyle().set("font-weight", "bold");
+		}
+		
+		horizontalLayout.add(labelDiv);
+		horizontalLayout.add(component);
+		
+		return horizontalLayout;
+	}
+
 	private static Checkbox createCheckbox(final Field field, final MetaData meta, final BeanValidationBinder<?> binder) {
 		final Checkbox checkbox = new Checkbox();
-		// no label for checkbox, checkbox.setLabel(meta.displayName());
 		checkbox.setRequiredIndicatorVisible(meta.required());
 		checkbox.setReadOnly(meta.readOnly());
+		
 		if (!meta.description().isEmpty()) {
 			checkbox.setHelperText(meta.description());
 		}
+		
+		if (!meta.defaultValue().isEmpty()) {
+			checkbox.setValue(Boolean.parseBoolean(meta.defaultValue()));
+		}
+		
+		setComponentWidth(checkbox, meta);
 		binder.bind(checkbox, field.getName());
 		return checkbox;
 	}
 
 	private static TextField createTextField(final Field field, final MetaData meta, final BeanValidationBinder<?> binder) {
 		final TextField textField = new TextField();
-		// no label for text field, textField.setLabel(meta.displayName());
 		textField.setRequiredIndicatorVisible(meta.required());
 		textField.setReadOnly(meta.readOnly());
+		
 		if (!meta.description().isEmpty()) {
 			textField.setHelperText(meta.description());
 		}
+		
 		if (!meta.defaultValue().isEmpty()) {
 			textField.setValue(meta.defaultValue());
 		}
-		// txtField.setId(field.getName());
+		
+		if (meta.maxLength() > 0) {
+			textField.setMaxLength(meta.maxLength());
+		}
+		
 		textField.setClassName("form-field-text");
-		textField.setWidthFull();
+		setComponentWidth(textField, meta);
 		binder.bind(textField, field.getName());
 		return textField;
+	}
+
+	private static NumberField createNumberField(final Field field, final MetaData meta, final BeanValidationBinder<?> binder) {
+		final NumberField numberField = new NumberField();
+		numberField.setRequiredIndicatorVisible(meta.required());
+		numberField.setReadOnly(meta.readOnly());
+		
+		if (!meta.description().isEmpty()) {
+			numberField.setHelperText(meta.description());
+		}
+		
+		if (meta.min() != Double.MIN_VALUE) {
+			numberField.setMin(meta.min());
+		}
+		
+		if (meta.max() != Double.MAX_VALUE) {
+			numberField.setMax(meta.max());
+		}
+		
+		if (!meta.defaultValue().isEmpty()) {
+			try {
+				numberField.setValue(Double.parseDouble(meta.defaultValue()));
+			} catch (final NumberFormatException e) {
+				LOGGER.warn("Invalid default numeric value: {} for field: {}", meta.defaultValue(), field.getName());
+			}
+		}
+		
+		numberField.setClassName("form-field-number");
+		setComponentWidth(numberField, meta);
+		binder.bind(numberField, field.getName());
+		return numberField;
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private static Component createEnumComponent(final Field field, final MetaData meta, final BeanValidationBinder<?> binder) {
+		final Class<? extends Enum> enumType = (Class<? extends Enum>) field.getType();
+		final Enum[] enumConstants = enumType.getEnumConstants();
+		
+		if (meta.useRadioButtons()) {
+			final RadioButtonGroup<Enum> radioGroup = new RadioButtonGroup<>();
+			radioGroup.setItems(enumConstants);
+			radioGroup.setItemLabelGenerator(Enum::name);
+			radioGroup.setRequiredIndicatorVisible(meta.required());
+			radioGroup.setReadOnly(meta.readOnly());
+			
+			if (!meta.description().isEmpty()) {
+				radioGroup.setHelperText(meta.description());
+			}
+			
+			setComponentWidth(radioGroup, meta);
+			binder.bind(radioGroup, field.getName());
+			return radioGroup;
+		} else {
+			final ComboBox<Enum> comboBox = new ComboBox<>();
+			comboBox.setItems(enumConstants);
+			comboBox.setItemLabelGenerator(Enum::name);
+			comboBox.setRequiredIndicatorVisible(meta.required());
+			comboBox.setReadOnly(meta.readOnly());
+			
+			if (!meta.description().isEmpty()) {
+				comboBox.setHelperText(meta.description());
+			}
+			
+			comboBox.setClassName("form-field-enum");
+			setComponentWidth(comboBox, meta);
+			binder.bind(comboBox, field.getName());
+			return comboBox;
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -108,19 +242,37 @@ public class CEntityFormBuilder {
 		final ComboBox<T> comboBox = new ComboBox<>();
 		comboBox.setRequiredIndicatorVisible(meta.required());
 		comboBox.setReadOnly(meta.readOnly());
+		
 		if (!meta.description().isEmpty()) {
 			comboBox.setHelperText(meta.description());
 		}
+		
 		comboBox.setClassName("form-field-combobox");
-		comboBox.setWidthFull();
+		setComponentWidth(comboBox, meta);
 		comboBox.setItemLabelGenerator(T::toString);
 		
-		// Get items from the data provider
-		final var items = dataProvider.getItems((Class<T>) field.getType());
-		comboBox.setItems(items);
+		try {
+			// Get items from the data provider with proper error handling
+			final List<T> items = dataProvider.getItems((Class<T>) field.getType());
+			comboBox.setItems(items);
+		} catch (final Exception e) {
+			LOGGER.error("Error loading data for combobox field: {}", field.getName(), e);
+			comboBox.setItems(); // Set empty items to prevent errors
+		}
 		
 		binder.bind(comboBox, field.getName());
 		return comboBox;
+	}
+
+	private static void setComponentWidth(final Component component, final MetaData meta) {
+		if (component instanceof com.vaadin.flow.component.HasSize) {
+			final com.vaadin.flow.component.HasSize hasSize = (com.vaadin.flow.component.HasSize) component;
+			if (!meta.width().isEmpty()) {
+				hasSize.setWidth(meta.width());
+			} else {
+				hasSize.setWidthFull();
+			}
+		}
 	}
 
 	/**
@@ -133,6 +285,6 @@ public class CEntityFormBuilder {
 		 * @param entityType the class type of the entity
 		 * @return list of entities to populate the ComboBox
 		 */
-		<T extends CEntityDB> java.util.List<T> getItems(Class<T> entityType);
+		<T extends CEntityDB> List<T> getItems(Class<T> entityType);
 	}
 }

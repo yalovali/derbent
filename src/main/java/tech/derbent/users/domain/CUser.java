@@ -22,33 +22,33 @@ public class CUser extends CEntityDB {
 	public static final int MAX_LENGTH_NAME = 255; // Define maximum length for name fields
 	@Column(name = "name", nullable = false, length = MAX_LENGTH_NAME, unique = false)
 	@Size(max = MAX_LENGTH_NAME)
-	@MetaData(displayName = "User Name", required = true, readOnly = false, defaultValue = "-", description = "User's first name", hidden = false)
+	@MetaData(displayName = "User Name", required = true, readOnly = false, defaultValue = "", description = "User's first name", hidden = false, order = 1, maxLength = MAX_LENGTH_NAME)
 	private String name;
 	@Column(name = "lastname", nullable = true, length = MAX_LENGTH_NAME, unique = false)
-	@MetaData(displayName = "Last Name", required = true, readOnly = false, defaultValue = "-", description = "User's lastname", hidden = false)
+	@MetaData(displayName = "Last Name", required = true, readOnly = false, defaultValue = "", description = "User's last name", hidden = false, order = 2, maxLength = MAX_LENGTH_NAME)
 	@Size(max = MAX_LENGTH_NAME)
 	private String lastname;
-	@MetaData(displayName = "Login", required = true, readOnly = false, defaultValue = "-", description = "Login name for the system", hidden = false)
+	@MetaData(displayName = "Login", required = true, readOnly = false, defaultValue = "", description = "Login name for the system", hidden = false, order = 3, maxLength = MAX_LENGTH_NAME)
 	@Column(name = "login", nullable = true, length = MAX_LENGTH_NAME, unique = true)
 	@Size(max = MAX_LENGTH_NAME)
 	private String login;
-	@MetaData(displayName = "Email", required = true, readOnly = false, defaultValue = "", description = "", hidden = false)
+	@MetaData(displayName = "Email", required = true, readOnly = false, defaultValue = "", description = "User's email address", hidden = false, order = 4, maxLength = MAX_LENGTH_NAME)
 	@Column(name = "email", nullable = true, length = MAX_LENGTH_NAME, unique = false)
 	@Size(max = MAX_LENGTH_NAME)
 	private String email;
-	@MetaData(displayName = "Phone", required = true, readOnly = false, defaultValue = "-", description = "Phone number", hidden = false)
+	@MetaData(displayName = "Phone", required = false, readOnly = false, defaultValue = "", description = "Phone number", hidden = false, order = 5, maxLength = MAX_LENGTH_NAME)
 	@Column(name = "phone", nullable = true, length = MAX_LENGTH_NAME, unique = false)
 	@Size(max = MAX_LENGTH_NAME)
 	private String phone;
 	@Column(name = "roles", nullable = false, length = 255)
 	@Size(max = 255)
-	@MetaData(displayName = "Roles", required = true, readOnly = false, defaultValue = "USER", description = "User roles (comma-separated)", hidden = false)
+	@MetaData(displayName = "Roles", required = true, readOnly = false, defaultValue = "USER", description = "User roles (comma-separated)", hidden = false, order = 6, maxLength = 255)
 	private String roles = "USER";
 	@Column(name = "password", nullable = true, length = 255)
 	@Size(max = 255)
-	@MetaData(displayName = "Password", required = false, readOnly = false, description = "User password (stored as hash)", hidden = true)
+	@MetaData(displayName = "Password", required = false, readOnly = false, description = "User password (stored as hash)", hidden = true, order = 99)
 	private String password; // Encoded password
-	@MetaData(displayName = "Enabled", required = true, readOnly = false, defaultValue = "true", description = "Is user account enabled?", hidden = false)
+	@MetaData(displayName = "Enabled", required = true, readOnly = false, defaultValue = "true", description = "Is user account enabled?", hidden = false, order = 7)
 	@Column(name = "enabled", nullable = false)
 	private boolean enabled = true; // User account status, default is enabled
 	@Column(name = "created_date", nullable = true)
@@ -60,7 +60,7 @@ public class CUser extends CEntityDB {
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_type_id", nullable = true)
-	@MetaData(displayName = "User Type", required = false, readOnly = false, description = "Type category of the user", hidden = false)
+	@MetaData(displayName = "User Type", required = false, readOnly = false, description = "Type category of the user", hidden = false, order = 8)
 	private CUserType userType;
 
 	public CUser() {

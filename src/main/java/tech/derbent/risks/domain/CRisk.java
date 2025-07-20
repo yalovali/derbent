@@ -15,7 +15,7 @@ public class CRisk extends CEntityOfProject {
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "risk_severity", nullable = false, length = 20)
-	@MetaData(displayName = "Risk Severity", required = true, readOnly = false, defaultValue = "LOW", description = "Severity of the risk", hidden = false)
+	@MetaData(displayName = "Risk Severity", required = true, readOnly = false, defaultValue = "LOW", description = "Severity level of the risk", hidden = false, order = 2, useRadioButtons = false)
 	private ERiskSeverity riskSeverity;
 
 	// Many risks belong to one project
