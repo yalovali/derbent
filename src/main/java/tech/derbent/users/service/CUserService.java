@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityNotFoundException;
+import tech.derbent.abstracts.annotations.CSpringAuxillaries;
 import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserProjectSettings;
@@ -113,8 +114,65 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 	 */
 	public PasswordEncoder getPasswordEncoder() { return passwordEncoder; }
 
+	/**
+	 * Gets a user with lazy-loaded project settings initialized.
+	 * @param id the user ID
+	 * @return the user with project settings loaded
+	 * @throws EntityNotFoundException if user not found
+	 */
+	@Transactional(readOnly = true)
 	public CUser getUserWithProjects(final Long id) {
-		return ((CUserRepository) repository).findByIdWithProjects(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
+		LOGGER.debug("Getting user with projects for ID: {}", id);
+		final CUser user = ((CUserRepository) repository).findByIdWithProjects(id)
+			.orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + id));
+		
+		// Ensure lazy fields are properly initialized
+		initializeLazyFields(user);
+		return user;
+	}
+
+	/**
+	 * Initializes lazy fields for a user entity to prevent LazyInitializationException.
+	 * Specifically initializes user type and project settings.
+	 * @param user the user entity to initialize
+	 */
+	@Override
+	protected void initializeLazyFields(final CUser user) {
+		if (user == null) {
+			return;
+		}
+		
+		try {
+			// Initialize the main entity
+			super.initializeLazyFields(user);
+			
+			// Initialize user type if present
+			if (user.getUserType() != null) {
+				CSpringAuxillaries.initializeLazily(user.getUserType());
+			}
+			
+			// Initialize project settings collection
+			if (user.getProjectSettings() != null) {
+				CSpringAuxillaries.initializeLazily(user.getProjectSettings());
+			}
+		} catch (final Exception e) {
+			LOGGER.warn("Error initializing lazy fields for user with ID: {}", 
+				CSpringAuxillaries.safeGetId(user), e);
+		}
+	}
+
+	@Override
+	protected void validateEntity(final CUser user) {
+		super.validateEntity(user);
+		
+		// Additional validation for user entities
+		if (user.getLogin() == null || user.getLogin().trim().isEmpty()) {
+			throw new IllegalArgumentException("User login cannot be null or empty");
+		}
+		
+		if (user.getName() == null || user.getName().trim().isEmpty()) {
+			throw new IllegalArgumentException("User name cannot be null or empty");
+		}
 	}
 
 	/**

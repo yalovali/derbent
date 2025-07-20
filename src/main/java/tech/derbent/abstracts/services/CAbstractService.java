@@ -11,8 +11,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 
+import tech.derbent.abstracts.annotations.CSpringAuxillaries;
 import tech.derbent.abstracts.domains.CEntityDB;
 
+/**
+ * CAbstractService - Abstract base service class for entity operations.
+ * Layer: Service (MVC)
+ * Provides common CRUD operations and lazy loading support for all entity types.
+ */
 public abstract class CAbstractService<EntityClass extends CEntityDB> {
 
 	protected final Clock clock;
@@ -26,33 +32,89 @@ public abstract class CAbstractService<EntityClass extends CEntityDB> {
 	}
 
 	public int count() {
+		LOGGER.debug("Counting entities in {}", getClass().getSimpleName());
 		return (int) repository.count();
 	}
 
 	public void delete(final EntityClass entity) {
+		LOGGER.info("Deleting entity with ID: {}", CSpringAuxillaries.safeGetId(entity));
 		repository.delete(entity);
 	}
 
 	public void delete(final Long id) {
+		LOGGER.info("Deleting entity by ID: {}", id);
 		repository.deleteById(id);
 	}
 
+	@Transactional(readOnly = true)
 	public Optional<EntityClass> get(final Long id) {
-		return repository.findById(id);
+		LOGGER.debug("Getting entity by ID: {}", id);
+		final Optional<EntityClass> entity = repository.findById(id);
+		// Initialize lazy fields if entity is present
+		entity.ifPresent(this::initializeLazyFields);
+		return entity;
 	}
-	// public Page<EntityClass> list(final Pageable pageable) { return
-	// repository.findAll(pageable); }
 
 	@Transactional(readOnly = true)
 	public List<EntityClass> list(final Pageable pageable) {
-		return repository.findAllBy(pageable).toList();
+		LOGGER.debug("Listing entities with pageable: {}", pageable);
+		final List<EntityClass> entities = repository.findAllBy(pageable).toList();
+		// Initialize lazy fields for all entities
+		entities.forEach(this::initializeLazyFields);
+		return entities;
 	}
 
+	@Transactional(readOnly = true)
 	public Page<EntityClass> list(final Pageable pageable, final Specification<EntityClass> filter) {
-		return repository.findAll(filter, pageable);
+		LOGGER.debug("Listing entities with filter and pageable");
+		final Page<EntityClass> page = repository.findAll(filter, pageable);
+		// Initialize lazy fields for all entities in the page
+		page.getContent().forEach(this::initializeLazyFields);
+		return page;
 	}
 
-	public CEntityDB save(final EntityClass entity) {
-		return repository.save(entity);
+	@Transactional
+	public EntityClass save(final EntityClass entity) {
+		LOGGER.info("Saving entity: {}", CSpringAuxillaries.safeToString(entity));
+		try {
+			final EntityClass savedEntity = repository.save(entity);
+			LOGGER.debug("Entity saved successfully with ID: {}", CSpringAuxillaries.safeGetId(savedEntity));
+			return savedEntity;
+		} catch (final Exception e) {
+			LOGGER.error("Error saving entity: {}", CSpringAuxillaries.safeToString(entity), e);
+			throw e;
+		}
+	}
+
+	/**
+	 * Initializes lazy fields for an entity to prevent LazyInitializationException.
+	 * Subclasses can override this method to specify which fields need initialization.
+	 * @param entity the entity to initialize
+	 */
+	protected void initializeLazyFields(final EntityClass entity) {
+		if (entity == null) {
+			return;
+		}
+		
+		try {
+			// Default implementation - just initialize the entity itself
+			CSpringAuxillaries.initializeLazily(entity);
+		} catch (final Exception e) {
+			LOGGER.warn("Error initializing lazy fields for entity: {}", 
+				CSpringAuxillaries.safeToString(entity), e);
+		}
+	}
+
+	/**
+	 * Validates an entity before saving.
+	 * Subclasses can override this method to add custom validation logic.
+	 * @param entity the entity to validate
+	 * @throws IllegalArgumentException if validation fails
+	 */
+	protected void validateEntity(final EntityClass entity) {
+		if (entity == null) {
+			throw new IllegalArgumentException("Entity cannot be null");
+		}
+		// Add more validation logic in subclasses if needed
 	}
 }
