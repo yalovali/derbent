@@ -2,7 +2,6 @@ package tech.derbent.activities.view;
 
 import java.util.List;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
@@ -30,7 +29,7 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 
 	private static final long serialVersionUID = 1L;
 	private final String ENTITY_ID_FIELD = "project_id";
-	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "projects/%s/edit";
+	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "activities/%s/edit";
 	private final CActivityTypeService activityTypeService;
 	private TextField name;
 
@@ -40,19 +39,20 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 		this.activityTypeService = activityTypeService;
 		// Configure Form Bind fields. This is where you'd define e.g. validation rules
 		getBinder().bindInstanceFields(this);
+		createDetailsLayout();
 	}
 
 	@Override
-	protected Component createDetailsLayout() {
+	protected void createDetailsLayout() {
 		LOGGER.info("Creating details layout for CActivitiesView");
 		final Div editorLayoutDiv = new Div();
 		editorLayoutDiv.setClassName("editor-layout");
 		final Div editorDiv = new Div();
 		editorDiv.setClassName("editor");
 		editorLayoutDiv.add(editorDiv);
-		
 		// Create data provider for ComboBoxes
 		final CEntityFormBuilder.ComboBoxDataProvider dataProvider = new CEntityFormBuilder.ComboBoxDataProvider() {
+
 			@Override
 			@SuppressWarnings("unchecked")
 			public <T extends CEntityDB> java.util.List<T> getItems(final Class<T> entityType) {
@@ -62,18 +62,15 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 				return java.util.Collections.emptyList();
 			}
 		};
-		
 		// Use CEntityFormBuilder for automatic form generation
 		editorDiv.add(CEntityFormBuilder.buildForm(CActivity.class, getBinder(), dataProvider));
-		
 		// Also add the manual name field for compatibility
 		final FormLayout formLayout = new FormLayout();
 		name = new TextField("Name");
 		formLayout.add(name);
 		editorDiv.add(formLayout);
-		
 		createButtonLayout(editorLayoutDiv);
-		return editorLayoutDiv;
+		getBaseDetailsLayout().add(editorLayoutDiv);
 	}
 
 	@Override
@@ -92,6 +89,14 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 		});
 	}
 
+	// private final BeanValidationBinder<CProject> binder; private final
+	// CProjectService userService; private final Grid<CProject> grid;// = new
+	// Grid<>(CProject.class, false);
+	@Override
+	protected CActivity createNewEntityInstance() {
+		return new CActivity();
+	}
+
 	@Override
 	protected String getEntityRouteIdField() { // TODO Auto-generated method stub
 		return ENTITY_ID_FIELD;
@@ -103,22 +108,14 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 	}
 
 	@Override
+	protected List<CActivity> getProjectFilteredData(final CProject project, final org.springframework.data.domain.Pageable pageable) {
+		return ((CActivityService) entityService).listByProject(project, pageable).getContent();
+	}
+
+	@Override
 	protected void initPage() {
 		// Initialize the page components and layout This method can be overridden to
 		// set up the view's components
-	}
-
-	// private final BeanValidationBinder<CProject> binder; private final
-	// CProjectService userService; private final Grid<CProject> grid;// = new
-	// Grid<>(CProject.class, false);
-	@Override
-	protected CActivity createNewEntityInstance() {
-		return new CActivity();
-	}
-
-	@Override
-	protected List<CActivity> getProjectFilteredData(final CProject project, final org.springframework.data.domain.Pageable pageable) {
-		return ((CActivityService) entityService).listByProject(project, pageable).getContent();
 	}
 
 	@Override

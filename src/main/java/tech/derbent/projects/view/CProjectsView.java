@@ -1,6 +1,5 @@
 package tech.derbent.projects.view;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
@@ -29,11 +28,12 @@ public class CProjectsView extends CAbstractMDPage<CProject> {
 		super(CProject.class, entityService);
 		addClassNames("projects-view");
 		// Configure Form Bind fields. This is where you'd define e.g. validation rules
+		createDetailsLayout();
 		getBinder().bindInstanceFields(this);
 	}
 
 	@Override
-	protected Component createDetailsLayout() {
+	protected void createDetailsLayout() {
 		final Div editorLayoutDiv = new Div();
 		editorLayoutDiv.setClassName("editor-layout");
 		final Div editorDiv = new Div();
@@ -44,7 +44,7 @@ public class CProjectsView extends CAbstractMDPage<CProject> {
 		formLayout.add(name);
 		editorDiv.add(formLayout);
 		createButtonLayout(editorLayoutDiv);
-		return editorLayoutDiv;
+		getBaseDetailsLayout().add(editorLayoutDiv);
 	}
 
 	@Override

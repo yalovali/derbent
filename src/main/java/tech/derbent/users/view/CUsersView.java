@@ -1,6 +1,7 @@
 package tech.derbent.users.view;
 
-import com.vaadin.flow.component.Component;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
@@ -27,26 +28,29 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "users/%s/edit";
 	private final CUserProjectSettingsGrid projectSettingsGrid;
 	private final CUserTypeService userTypeService;
-	// private final TextField name;
 
+	// private final TextField name; • Annotate the CUsersView constructor with
+	// @Autowired to let Spring inject dependencies.
+	@Autowired
 	public CUsersView(final CUserService entityService, final CProjectService projectService, final CUserTypeService userTypeService) {
 		super(CUser.class, entityService);
 		addClassNames("users-view");
 		this.userTypeService = userTypeService;
 		projectSettingsGrid = new CUserProjectSettingsGrid(projectService);
 		add(projectSettingsGrid);
+		createDetailsLayout();
 		// name = new TextField("Name"); getBinder().bind(name, CUser::getName,
 		// CUser::setName); add(name);
 	}
 
 	@Override
-	protected Component createDetailsLayout() {
+	protected void createDetailsLayout() {
 		LOGGER.info("Creating details layout for CUsersView");
 		final Div detailsLayout = new Div();
 		detailsLayout.setClassName("editor-layout");
-		
 		// Create data provider for ComboBoxes
 		final CEntityFormBuilder.ComboBoxDataProvider dataProvider = new CEntityFormBuilder.ComboBoxDataProvider() {
+
 			@Override
 			@SuppressWarnings("unchecked")
 			public <T extends CEntityDB> java.util.List<T> getItems(final Class<T> entityType) {
@@ -56,10 +60,9 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 				return java.util.Collections.emptyList();
 			}
 		};
-		
 		detailsLayout.add(CEntityFormBuilder.buildForm(CUser.class, getBinder(), dataProvider));
 		createButtonLayout(detailsLayout);
-		return detailsLayout;
+		getBaseDetailsLayout().add(detailsLayout);
 	}
 
 	@Override

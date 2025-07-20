@@ -2,7 +2,6 @@ package tech.derbent.risks.view;
 
 import java.util.List;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -42,7 +41,7 @@ public class CRiskView extends CProjectAwareMDPage<CRisk> {
 		addClassNames("risk-view");
 		System.out.println("binder initialized? " + (this.getBinder() != null));
 		// Configure Form Bind fields. This is where you'd define e.g. validation rules
-		getBinder().bindInstanceFields(this);
+		createDetailsLayout();
 	}
 
 	@Override
@@ -51,7 +50,7 @@ public class CRiskView extends CProjectAwareMDPage<CRisk> {
 	}
 
 	@Override
-	protected Component createDetailsLayout() {
+	protected void createDetailsLayout() {
 		final FormLayout formLayout = new FormLayout();
 		nameField = new TextField("Risk Name");
 		severityBox = new ComboBox<>("Severity", ERiskSeverity.values());
@@ -65,7 +64,8 @@ public class CRiskView extends CProjectAwareMDPage<CRisk> {
 		// Initialize the binder for the CRisk entity
 		getBinder().bind(nameField, CRisk::getName, CRisk::setName);
 		getBinder().bind(severityBox, CRisk::getRiskSeverity, CRisk::setRiskSeverity);
-		return formLayout;
+		getBaseDetailsLayout().add(formLayout);
+		getBinder().bindInstanceFields(this);
 	}
 
 	@Override

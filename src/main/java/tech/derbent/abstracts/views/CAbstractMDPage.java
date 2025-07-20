@@ -4,7 +4,6 @@ import java.util.Optional;
 
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -33,7 +32,7 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	protected Grid<EntityClass> grid;// = new Grid<>(CProject.class, false);
 	private final BeanValidationBinder<EntityClass> binder;
 	protected SplitLayout splitLayout = new SplitLayout();
-	VerticalLayout detailsLayout = new VerticalLayout();
+	private final VerticalLayout baseDetailsLayout = new VerticalLayout();
 	protected EntityClass currentEntity;
 	protected final CAbstractService<EntityClass> entityService;
 
@@ -49,8 +48,7 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
 		// Create UI
 		createGridLayout();
-		splitLayout.addToSecondary(detailsLayout);
-		detailsLayout.add(createDetailsLayout());
+		splitLayout.addToSecondary(baseDetailsLayout);
 		createGridForEntity();
 		// binder = new BeanValidationBinder<>(entityClass
 		add(splitLayout);
@@ -114,7 +112,7 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		return delete;
 	}
 
-	protected abstract Component createDetailsLayout();
+	protected abstract void createDetailsLayout();
 
 	protected abstract void createGridForEntity();
 
@@ -160,7 +158,11 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		return save;
 	}
 
+	public VerticalLayout getBaseDetailsLayout() { return baseDetailsLayout; }
+
 	public BeanValidationBinder<EntityClass> getBinder() { return binder; }
+
+	public EntityClass getCurrentEntity() { return currentEntity; }
 
 	protected abstract String getEntityRouteIdField();
 
@@ -177,6 +179,8 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		grid.select(null);
 		grid.getDataProvider().refreshAll();
 	}
+
+	public void setCurrentEntity(final EntityClass currentEntity) { this.currentEntity = currentEntity; }
 
 	/**
 	 * Sets up the toolbar for the page.
