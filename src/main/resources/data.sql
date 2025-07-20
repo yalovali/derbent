@@ -1,8 +1,9 @@
--- delete everything is table
-DELETE FROM cuser;
-DELETE FROM cproject;
-DELETE FROM cusertype;
-DELETE FROM cactivitytype;
+-- Sample data initialization for Derbent application
+-- This script assumes tables are created by Hibernate with the classname_id convention:
+-- cusertype table with cusertype_id as primary key
+-- cactivitytype table with cactivitytype_id as primary key  
+-- cuser table with user_id as primary key and cusertype_id as foreign key
+-- cproject table with project_id as primary key
 
 -- Insert sample user types
 INSERT INTO cusertype (name, description) VALUES 
