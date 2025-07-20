@@ -27,7 +27,7 @@ import tech.derbent.taskmanagement.service.TaskService;
 
 @Route("task-list")
 @PageTitle("Task List")
-@Menu(order = 0, icon = "vaadin:clipboard-check", title = "Tasks.		Task List")
+@Menu(order = 0, icon = "vaadin:tasks", title = "Tasks.		Task List")
 @PermitAll // When security is enabled, allow all authenticated users
 public class TaskListView extends CAbstractPage {
 
