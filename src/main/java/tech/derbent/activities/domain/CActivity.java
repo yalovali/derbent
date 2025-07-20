@@ -17,7 +17,7 @@ import tech.derbent.projects.domain.CProject;
 public class CActivity extends CEntityOfProject {
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "activity_type_id", nullable = true)
+	@JoinColumn(name = "cactivitytype_id", nullable = true)
 	@MetaData(displayName = "Activity Type", required = false, readOnly = false, description = "Type category of the activity", hidden = false, order = 2)
 	private CActivityType activityType;
 

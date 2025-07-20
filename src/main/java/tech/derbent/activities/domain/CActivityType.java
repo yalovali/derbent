@@ -1,5 +1,6 @@
 package tech.derbent.activities.domain;
 
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -14,6 +15,7 @@ import tech.derbent.abstracts.domains.CTypeEntity;
  */
 @Entity
 @Table(name = "cactivitytype")
+@AttributeOverride(name = "id", column = @Column(name = "cactivitytype_id")) // Override the default column name for the ID field to follow classname_id convention
 public class CActivityType extends CTypeEntity {
 
     private static final long serialVersionUID = 1L;

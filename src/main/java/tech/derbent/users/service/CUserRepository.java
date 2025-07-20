@@ -18,7 +18,7 @@ public interface CUserRepository extends CAbstractRepository<CUser> {
 	@Query("SELECT u FROM CUser u WHERE u.enabled = :enabled")
 	java.util.List<CUser> findByEnabled(@Param("enabled") boolean enabled);
 
-	@Query("SELECT u FROM CUser u LEFT JOIN FETCH u.projectSettings WHERE u.user_id = :id")
+	@Query("SELECT u FROM CUser u LEFT JOIN FETCH u.projectSettings WHERE u.id = :id")
 	Optional<CUser> findByIdWithProjects(@Param("id") Long id);
 
 	/**
