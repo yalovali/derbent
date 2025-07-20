@@ -7,7 +7,6 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
 import tech.derbent.abstracts.domains.CEntityDB;
@@ -30,18 +29,6 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB> extends
 		super(entityClass, entityService);
 		this.sessionService = sessionService;
 		// Now that sessionService is set, we can populate the grid
-		refreshProjectAwareGrid();
-	}
-
-	/**
-	 * Implementation of CProjectChangeListener interface.
-	 * Called when the active project changes via the SessionService.
-	 * 
-	 * @param newProject The newly selected project
-	 */
-	@Override
-	public void onProjectChanged(final CProject newProject) {
-		LOGGER.debug("Project change notification received: {}", newProject != null ? newProject.getName() : "null");
 		refreshProjectAwareGrid();
 	}
 
@@ -92,8 +79,8 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB> extends
 	}
 
 	/**
-	 * Called when the component is detached from the UI.
-	 * Unregisters the project change listener to prevent memory leaks.
+	 * Called when the component is detached from the UI. Unregisters the project
+	 * change listener to prevent memory leaks.
 	 */
 	@Override
 	protected void onDetach(final DetachEvent detachEvent) {
@@ -101,6 +88,17 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB> extends
 		// Unregister this component to prevent memory leaks
 		sessionService.removeProjectChangeListener(this);
 		LOGGER.debug("Unregistered project change listener for: {}", getClass().getSimpleName());
+	}
+
+	/**
+	 * Implementation of CProjectChangeListener interface. Called when the active
+	 * project changes via the SessionService.
+	 * @param newProject The newly selected project
+	 */
+	@Override
+	public void onProjectChanged(final CProject newProject) {
+		LOGGER.debug("Project change notification received: {}", newProject != null ? newProject.getName() : "null");
+		refreshProjectAwareGrid();
 	}
 
 	@Override

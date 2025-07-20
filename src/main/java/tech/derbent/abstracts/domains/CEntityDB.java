@@ -21,6 +21,10 @@ public abstract class CEntityDB extends CEntity {
 		super();
 	}
 
+	public CEntityDB(final String name) {
+		this();
+	}
+
 	public boolean equals(final CEntityDB obj) {
 		if (obj == null) {
 			return false;
