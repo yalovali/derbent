@@ -138,7 +138,28 @@ public final class CEntityFormBuilder {
 			LOGGER.error("Error loading data for combobox field: {}", field.getName(), e);
 			comboBox.setItems(List.of());
 		}
-		binder.bind(comboBox, field.getName());
+		
+		// Use custom converter to handle entity comparison by ID instead of object reference
+		// This prevents issues with lazy-loaded entities that may be proxy objects
+		binder.forField(comboBox)
+			.withConverter(
+				// Convert from ComboBox value to entity
+				comboBoxValue -> comboBoxValue,
+				// Convert from entity to ComboBox value - find matching item by ID
+				entityValue -> {
+					if (entityValue == null) {
+						return null;
+					}
+					// Find the matching item in ComboBox by comparing IDs
+					final List<T> allItems = comboBox.getDataProvider().fetch(new com.vaadin.flow.data.provider.Query<>()).collect(java.util.stream.Collectors.toList());
+					return allItems.stream()
+						.filter(item -> item.getId() != null && item.getId().equals(entityValue.getId()))
+						.findFirst()
+						.orElse(null);
+				}
+			)
+			.bind(field.getName());
+		
 		return comboBox;
 	}
 
