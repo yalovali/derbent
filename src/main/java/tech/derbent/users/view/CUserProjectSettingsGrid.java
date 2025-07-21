@@ -14,6 +14,8 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
+import tech.derbent.abstracts.views.CConfirmationDialog;
+import tech.derbent.abstracts.views.CWarningDialog;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
@@ -40,7 +42,21 @@ public class CUserProjectSettingsGrid extends VerticalLayout {
 
 	private void deleteSelected() {
 		final CUserProjectSettings selected = grid.asSingleSelect().getValue();
-		if ((selected != null) && (getProjectSettings != null) && (setProjectSettings != null)) {
+		if (selected == null) {
+			new CWarningDialog("No Selection", 
+				"Please select a project setting to delete.").open();
+			return;
+		}
+		if (getProjectSettings == null || setProjectSettings == null) {
+			new CWarningDialog("System Error", 
+				"Project settings handlers are not available. Please refresh the page.").open();
+			return;
+		}
+		
+		// Show confirmation dialog for delete operation
+		final String projectName = getProjectName(selected);
+		final String confirmMessage = String.format("Are you sure you want to delete the project setting for '%s'? This action cannot be undone.", projectName);
+		new CConfirmationDialog("Confirm Deletion", confirmMessage, () -> {
 			final List<CUserProjectSettings> settings = getProjectSettings.get();
 			settings.remove(selected);
 			setProjectSettings.accept(settings);
@@ -48,7 +64,7 @@ public class CUserProjectSettingsGrid extends VerticalLayout {
 				saveEntity.run();
 			}
 			refresh();
-		}
+		}).open();
 	}
 
 	private String getPermissionAsString(final CUserProjectSettings settings) {
@@ -100,10 +116,14 @@ public class CUserProjectSettingsGrid extends VerticalLayout {
 	private void openAddDialog() {
 		if (currentUser == null) {
 			LOGGER.warn("Cannot add project settings - current user is null");
+			new CWarningDialog("Cannot Add Project Settings", 
+				"Please select a user first before adding project settings.").open();
 			return;
 		}
 		if (projectService == null) {
 			LOGGER.warn("Cannot add project settings - project service is not initialized");
+			new CWarningDialog("System Error", 
+				"Project service is not available. Please try again later.").open();
 			return;
 		}
 		final CUserProjectSettingsDialog dialog = new CUserProjectSettingsDialog(projectService, null, // null for new settings
@@ -113,10 +133,18 @@ public class CUserProjectSettingsGrid extends VerticalLayout {
 
 	private void openEditDialog() {
 		final CUserProjectSettings selected = grid.asSingleSelect().getValue();
-		if ((selected != null) && (currentUser != null)) {
-			final CUserProjectSettingsDialog dialog = new CUserProjectSettingsDialog(projectService, selected, currentUser, this::onSettingsSaved);
-			dialog.open();
+		if (selected == null) {
+			new CWarningDialog("No Selection", 
+				"Please select a project setting to edit.").open();
+			return;
 		}
+		if (currentUser == null) {
+			new CWarningDialog("System Error", 
+				"Current user information is not available. Please refresh the page.").open();
+			return;
+		}
+		final CUserProjectSettingsDialog dialog = new CUserProjectSettingsDialog(projectService, selected, currentUser, this::onSettingsSaved);
+		dialog.open();
 	}
 
 	public void refresh() {
