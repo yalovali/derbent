@@ -127,14 +127,16 @@ public final class CEntityFormBuilder {
 		}
 		comboBox.setClassName("form-field-combobox");
 		setComponentWidth(comboBox, meta);
-		comboBox.setItemLabelGenerator(T::toString);
+		comboBox.setItemLabelGenerator(item -> item.toString()); // <-- burası düzeltildi
 		try {
-			// Get items from the data provider with proper error handling
 			final List<T> items = dataProvider.getItems((Class<T>) field.getType());
-			comboBox.setItems(items);
+			if ((items == null) || items.isEmpty()) {
+				LOGGER.warn("DataProvider returned empty list for field: {}", field.getName());
+			}
+			comboBox.setItems(items != null ? items : List.of());
 		} catch (final Exception e) {
 			LOGGER.error("Error loading data for combobox field: {}", field.getName(), e);
-			comboBox.setItems(); // Set empty items to prevent errors
+			comboBox.setItems(List.of());
 		}
 		binder.bind(comboBox, field.getName());
 		return comboBox;

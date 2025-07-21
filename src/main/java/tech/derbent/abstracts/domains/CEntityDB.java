@@ -25,20 +25,25 @@ public abstract class CEntityDB extends CEntity {
 		this();
 	}
 
-	public boolean equals(final CEntityDB obj) {
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
 		if (obj == null) {
 			return false;
 		}
-		else if (obj == this) {
-			return true;
-		}
-		final var thisUserClass = ProxyUtils.getUserClass(getClass());
-		final var otherUserClass = ProxyUtils.getUserClass(obj);
-		if (thisUserClass != otherUserClass) {
+		if (!(obj instanceof CEntityDB)) {
 			return false;
 		}
-		final var id = getId();
-		return (id != null) && id.equals(obj.getId());
+		final CEntityDB other = (CEntityDB) obj;
+		final Class<?> thisClass = ProxyUtils.getUserClass(getClass());
+		final Class<?> otherClass = ProxyUtils.getUserClass(other.getClass());
+		if (!thisClass.equals(otherClass)) {
+			return false;
+		}
+		final Long id = getId();
+		return (id != null) && id.equals(other.getId());
 	}
 
 	@Nullable
@@ -46,10 +51,10 @@ public abstract class CEntityDB extends CEntity {
 
 	@Override
 	public int hashCode() {
-		// Hashcode should never change during the lifetime of an object. Because of
-		// this we can't use getId() to calculate the hashcode. Unless you have sets
-		// with lots of entities in them, returning the same hashcode should not be a
-		// problem.
+		final Long id = getId();
+		if (id != null) {
+			return id.hashCode();
+		}
 		return ProxyUtils.getUserClass(getClass()).hashCode();
 	}
 
