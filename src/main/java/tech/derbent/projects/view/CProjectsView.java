@@ -37,8 +37,17 @@ public class CProjectsView extends CAbstractMDPage<CProject> {
 	protected void createDetailsLayout() {
 		LOGGER.info("Creating details layout for CProjectsView");
 		final Div detailsLayout = CEntityFormBuilder.buildForm(CProject.class, getBinder());
-		createButtonLayout(detailsLayout);
+		// Note: Buttons are now automatically added to the details tab by the parent class
 		getBaseDetailsLayout().add(detailsLayout);
+	}
+
+	@Override
+	protected Div createDetailsTabLeftContent() {
+		// Create custom tab content for projects view
+		final Div detailsTabLabel = new Div();
+		detailsTabLabel.setText("Project Information");
+		detailsTabLabel.setClassName("details-tab-label");
+		return detailsTabLabel;
 	}
 
 	@Override

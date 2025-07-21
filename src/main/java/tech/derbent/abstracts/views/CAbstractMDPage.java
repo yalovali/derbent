@@ -84,13 +84,16 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		populateForm(null);
 	}
 
+	/**
+	 * Creates a button layout for additional buttons if needed by subclasses.
+	 * Note: Default save/delete/cancel buttons are now in the details tab.
+	 * This method can be used for additional custom buttons in the main content area.
+	 * @param layout The layout to add buttons to
+	 */
 	protected void createButtonLayout(final Div layout) {
-		LOGGER.info("Creating button layout for CUsersView");
-		// Create a horizontal layout for buttons
-		final HorizontalLayout buttonLayout = new HorizontalLayout();
-		buttonLayout.setClassName("button-layout");
-		buttonLayout.add(createSaveButton("Save"), createCancelButton("Cancel"), createDeleteButton("Delete"));
-		layout.add(buttonLayout);
+		LOGGER.debug("createButtonLayout called - default save/delete/cancel buttons are now in details tab");
+		// Default implementation does nothing - buttons are in the tab
+		// Subclasses can override this for additional custom buttons in the main content area
 	}
 
 	protected CButton createCancelButton(final String buttonText) {
@@ -125,10 +128,60 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 
 	@PostConstruct
 	protected void createDetailsTabLayout() {
-		// create a label for the details tab
+		// Create the default details view tab with buttons
+		createDetailsViewTab();
+	}
+
+	/**
+	 * Creates the default details view tab content with save/delete/cancel buttons.
+	 * Subclasses can override this method to customize the tab content while 
+	 * maintaining consistent button placement and styling.
+	 */
+	protected void createDetailsViewTab() {
+		// Clear any existing content
+		getDetailsTabLayout().removeAll();
+		
+		// Create a horizontal layout for the tab content
+		final HorizontalLayout tabContent = new HorizontalLayout();
+		tabContent.setWidthFull();
+		tabContent.setJustifyContentMode(HorizontalLayout.JustifyContentMode.BETWEEN);
+		tabContent.setPadding(true);
+		tabContent.setSpacing(true);
+		tabContent.setClassName("details-tab-content");
+		
+		// Left side: Tab label or custom content (can be overridden by subclasses)
+		final Div leftContent = createDetailsTabLeftContent();
+		
+		// Right side: Action buttons
+		final HorizontalLayout buttonLayout = createDetailsTabButtonLayout();
+		
+		tabContent.add(leftContent, buttonLayout);
+		getDetailsTabLayout().add(tabContent);
+	}
+
+	/**
+	 * Creates the left content of the details tab.
+	 * Subclasses can override this to provide custom tab content.
+	 * @return Component for the left side of the tab
+	 */
+	protected Div createDetailsTabLeftContent() {
 		final Div detailsTabLabel = new Div();
-		detailsTabLabel.setText("this is the details tab menu");
-		getDetailsTabLayout().add(detailsTabLabel);
+		detailsTabLabel.setText("Details");
+		detailsTabLabel.setClassName("details-tab-label");
+		return detailsTabLabel;
+	}
+
+	/**
+	 * Creates the button layout for the details tab.
+	 * Contains save, cancel, and delete buttons with consistent styling.
+	 * @return HorizontalLayout with action buttons
+	 */
+	protected HorizontalLayout createDetailsTabButtonLayout() {
+		final HorizontalLayout buttonLayout = new HorizontalLayout();
+		buttonLayout.setClassName("details-tab-button-layout");
+		buttonLayout.setSpacing(true);
+		buttonLayout.add(createSaveButton("Save"), createCancelButton("Cancel"), createDeleteButton("Delete"));
+		return buttonLayout;
 	}
 
 	protected abstract void createGridForEntity();
