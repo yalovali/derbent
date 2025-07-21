@@ -3,6 +3,7 @@ package tech.derbent.users.service;
 import java.time.Clock;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -132,6 +133,22 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 	}
 
 	/**
+	 * Overrides the base get method to eagerly load CUserType relationship.
+	 * This prevents LazyInitializationException when the entity is used in UI contexts.
+	 * @param id the user ID
+	 * @return optional CUser with loaded userType
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public Optional<CUser> get(final Long id) {
+		LOGGER.debug("Getting CUser with ID {} (overridden to eagerly load userType)", id);
+		final Optional<CUser> entity = ((CUserRepository) repository).findByIdWithUserType(id);
+		// Initialize lazy fields if entity is present (for any other potential lazy relationships)
+		entity.ifPresent(this::initializeLazyFields);
+		return entity;
+	}
+
+	/**
 	 * Initializes lazy fields for a user entity to prevent LazyInitializationException.
 	 * Specifically initializes user type and project settings.
 	 * @param user the user entity to initialize
@@ -147,14 +164,10 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 			super.initializeLazyFields(user);
 			
 			// Initialize user type if present
-			if (user.getUserType() != null) {
-				CSpringAuxillaries.initializeLazily(user.getUserType());
-			}
+			initializeLazyRelationship(user.getUserType(), "CUserType");
 			
 			// Initialize project settings collection
-			if (user.getProjectSettings() != null) {
-				CSpringAuxillaries.initializeLazily(user.getProjectSettings());
-			}
+			initializeLazyRelationship(user.getProjectSettings(), "projectSettings");
 		} catch (final Exception e) {
 			LOGGER.warn("Error initializing lazy fields for user with ID: {}", 
 				CSpringAuxillaries.safeGetId(user), e);

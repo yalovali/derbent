@@ -42,4 +42,20 @@ public interface CUserRepository extends CAbstractRepository<CUser> {
 	 */
 	@Query("SELECT u FROM CUser u LEFT JOIN FETCH u.projectSettings WHERE u.login = :username")
 	Optional<CUser> findByUsernameWithProjects(@Param("username") String username);
+
+	/**
+	 * Finds a user by ID with eagerly loaded CUserType to prevent LazyInitializationException.
+	 * @param id the user ID
+	 * @return optional CUser with loaded userType
+	 */
+	@Query("SELECT u FROM CUser u LEFT JOIN FETCH u.userType WHERE u.id = :id")
+	Optional<CUser> findByIdWithUserType(@Param("id") Long id);
+
+	/**
+	 * Finds a user by ID with eagerly loaded CUserType and project settings.
+	 * @param id the user ID  
+	 * @return optional CUser with loaded userType and project settings
+	 */
+	@Query("SELECT u FROM CUser u LEFT JOIN FETCH u.userType LEFT JOIN FETCH u.projectSettings WHERE u.id = :id")
+	Optional<CUser> findByIdWithUserTypeAndProjects(@Param("id") Long id);
 }

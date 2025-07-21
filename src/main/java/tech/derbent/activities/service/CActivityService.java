@@ -2,6 +2,7 @@ package tech.derbent.activities.service;
 
 import java.time.Clock;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -43,5 +44,58 @@ public class CActivityService extends CAbstractService<CActivity> {
 	 */
 	public Page<CActivity> listByProject(final CProject project, final Pageable pageable) {
 		return ((CActivityRepository) repository).findByProject(project, pageable);
+	}
+
+	/**
+	 * Gets an activity by ID with eagerly loaded CActivityType relationship.
+	 * This method should be used in UI contexts to prevent LazyInitializationException.
+	 * @param id the activity ID
+	 * @return optional CActivity with loaded activityType
+	 */
+	@Transactional(readOnly = true)
+	public Optional<CActivity> getWithActivityType(final Long id) {
+		LOGGER.debug("Getting CActivity with ID {} and eagerly loading CActivityType", id);
+		return ((CActivityRepository) repository).findByIdWithActivityType(id);
+	}
+
+	/**
+	 * Overrides the base get method to eagerly load CActivityType relationship.
+	 * This prevents LazyInitializationException when the entity is used in UI contexts.
+	 * @param id the activity ID
+	 * @return optional CActivity with loaded activityType
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public Optional<CActivity> get(final Long id) {
+		LOGGER.debug("Getting CActivity with ID {} (overridden to eagerly load activityType)", id);
+		final Optional<CActivity> entity = ((CActivityRepository) repository).findByIdWithActivityType(id);
+		// Initialize lazy fields if entity is present (for any other potential lazy relationships)
+		entity.ifPresent(this::initializeLazyFields);
+		return entity;
+	}
+
+	/**
+	 * Initializes lazy fields for CActivity entity to prevent LazyInitializationException.
+	 * Specifically handles the lazy-loaded CActivityType relationship.
+	 * @param entity the CActivity entity to initialize
+	 */
+	@Override
+	protected void initializeLazyFields(final CActivity entity) {
+		if (entity == null) {
+			return;
+		}
+		
+		LOGGER.debug("Initializing lazy fields for CActivity with ID: {}", entity.getId());
+		
+		try {
+			// Initialize the entity itself first
+			super.initializeLazyFields(entity);
+			
+			// Initialize the lazy-loaded CActivityType relationship
+			initializeLazyRelationship(entity.getActivityType(), "CActivityType");
+		} catch (final Exception e) {
+			LOGGER.warn("Error initializing lazy fields for CActivity with ID: {}", 
+				entity.getId(), e);
+		}
 	}
 }
