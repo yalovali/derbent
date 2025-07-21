@@ -7,7 +7,6 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -36,7 +35,7 @@ public class CEntityProjectsGrid<T extends CEntityDB> extends VerticalLayout {
 		projectComboBox.setItems(projectService.findAll()); // Assumes findAll() returns all projects
 		add(projectComboBox);
 		// Add/remove buttons
-		final Button addProject = new Button("Add Project", e -> {
+		final CButton addProject = new CButton("Add Project", e -> {
 			final CProject selectedProject = projectComboBox.getValue();
 			if ((selectedProject != null) && (getProjects != null) && (setProjects != null)) {
 				final Set<CProject> projects = getProjects.get();
@@ -48,7 +47,7 @@ public class CEntityProjectsGrid<T extends CEntityDB> extends VerticalLayout {
 				}
 			}
 		});
-		final Button removeProject = new Button("Remove Selected", e -> {
+		final CButton removeProject = new CButton("Remove Selected", e -> {
 			final CProject selected = grid.asSingleSelect().getValue();
 			if ((selected != null) && (getProjects != null) && (setProjects != null)) {
 				final Set<CProject> projects = getProjects.get();
