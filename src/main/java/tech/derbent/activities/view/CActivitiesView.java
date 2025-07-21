@@ -56,7 +56,7 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 		};
 		// Use CEntityFormBuilder for automatic form generation
 		editorLayoutDiv.add(CEntityFormBuilder.buildForm(CActivity.class, getBinder(), dataProvider));
-		createButtonLayout(editorLayoutDiv);
+		// Note: Buttons are now automatically added to the details tab by the parent class
 		getBaseDetailsLayout().add(editorLayoutDiv);
 	}
 

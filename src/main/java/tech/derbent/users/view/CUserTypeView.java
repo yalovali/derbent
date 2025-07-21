@@ -43,7 +43,7 @@ public class CUserTypeView extends CAbstractMDPage<CUserType> {
 		final Div detailsLayout = new Div();
 		detailsLayout.setClassName("editor-layout");
 		detailsLayout.add(CEntityFormBuilder.buildForm(CUserType.class, getBinder()));
-		createButtonLayout(detailsLayout);
+		// Note: Buttons are now automatically added to the details tab by the parent class
 		getBaseDetailsLayout().add(detailsLayout);
 	}
 

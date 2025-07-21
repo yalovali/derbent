@@ -57,17 +57,18 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 			}
 		};
 		detailsLayout.add(CEntityFormBuilder.buildForm(CUser.class, getBinder(), dataProvider));
-		createButtonLayout(detailsLayout);
+		// Note: Buttons are now automatically added to the details tab by the parent class
 		detailsLayout.add(projectSettingsGrid);
 		getBaseDetailsLayout().add(detailsLayout);
 	}
 
 	@Override
-	protected void createDetailsTabLayout() {
-		// create a label for the details tab
+	protected Div createDetailsTabLeftContent() {
+		// Create custom tab content for users view
 		final Div detailsTabLabel = new Div();
-		detailsTabLabel.setText("this is the details tab menu");
-		getDetailsTabLayout().add(detailsTabLabel);
+		detailsTabLabel.setText("User Details");
+		detailsTabLabel.setClassName("details-tab-label");
+		return detailsTabLabel;
 	}
 
 	@Override

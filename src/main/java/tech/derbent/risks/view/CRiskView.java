@@ -41,7 +41,7 @@ public class CRiskView extends CProjectAwareMDPage<CRisk> {
 	protected void createDetailsLayout() {
 		LOGGER.info("Creating details layout for CRiskView");
 		final Div detailsLayout = CEntityFormBuilder.buildForm(CRisk.class, getBinder());
-		createButtonLayout(detailsLayout);
+		// Note: Buttons are now automatically added to the details tab by the parent class
 		getBaseDetailsLayout().add(detailsLayout);
 	}
 

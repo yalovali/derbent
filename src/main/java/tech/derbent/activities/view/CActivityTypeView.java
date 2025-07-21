@@ -43,7 +43,7 @@ public class CActivityTypeView extends CAbstractMDPage<CActivityType> {
 	protected void createDetailsLayout() {
 		LOGGER.info("Creating details layout for CActivityTypeView");
 		final Div detailsLayout = CEntityFormBuilder.buildForm(CActivityType.class, getBinder());
-		createButtonLayout(detailsLayout);
+		// Note: Buttons are now automatically added to the details tab by the parent class
 		getBaseDetailsLayout().add(detailsLayout);
 	}
 
