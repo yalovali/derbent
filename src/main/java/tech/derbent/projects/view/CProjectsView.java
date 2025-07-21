@@ -13,9 +13,8 @@ import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 
 /**
- * CProjectsView - View for managing projects.
- * Layer: View (MVC)
- * Provides CRUD operations for projects using the abstract master-detail pattern.
+ * CProjectsView - View for managing projects. Layer: View (MVC) Provides CRUD
+ * operations for projects using the abstract master-detail pattern.
  */
 @Route("projects/:project_id?/:action?(edit)")
 @PageTitle("Project Master Detail")
@@ -30,7 +29,7 @@ public class CProjectsView extends CAbstractMDPage<CProject> {
 	public CProjectsView(final CProjectService entityService) {
 		super(CProject.class, entityService);
 		addClassNames("projects-view");
-		createDetailsLayout();
+		// createDetailsLayout();
 		LOGGER.info("CProjectsView initialized successfully");
 	}
 
@@ -60,19 +59,15 @@ public class CProjectsView extends CAbstractMDPage<CProject> {
 	}
 
 	@Override
-	protected String getEntityRouteIdField() { 
-		return ENTITY_ID_FIELD; 
-	}
+	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
 
 	@Override
-	protected String getEntityRouteTemplateEdit() { 
-		return ENTITY_ROUTE_TEMPLATE_EDIT; 
-	}
+	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
 
 	@Override
 	protected void initPage() {
-		// Initialize the page components and layout
-		// This method can be overridden to set up the view's components
+		// Initialize the page components and layout This method can be overridden to
+		// set up the view's components
 	}
 
 	@Override

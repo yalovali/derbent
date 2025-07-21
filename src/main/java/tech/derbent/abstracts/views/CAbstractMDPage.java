@@ -5,7 +5,6 @@ import java.util.Optional;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
@@ -13,6 +12,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
@@ -20,10 +20,9 @@ import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
+import jakarta.annotation.PostConstruct;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.services.CAbstractService;
-import tech.derbent.abstracts.views.CConfirmationDialog;
-import tech.derbent.abstracts.views.CWarningDialog;
 
 public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAbstractPage {
 
@@ -33,6 +32,7 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	private final BeanValidationBinder<EntityClass> binder;
 	protected SplitLayout splitLayout = new SplitLayout();
 	private final VerticalLayout baseDetailsLayout = new VerticalLayout();
+	private final Div detailsTabLayout = new Div();
 	protected EntityClass currentEntity;
 	protected final CAbstractService<EntityClass> entityService;
 
@@ -48,7 +48,16 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
 		// Create UI
 		createGridLayout();
-		splitLayout.addToSecondary(baseDetailsLayout);
+		detailsTabLayout.setClassName("details-tab-layout");
+		detailsTabLayout.setMaxHeight("100px");
+		detailsTabLayout.setMinHeight("100px");
+		final VerticalLayout detailsBase = new VerticalLayout();
+		splitLayout.addToSecondary(detailsBase);
+		detailsBase.add(detailsTabLayout);
+		final Scroller scroller = new Scroller();
+		detailsBase.add(scroller);
+		scroller.setContent(baseDetailsLayout);
+		scroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
 		createGridForEntity();
 		// binder = new BeanValidationBinder<>(entityClass
 		add(splitLayout);
@@ -94,17 +103,14 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 
 	protected CButton createDeleteButton(final String buttonText) {
 		LOGGER.info("Creating delete button for CUsersView");
-    final CButton delete = CButton.createTertiary(buttonText);
+		final CButton delete = CButton.createTertiary(buttonText);
 		delete.addClickListener(e -> {
 			if (currentEntity == null) {
-				new CWarningDialog("No Selection", 
-					"Please select an item to delete.").open();
+				new CWarningDialog("No Selection", "Please select an item to delete.").open();
 				return;
 			}
-			
 			// Show confirmation dialog for delete operation
-			final String confirmMessage = String.format("Are you sure you want to delete this %s? This action cannot be undone.", 
-				entityClass.getSimpleName().replace("C", "").toLowerCase());
+			final String confirmMessage = String.format("Are you sure you want to delete this %s? This action cannot be undone.", entityClass.getSimpleName().replace("C", "").toLowerCase());
 			new CConfirmationDialog("Confirm Deletion", confirmMessage, () -> {
 				entityService.delete(currentEntity);
 				clearForm();
@@ -114,7 +120,16 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		return delete;
 	}
 
+	@PostConstruct
 	protected abstract void createDetailsLayout();
+
+	@PostConstruct
+	protected void createDetailsTabLayout() {
+		// create a label for the details tab
+		final Div detailsTabLabel = new Div();
+		detailsTabLabel.setText("this is the details tab menu");
+		getDetailsTabLayout().add(detailsTabLabel);
+	}
 
 	protected abstract void createGridForEntity();
 
@@ -153,12 +168,10 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 				n.setPosition(Position.MIDDLE);
 				n.addThemeVariants(NotificationVariant.LUMO_ERROR);
 			} catch (final ValidationException validationException) {
-				new CWarningDialog("Validation Error", 
-					"Failed to save the data. Please check that all required fields are filled and values are valid.").open();
+				new CWarningDialog("Validation Error", "Failed to save the data. Please check that all required fields are filled and values are valid.").open();
 			} catch (final Exception exception) {
 				LOGGER.error("Unexpected error during save operation", exception);
-				new CWarningDialog("Save Error", 
-					"An unexpected error occurred while saving. Please try again.").open();
+				new CWarningDialog("Save Error", "An unexpected error occurred while saving. Please try again.").open();
 			}
 		});
 		return save;
@@ -169,6 +182,8 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	public BeanValidationBinder<EntityClass> getBinder() { return binder; }
 
 	public EntityClass getCurrentEntity() { return currentEntity; }
+
+	public Div getDetailsTabLayout() { return detailsTabLayout; }
 
 	protected abstract String getEntityRouteIdField();
 

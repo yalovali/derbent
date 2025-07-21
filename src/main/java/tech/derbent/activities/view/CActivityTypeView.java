@@ -35,7 +35,7 @@ public class CActivityTypeView extends CAbstractMDPage<CActivityType> {
 	public CActivityTypeView(final CActivityTypeService entityService) {
 		super(CActivityType.class, entityService);
 		addClassNames("activity-types-view");
-		createDetailsLayout();
+		// createDetailsLayout();
 		LOGGER.info("CActivityTypeView initialized with route: " + CSpringAuxillaries.getRoutePath(this.getClass()));
 	}
 

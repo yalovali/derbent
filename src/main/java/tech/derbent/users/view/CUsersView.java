@@ -37,9 +37,6 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 		addClassNames("users-view");
 		this.userTypeService = userTypeService;
 		projectSettingsGrid = new CUserProjectSettingsGrid(projectService);
-		createDetailsLayout();
-		// name = new TextField("Name"); getBinder().bind(name, CUser::getName,
-		// CUser::setName); add(name);
 	}
 
 	@Override
@@ -63,6 +60,14 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 		createButtonLayout(detailsLayout);
 		detailsLayout.add(projectSettingsGrid);
 		getBaseDetailsLayout().add(detailsLayout);
+	}
+
+	@Override
+	protected void createDetailsTabLayout() {
+		// create a label for the details tab
+		final Div detailsTabLabel = new Div();
+		detailsTabLabel.setText("this is the details tab menu");
+		getDetailsTabLayout().add(detailsTabLabel);
 	}
 
 	@Override

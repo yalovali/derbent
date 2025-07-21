@@ -34,7 +34,7 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 		super(CActivity.class, entityService, sessionService);
 		addClassNames("activities-view");
 		this.activityTypeService = activityTypeService;
-		createDetailsLayout();
+		// createDetailsLayout();
 	}
 
 	@Override

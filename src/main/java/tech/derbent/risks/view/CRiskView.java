@@ -33,7 +33,7 @@ public class CRiskView extends CProjectAwareMDPage<CRisk> {
 	public CRiskView(final CRiskService entityService, final SessionService sessionService) {
 		super(CRisk.class, entityService, sessionService);
 		addClassNames("risk-view");
-		createDetailsLayout();
+		// createDetailsLayout();
 		LOGGER.info("CRiskView initialized successfully");
 	}
 

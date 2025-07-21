@@ -33,7 +33,7 @@ public class CUserTypeView extends CAbstractMDPage<CUserType> {
 	public CUserTypeView(final CUserTypeService entityService) {
 		super(CUserType.class, entityService);
 		addClassNames("user-types-view");
-		createDetailsLayout();
+		// createDetailsLayout();
 		LOGGER.info("CUserTypeView initialized");
 	}
 
