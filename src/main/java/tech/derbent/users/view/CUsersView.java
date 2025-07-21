@@ -37,7 +37,6 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 		addClassNames("users-view");
 		this.userTypeService = userTypeService;
 		projectSettingsGrid = new CUserProjectSettingsGrid(projectService);
-		add(projectSettingsGrid);
 		createDetailsLayout();
 		// name = new TextField("Name"); getBinder().bind(name, CUser::getName,
 		// CUser::setName); add(name);
@@ -62,6 +61,7 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 		};
 		detailsLayout.add(CEntityFormBuilder.buildForm(CUser.class, getBinder(), dataProvider));
 		createButtonLayout(detailsLayout);
+		detailsLayout.add(projectSettingsGrid);
 		getBaseDetailsLayout().add(detailsLayout);
 	}
 
