@@ -5,7 +5,6 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -78,9 +77,8 @@ public abstract class CDialog<T> extends Dialog {
 
 	/** Sets up Save and Cancel buttons. */
 	protected void setupButtons() {
-		final Button saveButton = new Button("Save", e -> save());
-		saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		final Button cancelButton = new Button("Cancel", e -> close());
+		final CButton saveButton = CButton.createPrimary("Save", e -> save());
+		final CButton cancelButton = CButton.createTertiary("Cancel", e -> close());
 		final HorizontalLayout buttonLayout = new HorizontalLayout(saveButton, cancelButton);
 		buttonLayout.setJustifyContentMode(HorizontalLayout.JustifyContentMode.END);
 		getFooter().add(buttonLayout);

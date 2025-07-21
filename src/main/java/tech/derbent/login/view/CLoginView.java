@@ -2,7 +2,6 @@ package tech.derbent.login.view;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.login.LoginOverlay;
@@ -13,6 +12,8 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+
+import tech.derbent.abstracts.views.CButton;
 
 import tech.derbent.base.data.DatabaseResetService;
 
@@ -62,7 +63,7 @@ public class CLoginView extends Main implements BeforeEnterObserver {
 		// Set form action to Spring Security's login processing endpoint This tells the
 		// form to POST credentials to /login for authentication
 		loginOverlay.setAction("login"); // Set action to /login for Spring Security processing
-		final Button resetDbButton = new Button("Reset Database", event -> {
+		final CButton resetDbButton = new CButton("Reset Database", event -> {
 			databaseResetService.resetDatabase();
 			Notification.show("Database reset from data.sql");
 		});

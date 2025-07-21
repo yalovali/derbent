@@ -7,7 +7,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Optional;
 
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.Grid;
@@ -21,6 +20,7 @@ import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.views.CAbstractPage;
+import tech.derbent.abstracts.views.CButton;
 import tech.derbent.base.ui.component.ViewToolbar;
 import tech.derbent.taskmanagement.domain.Task;
 import tech.derbent.taskmanagement.service.TaskService;
@@ -35,7 +35,7 @@ public class TaskListView extends CAbstractPage {
 	private final TaskService taskService;
 	TextField description;
 	DatePicker dueDate;
-	Button createBtn;
+	CButton createBtn;
 	Grid<Task> taskGrid;
 	Clock clock;
 
@@ -89,8 +89,7 @@ public class TaskListView extends CAbstractPage {
 		dueDate = new DatePicker();
 		dueDate.setPlaceholder("Due date");
 		dueDate.setAriaLabel("Due date");
-		createBtn = new Button("Create", event -> createTask());
-		createBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		createBtn = CButton.createPrimary("Create", event -> createTask());
 		add(ViewToolbar.group(description, dueDate, createBtn));
 	}
 }
