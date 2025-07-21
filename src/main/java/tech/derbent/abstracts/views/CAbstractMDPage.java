@@ -5,7 +5,6 @@ import java.util.Optional;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -85,20 +84,17 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		layout.add(buttonLayout);
 	}
 
-	protected Button createCancelButton(final String buttonText) {
-		final Button cancel = new Button(buttonText);
-		cancel.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-		cancel.addClickListener(e -> {
+	protected CButton createCancelButton(final String buttonText) {
+		final CButton cancel = CButton.createTertiary(buttonText, e -> {
 			clearForm();
 			refreshGrid();
 		});
 		return cancel;
 	}
 
-	protected Button createDeleteButton(final String buttonText) {
+	protected CButton createDeleteButton(final String buttonText) {
 		LOGGER.info("Creating delete button for CUsersView");
-		final Button delete = new Button(buttonText);
-		delete.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+    final CButton delete = CButton.createTertiary(buttonText);
 		delete.addClickListener(e -> {
 			if (currentEntity == null) {
 				new CWarningDialog("No Selection", 
@@ -138,11 +134,9 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		splitLayout.addToPrimary(wrapper);
 	}
 
-	protected Button createSaveButton(final String buttonText) {
+	protected CButton createSaveButton(final String buttonText) {
 		LOGGER.info("Creating save button for CUsersView");
-		final Button save = new Button(buttonText);
-		save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		save.addClickListener(e -> {
+		final CButton save = CButton.createPrimary(buttonText, e -> {
 			try {
 				if (currentEntity == null) {
 					currentEntity = newEntity();

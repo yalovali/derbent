@@ -7,7 +7,6 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -16,6 +15,8 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import tech.derbent.abstracts.views.CConfirmationDialog;
 import tech.derbent.abstracts.views.CWarningDialog;
+import tech.derbent.abstracts.views.CButton;
+
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
@@ -165,15 +166,10 @@ public class CUserProjectSettingsGrid extends VerticalLayout {
 	}
 
 	private void setupButtons() {
-		final Button addButton = new Button("Add Project", VaadinIcon.PLUS.create());
-		addButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		addButton.addClickListener(e -> openAddDialog());
-		final Button editButton = new Button("Edit", VaadinIcon.EDIT.create());
-		editButton.addClickListener(e -> openEditDialog());
+		final CButton addButton = CButton.createPrimary("Add Project", VaadinIcon.PLUS.create(), e -> openAddDialog());
+		final CButton editButton = new CButton("Edit", VaadinIcon.EDIT.create(), e -> openEditDialog());
 		editButton.setEnabled(false);
-		final Button deleteButton = new Button("Delete", VaadinIcon.TRASH.create());
-		deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
-		deleteButton.addClickListener(e -> deleteSelected());
+		final CButton deleteButton = CButton.createError("Delete", VaadinIcon.TRASH.create(), e -> deleteSelected());
 		deleteButton.setEnabled(false);
 		// Enable/disable edit and delete buttons based on selection
 		grid.addSelectionListener(selection -> {
