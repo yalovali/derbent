@@ -17,9 +17,9 @@ import com.vaadin.flow.component.html.Div;
 class CEntityFormBuilderValidationTest {
 
 	/**
-	 * Test entity with various MetaData annotations
+	 * Test entity with various MetaData annotations and proper getters/setters
 	 */
-	private static class TestEntity {
+	public static class TestEntity {
 		
 		@MetaData(
 			displayName = "Test String",
@@ -39,6 +39,23 @@ class CEntityFormBuilderValidationTest {
 			defaultValue = "false"
 		)
 		private Boolean testBoolean;
+
+		// Getters and setters required for Vaadin binding
+		public String getTestString() {
+			return testString;
+		}
+
+		public void setTestString(String testString) {
+			this.testString = testString;
+		}
+
+		public Boolean getTestBoolean() {
+			return testBoolean;
+		}
+
+		public void setTestBoolean(Boolean testBoolean) {
+			this.testBoolean = testBoolean;
+		}
 	}
 	
 	@Test

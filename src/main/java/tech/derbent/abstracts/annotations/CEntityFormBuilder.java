@@ -12,6 +12,9 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -31,15 +34,73 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 import tech.derbent.abstracts.domains.CEntityDB;
 
 /**
- * CEntityFormBuilder - Utility class for building forms from entity classes using MetaData annotations. Supports
- * automatic form generation for various field types including text, boolean, enum, numeric, and entity references.
+ * CEntityFormBuilder - Utility class for building forms from entity classes using MetaData annotations. 
+ * Supports automatic form generation for various field types including text, boolean, enum, numeric, and entity references.
+ * 
+ * <p>
+ * <strong>Enhanced ComboBox Data Provider Support:</strong>
+ * This form builder now supports annotation-based data provider configuration, making it more generic and maintainable.
+ * ComboBox fields can specify their data providers using MetaData annotations in three ways:
+ * </p>
+ * 
+ * <ol>
+ * <li><strong>Bean Name:</strong> {@code @MetaData(dataProviderBean = "activityTypeService")}</li>
+ * <li><strong>Bean Class:</strong> {@code @MetaData(dataProviderClass = CActivityTypeService.class)}</li>
+ * <li><strong>Automatic:</strong> Automatically resolves service by entity type naming convention</li>
+ * </ol>
+ * 
+ * <p>
+ * <strong>Backward Compatibility:</strong>
+ * The traditional ComboBoxDataProvider approach is still supported and takes precedence when provided.
+ * This allows existing code to continue working while new code can benefit from the annotation-based approach.
+ * </p>
+ * 
+ * <p>
+ * <strong>Usage Examples:</strong>
+ * </p>
+ * 
+ * <pre>{@code
+ * // New annotation-based approach - no data provider needed in view code
+ * public class CActivity extends CEntityOfProject {
+ *     @MetaData(displayName = "Activity Type", dataProviderBean = "activityTypeService")
+ *     private CActivityType activityType;
+ *     
+ *     @MetaData(displayName = "Assigned User", dataProviderClass = CUserService.class, dataProviderMethod = "findAllActive")
+ *     private CUser assignedUser;
+ * }
+ * 
+ * // In view - much simpler now
+ * Div form = CEntityFormBuilder.buildForm(CActivity.class, binder); // No data provider needed!
+ * 
+ * // Legacy approach still works
+ * ComboBoxDataProvider provider = new ComboBoxDataProvider() {
+ *     public List getItems(Class entityType) { return customLogic(entityType); }
+ * };
+ * Div form = CEntityFormBuilder.buildForm(CActivity.class, binder, provider);
+ * }</pre>
+ * 
  * Layer: Utility (MVC)
+ * 
+ * @author Derbent Framework
+ * @since 1.0
+ * @see tech.derbent.abstracts.annotations.MetaData
+ * @see tech.derbent.abstracts.annotations.CDataProviderResolver
  */
-public final class CEntityFormBuilder {
+@org.springframework.stereotype.Component
+public final class CEntityFormBuilder implements ApplicationContextAware {
 
     /**
      * Interface for providing data to ComboBox components. Implementations should provide lists of entities for
      * specific entity types.
+     * 
+     * <p>
+     * <strong>Note:</strong> This interface is maintained for backward compatibility. 
+     * New implementations should use the annotation-based approach with MetaData annotations.
+     * </p>
+     * 
+     * @see MetaData#dataProviderBean()
+     * @see MetaData#dataProviderClass()
+     * @see CDataProviderResolver
      */
     public interface ComboBoxDataProvider {
 
@@ -56,11 +117,86 @@ public final class CEntityFormBuilder {
     private static final Logger LOGGER = LoggerFactory.getLogger(CEntityFormBuilder.class);
     protected static final String LabelMinWidth_210PX = "210px";
 
+    /**
+     * Spring application context for accessing the data provider resolver.
+     * Set via ApplicationContextAware interface.
+     */
+    private static ApplicationContext applicationContext;
+
+    /**
+     * Cached instance of the data provider resolver for performance.
+     */
+    private static CDataProviderResolver dataProviderResolver;
+
+    /**
+     * Sets the application context and initializes the data provider resolver.
+     * This method is called automatically by Spring.
+     * 
+     * @param context the Spring application context
+     */
+    @Override
+    public void setApplicationContext(final ApplicationContext context) {
+        CEntityFormBuilder.applicationContext = context;
+        try {
+            CEntityFormBuilder.dataProviderResolver = context.getBean(CDataProviderResolver.class);
+            LOGGER.info("CEntityFormBuilder initialized with Spring context and data provider resolver");
+        } catch (final Exception e) {
+            LOGGER.warn("Failed to initialize CDataProviderResolver - annotation-based providers will not work: {}", 
+                    e.getMessage());
+            CEntityFormBuilder.dataProviderResolver = null;
+        }
+    }
+
+    /**
+     * Builds a form layout for the specified entity class using automatic data provider resolution.
+     * 
+     * <p>
+     * This method uses the new annotation-based approach to automatically resolve data providers
+     * for ComboBox fields based on their MetaData annotations. No explicit data provider is required.
+     * </p>
+     * 
+     * <p>
+     * <strong>ComboBox Data Resolution:</strong>
+     * ComboBox fields will have their data automatically resolved using:
+     * </p>
+     * <ul>
+     * <li>MetaData.dataProviderBean() - specified Spring bean name</li>
+     * <li>MetaData.dataProviderClass() - specified Spring bean class</li>
+     * <li>Automatic resolution based on entity type naming convention</li>
+     * </ul>
+     * 
+     * @param <EntityClass> the entity class type for the binder
+     * @param entityClass the class of the entity to create a form for
+     * @param binder the Vaadin binder for data binding
+     * @return a Div containing the generated form layout
+     * @throws IllegalArgumentException if entityClass or binder is null
+     * @see #buildForm(Class, BeanValidationBinder, ComboBoxDataProvider)
+     */
     public static <EntityClass> Div buildForm(final Class<?> entityClass,
             final BeanValidationBinder<EntityClass> binder) {
         return buildForm(entityClass, binder, null);
     }
 
+    /**
+     * Builds a form layout for the specified entity class with optional legacy data provider.
+     * 
+     * <p>
+     * This method supports both the new annotation-based approach and the legacy ComboBoxDataProvider approach:
+     * </p>
+     * 
+     * <ul>
+     * <li><strong>Legacy Provider Priority:</strong> If dataProvider is not null, it takes precedence over annotations</li>
+     * <li><strong>Annotation-Based:</strong> If dataProvider is null, uses MetaData annotations for data resolution</li>
+     * <li><strong>Fallback:</strong> If neither approach provides data, ComboBox will be empty</li>
+     * </ul>
+     * 
+     * @param <EntityClass> the entity class type for the binder
+     * @param entityClass the class of the entity to create a form for
+     * @param binder the Vaadin binder for data binding  
+     * @param dataProvider optional legacy data provider (null to use annotation-based approach)
+     * @return a Div containing the generated form layout
+     * @throws IllegalArgumentException if entityClass or binder is null
+     */
     public static <EntityClass> Div buildForm(final Class<?> entityClass,
             final BeanValidationBinder<EntityClass> binder, final ComboBoxDataProvider dataProvider) {
         // Enhanced null pointer checking with detailed logging
@@ -241,43 +377,175 @@ public final class CEntityFormBuilder {
     @SuppressWarnings("unchecked")
     private static <T extends CEntityDB> ComboBox<T> createComboBox(final Field field, final MetaData meta,
             final BeanValidationBinder<?> binder, final ComboBoxDataProvider dataProvider) {
+        
+        // Enhanced null pointer checking with detailed logging
+        if (field == null) {
+            LOGGER.error("Field parameter is null in createComboBox");
+            return null;
+        }
+        if (meta == null) {
+            LOGGER.error("MetaData parameter is null for field: {}", field.getName());
+            return null;
+        }
+        if (binder == null) {
+            LOGGER.error("Binder parameter is null for field: {}", field.getName());
+            return null;
+        }
+
+        final Class<T> fieldType = (Class<T>) field.getType();
+        LOGGER.debug("Creating ComboBox for field '{}' of type '{}'", field.getName(), 
+                fieldType.getSimpleName());
+
         final ComboBox<T> comboBox = new ComboBox<>();
         comboBox.setRequiredIndicatorVisible(meta.required());
         comboBox.setReadOnly(meta.readOnly());
-        if (!meta.description().isEmpty()) {
+        
+        // Safe null checking for description
+        if (meta.description() != null && !meta.description().trim().isEmpty()) {
             comboBox.setHelperText(meta.description());
+            LOGGER.debug("Set helper text for ComboBox '{}': {}", field.getName(), meta.description());
         }
+        
         comboBox.setClassName("form-field-combobox");
         setComponentWidth(comboBox, meta);
-        comboBox.setItemLabelGenerator(item -> item.toString()); // <-- burası düzeltildi
-        try {
-            final List<T> items = dataProvider.getItems((Class<T>) field.getType());
-            if ((items == null) || items.isEmpty()) {
-                LOGGER.warn("DataProvider returned empty list for field: {}", field.getName());
+        
+        // Enhanced item label generator with null safety
+        comboBox.setItemLabelGenerator(item -> {
+            if (item == null) {
+                return "N/A";
             }
-            comboBox.setItems(items != null ? items : List.of());
+            try {
+                return item.toString();
+            } catch (final Exception e) {
+                LOGGER.warn("Error generating label for ComboBox item of type {}: {}", 
+                        item.getClass().getSimpleName(), e.getMessage());
+                return "Error: " + item.getClass().getSimpleName();
+            }
+        });
+
+        // Data provider resolution with priority order:
+        // 1. Legacy ComboBoxDataProvider (if provided) - for backward compatibility
+        // 2. Annotation-based resolution using CDataProviderResolver
+        // 3. Empty list as fallback
+        
+        List<T> items = null;
+        
+        // Priority 1: Use legacy data provider if provided
+        if (dataProvider != null) {
+            LOGGER.debug("Using legacy ComboBoxDataProvider for field '{}' of type '{}'", 
+                    field.getName(), fieldType.getSimpleName());
+            try {
+                items = dataProvider.getItems(fieldType);
+                if (items != null) {
+                    LOGGER.debug("Legacy data provider returned {} items for field '{}'", 
+                            items.size(), field.getName());
+                } else {
+                    LOGGER.warn("Legacy data provider returned null for field '{}' of type '{}'", 
+                            field.getName(), fieldType.getSimpleName());
+                }
+            } catch (final Exception e) {
+                LOGGER.error("Error using legacy data provider for field '{}' of type '{}': {}", 
+                        field.getName(), fieldType.getSimpleName(), e.getMessage(), e);
+            }
+        }
+        
+        // Priority 2: Use annotation-based resolution if legacy provider didn't work
+        if (items == null && dataProviderResolver != null) {
+            LOGGER.debug("Attempting annotation-based data resolution for field '{}' of type '{}'", 
+                    field.getName(), fieldType.getSimpleName());
+            try {
+                items = dataProviderResolver.resolveData(fieldType, meta);
+                if (items != null) {
+                    LOGGER.debug("Annotation-based resolver returned {} items for field '{}'", 
+                            items.size(), field.getName());
+                } else {
+                    LOGGER.warn("Annotation-based resolver returned null for field '{}' of type '{}'", 
+                            field.getName(), fieldType.getSimpleName());
+                }
+            } catch (final Exception e) {
+                LOGGER.error("Error using annotation-based data resolver for field '{}' of type '{}': {}", 
+                        field.getName(), fieldType.getSimpleName(), e.getMessage(), e);
+            }
+        }
+        
+        // Priority 3: Fallback to empty list
+        if (items == null) {
+            LOGGER.warn("No data provider could supply items for field '{}' of type '{}' - using empty list", 
+                    field.getName(), fieldType.getSimpleName());
+            items = List.of();
+        }
+        
+        // Set items on ComboBox with validation
+        try {
+            comboBox.setItems(items);
+            LOGGER.debug("Successfully set {} items on ComboBox for field '{}'", items.size(), field.getName());
         } catch (final Exception e) {
-            LOGGER.error("Error loading data for combobox field: {}", field.getName(), e);
-            comboBox.setItems(List.of());
+            LOGGER.error("Error setting items on ComboBox for field '{}': {}", field.getName(), e.getMessage(), e);
+            comboBox.setItems(List.of()); // Fallback to empty list
         }
 
-        // Use custom converter to handle entity comparison by ID instead of object reference
-        // This prevents issues with lazy-loaded entities that may be proxy objects
+        // Enhanced converter with better error handling for lazy loading and proxy objects
         binder.forField(comboBox).withConverter(
-                // Convert from ComboBox value to entity
-                comboBoxValue -> comboBoxValue,
-                // Convert from entity to ComboBox value - find matching item by ID
-                entityValue -> {
-                    if (entityValue == null) {
+                // Convert from ComboBox value to entity (forward conversion)
+                comboBoxValue -> {
+                    if (comboBoxValue == null) {
+                        LOGGER.debug("ComboBox value is null for field '{}' - returning null", field.getName());
                         return null;
                     }
-                    // Find the matching item in ComboBox by comparing IDs
-                    final List<T> allItems = comboBox.getDataProvider()
-                            .fetch(new com.vaadin.flow.data.provider.Query<>())
-                            .collect(java.util.stream.Collectors.toList());
-                    return allItems.stream()
-                            .filter(item -> item.getId() != null && item.getId().equals(entityValue.getId()))
-                            .findFirst().orElse(null);
+                    LOGGER.debug("Converting ComboBox value to entity for field '{}': {}", 
+                            field.getName(), comboBoxValue.getClass().getSimpleName());
+                    return comboBoxValue;
+                },
+                // Convert from entity to ComboBox value (reverse conversion) - handles lazy loading
+                entityValue -> {
+                    if (entityValue == null) {
+                        LOGGER.debug("Entity value is null for field '{}' - returning null", field.getName());
+                        return null;
+                    }
+                    
+                    LOGGER.debug("Converting entity to ComboBox value for field '{}': entity type {}", 
+                            field.getName(), entityValue.getClass().getSimpleName());
+                    
+                    try {
+                        // Get the entity ID for comparison - handles proxy objects safely
+                        final Long entityId = ((CEntityDB) entityValue).getId();
+                        if (entityId == null) {
+                            LOGGER.warn("Entity has null ID for field '{}' - cannot match with ComboBox items", 
+                                    field.getName());
+                            return null;
+                        }
+                        
+                        // Find matching item in ComboBox by comparing IDs
+                        final List<T> allItems = comboBox.getDataProvider()
+                                .fetch(new com.vaadin.flow.data.provider.Query<>())
+                                .collect(java.util.stream.Collectors.toList());
+                        
+                        final T matchingItem = allItems.stream()
+                                .filter(item -> {
+                                    if (item == null) {
+                                        return false;
+                                    }
+                                    final Long itemId = item.getId();
+                                    return itemId != null && itemId.equals(entityId);
+                                })
+                                .findFirst()
+                                .orElse(null);
+                        
+                        if (matchingItem != null) {
+                            LOGGER.debug("Found matching ComboBox item for entity ID {} in field '{}'", 
+                                    entityId, field.getName());
+                        } else {
+                            LOGGER.warn("No matching ComboBox item found for entity ID {} in field '{}'", 
+                                    entityId, field.getName());
+                        }
+                        
+                        return matchingItem;
+                        
+                    } catch (final Exception e) {
+                        LOGGER.error("Error converting entity to ComboBox value for field '{}': {}", 
+                                field.getName(), e.getMessage(), e);
+                        return null;
+                    }
                 }).bind(field.getName());
 
         return comboBox;
@@ -629,6 +897,7 @@ public final class CEntityFormBuilder {
     }
 
     private CEntityFormBuilder() {
-        // Utility class - prevent instantiation
+        // Spring component - constructor managed by Spring
+        LOGGER.debug("CEntityFormBuilder instance created by Spring");
     }
 }
