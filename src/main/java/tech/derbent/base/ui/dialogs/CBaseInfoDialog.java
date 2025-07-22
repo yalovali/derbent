@@ -1,31 +1,16 @@
 package tech.derbent.base.ui.dialogs;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
-/**
- * CBaseDialog - Abstract base class for simple message dialogs. Layer: View
- * (MVC) Provides common functionality for warning, information, and exception
- * dialogs. These dialogs are for showing messages to users, not for data
- * editing.
- */
-public abstract class CBaseInfoDialog extends Dialog {
+import tech.derbent.abstracts.views.CButton;
+import tech.derbent.abstracts.views.CDialog;
+
+public abstract class CBaseInfoDialog extends CDialog {
 
 	private static final long serialVersionUID = 1L;
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
-	protected final String message;
-	protected final String title;
-	protected VerticalLayout mainLayout;
-	protected HorizontalLayout buttonLayout;
+	private final String message;
+	private final String title;
 	private final Icon icon;
 
 	/**
@@ -33,72 +18,47 @@ public abstract class CBaseInfoDialog extends Dialog {
 	 * @param message The message to display to the user
 	 */
 	public CBaseInfoDialog(final String title, final String message, final Icon icon) {
-		LOGGER.debug("CBaseDialog constructor called for {}", getClass().getSimpleName());
-		this.title = title;
-		this.message = message;
-		this.icon = icon;
+		super();
+		LOGGER.debug("CBaseInfoDialog constructor called for {}", getClass().getSimpleName());
 		if (icon == null) {
 			throw new IllegalArgumentException("Icon cannot be null");
 		}
+		this.title = title;
+		this.message = message;
+		this.icon = icon;
 		icon.setColor("var(--lumo-warning-color)");
-		// for error: icon.setColor("var(--lumo-error-color)");
-		// icon.setColor("var(--lumo-primary-color)");
-		setupDialog();
-		setupContent();
-		setupButtons();
+		setupDialog();// call setupDialog() to initialize the dialog
 	}
 
-	/**
-	 * Child classes can override to provide different button variants.
-	 */
-	protected ButtonVariant getOkButtonVariant() { return ButtonVariant.LUMO_PRIMARY; }
+	@Override
+	protected Icon getFormIcon() { return icon; }
+
+	@Override
+	protected String getFormTitle() { return title; }
+
+	@Override
+	public String getHeaderTitle() { return title; }
 
 	/**
 	 * Sets up the OK button.
 	 */
+	@Override
 	protected void setupButtons() {
-		final Button okButton = new Button("OK", e -> close());
-		okButton.addThemeVariants(getOkButtonVariant());
+		final CButton okButton = CButton.createPrimary("OK", e -> close());
 		okButton.setAutofocus(true);
-		buttonLayout = new HorizontalLayout(okButton);
-		buttonLayout.setJustifyContentMode(HorizontalLayout.JustifyContentMode.CENTER);
-		buttonLayout.getStyle().set("margin-top", "16px");
-		mainLayout.add(buttonLayout);
+		buttonLayout.add(okButton);
 	}
 
 	/**
-	 * Sets up the dialog content with icon, title and message.
+	 * Sets up the dialog content with icon and message.
 	 */
+	@Override
 	protected void setupContent() {
-		mainLayout = new VerticalLayout();
-		mainLayout.setPadding(true);
-		mainLayout.setSpacing(true);
-		mainLayout.setAlignItems(VerticalLayout.Alignment.CENTER);
-		// Header with icon and title
-		final HorizontalLayout headerLayout = new HorizontalLayout();
-		headerLayout.setAlignItems(HorizontalLayout.Alignment.CENTER);
-		headerLayout.setSpacing(true);
-		icon.setSize("24px");
-		final H3 titleComponent = new H3(title);
-		titleComponent.getStyle().set("margin", "0");
-		headerLayout.add(icon, titleComponent);
-		// Message content
+		// Header with icon and title (title already added by CDialog) Message content
 		final Div messageDiv = new Div();
 		messageDiv.setText(message);
 		messageDiv.getStyle().set("text-align", "center");
 		messageDiv.getStyle().set("margin", "16px 0");
-		mainLayout.add(headerLayout, messageDiv);
-		add(mainLayout);
-	}
-
-	/**
-	 * Sets up the dialog properties (modal, size, etc.)
-	 */
-	protected void setupDialog() {
-		setModal(true);
-		setCloseOnEsc(true);
-		setCloseOnOutsideClick(false);
-		setWidth("400px");
-		setResizable(false);
+		mainLayout.add(messageDiv);
 	}
 }

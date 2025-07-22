@@ -1,6 +1,5 @@
 package tech.derbent.base.ui.dialogs;
 
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
 
 /**
@@ -19,7 +18,4 @@ public final class CInformationDialog extends CBaseInfoDialog {
 		super("Information", message, VaadinIcon.INFO_CIRCLE.create());
 		LOGGER.debug("CInformationDialog created with message: {}", message);
 	}
-
-	@Override
-	protected ButtonVariant getOkButtonVariant() { return ButtonVariant.LUMO_PRIMARY; }
 }

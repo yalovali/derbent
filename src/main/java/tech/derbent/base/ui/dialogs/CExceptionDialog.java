@@ -1,6 +1,5 @@
 package tech.derbent.base.ui.dialogs;
 
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
 
 /**
@@ -20,7 +19,4 @@ public final class CExceptionDialog extends CBaseInfoDialog {
 		super("Error", exception.getMessage() != null ? exception.getMessage() : "An unexpected error occurred", VaadinIcon.EXCLAMATION_CIRCLE.create());
 		LOGGER.debug("CExceptionDialog created for exception: {}", exception.getClass().getSimpleName());
 	}
-
-	@Override
-	protected ButtonVariant getOkButtonVariant() { return ButtonVariant.LUMO_ERROR; }
 }

@@ -1,9 +1,8 @@
 package tech.derbent.base.ui.dialogs;
 
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+
+import tech.derbent.abstracts.views.CButton;
 
 /**
  * CConfirmationDialog - Dialog for user confirmations with Yes/No options.
@@ -27,20 +26,15 @@ public final class CConfirmationDialog extends CBaseInfoDialog {
 
 	@Override
 	protected void setupButtons() {
-		final Button yesButton = new Button("Yes", e -> {
+		final CButton yesButton = CButton.createPrimary("Yes", e -> {
 			if (onConfirm != null) {
 				onConfirm.run();
 			}
 			close();
 		});
-		yesButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
 		yesButton.setAutofocus(false);
-		final Button noButton = new Button("No", e -> close());
-		noButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+		final CButton noButton = CButton.createTertiary("No", e -> close());
 		noButton.setAutofocus(true);
-		buttonLayout = new HorizontalLayout(noButton, yesButton);
-		buttonLayout.setJustifyContentMode(HorizontalLayout.JustifyContentMode.CENTER);
-		buttonLayout.getStyle().set("margin-top", "16px");
-		mainLayout.add(buttonLayout);
+		buttonLayout.add(yesButton, noButton);
 	}
 }

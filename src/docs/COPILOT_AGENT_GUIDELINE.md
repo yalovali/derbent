@@ -124,7 +124,10 @@ After accepting Copilot suggestions, manually review for:
 - update docs folder with separate documentions about project design concepts, one document per concept. if the solution is about spring technologies or such complex structures always create a solution steps document in docs folder.
 - use abstracts/view for project-wide components such as CButton, CGrid etc. use these superclasses when every needed, also add new ui classes here.
 - when ever a button is not applicable, such as a user is not selected but, but a project add requested, dont silently return. Give a warning to user, explain the situation. Use a new CWarningDialog/CInformationDialog/CExceptionDialog classes. These dialogs should be simple and nice looking, and inherit from a common super class
----
+- dont put LOGGERS at end of functions, put logger at start of functions with full detail about the function parameters etc. 
+
+## 9.NEVER ALLOW
+-- Never allow to use Button, immediately update it to CButton, if there is a way to improve this super class, extend it, so that all buttons in the code has similar behavior
 
 **How to Use:**  
 - Reference this guideline for every Copilot-driven code change.

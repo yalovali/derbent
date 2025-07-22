@@ -20,7 +20,4 @@ public final class CWarningDialog extends CBaseInfoDialog {
 		super("Warning", message, VaadinIcon.WARNING.create());
 		LOGGER.debug("CWarningDialog created with message: {}", message);
 	}
-
-	@Override
-	protected ButtonVariant getOkButtonVariant() { return ButtonVariant.LUMO_TERTIARY; }
 }
