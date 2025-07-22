@@ -66,7 +66,7 @@ public class CMeeting extends CEntityOfProject {
         required = false, 
         readOnly = false, 
         description = "Users participating in the meeting", 
-        hidden = false, 
+        hidden = true, 
         order = 6,
         dataProviderBean = "CUserService"
     )
