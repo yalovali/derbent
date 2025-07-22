@@ -39,26 +39,32 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 
 	@Override
 	protected void createDetailsLayout() {
-		LOGGER.info("Creating details layout for CActivitiesView");
+		LOGGER.info("Creating details layout for CActivitiesView using annotation-based data providers");
 		final Div editorLayoutDiv = new Div();
 		editorLayoutDiv.setClassName("editor-layout");
-		// Create data provider for ComboBoxes
-		final CEntityFormBuilder.ComboBoxDataProvider dataProvider = new CEntityFormBuilder.ComboBoxDataProvider() {
-
-			@Override
-			@SuppressWarnings("unchecked")
-			public <T extends CEntityDB> java.util.List<T> getItems(final Class<T> entityType) {
-				if (entityType == CActivityType.class) {
-					return (java.util.List<T>) activityTypeService.list(org.springframework.data.domain.Pageable.unpaged());
-				}
-				return java.util.Collections.emptyList();
-			}
-		};
-		// Use CEntityFormBuilder for automatic form generation not good, what happens
-		// if the entity has more then one combobox
-		editorLayoutDiv.add(CEntityFormBuilder.buildForm(CActivity.class, getBinder(), dataProvider));
-		// Note: Buttons are now automatically added to the details tab by the parent
-		// class
+		
+		// NEW APPROACH: No data provider needed! 
+		// The @MetaData annotation on CActivity.activityType specifies dataProviderBean = "CActivityTypeService"
+		// This makes the code much simpler and more maintainable
+		editorLayoutDiv.add(CEntityFormBuilder.buildForm(CActivity.class, getBinder()));
+		
+		// LEGACY APPROACH (still supported for backward compatibility):
+		// Create data provider for ComboBoxes - this is the old complex way
+		// final CEntityFormBuilder.ComboBoxDataProvider dataProvider = new CEntityFormBuilder.ComboBoxDataProvider() {
+		//     @Override
+		//     @SuppressWarnings("unchecked")
+		//     public <T extends CEntityDB> java.util.List<T> getItems(final Class<T> entityType) {
+		//         if (entityType == CActivityType.class) {
+		//             return (java.util.List<T>) activityTypeService.list(org.springframework.data.domain.Pageable.unpaged());
+		//         }
+		//         // With multiple ComboBoxes, this becomes complex and hard to maintain
+		//         // What if we add more ComboBox fields? More if-else blocks needed!
+		//         return java.util.Collections.emptyList();
+		//     }
+		// };
+		// editorLayoutDiv.add(CEntityFormBuilder.buildForm(CActivity.class, getBinder(), dataProvider));
+		
+		// Note: Buttons are now automatically added to the details tab by the parent class
 		getBaseDetailsLayout().add(editorLayoutDiv);
 	}
 

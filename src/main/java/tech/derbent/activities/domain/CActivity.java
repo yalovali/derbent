@@ -18,7 +18,15 @@ public class CActivity extends CEntityOfProject {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cactivitytype_id", nullable = true)
-    @MetaData(displayName = "Activity Type", required = false, readOnly = false, description = "Type category of the activity", hidden = false, order = 2)
+    @MetaData(
+        displayName = "Activity Type", 
+        required = false, 
+        readOnly = false, 
+        description = "Type category of the activity", 
+        hidden = false, 
+        order = 2,
+        dataProviderBean = "CActivityTypeService"
+    )
     private CActivityType activityType;
 
     public CActivity() {

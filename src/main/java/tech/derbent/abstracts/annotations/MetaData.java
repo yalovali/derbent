@@ -193,4 +193,74 @@ public @interface MetaData {
      * @return true to use radio buttons, false to use dropdown, defaults to false
      */
     boolean useRadioButtons() default false;
+
+    /**
+     * Specifies the Spring bean name to use as data provider for ComboBox fields.
+     * 
+     * <p>
+     * This attribute allows you to specify which Spring service bean should provide data for ComboBox components.
+     * The bean must implement a method that returns a List of items for the field's entity type.
+     * </p>
+     * 
+     * <p>
+     * <strong>Usage Examples:</strong>
+     * </p>
+     * <ul>
+     * <li>{@code dataProviderBean = "activityTypeService"} - uses the activityTypeService Spring bean</li>
+     * <li>{@code dataProviderBean = "projectService"} - uses the projectService Spring bean</li>
+     * </ul>
+     * 
+     * <p>
+     * The specified bean should have a method named "list" or "findAll" that returns a List&lt;EntityType&gt;.
+     * If the method name is different, use {@link #dataProviderMethod()} to specify it.
+     * </p>
+     * 
+     * @return the Spring bean name to use as data provider, empty string by default
+     * @see #dataProviderMethod()
+     * @see #dataProviderClass()
+     */
+    String dataProviderBean() default "";
+
+    /**
+     * Specifies the method name to call on the data provider bean.
+     * 
+     * <p>
+     * Use this when the data provider bean method is not named "list" or "findAll".
+     * The method should return a List of entities compatible with the field type.
+     * </p>
+     * 
+     * <p>
+     * <strong>Usage Examples:</strong>
+     * </p>
+     * <ul>
+     * <li>{@code dataProviderMethod = "findAllActive"} - calls findAllActive() method</li>
+     * <li>{@code dataProviderMethod = "listByStatus"} - calls listByStatus() method</li>
+     * </ul>
+     * 
+     * @return the method name to call, defaults to "list"
+     * @see #dataProviderBean()
+     */
+    String dataProviderMethod() default "list";
+
+    /**
+     * Specifies the class type of the data provider service.
+     * 
+     * <p>
+     * Alternative to {@link #dataProviderBean()}, this allows specifying the service class type
+     * instead of bean name. The Spring context will be searched for a bean of this type.
+     * </p>
+     * 
+     * <p>
+     * <strong>Usage Example:</strong>
+     * </p>
+     * <pre>{@code
+     * @MetaData(displayName = "Activity Type", dataProviderClass = CActivityTypeService.class)
+     * private CActivityType activityType;
+     * }</pre>
+     * 
+     * @return the class type of the data provider service, Object.class by default (no provider)
+     * @see #dataProviderBean()
+     * @see #dataProviderMethod()
+     */
+    Class<?> dataProviderClass() default Object.class;
 }
