@@ -11,55 +11,57 @@ import jakarta.persistence.MappedSuperclass;
 @MappedSuperclass
 public abstract class CEntityDB extends CEntity {
 
-	public static final int MAX_LENGTH_DESCRIPTION = 255;
-	public static final int MAX_LENGTH_NAME = 100;
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    public static final int MAX_LENGTH_DESCRIPTION = 255;
+    public static final int MAX_LENGTH_NAME = 100;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	public CEntityDB() {
-		super();
-	}
+    public CEntityDB() {
+        super();
+    }
 
-	public CEntityDB(final String name) {
-		this();
-	}
+    public CEntityDB(final String name) {
+        this();
+    }
 
-	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (!(obj instanceof CEntityDB)) {
-			return false;
-		}
-		final CEntityDB other = (CEntityDB) obj;
-		final Class<?> thisClass = ProxyUtils.getUserClass(getClass());
-		final Class<?> otherClass = ProxyUtils.getUserClass(other.getClass());
-		if (!thisClass.equals(otherClass)) {
-			return false;
-		}
-		final Long id = getId();
-		return (id != null) && id.equals(other.getId());
-	}
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof CEntityDB)) {
+            return false;
+        }
+        final CEntityDB other = (CEntityDB) obj;
+        final Class<?> thisClass = ProxyUtils.getUserClass(getClass());
+        final Class<?> otherClass = ProxyUtils.getUserClass(other.getClass());
+        if (!thisClass.equals(otherClass)) {
+            return false;
+        }
+        final Long id = getId();
+        return (id != null) && id.equals(other.getId());
+    }
 
-	@Nullable
-	public Long getId() { return id; }
+    @Nullable
+    public Long getId() {
+        return id;
+    }
 
-	@Override
-	public int hashCode() {
-		final Long id = getId();
-		if (id != null) {
-			return id.hashCode();
-		}
-		return ProxyUtils.getUserClass(getClass()).hashCode();
-	}
+    @Override
+    public int hashCode() {
+        final Long id = getId();
+        if (id != null) {
+            return id.hashCode();
+        }
+        return ProxyUtils.getUserClass(getClass()).hashCode();
+    }
 
-	@Override
-	public String toString() {
-		return "%s{id=%s}".formatted(getClass().getSimpleName(), getId());
-	}
+    @Override
+    public String toString() {
+        return "%s{id=%s}".formatted(getClass().getSimpleName(), getId());
+    }
 }

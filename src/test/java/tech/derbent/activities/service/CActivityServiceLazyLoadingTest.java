@@ -18,8 +18,8 @@ import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.domain.CActivityType;
 
 /**
- * Test class for CActivityService lazy loading functionality.
- * Specifically tests the fix for LazyInitializationException with CActivityType.
+ * Test class for CActivityService lazy loading functionality. Specifically tests the fix for
+ * LazyInitializationException with CActivityType.
  */
 class CActivityServiceLazyLoadingTest {
 
@@ -43,7 +43,7 @@ class CActivityServiceLazyLoadingTest {
         final Long activityId = 1L;
         final CActivity activity = new CActivity();
         activity.setName("Test Activity");
-        
+
         final CActivityType activityType = new CActivityType();
         activityType.setName("Test Activity Type");
         activity.setActivityType(activityType);
@@ -65,7 +65,7 @@ class CActivityServiceLazyLoadingTest {
         final Long activityId = 1L;
         final CActivity activity = new CActivity();
         activity.setName("Test Activity");
-        
+
         final CActivityType activityType = new CActivityType();
         activityType.setName("Test Activity Type");
         activity.setActivityType(activityType);

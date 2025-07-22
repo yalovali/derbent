@@ -17,61 +17,62 @@ import tech.derbent.projects.service.CProjectService;
 
 public class CEntityProjectsGrid<T extends CEntityDB> extends VerticalLayout {
 
-	private static final long serialVersionUID = 1L;
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
-	private final Grid<CProject> grid = new Grid<>(CProject.class, false);
-	private Supplier<Set<CProject>> getProjects;
-	private Consumer<Set<CProject>> setProjects;
-	private Runnable saveEntity;
-	private final ComboBox<CProject> projectComboBox;
+    private static final long serialVersionUID = 1L;
+    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private final Grid<CProject> grid = new Grid<>(CProject.class, false);
+    private Supplier<Set<CProject>> getProjects;
+    private Consumer<Set<CProject>> setProjects;
+    private Runnable saveEntity;
+    private final ComboBox<CProject> projectComboBox;
 
-	public CEntityProjectsGrid(final CProjectService projectService) {
-		LOGGER.info("CEntityProjectsGrid constructor called for {}", getClass().getSimpleName());
-		grid.addColumn(CProject::getName).setHeader("Project Name").setAutoWidth(true);
-		add(grid);
-		// ComboBox to select a project
-		projectComboBox = new ComboBox<>("Select Project");
-		projectComboBox.setItemLabelGenerator(CProject::getName);
-		projectComboBox.setItems(projectService.findAll()); // Assumes findAll() returns all projects
-		add(projectComboBox);
-		// Add/remove buttons
-		final CButton addProject = new CButton("Add Project", e -> {
-			final CProject selectedProject = projectComboBox.getValue();
-			if ((selectedProject != null) && (getProjects != null) && (setProjects != null)) {
-				final Set<CProject> projects = getProjects.get();
-				if (!projects.contains(selectedProject)) {
-					projects.add(selectedProject);
-					setProjects.accept(projects);
-					saveEntity.run();
-					refresh();
-				}
-			}
-		});
-		final CButton removeProject = new CButton("Remove Selected", e -> {
-			final CProject selected = grid.asSingleSelect().getValue();
-			if ((selected != null) && (getProjects != null) && (setProjects != null)) {
-				final Set<CProject> projects = getProjects.get();
-				projects.remove(selected);
-				setProjects.accept(projects);
-				saveEntity.run();
-				refresh();
-			}
-		});
-		add(addProject, removeProject);
-	}
+    public CEntityProjectsGrid(final CProjectService projectService) {
+        LOGGER.info("CEntityProjectsGrid constructor called for {}", getClass().getSimpleName());
+        grid.addColumn(CProject::getName).setHeader("Project Name").setAutoWidth(true);
+        add(grid);
+        // ComboBox to select a project
+        projectComboBox = new ComboBox<>("Select Project");
+        projectComboBox.setItemLabelGenerator(CProject::getName);
+        projectComboBox.setItems(projectService.findAll()); // Assumes findAll() returns all projects
+        add(projectComboBox);
+        // Add/remove buttons
+        final CButton addProject = new CButton("Add Project", e -> {
+            final CProject selectedProject = projectComboBox.getValue();
+            if ((selectedProject != null) && (getProjects != null) && (setProjects != null)) {
+                final Set<CProject> projects = getProjects.get();
+                if (!projects.contains(selectedProject)) {
+                    projects.add(selectedProject);
+                    setProjects.accept(projects);
+                    saveEntity.run();
+                    refresh();
+                }
+            }
+        });
+        final CButton removeProject = new CButton("Remove Selected", e -> {
+            final CProject selected = grid.asSingleSelect().getValue();
+            if ((selected != null) && (getProjects != null) && (setProjects != null)) {
+                final Set<CProject> projects = getProjects.get();
+                projects.remove(selected);
+                setProjects.accept(projects);
+                saveEntity.run();
+                refresh();
+            }
+        });
+        add(addProject, removeProject);
+    }
 
-	public void refresh() {
-		LOGGER.info("Refreshing CEntityProjectsGrid for {}", getClass().getSimpleName());
-		if (getProjects != null) {
-			grid.setItems(getProjects.get());
-		}
-	}
+    public void refresh() {
+        LOGGER.info("Refreshing CEntityProjectsGrid for {}", getClass().getSimpleName());
+        if (getProjects != null) {
+            grid.setItems(getProjects.get());
+        }
+    }
 
-	public void setProjectAccessors(final Supplier<Set<CProject>> getProjects, final Consumer<Set<CProject>> setProjects, final Runnable saveEntity) {
-		LOGGER.info("Setting project accessors in CEntityProjectsGrid for {}", getClass().getSimpleName());
-		this.getProjects = getProjects;
-		this.setProjects = setProjects;
-		this.saveEntity = saveEntity;
-		refresh();
-	}
+    public void setProjectAccessors(final Supplier<Set<CProject>> getProjects,
+            final Consumer<Set<CProject>> setProjects, final Runnable saveEntity) {
+        LOGGER.info("Setting project accessors in CEntityProjectsGrid for {}", getClass().getSimpleName());
+        this.getProjects = getProjects;
+        this.setProjects = setProjects;
+        this.saveEntity = saveEntity;
+        refresh();
+    }
 }
