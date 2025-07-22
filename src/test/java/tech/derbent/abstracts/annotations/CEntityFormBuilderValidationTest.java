@@ -9,10 +9,8 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.component.html.Div;
 
 /**
- * Test class to verify CEntityFormBuilder improvements including:
- * - Enhanced null pointer checking
- * - Better logging and error handling
- * - Robust parameter validation
+ * Test class to verify CEntityFormBuilder improvements including: - Enhanced null pointer checking - Better logging and
+ * error handling - Robust parameter validation
  */
 class CEntityFormBuilderValidationTest {
 
