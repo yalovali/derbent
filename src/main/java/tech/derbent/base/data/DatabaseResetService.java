@@ -9,14 +9,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class DatabaseResetService {
 
-	private final DataSource dataSource;
+    private final DataSource dataSource;
 
-	public DatabaseResetService(final DataSource dataSource) {
-		this.dataSource = dataSource;
-	}
+    public DatabaseResetService(final DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
 
-	public void resetDatabase() {
-		final ResourceDatabasePopulator populator = new ResourceDatabasePopulator(new ClassPathResource("data.sql"));
-		populator.execute(dataSource);
-	}
+    public void resetDatabase() {
+        final ResourceDatabasePopulator populator = new ResourceDatabasePopulator(new ClassPathResource("data.sql"));
+        populator.execute(dataSource);
+    }
 }

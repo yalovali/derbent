@@ -19,8 +19,8 @@ import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserType;
 
 /**
- * Test class for CUserService lazy loading functionality.
- * Specifically tests the fix for LazyInitializationException with CUserType.
+ * Test class for CUserService lazy loading functionality. Specifically tests the fix for LazyInitializationException
+ * with CUserType.
  */
 class CUserServiceLazyLoadingTest {
 
@@ -45,7 +45,7 @@ class CUserServiceLazyLoadingTest {
         final CUser user = new CUser();
         user.setName("Test User");
         user.setLogin("testuser");
-        
+
         final CUserType userType = new CUserType();
         userType.setName("Test User Type");
         user.setUserType(userType);
@@ -59,7 +59,7 @@ class CUserServiceLazyLoadingTest {
         // Then
         assertTrue(result.isPresent(), "User should be found");
         assertNotNull(result.get().getUserType(), "UserType should be loaded");
-        
+
         // Test that accessing userType doesn't throw LazyInitializationException
         assertDoesNotThrow(() -> {
             final String userTypeName = result.get().getUserType().getName();
@@ -72,7 +72,7 @@ class CUserServiceLazyLoadingTest {
         // Given
         final CUser user = new CUser();
         user.setName("Test User");
-        
+
         final CUserType userType = mock(CUserType.class);
         user.setUserType(userType);
 

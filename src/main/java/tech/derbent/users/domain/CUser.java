@@ -21,140 +21,175 @@ import tech.derbent.abstracts.domains.CEntityDB;
 @AttributeOverride(name = "id", column = @Column(name = "user_id")) // Override the default column name for the ID field
 public class CUser extends CEntityDB {
 
-	public static final int MAX_LENGTH_NAME = 255; // Define maximum length for name fields
-	@Column(name = "name", nullable = false, length = MAX_LENGTH_NAME, unique = false)
-	@Size(max = MAX_LENGTH_NAME)
-	@MetaData(displayName = "User Name", required = true, readOnly = false, defaultValue = "", description = "User's first name", hidden = false, order = 1, maxLength = MAX_LENGTH_NAME)
-	private String name;
-	@Column(name = "lastname", nullable = true, length = MAX_LENGTH_NAME, unique = false)
-	@MetaData(displayName = "Last Name", required = true, readOnly = false, defaultValue = "", description = "User's last name", hidden = false, order = 2, maxLength = MAX_LENGTH_NAME)
-	@Size(max = MAX_LENGTH_NAME)
-	private String lastname;
-	@MetaData(displayName = "Login", required = true, readOnly = false, defaultValue = "", description = "Login name for the system", hidden = false, order = 3, maxLength = MAX_LENGTH_NAME)
-	@Column(name = "login", nullable = true, length = MAX_LENGTH_NAME, unique = true)
-	@Size(max = MAX_LENGTH_NAME)
-	private String login;
-	@MetaData(displayName = "Email", required = true, readOnly = false, defaultValue = "", description = "User's email address", hidden = false, order = 4, maxLength = MAX_LENGTH_NAME)
-	@Column(name = "email", nullable = true, length = MAX_LENGTH_NAME, unique = false)
-	@Size(max = MAX_LENGTH_NAME)
-	private String email;
-	@MetaData(displayName = "Phone", required = false, readOnly = false, defaultValue = "", description = "Phone number", hidden = false, order = 5, maxLength = MAX_LENGTH_NAME)
-	@Column(name = "phone", nullable = true, length = MAX_LENGTH_NAME, unique = false)
-	@Size(max = MAX_LENGTH_NAME)
-	private String phone;
-	@Column(name = "roles", nullable = false, length = 255)
-	@Size(max = 255)
-	@MetaData(displayName = "Roles", required = true, readOnly = false, defaultValue = "USER", description = "User roles (comma-separated)", hidden = false, order = 6, maxLength = 255)
-	private String roles = "USER";
-	@Column(name = "password", nullable = true, length = 255)
-	@Size(max = 255)
-	@MetaData(displayName = "Password", required = false, readOnly = false, description = "User password (stored as hash)", hidden = true, order = 99)
-	private String password; // Encoded password
-	@MetaData(displayName = "Enabled", required = true, readOnly = false, defaultValue = "true", description = "Is user account enabled?", hidden = false, order = 7)
-	@Column(name = "enabled", nullable = false)
-	private boolean enabled = true; // User account status, default is enabled
-	@Column(name = "created_date", nullable = true)
-	private LocalDateTime created_date;
-	@Column(name = "updated_date", nullable = true)
-	private LocalDateTime updated_date;
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<CUserProjectSettings> projectSettings;
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "cusertype_id", nullable = true)
-	@MetaData(displayName = "User Type", required = false, readOnly = false, description = "Type category of the user", hidden = false, order = 8)
-	private CUserType userType;
+    public static final int MAX_LENGTH_NAME = 255; // Define maximum length for name fields
+    @Column(name = "name", nullable = false, length = MAX_LENGTH_NAME, unique = false)
+    @Size(max = MAX_LENGTH_NAME)
+    @MetaData(displayName = "User Name", required = true, readOnly = false, defaultValue = "", description = "User's first name", hidden = false, order = 1, maxLength = MAX_LENGTH_NAME)
+    private String name;
+    @Column(name = "lastname", nullable = true, length = MAX_LENGTH_NAME, unique = false)
+    @MetaData(displayName = "Last Name", required = true, readOnly = false, defaultValue = "", description = "User's last name", hidden = false, order = 2, maxLength = MAX_LENGTH_NAME)
+    @Size(max = MAX_LENGTH_NAME)
+    private String lastname;
+    @MetaData(displayName = "Login", required = true, readOnly = false, defaultValue = "", description = "Login name for the system", hidden = false, order = 3, maxLength = MAX_LENGTH_NAME)
+    @Column(name = "login", nullable = true, length = MAX_LENGTH_NAME, unique = true)
+    @Size(max = MAX_LENGTH_NAME)
+    private String login;
+    @MetaData(displayName = "Email", required = true, readOnly = false, defaultValue = "", description = "User's email address", hidden = false, order = 4, maxLength = MAX_LENGTH_NAME)
+    @Column(name = "email", nullable = true, length = MAX_LENGTH_NAME, unique = false)
+    @Size(max = MAX_LENGTH_NAME)
+    private String email;
+    @MetaData(displayName = "Phone", required = false, readOnly = false, defaultValue = "", description = "Phone number", hidden = false, order = 5, maxLength = MAX_LENGTH_NAME)
+    @Column(name = "phone", nullable = true, length = MAX_LENGTH_NAME, unique = false)
+    @Size(max = MAX_LENGTH_NAME)
+    private String phone;
+    @Column(name = "roles", nullable = false, length = 255)
+    @Size(max = 255)
+    @MetaData(displayName = "Roles", required = true, readOnly = false, defaultValue = "USER", description = "User roles (comma-separated)", hidden = false, order = 6, maxLength = 255)
+    private String roles = "USER";
+    @Column(name = "password", nullable = true, length = 255)
+    @Size(max = 255)
+    @MetaData(displayName = "Password", required = false, readOnly = false, description = "User password (stored as hash)", hidden = true, order = 99)
+    private String password; // Encoded password
+    @MetaData(displayName = "Enabled", required = true, readOnly = false, defaultValue = "true", description = "Is user account enabled?", hidden = false, order = 7)
+    @Column(name = "enabled", nullable = false)
+    private boolean enabled = true; // User account status, default is enabled
+    @Column(name = "created_date", nullable = true)
+    private LocalDateTime created_date;
+    @Column(name = "updated_date", nullable = true)
+    private LocalDateTime updated_date;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CUserProjectSettings> projectSettings;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cusertype_id", nullable = true)
+    @MetaData(displayName = "User Type", required = false, readOnly = false, description = "Type category of the user", hidden = false, order = 8)
+    private CUserType userType;
 
-	public CUser() {
-		super();
-	}
+    public CUser() {
+        super();
+    }
 
-	public CUser(final String username, final String password, final String name, final String email) {
-		super();
-		this.login = username;
-		this.name = name;
-		this.email = email;
-		this.setPassword(password);
-	}
+    public CUser(final String username, final String password, final String name, final String email) {
+        super();
+        this.login = username;
+        this.name = name;
+        this.email = email;
+        this.setPassword(password);
+    }
 
-	public CUser(final String username, final String password, final String name, final String email, final String roles) {
-		super();
-		this.login = username;
-		this.name = name;
-		this.email = email;
-		this.setPassword(password);
-		this.setRoles(roles);
-	}
+    public CUser(final String username, final String password, final String name, final String email,
+            final String roles) {
+        super();
+        this.login = username;
+        this.name = name;
+        this.email = email;
+        this.setPassword(password);
+        this.setRoles(roles);
+    }
 
-	@Override
-	public boolean equals(final Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (!(o instanceof CUser)) {
-			return false;
-		}
-		final CUser cUser = (CUser) o;
-		return (enabled == cUser.enabled) && name.equals(cUser.name) && lastname.equals(cUser.lastname) && login.equals(cUser.login) && email.equals(cUser.email) && phone.equals(cUser.phone)
-			&& roles.equals(cUser.roles);
-	}
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof CUser)) {
+            return false;
+        }
+        final CUser cUser = (CUser) o;
+        return (enabled == cUser.enabled) && name.equals(cUser.name) && lastname.equals(cUser.lastname)
+                && login.equals(cUser.login) && email.equals(cUser.email) && phone.equals(cUser.phone)
+                && roles.equals(cUser.roles);
+    }
 
-	public String getEmail() { return email; }
+    public String getEmail() {
+        return email;
+    }
 
-	public String getLastname() { return lastname; }
+    public String getLastname() {
+        return lastname;
+    }
 
-	public String getLogin() { return login; }
+    public String getLogin() {
+        return login;
+    }
 
-	public String getName() { return name; }
+    public String getName() {
+        return name;
+    }
 
-	public String getPassword() {
-		return password; // Return the encoded password
-	}
+    public String getPassword() {
+        return password; // Return the encoded password
+    }
 
-	public String getPhone() { return phone; }
+    public String getPhone() {
+        return phone;
+    }
 
-	// Getter and setter
-	public List<CUserProjectSettings> getProjectSettings() { return projectSettings; }
+    // Getter and setter
+    public List<CUserProjectSettings> getProjectSettings() {
+        return projectSettings;
+    }
 
-	public String getRoles() { return roles; }
+    public String getRoles() {
+        return roles;
+    }
 
-	public String getUsername() {
-		return getLogin(); // Convenience method to get username for authentication
-	}
+    public String getUsername() {
+        return getLogin(); // Convenience method to get username for authentication
+    }
 
-	public CUserType getUserType() { return userType; }
+    public CUserType getUserType() {
+        return userType;
+    }
 
-	public boolean isEnabled() {
-		return enabled; // Return the enabled status
-	}
+    public boolean isEnabled() {
+        return enabled; // Return the enabled status
+    }
 
-	public void setEmail(final String email) { this.email = email; }
+    public void setEmail(final String email) {
+        this.email = email;
+    }
 
-	public void setEnabled(final boolean enabled) {
-		this.enabled = enabled; // Set the enabled status
-	}
+    public void setEnabled(final boolean enabled) {
+        this.enabled = enabled; // Set the enabled status
+    }
 
-	public void setLastname(final String lastname) { this.lastname = lastname; }
+    public void setLastname(final String lastname) {
+        this.lastname = lastname;
+    }
 
-	public void setLogin(final String login) { this.login = login; }
+    public void setLogin(final String login) {
+        this.login = login;
+    }
 
-	public void setName(final String name) { this.name = name; }
+    public void setName(final String name) {
+        this.name = name;
+    }
 
-	public void setPassword(final String password) {
-		// Password should be encoded before setting
-		this.password = password; // Assuming password is already encoded
-	}
+    public void setPassword(final String password) {
+        // Password should be encoded before setting
+        this.password = password; // Assuming password is already encoded
+    }
 
-	public void setPhone(final String phone) { this.phone = phone; }
+    public void setPhone(final String phone) {
+        this.phone = phone;
+    }
 
-	public void setProjectSettings(final List<CUserProjectSettings> projectSettings) { this.projectSettings = projectSettings; }
+    public void setProjectSettings(final List<CUserProjectSettings> projectSettings) {
+        this.projectSettings = projectSettings;
+    }
 
-	public void setRoles(final String roles) { this.roles = roles != null ? roles : "USER"; }
+    public void setRoles(final String roles) {
+        this.roles = roles != null ? roles : "USER";
+    }
 
-	public void setUserType(final CUserType userType) { this.userType = userType; }
+    public void setUserType(final CUserType userType) {
+        this.userType = userType;
+    }
 
-	@Override
-	public String toString() {
-		return "CUser{" + "name='" + name + '\'' + ", lastname='" + lastname + '\'' + ", login='" + login + '\'' + ", email='" + email + '\'' + ", phone='" + phone + '\'' + ", roles='" + roles + '\''
-			+ ", enabled=" + enabled + '}';
-	}
+    @Override
+    public String toString() {
+        return "CUser{" + "name='" + name + '\'' + ", lastname='" + lastname + '\'' + ", login='" + login + '\''
+                + ", email='" + email + '\'' + ", phone='" + phone + '\'' + ", roles='" + roles + '\'' + ", enabled="
+                + enabled + '}';
+    }
 }

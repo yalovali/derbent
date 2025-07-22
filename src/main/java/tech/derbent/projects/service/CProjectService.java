@@ -14,24 +14,24 @@ import tech.derbent.projects.domain.CProject;
 @PreAuthorize("isAuthenticated()")
 public class CProjectService extends CAbstractService<CProject> {
 
-	CProjectService(final CProjectRepository repository, final Clock clock) {
-		super(repository, clock);
-		LOGGER.info("CProjectService constructor called");
-	}
+    CProjectService(final CProjectRepository repository, final Clock clock) {
+        super(repository, clock);
+        LOGGER.info("CProjectService constructor called");
+    }
 
-	@Transactional
-	public void createEntity(final String name) {
-		LOGGER.info("Creating project with name: {}", name);
-		if ("fail".equals(name)) {
-			throw new RuntimeException("This is for testing the error handler");
-		}
-		final var entity = new CProject();
-		entity.setName(name);
-		repository.saveAndFlush(entity);
-	}
+    @Transactional
+    public void createEntity(final String name) {
+        LOGGER.info("Creating project with name: {}", name);
+        if ("fail".equals(name)) {
+            throw new RuntimeException("This is for testing the error handler");
+        }
+        final var entity = new CProject();
+        entity.setName(name);
+        repository.saveAndFlush(entity);
+    }
 
-	public List<CProject> findAll() {
-		LOGGER.info("Fetching all projects");
-		return repository.findAll();
-	}
+    public List<CProject> findAll() {
+        LOGGER.info("Fetching all projects");
+        return repository.findAll();
+    }
 }

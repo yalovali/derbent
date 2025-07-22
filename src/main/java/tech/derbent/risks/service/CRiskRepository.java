@@ -10,8 +10,8 @@ import tech.derbent.projects.domain.CProject;
 import tech.derbent.risks.domain.CRisk;
 
 public interface CRiskRepository extends CAbstractRepository<CRisk> {
-	
-	List<CRisk> findByProject(CProject project);
-	
-	Page<CRisk> findByProject(CProject project, Pageable pageable);
+
+    List<CRisk> findByProject(CProject project);
+
+    Page<CRisk> findByProject(CProject project, Pageable pageable);
 }

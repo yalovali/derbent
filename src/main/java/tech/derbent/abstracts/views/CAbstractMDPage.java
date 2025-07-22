@@ -26,239 +26,254 @@ import tech.derbent.abstracts.services.CAbstractService;
 
 public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAbstractPage {
 
-	private static final long serialVersionUID = 1L;
-	protected final Class<EntityClass> entityClass;
-	protected Grid<EntityClass> grid;// = new Grid<>(CProject.class, false);
-	private final BeanValidationBinder<EntityClass> binder;
-	protected SplitLayout splitLayout = new SplitLayout();
-	private final VerticalLayout baseDetailsLayout = new VerticalLayout();
-	private final Div detailsTabLayout = new Div();
-	protected EntityClass currentEntity;
-	protected final CAbstractService<EntityClass> entityService;
+    private static final long serialVersionUID = 1L;
+    protected final Class<EntityClass> entityClass;
+    protected Grid<EntityClass> grid;// = new Grid<>(CProject.class, false);
+    private final BeanValidationBinder<EntityClass> binder;
+    protected SplitLayout splitLayout = new SplitLayout();
+    private final VerticalLayout baseDetailsLayout = new VerticalLayout();
+    private final Div detailsTabLayout = new Div();
+    protected EntityClass currentEntity;
+    protected final CAbstractService<EntityClass> entityService;
 
-	protected CAbstractMDPage(final Class<EntityClass> entityClass, final CAbstractService<EntityClass> entityService) {
-		super();
-		this.entityClass = entityClass;
-		this.entityService = entityService;
-		binder = new BeanValidationBinder<>(entityClass);
-		addClassNames("md-page");
-		setSizeFull();
-		// create a split layout for the main content, vertical split
-		splitLayout.setSizeFull();
-		splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
-		// Create UI
-		createGridLayout();
-		detailsTabLayout.setClassName("details-tab-layout");
-		detailsTabLayout.setMaxHeight("100px");
-		detailsTabLayout.setMinHeight("100px");
-		final VerticalLayout detailsBase = new VerticalLayout();
-		splitLayout.addToSecondary(detailsBase);
-		detailsBase.add(detailsTabLayout);
-		final Scroller scroller = new Scroller();
-		detailsBase.add(scroller);
-		scroller.setContent(baseDetailsLayout);
-		scroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
-		createGridForEntity();
-		// binder = new BeanValidationBinder<>(entityClass
-		add(splitLayout);
-	}
+    protected CAbstractMDPage(final Class<EntityClass> entityClass, final CAbstractService<EntityClass> entityService) {
+        super();
+        this.entityClass = entityClass;
+        this.entityService = entityService;
+        binder = new BeanValidationBinder<>(entityClass);
+        addClassNames("md-page");
+        setSizeFull();
+        // create a split layout for the main content, vertical split
+        splitLayout.setSizeFull();
+        splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
+        // Create UI
+        createGridLayout();
+        detailsTabLayout.setClassName("details-tab-layout");
+        detailsTabLayout.setMaxHeight("100px");
+        detailsTabLayout.setMinHeight("100px");
+        final VerticalLayout detailsBase = new VerticalLayout();
+        splitLayout.addToSecondary(detailsBase);
+        detailsBase.add(detailsTabLayout);
+        final Scroller scroller = new Scroller();
+        detailsBase.add(scroller);
+        scroller.setContent(baseDetailsLayout);
+        scroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
+        createGridForEntity();
+        // binder = new BeanValidationBinder<>(entityClass
+        add(splitLayout);
+    }
 
-	@Override
-	public void beforeEnter(final BeforeEnterEvent event) {
-		final Optional<Long> entityID = event.getRouteParameters().get(getEntityRouteIdField()).map(Long::parseLong);
-		if (entityID.isPresent()) {
-			final Optional<EntityClass> samplePersonFromBackend = entityService.get(entityID.get());
-			if (samplePersonFromBackend.isPresent()) {
-				populateForm(samplePersonFromBackend.get());
-			}
-			else {
-				Notification.show(String.format("The requested samplePerson was not found, ID = %s", entityID.get()), 3000, Notification.Position.BOTTOM_START);
-				// when a row is selected but the data is no longer available, refresh grid
-				refreshGrid();
-				// event.forwardTo(CProjectsView.class);
-			}
-		}
-	}
+    @Override
+    public void beforeEnter(final BeforeEnterEvent event) {
+        final Optional<Long> entityID = event.getRouteParameters().get(getEntityRouteIdField()).map(Long::parseLong);
+        if (entityID.isPresent()) {
+            final Optional<EntityClass> samplePersonFromBackend = entityService.get(entityID.get());
+            if (samplePersonFromBackend.isPresent()) {
+                populateForm(samplePersonFromBackend.get());
+            } else {
+                Notification.show(String.format("The requested samplePerson was not found, ID = %s", entityID.get()),
+                        3000, Notification.Position.BOTTOM_START);
+                // when a row is selected but the data is no longer available, refresh grid
+                refreshGrid();
+                // event.forwardTo(CProjectsView.class);
+            }
+        }
+    }
 
-	protected void clearForm() {
-		populateForm(null);
-	}
+    protected void clearForm() {
+        populateForm(null);
+    }
 
-	/**
-	 * Creates a button layout for additional buttons if needed by subclasses.
-	 * Note: Default save/delete/cancel buttons are now in the details tab.
-	 * This method can be used for additional custom buttons in the main content area.
-	 * @param layout The layout to add buttons to
-	 */
-	protected void createButtonLayout(final Div layout) {
-		LOGGER.debug("createButtonLayout called - default save/delete/cancel buttons are now in details tab");
-		// Default implementation does nothing - buttons are in the tab
-		// Subclasses can override this for additional custom buttons in the main content area
-	}
+    /**
+     * Creates a button layout for additional buttons if needed by subclasses. Note: Default save/delete/cancel buttons
+     * are now in the details tab. This method can be used for additional custom buttons in the main content area.
+     * 
+     * @param layout
+     *            The layout to add buttons to
+     */
+    protected void createButtonLayout(final Div layout) {
+        LOGGER.debug("createButtonLayout called - default save/delete/cancel buttons are now in details tab");
+        // Default implementation does nothing - buttons are in the tab
+        // Subclasses can override this for additional custom buttons in the main content area
+    }
 
-	protected CButton createCancelButton(final String buttonText) {
-		final CButton cancel = CButton.createTertiary(buttonText, e -> {
-			clearForm();
-			refreshGrid();
-		});
-		return cancel;
-	}
+    protected CButton createCancelButton(final String buttonText) {
+        final CButton cancel = CButton.createTertiary(buttonText, e -> {
+            clearForm();
+            refreshGrid();
+        });
+        return cancel;
+    }
 
-	protected CButton createDeleteButton(final String buttonText) {
-		LOGGER.info("Creating delete button for CUsersView");
-		final CButton delete = CButton.createTertiary(buttonText);
-		delete.addClickListener(e -> {
-			if (currentEntity == null) {
-				new CWarningDialog("No Selection", "Please select an item to delete.").open();
-				return;
-			}
-			// Show confirmation dialog for delete operation
-			final String confirmMessage = String.format("Are you sure you want to delete this %s? This action cannot be undone.", entityClass.getSimpleName().replace("C", "").toLowerCase());
-			new CConfirmationDialog("Confirm Deletion", confirmMessage, () -> {
-				entityService.delete(currentEntity);
-				clearForm();
-				refreshGrid();
-			}).open();
-		});
-		return delete;
-	}
+    protected CButton createDeleteButton(final String buttonText) {
+        LOGGER.info("Creating delete button for CUsersView");
+        final CButton delete = CButton.createTertiary(buttonText);
+        delete.addClickListener(e -> {
+            if (currentEntity == null) {
+                new CWarningDialog("No Selection", "Please select an item to delete.").open();
+                return;
+            }
+            // Show confirmation dialog for delete operation
+            final String confirmMessage = String.format(
+                    "Are you sure you want to delete this %s? This action cannot be undone.",
+                    entityClass.getSimpleName().replace("C", "").toLowerCase());
+            new CConfirmationDialog("Confirm Deletion", confirmMessage, () -> {
+                entityService.delete(currentEntity);
+                clearForm();
+                refreshGrid();
+            }).open();
+        });
+        return delete;
+    }
 
-	@PostConstruct
-	protected abstract void createDetailsLayout();
+    @PostConstruct
+    protected abstract void createDetailsLayout();
 
-	@PostConstruct
-	protected void createDetailsTabLayout() {
-		// Create the default details view tab with buttons
-		createDetailsViewTab();
-	}
+    @PostConstruct
+    protected void createDetailsTabLayout() {
+        // Create the default details view tab with buttons
+        createDetailsViewTab();
+    }
 
-	/**
-	 * Creates the default details view tab content with save/delete/cancel buttons.
-	 * Subclasses can override this method to customize the tab content while 
-	 * maintaining consistent button placement and styling.
-	 */
-	protected void createDetailsViewTab() {
-		// Clear any existing content
-		getDetailsTabLayout().removeAll();
-		
-		// Create a horizontal layout for the tab content
-		final HorizontalLayout tabContent = new HorizontalLayout();
-		tabContent.setWidthFull();
-		tabContent.setJustifyContentMode(HorizontalLayout.JustifyContentMode.BETWEEN);
-		tabContent.setPadding(true);
-		tabContent.setSpacing(true);
-		tabContent.setClassName("details-tab-content");
-		
-		// Left side: Tab label or custom content (can be overridden by subclasses)
-		final Div leftContent = createDetailsTabLeftContent();
-		
-		// Right side: Action buttons
-		final HorizontalLayout buttonLayout = createDetailsTabButtonLayout();
-		
-		tabContent.add(leftContent, buttonLayout);
-		getDetailsTabLayout().add(tabContent);
-	}
+    /**
+     * Creates the default details view tab content with save/delete/cancel buttons. Subclasses can override this method
+     * to customize the tab content while maintaining consistent button placement and styling.
+     */
+    protected void createDetailsViewTab() {
+        // Clear any existing content
+        getDetailsTabLayout().removeAll();
 
-	/**
-	 * Creates the left content of the details tab.
-	 * Subclasses can override this to provide custom tab content.
-	 * @return Component for the left side of the tab
-	 */
-	protected Div createDetailsTabLeftContent() {
-		final Div detailsTabLabel = new Div();
-		detailsTabLabel.setText("Details");
-		detailsTabLabel.setClassName("details-tab-label");
-		return detailsTabLabel;
-	}
+        // Create a horizontal layout for the tab content
+        final HorizontalLayout tabContent = new HorizontalLayout();
+        tabContent.setWidthFull();
+        tabContent.setJustifyContentMode(HorizontalLayout.JustifyContentMode.BETWEEN);
+        tabContent.setPadding(true);
+        tabContent.setSpacing(true);
+        tabContent.setClassName("details-tab-content");
 
-	/**
-	 * Creates the button layout for the details tab.
-	 * Contains save, cancel, and delete buttons with consistent styling.
-	 * @return HorizontalLayout with action buttons
-	 */
-	protected HorizontalLayout createDetailsTabButtonLayout() {
-		final HorizontalLayout buttonLayout = new HorizontalLayout();
-		buttonLayout.setClassName("details-tab-button-layout");
-		buttonLayout.setSpacing(true);
-		buttonLayout.add(createSaveButton("Save"), createCancelButton("Cancel"), createDeleteButton("Delete"));
-		return buttonLayout;
-	}
+        // Left side: Tab label or custom content (can be overridden by subclasses)
+        final Div leftContent = createDetailsTabLeftContent();
 
-	protected abstract void createGridForEntity();
+        // Right side: Action buttons
+        final HorizontalLayout buttonLayout = createDetailsTabButtonLayout();
 
-	protected void createGridLayout() {
-		grid = new Grid<>(entityClass, false);
-		grid.getColumns().forEach(grid::removeColumn);
-		grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
-		grid.setItems(query -> entityService.list(VaadinSpringDataHelpers.toSpringPageRequest(query)).stream());
-		grid.addColumn(entity -> entity.getId().toString()).setHeader("ID").setKey("id");
-		// Add selection listener to the grid
-		grid.asSingleSelect().addValueChangeListener(event -> {
-			populateForm(event.getValue());
-		});
-		final Div wrapper = new Div();
-		wrapper.setClassName("grid-wrapper");
-		wrapper.add(grid);
-		splitLayout.addToPrimary(wrapper);
-	}
+        tabContent.add(leftContent, buttonLayout);
+        getDetailsTabLayout().add(tabContent);
+    }
 
-	protected CButton createSaveButton(final String buttonText) {
-		LOGGER.info("Creating save button for CUsersView");
-		final CButton save = CButton.createPrimary(buttonText, e -> {
-			try {
-				if (currentEntity == null) {
-					currentEntity = newEntity();
-				}
-				getBinder().writeBean(currentEntity);
-				entityService.save(currentEntity);
-				clearForm();
-				refreshGrid();
-				Notification.show("Data updated");
-				// Navigate back to the current view (list mode)
-				UI.getCurrent().navigate(getClass());
-			} catch (final ObjectOptimisticLockingFailureException exception) {
-				final Notification n = Notification.show("Error updating the data. Somebody else has updated the record while you were making changes.");
-				n.setPosition(Position.MIDDLE);
-				n.addThemeVariants(NotificationVariant.LUMO_ERROR);
-			} catch (final ValidationException validationException) {
-				new CWarningDialog("Validation Error", "Failed to save the data. Please check that all required fields are filled and values are valid.").open();
-			} catch (final Exception exception) {
-				LOGGER.error("Unexpected error during save operation", exception);
-				new CWarningDialog("Save Error", "An unexpected error occurred while saving. Please try again.").open();
-			}
-		});
-		return save;
-	}
+    /**
+     * Creates the left content of the details tab. Subclasses can override this to provide custom tab content.
+     * 
+     * @return Component for the left side of the tab
+     */
+    protected Div createDetailsTabLeftContent() {
+        final Div detailsTabLabel = new Div();
+        detailsTabLabel.setText("Details");
+        detailsTabLabel.setClassName("details-tab-label");
+        return detailsTabLabel;
+    }
 
-	public VerticalLayout getBaseDetailsLayout() { return baseDetailsLayout; }
+    /**
+     * Creates the button layout for the details tab. Contains save, cancel, and delete buttons with consistent styling.
+     * 
+     * @return HorizontalLayout with action buttons
+     */
+    protected HorizontalLayout createDetailsTabButtonLayout() {
+        final HorizontalLayout buttonLayout = new HorizontalLayout();
+        buttonLayout.setClassName("details-tab-button-layout");
+        buttonLayout.setSpacing(true);
+        buttonLayout.add(createSaveButton("Save"), createCancelButton("Cancel"), createDeleteButton("Delete"));
+        return buttonLayout;
+    }
 
-	public BeanValidationBinder<EntityClass> getBinder() { return binder; }
+    protected abstract void createGridForEntity();
 
-	public EntityClass getCurrentEntity() { return currentEntity; }
+    protected void createGridLayout() {
+        grid = new Grid<>(entityClass, false);
+        grid.getColumns().forEach(grid::removeColumn);
+        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+        grid.setItems(query -> entityService.list(VaadinSpringDataHelpers.toSpringPageRequest(query)).stream());
+        grid.addColumn(entity -> entity.getId().toString()).setHeader("ID").setKey("id");
+        // Add selection listener to the grid
+        grid.asSingleSelect().addValueChangeListener(event -> {
+            populateForm(event.getValue());
+        });
+        final Div wrapper = new Div();
+        wrapper.setClassName("grid-wrapper");
+        wrapper.add(grid);
+        splitLayout.addToPrimary(wrapper);
+    }
 
-	public Div getDetailsTabLayout() { return detailsTabLayout; }
+    protected CButton createSaveButton(final String buttonText) {
+        LOGGER.info("Creating save button for CUsersView");
+        final CButton save = CButton.createPrimary(buttonText, e -> {
+            try {
+                if (currentEntity == null) {
+                    currentEntity = newEntity();
+                }
+                getBinder().writeBean(currentEntity);
+                entityService.save(currentEntity);
+                clearForm();
+                refreshGrid();
+                Notification.show("Data updated");
+                // Navigate back to the current view (list mode)
+                UI.getCurrent().navigate(getClass());
+            } catch (final ObjectOptimisticLockingFailureException exception) {
+                final Notification n = Notification.show(
+                        "Error updating the data. Somebody else has updated the record while you were making changes.");
+                n.setPosition(Position.MIDDLE);
+                n.addThemeVariants(NotificationVariant.LUMO_ERROR);
+            } catch (final ValidationException validationException) {
+                new CWarningDialog("Validation Error",
+                        "Failed to save the data. Please check that all required fields are filled and values are valid.")
+                        .open();
+            } catch (final Exception exception) {
+                LOGGER.error("Unexpected error during save operation", exception);
+                new CWarningDialog("Save Error", "An unexpected error occurred while saving. Please try again.").open();
+            }
+        });
+        return save;
+    }
 
-	protected abstract String getEntityRouteIdField();
+    public VerticalLayout getBaseDetailsLayout() {
+        return baseDetailsLayout;
+    }
 
-	protected abstract String getEntityRouteTemplateEdit();
+    public BeanValidationBinder<EntityClass> getBinder() {
+        return binder;
+    }
 
-	protected abstract EntityClass newEntity();
+    public EntityClass getCurrentEntity() {
+        return currentEntity;
+    }
 
-	protected void populateForm(final EntityClass value) {
-		currentEntity = value;
-		binder.readBean(currentEntity);
-	}
+    public Div getDetailsTabLayout() {
+        return detailsTabLayout;
+    }
 
-	protected void refreshGrid() {
-		grid.select(null);
-		grid.getDataProvider().refreshAll();
-	}
+    protected abstract String getEntityRouteIdField();
 
-	public void setCurrentEntity(final EntityClass currentEntity) { this.currentEntity = currentEntity; }
+    protected abstract String getEntityRouteTemplateEdit();
 
-	/**
-	 * Sets up the toolbar for the page.
-	 */
-	@Override
-	protected abstract void setupToolbar();
+    protected abstract EntityClass newEntity();
+
+    protected void populateForm(final EntityClass value) {
+        currentEntity = value;
+        binder.readBean(currentEntity);
+    }
+
+    protected void refreshGrid() {
+        grid.select(null);
+        grid.getDataProvider().refreshAll();
+    }
+
+    public void setCurrentEntity(final EntityClass currentEntity) {
+        this.currentEntity = currentEntity;
+    }
+
+    /**
+     * Sets up the toolbar for the page.
+     */
+    @Override
+    protected abstract void setupToolbar();
 }

@@ -52,8 +52,7 @@ class CUserServiceTest {
         assertEquals(encodedPassword, userDetails.getPassword());
         assertTrue(userDetails.isEnabled());
         assertEquals(1, userDetails.getAuthorities().size());
-        assertTrue(userDetails.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ROLE_USER")));
+        assertTrue(userDetails.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_USER")));
     }
 
     @Test
@@ -63,8 +62,7 @@ class CUserServiceTest {
         when(repository.findByUsername(username)).thenReturn(Optional.empty());
 
         // When/Then
-        assertThrows(UsernameNotFoundException.class, 
-                () -> userService.loadUserByUsername(username));
+        assertThrows(UsernameNotFoundException.class, () -> userService.loadUserByUsername(username));
     }
 
     @Test
@@ -106,7 +104,7 @@ class CUserServiceTest {
         when(repository.findByUsername(username)).thenReturn(Optional.of(existingUser));
 
         // When/Then
-        assertThrows(IllegalArgumentException.class, 
+        assertThrows(IllegalArgumentException.class,
                 () -> userService.createLoginUser(username, "password", "name", "email", "roles"));
     }
 }

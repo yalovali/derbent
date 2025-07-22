@@ -16,25 +16,25 @@ import tech.derbent.projects.domain.CProject;
 @AttributeOverride(name = "id", column = @Column(name = "activity_id")) // Override the default column name for the ID field
 public class CActivity extends CEntityOfProject {
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "cactivitytype_id", nullable = true)
-	@MetaData(displayName = "Activity Type", required = false, readOnly = false, description = "Type category of the activity", hidden = false, order = 2)
-	private CActivityType activityType;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cactivitytype_id", nullable = true)
+    @MetaData(displayName = "Activity Type", required = false, readOnly = false, description = "Type category of the activity", hidden = false, order = 2)
+    private CActivityType activityType;
 
-	public CActivity() {
-		super();
-		// Default constructor - project will be set later
-	}
+    public CActivity() {
+        super();
+        // Default constructor - project will be set later
+    }
 
-	public CActivity(final String name, final CProject project) {
-		super(name, project);
-	}
+    public CActivity(final String name, final CProject project) {
+        super(name, project);
+    }
 
-	public CActivityType getActivityType() {
-		return activityType;
-	}
+    public CActivityType getActivityType() {
+        return activityType;
+    }
 
-	public void setActivityType(final CActivityType activityType) {
-		this.activityType = activityType;
-	}
+    public void setActivityType(final CActivityType activityType) {
+        this.activityType = activityType;
+    }
 }

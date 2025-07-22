@@ -31,65 +31,71 @@ import tech.derbent.taskmanagement.service.TaskService;
 @PermitAll // When security is enabled, allow all authenticated users
 public class TaskListView extends CAbstractPage {
 
-	private static final long serialVersionUID = 1L;
-	private final TaskService taskService;
-	TextField description;
-	DatePicker dueDate;
-	CButton createBtn;
-	Grid<Task> taskGrid;
-	Clock clock;
+    private static final long serialVersionUID = 1L;
+    private final TaskService taskService;
+    TextField description;
+    DatePicker dueDate;
+    CButton createBtn;
+    Grid<Task> taskGrid;
+    Clock clock;
 
-	/**
-	 * Constructs a new TaskListView.
-	 * @param taskService the service to manage tasks
-	 * @param clock       the clock to use for date and time operations
-	 */
-	public TaskListView(final TaskService taskService, final Clock clock) {
-		super();
-		this.clock = clock;
-		this.taskService = taskService;
-		taskGrid = new Grid<>();
-		taskGrid.setItems(query -> taskService.list(toSpringPageRequest(query)).stream());
-		taskGrid.addColumn(Task::getDescription).setHeader("Description");
-		final var dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(getLocale());
-		final var dateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withZone(clock.getZone()).withLocale(getLocale());
-		taskGrid.addColumn(task -> Optional.ofNullable(task.getDueDate()).map(dateFormatter::format).orElse("Never")).setHeader("Due Date");
-		taskGrid.addColumn(task -> dateTimeFormatter.format(task.getCreationDate())).setHeader("Creation Date");
-		taskGrid.setSizeFull();
-		add(taskGrid);
-	}
+    /**
+     * Constructs a new TaskListView.
+     * 
+     * @param taskService
+     *            the service to manage tasks
+     * @param clock
+     *            the clock to use for date and time operations
+     */
+    public TaskListView(final TaskService taskService, final Clock clock) {
+        super();
+        this.clock = clock;
+        this.taskService = taskService;
+        taskGrid = new Grid<>();
+        taskGrid.setItems(query -> taskService.list(toSpringPageRequest(query)).stream());
+        taskGrid.addColumn(Task::getDescription).setHeader("Description");
+        final var dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(getLocale());
+        final var dateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
+                .withZone(clock.getZone()).withLocale(getLocale());
+        taskGrid.addColumn(task -> Optional.ofNullable(task.getDueDate()).map(dateFormatter::format).orElse("Never"))
+                .setHeader("Due Date");
+        taskGrid.addColumn(task -> dateTimeFormatter.format(task.getCreationDate())).setHeader("Creation Date");
+        taskGrid.setSizeFull();
+        add(taskGrid);
+    }
 
-	@Override
-	public void beforeEnter(final BeforeEnterEvent event) {
-		// TODO Auto-generated method stub
-	}
+    @Override
+    public void beforeEnter(final BeforeEnterEvent event) {
+        // TODO Auto-generated method stub
+    }
 
-	private void createTask() {
-		taskService.createTask(description.getValue(), dueDate.getValue());
-		taskGrid.getDataProvider().refreshAll();
-		description.clear();
-		dueDate.clear();
-		Notification.show("Task added", 3000, Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-	}
+    private void createTask() {
+        taskService.createTask(description.getValue(), dueDate.getValue());
+        taskGrid.getDataProvider().refreshAll();
+        description.clear();
+        dueDate.clear();
+        Notification.show("Task added", 3000, Notification.Position.BOTTOM_END)
+                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+    }
 
-	@Override
-	protected void initPage() {
-		// Initialize the page components and layout
-		setSizeFull();
-		addClassNames("task-list-view");
-	}
+    @Override
+    protected void initPage() {
+        // Initialize the page components and layout
+        setSizeFull();
+        addClassNames("task-list-view");
+    }
 
-	@Override
-	protected void setupToolbar() {
-		description = new TextField();
-		description.setPlaceholder("What do you want to do?");
-		description.setAriaLabel("Task description");
-		description.setMaxLength(Task.DESCRIPTION_MAX_LENGTH);
-		description.setMinWidth("20em");
-		dueDate = new DatePicker();
-		dueDate.setPlaceholder("Due date");
-		dueDate.setAriaLabel("Due date");
-		createBtn = CButton.createPrimary("Create", event -> createTask());
-		add(ViewToolbar.group(description, dueDate, createBtn));
-	}
+    @Override
+    protected void setupToolbar() {
+        description = new TextField();
+        description.setPlaceholder("What do you want to do?");
+        description.setAriaLabel("Task description");
+        description.setMaxLength(Task.DESCRIPTION_MAX_LENGTH);
+        description.setMinWidth("20em");
+        dueDate = new DatePicker();
+        dueDate.setPlaceholder("Due date");
+        dueDate.setAriaLabel("Due date");
+        createBtn = CButton.createPrimary("Create", event -> createTask());
+        add(ViewToolbar.group(description, dueDate, createBtn));
+    }
 }
