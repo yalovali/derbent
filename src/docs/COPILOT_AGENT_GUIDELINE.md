@@ -121,7 +121,7 @@ After accepting Copilot suggestions, manually review for:
 - Always use apropriate icons for views
 - for delete operations always use user approval
 - selective combobox's are selection only. user should not be able to input text
-- update docs folder with separate documentions about project design concepts, one document per concept.
+- update docs folder with separate documentions about project design concepts, one document per concept. if the solution is about spring technologies or such complex structures always create a solution steps document in docs folder.
 - use abstracts/view for project-wide components such as CButton, CGrid etc. use these superclasses when every needed, also add new ui classes here.
 - when ever a button is not applicable, such as a user is not selected but, but a project add requested, dont silently return. Give a warning to user, explain the situation. Use a new CWarningDialog/CInformationDialog/CExceptionDialog classes. These dialogs should be simple and nice looking, and inherit from a common super class
 ---
