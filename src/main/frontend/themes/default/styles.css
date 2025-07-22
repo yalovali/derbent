@@ -8,9 +8,13 @@ vaadin-login-overlay {
 
 vaadin-login-form {
     --lumo-size-form-login-width: 450px;
+    width: 450px !important;
+    min-width: 450px !important;
+    max-width: 450px !important;
 }
 
 vaadin-login-form-wrapper {
     width: 450px !important;
     min-width: 450px !important;
+    max-width: 450px !important;
 }
