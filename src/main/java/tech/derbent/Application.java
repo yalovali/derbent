@@ -34,45 +34,49 @@ import com.vaadin.flow.theme.Theme;
 @Theme("default")
 public class Application implements AppShellConfigurator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
-    private static final long serialVersionUID = 1L;
-    // capture startup time
-    public static final long startTime = System.nanoTime();
+	private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
+	private static final long serialVersionUID = 1L;
+	// capture startup time
+	public static final long startTime = System.nanoTime();
 
-    public static void main(final String[] args) {
-        try {
-            LOGGER.info("Hello world!");
-            final SpringApplication app = new SpringApplication(Application.class);
-            // BU ADD LISTNER CALISMIYOR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            app.addListeners((final ApplicationReadyEvent event) -> {
-                final long endTime = System.nanoTime();
-                final long durationMs = (endTime - startTime) / 1_000_000;
-                LOGGER.info("Application started in {} ms", durationMs);
-            });
-            app.run(args);
-        } catch (final Throwable e) {
-            if (e.getClass().getName().contains("SilentExitException")) {
-                LOGGER.debug("Spring is restarting the main thread - See spring-boot-devtools");
-            } else {
-                LOGGER.error("Application crashed!", e);
-            }
-        }
-    }
+	public static void main(final String[] args) {
+		try {
+			LOGGER.info("Hello world!");
+			final SpringApplication app = new SpringApplication(Application.class);
+			// BU ADD LISTNER CALISMIYOR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			app.addListeners((final ApplicationReadyEvent event) -> {
+				final long endTime = System.nanoTime();
+				final long durationMs = (endTime - startTime) / 1_000_000;
+				LOGGER.info("Application started in {} ms", durationMs);
+			});
+			app.run(args);
+		} catch (final Throwable e) {
+			if (e.getClass().getName().contains("SilentExitException")) {
+				LOGGER.debug("Spring is restarting the main thread - See spring-boot-devtools");
+			}
+			else {
+				LOGGER.error("Application crashed!", e);
+			}
+		}
+	}
 
-    @Bean
-    public Clock clock() {
-        return Clock.systemDefaultZone(); // You can also use Clock.systemUTC()
-    }
+	/**
+	 * Provides a Clock bean that can be used throughout the application.
+	 * @return a Clock instance set to the system default time zone.
+	 */
+	@Bean
+	public Clock clock() {
+		return Clock.systemDefaultZone(); // You can also use Clock.systemUTC()
+	}
 
-    @Bean
-    public ApplicationRunner dataInitializer(final JdbcTemplate jdbcTemplate) {
-        return args -> {
-            final Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cuser", Integer.class);
-            if ((count != null) && (count == 0)) {
-                final String sql = StreamUtils.copyToString(new ClassPathResource("data.sql").getInputStream(),
-                        StandardCharsets.UTF_8);
-                jdbcTemplate.execute(sql);
-            }
-        };
-    }
+	@Bean
+	public ApplicationRunner dataInitializer(final JdbcTemplate jdbcTemplate) {
+		return args -> {
+			final Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cuser", Integer.class);
+			if ((count != null) && (count == 0)) {
+				final String sql = StreamUtils.copyToString(new ClassPathResource("data.sql").getInputStream(), StandardCharsets.UTF_8);
+				jdbcTemplate.execute(sql);
+			}
+		};
+	}
 }
