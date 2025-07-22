@@ -9,9 +9,8 @@ import tech.derbent.abstracts.annotations.MetaData;
 import tech.derbent.abstracts.domains.CTypeEntity;
 
 /**
- * CUserType - Domain entity representing user types.
- * Layer: Domain (MVC)
- * Inherits from CTypeEntity to provide type functionality for users.
+ * CUserType - Domain entity representing user types. Layer: Domain (MVC) Inherits from CTypeEntity to provide type
+ * functionality for users.
  */
 @Entity
 @Table(name = "cusertype")
@@ -39,7 +38,9 @@ public class CUserType extends CTypeEntity {
 
     /**
      * Constructor with name.
-     * @param name the name of the user type
+     * 
+     * @param name
+     *            the name of the user type
      */
     public CUserType(final String name) {
         super();
@@ -48,8 +49,11 @@ public class CUserType extends CTypeEntity {
 
     /**
      * Constructor with name and description.
-     * @param name the name of the user type
-     * @param description the description of the user type
+     * 
+     * @param name
+     *            the name of the user type
+     * @param description
+     *            the description of the user type
      */
     public CUserType(final String name, final String description) {
         super();

@@ -9,31 +9,48 @@ import tech.derbent.abstracts.domains.CEntityDB;
 @Entity
 public class CUserProjectSettings extends CEntityDB {
 
-	@ManyToOne
-	@JoinColumn(name = "user_id", nullable = false)
-	private CUser user;
-	@Column(name = "project_id", nullable = false)
-	private Long projectId;
-	@Column(name = "role")
-	private String role;
-	@Column
-	private String permission;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private CUser user;
+    @Column(name = "project_id", nullable = false)
+    private Long projectId;
+    @Column(name = "role")
+    private String role;
+    @Column
+    private String permission;
 
-	public CUserProjectSettings() {}
+    public CUserProjectSettings() {
+    }
 
-	public String getPermission() { return permission; }
+    public String getPermission() {
+        return permission;
+    }
 
-	public Long getProjectId() { return projectId; }
+    public Long getProjectId() {
+        return projectId;
+    }
 
-	public String getRole() { return role; }
+    public String getRole() {
+        return role;
+    }
 
-	public CUser getUser() { return user; }
+    public CUser getUser() {
+        return user;
+    }
 
-	public void setPermission(final String permission) { this.permission = permission; }
+    public void setPermission(final String permission) {
+        this.permission = permission;
+    }
 
-	public void setProjectId(final Long projectId) { this.projectId = projectId; }
+    public void setProjectId(final Long projectId) {
+        this.projectId = projectId;
+    }
 
-	public void setRole(final String role) { this.role = role; }
+    public void setRole(final String role) {
+        this.role = role;
+    }
 
-	public void setUser(final CUser user) { this.user = user; }
+    public void setUser(final CUser user) {
+        this.user = user;
+    }
 }

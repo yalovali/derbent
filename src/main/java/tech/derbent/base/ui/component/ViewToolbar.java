@@ -35,105 +35,114 @@ import tech.derbent.session.service.SessionService;
  */
 public final class ViewToolbar extends Composite<Header> {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	/*
-	 * just used to create a group of components with nice styling. Not related to a
-	 * toolbar
-	 */
-	public static Component group(final Component... components) {
-		final var group = new Div(components);
-		group.addClassNames(Display.FLEX, FlexDirection.COLUMN, AlignItems.STRETCH, Gap.SMALL, FlexDirection.Breakpoint.Medium.ROW, AlignItems.Breakpoint.Medium.CENTER);
-		return group;
-	}
+    /*
+     * just used to create a group of components with nice styling. Not related to a toolbar
+     */
+    public static Component group(final Component... components) {
+        final var group = new Div(components);
+        group.addClassNames(Display.FLEX, FlexDirection.COLUMN, AlignItems.STRETCH, Gap.SMALL,
+                FlexDirection.Breakpoint.Medium.ROW, AlignItems.Breakpoint.Medium.CENTER);
+        return group;
+    }
 
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
-	private final H1 title;
-	private final SessionService sessionService;
-	private ComboBox<CProject> projectComboBox;
+    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private final H1 title;
+    private final SessionService sessionService;
+    private ComboBox<CProject> projectComboBox;
 
-	/**
-	 * Constructs a ViewToolbar with a title and optional components.
-	 * @param viewTitle      The title of the view to be displayed in the toolbar.
-	 * @param sessionService The session service for managing project selection.
-	 * @param components     Optional components to be added to the toolbar.
-	 */
-	public ViewToolbar(final String viewTitle, final SessionService sessionService, final Component... components) {
-		LOGGER.debug("Creating ViewToolbar for {}", viewTitle);
-		this.sessionService = sessionService;
-		addClassNames(Display.FLEX, FlexDirection.COLUMN, JustifyContent.BETWEEN, AlignItems.STRETCH, Gap.MEDIUM, FlexDirection.Breakpoint.Medium.ROW, AlignItems.Breakpoint.Medium.CENTER);
-		
-		// this is a button that toggles the drawer in the app layout
-		final var drawerToggle = new DrawerToggle();
-		drawerToggle.addClassNames(Margin.NONE);
-		title = new H1(viewTitle);
-		title.addClassNames(FontSize.XLARGE, Margin.NONE, FontWeight.LIGHT);
-		
-		// put them together
-		final var toggleAndTitle = new Div(drawerToggle, title);
-		toggleAndTitle.addClassNames(Display.FLEX, AlignItems.CENTER);
-		
-		// Create project selection combobox
-		createProjectComboBox();
-		
-		// add them to the content of the header
-		getContent().add(toggleAndTitle);
-		
-		// add more if passed as a parameter
-		if (components.length > 0) {
-			// If there are additional components, add them to the toolbar
-			final var actions = new Div(components);
-			actions.addClassNames(Display.FLEX, FlexDirection.COLUMN, JustifyContent.BETWEEN, Flex.GROW, Gap.SMALL, FlexDirection.Breakpoint.Medium.ROW);
-			getContent().add(actions);
-		}
-		
-		// Add project selector to the right side
-		final var projectSelector = new Div(new Span("Active Project:"), projectComboBox);
-		projectSelector.addClassNames(Display.FLEX, AlignItems.CENTER, Gap.SMALL);
-		getContent().add(projectSelector);
-	}
+    /**
+     * Constructs a ViewToolbar with a title and optional components.
+     * 
+     * @param viewTitle
+     *            The title of the view to be displayed in the toolbar.
+     * @param sessionService
+     *            The session service for managing project selection.
+     * @param components
+     *            Optional components to be added to the toolbar.
+     */
+    public ViewToolbar(final String viewTitle, final SessionService sessionService, final Component... components) {
+        LOGGER.debug("Creating ViewToolbar for {}", viewTitle);
+        this.sessionService = sessionService;
+        addClassNames(Display.FLEX, FlexDirection.COLUMN, JustifyContent.BETWEEN, AlignItems.STRETCH, Gap.MEDIUM,
+                FlexDirection.Breakpoint.Medium.ROW, AlignItems.Breakpoint.Medium.CENTER);
+        
+        // Add separation line below the toolbar
+        getContent().getStyle().set("border-bottom", "1px solid var(--lumo-contrast-20pct)");
 
-	/**
-	 * Creates and configures the project selection ComboBox.
-	 */
-	private void createProjectComboBox() {
-		projectComboBox = new ComboBox<>();
-		projectComboBox.setItemLabelGenerator(CProject::getName);
-		projectComboBox.setPlaceholder("Select Project");
-		projectComboBox.setWidth("200px");
-		
-		// Load available projects
-		refreshProjectList();
-		
-		// Set current active project
-		sessionService.getActiveProject().ifPresent(projectComboBox::setValue);
-		
-		// Handle project selection change
-		projectComboBox.addValueChangeListener(event -> {
-			final CProject selectedProject = event.getValue();
-			if (selectedProject != null) {
-				LOGGER.info("Project changed to: {}", selectedProject.getName());
-				sessionService.setActiveProject(selectedProject);
-			}
-		});
-	}
+        // this is a button that toggles the drawer in the app layout
+        final var drawerToggle = new DrawerToggle();
+        drawerToggle.addClassNames(Margin.NONE);
+        title = new H1(viewTitle);
+        title.addClassNames(FontSize.XLARGE, Margin.NONE, FontWeight.LIGHT);
 
-	/**
-	 * Refreshes the project list in the ComboBox.
-	 */
-	public void refreshProjectList() {
-		if (sessionService != null && projectComboBox != null) {
-			final List<CProject> projects = sessionService.getAvailableProjects();
-			projectComboBox.setItems(projects);
-			
-			// If no project is selected but projects are available, select the first one
-			if (projectComboBox.getValue() == null && !projects.isEmpty()) {
-				projectComboBox.setValue(projects.get(0));
-			}
-		}
-	}
+        // put them together
+        final var toggleAndTitle = new Div(drawerToggle, title);
+        toggleAndTitle.addClassNames(Display.FLEX, AlignItems.CENTER);
 
-	public void setPageTitle(final String title) {
-		this.title.setText(title);
-	}
+        // Create project selection combobox
+        createProjectComboBox();
+
+        // add them to the content of the header
+        getContent().add(toggleAndTitle);
+
+        // add more if passed as a parameter
+        if (components.length > 0) {
+            // If there are additional components, add them to the toolbar
+            final var actions = new Div(components);
+            actions.addClassNames(Display.FLEX, FlexDirection.COLUMN, JustifyContent.BETWEEN, Flex.GROW, Gap.SMALL,
+                    FlexDirection.Breakpoint.Medium.ROW);
+            getContent().add(actions);
+        }
+
+        // Add project selector to the right side
+        final var projectSelector = new Div(new Span("Active Project:"), projectComboBox);
+        projectSelector.addClassNames(Display.FLEX, AlignItems.CENTER, Gap.SMALL);
+        getContent().add(projectSelector);
+    }
+
+    /**
+     * Creates and configures the project selection ComboBox.
+     */
+    private void createProjectComboBox() {
+        projectComboBox = new ComboBox<>();
+        projectComboBox.setItemLabelGenerator(CProject::getName);
+        projectComboBox.setPlaceholder("Select Project");
+        projectComboBox.setWidth("200px");
+
+        // Load available projects
+        refreshProjectList();
+
+        // Set current active project
+        sessionService.getActiveProject().ifPresent(projectComboBox::setValue);
+
+        // Handle project selection change
+        projectComboBox.addValueChangeListener(event -> {
+            final CProject selectedProject = event.getValue();
+            if (selectedProject != null) {
+                LOGGER.info("Project changed to: {}", selectedProject.getName());
+                sessionService.setActiveProject(selectedProject);
+            }
+        });
+    }
+
+    /**
+     * Refreshes the project list in the ComboBox.
+     */
+    public void refreshProjectList() {
+        if (sessionService != null && projectComboBox != null) {
+            final List<CProject> projects = sessionService.getAvailableProjects();
+            projectComboBox.setItems(projects);
+
+            // If no project is selected but projects are available, select the first one
+            if (projectComboBox.getValue() == null && !projects.isEmpty()) {
+                projectComboBox.setValue(projects.get(0));
+            }
+        }
+    }
+
+    public void setPageTitle(final String title) {
+        this.title.setText(title);
+    }
 }

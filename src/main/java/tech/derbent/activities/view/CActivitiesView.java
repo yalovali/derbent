@@ -54,9 +54,11 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 				return java.util.Collections.emptyList();
 			}
 		};
-		// Use CEntityFormBuilder for automatic form generation
+		// Use CEntityFormBuilder for automatic form generation not good, what happens
+		// if the entity has more then one combobox
 		editorLayoutDiv.add(CEntityFormBuilder.buildForm(CActivity.class, getBinder(), dataProvider));
-		// Note: Buttons are now automatically added to the details tab by the parent class
+		// Note: Buttons are now automatically added to the details tab by the parent
+		// class
 		getBaseDetailsLayout().add(editorLayoutDiv);
 	}
 

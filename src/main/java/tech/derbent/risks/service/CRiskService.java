@@ -37,17 +37,17 @@ public class CRiskService extends CAbstractService<CRisk> {
         repository.saveAndFlush(entity);
     }
 
-	/**
-	 * Finds risks by project.
-	 */
-	public List<CRisk> findByProject(final CProject project) {
-		return ((CRiskRepository) repository).findByProject(project);
-	}
+    /**
+     * Finds risks by project.
+     */
+    public List<CRisk> findByProject(final CProject project) {
+        return ((CRiskRepository) repository).findByProject(project);
+    }
 
-	/**
-	 * Gets paginated risks by project.
-	 */
-	public Page<CRisk> listByProject(final CProject project, final Pageable pageable) {
-		return ((CRiskRepository) repository).findByProject(project, pageable);
-	}
+    /**
+     * Gets paginated risks by project.
+     */
+    public Page<CRisk> listByProject(final CProject project, final Pageable pageable) {
+        return ((CRiskRepository) repository).findByProject(project, pageable);
+    }
 }

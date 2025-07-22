@@ -92,8 +92,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		appLogo.addClassNames(TextColor.PRIMARY, IconSize.LARGE);
 		final var appName = new Span("Derbent");
 		appName.addClassNames(FontWeight.SEMIBOLD, FontSize.LARGE);
-		final Div someMessage = new Div("Welcome to the Derbent application!");
-		final var header = new Div(appLogo, appName, someMessage);
+		final var header = new Div(appLogo, appName);
 		header.addClassNames(Display.FLEX, Padding.MEDIUM, Gap.MEDIUM, AlignItems.CENTER);
 		return header;
 	}

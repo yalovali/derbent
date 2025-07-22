@@ -16,19 +16,19 @@ import tech.derbent.taskmanagement.domain.TaskRepository;
 @PreAuthorize("isAuthenticated()") // Ensures that only authenticated users can access the methods of this service
 public class TaskService extends CAbstractService<Task> {
 
-	TaskService(final TaskRepository repository, final Clock clock) {
-		super(repository, clock);
-	}
+    TaskService(final TaskRepository repository, final Clock clock) {
+        super(repository, clock);
+    }
 
-	@Transactional
-	public void createTask(final String description, @Nullable final LocalDate dueDate) {
-		if ("fail".equals(description)) {
-			throw new RuntimeException("This is for testing the error handler");
-		}
-		final var task = new Task();
-		task.setDescription(description);
-		task.setCreationDate(clock.instant());
-		task.setDueDate(dueDate);
-		repository.saveAndFlush(task);
-	}
+    @Transactional
+    public void createTask(final String description, @Nullable final LocalDate dueDate) {
+        if ("fail".equals(description)) {
+            throw new RuntimeException("This is for testing the error handler");
+        }
+        final var task = new Task();
+        task.setDescription(description);
+        task.setCreationDate(clock.instant());
+        task.setDueDate(dueDate);
+        repository.saveAndFlush(task);
+    }
 }
