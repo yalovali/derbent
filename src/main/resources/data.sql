@@ -92,12 +92,12 @@ INSERT INTO cmeetingtype (name, description) VALUES
 ('All-hands', 'Company-wide or team all-hands meetings');
 
 -- Insert sample meetings
-INSERT INTO cmeeting (name, description, meeting_date, project_id, cmeetingtype_id) VALUES 
-('Daily Standup', 'Daily team synchronization meeting', '2025-07-23 09:00:00', 1, 1),
-('Sprint Planning', 'Planning for the upcoming sprint', '2025-07-24 10:00:00', 1, 2),
-('Sprint Demo', 'Demonstration of completed features', '2025-07-25 14:00:00', 1, 4),
-('Website Planning', 'Initial planning for website redesign', '2025-07-26 11:00:00', 2, 2),
-('Mobile App Review', 'Review of mobile app progress', '2025-07-27 15:00:00', 3, 5);
+INSERT INTO cmeeting (name, description, meeting_date, end_date, project_id, cmeetingtype_id) VALUES 
+('Daily Standup', 'Daily team synchronization meeting', '2025-07-23 09:00:00', '2025-07-23 09:30:00', 1, 1),
+('Sprint Planning', 'Planning for the upcoming sprint', '2025-07-24 10:00:00', '2025-07-24 12:00:00', 1, 2),
+('Sprint Demo', 'Demonstration of completed features', '2025-07-25 14:00:00', '2025-07-25 15:30:00', 1, 4),
+('Website Planning', 'Initial planning for website redesign', '2025-07-26 11:00:00', '2025-07-26 13:00:00', 2, 2),
+('Mobile App Review', 'Review of mobile app progress', '2025-07-27 15:00:00', '2025-07-27 16:00:00', 3, 5);
 
 -- Insert sample meeting participants (many-to-many relationship)
 INSERT INTO cmeeting_participants (meeting_id, user_id) VALUES 

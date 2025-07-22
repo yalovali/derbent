@@ -48,8 +48,12 @@ public class CMeeting extends CEntityOfProject {
     private String description;
 
     @Column(name = "meeting_date", nullable = true)
-    @MetaData(displayName = "Meeting Date", required = false, readOnly = false, description = "Date and time of the meeting", hidden = false, order = 4)
+    @MetaData(displayName = "Start Time", required = false, readOnly = false, description = "Start date and time of the meeting", hidden = false, order = 4)
     private LocalDateTime meetingDate;
+
+    @Column(name = "end_date", nullable = true)
+    @MetaData(displayName = "End Time", required = false, readOnly = false, description = "End date and time of the meeting", hidden = false, order = 5)
+    private LocalDateTime endDate;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -63,7 +67,7 @@ public class CMeeting extends CEntityOfProject {
         readOnly = false, 
         description = "Users participating in the meeting", 
         hidden = false, 
-        order = 5,
+        order = 6,
         dataProviderBean = "CUserService"
     )
     private Set<CUser> participants = new HashSet<>();
@@ -104,6 +108,14 @@ public class CMeeting extends CEntityOfProject {
 
     public void setMeetingDate(final LocalDateTime meetingDate) {
         this.meetingDate = meetingDate;
+    }
+
+    public LocalDateTime getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(final LocalDateTime endDate) {
+        this.endDate = endDate;
     }
 
     public Set<CUser> getParticipants() {

@@ -15,7 +15,7 @@ import tech.derbent.session.service.SessionService;
 
 @Route("meetings/:meeting_id?/:action?(edit)")
 @PageTitle("Meeting Master Detail")
-@Menu(order = 3, icon = "vaadin:group", title = "Meetings")
+@Menu(order = 3, icon = "vaadin:group", title = "Settings.Meetings")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CMeetingsView extends CProjectAwareMDPage<CMeeting> {
 
@@ -67,7 +67,12 @@ public class CMeetingsView extends CProjectAwareMDPage<CMeeting> {
             
         grid.addColumn(meeting -> meeting.getMeetingDate())
             .setAutoWidth(true)
-            .setHeader("Meeting Date")
+            .setHeader("Start Time")
+            .setSortable(true);
+            
+        grid.addColumn(meeting -> meeting.getEndDate())
+            .setAutoWidth(true)
+            .setHeader("End Time")
             .setSortable(true);
             
         grid.addColumn(meeting -> meeting.getParticipants().size())
