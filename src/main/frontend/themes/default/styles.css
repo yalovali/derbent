@@ -1,20 +1,3 @@
 
 @import url("dev-login.css");
 
-/* Make the login screen wider */
-vaadin-login-overlay {
-    --lumo-size-form-login-width: 450px;
-}
-
-vaadin-login-form {
-    --lumo-size-form-login-width: 450px;
-    width: 450px !important;
-    min-width: 450px !important;
-    max-width: 450px !important;
-}
-
-vaadin-login-form-wrapper {
-    width: 450px !important;
-    min-width: 450px !important;
-    max-width: 450px !important;
-}

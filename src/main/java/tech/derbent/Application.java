@@ -41,7 +41,7 @@ public class Application implements AppShellConfigurator {
 
 	public static void main(final String[] args) {
 		try {
-			LOGGER.info("Hello world!");
+			// LOGGER.info("Hello world!");
 			final SpringApplication app = new SpringApplication(Application.class);
 			// BU ADD LISTNER CALISMIYOR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 			app.addListeners((final ApplicationReadyEvent event) -> {
