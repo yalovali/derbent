@@ -67,6 +67,9 @@ public final class ViewToolbar extends Composite<Header> {
         this.sessionService = sessionService;
         addClassNames(Display.FLEX, FlexDirection.COLUMN, JustifyContent.BETWEEN, AlignItems.STRETCH, Gap.MEDIUM,
                 FlexDirection.Breakpoint.Medium.ROW, AlignItems.Breakpoint.Medium.CENTER);
+        
+        // Add separation line below the toolbar
+        getContent().getStyle().set("border-bottom", "1px solid var(--lumo-contrast-20pct)");
 
         // this is a button that toggles the drawer in the app layout
         final var drawerToggle = new DrawerToggle();
