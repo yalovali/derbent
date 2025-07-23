@@ -20,141 +20,99 @@ import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
 
 /**
- * CMeeting - Domain entity representing meetings.
- * Layer: Domain (MVC)
- * Inherits from CEntityOfProject to provide project association.
+ * CMeeting - Domain entity representing meetings. Layer: Domain (MVC) Inherits
+ * from CEntityOfProject to provide project association.
  */
 @Entity
 @Table(name = "cmeeting") // table name for the entity as the default is the class name in lowercase
 @AttributeOverride(name = "id", column = @Column(name = "meeting_id")) // Override the default column name for the ID field
 public class CMeeting extends CEntityOfProject {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cmeetingtype_id", nullable = true)
-    @MetaData(
-        displayName = "Meeting Type", 
-        required = false, 
-        readOnly = false, 
-        description = "Type category of the meeting", 
-        hidden = false, 
-        order = 2,
-        dataProviderBean = "CMeetingTypeService"
-    )
-    private CMeetingType meetingType;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "cmeetingtype_id", nullable = true)
+	@MetaData(displayName = "Meeting Type", required = false, readOnly = false, description = "Type category of the meeting", hidden = false, order = 2, dataProviderBean = "CMeetingTypeService")
+	private CMeetingType meetingType;
+	@Column(name = "description", nullable = true, length = MAX_LENGTH_DESCRIPTION)
+	@Size(max = MAX_LENGTH_DESCRIPTION)
+	@MetaData(displayName = "Description", required = false, readOnly = false, defaultValue = "", description = "Description of the meeting", hidden = false, order = 3, maxLength = MAX_LENGTH_DESCRIPTION)
+	private String description;
+	@Column(name = "meeting_date", nullable = true)
+	@MetaData(displayName = "Start Time", required = false, readOnly = false, description = "Start date and time of the meeting", hidden = false, order = 4)
+	private LocalDateTime meetingDate;
+	@Column(name = "end_date", nullable = true)
+	@MetaData(displayName = "End Time", required = false, readOnly = false, description = "End date and time of the meeting", hidden = false, order = 5)
+	private LocalDateTime endDate;
+	@ManyToMany(fetch = FetchType.LAZY)
+	@JoinTable(name = "cmeeting_participants", joinColumns = @JoinColumn(name = "meeting_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
+	@MetaData(displayName = "Participants", required = false, readOnly = false, description = "Users participating in the meeting", hidden = true, order = 6, dataProviderBean = "CUserService")
+	private Set<CUser> participants = new HashSet<>();
 
-    @Column(name = "description", nullable = true, length = MAX_LENGTH_DESCRIPTION)
-    @Size(max = MAX_LENGTH_DESCRIPTION)
-    @MetaData(displayName = "Description", required = false, readOnly = false, defaultValue = "", description = "Description of the meeting", hidden = false, order = 3, maxLength = MAX_LENGTH_DESCRIPTION)
-    private String description;
+	public CMeeting() {
+		super();
+		// Default constructor - project will be set later
+	}
 
-    @Column(name = "meeting_date", nullable = true)
-    @MetaData(displayName = "Start Time", required = false, readOnly = false, description = "Start date and time of the meeting", hidden = false, order = 4)
-    private LocalDateTime meetingDate;
+	public CMeeting(final String name, final CProject project) {
+		super(name, project);
+	}
 
-    @Column(name = "end_date", nullable = true)
-    @MetaData(displayName = "End Time", required = false, readOnly = false, description = "End date and time of the meeting", hidden = false, order = 5)
-    private LocalDateTime endDate;
+	/**
+	 * Constructor to create a meeting with name, project and meeting type.
+	 * @param name        the name of the meeting
+	 * @param project     the project associated with the meeting
+	 * @param meetingType the type of the meeting
+	 */
+	public CMeeting(final String name, final CProject project, final CMeetingType meetingType) {
+		super(name, project);
+		this.meetingType = meetingType;
+	}
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "cmeeting_participants",
-        joinColumns = @JoinColumn(name = "meeting_id"),
-        inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    @MetaData(
-        displayName = "Participants", 
-        required = false, 
-        readOnly = false, 
-        description = "Users participating in the meeting", 
-        hidden = true, 
-        order = 6,
-        dataProviderBean = "CUserService"
-    )
-    private Set<CUser> participants = new HashSet<>();
+	public CMeetingType getMeetingType() { return meetingType; }
 
-    public CMeeting() {
-        super();
-        // Default constructor - project will be set later
-    }
+	public void setMeetingType(final CMeetingType meetingType) { this.meetingType = meetingType; }
 
-    public CMeeting(final String name, final CProject project) {
-        super(name, project);
-    }
+	public String getDescription() { return description; }
 
-    public CMeeting(final String name, final CProject project, final CMeetingType meetingType) {
-        super(name, project);
-        this.meetingType = meetingType;
-    }
+	public void setDescription(final String description) { this.description = description; }
 
-    public CMeetingType getMeetingType() {
-        return meetingType;
-    }
+	public LocalDateTime getMeetingDate() { return meetingDate; }
 
-    public void setMeetingType(final CMeetingType meetingType) {
-        this.meetingType = meetingType;
-    }
+	public void setMeetingDate(final LocalDateTime meetingDate) { this.meetingDate = meetingDate; }
 
-    public String getDescription() {
-        return description;
-    }
+	public LocalDateTime getEndDate() { return endDate; }
 
-    public void setDescription(final String description) {
-        this.description = description;
-    }
+	public void setEndDate(final LocalDateTime endDate) { this.endDate = endDate; }
 
-    public LocalDateTime getMeetingDate() {
-        return meetingDate;
-    }
+	public Set<CUser> getParticipants() { return participants; }
 
-    public void setMeetingDate(final LocalDateTime meetingDate) {
-        this.meetingDate = meetingDate;
-    }
+	public void setParticipants(final Set<CUser> participants) { this.participants = participants != null ? participants : new HashSet<>(); }
 
-    public LocalDateTime getEndDate() {
-        return endDate;
-    }
+	/**
+	 * Convenience method to add a participant to the meeting.
+	 * @param user the user to add as a participant
+	 */
+	public void addParticipant(final CUser user) {
+		if (user != null) {
+			participants.add(user);
+		}
+	}
 
-    public void setEndDate(final LocalDateTime endDate) {
-        this.endDate = endDate;
-    }
+	/**
+	 * Convenience method to remove a participant from the meeting.
+	 * @param user the user to remove as a participant
+	 */
+	public void removeParticipant(final CUser user) {
+		if (user != null) {
+			participants.remove(user);
+		}
+	}
 
-    public Set<CUser> getParticipants() {
-        return participants;
-    }
-
-    public void setParticipants(final Set<CUser> participants) {
-        this.participants = participants != null ? participants : new HashSet<>();
-    }
-
-    /**
-     * Convenience method to add a participant to the meeting.
-     * 
-     * @param user the user to add as a participant
-     */
-    public void addParticipant(final CUser user) {
-        if (user != null) {
-            participants.add(user);
-        }
-    }
-
-    /**
-     * Convenience method to remove a participant from the meeting.
-     * 
-     * @param user the user to remove as a participant
-     */
-    public void removeParticipant(final CUser user) {
-        if (user != null) {
-            participants.remove(user);
-        }
-    }
-
-    /**
-     * Check if a user is a participant in this meeting.
-     * 
-     * @param user the user to check
-     * @return true if the user is a participant, false otherwise
-     */
-    public boolean isParticipant(final CUser user) {
-        return user != null && participants.contains(user);
-    }
+	/**
+	 * Check if a user is a participant in this meeting.
+	 * @param user the user to check
+	 * @return true if the user is a participant, false otherwise
+	 */
+	public boolean isParticipant(final CUser user) {
+		return (user != null) && participants.contains(user);
+	}
 }
