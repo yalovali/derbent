@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import com.vaadin.flow.component.UI;
@@ -14,7 +15,9 @@ import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 
 import tech.derbent.abstracts.interfaces.CProjectChangeListener;
+import tech.derbent.abstracts.interfaces.CProjectListChangeListener;
 import tech.derbent.projects.domain.CProject;
+import tech.derbent.projects.events.ProjectListChangeEvent;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.service.CUserService;
@@ -31,6 +34,8 @@ public class SessionService {
     private static final String ACTIVE_USER_KEY = "activeUser";
     // Thread-safe set to store project change listeners
     private final Set<CProjectChangeListener> projectChangeListeners = ConcurrentHashMap.newKeySet();
+    // Thread-safe set to store project list change listeners
+    private final Set<CProjectListChangeListener> projectListChangeListeners = ConcurrentHashMap.newKeySet();
     private final AuthenticationContext authenticationContext;
     private final CUserService userService;
     private final CProjectService projectService;
@@ -40,6 +45,20 @@ public class SessionService {
         this.authenticationContext = authenticationContext;
         this.userService = userService;
         this.projectService = projectService;
+    }
+
+    /**
+     * Registers a component to receive notifications when the project list changes.
+     * Components should call this method when they are attached to the UI.
+     * 
+     * @param listener
+     *            The component that wants to be notified of project list changes
+     */
+    public void addProjectListChangeListener(final CProjectListChangeListener listener) {
+        if (listener != null) {
+            projectListChangeListeners.add(listener);
+            LOGGER.debug("Project list change listener registered: {}", listener.getClass().getSimpleName());
+        }
     }
 
     /**
@@ -68,6 +87,7 @@ public class SessionService {
         }
         // Clear all project change listeners when session is cleared
         projectChangeListeners.clear();
+        projectListChangeListeners.clear();
         LOGGER.debug("Project change listeners cleared");
     }
 
@@ -125,6 +145,40 @@ public class SessionService {
     }
 
     /**
+     * Event listener for project list changes. This method is called when projects
+     * are created, updated, or deleted to notify all registered listeners.
+     * 
+     * @param event The project list change event
+     */
+    @EventListener
+    public void handleProjectListChange(final ProjectListChangeEvent event) {
+        LOGGER.debug("Received project list change event: {}", event);
+        notifyProjectListChanged();
+    }
+
+    /**
+     * Notifies all registered project list change listeners about changes to the project list.
+     * This method safely handles UI access for components that may be in different UIs.
+     */
+    public void notifyProjectListChanged() {
+        LOGGER.debug("Notifying {} project list change listeners of project list change", projectListChangeListeners.size());
+        // Use UI.access to safely notify listeners that may be in different UI contexts
+        final UI ui = UI.getCurrent();
+        if (ui != null) {
+            ui.access(() -> {
+                projectListChangeListeners.forEach(listener -> {
+                    try {
+                        listener.onProjectListChanged();
+                        LOGGER.debug("Notified project list listener: {}", listener.getClass().getSimpleName());
+                    } catch (final Exception e) {
+                        LOGGER.error("Error notifying project list change listener: {}", listener.getClass().getSimpleName(), e);
+                    }
+                });
+            });
+        }
+    }
+
+    /**
      * Notifies all registered project change listeners about a project change. This method safely handles UI access for
      * components that may be in different UIs.
      * 
@@ -147,6 +201,20 @@ public class SessionService {
                     }
                 });
             });
+        }
+    }
+
+    /**
+     * Unregisters a component from receiving project list change notifications.
+     * Components should call this method when they are detached from the UI.
+     * 
+     * @param listener
+     *            The component to unregister
+     */
+    public void removeProjectListChangeListener(final CProjectListChangeListener listener) {
+        if (listener != null) {
+            projectListChangeListeners.remove(listener);
+            LOGGER.debug("Project list change listener unregistered: {}", listener.getClass().getSimpleName());
         }
     }
 
