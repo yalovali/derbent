@@ -46,9 +46,17 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 		projectSettingsGrid = new CUserProjectSettingsGrid(projectService);
 	}
 
+	protected void createEntityDetails() {
+		LOGGER.info("Creating entity details for CUsersView");
+		// Create description panel for user details
+		final CUserDescriptionPanel descriptionPanel = new CUserDescriptionPanel();
+		getBaseDetailsLayout().add(descriptionPanel);
+	}
+
 	@Override
 	protected void createDetailsLayout() {
 		LOGGER.info("Creating details layout for CUsersView");
+		createEntityDetails();
 		final Div detailsLayout = new Div();
 		detailsLayout.setClassName("editor-layout");
 		// Create data provider for ComboBoxes

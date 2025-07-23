@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
@@ -33,6 +34,7 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	protected Grid<EntityClass> grid;// = new Grid<>(CProject.class, false);
 	private final BeanValidationBinder<EntityClass> binder;
 	protected SplitLayout splitLayout = new SplitLayout();
+	private final Accordion baseDescriptionAccordion = new Accordion();
 	private final VerticalLayout baseDetailsLayout = new VerticalLayout();
 	private final Div detailsTabLayout = new Div();
 	protected EntityClass currentEntity;
@@ -62,6 +64,7 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		detailsBase.add(scroller);
 		scroller.setContent(baseDetailsLayout);
 		scroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
+		// baseDetailsLayout.add(baseDescriptionAccordion);
 		createGridForEntity();
 		// binder = new BeanValidationBinder<>(entityClass
 		add(splitLayout);

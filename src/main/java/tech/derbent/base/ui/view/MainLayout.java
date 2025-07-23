@@ -69,6 +69,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		setPrimarySection(Section.DRAWER);
 		addToDrawer(createHeader(), new Scroller(createSideNav()), createUserMenu());
 		addToNavbar(true, createNavBar()); // Add the toggle button to the navbar
+		addToDrawer(createSlidingHeader());
 	}
 
 	@Override
@@ -95,6 +96,19 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		final var header = new Div(appLogo, appName);
 		header.addClassNames(Display.FLEX, Padding.MEDIUM, Gap.MEDIUM, AlignItems.CENTER);
 		return header;
+	}
+
+	private Div createSlidingHeader() {
+		final var slidingHeader = new Div();
+		slidingHeader.addClassNames(Display.FLEX, AlignItems.CENTER, Margin.Horizontal.MEDIUM);
+		final var appLogo = VaadinIcon.CUBES.create();
+		appLogo.addClassNames(TextColor.PRIMARY, IconSize.LARGE);
+		slidingHeader.add(appLogo);
+		final var appName = new Span("Derbent");
+		appName.addClassNames(FontWeight.SEMIBOLD, FontSize.LARGE);
+		slidingHeader.add(appName);
+		slidingHeader.add(new Div(new Span("Version: 1.0.0"))); // Add version info);
+		return slidingHeader;
 	}
 
 	private Div createNavBar() {

@@ -8,10 +8,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
+import tech.derbent.abstracts.views.CAccordion;
 import tech.derbent.abstracts.views.CButton;
 import tech.derbent.base.ui.dialogs.CConfirmationDialog;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
@@ -20,7 +22,7 @@ import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserProjectSettings;
 
-public class CUserProjectSettingsGrid extends VerticalLayout {
+public class CUserProjectSettingsGrid extends CAccordion {
 
 	private static final long serialVersionUID = 1L;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
@@ -28,15 +30,19 @@ public class CUserProjectSettingsGrid extends VerticalLayout {
 	private final CProjectService projectService;
 	private Supplier<List<CUserProjectSettings>> getProjectSettings;
 	private Consumer<List<CUserProjectSettings>> setProjectSettings;
+	private final VerticalLayout verticalLayout = new VerticalLayout();
 	private Runnable saveEntity;
 	private CUser currentUser;
 
 	public CUserProjectSettingsGrid(final CProjectService projectService) {
+		super("Project Settings");
 		LOGGER.info("CUserProjectSettingsGrid constructor called");
 		this.projectService = projectService;
+		add("Project Settings", verticalLayout);
+		add("Project Settings 2", new Div("This is a placeholder for additional content."));
+		add("Project Settings 3", new Div("This is another placeholder for additional content."));
 		setupGrid();
 		setupButtons();
-		add(grid);
 	}
 
 	private void deleteSelected() {
@@ -168,7 +174,7 @@ public class CUserProjectSettingsGrid extends VerticalLayout {
 		});
 		final HorizontalLayout buttonLayout = new HorizontalLayout(addButton, editButton, deleteButton);
 		buttonLayout.setSpacing(true);
-		add(buttonLayout);
+		verticalLayout.add(buttonLayout);
 	}
 
 	private void setupGrid() {
@@ -179,5 +185,6 @@ public class CUserProjectSettingsGrid extends VerticalLayout {
 		grid.addColumn(this::getRoleAsString).setHeader("Role").setAutoWidth(true);
 		grid.addColumn(this::getPermissionAsString).setHeader("Permission").setAutoWidth(true);
 		grid.setSelectionMode(Grid.SelectionMode.SINGLE);
+		verticalLayout.add(grid);
 	}
 }
