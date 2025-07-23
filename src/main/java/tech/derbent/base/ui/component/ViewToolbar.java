@@ -5,8 +5,10 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
@@ -23,6 +25,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 
+import tech.derbent.abstracts.interfaces.CProjectListChangeListener;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.SessionService;
 
@@ -33,7 +36,7 @@ import tech.derbent.session.service.SessionService;
  *
  * It extends Composite to allow for easy composition of the toolbar's content.
  */
-public final class ViewToolbar extends Composite<Header> {
+public final class ViewToolbar extends Composite<Header> implements CProjectListChangeListener {
 
     private static final long serialVersionUID = 1L;
 
@@ -100,6 +103,29 @@ public final class ViewToolbar extends Composite<Header> {
         final var projectSelector = new Div(new Span("Active Project:"), projectComboBox);
         projectSelector.addClassNames(Display.FLEX, AlignItems.CENTER, Gap.SMALL);
         getContent().add(projectSelector);
+
+        // Register for project list change notifications
+        sessionService.addProjectListChangeListener(this);
+    }
+
+    /**
+     * Override onAttach to ensure listener registration on component attach.
+     */
+    @Override
+    protected void onAttach(final AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        // Re-register in case it was missed during construction
+        sessionService.addProjectListChangeListener(this);
+    }
+
+    /**
+     * Override onDetach to clean up listener registration when component is detached.
+     */
+    @Override
+    protected void onDetach(final DetachEvent detachEvent) {
+        super.onDetach(detachEvent);
+        // Unregister to prevent memory leaks
+        sessionService.removeProjectListChangeListener(this);
     }
 
     /**
@@ -125,6 +151,15 @@ public final class ViewToolbar extends Composite<Header> {
                 sessionService.setActiveProject(selectedProject);
             }
         });
+    }
+
+    /**
+     * Called when the project list changes. Refreshes the ComboBox items.
+     */
+    @Override
+    public void onProjectListChanged() {
+        LOGGER.debug("Project list changed, refreshing ComboBox");
+        refreshProjectList();
     }
 
     /**
