@@ -36,6 +36,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.base.ui.component.ViewToolbar;
+import tech.derbent.base.ui.component.CHierarchicalSideMenu;
 import tech.derbent.session.service.SessionService;
 
 /**
@@ -99,16 +100,33 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	}
 
 	private Div createSlidingHeader() {
+		LOGGER.info("Creating sliding header with hierarchical side menu");
+		
 		final var slidingHeader = new Div();
 		slidingHeader.addClassNames(Display.FLEX, AlignItems.CENTER, Margin.Horizontal.MEDIUM);
+		
+		// Original header content (logo and app name)
 		final var appLogo = VaadinIcon.CUBES.create();
 		appLogo.addClassNames(TextColor.PRIMARY, IconSize.LARGE);
 		slidingHeader.add(appLogo);
+		
 		final var appName = new Span("Derbent");
 		appName.addClassNames(FontWeight.SEMIBOLD, FontSize.LARGE);
 		slidingHeader.add(appName);
-		slidingHeader.add(new Div(new Span("Version: 1.0.0"))); // Add version info);
-		return slidingHeader;
+		
+		final var versionInfo = new Div(new Span("Version: 1.0.0"));
+		slidingHeader.add(versionInfo);
+		
+		// Add hierarchical side menu below the header content
+		final var hierarchicalMenu = new CHierarchicalSideMenu();
+		hierarchicalMenu.addClassNames(Margin.Top.MEDIUM);
+		
+		// Create container for the complete sliding header with menu
+		final var completeHeader = new Div();
+		completeHeader.add(slidingHeader, hierarchicalMenu);
+		
+		LOGGER.info("Sliding header with hierarchical menu created successfully");
+		return completeHeader;
 	}
 
 	private Div createNavBar() {

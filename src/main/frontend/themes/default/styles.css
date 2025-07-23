@@ -23,3 +23,108 @@ vaadin-accordion-heading{
 		font-size: 1.3em;
 		border-bottom: 1px solid var(--lumo-contrast-10pct);
 }
+
+/* Hierarchical Side Menu Styles */
+.hierarchical-side-menu {
+    width: 100%;
+    max-width: 300px;
+    background: var(--lumo-base-color);
+    border-radius: var(--lumo-border-radius-m);
+    box-shadow: var(--lumo-box-shadow-s);
+    overflow: hidden;
+}
+
+.hierarchical-header {
+    background: var(--lumo-contrast-5pct);
+    border-bottom: 1px solid var(--lumo-contrast-10pct);
+    min-height: 48px;
+}
+
+.hierarchical-level-container {
+    position: relative;
+    overflow: hidden;
+    min-height: 200px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.hierarchical-menu-item {
+    transition: all 0.2s ease;
+    margin: 2px 8px;
+    padding: 8px 12px;
+    border-radius: var(--lumo-border-radius-s);
+}
+
+.hierarchical-menu-item:hover {
+    background-color: var(--lumo-primary-color-10pct);
+    transform: translateX(4px);
+}
+
+.hierarchical-menu-item:active {
+    background-color: var(--lumo-primary-color-20pct);
+    transform: translateX(2px);
+}
+
+.hierarchical-back-button {
+    min-width: 40px;
+    height: 32px;
+    padding: 0;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.hierarchical-back-button:hover {
+    background-color: var(--lumo-primary-color-10pct);
+    transform: scale(1.1);
+}
+
+/* Sliding animations */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.slide-in {
+    animation: slideInRight 0.3s ease-out forwards;
+}
+
+.slide-out {
+    animation: slideInLeft 0.3s ease-out forwards;
+}
+
+/* Level indicators for depth visualization */
+.hierarchical-menu-item[data-level="1"] {
+    padding-left: 16px;
+}
+
+.hierarchical-menu-item[data-level="2"] {
+    padding-left: 24px;
+    border-left: 2px solid var(--lumo-primary-color-50pct);
+}
+
+.hierarchical-menu-item[data-level="3"] {
+    padding-left: 32px;
+    border-left: 3px solid var(--lumo-primary-color);
+}
+
+.hierarchical-menu-item[data-level="4"] {
+    padding-left: 40px;
+    border-left: 4px solid var(--lumo-error-color);
+}
