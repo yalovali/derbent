@@ -35,8 +35,8 @@ public class CPanelActivityDescription extends CAccordionDescription<CActivity> 
 			currentEntity != null ? currentEntity.getName() : "null");
 		this.activityTypeService = activityTypeService;
 		createPanelContent();
-		// open the panel by default
-		open(0);
+		// open the panel by default using the new convenience method
+		openPanel();
 	}
 
 	@Override

@@ -38,8 +38,8 @@ public class CPanelUserProjectSettings extends CAccordion {
 		this.projectService = projectService;
 		setupGrid();
 		setupButtons();
-		// start accordion collapsed
-		close();
+		// start accordion collapsed using the new convenience method
+		closePanel();
 	}
 
 	private void deleteSelected() {
