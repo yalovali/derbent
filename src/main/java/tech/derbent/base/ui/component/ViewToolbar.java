@@ -119,16 +119,15 @@ public final class ViewToolbar extends Composite<Header> implements CProjectList
         title = new H1(viewTitle);
         title.addClassNames(FontSize.XLARGE, Margin.NONE, FontWeight.LIGHT);
 
-        // Left side: toggle and title
-        final var leftSide = new Div(drawerToggle, title);
-        leftSide.addClassNames(Display.FLEX, AlignItems.CENTER, Gap.SMALL);
-
         // Create project selection combobox
         createProjectComboBox();
         
-        // Middle: project selector
+        // Left side: toggle, title, and project selector
         final var projectSelector = new Div(new Span("Active Project:"), projectComboBox);
         projectSelector.addClassNames(Display.FLEX, AlignItems.CENTER, Gap.SMALL);
+        
+        final var leftSide = new Div(drawerToggle, title, projectSelector);
+        leftSide.addClassNames(Display.FLEX, AlignItems.CENTER, Gap.MEDIUM);
 
         // Spacer to push user info and layout toggle to the right
         final var spacer = new Div();
@@ -138,14 +137,16 @@ public final class ViewToolbar extends Composite<Header> implements CProjectList
         final var rightSide = createRightSideComponents();
 
         // Add all components to the toolbar
-        getContent().add(leftSide, projectSelector, spacer, rightSide);
+        getContent().add(leftSide, spacer, rightSide);
 
         // add additional components if passed as a parameter
         if (components.length > 0) {
-            // If there are additional components, add them between project selector and right side
+            // If there are additional components, add them before the spacer
             final var actions = new Div(components);
             actions.addClassNames(Display.FLEX, AlignItems.CENTER, Gap.SMALL);
-            getContent().add(actions);
+            // Re-add components in the correct order
+            getContent().removeAll();
+            getContent().add(leftSide, actions, spacer, rightSide);
         }
 
         // Register for project list change notifications
