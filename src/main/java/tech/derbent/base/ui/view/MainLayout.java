@@ -37,7 +37,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.base.ui.component.ViewToolbar;
 import tech.derbent.base.ui.component.CHierarchicalSideMenu;
-
+import tech.derbent.session.service.LayoutService;
 import tech.derbent.session.service.SessionService;
 
 /**
