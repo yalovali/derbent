@@ -2,9 +2,6 @@ package tech.derbent.session.service;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
-import java.time.Clock;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,65 +25,56 @@ import tech.derbent.users.service.CUserService;
 @ExtendWith(MockitoExtension.class)
 class SessionServiceProjectListChangeTest {
 
-    @Mock
-    private AuthenticationContext authenticationContext;
+	@Mock
+	private AuthenticationContext authenticationContext;
+	@Mock
+	private CUserService userService;
+	@Mock
+	private CProjectService projectService;
+	@Mock
+	private VaadinSession vaadinSession;
+	private SessionService sessionService;
 
-    @Mock
-    private CUserService userService;
+	@BeforeEach
+	void setUp() {
+		sessionService =
+			new SessionService(authenticationContext, userService, projectService);
+		// Setup security context
+		final User testUser =
+			new User("testuser", "password", java.util.Collections.emptyList());
+		final UsernamePasswordAuthenticationToken authentication =
+			new UsernamePasswordAuthenticationToken(testUser, null,
+				testUser.getAuthorities());
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+	}
 
-    @Mock
-    private CProjectService projectService;
+	@Test
+	void testAddAndRemoveProjectListChangeListener() {
+		final CProjectListChangeListener listener =
+			mock(CProjectListChangeListener.class);
+		// Test adding listener
+		sessionService.addProjectListChangeListener(listener);
+		// Test removing listener
+		sessionService.removeProjectListChangeListener(listener);
+		// Test removing null listener (should not throw exception)
+		sessionService.removeProjectListChangeListener(null);
+		assertTrue(true, "All listener operations completed successfully");
+	}
 
-    @Mock
-    private VaadinSession vaadinSession;
-
-    private SessionService sessionService;
-
-    @BeforeEach
-    void setUp() {
-        sessionService = new SessionService(authenticationContext, userService, projectService);
-        
-        // Setup security context
-        final User testUser = new User("testuser", "password", java.util.Collections.emptyList());
-        final UsernamePasswordAuthenticationToken authentication = 
-            new UsernamePasswordAuthenticationToken(testUser, null, testUser.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-    }
-
-    @Test
-    void testProjectListChangeListenerRegistration() {
-        // Create a mock listener
-        final CProjectListChangeListener listener = mock(CProjectListChangeListener.class);
-        
-        // Add the listener
-        sessionService.addProjectListChangeListener(listener);
-        
-        // Notify project list changed
-        sessionService.notifyProjectListChanged();
-        
-        // Verify the listener was called (note: this would work if UI context was available)
-        // In a real UI test, the listener would be called
-        assertTrue(true, "Listener registration completed without errors");
-        
-        // Remove the listener
-        sessionService.removeProjectListChangeListener(listener);
-        
-        assertTrue(true, "Listener removal completed without errors");
-    }
-
-    @Test
-    void testAddAndRemoveProjectListChangeListener() {
-        final CProjectListChangeListener listener = mock(CProjectListChangeListener.class);
-        
-        // Test adding listener
-        sessionService.addProjectListChangeListener(listener);
-        
-        // Test removing listener
-        sessionService.removeProjectListChangeListener(listener);
-        
-        // Test removing null listener (should not throw exception)
-        sessionService.removeProjectListChangeListener(null);
-        
-        assertTrue(true, "All listener operations completed successfully");
-    }
+	@Test
+	void testProjectListChangeListenerRegistration() {
+		// Create a mock listener
+		final CProjectListChangeListener listener =
+			mock(CProjectListChangeListener.class);
+		// Add the listener
+		sessionService.addProjectListChangeListener(listener);
+		// Notify project list changed
+		sessionService.notifyProjectListChanged();
+		// Verify the listener was called (note: this would work if UI context was
+		// available) In a real UI test, the listener would be called
+		assertTrue(true, "Listener registration completed without errors");
+		// Remove the listener
+		sessionService.removeProjectListChangeListener(listener);
+		assertTrue(true, "Listener removal completed without errors");
+	}
 }

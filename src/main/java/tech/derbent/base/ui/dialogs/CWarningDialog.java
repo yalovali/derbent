@@ -1,13 +1,11 @@
 //package tech.derbent.abstracts.views;
 package tech.derbent.base.ui.dialogs;
 
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
 
 /**
- * CWarningDialog - Dialog for displaying warning messages to users. Layer: View
- * (MVC) Used when an action cannot be performed due to missing prerequisites or
- * invalid state.
+ * CWarningDialog - Dialog for displaying warning messages to users. Layer: View (MVC)
+ * Used when an action cannot be performed due to missing prerequisites or invalid state.
  */
 public final class CWarningDialog extends CBaseInfoDialog {
 

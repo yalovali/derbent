@@ -1,8 +1,25 @@
-
 @import url("dev-login.css");
 
 /* Red background for detailed tab */
 .details-tab-layout {
-    background-color: red;
+    background-color: #fff7e9;
+	width: 100%;
+	border-radius: 12px;
+	border: 1px solid var(--lumo-contrast-10pct);
+	font-size: 1.6em;
+    font-weight: bold;
 }
 
+vaadin-scroller{
+	width: 100%;
+}
+
+
+vaadin-accordion-heading{
+	
+    font-size: var(--lumo-font-size-m);
+    font-weight: 600;
+	    color: 	#5d6069;
+		font-size: 1.3em;
+		border-bottom: 1px solid var(--lumo-contrast-10pct);
+}

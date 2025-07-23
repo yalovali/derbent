@@ -27,7 +27,8 @@ import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.base.ui.dialogs.CConfirmationDialog;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
 
-public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAbstractPage {
+public abstract class CAbstractMDPage<EntityClass extends CEntityDB>
+	extends CAbstractPage {
 
 	private static final long serialVersionUID = 1L;
 	protected final Class<EntityClass> entityClass;
@@ -40,7 +41,8 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	protected EntityClass currentEntity;
 	protected final CAbstractService<EntityClass> entityService;
 
-	protected CAbstractMDPage(final Class<EntityClass> entityClass, final CAbstractService<EntityClass> entityService) {
+	protected CAbstractMDPage(final Class<EntityClass> entityClass,
+		final CAbstractService<EntityClass> entityService) {
 		super();
 		this.entityClass = entityClass;
 		this.entityService = entityService;
@@ -52,13 +54,10 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
 		// Create UI
 		createGridLayout();
-		detailsTabLayout.setClassName("details-tab-layout");
-		detailsTabLayout.setMaxHeight("100px");
-		detailsTabLayout.setMinHeight("100px");
-		// put a line below
-		detailsTabLayout.getStyle().set("border-bottom", "1px solid var(--lumo-contrast-20pct)");
+		// see css for details-tab-layout
 		final VerticalLayout detailsBase = new VerticalLayout();
 		splitLayout.addToSecondary(detailsBase);
+		detailsTabLayout.setClassName("details-tab-layout");
 		detailsBase.add(detailsTabLayout);
 		final Scroller scroller = new Scroller();
 		detailsBase.add(scroller);
@@ -68,19 +67,26 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		createGridForEntity();
 		// binder = new BeanValidationBinder<>(entityClass
 		add(splitLayout);
+		splitLayout.setSplitterPosition(30.0); // 70% of the height for primary
 	}
 
 	@Override
 	public void beforeEnter(final BeforeEnterEvent event) {
-		final Optional<Long> entityID = event.getRouteParameters().get(getEntityRouteIdField()).map(Long::parseLong);
+		final Optional<Long> entityID =
+			event.getRouteParameters().get(getEntityRouteIdField()).map(Long::parseLong);
 		if (entityID.isPresent()) {
-			final Optional<EntityClass> samplePersonFromBackend = entityService.get(entityID.get());
+			final Optional<EntityClass> samplePersonFromBackend =
+				entityService.get(entityID.get());
 			if (samplePersonFromBackend.isPresent()) {
 				populateForm(samplePersonFromBackend.get());
 			}
 			else {
-				Notification.show(String.format("The requested samplePerson was not found, ID = %s", entityID.get()), 3000, Notification.Position.BOTTOM_START);
-				// when a row is selected but the data is no longer available, refresh grid
+				Notification.show(
+					String.format("The requested samplePerson was not found, ID = %s",
+						entityID.get()),
+					3000, Notification.Position.BOTTOM_START);
+				// when a row is selected but the data is no longer available, refresh
+				// grid
 				refreshGrid();
 				// event.forwardTo(CProjectsView.class);
 			}
@@ -93,12 +99,13 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 
 	/**
 	 * Creates a button layout for additional buttons if needed by subclasses. Note:
-	 * Default save/delete/cancel buttons are now in the details tab. This method
-	 * can be used for additional custom buttons in the main content area.
+	 * Default save/delete/cancel buttons are now in the details tab. This method can be
+	 * used for additional custom buttons in the main content area.
 	 * @param layout The layout to add buttons to
 	 */
 	protected void createButtonLayout(final Div layout) {
-		LOGGER.debug("createButtonLayout called - default save/delete/cancel buttons are now in details tab");
+		LOGGER.debug(
+			"createButtonLayout called - default save/delete/cancel buttons are now in details tab");
 		// Default implementation does nothing - buttons are in the tab Subclasses can
 		// override this for additional custom buttons in the main content area
 	}
@@ -120,7 +127,9 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 				return;
 			}
 			// Show confirmation dialog for delete operation
-			final String confirmMessage = String.format("Are you sure you want to delete this %s? This action cannot be undone.", entityClass.getSimpleName().replace("C", "").toLowerCase());
+			final String confirmMessage = String.format(
+				"Are you sure you want to delete this %s? This action cannot be undone.",
+				entityClass.getSimpleName().replace("C", "").toLowerCase());
 			new CConfirmationDialog(confirmMessage, () -> {
 				entityService.delete(currentEntity);
 				clearForm();
@@ -134,15 +143,16 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	protected abstract void createDetailsLayout();
 
 	/**
-	 * Creates the button layout for the details tab. Contains save, cancel, and
-	 * delete buttons with consistent styling.
+	 * Creates the button layout for the details tab. Contains save, cancel, and delete
+	 * buttons with consistent styling.
 	 * @return HorizontalLayout with action buttons
 	 */
 	protected HorizontalLayout createDetailsTabButtonLayout() {
 		final HorizontalLayout buttonLayout = new HorizontalLayout();
 		buttonLayout.setClassName("details-tab-button-layout");
 		buttonLayout.setSpacing(true);
-		buttonLayout.add(createSaveButton("Save"), createCancelButton("Cancel"), createDeleteButton("Delete"));
+		buttonLayout.add(createSaveButton("Save"), createCancelButton("Cancel"),
+			createDeleteButton("Delete"));
 		return buttonLayout;
 	}
 
@@ -166,8 +176,8 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 
 	/**
 	 * Creates the default details view tab content with save/delete/cancel buttons.
-	 * Subclasses can override this method to customize the tab content while
-	 * maintaining consistent button placement and styling.
+	 * Subclasses can override this method to customize the tab content while maintaining
+	 * consistent button placement and styling.
 	 */
 	protected void createDetailsViewTab() {
 		// Clear any existing content
@@ -193,7 +203,8 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		grid = new Grid<>(entityClass, false);
 		grid.getColumns().forEach(grid::removeColumn);
 		grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
-		grid.setItems(query -> entityService.list(VaadinSpringDataHelpers.toSpringPageRequest(query)).stream());
+		grid.setItems(query -> entityService
+			.list(VaadinSpringDataHelpers.toSpringPageRequest(query)).stream());
 		grid.addColumn(entity -> entity.getId().toString()).setHeader("ID").setKey("id");
 		// Add selection listener to the grid
 		grid.asSingleSelect().addValueChangeListener(event -> {
@@ -220,14 +231,19 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 				// Navigate back to the current view (list mode)
 				UI.getCurrent().navigate(getClass());
 			} catch (final ObjectOptimisticLockingFailureException exception) {
-				final Notification n = Notification.show("Error updating the data. Somebody else has updated the record while you were making changes.");
+				final Notification n = Notification.show(
+					"Error updating the data. Somebody else has updated the record while you were making changes.");
 				n.setPosition(Position.MIDDLE);
 				n.addThemeVariants(NotificationVariant.LUMO_ERROR);
 			} catch (final ValidationException validationException) {
-				new CWarningDialog("Failed to save the data. Please check that all required fields are filled and values are valid.").open();
+				new CWarningDialog(
+					"Failed to save the data. Please check that all required fields are filled and values are valid.")
+					.open();
 			} catch (final Exception exception) {
 				LOGGER.error("Unexpected error during save operation", exception);
-				new CWarningDialog("An unexpected error occurred while saving. Please try again.").open();
+				new CWarningDialog(
+					"An unexpected error occurred while saving. Please try again.")
+					.open();
 			}
 		});
 		return save;
@@ -257,7 +273,9 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		grid.getDataProvider().refreshAll();
 	}
 
-	public void setCurrentEntity(final EntityClass currentEntity) { this.currentEntity = currentEntity; }
+	public void setCurrentEntity(final EntityClass currentEntity) {
+		this.currentEntity = currentEntity;
+	}
 
 	/**
 	 * Sets up the toolbar for the page.
