@@ -119,6 +119,8 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB>
 		if (layoutService != null && splitLayout != null) {
 			final LayoutService.LayoutMode currentMode = layoutService.getCurrentLayoutMode();
 			
+			LOGGER.debug("Updating layout orientation to: {} for {}", currentMode, getClass().getSimpleName());
+			
 			if (currentMode == LayoutService.LayoutMode.HORIZONTAL) {
 				splitLayout.setOrientation(SplitLayout.Orientation.HORIZONTAL);
 				// For horizontal layout, give more space to the grid (left side)
@@ -129,12 +131,18 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB>
 				splitLayout.setSplitterPosition(30.0); // 30% for grid, 70% for details
 			}
 			
+			// Force UI refresh to apply changes immediately
+			getUI().ifPresent(ui -> ui.access(() -> {
+				splitLayout.getElement().callJsFunction("$server.requestUpdate");
+			}));
+			
 			LOGGER.debug("Updated split layout orientation to: {} with position: {}", 
 						splitLayout.getOrientation(), splitLayout.getSplitterPosition());
 		} else {
 			// Default fallback when no layout service is available
 			splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
 			splitLayout.setSplitterPosition(30.0);
+			LOGGER.debug("Applied default vertical layout (no layout service available)");
 		}
 	}
 

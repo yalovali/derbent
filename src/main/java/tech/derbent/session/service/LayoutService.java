@@ -155,9 +155,25 @@ public class LayoutService {
                         LOGGER.warn("Encountered null listener in the list");
                     }
                 });
+                // Force push to update the UI immediately
+                ui.push();
             });
         } else {
-            LOGGER.warn("UI.getCurrent() is null, cannot notify layout change listeners");
+            // If no UI context, try direct notification
+            LOGGER.warn("UI.getCurrent() is null, attempting direct notification");
+            layoutChangeListeners.forEach(listener -> {
+                if (listener != null) {
+                    try {
+                        listener.onLayoutModeChanged(newMode);
+                        LOGGER.debug("Directly notified layout listener: {}", listener.getClass().getSimpleName());
+                    } catch (final Exception e) {
+                        LOGGER.error("Error directly notifying layout change listener: {}", 
+                                   listener.getClass().getSimpleName(), e);
+                    }
+                } else {
+                    LOGGER.warn("Encountered null listener in the list");
+                }
+            });
         }
     }
 }

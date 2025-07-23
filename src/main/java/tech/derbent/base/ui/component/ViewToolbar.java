@@ -129,11 +129,15 @@ public final class ViewToolbar extends Composite<Header> implements CProjectList
         final var projectSelector = new Div(new Span("Active Project:"), projectComboBox);
         projectSelector.addClassNames(Display.FLEX, AlignItems.CENTER, Gap.SMALL);
 
+        // Spacer to push user info and layout toggle to the right
+        final var spacer = new Div();
+        spacer.getStyle().set("flex-grow", "1");
+
         // Right side: user info and layout toggle
         final var rightSide = createRightSideComponents();
 
         // Add all components to the toolbar
-        getContent().add(leftSide, projectSelector, rightSide);
+        getContent().add(leftSide, projectSelector, spacer, rightSide);
 
         // add additional components if passed as a parameter
         if (components.length > 0) {
@@ -278,12 +282,7 @@ public final class ViewToolbar extends Composite<Header> implements CProjectList
             return;
         }
         
-        // Create user icon using smiley-o icon
-        final Icon userIcon = VaadinIcon.SMILEY_O.create();
-        userIcon.setSize("24px");
-        userIcon.getStyle().set("color", "var(--lumo-primary-color)");
-        
-        // Since we want to use the icon, let's create a simple avatar without icon
+        // Create simple avatar without icon
         userAvatar = new Avatar();
         userAvatar.setName(username);
         userAvatar.setAbbreviation(username.length() > 0 ? username.substring(0, 1).toUpperCase() : "U");
@@ -291,9 +290,9 @@ public final class ViewToolbar extends Composite<Header> implements CProjectList
         userAvatar.setColorIndex(3);
         userAvatar.getElement().setAttribute("title", "User: " + username);
 
-        // Create username span
-        usernameSpan = new Span(userIcon, new Span(" " + username));
-        usernameSpan.addClassNames(FontWeight.MEDIUM, Display.FLEX, AlignItems.CENTER, Gap.SMALL);
+        // Create username span without icon
+        usernameSpan = new Span(username);
+        usernameSpan.addClassNames(FontWeight.MEDIUM);
         usernameSpan.getStyle().set("color", "var(--lumo-secondary-text-color)");
         
         LOGGER.debug("User components created successfully for: {}", username);
@@ -318,8 +317,21 @@ public final class ViewToolbar extends Composite<Header> implements CProjectList
             layoutToggleButton.addClickListener(event -> {
                 LOGGER.info("Layout toggle button clicked");
                 if (layoutService != null) {
+                    final LayoutService.LayoutMode oldMode = layoutService.getCurrentLayoutMode();
                     layoutService.toggleLayoutMode();
+                    final LayoutService.LayoutMode newMode = layoutService.getCurrentLayoutMode();
+                    
+                    LOGGER.info("Layout toggled from {} to {}", oldMode, newMode);
                     updateLayoutToggleIcon();
+                    
+                    // Force UI update
+                    final var ui = getUI();
+                    if (ui.isPresent()) {
+                        ui.get().access(() -> {
+                            LOGGER.debug("Forcing UI update after layout toggle");
+                            ui.get().push();
+                        });
+                    }
                 } else {
                     LOGGER.warn("LayoutService is null, cannot toggle layout mode");
                 }
