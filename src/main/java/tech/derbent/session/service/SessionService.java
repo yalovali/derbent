@@ -39,12 +39,20 @@ public class SessionService {
     private final AuthenticationContext authenticationContext;
     private final CUserService userService;
     private final CProjectService projectService;
+    private LayoutService layoutService; // Optional injection to avoid circular dependency
 
     public SessionService(final AuthenticationContext authenticationContext, final CUserService userService,
             final CProjectService projectService) {
         this.authenticationContext = authenticationContext;
         this.userService = userService;
         this.projectService = projectService;
+    }
+
+    /**
+     * Sets the layout service. This is called after bean creation to avoid circular dependency.
+     */
+    public void setLayoutService(final LayoutService layoutService) {
+        this.layoutService = layoutService;
     }
 
     /**
@@ -89,6 +97,11 @@ public class SessionService {
         projectChangeListeners.clear();
         projectListChangeListeners.clear();
         LOGGER.debug("Project change listeners cleared");
+        
+        // Clear layout change listeners if layoutService is available
+        if (layoutService != null) {
+            layoutService.clearLayoutChangeListeners();
+        }
     }
 
     /**
