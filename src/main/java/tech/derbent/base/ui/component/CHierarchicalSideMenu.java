@@ -12,12 +12,15 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.AfterNavigationEvent;
+import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.server.menu.MenuConfiguration;
 import com.vaadin.flow.server.menu.MenuEntry;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
@@ -42,8 +45,9 @@ import tech.derbent.abstracts.views.CButton;
  * - Back button navigation
  * - Parses menu entries from route annotations in format: parentItem2.childItem1.childofchileitem1
  * - Responsive design with proper styling
+ * - Current page highlighting
  */
-public final class CHierarchicalSideMenu extends Div {
+public final class CHierarchicalSideMenu extends Div implements AfterNavigationObserver {
 
     private static final long serialVersionUID = 1L;
     private static final int MAX_MENU_LEVELS = 4;
@@ -58,6 +62,7 @@ public final class CHierarchicalSideMenu extends Div {
     private final List<String> navigationPath;
     private final Map<String, CMenuLevel> menuLevels;
     private CMenuLevel currentLevel;
+    private String currentRoute; // Track current route for highlighting
     
     // Styling constants
     private static final String MENU_ITEM_CLASS = "hierarchical-menu-item";
@@ -103,6 +108,27 @@ public final class CHierarchicalSideMenu extends Div {
         showLevel("root");
         
         LOGGER.info("CHierarchicalSideMenu initialized successfully with {} menu levels", menuLevels.size());
+    }
+    
+    @Override
+    public void afterNavigation(final AfterNavigationEvent event) {
+        // Update current route and refresh highlighting
+        final String newRoute = event.getLocation().getPath();
+        if (!newRoute.equals(currentRoute)) {
+            currentRoute = newRoute;
+            LOGGER.debug("Route changed to: {}, updating menu highlighting", currentRoute);
+            refreshCurrentLevel();
+        }
+    }
+    
+    /**
+     * Refreshes the current level display to update highlighting.
+     */
+    private void refreshCurrentLevel() {
+        if (currentLevel != null) {
+            currentLevelContainer.removeAll();
+            currentLevelContainer.add(currentLevel.createLevelComponent());
+        }
     }
     
     /**
@@ -251,21 +277,32 @@ public final class CHierarchicalSideMenu extends Div {
     private void updateHeader(final CMenuLevel level) {
         headerLayout.removeAll();
         
+        // Always add an icon area with consistent width
+        Icon levelIcon;
         if (level.getParent() != null) {
-            // Add back button
-            final Icon backIcon = VaadinIcon.ARROW_LEFT.create();
-            backIcon.addClassNames(IconSize.SMALL);
+            // Add back button with consistent sizing
+            levelIcon = VaadinIcon.ARROW_LEFT.create();
+            levelIcon.addClassNames(IconSize.MEDIUM);
+            levelIcon.getStyle().set("min-width", "24px").set("min-height", "24px");
             
-            final CButton backButton = new CButton(backIcon, this::handleBackButtonClick);
-            backButton.addClassNames(BACK_BUTTON_CLASS, Margin.Right.SMALL);
+            final CButton backButton = new CButton(levelIcon, this::handleBackButtonClick);
+            backButton.addClassNames(BACK_BUTTON_CLASS, Margin.Right.MEDIUM);
             backButton.addThemeVariants(com.vaadin.flow.component.button.ButtonVariant.LUMO_TERTIARY_INLINE);
+            backButton.getStyle().set("min-width", "40px").set("min-height", "40px");
             
             headerLayout.add(backButton);
+        } else {
+            // Add app icon for root level to prevent label jumping
+            levelIcon = VaadinIcon.CUBES.create();
+            levelIcon.addClassNames(IconSize.MEDIUM, TextColor.PRIMARY, Margin.Right.MEDIUM);
+            levelIcon.getStyle().set("min-width", "24px").set("min-height", "24px");
+            
+            headerLayout.add(levelIcon);
         }
         
-        // Add level title
+        // Add level title with consistent font size
         final Span levelTitle = new Span(level.getDisplayName());
-        levelTitle.addClassNames(FontWeight.SEMIBOLD, FontSize.MEDIUM);
+        levelTitle.addClassNames(FontWeight.SEMIBOLD, FontSize.LARGE);
         headerLayout.add(levelTitle);
         
         // Add spacer to push content to the left
@@ -370,20 +407,34 @@ public final class CHierarchicalSideMenu extends Div {
         
         public Component createComponent() {
             final HorizontalLayout itemLayout = new HorizontalLayout();
-            itemLayout.addClassNames(Display.FLEX, AlignItems.CENTER, Padding.SMALL, 
+            itemLayout.addClassNames(Display.FLEX, AlignItems.CENTER, Padding.MEDIUM, 
                                    Gap.MEDIUM, MENU_ITEM_CLASS);
             itemLayout.setWidthFull();
             
-            // Add icon
+            // Check if this item represents the current page
+            final boolean isCurrentPage = path != null && !path.trim().isEmpty() && 
+                                        currentRoute != null && currentRoute.equals(path.trim());
+            
+            // Add icon with consistent sizing
+            Icon icon;
             if (iconName != null && !iconName.trim().isEmpty()) {
-                final Icon icon = new Icon(iconName);
-                icon.addClassNames(IconSize.SMALL, TextColor.SECONDARY);
-                itemLayout.add(icon);
+                icon = new Icon(iconName);
+            } else {
+                // Use a transparent placeholder icon to maintain consistent spacing
+                icon = VaadinIcon.CIRCLE.create();
+                icon.getStyle().set("visibility", "hidden");
             }
             
-            // Add text
+            icon.addClassNames(IconSize.MEDIUM, isCurrentPage ? TextColor.PRIMARY : TextColor.SECONDARY);
+            icon.getStyle().set("min-width", "24px").set("min-height", "24px");
+            itemLayout.add(icon);
+            
+            // Add text with highlighting
             final Span itemText = new Span(name);
-            itemText.addClassNames(FontSize.SMALL);
+            itemText.addClassNames(FontSize.LARGE, isCurrentPage ? FontWeight.BOLD : FontWeight.NORMAL);
+            if (isCurrentPage) {
+                itemText.addClassNames(TextColor.PRIMARY);
+            }
             itemLayout.add(itemText);
             
             // Add navigation arrow for navigation items
@@ -394,8 +445,16 @@ public final class CHierarchicalSideMenu extends Div {
                 itemLayout.setFlexGrow(1, spacer);
                 
                 final Icon navIcon = VaadinIcon.CHEVRON_RIGHT.create();
-                navIcon.addClassNames(IconSize.SMALL, TextColor.TERTIARY);
+                navIcon.addClassNames(IconSize.MEDIUM, TextColor.TERTIARY);
+                navIcon.getStyle().set("min-width", "24px").set("min-height", "24px");
                 itemLayout.add(navIcon);
+            }
+            
+            // Apply current page highlighting styles
+            if (isCurrentPage) {
+                itemLayout.getElement().getStyle()
+                    .set("background-color", "var(--lumo-primary-color-10pct)")
+                    .set("border-left", "4px solid var(--lumo-primary-color)");
             }
             
             // Add click listener
@@ -405,13 +464,15 @@ public final class CHierarchicalSideMenu extends Div {
             itemLayout.getElement().getStyle()
                 .set("cursor", "pointer")
                 .set("border-radius", "var(--lumo-border-radius-m)")
-                .set("transition", "background-color 0.2s ease");
+                .set("transition", "all 0.2s ease");
             
-            // Add hover effects
-            itemLayout.getElement().addEventListener("mouseenter", e -> 
-                itemLayout.getElement().getStyle().set("background-color", "var(--lumo-contrast-5pct)"));
-            itemLayout.getElement().addEventListener("mouseleave", e -> 
-                itemLayout.getElement().getStyle().remove("background-color"));
+            // Add hover effects (only if not current page to avoid conflicts)
+            if (!isCurrentPage) {
+                itemLayout.getElement().addEventListener("mouseenter", e -> 
+                    itemLayout.getElement().getStyle().set("background-color", "var(--lumo-contrast-5pct)"));
+                itemLayout.getElement().addEventListener("mouseleave", e -> 
+                    itemLayout.getElement().getStyle().remove("background-color"));
+            }
             
             return itemLayout;
         }

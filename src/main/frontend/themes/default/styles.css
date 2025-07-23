@@ -37,7 +37,7 @@ vaadin-accordion-heading{
     background: transparent; /* Match main app background */
     border-bottom: 1px solid var(--lumo-contrast-10pct);
     min-height: 48px;
-    font-size: var(--lumo-font-size-l); /* Increased font size */
+    font-size: var(--lumo-font-size-l); /* Follow old menu font size */
 }
 
 .hierarchical-level-container {
@@ -52,10 +52,10 @@ vaadin-accordion-heading{
 .hierarchical-menu-item {
     transition: all 0.2s ease;
     margin: 2px 8px;
-    padding: 12px 16px; /* Increased padding for bigger touch targets */
+    padding: 12px 16px; /* Follow old menu padding */
     border-radius: var(--lumo-border-radius-s);
-    font-size: var(--lumo-font-size-l); /* Increased font size */
-    font-weight: 500; /* Slightly bolder text */
+    font-size: var(--lumo-font-size-l); /* Follow old menu font size */
+    font-weight: 500; /* Follow old menu font weight */
 }
 
 .hierarchical-menu-item:hover {
@@ -69,12 +69,12 @@ vaadin-accordion-heading{
 }
 
 .hierarchical-back-button {
-    min-width: 48px; /* Increased size */
-    height: 40px; /* Increased size */
+    min-width: 40px; /* Consistent with icon sizing */
+    height: 40px; /* Consistent with icon sizing */
     padding: 0;
     border-radius: 50%;
     transition: all 0.2s ease;
-    font-size: var(--lumo-font-size-l); /* Increased font size */
+    font-size: var(--lumo-font-size-l); /* Follow old menu font size */
 }
 
 .hierarchical-back-button:hover {
