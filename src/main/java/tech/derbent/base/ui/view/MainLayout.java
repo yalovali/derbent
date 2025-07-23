@@ -107,19 +107,18 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		LOGGER.info("Creating sliding header with hierarchical side menu");
 		
 		final var slidingHeader = new Div();
-		slidingHeader.addClassNames(Display.FLEX, AlignItems.CENTER, Margin.Horizontal.MEDIUM);
+		slidingHeader.addClassNames(Display.FLEX, AlignItems.CENTER, Margin.Horizontal.MEDIUM, Gap.SMALL);
+		slidingHeader.getStyle().set("flex-wrap", "nowrap"); // Ensure single line
 		
-		// Original header content (logo and app name)
+		// Original header content (logo and app name) - version removed
 		final var appLogo = VaadinIcon.CUBES.create();
 		appLogo.addClassNames(TextColor.PRIMARY, IconSize.LARGE);
 		slidingHeader.add(appLogo);
 		
 		final var appName = new Span("Derbent");
 		appName.addClassNames(FontWeight.SEMIBOLD, FontSize.LARGE);
+		appName.getStyle().set("white-space", "nowrap"); // Prevent text wrapping
 		slidingHeader.add(appName);
-		
-		final var versionInfo = new Div(new Span("Version: 1.0.0"));
-		slidingHeader.add(versionInfo);
 		
 		// Add hierarchical side menu below the header content
 		final var hierarchicalMenu = new CHierarchicalSideMenu();
