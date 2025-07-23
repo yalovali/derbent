@@ -41,10 +41,11 @@ public class CMeetingService extends CAbstractService<CMeeting> {
     }
 
     /**
-     * Gets paginated meetings by project.
+     * Gets paginated meetings by project with all relationships eagerly loaded.
+     * This method should be used for grid display to prevent LazyInitializationException.
      */
     public Page<CMeeting> listByProject(final CProject project, final Pageable pageable) {
-        return ((CMeetingRepository) repository).findByProject(project, pageable);
+        return ((CMeetingRepository) repository).findByProjectWithRelationships(project, pageable);
     }
 
     /**

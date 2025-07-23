@@ -28,6 +28,21 @@ public interface CMeetingRepository extends CAbstractRepository<CMeeting> {
     Optional<CMeeting> findByIdWithMeetingTypeAndParticipants(@Param("id") Long id);
 
     /**
+     * Finds meetings by project with eagerly loaded relationships to prevent LazyInitializationException.
+     * Loads project, meetingType, and participants for grid display.
+     * 
+     * @param project the project to filter by
+     * @param pageable pagination information
+     * @return page of meetings with loaded relationships
+     */
+    @Query("SELECT DISTINCT m FROM CMeeting m " +
+           "LEFT JOIN FETCH m.project " +
+           "LEFT JOIN FETCH m.meetingType " +
+           "LEFT JOIN FETCH m.participants " +
+           "WHERE m.project = :project")
+    Page<CMeeting> findByProjectWithRelationships(@Param("project") CProject project, Pageable pageable);
+
+    /**
      * Finds meetings by participant user.
      * 
      * @param userId the user ID
