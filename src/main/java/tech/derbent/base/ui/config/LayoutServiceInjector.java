@@ -1,0 +1,30 @@
+package tech.derbent.base.ui.config;
+
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.stereotype.Component;
+
+import tech.derbent.abstracts.views.CAbstractMDPage;
+import tech.derbent.session.service.LayoutService;
+
+/**
+ * BeanPostProcessor that automatically injects LayoutService into all CAbstractMDPage instances.
+ * This ensures that all views that extend CAbstractMDPage can respond to layout changes.
+ */
+@Component
+public class LayoutServiceInjector implements BeanPostProcessor {
+
+    private final LayoutService layoutService;
+
+    public LayoutServiceInjector(final LayoutService layoutService) {
+        this.layoutService = layoutService;
+    }
+
+    @Override
+    public Object postProcessAfterInitialization(final Object bean, final String beanName) throws BeansException {
+        if (bean instanceof CAbstractMDPage) {
+            ((CAbstractMDPage<?>) bean).setLayoutService(layoutService);
+        }
+        return bean;
+    }
+}
