@@ -4,6 +4,8 @@ import java.util.Optional;
 
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.grid.Grid;
@@ -23,12 +25,14 @@ import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
 import jakarta.annotation.PostConstruct;
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.interfaces.CLayoutChangeListener;
 import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.base.ui.dialogs.CConfirmationDialog;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
+import tech.derbent.session.service.LayoutService;
 
 public abstract class CAbstractMDPage<EntityClass extends CEntityDB>
-	extends CAbstractPage {
+	extends CAbstractPage implements CLayoutChangeListener {
 
 	private static final long serialVersionUID = 1L;
 	protected final Class<EntityClass> entityClass;
@@ -40,6 +44,7 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB>
 	private final Div detailsTabLayout = new Div();
 	protected EntityClass currentEntity;
 	protected final CAbstractService<EntityClass> entityService;
+	protected LayoutService layoutService; // Optional injection
 
 	protected CAbstractMDPage(final Class<EntityClass> entityClass,
 		final CAbstractService<EntityClass> entityService) {
@@ -49,7 +54,7 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB>
 		binder = new BeanValidationBinder<>(entityClass);
 		addClassNames("md-page");
 		setSizeFull();
-		// create a split layout for the main content, vertical split
+		// create a split layout for the main content, default to vertical split
 		splitLayout.setSizeFull();
 		splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
 		// Create UI
@@ -67,7 +72,78 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB>
 		createGridForEntity();
 		// binder = new BeanValidationBinder<>(entityClass
 		add(splitLayout);
-		splitLayout.setSplitterPosition(30.0); // 70% of the height for primary
+		// Initial layout setup - will be updated when layout service is available
+		updateLayoutOrientation();
+	}
+
+	/**
+	 * Sets the layout service. This is typically called via dependency injection
+	 * or manually after construction.
+	 */
+	public void setLayoutService(final LayoutService layoutService) {
+		this.layoutService = layoutService;
+		// Update layout based on current mode
+		updateLayoutOrientation();
+	}
+
+	@Override
+	protected void onAttach(final AttachEvent attachEvent) {
+		super.onAttach(attachEvent);
+		// Register for layout change notifications if service is available
+		if (layoutService != null) {
+			layoutService.addLayoutChangeListener(this);
+			// Update layout based on current mode
+			updateLayoutOrientation();
+		}
+	}
+
+	@Override
+	protected void onDetach(final DetachEvent detachEvent) {
+		super.onDetach(detachEvent);
+		// Unregister from layout change notifications
+		if (layoutService != null) {
+			layoutService.removeLayoutChangeListener(this);
+		}
+	}
+
+	@Override
+	public void onLayoutModeChanged(final LayoutService.LayoutMode newMode) {
+		LOGGER.debug("Layout mode changed to: {} for {}", newMode, getClass().getSimpleName());
+		updateLayoutOrientation();
+	}
+
+	/**
+	 * Updates the split layout orientation based on the current layout mode.
+	 */
+	private void updateLayoutOrientation() {
+		if (layoutService != null && splitLayout != null) {
+			final LayoutService.LayoutMode currentMode = layoutService.getCurrentLayoutMode();
+			
+			LOGGER.debug("Updating layout orientation to: {} for {}", currentMode, getClass().getSimpleName());
+			
+			if (currentMode == LayoutService.LayoutMode.HORIZONTAL) {
+				splitLayout.setOrientation(SplitLayout.Orientation.HORIZONTAL);
+				// For horizontal layout, give more space to the grid (left side)
+				splitLayout.setSplitterPosition(50.0); // 50% for grid, 50% for details
+			} else {
+				splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
+				// For vertical layout, give more space to the grid (top)
+				splitLayout.setSplitterPosition(30.0); // 30% for grid, 70% for details
+			}
+			
+			// Force UI refresh to apply changes immediately
+			getUI().ifPresent(ui -> ui.access(() -> {
+				splitLayout.getElement().callJsFunction("$server.requestUpdate");
+			}));
+			
+			LOGGER.debug("Updated split layout orientation to: {} with position: {}", 
+						splitLayout.getOrientation(), splitLayout.getSplitterPosition());
+		} else {
+			// Default fallback when no layout service is available
+			splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
+			splitLayout.setSplitterPosition(30.0);
+			LOGGER.debug("Applied default vertical layout (no layout service available)");
+		}
 	}
 
 	@Override
