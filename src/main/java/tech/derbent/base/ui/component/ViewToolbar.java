@@ -13,7 +13,6 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.avatar.AvatarVariant;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
@@ -34,6 +33,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 
 import tech.derbent.abstracts.interfaces.CProjectListChangeListener;
+import tech.derbent.abstracts.views.CButton;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.LayoutService;
 import tech.derbent.session.service.SessionService;
@@ -66,7 +66,7 @@ public final class ViewToolbar extends Composite<Header> implements CProjectList
     private final LayoutService layoutService;
     private final AuthenticationContext authenticationContext;
     private ComboBox<CProject> projectComboBox;
-    private Button layoutToggleButton;
+    private CButton layoutToggleButton;
     private Avatar userAvatar;
     private Span usernameSpan;
 
@@ -171,6 +171,14 @@ public final class ViewToolbar extends Composite<Header> implements CProjectList
      * Creates the project selection ComboBox.
      */
     private void createProjectComboBox() {
+        LOGGER.debug("Creating project ComboBox with sessionService: {}", 
+                    sessionService != null ? sessionService.getClass().getSimpleName() : "null");
+        
+        if (sessionService == null) {
+            LOGGER.error("SessionService is null, cannot create project ComboBox");
+            return;
+        }
+        
         projectComboBox = new ComboBox<>();
         projectComboBox.setItemLabelGenerator(CProject::getName);
         projectComboBox.setPlaceholder("Select Project");
@@ -188,6 +196,8 @@ public final class ViewToolbar extends Composite<Header> implements CProjectList
             if (selectedProject != null) {
                 LOGGER.info("Project changed to: {}", selectedProject.getName());
                 sessionService.setActiveProject(selectedProject);
+            } else {
+                LOGGER.debug("Project selection cleared");
             }
         });
     }
@@ -221,19 +231,39 @@ public final class ViewToolbar extends Composite<Header> implements CProjectList
      * Creates user info components (avatar and username).
      */
     private void createUserInfoComponents() {
+        LOGGER.debug("Creating user info components with authenticationContext: {}", 
+                    authenticationContext != null ? "available" : "null");
+        
         if (authenticationContext != null) {
             // Try to get user from session service first
-            final var activeUser = sessionService.getActiveUser();
-            if (activeUser.isPresent()) {
-                final CUser user = activeUser.get();
-                createUserComponents(user.getName() != null ? user.getName() : user.getLogin());
-            } else {
-                // Fallback to authentication context
-                final var authenticatedUser = authenticationContext.getAuthenticatedUser(User.class);
-                if (authenticatedUser.isPresent()) {
-                    createUserComponents(authenticatedUser.get().getUsername());
+            if (sessionService != null) {
+                final var activeUser = sessionService.getActiveUser();
+                if (activeUser.isPresent()) {
+                    final CUser user = activeUser.get();
+                    final String username = user.getName() != null && !user.getName().trim().isEmpty() 
+                        ? user.getName() 
+                        : user.getLogin();
+                    if (username != null && !username.trim().isEmpty()) {
+                        createUserComponents(username);
+                        return;
+                    }
                 }
             }
+            
+            // Fallback to authentication context
+            final var authenticatedUser = authenticationContext.getAuthenticatedUser(User.class);
+            if (authenticatedUser.isPresent()) {
+                final String username = authenticatedUser.get().getUsername();
+                if (username != null && !username.trim().isEmpty()) {
+                    createUserComponents(username);
+                } else {
+                    LOGGER.warn("Authenticated user has null or empty username");
+                }
+            } else {
+                LOGGER.debug("No authenticated user found in authentication context");
+            }
+        } else {
+            LOGGER.debug("AuthenticationContext is null, user info components will not be created");
         }
     }
 
@@ -241,6 +271,13 @@ public final class ViewToolbar extends Composite<Header> implements CProjectList
      * Creates user avatar and username components.
      */
     private void createUserComponents(final String username) {
+        LOGGER.debug("Creating user components for username: {}", username);
+        
+        if (username == null || username.trim().isEmpty()) {
+            LOGGER.warn("Cannot create user components - username is null or empty");
+            return;
+        }
+        
         // Create user icon using smiley-o icon
         final Icon userIcon = VaadinIcon.SMILEY_O.create();
         userIcon.setSize("24px");
@@ -258,14 +295,19 @@ public final class ViewToolbar extends Composite<Header> implements CProjectList
         usernameSpan = new Span(userIcon, new Span(" " + username));
         usernameSpan.addClassNames(FontWeight.MEDIUM, Display.FLEX, AlignItems.CENTER, Gap.SMALL);
         usernameSpan.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        
+        LOGGER.debug("User components created successfully for: {}", username);
     }
 
     /**
      * Creates the layout toggle button.
      */
     private void createLayoutToggleButton() {
+        LOGGER.debug("Creating layout toggle button with layoutService: {}", 
+                    layoutService != null ? layoutService.getClass().getSimpleName() : "null");
+        
         if (layoutService != null) {
-            layoutToggleButton = new Button();
+            layoutToggleButton = new CButton();
             layoutToggleButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ICON);
             layoutToggleButton.getElement().setAttribute("title", "Toggle Layout Mode");
             
@@ -274,9 +316,16 @@ public final class ViewToolbar extends Composite<Header> implements CProjectList
             
             // Handle layout toggle
             layoutToggleButton.addClickListener(event -> {
-                layoutService.toggleLayoutMode();
-                updateLayoutToggleIcon();
+                LOGGER.info("Layout toggle button clicked");
+                if (layoutService != null) {
+                    layoutService.toggleLayoutMode();
+                    updateLayoutToggleIcon();
+                } else {
+                    LOGGER.warn("LayoutService is null, cannot toggle layout mode");
+                }
             });
+        } else {
+            LOGGER.debug("LayoutService is null, layout toggle button will not be created");
         }
     }
 
@@ -284,8 +333,17 @@ public final class ViewToolbar extends Composite<Header> implements CProjectList
      * Updates the layout toggle button icon based on current layout mode.
      */
     private void updateLayoutToggleIcon() {
+        LOGGER.debug("Updating layout toggle icon with layoutToggleButton: {}, layoutService: {}", 
+                    layoutToggleButton != null ? "available" : "null",
+                    layoutService != null ? "available" : "null");
+        
         if (layoutToggleButton != null && layoutService != null) {
             final LayoutService.LayoutMode currentMode = layoutService.getCurrentLayoutMode();
+            if (currentMode == null) {
+                LOGGER.warn("Current layout mode is null, using default VERTICAL");
+                return;
+            }
+            
             final Icon icon = currentMode == LayoutService.LayoutMode.HORIZONTAL 
                 ? VaadinIcon.GRID_H.create() 
                 : VaadinIcon.GRID_V.create();
@@ -293,6 +351,10 @@ public final class ViewToolbar extends Composite<Header> implements CProjectList
             layoutToggleButton.setIcon(icon);
             layoutToggleButton.getElement().setAttribute("title", 
                 "Current: " + currentMode + " - Click to toggle");
+            
+            LOGGER.debug("Layout toggle icon updated to: {}", currentMode);
+        } else {
+            LOGGER.debug("Cannot update layout toggle icon - button or service is null");
         }
     }
 
@@ -309,18 +371,40 @@ public final class ViewToolbar extends Composite<Header> implements CProjectList
      * Refreshes the project list in the ComboBox.
      */
     public void refreshProjectList() {
+        LOGGER.debug("Refreshing project list with sessionService: {}, projectComboBox: {}", 
+                    sessionService != null ? "available" : "null",
+                    projectComboBox != null ? "available" : "null");
+        
         if (sessionService != null && projectComboBox != null) {
-            final List<CProject> projects = sessionService.getAvailableProjects();
-            projectComboBox.setItems(projects);
+            try {
+                final List<CProject> projects = sessionService.getAvailableProjects();
+                if (projects == null) {
+                    LOGGER.warn("SessionService returned null project list");
+                    return;
+                }
+                
+                projectComboBox.setItems(projects);
+                LOGGER.debug("Project list refreshed with {} projects", projects.size());
 
-            // If no project is selected but projects are available, select the first one
-            if (projectComboBox.getValue() == null && !projects.isEmpty()) {
-                projectComboBox.setValue(projects.get(0));
+                // If no project is selected but projects are available, select the first one
+                if (projectComboBox.getValue() == null && !projects.isEmpty()) {
+                    projectComboBox.setValue(projects.get(0));
+                    LOGGER.debug("Auto-selected first project: {}", projects.get(0).getName());
+                }
+            } catch (final Exception e) {
+                LOGGER.error("Error refreshing project list", e);
             }
+        } else {
+            LOGGER.debug("Cannot refresh project list - sessionService or projectComboBox is null");
         }
     }
 
     public void setPageTitle(final String title) {
+        LOGGER.debug("Setting page title to: {}", title);
+        if (title == null || title.trim().isEmpty()) {
+            LOGGER.warn("Cannot set page title - title is null or empty");
+            return;
+        }
         this.title.setText(title);
     }
 }
