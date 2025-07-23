@@ -2,8 +2,7 @@
 
 - [ ] TODO Replace or update this README with instructions relevant to your application
 
-“See docs/COPILOT_AGENT_GUIDELINE.md for coding and Copilot usage standards.”
-
+“See docs/copilot-java-strict-coding-rules.md for coding and Copilot usage standards.”
 
 
 ## Getting Started
