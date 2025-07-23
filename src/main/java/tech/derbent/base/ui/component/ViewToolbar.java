@@ -21,6 +21,7 @@ import com.vaadin.flow.component.html.Header;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.Display;
@@ -209,9 +210,10 @@ public final class ViewToolbar extends Composite<Header> implements CProjectList
     /**
      * Creates the right side components containing user info and layout toggle.
      */
-    private Div createRightSideComponents() {
-        final var rightSide = new Div();
-        rightSide.addClassNames(Display.FLEX, AlignItems.CENTER, Gap.SMALL);
+    private HorizontalLayout createRightSideComponents() {
+        final var rightSide = new HorizontalLayout();
+        rightSide.setSpacing(true);
+        rightSide.setAlignItems(HorizontalLayout.Alignment.CENTER);
 
         // Create user info components
         createUserInfoComponents();
