@@ -28,8 +28,8 @@ public class CPanelUserDescription extends CAccordionDescription<CUser> {
 		super(currentEntity, beanValidationBinder, CUser.class, entityService);
 		this.userTypeService = userTypeService;
 		createPanelContent();
-		// open the panel by default
-		open(0);
+		// open the panel by default using the new convenience method
+		openPanel();
 	}
 
 	@Override
