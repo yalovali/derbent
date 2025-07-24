@@ -24,9 +24,9 @@ import tech.derbent.abstracts.domains.CEntityDB;
 /**
  * Test class for CDataProviderResolver to verify annotation-based data provider
  * functionality. These tests focus on the resolver's behavior with different
- * configurations and error conditions. Note: These are unit tests that focus on
- * the resolver's logic rather than actual Spring integration. Integration tests
- * are handled separately to test the full Spring context integration.
+ * configurations and error conditions. Note: These are unit tests that focus on the
+ * resolver's logic rather than actual Spring integration. Integration tests are handled
+ * separately to test the full Spring context integration.
  */
 class CDataProviderResolverTest {
 
@@ -63,8 +63,8 @@ class CDataProviderResolverTest {
 	/**
 	 * Helper method to create MetaData mock with specified values
 	 */
-	@SuppressWarnings("unchecked")
-	private MetaData createMetaData(final String beanName, final String beanValue, final Class<?> providerClass, final String methodName) {
+	private MetaData createMetaData(final String beanName, final String beanValue,
+		final Class<?> providerClass, final String methodName) {
 		final MetaData metaData = mock(MetaData.class);
 		when(metaData.dataProviderBean()).thenReturn(beanName);
 		doReturn(providerClass).when(metaData).dataProviderClass();
@@ -101,7 +101,8 @@ class CDataProviderResolverTest {
 	@DisplayName("should prioritize explicit bean name over class")
 	void testBeanNamePriorityOverClass() {
 		// Given - both bean name and class specified
-		final MetaData metaData = createMetaData("explicitService", "", String.class, "list");
+		final MetaData metaData =
+			createMetaData("explicitService", "", String.class, "list");
 		when(applicationContext.containsBean("explicitService")).thenReturn(false);
 		// When
 		final List<TestEntity> result = resolver.resolveData(TestEntity.class, metaData);
@@ -118,7 +119,8 @@ class CDataProviderResolverTest {
 	void testBeanNotFoundByClass() {
 		// Given
 		final MetaData metaData = createMetaData("", "", String.class, "list");
-		when(applicationContext.getBean(String.class)).thenThrow(new RuntimeException("Bean not found"));
+		when(applicationContext.getBean(String.class))
+			.thenThrow(new RuntimeException("Bean not found"));
 		// When
 		final List<TestEntity> result = resolver.resolveData(TestEntity.class, metaData);
 		// Then
@@ -131,7 +133,8 @@ class CDataProviderResolverTest {
 	@DisplayName("should return empty list when bean is not found by name")
 	void testBeanNotFoundByName() {
 		// Given
-		final MetaData metaData = createMetaData("nonExistentService", "", Object.class, "list");
+		final MetaData metaData =
+			createMetaData("nonExistentService", "", Object.class, "list");
 		when(applicationContext.containsBean("nonExistentService")).thenReturn(false);
 		// When
 		final List<TestEntity> result = resolver.resolveData(TestEntity.class, metaData);
@@ -147,7 +150,8 @@ class CDataProviderResolverTest {
 	void testClassResolutionWhenNoBeanName() {
 		// Given - only class specified
 		final MetaData metaData = createMetaData("", "", String.class, "list");
-		when(applicationContext.getBean(String.class)).thenThrow(new RuntimeException("Bean not found"));
+		when(applicationContext.getBean(String.class))
+			.thenThrow(new RuntimeException("Bean not found"));
 		// When
 		final List<TestEntity> result = resolver.resolveData(TestEntity.class, metaData);
 		// Then
@@ -164,8 +168,10 @@ class CDataProviderResolverTest {
 		resolver.clearCaches();
 		// Then - should not throw exception
 		final String stats = resolver.getCacheStats();
-		assertTrue(stats.contains("Method cache: 0 entries"), "Method cache should be cleared");
-		assertTrue(stats.contains("Bean cache: 0 entries"), "Bean cache should be cleared");
+		assertTrue(stats.contains("Method cache: 0 entries"),
+			"Method cache should be cleared");
+		assertTrue(stats.contains("Bean cache: 0 entries"),
+			"Bean cache should be cleared");
 	}
 
 	@Test
@@ -175,7 +181,8 @@ class CDataProviderResolverTest {
 		final String stats = resolver.getCacheStats();
 		// Then
 		assertNotNull(stats, "Stats should not be null");
-		assertTrue(stats.contains("Method cache:"), "Stats should contain method cache info");
+		assertTrue(stats.contains("Method cache:"),
+			"Stats should contain method cache info");
 		assertTrue(stats.contains("Bean cache:"), "Stats should contain bean cache info");
 	}
 
@@ -185,7 +192,8 @@ class CDataProviderResolverTest {
 		// Given
 		final MetaData metaData = createMetaData("testService", "", Object.class, "list");
 		// When & Then
-		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> resolver.resolveData(null, metaData));
+		final IllegalArgumentException exception = assertThrows(
+			IllegalArgumentException.class, () -> resolver.resolveData(null, metaData));
 		assertEquals("Entity type cannot be null", exception.getMessage());
 	}
 
@@ -193,7 +201,9 @@ class CDataProviderResolverTest {
 	@DisplayName("should handle null metadata gracefully")
 	void testNullMetaData() {
 		// When & Then
-		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> resolver.resolveData(TestEntity.class, null));
+		final IllegalArgumentException exception =
+			assertThrows(IllegalArgumentException.class,
+				() -> resolver.resolveData(TestEntity.class, null));
 		assertEquals("MetaData cannot be null", exception.getMessage());
 	}
 
@@ -209,6 +219,7 @@ class CDataProviderResolverTest {
 		final List<TestEntity> result = resolver.resolveData(TestEntity.class, metaData);
 		// Then
 		assertNotNull(result, "Result should not be null");
-		assertTrue(result.isEmpty(), "Result should be empty when method invocation fails");
+		assertTrue(result.isEmpty(),
+			"Result should be empty when method invocation fails");
 	}
 }

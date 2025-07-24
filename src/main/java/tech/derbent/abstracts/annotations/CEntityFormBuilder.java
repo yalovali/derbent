@@ -123,11 +123,6 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		LoggerFactory.getLogger(CEntityFormBuilder.class);
 	protected static final String LabelMinWidth_210PX = "210px";
 	/**
-	 * Spring application context for accessing the data provider resolver. Set via
-	 * ApplicationContextAware interface.
-	 */
-	private static ApplicationContext applicationContext;
-	/**
 	 * Cached instance of the data provider resolver for performance.
 	 */
 	private static CDataProviderResolver dataProviderResolver;
@@ -922,7 +917,6 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 	 */
 	@Override
 	public void setApplicationContext(final ApplicationContext context) {
-		CEntityFormBuilder.applicationContext = context;
 		try {
 			CEntityFormBuilder.dataProviderResolver =
 				context.getBean(CDataProviderResolver.class);

@@ -28,6 +28,7 @@ public class CMeetingsView extends CProjectAwareMDPage<CMeeting> {
 	private static final long serialVersionUID = 1L;
 	private final String ENTITY_ID_FIELD = "meeting_id";
 	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "meetings/%s/edit";
+	@SuppressWarnings("unused")
 	private final CMeetingTypeService meetingTypeService;
 	private final CUserService userService;
 	private MultiSelectComboBox<CUser> participantsField;

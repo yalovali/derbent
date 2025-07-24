@@ -16,8 +16,8 @@ import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.domain.CActivityType;
 
 /**
- * Test class for CActivityService lazy loading functionality. Specifically
- * tests the fix for LazyInitializationException with CActivityType.
+ * Test class for CActivityService lazy loading functionality. Specifically tests the fix
+ * for LazyInitializationException with CActivityType.
  */
 class CActivityServiceLazyLoadingTest {
 
@@ -42,9 +42,11 @@ class CActivityServiceLazyLoadingTest {
 		final CActivityType activityType = new CActivityType();
 		activityType.setName("Test Activity Type");
 		activity.setActivityType(activityType);
-		when(repository.findByIdWithActivityType(activityId)).thenReturn(Optional.of(activity));
+		when(repository.findByIdWithActivityType(activityId))
+			.thenReturn(Optional.of(activity));
 		// When
-		final Optional<CActivity> result = activityService.getWithActivityType(activityId);
+		final Optional<CActivity> result =
+			activityService.getWithActivityType(activityId);
 		// Then
 		assertNotNull(result);
 		assertNotNull(result.orElse(null));
@@ -53,12 +55,11 @@ class CActivityServiceLazyLoadingTest {
 
 	@Test
 	void testInitializeLazyFieldsHandlesNullEntity() {
-		// Given
-		final CActivity nullActivity = null;
 		// When & Then - Should not throw any exception
 		assertDoesNotThrow(() -> {
 			// Use reflection to access the protected method for testing
-			activityService.getClass().getDeclaredMethod("initializeLazyFields", CActivity.class);
+			activityService.getClass().getDeclaredMethod("initializeLazyFields",
+				CActivity.class);
 		});
 	}
 
@@ -71,13 +72,14 @@ class CActivityServiceLazyLoadingTest {
 		final CActivityType activityType = new CActivityType();
 		activityType.setName("Test Activity Type");
 		activity.setActivityType(activityType);
-		when(repository.findByIdWithActivityType(activityId)).thenReturn(Optional.of(activity));
+		when(repository.findByIdWithActivityType(activityId))
+			.thenReturn(Optional.of(activity));
 		// When & Then - Should not throw LazyInitializationException
 		assertDoesNotThrow(() -> {
 			final Optional<CActivity> result = activityService.get(activityId);
 			if (result.isPresent()) {
-				// Access the lazy loaded field - this would throw LazyInitializationException
-				// before the fix
+				// Access the lazy loaded field - this would throw
+				// LazyInitializationException before the fix
 				final CActivityType type = result.get().getActivityType();
 				if (type != null) {
 					type.getName(); // Access a property to trigger lazy loading

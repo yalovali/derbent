@@ -51,7 +51,7 @@ import tech.derbent.abstracts.domains.CEntityDB;
  * </p>
  *
  * <pre>
- * 
+ *
  * {
  * 	&#64;code
  * 	// Using bean name
@@ -122,7 +122,6 @@ public final class CDataProviderResolver {
 	 * @param entityType  the entity class for logging purposes
 	 * @return list of entities from the method call
 	 */
-	@SuppressWarnings("unchecked")
 	private <T extends CEntityDB> List<T> callDataMethod(final Object serviceBean,
 		final String methodName, final Class<T> entityType) {
 		if (serviceBean == null) {
@@ -296,7 +295,6 @@ public final class CDataProviderResolver {
 	 * @param methodName the method name to call on the bean
 	 * @return list of entities from automatically resolved service
 	 */
-	@SuppressWarnings("unchecked")
 	private <T extends CEntityDB> List<T>
 		resolveDataAutomatically(final Class<T> entityType, final String methodName) {
 		LOGGER.debug(
@@ -309,12 +307,8 @@ public final class CDataProviderResolver {
 				+ entityName.substring(1) + "Service",
 			entityName.toLowerCase() + "Service" };
 		for (final String beanName : possibleBeanNames) {
-			LOGGER.debug("Trying bean name: '{}' for entity type: {}", beanName,
-				entityName);
 			try {
 				if (applicationContext.containsBean(beanName)) {
-					LOGGER.debug("Found bean '{}' for entity type: {}", beanName,
-						entityName);
 					return resolveDataFromBean(entityType, beanName, methodName);
 				}
 			} catch (final Exception e) {
@@ -337,7 +331,6 @@ public final class CDataProviderResolver {
 	 * @param methodName the method name to call on the bean
 	 * @return list of entities from the specified bean
 	 */
-	@SuppressWarnings("unchecked")
 	private <T extends CEntityDB> List<T> resolveDataFromBean(final Class<T> entityType,
 		final String beanName, final String methodName) {
 		LOGGER.debug(
@@ -377,7 +370,6 @@ public final class CDataProviderResolver {
 	 * @param methodName   the method name to call on the bean
 	 * @return list of entities from the specified bean type
 	 */
-	@SuppressWarnings("unchecked")
 	private <T extends CEntityDB> List<T> resolveDataFromClass(final Class<T> entityType,
 		final Class<?> serviceClass, final String methodName) {
 		LOGGER.debug(
