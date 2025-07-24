@@ -3,7 +3,8 @@
 /* Red background for detailed tab */
 .details-tab-layout {
     background-color: #fff7e9;
-	width: 100%;
+	/* 100% creates a scrollbar, probably because of margins */
+	width: 99%;
 	border-radius: 12px;
 	border: 1px solid var(--lumo-contrast-10pct);
 	font-size: 1.6em;
@@ -22,6 +23,12 @@ vaadin-accordion-heading{
 	    color: 	#5d6069;
 		font-size: 1.3em;
 		border-bottom: 1px solid var(--lumo-contrast-10pct);
+}
+
+.c-accordion {
+    margin: 0;
+    padding: 0;
+    /*max-width: 1000px;*/
 }
 
 /* Hierarchical Side Menu Styles */
@@ -138,6 +145,5 @@ vaadin-accordion-heading{
 }
 
 .view-toolbar{
-	background-color: #616161;
 	width: 100%;
 }

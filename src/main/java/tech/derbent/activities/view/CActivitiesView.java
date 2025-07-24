@@ -53,7 +53,7 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 	protected void createEntityDetails() {
 		LOGGER.info("Creating entity details for CActivitiesView");
 		// Create description panel for activity details
-		descriptionPanel = new CPanelActivityDescription(currentEntity, getBinder(),
+		descriptionPanel = new CPanelActivityDescription(getCurrentEntity(), getBinder(),
 			(CActivityService) entityService, activityTypeService);
 		getBaseDetailsLayout().add(descriptionPanel);
 	}

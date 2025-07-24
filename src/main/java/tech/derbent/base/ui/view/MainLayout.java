@@ -72,14 +72,16 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		this.currentUser =
 			authenticationContext.getAuthenticatedUser(User.class).orElse(null);
 		setPrimarySection(Section.DRAWER);
-		addToDrawer(createHeader());
+		// this is the main layout, so we add the side navigation menu and the user menu
+		// to the drawer and the toolbar to the navbar
 		addToNavbar(true, createNavBar()); // Add the toggle button to the navbar
+		addToDrawer(createHeader());
 		// ok, lets put it in a scroller, so it can scroll if it is too long????
 		addToDrawer(new Scroller(createSlidingHeader()));
 		// why this is in a scroller? Add the side navigation menu to the drawer, wrapped
-		// in a Scroller for better scrolling behavior
-		addToDrawer(new Scroller(createSideNav()));
-		addToNavbar(createUserMenu()); // Add the user menu to the navbar
+		// in a Scroller for better scrolling behavior addToDrawer(new
+		// Scroller(createSideNav()));
+		addToDrawer(createUserMenu()); // Add the user menu to the navbar
 	}
 
 	@Override
@@ -98,6 +100,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		 */
 	}
 
+	@SuppressWarnings("unused")
 	private Div createAppMarker() {
 		final var slidingHeader = new Div();
 		slidingHeader.addClassNames(Display.FLEX, AlignItems.CENTER,
@@ -141,6 +144,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	 * with optional icons.
 	 * @return A `SideNav` component containing the navigation items.
 	 */
+	@SuppressWarnings("unused")
 	private SideNav createSideNav() {
 		final var nav = new SideNav(); // Create the side navigation
 		nav.addClassNames(Margin.Horizontal.MEDIUM); // Style the navigation

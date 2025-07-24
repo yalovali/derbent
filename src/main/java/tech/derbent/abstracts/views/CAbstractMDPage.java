@@ -6,14 +6,15 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.HasOrderedComponents;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -21,6 +22,7 @@ import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
 import jakarta.annotation.PostConstruct;
@@ -31,18 +33,18 @@ import tech.derbent.base.ui.dialogs.CConfirmationDialog;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
 import tech.derbent.session.service.LayoutService;
 
-public abstract class CAbstractMDPage<EntityClass extends CEntityDB>
-	extends CAbstractPage implements CLayoutChangeListener {
+public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAbstractPage
+	implements CLayoutChangeListener {
 
 	private static final long serialVersionUID = 1L;
 	protected final Class<EntityClass> entityClass;
 	protected Grid<EntityClass> grid;// = new Grid<>(CProject.class, false);
 	private final BeanValidationBinder<EntityClass> binder;
 	protected SplitLayout splitLayout = new SplitLayout();
-	private final Accordion baseDescriptionAccordion = new Accordion();
+	// private final FlexLayout baseDetailsLayout = new FlexLayout();
 	private final VerticalLayout baseDetailsLayout = new VerticalLayout();
 	private final Div detailsTabLayout = new Div();
-	protected EntityClass currentEntity;
+	private EntityClass currentEntity;
 	protected final CAbstractService<EntityClass> entityService;
 	protected LayoutService layoutService; // Optional injection
 
@@ -54,107 +56,42 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB>
 		binder = new BeanValidationBinder<>(entityClass);
 		addClassNames("md-page");
 		setSizeFull();
-		// create a split layout for the main content, default to vertical split
-		splitLayout.setSizeFull();
-		splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
-		// Create UI
 		createGridLayout();
-		// see css for details-tab-layout
+		// layout for the secondary part of the split layout
 		final VerticalLayout detailsBase = new VerticalLayout();
-		splitLayout.addToSecondary(detailsBase);
+		// create the tab layout for the details view top
 		detailsTabLayout.setClassName("details-tab-layout");
 		detailsBase.add(detailsTabLayout);
+		// now the content are!!!
 		final Scroller scroller = new Scroller();
 		detailsBase.add(scroller);
+		initBaseDetailsLayout();
 		scroller.setContent(baseDetailsLayout);
 		scroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
 		// baseDetailsLayout.add(baseDescriptionAccordion);
 		createGridForEntity();
 		// binder = new BeanValidationBinder<>(entityClass
-		add(splitLayout);
+		initSplitLayout(detailsBase);
 		// Initial layout setup - will be updated when layout service is available
 		updateLayoutOrientation();
 	}
 
-	/**
-	 * Sets the layout service. This is typically called via dependency injection
-	 * or manually after construction.
-	 */
-	public void setLayoutService(final LayoutService layoutService) {
-		this.layoutService = layoutService;
-		// Update layout based on current mode
-		updateLayoutOrientation();
-	}
-
-	@Override
-	protected void onAttach(final AttachEvent attachEvent) {
-		super.onAttach(attachEvent);
-		// Register for layout change notifications if service is available
-		if (layoutService != null) {
-			layoutService.addLayoutChangeListener(this);
-			// Update layout based on current mode
-			updateLayoutOrientation();
-		}
-	}
-
-	@Override
-	protected void onDetach(final DetachEvent detachEvent) {
-		super.onDetach(detachEvent);
-		// Unregister from layout change notifications
-		if (layoutService != null) {
-			layoutService.removeLayoutChangeListener(this);
-		}
-	}
-
-	@Override
-	public void onLayoutModeChanged(final LayoutService.LayoutMode newMode) {
-		LOGGER.debug("Layout mode changed to: {} for {}", newMode, getClass().getSimpleName());
-		updateLayoutOrientation();
-	}
-
-	/**
-	 * Updates the split layout orientation based on the current layout mode.
-	 */
-	private void updateLayoutOrientation() {
-		if (layoutService != null && splitLayout != null) {
-			final LayoutService.LayoutMode currentMode = layoutService.getCurrentLayoutMode();
-			
-			LOGGER.debug("Updating layout orientation to: {} for {}", currentMode, getClass().getSimpleName());
-			
-			if (currentMode == LayoutService.LayoutMode.HORIZONTAL) {
-				splitLayout.setOrientation(SplitLayout.Orientation.HORIZONTAL);
-				// For horizontal layout, give more space to the grid (left side)
-				splitLayout.setSplitterPosition(50.0); // 50% for grid, 50% for details
-			} else {
-				splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
-				// For vertical layout, give more space to the grid (top)
-				splitLayout.setSplitterPosition(30.0); // 30% for grid, 70% for details
-			}
-			
-			// Force UI refresh to apply changes immediately
-			getUI().ifPresent(ui -> ui.access(() -> {
-				splitLayout.getElement().callJsFunction("$server.requestUpdate");
-			}));
-			
-			LOGGER.debug("Updated split layout orientation to: {} with position: {}", 
-						splitLayout.getOrientation(), splitLayout.getSplitterPosition());
-		} else {
-			// Default fallback when no layout service is available
-			splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
-			splitLayout.setSplitterPosition(30.0);
-			LOGGER.debug("Applied default vertical layout (no layout service available)");
-		}
-	}
-
+	// this method is called before the page is entered
 	@Override
 	public void beforeEnter(final BeforeEnterEvent event) {
+		LOGGER.debug("beforeEnter called for {}", getClass().getSimpleName());
 		final Optional<Long> entityID =
 			event.getRouteParameters().get(getEntityRouteIdField()).map(Long::parseLong);
 		if (entityID.isPresent()) {
 			final Optional<EntityClass> samplePersonFromBackend =
 				entityService.get(entityID.get());
 			if (samplePersonFromBackend.isPresent()) {
-				populateForm(samplePersonFromBackend.get());
+				final Optional<EntityClass> entity = entityService.get(entityID.get());
+				populateForm(entity.get());
+				if (grid != null) {
+					grid.select(entity.get()); // Ensure grid selection matches the form
+				}
+				setLastSelectedEntityId(entity.get().getId());
 			}
 			else {
 				Notification.show(
@@ -164,11 +101,28 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB>
 				// when a row is selected but the data is no longer available, refresh
 				// grid
 				refreshGrid();
-				// event.forwardTo(CProjectsView.class);
 			}
-		} else {
-			// No specific entity ID in URL (list mode), auto-select first item if available
-			LOGGER.debug("No entity ID in URL for {}, attempting auto-selection", getClass().getSimpleName());
+		}
+		else if (getLastSelectedEntityId() != -1) {
+			// If no specific entity ID in URL, try to select the last selected entity
+			LOGGER.debug(
+				"No entity ID in URL, trying to select last selected entity ID: {}",
+				getLastSelectedEntityId());
+			final Optional<EntityClass> lastEntity =
+				entityService.get(getLastSelectedEntityId());
+			if (lastEntity.isPresent()) {
+				populateForm(lastEntity.get());
+				if (grid != null) {
+					grid.select(lastEntity.get()); // Ensure grid selection matches the
+													// form
+				}
+			}
+		}
+		else {
+			// No specific entity ID in URL (list mode), auto-select first item if
+			// available
+			LOGGER.debug("No entity ID in URL for {}, attempting auto-selection",
+				getClass().getSimpleName());
 			selectFirstItemIfAvailable();
 		}
 	}
@@ -290,13 +244,16 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB>
 		// Add selection listener to the grid
 		grid.asSingleSelect().addValueChangeListener(event -> {
 			populateForm(event.getValue());
+			if (event.getValue() != null) {
+				setLastSelectedEntityId(event.getValue().getId());
+			}
 		});
 		final Div wrapper = new Div();
 		wrapper.setClassName("grid-wrapper");
 		wrapper.add(grid);
 		splitLayout.addToPrimary(wrapper);
 		// Auto-select first item if available after grid is set up
-		selectFirstItemIfAvailable();
+		// selectFirstItemIfAvailable();
 	}
 
 	protected CButton createSaveButton(final String buttonText) {
@@ -332,7 +289,7 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB>
 		return save;
 	}
 
-	public VerticalLayout getBaseDetailsLayout() { return baseDetailsLayout; }
+	public HasOrderedComponents getBaseDetailsLayout() { return baseDetailsLayout; }
 
 	public BeanValidationBinder<EntityClass> getBinder() { return binder; }
 
@@ -344,7 +301,72 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB>
 
 	protected abstract String getEntityRouteTemplateEdit();
 
+	// if not present returns -1
+	public Long getLastSelectedEntityId() {
+		final String LAST_SELECTED_ID_KEY =
+			"lastSelectedEntityId_" + entityClass.getSimpleName();
+		if (VaadinSession.getCurrent() == null) {
+			return -1L; // Return -1 if session is not available
+		}
+		if (VaadinSession.getCurrent().getAttribute(LAST_SELECTED_ID_KEY) == null) {
+			return -1L; // Return -1 if attribute is not set
+		}
+		// Cast to Long since we expect the ID to be a Long
+		final Long lastId =
+			(Long) VaadinSession.getCurrent().getAttribute(LAST_SELECTED_ID_KEY);
+		return lastId;
+	}
+
+	private void initBaseDetailsLayout() {
+		baseDetailsLayout.setClassName("base-details-layout");
+		baseDetailsLayout.setSizeFull();
+		baseDetailsLayout.setAlignItems(FlexLayout.Alignment.STRETCH);
+		/* FOR FLEX LAYOUT */
+		// baseDetailsLayout.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
+		// baseDetailsLayout.setFlexWrap(FlexLayout.FlexWrap.WRAP);
+		baseDetailsLayout.setJustifyContentMode(FlexLayout.JustifyContentMode.START);
+	}
+
+	private void initSplitLayout(final VerticalLayout detailsBase) {
+		splitLayout.setSizeFull();
+		splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
+		splitLayout.addToSecondary(detailsBase);
+		add(splitLayout);
+	}
+
 	protected abstract EntityClass newEntity();
+
+	// this method is called when the page is attached to the UI
+	@Override
+	protected void onAttach(final AttachEvent attachEvent) {
+		LOGGER.debug("onAttach called for {}", getClass().getSimpleName());
+		super.onAttach(attachEvent);
+		// Register for layout change notifications if service is available
+		if (layoutService != null) {
+			layoutService.addLayoutChangeListener(this);
+			// Update layout based on current mode
+			updateLayoutOrientation();
+		}
+		// this is called when the page is attached to the UI if you dont call it, the
+		// first item will not be selected
+		selectFirstItemIfAvailable();
+	}
+
+	@Override
+	protected void onDetach(final DetachEvent detachEvent) {
+		super.onDetach(detachEvent);
+		// Unregister from layout change notifications
+		if (layoutService != null) {
+			layoutService.removeLayoutChangeListener(this);
+		}
+	}
+
+	@Override
+	public void onLayoutModeChanged(final LayoutService.LayoutMode newMode) {
+		LOGGER.debug("Layout mode changed to: {} for {}", newMode,
+			getClass().getSimpleName());
+		updateLayoutOrientation();
+	}
 
 	protected void populateForm(final EntityClass value) {
 		currentEntity = value;
@@ -355,54 +377,37 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB>
 		LOGGER.info("Refreshing grid for {}", getClass().getSimpleName());
 		grid.select(null);
 		grid.getDataProvider().refreshAll();
-		// Auto-select first item after refresh if available
-		selectFirstItemIfAvailable();
 	}
 
 	/**
-	 * Automatically selects the first item in the grid if available.
-	 * This ensures that details panels are populated when there is at least one item.
-	 * Following the requirement to always show details when data is available.
-	 * Only applies when no specific entity is already selected (i.e., in list mode).
+	 * Automatically selects the first item in the grid if available. This ensures that
+	 * details panels are populated when there is at least one item. Following the
+	 * requirement to always show details when data is available. Only applies when no
+	 * specific entity is already selected (i.e., in list mode).
 	 */
 	protected void selectFirstItemIfAvailable() {
-		LOGGER.info("Attempting to select first item if available for {}", getClass().getSimpleName());
-		
-		if (grid == null) {
-			LOGGER.debug("Grid is null, cannot select first item");
+		if ((grid == null) || (currentEntity != null)) {
 			return;
 		}
-		
-		// Don't auto-select if an entity is already selected (e.g., in edit mode)
-		if (currentEntity != null) {
-			LOGGER.debug("Entity already selected (ID: {}), skipping auto-selection for {}", 
-				currentEntity.getId(), getClass().getSimpleName());
-			return;
-		}
-		
 		try {
 			// Use UI.access to ensure this runs in the correct UI thread
 			getUI().ifPresent(ui -> ui.access(() -> {
 				try {
-					// Try to get the first item using a more direct approach
-					// Get the first page of results from the entity service
-					final var firstPageResults = entityService.list(
-						org.springframework.data.domain.PageRequest.of(0, 1));
-					if (firstPageResults != null && !firstPageResults.isEmpty()) {
-						final EntityClass firstItem = firstPageResults.get(0);
-						LOGGER.debug("Selecting first item with ID: {} for {}", 
-							firstItem.getId(), getClass().getSimpleName());
-						grid.select(firstItem);
-						// The selection listener will automatically call populateForm or navigate
-					} else {
-						LOGGER.debug("No items available to select for {}", getClass().getSimpleName());
+					// Try to get the first item using a more direct approach Get the
+					// first page of results from the entity service
+					final var firstPageResults = entityService
+						.list(org.springframework.data.domain.PageRequest.of(0, 1));
+					if ((firstPageResults != null) && !firstPageResults.isEmpty()) {
+						grid.select(firstPageResults.get(0));
 					}
 				} catch (final Exception e) {
-					LOGGER.error("Error querying first item for {}: {}", getClass().getSimpleName(), e.getMessage(), e);
+					LOGGER.error("Error querying first item for {}: {}",
+						getClass().getSimpleName(), e.getMessage(), e);
 				}
 			}));
 		} catch (final Exception e) {
-			LOGGER.error("Error selecting first item for {}: {}", getClass().getSimpleName(), e.getMessage(), e);
+			LOGGER.error("Error selecting first item for {}: {}",
+				getClass().getSimpleName(), e.getMessage(), e);
 		}
 	}
 
@@ -410,9 +415,64 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB>
 		this.currentEntity = currentEntity;
 	}
 
+	public void setLastSelectedEntityId(final Long lastSelectedEntityId) {
+		// this method conflicts with the currentEntity setter
+		if (lastSelectedEntityId == null) {
+			return;
+		}
+		final String LAST_SELECTED_ID_KEY =
+			"lastSelectedEntityId_" + entityClass.getSimpleName();
+		VaadinSession.getCurrent().setAttribute(LAST_SELECTED_ID_KEY,
+			lastSelectedEntityId);
+	}
+
+	/**
+	 * Sets the layout service. This is typically called via dependency injection or
+	 * manually after construction.
+	 */
+	public void setLayoutService(final LayoutService layoutService) {
+		this.layoutService = layoutService;
+		// Update layout based on current mode
+		updateLayoutOrientation();
+	}
+
 	/**
 	 * Sets up the toolbar for the page.
 	 */
 	@Override
 	protected abstract void setupToolbar();
+
+	/**
+	 * Updates the split layout orientation based on the current layout mode.
+	 */
+	private void updateLayoutOrientation() {
+		if ((layoutService != null) && (splitLayout != null)) {
+			final LayoutService.LayoutMode currentMode =
+				layoutService.getCurrentLayoutMode();
+			LOGGER.debug("Updating layout orientation to: {} for {}", currentMode,
+				getClass().getSimpleName());
+			if (currentMode == LayoutService.LayoutMode.HORIZONTAL) {
+				splitLayout.setOrientation(SplitLayout.Orientation.HORIZONTAL);
+				// For horizontal layout, give more space to the grid (left side)
+				splitLayout.setSplitterPosition(50.0); // 50% for grid, 50% for details
+			}
+			else {
+				splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
+				// For vertical layout, give more space to the grid (top)
+				splitLayout.setSplitterPosition(30.0); // 30% for grid, 70% for details
+			}
+			// Force UI refresh to apply changes immediately
+			getUI().ifPresent(ui -> ui.access(() -> {
+				splitLayout.getElement().callJsFunction("$server.requestUpdate");
+			}));
+			LOGGER.debug("Updated split layout orientation to: {} with position: {}",
+				splitLayout.getOrientation(), splitLayout.getSplitterPosition());
+		}
+		else {
+			// Default fallback when no layout service is available
+			splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
+			splitLayout.setSplitterPosition(30.0);
+			LOGGER.debug("Applied default vertical layout (no layout service available)");
+		}
+	}
 }

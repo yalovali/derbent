@@ -65,7 +65,7 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 	protected void createEntityDetails() {
 		LOGGER.info("Creating entity details for CUsersView");
 		// Create description panel for user details
-		descriptionPanel = new CPanelUserDescription(currentEntity, getBinder(),
+		descriptionPanel = new CPanelUserDescription(getCurrentEntity(), getBinder(),
 			(CUserService) entityService, userTypeService);
 		getBaseDetailsLayout().add(descriptionPanel);
 	}
@@ -99,13 +99,14 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 		final tech.derbent.abstracts.views.CButton save =
 			tech.derbent.abstracts.views.CButton.createPrimary(buttonText, e -> {
 				try {
-					if (currentEntity == null) {
-						currentEntity = newEntity();
+					if (getCurrentEntity() == null) {
+						// why dont you use populateForm(
+						setCurrentEntity(newEntity());
 					}
-					getBinder().writeBean(currentEntity);
+					getBinder().writeBean(getCurrentEntity());
 					// Handle password update if a new password was entered
 					descriptionPanel.saveEventHandler();
-					entityService.save(currentEntity);
+					entityService.save(getCurrentEntity());
 					clearForm();
 					refreshGrid();
 					Notification.show("Data updated");

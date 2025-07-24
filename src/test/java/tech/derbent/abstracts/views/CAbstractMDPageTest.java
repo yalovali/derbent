@@ -22,127 +22,119 @@ import tech.derbent.abstracts.services.CAbstractService;
 @ExtendWith(MockitoExtension.class)
 class CAbstractMDPageTest {
 
-    @Mock
-    private CAbstractService<TestEntity> mockEntityService;
+	/**
+	 * Test entity for testing purposes.
+	 */
+	private static class TestEntity extends CEntityDB {
+		// Test implementation
+	}
 
-    private TestMDPage testPage;
+	/**
+	 * Test implementation of CAbstractMDPage for testing purposes.
+	 */
+	private static class TestMDPage extends CAbstractMDPage<TestEntity> {
 
-    @BeforeEach
-    void setUp() {
-        testPage = new TestMDPage(mockEntityService);
-    }
+		private static final long serialVersionUID = 1L;
 
-    @Test
-    void testDetailsTabLayoutContainsButtons() {
-        // Act
-        testPage.createDetailsTabLayout();
+		public TestMDPage(final CAbstractService<TestEntity> entityService) {
+			super(TestEntity.class, entityService);
+		}
 
-        // Assert
-        final Div detailsTabLayout = testPage.getDetailsTabLayout();
-        assertNotNull(detailsTabLayout, "Details tab layout should not be null");
+		@Override
+		protected void createDetailsLayout() {
+			// Test implementation - empty
+		}
 
-        // Verify that the tab layout has content
-        assertTrue(detailsTabLayout.getChildren().count() > 0, "Details tab layout should have content");
+		@Override
+		protected void createGridForEntity() {
+			// Test implementation - empty
+		}
 
-        // Find the HorizontalLayout that should contain the tab content
-        final HorizontalLayout tabContent = detailsTabLayout.getChildren().filter(HorizontalLayout.class::isInstance)
-                .map(HorizontalLayout.class::cast).findFirst().orElse(null);
+		@Override
+		protected String getEntityRouteIdField() { return "test_id"; }
 
-        assertNotNull(tabContent, "Tab content layout should exist");
-        assertTrue(tabContent.getClassName().contains("details-tab-content"),
-                "Tab content should have correct CSS class");
-    }
+		@Override
+		protected String getEntityRouteTemplateEdit() { return "test/%s/edit"; }
 
-    @Test
-    void testCreateDetailsTabLeftContent() {
-        // Act
-        final Div leftContent = testPage.createDetailsTabLeftContent();
+		@Override
+		protected void initPage() {
+			// Test implementation - empty
+		}
 
-        // Assert
-        assertNotNull(leftContent, "Left content should not be null");
-        assertEquals("Details", leftContent.getText(), "Default left content should be 'Details'");
-        assertTrue(leftContent.getClassName().contains("details-tab-label"),
-                "Left content should have correct CSS class");
-    }
+		@Override
+		protected TestEntity newEntity() {
+			return new TestEntity();
+		}
 
-    @Test
-    void testCreateDetailsTabButtonLayout() {
-        // Act
-        final HorizontalLayout buttonLayout = testPage.createDetailsTabButtonLayout();
+		@Override
+		protected void setupToolbar() {
+			// Test implementation - empty
+		}
+	}
 
-        // Assert
-        assertNotNull(buttonLayout, "Button layout should not be null");
-        assertTrue(buttonLayout.getClassName().contains("details-tab-button-layout"),
-                "Button layout should have correct CSS class");
+	@Mock
+	private CAbstractService<TestEntity> mockEntityService;
+	private TestMDPage testPage;
 
-        // Verify that buttons are present (Save, Cancel, Delete)
-        final long buttonCount = buttonLayout.getChildren().filter(CButton.class::isInstance).count();
-        assertEquals(3, buttonCount, "Should have exactly 3 buttons (Save, Cancel, Delete)");
-    }
+	@BeforeEach
+	void setUp() {
+		testPage = new TestMDPage(mockEntityService);
+	}
 
-    @Test
-    void testCreateButtonLayoutIsEmptyByDefault() {
-        // Arrange
-        final Div testLayout = new Div();
+	@Test
+	void testCreateButtonLayoutIsEmptyByDefault() {
+		// Arrange
+		final Div testLayout = new Div();
+		// Act
+		testPage.createButtonLayout(testLayout);
+		// Assert The new implementation should not add any buttons to the main layout
+		assertEquals(0, testLayout.getChildren().count(),
+			"createButtonLayout should not add buttons to main layout anymore");
+	}
 
-        // Act
-        testPage.createButtonLayout(testLayout);
+	@Test
+	void testCreateDetailsTabButtonLayout() {
+		// Act
+		final HorizontalLayout buttonLayout = testPage.createDetailsTabButtonLayout();
+		// Assert
+		assertNotNull(buttonLayout, "Button layout should not be null");
+		assertTrue(buttonLayout.getClassName().contains("details-tab-button-layout"),
+			"Button layout should have correct CSS class");
+		// Verify that buttons are present (Save, Cancel, Delete)
+		final long buttonCount =
+			buttonLayout.getChildren().filter(CButton.class::isInstance).count();
+		assertEquals(3, buttonCount,
+			"Should have exactly 3 buttons (Save, Cancel, Delete)");
+	}
 
-        // Assert
-        // The new implementation should not add any buttons to the main layout
-        assertEquals(0, testLayout.getChildren().count(),
-                "createButtonLayout should not add buttons to main layout anymore");
-    }
+	@Test
+	void testCreateDetailsTabLeftContent() {
+		// Act
+		final Div leftContent = testPage.createDetailsTabLeftContent();
+		// Assert
+		assertNotNull(leftContent, "Left content should not be null");
+		assertEquals("Details", leftContent.getText(),
+			"Default left content should be 'Details'");
+		assertTrue(leftContent.getClassName().contains("details-tab-label"),
+			"Left content should have correct CSS class");
+	}
 
-    /**
-     * Test implementation of CAbstractMDPage for testing purposes.
-     */
-    private static class TestMDPage extends CAbstractMDPage<TestEntity> {
-
-        public TestMDPage(final CAbstractService<TestEntity> entityService) {
-            super(TestEntity.class, entityService);
-        }
-
-        @Override
-        protected void createDetailsLayout() {
-            // Test implementation - empty
-        }
-
-        @Override
-        protected void createGridForEntity() {
-            // Test implementation - empty
-        }
-
-        @Override
-        protected String getEntityRouteIdField() {
-            return "test_id";
-        }
-
-        @Override
-        protected String getEntityRouteTemplateEdit() {
-            return "test/%s/edit";
-        }
-
-        @Override
-        protected TestEntity newEntity() {
-            return new TestEntity();
-        }
-
-        @Override
-        protected void setupToolbar() {
-            // Test implementation - empty
-        }
-
-        @Override
-        protected void initPage() {
-            // Test implementation - empty
-        }
-    }
-
-    /**
-     * Test entity for testing purposes.
-     */
-    private static class TestEntity extends CEntityDB {
-        // Test implementation
-    }
+	@Test
+	void testDetailsTabLayoutContainsButtons() {
+		// Act
+		testPage.createDetailsTabLayout();
+		// Assert
+		final Div detailsTabLayout = testPage.getDetailsTabLayout();
+		assertNotNull(detailsTabLayout, "Details tab layout should not be null");
+		// Verify that the tab layout has content
+		assertTrue(detailsTabLayout.getChildren().count() > 0,
+			"Details tab layout should have content");
+		// Find the HorizontalLayout that should contain the tab content
+		final HorizontalLayout tabContent =
+			detailsTabLayout.getChildren().filter(HorizontalLayout.class::isInstance)
+				.map(HorizontalLayout.class::cast).findFirst().orElse(null);
+		assertNotNull(tabContent, "Tab content layout should exist");
+		assertTrue(tabContent.getClassName().contains("details-tab-content"),
+			"Tab content should have correct CSS class");
+	}
 }

@@ -8,9 +8,8 @@ import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 /**
- * CAccordion - Enhanced base class for accordion components.
- * Layer: View (MVC)
- * Provides common accordion functionality with standardized styling and behavior.
+ * CAccordion - Enhanced base class for accordion components. Layer: View (MVC) Provides
+ * common accordion functionality with standardized styling and behavior.
  */
 public class CAccordion extends Accordion {
 
@@ -28,26 +27,8 @@ public class CAccordion extends Accordion {
 		LOGGER.debug("Creating CAccordion with title: {}", title);
 		this.accordionTitle = title;
 		addClassName("c-accordion");
-		getStyle().set("min-width", "300px");
-		setWidthFull();
-		setHeightFull();
+		// getStyle().("min-width", "300px"); setWidthFull(); setMin
 		add(title, baseLayout);
-	}
-
-	/**
-	 * Gets the base layout for adding components.
-	 * @return the base VerticalLayout
-	 */
-	public VerticalLayout getBaseLayout() { 
-		return baseLayout; 
-	}
-
-	/**
-	 * Gets the title of this accordion.
-	 * @return the accordion title
-	 */
-	public String getAccordionTitle() {
-		return accordionTitle;
 	}
 
 	/**
@@ -68,11 +49,31 @@ public class CAccordion extends Accordion {
 	}
 
 	/**
-	 * Convenience method to set spacing for the base layout.
-	 * @param spacing whether to enable spacing
+	 * Convenience method to close this accordion panel.
 	 */
-	public void setContentSpacing(final boolean spacing) {
-		baseLayout.setSpacing(spacing);
+	public void closePanel() {
+		LOGGER.debug("Closing accordion panel: {}", accordionTitle);
+		close();
+	}
+
+	/**
+	 * Gets the title of this accordion.
+	 * @return the accordion title
+	 */
+	public String getAccordionTitle() { return accordionTitle; }
+
+	/**
+	 * Gets the base layout for adding components.
+	 * @return the base VerticalLayout
+	 */
+	public VerticalLayout getBaseLayout() { return baseLayout; }
+
+	/**
+	 * Convenience method to open this accordion panel (index 0).
+	 */
+	public void openPanel() {
+		LOGGER.debug("Opening accordion panel: {}", accordionTitle);
+		open(0);
 	}
 
 	/**
@@ -84,18 +85,10 @@ public class CAccordion extends Accordion {
 	}
 
 	/**
-	 * Convenience method to open this accordion panel (index 0).
+	 * Convenience method to set spacing for the base layout.
+	 * @param spacing whether to enable spacing
 	 */
-	public void openPanel() {
-		LOGGER.debug("Opening accordion panel: {}", accordionTitle);
-		open(0);
-	}
-
-	/**
-	 * Convenience method to close this accordion panel.
-	 */
-	public void closePanel() {
-		LOGGER.debug("Closing accordion panel: {}", accordionTitle);
-		close();
+	public void setContentSpacing(final boolean spacing) {
+		baseLayout.setSpacing(spacing);
 	}
 }
