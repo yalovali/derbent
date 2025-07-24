@@ -166,6 +166,10 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB>
 				refreshGrid();
 				// event.forwardTo(CProjectsView.class);
 			}
+		} else {
+			// No specific entity ID in URL (list mode), auto-select first item if available
+			LOGGER.debug("No entity ID in URL for {}, attempting auto-selection", getClass().getSimpleName());
+			selectFirstItemIfAvailable();
 		}
 	}
 
@@ -276,6 +280,7 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB>
 	protected abstract void createGridForEntity();
 
 	protected void createGridLayout() {
+		LOGGER.info("Creating grid layout for {}", getClass().getSimpleName());
 		grid = new Grid<>(entityClass, false);
 		grid.getColumns().forEach(grid::removeColumn);
 		grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
@@ -290,6 +295,8 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB>
 		wrapper.setClassName("grid-wrapper");
 		wrapper.add(grid);
 		splitLayout.addToPrimary(wrapper);
+		// Auto-select first item if available after grid is set up
+		selectFirstItemIfAvailable();
 	}
 
 	protected CButton createSaveButton(final String buttonText) {
@@ -345,8 +352,58 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB>
 	}
 
 	protected void refreshGrid() {
+		LOGGER.info("Refreshing grid for {}", getClass().getSimpleName());
 		grid.select(null);
 		grid.getDataProvider().refreshAll();
+		// Auto-select first item after refresh if available
+		selectFirstItemIfAvailable();
+	}
+
+	/**
+	 * Automatically selects the first item in the grid if available.
+	 * This ensures that details panels are populated when there is at least one item.
+	 * Following the requirement to always show details when data is available.
+	 * Only applies when no specific entity is already selected (i.e., in list mode).
+	 */
+	protected void selectFirstItemIfAvailable() {
+		LOGGER.info("Attempting to select first item if available for {}", getClass().getSimpleName());
+		
+		if (grid == null) {
+			LOGGER.debug("Grid is null, cannot select first item");
+			return;
+		}
+		
+		// Don't auto-select if an entity is already selected (e.g., in edit mode)
+		if (currentEntity != null) {
+			LOGGER.debug("Entity already selected (ID: {}), skipping auto-selection for {}", 
+				currentEntity.getId(), getClass().getSimpleName());
+			return;
+		}
+		
+		try {
+			// Use UI.access to ensure this runs in the correct UI thread
+			getUI().ifPresent(ui -> ui.access(() -> {
+				try {
+					// Try to get the first item using a more direct approach
+					// Get the first page of results from the entity service
+					final var firstPageResults = entityService.list(
+						org.springframework.data.domain.PageRequest.of(0, 1));
+					if (firstPageResults != null && !firstPageResults.isEmpty()) {
+						final EntityClass firstItem = firstPageResults.get(0);
+						LOGGER.debug("Selecting first item with ID: {} for {}", 
+							firstItem.getId(), getClass().getSimpleName());
+						grid.select(firstItem);
+						// The selection listener will automatically call populateForm or navigate
+					} else {
+						LOGGER.debug("No items available to select for {}", getClass().getSimpleName());
+					}
+				} catch (final Exception e) {
+					LOGGER.error("Error querying first item for {}: {}", getClass().getSimpleName(), e.getMessage(), e);
+				}
+			}));
+		} catch (final Exception e) {
+			LOGGER.error("Error selecting first item for {}: {}", getClass().getSimpleName(), e.getMessage(), e);
+		}
 	}
 
 	public void setCurrentEntity(final EntityClass currentEntity) {

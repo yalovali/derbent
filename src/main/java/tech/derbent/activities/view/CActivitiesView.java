@@ -3,13 +3,11 @@ package tech.derbent.activities.view;
 import java.util.List;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
@@ -27,39 +25,37 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 	private final String ENTITY_ID_FIELD = "activity_id";
 	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "activities/%s/edit";
 	private final CActivityTypeService activityTypeService;
+	private CPanelActivityDescription descriptionPanel;
 
-	public CActivitiesView(final CActivityService entityService, final SessionService sessionService, final CActivityTypeService activityTypeService) {
+	public CActivitiesView(final CActivityService entityService,
+		final SessionService sessionService,
+		final CActivityTypeService activityTypeService) {
 		super(CActivity.class, entityService, sessionService);
+		LOGGER.info(
+			"Initializing CActivitiesView with entityService and activityTypeService");
 		addClassNames("activities-view");
 		this.activityTypeService = activityTypeService;
-		// createDetailsLayout();
 	}
 
 	@Override
 	protected void createDetailsLayout() {
-		LOGGER.info("Creating details layout for CActivitiesView using annotation-based data providers");
-		final Div editorLayoutDiv = new Div();
-		editorLayoutDiv.setClassName("editor-layout");
-		// NEW APPROACH: No data provider needed! The @MetaData annotation on
-		// CActivity.activityType specifies dataProviderBean = "CActivityTypeService"
-		// This makes the code much simpler and more maintainable
-		editorLayoutDiv.add(CEntityFormBuilder.buildForm(CActivity.class, getBinder()));
-		// LEGACY APPROACH (still supported for backward compatibility): Create data
-		// provider for ComboBoxes - this is the old complex way final
-		// CEntityFormBuilder.ComboBoxDataProvider dataProvider = new
-		// CEntityFormBuilder.ComboBoxDataProvider() { @Override
-		// @SuppressWarnings("unchecked") public <T extends CEntityDB> java.util.List<T>
-		// getItems(final Class<T> entityType) { if (entityType == CActivityType.class)
-		// { return (java.util.List<T>)
-		// activityTypeService.list(org.springframework.data.domain.Pageable.unpaged());
-		// } // With multiple ComboBoxes, this becomes complex and hard to maintain //
-		// What if we add more ComboBox fields? More if-else blocks needed! return
-		// java.util.Collections.emptyList(); } };
-		// editorLayoutDiv.add(CEntityFormBuilder.buildForm(CActivity.class,
-		// getBinder(), dataProvider));
+		LOGGER.info(
+			"Creating details layout for CActivitiesView using CPanelActivityDescription");
+		createEntityDetails();
 		// Note: Buttons are now automatically added to the details tab by the parent
 		// class
-		getBaseDetailsLayout().add(editorLayoutDiv);
+	}
+
+	/**
+	 * Creates the entity details section using CPanelActivityDescription. Follows the
+	 * same pattern as CUsersView for consistency.
+	 */
+	protected void createEntityDetails() {
+		LOGGER.info("Creating entity details for CActivitiesView");
+		// Create description panel for activity details
+		descriptionPanel = new CPanelActivityDescription(currentEntity, getBinder(),
+			(CActivityService) entityService, activityTypeService);
+		getBaseDetailsLayout().add(descriptionPanel);
 	}
 
 	@Override
@@ -69,7 +65,8 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 		// when a row is selected or deselected, populate form
 		grid.asSingleSelect().addValueChangeListener(event -> {
 			if (event.getValue() != null) {
-				UI.getCurrent().navigate(String.format(ENTITY_ROUTE_TEMPLATE_EDIT, event.getValue().getId()));
+				UI.getCurrent().navigate(
+					String.format(ENTITY_ROUTE_TEMPLATE_EDIT, event.getValue().getId()));
 			}
 			else {
 				clearForm();
@@ -78,9 +75,9 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 		});
 	}
 
-	// private final BeanValidationBinder<CProject> binder; private final
-	// CProjectService userService; private final Grid<CProject> grid;// = new
-	// Grid<>(CProject.class, false);
+	// private final BeanValidationBinder<CProject> binder; private final CProjectService
+	// userService; private final Grid<CProject> grid;// = new Grid<>(CProject.class,
+	// false);
 	@Override
 	protected CActivity createNewEntityInstance() {
 		return new CActivity();
@@ -97,19 +94,32 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 	}
 
 	@Override
-	protected List<CActivity> getProjectFilteredData(final CProject project, final org.springframework.data.domain.Pageable pageable) {
-		return ((CActivityService) entityService).listByProject(project, pageable).getContent();
+	protected List<CActivity> getProjectFilteredData(final CProject project,
+		final org.springframework.data.domain.Pageable pageable) {
+		return ((CActivityService) entityService).listByProject(project, pageable)
+			.getContent();
 	}
 
 	@Override
 	protected void initPage() {
-		// Initialize the page components and layout This method can be overridden to
-		// set up the view's components
+		// Initialize the page components and layout This method can be overridden to set
+		// up the view's components
 	}
 
 	@Override
 	protected CActivity newEntity() {
 		return super.newEntity(); // Uses the project-aware implementation from parent
+	}
+
+	@Override
+	protected void populateForm(final CActivity value) {
+		super.populateForm(value);
+		LOGGER.info("Populating form with activity data: {}",
+			value != null ? value.getName() : "null");
+		// Update the description panel when an activity is selected
+		if (descriptionPanel != null) {
+			descriptionPanel.populateForm(value);
+		}
 	}
 
 	@Override

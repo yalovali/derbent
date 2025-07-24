@@ -23,3 +23,121 @@ vaadin-accordion-heading{
 		font-size: 1.3em;
 		border-bottom: 1px solid var(--lumo-contrast-10pct);
 }
+
+/* Hierarchical Side Menu Styles */
+.hierarchical-side-menu {
+    width: 100%;
+    /* Removed max-width to allow full expansion */
+    background: transparent; /* Match main app background */
+    border-radius: var(--lumo-border-radius-m);
+    overflow: hidden;
+}
+
+.hierarchical-header {
+    background: transparent; /* Match main app background */
+    border-bottom: 1px solid var(--lumo-contrast-10pct);
+    min-height: 48px;
+    font-size: var(--lumo-font-size-l); /* Follow old menu font size */
+}
+
+.hierarchical-level-container {
+    position: relative;
+    overflow: hidden;
+    min-height: 200px;
+    /* Removed max-height to allow full expansion */
+    overflow-y: auto;
+    width: 100%; /* Ensure full width */
+}
+
+.hierarchical-menu-item {
+    transition: all 0.2s ease;
+    margin: 2px 8px;
+    padding: 12px 16px; /* Follow old menu padding */
+    border-radius: var(--lumo-border-radius-s);
+    font-size: var(--lumo-font-size-l); /* Follow old menu font size */
+    font-weight: 500; /* Follow old menu font weight */
+}
+
+.hierarchical-menu-item:hover {
+    background-color: var(--lumo-primary-color-10pct);
+    transform: translateX(4px);
+}
+
+.hierarchical-menu-item:active {
+    background-color: var(--lumo-primary-color-20pct);
+    transform: translateX(2px);
+}
+
+.hierarchical-back-button {
+    min-width: 40px; /* Consistent with icon sizing */
+    height: 40px; /* Consistent with icon sizing */
+    padding: 0;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    font-size: var(--lumo-font-size-l); /* Follow old menu font size */
+}
+
+.hierarchical-back-button:hover {
+    background-color: var(--lumo-primary-color-10pct);
+    transform: scale(1.1);
+}
+
+/* Sliding animations */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.slide-in {
+    animation: slideInRight 0.3s ease-out forwards;
+}
+
+.slide-out {
+    animation: slideInLeft 0.3s ease-out forwards;
+}
+
+/* Level indicators for depth visualization */
+.hierarchical-menu-item[data-level="1"] {
+    padding-left: 20px; /* Increased padding for bigger fonts */
+    font-size: var(--lumo-font-size-l);
+}
+
+.hierarchical-menu-item[data-level="2"] {
+    padding-left: 28px; /* Increased padding for bigger fonts */
+    border-left: 2px solid var(--lumo-primary-color-50pct);
+    font-size: var(--lumo-font-size-l);
+}
+
+.hierarchical-menu-item[data-level="3"] {
+    padding-left: 36px; /* Increased padding for bigger fonts */
+    border-left: 3px solid var(--lumo-primary-color);
+    font-size: var(--lumo-font-size-l);
+}
+
+.hierarchical-menu-item[data-level="4"] {
+    padding-left: 44px; /* Increased padding for bigger fonts */
+    border-left: 4px solid var(--lumo-error-color);
+    font-size: var(--lumo-font-size-l);
+}
+
+.view-toolbar{
+	background-color: #616161;
+	width: 100%;
+}
