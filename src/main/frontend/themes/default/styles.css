@@ -136,3 +136,8 @@ vaadin-accordion-heading{
     border-left: 4px solid var(--lumo-error-color);
     font-size: var(--lumo-font-size-l);
 }
+
+.view-toolbar{
+	background-color: #616161;
+	width: 100%;
+}

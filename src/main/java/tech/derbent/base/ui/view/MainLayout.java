@@ -35,23 +35,22 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.base.ui.component.ViewToolbar;
 import tech.derbent.base.ui.component.CHierarchicalSideMenu;
+import tech.derbent.base.ui.component.ViewToolbar;
 import tech.derbent.session.service.LayoutService;
 import tech.derbent.session.service.SessionService;
 
 /**
- * The main layout is a top-level placeholder for other views. It provides a
- * side navigation menu and a user menu.
+ * The main layout is a top-level placeholder for other views. It provides a side
+ * navigation menu and a user menu.
  */
-// vaadin applayout is used to create a layout with a side navigation menu it
-// consists of a header, a side navigation, and a user menu the side navigation
-// is dynamically populated with menu entries from `MenuConfiguration`. Each
-// entry is represented as a `SideNavItem` with With Flow, the root layout can
-// be defined using the @Layout annotation, which tells the router to render all
-// routes or views inside of it. use these functions to add content to 3
-// sections:addToNavBar addToDrawer addToHeader added afterNavigationObserver to
-// the layout to handle navigation events
+// vaadin applayout is used to create a layout with a side navigation menu it consists of
+// a header, a side navigation, and a user menu the side navigation is dynamically
+// populated with menu entries from `MenuConfiguration`. Each entry is represented as a
+// `SideNavItem` with With Flow, the root layout can be defined using the @Layout
+// annotation, which tells the router to render all routes or views inside of it. use
+// these functions to add content to 3 sections:addToNavBar addToDrawer addToHeader added
+// afterNavigationObserver to the layout to handle navigation events
 @Layout
 @PermitAll // When security is enabled, allow all authenticated users
 public final class MainLayout extends AppLayout implements AfterNavigationObserver {
@@ -64,32 +63,55 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	private final LayoutService layoutService;
 	private ViewToolbar mainToolbar;
 
-	MainLayout(final AuthenticationContext authenticationContext, final SessionService sessionService,
-			   final LayoutService layoutService) {
+	MainLayout(final AuthenticationContext authenticationContext,
+		final SessionService sessionService, final LayoutService layoutService) {
 		LOGGER.info("Creating MainLayout");
 		this.authenticationContext = authenticationContext;
 		this.sessionService = sessionService;
 		this.layoutService = layoutService;
-		this.currentUser = authenticationContext.getAuthenticatedUser(User.class).orElse(null);
+		this.currentUser =
+			authenticationContext.getAuthenticatedUser(User.class).orElse(null);
 		setPrimarySection(Section.DRAWER);
-		addToDrawer(createHeader(), new Scroller(createSideNav()), createUserMenu());
+		addToDrawer(createHeader());
 		addToNavbar(true, createNavBar()); // Add the toggle button to the navbar
-		addToDrawer(createSlidingHeader());
+		// ok, lets put it in a scroller, so it can scroll if it is too long????
+		addToDrawer(new Scroller(createSlidingHeader()));
+		// why this is in a scroller? Add the side navigation menu to the drawer, wrapped
+		// in a Scroller for better scrolling behavior
+		addToDrawer(new Scroller(createSideNav()));
+		addToNavbar(createUserMenu()); // Add the user menu to the navbar
 	}
 
 	@Override
 	public void afterNavigation(final AfterNavigationEvent event) {
 		LOGGER.debug("After navigation in MainLayout");
 		// Update the view title in the toolbar after navigation
-		final String pageTitle = MenuConfiguration.getPageHeader(getContent()).orElse("Main Layout");
+		final String pageTitle =
+			MenuConfiguration.getPageHeader(getContent()).orElse("Main Layout");
 		mainToolbar.setPageTitle(pageTitle); // Set the page title in the toolbar
-		// addToNavbar(true, new ViewToolbar(pageTitle)); // Add the toolbar with the
-		// page title
+		// addToNavbar(true, new ViewToolbar(pageTitle)); // Add the toolbar with the page
+		// title
 		/*
 		 * Component content = getContent(); if (content instanceof HasDynamicTitle) {
 		 * String title = ((HasDynamicTitle) content).getPageTitle();
 		 * viewTitle.setText(title); } else { viewTitle.setText(""); }
 		 */
+	}
+
+	private Div createAppMarker() {
+		final var slidingHeader = new Div();
+		slidingHeader.addClassNames(Display.FLEX, AlignItems.CENTER,
+			Margin.Horizontal.MEDIUM, Gap.SMALL);
+		slidingHeader.getStyle().set("flex-wrap", "nowrap"); // Ensure single line
+		// Original header content (logo and app name) - version removed
+		final var appLogo = VaadinIcon.CUBES.create();
+		appLogo.addClassNames(TextColor.PRIMARY, IconSize.LARGE);
+		slidingHeader.add(appLogo);
+		final var appName = new Span("Derbent");
+		appName.addClassNames(FontWeight.SEMIBOLD, FontSize.LARGE);
+		appName.getStyle().set("white-space", "nowrap"); // Prevent text wrapping
+		slidingHeader.add(appName);
+		return slidingHeader;
 	}
 
 	private Div createHeader() {
@@ -103,54 +125,27 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		return header;
 	}
 
-	private Div createSlidingHeader() {
-		LOGGER.info("Creating sliding header with hierarchical side menu");
-		
-		final var slidingHeader = new Div();
-		slidingHeader.addClassNames(Display.FLEX, AlignItems.CENTER, Margin.Horizontal.MEDIUM, Gap.SMALL);
-		slidingHeader.getStyle().set("flex-wrap", "nowrap"); // Ensure single line
-		
-		// Original header content (logo and app name) - version removed
-		final var appLogo = VaadinIcon.CUBES.create();
-		appLogo.addClassNames(TextColor.PRIMARY, IconSize.LARGE);
-		slidingHeader.add(appLogo);
-		
-		final var appName = new Span("Derbent");
-		appName.addClassNames(FontWeight.SEMIBOLD, FontSize.LARGE);
-		appName.getStyle().set("white-space", "nowrap"); // Prevent text wrapping
-		slidingHeader.add(appName);
-		
-		// Add hierarchical side menu below the header content
-		final var hierarchicalMenu = new CHierarchicalSideMenu();
-		hierarchicalMenu.addClassNames(Margin.Top.MEDIUM);
-		
-		// Create container for the complete sliding header with menu
-		final var completeHeader = new Div();
-		completeHeader.add(slidingHeader, hierarchicalMenu);
-		
-		LOGGER.info("Sliding header with hierarchical menu created successfully");
-		return completeHeader;
-	}
-
 	private Div createNavBar() {
 		final Div navBar = new Div();
-		// dont add any other compoents to the navbar, just the toolbar otherwise call
-		// it with ,xyz,xyz etc..
-		mainToolbar = new ViewToolbar("Main Layout", sessionService, layoutService, authenticationContext);
+		// dont add any other compoents to the navbar, just the toolbar otherwise call it
+		// with ,xyz,xyz etc..
+		mainToolbar = new ViewToolbar("Main Layout", sessionService, layoutService,
+			authenticationContext);
 		navBar.add(mainToolbar);
 		return navBar;
 	}
 
 	/**
-	 * Creates the side navigation menu. The navigation menu is dynamically
-	 * populated with menu entries from `MenuConfiguration`. Each entry is
-	 * represented as a `SideNavItem` with optional icons.
+	 * Creates the side navigation menu. The navigation menu is dynamically populated with
+	 * menu entries from `MenuConfiguration`. Each entry is represented as a `SideNavItem`
+	 * with optional icons.
 	 * @return A `SideNav` component containing the navigation items.
 	 */
 	private SideNav createSideNav() {
 		final var nav = new SideNav(); // Create the side navigation
 		nav.addClassNames(Margin.Horizontal.MEDIUM); // Style the navigation
-		MenuConfiguration.getMenuEntries().forEach(entry -> createSideNavItem(nav, entry)); // Add menu entries
+		MenuConfiguration.getMenuEntries()
+			.forEach(entry -> createSideNavItem(nav, entry)); // Add menu entries
 		return nav;
 	}
 
@@ -172,12 +167,16 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		if (title.contains(".")) {
 			final var parts = title.split("\\.");
 			title = parts[parts.length - 1]; // Use the last part as the title
-			final String parent_title = parts[0]; // Use the first part as the parent title
+			final String parent_title = parts[0]; // Use the first part as the parent
+													// title
 			// find the parent menu entry
-			SideNavItem parentItem = nav.getItems().stream().filter(item -> item.getLabel().equals(parent_title)).findFirst().orElse(null);
+			SideNavItem parentItem = nav.getItems().stream()
+				.filter(item -> item.getLabel().equals(parent_title)).findFirst()
+				.orElse(null);
 			if (parentItem == null) {
 				parentItem = new SideNavItem(parent_title);
-				parentItem.setPrefixComponent(new Icon(icon)); // Set the icon for the parent item
+				parentItem.setPrefixComponent(new Icon(icon)); // Set the icon for the
+																// parent item
 				nav.addItem(parentItem); // Add the parent item to the navigation
 			}
 			// Create a sub-menu item under the parent entry
@@ -187,6 +186,19 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 			// Create a top-level menu item
 			nav.addItem(new SideNavItem(title, path, new Icon(icon))); // Create item with
 		}
+	}
+
+	private Div createSlidingHeader() {
+		LOGGER.info("Creating sliding header with hierarchical side menu");
+		// Add hierarchical side menu below the header content
+		final var hierarchicalMenu = new CHierarchicalSideMenu();
+		hierarchicalMenu.addClassNames(Margin.Top.MEDIUM);
+		// Create container for the complete sliding header with menu
+		final var completeHeader = new Div();
+		/// final var slidingHeader = createAppMarker(); dont add header: slidingHeader
+		completeHeader.add(hierarchicalMenu);
+		LOGGER.info("Sliding header with hierarchical menu created successfully");
+		return completeHeader;
 	}
 
 	private Component createUserMenu() {
@@ -200,9 +212,11 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		userMenu.addClassNames(Margin.MEDIUM);
 		final var userMenuItem = userMenu.addItem(avatar);
 		userMenuItem.add(user.getUsername());
-		userMenuItem.getSubMenu().addItem("View Profile", event -> UI.getCurrent().getPage().open(user.getUsername()));
+		userMenuItem.getSubMenu().addItem("View Profile",
+			event -> UI.getCurrent().getPage().open(user.getUsername()));
 		// TODO Add additional items to the user menu if needed
-		userMenuItem.getSubMenu().addItem("Logout", event -> authenticationContext.logout());
+		userMenuItem.getSubMenu().addItem("Logout",
+			event -> authenticationContext.logout());
 		return userMenu;
 	}
 }
