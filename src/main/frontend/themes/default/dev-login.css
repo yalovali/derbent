@@ -7,60 +7,6 @@
     background-color: var(--lumo-shade-5pct);
 }
 
-/* Modern login background styling - apply to body and html for full coverage */
-html, body {
-    background-image: url('./themes/default/images/login-background.jpg') !important;
-    background-size: cover !important;
-    background-position: center !important;
-    background-repeat: no-repeat !important;
-    background-attachment: fixed !important;
-    background-color: transparent !important;
-    min-height: 100vh !important;
-}
-
-/* Modern login background styling */
-.modern-login-background {
-    background-image: url('./images/login-background.jpg') !important;
-    background-size: cover !important;
-    background-position: center !important;
-    background-repeat: no-repeat !important;
-    background-attachment: fixed !important;
-    min-height: 100vh !important;
-    position: relative;
-    width: 100% !important;
-    height: 100% !important;
-}
-
-/* Style the login overlay backdrop to be semi-transparent */
-vaadin-login-overlay::part(backdrop) {
-    background: rgba(0, 0, 0, 0.3) !important;
-}
-
-/* Enhance the login overlay to work well with the background */
-.modern-login-background vaadin-login-overlay-wrapper {
-    background: rgba(255, 255, 255, 0.95) !important;
-    backdrop-filter: blur(10px);
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
-
-/* Make the login form more modern */
-.modern-login-background vaadin-login-form-wrapper {
-    background: transparent !important;
-}
-
-/* Style the login overlay title */
-.modern-login-background vaadin-login-overlay h1 {
-    color: var(--lumo-header-text-color);
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Style the login form description */
-.modern-login-background vaadin-login-overlay p {
-    color: var(--lumo-body-text-color);
-    opacity: 0.8;
-}
-
 .dev-login-view .dev-content-div {
     display: flex;
     box-shadow: var(--lumo-box-shadow-s);

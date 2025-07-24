@@ -1,57 +1,15 @@
-/* Login background specific styles */
-
-/* Apply background to the entire viewport */
-:root, html, body {
-    --login-bg-image: url('./images/login-background.jpg');
-    background-image: var(--login-bg-image) !important;
-    background-size: cover !important;
-    background-position: center !important;
-    background-repeat: no-repeat !important;
-    background-attachment: fixed !important;
-    background-color: transparent !important;
-    min-height: 100vh !important;
+/* Simple login background styling */
+.login-background {
+    background-image: url('./images/login-background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
-/* Apply background to Vaadin app container */
-#outlet {
-    background-image: var(--login-bg-image) !important;
-    background-size: cover !important;
-    background-position: center !important;
-    background-repeat: no-repeat !important;
-    background-attachment: fixed !important;
-    min-height: 100vh !important;
-}
-
-/* Apply background to main container */
-main.modern-login-background {
-    background-image: var(--login-bg-image) !important;
-    background-size: cover !important;
-    background-position: center !important;
-    background-repeat: no-repeat !important;
-    background-attachment: fixed !important;
-    min-height: 100vh !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    z-index: -1 !important;
-}
-
-/* Style the overlay to be more transparent */
-vaadin-login-overlay {
-    --lumo-primary-color: #1976d2;
-}
-
-/* Make the overlay card semi-transparent with blur */
+/* Style the login overlay card */
 vaadin-login-overlay [part="card"] {
-    background: rgba(255, 255, 255, 0.9) !important;
-    backdrop-filter: blur(10px) !important;
-    border-radius: 12px !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
 }
-
-/* Style the overlay backdrop */
-vaadin-login-overlay [part="backdrop"] {
-    background: rgba(0, 0, 0, 0.2) !important;
 }
