@@ -48,9 +48,58 @@ public class CLoginView extends Main implements BeforeEnterObserver {
 	 * space - Action set to "login" endpoint for Spring Security processing
 	 */
 	public CLoginView() {
-		// Apply CSS classes for centering the login form
-		addClassNames(LumoUtility.Display.FLEX, LumoUtility.JustifyContent.CENTER, LumoUtility.AlignItems.CENTER);
+		// Apply CSS classes for centering the login form and custom background
+		addClassNames(LumoUtility.Display.FLEX, LumoUtility.JustifyContent.CENTER, LumoUtility.AlignItems.CENTER, "modern-login-background");
 		setSizeFull();
+		
+		// Set inline styles as fallback for background
+		getStyle().set("background-image", "url('./themes/default/images/login-background.jpg')")
+				.set("background-size", "cover")
+				.set("background-position", "center")
+				.set("background-repeat", "no-repeat")
+				.set("background-attachment", "fixed");
+		
+		// Apply background to the body element using JavaScript
+		getElement().executeJs(
+			"document.body.style.backgroundImage = 'url(\\'./themes/default/images/login-background.jpg\\')'; " +
+			"document.body.style.backgroundSize = 'cover'; " +
+			"document.body.style.backgroundPosition = 'center'; " +
+			"document.body.style.backgroundRepeat = 'no-repeat'; " +
+			"document.body.style.backgroundAttachment = 'fixed'; " +
+			"document.documentElement.style.backgroundImage = 'url(\\'./themes/default/images/login-background.jpg\\')'; " +
+			"document.documentElement.style.backgroundSize = 'cover'; " +
+			"document.documentElement.style.backgroundPosition = 'center'; " +
+			"document.documentElement.style.backgroundRepeat = 'no-repeat'; " +
+			"document.documentElement.style.backgroundAttachment = 'fixed';"
+		);
+		
+		// Create a dedicated background element that will be visible
+		getElement().executeJs(
+			"setTimeout(() => {" +
+			"  const backgroundDiv = document.createElement('div');" +
+			"  backgroundDiv.id = 'login-background-layer';" +
+			"  backgroundDiv.style.cssText = `" +
+			"    position: fixed;" +
+			"    top: 0;" +
+			"    left: 0;" +
+			"    width: 100vw;" +
+			"    height: 100vh;" +
+			"    background-image: url('./themes/default/images/login-background.jpg');" +
+			"    background-size: cover;" +
+			"    background-position: center;" +
+			"    background-repeat: no-repeat;" +
+			"    z-index: 200;" +
+			"    pointer-events: none;" +
+			"  `;" +
+			"  document.body.insertBefore(backgroundDiv, document.body.firstChild);" +
+			"  " +
+			"  const overlay = document.querySelector('vaadin-login-overlay');" +
+			"  if (overlay) {" +
+			"    overlay.style.zIndex = '201';" +
+			"    overlay.style.position = 'relative';" +
+			"  }" +
+			"}, 100);"
+		);
 		final Paragraph passwordHint = new Paragraph("Default username: user\nDefault password: test123");
 		passwordHint.addClassName(LumoUtility.TextAlignment.CENTER);
 		final Paragraph text = new Paragraph("[spring.jpa.hibernate.ddl-auto = create] to init db");
