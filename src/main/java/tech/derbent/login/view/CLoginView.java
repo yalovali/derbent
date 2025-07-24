@@ -66,11 +66,13 @@ public class CLoginView extends Main implements BeforeEnterObserver {
 			"document.body.style.backgroundPosition = 'center'; " +
 			"document.body.style.backgroundRepeat = 'no-repeat'; " +
 			"document.body.style.backgroundAttachment = 'fixed'; " +
+			"document.body.style.backgroundColor = 'transparent'; " +
 			"document.documentElement.style.backgroundImage = 'url(\\'./themes/default/images/login-background.jpg\\')'; " +
 			"document.documentElement.style.backgroundSize = 'cover'; " +
 			"document.documentElement.style.backgroundPosition = 'center'; " +
 			"document.documentElement.style.backgroundRepeat = 'no-repeat'; " +
-			"document.documentElement.style.backgroundAttachment = 'fixed';"
+			"document.documentElement.style.backgroundAttachment = 'fixed'; " +
+			"document.documentElement.style.backgroundColor = 'transparent';"
 		);
 		
 		// Create a dedicated background element that will be visible
