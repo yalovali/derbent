@@ -3,7 +3,6 @@ package tech.derbent.activities.view;
 import java.util.List;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -28,23 +27,28 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 	private final CActivityTypeService activityTypeService;
 	private CPanelActivityDescription descriptionPanel;
 
-	public CActivitiesView(final CActivityService entityService, final SessionService sessionService, final CActivityTypeService activityTypeService) {
+	public CActivitiesView(final CActivityService entityService,
+		final SessionService sessionService,
+		final CActivityTypeService activityTypeService) {
 		super(CActivity.class, entityService, sessionService);
-		LOGGER.info("Initializing CActivitiesView with entityService and activityTypeService");
+		LOGGER.info(
+			"Initializing CActivitiesView with entityService and activityTypeService");
 		addClassNames("activities-view");
 		this.activityTypeService = activityTypeService;
 	}
 
 	@Override
 	protected void createDetailsLayout() {
-		LOGGER.info("Creating details layout for CActivitiesView using CPanelActivityDescription");
+		LOGGER.info(
+			"Creating details layout for CActivitiesView using CPanelActivityDescription");
 		createEntityDetails();
-		// Note: Buttons are now automatically added to the details tab by the parent class
+		// Note: Buttons are now automatically added to the details tab by the parent
+		// class
 	}
 
 	/**
-	 * Creates the entity details section using CPanelActivityDescription.
-	 * Follows the same pattern as CUsersView for consistency.
+	 * Creates the entity details section using CPanelActivityDescription. Follows the
+	 * same pattern as CUsersView for consistency.
 	 */
 	protected void createEntityDetails() {
 		LOGGER.info("Creating entity details for CActivitiesView");
@@ -61,7 +65,8 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 		// when a row is selected or deselected, populate form
 		grid.asSingleSelect().addValueChangeListener(event -> {
 			if (event.getValue() != null) {
-				UI.getCurrent().navigate(String.format(ENTITY_ROUTE_TEMPLATE_EDIT, event.getValue().getId()));
+				UI.getCurrent().navigate(
+					String.format(ENTITY_ROUTE_TEMPLATE_EDIT, event.getValue().getId()));
 			}
 			else {
 				clearForm();
@@ -70,9 +75,9 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 		});
 	}
 
-	// private final BeanValidationBinder<CProject> binder; private final
-	// CProjectService userService; private final Grid<CProject> grid;// = new
-	// Grid<>(CProject.class, false);
+	// private final BeanValidationBinder<CProject> binder; private final CProjectService
+	// userService; private final Grid<CProject> grid;// = new Grid<>(CProject.class,
+	// false);
 	@Override
 	protected CActivity createNewEntityInstance() {
 		return new CActivity();
@@ -89,14 +94,16 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 	}
 
 	@Override
-	protected List<CActivity> getProjectFilteredData(final CProject project, final org.springframework.data.domain.Pageable pageable) {
-		return ((CActivityService) entityService).listByProject(project, pageable).getContent();
+	protected List<CActivity> getProjectFilteredData(final CProject project,
+		final org.springframework.data.domain.Pageable pageable) {
+		return ((CActivityService) entityService).listByProject(project, pageable)
+			.getContent();
 	}
 
 	@Override
 	protected void initPage() {
-		// Initialize the page components and layout This method can be overridden to
-		// set up the view's components
+		// Initialize the page components and layout This method can be overridden to set
+		// up the view's components
 	}
 
 	@Override
