@@ -2,6 +2,9 @@
 
 this is a project for maintaining work flows, tasks, managerial targets, procedures, methodolgies of a product or project within a company.
 
+for solutions, usage coverage and ui design, inspire from Atlassian Jira product or Projeqtor from page https://projeqtor.org/en
+
+check src/docs/project_design_description.md file for project scope, update this document if necassary or given task enlarges this scope.
 
 ---
 

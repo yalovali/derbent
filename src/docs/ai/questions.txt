@@ -1,0 +1,6 @@
+QUESTION 1: 
+i want to write a java application, using vaadin framework. This project is:
+- a collaborative for project management, from resource management upto daily tasks, kanban.
+- for main features and screenshots check atlassian jira or https://projeqtor.org/en products.
+- we aim for small or medium offices. 
+Define the requirements for this project, including the main features, user roles, and any specific technologies or integrations that should be considered.
