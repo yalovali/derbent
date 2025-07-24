@@ -114,3 +114,21 @@ INSERT INTO cmeeting_participants (meeting_id, user_id) VALUES
 -- Mobile App Review (meeting_id = 5) - both users
 (5, 1),
 (5, 2);
+
+-- Insert sample companies
+-- ccompany table with company_id as primary key
+INSERT INTO ccompany (
+    name,                -- Company name (required, unique)
+    description,         -- Company description (optional)
+    address,            -- Company address (optional)
+    phone,              -- Company phone number (optional)
+    email,              -- Company email address (optional)
+    website,            -- Company website URL (optional)
+    tax_number,         -- Company tax identification number (optional)
+    enabled             -- Company active status (boolean, default true)
+) VALUES 
+('Tech Solutions Inc.', 'Leading software development company specializing in enterprise solutions', '123 Innovation Drive, Tech Valley, CA 94000', '+1-555-0100', 'contact@techsolutions.com', 'https://www.techsolutions.com', 'TAX-2025-001', TRUE),
+('Digital Dynamics LLC', 'Creative digital agency focusing on web and mobile applications', '456 Creative Boulevard, Design City, NY 10001', '+1-555-0200', 'info@digitaldynamics.com', 'https://www.digitaldynamics.com', 'TAX-2025-002', TRUE),
+('Innovation Labs Ltd.', 'Research and development company for emerging technologies', '789 Research Park, Innovation Hub, TX 75001', '+1-555-0300', 'contact@innovationlabs.com', 'https://www.innovationlabs.com', 'TAX-2025-003', TRUE),
+('Global Systems Corp.', 'International consulting firm for business process optimization', '321 Business Center, Corporate Plaza, FL 33101', '+1-555-0400', 'contact@globalsystems.com', 'https://www.globalsystems.com', 'TAX-2025-004', TRUE),
+('Startup Accelerator Inc.', 'Venture capital and startup incubation company', '654 Startup Street, Entrepreneur District, WA 98101', '+1-555-0500', 'contact@startupaccelerator.com', 'https://www.startupaccelerator.com', 'TAX-2025-005', FALSE);
