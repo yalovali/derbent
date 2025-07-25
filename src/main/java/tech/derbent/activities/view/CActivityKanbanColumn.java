@@ -1,16 +1,20 @@
 package tech.derbent.activities.view;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.H5;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import tech.derbent.activities.domain.CActivity;
+import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.domain.CActivityType;
 
 /**
@@ -18,7 +22,8 @@ import tech.derbent.activities.domain.CActivityType;
  * Layer: View (MVC)
  * 
  * Displays all activities for a specific activity type, including the type name
- * and count of activities. Contains multiple CActivityCard components.
+ * and count of activities. Groups activities by status within the column for better organization.
+ * Contains multiple CActivityCard components organized by status.
  */
 public class CActivityKanbanColumn extends Div {
 
@@ -91,10 +96,11 @@ public class CActivityKanbanColumn extends Div {
     }
 
     /**
-     * Populates the column with activity cards.
+     * Populates the column with activity cards grouped by status.
      */
     private void populateCards() {
-        LOGGER.debug("Populating {} activity cards for type: {}", activities.size(), activityType.getName());
+        LOGGER.debug("Populating {} activity cards for type: {} with status grouping", 
+            activities.size(), activityType.getName());
         
         cardsContainer.removeAll();
         
@@ -105,16 +111,75 @@ public class CActivityKanbanColumn extends Div {
             return;
         }
         
-        for (final CActivity activity : activities) {
+        // Group activities by status
+        final Map<CActivityStatus, List<CActivity>> activitiesByStatus = activities.stream()
+            .collect(Collectors.groupingBy(
+                activity -> activity.getActivityStatus() != null ? activity.getActivityStatus() : new CActivityStatus("No Status"),
+                Collectors.toList()
+            ));
+        
+        // Create a status section for each group
+        for (final Map.Entry<CActivityStatus, List<CActivity>> statusEntry : activitiesByStatus.entrySet()) {
+            final CActivityStatus status = statusEntry.getKey();
+            final List<CActivity> statusActivities = statusEntry.getValue();
+            
+            createStatusSection(status, statusActivities);
+        }
+    }
+    
+    /**
+     * Creates a status section with activities for the given status.
+     * 
+     * @param status the activity status for this section
+     * @param statusActivities the list of activities with this status
+     */
+    private void createStatusSection(final CActivityStatus status, final List<CActivity> statusActivities) {
+        LOGGER.debug("Creating status section for: {} with {} activities", 
+            status.getName(), statusActivities.size());
+        
+        // Create status section container
+        final Div statusSection = new Div();
+        statusSection.addClassName("kanban-status-section");
+        
+        // Create status header
+        final H5 statusHeader = new H5(status.getName() != null ? status.getName() : "No Status");
+        statusHeader.addClassName("kanban-status-header");
+        
+        // Create status count
+        final Span statusCount = new Span("(" + statusActivities.size() + ")");
+        statusCount.addClassName("kanban-status-count");
+        
+        // Create header container for status
+        final Div statusHeaderContainer = new Div();
+        statusHeaderContainer.addClassName("kanban-status-header-container");
+        statusHeaderContainer.add(statusHeader, statusCount);
+        
+        // Create cards container for this status
+        final VerticalLayout statusCardsContainer = new VerticalLayout();
+        statusCardsContainer.addClassName("kanban-status-cards");
+        statusCardsContainer.setSpacing(true);
+        statusCardsContainer.setPadding(false);
+        statusCardsContainer.setMargin(false);
+        
+        // Add activity cards for this status
+        for (final CActivity activity : statusActivities) {
             try {
                 final CActivityCard card = new CActivityCard(activity);
-                cardsContainer.add(card);
-                LOGGER.debug("Added card for activity: {}", activity.getName());
+                statusCardsContainer.add(card);
+                LOGGER.debug("Added card for activity: {} with status: {}", 
+                    activity.getName(), status.getName());
             } catch (final Exception e) {
-                LOGGER.error("Error creating card for activity: {}", 
-                    activity != null ? activity.getName() : "null", e);
+                LOGGER.error("Error creating card for activity: {} with status: {}", 
+                    activity != null ? activity.getName() : "null", 
+                    status.getName(), e);
             }
         }
+        
+        // Add components to status section
+        statusSection.add(statusHeaderContainer, statusCardsContainer);
+        
+        // Add status section to main container
+        cardsContainer.add(statusSection);
     }
 
     /**
