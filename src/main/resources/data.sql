@@ -34,8 +34,10 @@ INSERT INTO cuser (
     password,            -- BCrypt encoded password hash
     phone,               -- User's phone number
     roles,               -- User roles (e.g., 'USER')
+    user_role,           -- Primary user role enum
     updated_date,        -- Timestamp when the user was last updated
-    cusertype_id         -- Reference to user type (updated to match new classname_id convention)
+    cusertype_id,        -- Reference to user type (updated to match new classname_id convention)
+    company_id           -- Reference to company (nullable)
 ) VALUES (
     '2025-07-18 15:58:12.244818',
     'test@example.com',
@@ -46,8 +48,10 @@ INSERT INTO cuser (
     '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu',
     '1234567890',
     'USER',
+    'TEAM_MEMBER',
     '2025-07-18 15:58:12.244818',
-    1  -- Developer type
+    1,  -- Developer type
+    1   -- Tech Solutions Inc.
 );
 	
 INSERT INTO cuser (
@@ -60,8 +64,10 @@ INSERT INTO cuser (
     password,            -- BCrypt encoded password hash
     phone,               -- User's phone number
     roles,               -- User roles (e.g., 'USER')
+    user_role,           -- Primary user role enum
     updated_date,        -- Timestamp when the user was last updated
-    cusertype_id         -- Reference to user type (updated to match new classname_id convention)
+    cusertype_id,        -- Reference to user type (updated to match new classname_id convention)
+    company_id           -- Reference to company (nullable)
 ) VALUES (
     '2025-07-18 15:58:12.244818',
     'test@example.com',
@@ -72,8 +78,10 @@ INSERT INTO cuser (
     '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu',
     '1234567890',
     'USER2',
+    'PROJECT_MANAGER',
     '2025-07-18 15:58:12.244818',
-    2  -- Manager type
+    2,  -- Manager type
+    2   -- Digital Dynamics LLC
 );
 
 -- Insert sample projects

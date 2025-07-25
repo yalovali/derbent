@@ -7,6 +7,8 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -15,6 +17,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.MetaData;
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.companies.domain.CCompany;
 
 @Entity
 @Table(name = "cuser") // table name for the entity as the default is the class name in lowercase
@@ -46,11 +49,15 @@ public class CUser extends CEntityDB {
     @Size(max = 255)
     @MetaData(displayName = "Roles", required = true, readOnly = false, defaultValue = "USER", description = "User roles (comma-separated)", hidden = false, order = 6, maxLength = 255)
     private String roles = "USER";
+    @Enumerated(EnumType.STRING)
+    @Column(name = "user_role", nullable = false, length = 50)
+    @MetaData(displayName = "User Role", required = true, readOnly = false, defaultValue = "TEAM_MEMBER", description = "Primary user role in the system", hidden = false, order = 7, maxLength = 50)
+    private CUserRole userRole = CUserRole.TEAM_MEMBER;
     @Column(name = "password", nullable = true, length = 255)
     @Size(max = 255)
     @MetaData(displayName = "Password", required = false, readOnly = false, description = "User password (stored as hash)", hidden = true, order = 99)
     private String password; // Encoded password
-    @MetaData(displayName = "Enabled", required = true, readOnly = false, defaultValue = "true", description = "Is user account enabled?", hidden = false, order = 7)
+    @MetaData(displayName = "Enabled", required = true, readOnly = false, defaultValue = "true", description = "Is user account enabled?", hidden = false, order = 8)
     @Column(name = "enabled", nullable = false)
     private boolean enabled = true; // User account status, default is enabled
     @Column(name = "created_date", nullable = true)
@@ -61,8 +68,12 @@ public class CUser extends CEntityDB {
     private List<CUserProjectSettings> projectSettings;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cusertype_id", nullable = true)
-    @MetaData(displayName = "User Type", required = false, readOnly = false, description = "Type category of the user", hidden = false, order = 8)
+    @MetaData(displayName = "User Type", required = false, readOnly = false, description = "Type category of the user", hidden = false, order = 9)
     private CUserType userType;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id", nullable = true)
+    @MetaData(displayName = "Company", required = false, readOnly = false, description = "Company the user belongs to", hidden = false, order = 10)
+    private CCompany company;
 
     public CUser() {
         super();
@@ -84,6 +95,45 @@ public class CUser extends CEntityDB {
         this.email = email;
         this.setPassword(password);
         this.setRoles(roles);
+        // Set userRole based on roles string for backward compatibility
+        this.userRole = parseUserRoleFromRoles(roles);
+    }
+
+    /**
+     * Constructor with user role enum.
+     */
+    public CUser(final String username, final String password, final String name, final String email,
+            final CUserRole userRole) {
+        super();
+        this.login = username;
+        this.name = name;
+        this.email = email;
+        this.setPassword(password);
+        this.userRole = userRole != null ? userRole : CUserRole.TEAM_MEMBER;
+        this.setRoles(this.userRole.name()); // Keep roles string in sync
+    }
+
+    /**
+     * Parses user role from legacy roles string.
+     * @param roles comma-separated roles string
+     * @return corresponding CUserRole enum value
+     */
+    private CUserRole parseUserRoleFromRoles(final String roles) {
+        if (roles == null || roles.trim().isEmpty()) {
+            return CUserRole.TEAM_MEMBER;
+        }
+        
+        final String upperRoles = roles.toUpperCase();
+        if (upperRoles.contains("ADMIN")) {
+            return CUserRole.ADMIN;
+        }
+        if (upperRoles.contains("PROJECT_MANAGER") || upperRoles.contains("MANAGER")) {
+            return CUserRole.PROJECT_MANAGER;
+        }
+        if (upperRoles.contains("GUEST")) {
+            return CUserRole.GUEST;
+        }
+        return CUserRole.TEAM_MEMBER;
     }
 
     @Override
@@ -184,6 +234,24 @@ public class CUser extends CEntityDB {
 
     public void setUserType(final CUserType userType) {
         this.userType = userType;
+    }
+
+    public CUserRole getUserRole() {
+        return userRole;
+    }
+
+    public void setUserRole(final CUserRole userRole) {
+        this.userRole = userRole != null ? userRole : CUserRole.TEAM_MEMBER;
+        // Keep roles string in sync for backward compatibility
+        this.setRoles(this.userRole.name());
+    }
+
+    public CCompany getCompany() {
+        return company;
+    }
+
+    public void setCompany(final CCompany company) {
+        this.company = company;
     }
 
     @Override
