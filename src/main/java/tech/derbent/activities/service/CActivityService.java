@@ -2,7 +2,9 @@ package tech.derbent.activities.service;
 
 import java.time.Clock;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.activities.domain.CActivity;
+import tech.derbent.activities.domain.CActivityType;
 import tech.derbent.projects.domain.CProject;
 
 @Service
@@ -132,5 +135,39 @@ public class CActivityService extends CAbstractService<CActivity> {
     public long countByProject(final CProject project) {
         LOGGER.info("Counting activities for project: {}", project.getName());
         return ((CActivityRepository) repository).countByProject(project);
+    }
+
+    /**
+     * Gets all activities for a project grouped by activity type.
+     * Activities without a type are grouped under a "No Type" key.
+     * 
+     * @param project the project to get activities for
+     * @return map of activity type to list of activities
+     */
+    @Transactional(readOnly = true)
+    public Map<CActivityType, List<CActivity>> getActivitiesGroupedByType(final CProject project) {
+        LOGGER.debug("Getting activities grouped by type for project: {}", project.getName());
+        
+        // Get all activities for the project with type and status loaded
+        final List<CActivity> activities = ((CActivityRepository) repository).findByProjectWithTypeAndStatus(project);
+        
+        // Group by activity type, handling null types
+        return activities.stream()
+            .collect(Collectors.groupingBy(
+                activity -> activity.getActivityType() != null ? activity.getActivityType() : createNoTypeInstance(),
+                Collectors.toList()
+            ));
+    }
+    
+    /**
+     * Helper method to create a placeholder CActivityType for activities without a type.
+     * 
+     * @return a CActivityType instance representing "No Type"
+     */
+    private CActivityType createNoTypeInstance() {
+        final CActivityType noType = new CActivityType();
+        noType.setName("No Type");
+        noType.setDescription("Activities without an assigned type");
+        return noType;
     }
 }
