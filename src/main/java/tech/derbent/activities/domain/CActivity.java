@@ -29,6 +29,19 @@ public class CActivity extends CEntityOfProject {
     )
     private CActivityType activityType;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cactivitystatus_id", nullable = true)
+    @MetaData(
+        displayName = "Activity Status", 
+        required = false, 
+        readOnly = false, 
+        description = "Current status of the activity", 
+        hidden = false, 
+        order = 3,
+        dataProviderBean = "CActivityStatusService"
+    )
+    private CActivityStatus activityStatus;
+
     public CActivity() {
         super();
         // Default constructor - project will be set later
@@ -44,5 +57,13 @@ public class CActivity extends CEntityOfProject {
 
     public void setActivityType(final CActivityType activityType) {
         this.activityType = activityType;
+    }
+
+    public CActivityStatus getActivityStatus() {
+        return activityStatus;
+    }
+
+    public void setActivityStatus(final CActivityStatus activityStatus) {
+        this.activityStatus = activityStatus;
     }
 }
