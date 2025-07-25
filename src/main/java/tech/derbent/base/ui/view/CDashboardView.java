@@ -33,7 +33,7 @@ import tech.derbent.users.service.CUserService;
  * Displays key system metrics including total projects, users per project, and activities per project.
  * This view responds to the default route ("") and provides an overview of the application state.
  */
-@Route("")
+@Route("home")
 @PageTitle("Dashboard")
 @PermitAll // When security is enabled, allow all authenticated users
 public final class CDashboardView extends CAbstractPage {

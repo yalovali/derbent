@@ -367,7 +367,7 @@ public final class ViewToolbar extends Composite<Header> implements CProjectList
         // Handle home button click - navigate to dashboard
         homeButton.addClickListener(event -> {
             LOGGER.info("Home button clicked, navigating to dashboard");
-            homeButton.getUI().ifPresent(ui -> ui.navigate(""));
+            homeButton.getUI().ifPresent(ui -> ui.navigate("home"));
         });
         
         return homeButton;
