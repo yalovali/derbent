@@ -57,7 +57,15 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 	@Override
 	protected void createGridForEntity() {
 		// property name must match the field name in CProject
-		grid.addColumn("name").setAutoWidth(true);
+		grid.addColumn("name").setAutoWidth(true).setHeader("Activity Name");
+		
+		// Add status column to display activity status
+		grid.addColumn(activity -> {
+			CActivity activityEntity = (CActivity) activity;
+			return activityEntity.getActivityStatus() != null ? 
+				activityEntity.getActivityStatus().getName() : "";
+		}).setAutoWidth(true).setHeader("Status");
+		
 		// when a row is selected or deselected, populate form
 		grid.asSingleSelect().addValueChangeListener(event -> {
 			if (event.getValue() != null) {

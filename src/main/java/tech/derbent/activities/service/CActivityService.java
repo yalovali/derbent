@@ -40,10 +40,11 @@ public class CActivityService extends CAbstractService<CActivity> {
     }
 
     /**
-     * Gets paginated activities by project.
+     * Gets paginated activities by project with eagerly loaded relationships.
      */
     public Page<CActivity> listByProject(final CProject project, final Pageable pageable) {
-        return ((CActivityRepository) repository).findByProject(project, pageable);
+        LOGGER.debug("Getting paginated activities for project {} with eager loading", project.getName());
+        return ((CActivityRepository) repository).findByProjectWithTypeAndStatus(project, pageable);
     }
 
     /**
