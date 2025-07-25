@@ -17,7 +17,7 @@ import tech.derbent.session.service.SessionService;
 
 @Route("activities/:activity_id?/:action?(edit)")
 @PageTitle("Activity Master Detail")
-@Menu(order = 0, icon = "vaadin:calendar-clock", title = "Settings.Activities")
+@Menu(order = 0, icon = "vaadin:calendar-clock", title = "Project.Activities")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 
