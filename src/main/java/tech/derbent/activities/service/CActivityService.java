@@ -128,6 +128,7 @@ public class CActivityService extends CAbstractService<CActivity> {
      * @param project the project
      * @return count of activities for the project
      */
+    @PreAuthorize("permitAll()")
     public long countByProject(final CProject project) {
         LOGGER.info("Counting activities for project: {}", project.getName());
         return ((CActivityRepository) repository).countByProject(project);
