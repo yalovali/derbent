@@ -22,6 +22,15 @@ INSERT INTO cactivitytype (name, description) VALUES
 ('Meeting', 'Team meetings and discussions'),
 ('Research', 'Research and analysis activities');
 
+-- Insert sample activity statuses
+INSERT INTO cactivitystatus (name, description) VALUES 
+('TODO', 'Task is planned but not started yet'),
+('IN_PROGRESS', 'Task is currently being worked on'),
+('REVIEW', 'Task is completed and waiting for review'),
+('DONE', 'Task is completed and approved'),
+('BLOCKED', 'Task is blocked by external dependencies'),
+('ON_HOLD', 'Task is temporarily paused');
+
 -- check application.java to see WHEN this file is run
 -- Insert a sample login user into cuser table
 INSERT INTO cuser (

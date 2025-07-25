@@ -40,10 +40,11 @@ public class CActivityService extends CAbstractService<CActivity> {
     }
 
     /**
-     * Gets paginated activities by project.
+     * Gets paginated activities by project with eagerly loaded relationships.
      */
     public Page<CActivity> listByProject(final CProject project, final Pageable pageable) {
-        return ((CActivityRepository) repository).findByProject(project, pageable);
+        LOGGER.debug("Getting paginated activities for project {} with eager loading", project.getName());
+        return ((CActivityRepository) repository).findByProjectWithTypeAndStatus(project, pageable);
     }
 
     /**
@@ -61,26 +62,40 @@ public class CActivityService extends CAbstractService<CActivity> {
     }
 
     /**
-     * Overrides the base get method to eagerly load CActivityType relationship. This prevents
-     * LazyInitializationException when the entity is used in UI contexts.
+     * Gets an activity by ID with eagerly loaded CActivityType and CActivityStatus relationships. 
+     * This method should be used in UI contexts to prevent LazyInitializationException.
      * 
      * @param id
      *            the activity ID
-     * @return optional CActivity with loaded activityType
+     * @return optional CActivity with loaded activityType and activityStatus
+     */
+    @Transactional(readOnly = true)
+    public Optional<CActivity> getWithActivityTypeAndStatus(final Long id) {
+        LOGGER.debug("Getting CActivity with ID {} and eagerly loading CActivityType and CActivityStatus", id);
+        return ((CActivityRepository) repository).findByIdWithActivityTypeAndStatus(id);
+    }
+
+    /**
+     * Overrides the base get method to eagerly load CActivityType and CActivityStatus relationships. 
+     * This prevents LazyInitializationException when the entity is used in UI contexts.
+     * 
+     * @param id
+     *            the activity ID
+     * @return optional CActivity with loaded activityType and activityStatus
      */
     @Override
     @Transactional(readOnly = true)
     public Optional<CActivity> get(final Long id) {
-        LOGGER.debug("Getting CActivity with ID {} (overridden to eagerly load activityType)", id);
-        final Optional<CActivity> entity = ((CActivityRepository) repository).findByIdWithActivityType(id);
+        LOGGER.debug("Getting CActivity with ID {} (overridden to eagerly load activityType and activityStatus)", id);
+        final Optional<CActivity> entity = ((CActivityRepository) repository).findByIdWithActivityTypeAndStatus(id);
         // Initialize lazy fields if entity is present (for any other potential lazy relationships)
         entity.ifPresent(this::initializeLazyFields);
         return entity;
     }
 
     /**
-     * Initializes lazy fields for CActivity entity to prevent LazyInitializationException. Specifically handles the
-     * lazy-loaded CActivityType relationship.
+     * Initializes lazy fields for CActivity entity to prevent LazyInitializationException. 
+     * Specifically handles the lazy-loaded CActivityType and CActivityStatus relationships.
      * 
      * @param entity
      *            the CActivity entity to initialize
@@ -99,6 +114,9 @@ public class CActivityService extends CAbstractService<CActivity> {
 
             // Initialize the lazy-loaded CActivityType relationship
             initializeLazyRelationship(entity.getActivityType(), "CActivityType");
+            
+            // Initialize the lazy-loaded CActivityStatus relationship
+            initializeLazyRelationship(entity.getActivityStatus(), "CActivityStatus");
         } catch (final Exception e) {
             LOGGER.warn("Error initializing lazy fields for CActivity with ID: {}", entity.getId(), e);
         }
