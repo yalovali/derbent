@@ -116,15 +116,6 @@ public final class ViewToolbar extends Composite<Header> implements CProjectList
         final var drawerToggle = new DrawerToggle();
         drawerToggle.addClassNames(Margin.NONE);
         
-        // Add home button next to drawer toggle
-        final var homeButton = new CButton(VaadinIcon.HOME.create(), e -> {
-            LOGGER.debug("Home button clicked - navigating to dashboard");
-            com.vaadin.flow.component.UI.getCurrent().navigate("dashboard");
-        });
-        homeButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-        homeButton.addClassNames(Margin.NONE);
-        homeButton.setTooltipText("Go to Dashboard");
-        
         title = new H1(viewTitle);
         title.addClassNames(FontSize.XLARGE, Margin.NONE, FontWeight.LIGHT);
 
@@ -135,7 +126,7 @@ public final class ViewToolbar extends Composite<Header> implements CProjectList
         final var projectSelector = new Div(new Span("Active Project:"), projectComboBox);
         projectSelector.addClassNames(Display.FLEX, AlignItems.CENTER, Gap.SMALL);
         
-        final var leftSide = new Div(drawerToggle, homeButton, title, projectSelector);
+        final var leftSide = new Div(drawerToggle, title, projectSelector);
         leftSide.addClassNames(Display.FLEX, AlignItems.CENTER, Gap.MEDIUM);
 
         // Spacer to push user info and layout toggle to the right
