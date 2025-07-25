@@ -141,3 +141,58 @@ INSERT INTO ccompany (
 ('Innovation Labs Ltd.', 'Research and development company for emerging technologies', '789 Research Park, Innovation Hub, TX 75001', '+1-555-0300', 'contact@innovationlabs.com', 'https://www.innovationlabs.com', 'TAX-2025-003', TRUE),
 ('Global Systems Corp.', 'International consulting firm for business process optimization', '321 Business Center, Corporate Plaza, FL 33101', '+1-555-0400', 'contact@globalsystems.com', 'https://www.globalsystems.com', 'TAX-2025-004', TRUE),
 ('Startup Accelerator Inc.', 'Venture capital and startup incubation company', '654 Startup Street, Entrepreneur District, WA 98101', '+1-555-0500', 'contact@startupaccelerator.com', 'https://www.startupaccelerator.com', 'TAX-2025-005', FALSE);
+
+-- Insert sample activities for demonstration of Kanban board
+-- cactivity table with activity_id as primary key
+INSERT INTO cactivity (
+    name,                    -- Activity name (required)
+    project_id,             -- Reference to project (required)
+    cactivitytype_id,       -- Reference to activity type (optional)
+    cactivitystatus_id      -- Reference to activity status (optional)
+) VALUES 
+-- Development activities for Derbent Project
+('Implement User Authentication', 1, 1, 2),
+('Create Database Schema', 1, 1, 4),
+('Develop REST API', 1, 1, 2),
+('Build Frontend Components', 1, 1, 1),
+
+-- Testing activities for Derbent Project  
+('Unit Testing for Auth Module', 1, 2, 3),
+('Integration Testing', 1, 2, 1),
+('Performance Testing', 1, 2, 1),
+
+-- Design activities for Derbent Project
+('Design System Setup', 1, 3, 4),
+('Create UI Mockups', 1, 3, 2),
+('Design Login Page', 1, 3, 3),
+
+-- Documentation activities for Derbent Project
+('API Documentation', 1, 4, 2),
+('User Manual', 1, 4, 1),
+
+-- Meeting activities for Derbent Project
+('Daily Standups', 1, 5, 2),
+('Sprint Planning Session', 1, 5, 4),
+
+-- Research activities for Derbent Project
+('Technology Stack Research', 1, 6, 4),
+('Security Best Practices Study', 1, 6, 2),
+
+-- Website Redesign Project activities
+('Homepage Redesign', 2, 3, 1),
+('Content Migration', 2, 1, 1),
+('SEO Optimization', 2, 4, 1),
+
+-- Mobile App Development Project activities
+('Mobile UI Framework Setup', 3, 1, 2),
+('App Icon Design', 3, 3, 4),
+('Mobile Testing Strategy', 3, 2, 3);
+
+-- Activities without a type (to test "No Type" column)
+INSERT INTO cactivity (
+    name,
+    project_id, 
+    cactivitystatus_id
+) VALUES 
+('General Project Setup', 1, 1),
+('Team Coordination', 1, 2);
