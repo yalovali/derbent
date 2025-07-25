@@ -136,6 +136,17 @@ After accepting Copilot suggestions, manually review for:
 - Never add loggers at the end of functions. Always log at the start with full detail about the function and parameters.
 - All code must follow Java naming conventions for variables and methods, except for class names which must start with "C".
 
+
+**FOR CSS
+-- update css names from class name, also update css file accordingly
+-- always use very simple css. Dont use javascript in java or css.
+-- you can use css build in simple functions
+-- to style a layout use syntax like:
+		#vaadinLoginOverlayWrapper::part(overlay) {
+				background-image: url('./images/background1.png');
+		}
+		
+
 **Documentation & Modularity**
 - Update the `docs` folder for every significant change:
   - Add new documentation for each project design concept (one file per concept).
