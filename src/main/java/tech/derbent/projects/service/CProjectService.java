@@ -50,6 +50,11 @@ public class CProjectService extends CAbstractService<CProject> {
         return repository.findAll();
     }
 
+    public long getTotalProjectCount() {
+        LOGGER.info("Counting total number of projects");
+        return repository.count();
+    }
+
     @Override
     @Transactional
     public CProject save(final CProject entity) {
