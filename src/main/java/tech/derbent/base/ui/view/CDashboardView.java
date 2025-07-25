@@ -16,6 +16,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.views.CAbstractPage;
 import tech.derbent.activities.service.CActivityService;
@@ -81,7 +82,17 @@ public final class CDashboardView extends CAbstractPage {
         add(createSummaryCardsLayout());
         add(projectDetailsLayout);
         
-        // Load data
+        // Data will be loaded in postConstruct after dependency injection is complete
+    }
+
+    /**
+     * Initialize dashboard data after all dependencies are injected.
+     * This method is called after the constructor and dependency injection are complete.
+     */
+    @PostConstruct
+    private void postConstruct() {
+        LOGGER.info("PostConstruct - loading dashboard data");
+        // Load data after all dependencies are properly injected
         refreshDashboardData();
     }
 
