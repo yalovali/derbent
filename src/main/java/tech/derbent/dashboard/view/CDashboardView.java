@@ -38,8 +38,8 @@ import tech.derbent.users.service.CUserService;
  * Provides a comprehensive overview of the system's current state.
  */
 @Route("dashboard")
-@PageTitle("Dashboard")
-@Menu(order = 0, icon = "vaadin:dashboard", title = "Root Menu")
+@PageTitle("Home")
+@Menu(order = 0, icon = "vaadin:home", title = "Home")
 @PermitAll
 public final class CDashboardView extends CAbstractPage {
 
