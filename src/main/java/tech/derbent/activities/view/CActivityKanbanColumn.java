@@ -112,37 +112,37 @@ public class CActivityKanbanColumn extends Div {
         }
         
         // Group activities by status
-        final Map<CActivityStatus, List<CActivity>> activitiesByStatus = activities.stream()
+        final Map<String, List<CActivity>> activitiesByStatus = activities.stream()
             .collect(Collectors.groupingBy(
-                activity -> activity.getActivityStatus() != null ? activity.getActivityStatus() : new CActivityStatus("No Status"),
+                activity -> activity.getActivityStatus() != null ? activity.getActivityStatus().getName() : "No Status",
                 Collectors.toList()
             ));
         
         // Create a status section for each group
-        for (final Map.Entry<CActivityStatus, List<CActivity>> statusEntry : activitiesByStatus.entrySet()) {
-            final CActivityStatus status = statusEntry.getKey();
+        for (final Map.Entry<String, List<CActivity>> statusEntry : activitiesByStatus.entrySet()) {
+            final String statusName = statusEntry.getKey();
             final List<CActivity> statusActivities = statusEntry.getValue();
             
-            createStatusSection(status, statusActivities);
+            createStatusSection(statusName, statusActivities);
         }
     }
     
     /**
      * Creates a status section with activities for the given status.
      * 
-     * @param status the activity status for this section
+     * @param statusName the activity status name for this section
      * @param statusActivities the list of activities with this status
      */
-    private void createStatusSection(final CActivityStatus status, final List<CActivity> statusActivities) {
+    private void createStatusSection(final String statusName, final List<CActivity> statusActivities) {
         LOGGER.debug("Creating status section for: {} with {} activities", 
-            status.getName(), statusActivities.size());
+            statusName, statusActivities.size());
         
         // Create status section container
         final Div statusSection = new Div();
         statusSection.addClassName("kanban-status-section");
         
         // Create status header
-        final H5 statusHeader = new H5(status.getName() != null ? status.getName() : "No Status");
+        final H5 statusHeader = new H5(statusName != null ? statusName : "No Status");
         statusHeader.addClassName("kanban-status-header");
         
         // Create status count
@@ -167,11 +167,11 @@ public class CActivityKanbanColumn extends Div {
                 final CActivityCard card = new CActivityCard(activity);
                 statusCardsContainer.add(card);
                 LOGGER.debug("Added card for activity: {} with status: {}", 
-                    activity.getName(), status.getName());
+                    activity.getName(), statusName);
             } catch (final Exception e) {
                 LOGGER.error("Error creating card for activity: {} with status: {}", 
                     activity != null ? activity.getName() : "null", 
-                    status.getName(), e);
+                    statusName, e);
             }
         }
         
