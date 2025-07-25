@@ -20,7 +20,7 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.interfaces.CProjectChangeListener;
 import tech.derbent.activities.domain.CActivity;
-import tech.derbent.activities.domain.CActivityType;
+import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.service.CActivityService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.SessionService;
@@ -29,8 +29,8 @@ import tech.derbent.session.service.SessionService;
  * CActivityKanbanBoardView - Main Kanban board view for displaying activities.
  * Layer: View (MVC)
  * 
- * Displays all activities of the current project grouped by activity type in a Kanban-style layout.
- * Each activity type forms a column containing activity cards.
+ * Displays all activities of the current project grouped by activity status in a Kanban-style layout.
+ * Each activity status forms a column containing activity cards grouped by type.
  * Implements project awareness and real-time updates.
  */
 @Route("activities-kanban")
@@ -132,11 +132,11 @@ public class CActivityKanbanBoardView extends VerticalLayout implements CProject
             // Update title with project name
             titleElement.setText("Activity Kanban Board - " + project.getName());
             
-            // Get activities grouped by type
-            final Map<CActivityType, List<CActivity>> activitiesByType = 
-                activityService.getActivitiesGroupedByType(project);
+            // Get activities grouped by status
+            final Map<CActivityStatus, List<CActivity>> activitiesByStatus = 
+                activityService.getActivitiesGroupedByStatus(project);
             
-            if (activitiesByType.isEmpty()) {
+            if (activitiesByStatus.isEmpty()) {
                 showEmptyState("No activities found for this project");
                 return;
             }
@@ -146,15 +146,15 @@ public class CActivityKanbanBoardView extends VerticalLayout implements CProject
             emptyStateContainer.setVisible(false);
             kanbanContainer.setVisible(true);
             
-            // Create column for each activity type
-            for (final Map.Entry<CActivityType, List<CActivity>> entry : activitiesByType.entrySet()) {
-                final CActivityType type = entry.getKey();
+            // Create column for each activity status
+            for (final Map.Entry<CActivityStatus, List<CActivity>> entry : activitiesByStatus.entrySet()) {
+                final CActivityStatus status = entry.getKey();
                 final List<CActivity> activities = entry.getValue();
                 
-                LOGGER.debug("Creating column for type: {} with {} activities", 
-                    type.getName(), activities.size());
+                LOGGER.debug("Creating column for status: {} with {} activities", 
+                    status.getName(), activities.size());
                 
-                final CActivityKanbanColumn column = new CActivityKanbanColumn(type, activities);
+                final CActivityKanbanColumn column = new CActivityKanbanColumn(status, activities);
                 kanbanContainer.add(column);
                 kanbanContainer.setFlexGrow(1, column);
             }

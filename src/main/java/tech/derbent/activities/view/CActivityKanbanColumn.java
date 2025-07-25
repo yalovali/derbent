@@ -21,16 +21,16 @@ import tech.derbent.activities.domain.CActivityType;
  * CActivityKanbanColumn - UI component representing a column in the Kanban board.
  * Layer: View (MVC)
  * 
- * Displays all activities for a specific activity type, including the type name
- * and count of activities. Groups activities by status within the column for better organization.
- * Contains multiple CActivityCard components organized by status.
+ * Displays all activities for a specific activity status, including the status name
+ * and count of activities. Groups activities by type within the column for better organization.
+ * Contains multiple CActivityCard components organized by activity type.
  */
 public class CActivityKanbanColumn extends Div {
 
     private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = LoggerFactory.getLogger(CActivityKanbanColumn.class);
 
-    private final CActivityType activityType;
+    private final CActivityStatus activityStatus;
     private H3 headerElement;
     private Span countElement;
     private VerticalLayout cardsContainer;
@@ -39,19 +39,19 @@ public class CActivityKanbanColumn extends Div {
     /**
      * Constructor for CActivityKanbanColumn.
      * 
-     * @param activityType the activity type this column represents
-     * @param activities   the list of activities for this type
+     * @param activityStatus the activity status this column represents
+     * @param activities     the list of activities for this status
      */
-    public CActivityKanbanColumn(final CActivityType activityType, final List<CActivity> activities) {
-        LOGGER.debug("Creating CActivityKanbanColumn for type: {} with {} activities", 
-            activityType != null ? activityType.getName() : "null", 
+    public CActivityKanbanColumn(final CActivityStatus activityStatus, final List<CActivity> activities) {
+        LOGGER.debug("Creating CActivityKanbanColumn for status: {} with {} activities", 
+            activityStatus != null ? activityStatus.getName() : "null", 
             activities != null ? activities.size() : 0);
         
-        if (activityType == null) {
-            throw new IllegalArgumentException("Activity type cannot be null");
+        if (activityStatus == null) {
+            throw new IllegalArgumentException("Activity status cannot be null");
         }
         
-        this.activityType = activityType;
+        this.activityStatus = activityStatus;
         this.activities = activities != null ? activities : List.of();
         
         initializeColumn();
@@ -61,7 +61,7 @@ public class CActivityKanbanColumn extends Div {
      * Initializes the column components and layout.
      */
     private void initializeColumn() {
-        LOGGER.debug("Initializing column layout for type: {}", activityType.getName());
+        LOGGER.debug("Initializing column layout for status: {}", activityStatus.getName());
         
         // Set CSS class for styling
         addClassName("kanban-column");
@@ -70,8 +70,8 @@ public class CActivityKanbanColumn extends Div {
         final Div headerContainer = new Div();
         headerContainer.addClassName("kanban-column-header");
         
-        // Create type name header
-        headerElement = new H3(activityType.getName() != null ? activityType.getName() : "Unnamed Type");
+        // Create status name header
+        headerElement = new H3(activityStatus.getName() != null ? activityStatus.getName() : "Unnamed Status");
         headerElement.addClassName("kanban-column-title");
         
         // Create count element
@@ -96,11 +96,11 @@ public class CActivityKanbanColumn extends Div {
     }
 
     /**
-     * Populates the column with activity cards grouped by status.
+     * Populates the column with activity cards grouped by type.
      */
     private void populateCards() {
-        LOGGER.debug("Populating {} activity cards for type: {} with status grouping", 
-            activities.size(), activityType.getName());
+        LOGGER.debug("Populating {} activity cards for status: {} with type grouping", 
+            activities.size(), activityStatus.getName());
         
         cardsContainer.removeAll();
         
@@ -111,75 +111,75 @@ public class CActivityKanbanColumn extends Div {
             return;
         }
         
-        // Group activities by status
-        final Map<String, List<CActivity>> activitiesByStatus = activities.stream()
+        // Group activities by type
+        final Map<String, List<CActivity>> activitiesByType = activities.stream()
             .collect(Collectors.groupingBy(
-                activity -> activity.getActivityStatus() != null ? activity.getActivityStatus().getName() : "No Status",
+                activity -> activity.getActivityType() != null ? activity.getActivityType().getName() : "No Type",
                 Collectors.toList()
             ));
         
-        // Create a status section for each group
-        for (final Map.Entry<String, List<CActivity>> statusEntry : activitiesByStatus.entrySet()) {
-            final String statusName = statusEntry.getKey();
-            final List<CActivity> statusActivities = statusEntry.getValue();
+        // Create a type section for each group
+        for (final Map.Entry<String, List<CActivity>> typeEntry : activitiesByType.entrySet()) {
+            final String typeName = typeEntry.getKey();
+            final List<CActivity> typeActivities = typeEntry.getValue();
             
-            createStatusSection(statusName, statusActivities);
+            createTypeSection(typeName, typeActivities);
         }
     }
     
     /**
-     * Creates a status section with activities for the given status.
+     * Creates a type section with activities for the given type.
      * 
-     * @param statusName the activity status name for this section
-     * @param statusActivities the list of activities with this status
+     * @param typeName the activity type name for this section
+     * @param typeActivities the list of activities with this type
      */
-    private void createStatusSection(final String statusName, final List<CActivity> statusActivities) {
-        LOGGER.debug("Creating status section for: {} with {} activities", 
-            statusName, statusActivities.size());
+    private void createTypeSection(final String typeName, final List<CActivity> typeActivities) {
+        LOGGER.debug("Creating type section for: {} with {} activities", 
+            typeName, typeActivities.size());
         
-        // Create status section container
-        final Div statusSection = new Div();
-        statusSection.addClassName("kanban-status-section");
+        // Create type section container
+        final Div typeSection = new Div();
+        typeSection.addClassName("kanban-type-section");
         
-        // Create status header
-        final H5 statusHeader = new H5(statusName != null ? statusName : "No Status");
-        statusHeader.addClassName("kanban-status-header");
+        // Create type header
+        final H5 typeHeader = new H5(typeName != null ? typeName : "No Type");
+        typeHeader.addClassName("kanban-type-header");
         
-        // Create status count
-        final Span statusCount = new Span("(" + statusActivities.size() + ")");
-        statusCount.addClassName("kanban-status-count");
+        // Create type count
+        final Span typeCount = new Span("(" + typeActivities.size() + ")");
+        typeCount.addClassName("kanban-type-count");
         
-        // Create header container for status
-        final Div statusHeaderContainer = new Div();
-        statusHeaderContainer.addClassName("kanban-status-header-container");
-        statusHeaderContainer.add(statusHeader, statusCount);
+        // Create header container for type
+        final Div typeHeaderContainer = new Div();
+        typeHeaderContainer.addClassName("kanban-type-header-container");
+        typeHeaderContainer.add(typeHeader, typeCount);
         
-        // Create cards container for this status
-        final VerticalLayout statusCardsContainer = new VerticalLayout();
-        statusCardsContainer.addClassName("kanban-status-cards");
-        statusCardsContainer.setSpacing(true);
-        statusCardsContainer.setPadding(false);
-        statusCardsContainer.setMargin(false);
+        // Create cards container for this type
+        final VerticalLayout typeCardsContainer = new VerticalLayout();
+        typeCardsContainer.addClassName("kanban-type-cards");
+        typeCardsContainer.setSpacing(true);
+        typeCardsContainer.setPadding(false);
+        typeCardsContainer.setMargin(false);
         
-        // Add activity cards for this status
-        for (final CActivity activity : statusActivities) {
+        // Add activity cards for this type
+        for (final CActivity activity : typeActivities) {
             try {
                 final CActivityCard card = new CActivityCard(activity);
-                statusCardsContainer.add(card);
-                LOGGER.debug("Added card for activity: {} with status: {}", 
-                    activity.getName(), statusName);
+                typeCardsContainer.add(card);
+                LOGGER.debug("Added card for activity: {} with type: {}", 
+                    activity.getName(), typeName);
             } catch (final Exception e) {
-                LOGGER.error("Error creating card for activity: {} with status: {}", 
+                LOGGER.error("Error creating card for activity: {} with type: {}", 
                     activity != null ? activity.getName() : "null", 
-                    statusName, e);
+                    typeName, e);
             }
         }
         
-        // Add components to status section
-        statusSection.add(statusHeaderContainer, statusCardsContainer);
+        // Add components to type section
+        typeSection.add(typeHeaderContainer, typeCardsContainer);
         
-        // Add status section to main container
-        cardsContainer.add(statusSection);
+        // Add type section to main container
+        cardsContainer.add(typeSection);
     }
 
     /**
@@ -188,8 +188,8 @@ public class CActivityKanbanColumn extends Div {
      * @param newActivities the updated list of activities
      */
     public void updateActivities(final List<CActivity> newActivities) {
-        LOGGER.debug("Updating activities for type: {} from {} to {} activities", 
-            activityType.getName(), 
+        LOGGER.debug("Updating activities for status: {} from {} to {} activities", 
+            activityStatus.getName(), 
             this.activities.size(), 
             newActivities != null ? newActivities.size() : 0);
         
@@ -205,12 +205,12 @@ public class CActivityKanbanColumn extends Div {
     }
 
     /**
-     * Gets the activity type for this column.
+     * Gets the activity status for this column.
      * 
-     * @return the activity type
+     * @return the activity status
      */
-    public CActivityType getActivityType() {
-        return activityType;
+    public CActivityStatus getActivityStatus() {
+        return activityStatus;
     }
 
     /**
@@ -227,7 +227,7 @@ public class CActivityKanbanColumn extends Div {
      * Useful for real-time updates.
      */
     public void refresh() {
-        LOGGER.debug("Refreshing column for type: {}", activityType.getName());
+        LOGGER.debug("Refreshing column for status: {}", activityStatus.getName());
         populateCards();
     }
 }

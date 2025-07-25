@@ -10,7 +10,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import tech.derbent.activities.domain.CActivity;
-import tech.derbent.activities.domain.CActivityType;
+import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.projects.domain.CProject;
 
 /**
@@ -21,7 +21,7 @@ class CActivityKanbanColumnTest {
     @Test
     void testKanbanColumnCreation() {
         // Given
-        final CActivityType type = new CActivityType("Development");
+        final CActivityStatus status = new CActivityStatus("TODO");
         final CProject project = new CProject();
         project.setName("Test Project");
         
@@ -30,32 +30,32 @@ class CActivityKanbanColumnTest {
         final List<CActivity> activities = Arrays.asList(activity1, activity2);
         
         // When
-        final CActivityKanbanColumn column = new CActivityKanbanColumn(type, activities);
+        final CActivityKanbanColumn column = new CActivityKanbanColumn(status, activities);
         
         // Then
         assertNotNull(column);
-        assertEquals(type, column.getActivityType());
+        assertEquals(status, column.getActivityStatus());
         assertEquals(2, column.getActivities().size());
     }
 
     @Test
     void testKanbanColumnWithEmptyActivities() {
         // Given
-        final CActivityType type = new CActivityType("Testing");
+        final CActivityStatus status = new CActivityStatus("IN_PROGRESS");
         final List<CActivity> activities = List.of();
         
         // When
-        final CActivityKanbanColumn column = new CActivityKanbanColumn(type, activities);
+        final CActivityKanbanColumn column = new CActivityKanbanColumn(status, activities);
         
         // Then
         assertNotNull(column);
-        assertEquals(type, column.getActivityType());
+        assertEquals(status, column.getActivityStatus());
         assertEquals(0, column.getActivities().size());
     }
 
     @Test
-    void testKanbanColumnWithNullTypeThrowsException() {
-        // Given - null type
+    void testKanbanColumnWithNullStatusThrowsException() {
+        // Given - null status
         final List<CActivity> activities = List.of();
         
         // When & Then
@@ -67,14 +67,14 @@ class CActivityKanbanColumnTest {
     @Test
     void testUpdateActivities() {
         // Given
-        final CActivityType type = new CActivityType("Development");
+        final CActivityStatus status = new CActivityStatus("REVIEW");
         final CProject project = new CProject();
         project.setName("Test Project");
         
         final CActivity activity1 = new CActivity("Activity 1", project);
         final List<CActivity> initialActivities = Arrays.asList(activity1);
         
-        final CActivityKanbanColumn column = new CActivityKanbanColumn(type, initialActivities);
+        final CActivityKanbanColumn column = new CActivityKanbanColumn(status, initialActivities);
         
         // When
         final CActivity activity2 = new CActivity("Activity 2", project);
@@ -89,9 +89,9 @@ class CActivityKanbanColumnTest {
     @Test
     void testRefresh() {
         // Given
-        final CActivityType type = new CActivityType("Development");
+        final CActivityStatus status = new CActivityStatus("DONE");
         final List<CActivity> activities = List.of();
-        final CActivityKanbanColumn column = new CActivityKanbanColumn(type, activities);
+        final CActivityKanbanColumn column = new CActivityKanbanColumn(status, activities);
         
         // When
         column.refresh();
