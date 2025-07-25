@@ -1,0 +1,15 @@
+/* Simple login background styling */
+.login-background {
+    background-image: url('./images/login-background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Style the login overlay card */
+vaadin-login-overlay [part="card"] {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+}
+}

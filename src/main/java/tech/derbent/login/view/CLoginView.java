@@ -48,8 +48,8 @@ public class CLoginView extends Main implements BeforeEnterObserver {
 	 * space - Action set to "login" endpoint for Spring Security processing
 	 */
 	public CLoginView() {
-		// Apply CSS classes for centering the login form
-		addClassNames(LumoUtility.Display.FLEX, LumoUtility.JustifyContent.CENTER, LumoUtility.AlignItems.CENTER);
+		// Apply CSS classes for centering the login form with background
+		addClassNames(LumoUtility.Display.FLEX, LumoUtility.JustifyContent.CENTER, LumoUtility.AlignItems.CENTER, "login-background");
 		setSizeFull();
 		final Paragraph passwordHint = new Paragraph("Default username: user\nDefault password: test123");
 		passwordHint.addClassName(LumoUtility.TextAlignment.CENTER);
