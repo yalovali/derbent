@@ -263,7 +263,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	 */
 	private void buildMenuHierarchy() {
 		LOGGER.debug("Building menu hierarchy from route annotations");
-		final var rootLevel = new CMenuLevel("root", "Home", null);
+		final var rootLevel = new CMenuLevel("root", "Root Menu", null);
 		menuLevels.put("root", rootLevel);
 		// Get menu entries from MenuConfiguration
 		final var menuEntries = MenuConfiguration.getMenuEntries();
@@ -316,13 +316,6 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			LOGGER.warn("Menu entry with empty title encountered, skipping");
 			return;
 		}
-		
-		// Skip "Home" menu entry as it will be handled by the header home icon
-		if ("Home".equals(title.trim())) {
-			LOGGER.debug("Skipping 'Home' menu entry - will be handled by header home icon");
-			return;
-		}
-		
 		// Split title by dots to get hierarchy levels (up to 4 levels)
 		final String[] titleParts = title.split("\\.");
 		final int levelCount = Math.min(titleParts.length, MAX_MENU_LEVELS);
@@ -410,35 +403,19 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 				com.vaadin.flow.component.button.ButtonVariant.LUMO_TERTIARY_INLINE);
 			backButton.getStyle().set("min-width", "40px").set("min-height", "40px");
 			headerLayout.add(backButton);
-			
-			// Add level title with consistent font size
-			final Span levelTitle = new Span(level.getDisplayName());
-			levelTitle.addClassNames(FontWeight.SEMIBOLD, FontSize.LARGE);
-			headerLayout.add(levelTitle);
 		}
 		else {
-			// Add clickable home icon for root level
-			levelIcon = VaadinIcon.HOME.create();
+			// Add app icon for root level to prevent label jumping
+			levelIcon = VaadinIcon.CUBES.create();
 			levelIcon.addClassNames(IconSize.MEDIUM, TextColor.PRIMARY,
 				Margin.Right.MEDIUM);
-			levelIcon.getStyle().set("min-width", "24px").set("min-height", "24px")
-				.set("cursor", "pointer");
-			
-			// Make the home icon clickable to navigate to dashboard
-			levelIcon.addClickListener(e -> {
-				LOGGER.debug("Home icon clicked - navigating to dashboard");
-				com.vaadin.flow.component.UI.getCurrent().navigate("dashboard");
-			});
-			
-			// Add hover effect to home icon
-			levelIcon.getElement().addEventListener("mouseenter",
-				e -> levelIcon.getStyle().set("color", "var(--lumo-primary-color-50pct)"));
-			levelIcon.getElement().addEventListener("mouseleave",
-				e -> levelIcon.getStyle().remove("color"));
-				
+			levelIcon.getStyle().set("min-width", "24px").set("min-height", "24px");
 			headerLayout.add(levelIcon);
 		}
-		
+		// Add level title with consistent font size
+		final Span levelTitle = new Span(level.getDisplayName());
+		levelTitle.addClassNames(FontWeight.SEMIBOLD, FontSize.LARGE);
+		headerLayout.add(levelTitle);
 		// Add spacer to push content to the left
 		final Div spacer = new Div();
 		spacer.setWidthFull();
