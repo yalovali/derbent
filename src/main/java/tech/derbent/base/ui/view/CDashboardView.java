@@ -4,9 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -39,7 +36,6 @@ import tech.derbent.users.service.CUserService;
 public final class CDashboardView extends CAbstractPage {
 
     private static final long serialVersionUID = 1L;
-    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     private final CProjectService projectService;
     private final CUserService userService;
