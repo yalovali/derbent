@@ -121,4 +121,16 @@ public class CActivityService extends CAbstractService<CActivity> {
             LOGGER.warn("Error initializing lazy fields for CActivity with ID: {}", entity.getId(), e);
         }
     }
+
+    /**
+     * Counts the number of activities for a specific project.
+     * 
+     * @param project the project
+     * @return count of activities for the project
+     */
+    @PreAuthorize("permitAll()")
+    public long countByProject(final CProject project) {
+        LOGGER.info("Counting activities for project: {}", project.getName());
+        return ((CActivityRepository) repository).countByProject(project);
+    }
 }

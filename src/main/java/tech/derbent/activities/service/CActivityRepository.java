@@ -47,4 +47,12 @@ public interface CActivityRepository extends CAbstractRepository<CActivity> {
      */
     @Query("SELECT a FROM CActivity a LEFT JOIN FETCH a.activityType LEFT JOIN FETCH a.activityStatus WHERE a.id = :id")
     Optional<CActivity> findByIdWithActivityTypeAndStatus(@Param("id") Long id);
+
+    /**
+     * Counts the number of activities for a specific project.
+     * 
+     * @param project the project
+     * @return count of activities for the project
+     */
+    long countByProject(CProject project);
 }
