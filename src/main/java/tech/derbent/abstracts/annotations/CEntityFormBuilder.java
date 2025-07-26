@@ -1,6 +1,7 @@
 package tech.derbent.abstracts.annotations;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -581,7 +582,8 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		else if ((fieldType == Integer.class) || (fieldType == int.class)
 			|| (fieldType == Long.class) || (fieldType == long.class)
 			|| (fieldType == Double.class) || (fieldType == double.class)
-			|| (fieldType == Float.class) || (fieldType == float.class)) {
+			|| (fieldType == Float.class) || (fieldType == float.class)
+			|| (fieldType == BigDecimal.class)) {
 			LOGGER.debug(
 				"Creating number field component for numeric field: {} of type {}",
 				field.getName(), fieldType.getSimpleName());
@@ -811,9 +813,21 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		numberField.setClassName("form-field-number");
 		setComponentWidth(numberField, meta);
 		try {
-			binder.bind(numberField, field.getName());
-			LOGGER.debug("Successfully bound number field for field '{}'",
-				field.getName());
+			// Handle BigDecimal fields specially with a converter
+			if (field.getType() == BigDecimal.class) {
+				binder.forField(numberField)
+					.withConverter(
+						value -> value == null ? null : BigDecimal.valueOf(value),
+						value -> value == null ? 0.0 : value.doubleValue(),
+						"Invalid number format")
+					.bind(field.getName());
+				LOGGER.debug("Successfully bound BigDecimal number field for field '{}'",
+					field.getName());
+			} else {
+				binder.bind(numberField, field.getName());
+				LOGGER.debug("Successfully bound number field for field '{}'",
+					field.getName());
+			}
 		} catch (final Exception e) {
 			LOGGER.error("Failed to bind number field for field '{}': {}",
 				field.getName(), e.getMessage());
