@@ -103,7 +103,7 @@ After accepting Copilot suggestions, manually review for:
 		}
 
 **RULES OF DATABASE
-- password is always test123 for all users
+- password is always test123 for all users with has code '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu'
 - every entity should have an example in data.sql for per project, per company per user per activity etc...
 - Always ensure **PostgreSQL-only** configuration. Update `data.sql` with correct sample and initial database values after any database change.
 - keep spring.jpa.defer-datasource-initialization=true
