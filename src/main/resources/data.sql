@@ -1058,3 +1058,120 @@ INSERT INTO crisk (name, description, project_id, risk_severity, created_date, l
 ('Public Safety Risk', 'Risk of traffic management failures affecting public safety', 12, 'CRITICAL', NOW(), NOW()),
 ('Weather Impact Risk', 'Risk of weather conditions affecting traffic sensor accuracy and system performance', 12, 'LOW', NOW(), NOW());
 
+-- =====================================================================
+-- COMPANY SETTINGS DATA - Administration settings per company
+-- =====================================================================
+
+-- Delete existing company settings data
+DELETE FROM ccompanysettings;
+
+-- Reset company settings sequence
+DO '
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM pg_class c
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE c.relkind = ''S'' AND c.relname = ''ccompanysettings_company_settings_id_seq''
+    ) THEN
+        EXECUTE ''SELECT setval(''''ccompanysettings_company_settings_id_seq'''', 1, false)'';
+    END IF;
+END;
+';
+
+-- Insert company settings for each company
+INSERT INTO ccompanysettings (
+    company_id, default_project_status, default_activity_status, default_activity_priority,
+    company_timezone, working_hours_per_day, working_days_per_week, start_work_hour, end_work_hour,
+    email_notifications_enabled, due_date_reminder_days, overdue_notification_enabled,
+    auto_assign_project_manager, require_time_tracking, default_hourly_rate,
+    company_theme_color, show_budget_info, enable_gantt_charts,
+    default_user_role, require_approval_for_time_entries
+) VALUES 
+-- Derbent Technologies Settings (company_id=1)
+(1, 'PLANNED', 'TODO', 'MEDIUM', 
+ 'America/New_York', 8.0, 5, 9, 17,
+ TRUE, 3, TRUE,
+ FALSE, TRUE, 75.00,
+ '#1976d2', TRUE, TRUE,
+ 'TEAM_MEMBER', FALSE),
+
+-- TechFlow Solutions Settings (company_id=2)
+(2, 'IN_PROGRESS', 'TODO', 'HIGH', 
+ 'Europe/London', 7.5, 5, 8, 16,
+ TRUE, 2, TRUE,
+ TRUE, TRUE, 65.00,
+ '#4caf50', TRUE, TRUE,
+ 'TEAM_MEMBER', TRUE),
+
+-- DataCore Analytics Settings (company_id=3)
+(3, 'PLANNED', 'REVIEW', 'MEDIUM', 
+ 'America/Los_Angeles', 8.0, 4, 10, 18,
+ FALSE, 5, FALSE,
+ FALSE, FALSE, 85.00,
+ '#ff9800', FALSE, FALSE,
+ 'ANALYST', FALSE),
+
+-- CloudSync Enterprises Settings (company_id=4)
+(4, 'ACTIVE', 'IN_PROGRESS', 'HIGH', 
+ 'Asia/Tokyo', 9.0, 6, 8, 17,
+ TRUE, 1, TRUE,
+ TRUE, TRUE, 55.00,
+ '#e91e63', TRUE, TRUE,
+ 'TEAM_MEMBER', TRUE),
+
+-- NexGen Software Settings (company_id=5)
+(5, 'PLANNED', 'TODO', 'LOW', 
+ 'Australia/Sydney', 7.0, 5, 9, 16,
+ TRUE, 7, TRUE,
+ FALSE, TRUE, 70.00,
+ '#9c27b0', TRUE, FALSE,
+ 'DEVELOPER', FALSE);
+
+-- =====================================================================
+-- SYSTEM SETTINGS DATA - Global system configuration
+-- =====================================================================
+
+-- Delete existing system settings data
+DELETE FROM csystemsettings;
+
+-- Reset system settings sequence
+DO '
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM pg_class c
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE c.relkind = ''S'' AND c.relname = ''csystemsettings_system_settings_id_seq''
+    ) THEN
+        EXECUTE ''SELECT setval(''''csystemsettings_system_settings_id_seq'''', 1, false)'';
+    END IF;
+END;
+';
+
+-- Insert single system settings record
+INSERT INTO csystemsettings (
+    application_name, application_version, application_description, support_email,
+    session_timeout_minutes, max_login_attempts, account_lockout_duration_minutes,
+    require_strong_passwords, password_expiry_days,
+    max_file_upload_size_mb, allowed_file_extensions, file_storage_path, enable_file_versioning,
+    smtp_server, smtp_port, smtp_use_tls, system_email_from,
+    enable_database_logging, database_connection_pool_size, enable_caching, cache_ttl_minutes,
+    enable_automatic_backups, backup_schedule_cron, backup_retention_days,
+    maintenance_mode_enabled, maintenance_message,
+    default_system_theme, enable_dark_mode, show_system_info
+) VALUES (
+    'Derbent Project Management', '1.0.0', 
+    'Comprehensive project management solution for teams and organizations',
+    'admin@derbent.tech',
+    60, 3, 15,
+    TRUE, 90,
+    50.0, '.pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.txt,.zip,.rar,.csv,.json,.xml',
+    './uploads', TRUE,
+    'localhost', 587, TRUE, 'noreply@derbent.tech',
+    FALSE, 10, TRUE, 30,
+    TRUE, '0 2 * * *', 30,
+    FALSE, 'System is under maintenance. Please try again later.',
+    'lumo', TRUE, TRUE
+);
+
