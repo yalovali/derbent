@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.domain.CActivityStatus;
-import tech.derbent.kanban.CActivityKanbanColumn;
+import tech.derbent.kanban.view.CActivityKanbanColumn;
 import tech.derbent.projects.domain.CProject;
 
 /**

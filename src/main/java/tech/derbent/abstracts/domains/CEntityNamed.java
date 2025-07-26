@@ -59,6 +59,11 @@ public abstract class CEntityNamed extends CEntityDB {
 		this();
 		this.name = name;
 		this.description = null; // Default description is null
+
+		if ((name == null) || name.trim().isEmpty()) {
+			LOGGER.warn("constructor called with null or empty name for {}",
+				getClass().getSimpleName());
+		}
 	}
 
 	public CEntityNamed(final String name, final String description) {
@@ -106,7 +111,19 @@ public abstract class CEntityNamed extends CEntityDB {
 		this.lastModifiedDate = lastModifiedDate;
 	}
 
-	public void setName(final String name) { this.name = name; }
+	public void setName(final String name) {
+
+		if ((name == null) || name.trim().isEmpty()) {
+			LOGGER.warn("setname called with null or empty name for {}",
+				getClass().getSimpleName());
+		}
+		this.name = name;
+	}
+
+	@Override
+	public String toString() {
+		return name != null ? name : super.toString();
+	}
 
 	/**
 	 * Update the last modified date to now.

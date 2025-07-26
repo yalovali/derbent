@@ -29,13 +29,15 @@ import tech.derbent.base.data.DatabaseResetService;
  * LoginForm displays error message to user - User can retry with correct credentials
  */
 // Disables auto layout to prevent the login view from being embedded in a router layout.
-@Route(value = "login", autoLayout = false)
-@PageTitle("Login")
+@Route (value = "login", autoLayout = false)
+@PageTitle ("Login")
 @AnonymousAllowed // Allows anonymous access so users can access the login page without
 public class CLoginView extends Main implements BeforeEnterObserver {
 
 	private static final long serialVersionUID = 1L;
+
 	private final LoginOverlay loginOverlay = new LoginOverlay();
+
 	@Autowired
 	private DatabaseResetService databaseResetService;
 
@@ -47,23 +49,19 @@ public class CLoginView extends Main implements BeforeEnterObserver {
 	public CLoginView() {
 		addClassNames("cloginview");
 		setSizeFull();
-		final Paragraph passwordHint =
-			new Paragraph("Default username: user\nDefault password: test123");
+		final Paragraph passwordHint = new Paragraph("admin/test123");
 		passwordHint.addClassName(LumoUtility.TextAlignment.CENTER);
-		final Paragraph text =
-			new Paragraph("[spring.jpa.hibernate.ddl-auto = create] to init db");
-		text.addClassName(LumoUtility.TextAlignment.CENTER);
-		loginOverlay.getFooter().add(passwordHint, text);
-		loginOverlay.setTitle("Wellcome to Derbent");
-		loginOverlay.setDescription("Please enter your credentials to continue.");
-		loginOverlay.setAction("login"); // Set action to /login for Spring Security
-											// processing
+		loginOverlay.setTitle("Derbent ");
+		loginOverlay.setDescription("control the progress");
+		loginOverlay.setAction("login"); // Set action
+		loginOverlay.setForgotPasswordButtonVisible(false);
 		final CButton resetDbButton = new CButton("Reset Database", event -> {
 			databaseResetService.resetDatabase();
 			Notification.show("Database reset from data.sql");
 		});
 		resetDbButton.addClassName(LumoUtility.Margin.Top.SMALL);
 		loginOverlay.getFooter().add(resetDbButton);
+		loginOverlay.getFooter().add(passwordHint);
 		add(loginOverlay);
 		// cannot add components after the overlay is opened, so we set it up first
 		loginOverlay.setOpened(true);
@@ -79,6 +77,7 @@ public class CLoginView extends Main implements BeforeEnterObserver {
 	 */
 	@Override
 	public void beforeEnter(final BeforeEnterEvent event) {
+
 		// Check if the URL contains an error parameter
 		if (event.getLocation().getQueryParameters().getParameters()
 			.containsKey("error")) {

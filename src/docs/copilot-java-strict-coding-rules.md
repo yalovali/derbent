@@ -108,7 +108,8 @@ After accepting Copilot suggestions, manually review for:
 - Always ensure **PostgreSQL-only** configuration. Update `data.sql` with correct sample and initial database values after any database change.
 - keep spring.jpa.defer-datasource-initialization=true
 - dont use memory database H2
-- always drop tables, delete constraints etc. if there is change in the db structure
+- always delete tables at top of data.sql before you insert values into it.
+- delete constraints etc. if there is change in the db structure
 		
 
 **Documentation & Modularity**

@@ -1,4 +1,4 @@
-package tech.derbent.kanban;
+package tech.derbent.kanban.view;
 
 import java.util.List;
 import java.util.Map;
