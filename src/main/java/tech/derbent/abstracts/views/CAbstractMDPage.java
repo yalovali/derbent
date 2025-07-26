@@ -128,6 +128,11 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	}
 
 	protected void clearForm() {
+		// First deselect grid to avoid conflicts
+		if (grid != null) {
+			grid.deselectAll();
+		}
+		// Then clear the form
 		populateForm(null);
 	}
 
@@ -153,7 +158,7 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	}
 
 	protected CButton createDeleteButton(final String buttonText) {
-		LOGGER.info("Creating delete button for CUsersView");
+		LOGGER.info("Creating delete button for {}", getClass().getSimpleName());
 		final CButton delete = CButton.createTertiary(buttonText);
 		delete.addClickListener(e -> {
 			if (currentEntity == null) {
@@ -165,9 +170,17 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 				"Are you sure you want to delete this %s? This action cannot be undone.",
 				entityClass.getSimpleName().replace("C", "").toLowerCase());
 			new CConfirmationDialog(confirmMessage, () -> {
-				entityService.delete(currentEntity);
-				clearForm();
-				refreshGrid();
+				try {
+					LOGGER.info("Deleting entity: {} with ID: {}", 
+						entityClass.getSimpleName(), currentEntity.getId());
+					entityService.delete(currentEntity);
+					clearForm();
+					refreshGrid();
+					safeShowNotification("Item deleted successfully");
+				} catch (final Exception exception) {
+					LOGGER.error("Error deleting entity", exception);
+					new CWarningDialog("Failed to delete the item. Please try again.").open();
+				}
 			}).open();
 		});
 		return delete;
@@ -178,16 +191,20 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		final CButton newButton = CButton.createTertiary(buttonText, e -> {
 			LOGGER.debug("New button clicked, creating new entity");
 			try {
-				// Clear current selection and create new entity immediately
-				grid.deselectAll();
-				// Create new entity and bind it to the form immediately
+				// Step 1: Clear the form and deselect grid first
+				clearForm();
+				
+				// Step 2: Create new entity instance and bind it to the form
 				final EntityClass newEntityInstance = newEntity();
 				setCurrentEntity(newEntityInstance);
 				populateForm(newEntityInstance);
+				
 				LOGGER.debug("New entity created and bound to form: {}", 
 					newEntityInstance.getClass().getSimpleName());
-				// Navigate to the base view URL to indicate "new" mode (safely)
+				
+				// Step 3: Navigate to the base view URL to indicate "new" mode (safely)
 				safeNavigateToClass();
+				
 			} catch (final Exception exception) {
 				LOGGER.error("Error creating new entity", exception);
 				new CWarningDialog("Failed to create new " + 
