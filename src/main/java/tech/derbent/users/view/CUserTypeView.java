@@ -52,9 +52,12 @@ public class CUserTypeView extends CAbstractMDPage<CUserType> {
     @Override
     protected void createGridForEntity() {
         LOGGER.info("Creating grid for user types");
-        grid.addColumn(CUserType::getName).setAutoWidth(true).setHeader("Name").setSortable(true);
-        grid.addColumn(CUserType::getDescription).setAutoWidth(true).setHeader("Description").setSortable(true);
-        grid.setItems(query -> entityService.list(VaadinSpringDataHelpers.toSpringPageRequest(query)).stream());
+        grid.addColumn(CUserType::getName).setAutoWidth(true).setHeader("Name")
+            .setKey("name").setSortable(true);
+        grid.addColumn(CUserType::getDescription).setAutoWidth(true).setHeader("Description")
+            .setKey("description").setSortable(true);
+        // Data provider is already set up in the base class CAbstractMDPage.createGridLayout()
+        // No need to call grid.setItems() again as it's already configured to handle sorting properly
     }
 
     @Override

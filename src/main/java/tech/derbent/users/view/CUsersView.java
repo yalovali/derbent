@@ -80,13 +80,13 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 		LOGGER.info("Creating grid for users");
 		// Add columns for key user information
 		grid.addColumn(CUser::getName).setAutoWidth(true).setHeader("Name")
-			.setSortable(true);
+			.setKey("name").setSortable(true);
 		grid.addColumn(CUser::getLastname).setAutoWidth(true).setHeader("Last Name")
-			.setSortable(true);
+			.setKey("lastname").setSortable(true);
 		grid.addColumn(CUser::getLogin).setAutoWidth(true).setHeader("Login")
-			.setSortable(true);
+			.setKey("login").setSortable(true);
 		grid.addColumn(CUser::getEmail).setAutoWidth(true).setHeader("Email")
-			.setSortable(true);
+			.setKey("email").setSortable(true);
 		// Status column uses lambda expression - not directly sortable at DB level
 		grid.addColumn(user -> user.isEnabled() ? "Enabled" : "Disabled")
 			.setAutoWidth(true).setHeader("Status").setSortable(false);
@@ -99,9 +99,9 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 			user -> user.getCompany() != null ? user.getCompany().getName() : "")
 			.setAutoWidth(true).setHeader("Company").setSortable(false);
 		grid.addColumn(CUser::getRoles).setAutoWidth(true).setHeader("Roles")
-			.setSortable(true);
-		grid.setItems(query -> entityService
-			.list(VaadinSpringDataHelpers.toSpringPageRequest(query)).stream());
+			.setKey("roles").setSortable(true);
+		// Data provider is already set up in the base class CAbstractMDPage.createGridLayout()
+		// No need to call grid.setItems() again as it's already configured to handle sorting properly
 	}
 
 	@Override
