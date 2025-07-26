@@ -36,6 +36,7 @@ INSERT INTO cactivitytype (name, description) VALUES
 ('Deployment', 'Software deployment and release activities'),
 ('Maintenance', 'System maintenance and support activities');
 
+
 -- Insert sample activity statuses (workflow states)
 INSERT INTO cactivitystatus (name, description, color, is_final, sort_order) VALUES 
 ('BACKLOG', 'Items waiting to be prioritized and planned', '#9E9E9E', FALSE, 1),
@@ -135,6 +136,7 @@ INSERT INTO cproject (name, description, created_date, last_modified_date) VALUE
 -- =====================================================================
 
 -- Insert meeting types for different collaboration scenarios
+
 INSERT INTO cmeetingtype (name, description) VALUES 
 ('Daily Standup', 'Short daily synchronization meetings for team coordination'),
 ('Sprint Planning', 'Sprint planning sessions for work estimation and commitment'),

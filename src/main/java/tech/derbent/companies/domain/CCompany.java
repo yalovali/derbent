@@ -1,8 +1,13 @@
 package tech.derbent.companies.domain;
 
+import java.util.List;
+
 import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.MetaData;
@@ -56,6 +61,10 @@ public class CCompany extends CEntityDB {
     @Column(name = "enabled", nullable = false)
     @MetaData(displayName = "Active", required = true, readOnly = false, defaultValue = "true", description = "Is company active?", hidden = false, order = 8)
     private boolean enabled = true;
+
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @MetaData(displayName = "Users", required = false, readOnly = true, description = "Users belonging to this company", hidden = false, order = 9)
+    private List<tech.derbent.users.domain.CUser> users;
 
     public CCompany() {
         super();
@@ -136,6 +145,14 @@ public class CCompany extends CEntityDB {
 
     public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public List<tech.derbent.users.domain.CUser> getUsers() {
+        return users;
+    }
+
+    public void setUsers(final List<tech.derbent.users.domain.CUser> users) {
+        this.users = users;
     }
 
     @Override
