@@ -3,6 +3,8 @@ package tech.derbent.base.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.Size;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.derbent.abstracts.annotations.MetaData;
 import tech.derbent.abstracts.domains.CTypeEntity;
 
@@ -15,6 +17,8 @@ import tech.derbent.abstracts.domains.CTypeEntity;
  */
 @MappedSuperclass
 public abstract class CStatus extends CTypeEntity {
+
+    protected static final Logger LOGGER = LoggerFactory.getLogger(CStatus.class);
 
     @Column(name = "name", nullable = false, length = MAX_LENGTH_NAME, unique = true)
     @Size(max = MAX_LENGTH_NAME)
@@ -58,11 +62,10 @@ public abstract class CStatus extends CTypeEntity {
      */
     public CStatus(final String name) {
         super();
-        if (name == null || name.trim().isEmpty()) {
-            LOGGER.warn("CStatus constructor called with null or empty name");
-            throw new IllegalArgumentException("Status name cannot be null or empty");
-        }
         this.name = name;
+        if (name == null || name.trim().isEmpty()) {
+            LOGGER.warn("CStatus constructor called with null or empty name for {}", getClass().getSimpleName());
+        }
         LOGGER.debug("CStatus constructor called with name: {} for {}", name, getClass().getSimpleName());
     }
 
@@ -111,7 +114,6 @@ public abstract class CStatus extends CTypeEntity {
         LOGGER.debug("Setting name for {}: {}", getClass().getSimpleName(), name);
         if (name == null || name.trim().isEmpty()) {
             LOGGER.warn("Attempt to set null or empty name for {}", getClass().getSimpleName());
-            throw new IllegalArgumentException("Status name cannot be null or empty");
         }
         this.name = name;
     }
