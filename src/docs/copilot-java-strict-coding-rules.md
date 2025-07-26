@@ -102,6 +102,10 @@ After accepting Copilot suggestions, manually review for:
 				background-image: url('./images/background1.png');
 		}
 -- check the pattern of CPanelActivityDescription and its super classes. Use this pattern to group each entities fields according to related business topic. Dont leave any field out. create necassary classes, base classes with same naming convention for every entity and group fields in the view. only open the first one.
+-- always Check reference projects and do this task for a better structure, view and requirements of successful resource management, task tracking, project management, budget planning and better ui experience.
+-- always if necassary create new classes to support the new requirements with always less code and nice super classes for reuseability
+-- Prepare a detailed requirements document that includes this task description, main features, user roles, and any specific technologies or integrations that should be considered.
+
 
 **RULES OF DATABASE
 - password is always test123 for all users with has code '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu'

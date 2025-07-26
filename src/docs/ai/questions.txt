@@ -19,3 +19,6 @@ Update my CUser class to support the new requirements and ensure it adheres to t
 Associate one user with one company, and one company with many users.
 Ensure that the CUser class supports user roles such as admin, project manager, team member, and guest.
 Company and user's are not required fields for each other.
+
+GUIDELINES:
+Follow the guidelines in src/docs/copilot-java-strict-coding-rules.md and links and documents referenced in the file.
