@@ -45,9 +45,16 @@ public class CProjectService extends CAbstractService<CProject> {
         eventPublisher.publishEvent(new ProjectListChangeEvent(this, entity, ProjectListChangeEvent.ChangeType.DELETED));
     }
 
+    @PreAuthorize("permitAll()")
     public List<CProject> findAll() {
         LOGGER.info("Fetching all projects");
         return repository.findAll();
+    }
+
+    @PreAuthorize("permitAll()")
+    public long getTotalProjectCount() {
+        LOGGER.info("Counting total number of projects");
+        return repository.count();
     }
 
     @Override

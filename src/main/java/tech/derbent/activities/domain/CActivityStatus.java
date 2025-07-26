@@ -4,17 +4,15 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Size;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import tech.derbent.abstracts.annotations.MetaData;
-import tech.derbent.abstracts.domains.CTypeEntity;
+
+import tech.derbent.base.domain.CStatus;
 
 /**
- * CActivityStatus - Domain entity representing activity status types. 
- * Layer: Domain (MVC) 
- * Inherits from CTypeEntity to provide type functionality for activity states.
- * Supports workflow management with different activity states like TODO, IN_PROGRESS, DONE, etc.
+ * CActivityStatus - Domain entity representing activity status types.
+ * Layer: Domain (MVC)
+ * 
+ * Inherits from CStatus to provide status functionality for activities.
+ * This entity defines the possible statuses an activity can have (e.g., TODO, IN_PROGRESS, DONE).
  */
 @Entity
 @Table(name = "cactivitystatus")
@@ -89,12 +87,14 @@ public class CActivityStatus extends CTypeEntity {
     )
     private Integer sortOrder = 100;
 
+
     /**
      * Default constructor for JPA.
      */
     public CActivityStatus() {
         super();
         logger.debug("CActivityStatus() - Creating new activity status instance");
+
     }
 
     /**
@@ -107,7 +107,7 @@ public class CActivityStatus extends CTypeEntity {
         if (name == null) {
             logger.warn("CActivityStatus(name=null) - Name parameter is null");
         }
-        this.name = name;
+
     }
 
     /**
@@ -144,6 +144,7 @@ public class CActivityStatus extends CTypeEntity {
         this.description = description;
         this.color = color != null ? color : "#808080";
         this.isFinal = isFinal;
+
     }
 
     @Override
@@ -188,6 +189,7 @@ public class CActivityStatus extends CTypeEntity {
      */
     public Integer getSortOrder() {
         return sortOrder != null ? sortOrder : 100;
+
     }
 
     @Override
@@ -254,5 +256,6 @@ public class CActivityStatus extends CTypeEntity {
     @Override
     public String toString() {
         return name != null ? name : super.toString();
+
     }
 }

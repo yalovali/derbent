@@ -194,5 +194,6 @@ class CActivityStatusTest {
             assertEquals(statusData[2], testStatus.getColor());
             assertEquals(Boolean.parseBoolean(statusData[3]), testStatus.isFinal());
         }
+
     }
 }

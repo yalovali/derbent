@@ -61,4 +61,5 @@ public interface CActivityStatusRepository extends JpaRepository<CActivityStatus
      */
     @Query("SELECT s FROM CActivityStatus s WHERE LOWER(s.name) IN ('todo', 'new', 'open', 'pending') ORDER BY s.sortOrder ASC")
     Optional<CActivityStatus> findDefaultStatus();
+
 }

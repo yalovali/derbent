@@ -100,11 +100,11 @@ class CAbstractMDPageTest {
 		assertNotNull(buttonLayout, "Button layout should not be null");
 		assertTrue(buttonLayout.getClassName().contains("details-tab-button-layout"),
 			"Button layout should have correct CSS class");
-		// Verify that buttons are present (Save, Cancel, Delete)
+		// Verify that buttons are present (New, Save, Cancel, Delete)
 		final long buttonCount =
 			buttonLayout.getChildren().filter(CButton.class::isInstance).count();
-		assertEquals(3, buttonCount,
-			"Should have exactly 3 buttons (Save, Cancel, Delete)");
+		assertEquals(4, buttonCount,
+			"Should have exactly 4 buttons (New, Save, Cancel, Delete)");
 	}
 
 	@Test
@@ -136,5 +136,14 @@ class CAbstractMDPageTest {
 		assertNotNull(tabContent, "Tab content layout should exist");
 		assertTrue(tabContent.getClassName().contains("details-tab-content"),
 			"Tab content should have correct CSS class");
+	}
+
+	@Test
+	void testCreateNewButton() {
+		// Act
+		final CButton newButton = testPage.createNewButton("New");
+		// Assert
+		assertNotNull(newButton, "New button should not be null");
+		assertEquals("New", newButton.getText(), "New button should have correct text");
 	}
 }

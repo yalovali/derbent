@@ -10,6 +10,7 @@ import tech.derbent.activities.domain.CActivityStatus;
 import java.util.List;
 import java.util.Optional;
 
+
 /**
  * CActivityStatusService - Service class for managing CActivityStatus entities.
  * Layer: Service (MVC)
@@ -230,5 +231,6 @@ public class CActivityStatusService {
             }
         }
         logger.debug("createDefaultStatusesIfNotExist() - Completed creating default activity statuses");
+
     }
 }

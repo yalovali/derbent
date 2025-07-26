@@ -39,6 +39,7 @@ INSERT INTO cactivitypriority (name, description, priority_level, color, is_defa
 ('LOW', 'Low priority - can be deferred', 4, '#00AA00', FALSE),
 ('LOWEST', 'Lowest priority - nice to have', 5, '#808080', FALSE);
 
+
 -- check application.java to see WHEN this file is run
 -- Insert a sample login user into cuser table
 INSERT INTO cuser (
@@ -270,3 +271,4 @@ INSERT INTO cactivity (
  'System response time under 2 seconds. Database queries optimized. Caching implemented.',
  'Cancelled due to premature optimization. Will revisit after initial deployment.',
  '2025-07-12 11:00:00', '2025-07-18 17:30:00');
+

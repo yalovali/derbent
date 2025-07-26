@@ -327,6 +327,21 @@ public class CActivity extends CEntityOfProject {
     /**
      * Default constructor for JPA.
      */
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cactivitystatus_id", nullable = true)
+    @MetaData(
+        displayName = "Activity Status", 
+        required = false, 
+        readOnly = false, 
+        description = "Current status of the activity", 
+        hidden = false, 
+        order = 3,
+        dataProviderBean = "CActivityStatusService"
+    )
+    private CActivityStatus activityStatus;
+
+
     public CActivity() {
         super();
         logger.debug("CActivity() - Creating new activity instance");
@@ -734,5 +749,13 @@ public class CActivity extends CEntityOfProject {
             }
         }
         updateLastModified();
+    }
+
+    public CActivityStatus getActivityStatus() {
+        return activityStatus;
+    }
+
+    public void setActivityStatus(final CActivityStatus activityStatus) {
+        this.activityStatus = activityStatus;
     }
 }

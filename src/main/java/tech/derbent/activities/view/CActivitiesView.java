@@ -11,7 +11,6 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
-import tech.derbent.activities.service.CActivityTypeService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.SessionService;
 
@@ -24,17 +23,14 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 	private static final long serialVersionUID = 1L;
 	private final String ENTITY_ID_FIELD = "activity_id";
 	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "activities/%s/edit";
-	private final CActivityTypeService activityTypeService;
 	private CPanelActivityDescription descriptionPanel;
 
 	public CActivitiesView(final CActivityService entityService,
-		final SessionService sessionService,
-		final CActivityTypeService activityTypeService) {
+		final SessionService sessionService) {
 		super(CActivity.class, entityService, sessionService);
 		LOGGER.info(
-			"Initializing CActivitiesView with entityService and activityTypeService");
+			"Initializing CActivitiesView with entityService");
 		addClassNames("activities-view");
-		this.activityTypeService = activityTypeService;
 	}
 
 	@Override
@@ -54,14 +50,22 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 		LOGGER.info("Creating entity details for CActivitiesView");
 		// Create description panel for activity details
 		descriptionPanel = new CPanelActivityDescription(getCurrentEntity(), getBinder(),
-			(CActivityService) entityService, activityTypeService);
+			(CActivityService) entityService);
 		getBaseDetailsLayout().add(descriptionPanel);
 	}
 
 	@Override
 	protected void createGridForEntity() {
 		// property name must match the field name in CProject
-		grid.addColumn("name").setAutoWidth(true);
+		grid.addColumn("name").setAutoWidth(true).setHeader("Activity Name");
+		
+		// Add status column to display activity status
+		grid.addColumn(activity -> {
+			CActivity activityEntity = (CActivity) activity;
+			return activityEntity.getActivityStatus() != null ? 
+				activityEntity.getActivityStatus().getName() : "";
+		}).setAutoWidth(true).setHeader("Status");
+		
 		// when a row is selected or deselected, populate form
 		grid.asSingleSelect().addValueChangeListener(event -> {
 			if (event.getValue() != null) {
