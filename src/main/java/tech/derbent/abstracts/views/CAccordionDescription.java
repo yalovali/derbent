@@ -4,10 +4,10 @@ import java.util.List;
 
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 
-import tech.derbent.abstracts.domains.CEntityNamed;
+import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.services.CAbstractService;
 
-public abstract class CAccordionDescription<EntityClass extends CEntityNamed>
+public abstract class CAccordionDescription<EntityClass extends CEntityDB>
 	extends CAccordion {
 
 	private static final long serialVersionUID = 1L;
@@ -63,8 +63,8 @@ public abstract class CAccordionDescription<EntityClass extends CEntityNamed>
 	public List<String> getEntityFields() { return EntityFields; }
 
 	public void populateForm(final EntityClass entity) {
-		LOGGER.info("Populating form with activity data: {}",
-			entity != null ? entity.getName() : "null");
+		LOGGER.info("Populating form with entity data: {}",
+			entity != null ? entity.toString() : "null");
 
 		if (entity == null) {
 			LOGGER.warn("Entity is null, clearing form");
