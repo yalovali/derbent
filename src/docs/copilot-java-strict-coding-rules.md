@@ -27,19 +27,6 @@ src/main/java/cuser
 
 ---
 
-## 2. Using Copilot for Code Suggestions
-
-- Always specify the layer (Model, View, Controller) when requesting code from Copilot.
-- Request Copilot comments for key methods: explain responsibility, interactions, and MVC boundaries.
-- Ask Copilot for test stubs and edge-case handling.
-
-**Example Copilot prompt:**
-```java
-// Copilot: Generate a Vaadin view class for displaying User entities, using UserService as the model.
-```
-
----
-
 ## 3. Commenting Standards
 
 - **Every class:** Document its role in MVC.
@@ -71,34 +58,6 @@ src/main/java/cuser
 
 ---
 
-## 6. Example: Annotated MVC Class (Controller)
-
-```java
-package controller;
-
-import model.User;
-import service.UserService;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.Route;
-
-/**
- * UserViewController - Handles user interactions and updates the view.
- * Layer: Controller (MVC)
- */
-@Route("users")
-public class UserViewController extends VerticalLayout {
-    private final UserService userService;
-
-    public UserViewController(UserService userService) {
-        this.userService = userService;
-        // Initialize view components
-        // Copilot: Display users in a Vaadin Grid
-    }
-}
-```
-
----
-
 ## 7. Copilot Review Protocol
 
 After accepting Copilot suggestions, manually review for:
@@ -115,6 +74,8 @@ After accepting Copilot suggestions, manually review for:
 - Favor abstraction: if two or more features are similar, create an abstract base class with abstract fields and methods.
 - Always start class names with a capital "C" (e.g., `CUser`, `CSettings`). Do not use standard Java class naming for domain classes.
 - Always ensure **PostgreSQL-only** configuration. Update `data.sql` with correct sample and initial database values after any database change.
+- keep spring.jpa.defer-datasource-initialization=true
+- dont use memory database H2
 - Check for lazy loading issues using best practices (e.g., `@Transactional`, `fetch = FetchType.LAZY`). Add comments explaining lazy loading risks or solutions.
 - Always check for `null` values and possible `NullPointerException` in every function. If necessary, also check for empty strings.
 - Always prefer using base classes to avoid code duplication.

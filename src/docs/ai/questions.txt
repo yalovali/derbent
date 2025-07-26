@@ -5,9 +5,17 @@ i want to write a java application, using vaadin framework. This project is:
 - we aim for small or medium offices. 
 Define the requirements for this project, including the main features, user roles, and any specific technologies or integrations that should be considered.
 
-AGENT TASK
-Follow the guidelines in /derbent/src/docs/copilot-java-strict-coding-rules.md and links and documents referenced in the file.
+GUIDELINES:
+Follow the guidelines in src/docs/copilot-java-strict-coding-rules.md and links and documents referenced in the file.
 Check reference projects and do this task for a better structure, view and requirements of successful resource management, task tracking, project management, budget planning and better ui experience.
 if necassary create new classes to support the new requirements.
 Prepare a detailed requirements document that includes this task description, main features, user roles, and any specific technologies or integrations that should be considered.
+TASK:
 Update my CActivity class to support the new requirements and ensure it adheres to the coding standards outlined in the provided documentation.
+
+GUIDELINES:
+TASK:
+Update my CUser class to support the new requirements and ensure it adheres to the coding standards outlined in the provided documentation.
+Associate one user with one company, and one company with many users.
+Ensure that the CUser class supports user roles such as admin, project manager, team member, and guest.
+Company and user's are not required fields for each other.

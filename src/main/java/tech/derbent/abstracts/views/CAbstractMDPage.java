@@ -173,11 +173,25 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		return delete;
 	}
 
+	protected CButton createNewButton(final String buttonText) {
+		LOGGER.info("Creating new button for {}", getClass().getSimpleName());
+		final CButton newButton = CButton.createTertiary(buttonText, e -> {
+			LOGGER.debug("New button clicked, creating new entity");
+			// Clear current selection and create new entity
+			grid.deselectAll();
+			setCurrentEntity(null);
+			clearForm();
+			// Navigate to the base view URL to indicate "new" mode
+			UI.getCurrent().navigate(getClass());
+		});
+		return newButton;
+	}
+
 	@PostConstruct
 	protected abstract void createDetailsLayout();
 
 	/**
-	 * Creates the button layout for the details tab. Contains save, cancel, and delete
+	 * Creates the button layout for the details tab. Contains new, save, cancel, and delete
 	 * buttons with consistent styling.
 	 * @return HorizontalLayout with action buttons
 	 */
@@ -185,7 +199,7 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		final HorizontalLayout buttonLayout = new HorizontalLayout();
 		buttonLayout.setClassName("details-tab-button-layout");
 		buttonLayout.setSpacing(true);
-		buttonLayout.add(createSaveButton("Save"), createCancelButton("Cancel"),
+		buttonLayout.add(createNewButton("New"), createSaveButton("Save"), createCancelButton("Cancel"),
 			createDeleteButton("Delete"));
 		return buttonLayout;
 	}

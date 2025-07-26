@@ -14,14 +14,7 @@ import tech.derbent.abstracts.domains.CTypeEntity;
  */
 @Entity
 @Table(name = "cusertype")
-@AttributeOverride(name = "id", column = @Column(name = "cusertype_id")) // Override the
-																			// default
-																			// column name
-																			// for the ID
-																			// field to
-																			// follow
-																			// classname_id
-																			// convention
+@AttributeOverride(name = "id", column = @Column(name = "cusertype_id"))
 public class CUserType extends CTypeEntity {
 
 	@Column(name = "name", nullable = false, length = MAX_LENGTH_NAME, unique = true)

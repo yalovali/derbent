@@ -304,4 +304,16 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 			throw new IllegalArgumentException("User name cannot be null or empty");
 		}
 	}
+
+	/**
+	 * Counts the number of users assigned to a specific project.
+	 * 
+	 * @param projectId the project ID
+	 * @return count of users assigned to the project
+	 */
+	@PreAuthorize("permitAll()")
+	public long countUsersByProjectId(final Long projectId) {
+		logger.info("Counting users for project ID: {}", projectId);
+		return ((CUserRepository) repository).countUsersByProjectId(projectId);
+	}
 }
