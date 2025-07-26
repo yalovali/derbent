@@ -24,6 +24,7 @@ public class CActivityStatusService extends CAbstractService<CActivityStatus> {
 
 	private static final Logger logger =
 		LoggerFactory.getLogger(CActivityStatusService.class);
+
 	private final CActivityStatusRepository activityStatusRepository;
 
 	@Autowired
@@ -33,6 +34,7 @@ public class CActivityStatusService extends CAbstractService<CActivityStatus> {
 		logger.debug(
 			"CActivityStatusService(activityStatusRepository={}) - Initializing service",
 			activityStatusRepository);
+
 		if (activityStatusRepository == null) {
 			logger.error(
 				"CActivityStatusService constructor - Repository parameter is null");
@@ -64,8 +66,10 @@ public class CActivityStatusService extends CAbstractService<CActivityStatus> {
 				"DONE", "Task has been completed", "#00AA00", "true", "5" },
 			{
 				"CANCELLED", "Task has been cancelled", "#888888", "true", "6" } };
+
 		for (final String[] statusData : defaultStatuses) {
 			final String name = statusData[0];
+
 			if (!existsByName(name)) {
 				logger.debug(
 					"createDefaultStatusesIfNotExist() - Creating default status: {}",
@@ -92,15 +96,18 @@ public class CActivityStatusService extends CAbstractService<CActivityStatus> {
 	 */
 	public void deleteById(final Long id) {
 		logger.debug("deleteById(id={}) - Deleting activity status", id);
+
 		if (id == null) {
 			logger.error("deleteById(id=null) - ID parameter is null");
 			throw new IllegalArgumentException("Activity status ID cannot be null");
 		}
 		final Optional<CActivityStatus> existing = activityStatusRepository.findById(id);
+
 		if (!existing.isPresent()) {
 			logger.warn("deleteById(id={}) - Activity status not found", id);
 			return;
 		}
+
 		try {
 			activityStatusRepository.deleteById(id);
 			logger.debug("deleteById(id={}) - Successfully deleted activity status", id);
@@ -116,10 +123,11 @@ public class CActivityStatusService extends CAbstractService<CActivityStatus> {
 	 * @param name the name to check - must not be null
 	 * @return true if the name exists, false otherwise
 	 */
-	@Transactional(readOnly = true)
+	@Transactional (readOnly = true)
 	public boolean existsByName(final String name) {
 		logger.debug("existsByName(name={}) - Checking if activity status name exists",
 			name);
+
 		if ((name == null) || name.trim().isEmpty()) {
 			logger.warn("existsByName(name={}) - Name parameter is null or empty", name);
 			return false;
@@ -134,7 +142,7 @@ public class CActivityStatusService extends CAbstractService<CActivityStatus> {
 	 * Find all activity statuses ordered by sort order.
 	 * @return List of all activity statuses
 	 */
-	@Transactional(readOnly = true)
+	@Transactional (readOnly = true)
 	public List<CActivityStatus> findAll() {
 		logger.debug("findAll() - Finding all activity statuses");
 		final List<CActivityStatus> statuses =
@@ -147,7 +155,7 @@ public class CActivityStatusService extends CAbstractService<CActivityStatus> {
 	 * Find all active (non-final) statuses.
 	 * @return List of active statuses
 	 */
-	@Transactional(readOnly = true)
+	@Transactional (readOnly = true)
 	public List<CActivityStatus> findAllActiveStatuses() {
 		logger.debug("findAllActiveStatuses() - Finding all active activity statuses");
 		final List<CActivityStatus> statuses =
@@ -161,7 +169,7 @@ public class CActivityStatusService extends CAbstractService<CActivityStatus> {
 	 * Find all final statuses (completed/cancelled states).
 	 * @return List of final statuses
 	 */
-	@Transactional(readOnly = true)
+	@Transactional (readOnly = true)
 	public List<CActivityStatus> findAllFinalStatuses() {
 		logger.debug("findAllFinalStatuses() - Finding all final activity statuses");
 		final List<CActivityStatus> statuses =
@@ -175,9 +183,10 @@ public class CActivityStatusService extends CAbstractService<CActivityStatus> {
 	 * @param id the status ID - must not be null
 	 * @return Optional containing the status if found, empty otherwise
 	 */
-	@Transactional(readOnly = true)
+	@Transactional (readOnly = true)
 	public Optional<CActivityStatus> findById(final Long id) {
 		logger.debug("findById(id={}) - Finding activity status by ID", id);
+
 		if (id == null) {
 			logger.warn("findById(id=null) - ID parameter is null");
 			return Optional.empty();
@@ -192,9 +201,10 @@ public class CActivityStatusService extends CAbstractService<CActivityStatus> {
 	 * @param name the status name - must not be null or empty
 	 * @return Optional containing the status if found, empty otherwise
 	 */
-	@Transactional(readOnly = true)
+	@Transactional (readOnly = true)
 	public Optional<CActivityStatus> findByName(final String name) {
 		logger.debug("findByName(name={}) - Finding activity status by name", name);
+
 		if ((name == null) || name.trim().isEmpty()) {
 			logger.warn("findByName(name={}) - Name parameter is null or empty", name);
 			return Optional.empty();
@@ -209,7 +219,7 @@ public class CActivityStatusService extends CAbstractService<CActivityStatus> {
 	 * Find the default status for new activities.
 	 * @return Optional containing the default status if found
 	 */
-	@Transactional(readOnly = true)
+	@Transactional (readOnly = true)
 	public Optional<CActivityStatus> findDefaultStatus() {
 		logger.debug("findDefaultStatus() - Finding default activity status");
 		final Optional<CActivityStatus> status =
@@ -221,40 +231,41 @@ public class CActivityStatusService extends CAbstractService<CActivityStatus> {
 
 	/**
 	 * Save or update an activity status.
-	 * @param activityStatus the status to save - must not be null
+	 * @param status the status to save - must not be null
 	 * @return the saved status
 	 * @throws IllegalArgumentException if the status is null or invalid
 	 */
 	@Override
-	public CActivityStatus save(final CActivityStatus activityStatus) {
-		logger.debug("save(activityStatus={}) - Saving activity status",
-			activityStatus != null ? activityStatus.getName() : "null");
-		if (activityStatus == null) {
+	public CActivityStatus save(final CActivityStatus status) {
+		logger.debug("save(status={}) - Saving activity status",
+			status != null ? status.getName() : "null");
+
+		if (status == null) {
 			logger.error("save(activityStatus=null) - Activity status parameter is null");
 			throw new IllegalArgumentException("Activity status cannot be null");
 		}
-		if ((activityStatus.getName() == null)
-			|| activityStatus.getName().trim().isEmpty()) {
+
+		if ((status.getName() == null) || status.getName().trim().isEmpty()) {
 			logger.error(
 				"save() - Activity status name is null or empty for status id={}",
-				activityStatus.getId());
+				status.getId());
 			throw new IllegalArgumentException(
 				"Activity status name cannot be null or empty");
 		}
 		// Check for duplicate names (excluding self for updates)
-		final String trimmedName = activityStatus.getName().trim();
+		final String trimmedName = status.getName().trim();
 		final Optional<CActivityStatus> existing =
 			activityStatusRepository.findByNameIgnoreCase(trimmedName);
-		if (existing.isPresent()
-			&& !existing.get().getId().equals(activityStatus.getId())) {
+
+		if (existing.isPresent() && !existing.get().getId().equals(status.getId())) {
 			logger.error("save() - Activity status name '{}' already exists",
 				trimmedName);
 			throw new IllegalArgumentException(
 				"Activity status name '" + trimmedName + "' already exists");
 		}
+
 		try {
-			final CActivityStatus savedStatus =
-				activityStatusRepository.save(activityStatus);
+			final CActivityStatus savedStatus = activityStatusRepository.save(status);
 			logger.debug("save() - Successfully saved activity status with id={}",
 				savedStatus.getId());
 			return savedStatus;
