@@ -14,14 +14,14 @@ public class CPanelActivityDescription extends CPanelActivityBase {
 	public CPanelActivityDescription(final CActivity currentEntity,
 		final BeanValidationBinder<CActivity> beanValidationBinder,
 		final CActivityService entityService) {
-		super(currentEntity, beanValidationBinder, entityService);
+		super("Basic Information", currentEntity, beanValidationBinder, entityService);
 		// only open this panel
 		openPanel();
 	}
 
 	@Override
 	protected void updatePanelEntityFields() {
-		setEntityFields(List.of("name", "description", "type", "status", "startDate",
-			"endDate", "project"));
+		// Basic Information panel - only fundamental fields
+		setEntityFields(List.of("name", "description", "activityType", "project"));
 	}
 }

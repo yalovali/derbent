@@ -37,6 +37,25 @@ public abstract class CAccordionDescription<EntityClass extends CEntityNamed>
 		this.currentEntity = currentEntity;
 	}
 
+	/**
+	 * Constructor for CAccordionDescription with custom title.
+	 * @param title custom title for the accordion panel
+	 * @param currentEntity current entity instance
+	 * @param beanValidationBinder validation binder
+	 * @param entityClass entity class type
+	 * @param entityService service for the entity
+	 */
+	public CAccordionDescription(final String title, final EntityClass currentEntity,
+		final BeanValidationBinder<EntityClass> beanValidationBinder,
+		final Class<EntityClass> entityClass,
+		final CAbstractService<EntityClass> entityService) {
+		super(title);
+		this.entityClass = entityClass;
+		this.binder = beanValidationBinder;
+		this.entityService = entityService;
+		this.currentEntity = currentEntity;
+	}
+
 	protected abstract void createPanelContent();
 
 	public BeanValidationBinder<EntityClass> getBinder() { return binder; }
