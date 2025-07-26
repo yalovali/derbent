@@ -2,7 +2,6 @@ package tech.derbent.activities.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,11 +34,7 @@ import tech.derbent.users.domain.CUser;
 @Entity
 @Table (name = "cactivity") // table name for the entity as the default is the class name
 							// in lowercase
-@AttributeOverride (name = "id", column = @Column (name = "activity_id")) // Override the
-																			// default
-																			// column name
-																			// for the ID
-																			// field
+@AttributeOverride (name = "id", column = @Column (name = "activity_id"))
 public class CActivity extends CEntityOfProject {
 
 	private static final Logger logger = LoggerFactory.getLogger(CActivity.class);
@@ -53,15 +48,6 @@ public class CActivity extends CEntityOfProject {
 		dataProviderBean = "CActivityTypeService"
 	)
 	private CActivityType activityType;
-
-	@Column (name = "description", nullable = true, length = 2000)
-	@Size (max = 2000)
-	@MetaData (
-		displayName = "Description", required = false, readOnly = false,
-		defaultValue = "", description = "Detailed description of the activity",
-		hidden = false, order = 3, maxLength = 2000
-	)
-	private String description;
 
 	// Resource Management
 	@ManyToOne (fetch = FetchType.LAZY)
@@ -228,23 +214,6 @@ public class CActivity extends CEntityOfProject {
 	)
 	private String notes;
 
-	// Audit fields
-	@Column (name = "created_date", nullable = true)
-	@MetaData (
-		displayName = "Created Date", required = false, readOnly = true,
-		description = "Date and time when the activity was created", hidden = false,
-		order = 80
-	)
-	private LocalDateTime createdDate;
-
-	@Column (name = "last_modified_date", nullable = true)
-	@MetaData (
-		displayName = "Last Modified", required = false, readOnly = true,
-		description = "Date and time when the activity was last modified", hidden = false,
-		order = 81
-	)
-	private LocalDateTime lastModifiedDate;
-
 	/**
 	 * Default constructor for JPA.
 	 */
@@ -356,10 +325,6 @@ public class CActivity extends CEntityOfProject {
 
 	public CUser getCreatedBy() { return createdBy; }
 
-	public LocalDateTime getCreatedDate() { return createdDate; }
-
-	public String getDescription() { return description; }
-
 	public LocalDate getDueDate() { return dueDate; }
 
 	public BigDecimal getEstimatedCost() { return estimatedCost; }
@@ -367,8 +332,6 @@ public class CActivity extends CEntityOfProject {
 	public BigDecimal getEstimatedHours() { return estimatedHours; }
 
 	public BigDecimal getHourlyRate() { return hourlyRate; }
-
-	public LocalDateTime getLastModifiedDate() { return lastModifiedDate; }
 
 	public String getNotes() { return notes; }
 
@@ -389,7 +352,9 @@ public class CActivity extends CEntityOfProject {
 	/**
 	 * Initialize default values for the activity.
 	 */
-	private void initializeDefaults() {
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
 		logger.debug("initializeDefaults() - Setting default values for activity");
 
 		if (this.actualHours == null) {
@@ -403,11 +368,6 @@ public class CActivity extends CEntityOfProject {
 		if (this.progressPercentage == null) {
 			this.progressPercentage = 0;
 		}
-
-		if (this.createdDate == null) {
-			this.createdDate = LocalDateTime.now();
-		}
-		this.lastModifiedDate = LocalDateTime.now();
 	}
 
 	/**
@@ -516,21 +476,6 @@ public class CActivity extends CEntityOfProject {
 		this.createdBy = createdBy;
 	}
 
-	public void setCreatedDate(final LocalDateTime createdDate) {
-		logger.debug(
-			"setCreatedDate(createdDate={}) - Setting created date for activity id={}",
-			createdDate, getId());
-		this.createdDate = createdDate;
-	}
-
-	public void setDescription(final String description) {
-		logger.debug(
-			"setDescription(description={}) - Setting description for activity id={}",
-			description, getId());
-		this.description = description;
-		updateLastModified();
-	}
-
 	public void setDueDate(final LocalDate dueDate) {
 		logger.debug("setDueDate(dueDate={}) - Setting due date for activity id={}",
 			dueDate, getId());
@@ -578,13 +523,6 @@ public class CActivity extends CEntityOfProject {
 		}
 		this.hourlyRate = hourlyRate;
 		updateLastModified();
-	}
-
-	public void setLastModifiedDate(final LocalDateTime lastModifiedDate) {
-		logger.debug(
-			"setLastModifiedDate(lastModifiedDate={}) - Setting last modified date for activity id={}",
-			lastModifiedDate, getId());
-		this.lastModifiedDate = lastModifiedDate;
 	}
 
 	public void setNotes(final String notes) {
@@ -679,15 +617,5 @@ public class CActivity extends CEntityOfProject {
 			}
 		}
 		updateLastModified();
-	}
-
-	/**
-	 * Update the last modified date to now.
-	 */
-	public void updateLastModified() {
-		logger.debug(
-			"updateLastModified() - Updating last modified date for activity id={}",
-			getId());
-		this.lastModifiedDate = LocalDateTime.now();
 	}
 }

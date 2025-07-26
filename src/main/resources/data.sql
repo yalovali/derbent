@@ -123,7 +123,7 @@ INSERT INTO cuser (
 -- =====================================================================
 
 -- Insert sample projects with realistic business scenarios
-INSERT INTO cproject (name, description, created_date, updated_date) VALUES 
+INSERT INTO cproject (name, description, created_date, last_modified_date) VALUES 
 ('E-Commerce Platform Modernization', 'Migration of legacy e-commerce system to microservices architecture with React frontend and Spring Boot backend', NOW(), NOW()),
 ('Customer Analytics Dashboard', 'Real-time analytics dashboard for customer behavior tracking using machine learning and data visualization', NOW(), NOW()),
 ('Mobile Banking Application', 'Secure mobile banking app with biometric authentication, transaction management, and investment features', NOW(), NOW()),

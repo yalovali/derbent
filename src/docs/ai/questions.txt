@@ -6,7 +6,7 @@ i want to write a java application, using vaadin framework. This project is:
 Define the requirements for this project, including the main features, user roles, and any specific technologies or integrations that should be considered.
 
 GUIDELINES:
-Follow the guidelines in /derbent/src/docs/copilot-java-strict-coding-rules.md and links and documents referenced in the file.
+Follow the guidelines in src/docs/copilot-java-strict-coding-rules.md and links and documents referenced in the file.
 Check reference projects and do this task for a better structure, view and requirements of successful resource management, task tracking, project management, budget planning and better ui experience.
 if necassary create new classes to support the new requirements.
 Prepare a detailed requirements document that includes this task description, main features, user roles, and any specific technologies or integrations that should be considered.

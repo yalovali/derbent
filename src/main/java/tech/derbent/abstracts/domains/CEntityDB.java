@@ -7,14 +7,17 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
+//mapped superclass is a class that is not
 
 @MappedSuperclass
 public abstract class CEntityDB extends CEntity {
 
 	public static final int MAX_LENGTH_DESCRIPTION = 255;
+
 	public static final int MAX_LENGTH_NAME = 100;
+
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue (strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	public CEntityDB() {
@@ -27,18 +30,22 @@ public abstract class CEntityDB extends CEntity {
 
 	@Override
 	public boolean equals(final Object obj) {
+
 		if (this == obj) {
 			return true;
 		}
+
 		if (obj == null) {
 			return false;
 		}
+
 		if (!(obj instanceof CEntityDB)) {
 			return false;
 		}
 		final CEntityDB other = (CEntityDB) obj;
 		final Class<?> thisClass = ProxyUtils.getUserClass(getClass());
 		final Class<?> otherClass = ProxyUtils.getUserClass(other.getClass());
+
 		if (!thisClass.equals(otherClass)) {
 			return false;
 		}
@@ -52,11 +59,14 @@ public abstract class CEntityDB extends CEntity {
 	@Override
 	public int hashCode() {
 		final Long id = getId();
+
 		if (id != null) {
 			return id.hashCode();
 		}
 		return ProxyUtils.getUserClass(getClass()).hashCode();
 	}
+
+	protected void initializeDefaults() {}
 
 	@Override
 	public String toString() {
