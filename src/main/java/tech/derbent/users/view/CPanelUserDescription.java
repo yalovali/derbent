@@ -6,6 +6,8 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.views.CAccordionDescription;
+import tech.derbent.companies.domain.CCompany;
+import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserType;
 import tech.derbent.users.service.CUserService;
@@ -16,17 +18,24 @@ public class CPanelUserDescription extends CAccordionDescription<CUser> {
 	private static final long serialVersionUID = 1L;
 	private PasswordField passwordField;
 	private final CUserTypeService userTypeService;
+	private final CCompanyService companyService;
 
 	/**
 	 * Default constructor for CUserDescriptionPanel.
-	 * @param userTypeService
-	 * @param beanValidationBinder
+	 * @param currentEntity the current user entity
+	 * @param beanValidationBinder the validation binder
+	 * @param entityService the user service
+	 * @param userTypeService the user type service
+	 * @param companyService the company service
 	 */
 	public CPanelUserDescription(final CUser currentEntity,
 		final BeanValidationBinder<CUser> beanValidationBinder,
-		final CUserService entityService, final CUserTypeService userTypeService) {
+		final CUserService entityService, final CUserTypeService userTypeService,
+		final CCompanyService companyService) {
 		super(currentEntity, beanValidationBinder, CUser.class, entityService);
 		this.userTypeService = userTypeService;
+		this.companyService = companyService;
+		LOGGER.info("CPanelUserDescription initialized with user type and company services");
 		createPanelContent();
 		// open the panel by default using the new convenience method
 		openPanel();
@@ -42,10 +51,20 @@ public class CPanelUserDescription extends CAccordionDescription<CUser> {
 				@SuppressWarnings("unchecked")
 				public <T extends CEntityDB> java.util.List<T>
 					getItems(final Class<T> entityType) {
+					LOGGER.debug("Getting items for entity type: {}", entityType.getSimpleName());
 					if (entityType == CUserType.class) {
-						return (java.util.List<T>) userTypeService
+						final java.util.List<T> userTypes = (java.util.List<T>) userTypeService
 							.list(org.springframework.data.domain.Pageable.unpaged());
+						LOGGER.debug("Retrieved {} user types", userTypes.size());
+						return userTypes;
 					}
+					else if (entityType == CCompany.class) {
+						final java.util.List<T> companies = (java.util.List<T>) companyService
+							.findEnabledCompanies();
+						LOGGER.debug("Retrieved {} enabled companies", companies.size());
+						return companies;
+					}
+					LOGGER.warn("No data provider available for entity type: {}", entityType.getSimpleName());
 					return java.util.Collections.emptyList();
 				}
 			};
