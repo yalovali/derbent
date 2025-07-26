@@ -96,8 +96,8 @@ After accepting Copilot suggestions, manually review for:
   - These dialogs must be simple, visually appealing, and inherit from a common superclass (e.g., `CBaseDialog`).
 - Never add loggers at the end of functions. Always log at the start with full detail about the function and parameters.
 - All code must follow Java naming conventions for variables and methods, except for class names which must start with "C".
-
-
+- password is always test123 for all users
+- every entity should have an example in data.sql for per project, per company per user per activity etc...
 **FOR CSS
 -- update css names from class name, also update css file accordingly
 -- always use very simple css. Dont use javascript in java or css.
