@@ -73,9 +73,6 @@ After accepting Copilot suggestions, manually review for:
 - Use `final` keyword wherever possible (variables, parameters, methods, classes).
 - Favor abstraction: if two or more features are similar, create an abstract base class with abstract fields and methods.
 - Always start class names with a capital "C" (e.g., `CUser`, `CSettings`). Do not use standard Java class naming for domain classes.
-- Always ensure **PostgreSQL-only** configuration. Update `data.sql` with correct sample and initial database values after any database change.
-- keep spring.jpa.defer-datasource-initialization=true
-- dont use memory database H2
 - Check for lazy loading issues using best practices (e.g., `@Transactional`, `fetch = FetchType.LAZY`). Add comments explaining lazy loading risks or solutions.
 - Always check for `null` values and possible `NullPointerException` in every function. If necessary, also check for empty strings.
 - Always prefer using base classes to avoid code duplication.
@@ -96,8 +93,6 @@ After accepting Copilot suggestions, manually review for:
   - These dialogs must be simple, visually appealing, and inherit from a common superclass (e.g., `CBaseDialog`).
 - Never add loggers at the end of functions. Always log at the start with full detail about the function and parameters.
 - All code must follow Java naming conventions for variables and methods, except for class names which must start with "C".
-- password is always test123 for all users
-- every entity should have an example in data.sql for per project, per company per user per activity etc...
 **FOR CSS
 -- update css names from class name, also update css file accordingly
 -- always use very simple css. Dont use javascript in java or css.
@@ -106,6 +101,14 @@ After accepting Copilot suggestions, manually review for:
 		#vaadinLoginOverlayWrapper::part(overlay) {
 				background-image: url('./images/background1.png');
 		}
+
+**RULES OF DATABASE
+- password is always test123 for all users
+- every entity should have an example in data.sql for per project, per company per user per activity etc...
+- Always ensure **PostgreSQL-only** configuration. Update `data.sql` with correct sample and initial database values after any database change.
+- keep spring.jpa.defer-datasource-initialization=true
+- dont use memory database H2
+- always drop tables, delete constraints etc. if there is change in the db structure
 		
 
 **Documentation & Modularity**

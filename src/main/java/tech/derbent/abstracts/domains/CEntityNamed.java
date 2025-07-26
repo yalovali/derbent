@@ -20,8 +20,8 @@ public abstract class CEntityNamed extends CEntityDB {
 	@Column (name = "name", nullable = false, length = MAX_LENGTH_NAME, unique = true)
 	@Size (max = MAX_LENGTH_NAME)
 	@MetaData (
-		displayName = "Project Name", required = true, readOnly = false,
-		defaultValue = "", description = "Name of the project", hidden = false
+		displayName = "Name", required = true, readOnly = false, defaultValue = "",
+		description = "Name", hidden = false, order = 0, maxLength = MAX_LENGTH_NAME
 	)
 	private String name;
 
@@ -30,7 +30,7 @@ public abstract class CEntityNamed extends CEntityDB {
 	@MetaData (
 		displayName = "Description", required = false, readOnly = false,
 		defaultValue = "", description = "Detailed description of the project",
-		hidden = false, order = 3, maxLength = 2000
+		hidden = false, order = 1, maxLength = 2000
 	)
 	private String description;
 
