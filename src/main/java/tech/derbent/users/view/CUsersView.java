@@ -15,6 +15,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.views.CAbstractMDPage;
 import tech.derbent.abstracts.views.CButton;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
+import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.service.CUserService;
@@ -31,17 +32,21 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "users/%s/edit";
 	private final CPanelUserProjectSettings projectSettingsGrid;
 	private final CUserTypeService userTypeService;
+	private final CCompanyService companyService;
 	CPanelUserDescription descriptionPanel;
 
 	// private final TextField name; • Annotate the CUsersView constructor with @Autowired
 	// to let Spring inject dependencies.
 	@Autowired
 	public CUsersView(final CUserService entityService,
-		final CProjectService projectService, final CUserTypeService userTypeService) {
+		final CProjectService projectService, final CUserTypeService userTypeService,
+		final CCompanyService companyService) {
 		super(CUser.class, entityService);
 		addClassNames("users-view");
 		this.userTypeService = userTypeService;
+		this.companyService = companyService;
 		projectSettingsGrid = new CPanelUserProjectSettings(projectService);
+		LOGGER.info("CUsersView initialized with user type and company services");
 	}
 
 	@Override
@@ -66,7 +71,7 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 		LOGGER.info("Creating entity details for CUsersView");
 		// Create description panel for user details
 		descriptionPanel = new CPanelUserDescription(getCurrentEntity(), getBinder(),
-			(CUserService) entityService, userTypeService);
+			(CUserService) entityService, userTypeService, companyService);
 		getBaseDetailsLayout().add(descriptionPanel);
 	}
 
@@ -82,11 +87,17 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 			.setSortable(true);
 		grid.addColumn(CUser::getEmail).setAutoWidth(true).setHeader("Email")
 			.setSortable(true);
+		// Status column uses lambda expression - not directly sortable at DB level
 		grid.addColumn(user -> user.isEnabled() ? "Enabled" : "Disabled")
-			.setAutoWidth(true).setHeader("Status").setSortable(true);
+			.setAutoWidth(true).setHeader("Status").setSortable(false);
+		// User type requires join - not directly sortable at DB level  
 		grid.addColumn(
 			user -> user.getUserType() != null ? user.getUserType().getName() : "")
-			.setAutoWidth(true).setHeader("User Type").setSortable(true);
+			.setAutoWidth(true).setHeader("User Type").setSortable(false);
+		// Company requires join - not directly sortable at DB level
+		grid.addColumn(
+			user -> user.getCompany() != null ? user.getCompany().getName() : "")
+			.setAutoWidth(true).setHeader("Company").setSortable(false);
 		grid.addColumn(CUser::getRoles).setAutoWidth(true).setHeader("Roles")
 			.setSortable(true);
 		grid.setItems(query -> entityService

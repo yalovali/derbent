@@ -252,8 +252,18 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		grid = new Grid<>(entityClass, false);
 		grid.getColumns().forEach(grid::removeColumn);
 		grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
-		grid.setItems(query -> entityService
-			.list(VaadinSpringDataHelpers.toSpringPageRequest(query)).stream());
+		// Use a custom data provider that properly handles pagination and sorting
+		grid.setItems(query -> {
+			LOGGER.debug("Grid query - offset: {}, limit: {}, sortOrders: {}", 
+				query.getOffset(), query.getLimit(), query.getSortOrders());
+			final org.springframework.data.domain.Pageable pageable = 
+				VaadinSpringDataHelpers.toSpringPageRequest(query);
+			LOGGER.debug("Spring Pageable - pageNumber: {}, pageSize: {}, sort: {}", 
+				pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+			final java.util.List<EntityClass> result = entityService.list(pageable);
+			LOGGER.debug("Data provider returned {} items", result.size());
+			return result.stream();
+		});
 		grid.addColumn(entity -> entity.getId().toString()).setHeader("ID").setKey("id");
 		// Add selection listener to the grid
 		grid.asSingleSelect().addValueChangeListener(event -> {
