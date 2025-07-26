@@ -40,21 +40,65 @@ DELETE FROM cactivitypriority;
 DELETE FROM cmeetingtype;
 DELETE FROM cusertype;
 
--- Re-enable foreign key checks
 SET session_replication_role = DEFAULT;
 
 -- Reset sequences to start from 1
-SELECT setval('cuser_user_id_seq', 1, false);
-SELECT setval('ccompany_company_id_seq', 1, false);
-SELECT setval('cproject_project_id_seq', 1, false);
-SELECT setval('cactivity_activity_id_seq', 1, false);
-SELECT setval('cmeeting_meeting_id_seq', 1, false);
-SELECT setval('crisk_risk_id_seq', 1, false);
-SELECT setval('cusertype_id_seq', 1, false);
-SELECT setval('cactivitytype_id_seq', 1, false);
-SELECT setval('cactivitystatus_id_seq', 1, false);
-SELECT setval('cactivitypriority_id_seq', 1, false);
-SELECT setval('cmeetingtype_id_seq', 1, false);
+-- Reset 'cuser_user_id_seq'
+DO '
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM pg_class c
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE c.relkind = ''S'' AND c.relname = ''cuser_user_id_seq''
+    ) THEN
+        EXECUTE ''SELECT setval(''''cuser_user_id_seq'''', 1, false)'';
+    END IF;
+END;
+';
+
+-- Reset 'cproject_project_id_seq'
+DO '
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM pg_class c
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE c.relkind = ''S'' AND c.relname = ''cproject_project_id_seq''
+    ) THEN
+        EXECUTE ''SELECT setval(''''cproject_project_id_seq'''', 1, false)'';
+    END IF;
+END;
+';
+
+-- Reset 'ctask_task_id_seq'
+DO '
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM pg_class c
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE c.relkind = ''S'' AND c.relname = ''ctask_task_id_seq''
+    ) THEN
+        EXECUTE ''SELECT setval(''''ctask_task_id_seq'''', 1, false)'';
+    END IF;
+END;
+';
+
+-- Reset 'cstatus_status_id_seq'
+DO '
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM pg_class c
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE c.relkind = ''S'' AND c.relname = ''cstatus_status_id_seq''
+    ) THEN
+        EXECUTE ''SELECT setval(''''cstatus_status_id_seq'''', 1, false)'';
+    END IF;
+END;
+';
+
 
 -- =====================================================================
 -- BASIC LOOKUP TABLES (No foreign key dependencies)
@@ -393,7 +437,7 @@ INSERT INTO cmeeting_participants (meeting_id, user_id) VALUES
 (28, 2), (28, 17), (28, 21),
 
 -- Cybersecurity Kickoff (meeting_id=29): PM Rachel, Senior Dev Alex, QA James
-(29, 4), (29, 4), (29, 13),
+(29, 4), (29, 13),
 -- Security Training (meeting_id=30): Multiple participants for training
 (30, 4), (30, 5), (30, 6), (30, 9), (30, 10), (30, 13), (30, 14),
 

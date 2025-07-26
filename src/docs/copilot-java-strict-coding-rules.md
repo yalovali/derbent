@@ -108,8 +108,21 @@ After accepting Copilot suggestions, manually review for:
 - Always ensure **PostgreSQL-only** configuration. Update `data.sql` with correct sample and initial database values after any database change.
 - keep spring.jpa.defer-datasource-initialization=true
 - dont use memory database H2
-- always delete tables at top of data.sql before you insert values into it.
+- always delete tables at top of data.sql before you insert values into it. check them before they exists
 - delete constraints etc. if there is change in the db structure
+- always reset sequences in the format and escape characters below with a conditonal to check if they exists first
+DO '
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM pg_class c
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE c.relkind = ''S'' AND c.relname = ''ctask_task_id_seq''
+    ) THEN
+        EXECUTE ''SELECT setval(''''ctask_task_id_seq'''', 1, false)'';
+    END IF;
+END;
+';
 		
 
 **Documentation & Modularity**
