@@ -101,6 +101,7 @@ After accepting Copilot suggestions, manually review for:
 		#vaadinLoginOverlayWrapper::part(overlay) {
 				background-image: url('./images/background1.png');
 		}
+-- check the pattern of CPanelActivityDescription and its super classes. Use this pattern to group each entities fields according to related business topic. Dont leave any field out. create necassary classes, base classes with same naming convention for every entity and group fields in the view. only open the first one.
 
 **RULES OF DATABASE
 - password is always test123 for all users with has code '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu'

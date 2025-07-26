@@ -197,7 +197,7 @@ INSERT INTO ccompany (
 -- PASSWORD RULE: All passwords are 'test123' (hashed: $2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.)
 -- OR ? '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu'
 INSERT INTO cuser (
-    created_date, email, enabled, lastname, login, name, password, phone, roles, updated_date, cusertype_id, user_role
+    created_date, email, enabled, lastname, login, name, password, phone, roles, last_modified_date, cusertype_id, user_role
 ) VALUES 
 -- System Administrator
 ('2025-01-15 08:00:00', 'admin@derbent.tech', TRUE, 'Administrator', 'admin', 'System', 

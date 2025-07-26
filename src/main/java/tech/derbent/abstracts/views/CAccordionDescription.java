@@ -1,11 +1,13 @@
 package tech.derbent.abstracts.views;
 
+import java.util.List;
+
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 
-import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.services.CAbstractService;
 
-public abstract class CAccordionDescription<EntityClass extends CEntityDB>
+public abstract class CAccordionDescription<EntityClass extends CEntityNamed>
 	extends CAccordion {
 
 	private static final long serialVersionUID = 1L;
@@ -17,6 +19,8 @@ public abstract class CAccordionDescription<EntityClass extends CEntityDB>
 	protected EntityClass currentEntity;
 
 	protected CAbstractService<EntityClass> entityService;
+
+	private List<String> EntityFields;
 
 	/**
 	 * Default constructor for CAccordionDescription.
@@ -37,7 +41,27 @@ public abstract class CAccordionDescription<EntityClass extends CEntityDB>
 
 	public BeanValidationBinder<EntityClass> getBinder() { return binder; }
 
-	public abstract void populateForm(EntityClass entity);
+	public List<String> getEntityFields() { return EntityFields; }
+
+	public void populateForm(final EntityClass entity) {
+		LOGGER.info("Populating form with activity data: {}",
+			entity != null ? entity.getName() : "null");
+
+		if (entity == null) {
+			LOGGER.warn("Entity is null, clearing form");
+			return;
+		}
+		currentEntity = entity;
+	}
 
 	public void saveEventHandler() {}
+
+	protected void setEntityFields(final List<String> fields) {
+		LOGGER.info("Setting entity fields for CPanelActivityDescription: {}", fields);
+		EntityFields = fields;
+	}
+
+	protected void updatePanelEntityFields() {
+		// TODO Auto-generated method stub
+	}
 }

@@ -8,6 +8,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.abstracts.views.CAccordionDescription;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
@@ -26,7 +27,7 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 
 	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "activities/%s/edit";
 
-	private CPanelActivityDescription descriptionPanel;
+	private CAccordionDescription<CActivity> descriptionPanel;
 
 	public CActivitiesView(final CActivityService entityService,
 		final SessionService sessionService) {

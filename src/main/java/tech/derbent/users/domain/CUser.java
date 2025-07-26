@@ -1,6 +1,5 @@
 package tech.derbent.users.domain;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import jakarta.persistence.AttributeOverride;
@@ -16,17 +15,14 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.MetaData;
-import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.companies.domain.CCompany;
 
 @Entity
 @Table (name = "cuser") // table name for the entity as the default is the class name in
 						// lowercase
-@AttributeOverride (name = "id", column = @Column (name = "user_id")) // Override the
-																		// default column
-																		// name for the ID
-																		// field
-public class CUser extends CEntityDB {
+@AttributeOverride (name = "id", column = @Column (name = "user_id"))
+public class CUser extends CEntityNamed {
 
 	public static final int MAX_LENGTH_NAME = 255; // Define maximum length for name
 													// fields
@@ -109,12 +105,6 @@ public class CUser extends CEntityDB {
 	@Column (name = "enabled", nullable = false)
 	private boolean enabled = true; // User account status, default is enabled
 
-	@Column (name = "created_date", nullable = true)
-	private LocalDateTime created_date;
-
-	@Column (name = "updated_date", nullable = true)
-	private LocalDateTime updated_date;
-
 	@OneToMany (mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<CUserProjectSettings> projectSettings;
 
@@ -140,7 +130,7 @@ public class CUser extends CEntityDB {
 
 	public CUser(final String username, final String password, final String name,
 		final String email) {
-		super();
+		super(name);
 		this.login = username;
 		this.name = name;
 		this.email = email;
@@ -152,7 +142,7 @@ public class CUser extends CEntityDB {
 	 */
 	public CUser(final String username, final String password, final String name,
 		final String email, final CUserRole userRole) {
-		super();
+		super(name);
 		this.login = username;
 		this.name = name;
 		this.email = email;
@@ -163,7 +153,7 @@ public class CUser extends CEntityDB {
 
 	public CUser(final String username, final String password, final String name,
 		final String email, final String roles) {
-		super();
+		super(name);
 		this.login = username;
 		this.name = name;
 		this.email = email;
@@ -198,6 +188,7 @@ public class CUser extends CEntityDB {
 
 	public String getLogin() { return login; }
 
+	@Override
 	public String getName() { return name; }
 
 	public String getPassword() {
@@ -261,6 +252,7 @@ public class CUser extends CEntityDB {
 
 	public void setLogin(final String login) { this.login = login; }
 
+	@Override
 	public void setName(final String name) { this.name = name; }
 
 	public void setPassword(final String password) {

@@ -135,61 +135,14 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 	 */
 	private static CDataProviderResolver dataProviderResolver;
 
-	/**
-	 * Builds a form layout for the specified entity class using automatic data provider
-	 * resolution.
-	 * <p>
-	 * This method uses the new annotation-based approach to automatically resolve data
-	 * providers for ComboBox fields based on their MetaData annotations. No explicit data
-	 * provider is required.
-	 * </p>
-	 * <p>
-	 * <strong>ComboBox Data Resolution:</strong> ComboBox fields will have their data
-	 * automatically resolved using:
-	 * </p>
-	 * <ul>
-	 * <li>MetaData.dataProviderBean() - specified Spring bean name</li>
-	 * <li>MetaData.dataProviderClass() - specified Spring bean class</li>
-	 * <li>Automatic resolution based on entity type naming convention</li>
-	 * </ul>
-	 * @param <EntityClass> the entity class type for the binder
-	 * @param entityClass   the class of the entity to create a form for
-	 * @param binder        the Vaadin binder for data binding
-	 * @return a Div containing the generated form layout
-	 * @throws IllegalArgumentException if entityClass or binder is null
-	 * @see #buildForm(Class, BeanValidationBinder, ComboBoxDataProvider)
-	 */
 	public static <EntityClass> Div buildForm(final Class<?> entityClass,
 		final BeanValidationBinder<EntityClass> binder) {
-		return buildForm(entityClass, binder, null);
+		return buildForm(entityClass, binder, null, null);
 	}
 
-	/**
-	 * Builds a form layout for the specified entity class with optional legacy data
-	 * provider.
-	 * <p>
-	 * This method supports both the new annotation-based approach and the legacy
-	 * ComboBoxDataProvider approach:
-	 * </p>
-	 * <ul>
-	 * <li><strong>Legacy Provider Priority:</strong> If dataProvider is not null, it
-	 * takes precedence over annotations</li>
-	 * <li><strong>Annotation-Based:</strong> If dataProvider is null, uses MetaData
-	 * annotations for data resolution</li>
-	 * <li><strong>Fallback:</strong> If neither approach provides data, ComboBox will be
-	 * empty</li>
-	 * </ul>
-	 * @param <EntityClass> the entity class type for the binder
-	 * @param entityClass   the class of the entity to create a form for
-	 * @param binder        the Vaadin binder for data binding
-	 * @param dataProvider  optional legacy data provider (null to use annotation-based
-	 *                      approach)
-	 * @return a Div containing the generated form layout
-	 * @throws IllegalArgumentException if entityClass or binder is null
-	 */
 	public static <EntityClass> Div buildForm(final Class<?> entityClass,
 		final BeanValidationBinder<EntityClass> binder,
-		final ComboBoxDataProvider dataProvider) {
+		final ComboBoxDataProvider dataProvider, final List<String> entityFields) {
 
 		// Enhanced null pointer checking with detailed logging
 		if (entityClass == null) {
@@ -208,76 +161,10 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		final FormLayout formLayout = new FormLayout();
 		// Collect all fields from the class hierarchy with enhanced logging
 		final List<Field> allFields = new ArrayList<>();
-		Class<?> current = entityClass;
-		int hierarchyLevel = 0;
-
-		while ((current != null) && (current != Object.class)) {
-			final Field[] declaredFields = current.getDeclaredFields();
-
-			if (declaredFields != null) {
-				allFields.addAll(Arrays.asList(declaredFields));
-			}
-			else {
-				LOGGER.warn("getDeclaredFields() returned null for class: {}",
-					current.getSimpleName());
-			}
-			current = current.getSuperclass();
-			hierarchyLevel++;
-		}
+		getListOfAllFields(entityClass, allFields);
 		// LOGGER.debug("Total fields collected from hierarchy: {}", allFields.size());
-
-		// Enhanced field debugging with null checking
-		for (final Field field : allFields) {
-
-			if (field != null) {
-				// LOGGER.debug("Field analysis - Name: {}, Type: {}, Modifiers:
-				// {}",field.getName(),field.getType() != null ?
-				// field.getType().getSimpleName() :
-				// "null",java.lang.reflect.Modifier.toString(field.getModifiers())); Log
-				// MetaData annotation details if present
-				final MetaData metaData = field.getAnnotation(MetaData.class);
-
-				if (metaData != null) {
-					LOGGER.debug(
-						"MetaData found - DisplayName: '{}', Order: {}, Required: {}, Hidden: {}",
-						metaData.displayName(), metaData.order(), metaData.required(),
-						metaData.hidden());
-				}
-				else {
-					LOGGER.debug("No MetaData annotation found for field: {}",
-						field.getName());
-				}
-			}
-			else {
-				LOGGER.warn("Null field encountered in field list");
-			}
-		}
 		// Filter and sort fields with enhanced null checking and logging
-		final List<Field> sortedFields = allFields.stream().filter(field -> {
-
-			if (field == null) {
-				LOGGER.warn("Null field encountered during filtering");
-				return false;
-			}
-			return !java.lang.reflect.Modifier.isStatic(field.getModifiers());
-		}).filter(field -> {
-			final MetaData metaData = field.getAnnotation(MetaData.class);
-
-			if (metaData == null) {
-				return false;
-			}
-			return true;
-		}).filter(field -> {
-			final MetaData metaData = field.getAnnotation(MetaData.class);
-
-			if (metaData.hidden()) {
-				return false;
-			}
-			return true;
-		}).sorted(Comparator.comparingInt(field -> {
-			final MetaData metaData = field.getAnnotation(MetaData.class);
-			return metaData != null ? metaData.order() : Integer.MAX_VALUE;
-		})).collect(Collectors.toList());
+		final List<Field> sortedFields = getSortedFilteredFieldsList(allFields);
 		LOGGER.info("Processing {} visible fields for form generation",
 			sortedFields.size());
 		// Create components with enhanced error handling and logging
@@ -285,54 +172,31 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 
 		for (final Field field : sortedFields) {
 
-			if (field == null) {
-				LOGGER.warn("Null field encountered in sorted fields list");
+			// skip if entityFields is not null and does not contain the field name or
+			// entityFields is empty
+			if ((entityFields != null) && (!entityFields.isEmpty())
+				&& !entityFields.contains(field.getName())) {
 				continue;
 			}
-			final MetaData meta = field.getAnnotation(MetaData.class);
-
-			if (meta == null) {
-				LOGGER.warn("Field '{}' lost MetaData annotation during processing",
-					field.getName());
-				continue;
-			}
-
-			try {
-				// LOGGER.debug("Creating component for field '{}' with displayName
-				// '{}'",field.getName(), meta.displayName());
-				final Component component =
-					createComponentForField(field, meta, binder, dataProvider);
-
-				if (component != null) {
-					final HorizontalLayout horizontalLayout =
-						createFieldLayout(meta, component);
-
-					if (horizontalLayout != null) {
-						formLayout.add(horizontalLayout);
-						processedComponents++;
-					}
-					else {
-						LOGGER.warn("createFieldLayout returned null for field '{}'",
-							field.getName());
-					}
-				}
-				else {
-					LOGGER.warn(
-						"createComponentForField returned null for field '{}' of type {}",
-						field.getName(), field.getType().getSimpleName());
-				}
-			} catch (final Exception e) {
-				LOGGER.error(
-					"Error creating component for field '{}' of type {} with MetaData displayName '{}': {}",
-					field.getName(), field.getType().getSimpleName(), meta.displayName(),
-					e.getMessage(), e);
-			}
+			processedComponents = processMetaForField(binder, dataProvider, formLayout,
+				processedComponents, field);
 		}
 		LOGGER.info(
 			"Form generation completed. Successfully processed {} out of {} components",
 			processedComponents, sortedFields.size());
 		panel.add(formLayout);
 		return panel;
+	}
+
+	public static <EntityClass> Div buildForm(final Class<?> entityClass,
+		final BeanValidationBinder<EntityClass> binder, final List<String> entityFields) {
+		return buildForm(entityClass, binder, null, entityFields);
+	}
+
+	public static <EntityClass> Div buildFormAll(final Class<?> entityClass,
+		final BeanValidationBinder<EntityClass> binder,
+		final ComboBoxDataProvider dataProvider) {
+		return buildForm(entityClass, binder, dataProvider, null);
 	}
 
 	private static Checkbox createCheckbox(final Field field, final MetaData meta,
@@ -788,6 +652,124 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			return null;
 		}
 		return textField;
+	}
+
+	private static void getListOfAllFields(final Class<?> entityClass,
+		final List<Field> allFields) {
+		Class<?> current = entityClass;
+
+		while ((current != null) && (current != Object.class)) {
+			final Field[] declaredFields = current.getDeclaredFields();
+
+			if (declaredFields != null) {
+				allFields.addAll(Arrays.asList(declaredFields));
+			}
+			else {
+				LOGGER.warn("getDeclaredFields() returned null for class: {}",
+					current.getSimpleName());
+			}
+			current = current.getSuperclass();
+		}
+
+		// Enhanced field debugging with null checking
+		for (final Field field : allFields) {
+
+			if (field != null) {
+				final MetaData metaData = field.getAnnotation(MetaData.class);
+
+				if (metaData != null) {
+					LOGGER.debug(
+						"MetaData found - DisplayName: '{}', Order: {}, Required: {}, Hidden: {}",
+						metaData.displayName(), metaData.order(), metaData.required(),
+						metaData.hidden());
+				}
+				else {
+					LOGGER.debug("No MetaData annotation found for field: {}",
+						field.getName());
+				}
+			}
+			else {
+				LOGGER.warn("Null field encountered in field list");
+			}
+		}
+	}
+
+	private static List<Field> getSortedFilteredFieldsList(final List<Field> allFields) {
+		return allFields.stream().filter(field -> {
+
+			if (field == null) {
+				LOGGER.warn("Null field encountered during filtering");
+				return false;
+			}
+			return !java.lang.reflect.Modifier.isStatic(field.getModifiers());
+		}).filter(field -> {
+			final MetaData metaData = field.getAnnotation(MetaData.class);
+
+			if (metaData == null) {
+				return false;
+			}
+			return true;
+		}).filter(field -> {
+			final MetaData metaData = field.getAnnotation(MetaData.class);
+
+			if (metaData.hidden()) {
+				return false;
+			}
+			return true;
+		}).sorted(Comparator.comparingInt(field -> {
+			final MetaData metaData = field.getAnnotation(MetaData.class);
+			return metaData != null ? metaData.order() : Integer.MAX_VALUE;
+		})).collect(Collectors.toList());
+	}
+
+	private static <EntityClass> int processMetaForField(
+		final BeanValidationBinder<EntityClass> binder,
+		final ComboBoxDataProvider dataProvider, final FormLayout formLayout,
+		int processedComponents, final Field field) {
+
+		if (field == null) {
+			LOGGER.warn("Null field encountered in sorted fields list");
+			return processedComponents;
+		}
+		final MetaData meta = field.getAnnotation(MetaData.class);
+
+		if (meta == null) {
+			LOGGER.warn("Field '{}' lost MetaData annotation during processing",
+				field.getName());
+			return processedComponents;
+		}
+
+		try {
+			// LOGGER.debug("Creating component for field '{}' with displayName
+			// '{}'",field.getName(), meta.displayName());
+			final Component component =
+				createComponentForField(field, meta, binder, dataProvider);
+
+			if (component != null) {
+				final HorizontalLayout horizontalLayout =
+					createFieldLayout(meta, component);
+
+				if (horizontalLayout != null) {
+					formLayout.add(horizontalLayout);
+					processedComponents++;
+				}
+				else {
+					LOGGER.warn("createFieldLayout returned null for field '{}'",
+						field.getName());
+				}
+			}
+			else {
+				LOGGER.warn(
+					"createComponentForField returned null for field '{}' of type {}",
+					field.getName(), field.getType().getSimpleName());
+			}
+		} catch (final Exception e) {
+			LOGGER.error(
+				"Error creating component for field '{}' of type {} with MetaData displayName '{}': {}",
+				field.getName(), field.getType().getSimpleName(), meta.displayName(),
+				e.getMessage(), e);
+		}
+		return processedComponents;
 	}
 
 	private static void setComponentWidth(final Component component,
