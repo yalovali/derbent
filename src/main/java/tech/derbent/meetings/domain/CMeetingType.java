@@ -38,18 +38,4 @@ public class CMeetingType extends CTypeEntity {
 	public CMeetingType(final String name, final String description) {
 		super(name, description);
 	}
-
-	@Override
-	public boolean equals(final Object o) {
-
-		if (this == o) {
-			return true;
-		}
-
-		if (!(o instanceof CMeetingType)) {
-			return false;
-		}
-		final CMeetingType that = (CMeetingType) o;
-		return super.equals(that);
-	}
 }

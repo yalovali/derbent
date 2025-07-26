@@ -124,20 +124,6 @@ public class CActivityPriority extends CTypeEntity {
 		this.isDefault = isDefault;
 	}
 
-	@Override
-	public boolean equals(final Object o) {
-
-		if (this == o) {
-			return true;
-		}
-
-		if (!(o instanceof CActivityPriority)) {
-			return false;
-		}
-		final CActivityPriority that = (CActivityPriority) o;
-		return super.equals(that);
-	}
-
 	/**
 	 * Gets the color hex code for this priority.
 	 * @return the color hex code (e.g., "#FF0000") or default orange if null

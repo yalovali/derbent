@@ -176,14 +176,14 @@ public class CUser extends CEntityDB {
 	@Override
 	public boolean equals(final Object o) {
 
-		if (this == o) {
-			return true;
-		}
-
-		if (!(o instanceof CUser)) {
-			return false;
+		if (super.equals(o)) {
+			return true; // Use superclass equals for ID comparison
 		}
 		final CUser cUser = (CUser) o;
+
+		if (cUser == null) {
+			return false; // Null check
+		}
 		return (enabled == cUser.enabled) && name.equals(cUser.name)
 			&& lastname.equals(cUser.lastname) && login.equals(cUser.login)
 			&& email.equals(cUser.email) && phone.equals(cUser.phone)

@@ -38,18 +38,4 @@ public class CUserType extends CTypeEntity {
 	public CUserType(final String name, final String description) {
 		super(name, description);
 	}
-
-	@Override
-	public boolean equals(final Object o) {
-
-		if (this == o) {
-			return true;
-		}
-
-		if (!(o instanceof CUserType)) {
-			return false;
-		}
-		final CUserType that = (CUserType) o;
-		return super.equals(that);
-	}
 }

@@ -38,18 +38,4 @@ public class CActivityType extends CTypeEntity {
 	public CActivityType(final String name, final String description) {
 		super(name, description);
 	}
-
-	@Override
-	public boolean equals(final Object o) {
-
-		if (this == o) {
-			return true;
-		}
-
-		if (!(o instanceof CActivityType)) {
-			return false;
-		}
-		final CActivityType that = (CActivityType) o;
-		return super.equals(that);
-	}
 }

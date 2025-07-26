@@ -17,6 +17,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasValueAndElement;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
@@ -67,12 +69,15 @@ import tech.derbent.abstracts.domains.CEntityDB;
  * 	// New annotation-based approach - no data provider needed in view code
  * 	public class CActivity extends CEntityOfProject {
  *
- * 		&#64;MetaData(displayName = "Activity Type",
- * 			dataProviderBean = "activityTypeService")
+ * 		&#64;MetaData (
+ * 			displayName = "Activity Type", dataProviderBean = "activityTypeService"
+ * 		)
  * 		private CActivityType activityType;
- * 		@MetaData(displayName = "Assigned User",
- * 			dataProviderClass = CUserService.class,
- * 			dataProviderMethod = "findAllActive")
+ *
+ * 		@MetaData (
+ * 			displayName = "Assigned User", dataProviderClass = CUserService.class,
+ * 			dataProviderMethod = "findAllActive"
+ * 		)
  * 		private CUser assignedUser;
  * 	}
  * 	// In view - much simpler now
@@ -122,7 +127,9 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 
 	private static final Logger LOGGER =
 		LoggerFactory.getLogger(CEntityFormBuilder.class);
+
 	protected static final String LabelMinWidth_210PX = "210px";
+
 	/**
 	 * Cached instance of the data provider resolver for performance.
 	 */
@@ -183,22 +190,19 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 	public static <EntityClass> Div buildForm(final Class<?> entityClass,
 		final BeanValidationBinder<EntityClass> binder,
 		final ComboBoxDataProvider dataProvider) {
+
 		// Enhanced null pointer checking with detailed logging
 		if (entityClass == null) {
 			LOGGER.error("Entity class parameter is null - cannot build form");
 			throw new IllegalArgumentException("Entity class cannot be null");
 		}
+
 		if (binder == null) {
 			LOGGER.error(
 				"Binder parameter is null for entity class: {} - cannot build form",
 				entityClass.getSimpleName());
 			throw new IllegalArgumentException("Binder cannot be null");
 		}
-		LOGGER.info("Building form for entity class: {} with dataProvider: {}",
-			entityClass.getSimpleName(), dataProvider != null ? "provided" : "null");
-		LOGGER.debug("Entity class details - Name: {}, Package: {}, Modifiers: {}",
-			entityClass.getSimpleName(), entityClass.getPackageName(),
-			java.lang.reflect.Modifier.toString(entityClass.getModifiers()));
 		final Div panel = new Div();
 		panel.setClassName("editor-layout");
 		final FormLayout formLayout = new FormLayout();
@@ -206,12 +210,12 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		final List<Field> allFields = new ArrayList<>();
 		Class<?> current = entityClass;
 		int hierarchyLevel = 0;
+
 		while ((current != null) && (current != Object.class)) {
 			final Field[] declaredFields = current.getDeclaredFields();
+
 			if (declaredFields != null) {
 				allFields.addAll(Arrays.asList(declaredFields));
-				LOGGER.debug("Hierarchy level {}: Class {} contributed {} fields",
-					hierarchyLevel, current.getSimpleName(), declaredFields.length);
 			}
 			else {
 				LOGGER.warn("getDeclaredFields() returned null for class: {}",
@@ -220,16 +224,19 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			current = current.getSuperclass();
 			hierarchyLevel++;
 		}
-		LOGGER.debug("Total fields collected from hierarchy: {}", allFields.size());
+		// LOGGER.debug("Total fields collected from hierarchy: {}", allFields.size());
+
 		// Enhanced field debugging with null checking
 		for (final Field field : allFields) {
+
 			if (field != null) {
-				LOGGER.debug("Field analysis - Name: {}, Type: {}, Modifiers: {}",
-					field.getName(),
-					field.getType() != null ? field.getType().getSimpleName() : "null",
-					java.lang.reflect.Modifier.toString(field.getModifiers()));
-				// Log MetaData annotation details if present
+				// LOGGER.debug("Field analysis - Name: {}, Type: {}, Modifiers:
+				// {}",field.getName(),field.getType() != null ?
+				// field.getType().getSimpleName() :
+				// "null",java.lang.reflect.Modifier.toString(field.getModifiers())); Log
+				// MetaData annotation details if present
 				final MetaData metaData = field.getAnnotation(MetaData.class);
+
 				if (metaData != null) {
 					LOGGER.debug(
 						"MetaData found - DisplayName: '{}', Order: {}, Required: {}, Hidden: {}",
@@ -247,6 +254,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		}
 		// Filter and sort fields with enhanced null checking and logging
 		final List<Field> sortedFields = allFields.stream().filter(field -> {
+
 			if (field == null) {
 				LOGGER.warn("Null field encountered during filtering");
 				return false;
@@ -254,18 +262,15 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			return !java.lang.reflect.Modifier.isStatic(field.getModifiers());
 		}).filter(field -> {
 			final MetaData metaData = field.getAnnotation(MetaData.class);
+
 			if (metaData == null) {
-				LOGGER.debug(
-					"Field '{}' has no MetaData annotation - excluding from form",
-					field.getName());
 				return false;
 			}
 			return true;
 		}).filter(field -> {
 			final MetaData metaData = field.getAnnotation(MetaData.class);
+
 			if (metaData.hidden()) {
-				LOGGER.debug("Field '{}' marked as hidden - excluding from form",
-					field.getName());
 				return false;
 			}
 			return true;
@@ -277,30 +282,34 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			sortedFields.size());
 		// Create components with enhanced error handling and logging
 		int processedComponents = 0;
+
 		for (final Field field : sortedFields) {
+
 			if (field == null) {
 				LOGGER.warn("Null field encountered in sorted fields list");
 				continue;
 			}
 			final MetaData meta = field.getAnnotation(MetaData.class);
+
 			if (meta == null) {
 				LOGGER.warn("Field '{}' lost MetaData annotation during processing",
 					field.getName());
 				continue;
 			}
+
 			try {
-				LOGGER.debug("Creating component for field '{}' with displayName '{}'",
-					field.getName(), meta.displayName());
+				// LOGGER.debug("Creating component for field '{}' with displayName
+				// '{}'",field.getName(), meta.displayName());
 				final Component component =
 					createComponentForField(field, meta, binder, dataProvider);
+
 				if (component != null) {
 					final HorizontalLayout horizontalLayout =
 						createFieldLayout(meta, component);
+
 					if (horizontalLayout != null) {
 						formLayout.add(horizontalLayout);
 						processedComponents++;
-						LOGGER.debug("Successfully added component for field '{}'",
-							field.getName());
 					}
 					else {
 						LOGGER.warn("createFieldLayout returned null for field '{}'",
@@ -328,6 +337,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 
 	private static Checkbox createCheckbox(final Field field, final MetaData meta,
 		final BeanValidationBinder<?> binder) {
+
 		if ((field == null) || (meta == null) || (binder == null)) {
 			LOGGER.error(
 				"Null parameters in createCheckbox - field: {}, meta: {}, binder: {}",
@@ -335,32 +345,23 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 				meta != null ? "present" : "null", binder != null ? "present" : "null");
 			return null;
 		}
-		LOGGER.debug("Creating checkbox for field '{}' with displayName '{}'",
-			field.getName(), meta.displayName());
 		final Checkbox checkbox = new Checkbox();
-		checkbox.setRequiredIndicatorVisible(meta.required());
-		checkbox.setReadOnly(meta.readOnly());
-		// Safe null checking for description
-		if ((meta.description() != null) && !meta.description().trim().isEmpty()) {
-			checkbox.setHelperText(meta.description());
-			LOGGER.debug("Set helper text for checkbox '{}': {}", field.getName(),
-				meta.description());
-		}
+
 		// Safe null checking and parsing for default value
 		if ((meta.defaultValue() != null) && !meta.defaultValue().trim().isEmpty()) {
+
 			try {
 				checkbox.setValue(Boolean.parseBoolean(meta.defaultValue()));
-				LOGGER.debug("Set default value for checkbox '{}': {}", field.getName(),
-					meta.defaultValue());
+				// LOGGER.debug("Set default value for checkbox '{}': {}",
+				// field.getName(), meta.defaultValue());
 			} catch (final Exception e) {
 				LOGGER.warn("Invalid boolean default value '{}' for field '{}': {}",
 					meta.defaultValue(), field.getName(), e.getMessage());
 			}
 		}
-		setComponentWidth(checkbox, meta);
+
 		try {
 			binder.bind(checkbox, field.getName());
-			LOGGER.debug("Successfully bound checkbox for field '{}'", field.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Failed to bind checkbox for field '{}': {}", field.getName(),
 				e.getMessage());
@@ -369,42 +370,35 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		return checkbox;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings ("unchecked")
 	private static <T extends CEntityDB> ComboBox<T> createComboBox(final Field field,
 		final MetaData meta, final BeanValidationBinder<?> binder,
 		final ComboBoxDataProvider dataProvider) {
+
 		// Enhanced null pointer checking with detailed logging
 		if (field == null) {
 			LOGGER.error("Field parameter is null in createComboBox");
 			return null;
 		}
+
 		if (meta == null) {
 			LOGGER.error("MetaData parameter is null for field: {}", field.getName());
 			return null;
 		}
+
 		if (binder == null) {
 			LOGGER.error("Binder parameter is null for field: {}", field.getName());
 			return null;
 		}
 		final Class<T> fieldType = (Class<T>) field.getType();
-		LOGGER.debug("Creating ComboBox for field '{}' of type '{}'", field.getName(),
-			fieldType.getSimpleName());
 		final ComboBox<T> comboBox = new ComboBox<>();
-		comboBox.setRequiredIndicatorVisible(meta.required());
-		comboBox.setReadOnly(meta.readOnly());
-		// Safe null checking for description
-		if ((meta.description() != null) && !meta.description().trim().isEmpty()) {
-			comboBox.setHelperText(meta.description());
-			LOGGER.debug("Set helper text for ComboBox '{}': {}", field.getName(),
-				meta.description());
-		}
-		comboBox.setClassName("form-field-combobox");
-		setComponentWidth(comboBox, meta);
 		// Enhanced item label generator with null safety
 		comboBox.setItemLabelGenerator(item -> {
+
 			if (item == null) {
 				return "N/A";
 			}
+
 			try {
 				return item.toString();
 			} catch (final Exception e) {
@@ -417,16 +411,14 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		// (if provided) - for backward compatibility 2. Annotation-based resolution using
 		// CDataProviderResolver 3. Empty list as fallback
 		List<T> items = null;
+
 		// Priority 1: Use legacy data provider if provided
 		if (dataProvider != null) {
-			LOGGER.debug("Using legacy ComboBoxDataProvider for field '{}' of type '{}'",
-				field.getName(), fieldType.getSimpleName());
+
 			try {
 				items = dataProvider.getItems(fieldType);
-				if (items != null) {
-					LOGGER.debug("Legacy data provider returned {} items for field '{}'",
-						items.size(), field.getName());
-				}
+
+				if (items != null) {}
 				else {
 					LOGGER.warn(
 						"Legacy data provider returned null for field '{}' of type '{}'",
@@ -438,18 +430,14 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 					field.getName(), fieldType.getSimpleName(), e.getMessage(), e);
 			}
 		}
+
 		// Priority 2: Use annotation-based resolution if legacy provider didn't work
 		if ((items == null) && (dataProviderResolver != null)) {
-			LOGGER.debug(
-				"Attempting annotation-based data resolution for field '{}' of type '{}'",
-				field.getName(), fieldType.getSimpleName());
+
 			try {
 				items = dataProviderResolver.resolveData(fieldType, meta);
-				if (items != null) {
-					LOGGER.debug(
-						"Annotation-based resolver returned {} items for field '{}'",
-						items.size(), field.getName());
-				}
+
+				if (items != null) {}
 				else {
 					LOGGER.warn(
 						"Annotation-based resolver returned null for field '{}' of type '{}'",
@@ -461,6 +449,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 					field.getName(), fieldType.getSimpleName(), e.getMessage(), e);
 			}
 		}
+
 		// Priority 3: Fallback to empty list
 		if (items == null) {
 			LOGGER.warn(
@@ -468,11 +457,10 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 				field.getName(), fieldType.getSimpleName());
 			items = List.of();
 		}
+
 		// Set items on ComboBox with validation
 		try {
 			comboBox.setItems(items);
-			LOGGER.debug("Successfully set {} items on ComboBox for field '{}'",
-				items.size(), field.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error setting items on ComboBox for field '{}': {}",
 				field.getName(), e.getMessage(), e);
@@ -483,29 +471,24 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		binder.forField(comboBox).withConverter(
 			// Convert from ComboBox value to entity (forward conversion)
 			comboBoxValue -> {
+
 				if (comboBoxValue == null) {
-					LOGGER.debug("ComboBox value is null for field '{}' - returning null",
-						field.getName());
 					return null;
 				}
-				LOGGER.debug("Converting ComboBox value to entity for field '{}': {}",
-					field.getName(), comboBoxValue.getClass().getSimpleName());
 				return comboBoxValue;
 			},
 			// Convert from entity to ComboBox value (reverse conversion) - handles lazy
 			// loading
 			entityValue -> {
+
 				if (entityValue == null) {
-					LOGGER.debug("Entity value is null for field '{}' - returning null",
-						field.getName());
 					return null;
 				}
-				LOGGER.debug(
-					"Converting entity to ComboBox value for field '{}': entity type {}",
-					field.getName(), entityValue.getClass().getSimpleName());
+
 				try {
 					// Get the entity ID for comparison - handles proxy objects safely
 					final Long entityId = entityValue.getId();
+
 					if (entityId == null) {
 						LOGGER.warn(
 							"Entity has null ID for field '{}' - cannot match with ComboBox items",
@@ -517,17 +500,15 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 						.fetch(new com.vaadin.flow.data.provider.Query<>())
 						.collect(java.util.stream.Collectors.toList());
 					final T matchingItem = allItems.stream().filter(item -> {
+
 						if (item == null) {
 							return false;
 						}
 						final Long itemId = item.getId();
 						return (itemId != null) && itemId.equals(entityId);
 					}).findFirst().orElse(null);
-					if (matchingItem != null) {
-						LOGGER.debug(
-							"Found matching ComboBox item for entity ID {} in field '{}'",
-							entityId, field.getName());
-					}
+
+					if (matchingItem != null) {}
 					else {
 						LOGGER.warn(
 							"No matching ComboBox item found for entity ID {} in field '{}'",
@@ -547,20 +528,25 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 	private static Component createComponentForField(final Field field,
 		final MetaData meta, final BeanValidationBinder<?> binder,
 		final ComboBoxDataProvider dataProvider) {
+		Component component = null;
+
 		// Enhanced null pointer checking
 		if (field == null) {
 			LOGGER.error("Field parameter is null");
 			return null;
 		}
+
 		if (meta == null) {
 			LOGGER.error("MetaData parameter is null for field: {}", field.getName());
 			return null;
 		}
+
 		if (binder == null) {
 			LOGGER.error("Binder parameter is null for field: {}", field.getName());
 			return null;
 		}
 		final Class<?> fieldType = field.getType();
+
 		if (fieldType == null) {
 			LOGGER.error("Field type is null for field: {}", field.getName());
 			return null;
@@ -568,56 +554,36 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		LOGGER.debug(
 			"Creating component for field '{}' of type '{}' with displayName '{}'",
 			field.getName(), fieldType.getSimpleName(), meta.displayName());
+
 		// Handle different field types with detailed logging
 		if ((fieldType == Boolean.class) || (fieldType == boolean.class)) {
-			LOGGER.debug("Creating checkbox component for boolean field: {}",
-				field.getName());
-			return createCheckbox(field, meta, binder);
+			component = createCheckbox(field, meta, binder);
 		}
 		else if (fieldType == String.class) {
-			LOGGER.debug("Creating text field component for string field: {}",
-				field.getName());
-			return createTextField(field, meta, binder);
+			component = createTextField(field, meta, binder);
 		}
 		else if ((fieldType == Integer.class) || (fieldType == int.class)
-			|| (fieldType == Long.class) || (fieldType == long.class)
-			|| (fieldType == Double.class) || (fieldType == double.class)
+			|| (fieldType == Long.class) || (fieldType == long.class)) {
+			// Integer types
+			component = createIntegerField(field, meta, binder);
+		}
+		else if ((fieldType == Double.class) || (fieldType == double.class)
 			|| (fieldType == Float.class) || (fieldType == float.class)
 			|| (fieldType == BigDecimal.class)) {
-			LOGGER.debug(
-				"Creating number field component for numeric field: {} of type {}",
-				field.getName(), fieldType.getSimpleName());
-			return createNumberField(field, meta, binder);
+			// Floating-point types
+			component = createFloatingPointField(field, meta, binder);
 		}
 		else if (fieldType == LocalDate.class) {
-			LOGGER.debug("Creating date picker component for LocalDate field: {}",
-				field.getName());
-			return createDatePicker(field, meta, binder);
+			component = createDatePicker(field, meta, binder);
 		}
 		else if ((fieldType == LocalDateTime.class) || (fieldType == Instant.class)) {
-			LOGGER.debug(
-				"Creating date-time picker component for temporal field: {} of type {}",
-				field.getName(), fieldType.getSimpleName());
-			return createDateTimePicker(field, meta, binder);
+			component = createDateTimePicker(field, meta, binder);
 		}
 		else if (fieldType.isEnum()) {
-			LOGGER.debug("Creating enum component for enum field: {} of type {}",
-				field.getName(), fieldType.getSimpleName());
-			return createEnumComponent(field, meta, binder);
+			component = createEnumComponent(field, meta, binder);
 		}
-		/*
-		 * else if (CEntityDB.class.isAssignableFrom(fieldType)) { if (dataProvider !=
-		 * null) {
-		 * LOGGER.debug("Creating combobox component for entity field: {} of type {}",
-		 * field.getName(), fieldType.getSimpleName()); return createComboBox(field, meta,
-		 * binder, dataProvider); } else { LOGGER.
-		 * warn("Entity field '{}' of type {} requires dataProvider but none provided",
-		 * field.getName(), fieldType.getSimpleName()); return null; } }
-		 */
 		else if (CEntityDB.class.isAssignableFrom(fieldType)) {
-			// Always try to create ComboBox, annotation-based resolver will be used if
-			// dataProvider is null
-			return createComboBox(field, meta, binder, dataProvider);
+			component = createComboBox(field, meta, binder, dataProvider);
 		}
 		else {
 			LOGGER.warn(
@@ -625,18 +591,18 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 				fieldType.getSimpleName(), field.getName());
 			return null;
 		}
+		setRequiredIndicatorVisible(meta, component);
+		setHelperText(meta, component);
+		setComponentWidth(component, meta);
+		// setclass name for styling in format of form-field{ComponentType}
+		component.setClassName("form-field-" + component.getClass().getSimpleName());
+		// Create field
+		return component;
 	}
 
 	private static DatePicker createDatePicker(final Field field, final MetaData meta,
 		final BeanValidationBinder<?> binder) {
 		final DatePicker datePicker = new DatePicker();
-		datePicker.setRequiredIndicatorVisible(meta.required());
-		datePicker.setReadOnly(meta.readOnly());
-		if (!meta.description().isEmpty()) {
-			datePicker.setHelperText(meta.description());
-		}
-		datePicker.setClassName("form-field-date");
-		setComponentWidth(datePicker, meta);
 		binder.bind(datePicker, field.getName());
 		return datePicker;
 	}
@@ -644,13 +610,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 	private static DateTimePicker createDateTimePicker(final Field field,
 		final MetaData meta, final BeanValidationBinder<?> binder) {
 		final DateTimePicker dateTimePicker = new DateTimePicker();
-		dateTimePicker.setRequiredIndicatorVisible(meta.required());
-		dateTimePicker.setReadOnly(meta.readOnly());
-		if (!meta.description().isEmpty()) {
-			dateTimePicker.setHelperText(meta.description());
-		}
-		dateTimePicker.setClassName("form-field-datetime");
-		setComponentWidth(dateTimePicker, meta);
+
 		// For Instant fields, we need a custom converter
 		if (field.getType() == Instant.class) {
 			binder.forField(dateTimePicker)
@@ -668,22 +628,18 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		return dateTimePicker;
 	}
 
-	@SuppressWarnings({
-		"unchecked", "rawtypes" })
+	@SuppressWarnings ({
+		"unchecked", "rawtypes" }
+	)
 	private static Component createEnumComponent(final Field field, final MetaData meta,
 		final BeanValidationBinder<?> binder) {
 		final Class<? extends Enum> enumType = (Class<? extends Enum>) field.getType();
 		final Enum[] enumConstants = enumType.getEnumConstants();
+
 		if (meta.useRadioButtons()) {
 			final RadioButtonGroup<Enum> radioGroup = new RadioButtonGroup<>();
 			radioGroup.setItems(enumConstants);
 			radioGroup.setItemLabelGenerator(Enum::name);
-			radioGroup.setRequiredIndicatorVisible(meta.required());
-			radioGroup.setReadOnly(meta.readOnly());
-			if (!meta.description().isEmpty()) {
-				radioGroup.setHelperText(meta.description());
-			}
-			setComponentWidth(radioGroup, meta);
 			binder.bind(radioGroup, field.getName());
 			return radioGroup;
 		}
@@ -691,13 +647,6 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			final ComboBox<Enum> comboBox = new ComboBox<>();
 			comboBox.setItems(enumConstants);
 			comboBox.setItemLabelGenerator(Enum::name);
-			comboBox.setRequiredIndicatorVisible(meta.required());
-			comboBox.setReadOnly(meta.readOnly());
-			if (!meta.description().isEmpty()) {
-				comboBox.setHelperText(meta.description());
-			}
-			comboBox.setClassName("form-field-enum");
-			setComponentWidth(comboBox, meta);
 			binder.bind(comboBox, field.getName());
 			return comboBox;
 		}
@@ -705,16 +654,17 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 
 	private static HorizontalLayout createFieldLayout(final MetaData meta,
 		final Component component) {
+
 		if (meta == null) {
 			LOGGER.error("MetaData is null in createFieldLayout");
 			return null;
 		}
+
 		if (component == null) {
 			LOGGER.error("Component is null in createFieldLayout for displayName: {}",
 				meta.displayName() != null ? meta.displayName() : "unknown");
 			return null;
 		}
-		LOGGER.debug("Creating field layout for displayName: '{}'", meta.displayName());
 		final HorizontalLayout horizontalLayout = new HorizontalLayout();
 		horizontalLayout.setPadding(false);
 		horizontalLayout.setSpacing(false);
@@ -727,109 +677,77 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 				? meta.displayName() : "Field";
 		final Div labelDiv = new Div(displayName);
 		labelDiv.setMinWidth(LabelMinWidth_210PX);
+
 		if (meta.required()) {
 			labelDiv.getStyle().set("font-weight", "bold");
-			LOGGER.debug("Applied bold styling for required field: {}", displayName);
+			// LOGGER.debug("Applied bold styling for required field: {}", displayName);
 		}
 		horizontalLayout.add(labelDiv);
 		horizontalLayout.add(component);
-		LOGGER.debug("Successfully created field layout for: {}", displayName);
+		// LOGGER.debug("Successfully created field layout for: {}", displayName);
 		return horizontalLayout;
 	}
 
-	private static NumberField createNumberField(final Field field, final MetaData meta,
-		final BeanValidationBinder<?> binder) {
-		if ((field == null) || (meta == null) || (binder == null)) {
-			LOGGER.error(
-				"Null parameters in createNumberField - field: {}, meta: {}, binder: {}",
-				field != null ? field.getName() : "null",
-				meta != null ? "present" : "null", binder != null ? "present" : "null");
-			return null;
-		}
-		LOGGER.debug(
-			"Creating number field for field '{}' with displayName '{}' and type '{}'",
-			field.getName(), meta.displayName(), field.getType().getSimpleName());
+	private static NumberField createFloatingPointField(final Field field,
+		final MetaData meta, final BeanValidationBinder<?> binder) {
 		final NumberField numberField = new NumberField();
-		numberField.setRequiredIndicatorVisible(meta.required());
-		numberField.setReadOnly(meta.readOnly());
-		// Safe null checking for description
-		if ((meta.description() != null) && !meta.description().trim().isEmpty()) {
-			numberField.setHelperText(meta.description());
-			LOGGER.debug("Set helper text for number field '{}': {}", field.getName(),
-				meta.description());
-		}
-		// Validate and set min/max values
-		if (meta.min() != Double.MIN_VALUE) {
-			if (Double.isFinite(meta.min())) {
-				numberField.setMin(meta.min());
-				LOGGER.debug("Set minimum value for number field '{}': {}",
-					field.getName(), meta.min());
-			}
-			else {
-				LOGGER.warn(
-					"Invalid minimum value {} for field '{}' - not a finite number",
-					meta.min(), field.getName());
-			}
-		}
-		if (meta.max() != Double.MAX_VALUE) {
-			if (Double.isFinite(meta.max())) {
-				numberField.setMax(meta.max());
-				LOGGER.debug("Set maximum value for number field '{}': {}",
-					field.getName(), meta.max());
-			}
-			else {
-				LOGGER.warn(
-					"Invalid maximum value {} for field '{}' - not a finite number",
-					meta.max(), field.getName());
-			}
-		}
-		// Validate min/max relationship
-		if ((meta.min() != Double.MIN_VALUE) && (meta.max() != Double.MAX_VALUE)
-			&& Double.isFinite(meta.min()) && Double.isFinite(meta.max())
-			&& (meta.min() > meta.max())) {
-			LOGGER.warn(
-				"Invalid range for field '{}' - minimum ({}) is greater than maximum ({})",
-				field.getName(), meta.min(), meta.max());
-		}
-		// Safe null checking and parsing for default value
-		if ((meta.defaultValue() != null) && !meta.defaultValue().trim().isEmpty()) {
-			try {
-				final double defaultVal = Double.parseDouble(meta.defaultValue());
-				if (Double.isFinite(defaultVal)) {
-					numberField.setValue(defaultVal);
-					LOGGER.debug("Set default value for number field '{}': {}",
-						field.getName(), defaultVal);
-				}
-				else {
-					LOGGER.warn(
-						"Default value '{}' for field '{}' is not a finite number",
-						meta.defaultValue(), field.getName());
-				}
-			} catch (final NumberFormatException e) {
-				LOGGER.warn("Invalid numeric default value '{}' for field '{}': {}",
-					meta.defaultValue(), field.getName(), e.getMessage());
-			}
-		}
-		numberField.setClassName("form-field-number");
-		setComponentWidth(numberField, meta);
+
 		try {
-			// Handle BigDecimal fields specially with a converter
-			if (field.getType() == BigDecimal.class) {
+
+			if ((field.getType() == Double.class) || (field.getType() == double.class)) {
+				binder.forField(numberField)
+					.withConverter(value -> value == null ? null : value.doubleValue(),
+						value -> value == null ? null : value, "Invalid double format")
+					.bind(field.getName());
+			}
+			else if ((field.getType() == Float.class)
+				|| (field.getType() == float.class)) {
+				binder.forField(numberField)
+					.withConverter(value -> value == null ? null : value.floatValue(),
+						value -> value == null ? null : value.doubleValue(),
+						"Invalid float format")
+					.bind(field.getName());
+			}
+			else if (field.getType() == BigDecimal.class) {
 				binder.forField(numberField)
 					.withConverter(
 						value -> value == null ? null : BigDecimal.valueOf(value),
-						value -> value == null ? 0.0 : value.doubleValue(),
+						value -> value == null ? null : value.doubleValue(),
 						"Invalid number format")
 					.bind(field.getName());
-				LOGGER.debug("Successfully bound BigDecimal number field for field '{}'",
-					field.getName());
-			} else {
-				binder.bind(numberField, field.getName());
-				LOGGER.debug("Successfully bound number field for field '{}'",
-					field.getName());
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Failed to bind number field for field '{}': {}",
+			LOGGER.error("Failed to bind floating-point number field for field '{}': {}",
+				field.getName(), e.getMessage());
+			return null;
+		}
+		return numberField;
+	}
+
+	private static NumberField createIntegerField(final Field field, final MetaData meta,
+		final BeanValidationBinder<?> binder) {
+		final NumberField numberField = new NumberField();
+		// Only allow integer values
+		numberField.setStep(1);
+
+		try {
+
+			if ((field.getType() == Integer.class) || (field.getType() == int.class)) {
+				binder.forField(numberField)
+					.withConverter(value -> value == null ? null : value.intValue(),
+						value -> value == null ? null : value.doubleValue(),
+						"Invalid integer format")
+					.bind(field.getName());
+			}
+			else if ((field.getType() == Long.class) || (field.getType() == long.class)) {
+				binder.forField(numberField)
+					.withConverter(value -> value == null ? null : value.longValue(),
+						value -> value == null ? null : value.doubleValue(),
+						"Invalid long format")
+					.bind(field.getName());
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Failed to bind integer number field for field '{}': {}",
 				field.getName(), e.getMessage());
 			return null;
 		}
@@ -838,6 +756,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 
 	private static TextField createTextField(final Field field, final MetaData meta,
 		final BeanValidationBinder<?> binder) {
+
 		if ((field == null) || (meta == null) || (binder == null)) {
 			LOGGER.error(
 				"Null parameters in createTextField - field: {}, meta: {}, binder: {}",
@@ -845,38 +764,24 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 				meta != null ? "present" : "null", binder != null ? "present" : "null");
 			return null;
 		}
-		LOGGER.debug("Creating text field for field '{}' with displayName '{}'",
-			field.getName(), meta.displayName());
 		final TextField textField = new TextField();
-		textField.setRequiredIndicatorVisible(meta.required());
-		textField.setReadOnly(meta.readOnly());
-		// Safe null checking for description
-		if ((meta.description() != null) && !meta.description().trim().isEmpty()) {
-			textField.setHelperText(meta.description());
-			LOGGER.debug("Set helper text for text field '{}': {}", field.getName(),
-				meta.description());
-		}
+
 		// Safe null checking for default value
 		if ((meta.defaultValue() != null) && !meta.defaultValue().trim().isEmpty()) {
 			textField.setValue(meta.defaultValue());
-			LOGGER.debug("Set default value for text field '{}': {}", field.getName(),
-				meta.defaultValue());
 		}
+
 		// Validate and set max length
 		if (meta.maxLength() > 0) {
 			textField.setMaxLength(meta.maxLength());
-			LOGGER.debug("Set max length for text field '{}': {}", field.getName(),
-				meta.maxLength());
 		}
 		else if (meta.maxLength() < -1) {
 			LOGGER.warn("Invalid maxLength value {} for field '{}' - should be > 0 or -1",
 				meta.maxLength(), field.getName());
 		}
-		textField.setClassName("form-field-text");
-		setComponentWidth(textField, meta);
+
 		try {
 			binder.bind(textField, field.getName());
-			LOGGER.debug("Successfully bound text field for field '{}'", field.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Failed to bind text field for field '{}': {}", field.getName(),
 				e.getMessage());
@@ -887,21 +792,25 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 
 	private static void setComponentWidth(final Component component,
 		final MetaData meta) {
+
 		if (component == null) {
 			LOGGER.warn("Component is null in setComponentWidth - cannot set width");
 			return;
 		}
+
 		if (meta == null) {
 			LOGGER.warn("MetaData is null in setComponentWidth - using default width");
 			return;
 		}
+
 		if (component instanceof com.vaadin.flow.component.HasSize) {
 			final com.vaadin.flow.component.HasSize hasSize =
 				(com.vaadin.flow.component.HasSize) component;
+
 			if ((meta.width() != null) && !meta.width().trim().isEmpty()) {
+
 				try {
 					hasSize.setWidth(meta.width());
-					LOGGER.debug("Set component width to: {}", meta.width());
 				} catch (final Exception e) {
 					LOGGER.warn("Failed to set component width '{}': {}", meta.width(),
 						e.getMessage());
@@ -911,17 +820,37 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			}
 			else {
 				hasSize.setWidthFull();
-				LOGGER.debug("Set component width to full (no width specified)");
 			}
 		}
-		else {
-			LOGGER.debug("Component does not implement HasSize - cannot set width");
+	}
+
+	private static void setHelperText(final MetaData meta, final Component component) {
+
+		if ((component == null) || (meta == null)
+			|| ((component instanceof HasHelper) == false)) {
+			LOGGER.warn("cannot set helper text");
+			return;
 		}
+
+		if ((meta.description() != null) && !meta.description().trim().isEmpty()) {
+			((HasHelper) component).setHelperText(meta.description());
+		}
+	}
+
+	private static void setRequiredIndicatorVisible(final MetaData meta,
+		final Component field) {
+
+		if ((field == null) || (meta == null)
+			|| ((field instanceof HasValueAndElement) == false)) {
+			LOGGER.warn("cannot set helper text");
+			return;
+		}
+		((HasValueAndElement<?, ?>) field).setReadOnly(meta.readOnly());
+		((HasValueAndElement<?, ?>) field).setRequiredIndicatorVisible(meta.required());
 	}
 
 	private CEntityFormBuilder() {
 		// Spring component - constructor managed by Spring
-		LOGGER.debug("CEntityFormBuilder instance created by Spring");
 	}
 
 	/**
@@ -931,6 +860,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 	 */
 	@Override
 	public void setApplicationContext(final ApplicationContext context) {
+
 		try {
 			CEntityFormBuilder.dataProviderResolver =
 				context.getBean(CDataProviderResolver.class);
