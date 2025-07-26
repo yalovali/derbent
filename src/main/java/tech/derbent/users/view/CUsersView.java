@@ -87,14 +87,17 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 			.setSortable(true);
 		grid.addColumn(CUser::getEmail).setAutoWidth(true).setHeader("Email")
 			.setSortable(true);
+		// Status column uses lambda expression - not directly sortable at DB level
 		grid.addColumn(user -> user.isEnabled() ? "Enabled" : "Disabled")
-			.setAutoWidth(true).setHeader("Status").setSortable(true);
+			.setAutoWidth(true).setHeader("Status").setSortable(false);
+		// User type requires join - not directly sortable at DB level  
 		grid.addColumn(
 			user -> user.getUserType() != null ? user.getUserType().getName() : "")
-			.setAutoWidth(true).setHeader("User Type").setSortable(true);
+			.setAutoWidth(true).setHeader("User Type").setSortable(false);
+		// Company requires join - not directly sortable at DB level
 		grid.addColumn(
 			user -> user.getCompany() != null ? user.getCompany().getName() : "")
-			.setAutoWidth(true).setHeader("Company").setSortable(true);
+			.setAutoWidth(true).setHeader("Company").setSortable(false);
 		grid.addColumn(CUser::getRoles).setAutoWidth(true).setHeader("Roles")
 			.setSortable(true);
 		grid.setItems(query -> entityService
