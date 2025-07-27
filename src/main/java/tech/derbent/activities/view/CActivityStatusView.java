@@ -19,7 +19,7 @@ import tech.derbent.activities.service.CActivityStatusService;
  */
 @Route ("activity-statuses/:activity_status_id?/:action?(edit)")
 @PageTitle ("Activity Statuses")
-@Menu (order = 2, icon = "vaadin:flag", title = "Types.Activity Statuses")
+@Menu (order = 2.1, icon = "vaadin:flag", title = "Types.Activity Statuses")
 @PermitAll
 public class CActivityStatusView extends CAbstractMDPage<CActivityStatus> {
 

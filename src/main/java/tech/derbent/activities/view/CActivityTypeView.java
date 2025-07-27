@@ -18,7 +18,7 @@ import tech.derbent.activities.service.CActivityTypeService;
  */
 @Route ("activity-types/:activity_type_id?/:action?(edit)")
 @PageTitle ("Activity Types")
-@Menu (order = 1, icon = "vaadin:tags", title = "Types.Activity Types")
+@Menu (order = 2.4, icon = "vaadin:tags", title = "Types.Activity Types")
 @PermitAll
 public class CActivityTypeView extends CAbstractMDPage<CActivityType> {
 

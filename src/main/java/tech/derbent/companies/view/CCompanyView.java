@@ -24,7 +24,7 @@ import tech.derbent.companies.service.CCompanyService;
  */
 @Route ("companies/:company_id?/:action?(edit)")
 @PageTitle ("Company Master Detail")
-@Menu (order = 1, icon = "vaadin:building", title = "Settings.Companies")
+@Menu (order = 3.4, icon = "vaadin:building", title = "Settings.Companies")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CCompanyView extends CAbstractMDPage<CCompany> {
 

@@ -33,7 +33,7 @@ import tech.derbent.session.service.SessionService;
  */
 @Route("activities-kanban")
 @PageTitle("Activity Kanban Board")
-@Menu(order = 1, icon = "vaadin:dashboard", title = "Project.Kanban")
+@Menu(order = 1.2, icon = "vaadin:dashboard", title = "Project.Kanban")
 @PermitAll
 public class CActivityKanbanBoardView extends VerticalLayout
 	implements CProjectChangeListener {

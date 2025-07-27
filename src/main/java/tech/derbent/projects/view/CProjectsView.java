@@ -18,7 +18,7 @@ import tech.derbent.projects.service.CProjectService;
  */
 @Route ("projects/:project_id?/:action?(edit)")
 @PageTitle ("Project Master Detail")
-@Menu (order = 0, icon = "vaadin:briefcase", title = "Settings.Projects")
+@Menu (order = 3.1, icon = "vaadin:briefcase", title = "Settings.Projects")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CProjectsView extends CAbstractMDPage<CProject> {
 
