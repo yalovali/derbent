@@ -36,10 +36,10 @@ public class CActivityService extends CAbstractNamedEntityService<CActivity> {
 		LOGGER.info("Counting activities for project: {}", project.getName());
 		return ((CActivityRepository) repository).countByProject(project);
 	}
+	// Now using the inherited createEntity(String name) method from
+	// CAbstractNamedEntityService The original createEntity method is replaced by the
+	// parent class implementation
 
-	// Now using the inherited createEntity(String name) method from CAbstractNamedEntityService
-	// The original createEntity method is replaced by the parent class implementation
-	
 	@Override
 	protected CActivity createNewEntityInstance() {
 		return new CActivity();
@@ -197,6 +197,7 @@ public class CActivityService extends CAbstractNamedEntityService<CActivity> {
 	/**
 	 * Gets paginated activities by project with eagerly loaded relationships.
 	 */
+	@Transactional (readOnly = true)
 	public Page<CActivity> listByProject(final CProject project,
 		final Pageable pageable) {
 		LOGGER.debug("Getting paginated activities for project {} with eager loading",

@@ -42,22 +42,15 @@ public class CActivityTypeView extends CAbstractMDPage<CActivityType> {
 
 	@Override
 	protected void createDetailsLayout() {
-		LOGGER.info("Creating details layout for CActivityTypeView");
 		final Div detailsLayout =
 			CEntityFormBuilder.buildForm(CActivityType.class, getBinder());
-		// Note: Buttons are now automatically added to the details tab by the parent
-		// class
 		getBaseDetailsLayout().add(detailsLayout);
 	}
 
 	@Override
 	protected void createGridForEntity() {
-		LOGGER.info("Creating grid for activity types with appropriate field widths");
-		grid.addShortTextColumn(CActivityType::getName, "Name", "name", true);
-		grid.addLongTextColumn(CActivityType::getDescription, "Description", "description", true);
-		// Data provider is already set up in the base class
-		// CAbstractMDPage.createGridLayout() No need to call grid.setItems() again as
-		// it's already configured to handle sorting properly
+		grid.addShortTextColumn(CActivityType::getName, "Name", "name");
+		grid.addColumn(CActivityType::getDescription, "Description", "description");
 	}
 
 	@Override

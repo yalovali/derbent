@@ -103,19 +103,14 @@ public class CCompanyView extends CAbstractMDPage<CCompany> {
 	protected void createGridForEntity() {
 		LOGGER.info("Creating grid for companies with appropriate field widths");
 		// Add columns for key company information
-		grid.addShortTextColumn(CCompany::getName, "Company Name", "name", true);
-		grid.addLongTextColumn(CCompany::getDescription, "Description", "description", false);
-		grid.addShortTextColumn(CCompany::getAddress, "Address", "address", false);
-		grid.addShortTextColumn(CCompany::getPhone, "Phone", "phone", false);
-		grid.addColumn(CCompany::getEmail).setAutoWidth(true).setHeader("Email")
-			.setKey("email").setSortable(true);
-		grid.addColumn(CCompany::getWebsite).setAutoWidth(true).setHeader("Website")
-			.setKey("website").setSortable(false);
+		grid.addShortTextColumn(CCompany::getName, "Company Name", "name");
+		grid.addLongTextColumn(CCompany::getDescription, "Description", "description");
+		grid.addShortTextColumn(CCompany::getAddress, "Address", "address");
+		grid.addShortTextColumn(CCompany::getPhone, "Phone", "phone");
+		grid.addShortTextColumn(CCompany::getEmail, "Email", "email");
 		grid.addColumn(company -> company.isEnabled() ? "Active" : "Inactive")
 			.setAutoWidth(true).setHeader("Status").setKey("enabled").setSortable(true);
-		// Data provider is already set up in the base class
-		// CAbstractMDPage.createGridLayout() No need to call grid.setItems() again as
-		// it's already configured to handle sorting properly
+		grid.addColumn(CCompany::getWebsite, "Website", "website");
 	}
 
 	@Override

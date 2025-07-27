@@ -69,42 +69,33 @@ public class CGrid<T extends CEntityDB> extends Grid<T> {
 		initializeGrid();
 	}
 
-	/**
-	 * Add a boolean column with appropriate small width, converting boolean to readable
-	 * text.
-	 * @param valueProvider Value provider for the boolean field
-	 * @param header        Column header text
-	 * @param trueText      Text to display for true values
-	 * @param falseText     Text to display for false values
-	 * @param sortable      Whether the column should be sortable
-	 * @return The created column
-	 */
 	public Column<T> addBooleanColumn(final ValueProvider<T, Boolean> valueProvider,
-		final String header, final String trueText, final String falseText,
-		final boolean sortable) {
+		final String header, final String trueText, final String falseText) {
 		LOGGER.info("Adding boolean column: {} with width: {}", header, WIDTH_BOOLEAN);
 		final Column<T> column = addColumn(entity -> {
 			final Boolean value = valueProvider.apply(entity);
 			return (value != null) && value ? trueText : falseText;
-		}).setHeader(header).setWidth(WIDTH_BOOLEAN).setFlexGrow(0).setSortable(sortable);
+		}).setHeader(header).setWidth(WIDTH_BOOLEAN).setFlexGrow(0).setSortable(true);
 		return column;
 	}
 
-	/**
-	 * Convenience method to add a column using property name with automatic width based
-	 * on property type. This method inspects the property type and applies appropriate
-	 * width.
-	 * @param propertyName The property name to create column for
-	 * @param header       Column header text
-	 * @param sortable     Whether the column should be sortable
-	 * @return The created column
-	 */
-	public Column<T> addColumnByProperty(final String propertyName, final String header,
-		final boolean sortable) {
+	public Column<T> addColumn(final ValueProvider<T, String> valueProvider,
+		final String header, final String key) {
+		// flexglow set to 1 to allow the column to grow and fill available space
+		final Column<T> column =
+			addColumn(valueProvider).setHeader(header).setFlexGrow(1).setSortable(true);
+
+		if (key != null) {
+			column.setKey(key);
+		}
+		return column;
+	}
+
+	public Column<T> addColumnByProperty(final String propertyName, final String header) {
 		LOGGER.info("Adding column by property: {} with header: {}", propertyName,
 			header);
 		final Column<T> column =
-			addColumn(propertyName).setHeader(header).setSortable(sortable);
+			addColumn(propertyName).setHeader(header).setSortable(true);
 
 		// Apply width based on property name patterns
 		if (propertyName.toLowerCase().contains("id")) {
@@ -128,23 +119,12 @@ public class CGrid<T extends CEntityDB> extends Grid<T> {
 		return column;
 	}
 
-	/**
-	 * Add a flexible column with custom width and properties.
-	 * @param valueProvider Value provider for the field
-	 * @param header        Column header text
-	 * @param width         Custom width (e.g., "150px")
-	 * @param key           Column key for sorting (can be null)
-	 * @param sortable      Whether the column should be sortable
-	 * @param flexGrow      Flex grow value (0 for fixed width, >0 for flexible)
-	 * @return The created column
-	 */
 	public Column<T> addCustomColumn(final ValueProvider<T, ?> valueProvider,
-		final String header, final String width, final String key, final boolean sortable,
-		final int flexGrow) {
+		final String header, final String width, final String key, final int flexGrow) {
 		LOGGER.info("Adding custom column: {} with width: {} and flexGrow: {}", header,
 			width, flexGrow);
 		final Column<T> column = addColumn(valueProvider).setHeader(header)
-			.setWidth(width).setFlexGrow(flexGrow).setSortable(sortable);
+			.setWidth(width).setFlexGrow(flexGrow).setSortable(true);
 
 		if (key != null) {
 			column.setKey(key);
@@ -152,159 +132,45 @@ public class CGrid<T extends CEntityDB> extends Grid<T> {
 		return column;
 	}
 
-	/**
-	 * Add a date column with appropriate medium width.
-	 * @param valueProvider Value provider for the date field
-	 * @param header        Column header text
-	 * @param key           Column key for sorting (can be null)
-	 * @param sortable      Whether the column should be sortable
-	 * @return The created column
-	 */
 	public Column<T> addDateColumn(final ValueProvider<T, LocalDate> valueProvider,
-		final String header, final String key, final boolean sortable) {
-		LOGGER.info("Adding date column: {} with width: {}", header, WIDTH_DATE);
-		final Column<T> column = addColumn(valueProvider).setHeader(header)
-			.setWidth(WIDTH_DATE).setFlexGrow(0).setSortable(sortable);
-
-		if (key != null) {
-			column.setKey(key);
-		}
-		return column;
+		final String header, final String key) {
+		return addCustomColumn(valueProvider, header, WIDTH_DATE, key, 0);
 	}
 
-	/**
-	 * Add a datetime column with appropriate medium width.
-	 * @param valueProvider Value provider for the datetime field
-	 * @param header        Column header text
-	 * @param key           Column key for sorting (can be null)
-	 * @param sortable      Whether the column should be sortable
-	 * @return The created column
-	 */
 	public Column<T> addDateTimeColumn(
 		final ValueProvider<T, LocalDateTime> valueProvider, final String header,
-		final String key, final boolean sortable) {
-		LOGGER.info("Adding datetime column: {} with width: {}", header, WIDTH_DATE);
-		final Column<T> column = addColumn(valueProvider).setHeader(header)
-			.setWidth(WIDTH_DATE).setFlexGrow(0).setSortable(sortable);
-
-		if (key != null) {
-			column.setKey(key);
-		}
-		return column;
+		final String key) {
+		return addCustomColumn(valueProvider, header, WIDTH_DATE, key, 0);
 	}
 
-	/**
-	 * Add a BigDecimal column with appropriate medium width.
-	 * @param valueProvider Value provider for the BigDecimal field
-	 * @param header        Column header text
-	 * @param key           Column key for sorting (can be null)
-	 * @param sortable      Whether the column should be sortable
-	 * @return The created column
-	 */
 	public Column<T> addDecimalColumn(final ValueProvider<T, BigDecimal> valueProvider,
-		final String header, final String key, final boolean sortable) {
-		LOGGER.info("Adding decimal column: {} with width: {}", header, WIDTH_DECIMAL);
-		final Column<T> column = addColumn(valueProvider).setHeader(header)
-			.setWidth(WIDTH_DECIMAL).setFlexGrow(0).setSortable(sortable);
-
-		if (key != null) {
-			column.setKey(key);
-		}
-		return column;
+		final String header, final String key) {
+		return addCustomColumn(valueProvider, header, WIDTH_DECIMAL, key, 0);
 	}
 
-	/**
-	 * Add an ID column with appropriate small width.
-	 * @param valueProvider Value provider for the ID field
-	 * @param header        Column header text
-	 * @param key           Column key for sorting
-	 * @return The created column
-	 */
 	public Column<T> addIdColumn(final ValueProvider<T, ?> valueProvider,
 		final String header, final String key) {
-		LOGGER.info("Adding ID column: {} with width: {}", header, WIDTH_ID);
-		final Column<T> column = addColumn(valueProvider).setHeader(header).setKey(key)
-			.setWidth(WIDTH_ID).setFlexGrow(0).setSortable(true);
-		return column;
+		return addCustomColumn(valueProvider, header, WIDTH_ID, key, 0);
 	}
 
-	/**
-	 * Add an integer column with appropriate small width.
-	 * @param valueProvider Value provider for the integer field
-	 * @param header        Column header text
-	 * @param key           Column key for sorting (can be null)
-	 * @param sortable      Whether the column should be sortable
-	 * @return The created column
-	 */
 	public Column<T> addIntegerColumn(final ValueProvider<T, Integer> valueProvider,
-		final String header, final String key, final boolean sortable) {
-		LOGGER.info("Adding integer column: {} with width: {}", header, WIDTH_INTEGER);
-		final Column<T> column = addColumn(valueProvider).setHeader(header)
-			.setWidth(WIDTH_INTEGER).setFlexGrow(0).setSortable(sortable);
-
-		if (key != null) {
-			column.setKey(key);
-		}
-		return column;
+		final String header, final String key) {
+		return addCustomColumn(valueProvider, header, WIDTH_INTEGER, key, 0);
 	}
 
-	/**
-	 * Add a long text column with appropriate large width.
-	 * @param valueProvider Value provider for the text field
-	 * @param header        Column header text
-	 * @param key           Column key for sorting (can be null)
-	 * @param sortable      Whether the column should be sortable
-	 * @return The created column
-	 */
 	public Column<T> addLongTextColumn(final ValueProvider<T, String> valueProvider,
-		final String header, final String key, final boolean sortable) {
-		LOGGER.info("Adding long text column: {} with width: {}", header,
-			WIDTH_LONG_TEXT);
-		final Column<T> column = addColumn(valueProvider).setHeader(header)
-			.setWidth(WIDTH_LONG_TEXT).setFlexGrow(0).setSortable(sortable);
-
-		if (key != null) {
-			column.setKey(key);
-		}
-		return column;
+		final String header, final String key) {
+		return addCustomColumn(valueProvider, header, WIDTH_LONG_TEXT, key, 0);
 	}
 
-	/**
-	 * Add a reference column (for related entities) with appropriate medium width.
-	 * @param valueProvider Value provider that extracts display text from related entity
-	 * @param header        Column header text
-	 * @param sortable      Whether the column should be sortable (usually false for
-	 *                      joins)
-	 * @return The created column
-	 */
 	public Column<T> addReferenceColumn(final ValueProvider<T, String> valueProvider,
-		final String header, final boolean sortable) {
-		LOGGER.info("Adding reference column: {} with width: {}", header,
-			WIDTH_REFERENCE);
-		final Column<T> column = addColumn(valueProvider).setHeader(header)
-			.setWidth(WIDTH_REFERENCE).setFlexGrow(0).setSortable(sortable);
-		return column;
+		final String header) {
+		return addCustomColumn(valueProvider, header, WIDTH_REFERENCE, null, 0);
 	}
 
-	/**
-	 * Add a short text column with appropriate medium width.
-	 * @param valueProvider Value provider for the text field
-	 * @param header        Column header text
-	 * @param key           Column key for sorting (can be null)
-	 * @param sortable      Whether the column should be sortable
-	 * @return The created column
-	 */
 	public Column<T> addShortTextColumn(final ValueProvider<T, String> valueProvider,
-		final String header, final String key, final boolean sortable) {
-		LOGGER.info("Adding short text column: {} with width: {}", header,
-			WIDTH_SHORT_TEXT);
-		final Column<T> column = addColumn(valueProvider).setHeader(header)
-			.setWidth(WIDTH_SHORT_TEXT).setFlexGrow(0).setSortable(sortable);
-
-		if (key != null) {
-			column.setKey(key);
-		}
-		return column;
+		final String header, final String key) {
+		return addCustomColumn(valueProvider, header, WIDTH_SHORT_TEXT, key, 0);
 	}
 
 	/**

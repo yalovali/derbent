@@ -52,11 +52,8 @@ public class CMeetingTypeView extends CAbstractMDPage<CMeetingType> {
 
 	@Override
 	protected void createGridForEntity() {
-		LOGGER.info("Creating grid for meeting types");
-		grid.addColumn(CMeetingType::getName).setAutoWidth(true).setHeader("Name")
-			.setKey("name").setSortable(true);
-		grid.addColumn(CMeetingType::getDescription).setAutoWidth(true)
-			.setHeader("Description").setKey("description").setSortable(true);
+		grid.addShortTextColumn(CMeetingType::getName, "Name", "name");
+		grid.addColumn(CMeetingType::getDescription, "Description", "description");
 		// Data provider is already set up in the base class
 		// CAbstractMDPage.createGridLayout() No need to call grid.setItems() again as
 		// it's already configured to handle sorting properly

@@ -219,7 +219,6 @@ public class CActivity extends CEntityOfProject {
 	 */
 	public CActivity() {
 		super();
-		logger.debug("CActivity() - Creating new activity instance");
 		initializeDefaults();
 	}
 
@@ -355,7 +354,6 @@ public class CActivity extends CEntityOfProject {
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		logger.debug("initializeDefaults() - Setting default values for activity");
 
 		if (this.actualHours == null) {
 			this.actualHours = BigDecimal.ZERO;

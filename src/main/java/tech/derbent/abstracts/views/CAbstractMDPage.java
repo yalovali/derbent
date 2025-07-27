@@ -259,7 +259,6 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	protected abstract void createGridForEntity();
 
 	protected void createGridLayout() {
-		LOGGER.info("Creating grid layout for {}", getClass().getSimpleName());
 		grid = new CGrid<>(entityClass, false);
 		grid.getColumns().forEach(grid::removeColumn);
 		grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
@@ -275,7 +274,7 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 			LOGGER.debug("Data provider returned {} items", result.size());
 			return result.stream();
 		});
-		grid.addColumn(entity -> entity.getId().toString()).setHeader("ID").setKey("id");
+		grid.addIdColumn(entity -> entity.getId().toString(), "ID", "id");
 		// Add selection listener to the grid
 		grid.asSingleSelect().addValueChangeListener(event -> {
 			populateForm(event.getValue());

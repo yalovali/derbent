@@ -99,21 +99,21 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 	protected void createGridForEntity() {
 		LOGGER.info("Creating grid for users with appropriate field widths");
 		// Add columns using CGrid methods with field-type-appropriate widths
-		grid.addShortTextColumn(CUser::getName, "Name", "name", true);
-		grid.addShortTextColumn(CUser::getLastname, "Last Name", "lastname", true);
-		grid.addShortTextColumn(CUser::getLogin, "Login", "login", true);
-		grid.addLongTextColumn(CUser::getEmail, "Email", "email", true);
+		grid.addShortTextColumn(CUser::getName, "Name", "name");
+		grid.addShortTextColumn(CUser::getLastname, "Last Name", "lastname");
+		grid.addShortTextColumn(CUser::getLogin, "Login", "login");
+		grid.addLongTextColumn(CUser::getEmail, "Email", "email");
 		// Status column uses lambda expression - not directly sortable at DB level
-		grid.addBooleanColumn(CUser::isEnabled, "Status", "Enabled", "Disabled", false);
+		grid.addBooleanColumn(CUser::isEnabled, "Status", "Enabled", "Disabled");
 		// User type requires join - not directly sortable at DB level
 		grid.addReferenceColumn(
 			user -> user.getUserType() != null ? user.getUserType().getName() : "",
-			"User Type", false);
+			"User Type");
 		// Company requires join - not directly sortable at DB level
 		grid.addReferenceColumn(
 			user -> user.getCompany() != null ? user.getCompany().getName() : "",
-			"Company", false);
-		grid.addShortTextColumn(CUser::getRoles, "Roles", "roles", true);
+			"Company");
+		grid.addShortTextColumn(CUser::getRoles, "Roles", "roles");
 		// Data provider is already set up in the base class
 		// CAbstractMDPage.createGridLayout() No need to call grid.setItems() again as
 		// it's already configured to handle sorting properly

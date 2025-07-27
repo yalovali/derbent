@@ -34,29 +34,20 @@ public class CUserTypeView extends CAbstractMDPage<CUserType> {
 	public CUserTypeView(final CUserTypeService entityService) {
 		super(CUserType.class, entityService);
 		addClassNames("user-types-view");
-		// createDetailsLayout();
-		LOGGER.info("CUserTypeView initialized");
 	}
 
 	@Override
 	protected void createDetailsLayout() {
-		LOGGER.info("Creating details layout for CUserTypeView");
 		final Div detailsLayout = new Div();
 		detailsLayout.setClassName("editor-layout");
 		detailsLayout.add(CEntityFormBuilder.buildForm(CUserType.class, getBinder()));
-		// Note: Buttons are now automatically added to the details tab by the parent
-		// class
 		getBaseDetailsLayout().add(detailsLayout);
 	}
 
 	@Override
 	protected void createGridForEntity() {
-		LOGGER.info("Creating grid for user types with appropriate field widths");
-		grid.addShortTextColumn(CUserType::getName, "Name", "name", true);
-		grid.addLongTextColumn(CUserType::getDescription, "Description", "description", true);
-		// Data provider is already set up in the base class
-		// CAbstractMDPage.createGridLayout() No need to call grid.setItems() again as
-		// it's already configured to handle sorting properly
+		grid.addShortTextColumn(CUserType::getName, "Name", "name");
+		grid.addColumn(CUserType::getDescription, "Description", "description");
 	}
 
 	@Override

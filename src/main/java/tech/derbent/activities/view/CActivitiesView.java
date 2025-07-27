@@ -30,7 +30,6 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 	public CActivitiesView(final CActivityService entityService,
 		final SessionService sessionService) {
 		super(CActivity.class, entityService, sessionService);
-		LOGGER.info("Initializing CActivitiesView with entityService");
 		addClassNames("activities-view");
 	}
 
@@ -66,56 +65,45 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 
 	@Override
 	protected void createGridForEntity() {
-		LOGGER.info("Creating enhanced grid for activities with comprehensive field coverage");
-		
+		LOGGER.info(
+			"Creating enhanced grid for activities with comprehensive field coverage");
 		// Project Name - Important for context (similar to meetings view)
-		grid.addReferenceColumn(activity -> {
-			return activity.getProject() != null ? activity.getProject().getName() : "No Project";
-		}, "Project", false); // Project is derived from join, not directly sortable
-		
-		// Activity Name - Primary identifier
-		grid.addShortTextColumn(CActivity::getName, "Activity Name", "name", true);
-		
-		// Activity Type - Categorization (similar to meeting type)
-		grid.addReferenceColumn(activity -> {
-			return activity.getActivityType() != null ? activity.getActivityType().getName() : "No Type";
-		}, "Type", false); // Type is derived from join, not directly sortable
-		
-		// Assigned To - User assigned to activity (critical for resource management)
-		grid.addReferenceColumn(activity -> {
-			return activity.getAssignedTo() != null ? activity.getAssignedTo().getName() : "Unassigned";
-		}, "Assigned To", false); // User is derived from join, not directly sortable
-		
-		// Status - Current status of activity
-		grid.addReferenceColumn(activity -> {
-			return activity.getStatus() != null ? activity.getStatus().getName() : "No Status";
-		}, "Status", false); // Status is derived from join, not directly sortable
-		
-		// Priority - Important for task prioritization
-		grid.addReferenceColumn(activity -> {
-			return activity.getPriority() != null ? activity.getPriority().getName() : "No Priority";
-		}, "Priority", false); // Priority is derived from join, not directly sortable
-		
-		// Start Date - Timeline information with proper formatting
-		grid.addDateColumn(activity -> activity.getStartDate(), "Start Date", "startDate", true);
-		
-		// Due Date - Timeline information with proper formatting
-		grid.addDateColumn(activity -> activity.getDueDate(), "Due Date", "dueDate", true);
-		
-		// Progress Percentage - Completion tracking
-		grid.addIntegerColumn(activity -> activity.getProgressPercentage(), "Progress %", "progressPercentage", true);
-		
+		grid.addShortTextColumn(CActivity::getProjectName, "Project", "project");
+		grid.addShortTextColumn(CActivity::getName, "Activity Name", "name");
+		// grid.addReferenceColumn(activity -> { return activity.getActivityType() != null
+		// ? activity.getActivityType().getName() : "No Type"; }, "Type"); // Type is
+		// derived from join, not directly sortable // Assigned To - User assigned to
+		// activity (critical for resource management) grid.addReferenceColumn(activity ->
+		// { return activity.getAssignedTo() != null ? activity.getAssignedTo().getName()
+		// : "Unassigned"; }, "Assigned To"); // User is derived from join, not directly
+		// sortable // Status - Current status of activity
+		// grid.addReferenceColumn(activity -> { return activity.getStatus() != null ?
+		// activity.getStatus().getName() : "No Status"; }, "Status"); // Status is
+		// derived from join, not directly sortable // Priority - Important for task
+		// prioritization grid.addReferenceColumn(activity -> { return
+		// activity.getPriority() != null ? activity.getPriority().getName() : "No
+		// Priority"; }, "Priority"); // Priority is derived from join, not directly
+		// sortable // Start Date - Timeline information with proper formatting
+		// grid.addDateColumn(activity -> activity.getStartDate(), "Start Date",
+		// "startDate"); // Due Date - Timeline information with proper formatting
+		// grid.addDateColumn(activity -> activity.getDueDate(), "Due Date", "dueDate");
+		// // Progress Percentage - Completion tracking grid.addIntegerColumn(activity ->
+		// activity.getProgressPercentage(), "Progress %", "progressPercentage"); //
 		// Description - Shortened for grid display (similar to meetings view)
-		grid.addReferenceColumn(activity -> {
-			if ((activity.getDescription() == null) || activity.getDescription().trim().isEmpty()) {
-				return "No description";
-			}
-			final String desc = activity.getDescription().trim();
-			return desc.length() > 50 ? desc.substring(0, 47) + "..." : desc;
-		}, "Description", false); // Description is not directly sortable
-		
+		// grid.addColumn(activity -> { if ((activity.getDescription() == null) ||
+		// activity.getDescription().trim().isEmpty()) { return "No description"; } final
+		// String desc = activity.getDescription().trim(); return desc.length() > 50 ?
+		// desc.substring(0, 47) + "..." : desc; }, "Description", "description");
+		/*
+		 * grid.addReferenceColumn(activity -> { if ((activity.getDescription() == null)
+		 * || activity.getDescription().trim().isEmpty()) { return "No description"; }
+		 * final String desc = activity.getDescription().trim(); return desc.length() > 50
+		 * ? desc.substring(0, 47) + "..." : desc; }, "Description"); // Description is
+		 * not directly sortable
+		 */
 		// when a row is selected or deselected, populate form
 		grid.asSingleSelect().addValueChangeListener(event -> {
+
 			if (event.getValue() != null) {
 				UI.getCurrent().navigate(
 					String.format(ENTITY_ROUTE_TEMPLATE_EDIT, event.getValue().getId()));

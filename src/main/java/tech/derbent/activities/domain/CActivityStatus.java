@@ -1,8 +1,5 @@
 package tech.derbent.activities.domain;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,8 +17,6 @@ import tech.derbent.base.domain.CStatus;
 @Table (name = "cactivitystatus")
 @AttributeOverride (name = "id", column = @Column (name = "cactivitystatus_id"))
 public class CActivityStatus extends CStatus {
-
-	private static final Logger logger = LoggerFactory.getLogger(CActivityStatus.class);
 
 	@Column (name = "color", nullable = true, length = 7)
 	@Size (max = 7)
@@ -55,44 +50,20 @@ public class CActivityStatus extends CStatus {
 	 */
 	public CActivityStatus() {
 		super();
-		logger.debug("CActivityStatus() - Creating new activity status instance");
+		// logger.debug("CActivityStatus() - Creating new activity status instance");
 	}
 
-	/**
-	 * Constructor with name.
-	 * @param name the name of the activity status - must not be null
-	 */
 	public CActivityStatus(final String name) {
 		super(name);
-		logger.debug("CActivityStatus(name={}) - Creating activity status with name",
-			name);
 	}
 
-	/**
-	 * Constructor with name and description.
-	 * @param name        the name of the activity status - must not be null
-	 * @param description the description of the activity status - can be null
-	 */
 	public CActivityStatus(final String name, final String description) {
 		super(name, description);
-		logger.debug(
-			"CActivityStatus(name={}, description={}) - Creating activity status with name and description",
-			name, description);
 	}
 
-	/**
-	 * Constructor with all main fields.
-	 * @param name        the name of the activity status - must not be null
-	 * @param description the description of the activity status - can be null
-	 * @param color       the hex color code - can be null, defaults to gray
-	 * @param isFinal     whether this is a final status
-	 */
 	public CActivityStatus(final String name, final String description,
 		final String color, final boolean isFinal) {
 		super(name, description);
-		logger.debug(
-			"CActivityStatus(name={}, description={}, color={}, isFinal={}) - Creating full activity status",
-			name, description, color, isFinal);
 		this.color = color != null ? color : "#808080";
 		this.isFinal = isFinal;
 	}
@@ -111,55 +82,21 @@ public class CActivityStatus extends CStatus {
 		return super.equals(that);
 	}
 
-	/**
-	 * Gets the color hex code for this status.
-	 * @return the color hex code (e.g., "#FF0000") or default gray if null or empty
-	 */
 	public String getColor() {
 		return ((color != null) && !color.trim().isEmpty()) ? color : "#808080";
 	}
 
-	/**
-	 * Gets the sort order for this status.
-	 * @return the sort order (higher numbers appear later)
-	 */
 	public Integer getSortOrder() { return sortOrder != null ? sortOrder : 100; }
 
-	/**
-	 * Checks if this is a final status (completed/cancelled).
-	 * @return true if this status represents completion or cancellation
-	 */
 	public boolean isFinal() { return isFinal; }
 
-	/**
-	 * Sets the color hex code for this status.
-	 * @param color the hex color code (e.g., "#FF0000") - if null or empty, defaults to
-	 *              gray
-	 */
 	public void setColor(final String color) {
-		logger.debug("setColor(color={}) - Setting color for status id={}", color,
-			getId());
 		this.color = ((color != null) && !color.trim().isEmpty()) ? color : "#808080";
 	}
 
-	/**
-	 * Sets whether this is a final status.
-	 * @param isFinal true if this status represents completion or cancellation
-	 */
-	public void setFinal(final boolean isFinal) {
-		logger.debug("setFinal(isFinal={}) - Setting final flag for status id={}",
-			isFinal, getId());
-		this.isFinal = isFinal;
-	}
+	public void setFinal(final boolean isFinal) { this.isFinal = isFinal; }
 
-	/**
-	 * Sets the sort order for this status.
-	 * @param sortOrder the sort order (higher numbers appear later) - if null, defaults
-	 *                  to 100
-	 */
 	public void setSortOrder(final Integer sortOrder) {
-		logger.debug("setSortOrder(sortOrder={}) - Setting sort order for status id={}",
-			sortOrder, getId());
 		this.sortOrder = sortOrder != null ? sortOrder : 100;
 	}
 

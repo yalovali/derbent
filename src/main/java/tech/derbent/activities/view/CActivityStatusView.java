@@ -74,13 +74,8 @@ public class CActivityStatusView extends CAbstractMDPage<CActivityStatus> {
 		LOGGER.debug("Creating grid for activity statuses with appropriate field widths");
 
 		try {
-			grid.addShortTextColumn(CActivityStatus::getName, "Status Name", "name", true);
-			grid.addColumn(CActivityStatus::getDescription).setAutoWidth(true)
-				.setHeader("Description").setKey("description").setSortable(true);
-			// Data provider is already set up in the base class
-			// CAbstractMDPage.createGridLayout() No need to call grid.setItems() again as
-			// it's already configured to handle sorting properly
-			LOGGER.debug("Grid created successfully for activity statuses");
+			grid.addShortTextColumn(CActivityStatus::getName, "Status Name", "name");
+			grid.addColumn(CActivityStatus::getDescription, "Description", "description");
 		} catch (final Exception e) {
 			LOGGER.error("Error creating grid for CActivityStatusView", e);
 			throw new RuntimeException("Failed to create grid for activity status view",

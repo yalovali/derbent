@@ -31,6 +31,11 @@ public class CEntityOfProject extends CEntityNamed {
 
 	public CProject getProject() { return project; }
 
+	public String getProjectName() {
+		return (project != null) ? project.getName() : "No Project";
+	}
+
+	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
 	}

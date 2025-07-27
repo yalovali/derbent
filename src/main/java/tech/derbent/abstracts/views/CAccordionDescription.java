@@ -73,8 +73,6 @@ public abstract class CAccordionDescription<EntityClass extends CEntityDB>
 	public List<String> getEntityFields() { return EntityFields; }
 
 	public void populateForm(final EntityClass entity) {
-		LOGGER.info("Populating form with entity data: {}",
-			entity != null ? entity.toString() : "null");
 
 		if (entity == null) {
 			LOGGER.warn("Entity is null, clearing form");

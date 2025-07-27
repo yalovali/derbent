@@ -21,7 +21,6 @@ public abstract class CStatus extends CTypeEntity {
 	 */
 	public CStatus() {
 		super();
-		LOGGER.debug("CStatus constructor called for {}", getClass().getSimpleName());
 	}
 
 	/**

@@ -1,5 +1,6 @@
 package tech.derbent;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 
 import org.slf4j.Logger;
@@ -9,7 +10,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.util.StreamUtils;
 
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.theme.Theme;
@@ -76,14 +79,15 @@ public class Application implements AppShellConfigurator {
 		return args -> {
 			// Temporarily disable data initialization due to SQL syntax issues
 			LOGGER.info("Data initialization temporarily disabled");
-			/*
-			 * final Integer count =
-			 * jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cuser", Integer.class);
-			 * if ((count != null) && (count == 0)) { final String sql =
-			 * StreamUtils.copyToString(new
-			 * ClassPathResource("data.sql").getInputStream(), StandardCharsets.UTF_8);
-			 * jdbcTemplate.execute(sql); }
-			 */
+			final Integer count =
+				jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cuser", Integer.class);
+
+			if ((count != null) && (count == 0)) {
+				final String sql = StreamUtils.copyToString(
+					new ClassPathResource("data.sql").getInputStream(),
+					StandardCharsets.UTF_8);
+				jdbcTemplate.execute(sql);
+			}
 		};
 	}
 }

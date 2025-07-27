@@ -52,9 +52,8 @@ public class CProjectsView extends CAbstractMDPage<CProject> {
 
 	@Override
 	protected void createGridForEntity() {
-		LOGGER.info("Creating grid for projects with appropriate field widths");
 		// property name must match the field name in CProject
-		grid.addShortTextColumn(CProject::getName, "Name", "name", true);
+		grid.addShortTextColumn(CProject::getName, "Name", "name");
 		// when a row is selected or deselected, populate form
 		grid.asSingleSelect().addValueChangeListener(event -> {
 

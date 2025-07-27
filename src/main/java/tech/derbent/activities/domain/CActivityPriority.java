@@ -22,7 +22,7 @@ import tech.derbent.abstracts.domains.CTypeEntity;
 @AttributeOverride (name = "id", column = @Column (name = "cactivitypriority_id"))
 public class CActivityPriority extends CTypeEntity {
 
-	private static final Logger logger = LoggerFactory.getLogger(CActivityPriority.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityPriority.class);
 
 	@Column (name = "priority_level", nullable = false)
 	@MetaData (
@@ -56,7 +56,6 @@ public class CActivityPriority extends CTypeEntity {
 	 */
 	public CActivityPriority() {
 		super();
-		logger.debug("CActivityPriority() - Creating new activity priority instance");
 	}
 
 	/**
@@ -67,12 +66,9 @@ public class CActivityPriority extends CTypeEntity {
 	 */
 	public CActivityPriority(final String name, final Integer priorityLevel) {
 		super(name);
-		logger.debug(
-			"CActivityPriority(name={}, priorityLevel={}) - Creating activity priority",
-			name, priorityLevel);
 
 		if (priorityLevel == null) {
-			logger
+			LOGGER
 				.warn("CActivityPriority constructor - Priority level parameter is null");
 		}
 		this.priorityLevel = priorityLevel != null ? priorityLevel : 3;
@@ -88,12 +84,9 @@ public class CActivityPriority extends CTypeEntity {
 	public CActivityPriority(final String name, final Integer priorityLevel,
 		final String description) {
 		super(name, description);
-		logger.debug(
-			"CActivityPriority(name={}, priorityLevel={}, description={}) - Creating activity priority with description",
-			name, priorityLevel, description);
 
 		if (priorityLevel == null) {
-			logger
+			LOGGER
 				.warn("CActivityPriority constructor - Priority level parameter is null");
 		}
 		this.priorityLevel = priorityLevel != null ? priorityLevel : 3;
@@ -111,12 +104,9 @@ public class CActivityPriority extends CTypeEntity {
 	public CActivityPriority(final String name, final Integer priorityLevel,
 		final String description, final String color, final boolean isDefault) {
 		super(name, description);
-		logger.debug(
-			"CActivityPriority(name={}, priorityLevel={}, description={}, color={}, isDefault={}) - Creating full activity priority",
-			name, priorityLevel, description, color, isDefault);
 
 		if (priorityLevel == null) {
-			logger
+			LOGGER
 				.warn("CActivityPriority constructor - Priority level parameter is null");
 		}
 		this.priorityLevel = priorityLevel != null ? priorityLevel : 3;
@@ -167,8 +157,6 @@ public class CActivityPriority extends CTypeEntity {
 	 * @param color the hex color code (e.g., "#FF0000") - if null, defaults to orange
 	 */
 	public void setColor(final String color) {
-		logger.debug("setColor(color={}) - Setting color for priority id={}", color,
-			getId());
 		this.color = color != null ? color : "#FFA500";
 	}
 
@@ -176,11 +164,7 @@ public class CActivityPriority extends CTypeEntity {
 	 * Sets whether this is the default priority.
 	 * @param isDefault true if this should be the default priority for new activities
 	 */
-	public void setDefault(final boolean isDefault) {
-		logger.debug("setDefault(isDefault={}) - Setting default flag for priority id={}",
-			isDefault, getId());
-		this.isDefault = isDefault;
-	}
+	public void setDefault(final boolean isDefault) { this.isDefault = isDefault; }
 
 	/**
 	 * Sets the numeric priority level.
@@ -188,12 +172,9 @@ public class CActivityPriority extends CTypeEntity {
 	 *                      to 3
 	 */
 	public void setPriorityLevel(final Integer priorityLevel) {
-		logger.debug(
-			"setPriorityLevel(priorityLevel={}) - Setting priority level for priority id={}",
-			priorityLevel, getId());
 
 		if (priorityLevel == null) {
-			logger.warn(
+			LOGGER.warn(
 				"setPriorityLevel(priorityLevel=null) - Attempting to set null priority level for priority id={}",
 				getId());
 		}
