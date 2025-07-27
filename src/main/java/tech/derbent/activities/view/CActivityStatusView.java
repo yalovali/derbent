@@ -71,11 +71,10 @@ public class CActivityStatusView extends CAbstractMDPage<CActivityStatus> {
 	 */
 	@Override
 	protected void createGridForEntity() {
-		LOGGER.debug("Creating grid for activity statuses");
+		LOGGER.debug("Creating grid for activity statuses with appropriate field widths");
 
 		try {
-			grid.addColumn(CActivityStatus::getName).setAutoWidth(true)
-				.setHeader("Status Name").setKey("name").setSortable(true);
+			grid.addShortTextColumn(CActivityStatus::getName, "Status Name", "name", true);
 			grid.addColumn(CActivityStatus::getDescription).setAutoWidth(true)
 				.setHeader("Description").setKey("description").setSortable(true);
 			// Data provider is already set up in the base class

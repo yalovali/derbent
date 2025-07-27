@@ -52,11 +52,9 @@ public class CActivityTypeView extends CAbstractMDPage<CActivityType> {
 
 	@Override
 	protected void createGridForEntity() {
-		LOGGER.info("Creating grid for activity types");
-		grid.addColumn(CActivityType::getName).setAutoWidth(true).setHeader("Name")
-			.setKey("name").setSortable(true);
-		grid.addColumn(CActivityType::getDescription).setAutoWidth(true)
-			.setHeader("Description").setKey("description").setSortable(true);
+		LOGGER.info("Creating grid for activity types with appropriate field widths");
+		grid.addShortTextColumn(CActivityType::getName, "Name", "name", true);
+		grid.addLongTextColumn(CActivityType::getDescription, "Description", "description", true);
 		// Data provider is already set up in the base class
 		// CAbstractMDPage.createGridLayout() No need to call grid.setItems() again as
 		// it's already configured to handle sorting properly

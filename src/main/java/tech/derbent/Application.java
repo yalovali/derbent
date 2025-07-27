@@ -71,12 +71,9 @@ public class Application implements AppShellConfigurator {
 
 	@Bean
 	public ApplicationRunner dataInitializer(final JdbcTemplate jdbcTemplate) {
+		// Temporarily disable data initialization for testing
 		return args -> {
-			final Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cuser", Integer.class);
-			if ((count != null) && (count == 0)) {
-				final String sql = StreamUtils.copyToString(new ClassPathResource("data.sql").getInputStream(), StandardCharsets.UTF_8);
-				jdbcTemplate.execute(sql);
-			}
+			LOGGER.debug("Skipping data initialization - data.sql disabled for testing");
 		};
 	}
 }

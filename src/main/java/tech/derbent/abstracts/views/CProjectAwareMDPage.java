@@ -36,12 +36,12 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB> extends
     @Override
     protected void createGridLayout() {
         LOGGER.debug("Creating grid layout for project-aware MD page");
-        grid = new com.vaadin.flow.component.grid.Grid<>(entityClass, false);
+        grid = new CGrid<>(entityClass, false);
         grid.getColumns().forEach(grid::removeColumn);
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
         // Initially set empty items - will be populated after view is fully initialized
         grid.setItems(Collections.emptyList());
-        grid.addColumn(entity -> entity.getId().toString()).setHeader("ID").setKey("id");
+        grid.addIdColumn(entity -> entity.getId().toString(), "ID", "id");
         // Add selection listener to the grid
         grid.asSingleSelect().addValueChangeListener(event -> {
             populateForm(event.getValue());

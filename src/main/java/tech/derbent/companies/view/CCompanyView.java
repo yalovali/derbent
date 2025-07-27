@@ -101,16 +101,12 @@ public class CCompanyView extends CAbstractMDPage<CCompany> {
 
 	@Override
 	protected void createGridForEntity() {
-		LOGGER.info("Creating grid for companies");
+		LOGGER.info("Creating grid for companies with appropriate field widths");
 		// Add columns for key company information
-		grid.addColumn(CCompany::getName).setAutoWidth(true).setHeader("Company Name")
-			.setKey("name").setSortable(true);
-		grid.addColumn(CCompany::getDescription).setAutoWidth(true)
-			.setHeader("Description").setKey("description").setSortable(false);
-		grid.addColumn(CCompany::getAddress).setAutoWidth(true).setHeader("Address")
-			.setKey("address").setSortable(false);
-		grid.addColumn(CCompany::getPhone).setAutoWidth(true).setHeader("Phone")
-			.setKey("phone").setSortable(false);
+		grid.addShortTextColumn(CCompany::getName, "Company Name", "name", true);
+		grid.addLongTextColumn(CCompany::getDescription, "Description", "description", false);
+		grid.addShortTextColumn(CCompany::getAddress, "Address", "address", false);
+		grid.addShortTextColumn(CCompany::getPhone, "Phone", "phone", false);
 		grid.addColumn(CCompany::getEmail).setAutoWidth(true).setHeader("Email")
 			.setKey("email").setSortable(true);
 		grid.addColumn(CCompany::getWebsite).setAutoWidth(true).setHeader("Website")

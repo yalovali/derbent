@@ -41,7 +41,7 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 
 	protected final Class<EntityClass> entityClass;
 
-	protected Grid<EntityClass> grid;// = new Grid<>(CProject.class, false);
+	protected CGrid<EntityClass> grid;// = new CGrid<>(EntityClass.class, false);
 
 	private final BeanValidationBinder<EntityClass> binder;
 
@@ -261,7 +261,7 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 
 	protected void createGridLayout() {
 		LOGGER.info("Creating grid layout for {}", getClass().getSimpleName());
-		grid = new Grid<>(entityClass, false);
+		grid = new CGrid<>(entityClass, false);
 		grid.getColumns().forEach(grid::removeColumn);
 		grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 		// Use a custom data provider that properly handles pagination and sorting
