@@ -1,9 +1,6 @@
 package tech.derbent.users.view;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.function.Consumer;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,6 +25,7 @@ import com.vaadin.flow.server.streams.UploadMetadata;
 import tech.derbent.abstracts.views.CButton;
 import tech.derbent.abstracts.views.CDBEditDialog;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
+import tech.derbent.base.utils.CImageUtils;
 import tech.derbent.users.domain.CUser;
 
 /**
@@ -39,9 +37,7 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final String UPLOAD_DIR = "profile-pictures";
-
-	private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+	private static final long MAX_FILE_SIZE = CImageUtils.MAX_IMAGE_SIZE;
 
 	private final PasswordEncoder passwordEncoder;
 
@@ -61,7 +57,7 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 
 	private CButton deleteProfilePictureButton;
 
-	private String temporaryImagePath;
+	private byte[] temporaryImageData;
 
 	private final Binder<CUser> binder = new Binder<>(CUser.class);
 
@@ -153,9 +149,7 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 		profilePicturePreview.getStyle().set("object-fit", "cover");
 		profilePicturePreview.getStyle().set("border",
 			"2px solid var(--lumo-contrast-20pct)");
-		// Set default or current profile picture (after button is created)
-		// updateProfilePicturePreview(); // Move this after button creation File upload
-		// component using modern API
+		// File upload component using modern API
 		final InMemoryUploadCallback uploadCallback = (metadata, data) -> {
 			LOGGER.info("Profile picture upload received: {} ({} bytes)",
 				metadata.fileName(), data.length);
@@ -203,55 +197,17 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 	}
 
 	/**
-	 * Deletes the old profile picture file.
-	 */
-	private void deleteOldProfilePicture() {
-		LOGGER.debug("Deleting old profile picture");
-
-		if ((data != null) && (data.getProfilePicturePath() != null)) {
-			final Path oldPicturePath = Paths.get(data.getProfilePicturePath());
-
-			if (Files.exists(oldPicturePath)) {
-
-				try {
-					Files.delete(oldPicturePath);
-					LOGGER.info("Deleted old profile picture: {}", oldPicturePath);
-				} catch (final IOException e) {
-					LOGGER.warn("Failed to delete old profile picture: {}",
-						oldPicturePath, e);
-				}
-			}
-		}
-	}
-
-	/**
 	 * Deletes the current profile picture.
 	 */
 	private void deleteProfilePicture() {
 		LOGGER.info("Deleting profile picture for user: {}",
 			data != null ? data.getLogin() : "null");
-		// Clear temporary path and data
-		temporaryImagePath = null;
+		// Clear temporary data
+		temporaryImageData = null;
 		// Update preview to default
 		setDefaultProfilePicture();
 		Notification.show("Profile picture removed", 3000,
 			Notification.Position.TOP_CENTER);
-	}
-
-	/**
-	 * Gets file extension from filename.
-	 */
-	private String getFileExtension(final String fileName) {
-
-		if ((fileName == null) || fileName.trim().isEmpty()) {
-			return "jpg"; // default
-		}
-		final int lastDotIndex = fileName.lastIndexOf('.');
-
-		if ((lastDotIndex > 0) && (lastDotIndex < (fileName.length() - 1))) {
-			return fileName.substring(lastDotIndex + 1).toLowerCase();
-		}
-		return "jpg"; // default
 	}
 
 	@Override
@@ -269,21 +225,18 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 	/**
 	 * Handles profile picture changes on save.
 	 */
-	private void handleProfilePictureChange() throws IOException {
+	private void handleProfilePictureChange() {
 		LOGGER.debug("Handling profile picture change");
 
-		if (temporaryImagePath != null) {
+		if (temporaryImageData != null) {
 			// New picture was uploaded
-			deleteOldProfilePicture();
-			data.setProfilePicturePath(temporaryImagePath);
-			LOGGER.info("Profile picture path updated to: {}", temporaryImagePath);
+			data.setProfilePictureData(temporaryImageData);
+			LOGGER.info("Profile picture data updated for user: {}", data.getLogin());
 		}
-		else if ((deleteProfilePictureButton.isEnabled() == false)
-			&& (data.getProfilePicturePath() != null)
-			&& !data.getProfilePicturePath().isEmpty()) {
+		else if (!deleteProfilePictureButton.isEnabled() 
+			&& data.getProfilePictureData() != null) {
 			// Picture was deleted
-			deleteOldProfilePicture();
-			data.setProfilePicturePath(null);
+			data.setProfilePictureData(null);
 			LOGGER.info("Profile picture removed for user: {}", data.getLogin());
 		}
 	}
@@ -304,26 +257,22 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 		if ((fileName == null) || fileName.trim().isEmpty()) {
 			throw new IOException("Invalid file name");
 		}
-		// Create upload directory if it doesn't exist
-		final Path uploadDir = Paths.get(UPLOAD_DIR);
 
-		if (!Files.exists(uploadDir)) {
-			Files.createDirectories(uploadDir);
-			LOGGER.debug("Created upload directory: {}", uploadDir);
-		}
-		// Generate unique filename
-		final String fileExtension = getFileExtension(fileName);
-		final String uniqueFileName =
-			"profile_" + System.currentTimeMillis() + "." + fileExtension;
-		final Path targetPath = uploadDir.resolve(uniqueFileName);
-		// Save uploaded file from byte array
-		Files.write(targetPath, data);
-		LOGGER.info("Profile picture saved to: {}", targetPath);
-		// Update preview and store temporary path and data
-		temporaryImagePath = targetPath.toString();
-		profilePicturePreview.setSrc("file://" + temporaryImagePath);
+		// Validate image data
+		CImageUtils.validateImageData(data, fileName);
+
+		// Resize image to standard profile picture size
+		final byte[] resizedImageData = CImageUtils.resizeToProfilePicture(data);
+
+		// Store temporary image data
+		temporaryImageData = resizedImageData;
+
+		// Update preview
+		final String dataUrl = CImageUtils.createDataUrl(resizedImageData);
+		profilePicturePreview.setSrc(dataUrl);
 		deleteProfilePictureButton.setEnabled(true);
-		Notification.show("Profile picture uploaded successfully", 3000,
+
+		Notification.show("Profile picture uploaded and resized successfully", 3000,
 			Notification.Position.TOP_CENTER);
 	}
 
@@ -378,9 +327,8 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 	 * Sets the default profile picture (user icon).
 	 */
 	private void setDefaultProfilePicture() {
-		// Use a data URL for a default user icon
-		profilePicturePreview.setSrc(
-			"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNTAiIGZpbGw9IiNmNWY1ZjUiLz48Y2lyY2xlIGN4PSI1MCIgY3k9IjM1IiByPSIxNSIgZmlsbD0iIzk5OTk5OSIvPjxwYXRoIGQ9Im0yNSA3NWMwLTE0IDExLTI1IDI1LTI1czI1IDExIDI1IDI1IiBmaWxsPSIjOTk5OTk5Ii8+PC9zdmc+");
+		// Use the default profile picture from CImageUtils
+		profilePicturePreview.setSrc(CImageUtils.getDefaultProfilePictureDataUrl());
 		deleteProfilePictureButton.setEnabled(false);
 		LOGGER.debug("Set default profile picture");
 	}
@@ -404,14 +352,13 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 		LOGGER.debug("Updating profile picture preview for user: {}",
 			data != null ? data.getLogin() : "null");
 
-		if ((data != null) && (data.getProfilePicturePath() != null)
-			&& !data.getProfilePicturePath().isEmpty()) {
-			final String imagePath = data.getProfilePicturePath();
-
-			if (Files.exists(Paths.get(imagePath))) {
-				profilePicturePreview.setSrc("file://" + imagePath);
+		if ((data != null) && (data.getProfilePictureData() != null)
+			&& (data.getProfilePictureData().length > 0)) {
+			final String dataUrl = CImageUtils.createDataUrl(data.getProfilePictureData());
+			if (dataUrl != null) {
+				profilePicturePreview.setSrc(dataUrl);
 				deleteProfilePictureButton.setEnabled(true);
-				LOGGER.debug("Set profile picture preview to: {}", imagePath);
+				LOGGER.debug("Set profile picture preview from database data");
 			}
 			else {
 				setDefaultProfilePicture();
