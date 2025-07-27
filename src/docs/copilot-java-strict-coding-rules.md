@@ -4,7 +4,21 @@ This is a project for maintaining work flows, tasks, managerial targets, procedu
 
 For solutions, usage coverage and UI design, inspire from Atlassian Jira product or Projeqtor from page https://projeqtor.org/en
 
-Check src/docs/project_design_description.md file for project scope, update this document if necessary or given task enlarges this scope.
+Check [project_design_description.md](./project_design_description.md) file for project scope, update this document if necessary or given task enlarges this scope.
+
+## Table of Contents
+- [1. MVC Architecture Principles](#1-mvc-architecture-principles)
+- [2. Commenting Standards](#2-commenting-standards)
+- [3. Java Checks Before Submission](#3-java-checks-before-submission)
+- [4. Pull Request Checklist](#4-pull-request-checklist)
+- [5. Copilot Review Protocol](#5-copilot-review-protocol)
+- [6. Coding Styles & Best Practices](#6-coding-styles--best-practices)
+- [7. CSS Guidelines](#7-css-guidelines)
+- [8. Database Rules](#8-database-rules)
+- [9. Documentation & Modularity](#9-documentation--modularity)
+- [10. Strict Prohibitions](#10-strict-prohibitions)
+- [11. Additional Best Practices](#11-additional-best-practices)
+- [Related Documentation](#related-documentation)
 
 ---
 
@@ -25,8 +39,6 @@ src/main/java/cuser
 ├── controller/
 ```
 
----
-
 ## 2. Development Environment Setup
 
 - Use Java 17+ with Spring Boot 3+
@@ -46,6 +58,7 @@ src/main/java/cuser
 
 ---
 
+
 ## 4. Security and Validation Standards
 
 - Always validate all user inputs in controllers and services
@@ -55,7 +68,6 @@ src/main/java/cuser
 - Use parameterized queries to prevent SQL injection
 - Implement CSRF protection for all forms
 
----
 
 ## 5. Testing Requirements
 
@@ -78,7 +90,9 @@ src/main/java/cuser
 
 ---
 
+
 ## 7. Pull Request Checklist
+
 
 - Code follows MVC separation principles
 - Methods and classes are properly commented with JavaDoc
@@ -89,6 +103,7 @@ src/main/java/cuser
 - Database changes include proper migrations and sample data
 
 ---
+
 
 ## 8. Copilot Review Protocol
 
@@ -174,7 +189,15 @@ After accepting Copilot suggestions, manually review for:
 - All new UI components, dialogs, and base classes must be documented
 - Maintain consistency with existing documentation patterns
 
----
+### Available Documentation:
+- [Project Design Description](./project_design_description.md) - Overall project scope and requirements
+- [Enhanced Activity Management](./enhanced-activity-management-implementation.md) - Activity system implementation
+- [CSS Guidelines](./CSS_GUIDELINES.md) - Styling standards and best practices
+- [CPanelActivityDescription Implementation](./CPANEL_ACTIVITY_DESCRIPTION_IMPLEMENTATION.md) - Entity panel patterns
+- [User Profile Dialog Implementation](./user-profile-dialog-implementation.md) - Dialog implementation patterns
+- [Annotation-Based ComboBox Data Providers](./ANNOTATION_BASED_COMBOBOX_DATA_PROVIDERS.md) - Form building patterns
+- [Hierarchical Side Menu Implementation](./HIERARCHICAL_SIDE_MENU_IMPLEMENTATION.md) - Navigation patterns
+
 
 ## 10. Strict Prohibitions
 
@@ -187,11 +210,7 @@ After accepting Copilot suggestions, manually review for:
 - Never use H2 database in production environments
 - Never log sensitive information (passwords, tokens, personal data)
 - Never commit hardcoded configuration values or secrets
-
----
-
 ## 11. Additional Best Practices
-
 - Use dependency injection wherever possible
 - All domain classes should be immutable where practical
 - Always write unit tests for new features or bug fixes
@@ -205,11 +224,33 @@ After accepting Copilot suggestions, manually review for:
 
 ---
 
-## 12. Integration with GitHub Copilot
+## Related Documentation
+
+For comprehensive development guidance, refer to these additional documents:
+
+### Core Architecture & Design
+- [Project Design Description](./project_design_description.md) - Complete project requirements and architecture
+- [Enhanced Activity Management Requirements](./enhanced-activity-management-requirements.md) - Activity system specifications
+
+### UI/UX Implementation Guides  
+- [CSS Guidelines](./CSS_GUIDELINES.md) - Complete styling standards and Vaadin theming
+- [CPanelActivityDescription Implementation](./CPANEL_ACTIVITY_DESCRIPTION_IMPLEMENTATION.md) - Entity panel patterns
+- [User Profile Dialog Implementation](./user-profile-dialog-implementation.md) - Dialog patterns
+- [Hierarchical Side Menu Implementation](./HIERARCHICAL_SIDE_MENU_IMPLEMENTATION.md) - Navigation implementation
+
+### Technical Implementation Patterns
+- [Annotation-Based ComboBox Data Providers](./ANNOTATION_BASED_COMBOBOX_DATA_PROVIDERS.md) - Form building with annotations
+- [Comprehensive Lazy Loading Fix](./COMPREHENSIVE_LAZY_LOADING_FIX.md) - JPA performance optimization
+- [User Company Association Requirements](./user-company-association-requirements.md) - Multi-tenant patterns
+
+### Development Best Practices
+- [CActivity Enhancement Summary](./cactivity-enhancement-summary.md) - Activity domain implementation patterns
+
+---
 
 > **How to use with GitHub Copilot and PRs:**  
-> - Reference this file (`copilot-java-strict-coding-rules.md`) in your project root and in your `docs` folder  
-> - Link to this file in your README and in your PR/issue templates  
-> - Remind contributors (and Copilot) to always follow these rules in every code review and commit  
-> - Use these guidelines as context when requesting Copilot suggestions  
-> - Always review and adapt Copilot-generated code to match these standards
+> - This file exists in your `docs` folder and should also be copied to project root.  
+> - Link to this file in your README and in your PR/issue templates.
+> - Remind contributors (and Copilot) to always follow these rules in every code review and commit.
+> - Reference the related documentation above for specific implementation patterns.
+
