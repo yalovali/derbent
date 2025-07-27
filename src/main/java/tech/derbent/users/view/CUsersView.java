@@ -12,6 +12,7 @@ import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.views.CAbstractMDPage;
+import tech.derbent.abstracts.views.CAccordionDescription;
 import tech.derbent.abstracts.views.CButton;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
 import tech.derbent.companies.service.CCompanyService;
@@ -56,7 +57,10 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 
 	@Override
 	protected void createDetailsLayout() {
-		LOGGER.info("Creating details layout for CUsersView");
+		CAccordionDescription<CUser> panel;
+		panel = new CPanelUserDescription(getCurrentEntity(), getBinder(),
+			(CUserService) entityService, userTypeService, companyService);
+		addAccordionPanel(panel);
 		descriptionPanel = new CPanelUserDescription(getCurrentEntity(), getBinder(),
 			(CUserService) entityService, userTypeService, companyService);
 		getBaseDetailsLayout().add(descriptionPanel);

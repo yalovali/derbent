@@ -11,8 +11,8 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.views.CAbstractMDPage;
+import tech.derbent.abstracts.views.CAccordionDescription;
 import tech.derbent.abstracts.views.CButton;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
 import tech.derbent.companies.domain.CCompany;
@@ -74,17 +74,20 @@ public class CCompanyView extends CAbstractMDPage<CCompany> {
 
 	@Override
 	protected void createDetailsLayout() {
-
-		try {
-			// Create form using MetaData annotations and CEntityFormBuilder
-			final var formLayout =
-				CEntityFormBuilder.buildForm(CCompany.class, getBinder());
-			getBaseDetailsLayout().add(formLayout);
-			LOGGER.debug("Entity details created successfully for CCompanyView");
-		} catch (final Exception e) {
-			LOGGER.error("Error creating entity details for CCompanyView", e);
-			showErrorNotification("Failed to create company form: " + e.getMessage());
-		}
+		CAccordionDescription<CCompany> panel;
+		panel = new CPanelCompanyDescription(getCurrentEntity(), getBinder(),
+			(CCompanyService) entityService);
+		addAccordionPanel(panel);
+		panel = new CPanelCompanySystemStatus(getCurrentEntity(), getBinder(),
+			(CCompanyService) entityService);
+		addAccordionPanel(panel);
+		panel = new CPanelCompanyUsers(getCurrentEntity(), getBinder(),
+			(CCompanyService) entityService);
+		addAccordionPanel(panel);
+		panel = new CPanelCompanyContactDetails(getCurrentEntity(), getBinder(),
+			(CCompanyService) entityService);
+		// final var formLayout = CEntityFormBuilder.buildForm(CCompany.class,
+		// getBinder()); getBaseDetailsLayout().add(formLayout);
 	}
 
 	@Override
