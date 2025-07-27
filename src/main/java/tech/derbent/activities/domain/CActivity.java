@@ -290,9 +290,6 @@ public class CActivity extends CEntityOfProject {
 	 * @return the time variance, positive if over estimated, negative if under estimated
 	 */
 	public BigDecimal calculateTimeVariance() {
-		logger.debug(
-			"calculateTimeVariance() - Calculating time variance for activity id={}",
-			getId());
 
 		if ((actualHours == null) || (estimatedHours == null)) {
 			logger.debug(

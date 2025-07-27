@@ -65,42 +65,43 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 
 	@Override
 	protected void createGridForEntity() {
-		LOGGER.info(
-			"Creating enhanced grid for activities with comprehensive field coverage");
-		// Project Name - Important for context (similar to meetings view)
 		grid.addShortTextColumn(CActivity::getProjectName, "Project", "project");
 		grid.addShortTextColumn(CActivity::getName, "Activity Name", "name");
-		// grid.addReferenceColumn(activity -> { return activity.getActivityType() != null
-		// ? activity.getActivityType().getName() : "No Type"; }, "Type"); // Type is
-		// derived from join, not directly sortable // Assigned To - User assigned to
-		// activity (critical for resource management) grid.addReferenceColumn(activity ->
-		// { return activity.getAssignedTo() != null ? activity.getAssignedTo().getName()
-		// : "Unassigned"; }, "Assigned To"); // User is derived from join, not directly
-		// sortable // Status - Current status of activity
-		// grid.addReferenceColumn(activity -> { return activity.getStatus() != null ?
-		// activity.getStatus().getName() : "No Status"; }, "Status"); // Status is
-		// derived from join, not directly sortable // Priority - Important for task
-		// prioritization grid.addReferenceColumn(activity -> { return
-		// activity.getPriority() != null ? activity.getPriority().getName() : "No
-		// Priority"; }, "Priority"); // Priority is derived from join, not directly
-		// sortable // Start Date - Timeline information with proper formatting
-		// grid.addDateColumn(activity -> activity.getStartDate(), "Start Date",
-		// "startDate"); // Due Date - Timeline information with proper formatting
-		// grid.addDateColumn(activity -> activity.getDueDate(), "Due Date", "dueDate");
-		// // Progress Percentage - Completion tracking grid.addIntegerColumn(activity ->
-		// activity.getProgressPercentage(), "Progress %", "progressPercentage"); //
-		// Description - Shortened for grid display (similar to meetings view)
-		// grid.addColumn(activity -> { if ((activity.getDescription() == null) ||
-		// activity.getDescription().trim().isEmpty()) { return "No description"; } final
-		// String desc = activity.getDescription().trim(); return desc.length() > 50 ?
-		// desc.substring(0, 47) + "..." : desc; }, "Description", "description");
-		/*
-		 * grid.addReferenceColumn(activity -> { if ((activity.getDescription() == null)
-		 * || activity.getDescription().trim().isEmpty()) { return "No description"; }
-		 * final String desc = activity.getDescription().trim(); return desc.length() > 50
-		 * ? desc.substring(0, 47) + "..." : desc; }, "Description"); // Description is
-		 * not directly sortable
-		 */
+		grid.addReferenceColumn(activity -> activity.getActivityType() != null
+			? activity.getActivityType().getName() : "No Type", "Type");
+		grid.addShortTextColumn(CActivity::getDescription, "Description", "description");
+		grid.addShortTextColumn(activity -> activity.getStatus() != null
+			? activity.getStatus().getName() : "No Status", "Status", null);
+		// grid.addShortTextColumn(activity -> activity.getPriority() != null ?
+		// activity.getPriority().getName() : "No Priority", "Priority", null);
+		grid.addShortTextColumn(activity -> activity.getStartDate() != null
+			? activity.getStartDate().toString() : "", "Start Date", null);
+		grid.addShortTextColumn(activity -> activity.getDueDate() != null
+			? activity.getDueDate().toString() : "", "Due Date", null);
+		grid.addShortTextColumn(
+			activity -> activity.getParentActivity() != null
+				? activity.getParentActivity().getName() : "No Parent Activity",
+			"Parent", null);
+		grid.addColumn(activity -> {
+			final String desc = activity.getDescription();
+
+			if (desc == null) {
+				return "Not set";
+			}
+			return desc.length() > 50 ? desc.substring(0, 50) + "..." : desc;
+		}, "Description", null);
+		// Add more columns as needed for other fields
+		grid.asSingleSelect().addValueChangeListener(event -> {
+
+			if (event.getValue() != null) {
+				UI.getCurrent().navigate(
+					String.format(ENTITY_ROUTE_TEMPLATE_EDIT, event.getValue().getId()));
+			}
+			else {
+				clearForm();
+				UI.getCurrent().navigate(CActivitiesView.class);
+			}
+		});
 		// when a row is selected or deselected, populate form
 		grid.asSingleSelect().addValueChangeListener(event -> {
 
