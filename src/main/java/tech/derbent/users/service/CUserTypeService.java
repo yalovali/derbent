@@ -8,7 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import tech.derbent.abstracts.services.CAbstractService;
+import tech.derbent.abstracts.services.CAbstractNamedEntityService;
 import tech.derbent.users.domain.CUserType;
 
 /**
@@ -18,7 +18,7 @@ import tech.derbent.users.domain.CUserType;
 @Service
 @PreAuthorize("isAuthenticated()")
 @Transactional(readOnly = true)
-public class CUserTypeService extends CAbstractService<CUserType> {
+public class CUserTypeService extends CAbstractNamedEntityService<CUserType> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CUserTypeService.class);
 
@@ -36,7 +36,7 @@ public class CUserTypeService extends CAbstractService<CUserType> {
     }
 
     /**
-     * Creates a new user type entity.
+     * Creates a new user type entity with name and description.
      * 
      * @param name
      *            the name of the user type
@@ -45,8 +45,25 @@ public class CUserTypeService extends CAbstractService<CUserType> {
      */
     @Transactional
     public void createEntity(final String name, final String description) {
-        LOGGER.info("Creating new user type: {}", name);
-        final var entity = new CUserType(name, description);
+        LOGGER.info("Creating new user type: {} with description: {}", name, description);
+        
+        // Standard test failure logic for error handler testing
+        if ("fail".equals(name)) {
+            LOGGER.warn("Test failure requested for name: {}", name);
+            throw new RuntimeException("This is for testing the error handler");
+        }
+        
+        // Validate name using parent validation
+        validateEntityName(name);
+        
+        final CUserType entity = new CUserType(name, description);
         repository.saveAndFlush(entity);
+        
+        LOGGER.info("User type created successfully with name: {}", name);
+    }
+
+    @Override
+    protected CUserType createNewEntityInstance() {
+        return new CUserType();
     }
 }

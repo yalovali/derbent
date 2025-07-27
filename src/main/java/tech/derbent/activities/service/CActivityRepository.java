@@ -8,11 +8,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import tech.derbent.abstracts.services.CAbstractRepository;
+import tech.derbent.abstracts.services.CAbstractNamedRepository;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.projects.domain.CProject;
 
-public interface CActivityRepository extends CAbstractRepository<CActivity> {
+public interface CActivityRepository extends CAbstractNamedRepository<CActivity> {
 
 	/**
 	 * Counts the number of activities for a specific project.

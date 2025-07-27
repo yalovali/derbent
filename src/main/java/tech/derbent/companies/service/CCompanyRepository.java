@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import tech.derbent.abstracts.services.CAbstractRepository;
+import tech.derbent.abstracts.services.CAbstractNamedRepository;
 import tech.derbent.companies.domain.CCompany;
 
 /**
@@ -14,7 +14,7 @@ import tech.derbent.companies.domain.CCompany;
  * Layer: Service (MVC) - Repository interface
  * Extends CAbstractRepository to provide standard CRUD operations
  */
-public interface CCompanyRepository extends CAbstractRepository<CCompany> {
+public interface CCompanyRepository extends CAbstractNamedRepository<CCompany> {
 
     /**
      * Finds all enabled companies. Useful for filtering active companies only.
@@ -33,15 +33,6 @@ public interface CCompanyRepository extends CAbstractRepository<CCompany> {
      */
     @Query("SELECT c FROM CCompany c WHERE LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%')) ORDER BY c.name")
     List<CCompany> findByNameContainingIgnoreCase(@Param("name") String name);
-
-    /**
-     * Finds a company by exact name match.
-     * 
-     * @param name the exact company name
-     * @return Optional containing the CCompany if found, empty otherwise
-     */
-    @Query("SELECT c FROM CCompany c WHERE c.name = :name")
-    Optional<CCompany> findByName(@Param("name") String name);
 
     /**
      * Finds companies by tax number.
