@@ -119,7 +119,7 @@ public final class ViewToolbar extends Composite<Header> implements CProjectList
         
         // Add Home button to navigate to dashboard
         final var homeButton = createHomeButton();
-        
+
         title = new H1(viewTitle);
         title.addClassNames(FontSize.XLARGE, Margin.NONE, FontWeight.LIGHT);
 
