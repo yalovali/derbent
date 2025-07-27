@@ -8,16 +8,7 @@
     background: var(--lumo-base-color);
 }
 
-/* Red background for detailed tab */
-.details-tab-layout {
-    background-color: #fff7e9;
-	/* 100% creates a scrollbar, probably because of margins */
-	width: 99%;
-	border-radius: 12px;
-	border: 1px solid var(--lumo-contrast-10pct);
-	font-size: 1.6em;
-    font-weight: bold;
-}
+
 
 vaadin-scroller{
 	width: 100%;
@@ -696,17 +687,11 @@ vaadin-accordion-heading{
 
 /* Enhanced details panel */
 .base-details-layout {
-    background: var(--lumo-base-color);
-    border-radius: var(--lumo-border-radius-m);
-    margin: var(--lumo-space-m);
-    box-shadow: var(--lumo-box-shadow-s);
-    border: 1px solid var(--lumo-contrast-10pct);
+    margin: 0;
 }
 
 /* Card-style form sections */
 .details-form-card {
-    background: var(--lumo-base-color);
-    border-radius: var(--lumo-border-radius-m);
     padding: var(--lumo-space-l);
     margin-bottom: var(--lumo-space-m);
     box-shadow: var(--lumo-box-shadow-xs);
@@ -731,11 +716,14 @@ vaadin-accordion-heading{
 .details-tab-layout {
     background: linear-gradient(135deg, var(--lumo-primary-color-10pct), var(--lumo-base-color));
     border-radius: var(--lumo-border-radius-m);
-    padding: var(--lumo-space-m);
-    margin-bottom: var(--lumo-space-m);
+    padding: 0;
+    margin-bottom: 2px;
     box-shadow: var(--lumo-box-shadow-xs);
     border: 1px solid var(--lumo-contrast-10pct);
+	width: 99%;
 }
+
+
 
 .details-tab-content {
     align-items: center;

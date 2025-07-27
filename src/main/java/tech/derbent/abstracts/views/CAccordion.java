@@ -79,14 +79,6 @@ public class CAccordion extends Accordion {
 	}
 
 	/**
-	 * Convenience method to set padding for the base layout.
-	 * @param padding whether to enable padding
-	 */
-	public void setContentPadding(final boolean padding) {
-		baseLayout.setPadding(padding);
-	}
-
-	/**
 	 * Convenience method to set spacing for the base layout.
 	 * @param spacing whether to enable spacing
 	 */

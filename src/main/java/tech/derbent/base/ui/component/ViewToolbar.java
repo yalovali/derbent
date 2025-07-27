@@ -115,7 +115,6 @@ public final class ViewToolbar extends Composite<Header>
 		// Add separation line below the toolbar
 		getContent().getStyle().set("border-bottom",
 			"1px solid var(--lumo-contrast-20pct)");
-		getContent().getStyle().set("padding", "var(--lumo-space-s) var(--lumo-space-m)");
 		// this is a button that toggles the drawer in the app layout
 		final var drawerToggle = new DrawerToggle();
 		drawerToggle.addClassNames(Margin.NONE);
