@@ -22,6 +22,7 @@ import tech.derbent.projects.service.CProjectService;
 @PermitAll // When security is enabled, allow all authenticated users
 public class CProjectsView extends CAbstractMDPage<CProject> {
 
+
 	private static final long serialVersionUID = 1L;
 
 	private final String ENTITY_ID_FIELD = "project_id";

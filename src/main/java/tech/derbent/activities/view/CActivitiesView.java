@@ -65,6 +65,7 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 
 	@Override
 	protected void createGridForEntity() {
+
 		grid.addShortTextColumn(CActivity::getProjectName, "Project", "project");
 		grid.addShortTextColumn(CActivity::getName, "Activity Name", "name");
 		grid.addReferenceColumn(item -> item.getActivityType() != null

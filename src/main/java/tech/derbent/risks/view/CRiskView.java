@@ -48,6 +48,7 @@ public class CRiskView extends CProjectAwareMDPage<CRisk> {
 
 	@Override
 	protected void createGridForEntity() {
+
 		grid.addShortTextColumn(CRisk::getName, "Name", "name");
 		grid.addShortTextColumn(risk -> {
 			return risk.getRiskSeverity().name();
