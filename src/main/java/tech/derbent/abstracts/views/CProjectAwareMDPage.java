@@ -107,8 +107,21 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB> extends
 
     @Override
     protected void refreshGrid() {
+        LOGGER.debug("Refreshing project-aware grid for {}", getClass().getSimpleName());
+        
+        // Store the currently selected entity ID to preserve selection after refresh
+        final EntityClass selectedEntity = grid.asSingleSelect().getValue();
+        final Long selectedEntityId = selectedEntity != null ? selectedEntity.getId() : null;
+        LOGGER.debug("Currently selected entity ID before project-aware refresh: {}", selectedEntityId);
+        
+        // Clear selection and refresh with project-aware data
         grid.select(null);
         refreshProjectAwareGrid();
+        
+        // Restore selection if there was a previously selected entity
+        if (selectedEntityId != null) {
+            restoreGridSelection(selectedEntityId);
+        }
     }
 
     /**

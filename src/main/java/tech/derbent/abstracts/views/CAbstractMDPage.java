@@ -439,8 +439,46 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 
 	protected void refreshGrid() {
 		LOGGER.info("Refreshing grid for {}", getClass().getSimpleName());
+		
+		// Store the currently selected entity ID to preserve selection after refresh
+		final EntityClass selectedEntity = grid.asSingleSelect().getValue();
+		final Long selectedEntityId = selectedEntity != null ? selectedEntity.getId() : null;
+		LOGGER.debug("Currently selected entity ID before refresh: {}", selectedEntityId);
+		
+		// Clear selection and refresh data
 		grid.select(null);
 		grid.getDataProvider().refreshAll();
+		
+		// Restore selection if there was a previously selected entity
+		if (selectedEntityId != null) {
+			restoreGridSelection(selectedEntityId);
+		}
+	}
+
+	/**
+	 * Restores grid selection to the entity with the specified ID after refresh.
+	 * This prevents losing the current selection when the grid is refreshed.
+	 * 
+	 * @param entityId The ID of the entity to select
+	 */
+	protected void restoreGridSelection(final Long entityId) {
+		LOGGER.debug("Attempting to restore grid selection to entity ID: {}", entityId);
+		
+		try {
+			// Find the entity in the current grid data that matches the ID
+			grid.getDataProvider().fetch(new com.vaadin.flow.data.provider.Query<>())
+				.filter(entity -> entityId.equals(entity.getId()))
+				.findFirst()
+				.ifPresentOrElse(
+					entity -> {
+						grid.select(entity);
+						LOGGER.debug("Successfully restored selection to entity ID: {}", entityId);
+					},
+					() -> LOGGER.debug("Entity with ID {} not found in grid after refresh", entityId)
+				);
+		} catch (final Exception e) {
+			LOGGER.warn("Error restoring grid selection to entity ID {}: {}", entityId, e.getMessage());
+		}
 	}
 
 	/**
