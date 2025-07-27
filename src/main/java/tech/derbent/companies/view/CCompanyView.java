@@ -75,41 +75,47 @@ public class CCompanyView extends CAbstractMDPage<CCompany> {
         grid.addColumn(CCompany::getName)
             .setAutoWidth(true)
             .setHeader("Company Name")
+            .setKey("name")
             .setSortable(true);
             
         grid.addColumn(CCompany::getDescription)
             .setAutoWidth(true)
             .setHeader("Description")
+            .setKey("description")
             .setSortable(false);
             
         grid.addColumn(CCompany::getAddress)
             .setAutoWidth(true)
             .setHeader("Address")
+            .setKey("address")
             .setSortable(false);
             
         grid.addColumn(CCompany::getPhone)
             .setAutoWidth(true)
             .setHeader("Phone")
+            .setKey("phone")
             .setSortable(false);
             
         grid.addColumn(CCompany::getEmail)
             .setAutoWidth(true)
             .setHeader("Email")
+            .setKey("email")
             .setSortable(true);
             
         grid.addColumn(CCompany::getWebsite)
             .setAutoWidth(true)
             .setHeader("Website")
+            .setKey("website")
             .setSortable(false);
             
         grid.addColumn(company -> company.isEnabled() ? "Active" : "Inactive")
             .setAutoWidth(true)
             .setHeader("Status")
+            .setKey("enabled")
             .setSortable(true);
         
-        // Set data provider using the entityService
-        grid.setItems(query -> entityService
-            .list(VaadinSpringDataHelpers.toSpringPageRequest(query)).stream());
+        // Data provider is already set up in the base class CAbstractMDPage.createGridLayout()
+        // No need to call grid.setItems() again as it's already configured to handle sorting properly
     }
 
     @Override

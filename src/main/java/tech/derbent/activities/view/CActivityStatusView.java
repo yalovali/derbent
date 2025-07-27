@@ -78,15 +78,17 @@ public class CActivityStatusView extends CAbstractMDPage<CActivityStatus> {
             grid.addColumn(CActivityStatus::getName)
                 .setAutoWidth(true)
                 .setHeader("Status Name")
+                .setKey("name")
                 .setSortable(true);
                 
             grid.addColumn(CActivityStatus::getDescription)
                 .setAutoWidth(true)
                 .setHeader("Description")
+                .setKey("description")
                 .setSortable(true);
                 
-            grid.setItems(query -> entityService
-                .list(VaadinSpringDataHelpers.toSpringPageRequest(query)).stream());
+            // Data provider is already set up in the base class CAbstractMDPage.createGridLayout()
+            // No need to call grid.setItems() again as it's already configured to handle sorting properly
                 
             LOGGER.debug("Grid created successfully for activity statuses");
             
