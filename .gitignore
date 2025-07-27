@@ -19,3 +19,6 @@ vite.generated.ts
 # Additional JVM crash logs and compiler artifacts
 hs_err_pid*.log
 javac.*.args
+
+# Profile pictures directory - images should be stored in database, not as files
+profile-pictures/
