@@ -7,8 +7,8 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.views.CAbstractMDPage;
+import tech.derbent.abstracts.views.CAccordionDescription;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 
@@ -37,12 +37,10 @@ public class CProjectsView extends CAbstractMDPage<CProject> {
 
 	@Override
 	protected void createDetailsLayout() {
-		LOGGER.info("Creating details layout for CProjectsView");
-		final Div detailsLayout =
-			CEntityFormBuilder.buildForm(CProject.class, getBinder());
-		// Note: Buttons are now automatically added to the details tab by the parent
-		// class
-		getBaseDetailsLayout().add(detailsLayout);
+		CAccordionDescription<CProject> panel;
+		panel = new CPanelProjectBasicInfo(getCurrentEntity(), getBinder(),
+			(CProjectService) entityService);
+		addAccordionPanel(panel);
 	}
 
 	@Override
@@ -59,7 +57,7 @@ public class CProjectsView extends CAbstractMDPage<CProject> {
 		LOGGER.info("Creating grid for projects");
 		// property name must match the field name in CProject
 		grid.addShortTextColumn(CProject::getName, "Name", "name");
-		grid.addLongTextColumn(item -> {
+		grid.addColumn(item -> {
 			final String desc = item.getDescription();
 
 			if (desc == null) {
@@ -67,7 +65,6 @@ public class CProjectsView extends CAbstractMDPage<CProject> {
 			}
 			return desc.length() > 50 ? desc.substring(0, 50) + "..." : desc;
 		}, "Description", null);
-
 		// when a row is selected or deselected, populate form
 		grid.asSingleSelect().addValueChangeListener(event -> {
 

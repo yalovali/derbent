@@ -94,13 +94,11 @@ public abstract class CEntityNamed extends CEntityDB {
 	}
 
 	public void setDescription(final String description) {
-
 		this.description = description;
 		updateLastModified();
 	}
 
 	public void setLastModifiedDate(final LocalDateTime lastModifiedDate) {
-
 		this.lastModifiedDate = lastModifiedDate;
 	}
 
@@ -122,7 +120,6 @@ public abstract class CEntityNamed extends CEntityDB {
 	 * Update the last modified date to now.
 	 */
 	protected void updateLastModified() {
-
 		this.lastModifiedDate = LocalDateTime.now();
 	}
 }

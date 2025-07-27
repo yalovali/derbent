@@ -230,7 +230,6 @@ public class CActivity extends CEntityOfProject {
 	public CActivity(final String name, final CProject project) {
 		super(name, project);
 
-
 		if (name == null) {
 			LOGGER.warn("CActivity constructor - Name parameter is null");
 		}
@@ -250,8 +249,6 @@ public class CActivity extends CEntityOfProject {
 	public CActivity(final String name, final CProject project, final CUser assignedTo) {
 		super(name, project);
 
-
-
 		if (name == null) {
 			LOGGER.warn("CActivity constructor - Name parameter is null");
 		}
@@ -269,7 +266,6 @@ public class CActivity extends CEntityOfProject {
 	 */
 	public BigDecimal calculateCostVariance() {
 
-
 		if ((actualCost == null) || (estimatedCost == null)) {
 			LOGGER.debug(
 				"calculateCostVariance() - Missing cost data, actual={}, estimated={}",
@@ -286,7 +282,6 @@ public class CActivity extends CEntityOfProject {
 	public BigDecimal calculateTimeVariance() {
 
 		if ((actualHours == null) || (estimatedHours == null)) {
-
 			return BigDecimal.ZERO;
 		}
 		final BigDecimal variance = actualHours.subtract(estimatedHours);
@@ -405,7 +400,6 @@ public class CActivity extends CEntityOfProject {
 	}
 
 	public void setActualCost(final BigDecimal actualCost) {
-
 
 		if ((actualCost != null) && (actualCost.compareTo(BigDecimal.ZERO) < 0)) {
 			LOGGER.warn(

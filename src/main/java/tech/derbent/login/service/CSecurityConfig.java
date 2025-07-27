@@ -1,7 +1,5 @@
 package tech.derbent.login.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -27,8 +25,6 @@ import tech.derbent.users.service.CUserService;
 @EnableWebSecurity
 @Configuration
 class CSecurityConfig extends VaadinWebSecurity {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(CSecurityConfig.class);
 
 	private final CUserService loginUserService;
 
