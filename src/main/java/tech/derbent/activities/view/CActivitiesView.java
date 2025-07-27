@@ -67,23 +67,24 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 	protected void createGridForEntity() {
 		grid.addShortTextColumn(CActivity::getProjectName, "Project", "project");
 		grid.addShortTextColumn(CActivity::getName, "Activity Name", "name");
-		grid.addReferenceColumn(activity -> activity.getActivityType() != null
-			? activity.getActivityType().getName() : "No Type", "Type");
+		grid.addReferenceColumn(item -> item.getActivityType() != null
+			? item.getActivityType().getName() : "No Type", "Type");
 		grid.addShortTextColumn(CActivity::getDescription, "Description", "description");
-		grid.addShortTextColumn(activity -> activity.getStatus() != null
-			? activity.getStatus().getName() : "No Status", "Status", null);
+		grid.addShortTextColumn(
+			item -> item.getStatus() != null ? item.getStatus().getName() : "No Status",
+			"Status", null);
 		// grid.addShortTextColumn(activity -> activity.getPriority() != null ?
 		// activity.getPriority().getName() : "No Priority", "Priority", null);
-		grid.addShortTextColumn(activity -> activity.getStartDate() != null
-			? activity.getStartDate().toString() : "", "Start Date", null);
-		grid.addShortTextColumn(activity -> activity.getDueDate() != null
-			? activity.getDueDate().toString() : "", "Due Date", null);
 		grid.addShortTextColumn(
-			activity -> activity.getParentActivity() != null
-				? activity.getParentActivity().getName() : "No Parent Activity",
-			"Parent", null);
-		grid.addColumn(activity -> {
-			final String desc = activity.getDescription();
+			item -> item.getStartDate() != null ? item.getStartDate().toString() : "",
+			"Start Date", null);
+		grid.addShortTextColumn(
+			item -> item.getDueDate() != null ? item.getDueDate().toString() : "",
+			"Due Date", null);
+		grid.addShortTextColumn(item -> item.getParentActivity() != null
+			? item.getParentActivity().getName() : "No Parent Activity", "Parent", null);
+		grid.addColumn(item -> {
+			final String desc = item.getDescription();
 
 			if (desc == null) {
 				return "Not set";

@@ -109,11 +109,11 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 		grid.addBooleanColumn(CUser::isEnabled, "Status", "Enabled", "Disabled");
 		// User type requires join - not directly sortable at DB level
 		grid.addReferenceColumn(
-			user -> user.getUserType() != null ? user.getUserType().getName() : "",
+			item -> item.getUserType() != null ? item.getUserType().getName() : "",
 			"User Type");
 		// Company requires join - not directly sortable at DB level
 		grid.addReferenceColumn(
-			user -> user.getCompany() != null ? user.getCompany().getName() : "",
+			item -> item.getCompany() != null ? item.getCompany().getName() : "",
 			"Company");
 		grid.addShortTextColumn(CUser::getRoles, "Roles", "roles");
 		// Data provider is already set up in the base class

@@ -213,61 +213,61 @@ INSERT INTO cuser (
 
 -- Senior Developers (at least 4)
 ('2025-01-15 10:00:00', 'alex.rodriguez@derbent.tech', TRUE, 'Rodriguez', 'alex.rodriguez', 'Alex', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-2001', 'SENIOR_DEV,USER', '2025-01-15 10:00:00', 3, 'TEAM_MEMBER'),
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-2001', 'SENIOR_DEV,USER', '2025-01-15 10:00:00', 3, 'TEAM_MEMBER', NULL),
 ('2025-01-15 10:15:00', 'emma.wilson@derbent.tech', TRUE, 'Wilson', 'emma.wilson', 'Emma', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-2002', 'SENIOR_DEV,USER', '2025-01-15 10:15:00', 3, 'TEAM_MEMBER'),
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-2002', 'SENIOR_DEV,USER', '2025-01-15 10:15:00', 3, 'TEAM_MEMBER', NULL),
 ('2025-01-15 10:30:00', 'kevin.thompson@derbent.tech', TRUE, 'Thompson', 'kevin.thompson', 'Kevin', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-2003', 'SENIOR_DEV,USER', '2025-01-15 10:30:00', 3, 'TEAM_MEMBER'),
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-2003', 'SENIOR_DEV,USER', '2025-01-15 10:30:00', 3, 'TEAM_MEMBER', NULL),
 ('2025-01-15 10:45:00', 'nina.patel@derbent.tech', TRUE, 'Patel', 'nina.patel', 'Nina', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-2004', 'SENIOR_DEV,USER', '2025-01-15 10:45:00', 3, 'TEAM_MEMBER'),
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-2004', 'SENIOR_DEV,USER', '2025-01-15 10:45:00', 3, 'TEAM_MEMBER', NULL),
 
 -- Developers (at least 4)
 ('2025-01-15 11:00:00', 'david.kim@derbent.tech', TRUE, 'Kim', 'david.kim', 'David', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-3001', 'DEVELOPER,USER', '2025-01-15 11:00:00', 4, 'TEAM_MEMBER'),
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-3001', 'DEVELOPER,USER', '2025-01-15 11:00:00', 4, 'TEAM_MEMBER', NULL),
 ('2025-01-15 11:15:00', 'lisa.patel@derbent.tech', TRUE, 'Patel', 'lisa.patel', 'Lisa', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-3002', 'DEVELOPER,USER', '2025-01-15 11:15:00', 4, 'TEAM_MEMBER'),
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-3002', 'DEVELOPER,USER', '2025-01-15 11:15:00', 4, 'TEAM_MEMBER', NULL),
 ('2025-01-15 11:30:00', 'carlos.rivera@derbent.tech', TRUE, 'Rivera', 'carlos.rivera', 'Carlos', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-3003', 'DEVELOPER,USER', '2025-01-15 11:30:00', 4, 'TEAM_MEMBER'),
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-3003', 'DEVELOPER,USER', '2025-01-15 11:30:00', 4, 'TEAM_MEMBER', NULL),
 ('2025-01-15 11:45:00', 'amanda.smith@derbent.tech', TRUE, 'Smith', 'amanda.smith', 'Amanda', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-3004', 'DEVELOPER,USER', '2025-01-15 11:45:00', 4, 'TEAM_MEMBER'),
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-3004', 'DEVELOPER,USER', '2025-01-15 11:45:00', 4, 'TEAM_MEMBER', NULL),
 
 -- QA Engineers (at least 3)
 ('2025-01-15 12:00:00', 'james.taylor@derbent.tech', TRUE, 'Taylor', 'james.taylor', 'James', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-4001', 'QA,USER', '2025-01-15 12:00:00', 5, 'TEAM_MEMBER'),
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-4001', 'QA,USER', '2025-01-15 12:00:00', 5, 'TEAM_MEMBER', NULL),
 ('2025-01-15 12:15:00', 'maria.garcia@derbent.tech', TRUE, 'Garcia', 'maria.garcia', 'Maria', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-4002', 'QA,USER', '2025-01-15 12:15:00', 5, 'TEAM_MEMBER'),
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-4002', 'QA,USER', '2025-01-15 12:15:00', 5, 'TEAM_MEMBER', NULL),
 ('2025-01-15 12:30:00', 'peter.jones@derbent.tech', TRUE, 'Jones', 'peter.jones', 'Peter', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-4003', 'QA,USER', '2025-01-15 12:30:00', 5, 'TEAM_MEMBER'),
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-4003', 'QA,USER', '2025-01-15 12:30:00', 5, 'TEAM_MEMBER', NULL),
 
 -- UI/UX Designers (at least 2)
 ('2025-01-15 13:00:00', 'sophia.brown@derbent.tech', TRUE, 'Brown', 'sophia.brown', 'Sophia', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-5001', 'DESIGNER,USER', '2025-01-15 13:00:00', 6, 'TEAM_MEMBER'),
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-5001', 'DESIGNER,USER', '2025-01-15 13:00:00', 6, 'TEAM_MEMBER', NULL),
 ('2025-01-15 13:15:00', 'oliver.davis@derbent.tech', TRUE, 'Davis', 'oliver.davis', 'Oliver', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-5002', 'DESIGNER,USER', '2025-01-15 13:15:00', 6, 'TEAM_MEMBER'),
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-5002', 'DESIGNER,USER', '2025-01-15 13:15:00', 6, 'TEAM_MEMBER', NULL),
 
 -- Business Analysts (at least 2)
 ('2025-01-15 14:00:00', 'robert.anderson@derbent.tech', TRUE, 'Anderson', 'robert.anderson', 'Robert', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-6001', 'ANALYST,USER', '2025-01-15 14:00:00', 7, 'TEAM_MEMBER'),
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-6001', 'ANALYST,USER', '2025-01-15 14:00:00', 7, 'TEAM_MEMBER', NULL),
 ('2025-01-15 14:15:00', 'helen.white@derbent.tech', TRUE, 'White', 'helen.white', 'Helen', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-6002', 'ANALYST,USER', '2025-01-15 14:15:00', 7, 'TEAM_MEMBER'),
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-6002', 'ANALYST,USER', '2025-01-15 14:15:00', 7, 'TEAM_MEMBER', NULL),
 
 -- DevOps Engineers (at least 2)
 ('2025-01-15 15:00:00', 'jennifer.lee@derbent.tech', TRUE, 'Lee', 'jennifer.lee', 'Jennifer', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-7001', 'DEVOPS,USER', '2025-01-15 15:00:00', 8, 'TEAM_MEMBER'),
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-7001', 'DEVOPS,USER', '2025-01-15 15:00:00', 8, 'TEAM_MEMBER', NULL),
 ('2025-01-15 15:15:00', 'ryan.clark@derbent.tech', TRUE, 'Clark', 'ryan.clark', 'Ryan', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-7002', 'DEVOPS,USER', '2025-01-15 15:15:00', 8, 'TEAM_MEMBER'),
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-7002', 'DEVOPS,USER', '2025-01-15 15:15:00', 8, 'TEAM_MEMBER', NULL),
 
 -- Product Owners (at least 2)
 ('2025-01-15 16:00:00', 'stephanie.moore@derbent.tech', TRUE, 'Moore', 'stephanie.moore', 'Stephanie', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-8001', 'PRODUCT_OWNER,USER', '2025-01-15 16:00:00', 9, 'TEAM_MEMBER'),
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-8001', 'PRODUCT_OWNER,USER', '2025-01-15 16:00:00', 9, 'TEAM_MEMBER', NULL),
 ('2025-01-15 16:15:00', 'thomas.jackson@derbent.tech', TRUE, 'Jackson', 'thomas.jackson', 'Thomas', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-8002', 'PRODUCT_OWNER,USER', '2025-01-15 16:15:00', 9, 'TEAM_MEMBER'),
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-8002', 'PRODUCT_OWNER,USER', '2025-01-15 16:15:00', 9, 'TEAM_MEMBER', NULL),
 
 -- Scrum Masters (at least 2)
 ('2025-01-15 17:00:00', 'diana.miller@derbent.tech', TRUE, 'Miller', 'diana.miller', 'Diana', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-9001', 'SCRUM_MASTER,USER', '2025-01-15 17:00:00', 10, 'TEAM_MEMBER'),
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-9001', 'SCRUM_MASTER,USER', '2025-01-15 17:00:00', 10, 'TEAM_MEMBER', NULL),
 ('2025-01-15 17:15:00', 'mark.harris@derbent.tech', TRUE, 'Harris', 'mark.harris', 'Mark', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-9002', 'SCRUM_MASTER,USER', '2025-01-15 17:15:00', 10, 'TEAM_MEMBER');
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-9002', 'SCRUM_MASTER,USER', '2025-01-15 17:15:00', 10, 'TEAM_MEMBER',NULL);
 
 -- =====================================================================
 -- PROJECTS (Depends on users for assignment) - AT LEAST 10 ITEMS

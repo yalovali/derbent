@@ -12,55 +12,50 @@ import tech.derbent.abstracts.services.CAbstractNamedEntityService;
 import tech.derbent.meetings.domain.CMeetingType;
 
 /**
- * CMeetingTypeService - Service layer for CMeetingType entity.
- * Layer: Service (MVC)
+ * CMeetingTypeService - Service layer for CMeetingType entity. Layer: Service (MVC)
  * Handles business logic for meeting type operations.
  */
 @Service
-@PreAuthorize("isAuthenticated()")
-@Transactional(readOnly = true)
+@PreAuthorize ("isAuthenticated()")
+@Transactional (readOnly = true)
 public class CMeetingTypeService extends CAbstractNamedEntityService<CMeetingType> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingTypeService.class);
+	private static final Logger LOGGER =
+		LoggerFactory.getLogger(CMeetingTypeService.class);
 
-    /**
-     * Constructor for CMeetingTypeService.
-     * 
-     * @param repository the CMeetingTypeRepository to use for data access
-     * @param clock the Clock instance for time-related operations
-     */
-    CMeetingTypeService(final CMeetingTypeRepository repository, final Clock clock) {
-        super(repository, clock);
-        LOGGER.info("CMeetingTypeService initialized");
-    }
+	/**
+	 * Constructor for CMeetingTypeService.
+	 * @param repository the CMeetingTypeRepository to use for data access
+	 * @param clock      the Clock instance for time-related operations
+	 */
+	CMeetingTypeService(final CMeetingTypeRepository repository, final Clock clock) {
+		super(repository, clock);
+	}
 
-    /**
-     * Creates a new meeting type entity with name and description.
-     * 
-     * @param name the name of the meeting type
-     * @param description the description of the meeting type
-     */
-    @Transactional
-    public void createEntity(final String name, final String description) {
-        LOGGER.info("Creating new meeting type: {} with description: {}", name, description);
-        
-        // Standard test failure logic for error handler testing
-        if ("fail".equals(name)) {
-            LOGGER.warn("Test failure requested for name: {}", name);
-            throw new RuntimeException("This is for testing the error handler");
-        }
-        
-        // Validate name using parent validation
-        validateEntityName(name);
-        
-        final CMeetingType entity = new CMeetingType(name, description);
-        repository.saveAndFlush(entity);
-        
-        LOGGER.info("Meeting type created successfully with name: {}", name);
-    }
+	/**
+	 * Creates a new meeting type entity with name and description.
+	 * @param name        the name of the meeting type
+	 * @param description the description of the meeting type
+	 */
+	@Transactional
+	public void createEntity(final String name, final String description) {
+		LOGGER.info("Creating new meeting type: {} with description: {}", name,
+			description);
 
-    @Override
-    protected CMeetingType createNewEntityInstance() {
-        return new CMeetingType();
-    }
+		// Standard test failure logic for error handler testing
+		if ("fail".equals(name)) {
+			LOGGER.warn("Test failure requested for name: {}", name);
+			throw new RuntimeException("This is for testing the error handler");
+		}
+		// Validate name using parent validation
+		validateEntityName(name);
+		final CMeetingType entity = new CMeetingType(name, description);
+		repository.saveAndFlush(entity);
+		LOGGER.info("Meeting type created successfully with name: {}", name);
+	}
+
+	@Override
+	protected CMeetingType createNewEntityInstance() {
+		return new CMeetingType();
+	}
 }

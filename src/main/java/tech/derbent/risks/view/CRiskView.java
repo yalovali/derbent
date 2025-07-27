@@ -36,7 +36,6 @@ public class CRiskView extends CProjectAwareMDPage<CRisk> {
 		super(CRisk.class, entityService, sessionService);
 		addClassNames("risk-view");
 		// createDetailsLayout();
-		LOGGER.info("CRiskView initialized successfully");
 	}
 
 	@Override
@@ -49,10 +48,19 @@ public class CRiskView extends CProjectAwareMDPage<CRisk> {
 
 	@Override
 	protected void createGridForEntity() {
-		LOGGER.info("Creating grid for risks");
-		grid.addColumn("name").setHeader("Name").setAutoWidth(true).setSortable(true);
-		grid.addColumn(risk -> risk.getRiskSeverity().name()).setHeader("Severity")
-			.setAutoWidth(true).setSortable(true);
+		grid.addShortTextColumn(CRisk::getName, "Name", "name");
+		grid.addShortTextColumn(risk -> {
+			return risk.getRiskSeverity().name();
+		}, "Severity", null);
+		grid.addColumn(item -> {
+			final String desc = item.getDescription();
+
+			if (desc == null) {
+				return "Not set";
+			}
+			return desc.length() > 50 ? desc.substring(0, 50) + "..." : desc;
+		}, "Description", null);
+		/***/
 		grid.asSingleSelect().addValueChangeListener(event -> {
 
 			if (event.getValue() != null) {

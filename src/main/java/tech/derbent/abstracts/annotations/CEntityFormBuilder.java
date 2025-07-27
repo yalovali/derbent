@@ -265,7 +265,8 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		final Class<T> fieldType = (Class<T>) field.getType();
 		final ComboBox<T> comboBox = new ComboBox<>();
 		// Enhanced item label generator with null safety and proper display formatting
-		// Fix for combobox display issue: use getName() for CEntityNamed entities instead of toString()
+		// Fix for combobox display issue: use getName() for CEntityNamed entities instead
+		// of toString()
 		comboBox.setItemLabelGenerator(item -> {
 
 			if (item == null) {
@@ -273,14 +274,16 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			}
 
 			try {
-				// Check if the item is a CEntityNamed subclass (like CUser, CProject, etc.)
-				// and has a getName() method - use it for better display instead of toString()
+
+				// Check if the item is a CEntityNamed subclass (like CUser, CProject,
+				// etc.) and has a getName() method - use it for better display instead of
+				// toString()
 				if (item instanceof tech.derbent.abstracts.domains.CEntityNamed) {
-					final tech.derbent.abstracts.domains.CEntityNamed namedEntity = 
+					final tech.derbent.abstracts.domains.CEntityNamed namedEntity =
 						(tech.derbent.abstracts.domains.CEntityNamed) item;
 					final String name = namedEntity.getName();
-					return (name != null && !name.trim().isEmpty()) ? name : 
-						"Unnamed " + item.getClass().getSimpleName() + " #" + namedEntity.getId();
+					return ((name != null) && !name.trim().isEmpty()) ? name : "Unnamed "
+						+ item.getClass().getSimpleName() + " #" + namedEntity.getId();
 				}
 				// For non-named entities, fall back to toString()
 				return item.toString();
@@ -865,8 +868,6 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		try {
 			CEntityFormBuilder.dataProviderResolver =
 				context.getBean(CDataProviderResolver.class);
-			LOGGER.info(
-				"CEntityFormBuilder initialized with Spring context and data provider resolver");
 		} catch (final Exception e) {
 			LOGGER.warn(
 				"Failed to initialize CDataProviderResolver - annotation-based providers will not work: {}",
