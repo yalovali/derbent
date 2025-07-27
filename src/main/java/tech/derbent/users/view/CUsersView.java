@@ -124,7 +124,6 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 	@Override
 	protected CButton createSaveButton(final String buttonText) {
 		LOGGER.info("Creating custom save button for CUsersView");
-
 		final tech.derbent.abstracts.views.CButton save =
 			tech.derbent.abstracts.views.CButton.createPrimary(buttonText, e -> {
 
@@ -143,6 +142,19 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 					Notification.show("Data updated");
 					// Navigate back to the current view (list mode)
 					UI.getCurrent().navigate(getClass());
+					// Save the entity
+					final CUser savedEntity = entityService.save(getCurrentEntity());
+					LOGGER.info("User saved successfully with ID: {}",
+						savedEntity.getId());
+					// Update current entity with saved version
+					setCurrentEntity(savedEntity);
+					// Clear form and refresh grid
+					clearForm();
+					refreshGrid();
+					// Show success notification
+					safeShowNotification("User data saved successfully");
+					// Navigate back to the current view (list mode) safely
+					safeNavigateToClass();
 				} catch (final ValidationException validationException) {
 					new CWarningDialog(
 						"Failed to save the data. Please check that all required fields are filled and values are valid.")
@@ -152,44 +164,8 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 					new CWarningDialog(
 						"An unexpected error occurred while saving. Please try again.")
 						.open();
-
 				}
-				
-				// Write form data to entity
-				getBinder().writeBean(getCurrentEntity());
-				
-				// Handle password update if a new password was entered
-				descriptionPanel.saveEventHandler();
-				
-				// Save the entity
-				final CUser savedEntity = (CUser) entityService.save(getCurrentEntity());
-				LOGGER.info("User saved successfully with ID: {}", savedEntity.getId());
-				
-				// Update current entity with saved version
-				setCurrentEntity(savedEntity);
-				
-				// Clear form and refresh grid
-				clearForm();
-				refreshGrid();
-				
-				// Show success notification
-				safeShowNotification("User data saved successfully");
-				
-				// Navigate back to the current view (list mode) safely
-				safeNavigateToClass();
-				
-			} catch (final ValidationException validationException) {
-				LOGGER.error("Validation error during user save", validationException);
-				new CWarningDialog(
-					"Failed to save the data. Please check that all required fields are filled and values are valid.")
-					.open();
-			} catch (final Exception exception) {
-				LOGGER.error("Unexpected error during user save operation", exception);
-				new CWarningDialog(
-					"An unexpected error occurred while saving. Please try again.")
-					.open();
-			}
-		});
+			});
 		return save;
 	}
 

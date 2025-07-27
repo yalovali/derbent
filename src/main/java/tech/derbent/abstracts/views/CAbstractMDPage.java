@@ -152,6 +152,7 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	}
 
 	protected void clearForm() {
+
 		// First deselect grid to avoid conflicts
 		if (grid != null) {
 			grid.deselectAll();
@@ -195,8 +196,9 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 				"Are you sure you want to delete this %s? This action cannot be undone.",
 				entityClass.getSimpleName().replace("C", "").toLowerCase());
 			new CConfirmationDialog(confirmMessage, () -> {
+
 				try {
-					LOGGER.info("Deleting entity: {} with ID: {}", 
+					LOGGER.info("Deleting entity: {} with ID: {}",
 						entityClass.getSimpleName(), currentEntity.getId());
 					entityService.delete(currentEntity);
 					clearForm();
@@ -204,42 +206,13 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 					safeShowNotification("Item deleted successfully");
 				} catch (final Exception exception) {
 					LOGGER.error("Error deleting entity", exception);
-					new CWarningDialog("Failed to delete the item. Please try again.").open();
+					new CWarningDialog("Failed to delete the item. Please try again.")
+						.open();
 				}
 			}).open();
 		});
 		return delete;
 	}
-
-	protected CButton createNewButton(final String buttonText) {
-		LOGGER.info("Creating new button for {}", getClass().getSimpleName());
-		final CButton newButton = CButton.createTertiary(buttonText, e -> {
-			LOGGER.debug("New button clicked, creating new entity");
-			try {
-				// Step 1: Clear the form and deselect grid first
-				clearForm();
-				
-				// Step 2: Create new entity instance and bind it to the form
-				final EntityClass newEntityInstance = newEntity();
-				setCurrentEntity(newEntityInstance);
-				populateForm(newEntityInstance);
-				
-				LOGGER.debug("New entity created and bound to form: {}", 
-					newEntityInstance.getClass().getSimpleName());
-				
-				// Step 3: Navigate to the base view URL to indicate "new" mode (safely)
-				safeNavigateToClass();
-				
-			} catch (final Exception exception) {
-				LOGGER.error("Error creating new entity", exception);
-				new CWarningDialog("Failed to create new " + 
-					entityClass.getSimpleName().replace("C", "").toLowerCase() + 
-					". Please try again.").open();
-			}
-		});
-		return newButton;
-	}
-
 
 	@PostConstruct
 	protected abstract void createDetailsLayout();
@@ -338,12 +311,24 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		LOGGER.info("Creating new button for {}", getClass().getSimpleName());
 		final CButton newButton = CButton.createTertiary(buttonText, e -> {
 			LOGGER.debug("New button clicked, creating new entity");
-			// Clear current selection and create new entity
-			grid.deselectAll();
-			setCurrentEntity(null);
-			clearForm();
-			// Navigate to the base view URL to indicate "new" mode
-			UI.getCurrent().navigate(getClass());
+
+			try {
+				// Step 1: Clear the form and deselect grid first
+				clearForm();
+				// Step 2: Create new entity instance and bind it to the form
+				final EntityClass newEntityInstance = newEntity();
+				setCurrentEntity(newEntityInstance);
+				populateForm(newEntityInstance);
+				LOGGER.debug("New entity created and bound to form: {}",
+					newEntityInstance.getClass().getSimpleName());
+				// Step 3: Navigate to the base view URL to indicate "new" mode (safely)
+				safeNavigateToClass();
+			} catch (final Exception exception) {
+				LOGGER.error("Error creating new entity", exception);
+				new CWarningDialog("Failed to create new "
+					+ entityClass.getSimpleName().replace("C", "").toLowerCase()
+					+ ". Please try again.").open();
+			}
 		});
 		return newButton;
 	}
@@ -355,36 +340,28 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 			try {
 				// Ensure we have an entity to save
 
-
 				if (currentEntity == null) {
-					LOGGER.warn("No current entity for save operation, creating new entity");
+					LOGGER.warn(
+						"No current entity for save operation, creating new entity");
 					currentEntity = newEntity();
 					populateForm(currentEntity);
 				}
-				
 				// Write form data to entity
 				getBinder().writeBean(currentEntity);
-				
 				// Validate entity before saving
 				validateEntityForSave(currentEntity);
-				
 				// Save entity
 				final EntityClass savedEntity = entityService.save(currentEntity);
 				LOGGER.info("Entity saved successfully with ID: {}", savedEntity.getId());
-				
 				// Update current entity with saved version (includes generated ID)
 				setCurrentEntity(savedEntity);
-				
 				// Clear form and refresh grid
 				clearForm();
 				refreshGrid();
-				
 				// Show success notification
 				safeShowNotification("Data saved successfully");
-				
 				// Navigate back to the current view (list mode) safely
 				safeNavigateToClass();
-				
 			} catch (final ObjectOptimisticLockingFailureException exception) {
 				LOGGER.error("Optimistic locking failure during save", exception);
 				safeShowErrorNotification(
@@ -541,6 +518,62 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	}
 
 	/**
+	 * Safely navigates to the view class without throwing exceptions if UI is not
+	 * available. This is important for testing and edge cases where UI might not be
+	 * properly initialized.
+	 */
+	protected void safeNavigateToClass() {
+
+		try {
+			final UI currentUI = UI.getCurrent();
+
+			if (currentUI != null) {
+				currentUI.navigate(getClass());
+				LOGGER.debug("Successfully navigated to {}", getClass().getSimpleName());
+			}
+			else {
+				LOGGER.warn("UI not available for navigation to {}",
+					getClass().getSimpleName());
+			}
+		} catch (final Exception e) {
+			LOGGER.warn("Error during navigation to {}: {}", getClass().getSimpleName(),
+				e.getMessage());
+		}
+	}
+
+	/**
+	 * Safely shows an error notification without throwing exceptions if UI is not
+	 * available.
+	 */
+	protected void safeShowErrorNotification(final String message) {
+
+		try {
+			final Notification notification = Notification.show(message);
+			notification.setPosition(Position.MIDDLE);
+			notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+			LOGGER.debug("Shown error notification: {}", message);
+		} catch (final Exception e) {
+			LOGGER.warn("Error showing error notification '{}': {}", message,
+				e.getMessage());
+		}
+	}
+
+	/**
+	 * Safely shows a success notification without throwing exceptions if UI is not
+	 * available.
+	 */
+	protected void safeShowNotification(final String message) {
+
+		try {
+			final Notification notification = Notification.show(message);
+			notification.setPosition(Position.BOTTOM_START);
+			LOGGER.debug("Shown notification: {}", message);
+		} catch (final Exception e) {
+			LOGGER.warn("Error showing notification '{}': {}", message, e.getMessage());
+		}
+	}
+
+	/**
 	 * Automatically selects the first item in the grid if available. This ensures that
 	 * details panels are populated when there is at least one item. Following the
 	 * requirement to always show details when data is available. Only applies when no
@@ -645,61 +678,18 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	}
 
 	/**
-	 * Safely navigates to the view class without throwing exceptions if UI is not available.
-	 * This is important for testing and edge cases where UI might not be properly initialized.
-	 */
-	protected void safeNavigateToClass() {
-		try {
-			final UI currentUI = UI.getCurrent();
-			if (currentUI != null) {
-				currentUI.navigate(getClass());
-				LOGGER.debug("Successfully navigated to {}", getClass().getSimpleName());
-			} else {
-				LOGGER.warn("UI not available for navigation to {}", getClass().getSimpleName());
-			}
-		} catch (final Exception e) {
-			LOGGER.warn("Error during navigation to {}: {}", getClass().getSimpleName(), e.getMessage());
-		}
-	}
-
-	/**
-	 * Safely shows a success notification without throwing exceptions if UI is not available.
-	 */
-	protected void safeShowNotification(final String message) {
-		try {
-			final Notification notification = Notification.show(message);
-			notification.setPosition(Position.BOTTOM_START);
-			LOGGER.debug("Shown notification: {}", message);
-		} catch (final Exception e) {
-			LOGGER.warn("Error showing notification '{}': {}", message, e.getMessage());
-		}
-	}
-
-	/**
-	 * Safely shows an error notification without throwing exceptions if UI is not available.
-	 */
-	protected void safeShowErrorNotification(final String message) {
-		try {
-			final Notification notification = Notification.show(message);
-			notification.setPosition(Position.MIDDLE);
-			notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-			LOGGER.debug("Shown error notification: {}", message);
-		} catch (final Exception e) {
-			LOGGER.warn("Error showing error notification '{}': {}", message, e.getMessage());
-		}
-	}
-
-	/**
 	 * Validates an entity before saving. Subclasses can override this method to add
 	 * custom validation logic beyond the standard bean validation.
 	 * @param entity the entity to validate
 	 * @throws IllegalArgumentException if validation fails
 	 */
 	protected void validateEntityForSave(final EntityClass entity) {
+
 		if (entity == null) {
 			throw new IllegalArgumentException("Entity cannot be null");
 		}
 		// Add more validation logic in subclasses if needed
-		LOGGER.debug("Entity validation passed for {}", entity.getClass().getSimpleName());
+		LOGGER.debug("Entity validation passed for {}",
+			entity.getClass().getSimpleName());
 	}
 }
