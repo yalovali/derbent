@@ -15,7 +15,7 @@ import tech.derbent.users.service.CUserService;
 
 @Route ("meetings/:meeting_id?/:action?(edit)")
 @PageTitle ("Meeting Master Detail")
-@Menu (order = 3, icon = "vaadin:group", title = "Project.Meetings")
+@Menu (order = 1.4, icon = "vaadin:group", title = "Project.Meetings")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CMeetingsView extends CProjectAwareMDPage<CMeeting> {
 

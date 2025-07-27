@@ -23,7 +23,7 @@ import tech.derbent.users.service.CUserTypeService;
 
 @Route ("users/:user_id?/:action?(edit)")
 @PageTitle ("User Master Detail")
-@Menu (order = 0, icon = "vaadin:users", title = "Settings.Users")
+@Menu (order = 3.2, icon = "vaadin:users", title = "Settings.Users")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CUsersView extends CAbstractMDPage<CUser> {
 

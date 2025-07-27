@@ -27,7 +27,7 @@ import tech.derbent.base.ui.dialogs.CWarningDialog;
  */
 @Route ("administration/company-settings/:company_settings_id?/:action?(edit)")
 @PageTitle ("Company Administration Settings")
-@Menu (order = 201, icon = "vaadin:cogs", title = "Settings.Company Settings")
+@Menu (order = 3.5, icon = "vaadin:cogs", title = "Settings.Company Settings")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CCompanySettingsView extends CAbstractMDPage<CCompanySettings> {
 

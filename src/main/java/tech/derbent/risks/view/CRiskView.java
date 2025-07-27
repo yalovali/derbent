@@ -21,7 +21,7 @@ import tech.derbent.session.service.SessionService;
  */
 @PageTitle ("Project Risks")
 @Route ("risks/:risk_id?/:action?(edit)")
-@Menu (order = 2, icon = "vaadin:warning", title = "Project.Risks")
+@Menu (order = 1.3, icon = "vaadin:warning", title = "Project.Risks")
 @PermitAll
 public class CRiskView extends CProjectAwareMDPage<CRisk> {
 
