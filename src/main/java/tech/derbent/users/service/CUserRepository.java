@@ -68,6 +68,26 @@ public interface CUserRepository extends CAbstractRepository<CUser> {
     Optional<CUser> findByIdWithUserTypeAndProjects(@Param("id") Long id);
 
     /**
+     * Finds a user by ID with eagerly loaded company relationship to prevent LazyInitializationException.
+     * 
+     * @param id
+     *            the user ID
+     * @return optional CUser with loaded company
+     */
+    @Query("SELECT u FROM CUser u LEFT JOIN FETCH u.company WHERE u.id = :id")
+    Optional<CUser> findByIdWithCompany(@Param("id") Long id);
+
+    /**
+     * Finds a user by ID with all lazy relationships eagerly loaded (userType, company, and projectSettings).
+     * 
+     * @param id
+     *            the user ID
+     * @return optional CUser with all relationships loaded
+     */
+    @Query("SELECT u FROM CUser u LEFT JOIN FETCH u.userType LEFT JOIN FETCH u.company LEFT JOIN FETCH u.projectSettings WHERE u.id = :id")
+    Optional<CUser> findByIdWithAllRelationships(@Param("id") Long id);
+
+    /**
      * Counts the number of users for a specific project.
      * 
      * @param projectId

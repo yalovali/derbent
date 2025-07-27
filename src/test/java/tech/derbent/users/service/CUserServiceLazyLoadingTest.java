@@ -16,6 +16,7 @@ import org.mockito.MockitoAnnotations;
 
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserType;
+import tech.derbent.companies.domain.CCompany;
 
 /**
  * Test class for CUserService lazy loading functionality. Specifically tests
@@ -45,17 +46,28 @@ class CUserServiceLazyLoadingTest {
 		final CUserType userType = new CUserType();
 		userType.setName("Test User Type");
 		user.setUserType(userType);
-		// Mock the repository to return the user with userType
-		when(repository.findByIdWithUserType(userId)).thenReturn(Optional.of(user));
+		
+		final CCompany company = new CCompany();
+		company.setName("Test Company");
+		user.setCompany(company);
+		
+		// Mock the repository to return the user with all relationships
+		when(repository.findByIdWithAllRelationships(userId)).thenReturn(Optional.of(user));
 		// When
 		final Optional<CUser> result = userService.get(userId);
 		// Then
 		assertTrue(result.isPresent(), "User should be found");
 		assertNotNull(result.get().getUserType(), "UserType should be loaded");
+		assertNotNull(result.get().getCompany(), "Company should be loaded");
 		// Test that accessing userType doesn't throw LazyInitializationException
 		assertDoesNotThrow(() -> {
 			final String userTypeName = result.get().getUserType().getName();
 			assertNotNull(userTypeName, "UserType name should be accessible");
+		});
+		// Test that accessing company doesn't throw LazyInitializationException
+		assertDoesNotThrow(() -> {
+			final String companyName = result.get().getCompany().getName();
+			assertNotNull(companyName, "Company name should be accessible");
 		});
 	}
 
@@ -82,6 +94,30 @@ class CUserServiceLazyLoadingTest {
 		user.setName("Test User");
 		final CUserType userType = mock(CUserType.class);
 		user.setUserType(userType);
+		// When/Then - should not throw any exceptions
+		assertDoesNotThrow(() -> userService.initializeLazyFields(user));
+	}
+
+	@Test
+	void testInitializeLazyFieldsHandlesCompany() {
+		// Given
+		final CUser user = new CUser();
+		user.setName("Test User");
+		final CCompany company = mock(CCompany.class);
+		user.setCompany(company);
+		// When/Then - should not throw any exceptions
+		assertDoesNotThrow(() -> userService.initializeLazyFields(user));
+	}
+
+	@Test
+	void testInitializeLazyFieldsHandlesAllRelationships() {
+		// Given
+		final CUser user = new CUser();
+		user.setName("Test User");
+		final CUserType userType = mock(CUserType.class);
+		final CCompany company = mock(CCompany.class);
+		user.setUserType(userType);
+		user.setCompany(company);
 		// When/Then - should not throw any exceptions
 		assertDoesNotThrow(() -> userService.initializeLazyFields(user));
 	}
