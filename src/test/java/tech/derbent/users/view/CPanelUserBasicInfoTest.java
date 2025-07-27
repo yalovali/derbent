@@ -21,6 +21,7 @@ class CPanelUserBasicInfoTest {
 
 	private CUser testUser;
 
+	@SuppressWarnings ("unused")
 	private BeanValidationBinder<CUser> binder;
 
 	@BeforeEach

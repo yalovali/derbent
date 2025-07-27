@@ -195,8 +195,6 @@ public class CCompanySettingsView extends CAbstractMDPage<CCompanySettings> {
 		try {
 			// Create new entity with defaults but keep company and ID
 			final var company = entity.getCompany();
-			final var entityId = entity.getId();
-			final var defaultSettings = new CCompanySettings(company);
 			// Copy the ID from the existing entity (since CEntityDB doesn't have public
 			// setId) We'll update through the service which will handle the ID properly
 			// Update through service - this will preserve the ID

@@ -1,8 +1,6 @@
 package tech.derbent.users.view;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -21,11 +19,11 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.server.streams.InMemoryUploadHandler;
-import com.vaadin.flow.server.streams.InMemoryUploadCallback;
-import com.vaadin.flow.server.streams.UploadMetadata;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.validator.StringLengthValidator;
+import com.vaadin.flow.server.streams.InMemoryUploadCallback;
+import com.vaadin.flow.server.streams.InMemoryUploadHandler;
+import com.vaadin.flow.server.streams.UploadMetadata;
 
 import tech.derbent.abstracts.views.CButton;
 import tech.derbent.abstracts.views.CDBEditDialog;
@@ -64,10 +62,6 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 	private CButton deleteProfilePictureButton;
 
 	private String temporaryImagePath;
-
-	private byte[] temporaryImageData;
-
-	private String temporaryImageFileName;
 
 	private final Binder<CUser> binder = new Binder<>(CUser.class);
 
@@ -160,11 +154,12 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 		profilePicturePreview.getStyle().set("border",
 			"2px solid var(--lumo-contrast-20pct)");
 		// Set default or current profile picture (after button is created)
-		// updateProfilePicturePreview(); // Move this after button creation
-		// File upload component using modern API
+		// updateProfilePicturePreview(); // Move this after button creation File upload
+		// component using modern API
 		final InMemoryUploadCallback uploadCallback = (metadata, data) -> {
-			LOGGER.info("Profile picture upload received: {} ({} bytes)", 
+			LOGGER.info("Profile picture upload received: {} ({} bytes)",
 				metadata.fileName(), data.length);
+
 			try {
 				handleProfilePictureUpload(metadata, data);
 			} catch (final IOException e) {
@@ -173,7 +168,8 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 					.open();
 			}
 		};
-		final InMemoryUploadHandler uploadHandler = new InMemoryUploadHandler(uploadCallback);
+		final InMemoryUploadHandler uploadHandler =
+			new InMemoryUploadHandler(uploadCallback);
 		profilePictureUpload = new Upload();
 		profilePictureUpload.setUploadHandler(uploadHandler);
 		profilePictureUpload.setAcceptedFileTypes("image/jpeg", "image/png", "image/gif");
@@ -186,8 +182,7 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 		profilePictureUpload.addFileRejectedListener(event -> {
 			LOGGER.error("Profile picture upload rejected: {}", event.getErrorMessage());
 			new CWarningDialog(
-				"Failed to upload profile picture: " + event.getErrorMessage())
-				.open();
+				"Failed to upload profile picture: " + event.getErrorMessage()).open();
 		});
 		// Delete button
 		deleteProfilePictureButton =
@@ -237,8 +232,6 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 			data != null ? data.getLogin() : "null");
 		// Clear temporary path and data
 		temporaryImagePath = null;
-		temporaryImageData = null;
-		temporaryImageFileName = null;
 		// Update preview to default
 		setDefaultProfilePicture();
 		Notification.show("Profile picture removed", 3000,
@@ -300,18 +293,17 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 	 */
 	private void handleProfilePictureUpload(final UploadMetadata metadata,
 		final byte[] data) throws IOException {
-		LOGGER.info("Handling profile picture upload: {} ({} bytes)", 
-			metadata.fileName(), data.length);
+		LOGGER.info("Handling profile picture upload: {} ({} bytes)", metadata.fileName(),
+			data.length);
 
 		if ((metadata == null) || (data == null) || (data.length == 0)) {
 			throw new IOException("Invalid upload data");
 		}
-		
 		final String fileName = metadata.fileName();
+
 		if ((fileName == null) || fileName.trim().isEmpty()) {
 			throw new IOException("Invalid file name");
 		}
-		
 		// Create upload directory if it doesn't exist
 		final Path uploadDir = Paths.get(UPLOAD_DIR);
 
@@ -324,15 +316,11 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 		final String uniqueFileName =
 			"profile_" + System.currentTimeMillis() + "." + fileExtension;
 		final Path targetPath = uploadDir.resolve(uniqueFileName);
-
 		// Save uploaded file from byte array
 		Files.write(targetPath, data);
 		LOGGER.info("Profile picture saved to: {}", targetPath);
-		
 		// Update preview and store temporary path and data
 		temporaryImagePath = targetPath.toString();
-		temporaryImageData = data;
-		temporaryImageFileName = fileName;
 		profilePicturePreview.setSrc("file://" + temporaryImagePath);
 		deleteProfilePictureButton.setEnabled(true);
 		Notification.show("Profile picture uploaded successfully", 3000,

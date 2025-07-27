@@ -32,6 +32,7 @@ public class ManualVerificationTest {
 	@Autowired
 	private CUserService userService;
 
+	@SuppressWarnings ("unused")
 	@Autowired
 	private CUserTypeService userTypeService;
 
