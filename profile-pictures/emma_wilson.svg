@@ -1,0 +1,7 @@
+<svg width="150" height="150" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="75" cy="75" r="75" fill="#45B7D1"/>
+  <text x="75" y="83" font-family="Arial, sans-serif" font-size="50" 
+        font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">
+    EW
+  </text>
+</svg>
