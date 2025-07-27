@@ -80,7 +80,6 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	MainLayout(final AuthenticationContext authenticationContext,
 		final SessionService sessionService, final LayoutService layoutService,
 		final PasswordEncoder passwordEncoder, final CUserService userService) {
-		LOGGER.info("Creating MainLayout");
 		this.authenticationContext = authenticationContext;
 		this.sessionService = sessionService;
 		this.layoutService = layoutService;
@@ -142,20 +141,17 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		appName.addClassNames(FontWeight.SEMIBOLD, FontSize.LARGE);
 		final var header = new Div(appLogo, appName);
 		header.addClassNames(Display.FLEX, Padding.MEDIUM, Gap.MEDIUM, AlignItems.CENTER);
-		
 		// Make the header clickable to navigate to dashboard
 		header.getStyle().set("cursor", "pointer");
 		header.addClickListener(event -> {
 			LOGGER.debug("Header clicked - navigating to dashboard");
 			com.vaadin.flow.component.UI.getCurrent().navigate("dashboard");
 		});
-		
 		// Add hover effects
-		header.getElement().addEventListener("mouseenter", 
+		header.getElement().addEventListener("mouseenter",
 			e -> header.getStyle().set("background-color", "var(--lumo-contrast-5pct)"));
 		header.getElement().addEventListener("mouseleave",
 			e -> header.getStyle().remove("background-color"));
-		
 		return header;
 	}
 

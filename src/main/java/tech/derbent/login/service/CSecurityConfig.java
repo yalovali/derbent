@@ -48,7 +48,6 @@ class CSecurityConfig extends VaadinWebSecurity {
 	 */
 	@Override
 	protected void configure(final HttpSecurity http) throws Exception {
-		LOGGER.debug("Configuring HTTP security with database authentication");
 		// Apply Vaadin's default security configuration This handles CSRF protection,
 		// session management, and other Vaadin-specific security
 		super.configure(http);

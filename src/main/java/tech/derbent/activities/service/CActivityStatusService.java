@@ -31,9 +31,6 @@ public class CActivityStatusService extends CAbstractService<CActivityStatus> {
 	public CActivityStatusService(
 		final CActivityStatusRepository activityStatusRepository, final Clock clock) {
 		super(activityStatusRepository, clock);
-		LOGGER.debug(
-			"CActivityStatusService(activityStatusRepository={}) - Initializing service",
-			activityStatusRepository);
 
 		if (activityStatusRepository == null) {
 			LOGGER.error(

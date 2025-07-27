@@ -17,7 +17,7 @@ import tech.derbent.users.service.CUserTypeService;
  */
 @Route ("user-types/:user_type_id?/:action?(edit)")
 @PageTitle ("User Types")
-@Menu (order = 3.3, icon = "vaadin:group", title = "Settings.User Types")
+@Menu (order = 10.3, icon = "vaadin:group", title = "Settings.User Types")
 @PermitAll
 public class CUserTypeView extends CAbstractMDPage<CUserType> {
 

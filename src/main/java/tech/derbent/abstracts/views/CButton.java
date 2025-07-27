@@ -158,7 +158,6 @@ public class CButton extends Button {
 	 */
 	public CButton(final Icon icon) {
 		super(icon);
-		LOGGER.debug("Creating CButton with icon");
 		initializeButton();
 	}
 
@@ -170,7 +169,6 @@ public class CButton extends Button {
 	public CButton(final Icon icon,
 		final ComponentEventListener<ClickEvent<Button>> clickListener) {
 		super(icon, clickListener);
-		LOGGER.debug("Creating CButton with icon and click listener");
 		initializeButton();
 	}
 
@@ -180,7 +178,6 @@ public class CButton extends Button {
 	 */
 	public CButton(final String text) {
 		super(text);
-		LOGGER.debug("Creating CButton with text: {}", text);
 		initializeButton();
 	}
 
@@ -202,7 +199,6 @@ public class CButton extends Button {
 	 */
 	public CButton(final String text, final Icon icon) {
 		super(text, icon);
-		LOGGER.debug("Creating CButton with text: {} and icon", text);
 		initializeButton();
 	}
 
@@ -215,7 +211,6 @@ public class CButton extends Button {
 	public CButton(final String text, final Icon icon,
 		final ComponentEventListener<ClickEvent<Button>> clickListener) {
 		super(text, icon, clickListener);
-		LOGGER.debug("Creating CButton with text: {}, icon and click listener", text);
 		initializeButton();
 	}
 

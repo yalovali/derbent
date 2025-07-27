@@ -18,7 +18,7 @@ import tech.derbent.meetings.service.CMeetingTypeService;
  */
 @Route ("meeting-types/:meeting_type_id?/:action?(edit)")
 @PageTitle ("Meeting Types")
-@Menu (order = 2.2, icon = "vaadin:tags", title = "Types.Meeting Types")
+@Menu (order = 10.2, icon = "vaadin:tags", title = "Types.Meeting Types")
 @PermitAll
 public class CMeetingTypeView extends CAbstractMDPage<CMeetingType> {
 
@@ -53,7 +53,8 @@ public class CMeetingTypeView extends CAbstractMDPage<CMeetingType> {
 	@Override
 	protected void createGridForEntity() {
 		grid.addShortTextColumn(CMeetingType::getName, "Name", "name");
-		grid.addLongTextColumn(CMeetingType::getDescription, "Description", "description");
+		grid.addLongTextColumn(CMeetingType::getDescription, "Description",
+			"description");
 	}
 
 	@Override

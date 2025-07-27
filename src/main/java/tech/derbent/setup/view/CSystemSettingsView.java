@@ -33,7 +33,7 @@ import tech.derbent.setup.service.CSystemSettingsService;
  */
 @Route ("setup/system-settings")
 @PageTitle ("System Setup & Configuration")
-@Menu (order = 4.1, icon = "vaadin:tools", title = "Setup.System Settings")
+@Menu (order = 100.1, icon = "vaadin:tools", title = "Setup.System Settings")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CSystemSettingsView extends CAbstractPage {
 
