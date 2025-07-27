@@ -229,9 +229,6 @@ public class CActivity extends CEntityOfProject {
 	 */
 	public CActivity(final String name, final CProject project) {
 		super(name, project);
-		logger.debug(
-			"CActivity(name={}, project={}) - Creating activity with name and project",
-			name, project != null ? project.getName() : "null");
 
 		if (name == null) {
 			logger.warn("CActivity constructor - Name parameter is null");
@@ -251,10 +248,6 @@ public class CActivity extends CEntityOfProject {
 	 */
 	public CActivity(final String name, final CProject project, final CUser assignedTo) {
 		super(name, project);
-		logger.debug(
-			"CActivity(name={}, project={}, assignedTo={}) - Creating activity with assignment",
-			name, project != null ? project.getName() : "null",
-			assignedTo != null ? assignedTo.getUsername() : "null");
 
 		if (name == null) {
 			logger.warn("CActivity constructor - Name parameter is null");
@@ -272,9 +265,6 @@ public class CActivity extends CEntityOfProject {
 	 * @return the cost variance, positive if over budget, negative if under budget
 	 */
 	public BigDecimal calculateCostVariance() {
-		logger.debug(
-			"calculateCostVariance() - Calculating cost variance for activity id={}",
-			getId());
 
 		if ((actualCost == null) || (estimatedCost == null)) {
 			logger.debug(
@@ -292,9 +282,6 @@ public class CActivity extends CEntityOfProject {
 	public BigDecimal calculateTimeVariance() {
 
 		if ((actualHours == null) || (estimatedHours == null)) {
-			logger.debug(
-				"calculateTimeVariance() - Missing time data, actual={}, estimated={}",
-				actualHours, estimatedHours);
 			return BigDecimal.ZERO;
 		}
 		final BigDecimal variance = actualHours.subtract(estimatedHours);
@@ -413,9 +400,6 @@ public class CActivity extends CEntityOfProject {
 	}
 
 	public void setActualCost(final BigDecimal actualCost) {
-		logger.debug(
-			"setActualCost(actualCost={}) - Setting actual cost for activity id={}",
-			actualCost, getId());
 
 		if ((actualCost != null) && (actualCost.compareTo(BigDecimal.ZERO) < 0)) {
 			logger.warn(

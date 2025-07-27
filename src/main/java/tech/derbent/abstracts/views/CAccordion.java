@@ -14,8 +14,11 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 public class CAccordion extends Accordion {
 
 	private static final long serialVersionUID = 1L;
+
 	private final VerticalLayout baseLayout = new VerticalLayout();
+
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+
 	private final String accordionTitle;
 
 	/**
@@ -52,7 +55,6 @@ public class CAccordion extends Accordion {
 	 * Convenience method to close this accordion panel.
 	 */
 	public void closePanel() {
-		LOGGER.debug("Closing accordion panel: {}", accordionTitle);
 		close();
 	}
 

@@ -90,24 +90,15 @@ public abstract class CEntityNamed extends CEntityDB {
 	}
 
 	public void setCreatedDate(final LocalDateTime createdDate) {
-		logger.debug(
-			"setCreatedDate(createdDate={}) - Setting created date for item id={}",
-			createdDate, getId());
 		this.createdDate = createdDate;
 	}
 
 	public void setDescription(final String description) {
-		logger.debug(
-			"setDescription(description={}) - Setting description for item id={}",
-			description, getId());
 		this.description = description;
 		updateLastModified();
 	}
 
 	public void setLastModifiedDate(final LocalDateTime lastModifiedDate) {
-		logger.debug(
-			"setLastModifiedDate(lastModifiedDate={}) - Setting last modified date for activity id={}",
-			lastModifiedDate, getId());
 		this.lastModifiedDate = lastModifiedDate;
 	}
 
@@ -129,9 +120,6 @@ public abstract class CEntityNamed extends CEntityDB {
 	 * Update the last modified date to now.
 	 */
 	protected void updateLastModified() {
-		logger.debug(
-			"updateLastModified() - Updating last modified date for activity id={}",
-			getId());
 		this.lastModifiedDate = LocalDateTime.now();
 	}
 }

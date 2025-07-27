@@ -699,12 +699,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			if (field != null) {
 				final MetaData metaData = field.getAnnotation(MetaData.class);
 
-				if (metaData != null) {
-					LOGGER.debug(
-						"MetaData found - DisplayName: '{}', Order: {}, Required: {}, Hidden: {}",
-						metaData.displayName(), metaData.order(), metaData.required(),
-						metaData.hidden());
-				}
+				if (metaData != null) {}
 				else {
 					LOGGER.debug("No MetaData annotation found for field: {}",
 						field.getName());

@@ -666,14 +666,11 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 			getUI().ifPresent(ui -> ui.access(() -> {
 				splitLayout.getElement().callJsFunction("$server.requestUpdate");
 			}));
-			LOGGER.debug("Updated split layout orientation to: {} with position: {}",
-				splitLayout.getOrientation(), splitLayout.getSplitterPosition());
 		}
 		else {
 			// Default fallback when no layout service is available
 			splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
 			splitLayout.setSplitterPosition(30.0);
-			LOGGER.debug("Applied default vertical layout (no layout service available)");
 		}
 	}
 

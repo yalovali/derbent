@@ -78,7 +78,7 @@ public class Application implements AppShellConfigurator {
 	public ApplicationRunner dataInitializer(final JdbcTemplate jdbcTemplate) {
 		return args -> {
 			// Temporarily disable data initialization due to SQL syntax issues
-			LOGGER.info("Data initialization temporarily disabled");
+			// LOGGER.info("Data initialization temporarily disabled");
 			final Integer count =
 				jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cuser", Integer.class);
 
