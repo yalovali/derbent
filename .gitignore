@@ -15,3 +15,7 @@ vite.generated.ts
 /hs_err_pid17975.log
 /hs_err_pid17806.log
 /others/
+
+# Additional JVM crash logs and compiler artifacts
+hs_err_pid*.log
+javac.*.args

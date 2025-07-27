@@ -1,4 +1,21 @@
-# Derbent README
+# Derbent - Collaborative Project Management Application
+
+A Java-based project management application built with Vaadin, inspired by Jira and ProjeQtOr, targeting small to medium-sized offices.
+
+## 📋 Development Standards
+
+**Important:** All contributors must follow our strict coding guidelines:
+- **[Copilot Java Strict Coding Rules](./copilot-java-strict-coding-rules.md)** - Comprehensive coding standards and GitHub Copilot usage guidelines  
+- **[Project Design Description](./src/docs/project_design_description.md)** - Complete project requirements and architecture overview
+
+## 📚 Documentation
+
+For detailed implementation guidance, see the complete documentation in [`src/docs/`](./src/docs/):
+- [CSS Guidelines](./src/docs/CSS_GUIDELINES.md) - Styling standards and Vaadin theming
+- [Enhanced Activity Management](./src/docs/enhanced-activity-management-implementation.md) - Core business logic patterns  
+- [UI Component Implementation](./src/docs/CPANEL_ACTIVITY_DESCRIPTION_IMPLEMENTATION.md) - Reusable UI patterns
+
+---
 
 - [ ] TODO Replace or update this README with instructions relevant to your application
 
