@@ -5,12 +5,14 @@
 This is a comprehensive **project management and collaboration platform** built with **Java 17, Spring Boot 3.5, and Vaadin Flow 24.8**. The application provides workflows, task management, resource planning, and team collaboration features inspired by Atlassian Jira and ProjeQtOr.
 
 ### Key Implemented Features
-- **Enhanced Activity Management**: 25+ field activity tracking with status workflows, priorities, time/cost tracking
-- **User & Company Management**: Multi-tenant user system with role-based access control
-- **Project Management**: Project lifecycle management with resource allocation
-- **Meeting Management**: Meeting scheduling, participants, and types management
-- **Risk Management**: Project risk tracking and mitigation
-- **Dashboard & Reports**: KPI tracking and visual analytics
+- **Enhanced Activity Management**: 25+ field activity tracking with status workflows, priorities, time/cost tracking, parent-child relationships
+- **User & Company Management**: Multi-tenant user system with role-based access control, company associations
+- **Project Management**: Project lifecycle management with resource allocation and timeline tracking
+- **Meeting Management**: Comprehensive meeting scheduling with participants, types, and agenda management
+- **Risk Management**: Project risk identification, assessment, and mitigation tracking
+- **Dashboard & Analytics**: KPI tracking, progress visualization, and performance metrics
+- **Hierarchical Navigation**: Multi-level side menu system with context-aware navigation
+- **Advanced UI Components**: Custom dialog system, accordion layouts, responsive grid components
 
 ### Core Domain Model Examples
 ```java
@@ -298,21 +300,195 @@ private String name;
 - Include helpful `description` text for complex fields
 
 ## 9.2. CSS Guidelines
-- Update CSS names from class name, also update CSS file accordingly
+
+**File Organization:**
+- Main styles: `src/main/frontend/themes/default/styles.css`
+- Login styles: `src/main/frontend/themes/default/dev-login.css`
+- Background styles: `src/main/frontend/themes/default/login-background.css`
+
+**CSS Best Practices:**
 - Always use very simple CSS. Don't use JavaScript in Java or CSS
-- You can use CSS built-in simple functions
-- To style a layout use syntax like:
+- Use CSS built-in simple functions and Vaadin Lumo design tokens
+- Update CSS class names based on component class names, update CSS file accordingly
+- Use Vaadin Shadow DOM parts for component styling:
   ```css
   #vaadinLoginOverlayWrapper::part(overlay) {
       background-image: url('./images/background1.png');
   }
   ```
-- Check the pattern of CPanelActivityDescription and its super classes. Use this pattern to group each entity's fields according to related business topic. Don't leave any field out. Create necessary classes, base classes with same naming convention for every entity and group fields in the view. Only open the first one
-- Always check reference projects and do this task for a better structure, view and requirements of successful resource management, task tracking, project management, budget planning and better UI experience
-- Always if necessary create new classes to support the new requirements with always less code and nice super classes for reusability
-- Prepare a detailed requirements document that includes this task description, main features, user roles, and any specific technologies or integrations that should be considered
 
-## 9.3. Database Rules and Sample Data
+**Real CSS Examples from the Project:**
+```css
+/* Dashboard view styling */
+.cdashboard-view {
+    width: 100%;
+    padding: var(--lumo-space-m);
+    background: var(--lumo-base-color);
+}
+
+/* Detailed tab layout with background */
+.details-tab-layout {
+    background-color: #fff7e9;
+    width: 99%;
+    border-radius: 12px;
+    border: 1px solid var(--lumo-contrast-10pct);
+    font-size: 1.6em;
+    font-weight: bold;
+}
+
+/* Accordion styling */
+vaadin-accordion-heading {
+    font-size: var(--lumo-font-size-m);
+    font-weight: 600;
+    color: #5d6069;
+    font-size: 1.3em;
+    border-bottom: 1px solid var(--lumo-contrast-10pct);
+}
+```
+
+**Entity Panel Pattern Implementation:**
+- Follow the pattern of `CPanelActivityDescription` and its superclasses
+- Use this pattern to group each entity's fields according to related business topics
+- Don't leave any field out - create comprehensive panels for all entity aspects
+- Create necessary classes and base classes with consistent naming conventions
+- Only open the first panel by default (call `openPanel()` in constructor)
+
+**Example Panel Implementation:**
+```java
+public class CPanelActivityDescription extends CPanelActivityBase {
+    public CPanelActivityDescription(CActivity currentEntity,
+        BeanValidationBinder<CActivity> binder, CActivityService service) {
+        super("Basic Information", currentEntity, binder, service);
+        openPanel(); // Only open this panel by default
+    }
+    
+    @Override
+    protected void updatePanelEntityFields() {
+        // Group related fields logically
+        setEntityFields(List.of("name", "description", "activityType", "project"));
+    }
+}
+```
+
+**Panel Organization Guidelines:**
+- Create separate panels for different business aspects:
+  - `CPanelActivityDescription` - Basic information
+  - `CPanelActivityStatusPriority` - Status and priority management
+  - `CPanelActivityTimeTracking` - Time and progress tracking
+  - `CPanelActivityBudgetManagement` - Cost and budget information
+  - `CPanelActivityResourceManagement` - User assignments and resources
+
+## 9.5. Architecture Patterns and Best Practices
+
+**Entity Hierarchy Pattern:**
+The project uses a sophisticated inheritance hierarchy for domain entities:
+```java
+CEntityBase (id, createdBy, createdDate, lastModified)
+├── CEntityNamed (name, description) 
+│   ├── CUser, CProject, CActivityType, CActivityStatus
+│   └── CCompany, CMeetingType, CUserType
+└── CEntityOfProject (extends CEntityBase + project relationship)
+    ├── CActivity (comprehensive activity management)
+    ├── CMeeting (meeting management)
+    └── CRisk (risk management)
+```
+
+**Service Layer Pattern:**
+```java
+// Base service with CRUD operations
+public abstract class CEntityService<T extends CEntityBase> {
+    protected abstract CEntityRepository<T> getRepository();
+    // Common CRUD methods with logging
+}
+
+// Project-aware service for entities linked to projects
+public abstract class CEntityOfProjectService<T extends CEntityOfProject> 
+    extends CEntityService<T> {
+    // Project-specific operations
+}
+
+// Concrete implementation
+public class CActivityService extends CEntityOfProjectService<CActivity> {
+    // Activity-specific business logic
+}
+```
+
+**UI Component Hierarchy:**
+```java
+CAbstractPage (base page functionality)
+├── CAbstractMDPage (metadata-driven pages)
+│   ├── CProjectAwareMDPage (project context awareness)
+│   │   └── CActivitiesView, CMeetingsView
+│   └── CCustomizedMDPage (custom behavior)
+└── CDialog (base dialog functionality)
+    └── CWarningDialog, CInformationDialog, CExceptionDialog
+```
+
+**Form Building Pattern:**
+- Use `@MetaData` annotations on entity fields
+- Automatic form generation via reflection
+- Consistent validation and data binding
+- ComboBox data providers via service beans
+- Panel-based organization for complex entities
+
+**Logging Standards:**
+```java
+public class CActivityService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CActivityService.class);
+    
+    public CActivity save(CActivity activity) {
+        LOGGER.info("save called with activity: {}", activity);
+        // Implementation follows
+    }
+}
+```
+
+**Security and Validation:**
+- Always validate inputs in service layer
+- Use Spring Security for authentication/authorization
+- Implement proper null checking in all methods
+- Use `@Transactional` for data consistency
+- Handle exceptions gracefully with user-friendly dialogs
+
+**Testing Standards:**
+The project includes **41 comprehensive test classes** covering:
+```java
+// Unit tests for domain logic
+class CActivityCardTest {
+    @Test
+    void testActivityCardCreation() {
+        final CProject project = new CProject();
+        project.setName("Test Project");
+        final CActivity activity = new CActivity("Test Activity", project);
+        
+        final CActivityCard card = new CActivityCard(activity);
+        
+        assertNotNull(card);
+        assertEquals(activity, card.getActivity());
+    }
+}
+
+// Integration tests for services
+@SpringBootTest
+class SessionServiceProjectChangeTest {
+    // Test service layer integration
+}
+
+// Manual verification tests for complex UI components
+class ManualVerificationTest {
+    // UI component validation tests
+}
+```
+
+**Testing Guidelines:**
+- Write unit tests for all business logic and service methods
+- Use TestContainers for integration testing with PostgreSQL
+- Maintain test coverage above 80% for critical business logic
+- Test all validation scenarios and edge cases
+- Mock external dependencies appropriately
+- Include manual verification tests for complex UI interactions
+## 9.6. Database Rules and Sample Data
+
 - Password is always test123 for all users with hash code '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu'
 - Every entity should have an example in data.sql for per project, per company per user per activity etc...
 - Always ensure **PostgreSQL-only** configuration. Update `data.sql` with correct sample and initial database values after any database change
@@ -336,7 +512,7 @@ private String name;
   ';
   ```
 
-## 9.4. Documentation & Modularity
+## 9.7. Documentation & Modularity
 - Update the `docs` folder for every significant change:
   - Add new documentation for each project design concept (one file per concept)
   - For complex or Spring-based solutions, create a step-by-step solution file
