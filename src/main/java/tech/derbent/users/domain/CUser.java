@@ -107,12 +107,10 @@ public class CUser extends CEntityNamed {
 
 	@MetaData (
 		displayName = "Profile Picture", required = false, readOnly = false, defaultValue = "",
-		description = "Path to user's profile picture", hidden = false, order = 11,
-		maxLength = 500
+		description = "User's profile picture stored as binary data", hidden = false, order = 11
 	)
-	@Column (name = "profile_picture_path", nullable = true, length = 500)
-	@Size (max = 500)
-	private String profilePicturePath;
+	@Column (name = "profile_picture_data", nullable = true)
+	private byte[] profilePictureData;
 
 	@OneToMany (mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<CUserProjectSettings> projectSettings;
@@ -271,10 +269,10 @@ public class CUser extends CEntityNamed {
 
 	public void setPhone(final String phone) { this.phone = phone; }
 
-	public String getProfilePicturePath() { return profilePicturePath; }
+	public byte[] getProfilePictureData() { return profilePictureData; }
 
-	public void setProfilePicturePath(final String profilePicturePath) { 
-		this.profilePicturePath = profilePicturePath; 
+	public void setProfilePictureData(final byte[] profilePictureData) { 
+		this.profilePictureData = profilePictureData; 
 	}
 
 	public void setProjectSettings(final List<CUserProjectSettings> projectSettings) {
