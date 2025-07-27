@@ -7,8 +7,8 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.views.CAbstractMDPage;
-import tech.derbent.abstracts.views.CAccordionDescription;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 
@@ -18,10 +18,9 @@ import tech.derbent.projects.service.CProjectService;
  */
 @Route ("projects/:project_id?/:action?(edit)")
 @PageTitle ("Project Master Detail")
-@Menu (order = 3.1, icon = "vaadin:briefcase", title = "Settings.Projects")
+@Menu (order = 1.1, icon = "vaadin:briefcase", title = "Settings.Projects")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CProjectsView extends CAbstractMDPage<CProject> {
-
 
 	private static final long serialVersionUID = 1L;
 
@@ -32,14 +31,18 @@ public class CProjectsView extends CAbstractMDPage<CProject> {
 	public CProjectsView(final CProjectService entityService) {
 		super(CProject.class, entityService);
 		addClassNames("projects-view");
+		// createDetailsLayout();
+		LOGGER.info("CProjectsView initialized successfully");
 	}
 
 	@Override
 	protected void createDetailsLayout() {
-		CAccordionDescription<CProject> panel;
-		panel = new CPanelProjectBasicInfo(getCurrentEntity(), getBinder(),
-			(CProjectService) entityService);
-		addAccordionPanel(panel);
+		LOGGER.info("Creating details layout for CProjectsView");
+		final Div detailsLayout =
+			CEntityFormBuilder.buildForm(CProject.class, getBinder());
+		// Note: Buttons are now automatically added to the details tab by the parent
+		// class
+		getBaseDetailsLayout().add(detailsLayout);
 	}
 
 	@Override
@@ -53,6 +56,7 @@ public class CProjectsView extends CAbstractMDPage<CProject> {
 
 	@Override
 	protected void createGridForEntity() {
+		LOGGER.info("Creating grid for projects");
 		// property name must match the field name in CProject
 		grid.addShortTextColumn(CProject::getName, "Name", "name");
 		grid.addLongTextColumn(item -> {
@@ -63,6 +67,7 @@ public class CProjectsView extends CAbstractMDPage<CProject> {
 			}
 			return desc.length() > 50 ? desc.substring(0, 50) + "..." : desc;
 		}, "Description", null);
+
 		// when a row is selected or deselected, populate form
 		grid.asSingleSelect().addValueChangeListener(event -> {
 
@@ -82,6 +87,12 @@ public class CProjectsView extends CAbstractMDPage<CProject> {
 
 	@Override
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
+
+	@Override
+	protected void initPage() {
+		// Initialize the page components and layout This method can be overridden to set
+		// up the view's components
+	}
 
 	@Override
 	protected CProject newEntity() {

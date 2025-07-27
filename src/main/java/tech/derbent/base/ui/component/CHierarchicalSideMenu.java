@@ -279,8 +279,6 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 
 		if (!newRoute.equals(currentRoute)) {
 			currentRoute = newRoute;
-			LOGGER.debug("Route changed to: {}, updating menu highlighting",
-				currentRoute);
 			refreshCurrentLevel();
 		}
 	}

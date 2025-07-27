@@ -126,8 +126,6 @@ public abstract class CAbstractService<EntityClass extends CEntityDB> {
 
 		try {
 			final EntityClass savedEntity = repository.save(entity);
-			LOGGER.debug("Entity saved successfully with ID: {}",
-				CSpringAuxillaries.safeGetId(savedEntity));
 			return savedEntity;
 		} catch (final Exception e) {
 			LOGGER.error("Error saving entity: {}",

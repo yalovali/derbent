@@ -85,9 +85,6 @@ public class CActivityService extends CAbstractNamedEntityService<CActivity> {
 	@Override
 	@Transactional (readOnly = true)
 	public Optional<CActivity> get(final Long id) {
-		LOGGER.debug(
-			"Getting CActivity with ID {} (overridden to eagerly load activityType and activityStatus)",
-			id);
 		final Optional<CActivity> entity =
 			((CActivityRepository) repository).findByIdWithActivityTypeAndStatus(id);
 		// Initialize lazy fields if entity is present (for any other potential lazy
@@ -105,8 +102,6 @@ public class CActivityService extends CAbstractNamedEntityService<CActivity> {
 	@Transactional (readOnly = true)
 	public Map<CActivityStatus, List<CActivity>>
 		getActivitiesGroupedByStatus(final CProject project) {
-		LOGGER.debug("Getting activities grouped by status for project: {}",
-			project.getName());
 		// Get all activities for the project with type and status loaded
 		final List<CActivity> activities =
 			((CActivityRepository) repository).findByProjectWithTypeAndStatus(project);
