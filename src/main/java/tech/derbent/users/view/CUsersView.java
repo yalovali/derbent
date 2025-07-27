@@ -9,7 +9,6 @@ import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.views.CAbstractMDPage;
@@ -21,18 +20,24 @@ import tech.derbent.users.domain.CUser;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.CUserTypeService;
 
-@Route("users/:user_id?/:action?(edit)")
-@PageTitle("User Master Detail")
-@Menu(order = 0, icon = "vaadin:users", title = "Settings.Users")
+@Route ("users/:user_id?/:action?(edit)")
+@PageTitle ("User Master Detail")
+@Menu (order = 0, icon = "vaadin:users", title = "Settings.Users")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CUsersView extends CAbstractMDPage<CUser> {
 
 	private static final long serialVersionUID = 1L;
+
 	private final String ENTITY_ID_FIELD = "user_id";
+
 	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "users/%s/edit";
+
 	private final CPanelUserProjectSettings projectSettingsGrid;
+
 	private final CUserTypeService userTypeService;
+
 	private final CCompanyService companyService;
+
 	CPanelUserDescription descriptionPanel;
 
 	// private final TextField name; • Annotate the CUsersView constructor with @Autowired
@@ -52,9 +57,9 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 	@Override
 	protected void createDetailsLayout() {
 		LOGGER.info("Creating details layout for CUsersView");
-		createEntityDetails();
-		// Note: Buttons are now automatically added to the details tab by the parent
-		// class detailsLayout.add(projectSettingsGrid);
+		descriptionPanel = new CPanelUserDescription(getCurrentEntity(), getBinder(),
+			(CUserService) entityService, userTypeService, companyService);
+		getBaseDetailsLayout().add(descriptionPanel);
 		getBaseDetailsLayout().add(projectSettingsGrid);
 	}
 
@@ -67,20 +72,12 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 		return detailsTabLabel;
 	}
 
-	protected void createEntityDetails() {
-		LOGGER.info("Creating entity details for CUsersView");
-		// Create description panel for user details
-		descriptionPanel = new CPanelUserDescription(getCurrentEntity(), getBinder(),
-			(CUserService) entityService, userTypeService, companyService);
-		getBaseDetailsLayout().add(descriptionPanel);
-	}
-
 	@Override
 	protected void createGridForEntity() {
 		LOGGER.info("Creating grid for users");
 		// Add columns for key user information
-		grid.addColumn(CUser::getName).setAutoWidth(true).setHeader("Name")
-			.setKey("name").setSortable(true);
+		grid.addColumn(CUser::getName).setAutoWidth(true).setHeader("Name").setKey("name")
+			.setSortable(true);
 		grid.addColumn(CUser::getLastname).setAutoWidth(true).setHeader("Last Name")
 			.setKey("lastname").setSortable(true);
 		grid.addColumn(CUser::getLogin).setAutoWidth(true).setHeader("Login")
@@ -90,7 +87,7 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 		// Status column uses lambda expression - not directly sortable at DB level
 		grid.addColumn(user -> user.isEnabled() ? "Enabled" : "Disabled")
 			.setAutoWidth(true).setHeader("Status").setSortable(false);
-		// User type requires join - not directly sortable at DB level  
+		// User type requires join - not directly sortable at DB level
 		grid.addColumn(
 			user -> user.getUserType() != null ? user.getUserType().getName() : "")
 			.setAutoWidth(true).setHeader("User Type").setSortable(false);
@@ -100,8 +97,9 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 			.setAutoWidth(true).setHeader("Company").setSortable(false);
 		grid.addColumn(CUser::getRoles).setAutoWidth(true).setHeader("Roles")
 			.setKey("roles").setSortable(true);
-		// Data provider is already set up in the base class CAbstractMDPage.createGridLayout()
-		// No need to call grid.setItems() again as it's already configured to handle sorting properly
+		// Data provider is already set up in the base class
+		// CAbstractMDPage.createGridLayout() No need to call grid.setItems() again as
+		// it's already configured to handle sorting properly
 	}
 
 	@Override
@@ -109,7 +107,9 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 		LOGGER.info("Creating custom save button for CUsersView");
 		final tech.derbent.abstracts.views.CButton save =
 			tech.derbent.abstracts.views.CButton.createPrimary(buttonText, e -> {
+
 				try {
+
 					if (getCurrentEntity() == null) {
 						// why dont you use populateForm(
 						setCurrentEntity(newEntity());
@@ -160,6 +160,7 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 			value != null ? value.getLogin() : "null");
 		// Clear the description panel
 		descriptionPanel.populateForm(value);
+
 		// Update the project settings grid when a user is selected
 		if (value != null) {
 			// Load user with project settings to avoid lazy initialization issues
@@ -175,6 +176,7 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 					// Save the user when project settings are updated
 					entityService.save(userWithSettings);
 				}, () -> {
+
 					// Refresh the current entity after save
 					try {
 						final CUser refreshedUser = ((CUserService) entityService)

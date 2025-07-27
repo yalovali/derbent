@@ -27,8 +27,6 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 
 	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "activities/%s/edit";
 
-	private CAccordionDescription<CActivity> descriptionPanel;
-
 	public CActivitiesView(final CActivityService entityService,
 		final SessionService sessionService) {
 		super(CActivity.class, entityService, sessionService);
@@ -36,25 +34,34 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 		addClassNames("activities-view");
 	}
 
-	@Override
-	protected void createDetailsLayout() {
-		LOGGER.info(
-			"Creating details layout for CActivitiesView using CPanelActivityDescription");
-		createEntityDetails();
-		// Note: Buttons are now automatically added to the details tab by the parent
-		// class
-	}
-
 	/**
 	 * Creates the entity details section using CPanelActivityDescription. Follows the
 	 * same pattern as CUsersView for consistency.
 	 */
-	protected void createEntityDetails() {
-		LOGGER.info("Creating entity details for CActivitiesView");
-		// Create description panel for activity details
-		descriptionPanel = new CPanelActivityDescription(getCurrentEntity(), getBinder(),
+	@Override
+	protected void createDetailsLayout() {
+		CAccordionDescription<CActivity> panel;
+		panel = new CPanelActivityDescription(getCurrentEntity(), getBinder(),
 			(CActivityService) entityService);
-		getBaseDetailsLayout().add(descriptionPanel);
+		addAccordionPanel(panel);
+		panel = new CPanelActivityProject(getCurrentEntity(), getBinder(),
+			(CActivityService) entityService);
+		addAccordionPanel(panel);
+		panel = new CPanelActivityResourceManagement(getCurrentEntity(), getBinder(),
+			(CActivityService) entityService);
+		addAccordionPanel(panel);
+		panel = new CPanelActivityStatusPriority(getCurrentEntity(), getBinder(),
+			(CActivityService) entityService);
+		addAccordionPanel(panel);
+		panel = new CPanelActivityTimeTracking(getCurrentEntity(), getBinder(),
+			(CActivityService) entityService);
+		addAccordionPanel(panel);
+		panel = new CPanelActivityHierarchy(getCurrentEntity(), getBinder(),
+			(CActivityService) entityService);
+		addAccordionPanel(panel);
+		panel = new CPanelActivityBudgetManagement(getCurrentEntity(), getBinder(),
+			(CActivityService) entityService);
+		addAccordionPanel(panel);
 	}
 
 	@Override
@@ -67,8 +74,10 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 			final CActivity activityEntity = activity;
 			return activityEntity.getStatus() != null
 				? activityEntity.getStatus().getName() : "";
-		}).setAutoWidth(true).setHeader("Status")
-			.setSortable(false); // Status is derived from join, not directly sortable
+		}).setAutoWidth(true).setHeader("Status").setSortable(false); // Status is derived
+																		// from join, not
+																		// directly
+																		// sortable
 		// when a row is selected or deselected, populate form
 		grid.asSingleSelect().addValueChangeListener(event -> {
 
@@ -117,18 +126,6 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 	@Override
 	protected CActivity newEntity() {
 		return super.newEntity(); // Uses the project-aware implementation from parent
-	}
-
-	@Override
-	protected void populateForm(final CActivity value) {
-		super.populateForm(value);
-		LOGGER.info("Populating form with activity data: {}",
-			value != null ? value.getName() : "null");
-
-		// Update the description panel when an activity is selected
-		if (descriptionPanel != null) {
-			descriptionPanel.populateForm(value);
-		}
 	}
 
 	@Override
