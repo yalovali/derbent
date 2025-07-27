@@ -29,6 +29,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
 import com.vaadin.flow.theme.lumo.LumoUtility.FontSize;
 import com.vaadin.flow.theme.lumo.LumoUtility.FontWeight;
 import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
+import com.vaadin.flow.theme.lumo.LumoUtility.IconSize;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 
@@ -115,17 +116,21 @@ public final class ViewToolbar extends Composite<Header> implements CProjectList
         // this is a button that toggles the drawer in the app layout
         final var drawerToggle = new DrawerToggle();
         drawerToggle.addClassNames(Margin.NONE);
+        
+        // Add Home button to navigate to dashboard
+        final var homeButton = createHomeButton();
+
         title = new H1(viewTitle);
         title.addClassNames(FontSize.XLARGE, Margin.NONE, FontWeight.LIGHT);
 
         // Create project selection combobox
         createProjectComboBox();
         
-        // Left side: toggle, title, and project selector
+        // Left side: toggle, home button, title, and project selector
         final var projectSelector = new Div(new Span("Active Project:"), projectComboBox);
         projectSelector.addClassNames(Display.FLEX, AlignItems.CENTER, Gap.SMALL);
         
-        final var leftSide = new Div(drawerToggle, title, projectSelector);
+        final var leftSide = new Div(drawerToggle, homeButton, title, projectSelector);
         leftSide.addClassNames(Display.FLEX, AlignItems.CENTER, Gap.MEDIUM);
 
         // Spacer to push user info and layout toggle to the right
@@ -341,6 +346,31 @@ public final class ViewToolbar extends Composite<Header> implements CProjectList
         } else {
             LOGGER.debug("LayoutService is null, layout toggle button will not be created");
         }
+    }
+
+    /**
+     * Creates the home button that navigates to the dashboard.
+     * 
+     * @return the home button
+     */
+    private CButton createHomeButton() {
+        LOGGER.debug("Creating home button for dashboard navigation");
+        
+        final Icon homeIcon = VaadinIcon.HOME.create();
+        homeIcon.addClassNames(IconSize.MEDIUM);
+        
+        final CButton homeButton = new CButton(homeIcon);
+        homeButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ICON);
+        homeButton.getElement().setAttribute("title", "Go to Dashboard");
+        homeButton.addClassNames(Margin.NONE);
+        
+        // Handle home button click - navigate to dashboard
+        homeButton.addClickListener(event -> {
+            LOGGER.info("Home button clicked, navigating to dashboard");
+            com.vaadin.flow.component.UI.getCurrent().navigate("home");
+        });
+        
+        return homeButton;
     }
 
     /**

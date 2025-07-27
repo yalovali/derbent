@@ -1,12 +1,17 @@
 package tech.derbent.companies.domain;
 
+import java.util.List;
+
 import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.MetaData;
-import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.domains.CEntityNamed;
 
 /**
  * CCompany - Domain entity representing companies within the organization.
@@ -16,17 +21,9 @@ import tech.derbent.abstracts.domains.CEntityDB;
 @Entity
 @Table(name = "ccompany") // table name for the entity as the default is the class name in lowercase
 @AttributeOverride(name = "id", column = @Column(name = "company_id")) // Override the default column name for the ID field
-public class CCompany extends CEntityDB {
+public class CCompany extends CEntityNamed {
 
-    @Column(name = "name", nullable = false, length = MAX_LENGTH_NAME, unique = true)
-    @Size(max = MAX_LENGTH_NAME)
-    @MetaData(displayName = "Company Name", required = true, readOnly = false, defaultValue = "", description = "Name of the company", hidden = false, order = 1, maxLength = MAX_LENGTH_NAME)
-    private String name;
-
-    @Column(name = "description", nullable = true, length = MAX_LENGTH_DESCRIPTION)
-    @Size(max = MAX_LENGTH_DESCRIPTION)
-    @MetaData(displayName = "Description", required = false, readOnly = false, defaultValue = "", description = "Company description", hidden = false, order = 2, maxLength = MAX_LENGTH_DESCRIPTION)
-    private String description;
+    // name and description fields are now inherited from CEntityNamed
 
     @Column(name = "address", nullable = true, length = MAX_LENGTH_DESCRIPTION)
     @Size(max = MAX_LENGTH_DESCRIPTION)
@@ -57,38 +54,23 @@ public class CCompany extends CEntityDB {
     @MetaData(displayName = "Active", required = true, readOnly = false, defaultValue = "true", description = "Is company active?", hidden = false, order = 8)
     private boolean enabled = true;
 
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @MetaData(displayName = "Users", required = false, readOnly = true, description = "Users belonging to this company", hidden = false, order = 9)
+    private List<tech.derbent.users.domain.CUser> users;
+
     public CCompany() {
         super();
     }
 
     public CCompany(final String name) {
-        super();
-        this.name = name;
+        super(name); // Use the CEntityNamed constructor
     }
 
     public CCompany(final String name, final String description) {
-        super();
-        this.name = name;
-        this.description = description;
+        super(name, description); // Use the CEntityNamed constructor
     }
 
-    // Getters and setters following the existing pattern
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(final String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(final String description) {
-        this.description = description;
-    }
+    // name, description getters and setters are now inherited from CEntityNamed
 
     public String getAddress() {
         return address;
@@ -138,11 +120,19 @@ public class CCompany extends CEntityDB {
         this.enabled = enabled;
     }
 
+    public List<tech.derbent.users.domain.CUser> getUsers() {
+        return users;
+    }
+
+    public void setUsers(final List<tech.derbent.users.domain.CUser> users) {
+        this.users = users;
+    }
+
     @Override
     public String toString() {
         return "CCompany{" +
-                "name='" + name + '\'' +
-                ", description='" + description + '\'' +
+                "name='" + getName() + '\'' +
+                ", description='" + getDescription() + '\'' +
                 ", address='" + address + '\'' +
                 ", phone='" + phone + '\'' +
                 ", email='" + email + '\'' +

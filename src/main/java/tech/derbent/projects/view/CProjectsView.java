@@ -19,18 +19,17 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.views.CAbstractMDPage;
+import tech.derbent.abstracts.views.CAccordionDescription;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 
 /**
- * CProjectsView - View for managing projects. Layer: View (MVC) Provides CRUD operations for projects using the
- * abstract master-detail pattern with multiple layout options.
+
  */
-@Route("projects/:project_id?/:action?(edit)")
-@PageTitle("Project Master Detail")
-@Menu(order = 0, icon = "vaadin:briefcase", title = "Settings.Projects")
+@Route ("projects/:project_id?/:action?(edit)")
+@PageTitle ("Project Master Detail")
+@Menu (order = 3.1, icon = "vaadin:briefcase", title = "Settings.Projects")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CProjectsView extends CAbstractMDPage<CProject> {
 
@@ -87,7 +86,48 @@ public class CProjectsView extends CAbstractMDPage<CProject> {
         
         LOGGER.info("CProjectsView initialized successfully with multiple layout options");
     }
+@Override
+	protected void createDetailsLayout() {
+		CAccordionDescription<CProject> panel;
+		panel = new CPanelProjectBasicInfo(getCurrentEntity(), getBinder(),
+			(CProjectService) entityService);
+		addAccordionPanel(panel);
+	}
 
+	@Override
+	protected Div createDetailsTabLeftContent() {
+		// Create custom tab content for projects view
+		final Div detailsTabLabel = new Div();
+		detailsTabLabel.setText("Project Information");
+		detailsTabLabel.setClassName("details-tab-label");
+		return detailsTabLabel;
+	}
+
+	@Override
+	protected void createGridForEntity() {
+		// property name must match the field name in CProject
+		grid.addShortTextColumn(CProject::getName, "Name", "name");
+		grid.addColumn(item -> {
+			final String desc = item.getDescription();
+
+			if (desc == null) {
+				return "Not set";
+			}
+			return desc.length() > 50 ? desc.substring(0, 50) + "..." : desc;
+		}, "Description", null);
+		// when a row is selected or deselected, populate form
+		grid.asSingleSelect().addValueChangeListener(event -> {
+
+			if (event.getValue() != null) {
+				UI.getCurrent().navigate(
+					String.format(ENTITY_ROUTE_TEMPLATE_EDIT, event.getValue().getId()));
+			}
+			else {
+				clearForm();
+				UI.getCurrent().navigate(CProjectsView.class);
+			}
+		});
+	}
     @Override
     protected void createDetailsLayout() {
         LOGGER.info("Creating details layout for mode: " + (currentLayoutMode != null ? currentLayoutMode.getDisplayName() : "Default"));
@@ -838,4 +878,5 @@ public class CProjectsView extends CAbstractMDPage<CProject> {
         
         return infoCard;
     }
+
 }

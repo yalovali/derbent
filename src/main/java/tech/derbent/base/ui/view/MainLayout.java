@@ -3,9 +3,9 @@ package tech.derbent.base.ui.view;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.avatar.AvatarVariant;
@@ -37,8 +37,12 @@ import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.base.ui.component.CHierarchicalSideMenu;
 import tech.derbent.base.ui.component.ViewToolbar;
+import tech.derbent.base.ui.dialogs.CWarningDialog;
 import tech.derbent.session.service.LayoutService;
 import tech.derbent.session.service.SessionService;
+import tech.derbent.users.domain.CUser;
+import tech.derbent.users.service.CUserService;
+import tech.derbent.users.view.CUserProfileDialog;
 
 /**
  * The main layout is a top-level placeholder for other views. It provides a side
@@ -56,19 +60,32 @@ import tech.derbent.session.service.SessionService;
 public final class MainLayout extends AppLayout implements AfterNavigationObserver {
 
 	private static final long serialVersionUID = 1L;
+
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+
 	private final User currentUser;
+
 	private final AuthenticationContext authenticationContext;
+
 	private final SessionService sessionService;
+
 	private final LayoutService layoutService;
+
+	private final PasswordEncoder passwordEncoder;
+
+	private final CUserService userService;
+
 	private ViewToolbar mainToolbar;
 
 	MainLayout(final AuthenticationContext authenticationContext,
-		final SessionService sessionService, final LayoutService layoutService) {
+		final SessionService sessionService, final LayoutService layoutService,
+		final PasswordEncoder passwordEncoder, final CUserService userService) {
 		LOGGER.info("Creating MainLayout");
 		this.authenticationContext = authenticationContext;
 		this.sessionService = sessionService;
 		this.layoutService = layoutService;
+		this.passwordEncoder = passwordEncoder;
+		this.userService = userService;
 		this.currentUser =
 			authenticationContext.getAuthenticatedUser(User.class).orElse(null);
 		setPrimarySection(Section.DRAWER);
@@ -100,7 +117,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		 */
 	}
 
-	@SuppressWarnings("unused")
+	@SuppressWarnings ("unused")
 	private Div createAppMarker() {
 		final var slidingHeader = new Div();
 		slidingHeader.addClassNames(Display.FLEX, AlignItems.CENTER,
@@ -119,12 +136,26 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 
 	private Div createHeader() {
 		// TODO Replace with real application logo and name
-		final var appLogo = VaadinIcon.CUBES.create();
+		final var appLogo = VaadinIcon.HOME.create();
 		appLogo.addClassNames(TextColor.PRIMARY, IconSize.LARGE);
 		final var appName = new Span("Derbent");
 		appName.addClassNames(FontWeight.SEMIBOLD, FontSize.LARGE);
 		final var header = new Div(appLogo, appName);
 		header.addClassNames(Display.FLEX, Padding.MEDIUM, Gap.MEDIUM, AlignItems.CENTER);
+		
+		// Make the header clickable to navigate to dashboard
+		header.getStyle().set("cursor", "pointer");
+		header.addClickListener(event -> {
+			LOGGER.debug("Header clicked - navigating to dashboard");
+			com.vaadin.flow.component.UI.getCurrent().navigate("dashboard");
+		});
+		
+		// Add hover effects
+		header.getElement().addEventListener("mouseenter", 
+			e -> header.getStyle().set("background-color", "var(--lumo-contrast-5pct)"));
+		header.getElement().addEventListener("mouseleave",
+			e -> header.getStyle().remove("background-color"));
+		
 		return header;
 	}
 
@@ -144,7 +175,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	 * with optional icons.
 	 * @return A `SideNav` component containing the navigation items.
 	 */
-	@SuppressWarnings("unused")
+	@SuppressWarnings ("unused")
 	private SideNav createSideNav() {
 		final var nav = new SideNav(); // Create the side navigation
 		nav.addClassNames(Margin.Horizontal.MEDIUM); // Style the navigation
@@ -160,6 +191,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	 * @return A `SideNavItem` representing the menu entry.
 	 */
 	private void createSideNavItem(final SideNav nav, final MenuEntry menuEntry) {
+
 		if (menuEntry == null) {
 			return; // Return null if the menu entry is null
 		}
@@ -167,6 +199,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		String title = menuEntry.title();
 		final String path = menuEntry.path();
 		final String icon = menuEntry.icon();
+
 		// if title contains a dot, it is a sub-menu entry
 		if (title.contains(".")) {
 			final var parts = title.split("\\.");
@@ -177,6 +210,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 			SideNavItem parentItem = nav.getItems().stream()
 				.filter(item -> item.getLabel().equals(parent_title)).findFirst()
 				.orElse(null);
+
 			if (parentItem == null) {
 				parentItem = new SideNavItem(parent_title);
 				parentItem.setPrefixComponent(new Icon(icon)); // Set the icon for the
@@ -216,11 +250,66 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		userMenu.addClassNames(Margin.MEDIUM);
 		final var userMenuItem = userMenu.addItem(avatar);
 		userMenuItem.add(user.getUsername());
-		userMenuItem.getSubMenu().addItem("View Profile",
-			event -> UI.getCurrent().getPage().open(user.getUsername()));
+		userMenuItem.getSubMenu().addItem("Edit Profile",
+			event -> openUserProfileDialog());
 		// TODO Add additional items to the user menu if needed
 		userMenuItem.getSubMenu().addItem("Logout",
 			event -> authenticationContext.logout());
 		return userMenu;
+	}
+
+	/**
+	 * Opens the user profile dialog for the current user.
+	 */
+	private void openUserProfileDialog() {
+		LOGGER.info("Opening user profile dialog for user: {}",
+			currentUser != null ? currentUser.getUsername() : "null");
+
+		try {
+			// Get current user from session service
+			final var currentUserOptional = sessionService.getActiveUser();
+
+			if (currentUserOptional.isEmpty()) {
+				LOGGER.warn("No active user found in session");
+				new CWarningDialog(
+					"Unable to load user profile. Please try logging in again.").open();
+				return;
+			}
+			final CUser currentCUser = currentUserOptional.get();
+			// Create and open profile dialog
+			final CUserProfileDialog profileDialog = new CUserProfileDialog(currentCUser,
+				this::saveUserProfile, passwordEncoder);
+			profileDialog.open();
+			LOGGER.debug("User profile dialog opened successfully");
+		} catch (final Exception e) {
+			LOGGER.error("Error opening user profile dialog", e);
+			new CWarningDialog("Failed to open profile dialog: " + e.getMessage()).open();
+		}
+	}
+
+	/**
+	 * Saves the user profile after editing.
+	 * @param user The updated user object
+	 */
+	private void saveUserProfile(final CUser user) {
+		LOGGER.info("Saving user profile for user: {}",
+			user != null ? user.getLogin() : "null");
+
+		try {
+
+			if (user == null) {
+				throw new IllegalArgumentException("User cannot be null");
+			}
+			// Save user using user service
+			final CUser savedUser = userService.save(user);
+			// Update session with saved user
+			sessionService.setActiveUser(savedUser);
+			LOGGER.info("User profile saved successfully for user: {}",
+				savedUser.getLogin());
+		} catch (final Exception e) {
+			LOGGER.error("Error saving user profile", e);
+			throw new RuntimeException("Failed to save user profile: " + e.getMessage(),
+				e);
+		}
 	}
 }

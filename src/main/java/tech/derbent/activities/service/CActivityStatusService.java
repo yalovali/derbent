@@ -1,9 +1,12 @@
 package tech.derbent.activities.service;
 
 import java.time.Clock;
+import java.util.List;
 import java.util.Optional;
 
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,128 +14,264 @@ import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.activities.domain.CActivityStatus;
 
 /**
- * CActivityStatusService - Service class for managing CActivityStatus entities.
- * Layer: Service (MVC)
- * 
- * Extends CAbstractService to provide standard CRUD operations and business logic
- * for activity status entities. All operations require authentication.
+ * CActivityStatusService - Service class for managing CActivityStatus entities. Layer:
+ * Service (MVC) Provides business logic for activity status management including CRUD
+ * operations, validation, and workflow management.
  */
 @Service
-@PreAuthorize("isAuthenticated()")
+@Transactional
 public class CActivityStatusService extends CAbstractService<CActivityStatus> {
 
-    /**
-     * Constructor for dependency injection.
-     * @param repository the CActivityStatusRepository
-     * @param clock      the system clock for timestamps
-     */
-    CActivityStatusService(final CActivityStatusRepository repository, final Clock clock) {
-        super(repository, clock);
-        LOGGER.debug("CActivityStatusService constructor called with repository: {} and clock: {}", 
-                    repository.getClass().getSimpleName(), clock.getClass().getSimpleName());
-    }
+	private static final Logger logger =
+		LoggerFactory.getLogger(CActivityStatusService.class);
 
-    /**
-     * Creates a new activity status entity with the given name.
-     * @param name the name of the activity status
-     * @throws RuntimeException if name is "fail" (for testing error handling)
-     */
-    @Transactional
-    public void createEntity(final String name) {
-        LOGGER.debug("CActivityStatusService.createEntity called with name: {}", name);
-        
-        if (name == null || name.trim().isEmpty()) {
-            LOGGER.warn("Attempt to create CActivityStatus with null or empty name");
-            throw new IllegalArgumentException("Activity status name cannot be null or empty");
-        }
-        
-        if ("fail".equals(name)) {
-            LOGGER.warn("Test failure triggered in CActivityStatusService.createEntity");
-            throw new RuntimeException("This is for testing the error handler");
-        }
-        
-        final var entity = new CActivityStatus();
-        entity.setName(name);
-        repository.saveAndFlush(entity);
-        
-        LOGGER.debug("CActivityStatus created successfully with name: {}", name);
-    }
+	private final CActivityStatusRepository activityStatusRepository;
 
-    /**
-     * Creates a new activity status entity with the given name and description.
-     * @param name        the name of the activity status
-     * @param description the description of the activity status
-     */
-    @Transactional
-    public void createEntity(final String name, final String description) {
-        LOGGER.debug("CActivityStatusService.createEntity called with name: {} and description: {}", 
-                    name, description);
-        
-        if (name == null || name.trim().isEmpty()) {
-            LOGGER.warn("Attempt to create CActivityStatus with null or empty name");
-            throw new IllegalArgumentException("Activity status name cannot be null or empty");
-        }
-        
-        final var entity = new CActivityStatus(name, description);
-        repository.saveAndFlush(entity);
-        
-        LOGGER.debug("CActivityStatus created successfully with name: {} and description: {}", 
-                    name, description);
-    }
+	@Autowired
+	public CActivityStatusService(
+		final CActivityStatusRepository activityStatusRepository, final Clock clock) {
+		super(activityStatusRepository, clock);
+		logger.debug(
+			"CActivityStatusService(activityStatusRepository={}) - Initializing service",
+			activityStatusRepository);
 
-    /**
-     * Overrides the base get method to provide additional logging.
-     * No lazy loading concerns for CActivityStatus as it extends CTypeEntity.
-     * 
-     * @param id the activity status ID
-     * @return optional CActivityStatus
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<CActivityStatus> get(final Long id) {
-        LOGGER.debug("CActivityStatusService.get called with ID: {}", id);
-        
-        if (id == null) {
-            LOGGER.warn("Attempt to get CActivityStatus with null ID");
-            return Optional.empty();
-        }
-        
-        final Optional<CActivityStatus> entity = super.get(id);
-        
-        if (entity.isPresent()) {
-            LOGGER.debug("CActivityStatus found with ID: {} and name: {}", id, entity.get().getName());
-        } else {
-            LOGGER.debug("CActivityStatus not found with ID: {}", id);
-        }
-        
-        return entity;
-    }
+		if (activityStatusRepository == null) {
+			logger.error(
+				"CActivityStatusService constructor - Repository parameter is null");
+			throw new IllegalArgumentException(
+				"Activity status repository cannot be null");
+		}
+		this.activityStatusRepository = activityStatusRepository;
+	}
 
-    /**
-     * Initializes lazy fields for CActivityStatus entity.
-     * Since CActivityStatus extends CTypeEntity and has no lazy relationships,
-     * this method primarily calls the superclass implementation.
-     * 
-     * @param entity the CActivityStatus entity to initialize
-     */
-    @Override
-    protected void initializeLazyFields(final CActivityStatus entity) {
-        if (entity == null) {
-            LOGGER.debug("CActivityStatusService.initializeLazyFields called with null entity");
-            return;
-        }
+	/**
+	 * Create default activity statuses if they don't exist. This method should be called
+	 * during application startup.
+	 */
+	public void createDefaultStatusesIfNotExist() {
+		logger.debug(
+			"createDefaultStatusesIfNotExist() - Creating default activity statuses");
+		final String[][] defaultStatuses = {
+			{
+				"TODO", "Task is ready to be worked on", "#808080", "false", "1" },
+			{
+				"IN_PROGRESS", "Task is currently being worked on", "#007ACC", "false",
+				"2" },
+			{
+				"REVIEW", "Task is under review", "#FFA500", "false", "3" },
+			{
+				"BLOCKED", "Task is blocked and cannot proceed", "#FF4444", "false",
+				"4" },
+			{
+				"DONE", "Task has been completed", "#00AA00", "true", "5" },
+			{
+				"CANCELLED", "Task has been cancelled", "#888888", "true", "6" } };
 
-        LOGGER.debug("Initializing lazy fields for CActivityStatus with ID: {}", entity.getId());
+		for (final String[] statusData : defaultStatuses) {
+			final String name = statusData[0];
 
-        try {
-            // Initialize the entity itself first
-            super.initializeLazyFields(entity);
-            
-            // CActivityStatus has no lazy relationships to initialize
-            LOGGER.debug("Lazy fields initialization completed for CActivityStatus with ID: {}", entity.getId());
-            
-        } catch (final Exception e) {
-            LOGGER.warn("Error initializing lazy fields for CActivityStatus with ID: {}", entity.getId(), e);
-        }
-    }
+			if (!existsByName(name)) {
+				logger.debug(
+					"createDefaultStatusesIfNotExist() - Creating default status: {}",
+					name);
+				final CActivityStatus status = new CActivityStatus(name, statusData[1],
+					statusData[2], Boolean.parseBoolean(statusData[3]));
+				status.setSortOrder(Integer.parseInt(statusData[4]));
+				save(status);
+			}
+			else {
+				logger.debug(
+					"createDefaultStatusesIfNotExist() - Status '{}' already exists",
+					name);
+			}
+		}
+		logger.debug(
+			"createDefaultStatusesIfNotExist() - Completed creating default activity statuses");
+	}
+
+	/**
+	 * Delete an activity status by ID.
+	 * @param id the status ID - must not be null
+	 * @throws IllegalArgumentException if the ID is null
+	 */
+	public void deleteById(final Long id) {
+		logger.debug("deleteById(id={}) - Deleting activity status", id);
+
+		if (id == null) {
+			logger.error("deleteById(id=null) - ID parameter is null");
+			throw new IllegalArgumentException("Activity status ID cannot be null");
+		}
+		final Optional<CActivityStatus> existing = activityStatusRepository.findById(id);
+
+		if (!existing.isPresent()) {
+			logger.warn("deleteById(id={}) - Activity status not found", id);
+			return;
+		}
+
+		try {
+			activityStatusRepository.deleteById(id);
+			logger.debug("deleteById(id={}) - Successfully deleted activity status", id);
+		} catch (final Exception e) {
+			logger.error("deleteById(id={}) - Error deleting activity status: {}", id,
+				e.getMessage(), e);
+			throw new RuntimeException("Failed to delete activity status", e);
+		}
+	}
+
+	/**
+	 * Check if an activity status name exists (case-insensitive).
+	 * @param name the name to check - must not be null
+	 * @return true if the name exists, false otherwise
+	 */
+	@Transactional (readOnly = true)
+	public boolean existsByName(final String name) {
+		logger.debug("existsByName(name={}) - Checking if activity status name exists",
+			name);
+
+		if ((name == null) || name.trim().isEmpty()) {
+			logger.warn("existsByName(name={}) - Name parameter is null or empty", name);
+			return false;
+		}
+		final boolean exists =
+			activityStatusRepository.existsByNameIgnoreCase(name.trim());
+		logger.debug("existsByName(name={}) - Name exists: {}", name, exists);
+		return exists;
+	}
+
+	/**
+	 * Find all activity statuses ordered by sort order.
+	 * @return List of all activity statuses
+	 */
+	@Transactional (readOnly = true)
+	public List<CActivityStatus> findAll() {
+		logger.debug("findAll() - Finding all activity statuses");
+		final List<CActivityStatus> statuses =
+			activityStatusRepository.findAllOrderedBySortOrder();
+		logger.debug("findAll() - Found {} activity statuses", statuses.size());
+		return statuses;
+	}
+
+	/**
+	 * Find all active (non-final) statuses.
+	 * @return List of active statuses
+	 */
+	@Transactional (readOnly = true)
+	public List<CActivityStatus> findAllActiveStatuses() {
+		logger.debug("findAllActiveStatuses() - Finding all active activity statuses");
+		final List<CActivityStatus> statuses =
+			activityStatusRepository.findAllActiveStatuses();
+		logger.debug("findAllActiveStatuses() - Found {} active statuses",
+			statuses.size());
+		return statuses;
+	}
+
+	/**
+	 * Find all final statuses (completed/cancelled states).
+	 * @return List of final statuses
+	 */
+	@Transactional (readOnly = true)
+	public List<CActivityStatus> findAllFinalStatuses() {
+		logger.debug("findAllFinalStatuses() - Finding all final activity statuses");
+		final List<CActivityStatus> statuses =
+			activityStatusRepository.findAllFinalStatuses();
+		logger.debug("findAllFinalStatuses() - Found {} final statuses", statuses.size());
+		return statuses;
+	}
+
+	/**
+	 * Find activity status by ID.
+	 * @param id the status ID - must not be null
+	 * @return Optional containing the status if found, empty otherwise
+	 */
+	@Transactional (readOnly = true)
+	public Optional<CActivityStatus> findById(final Long id) {
+		logger.debug("findById(id={}) - Finding activity status by ID", id);
+
+		if (id == null) {
+			logger.warn("findById(id=null) - ID parameter is null");
+			return Optional.empty();
+		}
+		final Optional<CActivityStatus> status = activityStatusRepository.findById(id);
+		logger.debug("findById(id={}) - Found status: {}", id, status.isPresent());
+		return status;
+	}
+
+	/**
+	 * Find activity status by name (case-insensitive).
+	 * @param name the status name - must not be null or empty
+	 * @return Optional containing the status if found, empty otherwise
+	 */
+	@Transactional (readOnly = true)
+	public Optional<CActivityStatus> findByName(final String name) {
+		logger.debug("findByName(name={}) - Finding activity status by name", name);
+
+		if ((name == null) || name.trim().isEmpty()) {
+			logger.warn("findByName(name={}) - Name parameter is null or empty", name);
+			return Optional.empty();
+		}
+		final Optional<CActivityStatus> status =
+			activityStatusRepository.findByNameIgnoreCase(name.trim());
+		logger.debug("findByName(name={}) - Found status: {}", name, status.isPresent());
+		return status;
+	}
+
+	/**
+	 * Find the default status for new activities.
+	 * @return Optional containing the default status if found
+	 */
+	@Transactional (readOnly = true)
+	public Optional<CActivityStatus> findDefaultStatus() {
+		logger.debug("findDefaultStatus() - Finding default activity status");
+		final Optional<CActivityStatus> status =
+			activityStatusRepository.findDefaultStatus();
+		logger.debug("findDefaultStatus() - Found default status: {}",
+			status.isPresent());
+		return status;
+	}
+
+	/**
+	 * Save or update an activity status.
+	 * @param status the status to save - must not be null
+	 * @return the saved status
+	 * @throws IllegalArgumentException if the status is null or invalid
+	 */
+	@Override
+	public CActivityStatus save(final CActivityStatus status) {
+		logger.debug("save(status={}) - Saving activity status",
+			status != null ? status.getName() : "null");
+
+		if (status == null) {
+			logger.error("save(activityStatus=null) - Activity status parameter is null");
+			throw new IllegalArgumentException("Activity status cannot be null");
+		}
+
+		if ((status.getName() == null) || status.getName().trim().isEmpty()) {
+			logger.error(
+				"save() - Activity status name is null or empty for status id={}",
+				status.getId());
+			throw new IllegalArgumentException(
+				"Activity status name cannot be null or empty");
+		}
+		// Check for duplicate names (excluding self for updates)
+		final String trimmedName = status.getName().trim();
+		final Optional<CActivityStatus> existing =
+			activityStatusRepository.findByNameIgnoreCase(trimmedName);
+
+		if (existing.isPresent() && !existing.get().getId().equals(status.getId())) {
+			logger.error("save() - Activity status name '{}' already exists",
+				trimmedName);
+			throw new IllegalArgumentException(
+				"Activity status name '" + trimmedName + "' already exists");
+		}
+
+		try {
+			final CActivityStatus savedStatus = activityStatusRepository.save(status);
+			logger.debug("save() - Successfully saved activity status with id={}",
+				savedStatus.getId());
+			return savedStatus;
+		} catch (final Exception e) {
+			logger.error("save() - Error saving activity status: {}", e.getMessage(), e);
+			throw new RuntimeException("Failed to save activity status", e);
+		}
+	}
 }
