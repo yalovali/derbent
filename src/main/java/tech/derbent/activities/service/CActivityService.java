@@ -86,7 +86,7 @@ public class CActivityService extends CAbstractNamedEntityService<CActivity> {
 	@Transactional (readOnly = true)
 	public Optional<CActivity> get(final Long id) {
 		final Optional<CActivity> entity =
-			((CActivityRepository) repository).findByIdWithActivityTypeAndStatus(id);
+			((CActivityRepository) repository).findByIdWithActivityTypeStatusAndProject(id);
 		// Initialize lazy fields if entity is present (for any other potential lazy
 		// relationships)
 		entity.ifPresent(this::initializeLazyFields);
@@ -158,7 +158,7 @@ public class CActivityService extends CAbstractNamedEntityService<CActivity> {
 		LOGGER.debug(
 			"Getting CActivity with ID {} and eagerly loading CActivityType and CActivityStatus",
 			id);
-		return ((CActivityRepository) repository).findByIdWithActivityTypeAndStatus(id);
+		return ((CActivityRepository) repository).findByIdWithActivityTypeStatusAndProject(id);
 	}
 
 	/**
@@ -179,7 +179,11 @@ public class CActivityService extends CAbstractNamedEntityService<CActivity> {
 		try {
 			super.initializeLazyFields(entity);
 			initializeLazyRelationship(entity.getActivityType());
+			initializeLazyRelationship(entity.getAssignedTo());
+			initializeLazyRelationship(entity.getCreatedBy());
 			initializeLazyRelationship(entity.getStatus());
+			initializeLazyRelationship(entity.getPriority());
+			initializeLazyRelationship(entity.getParentActivity());
 			initializeLazyRelationship(entity.getProject());
 		} catch (final Exception e) {
 			LOGGER.warn("Error initializing lazy fields for CActivity with ID: {}",
