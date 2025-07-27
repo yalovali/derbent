@@ -97,29 +97,23 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 
 	@Override
 	protected void createGridForEntity() {
-		LOGGER.info("Creating grid for users");
-		// Add columns for key user information
-		grid.addColumn(CUser::getName).setAutoWidth(true).setHeader("Name").setKey("name")
-			.setSortable(true);
-		grid.addColumn(CUser::getLastname).setAutoWidth(true).setHeader("Last Name")
-			.setKey("lastname").setSortable(true);
-		grid.addColumn(CUser::getLogin).setAutoWidth(true).setHeader("Login")
-			.setKey("login").setSortable(true);
-		grid.addColumn(CUser::getEmail).setAutoWidth(true).setHeader("Email")
-			.setKey("email").setSortable(true);
+		LOGGER.info("Creating grid for users with appropriate field widths");
+		// Add columns using CGrid methods with field-type-appropriate widths
+		grid.addShortTextColumn(CUser::getName, "Name", "name", true);
+		grid.addShortTextColumn(CUser::getLastname, "Last Name", "lastname", true);
+		grid.addShortTextColumn(CUser::getLogin, "Login", "login", true);
+		grid.addLongTextColumn(CUser::getEmail, "Email", "email", true);
 		// Status column uses lambda expression - not directly sortable at DB level
-		grid.addColumn(user -> user.isEnabled() ? "Enabled" : "Disabled")
-			.setAutoWidth(true).setHeader("Status").setSortable(false);
+		grid.addBooleanColumn(CUser::isEnabled, "Status", "Enabled", "Disabled", false);
 		// User type requires join - not directly sortable at DB level
-		grid.addColumn(
-			user -> user.getUserType() != null ? user.getUserType().getName() : "")
-			.setAutoWidth(true).setHeader("User Type").setSortable(false);
+		grid.addReferenceColumn(
+			user -> user.getUserType() != null ? user.getUserType().getName() : "",
+			"User Type", false);
 		// Company requires join - not directly sortable at DB level
-		grid.addColumn(
-			user -> user.getCompany() != null ? user.getCompany().getName() : "")
-			.setAutoWidth(true).setHeader("Company").setSortable(false);
-		grid.addColumn(CUser::getRoles).setAutoWidth(true).setHeader("Roles")
-			.setKey("roles").setSortable(true);
+		grid.addReferenceColumn(
+			user -> user.getCompany() != null ? user.getCompany().getName() : "",
+			"Company", false);
+		grid.addShortTextColumn(CUser::getRoles, "Roles", "roles", true);
 		// Data provider is already set up in the base class
 		// CAbstractMDPage.createGridLayout() No need to call grid.setItems() again as
 		// it's already configured to handle sorting properly

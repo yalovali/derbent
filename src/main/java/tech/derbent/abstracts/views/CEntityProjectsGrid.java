@@ -19,7 +19,7 @@ public class CEntityProjectsGrid<T extends CEntityDB> extends VerticalLayout {
 
     private static final long serialVersionUID = 1L;
     protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
-    private final Grid<CProject> grid = new Grid<>(CProject.class, false);
+    private final CGrid<CProject> grid = new CGrid<>(CProject.class, false);
     private Supplier<Set<CProject>> getProjects;
     private Consumer<Set<CProject>> setProjects;
     private Runnable saveEntity;
@@ -27,8 +27,7 @@ public class CEntityProjectsGrid<T extends CEntityDB> extends VerticalLayout {
 
     public CEntityProjectsGrid(final CProjectService projectService) {
         LOGGER.info("CEntityProjectsGrid constructor called for {}", getClass().getSimpleName());
-        grid.addColumn(CProject::getName).setHeader("Project Name").setAutoWidth(true)
-            .setSortable(true);
+        grid.addShortTextColumn(CProject::getName, "Project Name", null, true);
         add(grid);
         // ComboBox to select a project
         projectComboBox = new ComboBox<>("Select Project");

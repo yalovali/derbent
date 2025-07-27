@@ -66,18 +66,13 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 
 	@Override
 	protected void createGridForEntity() {
-		// property name must match the field name in CProject
-		grid.addColumn("name").setAutoWidth(true).setHeader("Activity Name")
-			.setSortable(true);
-		// Add status column to display activity status
-		grid.addColumn(activity -> {
-			final CActivity activityEntity = activity;
-			return activityEntity.getStatus() != null
-				? activityEntity.getStatus().getName() : "";
-		}).setAutoWidth(true).setHeader("Status").setSortable(false); // Status is derived
-																		// from join, not
-																		// directly
-																		// sortable
+		LOGGER.info("Creating grid for activities with appropriate field widths");
+		// property name must match the field name in CActivity
+		grid.addShortTextColumn(CActivity::getName, "Activity Name", "name", true);
+		// Add status column to display activity status using reference column
+		grid.addReferenceColumn(activity -> {
+			return activity.getStatus() != null ? activity.getStatus().getName() : "";
+		}, "Status", false); // Status is derived from join, not directly sortable
 		// when a row is selected or deselected, populate form
 		grid.asSingleSelect().addValueChangeListener(event -> {
 
