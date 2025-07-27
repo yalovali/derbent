@@ -98,6 +98,8 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 	@Override
 	protected void createGridForEntity() {
 		LOGGER.info("Creating grid for users with appropriate field widths");
+		// Add profile picture column first
+		grid.addImageColumn(CUser::getProfilePictureData, "Picture");
 		// Add columns using CGrid methods with field-type-appropriate widths
 		grid.addShortTextColumn(CUser::getName, "Name", "name");
 		grid.addShortTextColumn(CUser::getLastname, "Last Name", "lastname");

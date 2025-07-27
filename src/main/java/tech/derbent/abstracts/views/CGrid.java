@@ -9,9 +9,11 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.function.ValueProvider;
 
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.base.utils.CImageUtils;
 
 /**
  * CGrid - Base grid class for consistent field width management based on data types.
@@ -42,6 +44,9 @@ public class CGrid<T extends CEntityDB> extends Grid<T> {
 	public static final String WIDTH_LONG_TEXT = "300px";
 
 	public static final String WIDTH_REFERENCE = "200px";
+
+	/** Width for image columns (profile pictures, etc.) */
+	public static final String WIDTH_IMAGE = "60px";
 
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
@@ -171,6 +176,41 @@ public class CGrid<T extends CEntityDB> extends Grid<T> {
 	public Column<T> addShortTextColumn(final ValueProvider<T, String> valueProvider,
 		final String header, final String key) {
 		return addCustomColumn(valueProvider, header, WIDTH_SHORT_TEXT, key, 0);
+	}
+
+	/**
+	 * Adds an image column with circular styling for profile pictures.
+	 * @param imageDataProvider Provider that returns byte array of image data
+	 * @param header            Column header text
+	 * @return The created column
+	 */
+	public Column<T> addImageColumn(final ValueProvider<T, byte[]> imageDataProvider,
+		final String header) {
+		LOGGER.info("Adding image column: {} with width: {}", header, WIDTH_IMAGE);
+		
+		final Column<T> column = addComponentColumn(entity -> {
+			final byte[] imageData = imageDataProvider.apply(entity);
+			final Image image = new Image();
+			image.setWidth("40px");
+			image.setHeight("40px");
+			image.getStyle().set("border-radius", "50%");
+			image.getStyle().set("object-fit", "cover");
+			
+			if (imageData != null && imageData.length > 0) {
+				final String dataUrl = CImageUtils.createDataUrl(imageData);
+				if (dataUrl != null) {
+					image.setSrc(dataUrl);
+				} else {
+					image.setSrc(CImageUtils.getDefaultProfilePictureDataUrl());
+				}
+			} else {
+				image.setSrc(CImageUtils.getDefaultProfilePictureDataUrl());
+			}
+			
+			return image;
+		}).setHeader(header).setWidth(WIDTH_IMAGE).setFlexGrow(0).setSortable(false);
+		
+		return column;
 	}
 
 	/**

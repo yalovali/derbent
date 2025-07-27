@@ -197,19 +197,19 @@ INSERT INTO ccompany (
 -- PASSWORD RULE: All passwords are 'test123' (hashed: $2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.)
 -- OR ? '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu'
 INSERT INTO cuser (
-    created_date, email, enabled, lastname, login, name, password, phone, roles, last_modified_date, cusertype_id, user_role
+    created_date, email, enabled, lastname, login, name, password, phone, roles, last_modified_date, cusertype_id, user_role, profile_picture_data
 ) VALUES 
 -- System Administrator
 ('2025-01-15 08:00:00', 'admin@derbent.tech', TRUE, 'Administrator', 'admin', 'System', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-0001', 'ADMIN,USER', '2025-01-15 08:00:00', 1, 'TEAM_MEMBER'),
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-0001', 'ADMIN,USER', '2025-01-15 08:00:00', 1, 'TEAM_MEMBER', NULL),
 
 -- Project Managers (at least 3)
 ('2025-01-15 09:00:00', 'sarah.johnson@derbent.tech', TRUE, 'Johnson', 'sarah.johnson', 'Sarah', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-1001', 'MANAGER,USER', '2025-01-15 09:00:00', 2, 'TEAM_MEMBER'),
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-1001', 'MANAGER,USER', '2025-01-15 09:00:00', 2, 'TEAM_MEMBER', NULL),
 ('2025-01-15 09:15:00', 'michael.chen@derbent.tech', TRUE, 'Chen', 'michael.chen', 'Michael', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-1002', 'MANAGER,USER', '2025-01-15 09:15:00', 2, 'TEAM_MEMBER'),
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-1002', 'MANAGER,USER', '2025-01-15 09:15:00', 2, 'TEAM_MEMBER', NULL),
 ('2025-01-15 09:30:00', 'rachel.martinez@derbent.tech', TRUE, 'Martinez', 'rachel.martinez', 'Rachel', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-1003', 'MANAGER,USER', '2025-01-15 09:30:00', 2, 'TEAM_MEMBER'),
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-1003', 'MANAGER,USER', '2025-01-15 09:30:00', 2, 'TEAM_MEMBER', NULL),
 
 -- Senior Developers (at least 4)
 ('2025-01-15 10:00:00', 'alex.rodriguez@derbent.tech', TRUE, 'Rodriguez', 'alex.rodriguez', 'Alex', 
