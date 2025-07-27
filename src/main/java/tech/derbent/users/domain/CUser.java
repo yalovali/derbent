@@ -105,6 +105,15 @@ public class CUser extends CEntityNamed {
 	@Column (name = "enabled", nullable = false)
 	private boolean enabled = true; // User account status, default is enabled
 
+	@MetaData (
+		displayName = "Profile Picture", required = false, readOnly = false, defaultValue = "",
+		description = "Path to user's profile picture", hidden = false, order = 11,
+		maxLength = 500
+	)
+	@Column (name = "profile_picture_path", nullable = true, length = 500)
+	@Size (max = 500)
+	private String profilePicturePath;
+
 	@OneToMany (mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<CUserProjectSettings> projectSettings;
 
@@ -261,6 +270,12 @@ public class CUser extends CEntityNamed {
 	}
 
 	public void setPhone(final String phone) { this.phone = phone; }
+
+	public String getProfilePicturePath() { return profilePicturePath; }
+
+	public void setProfilePicturePath(final String profilePicturePath) { 
+		this.profilePicturePath = profilePicturePath; 
+	}
 
 	public void setProjectSettings(final List<CUserProjectSettings> projectSettings) {
 		this.projectSettings = projectSettings;
