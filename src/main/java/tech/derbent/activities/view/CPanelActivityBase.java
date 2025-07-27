@@ -19,8 +19,24 @@ public abstract class CPanelActivityBase extends CAccordionDescription<CActivity
 		closePanel();
 	}
 
+	/**
+	 * Constructor with custom panel title.
+	 * @param title custom title for the panel
+	 * @param currentEntity current activity entity
+	 * @param beanValidationBinder validation binder
+	 * @param entityService activity service
+	 */
+	public CPanelActivityBase(final String title, final CActivity currentEntity,
+		final BeanValidationBinder<CActivity> beanValidationBinder,
+		final CActivityService entityService) {
+		super(title, currentEntity, beanValidationBinder, CActivity.class, entityService);
+		createPanelContent();
+		closePanel();
+	}
+
 	@Override
 	protected void createPanelContent() {
+		updatePanelEntityFields(); // Set the entity fields first
 		getBaseLayout().add(CEntityFormBuilder.buildForm(CActivity.class, getBinder(),
 			getEntityFields()));
 	}
