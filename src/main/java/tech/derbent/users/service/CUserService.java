@@ -191,12 +191,9 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 		}
 
 		try {
-			// Initialize the main entity
 			super.initializeLazyFields(user);
-			// Initialize user type if present
-			initializeLazyRelationship(user.getUserType(), "CUserType");
-			// Initialize project settings collection
-			initializeLazyRelationship(user.getProjectSettings(), "projectSettings");
+			initializeLazyRelationship(user.getUserType());
+			initializeLazyRelationship(user.getProjectSettings());
 		} catch (final Exception e) {
 			LOGGER.warn("Error initializing lazy fields for user with ID: {}",
 				CSpringAuxillaries.safeGetId(user), e);

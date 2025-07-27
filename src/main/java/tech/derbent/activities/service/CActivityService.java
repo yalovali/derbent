@@ -182,12 +182,10 @@ public class CActivityService extends CAbstractNamedEntityService<CActivity> {
 			entity.getId());
 
 		try {
-			// Initialize the entity itself first
 			super.initializeLazyFields(entity);
-			// Initialize the lazy-loaded CActivityType relationship
-			initializeLazyRelationship(entity.getActivityType(), "CActivityType");
-			// Initialize the lazy-loaded CActivityStatus relationship
-			initializeLazyRelationship(entity.getStatus(), "CActivityStatus");
+			initializeLazyRelationship(entity.getActivityType());
+			initializeLazyRelationship(entity.getStatus());
+			// initializeLazyRelationship(entity.getProject());
 		} catch (final Exception e) {
 			LOGGER.warn("Error initializing lazy fields for CActivity with ID: {}",
 				entity.getId(), e);
