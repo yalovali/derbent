@@ -110,18 +110,19 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 	}
 
 	/**
-	 * Overrides the base get method to eagerly load CUserType relationship. This prevents
-	 * LazyInitializationException when the entity is used in UI contexts.
+	 * Overrides the base get method to eagerly load CUserType and company relationships. 
+	 * This prevents LazyInitializationException when the entity is used in UI contexts,
+	 * particularly when company information is used in comboboxes.
 	 * @param id the user ID
-	 * @return optional CUser with loaded userType
+	 * @return optional CUser with loaded userType and company
 	 */
 	@Override
 	@Transactional (readOnly = true)
 	public Optional<CUser> get(final Long id) {
-		LOGGER.debug("Getting CUser with ID {} (overridden to eagerly load userType)",
+		LOGGER.debug("Getting CUser with ID {} (overridden to eagerly load userType and company)",
 			id);
 		final Optional<CUser> entity =
-			((CUserRepository) repository).findByIdWithUserType(id);
+			((CUserRepository) repository).findByIdWithAllRelationships(id);
 		// Initialize lazy fields if entity is present (for any other potential lazy
 		// relationships)
 		entity.ifPresent(this::initializeLazyFields);
@@ -180,7 +181,7 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 
 	/**
 	 * Initializes lazy fields for a user entity to prevent LazyInitializationException.
-	 * Specifically initializes user type and project settings.
+	 * Specifically initializes user type, company, and project settings.
 	 * @param user the user entity to initialize
 	 */
 	@Override
@@ -193,6 +194,7 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 		try {
 			super.initializeLazyFields(user);
 			initializeLazyRelationship(user.getUserType());
+			initializeLazyRelationship(user.getCompany());
 			initializeLazyRelationship(user.getProjectSettings());
 		} catch (final Exception e) {
 			LOGGER.warn("Error initializing lazy fields for user with ID: {}",
