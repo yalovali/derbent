@@ -8,7 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import tech.derbent.abstracts.services.CAbstractService;
+import tech.derbent.abstracts.services.CAbstractNamedEntityService;
 import tech.derbent.meetings.domain.CMeetingType;
 
 /**
@@ -19,7 +19,7 @@ import tech.derbent.meetings.domain.CMeetingType;
 @Service
 @PreAuthorize("isAuthenticated()")
 @Transactional(readOnly = true)
-public class CMeetingTypeService extends CAbstractService<CMeetingType> {
+public class CMeetingTypeService extends CAbstractNamedEntityService<CMeetingType> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingTypeService.class);
 
@@ -35,15 +35,32 @@ public class CMeetingTypeService extends CAbstractService<CMeetingType> {
     }
 
     /**
-     * Creates a new meeting type entity.
+     * Creates a new meeting type entity with name and description.
      * 
      * @param name the name of the meeting type
      * @param description the description of the meeting type
      */
     @Transactional
     public void createEntity(final String name, final String description) {
-        LOGGER.info("Creating new meeting type: {}", name);
-        final var entity = new CMeetingType(name, description);
+        LOGGER.info("Creating new meeting type: {} with description: {}", name, description);
+        
+        // Standard test failure logic for error handler testing
+        if ("fail".equals(name)) {
+            LOGGER.warn("Test failure requested for name: {}", name);
+            throw new RuntimeException("This is for testing the error handler");
+        }
+        
+        // Validate name using parent validation
+        validateEntityName(name);
+        
+        final CMeetingType entity = new CMeetingType(name, description);
         repository.saveAndFlush(entity);
+        
+        LOGGER.info("Meeting type created successfully with name: {}", name);
+    }
+
+    @Override
+    protected CMeetingType createNewEntityInstance() {
+        return new CMeetingType();
     }
 }
