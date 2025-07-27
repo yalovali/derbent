@@ -177,11 +177,6 @@ public class CCompanyView extends CAbstractMDPage<CCompany> {
 	@Override
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
 
-	@Override
-	protected void initPage() {
-		// Auto-generated method stub - can be used for additional page initialization
-	}
-
 	/**
 	 * Validates email format using simple regex
 	 * @param email the email to validate

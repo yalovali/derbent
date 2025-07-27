@@ -68,11 +68,6 @@ public class CUserTypeView extends CAbstractMDPage<CUserType> {
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
 
 	@Override
-	protected void initPage() {
-		// Initialize page components if needed
-	}
-
-	@Override
 	protected CUserType newEntity() {
 		return new CUserType();
 	}

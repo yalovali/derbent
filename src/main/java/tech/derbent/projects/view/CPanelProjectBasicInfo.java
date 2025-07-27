@@ -8,10 +8,8 @@ import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 
 /**
- * CPanelProjectBasicInfo - Panel for grouping basic information fields
- * of CProject entity.
- * Layer: View (MVC)
- * Groups fields: name, description
+ * CPanelProjectBasicInfo - Panel for grouping basic information fields of CProject
+ * entity. Layer: View (MVC) Groups fields: name, description
  */
 public class CPanelProjectBasicInfo extends CPanelProjectBase {
 
@@ -27,7 +25,8 @@ public class CPanelProjectBasicInfo extends CPanelProjectBase {
 
 	@Override
 	protected void updatePanelEntityFields() {
-		// Basic Information fields - project identity (CProject only has name and description from CEntityNamed)
+		// Basic Information fields - project identity (CProject only has name and
+		// description from CEntityNamed)
 		setEntityFields(List.of("name", "description"));
 	}
 }

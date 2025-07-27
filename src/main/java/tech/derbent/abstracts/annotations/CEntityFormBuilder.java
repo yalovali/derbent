@@ -171,11 +171,19 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		int processedComponents = 0;
 
 		for (final Field field : sortedFields) {
-
 			// skip if entityFields is not null and does not contain the field name or
 			// entityFields is empty
-			if ((entityFields != null) && (!entityFields.isEmpty())
-				&& !entityFields.contains(field.getName())) {
+			boolean skip = false;
+
+			if (entityFields == null) {
+				// skip = false; //already false by default
+			}
+
+			if ((entityFields != null) && !entityFields.contains(field.getName())) {
+				skip = true;
+			}
+
+			if (skip) {
 				continue;
 			}
 			processedComponents = processMetaForField(binder, dataProvider, formLayout,

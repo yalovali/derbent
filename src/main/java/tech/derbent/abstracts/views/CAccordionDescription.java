@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 
+import tech.derbent.abstracts.annotations.CEntityFormBuilder.ComboBoxDataProvider;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.services.CAbstractService;
 
@@ -16,11 +17,13 @@ public abstract class CAccordionDescription<EntityClass extends CEntityDB>
 
 	private final BeanValidationBinder<EntityClass> binder;
 
-	protected EntityClass currentEntity;
+	private EntityClass currentEntity;
 
 	protected CAbstractService<EntityClass> entityService;
 
 	private List<String> EntityFields;
+
+	private final ComboBoxDataProvider detailsDataProvider;
 
 	/**
 	 * Default constructor for CAccordionDescription.
@@ -35,15 +38,16 @@ public abstract class CAccordionDescription<EntityClass extends CEntityDB>
 		this.binder = beanValidationBinder;
 		this.entityService = entityService;
 		this.currentEntity = currentEntity;
+		this.detailsDataProvider = createComboBoxDataProvider();
 	}
 
 	/**
 	 * Constructor for CAccordionDescription with custom title.
-	 * @param title custom title for the accordion panel
-	 * @param currentEntity current entity instance
+	 * @param title                custom title for the accordion panel
+	 * @param currentEntity        current entity instance
 	 * @param beanValidationBinder validation binder
-	 * @param entityClass entity class type
-	 * @param entityService service for the entity
+	 * @param entityClass          entity class type
+	 * @param entityService        service for the entity
 	 */
 	public CAccordionDescription(final String title, final EntityClass currentEntity,
 		final BeanValidationBinder<EntityClass> beanValidationBinder,
@@ -54,11 +58,17 @@ public abstract class CAccordionDescription<EntityClass extends CEntityDB>
 		this.binder = beanValidationBinder;
 		this.entityService = entityService;
 		this.currentEntity = currentEntity;
+		this.detailsDataProvider = createComboBoxDataProvider();
 	}
 
+	protected abstract ComboBoxDataProvider createComboBoxDataProvider();
 	protected abstract void createPanelContent();
 
 	public BeanValidationBinder<EntityClass> getBinder() { return binder; }
+
+	public EntityClass getCurrentEntity() { return currentEntity; }
+
+	public ComboBoxDataProvider getDetailsDataProvider() { return detailsDataProvider; }
 
 	public List<String> getEntityFields() { return EntityFields; }
 
@@ -75,10 +85,7 @@ public abstract class CAccordionDescription<EntityClass extends CEntityDB>
 
 	public void saveEventHandler() {}
 
-	protected void setEntityFields(final List<String> fields) {
-		LOGGER.info("Setting entity fields for CPanelActivityDescription: {}", fields);
-		EntityFields = fields;
-	}
+	protected void setEntityFields(final List<String> fields) { EntityFields = fields; }
 
 	protected void updatePanelEntityFields() {
 		// TODO Auto-generated method stub

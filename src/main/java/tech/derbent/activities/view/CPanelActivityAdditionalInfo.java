@@ -8,10 +8,8 @@ import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
 
 /**
- * CPanelActivityAdditionalInfo - Panel for grouping additional information fields
- * of CActivity entity.
- * Layer: View (MVC)
- * Groups fields: acceptanceCriteria, notes
+ * CPanelActivityAdditionalInfo - Panel for grouping additional information fields of
+ * CActivity entity. Layer: View (MVC) Groups fields: acceptanceCriteria, notes
  */
 public class CPanelActivityAdditionalInfo extends CPanelActivityBase {
 

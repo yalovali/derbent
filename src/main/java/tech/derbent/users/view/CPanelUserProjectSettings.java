@@ -10,31 +10,44 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.data.binder.BeanValidationBinder;
 
-import tech.derbent.abstracts.views.CAccordion;
 import tech.derbent.abstracts.views.CButton;
 import tech.derbent.base.ui.dialogs.CConfirmationDialog;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
+import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserProjectSettings;
+import tech.derbent.users.service.CUserService;
+import tech.derbent.users.service.CUserTypeService;
 
-public class CPanelUserProjectSettings extends CAccordion {
+public class CPanelUserProjectSettings extends CPanelUserBase {
 
 	private static final long serialVersionUID = 1L;
+
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+
 	private final Grid<CUserProjectSettings> grid =
 		new Grid<>(CUserProjectSettings.class, false);
+
 	private final CProjectService projectService;
+
 	private Supplier<List<CUserProjectSettings>> getProjectSettings;
+
 	private Consumer<List<CUserProjectSettings>> setProjectSettings;
+
 	private Runnable saveEntity;
+
 	private CUser currentUser;
 
-	public CPanelUserProjectSettings(final CProjectService projectService) {
-		super("Project Settings");
-		LOGGER.info("CUserProjectSettingsGrid constructor called");
+	public CPanelUserProjectSettings(final CUser currentEntity,
+		final BeanValidationBinder<CUser> beanValidationBinder,
+		final CUserService entityService, final CUserTypeService userTypeService,
+		final CCompanyService companyService, final CProjectService projectService) {
+		super("Project Settings", currentEntity, beanValidationBinder, entityService,
+			userTypeService, companyService);
 		this.projectService = projectService;
 		setupGrid();
 		setupButtons();
@@ -44,10 +57,12 @@ public class CPanelUserProjectSettings extends CAccordion {
 
 	private void deleteSelected() {
 		final CUserProjectSettings selected = grid.asSingleSelect().getValue();
+
 		if (selected == null) {
 			new CWarningDialog("Please select a project setting to delete.").open();
 			return;
 		}
+
 		if ((getProjectSettings == null) || (setProjectSettings == null)) {
 			new CWarningDialog(
 				"Project settings handlers are not available. Please refresh the page.")
@@ -63,6 +78,7 @@ public class CPanelUserProjectSettings extends CAccordion {
 			final List<CUserProjectSettings> settings = getProjectSettings.get();
 			settings.remove(selected);
 			setProjectSettings.accept(settings);
+
 			if (saveEntity != null) {
 				saveEntity.run();
 			}
@@ -71,6 +87,7 @@ public class CPanelUserProjectSettings extends CAccordion {
 	}
 
 	private String getPermissionAsString(final CUserProjectSettings settings) {
+
 		if ((settings.getPermission() == null) || settings.getPermission().isEmpty()) {
 			return "";
 		}
@@ -78,6 +95,7 @@ public class CPanelUserProjectSettings extends CAccordion {
 	}
 
 	private String getProjectName(final CUserProjectSettings settings) {
+
 		if (settings.getProjectId() == null) {
 			return "Unknown Project";
 		}
@@ -87,6 +105,7 @@ public class CPanelUserProjectSettings extends CAccordion {
 	}
 
 	private String getRoleAsString(final CUserProjectSettings settings) {
+
 		if ((settings.getRole() == null) || settings.getRole().isEmpty()) {
 			return "";
 		}
@@ -94,12 +113,15 @@ public class CPanelUserProjectSettings extends CAccordion {
 	}
 
 	private void onSettingsSaved(final CUserProjectSettings settings) {
+
 		if ((getProjectSettings != null) && (setProjectSettings != null)) {
 			final List<CUserProjectSettings> settingsList = getProjectSettings.get();
 			// Check if this is an update or a new addition
 			boolean found = false;
+
 			for (int i = 0; i < settingsList.size(); i++) {
 				final CUserProjectSettings existing = settingsList.get(i);
+
 				if ((existing.getId() != null)
 					&& existing.getId().equals(settings.getId())) {
 					settingsList.set(i, settings);
@@ -107,10 +129,12 @@ public class CPanelUserProjectSettings extends CAccordion {
 					break;
 				}
 			}
+
 			if (!found) {
 				settingsList.add(settings);
 			}
 			setProjectSettings.accept(settingsList);
+
 			if (saveEntity != null) {
 				saveEntity.run();
 			}
@@ -119,11 +143,13 @@ public class CPanelUserProjectSettings extends CAccordion {
 	}
 
 	private void openAddDialog() {
+
 		if (currentUser == null) {
 			new CWarningDialog(
 				"Please select a user first before adding project settings.").open();
 			return;
 		}
+
 		if (projectService == null) {
 			new CWarningDialog(
 				"Project service is not available. Please try again later.").open();
@@ -137,10 +163,12 @@ public class CPanelUserProjectSettings extends CAccordion {
 
 	private void openEditDialog() {
 		final CUserProjectSettings selected = grid.asSingleSelect().getValue();
+
 		if (selected == null) {
 			new CWarningDialog("Please select a project setting to edit.").open();
 			return;
 		}
+
 		if (currentUser == null) {
 			new CWarningDialog(
 				"Current user information is not available. Please refresh the page.")
@@ -154,6 +182,7 @@ public class CPanelUserProjectSettings extends CAccordion {
 
 	public void refresh() {
 		LOGGER.info("Refreshing CUserProjectSettingsGrid");
+
 		if (getProjectSettings != null) {
 			grid.setItems(getProjectSettings.get());
 		}
@@ -205,5 +234,11 @@ public class CPanelUserProjectSettings extends CAccordion {
 			.setAutoWidth(true);
 		grid.setSelectionMode(Grid.SelectionMode.SINGLE);
 		getBaseLayout().add(grid);
+	}
+
+	@Override
+	protected void updatePanelEntityFields() {
+		// Contact Information fields - communication details setEntityFields();
+		setEntityFields(List.of(""));
 	}
 }

@@ -33,13 +33,15 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 
 	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "users/%s/edit";
 
-	private final CPanelUserProjectSettings projectSettingsGrid;
+	private CPanelUserProjectSettings projectSettingsGrid;
 
 	private final CUserTypeService userTypeService;
 
 	private final CCompanyService companyService;
 
 	CPanelUserDescription descriptionPanel;
+
+	private final CProjectService projectService;
 
 	// private final TextField name; • Annotate the CUsersView constructor with @Autowired
 	// to let Spring inject dependencies.
@@ -51,20 +53,37 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 		addClassNames("users-view");
 		this.userTypeService = userTypeService;
 		this.companyService = companyService;
-		projectSettingsGrid = new CPanelUserProjectSettings(projectService);
+		this.projectService = projectService;
+		// projectSettingsGrid = new CPanelUserProjectSettings(projectService);
 		LOGGER.info("CUsersView initialized with user type and company services");
 	}
 
 	@Override
 	protected void createDetailsLayout() {
 		CAccordionDescription<CUser> panel;
-		panel = new CPanelUserDescription(getCurrentEntity(), getBinder(),
-			(CUserService) entityService, userTypeService, companyService);
-		addAccordionPanel(panel);
 		descriptionPanel = new CPanelUserDescription(getCurrentEntity(), getBinder(),
 			(CUserService) entityService, userTypeService, companyService);
-		getBaseDetailsLayout().add(descriptionPanel);
-		getBaseDetailsLayout().add(projectSettingsGrid);
+		addAccordionPanel(descriptionPanel);
+		panel = new CPanelUserContactInfo(getCurrentEntity(), getBinder(),
+			(CUserService) entityService, userTypeService, companyService);
+		addAccordionPanel(panel);
+		panel = new CPanelUserCompanyAssociation(getCurrentEntity(), getBinder(),
+			(CUserService) entityService, userTypeService, companyService);
+		addAccordionPanel(panel);
+		// panel = new CPanelUserBasicInfo(getCurrentEntity(), getBinder(), (CUserService)
+		// entityService); addAccordionPanel(panel);
+		projectSettingsGrid = new CPanelUserProjectSettings(getCurrentEntity(),
+			getBinder(), (CUserService) entityService, userTypeService, companyService,
+			projectService);
+		addAccordionPanel(projectSettingsGrid);
+		panel = new CPanelUserSystemAccess(getCurrentEntity(), getBinder(),
+			(CUserService) entityService, userTypeService, companyService);
+		addAccordionPanel(panel);
+		/**************/
+		// descriptionPanel = new CPanelUserDescription(getCurrentEntity(),
+		// getBinder(),(CUserService) entityService, userTypeService, companyService);
+		// getBaseDetailsLayout().add(descriptionPanel);
+		// getBaseDetailsLayout().add(projectSettingsGrid);
 	}
 
 	@Override
@@ -148,11 +167,6 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
 
 	@Override
-	protected void initPage() {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
 	protected CUser newEntity() {
 		return new CUser();
 	}
@@ -162,8 +176,7 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 		super.populateForm(value);
 		LOGGER.info("Populating form with user data: {}",
 			value != null ? value.getLogin() : "null");
-		// Clear the description panel
-		descriptionPanel.populateForm(value);
+		// Clear the description panel descriptionPanel.populateForm(value);
 
 		// Update the project settings grid when a user is selected
 		if (value != null) {

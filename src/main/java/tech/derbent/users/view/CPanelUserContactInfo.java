@@ -4,8 +4,10 @@ import java.util.List;
 
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 
+import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.service.CUserService;
+import tech.derbent.users.service.CUserTypeService;
 
 /**
  * CPanelUserContactInfo - Panel for grouping contact information fields
@@ -19,8 +21,9 @@ public class CPanelUserContactInfo extends CPanelUserBase {
 
 	public CPanelUserContactInfo(final CUser currentEntity,
 		final BeanValidationBinder<CUser> beanValidationBinder,
-		final CUserService entityService) {
-		super("Contact Information", currentEntity, beanValidationBinder, entityService);
+		final CUserService entityService, final CUserTypeService userTypeService,
+		final CCompanyService companyService) {
+		super("Contact Information", currentEntity, beanValidationBinder, entityService, userTypeService, companyService);
 	}
 
 	@Override

@@ -6,12 +6,11 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.service.CMeetingService;
+import tech.derbent.meetings.service.CMeetingTypeService;
 
 /**
- * CPanelMeetingBasicInfo - Panel for grouping basic information fields
- * of CMeeting entity.
- * Layer: View (MVC)
- * Groups fields: name, description, meetingType, project
+ * CPanelMeetingBasicInfo - Panel for grouping basic information fields of CMeeting
+ * entity. Layer: View (MVC) Groups fields: name, description, meetingType, project
  */
 public class CPanelMeetingBasicInfo extends CPanelMeetingBase {
 
@@ -19,8 +18,10 @@ public class CPanelMeetingBasicInfo extends CPanelMeetingBase {
 
 	public CPanelMeetingBasicInfo(final CMeeting currentEntity,
 		final BeanValidationBinder<CMeeting> beanValidationBinder,
-		final CMeetingService entityService) {
-		super("Basic Information", currentEntity, beanValidationBinder, entityService);
+		final CMeetingService entityService,
+		final CMeetingTypeService meetingTypeService) {
+		super("Basic Information", currentEntity, beanValidationBinder, entityService,
+			meetingTypeService);
 		// only open this panel
 		openPanel();
 	}

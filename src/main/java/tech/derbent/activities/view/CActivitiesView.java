@@ -118,12 +118,6 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 	}
 
 	@Override
-	protected void initPage() {
-		// Initialize the page components and layout This method can be overridden to set
-		// up the view's components
-	}
-
-	@Override
 	protected CActivity newEntity() {
 		return super.newEntity(); // Uses the project-aware implementation from parent
 	}

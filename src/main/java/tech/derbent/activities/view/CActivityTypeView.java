@@ -69,11 +69,6 @@ public class CActivityTypeView extends CAbstractMDPage<CActivityType> {
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
 
 	@Override
-	protected void initPage() {
-		// Initialize page components if needed
-	}
-
-	@Override
 	protected CActivityType newEntity() {
 		return new CActivityType();
 	}

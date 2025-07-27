@@ -1,27 +1,20 @@
 package tech.derbent.users.view;
 
+import java.util.List;
+
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 
-import tech.derbent.abstracts.annotations.CEntityFormBuilder;
-import tech.derbent.abstracts.domains.CEntityDB;
-import tech.derbent.abstracts.views.CAccordionDescription;
-import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.users.domain.CUser;
-import tech.derbent.users.domain.CUserType;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.CUserTypeService;
 
-public class CPanelUserDescription extends CAccordionDescription<CUser> {
+public class CPanelUserDescription extends CPanelUserBase {
 
 	private static final long serialVersionUID = 1L;
 
 	private PasswordField passwordField;
-
-	private final CUserTypeService userTypeService;
-
-	private final CCompanyService companyService;
 
 	/**
 	 * Default constructor for CUserDescriptionPanel.
@@ -35,49 +28,15 @@ public class CPanelUserDescription extends CAccordionDescription<CUser> {
 		final BeanValidationBinder<CUser> beanValidationBinder,
 		final CUserService entityService, final CUserTypeService userTypeService,
 		final CCompanyService companyService) {
-		super(currentEntity, beanValidationBinder, CUser.class, entityService);
-		this.userTypeService = userTypeService;
-		this.companyService = companyService;
-		LOGGER.info(
-			"CPanelUserDescription initialized with user type and company services");
-		createPanelContent();
+		super("Basic Information", currentEntity, beanValidationBinder, entityService,
+			userTypeService, companyService);
 		// open the panel by default using the new convenience method
 		openPanel();
 	}
 
 	@Override
 	protected void createPanelContent() {
-		// Create data provider for ComboBoxes
-		final CEntityFormBuilder.ComboBoxDataProvider dataProvider =
-			new CEntityFormBuilder.ComboBoxDataProvider() {
-
-				@Override
-				@SuppressWarnings ("unchecked")
-				public <T extends CEntityDB> java.util.List<T>
-					getItems(final Class<T> entityType) {
-					LOGGER.debug("Getting items for entity type: {}",
-						entityType.getSimpleName());
-
-					if (entityType == CUserType.class) {
-						final java.util.List<T> userTypes =
-							(java.util.List<T>) userTypeService
-								.list(org.springframework.data.domain.Pageable.unpaged());
-						LOGGER.debug("Retrieved {} user types", userTypes.size());
-						return userTypes;
-					}
-					else if (entityType == CCompany.class) {
-						final java.util.List<T> companies =
-							(java.util.List<T>) companyService.findEnabledCompanies();
-						LOGGER.debug("Retrieved {} enabled companies", companies.size());
-						return companies;
-					}
-					LOGGER.warn("No data provider available for entity type: {}",
-						entityType.getSimpleName());
-					return java.util.Collections.emptyList();
-				}
-			};
-		getBaseLayout().add(CEntityFormBuilder.buildForm(CUser.class, getBinder(),
-			dataProvider, getEntityFields()));
+		super.createPanelContent();
 		// Add password field for editing
 		passwordField = new PasswordField("Password");
 		passwordField.setPlaceholder("Enter new password (leave empty to keep current)");
@@ -93,7 +52,7 @@ public class CPanelUserDescription extends CAccordionDescription<CUser> {
 		if (passwordField != null) {
 			passwordField.clear();
 		}
-		currentEntity = entity;
+		super.populateForm(entity);
 	}
 
 	@Override
@@ -103,12 +62,19 @@ public class CPanelUserDescription extends CAccordionDescription<CUser> {
 		if ((passwordField != null) && !passwordField.isEmpty()) {
 			final String newPassword = passwordField.getValue();
 
-			if ((currentEntity.getLogin() != null)
-				&& !currentEntity.getLogin().isEmpty()) {
-				((CUserService) entityService).updatePassword(currentEntity.getLogin(),
-					newPassword);
-				LOGGER.info("Password updated for user: {}", currentEntity.getLogin());
+			if ((getCurrentEntity().getLogin() != null)
+				&& !getCurrentEntity().getLogin().isEmpty()) {
+				((CUserService) entityService)
+					.updatePassword(getCurrentEntity().getLogin(), newPassword);
+				LOGGER.info("Password updated for user: {}",
+					getCurrentEntity().getLogin());
 			}
 		}
+	}
+
+	@Override
+	protected void updatePanelEntityFields() {
+		// Basic Information fields - essential user identity
+		setEntityFields(List.of("name", "lastname", "login", "password"));
 	}
 }

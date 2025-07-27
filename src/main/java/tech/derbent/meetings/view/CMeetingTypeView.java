@@ -69,11 +69,6 @@ public class CMeetingTypeView extends CAbstractMDPage<CMeetingType> {
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
 
 	@Override
-	protected void initPage() {
-		// Initialize page components if needed
-	}
-
-	@Override
 	protected CMeetingType newEntity() {
 		return new CMeetingType();
 	}

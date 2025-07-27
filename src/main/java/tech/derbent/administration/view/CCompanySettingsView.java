@@ -168,12 +168,6 @@ public class CCompanySettingsView extends CAbstractMDPage<CCompanySettings> {
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
 
 	@Override
-	protected void initPage() {
-		LOGGER.debug("initPage called for CCompanySettingsView");
-		// Additional page initialization if needed
-	}
-
-	@Override
 	protected CCompanySettings newEntity() {
 		LOGGER.debug("Creating new CCompanySettings entity");
 		// Create a new company settings entity with default values

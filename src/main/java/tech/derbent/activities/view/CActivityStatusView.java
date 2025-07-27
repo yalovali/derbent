@@ -95,13 +95,6 @@ public class CActivityStatusView extends CAbstractMDPage<CActivityStatus> {
 	@Override
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
 
-	@Override
-	protected void initPage() {
-		LOGGER.debug("Initializing CActivityStatusView page");
-		// Initialize page components if needed Currently no additional initialization
-		// required
-	}
-
 	/**
 	 * Creates a new CActivityStatus entity instance.
 	 * @return a new CActivityStatus entity
