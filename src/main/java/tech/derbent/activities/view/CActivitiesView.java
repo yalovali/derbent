@@ -12,6 +12,8 @@ import tech.derbent.abstracts.views.CAccordionDescription;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
+import tech.derbent.comments.service.CCommentService;
+import tech.derbent.comments.view.CPanelActivityComments;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.SessionService;
 
@@ -26,10 +28,14 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 	private final String ENTITY_ID_FIELD = "activity_id";
 
 	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "activities/%s/edit";
+	
+	private final CCommentService commentService;
 
 	public CActivitiesView(final CActivityService entityService,
-		final SessionService sessionService) {
+		final SessionService sessionService,
+		final CCommentService commentService) {
 		super(CActivity.class, entityService, sessionService);
+		this.commentService = commentService;
 		addClassNames("activities-view");
 	}
 
@@ -60,6 +66,11 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 		addAccordionPanel(panel);
 		panel = new CPanelActivityBudgetManagement(getCurrentEntity(), getBinder(),
 			(CActivityService) entityService);
+		addAccordionPanel(panel);
+		
+		// Add comments panel
+		panel = new CPanelActivityComments(getCurrentEntity(), getBinder(),
+			(CActivityService) entityService, commentService, sessionService);
 		addAccordionPanel(panel);
 	}
 
