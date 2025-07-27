@@ -36,7 +36,7 @@ import tech.derbent.setup.service.CSystemSettingsService;
 @PageTitle("System Setup & Configuration")
 @Menu(order = 301, icon = "vaadin:tools", title = "Setup.System Settings")
 @PermitAll // When security is enabled, allow all authenticated users
-public final class CSystemSettingsView extends CAbstractPage {
+public class CSystemSettingsView extends CAbstractPage {
 
     private static final long serialVersionUID = 1L;
     

@@ -25,7 +25,7 @@ import tech.derbent.companies.domain.CCompany;
 @Service
 @PreAuthorize("isAuthenticated()")
 @Transactional(readOnly = true) // Default to read-only transactions for better performance
-public final class CCompanySettingsService extends CAbstractService<CCompanySettings> {
+public class CCompanySettingsService extends CAbstractService<CCompanySettings> {
 
     private static final Logger logger = LoggerFactory.getLogger(CCompanySettingsService.class);
     private final CCompanySettingsRepository companySettingsRepository;

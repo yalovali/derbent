@@ -32,7 +32,7 @@ import tech.derbent.base.ui.dialogs.CConfirmationDialog;
 @PageTitle("Company Administration Settings")
 @Menu(order = 201, icon = "vaadin:cogs", title = "Administration.Company Settings")
 @PermitAll // When security is enabled, allow all authenticated users
-public final class CCompanySettingsView extends CAbstractMDPage<CCompanySettings> {
+public class CCompanySettingsView extends CAbstractMDPage<CCompanySettings> {
 
     private static final long serialVersionUID = 1L;
     private final String ENTITY_ID_FIELD = "company_settings_id";

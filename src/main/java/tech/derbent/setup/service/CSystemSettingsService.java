@@ -24,7 +24,7 @@ import tech.derbent.setup.domain.CSystemSettings;
 @Service
 @PreAuthorize("isAuthenticated()")
 @Transactional(readOnly = true) // Default to read-only transactions for better performance
-public final class CSystemSettingsService extends CAbstractService<CSystemSettings> {
+public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 
     private static final Logger logger = LoggerFactory.getLogger(CSystemSettingsService.class);
     private final CSystemSettingsRepository systemSettingsRepository;

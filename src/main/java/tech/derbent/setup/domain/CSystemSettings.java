@@ -24,7 +24,7 @@ import tech.derbent.abstracts.domains.CEntityDB;
 @Entity
 @Table(name = "csystemsettings")
 @AttributeOverride(name = "id", column = @Column(name = "system_settings_id"))
-public final class CSystemSettings extends CEntityDB {
+public class CSystemSettings extends CEntityDB {
 
     // Application Configuration
     @Column(name = "application_name", nullable = false, length = MAX_LENGTH_NAME)
