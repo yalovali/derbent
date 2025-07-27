@@ -27,19 +27,6 @@ src/main/java/cuser
 
 ---
 
-## 2. Using Copilot for Code Suggestions
-
-- Always specify the layer (Model, View, Controller) when requesting code from Copilot.
-- Request Copilot comments for key methods: explain responsibility, interactions, and MVC boundaries.
-- Ask Copilot for test stubs and edge-case handling.
-
-**Example Copilot prompt:**
-```java
-// Copilot: Generate a Vaadin view class for displaying User entities, using UserService as the model.
-```
-
----
-
 ## 3. Commenting Standards
 
 - **Every class:** Document its role in MVC.
@@ -71,34 +58,6 @@ src/main/java/cuser
 
 ---
 
-## 6. Example: Annotated MVC Class (Controller)
-
-```java
-package controller;
-
-import model.User;
-import service.UserService;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.Route;
-
-/**
- * UserViewController - Handles user interactions and updates the view.
- * Layer: Controller (MVC)
- */
-@Route("users")
-public class UserViewController extends VerticalLayout {
-    private final UserService userService;
-
-    public UserViewController(UserService userService) {
-        this.userService = userService;
-        // Initialize view components
-        // Copilot: Display users in a Vaadin Grid
-    }
-}
-```
-
----
-
 ## 7. Copilot Review Protocol
 
 After accepting Copilot suggestions, manually review for:
@@ -114,7 +73,6 @@ After accepting Copilot suggestions, manually review for:
 - Use `final` keyword wherever possible (variables, parameters, methods, classes).
 - Favor abstraction: if two or more features are similar, create an abstract base class with abstract fields and methods.
 - Always start class names with a capital "C" (e.g., `CUser`, `CSettings`). Do not use standard Java class naming for domain classes.
-- Always ensure **PostgreSQL-only** configuration. Update `data.sql` with correct sample and initial database values after any database change.
 - Check for lazy loading issues using best practices (e.g., `@Transactional`, `fetch = FetchType.LAZY`). Add comments explaining lazy loading risks or solutions.
 - Always check for `null` values and possible `NullPointerException` in every function. If necessary, also check for empty strings.
 - Always prefer using base classes to avoid code duplication.
@@ -135,8 +93,6 @@ After accepting Copilot suggestions, manually review for:
   - These dialogs must be simple, visually appealing, and inherit from a common superclass (e.g., `CBaseDialog`).
 - Never add loggers at the end of functions. Always log at the start with full detail about the function and parameters.
 - All code must follow Java naming conventions for variables and methods, except for class names which must start with "C".
-
-
 **FOR CSS
 -- update css names from class name, also update css file accordingly
 -- always use very simple css. Dont use javascript in java or css.
@@ -145,6 +101,33 @@ After accepting Copilot suggestions, manually review for:
 		#vaadinLoginOverlayWrapper::part(overlay) {
 				background-image: url('./images/background1.png');
 		}
+-- check the pattern of CPanelActivityDescription and its super classes. Use this pattern to group each entities fields according to related business topic. Dont leave any field out. create necassary classes, base classes with same naming convention for every entity and group fields in the view. only open the first one.
+-- always Check reference projects and do this task for a better structure, view and requirements of successful resource management, task tracking, project management, budget planning and better ui experience.
+-- always if necassary create new classes to support the new requirements with always less code and nice super classes for reuseability
+-- Prepare a detailed requirements document that includes this task description, main features, user roles, and any specific technologies or integrations that should be considered.
+
+
+**RULES OF DATABASE
+- password is always test123 for all users with has code '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu'
+- every entity should have an example in data.sql for per project, per company per user per activity etc...
+- Always ensure **PostgreSQL-only** configuration. Update `data.sql` with correct sample and initial database values after any database change.
+- keep spring.jpa.defer-datasource-initialization=true
+- dont use memory database H2
+- always delete tables at top of data.sql before you insert values into it. check them before they exists
+- delete constraints etc. if there is change in the db structure
+- always reset sequences in the format and escape characters below with a conditonal to check if they exists first
+DO '
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM pg_class c
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE c.relkind = ''S'' AND c.relname = ''ctask_task_id_seq''
+    ) THEN
+        EXECUTE ''SELECT setval(''''ctask_task_id_seq'''', 1, false)'';
+    END IF;
+END;
+';
 		
 
 **Documentation & Modularity**

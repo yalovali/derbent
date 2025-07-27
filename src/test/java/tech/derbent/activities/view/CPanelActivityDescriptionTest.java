@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 
+import tech.derbent.abstracts.views.CAccordionDescription;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
 
@@ -23,7 +24,7 @@ class CPanelActivityDescriptionTest {
     @Mock
     private CActivityService activityService;
 
-    private CPanelActivityDescription panel;
+    private CAccordionDescription<CActivity> panel;
     private CActivity testActivity;
     private BeanValidationBinder<CActivity> binder;
 

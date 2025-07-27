@@ -9,48 +9,81 @@ import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.views.CAbstractMDPage;
+import tech.derbent.abstracts.views.CAccordionDescription;
 import tech.derbent.abstracts.views.CButton;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
+import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.CUserTypeService;
 
-@Route("users/:user_id?/:action?(edit)")
-@PageTitle("User Master Detail")
-@Menu(order = 0, icon = "vaadin:users", title = "Settings.Users")
+@Route ("users/:user_id?/:action?(edit)")
+@PageTitle ("User Master Detail")
+@Menu (order = 3.2, icon = "vaadin:users", title = "Settings.Users")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CUsersView extends CAbstractMDPage<CUser> {
 
 	private static final long serialVersionUID = 1L;
+
 	private final String ENTITY_ID_FIELD = "user_id";
+
 	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "users/%s/edit";
-	private final CPanelUserProjectSettings projectSettingsGrid;
+
+	private CPanelUserProjectSettings projectSettingsGrid;
+
 	private final CUserTypeService userTypeService;
+
+	private final CCompanyService companyService;
+
 	CPanelUserDescription descriptionPanel;
+
+	private final CProjectService projectService;
 
 	// private final TextField name; • Annotate the CUsersView constructor with @Autowired
 	// to let Spring inject dependencies.
 	@Autowired
 	public CUsersView(final CUserService entityService,
-		final CProjectService projectService, final CUserTypeService userTypeService) {
+		final CProjectService projectService, final CUserTypeService userTypeService,
+		final CCompanyService companyService) {
 		super(CUser.class, entityService);
 		addClassNames("users-view");
 		this.userTypeService = userTypeService;
-		projectSettingsGrid = new CPanelUserProjectSettings(projectService);
+		this.companyService = companyService;
+		this.projectService = projectService;
+		// projectSettingsGrid = new CPanelUserProjectSettings(projectService);
+		LOGGER.info("CUsersView initialized with user type and company services");
 	}
 
 	@Override
 	protected void createDetailsLayout() {
-		LOGGER.info("Creating details layout for CUsersView");
-		createEntityDetails();
-		// Note: Buttons are now automatically added to the details tab by the parent
-		// class detailsLayout.add(projectSettingsGrid);
-		getBaseDetailsLayout().add(projectSettingsGrid);
+		CAccordionDescription<CUser> panel;
+		descriptionPanel = new CPanelUserDescription(getCurrentEntity(), getBinder(),
+			(CUserService) entityService, userTypeService, companyService);
+		addAccordionPanel(descriptionPanel);
+		panel = new CPanelUserContactInfo(getCurrentEntity(), getBinder(),
+			(CUserService) entityService, userTypeService, companyService);
+		addAccordionPanel(panel);
+		panel = new CPanelUserCompanyAssociation(getCurrentEntity(), getBinder(),
+			(CUserService) entityService, userTypeService, companyService);
+		addAccordionPanel(panel);
+		// panel = new CPanelUserBasicInfo(getCurrentEntity(), getBinder(), (CUserService)
+		// entityService); addAccordionPanel(panel);
+		projectSettingsGrid = new CPanelUserProjectSettings(getCurrentEntity(),
+			getBinder(), (CUserService) entityService, userTypeService, companyService,
+			projectService);
+		addAccordionPanel(projectSettingsGrid);
+		panel = new CPanelUserSystemAccess(getCurrentEntity(), getBinder(),
+			(CUserService) entityService, userTypeService, companyService);
+		addAccordionPanel(panel);
+		/**************/
+		// descriptionPanel = new CPanelUserDescription(getCurrentEntity(),
+		// getBinder(),(CUserService) entityService, userTypeService, companyService);
+		// getBaseDetailsLayout().add(descriptionPanel);
+		// getBaseDetailsLayout().add(projectSettingsGrid);
 	}
 
 	@Override
@@ -62,47 +95,64 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 		return detailsTabLabel;
 	}
 
-	protected void createEntityDetails() {
-		LOGGER.info("Creating entity details for CUsersView");
-		// Create description panel for user details
-		descriptionPanel = new CPanelUserDescription(getCurrentEntity(), getBinder(),
-			(CUserService) entityService, userTypeService);
-		getBaseDetailsLayout().add(descriptionPanel);
-	}
-
 	@Override
 	protected void createGridForEntity() {
-		LOGGER.info("Creating grid for users");
-		// Add columns for key user information
-		grid.addColumn(CUser::getName).setAutoWidth(true).setHeader("Name")
-			.setSortable(true);
-		grid.addColumn(CUser::getLastname).setAutoWidth(true).setHeader("Last Name")
-			.setSortable(true);
-		grid.addColumn(CUser::getLogin).setAutoWidth(true).setHeader("Login")
-			.setSortable(true);
-		grid.addColumn(CUser::getEmail).setAutoWidth(true).setHeader("Email")
-			.setSortable(true);
-		grid.addColumn(user -> user.isEnabled() ? "Enabled" : "Disabled")
-			.setAutoWidth(true).setHeader("Status").setSortable(true);
-		grid.addColumn(
-			user -> user.getUserType() != null ? user.getUserType().getName() : "")
-			.setAutoWidth(true).setHeader("User Type").setSortable(true);
-		grid.addColumn(CUser::getRoles).setAutoWidth(true).setHeader("Roles")
-			.setSortable(true);
-		grid.setItems(query -> entityService
-			.list(VaadinSpringDataHelpers.toSpringPageRequest(query)).stream());
+		LOGGER.info("Creating grid for users with appropriate field widths");
+		// Add profile picture column first
+		grid.addImageColumn(CUser::getProfilePictureData, "Picture");
+		// Add columns using CGrid methods with field-type-appropriate widths
+		grid.addShortTextColumn(CUser::getName, "Name", "name");
+		grid.addShortTextColumn(CUser::getLastname, "Last Name", "lastname");
+		grid.addShortTextColumn(CUser::getLogin, "Login", "login");
+		grid.addLongTextColumn(CUser::getEmail, "Email", "email");
+		// Status column uses lambda expression - not directly sortable at DB level
+		grid.addBooleanColumn(CUser::isEnabled, "Status", "Enabled", "Disabled");
+		// User type requires join - not directly sortable at DB level
+		grid.addReferenceColumn(
+			item -> item.getUserType() != null ? item.getUserType().getName() : "",
+			"User Type");
+		// Company requires join - not directly sortable at DB level
+		grid.addReferenceColumn(
+			item -> item.getCompany() != null ? item.getCompany().getName() : "",
+			"Company");
+		grid.addShortTextColumn(CUser::getRoles, "Roles", "roles");
+		// Data provider is already set up in the base class
+		// CAbstractMDPage.createGridLayout() No need to call grid.setItems() again as
+		// it's already configured to handle sorting properly
 	}
 
 	@Override
 	protected CButton createSaveButton(final String buttonText) {
 		LOGGER.info("Creating custom save button for CUsersView");
-		final CButton save = CButton.createPrimary(buttonText, e -> {
-			try {
-				// Ensure we have an entity to save
-				if (getCurrentEntity() == null) {
-					LOGGER.warn("No current entity for save operation, creating new entity");
-					setCurrentEntity(newEntity());
-					populateForm(getCurrentEntity());
+
+		final tech.derbent.abstracts.views.CButton save =
+			tech.derbent.abstracts.views.CButton.createPrimary(buttonText, e -> {
+
+				try {
+
+					if (getCurrentEntity() == null) {
+						// why dont you use populateForm(
+						setCurrentEntity(newEntity());
+					}
+					getBinder().writeBean(getCurrentEntity());
+					// Handle password update if a new password was entered
+					descriptionPanel.saveEventHandler();
+					entityService.save(getCurrentEntity());
+					clearForm();
+					refreshGrid();
+					Notification.show("Data updated");
+					// Navigate back to the current view (list mode)
+					UI.getCurrent().navigate(getClass());
+				} catch (final ValidationException validationException) {
+					new CWarningDialog(
+						"Failed to save the data. Please check that all required fields are filled and values are valid.")
+						.open();
+				} catch (final Exception exception) {
+					LOGGER.error("Unexpected error during save operation", exception);
+					new CWarningDialog(
+						"An unexpected error occurred while saving. Please try again.")
+						.open();
+
 				}
 				
 				// Write form data to entity
@@ -150,11 +200,6 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
 
 	@Override
-	protected void initPage() {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
 	protected CUser newEntity() {
 		return new CUser();
 	}
@@ -164,8 +209,8 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 		super.populateForm(value);
 		LOGGER.info("Populating form with user data: {}",
 			value != null ? value.getLogin() : "null");
-		// Clear the description panel
-		descriptionPanel.populateForm(value);
+		// Clear the description panel descriptionPanel.populateForm(value);
+
 		// Update the project settings grid when a user is selected
 		if (value != null) {
 			// Load user with project settings to avoid lazy initialization issues
@@ -181,6 +226,7 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 					// Save the user when project settings are updated
 					entityService.save(userWithSettings);
 				}, () -> {
+
 					// Refresh the current entity after save
 					try {
 						final CUser refreshedUser = ((CUserService) entityService)

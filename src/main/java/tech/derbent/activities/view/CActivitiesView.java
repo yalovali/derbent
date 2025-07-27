@@ -8,66 +8,114 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.abstracts.views.CAccordionDescription;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.SessionService;
 
-@Route("activities/:activity_id?/:action?(edit)")
-@PageTitle("Activity Master Detail")
-@Menu(order = 0, icon = "vaadin:calendar-clock", title = "Project.Activities")
+@Route ("activities/:activity_id?/:action?(edit)")
+@PageTitle ("Activity Master Detail")
+@Menu (order = 1.1, icon = "vaadin:calendar-clock", title = "Project.Activities")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 
 	private static final long serialVersionUID = 1L;
+
 	private final String ENTITY_ID_FIELD = "activity_id";
+
 	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "activities/%s/edit";
-	private CPanelActivityDescription descriptionPanel;
 
 	public CActivitiesView(final CActivityService entityService,
 		final SessionService sessionService) {
 		super(CActivity.class, entityService, sessionService);
-		LOGGER.info(
-			"Initializing CActivitiesView with entityService");
 		addClassNames("activities-view");
-	}
-
-	@Override
-	protected void createDetailsLayout() {
-		LOGGER.info(
-			"Creating details layout for CActivitiesView using CPanelActivityDescription");
-		createEntityDetails();
-		// Note: Buttons are now automatically added to the details tab by the parent
-		// class
 	}
 
 	/**
 	 * Creates the entity details section using CPanelActivityDescription. Follows the
 	 * same pattern as CUsersView for consistency.
 	 */
-	protected void createEntityDetails() {
-		LOGGER.info("Creating entity details for CActivitiesView");
-		// Create description panel for activity details
-		descriptionPanel = new CPanelActivityDescription(getCurrentEntity(), getBinder(),
+	@Override
+	protected void createDetailsLayout() {
+		CAccordionDescription<CActivity> panel;
+		panel = new CPanelActivityDescription(getCurrentEntity(), getBinder(),
 			(CActivityService) entityService);
-		getBaseDetailsLayout().add(descriptionPanel);
+		addAccordionPanel(panel);
+		panel = new CPanelActivityProject(getCurrentEntity(), getBinder(),
+			(CActivityService) entityService);
+		addAccordionPanel(panel);
+		panel = new CPanelActivityResourceManagement(getCurrentEntity(), getBinder(),
+			(CActivityService) entityService);
+		addAccordionPanel(panel);
+		panel = new CPanelActivityStatusPriority(getCurrentEntity(), getBinder(),
+			(CActivityService) entityService);
+		addAccordionPanel(panel);
+		panel = new CPanelActivityTimeTracking(getCurrentEntity(), getBinder(),
+			(CActivityService) entityService);
+		addAccordionPanel(panel);
+		panel = new CPanelActivityHierarchy(getCurrentEntity(), getBinder(),
+			(CActivityService) entityService);
+		addAccordionPanel(panel);
+		panel = new CPanelActivityBudgetManagement(getCurrentEntity(), getBinder(),
+			(CActivityService) entityService);
+		addAccordionPanel(panel);
 	}
 
 	@Override
 	protected void createGridForEntity() {
-		// property name must match the field name in CProject
-		grid.addColumn("name").setAutoWidth(true).setHeader("Activity Name");
-		
-		// Add status column to display activity status
-		grid.addColumn(activity -> {
-			CActivity activityEntity = (CActivity) activity;
-			return activityEntity.getActivityStatus() != null ? 
-				activityEntity.getActivityStatus().getName() : "";
-		}).setAutoWidth(true).setHeader("Status");
-		
-		// Note: Grid selection listener is handled by the base class CAbstractMDPage
-		// Removing duplicate listener that was causing conflicts with New/Delete buttons
+
+		grid.addShortTextColumn(CActivity::getProjectName, "Project", "project");
+		grid.addShortTextColumn(CActivity::getName, "Activity Name", "name");
+		grid.addReferenceColumn(item -> item.getActivityType() != null
+			? item.getActivityType().getName() : "No Type", "Type");
+		grid.addShortTextColumn(CActivity::getDescription, "Description", "description");
+		grid.addShortTextColumn(
+			item -> item.getStatus() != null ? item.getStatus().getName() : "No Status",
+			"Status", null);
+		// grid.addShortTextColumn(activity -> activity.getPriority() != null ?
+		// activity.getPriority().getName() : "No Priority", "Priority", null);
+		grid.addShortTextColumn(
+			item -> item.getStartDate() != null ? item.getStartDate().toString() : "",
+			"Start Date", null);
+		grid.addShortTextColumn(
+			item -> item.getDueDate() != null ? item.getDueDate().toString() : "",
+			"Due Date", null);
+		grid.addShortTextColumn(item -> item.getParentActivity() != null
+			? item.getParentActivity().getName() : "No Parent Activity", "Parent", null);
+		grid.addColumn(item -> {
+			final String desc = item.getDescription();
+
+			if (desc == null) {
+				return "Not set";
+			}
+			return desc.length() > 50 ? desc.substring(0, 50) + "..." : desc;
+		}, "Description", null);
+		// Add more columns as needed for other fields
+		grid.asSingleSelect().addValueChangeListener(event -> {
+
+			if (event.getValue() != null) {
+				UI.getCurrent().navigate(
+					String.format(ENTITY_ROUTE_TEMPLATE_EDIT, event.getValue().getId()));
+			}
+			else {
+				clearForm();
+				UI.getCurrent().navigate(CActivitiesView.class);
+			}
+		});
+		// when a row is selected or deselected, populate form
+		grid.asSingleSelect().addValueChangeListener(event -> {
+
+			if (event.getValue() != null) {
+				UI.getCurrent().navigate(
+					String.format(ENTITY_ROUTE_TEMPLATE_EDIT, event.getValue().getId()));
+			}
+			else {
+				clearForm();
+				UI.getCurrent().navigate(CActivitiesView.class);
+			}
+		});
 	}
 
 	// private final BeanValidationBinder<CProject> binder; private final CProjectService
@@ -96,25 +144,8 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 	}
 
 	@Override
-	protected void initPage() {
-		// Initialize the page components and layout This method can be overridden to set
-		// up the view's components
-	}
-
-	@Override
 	protected CActivity newEntity() {
 		return super.newEntity(); // Uses the project-aware implementation from parent
-	}
-
-	@Override
-	protected void populateForm(final CActivity value) {
-		super.populateForm(value);
-		LOGGER.info("Populating form with activity data: {}",
-			value != null ? value.getName() : "null");
-		// Update the description panel when an activity is selected
-		if (descriptionPanel != null) {
-			descriptionPanel.populateForm(value);
-		}
 	}
 
 	@Override

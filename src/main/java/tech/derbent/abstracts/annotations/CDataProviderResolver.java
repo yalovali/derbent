@@ -55,14 +55,16 @@ import tech.derbent.abstracts.domains.CEntityDB;
  * {
  * 	&#64;code
  * 	// Using bean name
- * 	&#64;MetaData(displayName = "Activity Type", dataProviderBean = "activityTypeService")
+ * 	&#64;MetaData (displayName = "Activity Type", dataProviderBean = "activityTypeService")
  * 	private CActivityType activityType;
  * 	// Using bean class
- * 	&#64;MetaData(displayName = "Project", dataProviderClass = CProjectService.class)
+ * 	&#64;MetaData (displayName = "Project", dataProviderClass = CProjectService.class)
  * 	private CProject project;
  * 	// Using custom method
- * 	@MetaData(displayName = "Active Users", dataProviderBean = "userService",
- * 		dataProviderMethod = "findAllActive")
+ * 	@MetaData (
+ * 		displayName = "Active Users", dataProviderBean = "userService",
+ * 		dataProviderMethod = "findAllActive"
+ * 	)
  * 	private CUser assignedUser;
  * }
  * </pre>
@@ -78,20 +80,24 @@ public final class CDataProviderResolver {
 
 	private static final Logger LOGGER =
 		LoggerFactory.getLogger(CDataProviderResolver.class);
+
 	/**
 	 * Default page size for paginated queries when no specific size is provided.
 	 */
 	private static final int DEFAULT_PAGE_SIZE = 1000;
+
 	/**
 	 * Cache for resolved methods to improve performance. Key format:
 	 * "beanName:methodName:entityType"
 	 */
 	private final Map<String, Method> methodCache = new ConcurrentHashMap<>();
+
 	/**
 	 * Cache for resolved bean instances to improve performance. Key format: "beanName" or
 	 * "className"
 	 */
 	private final Map<String, Object> beanCache = new ConcurrentHashMap<>();
+
 	private final ApplicationContext applicationContext;
 
 	/**
@@ -101,7 +107,6 @@ public final class CDataProviderResolver {
 	@Autowired
 	public CDataProviderResolver(final ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
-		LOGGER.info("CDataProviderResolver initialized with application context");
 	}
 
 	/**
@@ -124,6 +129,7 @@ public final class CDataProviderResolver {
 	 */
 	private <T extends CEntityDB> List<T> callDataMethod(final Object serviceBean,
 		final String methodName, final Class<T> entityType) {
+
 		if (serviceBean == null) {
 			LOGGER.error("Service bean is null - cannot call data method");
 			return Collections.emptyList();
@@ -135,14 +141,18 @@ public final class CDataProviderResolver {
 		// Define method names to try in order of preference
 		final String[] methodsToTry = {
 			methodName, "list", "findAll" };
+
 		for (final String currentMethodName : methodsToTry) {
+
 			if ((currentMethodName == null) || currentMethodName.trim().isEmpty()) {
 				continue;
 			}
+
 			try {
 				// Try with Pageable parameter first
 				final List<T> result =
 					tryMethodWithPageable(serviceBean, currentMethodName, entityType);
+
 				if (result != null) {
 					LOGGER.debug(
 						"Successfully called method '{}' with Pageable on bean '{}' - returned {} items",
@@ -152,6 +162,7 @@ public final class CDataProviderResolver {
 				// Try without parameters
 				final List<T> resultNoParams =
 					tryMethodWithoutParams(serviceBean, currentMethodName, entityType);
+
 				if (resultNoParams != null) {
 					LOGGER.debug(
 						"Successfully called method '{}' without parameters on bean '{}' - returned {} items",
@@ -188,6 +199,7 @@ public final class CDataProviderResolver {
 		final java.util.function.Supplier<Object> beanSupplier) {
 		return beanCache.computeIfAbsent(cacheKey, k -> {
 			final Object bean = beanSupplier.get();
+
 			if (bean != null) {
 				LOGGER.debug("Cached bean for key: {}", cacheKey);
 			}
@@ -215,6 +227,7 @@ public final class CDataProviderResolver {
 		final java.util.function.Supplier<Method> methodSupplier) {
 		return methodCache.computeIfAbsent(cacheKey, k -> {
 			final Method method = methodSupplier.get();
+
 			if (method != null) {
 				LOGGER.debug("Cached method for key: {}", cacheKey);
 			}
@@ -237,11 +250,13 @@ public final class CDataProviderResolver {
 	 */
 	public <T extends CEntityDB> List<T> resolveData(final Class<T> entityType,
 		final MetaData metaData) {
+
 		// Enhanced null pointer checking with detailed logging
 		if (entityType == null) {
 			LOGGER.error("Entity type parameter is null - cannot resolve data");
 			throw new IllegalArgumentException("Entity type cannot be null");
 		}
+
 		if (metaData == null) {
 			LOGGER.error(
 				"MetaData parameter is null for entity type: {} - cannot resolve data",
@@ -251,7 +266,9 @@ public final class CDataProviderResolver {
 		LOGGER.debug(
 			"Resolving data provider for entity type: {} with MetaData configuration",
 			entityType.getSimpleName());
+
 		try {
+
 			// Strategy 1: Use specified bean name
 			if ((metaData.dataProviderBean() != null)
 				&& !metaData.dataProviderBean().trim().isEmpty()) {
@@ -260,6 +277,7 @@ public final class CDataProviderResolver {
 				return resolveDataFromBean(entityType, metaData.dataProviderBean(),
 					metaData.dataProviderMethod());
 			}
+
 			// Strategy 2: Use specified bean class
 			if ((metaData.dataProviderClass() != null)
 				&& (metaData.dataProviderClass() != Object.class)) {
@@ -306,8 +324,11 @@ public final class CDataProviderResolver {
 			entityName + "Service", Character.toLowerCase(entityName.charAt(0))
 				+ entityName.substring(1) + "Service",
 			entityName.toLowerCase() + "Service" };
+
 		for (final String beanName : possibleBeanNames) {
+
 			try {
+
 				if (applicationContext.containsBean(beanName)) {
 					return resolveDataFromBean(entityType, beanName, methodName);
 				}
@@ -336,9 +357,11 @@ public final class CDataProviderResolver {
 		LOGGER.debug(
 			"Resolving data from bean '{}' using method '{}' for entity type: {}",
 			beanName, methodName, entityType.getSimpleName());
+
 		try {
 			// Get bean from Spring context with caching
 			final Object serviceBean = getBeanFromCache(beanName, () -> {
+
 				if (applicationContext.containsBean(beanName)) {
 					return applicationContext.getBean(beanName);
 				}
@@ -347,6 +370,7 @@ public final class CDataProviderResolver {
 					return null;
 				}
 			});
+
 			if (serviceBean == null) {
 				LOGGER.error("Failed to retrieve bean '{}' from Spring context",
 					beanName);
@@ -375,10 +399,12 @@ public final class CDataProviderResolver {
 		LOGGER.debug(
 			"Resolving data from bean class '{}' using method '{}' for entity type: {}",
 			serviceClass.getSimpleName(), methodName, entityType.getSimpleName());
+
 		try {
 			// Get bean by type from Spring context with caching
 			final String cacheKey = serviceClass.getName();
 			final Object serviceBean = getBeanFromCache(cacheKey, () -> {
+
 				try {
 					return applicationContext.getBean(serviceClass);
 				} catch (final Exception e) {
@@ -387,6 +413,7 @@ public final class CDataProviderResolver {
 					return null;
 				}
 			});
+
 			if (serviceBean == null) {
 				LOGGER.error("Failed to retrieve bean of type '{}' from Spring context",
 					serviceClass.getSimpleName());
@@ -410,21 +437,25 @@ public final class CDataProviderResolver {
 	 * @param entityType  the entity type for caching
 	 * @return list of entities or null if method not found/failed
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings ("unchecked")
 	private <T extends CEntityDB> List<T> tryMethodWithoutParams(final Object serviceBean,
 		final String methodName, final Class<T> entityType) {
 		final String cacheKey = serviceBean.getClass().getName() + ":" + methodName
 			+ ":noparams:" + entityType.getSimpleName();
+
 		try {
 			final Method method = getMethodFromCache(cacheKey, () -> {
+
 				try {
 					return serviceBean.getClass().getMethod(methodName);
 				} catch (final NoSuchMethodException e) {
 					return null;
 				}
 			});
+
 			if (method != null) {
 				final Object result = method.invoke(serviceBean);
+
 				if (result instanceof List) {
 					return (List<T>) result;
 				}
@@ -444,22 +475,26 @@ public final class CDataProviderResolver {
 	 * @param entityType  the entity type for caching
 	 * @return list of entities or null if method not found/failed
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings ("unchecked")
 	private <T extends CEntityDB> List<T> tryMethodWithPageable(final Object serviceBean,
 		final String methodName, final Class<T> entityType) {
 		final String cacheKey = serviceBean.getClass().getName() + ":" + methodName
 			+ ":pageable:" + entityType.getSimpleName();
+
 		try {
 			final Method method = getMethodFromCache(cacheKey, () -> {
+
 				try {
 					return serviceBean.getClass().getMethod(methodName, Pageable.class);
 				} catch (final NoSuchMethodException e) {
 					return null;
 				}
 			});
+
 			if (method != null) {
 				final Pageable pageable = PageRequest.of(0, DEFAULT_PAGE_SIZE);
 				final Object result = method.invoke(serviceBean, pageable);
+
 				if (result instanceof org.springframework.data.domain.Page) {
 					return ((org.springframework.data.domain.Page<T>) result)
 						.getContent();
