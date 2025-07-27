@@ -154,6 +154,15 @@ public class CSystemSettings extends CEntityDB {
     private String systemEmailFrom = "noreply@derbent.tech";
 
     // Database and Performance Settings
+    @Column(name = "database_name", nullable = false, length = MAX_LENGTH_NAME)
+    @Size(max = MAX_LENGTH_NAME, message = "Database name cannot exceed " + MAX_LENGTH_NAME + " characters")
+    @jakarta.validation.constraints.NotNull(message = "Database name cannot be null")
+    @jakarta.validation.constraints.NotBlank(message = "Database name cannot be blank")
+    @MetaData(displayName = "Database Name", required = true, readOnly = false, 
+              defaultValue = "derbent", description = "Name of the database to connect to", 
+              hidden = false, order = 17, maxLength = MAX_LENGTH_NAME)
+    private String databaseName = "derbent";
+
     @Column(name = "enable_database_logging", nullable = false)
     @MetaData(displayName = "Enable Database Logging", required = true, readOnly = false, 
               defaultValue = "false", description = "Enable detailed database query logging", 
@@ -251,6 +260,9 @@ public class CSystemSettings extends CEntityDB {
     protected void initializeDefaults() {
         if (maxFileUploadSizeMb == null) {
             maxFileUploadSizeMb = new BigDecimal("50.0");
+        }
+        if (databaseName == null || databaseName.trim().isEmpty()) {
+            databaseName = "derbent";
         }
     }
 
@@ -392,6 +404,14 @@ public class CSystemSettings extends CEntityDB {
         this.systemEmailFrom = systemEmailFrom;
     }
 
+    public String getDatabaseName() {
+        return databaseName;
+    }
+
+    public void setDatabaseName(final String databaseName) {
+        this.databaseName = databaseName;
+    }
+
     public boolean isEnableDatabaseLogging() {
         return enableDatabaseLogging;
     }
@@ -496,6 +516,7 @@ public class CSystemSettings extends CEntityDB {
                 ", sessionTimeoutMinutes=" + sessionTimeoutMinutes +
                 ", maxLoginAttempts=" + maxLoginAttempts +
                 ", maxFileUploadSizeMb=" + maxFileUploadSizeMb +
+                ", databaseName='" + databaseName + '\'' +
                 ", enableDatabaseLogging=" + enableDatabaseLogging +
                 ", maintenanceModeEnabled=" + maintenanceModeEnabled +
                 '}';
