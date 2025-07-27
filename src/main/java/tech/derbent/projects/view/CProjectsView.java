@@ -58,7 +58,16 @@ public class CProjectsView extends CAbstractMDPage<CProject> {
 	protected void createGridForEntity() {
 		LOGGER.info("Creating grid for projects");
 		// property name must match the field name in CProject
-		grid.addColumn("name").setAutoWidth(true).setHeader("Name").setSortable(true);
+		grid.addShortTextColumn(CProject::getName, "Name", "name");
+		grid.addLongTextColumn(item -> {
+			final String desc = item.getDescription();
+
+			if (desc == null) {
+				return "Not set";
+			}
+			return desc.length() > 50 ? desc.substring(0, 50) + "..." : desc;
+		}, "Description", null);
+
 		// when a row is selected or deselected, populate form
 		grid.asSingleSelect().addValueChangeListener(event -> {
 

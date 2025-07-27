@@ -28,7 +28,7 @@ import tech.derbent.users.service.CUserService;
 @Configuration
 class CSecurityConfig extends VaadinWebSecurity {
 
-	private static final Logger logger = LoggerFactory.getLogger(CSecurityConfig.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CSecurityConfig.class);
 
 	private final CUserService loginUserService;
 
@@ -48,7 +48,7 @@ class CSecurityConfig extends VaadinWebSecurity {
 	 */
 	@Override
 	protected void configure(final HttpSecurity http) throws Exception {
-		logger.debug("Configuring HTTP security with database authentication");
+		LOGGER.debug("Configuring HTTP security with database authentication");
 		// Apply Vaadin's default security configuration This handles CSRF protection,
 		// session management, and other Vaadin-specific security
 		super.configure(http);

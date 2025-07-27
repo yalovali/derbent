@@ -32,7 +32,7 @@ import tech.derbent.users.domain.CUserProjectSettings;
 									// performance
 public class CUserService extends CAbstractService<CUser> implements UserDetailsService {
 
-	private static final Logger logger = LoggerFactory.getLogger(CUserService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CUserService.class);
 
 	private final PasswordEncoder passwordEncoder;
 
@@ -52,7 +52,7 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 	 */
 	@PreAuthorize ("permitAll()")
 	public long countUsersByProjectId(final Long projectId) {
-		logger.info("Counting users for project ID: {}", projectId);
+		LOGGER.info("Counting users for project ID: {}", projectId);
 		return ((CUserRepository) repository).countUsersByProjectId(projectId);
 	}
 
@@ -80,7 +80,7 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 	@Transactional // Write operation requires writable transaction
 	public CUser createLoginUser(final String username, final String plainPassword,
 		final String name, final String email, final String roles) {
-		logger.info("Creating new login user with username: {}", username);
+		LOGGER.info("Creating new login user with username: {}", username);
 
 		// Check if username already exists
 		if (((CUserRepository) repository).findByUsername(username).isPresent()) {
@@ -94,7 +94,7 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 		loginUser.setEnabled(true);
 		// Save to database
 		final CUser savedUser = repository.saveAndFlush(loginUser);
-		logger.info("Successfully created login user with ID: {} and username: {}",
+		LOGGER.info("Successfully created login user with ID: {} and username: {}",
 			savedUser.getId(), username);
 		return savedUser;
 	}
@@ -105,7 +105,7 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 	 * @return the CUser if found, null otherwise
 	 */
 	public CUser findByLogin(final String login) {
-		logger.debug("Finding user by login: {}", login);
+		LOGGER.debug("Finding user by login: {}", login);
 		return ((CUserRepository) repository).findByUsername(login).orElse(null);
 	}
 
@@ -137,7 +137,7 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 	private Collection<GrantedAuthority> getAuthorities(final String rolesString) {
 
 		if ((rolesString == null) || rolesString.trim().isEmpty()) {
-			logger.warn("User has no roles assigned, defaulting to ROLE_USER");
+			LOGGER.warn("User has no roles assigned, defaulting to ROLE_USER");
 			return Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"));
 		}
 		// Split roles by comma and convert to authorities
@@ -150,7 +150,7 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 																				// if not
 																				// present
 				.map(SimpleGrantedAuthority::new).collect(Collectors.toList());
-		logger.debug("Converted roles '{}' to authorities: {}", rolesString, authorities);
+		LOGGER.debug("Converted roles '{}' to authorities: {}", rolesString, authorities);
 		return authorities;
 	}
 
@@ -215,15 +215,15 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 	@Override
 	public UserDetails loadUserByUsername(final String username)
 		throws UsernameNotFoundException {
-		logger.debug("Attempting to load user by username: {}", username);
+		LOGGER.debug("Attempting to load user by username: {}", username);
 		// Step 1: Query database for user by username
 		final CUser loginUser =
 			((CUserRepository) repository).findByUsername(username).orElseThrow(() -> {
-				logger.warn("User not found with username: {}", username);
+				LOGGER.warn("User not found with username: {}", username);
 				return new UsernameNotFoundException(
 					"User not found with username: " + username);
 			});
-		logger.debug("User found: {} with roles: {}", username, loginUser.getRoles());
+		LOGGER.debug("User found: {} with roles: {}", username, loginUser.getRoles());
 		// Step 2: Convert user roles to Spring Security authorities
 		final Collection<GrantedAuthority> authorities =
 			getAuthorities(loginUser.getRoles());
@@ -245,7 +245,7 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 	 */
 	@Transactional
 	public void removeUserProjectSetting(final Long userId, final Long projectId) {
-		logger.info("Removing user project setting for user ID: {} and project ID: {}",
+		LOGGER.info("Removing user project setting for user ID: {} and project ID: {}",
 			userId, projectId);
 		final CUser user = getUserWithProjects(userId);
 
@@ -264,7 +264,7 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 	@Transactional
 	public CUserProjectSettings
 		saveUserProjectSetting(final CUserProjectSettings userProjectSetting) {
-		logger.info("Saving user project setting for user ID: {} and project ID: {}",
+		LOGGER.info("Saving user project setting for user ID: {} and project ID: {}",
 			userProjectSetting.getUser().getId(), userProjectSetting.getProjectId());
 		// Ensure the user exists and reload with project settings
 		final CUser user = getUserWithProjects(userProjectSetting.getUser().getId());
@@ -303,14 +303,14 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 	 */
 	@Transactional
 	public void updatePassword(final String username, final String newPlainPassword) {
-		logger.info("Updating password for user: {}", username);
+		LOGGER.info("Updating password for user: {}", username);
 		final CUser loginUser =
 			((CUserRepository) repository).findByUsername(username).orElseThrow(
 				() -> new UsernameNotFoundException("User not found: " + username));
 		final String encodedPassword = passwordEncoder.encode(newPlainPassword);
 		loginUser.setPassword(encodedPassword);
 		repository.saveAndFlush(loginUser);
-		logger.info("Password updated successfully for user: {}", username);
+		LOGGER.info("Password updated successfully for user: {}", username);
 	}
 
 	@Override

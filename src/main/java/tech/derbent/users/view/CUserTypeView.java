@@ -47,7 +47,7 @@ public class CUserTypeView extends CAbstractMDPage<CUserType> {
 	@Override
 	protected void createGridForEntity() {
 		grid.addShortTextColumn(CUserType::getName, "Name", "name");
-		grid.addColumn(CUserType::getDescription, "Description", "description");
+		grid.addLongTextColumn(CUserType::getDescription, "Description", "description");
 	}
 
 	@Override

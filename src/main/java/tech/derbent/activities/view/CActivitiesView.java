@@ -70,7 +70,6 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 		grid.addShortTextColumn(CActivity::getName, "Activity Name", "name");
 		grid.addReferenceColumn(item -> item.getActivityType() != null
 			? item.getActivityType().getName() : "No Type", "Type");
-		grid.addShortTextColumn(CActivity::getDescription, "Description", "description");
 		grid.addShortTextColumn(
 			item -> item.getStatus() != null ? item.getStatus().getName() : "No Status",
 			"Status", null);
@@ -92,18 +91,6 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 			}
 			return desc.length() > 50 ? desc.substring(0, 50) + "..." : desc;
 		}, "Description", null);
-		// Add more columns as needed for other fields
-		grid.asSingleSelect().addValueChangeListener(event -> {
-
-			if (event.getValue() != null) {
-				UI.getCurrent().navigate(
-					String.format(ENTITY_ROUTE_TEMPLATE_EDIT, event.getValue().getId()));
-			}
-			else {
-				clearForm();
-				UI.getCurrent().navigate(CActivitiesView.class);
-			}
-		});
 		// when a row is selected or deselected, populate form
 		grid.asSingleSelect().addValueChangeListener(event -> {
 

@@ -50,7 +50,7 @@ public class CActivityTypeView extends CAbstractMDPage<CActivityType> {
 	@Override
 	protected void createGridForEntity() {
 		grid.addShortTextColumn(CActivityType::getName, "Name", "name");
-		grid.addColumn(CActivityType::getDescription, "Description", "description");
+		grid.addLongTextColumn(CActivityType::getDescription, "Description", "description");
 	}
 
 	@Override

@@ -25,7 +25,7 @@ import tech.derbent.companies.domain.CCompany;
 									// performance
 public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 
-	private static final Logger logger = LoggerFactory.getLogger(CCompanyService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CCompanyService.class);
 
 	private final CCompanyRepository companyRepository;
 
@@ -49,7 +49,7 @@ public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 	@Override
 	@Transactional
 	public void createEntity(final String name) {
-		logger.debug("createEntity called with name: {} for CCompany", name);
+		LOGGER.debug("createEntity called with name: {} for CCompany", name);
 		// Use parent validation and creation logic
 		super.createEntity(name);
 		// Find the created entity to set company-specific properties
@@ -58,7 +58,7 @@ public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 		// Set company-specific default values
 		entity.setEnabled(true);
 		companyRepository.saveAndFlush(entity);
-		logger.info("Company entity created successfully with name: {}", name);
+		LOGGER.info("Company entity created successfully with name: {}", name);
 	}
 
 	@Override
@@ -74,10 +74,10 @@ public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 	 */
 	@Transactional
 	public void disableCompany(final Long id) {
-		logger.debug("disableCompany called with id: {}", id);
+		LOGGER.debug("disableCompany called with id: {}", id);
 
 		if (id == null) {
-			logger.warn("Attempt to disable company with null id");
+			LOGGER.warn("Attempt to disable company with null id");
 			throw new IllegalArgumentException("Company ID cannot be null");
 		}
 
@@ -85,15 +85,15 @@ public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 			final Optional<CCompany> companyOptional = companyRepository.findById(id);
 
 			if (companyOptional.isEmpty()) {
-				logger.warn("Company not found for disabling with id: {}", id);
+				LOGGER.warn("Company not found for disabling with id: {}", id);
 				throw new EntityNotFoundException("Company not found with id: " + id);
 			}
 			final CCompany company = companyOptional.get();
 			company.setEnabled(false);
 			companyRepository.saveAndFlush(company);
-			logger.info("Company disabled successfully with id: {}", id);
+			LOGGER.info("Company disabled successfully with id: {}", id);
 		} catch (final Exception e) {
-			logger.error("Error disabling company with id: {}", id, e);
+			LOGGER.error("Error disabling company with id: {}", id, e);
 			throw new RuntimeException("Failed to disable company", e);
 		}
 	}
@@ -104,10 +104,10 @@ public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 	 */
 	@Transactional
 	public void enableCompany(final Long id) {
-		logger.debug("enableCompany called with id: {}", id);
+		LOGGER.debug("enableCompany called with id: {}", id);
 
 		if (id == null) {
-			logger.warn("Attempt to enable company with null id");
+			LOGGER.warn("Attempt to enable company with null id");
 			throw new IllegalArgumentException("Company ID cannot be null");
 		}
 
@@ -115,15 +115,15 @@ public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 			final Optional<CCompany> companyOptional = companyRepository.findById(id);
 
 			if (companyOptional.isEmpty()) {
-				logger.warn("Company not found for enabling with id: {}", id);
+				LOGGER.warn("Company not found for enabling with id: {}", id);
 				throw new EntityNotFoundException("Company not found with id: " + id);
 			}
 			final CCompany company = companyOptional.get();
 			company.setEnabled(true);
 			companyRepository.saveAndFlush(company);
-			logger.info("Company enabled successfully with id: {}", id);
+			LOGGER.info("Company enabled successfully with id: {}", id);
 		} catch (final Exception e) {
-			logger.error("Error enabling company with id: {}", id, e);
+			LOGGER.error("Error enabling company with id: {}", id, e);
 			throw new RuntimeException("Failed to enable company", e);
 		}
 	}
@@ -134,21 +134,21 @@ public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 	 * @return Optional containing the company if found
 	 */
 	public Optional<CCompany> findByTaxNumber(final String taxNumber) {
-		logger.debug("findByTaxNumber called with taxNumber: {}", taxNumber);
+		LOGGER.debug("findByTaxNumber called with taxNumber: {}", taxNumber);
 
 		if ((taxNumber == null) || taxNumber.trim().isEmpty()) {
-			logger.warn("Attempt to find company with null or empty tax number");
+			LOGGER.warn("Attempt to find company with null or empty tax number");
 			return Optional.empty();
 		}
 
 		try {
 			final Optional<CCompany> company =
 				companyRepository.findByTaxNumber(taxNumber.trim());
-			logger.debug("Company with tax number {} found: {}", taxNumber,
+			LOGGER.debug("Company with tax number {} found: {}", taxNumber,
 				company.isPresent());
 			return company;
 		} catch (final Exception e) {
-			logger.error("Error finding company by tax number: {}", taxNumber, e);
+			LOGGER.error("Error finding company by tax number: {}", taxNumber, e);
 			throw new RuntimeException("Failed to find company by tax number", e);
 		}
 	}
@@ -158,14 +158,14 @@ public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 	 * @return List of enabled companies
 	 */
 	public List<CCompany> findEnabledCompanies() {
-		logger.debug("findEnabledCompanies called");
+		LOGGER.debug("findEnabledCompanies called");
 
 		try {
 			final List<CCompany> companies = companyRepository.findByEnabled(true);
-			logger.debug("Found {} enabled companies", companies.size());
+			LOGGER.debug("Found {} enabled companies", companies.size());
 			return companies;
 		} catch (final Exception e) {
-			logger.error("Error finding enabled companies", e);
+			LOGGER.error("Error finding enabled companies", e);
 			throw new RuntimeException("Failed to retrieve enabled companies", e);
 		}
 	}
@@ -176,21 +176,21 @@ public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 	 * @return List of companies matching the search term
 	 */
 	public List<CCompany> searchCompaniesByName(final String searchTerm) {
-		logger.debug("searchCompaniesByName called with searchTerm: {}", searchTerm);
+		LOGGER.debug("searchCompaniesByName called with searchTerm: {}", searchTerm);
 
 		if ((searchTerm == null) || searchTerm.trim().isEmpty()) {
-			logger.debug("Empty search term, returning all companies");
+			LOGGER.debug("Empty search term, returning all companies");
 			return companyRepository.findAllOrderByName();
 		}
 
 		try {
 			final List<CCompany> companies =
 				companyRepository.findByNameContainingIgnoreCase(searchTerm.trim());
-			logger.debug("Found {} companies matching search term: {}", companies.size(),
+			LOGGER.debug("Found {} companies matching search term: {}", companies.size(),
 				searchTerm);
 			return companies;
 		} catch (final Exception e) {
-			logger.error("Error searching companies by name: {}", searchTerm, e);
+			LOGGER.error("Error searching companies by name: {}", searchTerm, e);
 			throw new RuntimeException("Failed to search companies by name", e);
 		}
 	}
