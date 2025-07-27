@@ -293,6 +293,14 @@ public class CUser extends CEntityNamed {
 
 	public void setUserType(final CUserType userType) { this.userType = userType; }
 
+	/**
+	 * Returns a comprehensive string representation of the user including all key fields.
+	 * Note: This method is used for debugging and logging purposes. For ComboBox display
+	 * in the UI, the CEntityFormBuilder now uses getName() method automatically to show
+	 * only the user's name instead of all fields. This resolves the combobox display issue
+	 * where users were listed with complete text with all fields.
+	 * @return detailed string representation of the user
+	 */
 	@Override
 	public String toString() {
 		return "CUser{" + "name='" + name + '\'' + ", lastname='" + lastname + '\''
