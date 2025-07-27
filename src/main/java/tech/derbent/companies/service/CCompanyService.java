@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityNotFoundException;
-import tech.derbent.abstracts.services.CAbstractService;
+import tech.derbent.abstracts.services.CAbstractNamedEntityService;
 import tech.derbent.companies.domain.CCompany;
 
 /**
@@ -22,7 +22,7 @@ import tech.derbent.companies.domain.CCompany;
 @Service
 @PreAuthorize("isAuthenticated()")
 @Transactional(readOnly = true) // Default to read-only transactions for better performance
-public class CCompanyService extends CAbstractService<CCompany> {
+public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 
     private static final Logger logger = LoggerFactory.getLogger(CCompanyService.class);
     private final CCompanyRepository companyRepository;
@@ -39,35 +39,37 @@ public class CCompanyService extends CAbstractService<CCompany> {
     }
 
     /**
-     * Creates a new company entity with the given name
+     * Creates a new company entity with the given name and sets it as enabled by default.
+     * Overrides the base createEntity to add company-specific logic (enabled flag).
+     * 
      * @param name the company name
      * @throws RuntimeException if name is "fail" (for testing error handling)
+     * @throws IllegalArgumentException if name is null or empty
      */
+    @Override
     @Transactional
     public void createEntity(final String name) {
-        logger.debug("createEntity called with name: {}", name);
+        logger.debug("createEntity called with name: {} for CCompany", name);
         
-        if (name == null || name.trim().isEmpty()) {
-            logger.warn("Attempt to create company with null or empty name");
-            throw new IllegalArgumentException("Company name cannot be null or empty");
-        }
+        // Use parent validation and creation logic
+        super.createEntity(name);
         
-        if ("fail".equals(name)) {
-            logger.warn("Test failure requested for name: {}", name);
-            throw new RuntimeException("This is for testing the error handler");
-        }
+        // Find the created entity to set company-specific properties
+        final var entity = findByName(name).orElseThrow(() -> 
+            new RuntimeException("Created company not found: " + name));
+            
+        // Set company-specific default values
+        entity.setEnabled(true);
+        companyRepository.saveAndFlush(entity);
         
-        final var entity = new CCompany();
-        entity.setName(name.trim());
-        entity.setEnabled(true); // Default to enabled
-        
-        try {
-            companyRepository.saveAndFlush(entity);
-            logger.info("Company entity created successfully with name: {}", name);
-        } catch (final Exception e) {
-            logger.error("Failed to create company entity with name: {}", name, e);
-            throw new RuntimeException("Failed to create company: " + e.getMessage(), e);
-        }
+        logger.info("Company entity created successfully with name: {}", name);
+    }
+
+    @Override
+    protected CCompany createNewEntityInstance() {
+        final CCompany company = new CCompany();
+        company.setEnabled(true); // Default to enabled
+        return company;
     }
 
     /**
@@ -110,29 +112,6 @@ public class CCompanyService extends CAbstractService<CCompany> {
     }
 
     /**
-     * Finds a company by exact name match
-     * @param name the exact company name
-     * @return Optional containing the company if found
-     */
-    public Optional<CCompany> findByName(final String name) {
-        logger.debug("findByName called with name: {}", name);
-        
-        if (name == null || name.trim().isEmpty()) {
-            logger.warn("Attempt to find company with null or empty name");
-            return Optional.empty();
-        }
-        
-        try {
-            final Optional<CCompany> company = companyRepository.findByName(name.trim());
-            logger.debug("Company {} found: {}", name, company.isPresent());
-            return company;
-        } catch (final Exception e) {
-            logger.error("Error finding company by name: {}", name, e);
-            throw new RuntimeException("Failed to find company by name", e);
-        }
-    }
-
-    /**
      * Finds a company by tax number
      * @param taxNumber the tax identification number
      * @return Optional containing the company if found
@@ -152,41 +131,6 @@ public class CCompanyService extends CAbstractService<CCompany> {
         } catch (final Exception e) {
             logger.error("Error finding company by tax number: {}", taxNumber, e);
             throw new RuntimeException("Failed to find company by tax number", e);
-        }
-    }
-
-    /**
-     * Validates if a company name is unique (excluding the current company being updated)
-     * @param name the company name to validate
-     * @param currentId the ID of the current company being updated (null for new companies)
-     * @return true if the name is unique, false otherwise
-     */
-    public boolean isNameUnique(final String name, final Long currentId) {
-        logger.debug("isNameUnique called with name: {}, currentId: {}", name, currentId);
-        
-        if (name == null || name.trim().isEmpty()) {
-            logger.warn("Name uniqueness check called with null or empty name");
-            return false;
-        }
-        
-        try {
-            final Optional<CCompany> existingCompany = companyRepository.findByName(name.trim());
-            if (existingCompany.isEmpty()) {
-                logger.debug("Name {} is unique", name);
-                return true;
-            }
-            
-            // If we're updating an existing company, check if it's the same company
-            if (currentId != null && existingCompany.get().getId().equals(currentId)) {
-                logger.debug("Name {} belongs to current company being updated", name);
-                return true;
-            }
-            
-            logger.debug("Name {} is not unique", name);
-            return false;
-        } catch (final Exception e) {
-            logger.error("Error checking name uniqueness for: {}", name, e);
-            throw new RuntimeException("Failed to check name uniqueness", e);
         }
     }
 
