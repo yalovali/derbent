@@ -8,13 +8,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import tech.derbent.abstracts.services.CAbstractService;
+import tech.derbent.abstracts.services.CAbstractNamedEntityService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.events.ProjectListChangeEvent;
 
 @Service
 @PreAuthorize("isAuthenticated()")
-public class CProjectService extends CAbstractService<CProject> {
+public class CProjectService extends CAbstractNamedEntityService<CProject> {
 
     private final ApplicationEventPublisher eventPublisher;
 
@@ -24,17 +24,25 @@ public class CProjectService extends CAbstractService<CProject> {
         LOGGER.info("CProjectService constructor called");
     }
 
+    @Override
     @Transactional
     public void createEntity(final String name) {
         LOGGER.info("Creating project with name: {}", name);
-        if ("fail".equals(name)) {
-            throw new RuntimeException("This is for testing the error handler");
-        }
-        final var entity = new CProject();
-        entity.setName(name);
-        repository.saveAndFlush(entity);
+        
+        // Use parent validation and creation logic
+        super.createEntity(name);
+        
+        // Find the created entity to publish event
+        final var entity = findByName(name).orElseThrow(() -> 
+            new RuntimeException("Created project not found: " + name));
+            
         // Publish project list change event
         eventPublisher.publishEvent(new ProjectListChangeEvent(this, entity, ProjectListChangeEvent.ChangeType.CREATED));
+    }
+
+    @Override
+    protected CProject createNewEntityInstance() {
+        return new CProject();
     }
 
     @Override

@@ -8,11 +8,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import tech.derbent.abstracts.services.CAbstractRepository;
+import tech.derbent.abstracts.services.CAbstractNamedRepository;
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.projects.domain.CProject;
 
-public interface CMeetingRepository extends CAbstractRepository<CMeeting> {
+public interface CMeetingRepository extends CAbstractNamedRepository<CMeeting> {
 
     List<CMeeting> findByProject(CProject project);
 

@@ -10,27 +10,25 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import tech.derbent.abstracts.services.CAbstractService;
+import tech.derbent.abstracts.services.CAbstractNamedEntityService;
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
 
 @Service
 @PreAuthorize("isAuthenticated()")
-public class CMeetingService extends CAbstractService<CMeeting> {
+public class CMeetingService extends CAbstractNamedEntityService<CMeeting> {
 
     CMeetingService(final CMeetingRepository repository, final Clock clock) {
         super(repository, clock);
     }
 
-    @Transactional
-    public void createEntity(final String name) {
-        if ("fail".equals(name)) {
-            throw new RuntimeException("This is for testing the error handler");
-        }
-        final var entity = new CMeeting();
-        entity.setName(name);
-        repository.saveAndFlush(entity);
+    // Now using the inherited createEntity(String name) method from CAbstractNamedEntityService
+    // The original createEntity method is replaced by the parent class implementation
+    
+    @Override
+    protected CMeeting createNewEntityInstance() {
+        return new CMeeting();
     }
 
     /**
