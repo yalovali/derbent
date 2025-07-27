@@ -107,7 +107,6 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 	 * Creates the profile information section with name fields.
 	 */
 	private void createProfileInfoSection() {
-		LOGGER.debug("Creating profile info section");
 		final Span sectionTitle = new Span("Profile Information");
 		sectionTitle.getStyle().set("font-weight", "bold");
 		sectionTitle.getStyle().set("font-size", "1.1em");
@@ -136,7 +135,6 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 	 * Creates the profile picture upload section.
 	 */
 	private void createProfilePictureSection() {
-		LOGGER.debug("Creating profile picture section");
 		final Span sectionTitle = new Span("Profile Picture");
 		sectionTitle.getStyle().set("font-weight", "bold");
 		sectionTitle.getStyle().set("font-size", "1.1em");
@@ -200,8 +198,6 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 	 * Deletes the current profile picture.
 	 */
 	private void deleteProfilePicture() {
-		LOGGER.info("Deleting profile picture for user: {}",
-			data != null ? data.getLogin() : "null");
 		// Clear temporary data
 		temporaryImageData = null;
 		// Update preview to default
@@ -226,15 +222,14 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 	 * Handles profile picture changes on save.
 	 */
 	private void handleProfilePictureChange() {
-		LOGGER.debug("Handling profile picture change");
 
 		if (temporaryImageData != null) {
 			// New picture was uploaded
 			data.setProfilePictureData(temporaryImageData);
 			LOGGER.info("Profile picture data updated for user: {}", data.getLogin());
 		}
-		else if (!deleteProfilePictureButton.isEnabled() 
-			&& data.getProfilePictureData() != null) {
+		else if (!deleteProfilePictureButton.isEnabled()
+			&& (data.getProfilePictureData() != null)) {
 			// Picture was deleted
 			data.setProfilePictureData(null);
 			LOGGER.info("Profile picture removed for user: {}", data.getLogin());
@@ -257,21 +252,16 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 		if ((fileName == null) || fileName.trim().isEmpty()) {
 			throw new IOException("Invalid file name");
 		}
-
 		// Validate image data
 		CImageUtils.validateImageData(data, fileName);
-
 		// Resize image to standard profile picture size
 		final byte[] resizedImageData = CImageUtils.resizeToProfilePicture(data);
-
 		// Store temporary image data
 		temporaryImageData = resizedImageData;
-
 		// Update preview
 		final String dataUrl = CImageUtils.createDataUrl(resizedImageData);
 		profilePicturePreview.setSrc(dataUrl);
 		deleteProfilePictureButton.setEnabled(true);
-
 		Notification.show("Profile picture uploaded and resized successfully", 3000,
 			Notification.Position.TOP_CENTER);
 	}
@@ -354,7 +344,9 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 
 		if ((data != null) && (data.getProfilePictureData() != null)
 			&& (data.getProfilePictureData().length > 0)) {
-			final String dataUrl = CImageUtils.createDataUrl(data.getProfilePictureData());
+			final String dataUrl =
+				CImageUtils.createDataUrl(data.getProfilePictureData());
+
 			if (dataUrl != null) {
 				profilePicturePreview.setSrc(dataUrl);
 				deleteProfilePictureButton.setEnabled(true);

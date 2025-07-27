@@ -33,23 +33,24 @@ public abstract class CAbstractService<EntityClass extends CEntityDB> {
 	}
 
 	public int count() {
-		LOGGER.debug("Counting entities in {}", getClass().getSimpleName());
+		// LOGGER.debug("Counting entities in {}", getClass().getSimpleName());
 		return (int) repository.count();
 	}
 
 	public void delete(final EntityClass entity) {
-		LOGGER.info("Deleting entity with ID: {}", CSpringAuxillaries.safeGetId(entity));
+		// LOGGER.info("Deleting entity with ID: {}",
+		// CSpringAuxillaries.safeGetId(entity));
 		repository.delete(entity);
 	}
 
 	public void delete(final Long id) {
-		LOGGER.info("Deleting entity by ID: {}", id);
+		// LOGGER.info("Deleting entity by ID: {}", id);
 		repository.deleteById(id);
 	}
 
 	@Transactional (readOnly = true)
 	public Optional<EntityClass> get(final Long id) {
-		LOGGER.debug("Getting entity by ID: {}", id);
+		// LOGGER.debug("Getting entity by ID: {}", id);
 		final Optional<EntityClass> entity = repository.findById(id);
 		// Initialize lazy fields if entity is present
 		entity.ifPresent(this::initializeLazyFields);
@@ -103,7 +104,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB> {
 
 	@Transactional (readOnly = true)
 	public List<EntityClass> list(final Pageable pageable) {
-		LOGGER.debug("Listing entities with pageable: {}", pageable);
+		// LOGGER.debug("Listing entities with pageable: {}", pageable);
 		final List<EntityClass> entities = repository.findAllBy(pageable).toList();
 		// Initialize lazy fields for all entities
 		entities.forEach(this::initializeLazyFields);
@@ -113,7 +114,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB> {
 	@Transactional (readOnly = true)
 	public Page<EntityClass> list(final Pageable pageable,
 		final Specification<EntityClass> filter) {
-		LOGGER.debug("Listing entities with filter and pageable");
+		// LOGGER.debug("Listing entities with filter and pageable");
 		final Page<EntityClass> page = repository.findAll(filter, pageable);
 		// Initialize lazy fields for all entities in the page
 		page.getContent().forEach(this::initializeLazyFields);
@@ -122,7 +123,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB> {
 
 	@Transactional
 	public EntityClass save(final EntityClass entity) {
-		LOGGER.info("Saving entity: {}", CSpringAuxillaries.safeToString(entity));
+		// LOGGER.info("Saving entity: {}", CSpringAuxillaries.safeToString(entity));
 
 		try {
 			final EntityClass savedEntity = repository.save(entity);
