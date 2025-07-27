@@ -13,7 +13,7 @@ import tech.derbent.abstracts.annotations.MetaData;
 @MappedSuperclass
 public abstract class CEntityNamed extends CEntityDB {
 
-	private static final Logger logger = LoggerFactory.getLogger(CEntityNamed.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityNamed.class);
 
 	protected static final int MAX_LENGTH_NAME = 100;
 
@@ -90,14 +90,14 @@ public abstract class CEntityNamed extends CEntityDB {
 	}
 
 	public void setCreatedDate(final LocalDateTime createdDate) {
-		logger.debug(
+		LOGGER.debug(
 			"setCreatedDate(createdDate={}) - Setting created date for item id={}",
 			createdDate, getId());
 		this.createdDate = createdDate;
 	}
 
 	public void setDescription(final String description) {
-		logger.debug(
+		LOGGER.debug(
 			"setDescription(description={}) - Setting description for item id={}",
 			description, getId());
 		this.description = description;
@@ -105,7 +105,7 @@ public abstract class CEntityNamed extends CEntityDB {
 	}
 
 	public void setLastModifiedDate(final LocalDateTime lastModifiedDate) {
-		logger.debug(
+		LOGGER.debug(
 			"setLastModifiedDate(lastModifiedDate={}) - Setting last modified date for activity id={}",
 			lastModifiedDate, getId());
 		this.lastModifiedDate = lastModifiedDate;
@@ -129,7 +129,7 @@ public abstract class CEntityNamed extends CEntityDB {
 	 * Update the last modified date to now.
 	 */
 	protected void updateLastModified() {
-		logger.debug(
+		LOGGER.debug(
 			"updateLastModified() - Updating last modified date for activity id={}",
 			getId());
 		this.lastModifiedDate = LocalDateTime.now();

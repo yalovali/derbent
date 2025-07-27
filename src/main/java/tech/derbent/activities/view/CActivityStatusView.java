@@ -71,16 +71,8 @@ public class CActivityStatusView extends CAbstractMDPage<CActivityStatus> {
 	 */
 	@Override
 	protected void createGridForEntity() {
-		LOGGER.debug("Creating grid for activity statuses with appropriate field widths");
-
-		try {
-			grid.addShortTextColumn(CActivityStatus::getName, "Status Name", "name");
-			grid.addColumn(CActivityStatus::getDescription, "Description", "description");
-		} catch (final Exception e) {
-			LOGGER.error("Error creating grid for CActivityStatusView", e);
-			throw new RuntimeException("Failed to create grid for activity status view",
-				e);
-		}
+		grid.addShortTextColumn(CActivityStatus::getName, "Status Name", "name");
+		grid.addLongTextColumn(CActivityStatus::getDescription, "Description", "description");
 	}
 
 	@Override

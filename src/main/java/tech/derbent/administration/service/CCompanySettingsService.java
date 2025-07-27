@@ -27,7 +27,7 @@ import tech.derbent.companies.domain.CCompany;
 									// performance
 public class CCompanySettingsService extends CAbstractService<CCompanySettings> {
 
-	private static final Logger logger =
+	private static final Logger LOGGER =
 		LoggerFactory.getLogger(CCompanySettingsService.class);
 
 	private final CCompanySettingsRepository companySettingsRepository;
@@ -52,11 +52,11 @@ public class CCompanySettingsService extends CAbstractService<CCompanySettings> 
 	 */
 	@Transactional
 	public CCompanySettings createDefaultSettingsForCompany(final CCompany company) {
-		logger.debug("createDefaultSettingsForCompany called with company: {}",
+		LOGGER.debug("createDefaultSettingsForCompany called with company: {}",
 			company != null ? company.getName() : "null");
 
 		if (company == null) {
-			logger.warn("Attempt to create settings for null company");
+			LOGGER.warn("Attempt to create settings for null company");
 			throw new IllegalArgumentException("Company cannot be null");
 		}
 		// Check if settings already exist
@@ -64,7 +64,7 @@ public class CCompanySettingsService extends CAbstractService<CCompanySettings> 
 			companySettingsRepository.findByCompany(company);
 
 		if (existingSettings.isPresent()) {
-			logger.info("Company settings already exist for company: {}",
+			LOGGER.info("Company settings already exist for company: {}",
 				company.getName());
 			return existingSettings.get();
 		}
@@ -73,11 +73,11 @@ public class CCompanySettingsService extends CAbstractService<CCompanySettings> 
 			final CCompanySettings newSettings = new CCompanySettings(company);
 			final CCompanySettings savedSettings =
 				companySettingsRepository.saveAndFlush(newSettings);
-			logger.info("Default company settings created successfully for company: {}",
+			LOGGER.info("Default company settings created successfully for company: {}",
 				company.getName());
 			return savedSettings;
 		} catch (final Exception e) {
-			logger.error("Failed to create default settings for company: {}",
+			LOGGER.error("Failed to create default settings for company: {}",
 				company.getName(), e);
 			throw new RuntimeException(
 				"Failed to create company settings: " + e.getMessage(), e);
@@ -91,19 +91,19 @@ public class CCompanySettingsService extends CAbstractService<CCompanySettings> 
 	 * @throws IllegalArgumentException if companyId is null or invalid
 	 */
 	public boolean existsByCompanyId(final Long companyId) {
-		logger.debug("existsByCompanyId called with companyId: {}", companyId);
+		LOGGER.debug("existsByCompanyId called with companyId: {}", companyId);
 
 		if ((companyId == null) || (companyId <= 0)) {
-			logger.warn("Invalid company ID provided: {}", companyId);
+			LOGGER.warn("Invalid company ID provided: {}", companyId);
 			throw new IllegalArgumentException("Company ID must be a positive number");
 		}
 
 		try {
 			final boolean exists = companySettingsRepository.existsByCompanyId(companyId);
-			logger.debug("Settings exist for company ID {}: {}", companyId, exists);
+			LOGGER.debug("Settings exist for company ID {}: {}", companyId, exists);
 			return exists;
 		} catch (final Exception e) {
-			logger.error("Error checking if settings exist for company ID: {}", companyId,
+			LOGGER.error("Error checking if settings exist for company ID: {}", companyId,
 				e);
 			throw new RuntimeException(
 				"Failed to check settings existence: " + e.getMessage(), e);
@@ -115,15 +115,15 @@ public class CCompanySettingsService extends CAbstractService<CCompanySettings> 
 	 * @return List of all CCompanySettings ordered by company name
 	 */
 	public List<CCompanySettings> findAllSettingsOrderedByCompanyName() {
-		logger.debug("findAllSettingsOrderedByCompanyName called");
+		LOGGER.debug("findAllSettingsOrderedByCompanyName called");
 
 		try {
 			final List<CCompanySettings> result =
 				companySettingsRepository.findAllOrderByCompanyName();
-			logger.debug("Found {} company settings records", result.size());
+			LOGGER.debug("Found {} company settings records", result.size());
 			return result;
 		} catch (final Exception e) {
-			logger.error("Error finding all company settings", e);
+			LOGGER.error("Error finding all company settings", e);
 			throw new RuntimeException(
 				"Failed to find company settings: " + e.getMessage(), e);
 		}
@@ -136,22 +136,22 @@ public class CCompanySettingsService extends CAbstractService<CCompanySettings> 
 	 * @throws IllegalArgumentException if company is null
 	 */
 	public Optional<CCompanySettings> findByCompany(final CCompany company) {
-		logger.debug("findByCompany called with company: {}",
+		LOGGER.debug("findByCompany called with company: {}",
 			company != null ? company.getName() : "null");
 
 		if (company == null) {
-			logger.warn("Attempt to find settings for null company");
+			LOGGER.warn("Attempt to find settings for null company");
 			throw new IllegalArgumentException("Company cannot be null");
 		}
 
 		try {
 			final Optional<CCompanySettings> result =
 				companySettingsRepository.findByCompany(company);
-			logger.debug("Found settings for company {}: {}", company.getName(),
+			LOGGER.debug("Found settings for company {}: {}", company.getName(),
 				result.isPresent());
 			return result;
 		} catch (final Exception e) {
-			logger.error("Error finding settings for company: {}", company.getName(), e);
+			LOGGER.error("Error finding settings for company: {}", company.getName(), e);
 			throw new RuntimeException(
 				"Failed to find company settings: " + e.getMessage(), e);
 		}
@@ -164,21 +164,21 @@ public class CCompanySettingsService extends CAbstractService<CCompanySettings> 
 	 * @throws IllegalArgumentException if companyId is null or invalid
 	 */
 	public Optional<CCompanySettings> findByCompanyId(final Long companyId) {
-		logger.debug("findByCompanyId called with companyId: {}", companyId);
+		LOGGER.debug("findByCompanyId called with companyId: {}", companyId);
 
 		if ((companyId == null) || (companyId <= 0)) {
-			logger.warn("Invalid company ID provided: {}", companyId);
+			LOGGER.warn("Invalid company ID provided: {}", companyId);
 			throw new IllegalArgumentException("Company ID must be a positive number");
 		}
 
 		try {
 			final Optional<CCompanySettings> result =
 				companySettingsRepository.findByCompanyId(companyId);
-			logger.debug("Found settings for company ID {}: {}", companyId,
+			LOGGER.debug("Found settings for company ID {}: {}", companyId,
 				result.isPresent());
 			return result;
 		} catch (final Exception e) {
-			logger.error("Error finding settings for company ID: {}", companyId, e);
+			LOGGER.error("Error finding settings for company ID: {}", companyId, e);
 			throw new RuntimeException(
 				"Failed to find company settings: " + e.getMessage(), e);
 		}
@@ -191,20 +191,20 @@ public class CCompanySettingsService extends CAbstractService<CCompanySettings> 
 	 * @throws IllegalArgumentException if timezone is null or empty
 	 */
 	public List<CCompanySettings> findCompaniesByTimezone(final String timezone) {
-		logger.debug("findCompaniesByTimezone called with timezone: {}", timezone);
+		LOGGER.debug("findCompaniesByTimezone called with timezone: {}", timezone);
 
 		if ((timezone == null) || timezone.trim().isEmpty()) {
-			logger.warn("Invalid timezone provided: {}", timezone);
+			LOGGER.warn("Invalid timezone provided: {}", timezone);
 			throw new IllegalArgumentException("Timezone cannot be null or empty");
 		}
 
 		try {
 			final List<CCompanySettings> result =
 				companySettingsRepository.findByCompanyTimezone(timezone.trim());
-			logger.debug("Found {} companies in timezone: {}", result.size(), timezone);
+			LOGGER.debug("Found {} companies in timezone: {}", result.size(), timezone);
 			return result;
 		} catch (final Exception e) {
-			logger.error("Error finding companies by timezone: {}", timezone, e);
+			LOGGER.error("Error finding companies by timezone: {}", timezone, e);
 			throw new RuntimeException(
 				"Failed to find companies by timezone: " + e.getMessage(), e);
 		}
@@ -216,16 +216,16 @@ public class CCompanySettingsService extends CAbstractService<CCompanySettings> 
 	 * @return List of CCompanySettings with email notifications enabled
 	 */
 	public List<CCompanySettings> findCompaniesWithEmailNotificationsEnabled() {
-		logger.debug("findCompaniesWithEmailNotificationsEnabled called");
+		LOGGER.debug("findCompaniesWithEmailNotificationsEnabled called");
 
 		try {
 			final List<CCompanySettings> result =
 				companySettingsRepository.findByEmailNotificationsEnabled();
-			logger.debug("Found {} companies with email notifications enabled",
+			LOGGER.debug("Found {} companies with email notifications enabled",
 				result.size());
 			return result;
 		} catch (final Exception e) {
-			logger.error("Error finding companies with email notifications enabled", e);
+			LOGGER.error("Error finding companies with email notifications enabled", e);
 			throw new RuntimeException(
 				"Failed to find companies with email notifications: " + e.getMessage(),
 				e);
@@ -241,22 +241,22 @@ public class CCompanySettingsService extends CAbstractService<CCompanySettings> 
 	 */
 	@Transactional
 	public CCompanySettings getOrCreateSettingsForCompany(final CCompany company) {
-		logger.debug("getOrCreateSettingsForCompany called with company: {}",
+		LOGGER.debug("getOrCreateSettingsForCompany called with company: {}",
 			company != null ? company.getName() : "null");
 
 		if (company == null) {
-			logger.warn("Attempt to get or create settings for null company");
+			LOGGER.warn("Attempt to get or create settings for null company");
 			throw new IllegalArgumentException("Company cannot be null");
 		}
 		final Optional<CCompanySettings> existingSettings = findByCompany(company);
 
 		if (existingSettings.isPresent()) {
-			logger.debug("Returning existing settings for company: {}",
+			LOGGER.debug("Returning existing settings for company: {}",
 				company.getName());
 			return existingSettings.get();
 		}
 		else {
-			logger.info("Creating new settings for company: {}", company.getName());
+			LOGGER.info("Creating new settings for company: {}", company.getName());
 			return createDefaultSettingsForCompany(company);
 		}
 	}
@@ -270,22 +270,22 @@ public class CCompanySettingsService extends CAbstractService<CCompanySettings> 
 	 */
 	@Transactional
 	public CCompanySettings updateSettings(final CCompanySettings settings) {
-		logger.debug("updateSettings called with settings ID: {}",
+		LOGGER.debug("updateSettings called with settings ID: {}",
 			settings != null ? settings.getId() : "null");
 
 		if (settings == null) {
-			logger.warn("Attempt to update null settings");
+			LOGGER.warn("Attempt to update null settings");
 			throw new IllegalArgumentException("Settings cannot be null");
 		}
 
 		if (settings.getCompany() == null) {
-			logger.warn("Attempt to update settings with null company");
+			LOGGER.warn("Attempt to update settings with null company");
 			throw new IllegalArgumentException(
 				"Settings must have an associated company");
 		}
 
 		if (settings.getId() == null) {
-			logger.warn("Attempt to update settings without ID");
+			LOGGER.warn("Attempt to update settings without ID");
 			throw new IllegalArgumentException(
 				"Settings must have an ID for update operation");
 		}
@@ -296,20 +296,20 @@ public class CCompanySettingsService extends CAbstractService<CCompanySettings> 
 
 			// Check if entity exists
 			if (!companySettingsRepository.existsById(settings.getId())) {
-				logger.warn("Attempt to update non-existent settings with ID: {}",
+				LOGGER.warn("Attempt to update non-existent settings with ID: {}",
 					settings.getId());
 				throw new EntityNotFoundException(
 					"Company settings not found with ID: " + settings.getId());
 			}
 			final CCompanySettings updatedSettings =
 				companySettingsRepository.saveAndFlush(settings);
-			logger.info("Company settings updated successfully for company: {}",
+			LOGGER.info("Company settings updated successfully for company: {}",
 				settings.getCompany().getName());
 			return updatedSettings;
 		} catch (final EntityNotFoundException e) {
 			throw e; // Re-throw EntityNotFoundException as-is
 		} catch (final Exception e) {
-			logger.error("Failed to update settings for company: {}",
+			LOGGER.error("Failed to update settings for company: {}",
 				settings.getCompany().getName(), e);
 			throw new RuntimeException(
 				"Failed to update company settings: " + e.getMessage(), e);
@@ -322,7 +322,7 @@ public class CCompanySettingsService extends CAbstractService<CCompanySettings> 
 	 * @throws IllegalArgumentException if validation fails
 	 */
 	private void validateSettingsBusinessRules(final CCompanySettings settings) {
-		logger.debug("validateSettingsBusinessRules called");
+		LOGGER.debug("validateSettingsBusinessRules called");
 
 		// Validate working hours
 		if ((settings.getWorkingHoursPerDay() != null)
@@ -363,6 +363,6 @@ public class CCompanySettingsService extends CAbstractService<CCompanySettings> 
 			throw new IllegalArgumentException(
 				"Company theme color must be a valid hex color (e.g., #1976d2)");
 		}
-		logger.debug("Settings validation passed successfully");
+		LOGGER.debug("Settings validation passed successfully");
 	}
 }

@@ -12,13 +12,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 class MainErrorHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(MainErrorHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MainErrorHandler.class);
 
     @Bean
     public VaadinServiceInitListener errorHandlerInitializer() {
         return (event) -> event.getSource().addSessionInitListener(
                 sessionInitEvent -> sessionInitEvent.getSession().setErrorHandler(errorEvent -> {
-                    log.error("An unexpected error occurred", errorEvent.getThrowable());
+                    LOGGER.error("An unexpected error occurred", errorEvent.getThrowable());
                     errorEvent.getComponent().flatMap(Component::getUI).ifPresent(ui -> {
                         var notification = new Notification(
                                 "An unexpected error has occurred. Please try again later.");

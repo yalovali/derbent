@@ -53,10 +53,7 @@ public class CMeetingTypeView extends CAbstractMDPage<CMeetingType> {
 	@Override
 	protected void createGridForEntity() {
 		grid.addShortTextColumn(CMeetingType::getName, "Name", "name");
-		grid.addColumn(CMeetingType::getDescription, "Description", "description");
-		// Data provider is already set up in the base class
-		// CAbstractMDPage.createGridLayout() No need to call grid.setItems() again as
-		// it's already configured to handle sorting properly
+		grid.addLongTextColumn(CMeetingType::getDescription, "Description", "description");
 	}
 
 	@Override

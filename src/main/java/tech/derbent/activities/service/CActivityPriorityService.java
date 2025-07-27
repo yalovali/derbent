@@ -20,7 +20,7 @@ import tech.derbent.activities.domain.CActivityPriority;
 @Transactional
 public class CActivityPriorityService {
 
-	private static final Logger logger =
+	private static final Logger LOGGER =
 		LoggerFactory.getLogger(CActivityPriorityService.class);
 
 	private final CActivityPriorityRepository activityPriorityRepository;
@@ -30,7 +30,7 @@ public class CActivityPriorityService {
 		final CActivityPriorityRepository activityPriorityRepository) {
 
 		if (activityPriorityRepository == null) {
-			logger.error(
+			LOGGER.error(
 				"CActivityPriorityService constructor - Repository parameter is null");
 			throw new IllegalArgumentException(
 				"Activity priority repository cannot be null");
@@ -43,7 +43,7 @@ public class CActivityPriorityService {
 	 * called during application startup.
 	 */
 	public void createDefaultPrioritiesIfNotExist() {
-		logger.debug(
+		LOGGER.debug(
 			"createDefaultPrioritiesIfNotExist() - Creating default activity priorities");
 		final String[][] defaultPriorities = {
 			{
@@ -63,7 +63,7 @@ public class CActivityPriorityService {
 			final Integer level = Integer.parseInt(priorityData[1]);
 
 			if (!existsByName(name) && !existsByPriorityLevel(level)) {
-				logger.debug(
+				LOGGER.debug(
 					"createDefaultPrioritiesIfNotExist() - Creating default priority: {}",
 					name);
 				final CActivityPriority priority =
@@ -72,12 +72,12 @@ public class CActivityPriorityService {
 				save(priority);
 			}
 			else {
-				logger.debug(
+				LOGGER.debug(
 					"createDefaultPrioritiesIfNotExist() - Priority '{}' or level {} already exists",
 					name, level);
 			}
 		}
-		logger.debug(
+		LOGGER.debug(
 			"createDefaultPrioritiesIfNotExist() - Completed creating default activity priorities");
 	}
 
@@ -87,26 +87,26 @@ public class CActivityPriorityService {
 	 * @throws IllegalArgumentException if the ID is null
 	 */
 	public void deleteById(final Long id) {
-		logger.debug("deleteById(id={}) - Deleting activity priority", id);
+		LOGGER.debug("deleteById(id={}) - Deleting activity priority", id);
 
 		if (id == null) {
-			logger.error("deleteById(id=null) - ID parameter is null");
+			LOGGER.error("deleteById(id=null) - ID parameter is null");
 			throw new IllegalArgumentException("Activity priority ID cannot be null");
 		}
 		final Optional<CActivityPriority> existing =
 			activityPriorityRepository.findById(id);
 
 		if (!existing.isPresent()) {
-			logger.warn("deleteById(id={}) - Activity priority not found", id);
+			LOGGER.warn("deleteById(id={}) - Activity priority not found", id);
 			return;
 		}
 
 		try {
 			activityPriorityRepository.deleteById(id);
-			logger.debug("deleteById(id={}) - Successfully deleted activity priority",
+			LOGGER.debug("deleteById(id={}) - Successfully deleted activity priority",
 				id);
 		} catch (final Exception e) {
-			logger.error("deleteById(id={}) - Error deleting activity priority: {}", id,
+			LOGGER.error("deleteById(id={}) - Error deleting activity priority: {}", id,
 				e.getMessage(), e);
 			throw new RuntimeException("Failed to delete activity priority", e);
 		}
@@ -119,16 +119,16 @@ public class CActivityPriorityService {
 	 */
 	@Transactional (readOnly = true)
 	public boolean existsByName(final String name) {
-		logger.debug("existsByName(name={}) - Checking if activity priority name exists",
+		LOGGER.debug("existsByName(name={}) - Checking if activity priority name exists",
 			name);
 
 		if ((name == null) || name.trim().isEmpty()) {
-			logger.warn("existsByName(name={}) - Name parameter is null or empty", name);
+			LOGGER.warn("existsByName(name={}) - Name parameter is null or empty", name);
 			return false;
 		}
 		final boolean exists =
 			activityPriorityRepository.existsByNameIgnoreCase(name.trim());
-		logger.debug("existsByName(name={}) - Name exists: {}", name, exists);
+		LOGGER.debug("existsByName(name={}) - Name exists: {}", name, exists);
 		return exists;
 	}
 
@@ -139,18 +139,18 @@ public class CActivityPriorityService {
 	 */
 	@Transactional (readOnly = true)
 	public boolean existsByPriorityLevel(final Integer priorityLevel) {
-		logger.debug(
+		LOGGER.debug(
 			"existsByPriorityLevel(priorityLevel={}) - Checking if priority level exists",
 			priorityLevel);
 
 		if (priorityLevel == null) {
-			logger.warn(
+			LOGGER.warn(
 				"existsByPriorityLevel(priorityLevel=null) - Priority level parameter is null");
 			return false;
 		}
 		final boolean exists =
 			activityPriorityRepository.existsByPriorityLevel(priorityLevel);
-		logger.debug("existsByPriorityLevel(priorityLevel={}) - Level exists: {}",
+		LOGGER.debug("existsByPriorityLevel(priorityLevel={}) - Level exists: {}",
 			priorityLevel, exists);
 		return exists;
 	}
@@ -161,10 +161,10 @@ public class CActivityPriorityService {
 	 */
 	@Transactional (readOnly = true)
 	public List<CActivityPriority> findAll() {
-		logger.debug("findAll() - Finding all activity priorities");
+		LOGGER.debug("findAll() - Finding all activity priorities");
 		final List<CActivityPriority> priorities =
 			activityPriorityRepository.findAllOrderedByPriorityLevel();
-		logger.debug("findAll() - Found {} activity priorities", priorities.size());
+		LOGGER.debug("findAll() - Found {} activity priorities", priorities.size());
 		return priorities;
 	}
 
@@ -174,10 +174,10 @@ public class CActivityPriorityService {
 	 */
 	@Transactional (readOnly = true)
 	public List<CActivityPriority> findAllHighPriorities() {
-		logger.debug("findAllHighPriorities() - Finding all high activity priorities");
+		LOGGER.debug("findAllHighPriorities() - Finding all high activity priorities");
 		final List<CActivityPriority> priorities =
 			activityPriorityRepository.findAllHighPriorities();
-		logger.debug("findAllHighPriorities() - Found {} high priorities",
+		LOGGER.debug("findAllHighPriorities() - Found {} high priorities",
 			priorities.size());
 		return priorities;
 	}
@@ -188,10 +188,10 @@ public class CActivityPriorityService {
 	 */
 	@Transactional (readOnly = true)
 	public List<CActivityPriority> findAllLowPriorities() {
-		logger.debug("findAllLowPriorities() - Finding all low activity priorities");
+		LOGGER.debug("findAllLowPriorities() - Finding all low activity priorities");
 		final List<CActivityPriority> priorities =
 			activityPriorityRepository.findAllLowPriorities();
-		logger.debug("findAllLowPriorities() - Found {} low priorities",
+		LOGGER.debug("findAllLowPriorities() - Found {} low priorities",
 			priorities.size());
 		return priorities;
 	}
@@ -203,15 +203,15 @@ public class CActivityPriorityService {
 	 */
 	@Transactional (readOnly = true)
 	public Optional<CActivityPriority> findById(final Long id) {
-		logger.debug("findById(id={}) - Finding activity priority by ID", id);
+		LOGGER.debug("findById(id={}) - Finding activity priority by ID", id);
 
 		if (id == null) {
-			logger.warn("findById(id=null) - ID parameter is null");
+			LOGGER.warn("findById(id=null) - ID parameter is null");
 			return Optional.empty();
 		}
 		final Optional<CActivityPriority> priority =
 			activityPriorityRepository.findById(id);
-		logger.debug("findById(id={}) - Found priority: {}", id, priority.isPresent());
+		LOGGER.debug("findById(id={}) - Found priority: {}", id, priority.isPresent());
 		return priority;
 	}
 
@@ -222,15 +222,15 @@ public class CActivityPriorityService {
 	 */
 	@Transactional (readOnly = true)
 	public Optional<CActivityPriority> findByName(final String name) {
-		logger.debug("findByName(name={}) - Finding activity priority by name", name);
+		LOGGER.debug("findByName(name={}) - Finding activity priority by name", name);
 
 		if ((name == null) || name.trim().isEmpty()) {
-			logger.warn("findByName(name={}) - Name parameter is null or empty", name);
+			LOGGER.warn("findByName(name={}) - Name parameter is null or empty", name);
 			return Optional.empty();
 		}
 		final Optional<CActivityPriority> priority =
 			activityPriorityRepository.findByNameIgnoreCase(name.trim());
-		logger.debug("findByName(name={}) - Found priority: {}", name,
+		LOGGER.debug("findByName(name={}) - Found priority: {}", name,
 			priority.isPresent());
 		return priority;
 	}
@@ -242,18 +242,18 @@ public class CActivityPriorityService {
 	 */
 	@Transactional (readOnly = true)
 	public Optional<CActivityPriority> findByPriorityLevel(final Integer priorityLevel) {
-		logger.debug(
+		LOGGER.debug(
 			"findByPriorityLevel(priorityLevel={}) - Finding activity priority by level",
 			priorityLevel);
 
 		if (priorityLevel == null) {
-			logger.warn(
+			LOGGER.warn(
 				"findByPriorityLevel(priorityLevel=null) - Priority level parameter is null");
 			return Optional.empty();
 		}
 		final Optional<CActivityPriority> priority =
 			activityPriorityRepository.findByPriorityLevel(priorityLevel);
-		logger.debug("findByPriorityLevel(priorityLevel={}) - Found priority: {}",
+		LOGGER.debug("findByPriorityLevel(priorityLevel={}) - Found priority: {}",
 			priorityLevel, priority.isPresent());
 		return priority;
 	}
@@ -264,10 +264,10 @@ public class CActivityPriorityService {
 	 */
 	@Transactional (readOnly = true)
 	public Optional<CActivityPriority> findDefaultPriority() {
-		logger.debug("findDefaultPriority() - Finding default activity priority");
+		LOGGER.debug("findDefaultPriority() - Finding default activity priority");
 		final Optional<CActivityPriority> priority =
 			activityPriorityRepository.findDefaultPriority();
-		logger.debug("findDefaultPriority() - Found default priority: {}",
+		LOGGER.debug("findDefaultPriority() - Found default priority: {}",
 			priority.isPresent());
 		return priority;
 	}
@@ -279,18 +279,18 @@ public class CActivityPriorityService {
 	 * @throws IllegalArgumentException if the priority is null or invalid
 	 */
 	public CActivityPriority save(final CActivityPriority activityPriority) {
-		logger.debug("save(activityPriority={}) - Saving activity priority",
+		LOGGER.debug("save(activityPriority={}) - Saving activity priority",
 			activityPriority != null ? activityPriority.getName() : "null");
 
 		if (activityPriority == null) {
-			logger.error(
+			LOGGER.error(
 				"save(activityPriority=null) - Activity priority parameter is null");
 			throw new IllegalArgumentException("Activity priority cannot be null");
 		}
 
 		if ((activityPriority.getName() == null)
 			|| activityPriority.getName().trim().isEmpty()) {
-			logger.error(
+			LOGGER.error(
 				"save() - Activity priority name is null or empty for priority id={}",
 				activityPriority.getId());
 			throw new IllegalArgumentException(
@@ -300,7 +300,7 @@ public class CActivityPriorityService {
 		if ((activityPriority.getPriorityLevel() == null)
 			|| (activityPriority.getPriorityLevel() < 1)
 			|| (activityPriority.getPriorityLevel() > 5)) {
-			logger.error("save() - Invalid priority level {} for priority id={}",
+			LOGGER.error("save() - Invalid priority level {} for priority id={}",
 				activityPriority.getPriorityLevel(), activityPriority.getId());
 			throw new IllegalArgumentException("Priority level must be between 1 and 5");
 		}
@@ -311,7 +311,7 @@ public class CActivityPriorityService {
 
 		if (existingByName.isPresent()
 			&& !existingByName.get().getId().equals(activityPriority.getId())) {
-			logger.error("save() - Activity priority name '{}' already exists",
+			LOGGER.error("save() - Activity priority name '{}' already exists",
 				trimmedName);
 			throw new IllegalArgumentException(
 				"Activity priority name '" + trimmedName + "' already exists");
@@ -322,7 +322,7 @@ public class CActivityPriorityService {
 
 		if (existingByLevel.isPresent()
 			&& !existingByLevel.get().getId().equals(activityPriority.getId())) {
-			logger.error("save() - Priority level {} already exists",
+			LOGGER.error("save() - Priority level {} already exists",
 				activityPriority.getPriorityLevel());
 			throw new IllegalArgumentException("Priority level "
 				+ activityPriority.getPriorityLevel() + " already exists");
@@ -331,11 +331,11 @@ public class CActivityPriorityService {
 		try {
 			final CActivityPriority savedPriority =
 				activityPriorityRepository.save(activityPriority);
-			logger.debug("save() - Successfully saved activity priority with id={}",
+			LOGGER.debug("save() - Successfully saved activity priority with id={}",
 				savedPriority.getId());
 			return savedPriority;
 		} catch (final Exception e) {
-			logger.error("save() - Error saving activity priority: {}", e.getMessage(),
+			LOGGER.error("save() - Error saving activity priority: {}", e.getMessage(),
 				e);
 			throw new RuntimeException("Failed to save activity priority", e);
 		}

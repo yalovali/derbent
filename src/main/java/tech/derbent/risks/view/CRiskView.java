@@ -53,7 +53,7 @@ public class CRiskView extends CProjectAwareMDPage<CRisk> {
 		grid.addShortTextColumn(risk -> {
 			return risk.getRiskSeverity().name();
 		}, "Severity", null);
-		grid.addColumn(item -> {
+		grid.addLongTextColumn(item -> {
 			final String desc = item.getDescription();
 
 			if (desc == null) {

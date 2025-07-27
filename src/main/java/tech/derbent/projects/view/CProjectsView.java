@@ -55,7 +55,7 @@ public class CProjectsView extends CAbstractMDPage<CProject> {
 	protected void createGridForEntity() {
 		// property name must match the field name in CProject
 		grid.addShortTextColumn(CProject::getName, "Name", "name");
-		grid.addColumn(item -> {
+		grid.addLongTextColumn(item -> {
 			final String desc = item.getDescription();
 
 			if (desc == null) {

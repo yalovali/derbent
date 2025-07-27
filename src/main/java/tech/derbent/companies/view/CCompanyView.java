@@ -108,9 +108,8 @@ public class CCompanyView extends CAbstractMDPage<CCompany> {
 		grid.addShortTextColumn(CCompany::getAddress, "Address", "address");
 		grid.addShortTextColumn(CCompany::getPhone, "Phone", "phone");
 		grid.addShortTextColumn(CCompany::getEmail, "Email", "email");
-		grid.addColumn(company -> company.isEnabled() ? "Active" : "Inactive")
-			.setAutoWidth(true).setHeader("Status").setKey("enabled").setSortable(true);
-		grid.addColumn(CCompany::getWebsite, "Website", "website");
+		grid.addBooleanColumn(CCompany::isEnabled, "Status", "Active", "Inactive");
+		grid.addShortTextColumn(CCompany::getWebsite, "Website", "website");
 	}
 
 	@Override

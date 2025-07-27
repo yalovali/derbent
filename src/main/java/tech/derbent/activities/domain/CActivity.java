@@ -37,7 +37,7 @@ import tech.derbent.users.domain.CUser;
 @AttributeOverride (name = "id", column = @Column (name = "activity_id"))
 public class CActivity extends CEntityOfProject {
 
-	private static final Logger logger = LoggerFactory.getLogger(CActivity.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CActivity.class);
 
 	// Basic Activity Information
 	@ManyToOne (fetch = FetchType.LAZY)
@@ -229,16 +229,16 @@ public class CActivity extends CEntityOfProject {
 	 */
 	public CActivity(final String name, final CProject project) {
 		super(name, project);
-		logger.debug(
+		LOGGER.debug(
 			"CActivity(name={}, project={}) - Creating activity with name and project",
 			name, project != null ? project.getName() : "null");
 
 		if (name == null) {
-			logger.warn("CActivity constructor - Name parameter is null");
+			LOGGER.warn("CActivity constructor - Name parameter is null");
 		}
 
 		if (project == null) {
-			logger.warn("CActivity constructor - Project parameter is null");
+			LOGGER.warn("CActivity constructor - Project parameter is null");
 		}
 		initializeDefaults();
 	}
@@ -251,17 +251,17 @@ public class CActivity extends CEntityOfProject {
 	 */
 	public CActivity(final String name, final CProject project, final CUser assignedTo) {
 		super(name, project);
-		logger.debug(
+		LOGGER.debug(
 			"CActivity(name={}, project={}, assignedTo={}) - Creating activity with assignment",
 			name, project != null ? project.getName() : "null",
 			assignedTo != null ? assignedTo.getUsername() : "null");
 
 		if (name == null) {
-			logger.warn("CActivity constructor - Name parameter is null");
+			LOGGER.warn("CActivity constructor - Name parameter is null");
 		}
 
 		if (project == null) {
-			logger.warn("CActivity constructor - Project parameter is null");
+			LOGGER.warn("CActivity constructor - Project parameter is null");
 		}
 		this.assignedTo = assignedTo;
 		initializeDefaults();
@@ -272,12 +272,12 @@ public class CActivity extends CEntityOfProject {
 	 * @return the cost variance, positive if over budget, negative if under budget
 	 */
 	public BigDecimal calculateCostVariance() {
-		logger.debug(
+		LOGGER.debug(
 			"calculateCostVariance() - Calculating cost variance for activity id={}",
 			getId());
 
 		if ((actualCost == null) || (estimatedCost == null)) {
-			logger.debug(
+			LOGGER.debug(
 				"calculateCostVariance() - Missing cost data, actual={}, estimated={}",
 				actualCost, estimatedCost);
 			return BigDecimal.ZERO;
@@ -292,13 +292,13 @@ public class CActivity extends CEntityOfProject {
 	public BigDecimal calculateTimeVariance() {
 
 		if ((actualHours == null) || (estimatedHours == null)) {
-			logger.debug(
+			LOGGER.debug(
 				"calculateTimeVariance() - Missing time data, actual={}, estimated={}",
 				actualHours, estimatedHours);
 			return BigDecimal.ZERO;
 		}
 		final BigDecimal variance = actualHours.subtract(estimatedHours);
-		logger.debug("calculateTimeVariance() - Time variance calculated: {}", variance);
+		LOGGER.debug("calculateTimeVariance() - Time variance calculated: {}", variance);
 		return variance;
 	}
 
@@ -375,7 +375,7 @@ public class CActivity extends CEntityOfProject {
 			(progressPercentage != null) && (progressPercentage >= 100);
 		final boolean isFinalStatus = (status != null) && status.isFinal();
 		final boolean completed = hasCompletionDate || isFullProgress || isFinalStatus;
-		logger.debug(
+		LOGGER.debug(
 			"isCompleted() - Activity id={} completed={} (completionDate={}, progress={}, finalStatus={})",
 			getId(), completed, hasCompletionDate, progressPercentage, isFinalStatus);
 		return completed;
@@ -391,13 +391,13 @@ public class CActivity extends CEntityOfProject {
 			return false;
 		}
 		final boolean overdue = LocalDate.now().isAfter(dueDate);
-		logger.debug("isOverdue() - Activity id={} overdue={} (dueDate={}, today={})",
+		LOGGER.debug("isOverdue() - Activity id={} overdue={} (dueDate={}, today={})",
 			getId(), overdue, dueDate, LocalDate.now());
 		return overdue;
 	}
 
 	public void setAcceptanceCriteria(final String acceptanceCriteria) {
-		logger.debug(
+		LOGGER.debug(
 			"setAcceptanceCriteria(acceptanceCriteria={}) - Setting acceptance criteria for activity id={}",
 			acceptanceCriteria, getId());
 		this.acceptanceCriteria = acceptanceCriteria;
@@ -405,7 +405,7 @@ public class CActivity extends CEntityOfProject {
 	}
 
 	public void setActivityType(final CActivityType activityType) {
-		logger.debug(
+		LOGGER.debug(
 			"setActivityType(activityType={}) - Setting activity type for activity id={}",
 			activityType != null ? activityType.getName() : "null", getId());
 		this.activityType = activityType;
@@ -413,12 +413,12 @@ public class CActivity extends CEntityOfProject {
 	}
 
 	public void setActualCost(final BigDecimal actualCost) {
-		logger.debug(
+		LOGGER.debug(
 			"setActualCost(actualCost={}) - Setting actual cost for activity id={}",
 			actualCost, getId());
 
 		if ((actualCost != null) && (actualCost.compareTo(BigDecimal.ZERO) < 0)) {
-			logger.warn(
+			LOGGER.warn(
 				"setActualCost - Attempting to set negative actual cost: {} for activity id={}",
 				actualCost, getId());
 		}
@@ -427,12 +427,12 @@ public class CActivity extends CEntityOfProject {
 	}
 
 	public void setActualHours(final BigDecimal actualHours) {
-		logger.debug(
+		LOGGER.debug(
 			"setActualHours(actualHours={}) - Setting actual hours for activity id={}",
 			actualHours, getId());
 
 		if ((actualHours != null) && (actualHours.compareTo(BigDecimal.ZERO) < 0)) {
-			logger.warn(
+			LOGGER.warn(
 				"setActualHours - Attempting to set negative actual hours: {} for activity id={}",
 				actualHours, getId());
 		}
@@ -441,7 +441,7 @@ public class CActivity extends CEntityOfProject {
 	}
 
 	public void setAssignedTo(final CUser assignedTo) {
-		logger.debug(
+		LOGGER.debug(
 			"setAssignedTo(assignedTo={}) - Setting assigned user for activity id={}",
 			assignedTo != null ? assignedTo.getUsername() : "null", getId());
 		this.assignedTo = assignedTo;
@@ -449,14 +449,14 @@ public class CActivity extends CEntityOfProject {
 	}
 
 	public void setCompletionDate(final LocalDate completionDate) {
-		logger.debug(
+		LOGGER.debug(
 			"setCompletionDate(completionDate={}) - Setting completion date for activity id={}",
 			completionDate, getId());
 		this.completionDate = completionDate;
 
 		if ((completionDate != null) && (progressPercentage != null)
 			&& (progressPercentage < 100)) {
-			logger.debug(
+			LOGGER.debug(
 				"setCompletionDate - Auto-setting progress to 100% for completed activity id={}",
 				getId());
 			this.progressPercentage = 100;
@@ -465,26 +465,26 @@ public class CActivity extends CEntityOfProject {
 	}
 
 	public void setCreatedBy(final CUser createdBy) {
-		logger.debug(
+		LOGGER.debug(
 			"setCreatedBy(createdBy={}) - Setting created by user for activity id={}",
 			createdBy != null ? createdBy.getUsername() : "null", getId());
 		this.createdBy = createdBy;
 	}
 
 	public void setDueDate(final LocalDate dueDate) {
-		logger.debug("setDueDate(dueDate={}) - Setting due date for activity id={}",
+		LOGGER.debug("setDueDate(dueDate={}) - Setting due date for activity id={}",
 			dueDate, getId());
 		this.dueDate = dueDate;
 		updateLastModified();
 	}
 
 	public void setEstimatedCost(final BigDecimal estimatedCost) {
-		logger.debug(
+		LOGGER.debug(
 			"setEstimatedCost(estimatedCost={}) - Setting estimated cost for activity id={}",
 			estimatedCost, getId());
 
 		if ((estimatedCost != null) && (estimatedCost.compareTo(BigDecimal.ZERO) < 0)) {
-			logger.warn(
+			LOGGER.warn(
 				"setEstimatedCost - Attempting to set negative estimated cost: {} for activity id={}",
 				estimatedCost, getId());
 		}
@@ -493,12 +493,12 @@ public class CActivity extends CEntityOfProject {
 	}
 
 	public void setEstimatedHours(final BigDecimal estimatedHours) {
-		logger.debug(
+		LOGGER.debug(
 			"setEstimatedHours(estimatedHours={}) - Setting estimated hours for activity id={}",
 			estimatedHours, getId());
 
 		if ((estimatedHours != null) && (estimatedHours.compareTo(BigDecimal.ZERO) < 0)) {
-			logger.warn(
+			LOGGER.warn(
 				"setEstimatedHours - Attempting to set negative estimated hours: {} for activity id={}",
 				estimatedHours, getId());
 		}
@@ -507,12 +507,12 @@ public class CActivity extends CEntityOfProject {
 	}
 
 	public void setHourlyRate(final BigDecimal hourlyRate) {
-		logger.debug(
+		LOGGER.debug(
 			"setHourlyRate(hourlyRate={}) - Setting hourly rate for activity id={}",
 			hourlyRate, getId());
 
 		if ((hourlyRate != null) && (hourlyRate.compareTo(BigDecimal.ZERO) < 0)) {
-			logger.warn(
+			LOGGER.warn(
 				"setHourlyRate - Attempting to set negative hourly rate: {} for activity id={}",
 				hourlyRate, getId());
 		}
@@ -521,19 +521,19 @@ public class CActivity extends CEntityOfProject {
 	}
 
 	public void setNotes(final String notes) {
-		logger.debug("setNotes(notes={}) - Setting notes for activity id={}", notes,
+		LOGGER.debug("setNotes(notes={}) - Setting notes for activity id={}", notes,
 			getId());
 		this.notes = notes;
 		updateLastModified();
 	}
 
 	public void setParentActivity(final CActivity parentActivity) {
-		logger.debug(
+		LOGGER.debug(
 			"setParentActivity(parentActivity={}) - Setting parent activity for activity id={}",
 			parentActivity != null ? parentActivity.getName() : "null", getId());
 
 		if ((parentActivity != null) && parentActivity.equals(this)) {
-			logger.warn(
+			LOGGER.warn(
 				"setParentActivity - Attempting to set self as parent for activity id={}",
 				getId());
 			return;
@@ -543,20 +543,20 @@ public class CActivity extends CEntityOfProject {
 	}
 
 	public void setPriority(final CActivityPriority priority) {
-		logger.debug("setPriority(priority={}) - Setting priority for activity id={}",
+		LOGGER.debug("setPriority(priority={}) - Setting priority for activity id={}",
 			priority != null ? priority.getName() : "null", getId());
 		this.priority = priority;
 		updateLastModified();
 	}
 
 	public void setProgressPercentage(final Integer progressPercentage) {
-		logger.debug(
+		LOGGER.debug(
 			"setProgressPercentage(progressPercentage={}) - Setting progress percentage for activity id={}",
 			progressPercentage, getId());
 
 		if ((progressPercentage != null)
 			&& ((progressPercentage < 0) || (progressPercentage > 100))) {
-			logger.warn(
+			LOGGER.warn(
 				"setProgressPercentage - Invalid progress percentage: {} for activity id={}",
 				progressPercentage, getId());
 			return;
@@ -566,7 +566,7 @@ public class CActivity extends CEntityOfProject {
 		// Auto-set completion date if progress reaches 100%
 		if ((progressPercentage != null) && (progressPercentage >= 100)
 			&& (completionDate == null)) {
-			logger.debug(
+			LOGGER.debug(
 				"setProgressPercentage - Auto-setting completion date for 100% progress activity id={}",
 				getId());
 			this.completionDate = LocalDate.now();
@@ -575,12 +575,12 @@ public class CActivity extends CEntityOfProject {
 	}
 
 	public void setRemainingHours(final BigDecimal remainingHours) {
-		logger.debug(
+		LOGGER.debug(
 			"setRemainingHours(remainingHours={}) - Setting remaining hours for activity id={}",
 			remainingHours, getId());
 
 		if ((remainingHours != null) && (remainingHours.compareTo(BigDecimal.ZERO) < 0)) {
-			logger.warn(
+			LOGGER.warn(
 				"setRemainingHours - Attempting to set negative remaining hours: {} for activity id={}",
 				remainingHours, getId());
 		}
@@ -589,20 +589,20 @@ public class CActivity extends CEntityOfProject {
 	}
 
 	public void setStartDate(final LocalDate startDate) {
-		logger.debug("setStartDate(startDate={}) - Setting start date for activity id={}",
+		LOGGER.debug("setStartDate(startDate={}) - Setting start date for activity id={}",
 			startDate, getId());
 		this.startDate = startDate;
 		updateLastModified();
 	}
 
 	public void setStatus(final CActivityStatus status) {
-		logger.debug("setStatus(status={}) - Setting status for activity id={}",
+		LOGGER.debug("setStatus(status={}) - Setting status for activity id={}",
 			status != null ? status.getName() : "null", getId());
 		this.status = status;
 
 		// Auto-set completion date if status is final
 		if ((status != null) && status.isFinal() && (completionDate == null)) {
-			logger.debug(
+			LOGGER.debug(
 				"setStatus - Auto-setting completion date for final status activity id={}",
 				getId());
 			this.completionDate = LocalDate.now();

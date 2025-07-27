@@ -101,21 +101,12 @@ public class CCompanySettingsView extends CAbstractMDPage<CCompanySettings> {
 
 		try {
 			// Configure grid columns for company settings
-			grid.addColumn(settings -> settings.getCompany() != null
-				? settings.getCompany().getName() : "").setHeader("Company")
-				.setSortable(true).setAutoWidth(true);
-			grid.addColumn(CCompanySettings::getDefaultProjectStatus)
-				.setHeader("Default Project Status").setSortable(true).setAutoWidth(true);
-			grid.addColumn(CCompanySettings::getCompanyTimezone).setHeader("Timezone")
-				.setSortable(true).setAutoWidth(true);
-			grid.addColumn(settings -> settings.getWorkingHoursPerDay() + " hrs/day")
-				.setHeader("Working Hours").setSortable(true).setAutoWidth(true);
-			grid.addColumn(settings -> settings.isEmailNotificationsEnabled() ? "Enabled"
-				: "Disabled").setHeader("Email Notifications").setSortable(true)
-				.setAutoWidth(true);
-			// Set data provider using the entityService
-			grid.setItems(query -> companySettingsService
-				.list(VaadinSpringDataHelpers.toSpringPageRequest(query)).stream());
+			grid.addReferenceColumn(settings -> settings.getCompany() != null
+				? settings.getCompany().getName() : "", "Company");
+			grid.addShortTextColumn(CCompanySettings::getDefaultProjectStatus, "Default Project Status", "defaultProjectStatus");
+			grid.addShortTextColumn(CCompanySettings::getCompanyTimezone, "Timezone", "companyTimezone");
+			grid.addShortTextColumn(settings -> settings.getWorkingHoursPerDay() + " hrs/day", "Working Hours", null);
+			grid.addBooleanColumn(CCompanySettings::isEmailNotificationsEnabled, "Email Notifications", "Enabled", "Disabled");
 			LOGGER.debug("Grid configured successfully for CCompanySettingsView");
 		} catch (final Exception e) {
 			LOGGER.error("Error configuring grid for CCompanySettingsView", e);
