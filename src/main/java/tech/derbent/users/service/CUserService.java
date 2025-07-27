@@ -27,23 +27,38 @@ import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserProjectSettings;
 
 @Service
-@PreAuthorize("isAuthenticated()")
-@Transactional(readOnly = true) // Default to read-only transactions for better
-								// performance
+@PreAuthorize ("isAuthenticated()")
+@Transactional (readOnly = true) // Default to read-only transactions for better
+									// performance
 public class CUserService extends CAbstractService<CUser> implements UserDetailsService {
 
 	private static final Logger logger = LoggerFactory.getLogger(CUserService.class);
+
 	private final PasswordEncoder passwordEncoder;
 
 	CUserService(final CUserRepository repository, final Clock clock) {
 		super(repository, clock);
 		this.passwordEncoder = new BCryptPasswordEncoder(); // BCrypt for secure password
 															// hashing
-		logger.info("CLoginUserService initialized with database authentication");
+		final CharSequence newPlainPassword = "test123";
+		final String encodedPassword = passwordEncoder.encode(newPlainPassword);
+		LOGGER.info("Encoded password for '{}': {}", newPlainPassword, encodedPassword);
+	}
+
+	/**
+	 * Counts the number of users assigned to a specific project.
+	 * @param projectId the project ID
+	 * @return count of users assigned to the project
+	 */
+	@PreAuthorize ("permitAll()")
+	public long countUsersByProjectId(final Long projectId) {
+		logger.info("Counting users for project ID: {}", projectId);
+		return ((CUserRepository) repository).countUsersByProjectId(projectId);
 	}
 
 	@Transactional
 	public void createEntity(final String name) {
+
 		if ("fail".equals(name)) {
 			throw new RuntimeException("This is for testing the error handler");
 		}
@@ -66,6 +81,7 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 	public CUser createLoginUser(final String username, final String plainPassword,
 		final String name, final String email, final String roles) {
 		logger.info("Creating new login user with username: {}", username);
+
 		// Check if username already exists
 		if (((CUserRepository) repository).findByUsername(username).isPresent()) {
 			throw new IllegalArgumentException("Username already exists: " + username);
@@ -100,7 +116,7 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 	 * @return optional CUser with loaded userType
 	 */
 	@Override
-	@Transactional(readOnly = true)
+	@Transactional (readOnly = true)
 	public Optional<CUser> get(final Long id) {
 		LOGGER.debug("Getting CUser with ID {} (overridden to eagerly load userType)",
 			id);
@@ -119,6 +135,7 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 	 * @return Collection of GrantedAuthority objects
 	 */
 	private Collection<GrantedAuthority> getAuthorities(final String rolesString) {
+
 		if ((rolesString == null) || rolesString.trim().isEmpty()) {
 			logger.warn("User has no roles assigned, defaulting to ROLE_USER");
 			return Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"));
@@ -150,7 +167,7 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 	 * @return the user with project settings loaded
 	 * @throws EntityNotFoundException if user not found
 	 */
-	@Transactional(readOnly = true)
+	@Transactional (readOnly = true)
 	public CUser getUserWithProjects(final Long id) {
 		LOGGER.debug("Getting user with projects for ID: {}", id);
 		final CUser user =
@@ -168,16 +185,15 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 	 */
 	@Override
 	protected void initializeLazyFields(final CUser user) {
+
 		if (user == null) {
 			return;
 		}
+
 		try {
-			// Initialize the main entity
 			super.initializeLazyFields(user);
-			// Initialize user type if present
-			initializeLazyRelationship(user.getUserType(), "CUserType");
-			// Initialize project settings collection
-			initializeLazyRelationship(user.getProjectSettings(), "projectSettings");
+			initializeLazyRelationship(user.getUserType());
+			initializeLazyRelationship(user.getProjectSettings());
 		} catch (final Exception e) {
 			LOGGER.warn("Error initializing lazy fields for user with ID: {}",
 				CSpringAuxillaries.safeGetId(user), e);
@@ -232,6 +248,7 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 		logger.info("Removing user project setting for user ID: {} and project ID: {}",
 			userId, projectId);
 		final CUser user = getUserWithProjects(userId);
+
 		if (user.getProjectSettings() != null) {
 			user.getProjectSettings()
 				.removeIf(setting -> setting.getProjectId().equals(projectId));
@@ -251,14 +268,16 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 			userProjectSetting.getUser().getId(), userProjectSetting.getProjectId());
 		// Ensure the user exists and reload with project settings
 		final CUser user = getUserWithProjects(userProjectSetting.getUser().getId());
+
 		// Initialize project settings list if null
 		if (user.getProjectSettings() == null) {
 			user.setProjectSettings(new java.util.ArrayList<>());
 		}
 		// Check if this setting already exists (update case)
 		boolean updated = false;
-		for (int i = 0; i < user.getProjectSettings().size(); i++) {
-			final CUserProjectSettings existing = user.getProjectSettings().get(i);
+
+		for (final CUserProjectSettings existing : user.getProjectSettings()) {
+
 			if (existing.getProjectId().equals(userProjectSetting.getProjectId())) {
 				existing.setRole(userProjectSetting.getRole());
 				existing.setPermission(userProjectSetting.getPermission());
@@ -266,6 +285,7 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 				break;
 			}
 		}
+
 		if (!updated) {
 			userProjectSetting.setUser(user);
 			user.getProjectSettings().add(userProjectSetting);
@@ -296,10 +316,12 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 	@Override
 	protected void validateEntity(final CUser user) {
 		super.validateEntity(user);
+
 		// Additional validation for user entities
 		if ((user.getLogin() == null) || user.getLogin().trim().isEmpty()) {
 			throw new IllegalArgumentException("User login cannot be null or empty");
 		}
+
 		if ((user.getName() == null) || user.getName().trim().isEmpty()) {
 			throw new IllegalArgumentException("User name cannot be null or empty");
 		}

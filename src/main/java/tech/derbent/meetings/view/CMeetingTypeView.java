@@ -4,7 +4,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
@@ -17,14 +16,16 @@ import tech.derbent.meetings.service.CMeetingTypeService;
  * CMeetingTypeView - View for managing meeting types. Layer: View (MVC) Provides CRUD
  * operations for meeting types using the abstract master-detail pattern.
  */
-@Route("meeting-types/:meeting_type_id?/:action?(edit)")
-@PageTitle("Meeting Types")
-@Menu(order = 2, icon = "vaadin:tags", title = "Types.Meeting Types")
+@Route ("meeting-types/:meeting_type_id?/:action?(edit)")
+@PageTitle ("Meeting Types")
+@Menu (order = 2.2, icon = "vaadin:tags", title = "Types.Meeting Types")
 @PermitAll
 public class CMeetingTypeView extends CAbstractMDPage<CMeetingType> {
 
 	private static final long serialVersionUID = 1L;
+
 	private final String ENTITY_ID_FIELD = "meeting_type_id";
+
 	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "meeting-types/%s/edit";
 
 	/**
@@ -51,13 +52,11 @@ public class CMeetingTypeView extends CAbstractMDPage<CMeetingType> {
 
 	@Override
 	protected void createGridForEntity() {
-		LOGGER.info("Creating grid for meeting types");
-		grid.addColumn(CMeetingType::getName).setAutoWidth(true).setHeader("Name")
-			.setSortable(true);
-		grid.addColumn(CMeetingType::getDescription).setAutoWidth(true)
-			.setHeader("Description").setSortable(true);
-		grid.setItems(query -> entityService
-			.list(VaadinSpringDataHelpers.toSpringPageRequest(query)).stream());
+		grid.addShortTextColumn(CMeetingType::getName, "Name", "name");
+		grid.addColumn(CMeetingType::getDescription, "Description", "description");
+		// Data provider is already set up in the base class
+		// CAbstractMDPage.createGridLayout() No need to call grid.setItems() again as
+		// it's already configured to handle sorting properly
 	}
 
 	@Override
@@ -65,11 +64,6 @@ public class CMeetingTypeView extends CAbstractMDPage<CMeetingType> {
 
 	@Override
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	@Override
-	protected void initPage() {
-		// Initialize page components if needed
-	}
 
 	@Override
 	protected CMeetingType newEntity() {

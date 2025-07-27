@@ -47,9 +47,13 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	private final class CMenuItem {
 
 		private final String name;
+
 		private final String iconName;
+
 		private final String path;
+
 		private final String targetLevelKey;
+
 		private final boolean isNavigation;
 
 		public CMenuItem(final String name, final String iconName, final String path,
@@ -71,6 +75,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 				&& (currentRoute != null) && currentRoute.equals(path.trim());
 			// Add icon with consistent sizing
 			Icon icon;
+
 			if ((iconName != null) && !iconName.trim().isEmpty()) {
 				icon = new Icon(iconName);
 			}
@@ -87,10 +92,12 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			final Span itemText = new Span(name);
 			itemText.addClassNames(FontSize.LARGE,
 				isCurrentPage ? FontWeight.BOLD : FontWeight.NORMAL);
+
 			if (isCurrentPage) {
 				itemText.addClassNames(TextColor.PRIMARY);
 			}
 			itemLayout.add(itemText);
+
 			// Add navigation arrow for navigation items
 			if (isNavigation) {
 				final Div spacer = new Div();
@@ -102,6 +109,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 				navIcon.getStyle().set("min-width", "24px").set("min-height", "24px");
 				itemLayout.add(navIcon);
 			}
+
 			// Apply current page highlighting styles
 			if (isCurrentPage) {
 				itemLayout.getElement().getStyle()
@@ -114,6 +122,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			itemLayout.getElement().getStyle().set("cursor", "pointer")
 				.set("border-radius", "var(--lumo-border-radius-m)")
 				.set("transition", "all 0.2s ease");
+
 			// Add hover effects (only if not current page to avoid conflicts)
 			if (!isCurrentPage) {
 				itemLayout.getElement().addEventListener("mouseenter",
@@ -128,6 +137,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		private void handleItemClick(
 			final com.vaadin.flow.component.ClickEvent<HorizontalLayout> event) {
 			LOGGER.debug("Menu item clicked: {} (isNavigation: {})", name, isNavigation);
+
 			if (isNavigation && (targetLevelKey != null)) {
 				// Navigate to sub-level
 				showLevel(targetLevelKey);
@@ -146,8 +156,11 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	private final class CMenuLevel {
 
 		private final String levelKey;
+
 		private final String displayName;
+
 		private final CMenuLevel parent;
+
 		private final List<CMenuItem> items;
 
 		public CMenuLevel(final String levelKey, final String displayName,
@@ -156,15 +169,15 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			this.displayName = displayName;
 			this.parent = parent;
 			this.items = new ArrayList<>();
-			LOGGER.debug("Created menu level: {} with display name: {}", levelKey,
-				displayName);
+			// LOGGER.debug("Created menu level: {} with display name: {}", levelKey,
+			// displayName);
 		}
 
 		public void addMenuItem(final String name, final String iconName,
 			final String path) {
 			final CMenuItem item = new CMenuItem(name, iconName, path, null, false);
 			items.add(item);
-			LOGGER.debug("Added menu item '{}' to level '{}'", name, levelKey);
+			// LOGGER.debug("Added menu item '{}' to level '{}'", name, levelKey);
 		}
 
 		public void addNavigationItem(final String name, final String iconName,
@@ -172,13 +185,14 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			final CMenuItem item =
 				new CMenuItem(name, iconName, null, targetLevelKey, true);
 			items.add(item);
-			LOGGER.debug("Added navigation item '{}' to level '{}'", name, levelKey);
+			// LOGGER.debug("Added navigation item '{}' to level '{}'", name, levelKey);
 		}
 
 		public Component createLevelComponent() {
 			final VerticalLayout levelLayout = new VerticalLayout();
 			levelLayout.addClassNames(Padding.NONE, Gap.SMALL);
 			levelLayout.setWidthFull();
+
 			for (final CMenuItem item : items) {
 				levelLayout.add(item.createComponent());
 			}
@@ -194,21 +208,34 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	}
 
 	private static final long serialVersionUID = 1L;
+
 	private static final int MAX_MENU_LEVELS = 4;
+
 	// Styling constants
 	private static final String MENU_ITEM_CLASS = "hierarchical-menu-item";
+
 	private static final String BACK_BUTTON_CLASS = "hierarchical-back-button";
+
 	private static final String LEVEL_CONTAINER_CLASS = "hierarchical-level-container";
+
 	private static final String HEADER_CLASS = "hierarchical-header";
+
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+
 	// Menu structure components
 	private final VerticalLayout menuContainer;
+
 	private final HorizontalLayout headerLayout;
+
 	private final Div currentLevelContainer;
+
 	// Navigation state
 	private final List<String> navigationPath;
+
 	private final Map<String, CMenuLevel> menuLevels;
+
 	private CMenuLevel currentLevel;
+
 	private String currentRoute; // Track current route for highlighting
 
 	/**
@@ -249,6 +276,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	public void afterNavigation(final AfterNavigationEvent event) {
 		// Update current route and refresh highlighting
 		final String newRoute = event.getLocation().getPath();
+
 		if (!newRoute.equals(currentRoute)) {
 			currentRoute = newRoute;
 			LOGGER.debug("Route changed to: {}, updating menu highlighting",
@@ -262,16 +290,17 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	 * parentItem2.childItem1.childofchileitem1
 	 */
 	private void buildMenuHierarchy() {
-		LOGGER.debug("Building menu hierarchy from route annotations");
+		// LOGGER.debug("Building menu hierarchy from route annotations");
 		final var rootLevel = new CMenuLevel("root", "Root Menu", null);
 		menuLevels.put("root", rootLevel);
 		// Get menu entries from MenuConfiguration
 		final var menuEntries = MenuConfiguration.getMenuEntries();
-		LOGGER.debug("Processing {} menu entries", menuEntries.size());
+
+		// LOGGER.debug("Processing {} menu entries", menuEntries.size());
 		for (final MenuEntry menuEntry : menuEntries) {
 			processMenuEntry(menuEntry);
 		}
-		LOGGER.debug("Menu hierarchy built with {} levels", menuLevels.size());
+		// LOGGER.debug("Menu hierarchy built with {} levels", menuLevels.size());
 	}
 
 	/**
@@ -282,6 +311,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		final ClickEvent<com.vaadin.flow.component.button.Button> event) {
 		LOGGER.debug("Back button clicked from level: {}",
 			currentLevel != null ? currentLevel.getLevelKey() : "unknown");
+
 		if ((currentLevel != null) && (currentLevel.getParent() != null)) {
 			showLevel(currentLevel.getParent().getLevelKey());
 		}
@@ -303,6 +333,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	 * @param menuEntry The menu entry to process
 	 */
 	private void processMenuEntry(final MenuEntry menuEntry) {
+
 		if (menuEntry == null) {
 			LOGGER.warn("Null menu entry encountered, skipping");
 			return;
@@ -310,8 +341,9 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		final String title = menuEntry.title();
 		final String path = menuEntry.path();
 		final String icon = menuEntry.icon();
-		LOGGER.debug("Processing menu entry - title: {}, path: {}, icon: {}", title, path,
-			icon);
+
+		// LOGGER.debug("Processing menu entry - title: {}, path: {}, icon: {}", title,
+		// path, icon);
 		if ((title == null) || title.trim().isEmpty()) {
 			LOGGER.warn("Menu entry with empty title encountered, skipping");
 			return;
@@ -321,9 +353,11 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		final int levelCount = Math.min(titleParts.length, MAX_MENU_LEVELS);
 		// Ensure all parent levels exist
 		String currentLevelKey = "root";
+
 		for (int i = 0; i < (levelCount - 1); i++) {
 			final String levelName = titleParts[i].trim();
 			final String childLevelKey = currentLevelKey + "." + levelName;
+
 			if (!menuLevels.containsKey(childLevelKey)) {
 				final CMenuLevel parentLevel = menuLevels.get(currentLevelKey);
 				final CMenuLevel newLevel =
@@ -331,19 +365,21 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 				menuLevels.put(childLevelKey, newLevel);
 				// Add navigation item to parent level
 				parentLevel.addNavigationItem(levelName, icon, childLevelKey);
-				LOGGER.debug("Created level: {} under parent: {}", childLevelKey,
-					currentLevelKey);
+				// LOGGER.debug("Created level: {} under parent: {}", childLevelKey,
+				// currentLevelKey);
 			}
 			currentLevelKey = childLevelKey;
 		}
+
 		// Add final menu item (leaf node) to the current level
 		if (levelCount > 0) {
 			final String itemName = titleParts[levelCount - 1].trim();
 			final CMenuLevel targetLevel = menuLevels.get(currentLevelKey);
+
 			if (targetLevel != null) {
 				targetLevel.addMenuItem(itemName, icon, path);
-				LOGGER.debug("Added menu item '{}' to level '{}'", itemName,
-					currentLevelKey);
+				// LOGGER.debug("Added menu item '{}' to level '{}'", itemName,
+				// currentLevelKey);
 			}
 		}
 	}
@@ -352,6 +388,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	 * Refreshes the current level display to update highlighting.
 	 */
 	private void refreshCurrentLevel() {
+
 		if (currentLevel != null) {
 			currentLevelContainer.removeAll();
 			currentLevelContainer.add(currentLevel.createLevelComponent());
@@ -363,8 +400,9 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	 * @param levelKey The key of the level to show
 	 */
 	private void showLevel(final String levelKey) {
-		LOGGER.debug("Showing menu level: {}", levelKey);
+		// LOGGER.debug("Showing menu level: {}", levelKey);
 		final CMenuLevel level = menuLevels.get(levelKey);
+
 		if (level == null) {
 			LOGGER.warn("Menu level '{}' not found", levelKey);
 			return;
@@ -380,7 +418,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		currentLevelContainer.addClassName("slide-in");
 		// Store current level reference
 		currentLevel = level;
-		LOGGER.debug("Menu level '{}' displayed successfully", levelKey);
+		// LOGGER.debug("Menu level '{}' displayed successfully", levelKey);
 	}
 
 	/**
@@ -391,6 +429,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		headerLayout.removeAll();
 		// Always add an icon area with consistent width
 		Icon levelIcon;
+
 		if (level.getParent() != null) {
 			// Add back button with consistent sizing
 			levelIcon = VaadinIcon.ARROW_LEFT.create();
@@ -429,13 +468,16 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	 */
 	private void updateNavigationPath(final String levelKey) {
 		navigationPath.clear();
+
 		if ("root".equals(levelKey)) {
 			return;
 		}
 		// Build path from root to current level
 		final String[] pathParts = levelKey.split("\\.");
 		String currentPath = "";
+
 		for (final String part : pathParts) {
+
 			if ("root".equals(part)) {
 				currentPath = "root";
 			}
@@ -444,6 +486,6 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			}
 			navigationPath.add(currentPath);
 		}
-		LOGGER.debug("Navigation path updated: {}", navigationPath);
+		// LOGGER.debug("Navigation path updated: {}", navigationPath);
 	}
 }

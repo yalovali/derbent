@@ -41,22 +41,31 @@ class CEntityFormBuilderIntegrationTest {
 	 */
 	public static class ExampleEntity extends CEntityDB {
 
-		@MetaData(displayName = "Primary Type", description = "The primary type category",
-			order = 1, required = true, dataProviderBean = "primaryTypeService")
+		@MetaData (
+			displayName = "Primary Type", description = "The primary type category",
+			order = 1, required = true, dataProviderBean = "primaryTypeService"
+		)
 		private PrimaryType primaryType;
-		@MetaData(displayName = "Secondary Type",
-			description = "The secondary type category", order = 2, required = false,
-			dataProviderClass = SecondaryTypeService.class,
-			dataProviderMethod = "findAllActive")
+
+		@MetaData (
+			displayName = "Secondary Type", description = "The secondary type category",
+			order = 2, required = false, dataProviderClass = SecondaryTypeService.class,
+			dataProviderMethod = "findAllActive"
+		)
 		private SecondaryType secondaryType;
-		@MetaData(displayName = "Related Item",
+
+		@MetaData (
+			displayName = "Related Item",
 			description = "Related item using automatic resolution", order = 3,
 			required = false
-		// No explicit data provider - will use automatic resolution
+			// No explicit data provider - will use automatic resolution
 		)
 		private RelatedItem relatedItem;
-		@MetaData(displayName = "Entity Name", description = "The name of this entity",
-			order = 0, required = true, maxLength = 100)
+
+		@MetaData (
+			displayName = "Entity Name", description = "The name of this entity",
+			order = 0, required = true, maxLength = 100
+		)
 		private String name;
 
 		// Constructors
@@ -200,15 +209,18 @@ class CEntityFormBuilderIntegrationTest {
 	}
 
 	@Test
-	@DisplayName("should maintain backward compatibility with legacy ComboBoxDataProvider")
+	@DisplayName (
+		"should maintain backward compatibility with legacy ComboBoxDataProvider"
+	)
 	void testBackwardCompatibilityWithLegacyProvider() {
 		// Given - Create legacy data provider
 		final CEntityFormBuilder.ComboBoxDataProvider legacyProvider =
 			new CEntityFormBuilder.ComboBoxDataProvider() {
 
 				@Override
-				@SuppressWarnings("unchecked")
+				@SuppressWarnings ("unchecked")
 				public <T extends CEntityDB> List<T> getItems(final Class<T> entityType) {
+
 					if (entityType == PrimaryType.class) {
 						return (List<T>) Arrays.asList(new PrimaryType("Legacy Type 1"),
 							new PrimaryType("Legacy Type 2"));
@@ -222,8 +234,8 @@ class CEntityFormBuilderIntegrationTest {
 				}
 			};
 		// When - Create form using legacy approach (should still work)
-		final Div form =
-			CEntityFormBuilder.buildForm(ExampleEntity.class, binder, legacyProvider);
+		final Div form = CEntityFormBuilder.buildForm(ExampleEntity.class, binder,
+			legacyProvider, null);
 		// Then
 		assertNotNull(form, "Form should be created successfully with legacy provider");
 		assertEquals("editor-layout", form.getClassName(),
@@ -232,26 +244,27 @@ class CEntityFormBuilderIntegrationTest {
 	}
 
 	@Test
-	@DisplayName("should handle entity without ComboBox fields gracefully")
+	@DisplayName ("should handle entity without ComboBox fields gracefully")
 	void testEntityWithoutComboBoxFields() {
 		// Given - Simple entity without ComboBox fields
 		class SimpleEntity {
 
-			@MetaData(displayName = "Simple Name", required = true, order = 1)
+			@MetaData (displayName = "Simple Name", required = true, order = 1)
 			private String name;
-			@MetaData(displayName = "Simple Number", required = false, order = 2)
+
+			@MetaData (displayName = "Simple Number", required = false, order = 2)
 			private Integer number;
 
-			@SuppressWarnings("unused")
+			@SuppressWarnings ("unused")
 			public String getName() { return name; }
 
-			@SuppressWarnings("unused")
+			@SuppressWarnings ("unused")
 			public Integer getNumber() { return number; }
 
-			@SuppressWarnings("unused")
+			@SuppressWarnings ("unused")
 			public void setName(final String name) { this.name = name; }
 
-			@SuppressWarnings("unused")
+			@SuppressWarnings ("unused")
 			public void setNumber(final Integer number) { this.number = number; }
 		}
 		final BeanValidationBinder<SimpleEntity> simpleBinder =
@@ -266,7 +279,7 @@ class CEntityFormBuilderIntegrationTest {
 	}
 
 	@Test
-	@DisplayName("should create form with annotation-based ComboBox providers")
+	@DisplayName ("should create form with annotation-based ComboBox providers")
 	void testFormWithAnnotationBasedProviders() {
 		// When - Create form using the new annotation-based approach Note: No explicit
 		// ComboBoxDataProvider needed!
@@ -282,7 +295,7 @@ class CEntityFormBuilderIntegrationTest {
 	}
 
 	@Test
-	@DisplayName("should demonstrate the improved developer experience")
+	@DisplayName ("should demonstrate the improved developer experience")
 	void testImprovedDeveloperExperience() {
 		/*
 		 * This test demonstrates how the new annotation-based approach dramatically

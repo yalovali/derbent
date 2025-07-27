@@ -14,6 +14,7 @@ import org.mockito.MockitoAnnotations;
 
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.domain.CActivityType;
+import tech.derbent.projects.domain.CProject;
 
 /**
  * Test class for CActivityService lazy loading functionality. Specifically tests the fix
@@ -72,7 +73,7 @@ class CActivityServiceLazyLoadingTest {
 		final CActivityType activityType = new CActivityType();
 		activityType.setName("Test Activity Type");
 		activity.setActivityType(activityType);
-		when(repository.findByIdWithActivityType(activityId))
+		when(repository.findByIdWithActivityTypeStatusAndProject(activityId))
 			.thenReturn(Optional.of(activity));
 		// When & Then - Should not throw LazyInitializationException
 		assertDoesNotThrow(() -> {
@@ -84,6 +85,36 @@ class CActivityServiceLazyLoadingTest {
 				if (type != null) {
 					type.getName(); // Access a property to trigger lazy loading
 				}
+			}
+		});
+	}
+
+	@Test
+	void testProjectNameAccessForGridDisplay() {
+		// Given
+		final Long activityId = 1L;
+		final CActivity activity = new CActivity();
+		activity.setName("Test Activity");
+		
+		// Create a mock project
+		final CProject project = new CProject();
+		project.setName("Test Project");
+		activity.setProject(project);
+		
+		final CActivityType activityType = new CActivityType();
+		activityType.setName("Test Activity Type");
+		activity.setActivityType(activityType);
+		
+		when(repository.findByIdWithActivityTypeStatusAndProject(activityId))
+			.thenReturn(Optional.of(activity));
+		
+		// When & Then - Should not throw LazyInitializationException when accessing project name
+		assertDoesNotThrow(() -> {
+			final Optional<CActivity> result = activityService.get(activityId);
+			if (result.isPresent()) {
+				// This is what the grid calls - should not throw LazyInitializationException
+				final String projectName = result.get().getProjectName();
+				assertNotNull(projectName);
 			}
 		});
 	}

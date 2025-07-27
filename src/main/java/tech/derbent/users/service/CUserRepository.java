@@ -66,4 +66,14 @@ public interface CUserRepository extends CAbstractRepository<CUser> {
      */
     @Query("SELECT u FROM CUser u LEFT JOIN FETCH u.userType LEFT JOIN FETCH u.projectSettings WHERE u.id = :id")
     Optional<CUser> findByIdWithUserTypeAndProjects(@Param("id") Long id);
+
+    /**
+     * Counts the number of users for a specific project.
+     * 
+     * @param projectId
+     *            the project ID
+     * @return count of users assigned to the project
+     */
+    @Query("SELECT COUNT(DISTINCT u) FROM CUser u JOIN u.projectSettings ps WHERE ps.projectId = :projectId")
+    long countUsersByProjectId(@Param("projectId") Long projectId);
 }

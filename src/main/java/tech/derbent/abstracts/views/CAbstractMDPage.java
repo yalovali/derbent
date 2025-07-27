@@ -1,5 +1,6 @@
 package tech.derbent.abstracts.views;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -8,7 +9,6 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasOrderedComponents;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
@@ -37,16 +37,29 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	implements CLayoutChangeListener {
 
 	private static final long serialVersionUID = 1L;
+
 	protected final Class<EntityClass> entityClass;
-	protected Grid<EntityClass> grid;// = new Grid<>(CProject.class, false);
+
+	protected CGrid<EntityClass> grid;// = new CGrid<>(EntityClass.class, false);
+
 	private final BeanValidationBinder<EntityClass> binder;
+
 	protected SplitLayout splitLayout = new SplitLayout();
+
 	// private final FlexLayout baseDetailsLayout = new FlexLayout();
 	private final VerticalLayout baseDetailsLayout = new VerticalLayout();
+
 	private final Div detailsTabLayout = new Div();
+
 	private EntityClass currentEntity;
+
 	protected final CAbstractService<EntityClass> entityService;
+
 	protected LayoutService layoutService; // Optional injection
+
+	ArrayList<CAccordionDescription<EntityClass>> AccordionList =
+		new ArrayList<CAccordionDescription<EntityClass>>(); // List of accordions
+	{}
 
 	protected CAbstractMDPage(final Class<EntityClass> entityClass,
 		final CAbstractService<EntityClass> entityService) {
@@ -76,18 +89,27 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		updateLayoutOrientation();
 	}
 
+	// for details view
+	protected void addAccordionPanel(final CAccordionDescription<EntityClass> accordion) {
+		AccordionList.add(accordion);
+		getBaseDetailsLayout().add(accordion);
+	}
+
 	// this method is called before the page is entered
 	@Override
 	public void beforeEnter(final BeforeEnterEvent event) {
 		LOGGER.debug("beforeEnter called for {}", getClass().getSimpleName());
 		final Optional<Long> entityID =
 			event.getRouteParameters().get(getEntityRouteIdField()).map(Long::parseLong);
+
 		if (entityID.isPresent()) {
 			final Optional<EntityClass> samplePersonFromBackend =
 				entityService.get(entityID.get());
+
 			if (samplePersonFromBackend.isPresent()) {
 				final Optional<EntityClass> entity = entityService.get(entityID.get());
 				populateForm(entity.get());
+
 				if (grid != null) {
 					grid.select(entity.get()); // Ensure grid selection matches the form
 				}
@@ -110,8 +132,10 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 				getLastSelectedEntityId());
 			final Optional<EntityClass> lastEntity =
 				entityService.get(getLastSelectedEntityId());
+
 			if (lastEntity.isPresent()) {
 				populateForm(lastEntity.get());
+
 				if (grid != null) {
 					grid.select(lastEntity.get()); // Ensure grid selection matches the
 													// form
@@ -128,6 +152,11 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	}
 
 	protected void clearForm() {
+		// First deselect grid to avoid conflicts
+		if (grid != null) {
+			grid.deselectAll();
+		}
+		// Then clear the form
 		populateForm(null);
 	}
 
@@ -153,9 +182,10 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	}
 
 	protected CButton createDeleteButton(final String buttonText) {
-		LOGGER.info("Creating delete button for CUsersView");
+		LOGGER.info("Creating delete button for {}", getClass().getSimpleName());
 		final CButton delete = CButton.createTertiary(buttonText);
 		delete.addClickListener(e -> {
+
 			if (currentEntity == null) {
 				new CWarningDialog("Please select an item to delete.").open();
 				return;
@@ -165,28 +195,66 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 				"Are you sure you want to delete this %s? This action cannot be undone.",
 				entityClass.getSimpleName().replace("C", "").toLowerCase());
 			new CConfirmationDialog(confirmMessage, () -> {
-				entityService.delete(currentEntity);
-				clearForm();
-				refreshGrid();
+				try {
+					LOGGER.info("Deleting entity: {} with ID: {}", 
+						entityClass.getSimpleName(), currentEntity.getId());
+					entityService.delete(currentEntity);
+					clearForm();
+					refreshGrid();
+					safeShowNotification("Item deleted successfully");
+				} catch (final Exception exception) {
+					LOGGER.error("Error deleting entity", exception);
+					new CWarningDialog("Failed to delete the item. Please try again.").open();
+				}
 			}).open();
 		});
 		return delete;
 	}
 
+	protected CButton createNewButton(final String buttonText) {
+		LOGGER.info("Creating new button for {}", getClass().getSimpleName());
+		final CButton newButton = CButton.createTertiary(buttonText, e -> {
+			LOGGER.debug("New button clicked, creating new entity");
+			try {
+				// Step 1: Clear the form and deselect grid first
+				clearForm();
+				
+				// Step 2: Create new entity instance and bind it to the form
+				final EntityClass newEntityInstance = newEntity();
+				setCurrentEntity(newEntityInstance);
+				populateForm(newEntityInstance);
+				
+				LOGGER.debug("New entity created and bound to form: {}", 
+					newEntityInstance.getClass().getSimpleName());
+				
+				// Step 3: Navigate to the base view URL to indicate "new" mode (safely)
+				safeNavigateToClass();
+				
+			} catch (final Exception exception) {
+				LOGGER.error("Error creating new entity", exception);
+				new CWarningDialog("Failed to create new " + 
+					entityClass.getSimpleName().replace("C", "").toLowerCase() + 
+					". Please try again.").open();
+			}
+		});
+		return newButton;
+	}
+
+
 	@PostConstruct
 	protected abstract void createDetailsLayout();
 
 	/**
-	 * Creates the button layout for the details tab. Contains save, cancel, and delete
-	 * buttons with consistent styling.
+	 * Creates the button layout for the details tab. Contains new, save, cancel, and
+	 * delete buttons with consistent styling.
 	 * @return HorizontalLayout with action buttons
 	 */
 	protected HorizontalLayout createDetailsTabButtonLayout() {
 		final HorizontalLayout buttonLayout = new HorizontalLayout();
 		buttonLayout.setClassName("details-tab-button-layout");
 		buttonLayout.setSpacing(true);
-		buttonLayout.add(createSaveButton("Save"), createCancelButton("Cancel"),
-			createDeleteButton("Delete"));
+		buttonLayout.add(createNewButton("New"), createSaveButton("Save"),
+			createCancelButton("Cancel"), createDeleteButton("Delete"));
 		return buttonLayout;
 	}
 
@@ -234,16 +302,26 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	protected abstract void createGridForEntity();
 
 	protected void createGridLayout() {
-		LOGGER.info("Creating grid layout for {}", getClass().getSimpleName());
-		grid = new Grid<>(entityClass, false);
+		grid = new CGrid<>(entityClass, false);
 		grid.getColumns().forEach(grid::removeColumn);
 		grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
-		grid.setItems(query -> entityService
-			.list(VaadinSpringDataHelpers.toSpringPageRequest(query)).stream());
-		grid.addColumn(entity -> entity.getId().toString()).setHeader("ID").setKey("id");
+		// Use a custom data provider that properly handles pagination and sorting
+		grid.setItems(query -> {
+			LOGGER.debug("Grid query - offset: {}, limit: {}, sortOrders: {}",
+				query.getOffset(), query.getLimit(), query.getSortOrders());
+			final org.springframework.data.domain.Pageable pageable =
+				VaadinSpringDataHelpers.toSpringPageRequest(query);
+			LOGGER.debug("Spring Pageable - pageNumber: {}, pageSize: {}, sort: {}",
+				pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+			final java.util.List<EntityClass> result = entityService.list(pageable);
+			LOGGER.debug("Data provider returned {} items", result.size());
+			return result.stream();
+		});
+		grid.addIdColumn(entity -> entity.getId().toString(), "ID", "id");
 		// Add selection listener to the grid
 		grid.asSingleSelect().addValueChangeListener(event -> {
 			populateForm(event.getValue());
+
 			if (event.getValue() != null) {
 				setLastSelectedEntityId(event.getValue().getId());
 			}
@@ -256,26 +334,63 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		// selectFirstItemIfAvailable();
 	}
 
+	protected CButton createNewButton(final String buttonText) {
+		LOGGER.info("Creating new button for {}", getClass().getSimpleName());
+		final CButton newButton = CButton.createTertiary(buttonText, e -> {
+			LOGGER.debug("New button clicked, creating new entity");
+			// Clear current selection and create new entity
+			grid.deselectAll();
+			setCurrentEntity(null);
+			clearForm();
+			// Navigate to the base view URL to indicate "new" mode
+			UI.getCurrent().navigate(getClass());
+		});
+		return newButton;
+	}
+
 	protected CButton createSaveButton(final String buttonText) {
-		LOGGER.info("Creating save button for CUsersView");
+		LOGGER.info("Creating save button for {}", getClass().getSimpleName());
 		final CButton save = CButton.createPrimary(buttonText, e -> {
+
 			try {
+				// Ensure we have an entity to save
+
+
 				if (currentEntity == null) {
+					LOGGER.warn("No current entity for save operation, creating new entity");
 					currentEntity = newEntity();
+					populateForm(currentEntity);
 				}
+				
+				// Write form data to entity
 				getBinder().writeBean(currentEntity);
-				entityService.save(currentEntity);
+				
+				// Validate entity before saving
+				validateEntityForSave(currentEntity);
+				
+				// Save entity
+				final EntityClass savedEntity = entityService.save(currentEntity);
+				LOGGER.info("Entity saved successfully with ID: {}", savedEntity.getId());
+				
+				// Update current entity with saved version (includes generated ID)
+				setCurrentEntity(savedEntity);
+				
+				// Clear form and refresh grid
 				clearForm();
 				refreshGrid();
-				Notification.show("Data updated");
-				// Navigate back to the current view (list mode)
-				UI.getCurrent().navigate(getClass());
+				
+				// Show success notification
+				safeShowNotification("Data saved successfully");
+				
+				// Navigate back to the current view (list mode) safely
+				safeNavigateToClass();
+				
 			} catch (final ObjectOptimisticLockingFailureException exception) {
-				final Notification n = Notification.show(
+				LOGGER.error("Optimistic locking failure during save", exception);
+				safeShowErrorNotification(
 					"Error updating the data. Somebody else has updated the record while you were making changes.");
-				n.setPosition(Position.MIDDLE);
-				n.addThemeVariants(NotificationVariant.LUMO_ERROR);
 			} catch (final ValidationException validationException) {
+				LOGGER.error("Validation error during save", validationException);
 				new CWarningDialog(
 					"Failed to save the data. Please check that all required fields are filled and values are valid.")
 					.open();
@@ -298,16 +413,17 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	public Div getDetailsTabLayout() { return detailsTabLayout; }
 
 	protected abstract String getEntityRouteIdField();
-
 	protected abstract String getEntityRouteTemplateEdit();
 
 	// if not present returns -1
 	public Long getLastSelectedEntityId() {
 		final String LAST_SELECTED_ID_KEY =
 			"lastSelectedEntityId_" + entityClass.getSimpleName();
+
 		if (VaadinSession.getCurrent() == null) {
 			return -1L; // Return -1 if session is not available
 		}
+
 		if (VaadinSession.getCurrent().getAttribute(LAST_SELECTED_ID_KEY) == null) {
 			return -1L; // Return -1 if attribute is not set
 		}
@@ -341,6 +457,7 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	protected void onAttach(final AttachEvent attachEvent) {
 		LOGGER.debug("onAttach called for {}", getClass().getSimpleName());
 		super.onAttach(attachEvent);
+
 		// Register for layout change notifications if service is available
 		if (layoutService != null) {
 			layoutService.addLayoutChangeListener(this);
@@ -355,6 +472,7 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	@Override
 	protected void onDetach(final DetachEvent detachEvent) {
 		super.onDetach(detachEvent);
+
 		// Unregister from layout change notifications
 		if (layoutService != null) {
 			layoutService.removeLayoutChangeListener(this);
@@ -368,15 +486,58 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		updateLayoutOrientation();
 	}
 
+	protected void populateAccordionPanels(final EntityClass entity) {
+		// This method can be overridden by subclasses to populate accordion panels
+		AccordionList.forEach(accordion -> {
+			accordion.populateForm(entity);
+		});
+	}
+
 	protected void populateForm(final EntityClass value) {
 		currentEntity = value;
 		binder.readBean(currentEntity);
+		populateAccordionPanels(value);
 	}
 
 	protected void refreshGrid() {
 		LOGGER.info("Refreshing grid for {}", getClass().getSimpleName());
+		// Store the currently selected entity ID to preserve selection after refresh
+		final EntityClass selectedEntity = grid.asSingleSelect().getValue();
+		final Long selectedEntityId =
+			selectedEntity != null ? selectedEntity.getId() : null;
+		LOGGER.debug("Currently selected entity ID before refresh: {}", selectedEntityId);
+		// Clear selection and refresh data
 		grid.select(null);
 		grid.getDataProvider().refreshAll();
+
+		// Restore selection if there was a previously selected entity
+		if (selectedEntityId != null) {
+			restoreGridSelection(selectedEntityId);
+		}
+	}
+
+	/**
+	 * Restores grid selection to the entity with the specified ID after refresh. This
+	 * prevents losing the current selection when the grid is refreshed.
+	 * @param entityId The ID of the entity to select
+	 */
+	protected void restoreGridSelection(final Long entityId) {
+		LOGGER.debug("Attempting to restore grid selection to entity ID: {}", entityId);
+
+		try {
+			// Find the entity in the current grid data that matches the ID
+			grid.getDataProvider().fetch(new com.vaadin.flow.data.provider.Query<>())
+				.filter(entity -> entityId.equals(entity.getId())).findFirst()
+				.ifPresentOrElse(entity -> {
+					grid.select(entity);
+					LOGGER.debug("Successfully restored selection to entity ID: {}",
+						entityId);
+				}, () -> LOGGER.debug("Entity with ID {} not found in grid after refresh",
+					entityId));
+		} catch (final Exception e) {
+			LOGGER.warn("Error restoring grid selection to entity ID {}: {}", entityId,
+				e.getMessage());
+		}
 	}
 
 	/**
@@ -386,17 +547,21 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	 * specific entity is already selected (i.e., in list mode).
 	 */
 	protected void selectFirstItemIfAvailable() {
+
 		if ((grid == null) || (currentEntity != null)) {
 			return;
 		}
+
 		try {
 			// Use UI.access to ensure this runs in the correct UI thread
 			getUI().ifPresent(ui -> ui.access(() -> {
+
 				try {
 					// Try to get the first item using a more direct approach Get the
 					// first page of results from the entity service
 					final var firstPageResults = entityService
 						.list(org.springframework.data.domain.PageRequest.of(0, 1));
+
 					if ((firstPageResults != null) && !firstPageResults.isEmpty()) {
 						grid.select(firstPageResults.get(0));
 					}
@@ -416,6 +581,7 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	}
 
 	public void setLastSelectedEntityId(final Long lastSelectedEntityId) {
+
 		// this method conflicts with the currentEntity setter
 		if (lastSelectedEntityId == null) {
 			return;
@@ -446,11 +612,13 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	 * Updates the split layout orientation based on the current layout mode.
 	 */
 	private void updateLayoutOrientation() {
+
 		if ((layoutService != null) && (splitLayout != null)) {
 			final LayoutService.LayoutMode currentMode =
 				layoutService.getCurrentLayoutMode();
 			LOGGER.debug("Updating layout orientation to: {} for {}", currentMode,
 				getClass().getSimpleName());
+
 			if (currentMode == LayoutService.LayoutMode.HORIZONTAL) {
 				splitLayout.setOrientation(SplitLayout.Orientation.HORIZONTAL);
 				// For horizontal layout, give more space to the grid (left side)
@@ -474,5 +642,64 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 			splitLayout.setSplitterPosition(30.0);
 			LOGGER.debug("Applied default vertical layout (no layout service available)");
 		}
+	}
+
+	/**
+	 * Safely navigates to the view class without throwing exceptions if UI is not available.
+	 * This is important for testing and edge cases where UI might not be properly initialized.
+	 */
+	protected void safeNavigateToClass() {
+		try {
+			final UI currentUI = UI.getCurrent();
+			if (currentUI != null) {
+				currentUI.navigate(getClass());
+				LOGGER.debug("Successfully navigated to {}", getClass().getSimpleName());
+			} else {
+				LOGGER.warn("UI not available for navigation to {}", getClass().getSimpleName());
+			}
+		} catch (final Exception e) {
+			LOGGER.warn("Error during navigation to {}: {}", getClass().getSimpleName(), e.getMessage());
+		}
+	}
+
+	/**
+	 * Safely shows a success notification without throwing exceptions if UI is not available.
+	 */
+	protected void safeShowNotification(final String message) {
+		try {
+			final Notification notification = Notification.show(message);
+			notification.setPosition(Position.BOTTOM_START);
+			LOGGER.debug("Shown notification: {}", message);
+		} catch (final Exception e) {
+			LOGGER.warn("Error showing notification '{}': {}", message, e.getMessage());
+		}
+	}
+
+	/**
+	 * Safely shows an error notification without throwing exceptions if UI is not available.
+	 */
+	protected void safeShowErrorNotification(final String message) {
+		try {
+			final Notification notification = Notification.show(message);
+			notification.setPosition(Position.MIDDLE);
+			notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+			LOGGER.debug("Shown error notification: {}", message);
+		} catch (final Exception e) {
+			LOGGER.warn("Error showing error notification '{}': {}", message, e.getMessage());
+		}
+	}
+
+	/**
+	 * Validates an entity before saving. Subclasses can override this method to add
+	 * custom validation logic beyond the standard bean validation.
+	 * @param entity the entity to validate
+	 * @throws IllegalArgumentException if validation fails
+	 */
+	protected void validateEntityForSave(final EntityClass entity) {
+		if (entity == null) {
+			throw new IllegalArgumentException("Entity cannot be null");
+		}
+		// Add more validation logic in subclasses if needed
+		LOGGER.debug("Entity validation passed for {}", entity.getClass().getSimpleName());
 	}
 }

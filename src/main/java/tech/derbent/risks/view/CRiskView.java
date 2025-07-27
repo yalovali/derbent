@@ -3,13 +3,12 @@ package tech.derbent.risks.view;
 import java.util.List;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.annotations.CEntityFormBuilder;
+import tech.derbent.abstracts.views.CAccordionDescription;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.risks.domain.CRisk;
@@ -20,14 +19,16 @@ import tech.derbent.session.service.SessionService;
  * CRiskView - View for managing project risks. Layer: View (MVC) Provides CRUD operations
  * for risks using the project-aware master-detail pattern.
  */
-@PageTitle("Project Risks")
-@Route("risks/:risk_id?/:action?(edit)")
-@Menu(order = 2, icon = "vaadin:warning", title = "Project.Risks")
+@PageTitle ("Project Risks")
+@Route ("risks/:risk_id?/:action?(edit)")
+@Menu (order = 1.3, icon = "vaadin:warning", title = "Project.Risks")
 @PermitAll
 public class CRiskView extends CProjectAwareMDPage<CRisk> {
 
 	private static final long serialVersionUID = 1L;
+
 	private static final String ENTITY_ID_FIELD = "risk_id";
+
 	private static final String ENTITY_ROUTE_TEMPLATE_EDIT = "risks/%s/edit";
 
 	public CRiskView(final CRiskService entityService,
@@ -35,25 +36,34 @@ public class CRiskView extends CProjectAwareMDPage<CRisk> {
 		super(CRisk.class, entityService, sessionService);
 		addClassNames("risk-view");
 		// createDetailsLayout();
-		LOGGER.info("CRiskView initialized successfully");
 	}
 
 	@Override
 	protected void createDetailsLayout() {
-		LOGGER.info("Creating details layout for CRiskView");
-		final Div detailsLayout = CEntityFormBuilder.buildForm(CRisk.class, getBinder());
-		// Note: Buttons are now automatically added to the details tab by the parent
-		// class
-		getBaseDetailsLayout().add(detailsLayout);
+		final CAccordionDescription<CRisk> panel;
+		panel = new CPanelRiskBasicInfo(getCurrentEntity(), getBinder(),
+			(CRiskService) entityService);
+		addAccordionPanel(panel);
 	}
 
 	@Override
 	protected void createGridForEntity() {
-		LOGGER.info("Creating grid for risks");
-		grid.addColumn("name").setHeader("Name").setAutoWidth(true).setSortable(true);
-		grid.addColumn(risk -> risk.getRiskSeverity().name()).setHeader("Severity")
-			.setAutoWidth(true).setSortable(true);
+
+		grid.addShortTextColumn(CRisk::getName, "Name", "name");
+		grid.addShortTextColumn(risk -> {
+			return risk.getRiskSeverity().name();
+		}, "Severity", null);
+		grid.addColumn(item -> {
+			final String desc = item.getDescription();
+
+			if (desc == null) {
+				return "Not set";
+			}
+			return desc.length() > 50 ? desc.substring(0, 50) + "..." : desc;
+		}, "Description", null);
+		/***/
 		grid.asSingleSelect().addValueChangeListener(event -> {
+
 			if (event.getValue() != null) {
 				UI.getCurrent().navigate(
 					String.format(ENTITY_ROUTE_TEMPLATE_EDIT, event.getValue().getId()));
@@ -81,11 +91,6 @@ public class CRiskView extends CProjectAwareMDPage<CRisk> {
 		final org.springframework.data.domain.Pageable pageable) {
 		return ((CRiskService) entityService).listByProject(project, pageable)
 			.getContent();
-	}
-
-	@Override
-	protected void initPage() {
-		// Initialize page components if needed
 	}
 
 	@Override

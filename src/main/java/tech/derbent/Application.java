@@ -31,15 +31,18 @@ import com.vaadin.flow.theme.Theme;
 //@ComponentScan(basePackages = "tech.derbent") // This is not needed as Spring Boot will scan the package of the main
 
 @SpringBootApplication
-@Theme("default")
+@Theme ("default")
 public class Application implements AppShellConfigurator {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
+
 	private static final long serialVersionUID = 1L;
+
 	// capture startup time
 	public static final long startTime = System.nanoTime();
 
 	public static void main(final String[] args) {
+
 		try {
 			// LOGGER.info("Hello world!");
 			final SpringApplication app = new SpringApplication(Application.class);
@@ -51,8 +54,10 @@ public class Application implements AppShellConfigurator {
 			});
 			app.run(args);
 		} catch (final Throwable e) {
+
 			if (e.getClass().getName().contains("SilentExitException")) {
-				LOGGER.debug("Spring is restarting the main thread - See spring-boot-devtools");
+				LOGGER.debug(
+					"Spring is restarting the main thread - See spring-boot-devtools");
 			}
 			else {
 				LOGGER.error("Application crashed!", e);
@@ -72,9 +77,15 @@ public class Application implements AppShellConfigurator {
 	@Bean
 	public ApplicationRunner dataInitializer(final JdbcTemplate jdbcTemplate) {
 		return args -> {
-			final Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cuser", Integer.class);
+			// Temporarily disable data initialization due to SQL syntax issues
+			LOGGER.info("Data initialization temporarily disabled");
+			final Integer count =
+				jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cuser", Integer.class);
+
 			if ((count != null) && (count == 0)) {
-				final String sql = StreamUtils.copyToString(new ClassPathResource("data.sql").getInputStream(), StandardCharsets.UTF_8);
+				final String sql = StreamUtils.copyToString(
+					new ClassPathResource("data.sql").getInputStream(),
+					StandardCharsets.UTF_8);
 				jdbcTemplate.execute(sql);
 			}
 		};
