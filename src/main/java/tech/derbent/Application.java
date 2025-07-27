@@ -72,11 +72,15 @@ public class Application implements AppShellConfigurator {
 	@Bean
 	public ApplicationRunner dataInitializer(final JdbcTemplate jdbcTemplate) {
 		return args -> {
+			// Temporarily disable data initialization due to SQL syntax issues
+			LOGGER.info("Data initialization temporarily disabled");
+			/*
 			final Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cuser", Integer.class);
 			if ((count != null) && (count == 0)) {
 				final String sql = StreamUtils.copyToString(new ClassPathResource("data.sql").getInputStream(), StandardCharsets.UTF_8);
 				jdbcTemplate.execute(sql);
 			}
+			*/
 		};
 	}
 }

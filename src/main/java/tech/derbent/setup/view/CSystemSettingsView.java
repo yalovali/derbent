@@ -13,6 +13,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.BeforeEnterEvent;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.views.CAbstractPage;
@@ -70,14 +71,26 @@ public class CSystemSettingsView extends CAbstractPage {
         try {
             createHeaderSection();
             createMainLayout();
-            loadSystemSettings();
+            // Note: loadSystemSettings() is called in postConstruct() after dependency injection is complete
             
-            LOGGER.debug("System settings view initialized successfully");
+            LOGGER.debug("System settings view initialized successfully (data loading deferred)");
         } catch (final Exception e) {
             LOGGER.error("Error initializing system settings view", e);
             Notification.show("Error initializing view: " + e.getMessage(), 5000, 
                             Notification.Position.MIDDLE);
         }
+    }
+
+    /**
+     * Post-construction initialization method called after dependency injection is complete.
+     * This ensures that systemSettingsService is properly injected before we try to use it.
+     */
+    @PostConstruct
+    private void postConstruct() {
+        LOGGER.debug("postConstruct called for CSystemSettingsView - loading system settings");
+        
+        // Now it's safe to load system settings since all dependencies are injected
+        loadSystemSettings();
     }
 
     @Override
@@ -89,8 +102,9 @@ public class CSystemSettingsView extends CAbstractPage {
     @Override
     public void beforeEnter(final BeforeEnterEvent event) {
         LOGGER.debug("beforeEnter called for CSystemSettingsView");
-        // Load settings when entering the view
-        if (currentSettings == null) {
+        // Load settings when entering the view, but only if systemSettingsService is available
+        // and settings haven't been loaded yet
+        if (systemSettingsService != null && currentSettings == null) {
             loadSystemSettings();
         }
     }
@@ -143,6 +157,16 @@ public class CSystemSettingsView extends CAbstractPage {
      */
     private void loadSystemSettings() {
         LOGGER.debug("loadSystemSettings called");
+        
+        // Safety check to ensure systemSettingsService is not null
+        if (systemSettingsService == null) {
+            LOGGER.error("systemSettingsService is null - dependency injection may not be complete");
+            final var errorDiv = new Div();
+            errorDiv.addClassName("error-message");
+            errorDiv.add(new Paragraph("System settings service is not available. Please refresh the page."));
+            formContainer.add(errorDiv);
+            return;
+        }
         
         try {
             // Get or create system settings
