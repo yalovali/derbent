@@ -22,15 +22,12 @@ SET session_replication_role = replica;
 
 -- Delete data from junction tables first
 DELETE FROM cmeeting_participants;
-DELETE FROM cdecision_team_members;
 
 -- Delete data from dependent tables (in reverse dependency order)
 DELETE FROM ccomment;
 DELETE FROM cactivity;
 DELETE FROM cmeeting;
 DELETE FROM crisk;
-DELETE FROM cdecisionapproval;
-DELETE FROM cdecision;
 
 -- Delete data from main entity tables
 DELETE FROM cproject;
@@ -44,8 +41,6 @@ DELETE FROM cactivitypriority;
 DELETE FROM ccommentpriority;
 DELETE FROM cmeetingtype;
 DELETE FROM cusertype;
-DELETE FROM cdecisiontype;
-DELETE FROM cdecisionstatus;
 
 SET session_replication_role = DEFAULT;
 
@@ -134,62 +129,6 @@ BEGIN
 END;
 ';
 
--- Reset 'cdecision_decision_id_seq'
-DO '
-BEGIN
-    IF EXISTS (
-        SELECT 1
-        FROM pg_class c
-        JOIN pg_namespace n ON n.oid = c.relnamespace
-        WHERE c.relkind = ''S'' AND c.relname = ''cdecision_decision_id_seq''
-    ) THEN
-        EXECUTE ''SELECT setval(''''cdecision_decision_id_seq'''', 1, false)'';
-    END IF;
-END;
-';
-
--- Reset 'cdecisiontype_decision_type_id_seq'
-DO '
-BEGIN
-    IF EXISTS (
-        SELECT 1
-        FROM pg_class c
-        JOIN pg_namespace n ON n.oid = c.relnamespace
-        WHERE c.relkind = ''S'' AND c.relname = ''cdecisiontype_decision_type_id_seq''
-    ) THEN
-        EXECUTE ''SELECT setval(''''cdecisiontype_decision_type_id_seq'''', 1, false)'';
-    END IF;
-END;
-';
-
--- Reset 'cdecisionstatus_decision_status_id_seq'
-DO '
-BEGIN
-    IF EXISTS (
-        SELECT 1
-        FROM pg_class c
-        JOIN pg_namespace n ON n.oid = c.relnamespace
-        WHERE c.relkind = ''S'' AND c.relname = ''cdecisionstatus_decision_status_id_seq''
-    ) THEN
-        EXECUTE ''SELECT setval(''''cdecisionstatus_decision_status_id_seq'''', 1, false)'';
-    END IF;
-END;
-';
-
--- Reset 'cdecisionapproval_decision_approval_id_seq'
-DO '
-BEGIN
-    IF EXISTS (
-        SELECT 1
-        FROM pg_class c
-        JOIN pg_namespace n ON n.oid = c.relnamespace
-        WHERE c.relkind = ''S'' AND c.relname = ''cdecisionapproval_decision_approval_id_seq''
-    ) THEN
-        EXECUTE ''SELECT setval(''''cdecisionapproval_decision_approval_id_seq'''', 1, false)'';
-    END IF;
-END;
-';
-
 -- =====================================================================
 -- BASIC LOOKUP TABLES (No foreign key dependencies)
 -- =====================================================================
@@ -242,24 +181,6 @@ INSERT INTO ccommentpriority (name, description, priority_level, color, is_defau
 ('NORMAL', 'Normal priority comment', 2, '#2196F3', TRUE),
 ('LOW', 'Low priority informational comment', 3, '#4CAF50', FALSE),
 ('INFO', 'General information or note', 4, '#9E9E9E', FALSE);
-
--- Insert essential decision types (decision categorization) - 6 ITEMS
-INSERT INTO cdecisiontype (name, description, color, sort_order, requires_approval, is_active) VALUES 
-('Strategic', 'High-level strategic business decisions', '#8E24AA', 1, TRUE, TRUE),
-('Technical', 'Technical architecture and implementation decisions', '#1976D2', 2, TRUE, TRUE),
-('Financial', 'Budget and financial investment decisions', '#388E3C', 3, TRUE, TRUE),
-('Operational', 'Day-to-day operational decisions', '#F57C00', 4, FALSE, TRUE),
-('Regulatory', 'Compliance and regulatory decisions', '#D32F2F', 5, TRUE, TRUE),
-('Project', 'Project-specific decisions and changes', '#512DA8', 6, FALSE, TRUE);
-
--- Insert essential decision statuses (decision workflow) - 6 ITEMS
-INSERT INTO cdecisionstatus (name, description, color, is_final, sort_order, allows_editing, requires_approval) VALUES 
-('Draft', 'Decision in draft status, being prepared', '#9E9E9E', FALSE, 1, TRUE, FALSE),
-('Under Review', 'Decision is being reviewed by stakeholders', '#FF9800', FALSE, 2, TRUE, TRUE),
-('Pending Approval', 'Decision awaiting formal approval', '#2196F3', FALSE, 3, FALSE, TRUE),
-('Approved', 'Decision has been approved for implementation', '#4CAF50', FALSE, 4, FALSE, FALSE),
-('Implemented', 'Decision has been successfully implemented', '#8BC34A', TRUE, 5, FALSE, FALSE),
-('Rejected', 'Decision has been rejected and will not proceed', '#F44336', TRUE, 6, FALSE, FALSE);
 
 -- =====================================================================
 -- COMPANIES (Independent entities) - 5 ITEMS
@@ -769,135 +690,3 @@ INSERT INTO crisk (name, description, project_id, risk_severity, created_date, l
 ('HIPAA Compliance Risk', 'Risk of violating HIPAA regulations in healthcare data handling', 6, 'CRITICAL', NOW(), NOW()),
 ('Patient Data Security Risk', 'Risk of unauthorized access to sensitive patient information', 6, 'CRITICAL', NOW(), NOW()),
 ('Healthcare System Integration Risk', 'Risk of integration failures with existing hospital systems', 6, 'HIGH', NOW(), NOW());
-
--- =====================================================================
--- DECISIONS MANAGEMENT (Depends on projects, users, decision types and statuses)
--- =====================================================================
-
--- Insert essential decisions covering key project decisions - 15 DECISIONS across projects
-INSERT INTO cdecision (
-    name, description, project_id, decision_type_id, decision_status_id, 
-    accountable_user_id, assigned_to_id, created_by_id, estimated_cost, 
-    implementation_date, review_date, created_date, last_modified_date
-) VALUES 
-
--- ===== E-COMMERCE PLATFORM MODERNIZATION PROJECT (project_id=1) =====
--- Strategic decisions
-('Microservices Architecture Adoption', 
- 'Decision to adopt microservices architecture for better scalability and maintainability of the e-commerce platform',
- 1, 1, 4, 2, 2, 1, 250000.00, '2025-02-01 00:00:00', '2025-04-01 00:00:00', NOW(), NOW()),
-
-('Cloud Provider Selection', 
- 'Decision to use AWS as the primary cloud provider for hosting and infrastructure services',
- 1, 1, 5, 2, 3, 1, 180000.00, '2025-01-15 00:00:00', NULL, NOW(), NOW()),
-
--- Technical decisions
-('Database Technology Choice', 
- 'Decision to use PostgreSQL for transactional data and Redis for caching layer',
- 1, 2, 5, 3, 3, 2, 50000.00, '2025-01-20 00:00:00', NULL, NOW(), NOW()),
-
-('Frontend Framework Decision', 
- 'Decision to migrate from legacy JavaScript to React with TypeScript for the user interface',
- 1, 2, 4, 4, 4, 3, 120000.00, '2025-02-15 00:00:00', '2025-05-15 00:00:00', NOW(), NOW()),
-
--- Financial decision
-('Third-Party Payment Integration', 
- 'Decision to integrate with Stripe and PayPal for payment processing capabilities',
- 1, 3, 3, 2, 5, 1, 85000.00, NULL, NULL, NOW(), NOW()),
-
--- ===== CUSTOMER RELATIONSHIP MANAGEMENT SYSTEM (project_id=2) =====
--- Strategic decision
-('CRM Platform Build vs Buy', 
- 'Decision to build custom CRM solution instead of purchasing existing platform like Salesforce',
- 2, 1, 2, 2, 2, 1, 500000.00, NULL, '2025-02-10 00:00:00', NOW(), NOW()),
-
--- Technical decision
-('API Design Standard', 
- 'Decision to adopt REST API design with OpenAPI specification for all CRM integrations',
- 2, 2, 5, 3, 3, 2, 25000.00, '2025-01-25 00:00:00', NULL, NOW(), NOW()),
-
--- Operational decision
-('Customer Data Migration Strategy', 
- 'Decision on phased approach for migrating existing customer data from legacy systems',
- 2, 4, 4, 4, 4, 3, 75000.00, '2025-03-01 00:00:00', '2025-06-01 00:00:00', NOW(), NOW()),
-
--- ===== MOBILE BANKING APPLICATION (project_id=3) =====
--- Regulatory decision
-('Security Framework Compliance', 
- 'Decision to implement OWASP security framework and PCI DSS compliance for banking application',
- 3, 5, 4, 2, 3, 1, 200000.00, '2025-02-01 00:00:00', '2025-08-01 00:00:00', NOW(), NOW()),
-
--- Technical decision
-('Biometric Authentication Implementation', 
- 'Decision to implement fingerprint and face recognition for secure user authentication',
- 3, 2, 3, 3, 4, 2, 150000.00, NULL, NULL, NOW(), NOW()),
-
--- Financial decision
-('Mobile Development Budget Allocation', 
- 'Decision to allocate additional budget for native iOS and Android development teams',
- 3, 3, 2, 2, 2, 1, 300000.00, NULL, '2025-01-30 00:00:00', NOW(), NOW()),
-
--- ===== DEVOPS INFRASTRUCTURE AUTOMATION (project_id=4) =====
--- Technical decisions
-('Container Orchestration Platform', 
- 'Decision to use Kubernetes for container orchestration and deployment automation',
- 4, 2, 5, 3, 3, 2, 100000.00, '2025-01-10 00:00:00', NULL, NOW(), NOW()),
-
-('CI/CD Pipeline Tool Selection', 
- 'Decision to implement GitLab CI/CD with automated testing and deployment pipelines',
- 4, 2, 5, 4, 4, 3, 60000.00, '2025-01-12 00:00:00', NULL, NOW(), NOW()),
-
--- ===== API GATEWAY IMPLEMENTATION (project_id=5) =====
--- Operational decision
-('API Rate Limiting Strategy', 
- 'Decision on rate limiting policies and fair usage quotas for different API consumer tiers',
- 5, 4, 1, 4, 5, 3, 15000.00, NULL, NULL, NOW(), NOW()),
-
--- ===== HEALTHCARE DATA INTEGRATION (project_id=6) =====
--- Regulatory decision
-('HIPAA Compliance Architecture', 
- 'Decision on HIPAA-compliant data architecture with encryption and audit trail requirements',
- 6, 5, 2, 2, 3, 1, 400000.00, NULL, '2025-02-15 00:00:00', NOW(), NOW());
-
--- Insert decision approval requirements for decisions requiring approval
-INSERT INTO cdecisionapproval (
-    name, description, decision_id, approver_user_id, is_required, approval_priority, 
-    due_date, created_date, last_modified_date
-) VALUES 
--- Approvals for Microservices Architecture Adoption (decision_id=1)
-('Technical Lead Approval', 'Technical architecture review and approval', 1, 3, TRUE, 1, '2025-01-25 00:00:00', NOW(), NOW()),
-('CTO Approval', 'Executive technical decision approval', 1, 2, TRUE, 1, '2025-01-30 00:00:00', NOW(), NOW()),
-
--- Approvals for Frontend Framework Decision (decision_id=4) 
-('Senior Developer Approval', 'Frontend technology stack approval', 4, 4, TRUE, 2, '2025-02-10 00:00:00', NOW(), NOW()),
-
--- Approvals for Third-Party Payment Integration (decision_id=5)
-('Finance Team Approval', 'Financial impact and vendor approval', 5, 5, TRUE, 1, '2025-01-28 00:00:00', NOW(), NOW()),
-('Security Team Approval', 'Payment security and compliance approval', 5, 3, TRUE, 1, '2025-01-28 00:00:00', NOW(), NOW()),
-
--- Approvals for CRM Platform Build vs Buy (decision_id=6)
-('Project Manager Approval', 'Project scope and resource approval', 6, 2, TRUE, 2, '2025-02-05 00:00:00', NOW(), NOW()),
-('Budget Manager Approval', 'Budget allocation and financial approval', 6, 5, TRUE, 1, '2025-02-05 00:00:00', NOW(), NOW()),
-
--- Approvals for Security Framework Compliance (decision_id=9)
-('Compliance Officer Approval', 'Regulatory compliance verification', 9, 2, TRUE, 1, '2025-01-28 00:00:00', NOW(), NOW()),
-
--- Approvals for Mobile Development Budget Allocation (decision_id=11)
-('Executive Approval', 'Executive budget approval for additional resources', 11, 1, TRUE, 1, '2025-01-25 00:00:00', NOW(), NOW()),
-
--- Approvals for HIPAA Compliance Architecture (decision_id=15)
-('Healthcare Compliance Approval', 'HIPAA compliance architecture approval', 15, 2, TRUE, 1, '2025-02-10 00:00:00', NOW(), NOW()),
-('Legal Team Approval', 'Legal review for healthcare regulations', 15, 3, TRUE, 1, '2025-02-10 00:00:00', NOW(), NOW());
-
--- Insert team member assignments for collaborative decisions
-INSERT INTO cdecision_team_members (decision_id, user_id) VALUES 
--- Microservices Architecture team (decision_id=1)
-(1, 2), (1, 3), (1, 4),
--- Frontend Framework team (decision_id=4)
-(4, 3), (4, 4), (4, 5),
--- CRM Platform team (decision_id=6)
-(6, 2), (6, 3), (6, 5),
--- Security Framework team (decision_id=9)
-(9, 2), (9, 3),
--- HIPAA Compliance team (decision_id=15)
-(15, 2), (15, 3), (15, 1);
