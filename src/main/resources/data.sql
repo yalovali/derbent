@@ -24,6 +24,7 @@ SET session_replication_role = replica;
 DELETE FROM cmeeting_participants;
 
 -- Delete data from dependent tables (in reverse dependency order)
+DELETE FROM ccomment;
 DELETE FROM cactivity;
 DELETE FROM cmeeting;
 DELETE FROM crisk;
@@ -37,6 +38,7 @@ DELETE FROM ccompany;
 DELETE FROM cactivitytype;
 DELETE FROM cactivitystatus;
 DELETE FROM cactivitypriority;
+DELETE FROM ccommentpriority;
 DELETE FROM cmeetingtype;
 DELETE FROM cusertype;
 
@@ -99,6 +101,34 @@ BEGIN
 END;
 ';
 
+-- Reset 'ccommentpriority_ccommentpriority_id_seq'
+DO '
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM pg_class c
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE c.relkind = ''S'' AND c.relname = ''ccommentpriority_ccommentpriority_id_seq''
+    ) THEN
+        EXECUTE ''SELECT setval(''''ccommentpriority_ccommentpriority_id_seq'''', 1, false)'';
+    END IF;
+END;
+';
+
+-- Reset 'ccomment_comment_id_seq'
+DO '
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM pg_class c
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE c.relkind = ''S'' AND c.relname = ''ccomment_comment_id_seq''
+    ) THEN
+        EXECUTE ''SELECT setval(''''ccomment_comment_id_seq'''', 1, false)'';
+    END IF;
+END;
+';
+
 -- =====================================================================
 -- BASIC LOOKUP TABLES (No foreign key dependencies)
 -- =====================================================================
@@ -144,6 +174,13 @@ INSERT INTO cactivitypriority (name, description, priority_level, color, is_defa
 ('MEDIUM', 'Medium priority - normal task', 4, '#2196F3', TRUE),
 ('LOW', 'Low priority - can be deferred to next sprint', 5, '#4CAF50', FALSE),
 ('TRIVIAL', 'Minor improvement - nice to have', 6, '#9E9E9E', FALSE);
+
+-- Insert essential comment priorities (categorizes comment importance) - 4 ITEMS
+INSERT INTO ccommentpriority (name, description, priority_level, color, is_default) VALUES 
+('URGENT', 'Urgent comment requiring immediate attention', 1, '#F44336', FALSE),
+('NORMAL', 'Normal priority comment', 2, '#2196F3', TRUE),
+('LOW', 'Low priority informational comment', 3, '#4CAF50', FALSE),
+('INFO', 'General information or note', 4, '#9E9E9E', FALSE);
 
 -- =====================================================================
 -- COMPANIES (Independent entities) - 5 ITEMS
@@ -552,6 +589,70 @@ INSERT INTO cactivity (
  'Architecture documentation covers all projects with diagrams and design decisions',
  'Documentation framework created. Working on individual project sections.',
  '2025-01-18 14:00:00', '2025-02-01 16:00:00');
+
+-- =====================================================================
+-- REPRESENTATIVE COMMENT DATA (Depends on activities and users) - 12 ITEMS (2 per project)
+-- =====================================================================
+
+-- Insert representative comment data covering different activities and users
+INSERT INTO ccomment (
+    name, description, comment_text, activity_id, author_id, project_id, 
+    priority_id, is_important, event_date, created_date, last_modified_date
+) VALUES 
+
+-- Comments for E-Commerce Platform activities (project_id=1)
+('Comment', 'Comment on User Management System Epic', 
+ 'Great progress on the user authentication system! The social login integration is working well in testing. We should consider adding two-factor authentication as well.',
+ 1, 2, 1, 2, FALSE, '2025-01-15 10:30:00', '2025-01-15 10:30:00', '2025-01-15 10:30:00'),
+
+('Comment', 'Important feedback on Product Catalog API',
+ 'URGENT: Found a critical performance issue with the product search API. Response times are over 3 seconds for complex queries. This needs immediate attention before release.',
+ 3, 3, 1, 1, TRUE, '2025-01-16 14:15:00', '2025-01-16 14:15:00', '2025-01-16 14:15:00'),
+
+-- Comments for Customer Analytics Dashboard activities (project_id=2)
+('Comment', 'Update on Real-time Analytics Engine',
+ 'The Kafka integration is complete and we are seeing good throughput. Data pipeline is processing approximately 10,000 events per second without issues.',
+ 9, 4, 2, 2, FALSE, '2025-01-17 09:45:00', '2025-01-17 09:45:00', '2025-01-17 09:45:00'),
+
+('Comment', 'Privacy compliance concern',
+ 'Please review the data retention policy for customer analytics. We need to ensure GDPR compliance, especially for EU customers. Recommend 90-day retention limit.',
+ 10, 5, 2, 1, TRUE, '2025-01-18 11:20:00', '2025-01-18 11:20:00', '2025-01-18 11:20:00'),
+
+-- Comments for Mobile Banking Application activities (project_id=3)
+('Comment', 'Biometric authentication testing',
+ 'Fingerprint authentication is working perfectly on iOS devices. Still testing on various Android models. Face ID integration is scheduled for next sprint.',
+ 13, 6, 3, 2, FALSE, '2025-01-19 16:30:00', '2025-01-19 16:30:00', '2025-01-19 16:30:00'),
+
+('Comment', 'Security review findings',
+ 'Completed security audit of the mobile banking core. Found minor issues with session management. All high-priority vulnerabilities have been addressed.',
+ 14, 2, 3, 3, FALSE, '2025-01-20 13:45:00', '2025-01-20 13:45:00', '2025-01-20 13:45:00'),
+
+-- Comments for DevOps Infrastructure activities (project_id=4)
+('Comment', 'Container orchestration update',
+ 'Kubernetes cluster is now running smoothly. All microservices are deployed and load balancing is working as expected. Ready for production deployment.',
+ 17, 7, 4, 2, FALSE, '2025-01-21 08:15:00', '2025-01-21 08:15:00', '2025-01-21 08:15:00'),
+
+('Comment', 'CI/CD pipeline optimization',
+ 'Build times reduced from 45 minutes to 12 minutes after pipeline optimization. Docker image caching and parallel test execution are major improvements.',
+ 18, 8, 4, 2, FALSE, '2025-01-22 15:20:00', '2025-01-22 15:20:00', '2025-01-22 15:20:00'),
+
+-- Comments for API Gateway Implementation activities (project_id=5)
+('Comment', 'Load testing results',
+ 'API Gateway handling 50,000 requests per minute without issues. Response times are under 100ms for most endpoints. Rate limiting is working correctly.',
+ 21, 3, 5, 2, FALSE, '2025-01-23 12:00:00', '2025-01-23 12:00:00', '2025-01-23 12:00:00'),
+
+('Comment', 'Authentication service integration',
+ 'OAuth 2.0 integration completed successfully. JWT token validation is working across all services. Need to update documentation for the new endpoints.',
+ 22, 4, 5, 3, FALSE, '2025-01-24 10:30:00', '2025-01-24 10:30:00', '2025-01-24 10:30:00'),
+
+-- Comments for Healthcare Data Integration activities (project_id=6)
+('Comment', 'HIPAA compliance verification',
+ 'All healthcare data processing components have been reviewed for HIPAA compliance. Encryption is properly implemented both at rest and in transit.',
+ 25, 5, 6, 1, TRUE, '2025-01-25 14:45:00', '2025-01-25 14:45:00', '2025-01-25 14:45:00'),
+
+('Comment', 'Hospital system integration status',
+ 'Successfully integrated with Epic EMR system. HL7 FHIR messaging is working correctly. Patient data synchronization is running every 15 minutes.',
+ 26, 6, 6, 2, FALSE, '2025-01-26 09:30:00', '2025-01-26 09:30:00', '2025-01-26 09:30:00');
 
 -- =====================================================================
 -- REPRESENTATIVE RISK DATA (Depends on projects) - 18 ITEMS (3 per project)
