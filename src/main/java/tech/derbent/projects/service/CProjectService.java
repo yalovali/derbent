@@ -46,6 +46,7 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 	@Override
 	@Transactional
 	public void delete(final CProject entity) {
+		LOGGER.info("delete called with entity: {}", entity);
 		super.delete(entity);
 		// Publish project list change event after deletion
 		eventPublisher.publishEvent(new ProjectListChangeEvent(this, entity,
@@ -67,6 +68,7 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 	@Override
 	@Transactional
 	public CProject save(final CProject entity) {
+		LOGGER.info("save called with entity: {}", entity);
 		final boolean isNew = entity.getId() == null;
 		final CProject savedEntity = super.save(entity);
 		// Publish project list change event after saving

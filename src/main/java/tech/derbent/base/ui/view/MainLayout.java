@@ -36,7 +36,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.base.ui.component.CHierarchicalSideMenu;
-import tech.derbent.base.ui.component.ViewToolbar;
+import tech.derbent.base.ui.component.CViewToolbar;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
 import tech.derbent.session.service.LayoutService;
 import tech.derbent.session.service.SessionService;
@@ -75,7 +75,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 
 	private final CUserService userService;
 
-	private ViewToolbar mainToolbar;
+	private CViewToolbar mainToolbar;
 
 	MainLayout(final AuthenticationContext authenticationContext,
 		final SessionService sessionService, final LayoutService layoutService,
@@ -107,7 +107,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		final String pageTitle =
 			MenuConfiguration.getPageHeader(getContent()).orElse("Main Layout");
 		mainToolbar.setPageTitle(pageTitle); // Set the page title in the toolbar
-		// addToNavbar(true, new ViewToolbar(pageTitle)); // Add the toolbar with the page
+		// addToNavbar(true, new CViewToolbar(pageTitle)); // Add the toolbar with the page
 		// title
 		/*
 		 * Component content = getContent(); if (content instanceof HasDynamicTitle) {
@@ -159,7 +159,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		final Div navBar = new Div();
 		// dont add any other compoents to the navbar, just the toolbar otherwise call it
 		// with ,xyz,xyz etc..
-		mainToolbar = new ViewToolbar("Main Layout", sessionService, layoutService,
+		mainToolbar = new CViewToolbar("Main Layout", sessionService, layoutService,
 			authenticationContext);
 		navBar.add(mainToolbar);
 		return navBar;

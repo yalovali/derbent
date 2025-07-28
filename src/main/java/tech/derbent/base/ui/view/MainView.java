@@ -35,7 +35,7 @@ public final class MainView extends Main {
 	MainView() {
 		addClassName(LumoUtility.Padding.MEDIUM);
 		// dont create the main toolbar. it is not needed here add(new
-		// ViewToolbar("Main"));
+		// CViewToolbar("Main"));
 		add(new Div("Please select a view from the menu on the left."));
 	}
 }

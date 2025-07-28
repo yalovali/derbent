@@ -40,14 +40,14 @@ import tech.derbent.session.service.LayoutService;
 import tech.derbent.session.service.SessionService;
 import tech.derbent.users.domain.CUser;
 
-/* ViewToolbar.java
+/* CViewToolbar.java
  *
  * This class defines a toolbar for views in the application, providing a
  * consistent header with a title and optional action components.
  *
  * It extends Composite to allow for easy composition of the toolbar's content.
  */
-public final class ViewToolbar extends Composite<Header>
+public final class CViewToolbar extends Composite<Header>
 	implements CProjectListChangeListener {
 
 	private static final long serialVersionUID = 1L;
@@ -83,18 +83,18 @@ public final class ViewToolbar extends Composite<Header>
 	private Span usernameSpan;
 
 	/**
-	 * Constructs a ViewToolbar with a title and optional components.
+	 * Constructs a CViewToolbar with a title and optional components.
 	 * @param viewTitle      The title of the view to be displayed in the toolbar.
 	 * @param sessionService The session service for managing project selection.
 	 * @param components     Optional components to be added to the toolbar.
 	 */
-	public ViewToolbar(final String viewTitle, final SessionService sessionService,
+	public CViewToolbar(final String viewTitle, final SessionService sessionService,
 		final Component... components) {
 		this(viewTitle, sessionService, null, null, components);
 	}
 
 	/**
-	 * Constructs a ViewToolbar with a title, services, and optional components.
+	 * Constructs a CViewToolbar with a title, services, and optional components.
 	 * @param viewTitle             The title of the view to be displayed in the toolbar.
 	 * @param sessionService        The session service for managing project selection.
 	 * @param layoutService         The layout service for managing layout mode
@@ -103,7 +103,7 @@ public final class ViewToolbar extends Composite<Header>
 	 *                              (optional).
 	 * @param components            Optional components to be added to the toolbar.
 	 */
-	public ViewToolbar(final String viewTitle, final SessionService sessionService,
+	public CViewToolbar(final String viewTitle, final SessionService sessionService,
 		final LayoutService layoutService,
 		final AuthenticationContext authenticationContext,
 		final Component... components) {

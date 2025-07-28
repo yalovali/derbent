@@ -1,8 +1,8 @@
 package tech.derbent.projects.view;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import tech.derbent.abstracts.views.CButton;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -502,7 +502,7 @@ public class CProjectDetailsView extends CAbstractMDPage<CProject> {
 			new Span("Created: " + java.time.LocalDate.now().toString()));
 		final Div cardActions = new Div();
 		cardActions.setClassName("large-card-actions");
-		final Button viewButton = new Button("View", new Icon(VaadinIcon.EYE));
+		final CButton viewButton = CButton.createPrimary("View", new Icon(VaadinIcon.EYE));
 		viewButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
 		cardActions.add(viewButton);
 		card.add(cardHeader, cardContent, cardActions);
