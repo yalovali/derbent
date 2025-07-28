@@ -128,6 +128,25 @@ public class COrderService extends CAbstractNamedEntityService<COrder> {
     }
 
     /**
+     * Override get() method to eagerly load relationships and prevent LazyInitializationException.
+     * Following the comprehensive lazy loading fix pattern from the guidelines.
+     * 
+     * @param id the order ID
+     * @return optional COrder with all relationships loaded
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<COrder> get(final Long id) {
+        LOGGER.info("get called with id: {} (overridden to eagerly load relationships)", id);
+        if (id == null) {
+            return Optional.empty();
+        }
+        final Optional<COrder> entity = orderRepository.findByIdWithRelationships(id);
+        entity.ifPresent(this::initializeLazyFields);
+        return entity;
+    }
+
+    /**
      * Creates a new order entity with name and description.
      * 
      * @param name the name of the order

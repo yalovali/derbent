@@ -37,6 +37,9 @@ public class CEntityProjectsGrid<T extends CEntityDB> extends VerticalLayout {
 		add(grid);
 		// ComboBox to select a project
 		projectComboBox = new ComboBox<>("Select Project");
+		// Following coding guidelines: All selective ComboBoxes must be selection only 
+		// (user must not be able to type arbitrary text)
+		projectComboBox.setAllowCustomValue(false);
 		projectComboBox.setItemLabelGenerator(CProject::getName);
 		projectComboBox.setItems(projectService.findAll()); // Assumes findAll() returns
 															// all projects

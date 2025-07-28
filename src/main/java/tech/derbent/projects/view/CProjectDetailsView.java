@@ -1,8 +1,6 @@
 package tech.derbent.projects.view;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.button.ButtonVariant;
-import tech.derbent.abstracts.views.CButton;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -21,6 +19,7 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.views.CAbstractMDPage;
+import tech.derbent.abstracts.views.CButton;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 
@@ -502,8 +501,8 @@ public class CProjectDetailsView extends CAbstractMDPage<CProject> {
 			new Span("Created: " + java.time.LocalDate.now().toString()));
 		final Div cardActions = new Div();
 		cardActions.setClassName("large-card-actions");
-		final CButton viewButton = CButton.createPrimary("View", new Icon(VaadinIcon.EYE));
-		viewButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
+		final CButton viewButton = CButton.createTertiary("View");
+		viewButton.setIcon(new Icon(VaadinIcon.EYE));
 		cardActions.add(viewButton);
 		card.add(cardHeader, cardContent, cardActions);
 		return card;
