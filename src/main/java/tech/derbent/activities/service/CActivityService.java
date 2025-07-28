@@ -33,7 +33,10 @@ public class CActivityService extends CAbstractNamedEntityService<CActivity> {
 	 */
 	@PreAuthorize ("permitAll()")
 	public long countByProject(final CProject project) {
-		LOGGER.info("Counting activities for project: {}", project.getName());
+		LOGGER.info("countByProject called with project: {}", project);
+		if (project == null) {
+			return 0L;
+		}
 		return ((CActivityRepository) repository).countByProject(project);
 	}
 	// Now using the inherited createEntity(String name) method from
@@ -70,8 +73,14 @@ public class CActivityService extends CAbstractNamedEntityService<CActivity> {
 
 	/**
 	 * Finds activities by project.
+	 * @param project the project to search for
+	 * @return list of activities for the project
 	 */
 	public List<CActivity> findByProject(final CProject project) {
+		LOGGER.info("findByProject called with project: {}", project);
+		if (project == null) {
+			return List.of();
+		}
 		return ((CActivityRepository) repository).findByProject(project);
 	}
 
@@ -85,6 +94,10 @@ public class CActivityService extends CAbstractNamedEntityService<CActivity> {
 	@Override
 	@Transactional (readOnly = true)
 	public Optional<CActivity> get(final Long id) {
+		LOGGER.info("get called with id: {}", id);
+		if (id == null) {
+			return Optional.empty();
+		}
 		final Optional<CActivity> entity =
 			((CActivityRepository) repository).findByIdWithActivityTypeStatusAndProject(id);
 		// Initialize lazy fields if entity is present (for any other potential lazy

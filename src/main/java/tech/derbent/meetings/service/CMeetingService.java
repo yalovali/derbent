@@ -59,8 +59,14 @@ public class CMeetingService extends CAbstractNamedEntityService<CMeeting> {
 
 	/**
 	 * Finds meetings by project.
+	 * @param project the project to search for
+	 * @return list of meetings for the project
 	 */
 	public List<CMeeting> findByProject(final CProject project) {
+		LOGGER.info("findByProject called with project: {}", project);
+		if (project == null) {
+			return List.of();
+		}
 		return ((CMeetingRepository) repository).findByProject(project);
 	}
 
@@ -73,9 +79,10 @@ public class CMeetingService extends CAbstractNamedEntityService<CMeeting> {
 	@Override
 	@Transactional (readOnly = true)
 	public Optional<CMeeting> get(final Long id) {
-		LOGGER.debug(
-			"Getting CMeeting with ID {} (overridden to eagerly load all relationships)",
-			id);
+		LOGGER.info("get called with id: {}", id);
+		if (id == null) {
+			return Optional.empty();
+		}
 		final Optional<CMeeting> entity =
 			((CMeetingRepository) repository).findByIdWithMeetingTypeAndParticipants(id);
 		// Initialize lazy fields if entity is present (for any other potential lazy
@@ -92,9 +99,10 @@ public class CMeetingService extends CAbstractNamedEntityService<CMeeting> {
 	 */
 	@Transactional (readOnly = true)
 	public Optional<CMeeting> getWithMeetingTypeAndParticipants(final Long id) {
-		LOGGER.debug(
-			"Getting CMeeting with ID {} and eagerly loading all relationships",
-			id);
+		LOGGER.info("getWithMeetingTypeAndParticipants called with id: {}", id);
+		if (id == null) {
+			return Optional.empty();
+		}
 		return ((CMeetingRepository) repository)
 			.findByIdWithMeetingTypeAndParticipants(id);
 	}
