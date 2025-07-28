@@ -100,7 +100,8 @@ src/main/java/tech/derbent/
 **Database Configuration:**
 - Always ensure **PostgreSQL-only** configuration for production
 - Use `spring.jpa.defer-datasource-initialization=true`
-- Update `data.sql` with correct sample and initial database values after any database change
+- Dont Update `data.sql` with correct sample and initial database values after any database change
+- update sample CSampleDataInitializer for every entity entitytype with at least 5 examples
 - Password is always **test123** for all users with hash: `$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu`
 
 ---
