@@ -483,18 +483,18 @@ INSERT INTO ccommentpriority (name, description, priority_level, color, is_defau
 ('INFO', 'General information or note', 4, '#9E9E9E', FALSE);
 
 -- Insert essential decision types (categorizes different types of decisions) - 4 ITEMS
-INSERT INTO cdecisiontype (name, description) VALUES 
-('Strategic', 'High-level strategic decisions affecting project direction'),
-('Technical', 'Technical architecture and implementation decisions'),
-('Financial', 'Budget and cost-related decisions requiring approval'),
-('Operational', 'Day-to-day operational and process decisions');
+INSERT INTO cdecisiontype (name, description, color, sort_order, requires_approval, is_active) VALUES 
+('Strategic', 'High-level strategic decisions affecting project direction', '#FF5722', 1, TRUE, TRUE),
+('Technical', 'Technical architecture and implementation decisions', '#2196F3', 2, TRUE, TRUE),
+('Financial', 'Budget and cost-related decisions requiring approval', '#4CAF50', 3, TRUE, TRUE),
+('Operational', 'Day-to-day operational and process decisions', '#FF9800', 4, FALSE, TRUE);
 
 -- Insert essential decision statuses (workflow states for decisions) - 4 ITEMS
-INSERT INTO cdecisionstatus (name, description, color, is_final, sort_order) VALUES 
-('PENDING', 'Decision is pending review and discussion', '#9E9E9E', FALSE, 1),
-('UNDER_REVIEW', 'Decision is currently under review by stakeholders', '#2196F3', FALSE, 2),
-('APPROVED', 'Decision has been approved and documented', '#4CAF50', TRUE, 3),
-('REJECTED', 'Decision has been rejected', '#F44336', TRUE, 4);
+INSERT INTO cdecisionstatus (name, description, color, is_final, sort_order, allows_editing, requires_approval) VALUES 
+('PENDING', 'Decision is pending review and discussion', '#9E9E9E', FALSE, 1, TRUE, FALSE),
+('UNDER_REVIEW', 'Decision is currently under review by stakeholders', '#2196F3', FALSE, 2, TRUE, TRUE),
+('APPROVED', 'Decision has been approved and documented', '#4CAF50', TRUE, 3, FALSE, FALSE),
+('REJECTED', 'Decision has been rejected', '#F44336', TRUE, 4, FALSE, FALSE);
 
 
 -- Insert essential order types (categorizes different types of orders) - 4 ITEMS
@@ -583,25 +583,25 @@ INSERT INTO cuser (
 
 -- QA Engineers (2)
 ('2025-01-15 12:00:00', 'james.taylor@derbent.tech', TRUE, 'Taylor', 'james.taylor', 'James', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-4001', 'QA,USER', '2025-01-15 12:00:00', 5, 'TEAM_MEMBER', 
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-4001', 'QA,USER', '2025-01-15 12:00:00', 4, 'TEAM_MEMBER', 
  decode('PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSI3NSIgY3k9Ijc1IiByPSI3NSIgZmlsbD0iI0ZGRDkzRCIvPgogIDx0ZXh0IHg9Ijc1IiB5PSI4MyIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjUwIiAKICAgICAgICBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPgogICAgSlQKICA8L3RleHQ+Cjwvc3ZnPg==', 'base64')),
 ('2025-01-15 12:15:00', 'maria.garcia@derbent.tech', TRUE, 'Garcia', 'maria.garcia', 'Maria', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-4002', 'QA,USER', '2025-01-15 12:15:00', 5, 'TEAM_MEMBER', 
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-4002', 'QA,USER', '2025-01-15 12:15:00', 4, 'TEAM_MEMBER', 
  decode('PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSI3NSIgY3k9Ijc1IiByPSI3NSIgZmlsbD0iIzZCQ0Y3RiIvPgogIDx0ZXh0IHg9Ijc1IiB5PSI4MyIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjUwIiAKICAgICAgICBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPgogICAgTUcKICA8L3RleHQ+Cjwvc3ZnPg==', 'base64')),
 
 -- UI/UX Designer (1)
 ('2025-01-15 13:00:00', 'sophia.brown@derbent.tech', TRUE, 'Brown', 'sophia.brown', 'Sophia', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-5001', 'DESIGNER,USER', '2025-01-15 13:00:00', 6, 'TEAM_MEMBER', 
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-5001', 'DESIGNER,USER', '2025-01-15 13:00:00', 3, 'TEAM_MEMBER', 
  decode('PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSI3NSIgY3k9Ijc1IiByPSI3NSIgZmlsbD0iIzlDODhGRiIvPgogIDx0ZXh0IHg9Ijc1IiB5PSI4MyIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjUwIiAKICAgICAgICBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPgogICAgU0IKICA8L3RleHQ+Cjwvc3ZnPg==', 'base64')),
 
 -- Business Analyst (1)
 ('2025-01-15 14:00:00', 'robert.anderson@derbent.tech', TRUE, 'Anderson', 'robert.anderson', 'Robert', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-6001', 'ANALYST,USER', '2025-01-15 14:00:00', 7, 'TEAM_MEMBER', 
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-6001', 'ANALYST,USER', '2025-01-15 14:00:00', 2, 'TEAM_MEMBER', 
  decode('PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSI3NSIgY3k9Ijc1IiByPSI3NSIgZmlsbD0iIzM0RDM5OSIvPgogIDx0ZXh0IHg9Ijc1IiB5PSI4MyIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjUwIiAKICAgICAgICBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPgogICAgUkEKICA8L3RleHQ+Cjwvc3ZnPg==', 'base64')),
 
 -- DevOps Engineer (1)
 ('2025-01-15 15:00:00', 'jennifer.lee@derbent.tech', TRUE, 'Lee', 'jennifer.lee', 'Jennifer', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-7001', 'DEVOPS,USER', '2025-01-15 15:00:00', 8, 'TEAM_MEMBER', 
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-7001', 'DEVOPS,USER', '2025-01-15 15:00:00', 3, 'TEAM_MEMBER', 
  decode('PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSI3NSIgY3k9Ijc1IiByPSI3NSIgZmlsbD0iIzhCNUNGNiIvPgogIDx0ZXh0IHg9Ijc1IiB5PSI4MyIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjUwIiAKICAgICAgICBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPgogICAgSkwKICA8L3RleHQ+Cjwvc3ZnPg==', 'base64'));
 
 -- =====================================================================
