@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import tech.derbent.comments.domain.CComment;
+import tech.derbent.comments.service.CCommentService;
 
 /**
  * CCommentView - UI component for displaying individual comments.
@@ -47,6 +48,37 @@ public class CCommentView extends Div {
         }
         
         this.comment = comment;
+        this.layout = new VerticalLayout();
+        this.headerLayout = new HorizontalLayout();
+        this.commentTextParagraph = new Paragraph();
+        
+        setupLayout();
+        updateContent();
+        addClassName("comment-view");
+    }
+
+    /**
+     * Creates a new CCommentView for a comment loaded by ID from the database.
+     * @param commentId the ID of the comment to load and display
+     * @param commentService the service to load the comment
+     */
+    public CCommentView(final Long commentId, final CCommentService commentService) {
+        LOGGER.info("CCommentView constructor called with commentId: {}", commentId);
+        
+        if (commentId == null) {
+            throw new IllegalArgumentException("Comment ID cannot be null");
+        }
+        
+        if (commentService == null) {
+            throw new IllegalArgumentException("Comment service cannot be null");
+        }
+        
+        final java.util.Optional<CComment> commentOptional = commentService.get(commentId);
+        if (commentOptional.isEmpty()) {
+            throw new IllegalArgumentException("Comment with ID " + commentId + " not found");
+        }
+        
+        this.comment = commentOptional.get();
         this.layout = new VerticalLayout();
         this.headerLayout = new HorizontalLayout();
         this.commentTextParagraph = new Paragraph();
