@@ -483,11 +483,11 @@ INSERT INTO ccommentpriority (name, description, priority_level, color, is_defau
 ('INFO', 'General information or note', 4, '#9E9E9E', FALSE);
 
 -- Insert essential decision types (categorizes different types of decisions) - 4 ITEMS
-INSERT INTO cdecisiontype (name, description) VALUES 
-('Strategic', 'High-level strategic decisions affecting project direction'),
-('Technical', 'Technical architecture and implementation decisions'),
-('Financial', 'Budget and cost-related decisions requiring approval'),
-('Operational', 'Day-to-day operational and process decisions');
+INSERT INTO cdecisiontype (name, description, color, sort_order, requires_approval, is_active) VALUES 
+('Strategic', 'High-level strategic decisions affecting project direction', '#FF5722', 1, TRUE, TRUE),
+('Technical', 'Technical architecture and implementation decisions', '#2196F3', 2, TRUE, TRUE),
+('Financial', 'Budget and cost-related decisions requiring approval', '#4CAF50', 3, TRUE, TRUE),
+('Operational', 'Day-to-day operational and process decisions', '#FF9800', 4, FALSE, TRUE);
 
 -- Insert essential decision statuses (workflow states for decisions) - 4 ITEMS
 INSERT INTO cdecisionstatus (name, description, color, is_final, sort_order) VALUES 
