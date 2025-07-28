@@ -17,7 +17,7 @@ public abstract class CEntityNamed extends CEntityDB {
 
 	protected static final int MAX_LENGTH_NAME = 100;
 
-	@Column (name = "name", nullable = false, length = MAX_LENGTH_NAME, unique = true)
+	@Column (name = "name", nullable = false, length = MAX_LENGTH_NAME, unique = false)
 	@Size (max = MAX_LENGTH_NAME)
 	@MetaData (
 		displayName = "Name", required = true, readOnly = false, defaultValue = "",

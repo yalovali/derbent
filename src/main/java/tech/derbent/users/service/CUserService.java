@@ -110,7 +110,7 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 	}
 
 	/**
-	 * Overrides the base get method to eagerly load CUserType and company relationships. 
+	 * Overrides the base get method to eagerly load CUserType and company relationships.
 	 * This prevents LazyInitializationException when the entity is used in UI contexts,
 	 * particularly when company information is used in comboboxes.
 	 * @param id the user ID
@@ -119,7 +119,8 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 	@Override
 	@Transactional (readOnly = true)
 	public Optional<CUser> get(final Long id) {
-		LOGGER.debug("Getting CUser with ID {} (overridden to eagerly load userType and company)",
+		LOGGER.debug(
+			"Getting CUser with ID {} (overridden to eagerly load userType and company)",
 			id);
 		final Optional<CUser> entity =
 			((CUserRepository) repository).findByIdWithAllRelationships(id);
@@ -247,8 +248,6 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 	 */
 	@Transactional
 	public void removeUserProjectSetting(final Long userId, final Long projectId) {
-		LOGGER.info("Removing user project setting for user ID: {} and project ID: {}",
-			userId, projectId);
 		final CUser user = getUserWithProjects(userId);
 
 		if (user.getProjectSettings() != null) {

@@ -384,17 +384,11 @@ public class CActivity extends CEntityOfProject {
 	}
 
 	public void setAcceptanceCriteria(final String acceptanceCriteria) {
-		LOGGER.debug(
-			"setAcceptanceCriteria(acceptanceCriteria={}) - Setting acceptance criteria for activity id={}",
-			acceptanceCriteria, getId());
 		this.acceptanceCriteria = acceptanceCriteria;
 		updateLastModified();
 	}
 
 	public void setActivityType(final CActivityType activityType) {
-		LOGGER.debug(
-			"setActivityType(activityType={}) - Setting activity type for activity id={}",
-			activityType != null ? activityType.getName() : "null", getId());
 		this.activityType = activityType;
 		updateLastModified();
 	}
@@ -411,9 +405,6 @@ public class CActivity extends CEntityOfProject {
 	}
 
 	public void setActualHours(final BigDecimal actualHours) {
-		LOGGER.debug(
-			"setActualHours(actualHours={}) - Setting actual hours for activity id={}",
-			actualHours, getId());
 
 		if ((actualHours != null) && (actualHours.compareTo(BigDecimal.ZERO) < 0)) {
 			LOGGER.warn(
@@ -425,17 +416,11 @@ public class CActivity extends CEntityOfProject {
 	}
 
 	public void setAssignedTo(final CUser assignedTo) {
-		LOGGER.debug(
-			"setAssignedTo(assignedTo={}) - Setting assigned user for activity id={}",
-			assignedTo != null ? assignedTo.getUsername() : "null", getId());
 		this.assignedTo = assignedTo;
 		updateLastModified();
 	}
 
 	public void setCompletionDate(final LocalDate completionDate) {
-		LOGGER.debug(
-			"setCompletionDate(completionDate={}) - Setting completion date for activity id={}",
-			completionDate, getId());
 		this.completionDate = completionDate;
 
 		if ((completionDate != null) && (progressPercentage != null)
@@ -448,24 +433,14 @@ public class CActivity extends CEntityOfProject {
 		updateLastModified();
 	}
 
-	public void setCreatedBy(final CUser createdBy) {
-		LOGGER.debug(
-			"setCreatedBy(createdBy={}) - Setting created by user for activity id={}",
-			createdBy != null ? createdBy.getUsername() : "null", getId());
-		this.createdBy = createdBy;
-	}
+	public void setCreatedBy(final CUser createdBy) { this.createdBy = createdBy; }
 
 	public void setDueDate(final LocalDate dueDate) {
-		LOGGER.debug("setDueDate(dueDate={}) - Setting due date for activity id={}",
-			dueDate, getId());
 		this.dueDate = dueDate;
 		updateLastModified();
 	}
 
 	public void setEstimatedCost(final BigDecimal estimatedCost) {
-		LOGGER.debug(
-			"setEstimatedCost(estimatedCost={}) - Setting estimated cost for activity id={}",
-			estimatedCost, getId());
 
 		if ((estimatedCost != null) && (estimatedCost.compareTo(BigDecimal.ZERO) < 0)) {
 			LOGGER.warn(
@@ -477,9 +452,6 @@ public class CActivity extends CEntityOfProject {
 	}
 
 	public void setEstimatedHours(final BigDecimal estimatedHours) {
-		LOGGER.debug(
-			"setEstimatedHours(estimatedHours={}) - Setting estimated hours for activity id={}",
-			estimatedHours, getId());
 
 		if ((estimatedHours != null) && (estimatedHours.compareTo(BigDecimal.ZERO) < 0)) {
 			LOGGER.warn(
@@ -491,9 +463,6 @@ public class CActivity extends CEntityOfProject {
 	}
 
 	public void setHourlyRate(final BigDecimal hourlyRate) {
-		LOGGER.debug(
-			"setHourlyRate(hourlyRate={}) - Setting hourly rate for activity id={}",
-			hourlyRate, getId());
 
 		if ((hourlyRate != null) && (hourlyRate.compareTo(BigDecimal.ZERO) < 0)) {
 			LOGGER.warn(
@@ -505,16 +474,11 @@ public class CActivity extends CEntityOfProject {
 	}
 
 	public void setNotes(final String notes) {
-		LOGGER.debug("setNotes(notes={}) - Setting notes for activity id={}", notes,
-			getId());
 		this.notes = notes;
 		updateLastModified();
 	}
 
 	public void setParentActivity(final CActivity parentActivity) {
-		LOGGER.debug(
-			"setParentActivity(parentActivity={}) - Setting parent activity for activity id={}",
-			parentActivity != null ? parentActivity.getName() : "null", getId());
 
 		if ((parentActivity != null) && parentActivity.equals(this)) {
 			LOGGER.warn(
@@ -527,16 +491,11 @@ public class CActivity extends CEntityOfProject {
 	}
 
 	public void setPriority(final CActivityPriority priority) {
-		LOGGER.debug("setPriority(priority={}) - Setting priority for activity id={}",
-			priority != null ? priority.getName() : "null", getId());
 		this.priority = priority;
 		updateLastModified();
 	}
 
 	public void setProgressPercentage(final Integer progressPercentage) {
-		LOGGER.debug(
-			"setProgressPercentage(progressPercentage={}) - Setting progress percentage for activity id={}",
-			progressPercentage, getId());
 
 		if ((progressPercentage != null)
 			&& ((progressPercentage < 0) || (progressPercentage > 100))) {
@@ -550,18 +509,12 @@ public class CActivity extends CEntityOfProject {
 		// Auto-set completion date if progress reaches 100%
 		if ((progressPercentage != null) && (progressPercentage >= 100)
 			&& (completionDate == null)) {
-			LOGGER.debug(
-				"setProgressPercentage - Auto-setting completion date for 100% progress activity id={}",
-				getId());
 			this.completionDate = LocalDate.now();
 		}
 		updateLastModified();
 	}
 
 	public void setRemainingHours(final BigDecimal remainingHours) {
-		LOGGER.debug(
-			"setRemainingHours(remainingHours={}) - Setting remaining hours for activity id={}",
-			remainingHours, getId());
 
 		if ((remainingHours != null) && (remainingHours.compareTo(BigDecimal.ZERO) < 0)) {
 			LOGGER.warn(
@@ -573,22 +526,15 @@ public class CActivity extends CEntityOfProject {
 	}
 
 	public void setStartDate(final LocalDate startDate) {
-		LOGGER.debug("setStartDate(startDate={}) - Setting start date for activity id={}",
-			startDate, getId());
 		this.startDate = startDate;
 		updateLastModified();
 	}
 
 	public void setStatus(final CActivityStatus status) {
-		LOGGER.debug("setStatus(status={}) - Setting status for activity id={}",
-			status != null ? status.getName() : "null", getId());
 		this.status = status;
 
 		// Auto-set completion date if status is final
 		if ((status != null) && status.isFinal() && (completionDate == null)) {
-			LOGGER.debug(
-				"setStatus - Auto-setting completion date for final status activity id={}",
-				getId());
 			this.completionDate = LocalDate.now();
 
 			if ((progressPercentage != null) && (progressPercentage < 100)) {

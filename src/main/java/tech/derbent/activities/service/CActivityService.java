@@ -34,6 +34,7 @@ public class CActivityService extends CAbstractNamedEntityService<CActivity> {
 	@PreAuthorize ("permitAll()")
 	public long countByProject(final CProject project) {
 		LOGGER.info("countByProject called with project: {}", project);
+
 		if (project == null) {
 			return 0L;
 		}
@@ -78,6 +79,7 @@ public class CActivityService extends CAbstractNamedEntityService<CActivity> {
 	 */
 	public List<CActivity> findByProject(final CProject project) {
 		LOGGER.info("findByProject called with project: {}", project);
+
 		if (project == null) {
 			return List.of();
 		}
@@ -95,11 +97,12 @@ public class CActivityService extends CAbstractNamedEntityService<CActivity> {
 	@Transactional (readOnly = true)
 	public Optional<CActivity> get(final Long id) {
 		LOGGER.info("get called with id: {}", id);
+
 		if (id == null) {
 			return Optional.empty();
 		}
-		final Optional<CActivity> entity =
-			((CActivityRepository) repository).findByIdWithActivityTypeStatusAndProject(id);
+		final Optional<CActivity> entity = ((CActivityRepository) repository)
+			.findByIdWithActivityTypeStatusAndProject(id);
 		// Initialize lazy fields if entity is present (for any other potential lazy
 		// relationships)
 		entity.ifPresent(this::initializeLazyFields);
@@ -171,7 +174,8 @@ public class CActivityService extends CAbstractNamedEntityService<CActivity> {
 		LOGGER.debug(
 			"Getting CActivity with ID {} and eagerly loading CActivityType and CActivityStatus",
 			id);
-		return ((CActivityRepository) repository).findByIdWithActivityTypeStatusAndProject(id);
+		return ((CActivityRepository) repository)
+			.findByIdWithActivityTypeStatusAndProject(id);
 	}
 
 	/**

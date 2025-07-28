@@ -85,7 +85,7 @@ public class CComment extends CEvent {
 	 */
 	public CComment(final String commentText, final CActivity activity,
 		final CUser author) {
-		super(activity != null ? activity.getProject() : null, author);
+		super(author);
 		LOGGER.info(
 			"CComment constructor called with commentText: {}, activity: {}, author: {}",
 			commentText, activity, author);
@@ -103,7 +103,6 @@ public class CComment extends CEvent {
 		}
 		this.commentText = commentText;
 		this.activity = activity;
-		setName("Comment"); // Set a default name for the inherited field
 	}
 
 	/**
@@ -158,41 +157,24 @@ public class CComment extends CEvent {
 	public boolean isImportant() { return important; }
 
 	public void setActivity(final CActivity activity) {
-		LOGGER.info("setActivity called with activity: {}", activity);
 
 		if (activity == null) {
 			LOGGER.warn("setActivity called with null activity");
 		}
 		this.activity = activity;
-
-		// Update project context when activity changes
-		if (activity != null) {
-			setProject(activity.getProject());
-		}
-		updateLastModified();
 	}
 
 	public void setCommentText(final String commentText) {
-		LOGGER.info("setCommentText called with commentText: {}", commentText);
 
 		if ((commentText == null) || commentText.trim().isEmpty()) {
 			LOGGER.warn("setCommentText called with null or empty comment text");
 		}
 		this.commentText = commentText;
-		updateLastModified();
 	}
 
-	public void setImportant(final boolean important) {
-		LOGGER.info("setImportant called with important: {}", important);
-		this.important = important;
-		updateLastModified();
-	}
+	public void setImportant(final boolean important) { this.important = important; }
 
-	public void setPriority(final CCommentPriority priority) {
-		LOGGER.info("setPriority called with priority: {}", priority);
-		this.priority = priority;
-		updateLastModified();
-	}
+	public void setPriority(final CCommentPriority priority) { this.priority = priority; }
 
 	@Override
 	public String toString() {
