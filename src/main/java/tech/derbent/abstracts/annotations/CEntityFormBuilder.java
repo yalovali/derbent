@@ -264,6 +264,11 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		}
 		final Class<T> fieldType = (Class<T>) field.getType();
 		final ComboBox<T> comboBox = new ComboBox<>();
+		
+		// Following coding guidelines: All selective ComboBoxes must be selection only 
+		// (user must not be able to type arbitrary text)
+		comboBox.setAllowCustomValue(false);
+		
 		// Enhanced item label generator with null safety and proper display formatting
 		// Fix for combobox display issue: use getName() for CEntityNamed entities instead
 		// of toString()
@@ -539,6 +544,11 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		}
 		else {
 			final ComboBox<Enum> comboBox = new ComboBox<>();
+			
+			// Following coding guidelines: All selective ComboBoxes must be selection only 
+			// (user must not be able to type arbitrary text)
+			comboBox.setAllowCustomValue(false);
+			
 			comboBox.setItems(enumConstants);
 			comboBox.setItemLabelGenerator(Enum::name);
 			binder.bind(comboBox, field.getName());

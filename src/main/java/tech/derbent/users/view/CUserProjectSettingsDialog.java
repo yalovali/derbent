@@ -78,6 +78,9 @@ public class CUserProjectSettingsDialog extends CDBEditDialog<CUserProjectSettin
 		}
 		// Project selection
 		projectComboBox = new ComboBox<>("Project");
+		// Following coding guidelines: All selective ComboBoxes must be selection only 
+		// (user must not be able to type arbitrary text)
+		projectComboBox.setAllowCustomValue(false);
 		projectComboBox.setItemLabelGenerator(CProject::getName);
 		projectComboBox.setItems(getAvailableProjects());
 		projectComboBox.setRequired(true);

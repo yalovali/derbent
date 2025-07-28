@@ -3,7 +3,6 @@ package tech.derbent.comments.view;
 import java.util.List;
 import java.util.Optional;
 
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;

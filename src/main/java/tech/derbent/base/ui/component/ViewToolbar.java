@@ -226,6 +226,9 @@ public final class ViewToolbar extends Composite<Header>
 			return;
 		}
 		projectComboBox = new ComboBox<>();
+		// Following coding guidelines: All selective ComboBoxes must be selection only 
+		// (user must not be able to type arbitrary text)
+		projectComboBox.setAllowCustomValue(false);
 		projectComboBox.setItemLabelGenerator(CProject::getName);
 		projectComboBox.setPlaceholder("Select Project");
 		projectComboBox.setWidth("200px");
