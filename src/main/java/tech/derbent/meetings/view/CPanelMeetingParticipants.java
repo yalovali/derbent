@@ -15,13 +15,14 @@ import tech.derbent.users.service.CUserService;
 
 /**
  * CPanelMeetingParticipants - Panel for grouping participant-related fields of CMeeting
- * entity. Layer: View (MVC) Groups fields: participants
+ * entity. Layer: View (MVC) Groups fields: participants, attendees
  */
 public class CPanelMeetingParticipants extends CPanelMeetingBase {
 
 	private static final long serialVersionUID = 1L;
 
 	private MultiSelectComboBox<CUser> participantsField;
+	private MultiSelectComboBox<CUser> attendeesField;
 
 	private final CUserService userService;
 
@@ -29,14 +30,14 @@ public class CPanelMeetingParticipants extends CPanelMeetingBase {
 		final BeanValidationBinder<CMeeting> beanValidationBinder,
 		final CMeetingService entityService, final CMeetingTypeService meetingTypeService,
 		final CUserService userService) {
-		super("Participants", currentEntity, beanValidationBinder, entityService,
+		super("Participants & Attendees", currentEntity, beanValidationBinder, entityService,
 			meetingTypeService);
 		this.userService = userService;
 	}
 
 	private void createParticipantsField() {
 		participantsField = new MultiSelectComboBox<>("Participants");
-		participantsField.setHelperText("Select users participating in the meeting");
+		participantsField.setHelperText("Select users invited to participate in the meeting");
 		participantsField.setWidthFull();
 
 		// Load users from userService
@@ -62,11 +63,40 @@ public class CPanelMeetingParticipants extends CPanelMeetingBase {
 			.bind(CMeeting::getParticipants, CMeeting::setParticipants);
 	}
 
+	private void createAttendeesField() {
+		attendeesField = new MultiSelectComboBox<>("Attendees");
+		attendeesField.setHelperText("Select users who actually attended the meeting");
+		attendeesField.setWidthFull();
+
+		// Load users from userService
+		try {
+			final var users =
+				userService.list(org.springframework.data.domain.Pageable.unpaged());
+			attendeesField.setItems(users);
+			attendeesField.setItemLabelGenerator(user -> user.getName() != null
+				? user.getName() : "User #" + user.getId());
+			LOGGER.debug("Loaded {} users for attendees selection", users.size());
+		} catch (final Exception e) {
+			LOGGER.error("Error loading users for attendees field: {}", e.getMessage(),
+				e);
+			attendeesField.setItems();
+		}
+		// Manual binding for attendees field with proper type handling
+		getBinder().forField(attendeesField)
+			.withConverter(
+				(final Set<CUser> selectedUsers) -> selectedUsers != null
+					? new HashSet<>(selectedUsers) : new HashSet<CUser>(),
+				(final Set<CUser> attendeesSet) -> attendeesSet != null
+					? attendeesSet : Set.<CUser>of())
+			.bind(CMeeting::getAttendees, CMeeting::setAttendees);
+	}
+
 	@Override
 	protected void updatePanelEntityFields() {
-		// Participants fields - attendee information
-		setEntityFields(List.of("participants"));
+		// Participants and attendees fields - meeting people information
+		setEntityFields(List.of("participants", "attendees"));
 		createParticipantsField();
-		getBaseLayout().add(participantsField);
+		createAttendeesField();
+		getBaseLayout().add(participantsField, attendeesField);
 	}
 }
