@@ -23,9 +23,13 @@ SET session_replication_role = replica;
 -- Delete data from junction tables first
 DELETE FROM cmeeting_participants;
 DELETE FROM cdecision_team_members;
+DELETE FROM cmeeting_attendees;
+
 
 -- Delete data from dependent tables (in reverse dependency order)
 DELETE FROM ccomment;
+DELETE FROM corderapproval;
+DELETE FROM corder;
 DELETE FROM cactivity;
 DELETE FROM cmeeting;
 DELETE FROM crisk;
@@ -43,9 +47,15 @@ DELETE FROM cactivitystatus;
 DELETE FROM cactivitypriority;
 DELETE FROM ccommentpriority;
 DELETE FROM cmeetingtype;
+DELETE FROM cmeetingstatus;
 DELETE FROM cusertype;
 DELETE FROM cdecisiontype;
 DELETE FROM cdecisionstatus;
+
+DELETE FROM cordertype;
+DELETE FROM corderstatus;
+DELETE FROM ccurrency;
+DELETE FROM capprovalstatus;
 
 SET session_replication_role = DEFAULT;
 
@@ -120,6 +130,20 @@ BEGIN
 END;
 ';
 
+-- Reset 'cmeetingstatus_cmeetingstatus_id_seq'
+DO '
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM pg_class c
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE c.relkind = ''S'' AND c.relname = ''cmeetingstatus_cmeetingstatus_id_seq''
+    ) THEN
+        EXECUTE ''SELECT setval(''''cmeetingstatus_cmeetingstatus_id_seq'''', 1, false)'';
+    END IF;
+END;
+';
+
 -- Reset 'ccomment_comment_id_seq'
 DO '
 BEGIN
@@ -135,6 +159,8 @@ END;
 ';
 
 -- Reset 'cdecision_decision_id_seq'
+
+-- Reset 'cordertype_order_type_id_seq'
 DO '
 BEGIN
     IF EXISTS (
@@ -144,11 +170,16 @@ BEGIN
         WHERE c.relkind = ''S'' AND c.relname = ''cdecision_decision_id_seq''
     ) THEN
         EXECUTE ''SELECT setval(''''cdecision_decision_id_seq'''', 1, false)'';
+
+        WHERE c.relkind = ''S'' AND c.relname = ''cordertype_order_type_id_seq''
+    ) THEN
+        EXECUTE ''SELECT setval(''''cordertype_order_type_id_seq'''', 1, false)'';
     END IF;
 END;
 ';
 
 -- Reset 'cdecisiontype_decision_type_id_seq'
+-- Reset 'corderstatus_order_status_id_seq'
 DO '
 BEGIN
     IF EXISTS (
@@ -158,34 +189,67 @@ BEGIN
         WHERE c.relkind = ''S'' AND c.relname = ''cdecisiontype_decision_type_id_seq''
     ) THEN
         EXECUTE ''SELECT setval(''''cdecisiontype_decision_type_id_seq'''', 1, false)'';
+
     END IF;
 END;
 ';
 
--- Reset 'cdecisionstatus_decision_status_id_seq'
+
+-- Reset 'ccurrency_currency_id_seq'
 DO '
 BEGIN
     IF EXISTS (
         SELECT 1
         FROM pg_class c
         JOIN pg_namespace n ON n.oid = c.relnamespace
-        WHERE c.relkind = ''S'' AND c.relname = ''cdecisionstatus_decision_status_id_seq''
+
+        WHERE c.relkind = ''S'' AND c.relname = ''ccurrency_currency_id_seq''
     ) THEN
-        EXECUTE ''SELECT setval(''''cdecisionstatus_decision_status_id_seq'''', 1, false)'';
+        EXECUTE ''SELECT setval(''''ccurrency_currency_id_seq'''', 1, false)'';
     END IF;
 END;
 ';
 
--- Reset 'cdecisionapproval_decision_approval_id_seq'
+
+-- Reset 'capprovalstatus_approval_status_id_seq'
 DO '
 BEGIN
     IF EXISTS (
         SELECT 1
         FROM pg_class c
         JOIN pg_namespace n ON n.oid = c.relnamespace
-        WHERE c.relkind = ''S'' AND c.relname = ''cdecisionapproval_decision_approval_id_seq''
+
+        WHERE c.relkind = ''S'' AND c.relname = ''capprovalstatus_approval_status_id_seq''
     ) THEN
-        EXECUTE ''SELECT setval(''''cdecisionapproval_decision_approval_id_seq'''', 1, false)'';
+        EXECUTE ''SELECT setval(''''capprovalstatus_approval_status_id_seq'''', 1, false)'';
+    END IF;
+END;
+';
+
+-- Reset 'corder_order_id_seq'
+DO '
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM pg_class c
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE c.relkind = ''S'' AND c.relname = ''corder_order_id_seq''
+    ) THEN
+        EXECUTE ''SELECT setval(''''corder_order_id_seq'''', 1, false)'';
+    END IF;
+END;
+';
+
+-- Reset 'corderapproval_order_approval_id_seq'
+DO '
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM pg_class c
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE c.relkind = ''S'' AND c.relname = ''corderapproval_order_approval_id_seq''
+    ) THEN
+        EXECUTE ''SELECT setval(''''corderapproval_order_approval_id_seq'''', 1, false)'';
     END IF;
 END;
 ';
@@ -227,6 +291,15 @@ INSERT INTO cactivitystatus (name, description, color, is_final, sort_order) VAL
 ('DONE', 'Successfully completed and delivered', '#4CAF50', TRUE, 7),
 ('CANCELLED', 'Work cancelled or deemed unnecessary', '#607D8B', TRUE, 8);
 
+-- Insert essential meeting statuses (workflow states) - 6 ITEMS
+INSERT INTO cmeetingstatus (name, description, color, is_final, sort_order) VALUES 
+('PLANNED', 'Meeting is planned but not yet scheduled', '#9E9E9E', FALSE, 1),
+('SCHEDULED', 'Meeting is scheduled and participants notified', '#2196F3', FALSE, 2),
+('IN_PROGRESS', 'Meeting is currently in progress', '#FF9800', FALSE, 3),
+('COMPLETED', 'Meeting has been completed', '#4CAF50', TRUE, 4),
+('CANCELLED', 'Meeting has been cancelled', '#F44336', TRUE, 5),
+('POSTPONED', 'Meeting has been postponed', '#607D8B', FALSE, 6);
+
 -- Insert essential activity priorities (business importance levels) - 6 ITEMS
 INSERT INTO cactivitypriority (name, description, priority_level, color, is_default) VALUES 
 ('BLOCKER', 'Critical blocker - stops all work', 1, '#B71C1C', FALSE),
@@ -243,23 +316,39 @@ INSERT INTO ccommentpriority (name, description, priority_level, color, is_defau
 ('LOW', 'Low priority informational comment', 3, '#4CAF50', FALSE),
 ('INFO', 'General information or note', 4, '#9E9E9E', FALSE);
 
--- Insert essential decision types (decision categorization) - 6 ITEMS
-INSERT INTO cdecisiontype (name, description, color, sort_order, requires_approval, is_active) VALUES 
-('Strategic', 'High-level strategic business decisions', '#8E24AA', 1, TRUE, TRUE),
-('Technical', 'Technical architecture and implementation decisions', '#1976D2', 2, TRUE, TRUE),
-('Financial', 'Budget and financial investment decisions', '#388E3C', 3, TRUE, TRUE),
-('Operational', 'Day-to-day operational decisions', '#F57C00', 4, FALSE, TRUE),
-('Regulatory', 'Compliance and regulatory decisions', '#D32F2F', 5, TRUE, TRUE),
-('Project', 'Project-specific decisions and changes', '#512DA8', 6, FALSE, TRUE);
 
--- Insert essential decision statuses (decision workflow) - 6 ITEMS
-INSERT INTO cdecisionstatus (name, description, color, is_final, sort_order, allows_editing, requires_approval) VALUES 
-('Draft', 'Decision in draft status, being prepared', '#9E9E9E', FALSE, 1, TRUE, FALSE),
-('Under Review', 'Decision is being reviewed by stakeholders', '#FF9800', FALSE, 2, TRUE, TRUE),
-('Pending Approval', 'Decision awaiting formal approval', '#2196F3', FALSE, 3, FALSE, TRUE),
-('Approved', 'Decision has been approved for implementation', '#4CAF50', FALSE, 4, FALSE, FALSE),
-('Implemented', 'Decision has been successfully implemented', '#8BC34A', TRUE, 5, FALSE, FALSE),
-('Rejected', 'Decision has been rejected and will not proceed', '#F44336', TRUE, 6, FALSE, FALSE);
+-- Insert essential order types (categorizes different types of orders) - 6 ITEMS
+INSERT INTO cordertype (name, description) VALUES 
+('Purchase Order', 'Orders for purchasing goods and materials'),
+('Service Order', 'Orders for services and consultancy work'),
+('Software License', 'Software licensing and subscription orders'),
+('Hardware Order', 'Hardware and equipment procurement orders'),
+('Maintenance Contract', 'Maintenance and support service contracts'),
+('Travel & Expenses', 'Travel bookings and expense reimbursement orders');
+
+-- Insert essential order statuses (workflow states for orders) - 6 ITEMS
+INSERT INTO corderstatus (name, description) VALUES 
+('Draft', 'Order is being prepared and not yet submitted'),
+('Submitted', 'Order has been submitted for approval'),
+('Approved', 'Order has been approved and is ready for processing'),
+('In Progress', 'Order is being processed by the provider'),
+('Completed', 'Order has been fulfilled and delivered'),
+('Cancelled', 'Order has been cancelled before completion');
+
+-- Insert essential currencies (financial currencies for orders) - 5 ITEMS
+INSERT INTO ccurrency (name, description, currency_code, currency_symbol) VALUES 
+('US Dollar', 'United States Dollar', 'USD', '$'),
+('Euro', 'European Union Euro', 'EUR', '€'),
+('British Pound', 'British Pound Sterling', 'GBP', '£'),
+('Canadian Dollar', 'Canadian Dollar', 'CAD', 'C$'),
+('Japanese Yen', 'Japanese Yen', 'JPY', '¥');
+
+-- Insert essential approval statuses (states for order approvals) - 4 ITEMS
+INSERT INTO capprovalstatus (name, description) VALUES 
+('Pending', 'Approval is pending review'),
+('Approved', 'Approval has been granted'),
+('Rejected', 'Approval has been rejected'),
+('Under Review', 'Approval is currently being reviewed');
 
 -- =====================================================================
 -- COMPANIES (Independent entities) - 5 ITEMS
@@ -368,30 +457,43 @@ INSERT INTO cmeetingtype (name, description) VALUES
 ('Project Kickoff', 'Project initiation meetings with goal setting');
 
 -- Insert essential meetings with realistic scheduling - 12 MEETINGS covering key projects
-INSERT INTO cmeeting (name, description, meeting_date, end_date, project_id, cmeetingtype_id) VALUES 
+INSERT INTO cmeeting (name, description, meeting_date, end_date, project_id, cmeetingtype_id, 
+                      location, agenda, meeting_status_id, responsible_id, minutes, linked_element) VALUES 
 -- E-Commerce Platform project meetings (project_id = 1)
-('E-Commerce Sprint Planning #1', 'Planning session for first sprint focusing on user authentication and product catalog', '2025-01-20 09:00:00', '2025-01-20 11:00:00', 1, 2),
-('Daily Standup - E-Commerce Team', 'Daily team sync for E-Commerce platform development', '2025-01-21 09:00:00', '2025-01-21 09:15:00', 1, 1),
-('Architecture Review - Microservices Design', 'Review of microservices architecture for E-Commerce platform', '2025-01-22 14:00:00', '2025-01-22 16:00:00', 1, 4),
+('E-Commerce Sprint Planning #1', 'Planning session for first sprint focusing on user authentication and product catalog', '2025-01-20 09:00:00', '2025-01-20 11:00:00', 1, 2, 
+ 'Conference Room A', 'Review user stories, estimate tasks, plan sprint 1 deliverables', 4, 2, 'Sprint 1 committed with 25 story points. Focus on authentication module.', 'JIRA-123'),
+('Daily Standup - E-Commerce Team', 'Daily team sync for E-Commerce platform development', '2025-01-21 09:00:00', '2025-01-21 09:15:00', 1, 1,
+ 'Team Area', 'Daily progress updates, blockers discussion', 3, 4, NULL, NULL),
+('Architecture Review - Microservices Design', 'Review of microservices architecture for E-Commerce platform', '2025-01-22 14:00:00', '2025-01-22 16:00:00', 1, 4,
+ 'Architecture Board Room', 'Review microservices design, API contracts, data flow', 2, 3, NULL, 'ARCH-DOC-001'),
 
 -- Customer Analytics project meetings (project_id = 2)
-('Analytics Project Kickoff', 'Initial planning and goal setting for customer analytics dashboard', '2025-01-18 10:00:00', '2025-01-18 12:00:00', 2, 6),
-('Stakeholder Demo - Analytics Prototype', 'Demonstration of analytics dashboard prototype to business users', '2025-02-01 11:00:00', '2025-02-01 12:00:00', 2, 5),
+('Analytics Project Kickoff', 'Initial planning and goal setting for customer analytics dashboard', '2025-01-18 10:00:00', '2025-01-18 12:00:00', 2, 6,
+ 'Executive Meeting Room', 'Project scope, requirements gathering, team formation', 4, 3, 'Project approved with Q1 delivery target. Analytics team formed.', 'PRJ-ANALYTICS-001'),
+('Stakeholder Demo - Analytics Prototype', 'Demonstration of analytics dashboard prototype to business users', '2025-02-01 11:00:00', '2025-02-01 12:00:00', 2, 5,
+ 'Demo Lab', 'Prototype demonstration, stakeholder feedback collection', 2, 5, NULL, 'DEMO-PROTOTYPE-V1'),
 
 -- Mobile Banking project meetings (project_id = 3)
-('Mobile Banking Project Kickoff', 'Security and compliance planning for mobile banking features', '2025-01-19 14:00:00', '2025-01-19 16:00:00', 3, 6),
-('Banking Security Architecture Review', 'Security architecture review for mobile banking application', '2025-01-24 10:00:00', '2025-01-24 11:30:00', 3, 4),
+('Mobile Banking Project Kickoff', 'Security and compliance planning for mobile banking features', '2025-01-19 14:00:00', '2025-01-19 16:00:00', 3, 6,
+ 'Secure Conference Room', 'Security requirements, compliance planning, risk assessment', 4, 2, 'Security framework approved. PCI DSS compliance requirements documented.', 'SEC-COMPLIANCE-001'),
+('Banking Security Architecture Review', 'Security architecture review for mobile banking application', '2025-01-24 10:00:00', '2025-01-24 11:30:00', 3, 4,
+ 'Security Office', 'Security architecture validation, penetration testing plan', 2, 13, NULL, 'SEC-ARCH-REVIEW-001'),
 
 -- DevOps Infrastructure meetings (project_id = 4)
-('DevOps Strategy Session', 'Planning for infrastructure automation and CI/CD implementation', '2025-01-23 13:00:00', '2025-01-23 15:00:00', 4, 6),
-('Infrastructure Sprint Planning', 'Sprint planning for CI/CD pipeline implementation', '2025-01-26 09:00:00', '2025-01-26 10:30:00', 4, 2),
+('DevOps Strategy Session', 'Planning for infrastructure automation and CI/CD implementation', '2025-01-23 13:00:00', '2025-01-23 15:00:00', 4, 6,
+ 'Infrastructure Lab', 'CI/CD pipeline strategy, automation roadmap planning', 4, 14, 'Jenkins pipeline approved. Docker containerization strategy defined.', 'DEVOPS-STRATEGY-001'),
+('Infrastructure Sprint Planning', 'Sprint planning for CI/CD pipeline implementation', '2025-01-26 09:00:00', '2025-01-26 10:30:00', 4, 2,
+ 'DevOps War Room', 'Sprint planning for CI/CD implementation tasks', 2, 14, NULL, 'SPRINT-INFRA-001'),
 
 -- API Gateway project meetings (project_id = 5)
-('API Gateway Kickoff', 'Initial planning for centralized API gateway implementation', '2025-01-28 10:00:00', '2025-01-28 11:30:00', 5, 6),
-('Gateway Architecture Review', 'Technical architecture review for API gateway design', '2025-02-04 14:00:00', '2025-02-04 16:00:00', 5, 4),
+('API Gateway Kickoff', 'Initial planning for centralized API gateway implementation', '2025-01-28 10:00:00', '2025-01-28 11:30:00', 5, 6,
+ 'Technical Meeting Room', 'API gateway requirements, technology selection, architecture planning', 2, 2, NULL, 'API-GATEWAY-KICKOFF'),
+('Gateway Architecture Review', 'Technical architecture review for API gateway design', '2025-02-04 14:00:00', '2025-02-04 16:00:00', 5, 4,
+ 'Architecture Review Room', 'Gateway design review, scalability assessment, security validation', 1, 6, NULL, 'GATEWAY-ARCH-001'),
 
 -- Healthcare Data Integration meetings (project_id = 6)
-('Healthcare Project Kickoff', 'HIPAA compliance and healthcare integration planning', '2025-01-30 09:00:00', '2025-01-30 11:00:00', 6, 6);
+('Healthcare Project Kickoff', 'HIPAA compliance and healthcare integration planning', '2025-01-30 09:00:00', '2025-01-30 11:00:00', 6, 6,
+ 'HIPAA Compliant Room', 'HIPAA requirements review, data integration planning, compliance strategy', 2, 3, NULL, 'HEALTHCARE-KICKOFF-001');
 
 -- Insert meeting participants (many-to-many relationships) - Representative coverage
 INSERT INTO cmeeting_participants (meeting_id, user_id) VALUES 
@@ -424,6 +526,177 @@ INSERT INTO cmeeting_participants (meeting_id, user_id) VALUES
 
 -- Healthcare Project Kickoff (meeting_id=12): PM Sarah, Analyst Robert, QA Maria
 (12, 2), (12, 13), (12, 11);
+
+-- Insert meeting attendees (who actually attended) - subset of participants
+INSERT INTO cmeeting_attendees (meeting_id, user_id) VALUES 
+-- E-Commerce Sprint Planning (meeting_id=1): PM Sarah, Senior Dev Alex, Dev David
+(1, 2), (1, 4), (1, 7),
+-- Daily Standup E-Commerce (meeting_id=2): Same team (everyone attended)
+(2, 2), (2, 4), (2, 7), (2, 10),
+-- Architecture Review (meeting_id=3): PM Michael, Senior Devs Alex & Emma
+(3, 3), (3, 4), (3, 5),
+-- Analytics Kickoff (meeting_id=4): All participants attended
+(4, 3), (4, 5), (4, 13),
+-- DevOps Strategy (meeting_id=8): DevOps Jennifer, Senior Dev Alex
+(8, 14), (8, 4),
+-- Healthcare Project Kickoff (meeting_id=12): PM Sarah, Analyst Robert
+(12, 2), (12, 13);
+
+-- =====================================================================
+-- ORDER DATA (Depends on projects, users, and order lookup tables)
+-- =====================================================================
+
+-- Insert essential orders with realistic business scenarios - 12 ORDERS covering key projects
+INSERT INTO corder (
+    name, description, order_date, required_date, delivery_date,
+    provider_company_name, provider_contact_name, provider_email,
+    requestor_id, responsible_id, project_id, order_type_id, order_status_id, currency_id,
+    estimated_cost, actual_cost, order_number, delivery_address,
+    created_date, last_modified_date
+) VALUES 
+-- E-Commerce Platform project orders (project_id = 1)
+('AWS Cloud Infrastructure License', 'AWS cloud services for e-commerce platform hosting and scaling', '2025-01-15', '2025-02-01', NULL,
+ 'Amazon Web Services Inc.', 'AWS Support Team', 'support@aws.amazon.com',
+ 2, 2, 1, 3, 2, 1, 5000.00, NULL, 'AWS-2025-001', '456 Innovation Plaza, Cloud Services Dept',
+ '2025-01-15 10:00:00', '2025-01-15 10:00:00'),
+
+('React UI Component Library', 'Premium React component library for e-commerce frontend development', '2025-01-18', '2025-01-25', '2025-01-24',
+ 'Material-UI Technologies', 'John Smith', 'john.smith@mui.com',
+ 4, 2, 1, 3, 5, 1, 2400.00, 2400.00, 'MUI-2025-001', '456 Innovation Plaza, Development Team',
+ '2025-01-18 14:00:00', '2025-01-24 16:00:00'),
+
+-- Customer Analytics project orders (project_id = 2)
+('Analytics Server Hardware', 'High-performance servers for real-time analytics processing', '2025-01-16', '2025-02-15', NULL,
+ 'Dell Technologies Inc.', 'Sarah Johnson', 'sarah.johnson@dell.com',
+ 3, 3, 2, 4, 3, 1, 15000.00, NULL, 'DELL-2025-HW-001', '789 Future Tech Center, Server Room',
+ '2025-01-16 11:00:00', '2025-01-20 09:00:00'),
+
+('Data Visualization Consulting', 'Expert consulting for advanced data visualization and dashboard design', '2025-01-20', '2025-03-01', NULL,
+ 'Tableau Professional Services', 'Michael Brown', 'michael.brown@tableau.com',
+ 5, 3, 2, 2, 4, 1, 8500.00, NULL, 'TAB-2025-CONS-001', 'Remote consulting services',
+ '2025-01-20 15:30:00', '2025-01-20 15:30:00'),
+
+-- Mobile Banking project orders (project_id = 3)
+('Security Audit and Penetration Testing', 'Comprehensive security audit for mobile banking application', '2025-01-17', '2025-02-28', NULL,
+ 'CyberSec Solutions Ltd.', 'Alex Rodriguez', 'alex.rodriguez@cybersec.com',
+ 2, 4, 3, 2, 2, 1, 12000.00, NULL, 'CYBER-2025-AUDIT-001', 'Remote security testing',
+ '2025-01-17 13:00:00', '2025-01-22 10:00:00'),
+
+('Mobile Device Testing Lab', 'Mobile device testing laboratory rental for banking app compatibility testing', '2025-01-22', '2025-02-10', NULL,
+ 'MobileTest Labs Inc.', 'Jennifer Davis', 'jennifer.davis@mobiletest.com',
+ 10, 2, 3, 2, 3, 1, 3500.00, NULL, 'MTL-2025-LAB-001', '321 Cloud Street, Testing Facility',
+ '2025-01-22 16:00:00', '2025-01-22 16:00:00'),
+
+-- DevOps Infrastructure project orders (project_id = 4)
+('Docker Enterprise License', 'Docker Enterprise licensing for containerization infrastructure', '2025-01-19', '2025-02-05', '2025-02-03',
+ 'Docker Inc.', 'Robert Wilson', 'robert.wilson@docker.com',
+ 14, 14, 4, 3, 5, 1, 6000.00, 6000.00, 'DOCKER-2025-ENT-001', '654 Agile Avenue, DevOps Team',
+ '2025-01-19 12:00:00', '2025-02-03 14:00:00'),
+
+('CI/CD Pipeline Consulting', 'Expert consulting for automated CI/CD pipeline implementation', '2025-01-25', '2025-03-15', NULL,
+ 'Jenkins Professional Services', 'Lisa Martinez', 'lisa.martinez@jenkins.io',
+ 14, 6, 4, 2, 4, 1, 9500.00, NULL, 'JENKINS-2025-CONS-001', 'Remote consulting and training',
+ '2025-01-25 10:30:00', '2025-01-25 10:30:00'),
+
+-- API Gateway project orders (project_id = 5)
+('API Management Platform License', 'Enterprise API management platform for centralized gateway', '2025-01-21', '2025-02-20', NULL,
+ 'Kong Inc.', 'David Chen', 'david.chen@konghq.com',
+ 2, 6, 5, 3, 2, 1, 8000.00, NULL, 'KONG-2025-API-001', '987 Startup Boulevard, API Team',
+ '2025-01-21 09:00:00', '2025-01-28 11:00:00'),
+
+('Load Balancer Hardware', 'High-availability load balancers for API gateway infrastructure', '2025-01-28', '2025-02-25', NULL,
+ 'F5 Networks Inc.', 'Angela Thompson', 'angela.thompson@f5.com',
+ 6, 2, 5, 4, 1, 1, 18000.00, NULL, 'F5-2025-LB-001', '987 Startup Boulevard, Network Infrastructure',
+ '2025-01-28 14:00:00', '2025-01-28 14:00:00'),
+
+-- Healthcare Data Integration project orders (project_id = 6)
+('HIPAA Compliance Consulting', 'Healthcare compliance consulting for HIPAA-compliant data integration', '2025-01-23', '2025-04-01', NULL,
+ 'Healthcare Compliance Experts', 'Dr. Patricia Lee', 'patricia.lee@healthcompliance.com',
+ 2, 13, 6, 2, 3, 1, 15000.00, NULL, 'HCE-2025-HIPAA-001', 'Remote compliance consulting',
+ '2025-01-23 11:30:00', '2025-01-30 09:00:00'),
+
+('Medical Data Security Software', 'Enterprise medical data encryption and security software licensing', '2025-01-30', '2025-02-28', NULL,
+ 'MedSec Technologies', 'Thomas Anderson', 'thomas.anderson@medsec.com',
+ 13, 2, 6, 3, 2, 1, 11500.00, NULL, 'MEDSEC-2025-LIC-001', '456 Innovation Plaza, Security Infrastructure',
+ '2025-01-30 15:00:00', '2025-01-30 15:00:00');
+
+-- Insert order approvals for representative orders - 18 APPROVALS covering different scenarios
+INSERT INTO corderapproval (
+    name, description, order_id, approver_id, approval_status_id,
+    approval_date, comments, approval_level,
+    created_date, last_modified_date
+) VALUES 
+-- AWS Cloud Infrastructure License (order_id = 1) - Multi-level approval
+('Technical Approval - AWS Infrastructure', 'Technical review of AWS cloud infrastructure requirements', 1, 4, 2, 
+ '2025-01-16 14:00:00', 'AWS services align with our technical architecture requirements', 1,
+ '2025-01-15 10:30:00', '2025-01-16 14:00:00'),
+('Budget Approval - AWS Infrastructure', 'Budget approval for AWS cloud services', 1, 1, 2,
+ '2025-01-17 10:00:00', 'Budget approved for annual AWS subscription', 2,
+ '2025-01-15 10:30:00', '2025-01-17 10:00:00'),
+
+-- React UI Component Library (order_id = 2) - Single approval (completed order)
+('Technical Approval - React Components', 'Technical approval for React UI component library', 2, 5, 2,
+ '2025-01-19 09:00:00', 'Material-UI components will accelerate frontend development', 1,
+ '2025-01-18 14:30:00', '2025-01-19 09:00:00'),
+
+-- Analytics Server Hardware (order_id = 3) - Multi-level approval in progress
+('Technical Approval - Analytics Hardware', 'Technical specifications review for analytics servers', 3, 5, 2,
+ '2025-01-18 11:00:00', 'Dell PowerEdge servers meet our performance requirements for real-time analytics', 1,
+ '2025-01-16 11:30:00', '2025-01-18 11:00:00'),
+('Budget Approval - Analytics Hardware', 'Budget review for server hardware purchase', 3, 1, 4,
+ NULL, NULL, 2,
+ '2025-01-16 11:30:00', '2025-01-18 11:00:00'),
+
+-- Data Visualization Consulting (order_id = 4) - Under review
+('Service Approval - Tableau Consulting', 'Approval for data visualization consulting services', 4, 13, 4,
+ NULL, NULL, 1,
+ '2025-01-20 16:00:00', '2025-01-20 16:00:00'),
+
+-- Security Audit (order_id = 5) - Approved
+('Security Approval - Penetration Testing', 'Security team approval for penetration testing services', 5, 1, 2,
+ '2025-01-23 14:00:00', 'CyberSec Solutions is an approved security vendor with excellent track record', 1,
+ '2025-01-17 13:30:00', '2025-01-23 14:00:00'),
+
+-- Mobile Testing Lab (order_id = 6) - Approved
+('Technical Approval - Mobile Testing', 'Technical approval for mobile device testing laboratory', 6, 10, 2,
+ '2025-01-23 10:00:00', 'Testing lab provides comprehensive device coverage for mobile banking app', 1,
+ '2025-01-22 16:30:00', '2025-01-23 10:00:00'),
+
+-- Docker License (order_id = 7) - Completed with approval
+('Technical Approval - Docker Enterprise', 'Technical approval for Docker Enterprise licensing', 7, 14, 2,
+ '2025-01-20 15:00:00', 'Docker Enterprise is essential for our containerization strategy', 1,
+ '2025-01-19 12:30:00', '2025-01-20 15:00:00'),
+
+-- CI/CD Consulting (order_id = 8) - Under review
+('Service Approval - Jenkins Consulting', 'Approval for CI/CD pipeline consulting services', 8, 6, 4,
+ NULL, NULL, 1,
+ '2025-01-25 11:00:00', '2025-01-25 11:00:00'),
+
+-- API Management License (order_id = 9) - Multi-level approval
+('Technical Approval - API Management', 'Technical review of Kong API management platform', 9, 6, 2,
+ '2025-01-29 13:00:00', 'Kong Enterprise provides all required API gateway features', 1,
+ '2025-01-21 09:30:00', '2025-01-29 13:00:00'),
+('Budget Approval - API Management', 'Budget approval for API management platform', 9, 1, 1,
+ NULL, NULL, 2,
+ '2025-01-21 09:30:00', '2025-01-29 13:00:00'),
+
+-- Load Balancer Hardware (order_id = 10) - Pending
+('Technical Approval - Load Balancers', 'Technical review of F5 load balancer specifications', 10, 14, 1,
+ NULL, NULL, 1,
+ '2025-01-28 14:30:00', '2025-01-28 14:30:00'),
+
+-- HIPAA Compliance Consulting (order_id = 11) - Approved
+('Compliance Approval - HIPAA Consulting', 'Compliance team approval for HIPAA consulting services', 11, 13, 2,
+ '2025-01-31 16:00:00', 'Healthcare Compliance Experts have excellent HIPAA expertise and track record', 1,
+ '2025-01-23 12:00:00', '2025-01-31 16:00:00'),
+
+-- Medical Security Software (order_id = 12) - Multi-level approval
+('Security Approval - Medical Data Encryption', 'Security approval for medical data encryption software', 12, 1, 2,
+ '2025-01-31 11:00:00', 'MedSec Technologies meets all healthcare security requirements', 1,
+ '2025-01-30 15:30:00', '2025-01-31 11:00:00'),
+('Budget Approval - Medical Security Software', 'Budget approval for medical data security software', 12, 1, 4,
+ NULL, NULL, 2,
+ '2025-01-30 15:30:00', '2025-01-31 11:00:00');
 
 -- =====================================================================
 -- REPRESENTATIVE ACTIVITY DATA (Depends on all above entities)

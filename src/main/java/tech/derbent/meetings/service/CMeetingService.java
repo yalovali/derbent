@@ -45,6 +45,19 @@ public class CMeetingService extends CAbstractNamedEntityService<CMeeting> {
 	}
 
 	/**
+	 * Finds meetings where the specified user is an attendee.
+	 * @param user the user to search for
+	 * @return list of meetings where the user is an attendee
+	 */
+	public List<CMeeting> findByAttendee(final CUser user) {
+
+		if ((user == null) || (user.getId() == null)) {
+			return List.of();
+		}
+		return ((CMeetingRepository) repository).findByAttendeeId(user.getId());
+	}
+
+	/**
 	 * Finds meetings by project.
 	 */
 	public List<CMeeting> findByProject(final CProject project) {
@@ -52,17 +65,16 @@ public class CMeetingService extends CAbstractNamedEntityService<CMeeting> {
 	}
 
 	/**
-	 * Overrides the base get method to eagerly load CMeetingType and participants
-	 * relationships. This prevents LazyInitializationException when the entity is used in
-	 * UI contexts.
+	 * Overrides the base get method to eagerly load all relationships
+	 * to prevent LazyInitializationException when the entity is used in UI contexts.
 	 * @param id the meeting ID
-	 * @return optional CMeeting with loaded meetingType and participants
+	 * @return optional CMeeting with loaded relationships
 	 */
 	@Override
 	@Transactional (readOnly = true)
 	public Optional<CMeeting> get(final Long id) {
 		LOGGER.debug(
-			"Getting CMeeting with ID {} (overridden to eagerly load meetingType and participants)",
+			"Getting CMeeting with ID {} (overridden to eagerly load all relationships)",
 			id);
 		final Optional<CMeeting> entity =
 			((CMeetingRepository) repository).findByIdWithMeetingTypeAndParticipants(id);
@@ -73,16 +85,15 @@ public class CMeetingService extends CAbstractNamedEntityService<CMeeting> {
 	}
 
 	/**
-	 * Gets a meeting by ID with eagerly loaded CMeetingType and participants
-	 * relationship. This method should be used in UI contexts to prevent
-	 * LazyInitializationException.
+	 * Gets a meeting by ID with eagerly loaded relationships.
+	 * This method should be used in UI contexts to prevent LazyInitializationException.
 	 * @param id the meeting ID
-	 * @return optional CMeeting with loaded meetingType and participants
+	 * @return optional CMeeting with loaded relationships
 	 */
 	@Transactional (readOnly = true)
 	public Optional<CMeeting> getWithMeetingTypeAndParticipants(final Long id) {
 		LOGGER.debug(
-			"Getting CMeeting with ID {} and eagerly loading CMeetingType and participants",
+			"Getting CMeeting with ID {} and eagerly loading all relationships",
 			id);
 		return ((CMeetingRepository) repository)
 			.findByIdWithMeetingTypeAndParticipants(id);
@@ -90,7 +101,8 @@ public class CMeetingService extends CAbstractNamedEntityService<CMeeting> {
 
 	/**
 	 * Initializes lazy fields for CMeeting entity to prevent LazyInitializationException.
-	 * Specifically handles the lazy-loaded CMeetingType and participants relationships.
+	 * Specifically handles the lazy-loaded relationships including meetingType, participants,
+	 * attendees, status, responsible, and relatedActivity.
 	 * @param entity the CMeeting entity to initialize
 	 */
 	@Override
@@ -106,6 +118,10 @@ public class CMeetingService extends CAbstractNamedEntityService<CMeeting> {
 			super.initializeLazyFields(entity);
 			initializeLazyRelationship(entity.getMeetingType());
 			initializeLazyRelationship(entity.getParticipants());
+			initializeLazyRelationship(entity.getAttendees());
+			initializeLazyRelationship(entity.getStatus());
+			initializeLazyRelationship(entity.getResponsible());
+			initializeLazyRelationship(entity.getRelatedActivity());
 		} catch (final Exception e) {
 			LOGGER.warn("Error initializing lazy fields for CMeeting with ID: {}",
 				entity.getId(), e);
