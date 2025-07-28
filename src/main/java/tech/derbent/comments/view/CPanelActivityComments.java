@@ -252,9 +252,16 @@ public class CPanelActivityComments extends CPanelActivityBase {
 		addCommentButton.setIcon(addIcon);
 		addCommentButton.setEnabled(false); // Disabled until text is entered
 		// Enable/disable button based on text area content
+		// Use value change listener for immediate response
 		newCommentArea.addValueChangeListener(event -> {
 			final String text = event.getValue();
 			addCommentButton.setEnabled((text != null) && !text.trim().isEmpty());
+		});
+		
+		// Additional listener for immediate response during typing
+		newCommentArea.getElement().addEventListener("input", e -> {
+			final String currentValue = newCommentArea.getValue();
+			addCommentButton.setEnabled((currentValue != null) && !currentValue.trim().isEmpty());
 		});
 	}
 
