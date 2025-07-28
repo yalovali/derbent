@@ -89,6 +89,10 @@ public class CSystemSettingsView extends CAbstractPage {
 		final var saveButton = new CButton("Save Settings");
 		saveButton.addClassName("primary");
 		saveButton.addClickListener(event -> saveSettings());
+		// Cancel button - to reject changes and revert to original state
+		final var cancelButton = new CButton("Cancel");
+		cancelButton.addClassName("tertiary");
+		cancelButton.addClickListener(event -> cancelChanges());
 		// Reload Settings button
 		final var reloadButton = new CButton("Reload Settings");
 		reloadButton.addClassName("tertiary");
@@ -101,7 +105,7 @@ public class CSystemSettingsView extends CAbstractPage {
 		final var testButton = new CButton("Test Configuration");
 		testButton.addClassName("success");
 		testButton.addClickListener(event -> testConfiguration());
-		buttonLayout.add(saveButton, reloadButton, resetButton, testButton);
+		buttonLayout.add(saveButton, cancelButton, reloadButton, resetButton, testButton);
 		return buttonLayout;
 	}
 
@@ -264,6 +268,38 @@ public class CSystemSettingsView extends CAbstractPage {
 			LOGGER.error("Error resetting system settings to defaults", e);
 			Notification.show("Error resetting settings: " + e.getMessage(), 5000,
 				Notification.Position.MIDDLE);
+		}
+	}
+
+	/**
+	 * Cancels any unsaved changes and reverts the form to the last saved state.
+	 * This method provides users with a way to reject changes they made without saving.
+	 */
+	private void cancelChanges() {
+		LOGGER.debug("cancelChanges called for CSystemSettingsView");
+		
+		if (currentSettings == null) {
+			LOGGER.warn("No current settings available to revert to");
+			new CWarningDialog("No settings loaded to revert to.").open();
+			return;
+		}
+		
+		try {
+			// Reload the current settings from the database to revert any unsaved changes
+			final var freshSettings = systemSettingsService.getOrCreateSystemSettings();
+			currentSettings = freshSettings;
+			
+			// Refresh the form with the original values
+			binder.readBean(currentSettings);
+			
+			// Show confirmation that changes were cancelled
+			Notification.show("Changes cancelled - form reverted to saved state", 3000,
+				Notification.Position.TOP_CENTER);
+			
+			LOGGER.info("Changes cancelled successfully, form reverted to saved state");
+		} catch (final Exception e) {
+			LOGGER.error("Error cancelling changes and reverting form", e);
+			new CWarningDialog("Error cancelling changes: " + e.getMessage()).open();
 		}
 	}
 

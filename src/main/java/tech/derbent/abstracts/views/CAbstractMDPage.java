@@ -321,7 +321,10 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 				populateForm(newEntityInstance);
 				LOGGER.debug("New entity created and bound to form: {}",
 					newEntityInstance.getClass().getSimpleName());
-				// Step 3: Navigate to the base view URL to indicate "new" mode (safely)
+				// Step 3: Reset ComboBoxes to their first item instead of leaving them empty
+				tech.derbent.abstracts.annotations.CEntityFormBuilder.resetComboBoxesToFirstItem(getBaseDetailsLayout());
+				LOGGER.debug("Reset ComboBoxes to first item for new entity form");
+				// Step 4: Navigate to the base view URL to indicate "new" mode (safely)
 				safeNavigateToClass();
 			} catch (final Exception exception) {
 				LOGGER.error("Error creating new entity", exception);

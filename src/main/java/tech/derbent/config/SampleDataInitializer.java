@@ -18,26 +18,10 @@ import tech.derbent.users.service.CUserTypeService;
 @Component
 public class SampleDataInitializer implements ApplicationRunner {
 
-	private final CProjectService projectService;
-
-	private final CUserService userService;
-
-	private final CActivityService activityService;
-
-	private final CUserTypeService userTypeService;
-
-	private final CActivityTypeService activityTypeService;
-
 	public SampleDataInitializer(final CProjectService projectService,
 		final CUserService userService, final CActivityService activityService,
 		final CUserTypeService userTypeService,
-		final CActivityTypeService activityTypeService) {
-		this.projectService = projectService;
-		this.userService = userService;
-		this.activityService = activityService;
-		this.userTypeService = userTypeService;
-		this.activityTypeService = activityTypeService;
-	}
+		final CActivityTypeService activityTypeService) {}
 
 	@Override
 	@Transactional

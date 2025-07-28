@@ -12,10 +12,10 @@ Check [project_design_description.md](./project_design_description.md) file for 
 - [3. Java Checks Before Submission](#3-java-checks-before-submission)
 - [4. Pull Request Checklist](#4-pull-request-checklist)
 - [5. Copilot Review Protocol](#5-copilot-review-protocol)
-- [6. Coding Styles & Best Practices](#6-coding-styles--best-practices)
+- [6. Coding Styles & Best Practices]
 - [7. CSS Guidelines](#7-css-guidelines)
 - [8. Database Rules](#8-database-rules)
-- [9. Documentation & Modularity](#9-documentation--modularity)
+- [9. Documentation & Modularity]
 - [10. Strict Prohibitions](#10-strict-prohibitions)
 - [11. Additional Best Practices](#11-additional-best-practices)
 - [Related Documentation](#related-documentation)

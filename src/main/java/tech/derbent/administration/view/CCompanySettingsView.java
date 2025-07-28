@@ -7,7 +7,6 @@ import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
@@ -103,10 +102,15 @@ public class CCompanySettingsView extends CAbstractMDPage<CCompanySettings> {
 			// Configure grid columns for company settings
 			grid.addReferenceColumn(settings -> settings.getCompany() != null
 				? settings.getCompany().getName() : "", "Company");
-			grid.addShortTextColumn(CCompanySettings::getDefaultProjectStatus, "Default Project Status", "defaultProjectStatus");
-			grid.addShortTextColumn(CCompanySettings::getCompanyTimezone, "Timezone", "companyTimezone");
-			grid.addShortTextColumn(settings -> settings.getWorkingHoursPerDay() + " hrs/day", "Working Hours", null);
-			grid.addBooleanColumn(CCompanySettings::isEmailNotificationsEnabled, "Email Notifications", "Enabled", "Disabled");
+			grid.addShortTextColumn(CCompanySettings::getDefaultProjectStatus,
+				"Default Project Status", "defaultProjectStatus");
+			grid.addShortTextColumn(CCompanySettings::getCompanyTimezone, "Timezone",
+				"companyTimezone");
+			grid.addShortTextColumn(
+				settings -> settings.getWorkingHoursPerDay() + " hrs/day",
+				"Working Hours", null);
+			grid.addBooleanColumn(CCompanySettings::isEmailNotificationsEnabled,
+				"Email Notifications", "Enabled", "Disabled");
 			LOGGER.debug("Grid configured successfully for CCompanySettingsView");
 		} catch (final Exception e) {
 			LOGGER.error("Error configuring grid for CCompanySettingsView", e);

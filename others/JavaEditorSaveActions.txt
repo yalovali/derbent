@@ -15,3 +15,22 @@ Unnecassary Code
 	remove unused imports
 	
 
+Convert control statement bodies to block
+Convert to enhanced 'for' loops
+Convert to enhanced 'for' loops
+Add final modifier to private fields
+Add final modifier to method parameters
+Add final modifier to local variables
+Combine nested 'if' statement in 'else' block to 'else if'
+Put expressions in parentheses
+Extract increment/decrement from statement
+Pull up assignment
+Use uppercase for long literal suffix
+Remove unused imports
+Add missing '@Override' annotations
+Add missing '@Override' annotations to implementations of interface methods
+Add missing '@Deprecated' annotations
+Remove unnecessary casts
+Sort members excluding fields, enum constants, and initializers
+Remove trailing white spaces on all lines
+Factorize operands
