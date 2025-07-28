@@ -2,6 +2,9 @@ package tech.derbent.config;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +19,8 @@ import tech.derbent.activities.service.CActivityTypeService;
 import tech.derbent.comments.service.CCommentService;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
+import tech.derbent.meetings.domain.CMeeting;
+import tech.derbent.meetings.service.CMeetingService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
@@ -63,11 +68,14 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 	private final CCommentService commentService;
 
+	private final CMeetingService meetingService;
+
 	public CSampleDataInitializer(final CProjectService projectService,
 		final CUserService userService, final CActivityService activityService,
 		final CUserTypeService userTypeService,
 		final CActivityTypeService activityTypeService,
-		final CCompanyService companyService, final CCommentService commentService) {
+		final CCompanyService companyService, final CCommentService commentService,
+		final CMeetingService meetingService) {
 		LOGGER
 			.info("CSampleDataInitializer constructor called with service dependencies");
 		this.projectService = projectService;
@@ -77,6 +85,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		this.activityTypeService = activityTypeService;
 		this.companyService = companyService;
 		this.commentService = commentService;
+		this.meetingService = meetingService;
 	}
 
 	/**
@@ -442,6 +451,50 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	}
 
 	/**
+	 * Creates sample project meeting using auxiliary service methods.
+	 * Demonstrates the use of auxiliary meeting service methods.
+	 */
+	private void createSampleProjectMeeting() {
+		LOGGER.info("createSampleProjectMeeting called - creating sample project meeting");
+		final CProject project = findProjectByName("Digital Transformation Initiative");
+
+		if (project == null) {
+			LOGGER.warn("Project 'Digital Transformation Initiative' not found, skipping meeting creation");
+			return;
+		}
+
+		// Create the meeting using new auxiliary methods
+		final CMeeting meeting = new CMeeting("Weekly Project Status Meeting", project);
+
+		// Set meeting details using auxiliary method
+		meetingService.setMeetingDetails(meeting, null, 
+			LocalDateTime.now().plusDays(1).withHour(14).withMinute(0), 
+			LocalDateTime.now().plusDays(1).withHour(15).withMinute(0), 
+			"Conference Room A");
+
+		// Set meeting content using auxiliary method
+		final CUser responsible = findUserByLogin("jsmith");
+		meetingService.setMeetingContent(meeting, 
+			"Weekly status update on project progress, blockers discussion, and next steps planning",
+			null, responsible);
+
+		// Set participants using auxiliary method
+		final Set<CUser> participants = new HashSet<>();
+		participants.add(findUserByLogin("admin"));
+		participants.add(findUserByLogin("jsmith"));
+		participants.add(findUserByLogin("bwilson"));
+		participants.add(findUserByLogin("mjohnson"));
+		meetingService.setParticipants(meeting, participants);
+
+		// Set meeting status using auxiliary method
+		meetingService.setMeetingStatus(meeting, null, 
+			"Meeting agenda prepared, participants notified", 
+			"Project management system");
+
+		LOGGER.info("Sample project meeting created successfully using auxiliary methods");
+	}
+
+	/**
 	 * Helper method to find company by name.
 	 * @param name the company name to search for
 	 * @return the CCompany entity or null if not found
@@ -505,6 +558,21 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		} catch (final Exception e) {
 			LOGGER.error("Error creating sample activities", e);
 			throw new RuntimeException("Failed to initialize activities", e);
+		}
+	}
+
+	/**
+	 * Initializes sample meetings with participants and content.
+	 */
+	private void initializeMeetings() {
+		LOGGER.info("initializeMeetings called - creating sample meetings");
+
+		try {
+			createSampleProjectMeeting();
+			LOGGER.info("Successfully created sample meetings");
+		} catch (final Exception e) {
+			LOGGER.error("Error creating sample meetings", e);
+			throw new RuntimeException("Failed to initialize meetings", e);
 		}
 	}
 
@@ -626,6 +694,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			initializeProjects();
 			initializeActivityTypes();
 			initializeActivities();
+			initializeMeetings();
 			LOGGER.info("Sample data initialization completed successfully");
 		} catch (final Exception e) {
 			LOGGER.error("Error loading sample data", e);

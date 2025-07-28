@@ -445,4 +445,37 @@ public class CActivityService extends CAbstractNamedEntityService<CActivity> {
 
 		return save(activity);
 	}
+
+	/**
+	 * Auxiliary method to set comprehensive activity information in one call.
+	 * This demonstrates how auxiliary methods can be combined for complex setup scenarios.
+	 * @param activity the activity to configure
+	 * @param activityType the activity type
+	 * @param description activity description
+	 * @param assignedTo assigned user
+	 * @param estimatedHours estimated time
+	 * @param startDate start date
+	 * @param dueDate due date
+	 * @return the fully configured activity
+	 */
+	@Transactional
+	public CActivity setFullActivityInfo(final CActivity activity, final CActivityType activityType,
+		final String description, final CUser assignedTo, final BigDecimal estimatedHours,
+		final LocalDate startDate, final LocalDate dueDate) {
+		LOGGER.info("setFullActivityInfo called for comprehensive activity setup: {}",
+			activity != null ? activity.getName() : "null");
+
+		if (activity == null) {
+			LOGGER.warn("Activity is null, cannot set full activity info");
+			return null;
+		}
+
+		// Use other auxiliary methods for comprehensive setup
+		setActivityType(activity, activityType, description);
+		setAssignedUsers(activity, assignedTo, null);
+		setTimeTracking(activity, estimatedHours, null, null);
+		setDateInfo(activity, startDate, dueDate, null);
+
+		return activity;
+	}
 }
