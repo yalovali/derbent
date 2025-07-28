@@ -37,6 +37,25 @@ public class CDecisionService extends CAbstractNamedEntityService<CDecision> {
     }
 
     /**
+     * Override get() method to eagerly load relationships and prevent LazyInitializationException.
+     * Following the comprehensive lazy loading fix pattern from the guidelines.
+     * 
+     * @param id the decision ID
+     * @return optional CDecision with all relationships loaded
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<CDecision> get(final Long id) {
+        LOGGER.info("get called with id: {} (overridden to eagerly load relationships)", id);
+        if (id == null) {
+            return Optional.empty();
+        }
+        final Optional<CDecision> entity = ((CDecisionRepository) repository).findByIdWithAllRelationships(id);
+        entity.ifPresent(this::initializeLazyFields);
+        return entity;
+    }
+
+    /**
      * Counts the number of decisions for a specific project.
      * @param project the project
      * @return count of decisions for the project
