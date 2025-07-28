@@ -54,7 +54,7 @@ class CCommentViewTest {
 
     @Test
     void testConstructorWithComment() {
-        // Test: Create CCommentView with comment entity
+        // Test: Create CCommentView with comment entity (read-only)
         final CCommentView commentView = new CCommentView(testComment);
         
         // Verify: Component was created successfully
@@ -62,6 +62,20 @@ class CCommentViewTest {
         assertEquals(testComment, commentView.getComment());
         assertTrue(commentView.getElement().hasAttribute("class"));
         assertTrue(commentView.getElement().getAttribute("class").contains("comment-view"));
+        assertFalse(commentView.isEditing());
+    }
+
+    @Test
+    void testConstructorWithCommentAndService() {
+        // Test: Create CCommentView with comment entity and service (editable)
+        final CCommentView commentView = new CCommentView(testComment, mockCommentService);
+        
+        // Verify: Component was created successfully
+        assertNotNull(commentView);
+        assertEquals(testComment, commentView.getComment());
+        assertTrue(commentView.getElement().hasAttribute("class"));
+        assertTrue(commentView.getElement().getAttribute("class").contains("comment-view"));
+        assertFalse(commentView.isEditing());
     }
 
     @Test
@@ -77,6 +91,7 @@ class CCommentViewTest {
         assertEquals(testComment, commentView.getComment());
         assertTrue(commentView.getElement().hasAttribute("class"));
         assertTrue(commentView.getElement().getAttribute("class").contains("comment-view"));
+        assertFalse(commentView.isEditing());
     }
 
     @Test
@@ -94,9 +109,10 @@ class CCommentViewTest {
     @Test
     void testConstructorWithNullCommentId() {
         // Test: Create CCommentView with null comment ID
+        final Long nullId = null;
         final IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> new CCommentView(null, mockCommentService)
+            () -> new CCommentView(nullId, mockCommentService)
         );
         
         // Verify: Appropriate exception is thrown
@@ -140,5 +156,16 @@ class CCommentViewTest {
         
         // Verify: Component still displays the same comment
         assertEquals(testComment, commentView.getComment());
+    }
+
+    @Test
+    void testIsEditingInitiallyFalse() {
+        // Test: Create comment views
+        final CCommentView readOnlyView = new CCommentView(testComment);
+        final CCommentView editableView = new CCommentView(testComment, mockCommentService);
+        
+        // Verify: Both views are not in editing mode initially
+        assertFalse(readOnlyView.isEditing());
+        assertFalse(editableView.isEditing());
     }
 }

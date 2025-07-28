@@ -195,7 +195,7 @@ public class CPanelActivityComments extends CAccordionDescription<CActivity> {
             } else {
                 // Add comments in chronological order
                 for (final CComment comment : comments) {
-                    final CCommentView commentView = new CCommentView(comment);
+                    final CCommentView commentView = new CCommentView(comment, commentService);
                     commentsContainer.add(commentView);
                 }
             }
