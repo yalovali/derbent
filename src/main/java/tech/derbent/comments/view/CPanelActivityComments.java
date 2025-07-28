@@ -62,7 +62,7 @@ public class CPanelActivityComments extends CPanelActivityBase {
 		final BeanValidationBinder<CActivity> binder,
 		final CActivityService activityService, final CCommentService commentService,
 		final SessionService sessionService) {
-		super("Comments", currentEntity, binder, activityService);
+		super("Comments", currentEntity, binder, activityService, sessionService);
 		LOGGER.info("CPanelActivityComments constructor called with activity: {}",
 			currentEntity);
 		this.commentService = commentService;

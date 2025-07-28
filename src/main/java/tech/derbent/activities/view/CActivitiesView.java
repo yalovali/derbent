@@ -47,25 +47,25 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 	protected void createDetailsLayout() {
 		CAccordionDescription<CActivity> panel;
 		panel = new CPanelActivityDescription(getCurrentEntity(), getBinder(),
-			(CActivityService) entityService);
+			(CActivityService) entityService, sessionService);
 		addAccordionPanel(panel);
 		panel = new CPanelActivityProject(getCurrentEntity(), getBinder(),
-			(CActivityService) entityService);
+			(CActivityService) entityService, sessionService);
 		addAccordionPanel(panel);
 		panel = new CPanelActivityResourceManagement(getCurrentEntity(), getBinder(),
-			(CActivityService) entityService);
+			(CActivityService) entityService, sessionService);
 		addAccordionPanel(panel);
 		panel = new CPanelActivityStatusPriority(getCurrentEntity(), getBinder(),
-			(CActivityService) entityService);
+			(CActivityService) entityService, sessionService);
 		addAccordionPanel(panel);
 		panel = new CPanelActivityTimeTracking(getCurrentEntity(), getBinder(),
-			(CActivityService) entityService);
+			(CActivityService) entityService, sessionService);
 		addAccordionPanel(panel);
 		panel = new CPanelActivityHierarchy(getCurrentEntity(), getBinder(),
-			(CActivityService) entityService);
+			(CActivityService) entityService, sessionService);
 		addAccordionPanel(panel);
 		panel = new CPanelActivityBudgetManagement(getCurrentEntity(), getBinder(),
-			(CActivityService) entityService);
+			(CActivityService) entityService, sessionService);
 		addAccordionPanel(panel);
 		
 		// Add comments panel

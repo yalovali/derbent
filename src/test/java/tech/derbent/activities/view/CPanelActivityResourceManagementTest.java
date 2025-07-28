@@ -13,6 +13,7 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
+import tech.derbent.session.service.SessionService;
 
 /**
  * Test class for CPanelActivityResourceManagement to ensure proper field grouping.
@@ -22,6 +23,9 @@ class CPanelActivityResourceManagementTest {
 
     @Mock
     private CActivityService activityService;
+    
+    @Mock
+    private SessionService sessionService;
 
     private CPanelActivityResourceManagement panel;
     private CActivity testActivity;
@@ -38,7 +42,7 @@ class CPanelActivityResourceManagementTest {
     @Test
     void testPanelCreation() {
         // When
-        panel = new CPanelActivityResourceManagement(testActivity, binder, activityService);
+        panel = new CPanelActivityResourceManagement(testActivity, binder, activityService, sessionService);
         
         // Then
         assertNotNull(panel, "Panel should be created successfully");
@@ -49,7 +53,7 @@ class CPanelActivityResourceManagementTest {
     @Test
     void testFieldGrouping() {
         // When
-        panel = new CPanelActivityResourceManagement(testActivity, binder, activityService);
+        panel = new CPanelActivityResourceManagement(testActivity, binder, activityService, sessionService);
         
         // Then
         assertNotNull(panel.getEntityFields(), "Entity fields should be set");
@@ -63,7 +67,7 @@ class CPanelActivityResourceManagementTest {
     @Test
     void testPopulateFormWithValidEntity() {
         // Given
-        panel = new CPanelActivityResourceManagement(testActivity, binder, activityService);
+        panel = new CPanelActivityResourceManagement(testActivity, binder, activityService, sessionService);
         final CActivity newActivity = new CActivity();
         newActivity.setName("New Activity");
         

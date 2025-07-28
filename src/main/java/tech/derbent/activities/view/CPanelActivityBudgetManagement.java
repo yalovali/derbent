@@ -6,6 +6,7 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
+import tech.derbent.session.service.SessionService;
 
 /**
  * CPanelActivityBudgetManagement - Panel for grouping budget management related fields
@@ -19,8 +20,8 @@ public class CPanelActivityBudgetManagement extends CPanelActivityBase {
 
 	public CPanelActivityBudgetManagement(final CActivity currentEntity,
 		final BeanValidationBinder<CActivity> beanValidationBinder,
-		final CActivityService entityService) {
-		super("Budget Management", currentEntity, beanValidationBinder, entityService);
+		final CActivityService entityService, final SessionService sessionService) {
+		super("Budget Management", currentEntity, beanValidationBinder, entityService, sessionService);
 	}
 
 	@Override
