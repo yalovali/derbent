@@ -490,11 +490,11 @@ INSERT INTO cdecisiontype (name, description, color, sort_order, requires_approv
 ('Operational', 'Day-to-day operational and process decisions', '#FF9800', 4, FALSE, TRUE);
 
 -- Insert essential decision statuses (workflow states for decisions) - 4 ITEMS
-INSERT INTO cdecisionstatus (name, description, color, is_final, sort_order) VALUES 
-('PENDING', 'Decision is pending review and discussion', '#9E9E9E', FALSE, 1),
-('UNDER_REVIEW', 'Decision is currently under review by stakeholders', '#2196F3', FALSE, 2),
-('APPROVED', 'Decision has been approved and documented', '#4CAF50', TRUE, 3),
-('REJECTED', 'Decision has been rejected', '#F44336', TRUE, 4);
+INSERT INTO cdecisionstatus (name, description, color, is_final, sort_order, allows_editing, requires_approval) VALUES 
+('PENDING', 'Decision is pending review and discussion', '#9E9E9E', FALSE, 1, TRUE, FALSE),
+('UNDER_REVIEW', 'Decision is currently under review by stakeholders', '#2196F3', FALSE, 2, TRUE, TRUE),
+('APPROVED', 'Decision has been approved and documented', '#4CAF50', TRUE, 3, FALSE, FALSE),
+('REJECTED', 'Decision has been rejected', '#F44336', TRUE, 4, FALSE, FALSE);
 
 
 -- Insert essential order types (categorizes different types of orders) - 4 ITEMS
