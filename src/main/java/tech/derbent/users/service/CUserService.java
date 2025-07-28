@@ -314,6 +314,92 @@ public class CUserService extends CAbstractService<CUser> implements UserDetails
 		LOGGER.info("Password updated successfully for user: {}", username);
 	}
 
+	// Auxiliary methods for sample data initialization and user setup
+
+	/**
+	 * Auxiliary method to set user profile information.
+	 * Following coding guidelines to use service layer methods instead of direct field setting.
+	 * @param user the user to configure
+	 * @param lastname the user's last name
+	 * @param phone the user's phone number
+	 * @param profilePictureData profile picture data
+	 * @return the configured user
+	 */
+	@Transactional
+	public CUser setUserProfile(final CUser user, final String lastname, final String phone, 
+		final byte[] profilePictureData) {
+		LOGGER.info("setUserProfile called for user: {} with lastname: {}, phone: {}",
+			user != null ? user.getName() : "null", lastname, phone);
+
+		if (user == null) {
+			LOGGER.warn("User is null, cannot set user profile");
+			return null;
+		}
+
+		if (lastname != null && !lastname.isEmpty()) {
+			user.setLastname(lastname);
+		}
+		if (phone != null && !phone.isEmpty()) {
+			user.setPhone(phone);
+		}
+		if (profilePictureData != null) {
+			user.setProfilePictureData(profilePictureData);
+		}
+
+		return save(user);
+	}
+
+	/**
+	 * Auxiliary method to set company association for a user.
+	 * @param user the user to configure
+	 * @param company the company to associate with the user
+	 * @return the configured user
+	 */
+	@Transactional
+	public CUser setCompanyAssociation(final CUser user, final tech.derbent.companies.domain.CCompany company) {
+		LOGGER.info("setCompanyAssociation called for user: {} with company: {}",
+			user != null ? user.getName() : "null",
+			company != null ? company.getName() : "null");
+
+		if (user == null) {
+			LOGGER.warn("User is null, cannot set company association");
+			return null;
+		}
+
+		if (company != null) {
+			user.setCompany(company);
+		}
+
+		return save(user);
+	}
+
+	/**
+	 * Auxiliary method to set user role and permissions.
+	 * @param user the user to configure
+	 * @param userRole the user's role enum
+	 * @param roles comma-separated role string for Spring Security
+	 * @return the configured user
+	 */
+	@Transactional
+	public CUser setUserRole(final CUser user, final tech.derbent.users.domain.CUserRole userRole, final String roles) {
+		LOGGER.info("setUserRole called for user: {} with role: {}, security roles: {}",
+			user != null ? user.getName() : "null", userRole, roles);
+
+		if (user == null) {
+			LOGGER.warn("User is null, cannot set user role");
+			return null;
+		}
+
+		if (userRole != null) {
+			user.setUserRole(userRole);
+		}
+		if (roles != null && !roles.isEmpty()) {
+			user.setRoles(roles);
+		}
+
+		return save(user);
+	}
+
 	@Override
 	protected void validateEntity(final CUser user) {
 		super.validateEntity(user);
