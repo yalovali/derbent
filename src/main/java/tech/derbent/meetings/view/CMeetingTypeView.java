@@ -16,7 +16,7 @@ import tech.derbent.meetings.service.CMeetingTypeService;
  * CMeetingTypeView - View for managing meeting types. Layer: View (MVC) Provides CRUD
  * operations for meeting types using the abstract master-detail pattern.
  */
-@Route ("meeting-types/:meeting_type_id?/:action?(edit)")
+@Route ("meeting-types/:meetingtype_id?/:action?(edit)")
 @PageTitle ("Meeting Types")
 @Menu (order = 10.2, icon = "vaadin:tags", title = "Types.Meeting Types")
 @PermitAll
@@ -24,7 +24,7 @@ public class CMeetingTypeView extends CAbstractMDPage<CMeetingType> {
 
 	private static final long serialVersionUID = 1L;
 
-	private final String ENTITY_ID_FIELD = "meeting_type_id";
+	private final String ENTITY_ID_FIELD = "meetingtype_id";
 
 	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "meeting-types/%s/edit";
 

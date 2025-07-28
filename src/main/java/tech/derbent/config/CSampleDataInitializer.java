@@ -458,7 +458,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * @return the CUser entity or null if not found
 	 */
 	private CUser findUserByLogin(final String login) {
-		LOGGER.info("findUserByLogin called with login: {}", login);
+		// LOGGER.info("findUserByLogin called with login: {}", login);
 
 		try {
 			return userService.findByLogin(login);
@@ -480,7 +480,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			createUITestingActivity();
 			createSystemArchitectureActivity();
 			createTechnicalDocumentationActivity();
-			LOGGER.info("Successfully created 4 comprehensive activity samples");
+			// LOGGER.info("Successfully created 4 comprehensive activity samples");
 		} catch (final Exception e) {
 			LOGGER.error("Error creating sample activities", e);
 			throw new RuntimeException("Failed to initialize activities", e);
@@ -505,7 +505,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 				"Technical writing and documentation");
 			activityTypeService.createEntity("Research",
 				"Research and analysis activities");
-			LOGGER.info("Successfully created 5 activity types");
+			// LOGGER.info("Successfully created 5 activity types");
 		} catch (final Exception e) {
 			LOGGER.error("Error creating activity types", e);
 			throw new RuntimeException("Failed to initialize activity types", e);
@@ -523,7 +523,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			createManufacturingCompany();
 			createConsultingCompany();
 			createHealthcareCompany();
-			LOGGER.info("Successfully created 4 sample companies");
+			// LOGGER.info("Successfully created 4 sample companies");
 		} catch (final Exception e) {
 			LOGGER.error("Error creating sample companies", e);
 			throw new RuntimeException("Failed to initialize companies", e);
@@ -541,7 +541,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			projectService.createEntity("Product Development Phase 2");
 			projectService.createEntity("Infrastructure Modernization");
 			projectService.createEntity("Customer Experience Enhancement");
-			LOGGER.info("Successfully created 4 sample projects");
+			// LOGGER.info("Successfully created 4 sample projects");
 		} catch (final Exception e) {
 			LOGGER.error("Error creating sample projects", e);
 			throw new RuntimeException("Failed to initialize projects", e);
@@ -559,8 +559,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			createAdminUser();
 			createProjectManagerUser();
 			createTeamMemberUsers();
-			LOGGER.info(
-				"Successfully created 5 sample users with different roles and companies");
 		} catch (final Exception e) {
 			LOGGER.error("Error creating sample users", e);
 			throw new RuntimeException("Failed to initialize users", e);
@@ -578,7 +576,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			userTypeService.createEntity("Manager");
 			userTypeService.createEntity("Executive");
 			userTypeService.createEntity("Contractor");
-			LOGGER.info("Successfully created 4 user types");
+			// LOGGER.info("Successfully created 4 user types");
 		} catch (final Exception e) {
 			LOGGER.error("Error creating user types", e);
 			throw new RuntimeException("Failed to initialize user types", e);
@@ -590,7 +588,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * @return true if database is empty, false otherwise
 	 */
 	private boolean isDatabaseEmpty() {
-		LOGGER.info("isDatabaseEmpty called - checking user count");
+		/// LOGGER.info("isDatabaseEmpty called - checking user count");
 		final long userCount = userService.count();
 		LOGGER.info("User count in database: {}", userCount);
 		return userCount == 0;
@@ -616,8 +614,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			// In production this would be proper image handling
 			final byte[] pictureBytes = "profile-picture".getBytes();
 			user.setProfilePictureData(pictureBytes);
-			LOGGER.info("Profile picture loaded successfully for user: {}",
-				user.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error loading profile picture for user: " + user.getName(), e);
 		}
