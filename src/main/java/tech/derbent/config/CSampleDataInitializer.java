@@ -80,53 +80,24 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	}
 
 	/**
-	 * Helper method to add company to a user safely.
-	 * @param user        the user to add company to
-	 * @param companyName the name of the company to find and assign
-	 */
-	private void addCompany(final CUser user, final String companyName) {
-		LOGGER.info("addCompany called for user: {} with company: {}",
-			user != null ? user.getName() : "null", companyName);
-
-		if (user == null) {
-			LOGGER.warn("User is null, cannot add company");
-			return;
-		}
-
-		if ((companyName == null) || companyName.isEmpty()) {
-			LOGGER.warn("Company name is null or empty for user: {}", user.getName());
-			return;
-		}
-
-		try {
-			final CCompany company = findCompanyByName(companyName);
-
-			if (company != null) {
-				user.setCompany(company);
-				LOGGER.info("Company {} added to user {}", companyName, user.getName());
-			}
-			else {
-				LOGGER.warn("Company {} not found for user {}", companyName,
-					user.getName());
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error adding company to user: " + user.getName(), e);
-		}
-	}
-
-	/**
 	 * Creates system administrator user.
 	 */
 	private void createAdminUser() {
 		LOGGER.info("createAdminUser called - creating system administrator");
 		final CUser admin = userService.createLoginUser("admin", STANDARD_PASSWORD,
 			"Administrator", "admin@system.com", "ADMIN,USER");
-		admin.setLastname("System");
-		admin.setPhone("+1-555-1001");
-		admin.setUserRole(CUserRole.ADMIN);
-		addCompany(admin, "TechNova Solutions");
-		loadProfilePicture(admin, PROFILE_PICTURE_USER);
-		userService.save(admin);
+		
+		// Set user profile using auxiliary method
+		final byte[] profilePictureBytes = "profile-picture".getBytes();
+		userService.setUserProfile(admin, "System", "+1-555-1001", profilePictureBytes);
+		
+		// Set user role using auxiliary method
+		userService.setUserRole(admin, CUserRole.ADMIN, "ADMIN,USER");
+		
+		// Set company association using auxiliary method
+		final CCompany company = findCompanyByName("TechNova Solutions");
+		userService.setCompanyAssociation(admin, company);
+		
 		LOGGER.info("Administrator user created successfully");
 	}
 
@@ -143,25 +114,28 @@ public class CSampleDataInitializer implements ApplicationRunner {
 				"Project 'Digital Transformation Initiative' not found, skipping backend activity");
 			return;
 		}
+
+		// Create the activity using new auxiliary methods
 		final CActivity backendDev = new CActivity("Backend API Development", project);
-		backendDev.setDescription(
+		
+		// Set activity type and description using auxiliary method
+		activityService.setActivityType(backendDev, null, 
 			"Develop REST API endpoints for user management and authentication");
+
+		// Set assigned users using auxiliary method
 		final CUser manager = findUserByLogin("jsmith");
-
-		if (manager != null) {
-			backendDev.setAssignedTo(manager);
-		}
 		final CUser admin = findUserByLogin("admin");
+		activityService.setAssignedUsers(backendDev, manager, admin);
 
-		if (admin != null) {
-			backendDev.setCreatedBy(admin);
-		}
-		backendDev.setEstimatedHours(new BigDecimal("40.00"));
-		backendDev.setActualHours(new BigDecimal("35.50"));
-		backendDev.setRemainingHours(new BigDecimal("4.50"));
-		backendDev.setStartDate(LocalDate.now().minusDays(10));
-		backendDev.setDueDate(LocalDate.now().plusDays(5));
-		activityService.save(backendDev);
+		// Set time tracking using auxiliary method
+		activityService.setTimeTracking(backendDev, 
+			new BigDecimal("40.00"), new BigDecimal("35.50"), new BigDecimal("4.50"));
+
+		// Set date information using auxiliary method
+		activityService.setDateInfo(backendDev, 
+			LocalDate.now().minusDays(10), LocalDate.now().plusDays(5), null);
+
+		// Create comments
 		commentService.createComment("Initial backend API development started",
 			backendDev, admin);
 		commentService.createComment(
@@ -229,12 +203,18 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		LOGGER.info("createProjectManagerUser called - creating project manager");
 		final CUser manager = userService.createLoginUser("jsmith", STANDARD_PASSWORD,
 			"John", "john.smith@technova.com", "MANAGER,USER");
-		manager.setLastname("Smith");
-		manager.setPhone("+1-555-1002");
-		manager.setUserRole(CUserRole.PROJECT_MANAGER);
-		addCompany(manager, "TechNova Solutions");
-		loadProfilePicture(manager, PROFILE_PICTURE_USER);
-		userService.save(manager);
+		
+		// Set user profile using auxiliary method
+		final byte[] profilePictureBytes = "profile-picture".getBytes();
+		userService.setUserProfile(manager, "Smith", "+1-555-1002", profilePictureBytes);
+		
+		// Set user role using auxiliary method
+		userService.setUserRole(manager, CUserRole.PROJECT_MANAGER, "MANAGER,USER");
+		
+		// Set company association using auxiliary method
+		final CCompany company = findCompanyByName("TechNova Solutions");
+		userService.setCompanyAssociation(manager, company);
+		
 		LOGGER.info("Project manager user created successfully");
 	}
 
@@ -251,25 +231,28 @@ public class CSampleDataInitializer implements ApplicationRunner {
 				"Project 'Infrastructure Modernization' not found, skipping architecture activity");
 			return;
 		}
+
+		// Create the activity using new auxiliary methods
 		final CActivity archDesign = new CActivity("System Architecture Design", project);
-		archDesign.setDescription(
+		
+		// Set activity type and description using auxiliary method
+		activityService.setActivityType(archDesign, null, 
 			"Design scalable system architecture for infrastructure modernization");
+
+		// Set assigned users using auxiliary method
 		final CUser teamMember2 = findUserByLogin("bwilson");
-
-		if (teamMember2 != null) {
-			archDesign.setAssignedTo(teamMember2);
-		}
 		final CUser admin = findUserByLogin("admin");
+		activityService.setAssignedUsers(archDesign, teamMember2, admin);
 
-		if (admin != null) {
-			archDesign.setCreatedBy(admin);
-		}
-		archDesign.setEstimatedHours(new BigDecimal("60.00"));
-		archDesign.setActualHours(new BigDecimal("45.00"));
-		archDesign.setRemainingHours(new BigDecimal("15.00"));
-		archDesign.setStartDate(LocalDate.now().minusDays(15));
-		archDesign.setDueDate(LocalDate.now().plusDays(10));
-		activityService.save(archDesign);
+		// Set time tracking using auxiliary method
+		activityService.setTimeTracking(archDesign, 
+			new BigDecimal("60.00"), new BigDecimal("45.00"), new BigDecimal("15.00"));
+
+		// Set date information using auxiliary method
+		activityService.setDateInfo(archDesign, 
+			LocalDate.now().minusDays(15), LocalDate.now().plusDays(10), null);
+
+		// Create comments
 		commentService.createComment("Initial system architecture design phase started",
 			archDesign, admin);
 		commentService.createComment(
@@ -288,12 +271,18 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		LOGGER.info("createTeamMemberAlice called - creating Alice Davis");
 		final CUser analyst = userService.createLoginUser("adavis", STANDARD_PASSWORD,
 			"Alice", "alice.davis@medtechinnovations.com", "USER");
-		analyst.setLastname("Davis");
-		analyst.setPhone("+1-555-1005");
-		analyst.setUserRole(CUserRole.TEAM_MEMBER);
-		addCompany(analyst, "MedTech Innovations");
-		loadProfilePicture(analyst, PROFILE_PICTURE_USER);
-		userService.save(analyst);
+		
+		// Set user profile using auxiliary method
+		final byte[] profilePictureBytes = "profile-picture".getBytes();
+		userService.setUserProfile(analyst, "Davis", "+1-555-1005", profilePictureBytes);
+		
+		// Set user role using auxiliary method
+		userService.setUserRole(analyst, CUserRole.TEAM_MEMBER, "USER");
+		
+		// Set company association using auxiliary method
+		final CCompany company = findCompanyByName("MedTech Innovations");
+		userService.setCompanyAssociation(analyst, company);
+		
 		LOGGER.info("Team member Alice Davis created successfully");
 	}
 
@@ -304,12 +293,18 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		LOGGER.info("createTeamMemberBob called - creating Bob Wilson");
 		final CUser developer = userService.createLoginUser("bwilson", STANDARD_PASSWORD,
 			"Bob", "bob.wilson@strategicadvisors.com", "USER");
-		developer.setLastname("Wilson");
-		developer.setPhone("+1-555-1004");
-		developer.setUserRole(CUserRole.TEAM_MEMBER);
-		addCompany(developer, "Strategic Advisors Ltd");
-		loadProfilePicture(developer, PROFILE_PICTURE_USER);
-		userService.save(developer);
+		
+		// Set user profile using auxiliary method
+		final byte[] profilePictureBytes = "profile-picture".getBytes();
+		userService.setUserProfile(developer, "Wilson", "+1-555-1004", profilePictureBytes);
+		
+		// Set user role using auxiliary method
+		userService.setUserRole(developer, CUserRole.TEAM_MEMBER, "USER");
+		
+		// Set company association using auxiliary method
+		final CCompany company = findCompanyByName("Strategic Advisors Ltd");
+		userService.setCompanyAssociation(developer, company);
+		
 		LOGGER.info("Team member Bob Wilson created successfully");
 	}
 
@@ -320,12 +315,18 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		LOGGER.info("createTeamMemberMary called - creating Mary Johnson");
 		final CUser teamMember = userService.createLoginUser("mjohnson",
 			STANDARD_PASSWORD, "Mary", "mary.johnson@industrialdynamics.com", "USER");
-		teamMember.setLastname("Johnson");
-		teamMember.setPhone("+1-555-1003");
-		teamMember.setUserRole(CUserRole.TEAM_MEMBER);
-		addCompany(teamMember, "Industrial Dynamics Corp");
-		loadProfilePicture(teamMember, PROFILE_PICTURE_USER);
-		userService.save(teamMember);
+		
+		// Set user profile using auxiliary method
+		final byte[] profilePictureBytes = "profile-picture".getBytes();
+		userService.setUserProfile(teamMember, "Johnson", "+1-555-1003", profilePictureBytes);
+		
+		// Set user role using auxiliary method
+		userService.setUserRole(teamMember, CUserRole.TEAM_MEMBER, "USER");
+		
+		// Set company association using auxiliary method
+		final CCompany company = findCompanyByName("Industrial Dynamics Corp");
+		userService.setCompanyAssociation(teamMember, company);
+		
 		LOGGER.info("Team member Mary Johnson created successfully");
 	}
 
@@ -370,26 +371,28 @@ public class CSampleDataInitializer implements ApplicationRunner {
 				"Project 'Customer Experience Enhancement' not found, skipping documentation activity");
 			return;
 		}
-		final CActivity techDoc =
-			new CActivity("Technical Documentation Update", project);
-		techDoc.setDescription(
+
+		// Create the activity using new auxiliary methods
+		final CActivity techDoc = new CActivity("Technical Documentation Update", project);
+		
+		// Set activity type and description using auxiliary method
+		activityService.setActivityType(techDoc, null, 
 			"Update and enhance technical documentation for customer experience features");
+
+		// Set assigned users using auxiliary method
 		final CUser analyst = findUserByLogin("adavis");
-
-		if (analyst != null) {
-			techDoc.setAssignedTo(analyst);
-		}
 		final CUser manager = findUserByLogin("jsmith");
+		activityService.setAssignedUsers(techDoc, analyst, manager);
 
-		if (manager != null) {
-			techDoc.setCreatedBy(manager);
-		}
-		techDoc.setEstimatedHours(new BigDecimal("16.00"));
-		techDoc.setActualHours(new BigDecimal("16.00"));
-		techDoc.setRemainingHours(new BigDecimal("0.00"));
-		techDoc.setStartDate(LocalDate.now().minusDays(5));
-		techDoc.setDueDate(LocalDate.now().minusDays(1));
-		activityService.save(techDoc);
+		// Set time tracking using auxiliary method (completed activity)
+		activityService.setTimeTracking(techDoc, 
+			new BigDecimal("16.00"), new BigDecimal("16.00"), new BigDecimal("0.00"));
+
+		// Set date information using auxiliary method (completed activity)
+		activityService.setDateInfo(techDoc, 
+			LocalDate.now().minusDays(5), LocalDate.now().minusDays(1), LocalDate.now().minusDays(1));
+
+		// Create comments
 		commentService.createComment(
 			"Initial technical documentation review and updates started", techDoc,
 			manager);
@@ -414,25 +417,27 @@ public class CSampleDataInitializer implements ApplicationRunner {
 				"Project 'Product Development Phase 2' not found, skipping UI testing activity");
 			return;
 		}
+
+		// Create the activity using new auxiliary methods
 		final CActivity uiTesting = new CActivity("User Interface Testing", project);
-		uiTesting.setDescription(
+		
+		// Set activity type and description using auxiliary method
+		activityService.setActivityType(uiTesting, null, 
 			"Comprehensive testing of user interface components and workflows");
+
+		// Set assigned users using auxiliary method
 		final CUser teamMember1 = findUserByLogin("mjohnson");
-
-		if (teamMember1 != null) {
-			uiTesting.setAssignedTo(teamMember1);
-		}
 		final CUser manager = findUserByLogin("jsmith");
+		activityService.setAssignedUsers(uiTesting, teamMember1, manager);
 
-		if (manager != null) {
-			uiTesting.setCreatedBy(manager);
-		}
-		uiTesting.setEstimatedHours(new BigDecimal("24.00"));
-		uiTesting.setActualHours(new BigDecimal("20.00"));
-		uiTesting.setRemainingHours(new BigDecimal("4.00"));
-		uiTesting.setStartDate(LocalDate.now().minusDays(7));
-		uiTesting.setDueDate(LocalDate.now().plusDays(3));
-		activityService.save(uiTesting);
+		// Set time tracking using auxiliary method
+		activityService.setTimeTracking(uiTesting, 
+			new BigDecimal("24.00"), new BigDecimal("20.00"), new BigDecimal("4.00"));
+
+		// Set date information using auxiliary method
+		activityService.setDateInfo(uiTesting, 
+			LocalDate.now().minusDays(7), LocalDate.now().plusDays(3), null);
+
 		LOGGER.info("UI testing activity created successfully");
 	}
 
@@ -608,31 +613,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final long userCount = userService.count();
 		LOGGER.info("User count in database: {}", userCount);
 		return userCount == 0;
-	}
-
-	/**
-	 * Loads profile picture for a user.
-	 * @param user               the user to set profile picture for
-	 * @param profilePictureData the base64 encoded profile picture data
-	 */
-	private void loadProfilePicture(final CUser user, final String profilePictureData) {
-		LOGGER.info("loadProfilePicture called for user: {} with picture data length: {}",
-			user.getName(), profilePictureData != null ? profilePictureData.length() : 0);
-
-		if ((profilePictureData == null) || profilePictureData.isEmpty()) {
-			LOGGER.warn("Profile picture data is null or empty for user: {}",
-				user.getName());
-			return;
-		}
-
-		try {
-			// For now, just set a simple byte array to avoid database column size issues
-			// In production this would be proper image handling
-			final byte[] pictureBytes = "profile-picture".getBytes();
-			user.setProfilePictureData(pictureBytes);
-		} catch (final Exception e) {
-			LOGGER.error("Error loading profile picture for user: " + user.getName(), e);
-		}
 	}
 
 	public void loadSampleData() {
