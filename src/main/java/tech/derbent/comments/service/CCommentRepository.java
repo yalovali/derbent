@@ -99,10 +99,12 @@ public interface CCommentRepository extends CAbstractNamedRepository<CComment> {
     List<CComment> findImportantByActivity(@Param("activity") CActivity activity);
 
     /**
-     * Finds recent comments for a project (last 30 days).
+     * Finds recent comments for a project (last 30 days) with eagerly loaded relationships.
+     * Uses parameter-based date calculation for database portability and eager loading to prevent lazy loading issues.
      * @param project the project
-     * @return list of recent comments for the project
+     * @param since the date threshold (30 days ago)
+     * @return list of recent comments for the project ordered by event date (newest first)
      */
-    @Query("SELECT c FROM CComment c WHERE c.project = :project AND c.eventDate >= CURRENT_DATE - 30 ORDER BY c.eventDate DESC")
-    List<CComment> findRecentByProject(@Param("project") CProject project);
+    @Query("SELECT c FROM CComment c LEFT JOIN FETCH c.author LEFT JOIN FETCH c.priority WHERE c.project = :project AND c.eventDate >= :since ORDER BY c.eventDate DESC")
+    List<CComment> findRecentByProject(@Param("project") CProject project, @Param("since") java.time.LocalDateTime since);
 }

@@ -220,7 +220,10 @@ public class CCommentService extends CAbstractNamedEntityService<CComment> {
             return List.of();
         }
         
-        return ((CCommentRepository) repository).findRecentByProject(project);
+        // Calculate the date 30 days ago for database portability
+        final java.time.LocalDateTime thirtyDaysAgo = java.time.LocalDateTime.now().minusDays(30);
+        
+        return ((CCommentRepository) repository).findRecentByProject(project, thirtyDaysAgo);
     }
 
     /**
