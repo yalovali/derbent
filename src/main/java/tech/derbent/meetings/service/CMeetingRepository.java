@@ -19,17 +19,24 @@ public interface CMeetingRepository extends CAbstractNamedRepository<CMeeting> {
     Page<CMeeting> findByProject(CProject project, Pageable pageable);
 
     /**
-     * Finds a meeting by ID with eagerly loaded CMeetingType and participants to prevent LazyInitializationException.
+     * Finds a meeting by ID with eagerly loaded relationships to prevent LazyInitializationException.
      * 
      * @param id the meeting ID
-     * @return optional CMeeting with loaded meetingType and participants
+     * @return optional CMeeting with loaded relationships
      */
-    @Query("SELECT m FROM CMeeting m LEFT JOIN FETCH m.meetingType LEFT JOIN FETCH m.participants WHERE m.id = :id")
+    @Query("SELECT m FROM CMeeting m " +
+           "LEFT JOIN FETCH m.meetingType " +
+           "LEFT JOIN FETCH m.participants " +
+           "LEFT JOIN FETCH m.attendees " +
+           "LEFT JOIN FETCH m.status " +
+           "LEFT JOIN FETCH m.responsible " +
+           "LEFT JOIN FETCH m.relatedActivity " +
+           "WHERE m.id = :id")
     Optional<CMeeting> findByIdWithMeetingTypeAndParticipants(@Param("id") Long id);
 
     /**
      * Finds meetings by project with eagerly loaded relationships to prevent LazyInitializationException.
-     * Loads project, meetingType, and participants for grid display.
+     * Loads project, meetingType, participants, attendees, status, responsible, and relatedActivity for grid display.
      * 
      * @param project the project to filter by
      * @param pageable pagination information
@@ -39,6 +46,10 @@ public interface CMeetingRepository extends CAbstractNamedRepository<CMeeting> {
            "LEFT JOIN FETCH m.project " +
            "LEFT JOIN FETCH m.meetingType " +
            "LEFT JOIN FETCH m.participants " +
+           "LEFT JOIN FETCH m.attendees " +
+           "LEFT JOIN FETCH m.status " +
+           "LEFT JOIN FETCH m.responsible " +
+           "LEFT JOIN FETCH m.relatedActivity " +
            "WHERE m.project = :project")
     Page<CMeeting> findByProjectWithRelationships(@Param("project") CProject project, Pageable pageable);
 
@@ -50,4 +61,13 @@ public interface CMeetingRepository extends CAbstractNamedRepository<CMeeting> {
      */
     @Query("SELECT m FROM CMeeting m JOIN m.participants p WHERE p.id = :userId")
     List<CMeeting> findByParticipantId(@Param("userId") Long userId);
+
+    /**
+     * Finds meetings by attendee user.
+     * 
+     * @param userId the user ID
+     * @return list of meetings where the user is an attendee
+     */
+    @Query("SELECT m FROM CMeeting m JOIN m.attendees a WHERE a.id = :userId")
+    List<CMeeting> findByAttendeeId(@Param("userId") Long userId);
 }

@@ -22,6 +22,7 @@ SET session_replication_role = replica;
 
 -- Delete data from junction tables first
 DELETE FROM cmeeting_participants;
+DELETE FROM cmeeting_attendees;
 
 -- Delete data from dependent tables (in reverse dependency order)
 DELETE FROM ccomment;
@@ -40,6 +41,7 @@ DELETE FROM cactivitystatus;
 DELETE FROM cactivitypriority;
 DELETE FROM ccommentpriority;
 DELETE FROM cmeetingtype;
+DELETE FROM cmeetingstatus;
 DELETE FROM cusertype;
 
 SET session_replication_role = DEFAULT;
@@ -115,6 +117,20 @@ BEGIN
 END;
 ';
 
+-- Reset 'cmeetingstatus_cmeetingstatus_id_seq'
+DO '
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM pg_class c
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE c.relkind = ''S'' AND c.relname = ''cmeetingstatus_cmeetingstatus_id_seq''
+    ) THEN
+        EXECUTE ''SELECT setval(''''cmeetingstatus_cmeetingstatus_id_seq'''', 1, false)'';
+    END IF;
+END;
+';
+
 -- Reset 'ccomment_comment_id_seq'
 DO '
 BEGIN
@@ -165,6 +181,15 @@ INSERT INTO cactivitystatus (name, description, color, is_final, sort_order) VAL
 ('BLOCKED', 'Cannot proceed due to external dependencies', '#F44336', FALSE, 6),
 ('DONE', 'Successfully completed and delivered', '#4CAF50', TRUE, 7),
 ('CANCELLED', 'Work cancelled or deemed unnecessary', '#607D8B', TRUE, 8);
+
+-- Insert essential meeting statuses (workflow states) - 6 ITEMS
+INSERT INTO cmeetingstatus (name, description, color, is_final, sort_order) VALUES 
+('PLANNED', 'Meeting is planned but not yet scheduled', '#9E9E9E', FALSE, 1),
+('SCHEDULED', 'Meeting is scheduled and participants notified', '#2196F3', FALSE, 2),
+('IN_PROGRESS', 'Meeting is currently in progress', '#FF9800', FALSE, 3),
+('COMPLETED', 'Meeting has been completed', '#4CAF50', TRUE, 4),
+('CANCELLED', 'Meeting has been cancelled', '#F44336', TRUE, 5),
+('POSTPONED', 'Meeting has been postponed', '#607D8B', FALSE, 6);
 
 -- Insert essential activity priorities (business importance levels) - 6 ITEMS
 INSERT INTO cactivitypriority (name, description, priority_level, color, is_default) VALUES 
@@ -289,30 +314,43 @@ INSERT INTO cmeetingtype (name, description) VALUES
 ('Project Kickoff', 'Project initiation meetings with goal setting');
 
 -- Insert essential meetings with realistic scheduling - 12 MEETINGS covering key projects
-INSERT INTO cmeeting (name, description, meeting_date, end_date, project_id, cmeetingtype_id) VALUES 
+INSERT INTO cmeeting (name, description, meeting_date, end_date, project_id, cmeetingtype_id, 
+                      location, agenda, meeting_status_id, responsible_id, minutes, linked_element) VALUES 
 -- E-Commerce Platform project meetings (project_id = 1)
-('E-Commerce Sprint Planning #1', 'Planning session for first sprint focusing on user authentication and product catalog', '2025-01-20 09:00:00', '2025-01-20 11:00:00', 1, 2),
-('Daily Standup - E-Commerce Team', 'Daily team sync for E-Commerce platform development', '2025-01-21 09:00:00', '2025-01-21 09:15:00', 1, 1),
-('Architecture Review - Microservices Design', 'Review of microservices architecture for E-Commerce platform', '2025-01-22 14:00:00', '2025-01-22 16:00:00', 1, 4),
+('E-Commerce Sprint Planning #1', 'Planning session for first sprint focusing on user authentication and product catalog', '2025-01-20 09:00:00', '2025-01-20 11:00:00', 1, 2, 
+ 'Conference Room A', 'Review user stories, estimate tasks, plan sprint 1 deliverables', 4, 2, 'Sprint 1 committed with 25 story points. Focus on authentication module.', 'JIRA-123'),
+('Daily Standup - E-Commerce Team', 'Daily team sync for E-Commerce platform development', '2025-01-21 09:00:00', '2025-01-21 09:15:00', 1, 1,
+ 'Team Area', 'Daily progress updates, blockers discussion', 3, 4, NULL, NULL),
+('Architecture Review - Microservices Design', 'Review of microservices architecture for E-Commerce platform', '2025-01-22 14:00:00', '2025-01-22 16:00:00', 1, 4,
+ 'Architecture Board Room', 'Review microservices design, API contracts, data flow', 2, 3, NULL, 'ARCH-DOC-001'),
 
 -- Customer Analytics project meetings (project_id = 2)
-('Analytics Project Kickoff', 'Initial planning and goal setting for customer analytics dashboard', '2025-01-18 10:00:00', '2025-01-18 12:00:00', 2, 6),
-('Stakeholder Demo - Analytics Prototype', 'Demonstration of analytics dashboard prototype to business users', '2025-02-01 11:00:00', '2025-02-01 12:00:00', 2, 5),
+('Analytics Project Kickoff', 'Initial planning and goal setting for customer analytics dashboard', '2025-01-18 10:00:00', '2025-01-18 12:00:00', 2, 6,
+ 'Executive Meeting Room', 'Project scope, requirements gathering, team formation', 4, 3, 'Project approved with Q1 delivery target. Analytics team formed.', 'PRJ-ANALYTICS-001'),
+('Stakeholder Demo - Analytics Prototype', 'Demonstration of analytics dashboard prototype to business users', '2025-02-01 11:00:00', '2025-02-01 12:00:00', 2, 5,
+ 'Demo Lab', 'Prototype demonstration, stakeholder feedback collection', 2, 5, NULL, 'DEMO-PROTOTYPE-V1'),
 
 -- Mobile Banking project meetings (project_id = 3)
-('Mobile Banking Project Kickoff', 'Security and compliance planning for mobile banking features', '2025-01-19 14:00:00', '2025-01-19 16:00:00', 3, 6),
-('Banking Security Architecture Review', 'Security architecture review for mobile banking application', '2025-01-24 10:00:00', '2025-01-24 11:30:00', 3, 4),
+('Mobile Banking Project Kickoff', 'Security and compliance planning for mobile banking features', '2025-01-19 14:00:00', '2025-01-19 16:00:00', 3, 6,
+ 'Secure Conference Room', 'Security requirements, compliance planning, risk assessment', 4, 2, 'Security framework approved. PCI DSS compliance requirements documented.', 'SEC-COMPLIANCE-001'),
+('Banking Security Architecture Review', 'Security architecture review for mobile banking application', '2025-01-24 10:00:00', '2025-01-24 11:30:00', 3, 4,
+ 'Security Office', 'Security architecture validation, penetration testing plan', 2, 13, NULL, 'SEC-ARCH-REVIEW-001'),
 
 -- DevOps Infrastructure meetings (project_id = 4)
-('DevOps Strategy Session', 'Planning for infrastructure automation and CI/CD implementation', '2025-01-23 13:00:00', '2025-01-23 15:00:00', 4, 6),
-('Infrastructure Sprint Planning', 'Sprint planning for CI/CD pipeline implementation', '2025-01-26 09:00:00', '2025-01-26 10:30:00', 4, 2),
+('DevOps Strategy Session', 'Planning for infrastructure automation and CI/CD implementation', '2025-01-23 13:00:00', '2025-01-23 15:00:00', 4, 6,
+ 'Infrastructure Lab', 'CI/CD pipeline strategy, automation roadmap planning', 4, 14, 'Jenkins pipeline approved. Docker containerization strategy defined.', 'DEVOPS-STRATEGY-001'),
+('Infrastructure Sprint Planning', 'Sprint planning for CI/CD pipeline implementation', '2025-01-26 09:00:00', '2025-01-26 10:30:00', 4, 2,
+ 'DevOps War Room', 'Sprint planning for CI/CD implementation tasks', 2, 14, NULL, 'SPRINT-INFRA-001'),
 
 -- API Gateway project meetings (project_id = 5)
-('API Gateway Kickoff', 'Initial planning for centralized API gateway implementation', '2025-01-28 10:00:00', '2025-01-28 11:30:00', 5, 6),
-('Gateway Architecture Review', 'Technical architecture review for API gateway design', '2025-02-04 14:00:00', '2025-02-04 16:00:00', 5, 4),
+('API Gateway Kickoff', 'Initial planning for centralized API gateway implementation', '2025-01-28 10:00:00', '2025-01-28 11:30:00', 5, 6,
+ 'Technical Meeting Room', 'API gateway requirements, technology selection, architecture planning', 2, 2, NULL, 'API-GATEWAY-KICKOFF'),
+('Gateway Architecture Review', 'Technical architecture review for API gateway design', '2025-02-04 14:00:00', '2025-02-04 16:00:00', 5, 4,
+ 'Architecture Review Room', 'Gateway design review, scalability assessment, security validation', 1, 6, NULL, 'GATEWAY-ARCH-001'),
 
 -- Healthcare Data Integration meetings (project_id = 6)
-('Healthcare Project Kickoff', 'HIPAA compliance and healthcare integration planning', '2025-01-30 09:00:00', '2025-01-30 11:00:00', 6, 6);
+('Healthcare Project Kickoff', 'HIPAA compliance and healthcare integration planning', '2025-01-30 09:00:00', '2025-01-30 11:00:00', 6, 6,
+ 'HIPAA Compliant Room', 'HIPAA requirements review, data integration planning, compliance strategy', 2, 3, NULL, 'HEALTHCARE-KICKOFF-001');
 
 -- Insert meeting participants (many-to-many relationships) - Representative coverage
 INSERT INTO cmeeting_participants (meeting_id, user_id) VALUES 
@@ -345,6 +383,21 @@ INSERT INTO cmeeting_participants (meeting_id, user_id) VALUES
 
 -- Healthcare Project Kickoff (meeting_id=12): PM Sarah, Analyst Robert, QA Maria
 (12, 2), (12, 13), (12, 11);
+
+-- Insert meeting attendees (who actually attended) - subset of participants
+INSERT INTO cmeeting_attendees (meeting_id, user_id) VALUES 
+-- E-Commerce Sprint Planning (meeting_id=1): PM Sarah, Senior Dev Alex, Dev David
+(1, 2), (1, 4), (1, 7),
+-- Daily Standup E-Commerce (meeting_id=2): Same team (everyone attended)
+(2, 2), (2, 4), (2, 7), (2, 10),
+-- Architecture Review (meeting_id=3): PM Michael, Senior Devs Alex & Emma
+(3, 3), (3, 4), (3, 5),
+-- Analytics Kickoff (meeting_id=4): All participants attended
+(4, 3), (4, 5), (4, 13),
+-- DevOps Strategy (meeting_id=8): DevOps Jennifer, Senior Dev Alex
+(8, 14), (8, 4),
+-- Healthcare Project Kickoff (meeting_id=12): PM Sarah, Analyst Robert
+(12, 2), (12, 13);
 
 -- =====================================================================
 -- REPRESENTATIVE ACTIVITY DATA (Depends on all above entities)
