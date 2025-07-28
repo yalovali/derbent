@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
 import tech.derbent.activities.service.CActivityTypeService;
+import tech.derbent.comments.service.CCommentService;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.domain.CProject;
@@ -60,20 +61,13 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 	private final CCompanyService companyService;
 
-	/**
-	 * Constructor with required service dependencies.
-	 * @param projectService      the project service
-	 * @param userService         the user service
-	 * @param activityService     the activity service
-	 * @param userTypeService     the user type service
-	 * @param activityTypeService the activity type service
-	 * @param companyService      the company service
-	 */
+	private final CCommentService commentService;
+
 	public CSampleDataInitializer(final CProjectService projectService,
 		final CUserService userService, final CActivityService activityService,
 		final CUserTypeService userTypeService,
 		final CActivityTypeService activityTypeService,
-		final CCompanyService companyService) {
+		final CCompanyService companyService, final CCommentService commentService) {
 		LOGGER
 			.info("CSampleDataInitializer constructor called with service dependencies");
 		this.projectService = projectService;
@@ -82,6 +76,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		this.userTypeService = userTypeService;
 		this.activityTypeService = activityTypeService;
 		this.companyService = companyService;
+		this.commentService = commentService;
 	}
 
 	/**
@@ -167,6 +162,11 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		backendDev.setStartDate(LocalDate.now().minusDays(10));
 		backendDev.setDueDate(LocalDate.now().plusDays(5));
 		activityService.save(backendDev);
+		commentService.createComment("Initial backend API development started",
+			backendDev, admin);
+		commentService.createComment(
+			"API endpoints for user registration and login implemented", backendDev,
+			admin);
 		LOGGER.info("Backend development activity created successfully");
 	}
 
@@ -270,6 +270,14 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		archDesign.setStartDate(LocalDate.now().minusDays(15));
 		archDesign.setDueDate(LocalDate.now().plusDays(10));
 		activityService.save(archDesign);
+		commentService.createComment("Initial system architecture design phase started",
+			archDesign, admin);
+		commentService.createComment(
+			"Completed high-level architecture diagrams and component definitions",
+			archDesign, admin);
+		commentService.createComment(
+			"Reviewed architecture with team and incorporated feedback", archDesign,
+			teamMember2);
 		LOGGER.info("System architecture activity created successfully");
 	}
 
@@ -382,6 +390,14 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		techDoc.setStartDate(LocalDate.now().minusDays(5));
 		techDoc.setDueDate(LocalDate.now().minusDays(1));
 		activityService.save(techDoc);
+		commentService.createComment(
+			"Initial technical documentation review and updates started", techDoc,
+			manager);
+		commentService.createComment(
+			"Completed updates to user guides and API documentation", techDoc, analyst);
+		commentService.createComment(
+			"Reviewed documentation with team and incorporated feedback", techDoc,
+			analyst);
 		LOGGER.info("Technical documentation activity created successfully");
 	}
 
@@ -619,6 +635,24 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		}
 	}
 
+	public void loadSampleData() {
+		LOGGER.info("loadSampleData called - initializing sample data for core entities");
+
+		try {
+			// Initialize data in proper dependency order
+			initializeCompanies();
+			initializeUserTypes();
+			initializeUsers();
+			initializeProjects();
+			initializeActivityTypes();
+			initializeActivities();
+			LOGGER.info("Sample data initialization completed successfully");
+		} catch (final Exception e) {
+			LOGGER.error("Error loading sample data", e);
+			throw new RuntimeException("Failed to load sample data", e);
+		}
+	}
+
 	@Override
 	@Transactional
 	public void run(final ApplicationArguments args) throws Exception {
@@ -633,15 +667,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 					"Database already contains data, skipping sample data initialization");
 				return;
 			}
-			LOGGER.info("Database is empty, initializing sample data for core entities");
-			// Initialize data in proper dependency order
-			initializeCompanies();
-			initializeUserTypes();
-			initializeUsers();
-			initializeProjects();
-			initializeActivityTypes();
-			initializeActivities();
-			LOGGER.info("Sample data initialization completed successfully");
+			loadSampleData(); // Load sample data
 		} catch (final Exception e) {
 			LOGGER.error("Error during sample data initialization", e);
 			throw e;

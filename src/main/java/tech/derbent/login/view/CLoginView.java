@@ -56,8 +56,16 @@ public class CLoginView extends Main implements BeforeEnterObserver {
 		loginOverlay.setAction("login"); // Set action
 		loginOverlay.setForgotPasswordButtonVisible(false);
 		final CButton resetDbButton = new CButton("Reset Database", event -> {
-			databaseResetService.resetDatabase();
-			Notification.show("Database reset from data.sql");
+
+			try {
+				databaseResetService.resetDatabase();
+				Notification.show("Database reset from data.sql and samples are loaded");
+			} catch (final Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				Notification.show("Error resetting database: " + e.getMessage(), 3000,
+					Notification.Position.MIDDLE);
+			}
 		});
 		resetDbButton.addClassName(LumoUtility.Margin.Top.SMALL);
 		loginOverlay.getFooter().add(resetDbButton);

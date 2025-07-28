@@ -160,7 +160,6 @@ public class CPanelActivityComments extends CPanelActivityBase {
 	 * Loads and displays comments for the current activity.
 	 */
 	private void loadComments() {
-		LOGGER.info("Loading comments for activity: {}", getCurrentEntity());
 		commentsContainer.removeAll();
 
 		if (getCurrentEntity() == null) {
@@ -169,8 +168,6 @@ public class CPanelActivityComments extends CPanelActivityBase {
 		}
 
 		try {
-			getBaseLayout().add(new Div("Loading comments...")); // Optional loading
-																	// indicator
 			final List<CComment> comments =
 				commentService.findByActivityWithRelationships(getCurrentEntity());
 			LOGGER.debug("Found {} comments for activity", comments.size());
@@ -251,17 +248,17 @@ public class CPanelActivityComments extends CPanelActivityBase {
 		final Icon addIcon = new Icon(VaadinIcon.PLUS);
 		addCommentButton.setIcon(addIcon);
 		addCommentButton.setEnabled(false); // Disabled until text is entered
-		// Enable/disable button based on text area content
-		// Use value change listener for immediate response
+		// Enable/disable button based on text area content Use value change listener for
+		// immediate response
 		newCommentArea.addValueChangeListener(event -> {
 			final String text = event.getValue();
 			addCommentButton.setEnabled((text != null) && !text.trim().isEmpty());
 		});
-		
 		// Additional listener for immediate response during typing
 		newCommentArea.getElement().addEventListener("input", e -> {
 			final String currentValue = newCommentArea.getValue();
-			addCommentButton.setEnabled((currentValue != null) && !currentValue.trim().isEmpty());
+			addCommentButton
+				.setEnabled((currentValue != null) && !currentValue.trim().isEmpty());
 		});
 	}
 
