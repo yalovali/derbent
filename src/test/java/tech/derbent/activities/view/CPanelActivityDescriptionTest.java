@@ -13,6 +13,7 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 import tech.derbent.abstracts.views.CAccordionDescription;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
+import tech.derbent.session.service.SessionService;
 
 /**
  * Test class for CPanelActivityDescription to ensure it follows the same pattern as CPanelUserDescription.
@@ -23,6 +24,9 @@ class CPanelActivityDescriptionTest {
 
     @Mock
     private CActivityService activityService;
+    
+    @Mock
+    private SessionService sessionService;
 
     private CAccordionDescription<CActivity> panel;
     private CActivity testActivity;
@@ -39,7 +43,7 @@ class CPanelActivityDescriptionTest {
     @Test
     void testPanelCreation() {
         // When
-        panel = new CPanelActivityDescription(testActivity, binder, activityService);
+        panel = new CPanelActivityDescription(testActivity, binder, activityService, sessionService);
         
         // Then
         assertNotNull(panel, "Panel should be created successfully");
@@ -49,7 +53,7 @@ class CPanelActivityDescriptionTest {
     @Test
     void testPopulateFormWithNullEntity() {
         // Given
-        panel = new CPanelActivityDescription(testActivity, binder, activityService);
+        panel = new CPanelActivityDescription(testActivity, binder, activityService, sessionService);
         
         // When - Should not throw exception when entity is null
         panel.populateForm(null);
@@ -61,7 +65,7 @@ class CPanelActivityDescriptionTest {
     @Test
     void testPopulateFormWithValidEntity() {
         // Given
-        panel = new CPanelActivityDescription(testActivity, binder, activityService);
+        panel = new CPanelActivityDescription(testActivity, binder, activityService, sessionService);
         final CActivity newActivity = new CActivity();
         newActivity.setName("New Activity");
         
@@ -75,7 +79,7 @@ class CPanelActivityDescriptionTest {
     @Test
     void testSaveEventHandler() {
         // Given
-        panel = new CPanelActivityDescription(testActivity, binder, activityService);
+        panel = new CPanelActivityDescription(testActivity, binder, activityService, sessionService);
         
         // When - Should not throw exception
         panel.saveEventHandler();
