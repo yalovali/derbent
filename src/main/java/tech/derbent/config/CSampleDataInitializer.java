@@ -135,49 +135,10 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		LOGGER.info("initializeCompanies called - creating 4 sample companies");
 		
 		try {
-			// Company 1: Technology startup
-			final CCompany techStartup = new CCompany("TechNova Solutions", 
-				"Innovative technology solutions for digital transformation");
-			techStartup.setAddress("123 Innovation Drive, Silicon Valley, CA 94025");
-			techStartup.setPhone("+1-555-0101");
-			techStartup.setEmail("contact@technova.com");
-			techStartup.setWebsite("https://www.technova.com");
-			techStartup.setTaxNumber("TAX-123456789");
-			techStartup.setEnabled(true);
-			companyService.save(techStartup);
-			
-			// Company 2: Manufacturing company
-			final CCompany manufacturing = new CCompany("Industrial Dynamics Corp", 
-				"Leading manufacturer of precision engineering components");
-			manufacturing.setAddress("456 Manufacturing Blvd, Detroit, MI 48201");
-			manufacturing.setPhone("+1-555-0202");
-			manufacturing.setEmail("info@industrialdynamics.com");
-			manufacturing.setWebsite("https://www.industrialdynamics.com");
-			manufacturing.setTaxNumber("TAX-987654321");
-			manufacturing.setEnabled(true);
-			companyService.save(manufacturing);
-			
-			// Company 3: Consulting firm
-			final CCompany consulting = new CCompany("Strategic Advisors Ltd", 
-				"Management consulting and strategic planning services");
-			consulting.setAddress("789 Business Center, New York, NY 10001");
-			consulting.setPhone("+1-555-0303");
-			consulting.setEmail("hello@strategicadvisors.com");
-			consulting.setWebsite("https://www.strategicadvisors.com");
-			consulting.setTaxNumber("TAX-456789123");
-			consulting.setEnabled(true);
-			companyService.save(consulting);
-			
-			// Company 4: Healthcare organization
-			final CCompany healthcare = new CCompany("MedTech Innovations", 
-				"Advanced medical technology and healthcare solutions");
-			healthcare.setAddress("321 Medical Plaza, Boston, MA 02101");
-			healthcare.setPhone("+1-555-0404");
-			healthcare.setEmail("contact@medtechinnovations.com");
-			healthcare.setWebsite("https://www.medtechinnovations.com");
-			healthcare.setTaxNumber("TAX-789123456");
-			healthcare.setEnabled(true);
-			companyService.save(healthcare);
+			createTechCompany();
+			createManufacturingCompany();
+			createConsultingCompany();
+			createHealthcareCompany();
 			
 			LOGGER.info("Successfully created 4 sample companies");
 			
@@ -185,6 +146,82 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			LOGGER.error("Error creating sample companies", e);
 			throw new RuntimeException("Failed to initialize companies", e);
 		}
+	}
+
+	/**
+	 * Creates technology startup company.
+	 */
+	private void createTechCompany() {
+		LOGGER.info("createTechCompany called - creating TechNova Solutions");
+		
+		final CCompany techStartup = new CCompany("TechNova Solutions", 
+			"Innovative technology solutions for digital transformation");
+		techStartup.setAddress("123 Innovation Drive, Silicon Valley, CA 94025");
+		techStartup.setPhone("+1-555-0101");
+		techStartup.setEmail("contact@technova.com");
+		techStartup.setWebsite("https://www.technova.com");
+		techStartup.setTaxNumber("TAX-123456789");
+		techStartup.setEnabled(true);
+		companyService.save(techStartup);
+		
+		LOGGER.info("Technology company created successfully");
+	}
+
+	/**
+	 * Creates manufacturing company.
+	 */
+	private void createManufacturingCompany() {
+		LOGGER.info("createManufacturingCompany called - creating Industrial Dynamics Corp");
+		
+		final CCompany manufacturing = new CCompany("Industrial Dynamics Corp", 
+			"Leading manufacturer of precision engineering components");
+		manufacturing.setAddress("456 Manufacturing Blvd, Detroit, MI 48201");
+		manufacturing.setPhone("+1-555-0202");
+		manufacturing.setEmail("info@industrialdynamics.com");
+		manufacturing.setWebsite("https://www.industrialdynamics.com");
+		manufacturing.setTaxNumber("TAX-987654321");
+		manufacturing.setEnabled(true);
+		companyService.save(manufacturing);
+		
+		LOGGER.info("Manufacturing company created successfully");
+	}
+
+	/**
+	 * Creates consulting company.
+	 */
+	private void createConsultingCompany() {
+		LOGGER.info("createConsultingCompany called - creating Strategic Advisors Ltd");
+		
+		final CCompany consulting = new CCompany("Strategic Advisors Ltd", 
+			"Management consulting and strategic planning services");
+		consulting.setAddress("789 Business Center, New York, NY 10001");
+		consulting.setPhone("+1-555-0303");
+		consulting.setEmail("hello@strategicadvisors.com");
+		consulting.setWebsite("https://www.strategicadvisors.com");
+		consulting.setTaxNumber("TAX-456789123");
+		consulting.setEnabled(true);
+		companyService.save(consulting);
+		
+		LOGGER.info("Consulting company created successfully");
+	}
+
+	/**
+	 * Creates healthcare company.
+	 */
+	private void createHealthcareCompany() {
+		LOGGER.info("createHealthcareCompany called - creating MedTech Innovations");
+		
+		final CCompany healthcare = new CCompany("MedTech Innovations", 
+			"Advanced medical technology and healthcare solutions");
+		healthcare.setAddress("321 Medical Plaza, Boston, MA 02101");
+		healthcare.setPhone("+1-555-0404");
+		healthcare.setEmail("contact@medtechinnovations.com");
+		healthcare.setWebsite("https://www.medtechinnovations.com");
+		healthcare.setTaxNumber("TAX-789123456");
+		healthcare.setEnabled(true);
+		companyService.save(healthcare);
+		
+		LOGGER.info("Healthcare company created successfully");
 	}
 
 	/**
@@ -246,55 +283,9 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		LOGGER.info("initializeUsers called - creating 5+ sample users with different roles");
 		
 		try {
-			// User 1: System Administrator
-			final CUser admin = userService.createLoginUser("admin", STANDARD_PASSWORD, 
-				"Administrator", "admin@system.com", "ADMIN,USER");
-			admin.setLastname("System");
-			admin.setPhone("+1-555-1001");
-			admin.setUserRole(CUserRole.ADMIN);
-			addCompany(admin, "TechNova Solutions");
-			loadProfilePicture(admin, PROFILE_PICTURE_USER);
-			userService.save(admin);
-			
-			// User 2: Project Manager
-			final CUser manager = userService.createLoginUser("jsmith", STANDARD_PASSWORD,
-				"John", "john.smith@technova.com", "MANAGER,USER");
-			manager.setLastname("Smith");
-			manager.setPhone("+1-555-1002");
-			manager.setUserRole(CUserRole.PROJECT_MANAGER);
-			addCompany(manager, "TechNova Solutions");
-			loadProfilePicture(manager, PROFILE_PICTURE_USER);
-			userService.save(manager);
-			
-			// User 3: Team Member
-			final CUser teamMember = userService.createLoginUser("mjohnson", STANDARD_PASSWORD,
-				"Mary", "mary.johnson@industrialdynamics.com", "USER");
-			teamMember.setLastname("Johnson");
-			teamMember.setPhone("+1-555-1003");
-			teamMember.setUserRole(CUserRole.TEAM_MEMBER);
-			addCompany(teamMember, "Industrial Dynamics Corp");
-			loadProfilePicture(teamMember, PROFILE_PICTURE_USER);
-			userService.save(teamMember);
-			
-			// User 4: Team Member
-			final CUser developer = userService.createLoginUser("bwilson", STANDARD_PASSWORD,
-				"Bob", "bob.wilson@strategicadvisors.com", "USER");
-			developer.setLastname("Wilson");
-			developer.setPhone("+1-555-1004");
-			developer.setUserRole(CUserRole.TEAM_MEMBER);
-			addCompany(developer, "Strategic Advisors Ltd");
-			loadProfilePicture(developer, PROFILE_PICTURE_USER);
-			userService.save(developer);
-			
-			// User 5: Team Member
-			final CUser analyst = userService.createLoginUser("adavis", STANDARD_PASSWORD,
-				"Alice", "alice.davis@medtechinnovations.com", "USER");
-			analyst.setLastname("Davis");
-			analyst.setPhone("+1-555-1005");
-			analyst.setUserRole(CUserRole.TEAM_MEMBER);
-			addCompany(analyst, "MedTech Innovations");
-			loadProfilePicture(analyst, PROFILE_PICTURE_USER);
-			userService.save(analyst);
+			createAdminUser();
+			createProjectManagerUser();
+			createTeamMemberUsers();
 			
 			LOGGER.info("Successfully created 5 sample users with different roles and companies");
 			
@@ -302,6 +293,109 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			LOGGER.error("Error creating sample users", e);
 			throw new RuntimeException("Failed to initialize users", e);
 		}
+	}
+
+	/**
+	 * Creates system administrator user.
+	 */
+	private void createAdminUser() {
+		LOGGER.info("createAdminUser called - creating system administrator");
+		
+		final CUser admin = userService.createLoginUser("admin", STANDARD_PASSWORD, 
+			"Administrator", "admin@system.com", "ADMIN,USER");
+		admin.setLastname("System");
+		admin.setPhone("+1-555-1001");
+		admin.setUserRole(CUserRole.ADMIN);
+		addCompany(admin, "TechNova Solutions");
+		loadProfilePicture(admin, PROFILE_PICTURE_USER);
+		userService.save(admin);
+		
+		LOGGER.info("Administrator user created successfully");
+	}
+
+	/**
+	 * Creates project manager user.
+	 */
+	private void createProjectManagerUser() {
+		LOGGER.info("createProjectManagerUser called - creating project manager");
+		
+		final CUser manager = userService.createLoginUser("jsmith", STANDARD_PASSWORD,
+			"John", "john.smith@technova.com", "MANAGER,USER");
+		manager.setLastname("Smith");
+		manager.setPhone("+1-555-1002");
+		manager.setUserRole(CUserRole.PROJECT_MANAGER);
+		addCompany(manager, "TechNova Solutions");
+		loadProfilePicture(manager, PROFILE_PICTURE_USER);
+		userService.save(manager);
+		
+		LOGGER.info("Project manager user created successfully");
+	}
+
+	/**
+	 * Creates team member users across different companies.
+	 */
+	private void createTeamMemberUsers() {
+		LOGGER.info("createTeamMemberUsers called - creating team member users");
+		
+		createTeamMemberMary();
+		createTeamMemberBob();
+		createTeamMemberAlice();
+		
+		LOGGER.info("Team member users created successfully");
+	}
+
+	/**
+	 * Creates team member Mary Johnson.
+	 */
+	private void createTeamMemberMary() {
+		LOGGER.info("createTeamMemberMary called - creating Mary Johnson");
+		
+		final CUser teamMember = userService.createLoginUser("mjohnson", STANDARD_PASSWORD,
+			"Mary", "mary.johnson@industrialdynamics.com", "USER");
+		teamMember.setLastname("Johnson");
+		teamMember.setPhone("+1-555-1003");
+		teamMember.setUserRole(CUserRole.TEAM_MEMBER);
+		addCompany(teamMember, "Industrial Dynamics Corp");
+		loadProfilePicture(teamMember, PROFILE_PICTURE_USER);
+		userService.save(teamMember);
+		
+		LOGGER.info("Team member Mary Johnson created successfully");
+	}
+
+	/**
+	 * Creates team member Bob Wilson.
+	 */
+	private void createTeamMemberBob() {
+		LOGGER.info("createTeamMemberBob called - creating Bob Wilson");
+		
+		final CUser developer = userService.createLoginUser("bwilson", STANDARD_PASSWORD,
+			"Bob", "bob.wilson@strategicadvisors.com", "USER");
+		developer.setLastname("Wilson");
+		developer.setPhone("+1-555-1004");
+		developer.setUserRole(CUserRole.TEAM_MEMBER);
+		addCompany(developer, "Strategic Advisors Ltd");
+		loadProfilePicture(developer, PROFILE_PICTURE_USER);
+		userService.save(developer);
+		
+		LOGGER.info("Team member Bob Wilson created successfully");
+	}
+
+	/**
+	 * Creates team member Alice Davis.
+	 */
+	private void createTeamMemberAlice() {
+		LOGGER.info("createTeamMemberAlice called - creating Alice Davis");
+		
+		final CUser analyst = userService.createLoginUser("adavis", STANDARD_PASSWORD,
+			"Alice", "alice.davis@medtechinnovations.com", "USER");
+		analyst.setLastname("Davis");
+		analyst.setPhone("+1-555-1005");
+		analyst.setUserRole(CUserRole.TEAM_MEMBER);
+		addCompany(analyst, "MedTech Innovations");
+		loadProfilePicture(analyst, PROFILE_PICTURE_USER);
+		userService.save(analyst);
+		
+		LOGGER.info("Team member Alice Davis created successfully");
 	}
 
 	/**
@@ -398,90 +492,10 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		LOGGER.info("initializeActivities called - creating comprehensive activity samples");
 		
 		try {
-			// Get created projects for assignment
-			final CProject project1 = findProjectByName("Digital Transformation Initiative");
-			final CProject project2 = findProjectByName("Product Development Phase 2");
-			final CProject project3 = findProjectByName("Infrastructure Modernization");
-			final CProject project4 = findProjectByName("Customer Experience Enhancement");
-			
-			// Get created users for assignment
-			final CUser admin = findUserByLogin("admin");
-			final CUser manager = findUserByLogin("jsmith");
-			final CUser teamMember1 = findUserByLogin("mjohnson");
-			final CUser teamMember2 = findUserByLogin("bwilson");
-			final CUser analyst = findUserByLogin("adavis");
-			
-			// Activity 1: Backend Development
-			if (project1 != null) {
-				final CActivity backendDev = new CActivity("Backend API Development", project1);
-				backendDev.setDescription("Develop REST API endpoints for user management and authentication");
-				if (manager != null) {
-					backendDev.setAssignedTo(manager);
-				}
-				if (admin != null) {
-					backendDev.setCreatedBy(admin);
-				}
-				backendDev.setEstimatedHours(new BigDecimal("40.00"));
-				backendDev.setActualHours(new BigDecimal("35.50"));
-				backendDev.setRemainingHours(new BigDecimal("4.50"));
-				backendDev.setStartDate(LocalDate.now().minusDays(10));
-				backendDev.setDueDate(LocalDate.now().plusDays(5));
-				activityService.save(backendDev);
-			}
-			
-			// Activity 2: UI Testing
-			if (project2 != null) {
-				final CActivity uiTesting = new CActivity("User Interface Testing", project2);
-				uiTesting.setDescription("Comprehensive testing of user interface components and workflows");
-				if (teamMember1 != null) {
-					uiTesting.setAssignedTo(teamMember1);
-				}
-				if (manager != null) {
-					uiTesting.setCreatedBy(manager);
-				}
-				uiTesting.setEstimatedHours(new BigDecimal("24.00"));
-				uiTesting.setActualHours(new BigDecimal("20.00"));
-				uiTesting.setRemainingHours(new BigDecimal("4.00"));
-				uiTesting.setStartDate(LocalDate.now().minusDays(7));
-				uiTesting.setDueDate(LocalDate.now().plusDays(3));
-				activityService.save(uiTesting);
-			}
-			
-			// Activity 3: System Architecture Design
-			if (project3 != null) {
-				final CActivity archDesign = new CActivity("System Architecture Design", project3);
-				archDesign.setDescription("Design scalable system architecture for infrastructure modernization");
-				if (teamMember2 != null) {
-					archDesign.setAssignedTo(teamMember2);
-				}
-				if (admin != null) {
-					archDesign.setCreatedBy(admin);
-				}
-				archDesign.setEstimatedHours(new BigDecimal("60.00"));
-				archDesign.setActualHours(new BigDecimal("45.00"));
-				archDesign.setRemainingHours(new BigDecimal("15.00"));
-				archDesign.setStartDate(LocalDate.now().minusDays(15));
-				archDesign.setDueDate(LocalDate.now().plusDays(10));
-				activityService.save(archDesign);
-			}
-			
-			// Activity 4: Technical Documentation
-			if (project4 != null) {
-				final CActivity techDoc = new CActivity("Technical Documentation Update", project4);
-				techDoc.setDescription("Update and enhance technical documentation for customer experience features");
-				if (analyst != null) {
-					techDoc.setAssignedTo(analyst);
-				}
-				if (manager != null) {
-					techDoc.setCreatedBy(manager);
-				}
-				techDoc.setEstimatedHours(new BigDecimal("16.00"));
-				techDoc.setActualHours(new BigDecimal("16.00"));
-				techDoc.setRemainingHours(new BigDecimal("0.00"));
-				techDoc.setStartDate(LocalDate.now().minusDays(5));
-				techDoc.setDueDate(LocalDate.now().minusDays(1));
-				activityService.save(techDoc);
-			}
+			createBackendDevActivity();
+			createUITestingActivity();
+			createSystemArchitectureActivity();
+			createTechnicalDocumentationActivity();
 			
 			LOGGER.info("Successfully created 4 comprehensive activity samples");
 			
@@ -489,6 +503,146 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			LOGGER.error("Error creating sample activities", e);
 			throw new RuntimeException("Failed to initialize activities", e);
 		}
+	}
+
+	/**
+	 * Creates backend development activity.
+	 */
+	private void createBackendDevActivity() {
+		LOGGER.info("createBackendDevActivity called - creating backend API development activity");
+		
+		final CProject project = findProjectByName("Digital Transformation Initiative");
+		if (project == null) {
+			LOGGER.warn("Project 'Digital Transformation Initiative' not found, skipping backend activity");
+			return;
+		}
+		
+		final CActivity backendDev = new CActivity("Backend API Development", project);
+		backendDev.setDescription("Develop REST API endpoints for user management and authentication");
+		
+		final CUser manager = findUserByLogin("jsmith");
+		if (manager != null) {
+			backendDev.setAssignedTo(manager);
+		}
+		
+		final CUser admin = findUserByLogin("admin");
+		if (admin != null) {
+			backendDev.setCreatedBy(admin);
+		}
+		
+		backendDev.setEstimatedHours(new BigDecimal("40.00"));
+		backendDev.setActualHours(new BigDecimal("35.50"));
+		backendDev.setRemainingHours(new BigDecimal("4.50"));
+		backendDev.setStartDate(LocalDate.now().minusDays(10));
+		backendDev.setDueDate(LocalDate.now().plusDays(5));
+		activityService.save(backendDev);
+		
+		LOGGER.info("Backend development activity created successfully");
+	}
+
+	/**
+	 * Creates UI testing activity.
+	 */
+	private void createUITestingActivity() {
+		LOGGER.info("createUITestingActivity called - creating user interface testing activity");
+		
+		final CProject project = findProjectByName("Product Development Phase 2");
+		if (project == null) {
+			LOGGER.warn("Project 'Product Development Phase 2' not found, skipping UI testing activity");
+			return;
+		}
+		
+		final CActivity uiTesting = new CActivity("User Interface Testing", project);
+		uiTesting.setDescription("Comprehensive testing of user interface components and workflows");
+		
+		final CUser teamMember1 = findUserByLogin("mjohnson");
+		if (teamMember1 != null) {
+			uiTesting.setAssignedTo(teamMember1);
+		}
+		
+		final CUser manager = findUserByLogin("jsmith");
+		if (manager != null) {
+			uiTesting.setCreatedBy(manager);
+		}
+		
+		uiTesting.setEstimatedHours(new BigDecimal("24.00"));
+		uiTesting.setActualHours(new BigDecimal("20.00"));
+		uiTesting.setRemainingHours(new BigDecimal("4.00"));
+		uiTesting.setStartDate(LocalDate.now().minusDays(7));
+		uiTesting.setDueDate(LocalDate.now().plusDays(3));
+		activityService.save(uiTesting);
+		
+		LOGGER.info("UI testing activity created successfully");
+	}
+
+	/**
+	 * Creates system architecture design activity.
+	 */
+	private void createSystemArchitectureActivity() {
+		LOGGER.info("createSystemArchitectureActivity called - creating system architecture design activity");
+		
+		final CProject project = findProjectByName("Infrastructure Modernization");
+		if (project == null) {
+			LOGGER.warn("Project 'Infrastructure Modernization' not found, skipping architecture activity");
+			return;
+		}
+		
+		final CActivity archDesign = new CActivity("System Architecture Design", project);
+		archDesign.setDescription("Design scalable system architecture for infrastructure modernization");
+		
+		final CUser teamMember2 = findUserByLogin("bwilson");
+		if (teamMember2 != null) {
+			archDesign.setAssignedTo(teamMember2);
+		}
+		
+		final CUser admin = findUserByLogin("admin");
+		if (admin != null) {
+			archDesign.setCreatedBy(admin);
+		}
+		
+		archDesign.setEstimatedHours(new BigDecimal("60.00"));
+		archDesign.setActualHours(new BigDecimal("45.00"));
+		archDesign.setRemainingHours(new BigDecimal("15.00"));
+		archDesign.setStartDate(LocalDate.now().minusDays(15));
+		archDesign.setDueDate(LocalDate.now().plusDays(10));
+		activityService.save(archDesign);
+		
+		LOGGER.info("System architecture activity created successfully");
+	}
+
+	/**
+	 * Creates technical documentation activity.
+	 */
+	private void createTechnicalDocumentationActivity() {
+		LOGGER.info("createTechnicalDocumentationActivity called - creating technical documentation activity");
+		
+		final CProject project = findProjectByName("Customer Experience Enhancement");
+		if (project == null) {
+			LOGGER.warn("Project 'Customer Experience Enhancement' not found, skipping documentation activity");
+			return;
+		}
+		
+		final CActivity techDoc = new CActivity("Technical Documentation Update", project);
+		techDoc.setDescription("Update and enhance technical documentation for customer experience features");
+		
+		final CUser analyst = findUserByLogin("adavis");
+		if (analyst != null) {
+			techDoc.setAssignedTo(analyst);
+		}
+		
+		final CUser manager = findUserByLogin("jsmith");
+		if (manager != null) {
+			techDoc.setCreatedBy(manager);
+		}
+		
+		techDoc.setEstimatedHours(new BigDecimal("16.00"));
+		techDoc.setActualHours(new BigDecimal("16.00"));
+		techDoc.setRemainingHours(new BigDecimal("0.00"));
+		techDoc.setStartDate(LocalDate.now().minusDays(5));
+		techDoc.setDueDate(LocalDate.now().minusDays(1));
+		activityService.save(techDoc);
+		
+		LOGGER.info("Technical documentation activity created successfully");
 	}
 
 	/**
