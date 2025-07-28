@@ -175,9 +175,28 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	}
 
 	protected CButton createCancelButton(final String buttonText) {
+		LOGGER.info("Creating cancel button for {}", getClass().getSimpleName());
 		final CButton cancel = CButton.createTertiary(buttonText, e -> {
-			clearForm();
-			refreshGrid();
+			LOGGER.debug("Cancel button clicked, reverting to last selected entry");
+			
+			try {
+				// Get the last selected entity ID
+				final Long lastSelectedId = getLastSelectedEntityId();
+				
+				if (lastSelectedId != null && lastSelectedId != -1) {
+					// Restore selection to the last selected entity
+					restoreGridSelection(lastSelectedId);
+					LOGGER.debug("Reverted to last selected entity with ID: {}", lastSelectedId);
+				} else {
+					// If no previous selection, just clear the form
+					clearForm();
+					LOGGER.debug("No previous selection found, cleared form");
+				}
+			} catch (final Exception exception) {
+				LOGGER.error("Error reverting to last selected entry", exception);
+				// Fallback to clearing form if restoration fails
+				clearForm();
+			}
 		});
 		return cancel;
 	}
@@ -310,29 +329,18 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	protected CButton createNewButton(final String buttonText) {
 		LOGGER.info("Creating new button for {}", getClass().getSimpleName());
 		final CButton newButton = CButton.createTertiary(buttonText, e -> {
-			LOGGER.debug("New button clicked, creating new entity");
+			LOGGER.debug("New button clicked, emptying bound fields");
 
 			try {
-				// Step 1: Clear the form and deselect grid first
-				clearForm();
-				// Step 2: Create new entity instance and bind it to the form
+				// Empty the bound fields by creating new entity and binding it
 				final EntityClass newEntityInstance = newEntity();
 				setCurrentEntity(newEntityInstance);
 				populateForm(newEntityInstance);
-				LOGGER.debug("New entity created and bound to form: {}",
+				LOGGER.debug("Bound fields emptied for new entity: {}",
 					newEntityInstance.getClass().getSimpleName());
-				// Step 3: Reset ComboBoxes to their first item instead of leaving them
-				// empty
-				tech.derbent.abstracts.annotations.CEntityFormBuilder
-					.resetComboBoxesToFirstItem(getBaseDetailsLayout());
-				LOGGER.debug("Reset ComboBoxes to first item for new entity form");
-				// Step 4: Navigate to the base view URL to indicate "new" mode (safely)
-				safeNavigateToClass();
 			} catch (final Exception exception) {
-				LOGGER.error("Error creating new entity", exception);
-				new CWarningDialog("Failed to create new "
-					+ entityClass.getSimpleName().replace("C", "").toLowerCase()
-					+ ". Please try again.").open();
+				LOGGER.error("Error emptying bound fields", exception);
+				new CWarningDialog("Failed to empty fields. Please try again.").open();
 			}
 		});
 		return newButton;
