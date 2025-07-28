@@ -321,8 +321,10 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 				populateForm(newEntityInstance);
 				LOGGER.debug("New entity created and bound to form: {}",
 					newEntityInstance.getClass().getSimpleName());
-				// Step 3: Reset ComboBoxes to their first item instead of leaving them empty
-				tech.derbent.abstracts.annotations.CEntityFormBuilder.resetComboBoxesToFirstItem(getBaseDetailsLayout());
+				// Step 3: Reset ComboBoxes to their first item instead of leaving them
+				// empty
+				tech.derbent.abstracts.annotations.CEntityFormBuilder
+					.resetComboBoxesToFirstItem(getBaseDetailsLayout());
 				LOGGER.debug("Reset ComboBoxes to first item for new entity form");
 				// Step 4: Navigate to the base view URL to indicate "new" mode (safely)
 				safeNavigateToClass();
@@ -467,6 +469,8 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	}
 
 	protected void populateAccordionPanels(final EntityClass entity) {
+		LOGGER.debug("Populating accordion panels for entity: {}",
+			entity != null ? entity.getId() : "null");
 		// This method can be overridden by subclasses to populate accordion panels
 		AccordionList.forEach(accordion -> {
 			accordion.populateForm(entity);
@@ -474,6 +478,7 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	}
 
 	protected void populateForm(final EntityClass value) {
+		LOGGER.debug("Populating form with entity: {}", value);
 		currentEntity = value;
 		binder.readBean(currentEntity);
 		populateAccordionPanels(value);
@@ -485,7 +490,6 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		final EntityClass selectedEntity = grid.asSingleSelect().getValue();
 		final Long selectedEntityId =
 			selectedEntity != null ? selectedEntity.getId() : null;
-		LOGGER.debug("Currently selected entity ID before refresh: {}", selectedEntityId);
 		// Clear selection and refresh data
 		grid.select(null);
 		grid.getDataProvider().refreshAll();
