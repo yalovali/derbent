@@ -12,27 +12,25 @@ import tech.derbent.abstracts.views.CAbstractMDPage;
 import tech.derbent.decisions.domain.CDecisionType;
 import tech.derbent.decisions.service.CDecisionTypeService;
 
-@Route ("decision-types/:decisiontype_id?/:decision?(edit)")
-@PageTitle ("Decision Types")
-@Menu (order = 10.4, icon = "vaadin:tags", title = "Types.Decision Types")
+@Route("decision-types/:decisiontype_id?/:action?(edit)")
+@PageTitle("Decision Types")
+@Menu(order = 11.1, icon = "vaadin:tags", title = "Types.Decision Types")
 @PermitAll
 public class CDecisionTypeView extends CAbstractMDPage<CDecisionType> {
 
 	private static final long serialVersionUID = 1L;
 
 	private final String ENTITY_ID_FIELD = "decisiontype_id";
-
 	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "decision-types/%s/edit";
 
 	/**
-	 * Constructor for CActivityTypeView.
-	 * @param entityService the service for activity type operations
+	 * Constructor for CDecisionTypeView.
+	 * @param entityService the service for decision type operations
 	 */
 	public CDecisionTypeView(final CDecisionTypeService entityService) {
 		super(CDecisionType.class, entityService);
-		addClassNames("activity-types-view");
-		// createDetailsLayout();
-		LOGGER.info("CActivityTypeView initialized with route: "
+		addClassNames("decision-types-view");
+		LOGGER.info("CDecisionTypeView initialized with route: "
 			+ CSpringAuxillaries.getRoutePath(this.getClass()));
 	}
 
@@ -46,8 +44,36 @@ public class CDecisionTypeView extends CAbstractMDPage<CDecisionType> {
 	@Override
 	protected void createGridForEntity() {
 		grid.addShortTextColumn(CDecisionType::getName, "Name", "name");
-		grid.addLongTextColumn(CDecisionType::getDescription, "Description",
-			"description");
+		grid.addLongTextColumn(CDecisionType::getDescription, "Description", "description");
+		grid.addShortTextColumn(entity -> entity.getColor(), "Color", "color");
+		grid.addComponentColumn(entity -> {
+			final Div colorDiv = new Div();
+			colorDiv.getStyle().set("width", "20px");
+			colorDiv.getStyle().set("height", "20px");
+			colorDiv.getStyle().set("background-color", entity.getColor());
+			colorDiv.getStyle().set("border", "1px solid #ccc");
+			colorDiv.getStyle().set("border-radius", "3px");
+			return colorDiv;
+		}).setHeader("Preview").setWidth("80px").setFlexGrow(0);
+		
+		grid.addComponentColumn(entity -> {
+			final Div approvalDiv = new Div();
+			approvalDiv.setText(entity.isRequiresApproval() ? "Yes" : "No");
+			approvalDiv.getStyle().set("padding", "4px 8px");
+			approvalDiv.getStyle().set("border-radius", "12px");
+			approvalDiv.getStyle().set("font-size", "12px");
+			approvalDiv.getStyle().set("font-weight", "bold");
+			if (entity.isRequiresApproval()) {
+				approvalDiv.getStyle().set("background-color", "#fff3e0");
+				approvalDiv.getStyle().set("color", "#ef6c00");
+			} else {
+				approvalDiv.getStyle().set("background-color", "#e8f5e8");
+				approvalDiv.getStyle().set("color", "#2e7d32");
+			}
+			return approvalDiv;
+		}).setHeader("Requires Approval").setWidth("150px").setFlexGrow(0);
+		
+		grid.addShortTextColumn(entity -> String.valueOf(entity.getSortOrder()), "Order", "sortOrder");
 	}
 
 	@Override
@@ -58,11 +84,14 @@ public class CDecisionTypeView extends CAbstractMDPage<CDecisionType> {
 
 	@Override
 	protected CDecisionType newEntity() {
-		return new CDecisionType();
+		LOGGER.info("newEntity called - creating new CDecisionType with defaults");
+		final CDecisionType newType = new CDecisionType();
+		// Default values are set via MetaData annotations and constructor
+		return newType;
 	}
 
 	@Override
 	protected void setupToolbar() {
-		// TODO: Implement toolbar setup if needed
+		// Toolbar setup is handled by the parent class
 	}
 }

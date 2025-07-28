@@ -475,19 +475,26 @@ INSERT INTO cactivitypriority (name, description, priority_level, color, is_defa
 ('MEDIUM', 'Medium priority - normal task', 3, '#2196F3', TRUE),
 ('LOW', 'Low priority - can be deferred to next sprint', 4, '#4CAF50', FALSE);
 
--- Insert essential comment priorities (categorizes comment importance) - 4 ITEMS
+-- Insert essential comment priorities (categorizes comment importance) - 7 ITEMS
 INSERT INTO ccommentpriority (name, description, priority_level, color, is_default) VALUES 
-('URGENT', 'Urgent comment requiring immediate attention', 1, '#F44336', FALSE),
-('NORMAL', 'Normal priority comment', 2, '#2196F3', TRUE),
-('LOW', 'Low priority informational comment', 3, '#4CAF50', FALSE),
-('INFO', 'General information or note', 4, '#9E9E9E', FALSE);
+('CRITICAL', 'Critical comment requiring immediate escalation', 1, '#D32F2F', FALSE),
+('URGENT', 'Urgent comment requiring immediate attention', 2, '#F44336', FALSE),
+('HIGH', 'High priority comment needing quick response', 3, '#FF9800', FALSE),
+('NORMAL', 'Normal priority comment', 4, '#2196F3', TRUE),
+('LOW', 'Low priority informational comment', 5, '#4CAF50', FALSE),
+('INFO', 'General information or note', 6, '#9E9E9E', FALSE),
+('SUGGESTION', 'Suggestion or improvement idea', 7, '#9C27B0', FALSE);
 
--- Insert essential decision types (categorizes different types of decisions) - 4 ITEMS
+-- Insert essential decision types (categorizes different types of decisions) - 8 ITEMS
 INSERT INTO cdecisiontype (name, description, color, sort_order, requires_approval, is_active) VALUES 
-('Strategic', 'High-level strategic decisions affecting project direction', '#FF5722', 1, TRUE, TRUE),
-('Technical', 'Technical architecture and implementation decisions', '#2196F3', 2, TRUE, TRUE),
-('Financial', 'Budget and cost-related decisions requiring approval', '#4CAF50', 3, TRUE, TRUE),
-('Operational', 'Day-to-day operational and process decisions', '#FF9800', 4, FALSE, TRUE);
+('Strategic', 'High-level strategic decisions affecting project direction and long-term goals', '#FF5722', 1, TRUE, TRUE),
+('Technical', 'Technical architecture and implementation decisions requiring engineering review', '#2196F3', 2, TRUE, TRUE),
+('Financial', 'Budget and cost-related decisions requiring financial approval', '#4CAF50', 3, TRUE, TRUE),
+('Operational', 'Day-to-day operational and process decisions for workflow optimization', '#FF9800', 4, FALSE, TRUE),
+('Resource', 'Human resource allocation and team assignment decisions', '#9C27B0', 5, TRUE, TRUE),
+('Quality', 'Quality assurance and testing related decisions', '#00BCD4', 6, TRUE, TRUE),
+('Security', 'Security and compliance related decisions requiring special approval', '#795548', 7, TRUE, TRUE),
+('Administrative', 'Administrative and governance decisions for project management', '#607D8B', 8, FALSE, TRUE);
 
 -- Insert essential decision statuses (workflow states for decisions) - 4 ITEMS
 INSERT INTO cdecisionstatus (name, description, color, is_final, sort_order, allows_editing, requires_approval) VALUES 
