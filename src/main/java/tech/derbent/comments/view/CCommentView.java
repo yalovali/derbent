@@ -8,11 +8,14 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import tech.derbent.abstracts.views.CButton;
 import tech.derbent.comments.domain.CComment;
+import tech.derbent.comments.service.CCommentService;
 
 /**
  * CCommentView - UI component for displaying individual comments.
@@ -31,27 +34,94 @@ public class CCommentView extends Div {
     private static final long serialVersionUID = 1L;
     
     private final CComment comment;
+    private final CCommentService commentService;
     private final VerticalLayout layout;
     private final HorizontalLayout headerLayout;
     private final Paragraph commentTextParagraph;
+    private final TextArea editTextArea;
+    private final HorizontalLayout editButtonsLayout;
+    private final CButton editButton;
+    private final CButton saveButton;
+    private final CButton cancelButton;
+    
+    private boolean isEditing = false;
+    private String originalText;
 
     /**
      * Creates a new CCommentView for the given comment.
      * @param comment the comment to display
+     * @param commentService the comment service for edit operations (can be null for read-only)
      */
-    public CCommentView(final CComment comment) {
-        LOGGER.info("CCommentView constructor called with comment: {}", comment);
+    public CCommentView(final CComment comment, final CCommentService commentService) {
+        LOGGER.info("CCommentView constructor called with comment: {}, commentService provided: {}", comment, commentService != null);
         
         if (comment == null) {
             throw new IllegalArgumentException("Comment cannot be null");
         }
         
         this.comment = comment;
+        this.commentService = commentService;
         this.layout = new VerticalLayout();
         this.headerLayout = new HorizontalLayout();
         this.commentTextParagraph = new Paragraph();
+        this.editTextArea = new TextArea();
+        this.editButtonsLayout = new HorizontalLayout();
+        
+        // Create buttons
+        this.editButton = CButton.createTertiary("Edit", event -> startEditing());
+        this.saveButton = CButton.createPrimary("Save", event -> saveChanges());
+        this.cancelButton = CButton.createTertiary("Cancel", event -> cancelEditing());
         
         setupLayout();
+        setupEditComponents();
+        updateContent();
+        addClassName("comment-view");
+    }
+
+    /**
+     * Creates a new CCommentView for the given comment (read-only).
+     * @param comment the comment to display
+     */
+    public CCommentView(final CComment comment) {
+        this(comment, null);
+    }
+
+    /**
+     * Creates a new CCommentView for a comment loaded by ID from the database.
+     * @param commentId the ID of the comment to load and display
+     * @param commentService the service to load the comment and handle edits
+     */
+    public CCommentView(final Long commentId, final CCommentService commentService) {
+        LOGGER.info("CCommentView constructor called with commentId: {}", commentId);
+        
+        if (commentId == null) {
+            throw new IllegalArgumentException("Comment ID cannot be null");
+        }
+        
+        if (commentService == null) {
+            throw new IllegalArgumentException("Comment service cannot be null");
+        }
+        
+        final java.util.Optional<CComment> commentOptional = commentService.get(commentId);
+        if (commentOptional.isEmpty()) {
+            throw new IllegalArgumentException("Comment with ID " + commentId + " not found");
+        }
+        
+        this.comment = commentOptional.get();
+        this.commentService = commentService;
+        this.layout = new VerticalLayout();
+        this.headerLayout = new HorizontalLayout();
+        this.commentTextParagraph = new Paragraph();
+        this.editTextArea = new TextArea();
+        this.editButtonsLayout = new HorizontalLayout();
+        
+        // Create buttons
+        this.editButton = CButton.createTertiary("Edit", event -> startEditing());
+        this.saveButton = CButton.createPrimary("Save", event -> saveChanges());
+        this.cancelButton = CButton.createTertiary("Cancel", event -> cancelEditing());
+        
+        setupLayout();
+        setupEditComponents();
         updateContent();
         addClassName("comment-view");
     }
@@ -72,8 +142,32 @@ public class CCommentView extends Div {
         
         commentTextParagraph.setWidthFull();
         
-        layout.add(headerLayout, commentTextParagraph);
+        layout.add(headerLayout, commentTextParagraph, editTextArea, editButtonsLayout);
         add(layout);
+    }
+
+    /**
+     * Sets up the edit components.
+     */
+    private void setupEditComponents() {
+        LOGGER.debug("Setting up edit components");
+        
+        // Configure edit text area
+        editTextArea.setWidthFull();
+        editTextArea.setMinHeight("100px");
+        editTextArea.setMaxLength(4000);
+        editTextArea.setVisible(false);
+        
+        // Configure edit buttons layout
+        editButtonsLayout.setJustifyContentMode(HorizontalLayout.JustifyContentMode.END);
+        editButtonsLayout.setSpacing(true);
+        editButtonsLayout.add(saveButton, cancelButton);
+        editButtonsLayout.setVisible(false);
+        
+        // Configure buttons
+        editButton.setIcon(new Icon(VaadinIcon.EDIT));
+        saveButton.setIcon(new Icon(VaadinIcon.CHECK));
+        cancelButton.setIcon(new Icon(VaadinIcon.CLOSE));
     }
 
     /**
@@ -114,6 +208,11 @@ public class CCommentView extends Div {
         rightSide.setSpacing(true);
         rightSide.setAlignItems(HorizontalLayout.Alignment.CENTER);
         
+        // Add edit button if service is available
+        if (commentService != null && !isEditing) {
+            rightSide.add(editButton);
+        }
+        
         // Priority indicator
         if (comment.getPriority() != null) {
             final Span prioritySpan = new Span(comment.getPriorityName());
@@ -143,10 +242,21 @@ public class CCommentView extends Div {
      * Updates the comment text content.
      */
     private void updateCommentText() {
-        commentTextParagraph.setText(comment.getCommentText());
-        commentTextParagraph.addClassName("comment-text");
-        commentTextParagraph.getStyle().set("white-space", "pre-wrap");
-        commentTextParagraph.getStyle().set("word-wrap", "break-word");
+        if (isEditing) {
+            commentTextParagraph.setVisible(false);
+            editTextArea.setValue(comment.getCommentText());
+            editTextArea.setVisible(true);
+        } else {
+            commentTextParagraph.setText(comment.getCommentText());
+            commentTextParagraph.addClassName("comment-text");
+            commentTextParagraph.getStyle().set("white-space", "pre-wrap");
+            commentTextParagraph.getStyle().set("word-wrap", "break-word");
+            commentTextParagraph.setVisible(true);
+            editTextArea.setVisible(false);
+        }
+        
+        // Update edit buttons visibility
+        editButtonsLayout.setVisible(isEditing);
     }
 
     /**
@@ -187,5 +297,67 @@ public class CCommentView extends Div {
     public void refresh() {
         LOGGER.debug("Refreshing comment view for comment: {}", comment.getId());
         updateContent();
+    }
+
+    /**
+     * Starts editing mode for the comment.
+     */
+    private void startEditing() {
+        LOGGER.info("Starting edit mode for comment: {}", comment.getId());
+        
+        if (commentService == null) {
+            LOGGER.warn("Cannot edit comment - no comment service available");
+            return;
+        }
+        
+        isEditing = true;
+        originalText = comment.getCommentText();
+        updateContent();
+    }
+
+    /**
+     * Saves the edited comment text.
+     */
+    private void saveChanges() {
+        LOGGER.info("Saving changes for comment: {}", comment.getId());
+        
+        final String newText = editTextArea.getValue();
+        if (newText == null || newText.trim().isEmpty()) {
+            LOGGER.warn("Cannot save empty comment text");
+            // Could show an error notification here
+            return;
+        }
+        
+        try {
+            commentService.updateCommentText(comment, newText.trim());
+            isEditing = false;
+            updateContent();
+            LOGGER.info("Successfully saved comment changes");
+        } catch (final Exception e) {
+            LOGGER.error("Error saving comment changes", e);
+            // Could show an error notification here
+        }
+    }
+
+    /**
+     * Cancels editing and reverts to original text.
+     */
+    private void cancelEditing() {
+        LOGGER.info("Canceling edit mode for comment: {}", comment.getId());
+        
+        isEditing = false;
+        // Revert any changes made to the comment text
+        if (originalText != null) {
+            comment.setCommentText(originalText);
+        }
+        updateContent();
+    }
+
+    /**
+     * Checks if the comment is currently being edited.
+     * @return true if in edit mode, false otherwise
+     */
+    public boolean isEditing() {
+        return isEditing;
     }
 }

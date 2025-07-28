@@ -195,7 +195,7 @@ public class CPanelActivityComments extends CAccordionDescription<CActivity> {
             } else {
                 // Add comments in chronological order
                 for (final CComment comment : comments) {
-                    final CCommentView commentView = new CCommentView(comment);
+                    final CCommentView commentView = new CCommentView(comment, commentService);
                     commentsContainer.add(commentView);
                 }
             }
@@ -285,5 +285,21 @@ public class CPanelActivityComments extends CAccordionDescription<CActivity> {
      */
     public CCommentService getCommentService() {
         return commentService;
+    }
+
+    @Override
+    public void populateForm(final CActivity entity) {
+        LOGGER.info("populateForm called with activity: {}", entity);
+        
+        super.populateForm(entity);
+        
+        // Refresh comments when activity changes
+        if (entity != null) {
+            loadComments();
+        } else {
+            // Clear comments if no activity selected
+            commentsContainer.removeAll();
+            updateCommentsTitle();
+        }
     }
 }
