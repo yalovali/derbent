@@ -121,7 +121,16 @@ public class CComment extends CEvent {
 	public CActivity getActivity() { return activity; }
 
 	public String getActivityName() {
-		return (activity != null) ? activity.getName() : "No Activity";
+		if (activity == null) {
+			return "No Activity";
+		}
+		try {
+			// Safe access to avoid LazyInitializationException
+			return activity.getName();
+		} catch (final org.hibernate.LazyInitializationException e) {
+			LOGGER.debug("LazyInitializationException accessing activity name, returning safe value", e);
+			return "Activity#" + (activity.getId() != null ? activity.getId() : "unknown");
+		}
 	}
 
 	/**
