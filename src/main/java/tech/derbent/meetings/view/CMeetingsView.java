@@ -9,6 +9,7 @@ import tech.derbent.abstracts.views.CAccordionDescription;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.service.CMeetingService;
+import tech.derbent.meetings.service.CMeetingStatusService;
 import tech.derbent.meetings.service.CMeetingTypeService;
 import tech.derbent.session.service.SessionService;
 import tech.derbent.users.service.CUserService;
@@ -29,13 +30,17 @@ public class CMeetingsView extends CProjectAwareMDPage<CMeeting> {
 
 	private final CUserService userService;
 
+	private final CMeetingStatusService meetingStatusService;
+
 	public CMeetingsView(final CMeetingService entityService,
 		final SessionService sessionService, final CMeetingTypeService meetingTypeService,
-		final CUserService userService) {
+		final CUserService userService,
+		final CMeetingStatusService meetingStatusService) {
 		super(CMeeting.class, entityService, sessionService);
 		addClassNames("meetings-view");
 		this.meetingTypeService = meetingTypeService;
 		this.userService = userService;
+		this.meetingStatusService = meetingStatusService;
 		// createDetailsLayout();
 	}
 
@@ -50,6 +55,15 @@ public class CMeetingsView extends CProjectAwareMDPage<CMeeting> {
 		addAccordionPanel(panel);
 		panel = new CPanelMeetingSchedule(getCurrentEntity(), getBinder(),
 			(CMeetingService) entityService);
+		addAccordionPanel(panel);
+		panel = new CPanelMeetingAgenda(getCurrentEntity(), getBinder(),
+			(CMeetingService) entityService);
+		addAccordionPanel(panel);
+		panel = new CPanelMeetingMinutes(getCurrentEntity(), getBinder(),
+			(CMeetingService) entityService);
+		addAccordionPanel(panel);
+		panel = new CPanelMeetingStatus(getCurrentEntity(), getBinder(),
+			(CMeetingService) entityService, meetingStatusService);
 		addAccordionPanel(panel);
 	}
 
