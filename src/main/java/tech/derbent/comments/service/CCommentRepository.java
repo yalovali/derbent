@@ -45,19 +45,19 @@ public interface CCommentRepository extends CAbstractNamedRepository<CComment> {
     Page<CComment> findByActivityOrderByEventDateAsc(@Param("activity") CActivity activity, Pageable pageable);
 
     /**
-     * Finds all comments for a specific project, ordered by event date.
+     * Finds all comments for a specific project, ordered by event date with eagerly loaded relationships.
      * @param project the project
      * @return list of comments for the project ordered by event date
      */
-    @Query("SELECT c FROM CComment c WHERE c.project = :project ORDER BY c.eventDate ASC")
+    @Query("SELECT c FROM CComment c LEFT JOIN FETCH c.author LEFT JOIN FETCH c.priority WHERE c.project = :project ORDER BY c.eventDate ASC")
     List<CComment> findByProjectOrderByEventDateAsc(@Param("project") CProject project);
 
     /**
-     * Finds all comments by a specific author, ordered by event date.
+     * Finds all comments by a specific author, ordered by event date with eagerly loaded relationships.
      * @param author the comment author
      * @return list of comments by the author ordered by event date
      */
-    @Query("SELECT c FROM CComment c WHERE c.author = :author ORDER BY c.eventDate DESC")
+    @Query("SELECT c FROM CComment c LEFT JOIN FETCH c.priority WHERE c.author = :author ORDER BY c.eventDate DESC")
     List<CComment> findByAuthorOrderByEventDateDesc(@Param("author") CUser author);
 
     /**
@@ -91,18 +91,20 @@ public interface CCommentRepository extends CAbstractNamedRepository<CComment> {
     long countByProject(CProject project);
 
     /**
-     * Finds important comments for an activity.
+     * Finds important comments for an activity with eagerly loaded relationships.
      * @param activity the activity
      * @return list of important comments for the activity ordered by event date
      */
-    @Query("SELECT c FROM CComment c WHERE c.activity = :activity AND c.important = true ORDER BY c.eventDate ASC")
+    @Query("SELECT c FROM CComment c LEFT JOIN FETCH c.author LEFT JOIN FETCH c.priority WHERE c.activity = :activity AND c.important = true ORDER BY c.eventDate ASC")
     List<CComment> findImportantByActivity(@Param("activity") CActivity activity);
 
     /**
-     * Finds recent comments for a project (last 30 days).
+     * Finds recent comments for a project (last 30 days) with eagerly loaded relationships.
+     * Uses parameter-based date calculation for database portability and eager loading to prevent lazy loading issues.
      * @param project the project
-     * @return list of recent comments for the project
+     * @param since the date threshold (30 days ago)
+     * @return list of recent comments for the project ordered by event date (newest first)
      */
-    @Query("SELECT c FROM CComment c WHERE c.project = :project AND c.eventDate >= CURRENT_DATE - 30 ORDER BY c.eventDate DESC")
-    List<CComment> findRecentByProject(@Param("project") CProject project);
+    @Query("SELECT c FROM CComment c LEFT JOIN FETCH c.author LEFT JOIN FETCH c.priority WHERE c.project = :project AND c.eventDate >= :since ORDER BY c.eventDate DESC")
+    List<CComment> findRecentByProject(@Param("project") CProject project, @Param("since") java.time.LocalDateTime since);
 }
