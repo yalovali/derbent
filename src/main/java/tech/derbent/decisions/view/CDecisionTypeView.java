@@ -8,16 +8,17 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.annotations.CSpringAuxillaries;
-import tech.derbent.abstracts.views.CAbstractMDPage;
+import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.decisions.domain.CDecisionType;
 import tech.derbent.decisions.service.CDecisionTypeService;
+import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 
 @Route("decision-types/:decisiontype_id?/:action?(edit)")
 @PageTitle("Decision Types")
 @Menu(order = 11.1, icon = "vaadin:tags", title = "Types.Decision Types")
 @PermitAll
-public class CDecisionTypeView extends CAbstractMDPage<CDecisionType> {
+public class CDecisionTypeView extends CProjectAwareMDPage<CDecisionType> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -37,6 +38,11 @@ public class CDecisionTypeView extends CAbstractMDPage<CDecisionType> {
 	}
 
 	@Override
+	protected CDecisionType createNewEntityInstance() {
+		return new CDecisionType();
+	}
+
+	@Override
 	protected void createDetailsLayout() {
 		final Div detailsLayout =
 			CEntityFormBuilder.buildForm(CDecisionType.class, getBinder());
@@ -47,6 +53,7 @@ public class CDecisionTypeView extends CAbstractMDPage<CDecisionType> {
 	protected void createGridForEntity() {
 		grid.addShortTextColumn(CDecisionType::getName, "Name", "name");
 		grid.addLongTextColumn(CDecisionType::getDescription, "Description", "description");
+		grid.addShortTextColumn(CDecisionType::getProjectName, "Project", "project");
 		grid.addShortTextColumn(entity -> entity.getColor(), "Color", "color");
 		grid.addComponentColumn(entity -> {
 			final Div colorDiv = new Div();
@@ -90,6 +97,11 @@ public class CDecisionTypeView extends CAbstractMDPage<CDecisionType> {
 		final CDecisionType newType = new CDecisionType();
 		// Default values are set via MetaData annotations and constructor
 		return newType;
+	}
+
+	@Override
+	protected void setProjectForEntity(CDecisionType entity, CProject project) {
+		entity.setProject(project);
 	}
 
 	@Override

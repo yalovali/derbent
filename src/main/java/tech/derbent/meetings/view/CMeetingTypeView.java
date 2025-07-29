@@ -8,20 +8,21 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.annotations.CSpringAuxillaries;
-import tech.derbent.abstracts.views.CAbstractMDPage;
+import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.meetings.domain.CMeetingType;
 import tech.derbent.meetings.service.CMeetingTypeService;
+import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 
 /**
  * CMeetingTypeView - View for managing meeting types. Layer: View (MVC) Provides CRUD
- * operations for meeting types using the abstract master-detail pattern.
+ * operations for meeting types using the abstract master-detail pattern with project awareness.
  */
 @Route ("meeting-types/:meetingtype_id?/:action?(edit)")
 @PageTitle ("Meeting Types")
 @Menu (order = 10.2, icon = "vaadin:tags", title = "Types.Meeting Types")
 @PermitAll
-public class CMeetingTypeView extends CAbstractMDPage<CMeetingType> {
+public class CMeetingTypeView extends CProjectAwareMDPage<CMeetingType> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -43,6 +44,11 @@ public class CMeetingTypeView extends CAbstractMDPage<CMeetingType> {
 	}
 
 	@Override
+	protected CMeetingType createNewEntityInstance() {
+		return new CMeetingType();
+	}
+
+	@Override
 	protected void createDetailsLayout() {
 		LOGGER.info("Creating details layout for CMeetingTypeView");
 		final Div detailsLayout =
@@ -57,6 +63,7 @@ public class CMeetingTypeView extends CAbstractMDPage<CMeetingType> {
 		grid.addShortTextColumn(CMeetingType::getName, "Name", "name");
 		grid.addLongTextColumn(CMeetingType::getDescription, "Description",
 			"description");
+		grid.addShortTextColumn(CMeetingType::getProjectName, "Project", "project");
 	}
 
 	@Override
@@ -68,6 +75,11 @@ public class CMeetingTypeView extends CAbstractMDPage<CMeetingType> {
 	@Override
 	protected CMeetingType newEntity() {
 		return new CMeetingType();
+	}
+
+	@Override
+	protected void setProjectForEntity(CMeetingType entity, CProject project) {
+		entity.setProject(project);
 	}
 
 	@Override

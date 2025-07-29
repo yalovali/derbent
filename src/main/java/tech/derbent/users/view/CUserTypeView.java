@@ -7,20 +7,21 @@ import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
-import tech.derbent.abstracts.views.CAbstractMDPage;
+import tech.derbent.abstracts.views.CProjectAwareMDPage;
+import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUserType;
 import tech.derbent.users.service.CUserTypeService;
 
 /**
  * CUserTypeView - View for managing user types. Layer: View (MVC) Provides CRUD
- * operations for user types using the abstract master-detail pattern.
+ * operations for user types using the abstract master-detail pattern with project awareness.
  */
 @Route ("user-types/:user_type_id?/:action?(edit)")
 @PageTitle ("User Types")
 @Menu (order = 10.3, icon = "vaadin:group", title = "Settings.User Types")
 @PermitAll
-public class CUserTypeView extends CAbstractMDPage<CUserType> {
+public class CUserTypeView extends CProjectAwareMDPage<CUserType> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -39,6 +40,11 @@ public class CUserTypeView extends CAbstractMDPage<CUserType> {
 	}
 
 	@Override
+	protected CUserType createNewEntityInstance() {
+		return new CUserType();
+	}
+
+	@Override
 	protected void createDetailsLayout() {
 		final Div detailsLayout = new Div();
 		detailsLayout.setClassName("editor-layout");
@@ -50,6 +56,7 @@ public class CUserTypeView extends CAbstractMDPage<CUserType> {
 	protected void createGridForEntity() {
 		grid.addShortTextColumn(CUserType::getName, "Name", "name");
 		grid.addLongTextColumn(CUserType::getDescription, "Description", "description");
+		grid.addShortTextColumn(CUserType::getProjectName, "Project", "project");
 	}
 
 	@Override
@@ -61,6 +68,11 @@ public class CUserTypeView extends CAbstractMDPage<CUserType> {
 	@Override
 	protected CUserType newEntity() {
 		return new CUserType();
+	}
+
+	@Override
+	protected void setProjectForEntity(CUserType entity, CProject project) {
+		entity.setProject(project);
 	}
 
 	@Override

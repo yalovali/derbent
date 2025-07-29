@@ -42,7 +42,7 @@ class CDashboardViewIntegrationTest {
     void testDashboardDataInitialization() {
         System.out.println("Testing dashboard data initialization...");
         
-        // Test project count - should be 3 from data.sql
+        // Test project count - should be 4 from CSampleDataInitializer
         long projectCount = projectService.getTotalProjectCount();
         System.out.println("Project count: " + projectCount);
         assertTrue(projectCount > 0, "Project count should be greater than 0");
@@ -66,17 +66,21 @@ class CDashboardViewIntegrationTest {
             System.out.println("    Activities: " + activityCount);
         }
         
-        // Verify we have the expected projects from data.sql
-        boolean hasDerbentProject = projects.stream()
-            .anyMatch(p -> "Derbent Project".equals(p.getName()));
-        assertTrue(hasDerbentProject, "Should have 'Derbent Project' from data.sql");
+        // Verify we have the expected projects from CSampleDataInitializer
+        boolean hasDigitalTransformation = projects.stream()
+            .anyMatch(p -> "Digital Transformation Initiative".equals(p.getName()));
+        assertTrue(hasDigitalTransformation, "Should have 'Digital Transformation Initiative' from CSampleDataInitializer");
         
-        boolean hasWebsiteRedesign = projects.stream()
-            .anyMatch(p -> "Website Redesign".equals(p.getName()));
-        assertTrue(hasWebsiteRedesign, "Should have 'Website Redesign' from data.sql");
+        boolean hasProductDevelopment = projects.stream()
+            .anyMatch(p -> "Product Development Phase 2".equals(p.getName()));
+        assertTrue(hasProductDevelopment, "Should have 'Product Development Phase 2' from CSampleDataInitializer");
         
-        boolean hasMobileApp = projects.stream()
-            .anyMatch(p -> "Mobile App Development".equals(p.getName()));
-        assertTrue(hasMobileApp, "Should have 'Mobile App Development' from data.sql");
+        boolean hasInfrastructureModernization = projects.stream()
+            .anyMatch(p -> "Infrastructure Modernization".equals(p.getName()));
+        assertTrue(hasInfrastructureModernization, "Should have 'Infrastructure Modernization' from CSampleDataInitializer");
+        
+        boolean hasCustomerExperience = projects.stream()
+            .anyMatch(p -> "Customer Experience Enhancement".equals(p.getName()));
+        assertTrue(hasCustomerExperience, "Should have 'Customer Experience Enhancement' from CSampleDataInitializer");
     }
 }
