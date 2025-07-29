@@ -176,7 +176,7 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> {
 			LOGGER.warn("findByTeamMember called with null user");
 			return List.of();
 		}
-		return ((CDecisionRepository) repository).findByTeamMembersContaining(user);
+		return decisionRepository.findByTeamMembersContaining(user);
 	}
 
 	/**
@@ -193,8 +193,7 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> {
 			LOGGER.warn("findDecisionsPendingApprovalByUser called with null user");
 			return List.of();
 		}
-		return ((CDecisionRepository) repository)
-			.findDecisionsPendingApprovalByUser(user);
+		return decisionRepository.findDecisionsPendingApprovalByUser(user);
 	}
 
 	/**
@@ -214,7 +213,7 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> {
 			return Optional.empty();
 		}
 		final Optional<CDecision> entity =
-			((CDecisionRepository) repository).findByIdWithAllRelationships(id);
+			decisionRepository.findByIdWithAllRelationships(id);
 		entity.ifPresent(this::initializeLazyFields);
 		return entity;
 	}
