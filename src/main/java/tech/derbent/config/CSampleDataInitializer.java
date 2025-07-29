@@ -33,6 +33,17 @@ import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserRole;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.CUserTypeService;
+import tech.derbent.meetings.service.CMeetingStatusService;
+import tech.derbent.decisions.service.CDecisionStatusService;
+import tech.derbent.activities.service.CActivityStatusService;
+import tech.derbent.orders.service.COrderStatusService;
+import tech.derbent.orders.service.CApprovalStatusService;
+import tech.derbent.meetings.domain.CMeetingStatus;
+import tech.derbent.decisions.domain.CDecisionStatus; 
+import tech.derbent.activities.domain.CActivityStatus;
+import tech.derbent.activities.domain.CActivityType;
+import tech.derbent.orders.domain.COrderStatus;
+import tech.derbent.orders.domain.CApprovalStatus;
 
 /**
  * CSampleDataInitializer - Enhanced sample data initializer following coding guidelines.
@@ -84,6 +95,16 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	private final CMeetingService meetingService;
 	
 	private final CRiskService riskService;
+	
+	private final CMeetingStatusService meetingStatusService;
+	
+	private final CDecisionStatusService decisionStatusService;
+	
+	private final CActivityStatusService activityStatusService;
+	
+	private final COrderStatusService orderStatusService;
+	
+	private final CApprovalStatusService approvalStatusService;
 
 	public CSampleDataInitializer(final CProjectService projectService,
 		final CUserService userService, final CActivityService activityService,
@@ -93,7 +114,12 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CDecisionTypeService decisionTypeService,
 		final COrderTypeService orderTypeService,
 		final CCompanyService companyService, final CCommentService commentService,
-		final CMeetingService meetingService, final CRiskService riskService) {
+		final CMeetingService meetingService, final CRiskService riskService,
+		final CMeetingStatusService meetingStatusService,
+		final CDecisionStatusService decisionStatusService,
+		final CActivityStatusService activityStatusService,
+		final COrderStatusService orderStatusService,
+		final CApprovalStatusService approvalStatusService) {
 		LOGGER
 			.info("CSampleDataInitializer constructor called with service dependencies");
 		this.projectService = projectService;
@@ -108,6 +134,11 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		this.commentService = commentService;
 		this.meetingService = meetingService;
 		this.riskService = riskService;
+		this.meetingStatusService = meetingStatusService;
+		this.decisionStatusService = decisionStatusService;
+		this.activityStatusService = activityStatusService;
+		this.orderStatusService = orderStatusService;
+		this.approvalStatusService = approvalStatusService;
 	}
 
 	/**
@@ -149,8 +180,14 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		// Create the activity using new auxiliary methods
 		final CActivity backendDev = new CActivity("Backend API Development", project);
 
+		// Find and set the activity type
+		final CActivityType developmentType = findActivityTypeByNameAndProject("Development", project);
+		if (developmentType == null) {
+			LOGGER.warn("Development activity type not found for project, using null");
+		}
+
 		// Set activity type and description using auxiliary method
-		activityService.setActivityType(backendDev, null,
+		activityService.setActivityType(backendDev, developmentType,
 			"Develop REST API endpoints for user management and authentication");
 
 		// Set assigned users using auxiliary method
@@ -264,6 +301,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 		// Create the meeting using new auxiliary methods
 		final CMeeting meeting = new CMeeting("Weekly Project Status Meeting", project);
+		meeting.setDescription("Weekly status update on project progress, blockers discussion, and next steps planning");
 
 		// Set meeting details using auxiliary method
 		meetingService.setMeetingDetails(meeting, null,
@@ -310,8 +348,14 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		// Create the activity using new auxiliary methods
 		final CActivity archDesign = new CActivity("System Architecture Design", project);
 
+		// Find and set the activity type
+		final CActivityType designType = findActivityTypeByNameAndProject("Design", project);
+		if (designType == null) {
+			LOGGER.warn("Design activity type not found for project, using null");
+		}
+
 		// Set activity type and description using auxiliary method
-		activityService.setActivityType(archDesign, null,
+		activityService.setActivityType(archDesign, designType,
 			"Design scalable system architecture for infrastructure modernization");
 
 		// Set assigned users using auxiliary method
@@ -450,8 +494,14 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		// Create the activity using new auxiliary methods
 		final CActivity techDoc = new CActivity("Technical Documentation Update", project);
 
+		// Find and set the activity type
+		final CActivityType documentationType = findActivityTypeByNameAndProject("Documentation", project);
+		if (documentationType == null) {
+			LOGGER.warn("Documentation activity type not found for project, using null");
+		}
+
 		// Set activity type and description using auxiliary method
-		activityService.setActivityType(techDoc, null,
+		activityService.setActivityType(techDoc, documentationType,
 			"Update and enhance technical documentation for customer experience features");
 
 		// Set assigned users using auxiliary method
@@ -496,8 +546,14 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		// Create the activity using new auxiliary methods
 		final CActivity uiTesting = new CActivity("User Interface Testing", project);
 
+		// Find and set the activity type
+		final CActivityType testingType = findActivityTypeByNameAndProject("Testing", project);
+		if (testingType == null) {
+			LOGGER.warn("Testing activity type not found for project, using null");
+		}
+
 		// Set activity type and description using auxiliary method
-		activityService.setActivityType(uiTesting, null,
+		activityService.setActivityType(uiTesting, testingType,
 			"Comprehensive testing of user interface components and workflows");
 
 		// Set assigned users using auxiliary method
@@ -544,6 +600,21 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			return projectService.findByName(name).orElse(null);
 		} catch (final Exception e) {
 			LOGGER.warn("Could not find project with name: {}", name);
+			return null;
+		}
+	}
+
+	private CActivityType findActivityTypeByNameAndProject(final String name, final CProject project) {
+		LOGGER.debug("findActivityTypeByNameAndProject called with name: {} and project: {}", name, project.getName());
+		try {
+			// Get all activity types for the project and find by name
+			var activityTypes = activityTypeService.list(org.springframework.data.domain.Pageable.unpaged());
+			return activityTypes.stream()
+				.filter(type -> name.equals(type.getName()) && project.equals(type.getProject()))
+				.findFirst()
+				.orElse(null);
+		} catch (final Exception e) {
+			LOGGER.error("Error finding activity type by name: {} for project: {}", name, project.getName(), e);
 			return null;
 		}
 	}
@@ -693,15 +764,27 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		LOGGER.info("initializeProjects called - creating 4 sample projects");
 
 		try {
-			projectService.createEntity("Digital Transformation Initiative");
-			projectService.createEntity("Product Development Phase 2");
-			projectService.createEntity("Infrastructure Modernization");
-			projectService.createEntity("Customer Experience Enhancement");
-			// LOGGER.info("Successfully created 4 sample projects");
+			// Create projects with comprehensive descriptions
+			createProjectWithDescription("Digital Transformation Initiative", 
+				"A comprehensive digital transformation project aimed at modernizing business processes and improving operational efficiency across all departments.");
+			createProjectWithDescription("Product Development Phase 2", 
+				"Second phase of new product development focusing on advanced features, user experience improvements, and market expansion strategies.");
+			createProjectWithDescription("Infrastructure Modernization", 
+				"Complete infrastructure overhaul including server upgrades, network optimization, security enhancements, and cloud migration initiatives.");
+			createProjectWithDescription("Customer Experience Enhancement", 
+				"Strategic initiative to improve customer journey, implement feedback systems, and enhance service quality across all touchpoints.");
 		} catch (final Exception e) {
 			LOGGER.error("Error creating sample projects", e);
 			throw new RuntimeException("Failed to initialize projects", e);
 		}
+	}
+
+	private void createProjectWithDescription(String name, String description) {
+		CProject project = new CProject();
+		project.setName(name);
+		project.setDescription(description);
+		projectService.save(project);
+		LOGGER.debug("Created project: {} with description", name);
 	}
 
 	/**
@@ -921,6 +1004,10 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			// Initialize data in proper dependency order
 			initializeCompanies();
 			initializeProjects(); // Projects must be created before project-aware entities
+			initializeMeetingStatuses(); // Initialize status entities first
+			initializeDecisionStatuses();
+			initializeActivityStatuses();
+			initializeOrderStatuses();
 			initializeUserTypes(); // Now can use projects
 			initializeMeetingTypes();
 			initializeDecisionTypes();
@@ -1191,5 +1278,127 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		
 		riskService.save(risk);
 		LOGGER.info("Low priority schedule risk created successfully");
+	}
+
+	/**
+	 * Initialize meeting status entities with comprehensive sample data.
+	 */
+	private void initializeMeetingStatuses() {
+		LOGGER.info("initializeMeetingStatuses called - creating meeting status classifications");
+		
+		try {
+			createMeetingStatus("Scheduled", "Meeting is scheduled but not yet started", "#3498db", false, 1);
+			createMeetingStatus("In Progress", "Meeting is currently in progress", "#f39c12", false, 2);
+			createMeetingStatus("Completed", "Meeting has been completed successfully", "#27ae60", true, 3);
+			createMeetingStatus("Cancelled", "Meeting has been cancelled", "#e74c3c", true, 4);
+			createMeetingStatus("Postponed", "Meeting has been postponed to a later date", "#9b59b6", false, 5);
+			
+			LOGGER.info("Meeting statuses initialized successfully");
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing meeting statuses", e);
+			throw new RuntimeException("Failed to initialize meeting statuses", e);
+		}
+	}
+
+	private void createMeetingStatus(String name, String description, String color, boolean isFinal, int sortOrder) {
+		CMeetingStatus status = new CMeetingStatus();
+		status.setName(name);
+		status.setDescription(description);
+		status.setColor(color);
+		status.setFinal(isFinal);
+		status.setSortOrder(sortOrder);
+		meetingStatusService.save(status);
+		LOGGER.debug("Created meeting status: {}", name);
+	}
+
+	/**
+	 * Initialize decision status entities with comprehensive sample data.
+	 */
+	private void initializeDecisionStatuses() {
+		LOGGER.info("initializeDecisionStatuses called - creating decision status classifications");
+		
+		try {
+			createDecisionStatus("Draft", "Decision is in draft state", "#95a5a6", false, 1);
+			createDecisionStatus("Under Review", "Decision is being reviewed", "#f39c12", false, 2);
+			createDecisionStatus("Approved", "Decision has been approved", "#27ae60", false, 3);
+			createDecisionStatus("Implemented", "Decision has been implemented", "#2ecc71", true, 4);
+			createDecisionStatus("Rejected", "Decision has been rejected", "#e74c3c", true, 5);
+			
+			LOGGER.info("Decision statuses initialized successfully");
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing decision statuses", e);
+			throw new RuntimeException("Failed to initialize decision statuses", e);
+		}
+	}
+
+	private void createDecisionStatus(String name, String description, String color, boolean isFinal, int sortOrder) {
+		CDecisionStatus status = new CDecisionStatus();
+		status.setName(name);
+		status.setDescription(description);
+		status.setColor(color);
+		status.setFinal(isFinal);
+		status.setSortOrder(sortOrder);
+		decisionStatusService.save(status);
+		LOGGER.debug("Created decision status: {}", name);
+	}
+
+	/**
+	 * Initialize activity status entities with comprehensive sample data.
+	 */
+	private void initializeActivityStatuses() {
+		LOGGER.info("initializeActivityStatuses called - creating activity status classifications");
+		
+		try {
+			createActivityStatus("Not Started", "Activity has not been started yet", "#95a5a6", false, 1);
+			createActivityStatus("In Progress", "Activity is currently in progress", "#3498db", false, 2);
+			createActivityStatus("On Hold", "Activity is temporarily on hold", "#f39c12", false, 3);
+			createActivityStatus("Completed", "Activity has been completed", "#27ae60", true, 4);
+			createActivityStatus("Cancelled", "Activity has been cancelled", "#e74c3c", true, 5);
+			
+			LOGGER.info("Activity statuses initialized successfully");
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing activity statuses", e);
+			throw new RuntimeException("Failed to initialize activity statuses", e);
+		}
+	}
+
+	private void createActivityStatus(String name, String description, String color, boolean isFinal, int sortOrder) {
+		CActivityStatus status = new CActivityStatus();
+		status.setName(name);
+		status.setDescription(description);
+		status.setColor(color);
+		status.setFinal(isFinal);
+		status.setSortOrder(sortOrder);
+		activityStatusService.save(status);
+		LOGGER.debug("Created activity status: {}", name);
+	}
+
+	/**
+	 * Initialize order status entities with comprehensive sample data.
+	 */
+	private void initializeOrderStatuses() {
+		LOGGER.info("initializeOrderStatuses called - creating order status classifications");
+		
+		try {
+			createOrderStatus("Draft", "Order is in draft state", "#95a5a6", false, 1);
+			createOrderStatus("Submitted", "Order has been submitted", "#3498db", false, 2);
+			createOrderStatus("Approved", "Order has been approved", "#27ae60", false, 3);
+			createOrderStatus("Fulfilled", "Order has been fulfilled", "#2ecc71", true, 4);
+			createOrderStatus("Rejected", "Order has been rejected", "#e74c3c", true, 5);
+			
+			LOGGER.info("Order statuses initialized successfully");
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing order statuses", e);
+			throw new RuntimeException("Failed to initialize order statuses", e);
+		}
+	}
+
+	private void createOrderStatus(String name, String description, String color, boolean isFinal, int sortOrder) {
+		COrderStatus status = new COrderStatus();
+		status.setName(name);
+		status.setDescription(description);
+		// COrderStatus extends CEntityNamed, not CStatus, so it doesn't have color, isFinal, sortOrder
+		orderStatusService.save(status);
+		LOGGER.debug("Created order status: {}", name);
 	}
 }
