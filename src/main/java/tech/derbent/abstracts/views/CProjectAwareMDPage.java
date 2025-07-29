@@ -153,15 +153,10 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB>
 				final CEntityOfProjectService<CEntityOfProject> projectService = 
 					(CEntityOfProjectService<CEntityOfProject>) entityService;
 				entities = projectService.findEntitiesByProject(activeProject.get(), PageRequest.of(0, 10));
-			} else if (entityService instanceof CAbstractNamedEntityService) {
-				@SuppressWarnings("unchecked")
-				final CAbstractNamedEntityService<CEntityNamed> namedService = 
-					(CAbstractNamedEntityService<CEntityNamed>) entityService;
-				entities = namedService.findByProject(activeProject.get(), PageRequest.of(0, 10));
 			} else {
-				LOGGER.warn("Entity service type not supported for project-aware filtering: {}", 
-					entityService.getClass().getSimpleName());
-				entities = Collections.emptyList();
+				// For non-project entities, show all entities (they don't have project filtering)
+				LOGGER.debug("Entity service is not project-aware, showing all entities");
+				entities = entityService.list(PageRequest.of(0, 10));
 			}
 			
 			@SuppressWarnings("unchecked")
@@ -197,15 +192,11 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB>
 			final CEntityOfProjectService<CEntityOfProject> projectService = 
 				(CEntityOfProjectService<CEntityOfProject>) entityService;
 			result = projectService.findEntitiesByProject(sessionService.getActiveProject().get(), pageable);
-		} else if (entityService instanceof CAbstractNamedEntityService) {
-			@SuppressWarnings("unchecked")
-			final CAbstractNamedEntityService<CEntityNamed> namedService = 
-				(CAbstractNamedEntityService<CEntityNamed>) entityService;
-			result = namedService.findByProject(sessionService.getActiveProject().get(), pageable);
 		} else {
-			LOGGER.warn("Entity service type not supported for project-aware selection: {}", 
-				entityService.getClass().getSimpleName());
-			return;
+			// For non-project entities, just get the first entity from all entities
+			LOGGER.debug("Entity service is not project-aware, selecting from all entities");
+			final List<EntityClass> allEntities = entityService.list(pageable);
+			result = allEntities.isEmpty() ? Collections.emptyList() : allEntities.subList(0, Math.min(1, allEntities.size()));
 		}
 		
 		LOGGER.debug("Fetched {} entities for project", result.size());

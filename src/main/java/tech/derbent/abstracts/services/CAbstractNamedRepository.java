@@ -36,20 +36,5 @@ public interface CAbstractNamedRepository<EntityClass extends CEntityNamed>
 	 */
 	@Query ("SELECT e FROM #{#entityName} e WHERE LOWER(e.name) = LOWER(:name)")
 	Optional<EntityClass> findByNameIgnoreCase(@Param ("name") String name);
-	@Query (
-		"SELECT a FROM #{#entityName} a LEFT JOIN FETCH a.project WHERE a.project = :project"
-	)
-	List<EntityClass> findByProject(@Param ("project") CProject project);
-	/**
-	 * Finds activities by project with eagerly loaded CActivityType, CActivityStatus, and
-	 * CProject to prevent LazyInitializationException.
-	 * @param project  the project
-	 * @param pageable pagination information
-	 * @return page of CActivity with loaded activityType, status, and project
-	 */
-	@Query (
-		"SELECT a FROM #{#entityName} a LEFT JOIN FETCH a.project WHERE a.project = :project"
-	)
-	List<EntityClass> findByProject(@Param ("project") CProject project,
-		final Pageable pageable);
+
 }

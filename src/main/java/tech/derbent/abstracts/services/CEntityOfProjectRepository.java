@@ -44,7 +44,6 @@ public interface CEntityOfProjectRepository<EntityClass extends CEntityOfProject
            "LEFT JOIN FETCH e.assignedTo " +
            "LEFT JOIN FETCH e.createdBy " +
            "WHERE e.project = :project")
-    @Override
     List<EntityClass> findByProject(@Param("project") CProject project);
 
     /**
@@ -59,7 +58,6 @@ public interface CEntityOfProjectRepository<EntityClass extends CEntityOfProject
            "LEFT JOIN FETCH e.assignedTo " +
            "LEFT JOIN FETCH e.createdBy " +
            "WHERE e.project = :project")
-    @Override
     List<EntityClass> findByProject(@Param("project") CProject project, Pageable pageable);
 
     /**
