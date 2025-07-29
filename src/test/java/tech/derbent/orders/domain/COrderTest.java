@@ -46,7 +46,7 @@ class COrderTest {
     @Test
     void testOrderWithBasicFields() {
         // Set up order fields
-        COrderType orderType = new COrderType("Service Order");
+        COrderType orderType = new COrderType("Service Order", project);
         COrderStatus status = new COrderStatus("Draft");
         CCurrency currency = new CCurrency("US Dollar", "USD", "$");
         
