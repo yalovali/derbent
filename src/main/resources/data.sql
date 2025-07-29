@@ -1,9 +1,36 @@
 -- H2-compatible sample data for testing
 
--- Delete existing data
+-- Delete existing data in proper order (respecting foreign key constraints)
+-- First delete data with dependencies
+DELETE FROM ccomment WHERE 1=1;
+DELETE FROM corderapproval WHERE 1=1;
+DELETE FROM corder WHERE 1=1;
+DELETE FROM cdecisionapproval WHERE 1=1;
+DELETE FROM cdecision WHERE 1=1;
+DELETE FROM cmeeting WHERE 1=1;
+DELETE FROM cactivity WHERE 1=1;
+DELETE FROM cuser WHERE 1=1;
+DELETE FROM cproject WHERE 1=1;
+DELETE FROM ccompany WHERE 1=1;
+DELETE FROM crisk WHERE 1=1;
+DELETE FROM cuserprojectsettings WHERE 1=1;
+
+-- Then delete lookup/reference data
 DELETE FROM ccommentpriority WHERE 1=1;
 DELETE FROM cdecisiontype WHERE 1=1;
 DELETE FROM cdecisionstatus WHERE 1=1;
+DELETE FROM cordertype WHERE 1=1;
+DELETE FROM corderstatus WHERE 1=1;
+DELETE FROM capprovalstatus WHERE 1=1;
+DELETE FROM ccurrency WHERE 1=1;
+DELETE FROM cmeetingtype WHERE 1=1;
+DELETE FROM cmeetingstatus WHERE 1=1;
+DELETE FROM cactivitytype WHERE 1=1;
+DELETE FROM cactivitystatus WHERE 1=1;
+DELETE FROM cactivitypriority WHERE 1=1;
+DELETE FROM cusertype WHERE 1=1;
+DELETE FROM ccompanysettings WHERE 1=1;
+DELETE FROM csystemsettings WHERE 1=1;
 
 -- Insert essential comment priorities (categorizes comment importance) - 7 ITEMS
 INSERT INTO ccommentpriority (name, description, priority_level, color, is_default) VALUES 
