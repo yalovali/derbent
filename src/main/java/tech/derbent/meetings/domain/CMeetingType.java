@@ -4,16 +4,17 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import tech.derbent.abstracts.domains.CTypeEntity;
+import tech.derbent.abstracts.domains.CEntityOfProject;
+import tech.derbent.projects.domain.CProject;
 
 /**
  * CMeetingType - Domain entity representing meeting types. Layer: Domain (MVC) Inherits
- * from CTypeEntity to provide type functionality for meetings.
+ * from CEntityOfProject to provide project-aware type functionality for meetings.
  */
 @Entity
 @Table (name = "cmeetingtype")
 @AttributeOverride (name = "id", column = @Column (name = "cmeetingtype_id"))
-public class CMeetingType extends CTypeEntity {
+public class CMeetingType extends CEntityOfProject {
 
 	/**
 	 * Default constructor for JPA.
@@ -23,19 +24,22 @@ public class CMeetingType extends CTypeEntity {
 	}
 
 	/**
-	 * Constructor with name.
+	 * Constructor with name and project.
 	 * @param name the name of the meeting type
+	 * @param project the project this type belongs to
 	 */
-	public CMeetingType(final String name) {
-		super(name);
+	public CMeetingType(final String name, final CProject project) {
+		super(name, project);
 	}
 
 	/**
-	 * Constructor with name and description.
+	 * Constructor with name, description and project.
 	 * @param name        the name of the meeting type
 	 * @param description the description of the meeting type
+	 * @param project     the project this type belongs to
 	 */
-	public CMeetingType(final String name, final String description) {
-		super(name, description);
+	public CMeetingType(final String name, final String description, final CProject project) {
+		super(name, project);
+		setDescription(description);
 	}
 }

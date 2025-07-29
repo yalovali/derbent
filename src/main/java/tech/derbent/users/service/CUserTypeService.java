@@ -8,17 +8,18 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import tech.derbent.abstracts.services.CAbstractNamedEntityService;
+import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.users.domain.CUserType;
+import tech.derbent.projects.domain.CProject;
 
 /**
  * CUserTypeService - Service layer for CUserType entity. Layer: Service (MVC) Handles
- * business logic for user type operations.
+ * business logic for project-aware user type operations.
  */
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CUserTypeService extends CAbstractNamedEntityService<CUserType> {
+public class CUserTypeService extends CEntityOfProjectService<CUserType> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserTypeService.class);
 
@@ -32,13 +33,15 @@ public class CUserTypeService extends CAbstractNamedEntityService<CUserType> {
 	}
 
 	/**
-	 * Creates a new user type entity with name and description.
+	 * Creates a new user type entity with name, description and project.
 	 * @param name        the name of the user type
 	 * @param description the description of the user type
+	 * @param project     the project this type belongs to
 	 */
 	@Transactional
-	public void createEntity(final String name, final String description) {
-		LOGGER.info("Creating new user type: {} with description: {}", name, description);
+	public void createEntity(final String name, final String description, final CProject project) {
+		LOGGER.info("Creating new user type: {} with description: {} for project: {}", 
+			name, description, project.getName());
 
 		// Standard test failure logic for error handler testing
 		if ("fail".equals(name)) {
@@ -47,9 +50,10 @@ public class CUserTypeService extends CAbstractNamedEntityService<CUserType> {
 		}
 		// Validate name using parent validation
 		validateEntityName(name);
-		final CUserType entity = new CUserType(name, description);
+		final CUserType entity = new CUserType(name, description, project);
 		repository.saveAndFlush(entity);
-		LOGGER.info("User type created successfully with name: {}", name);
+		LOGGER.info("User type created successfully with name: {} for project: {}", 
+			name, project.getName());
 	}
 
 	@Override

@@ -7,19 +7,20 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import tech.derbent.abstracts.services.CAbstractNamedEntityService;
+import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.decisions.domain.CDecisionType;
+import tech.derbent.projects.domain.CProject;
 
 /**
  * CDecisionTypeService - Service class for CDecisionType entities.
  * Layer: Service (MVC)
  * 
- * Provides business logic operations for decision type management including
+ * Provides business logic operations for project-aware decision type management including
  * validation, creation, and status management.
  */
 @Service
 @PreAuthorize("isAuthenticated()")
-public class CDecisionTypeService extends CAbstractNamedEntityService<CDecisionType> {
+public class CDecisionTypeService extends CEntityOfProjectService<CDecisionType> {
 
     public CDecisionTypeService(final CDecisionTypeRepository repository, final Clock clock) {
         super(repository, clock);
@@ -31,43 +32,36 @@ public class CDecisionTypeService extends CAbstractNamedEntityService<CDecisionT
     }
 
     /**
-     * Finds all active decision types.
-     * @return list of active decision types
+     * Finds all active decision types for a project.
+     * @param project the project
+     * @return list of active decision types for the project
      */
     @Transactional(readOnly = true)
-    public List<CDecisionType> findAllActive() {
-        LOGGER.info("findAllActive called for decision types");
-        return ((CDecisionTypeRepository) repository).findByIsActiveTrue();
+    public List<CDecisionType> findAllActiveByProject(final CProject project) {
+        LOGGER.info("findAllActiveByProject called for project: {}", project.getName());
+        return ((CDecisionTypeRepository) repository).findByProjectAndIsActiveTrue(project);
     }
 
     /**
-     * Finds all active decision types ordered by sort order.
-     * @return list of active decision types sorted by sort order
+     * Finds all decision types for a project ordered by sort order.
+     * @param project the project
+     * @return list of decision types for the project sorted by sort order
      */
     @Transactional(readOnly = true)
-    public List<CDecisionType> findAllActiveOrdered() {
-        LOGGER.info("findAllActiveOrdered called for decision types");
-        return ((CDecisionTypeRepository) repository).findByIsActiveTrueOrderBySortOrderAsc();
+    public List<CDecisionType> findAllByProjectOrdered(final CProject project) {
+        LOGGER.info("findAllByProjectOrdered called for project: {}", project.getName());
+        return ((CDecisionTypeRepository) repository).findByProjectOrderBySortOrderAsc(project);
     }
 
     /**
-     * Finds all decision types ordered by sort order.
-     * @return list of decision types sorted by sort order
+     * Finds decision types that require approval for a project.
+     * @param project the project
+     * @return list of decision types that require approval for the project
      */
     @Transactional(readOnly = true)
-    public List<CDecisionType> findAllOrdered() {
-        LOGGER.info("findAllOrdered called for decision types");
-        return ((CDecisionTypeRepository) repository).findAllByOrderBySortOrderAsc();
-    }
-
-    /**
-     * Finds decision types that require approval.
-     * @return list of decision types that require approval
-     */
-    @Transactional(readOnly = true)
-    public List<CDecisionType> findRequiringApproval() {
-        LOGGER.info("findRequiringApproval called for decision types");
-        return ((CDecisionTypeRepository) repository).findByRequiresApprovalTrue();
+    public List<CDecisionType> findRequiringApprovalByProject(final CProject project) {
+        LOGGER.info("findRequiringApprovalByProject called for project: {}", project.getName());
+        return ((CDecisionTypeRepository) repository).findByProjectAndRequiresApprovalTrue(project);
     }
 
     /**
@@ -75,20 +69,21 @@ public class CDecisionTypeService extends CAbstractNamedEntityService<CDecisionT
      * @param name the decision type name - must not be null or empty
      * @param description the description - can be null
      * @param requiresApproval whether decisions of this type require approval
+     * @param project the project this type belongs to
      * @return the created decision type
      */
     @Transactional
     public CDecisionType createDecisionType(final String name, final String description, 
-                                          final boolean requiresApproval) {
-        LOGGER.info("createDecisionType called with name: {}, description: {}, requiresApproval: {}", 
-                   name, description, requiresApproval);
+                                          final boolean requiresApproval, final CProject project) {
+        LOGGER.info("createDecisionType called with name: {}, description: {}, requiresApproval: {} for project: {}", 
+                   name, description, requiresApproval, project.getName());
         
         if (name == null || name.trim().isEmpty()) {
             LOGGER.error("createDecisionType called with null or empty name");
             throw new IllegalArgumentException("Decision type name cannot be null or empty");
         }
         
-        final CDecisionType decisionType = new CDecisionType(name.trim(), description);
+        final CDecisionType decisionType = new CDecisionType(name.trim(), description, project);
         decisionType.setRequiresApproval(requiresApproval);
         
         return repository.saveAndFlush(decisionType);
@@ -101,14 +96,15 @@ public class CDecisionTypeService extends CAbstractNamedEntityService<CDecisionT
      * @param color the hex color code - can be null
      * @param requiresApproval whether decisions of this type require approval
      * @param sortOrder the display sort order
+     * @param project the project this type belongs to
      * @return the created decision type
      */
     @Transactional
     public CDecisionType createDecisionType(final String name, final String description, 
                                           final String color, final boolean requiresApproval, 
-                                          final Integer sortOrder) {
-        LOGGER.info("createDecisionType called with name: {}, description: {}, color: {}, requiresApproval: {}, sortOrder: {}", 
-                   name, description, color, requiresApproval, sortOrder);
+                                          final Integer sortOrder, final CProject project) {
+        LOGGER.info("createDecisionType called with name: {}, description: {}, color: {}, requiresApproval: {}, sortOrder: {} for project: {}", 
+                   name, description, color, requiresApproval, sortOrder, project.getName());
         
         if (name == null || name.trim().isEmpty()) {
             LOGGER.error("createDecisionType called with null or empty name");
@@ -116,7 +112,7 @@ public class CDecisionTypeService extends CAbstractNamedEntityService<CDecisionT
         }
         
         final CDecisionType decisionType = new CDecisionType(name.trim(), description, color, 
-                                                           requiresApproval, sortOrder);
+                                                           requiresApproval, sortOrder, project);
         
         return repository.saveAndFlush(decisionType);
     }

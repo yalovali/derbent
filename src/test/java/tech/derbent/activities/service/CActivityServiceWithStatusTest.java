@@ -16,6 +16,7 @@ import org.mockito.MockitoAnnotations;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.domain.CActivityType;
+import tech.derbent.projects.domain.CProject;
 
 /**
  * Test class for CActivityService with new CActivityStatus relationship. Tests lazy
@@ -37,7 +38,12 @@ class CActivityServiceWithStatusTest {
 	private CActivity createTestActivity() {
 		final CActivity activity = new CActivity();
 		activity.setName("Test Activity");
-		final CActivityType activityType = new CActivityType("Development");
+		
+		// Create test project for the type
+		final CProject testProject = new CProject();
+		testProject.setName("Test Project");
+		
+		final CActivityType activityType = new CActivityType("Development", testProject);
 		activity.setActivityType(activityType);
 		final CActivityStatus status = new CActivityStatus("IN_PROGRESS");
 		activity.setStatus(status);
@@ -94,7 +100,12 @@ class CActivityServiceWithStatusTest {
 		// Given
 		final CActivity activity = new CActivity();
 		activity.setName("Test Activity");
-		final CActivityType type = new CActivityType("Development");
+		
+		// Create test project for the type
+		final CProject testProject = new CProject();
+		testProject.setName("Test Project");
+		
+		final CActivityType type = new CActivityType("Development", testProject);
 		activity.setActivityType(type);
 		// activityStatus is null When/Then - should not throw exception
 		assertDoesNotThrow(() -> activityService.initializeLazyFields(activity));

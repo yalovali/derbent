@@ -8,17 +8,18 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import tech.derbent.abstracts.services.CAbstractNamedEntityService;
+import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.meetings.domain.CMeetingType;
+import tech.derbent.projects.domain.CProject;
 
 /**
  * CMeetingTypeService - Service layer for CMeetingType entity. Layer: Service (MVC)
- * Handles business logic for meeting type operations.
+ * Handles business logic for project-aware meeting type operations.
  */
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CMeetingTypeService extends CAbstractNamedEntityService<CMeetingType> {
+public class CMeetingTypeService extends CEntityOfProjectService<CMeetingType> {
 
 	private static final Logger LOGGER =
 		LoggerFactory.getLogger(CMeetingTypeService.class);
@@ -33,14 +34,15 @@ public class CMeetingTypeService extends CAbstractNamedEntityService<CMeetingTyp
 	}
 
 	/**
-	 * Creates a new meeting type entity with name and description.
+	 * Creates a new meeting type entity with name, description and project.
 	 * @param name        the name of the meeting type
 	 * @param description the description of the meeting type
+	 * @param project     the project this type belongs to
 	 */
 	@Transactional
-	public void createEntity(final String name, final String description) {
-		LOGGER.info("Creating new meeting type: {} with description: {}", name,
-			description);
+	public void createEntity(final String name, final String description, final CProject project) {
+		LOGGER.info("Creating new meeting type: {} with description: {} for project: {}", 
+			name, description, project.getName());
 
 		// Standard test failure logic for error handler testing
 		if ("fail".equals(name)) {
@@ -49,9 +51,10 @@ public class CMeetingTypeService extends CAbstractNamedEntityService<CMeetingTyp
 		}
 		// Validate name using parent validation
 		validateEntityName(name);
-		final CMeetingType entity = new CMeetingType(name, description);
+		final CMeetingType entity = new CMeetingType(name, description, project);
 		repository.saveAndFlush(entity);
-		LOGGER.info("Meeting type created successfully with name: {}", name);
+		LOGGER.info("Meeting type created successfully with name: {} for project: {}", 
+			name, project.getName());
 	}
 
 	@Override

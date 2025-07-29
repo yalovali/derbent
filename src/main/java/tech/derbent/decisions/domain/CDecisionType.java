@@ -9,18 +9,19 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.MetaData;
-import tech.derbent.abstracts.domains.CTypeEntity;
+import tech.derbent.abstracts.domains.CEntityOfProject;
+import tech.derbent.projects.domain.CProject;
 
 /**
  * CDecisionType - Domain entity representing decision type categories. Layer: Domain
- * (MVC) Inherits from CTypeEntity to provide type functionality for decision
+ * (MVC) Inherits from CEntityOfProject to provide project-aware type functionality for decision
  * categorization. Supports classification of decisions by type such as Strategic,
  * Operational, Technical, Financial, etc.
  */
 @Entity
 @Table (name = "cdecisiontype")
 @AttributeOverride (name = "id", column = @Column (name = "decisiontype_id"))
-public class CDecisionType extends CTypeEntity {
+public class CDecisionType extends CEntityOfProject {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDecisionType.class);
 
@@ -69,12 +70,14 @@ public class CDecisionType extends CTypeEntity {
 	}
 
 	/**
-	 * Constructor with name.
+	 * Constructor with name and project.
 	 * @param name the name of the decision type - must not be null or empty
+	 * @param project the project this type belongs to
 	 */
-	public CDecisionType(final String name) {
-		super(name);
-		LOGGER.debug("CDecisionType constructor called with name: {}", name);
+	public CDecisionType(final String name, final CProject project) {
+		super(name, project);
+		LOGGER.debug("CDecisionType constructor called with name: {} for project: {}", 
+			name, project.getName());
 
 		if ((name == null) || name.trim().isEmpty()) {
 			LOGGER.warn("CDecisionType constructor - Name parameter is null or empty");
@@ -82,14 +85,16 @@ public class CDecisionType extends CTypeEntity {
 	}
 
 	/**
-	 * Constructor with name and description.
+	 * Constructor with name, description and project.
 	 * @param name        the name of the decision type - must not be null or empty
 	 * @param description detailed description of the decision type - can be null
+	 * @param project     the project this type belongs to
 	 */
-	public CDecisionType(final String name, final String description) {
-		super(name, description);
-		LOGGER.debug("CDecisionType constructor called with name: {}, description: {}",
-			name, description);
+	public CDecisionType(final String name, final String description, final CProject project) {
+		super(name, project);
+		setDescription(description);
+		LOGGER.debug("CDecisionType constructor called with name: {}, description: {} for project: {}",
+			name, description, project.getName());
 	}
 
 	/**
@@ -99,13 +104,15 @@ public class CDecisionType extends CTypeEntity {
 	 * @param color            the hex color code - can be null, defaults to blue
 	 * @param requiresApproval whether decisions of this type require approval
 	 * @param sortOrder        the display sort order
+	 * @param project          the project this type belongs to
 	 */
 	public CDecisionType(final String name, final String description, final String color,
-		final boolean requiresApproval, final Integer sortOrder) {
-		super(name, description);
+		final boolean requiresApproval, final Integer sortOrder, final CProject project) {
+		super(name, project);
+		setDescription(description);
 		LOGGER.debug(
-			"CDecisionType constructor called with name: {}, description: {}, color: {}, requiresApproval: {}, sortOrder: {}",
-			name, description, color, requiresApproval, sortOrder);
+			"CDecisionType constructor called with name: {}, description: {}, color: {}, requiresApproval: {}, sortOrder: {} for project: {}",
+			name, description, color, requiresApproval, sortOrder, project.getName());
 		this.color = color != null ? color : "#4A90E2";
 		this.requiresApproval = requiresApproval;
 		this.sortOrder = sortOrder != null ? sortOrder : 100;

@@ -8,20 +8,21 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.annotations.CSpringAuxillaries;
-import tech.derbent.abstracts.views.CAbstractMDPage;
+import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.activities.domain.CActivityType;
 import tech.derbent.activities.service.CActivityTypeService;
+import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 
 /**
  * CActivityTypeView - View for managing activity types. Layer: View (MVC) Provides CRUD
- * operations for activity types using the abstract master-detail pattern.
+ * operations for activity types using the abstract master-detail pattern with project awareness.
  */
 @Route ("activity-types/:activity_type_id?/:action?(edit)")
 @PageTitle ("Activity Types")
 @Menu (order = 10.4, icon = "vaadin:tags", title = "Types.Activity Types")
 @PermitAll
-public class CActivityTypeView extends CAbstractMDPage<CActivityType> {
+public class CActivityTypeView extends CProjectAwareMDPage<CActivityType> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -43,6 +44,11 @@ public class CActivityTypeView extends CAbstractMDPage<CActivityType> {
 	}
 
 	@Override
+	protected CActivityType createNewEntityInstance() {
+		return new CActivityType();
+	}
+
+	@Override
 	protected void createDetailsLayout() {
 		final Div detailsLayout =
 			CEntityFormBuilder.buildForm(CActivityType.class, getBinder());
@@ -54,6 +60,7 @@ public class CActivityTypeView extends CAbstractMDPage<CActivityType> {
 		grid.addShortTextColumn(CActivityType::getName, "Name", "name");
 		grid.addLongTextColumn(CActivityType::getDescription, "Description",
 			"description");
+		grid.addShortTextColumn(CActivityType::getProjectName, "Project", "project");
 	}
 
 	@Override
@@ -65,6 +72,11 @@ public class CActivityTypeView extends CAbstractMDPage<CActivityType> {
 	@Override
 	protected CActivityType newEntity() {
 		return new CActivityType();
+	}
+
+	@Override
+	protected void setProjectForEntity(CActivityType entity, CProject project) {
+		entity.setProject(project);
 	}
 
 	@Override

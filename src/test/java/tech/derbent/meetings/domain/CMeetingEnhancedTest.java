@@ -36,7 +36,7 @@ class CMeetingEnhancedTest {
         project.setDescription("Test project description");
         
         // Create test meeting type
-        meetingType = new CMeetingType("Test Meeting Type", "Test meeting type description");
+        meetingType = new CMeetingType("Test Meeting Type", "Test meeting type description", project);
         
         // Create test meeting status
         status = new CMeetingStatus("SCHEDULED", "Meeting is scheduled");

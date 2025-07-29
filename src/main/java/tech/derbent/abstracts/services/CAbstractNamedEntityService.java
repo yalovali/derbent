@@ -123,26 +123,7 @@ public abstract class CAbstractNamedEntityService<EntityClass extends CEntityNam
 		}
 	}
 
-	@SuppressWarnings ("unchecked")
-	@Transactional (readOnly = true)
-	public List<CEntityNamed> findByProject(final CProject project) {
-		LOGGER.info("findByProject called with project: {}", project);
 
-		if (project == null) {
-			return List.of();
-		}
-		return ((CAbstractNamedRepository<CEntityNamed>) repository)
-			.findByProject(project);
-	}
-
-	@SuppressWarnings ("unchecked")
-	@Transactional (readOnly = true)
-	public List<CEntityNamed> findByProject(final CProject project,
-		final Pageable pageable) {
-		LOGGER.debug("Fetching activities for project: {}", project.getName());
-		return ((CAbstractNamedRepository<CEntityNamed>) repository)
-			.findByProject(project, pageable);
-	}
 
 	/**
 	 * Validates if a name is unique (excluding the current entity being updated).
