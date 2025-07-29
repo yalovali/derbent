@@ -920,12 +920,12 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		try {
 			// Initialize data in proper dependency order
 			initializeCompanies();
-			initializeUserTypes();
+			initializeProjects(); // Projects must be created before project-aware entities
+			initializeUserTypes(); // Now can use projects
 			initializeMeetingTypes();
 			initializeDecisionTypes();
 			initializeOrderTypes();
 			initializeUsers();
-			initializeProjects();
 			initializeActivityTypes();
 			initializeActivities();
 			initializeMeetings();
