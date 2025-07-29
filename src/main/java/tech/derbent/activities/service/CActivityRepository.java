@@ -8,18 +8,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import tech.derbent.abstracts.services.CAbstractNamedRepository;
+import tech.derbent.abstracts.services.CEntityOfProjectRepository;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.projects.domain.CProject;
 
-public interface CActivityRepository extends CAbstractNamedRepository<CActivity> {
+public interface CActivityRepository extends CEntityOfProjectRepository<CActivity> {
 
-	/**
-	 * Counts the number of activities for a specific project.
-	 * @param project the project
-	 * @return count of activities for the project
-	 */
-	long countByProject(CProject project);
 	/**
 	 * Finds an activity by ID with eagerly loaded CActivityType to prevent
 	 * LazyInitializationException.
@@ -28,6 +22,7 @@ public interface CActivityRepository extends CAbstractNamedRepository<CActivity>
 	 */
 	@Query ("SELECT a FROM CActivity a LEFT JOIN FETCH a.activityType WHERE a.id = :id")
 	Optional<CActivity> findByIdWithActivityType(@Param ("id") Long id);
+
 	/**
 	 * Finds an activity by ID with eagerly loaded CActivityType and CActivityStatus to
 	 * prevent LazyInitializationException.
@@ -38,27 +33,43 @@ public interface CActivityRepository extends CAbstractNamedRepository<CActivity>
 		"SELECT a FROM CActivity a LEFT JOIN FETCH a.activityType LEFT JOIN FETCH a.status WHERE a.id = :id"
 	)
 	Optional<CActivity> findByIdWithActivityTypeAndStatus(@Param ("id") Long id);
+
 	/**
 	 * Finds an activity by ID with eagerly loaded CActivityType, CActivityStatus, and
-	 * CProject to prevent LazyInitializationException.
+	 * CProject to prevent LazyInitializationException. This extends the base method
+	 * with activity-specific relationships.
 	 * @param id the activity ID
 	 * @return optional CActivity with loaded activityType, status, and project
 	 */
 	@Query (
-		"SELECT a FROM CActivity a LEFT JOIN FETCH a.activityType LEFT JOIN FETCH a.status LEFT JOIN FETCH a.project WHERE a.id = :id"
+		"SELECT a FROM CActivity a " +
+		"LEFT JOIN FETCH a.project " +
+		"LEFT JOIN FETCH a.assignedTo " +
+		"LEFT JOIN FETCH a.createdBy " +
+		"LEFT JOIN FETCH a.activityType " +
+		"LEFT JOIN FETCH a.status " +
+		"WHERE a.id = :id"
 	)
-	Optional<CActivity> findByIdWithActivityTypeStatusAndProject(@Param ("id") Long id);
+	Optional<CActivity> findByIdWithAllRelationships(@Param ("id") Long id);
+
 	/**
 	 * Finds all activities by project with eagerly loaded CActivityType, CActivityStatus,
 	 * and CProject to prevent LazyInitializationException. This method returns all
-	 * activities without pagination.
+	 * activities without pagination with activity-specific relationships.
 	 * @param project the project
 	 * @return list of CActivity with loaded activityType, status, and project
 	 */
 	@Query (
-		"SELECT a FROM CActivity a LEFT JOIN FETCH a.activityType LEFT JOIN FETCH a.status LEFT JOIN FETCH a.project WHERE a.project = :project"
+		"SELECT a FROM CActivity a " +
+		"LEFT JOIN FETCH a.project " +
+		"LEFT JOIN FETCH a.assignedTo " +
+		"LEFT JOIN FETCH a.createdBy " +
+		"LEFT JOIN FETCH a.activityType " +
+		"LEFT JOIN FETCH a.status " +
+		"WHERE a.project = :project"
 	)
-	List<CActivity> findByProjectWithTypeAndStatus(@Param ("project") CProject project);
+	List<CActivity> findByProjectWithAllRelationships(@Param ("project") CProject project);
+
 	/**
 	 * Finds activities by project with eagerly loaded CActivityType, CActivityStatus, and
 	 * CProject to prevent LazyInitializationException.
@@ -67,8 +78,14 @@ public interface CActivityRepository extends CAbstractNamedRepository<CActivity>
 	 * @return page of CActivity with loaded activityType, status, and project
 	 */
 	@Query (
-		"SELECT a FROM CActivity a LEFT JOIN FETCH a.activityType LEFT JOIN FETCH a.status LEFT JOIN FETCH a.project WHERE a.project = :project"
+		"SELECT a FROM CActivity a " +
+		"LEFT JOIN FETCH a.project " +
+		"LEFT JOIN FETCH a.assignedTo " +
+		"LEFT JOIN FETCH a.createdBy " +
+		"LEFT JOIN FETCH a.activityType " +
+		"LEFT JOIN FETCH a.status " +
+		"WHERE a.project = :project"
 	)
-	Page<CActivity> findByProjectWithTypeAndStatus(@Param ("project") CProject project,
+	Page<CActivity> findByProjectWithAllRelationships(@Param ("project") CProject project,
 		Pageable pageable);
 }

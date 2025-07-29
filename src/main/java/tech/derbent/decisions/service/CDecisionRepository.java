@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import tech.derbent.abstracts.services.CAbstractNamedRepository;
+import tech.derbent.abstracts.services.CEntityOfProjectRepository;
 import tech.derbent.decisions.domain.CDecision;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
@@ -18,20 +18,15 @@ import tech.derbent.users.domain.CUser;
  * (MVC) Provides data access methods for decision entities including project-based
  * queries and eagerly loaded relationships to prevent LazyInitializationException.
  */
-public interface CDecisionRepository extends CAbstractNamedRepository<CDecision> {
+public interface CDecisionRepository extends CEntityOfProjectRepository<CDecision> {
 
-	/**
-	 * Counts the number of decisions for a specific project.
-	 * @param project the project
-	 * @return count of decisions for the project
-	 */
-	long countByProject(CProject project);
 	/**
 	 * Finds decisions by accountable user.
 	 * @param user the accountable user
 	 * @return list of decisions where the user is accountable
 	 */
 	List<CDecision> findByAccountableUser(CUser user);
+
 	/**
 	 * Finds decisions by decision type.
 	 * @param decisionTypeId the decision type ID
@@ -39,18 +34,26 @@ public interface CDecisionRepository extends CAbstractNamedRepository<CDecision>
 	 */
 	@Query ("SELECT d FROM CDecision d WHERE d.decisionType.id = :decisionTypeId")
 	List<CDecision> findByDecisionTypeId(@Param ("decisionTypeId") Long decisionTypeId);
+
 	/**
 	 * Finds a decision by ID with all main relationships eagerly loaded to prevent
-	 * LazyInitializationException.
+	 * LazyInitializationException. This extends the base method with decision-specific
+	 * relationships.
 	 * @param id the decision ID
 	 * @return optional CDecision with loaded relationships
 	 */
 	@Query (
-		"SELECT d FROM CDecision d " + "LEFT JOIN FETCH d.decisionType "
-			+ "LEFT JOIN FETCH d.decisionStatus " + "LEFT JOIN FETCH d.project "
-			+ "LEFT JOIN FETCH d.accountableUser " + "WHERE d.id = :id"
+		"SELECT d FROM CDecision d " + 
+		"LEFT JOIN FETCH d.project " +
+		"LEFT JOIN FETCH d.assignedTo " +
+		"LEFT JOIN FETCH d.createdBy " +
+		"LEFT JOIN FETCH d.decisionType " +
+		"LEFT JOIN FETCH d.decisionStatus " + 
+		"LEFT JOIN FETCH d.accountableUser " + 
+		"WHERE d.id = :id"
 	)
 	Optional<CDecision> findByIdWithAllRelationships(@Param ("id") Long id);
+
 	/**
 	 * Finds a decision by ID with eagerly loaded decision type to prevent
 	 * LazyInitializationException.
@@ -59,6 +62,7 @@ public interface CDecisionRepository extends CAbstractNamedRepository<CDecision>
 	 */
 	@Query ("SELECT d FROM CDecision d LEFT JOIN FETCH d.decisionType WHERE d.id = :id")
 	Optional<CDecision> findByIdWithDecisionType(@Param ("id") Long id);
+
 	/**
 	 * Finds a decision by ID with eagerly loaded decision type and status to prevent
 	 * LazyInitializationException.
@@ -69,6 +73,7 @@ public interface CDecisionRepository extends CAbstractNamedRepository<CDecision>
 		"SELECT d FROM CDecision d LEFT JOIN FETCH d.decisionType LEFT JOIN FETCH d.decisionStatus WHERE d.id = :id"
 	)
 	Optional<CDecision> findByIdWithDecisionTypeAndStatus(@Param ("id") Long id);
+
 	/**
 	 * Finds all decisions by project with eagerly loaded relationships to prevent
 	 * LazyInitializationException.
@@ -76,12 +81,17 @@ public interface CDecisionRepository extends CAbstractNamedRepository<CDecision>
 	 * @return list of CDecision with loaded relationships
 	 */
 	@Query (
-		"SELECT d FROM CDecision d " + "LEFT JOIN FETCH d.decisionType "
-			+ "LEFT JOIN FETCH d.decisionStatus " + "LEFT JOIN FETCH d.project "
-			+ "LEFT JOIN FETCH d.accountableUser " + "WHERE d.project = :project"
+		"SELECT d FROM CDecision d " + 
+		"LEFT JOIN FETCH d.project " +
+		"LEFT JOIN FETCH d.assignedTo " +
+		"LEFT JOIN FETCH d.createdBy " +
+		"LEFT JOIN FETCH d.decisionType " +
+		"LEFT JOIN FETCH d.decisionStatus " + 
+		"LEFT JOIN FETCH d.accountableUser " + 
+		"WHERE d.project = :project"
 	)
-	List<CDecision>
-		findByProjectWithAllRelationships(@Param ("project") CProject project);
+	List<CDecision> findByProjectWithAllRelationships(@Param ("project") CProject project);
+
 	/**
 	 * Finds decisions by project with eagerly loaded relationships and pagination.
 	 * @param project  the project
@@ -89,12 +99,18 @@ public interface CDecisionRepository extends CAbstractNamedRepository<CDecision>
 	 * @return page of CDecision with loaded relationships
 	 */
 	@Query (
-		"SELECT d FROM CDecision d " + "LEFT JOIN FETCH d.decisionType "
-			+ "LEFT JOIN FETCH d.decisionStatus " + "LEFT JOIN FETCH d.project "
-			+ "LEFT JOIN FETCH d.accountableUser " + "WHERE d.project = :project"
+		"SELECT d FROM CDecision d " + 
+		"LEFT JOIN FETCH d.project " +
+		"LEFT JOIN FETCH d.assignedTo " +
+		"LEFT JOIN FETCH d.createdBy " +
+		"LEFT JOIN FETCH d.decisionType " +
+		"LEFT JOIN FETCH d.decisionStatus " + 
+		"LEFT JOIN FETCH d.accountableUser " + 
+		"WHERE d.project = :project"
 	)
 	Page<CDecision> findByProjectWithAllRelationships(@Param ("project") CProject project,
 		Pageable pageable);
+
 	/**
 	 * Finds decisions where the user is a team member.
 	 * @param user the team member user
@@ -102,6 +118,7 @@ public interface CDecisionRepository extends CAbstractNamedRepository<CDecision>
 	 */
 	@Query ("SELECT d FROM CDecision d JOIN d.teamMembers tm WHERE tm = :user")
 	List<CDecision> findByTeamMembersContaining(@Param ("user") CUser user);
+
 	/**
 	 * Finds decisions that require approval from a specific user.
 	 * @param user the approver user

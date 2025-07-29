@@ -8,7 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import tech.derbent.abstracts.services.CAbstractNamedEntityService;
+import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.orders.domain.COrder;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
@@ -22,7 +22,7 @@ import tech.derbent.users.domain.CUser;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class COrderService extends CAbstractNamedEntityService<COrder> {
+public class COrderService extends CEntityOfProjectService<COrder> {
 
 	private final COrderRepository orderRepository;
 
@@ -34,22 +34,6 @@ public class COrderService extends CAbstractNamedEntityService<COrder> {
 	COrderService(final COrderRepository repository, final Clock clock) {
 		super(repository, clock);
 		this.orderRepository = repository;
-	}
-
-	/**
-	 * Counts the number of orders for a specific project.
-	 * @param project the project
-	 * @return count of orders for the project
-	 */
-	@PreAuthorize ("permitAll()")
-	public long countByProject(final CProject project) {
-		LOGGER.info("countByProject called with project: {}",
-			project != null ? project.getName() : "null");
-
-		if (project == null) {
-			return 0;
-		}
-		return orderRepository.countByProject(project);
 	}
 
 	/**
@@ -92,7 +76,7 @@ public class COrderService extends CAbstractNamedEntityService<COrder> {
 		if (id == null) {
 			return Optional.empty();
 		}
-		return orderRepository.findByIdWithRelationships(id);
+		return orderRepository.findByIdWithAllRelationships(id);
 	}
 
 	/**
@@ -107,7 +91,7 @@ public class COrderService extends CAbstractNamedEntityService<COrder> {
 		if (project == null) {
 			return List.of();
 		}
-		return orderRepository.findByProjectWithRelationships(project);
+		return orderRepository.findByProjectWithAllRelationships(project);
 	}
 
 	/**
@@ -156,7 +140,7 @@ public class COrderService extends CAbstractNamedEntityService<COrder> {
 		if (id == null) {
 			return Optional.empty();
 		}
-		final Optional<COrder> entity = orderRepository.findByIdWithRelationships(id);
+		final Optional<COrder> entity = orderRepository.findByIdWithAllRelationships(id);
 		entity.ifPresent(this::initializeLazyFields);
 		return entity;
 	}

@@ -10,23 +10,26 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import tech.derbent.abstracts.services.CAbstractNamedEntityService;
+import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.domain.CMeetingStatus;
 import tech.derbent.meetings.domain.CMeetingType;
+import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CMeetingService extends CAbstractNamedEntityService<CMeeting> {
+public class CMeetingService extends CEntityOfProjectService<CMeeting> {
+
+	private final CMeetingRepository meetingRepository;
 
 	CMeetingService(final CMeetingRepository repository, final Clock clock) {
 		super(repository, clock);
+		this.meetingRepository = repository;
 	}
 	// Now using the inherited createEntity(String name) method from
-	// CAbstractNamedEntityService The original createEntity method is replaced by the
-	// parent class implementation
+	// CEntityOfProjectService which includes createEntityForProject method.
 
 	@Override
 	protected CMeeting createNewEntityInstance() {
@@ -43,7 +46,7 @@ public class CMeetingService extends CAbstractNamedEntityService<CMeeting> {
 		if ((user == null) || (user.getId() == null)) {
 			return List.of();
 		}
-		return ((CMeetingRepository) repository).findByAttendeeId(user.getId());
+		return meetingRepository.findByAttendeeId(user.getId());
 	}
 
 	/**
@@ -56,7 +59,34 @@ public class CMeetingService extends CAbstractNamedEntityService<CMeeting> {
 		if ((user == null) || (user.getId() == null)) {
 			return List.of();
 		}
-		return ((CMeetingRepository) repository).findByParticipantId(user.getId());
+		return meetingRepository.findByParticipantId(user.getId());
+	}
+
+	/**
+	 * Finds meetings by project with all relationships loaded to prevent
+	 * LazyInitializationException. This method provides meeting-specific
+	 * relationship loading beyond the base implementation.
+	 * 
+	 * @param project the project
+	 * @return list of meetings with all relationships loaded
+	 */
+	@Transactional(readOnly = true)
+	public List<CMeeting> findByProjectWithAllRelationships(final CProject project) {
+		LOGGER.info("findByProjectWithAllRelationships called with project: {}",
+			project != null ? project.getName() : "null");
+
+		if (project == null) {
+			LOGGER.warn("findByProjectWithAllRelationships called with null project");
+			return List.of();
+		}
+
+		try {
+			return meetingRepository.findByProjectWithAllRelationships(project);
+		} catch (final Exception e) {
+			LOGGER.error("Error finding meetings by project with all relationships '{}': {}",
+				project.getName(), e.getMessage(), e);
+			throw new RuntimeException("Failed to find meetings by project with all relationships", e);
+		}
 	}
 
 	/**
@@ -74,28 +104,11 @@ public class CMeetingService extends CAbstractNamedEntityService<CMeeting> {
 			return Optional.empty();
 		}
 		final Optional<CMeeting> entity =
-			((CMeetingRepository) repository).findByIdWithMeetingTypeAndParticipants(id);
+			meetingRepository.findByIdWithAllRelationships(id);
 		// Initialize lazy fields if entity is present (for any other potential lazy
 		// relationships)
 		entity.ifPresent(this::initializeLazyFields);
 		return entity;
-	}
-
-	/**
-	 * Gets a meeting by ID with eagerly loaded relationships. This method should be used
-	 * in UI contexts to prevent LazyInitializationException.
-	 * @param id the meeting ID
-	 * @return optional CMeeting with loaded relationships
-	 */
-	@Transactional (readOnly = true)
-	public Optional<CMeeting> getWithMeetingTypeAndParticipants(final Long id) {
-		LOGGER.info("getWithMeetingTypeAndParticipants called with id: {}", id);
-
-		if (id == null) {
-			return Optional.empty();
-		}
-		return ((CMeetingRepository) repository)
-			.findByIdWithMeetingTypeAndParticipants(id);
 	}
 
 	/**
