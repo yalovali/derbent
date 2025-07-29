@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import tech.derbent.abstracts.services.CAbstractNamedRepository;
+import tech.derbent.abstracts.services.CEntityOfProjectRepository;
 import tech.derbent.orders.domain.COrder;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
@@ -15,28 +15,12 @@ import tech.derbent.users.domain.CUser;
  * COrderRepository - Repository interface for COrder entities.
  * Layer: Service (MVC)
  * 
- * Provides data access operations for orders, extending the standard
- * CAbstractNamedRepository to inherit common CRUD and query operations.
- * Includes order-specific query methods for finding orders by project,
- * requestor, responsible user, and status.
+ * Provides data access operations for orders, extending the CEntityOfProjectRepository
+ * to inherit common CRUD and query operations with proper lazy loading.
+ * Includes order-specific query methods for finding orders by requestor, 
+ * responsible user, and status.
  */
-public interface COrderRepository extends CAbstractNamedRepository<COrder> {
-
-    /**
-     * Counts the number of orders for a specific project.
-     * 
-     * @param project the project
-     * @return count of orders for the project
-     */
-    long countByProject(CProject project);
-
-    /**
-     * Finds orders by project.
-     * 
-     * @param project the project
-     * @return list of orders for the project
-     */
-    List<COrder> findByProject(CProject project);
+public interface COrderRepository extends CEntityOfProjectRepository<COrder> {
 
     /**
      * Finds orders by requestor.
@@ -56,33 +40,40 @@ public interface COrderRepository extends CAbstractNamedRepository<COrder> {
 
     /**
      * Finds an order by ID with eagerly loaded relationships to prevent
-     * LazyInitializationException.
+     * LazyInitializationException. This extends the base method with order-specific
+     * relationships.
      * 
      * @param id the order ID
      * @return optional COrder with loaded relationships
      */
     @Query("SELECT o FROM COrder o " +
+           "LEFT JOIN FETCH o.project " +
+           "LEFT JOIN FETCH o.assignedTo " +
+           "LEFT JOIN FETCH o.createdBy " +
            "LEFT JOIN FETCH o.orderType " +
            "LEFT JOIN FETCH o.status " +
            "LEFT JOIN FETCH o.currency " +
            "LEFT JOIN FETCH o.requestor " +
            "LEFT JOIN FETCH o.responsible " +
-           "LEFT JOIN FETCH o.project " +
            "WHERE o.id = :id")
-    Optional<COrder> findByIdWithRelationships(@Param("id") Long id);
+    Optional<COrder> findByIdWithAllRelationships(@Param("id") Long id);
 
     /**
      * Finds orders by project with eagerly loaded relationships.
+     * This extends the base implementation with order-specific relationships.
      * 
      * @param project the project
      * @return list of orders with loaded relationships
      */
     @Query("SELECT o FROM COrder o " +
+           "LEFT JOIN FETCH o.project " +
+           "LEFT JOIN FETCH o.assignedTo " +
+           "LEFT JOIN FETCH o.createdBy " +
            "LEFT JOIN FETCH o.orderType " +
            "LEFT JOIN FETCH o.status " +
            "LEFT JOIN FETCH o.currency " +
            "LEFT JOIN FETCH o.requestor " +
            "LEFT JOIN FETCH o.responsible " +
            "WHERE o.project = :project")
-    List<COrder> findByProjectWithRelationships(@Param("project") CProject project);
+    List<COrder> findByProjectWithAllRelationships(@Param("project") CProject project);
 }

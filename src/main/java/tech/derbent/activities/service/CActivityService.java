@@ -12,7 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import tech.derbent.abstracts.services.CAbstractNamedEntityService;
+import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.domain.CActivityPriority;
 import tech.derbent.activities.domain.CActivityStatus;
@@ -22,29 +22,17 @@ import tech.derbent.users.domain.CUser;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CActivityService extends CAbstractNamedEntityService<CActivity> {
+public class CActivityService extends CEntityOfProjectService<CActivity> {
+
+	private final CActivityRepository activityRepository;
 
 	CActivityService(final CActivityRepository repository, final Clock clock) {
 		super(repository, clock);
+		this.activityRepository = repository;
 	}
 
-	/**
-	 * Counts the number of activities for a specific project.
-	 * @param project the project
-	 * @return count of activities for the project
-	 */
-	@PreAuthorize ("permitAll()")
-	public long countByProject(final CProject project) {
-		LOGGER.info("countByProject called with project: {}", project);
-
-		if (project == null) {
-			return 0L;
-		}
-		return ((CActivityRepository) repository).countByProject(project);
-	}
 	// Now using the inherited createEntity(String name) method from
-	// CAbstractNamedEntityService The original createEntity method is replaced by the
-	// parent class implementation
+	// CEntityOfProjectService which includes createEntityForProject method.
 
 	@Override
 	protected CActivity createNewEntityInstance() {
@@ -82,8 +70,7 @@ public class CActivityService extends CAbstractNamedEntityService<CActivity> {
 		if (id == null) {
 			return Optional.empty();
 		}
-		final Optional<CActivity> entity = ((CActivityRepository) repository)
-			.findByIdWithActivityTypeStatusAndProject(id);
+		final Optional<CActivity> entity = activityRepository.findByIdWithAllRelationships(id);
 		// Initialize lazy fields if entity is present (for any other potential lazy
 		// relationships)
 		entity.ifPresent(this::initializeLazyFields);
@@ -101,7 +88,7 @@ public class CActivityService extends CAbstractNamedEntityService<CActivity> {
 		getActivitiesGroupedByStatus(final CProject project) {
 		// Get all activities for the project with type and status loaded
 		final List<CActivity> activities =
-			((CActivityRepository) repository).findByProjectWithTypeAndStatus(project);
+			activityRepository.findByProjectWithAllRelationships(project);
 		// Group by activity status, handling null statuses
 		return activities.stream()
 			.collect(Collectors.groupingBy(activity -> activity.getStatus() != null
@@ -121,7 +108,7 @@ public class CActivityService extends CAbstractNamedEntityService<CActivity> {
 			project.getName());
 		// Get all activities for the project with type and status loaded
 		final List<CActivity> activities =
-			((CActivityRepository) repository).findByProjectWithTypeAndStatus(project);
+			activityRepository.findByProjectWithAllRelationships(project);
 		// Group by activity type, handling null types
 		return activities.stream()
 			.collect(Collectors.groupingBy(
@@ -140,7 +127,7 @@ public class CActivityService extends CAbstractNamedEntityService<CActivity> {
 	public Optional<CActivity> getWithActivityType(final Long id) {
 		LOGGER.debug("Getting CActivity with ID {} and eagerly loading CActivityType",
 			id);
-		return ((CActivityRepository) repository).findByIdWithActivityType(id);
+		return activityRepository.findByIdWithActivityType(id);
 	}
 
 	/**
@@ -155,8 +142,7 @@ public class CActivityService extends CAbstractNamedEntityService<CActivity> {
 		LOGGER.debug(
 			"Getting CActivity with ID {} and eagerly loading CActivityType and CActivityStatus",
 			id);
-		return ((CActivityRepository) repository)
-			.findByIdWithActivityTypeStatusAndProject(id);
+		return activityRepository.findByIdWithActivityTypeAndStatus(id);
 	}
 
 	/**

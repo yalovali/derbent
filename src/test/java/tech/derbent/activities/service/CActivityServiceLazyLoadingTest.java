@@ -73,7 +73,7 @@ class CActivityServiceLazyLoadingTest {
 		final CActivityType activityType = new CActivityType();
 		activityType.setName("Test Activity Type");
 		activity.setActivityType(activityType);
-		when(repository.findByIdWithActivityTypeStatusAndProject(activityId))
+		when(repository.findByIdWithAllRelationships(activityId))
 			.thenReturn(Optional.of(activity));
 		// When & Then - Should not throw LazyInitializationException
 		assertDoesNotThrow(() -> {
@@ -105,7 +105,7 @@ class CActivityServiceLazyLoadingTest {
 		activityType.setName("Test Activity Type");
 		activity.setActivityType(activityType);
 		
-		when(repository.findByIdWithActivityTypeStatusAndProject(activityId))
+		when(repository.findByIdWithAllRelationships(activityId))
 			.thenReturn(Optional.of(activity));
 		
 		// When & Then - Should not throw LazyInitializationException when accessing project name

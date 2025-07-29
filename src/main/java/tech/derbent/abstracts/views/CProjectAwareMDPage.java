@@ -14,9 +14,11 @@ import com.vaadin.flow.data.provider.DataProvider;
 
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
+import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.interfaces.CProjectChangeListener;
 import tech.derbent.abstracts.services.CAbstractNamedEntityService;
 import tech.derbent.abstracts.services.CAbstractService;
+import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 
@@ -142,10 +144,29 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB>
 
 		if (activeProject.isPresent()) {
 			LOGGER.debug("Active project found: {}", activeProject.get().getName());
-			final List<CEntityNamed> entities =
-				((CAbstractNamedEntityService<CEntityNamed>) entityService)
-					.findByProject(activeProject.get(), PageRequest.of(0, 10));
-			grid.setItems((DataProvider<EntityClass, Void>) entities);
+			
+			List<? extends CEntityDB> entities;
+			
+			// Check if the entity service is for CEntityOfProject entities
+			if (entityService instanceof CEntityOfProjectService) {
+				@SuppressWarnings("unchecked")
+				final CEntityOfProjectService<CEntityOfProject> projectService = 
+					(CEntityOfProjectService<CEntityOfProject>) entityService;
+				entities = projectService.findEntitiesByProject(activeProject.get(), PageRequest.of(0, 10));
+			} else if (entityService instanceof CAbstractNamedEntityService) {
+				@SuppressWarnings("unchecked")
+				final CAbstractNamedEntityService<CEntityNamed> namedService = 
+					(CAbstractNamedEntityService<CEntityNamed>) entityService;
+				entities = namedService.findByProject(activeProject.get(), PageRequest.of(0, 10));
+			} else {
+				LOGGER.warn("Entity service type not supported for project-aware filtering: {}", 
+					entityService.getClass().getSimpleName());
+				entities = Collections.emptyList();
+			}
+			
+			@SuppressWarnings("unchecked")
+			final List<EntityClass> typedEntities = (List<EntityClass>) entities;
+			grid.setItems(typedEntities);
 		}
 		else {
 			// If no active project, show empty grid
@@ -161,14 +182,38 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB>
 			LOGGER.warn("Grid is null, cannot select first item");
 			return;
 		}
-		final CAbstractNamedEntityService<CEntityNamed> namedService =
-			(CAbstractNamedEntityService<CEntityNamed>) entityService;
-		final PageRequest pageable = PageRequest.of(0, 1); // first page, 10 items per
-		// page
-		final List<CEntityNamed> result =
-			namedService.findByProject(sessionService.getActiveProject().get(), pageable);
-		LOGGER.debug("Fetched {} activities for project", result.size());
-		grid.select(((EntityClass) result.get(0)));
+		
+		if (!sessionService.getActiveProject().isPresent()) {
+			LOGGER.warn("No active project available for first item selection");
+			return;
+		}
+		
+		final PageRequest pageable = PageRequest.of(0, 1); // first page, 1 item
+		List<? extends CEntityDB> result;
+		
+		// Check if the entity service is for CEntityOfProject entities
+		if (entityService instanceof CEntityOfProjectService) {
+			@SuppressWarnings("unchecked")
+			final CEntityOfProjectService<CEntityOfProject> projectService = 
+				(CEntityOfProjectService<CEntityOfProject>) entityService;
+			result = projectService.findEntitiesByProject(sessionService.getActiveProject().get(), pageable);
+		} else if (entityService instanceof CAbstractNamedEntityService) {
+			@SuppressWarnings("unchecked")
+			final CAbstractNamedEntityService<CEntityNamed> namedService = 
+				(CAbstractNamedEntityService<CEntityNamed>) entityService;
+			result = namedService.findByProject(sessionService.getActiveProject().get(), pageable);
+		} else {
+			LOGGER.warn("Entity service type not supported for project-aware selection: {}", 
+				entityService.getClass().getSimpleName());
+			return;
+		}
+		
+		LOGGER.debug("Fetched {} entities for project", result.size());
+		if (!result.isEmpty()) {
+			@SuppressWarnings("unchecked")
+			final EntityClass firstEntity = (EntityClass) result.get(0);
+			grid.select(firstEntity);
+		}
 	}
 
 	/**

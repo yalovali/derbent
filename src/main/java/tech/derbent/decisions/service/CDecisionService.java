@@ -8,7 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import tech.derbent.abstracts.services.CAbstractNamedEntityService;
+import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.decisions.domain.CDecision;
 import tech.derbent.decisions.domain.CDecisionApproval;
 import tech.derbent.projects.domain.CProject;
@@ -21,10 +21,13 @@ import tech.derbent.users.domain.CUser;
  */
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CDecisionService extends CAbstractNamedEntityService<CDecision> {
+public class CDecisionService extends CEntityOfProjectService<CDecision> {
+
+	private final CDecisionRepository decisionRepository;
 
 	public CDecisionService(final CDecisionRepository repository, final Clock clock) {
 		super(repository, clock);
+		this.decisionRepository = repository;
 	}
 
 	/**
@@ -57,23 +60,6 @@ public class CDecisionService extends CAbstractNamedEntityService<CDecision> {
 		// Save the decision which will cascade to the approval
 		repository.saveAndFlush(decision);
 		return approval;
-	}
-
-	/**
-	 * Counts the number of decisions for a specific project.
-	 * @param project the project
-	 * @return count of decisions for the project
-	 */
-	@PreAuthorize ("permitAll()")
-	public long countByProject(final CProject project) {
-		LOGGER.info("countByProject called with project: {}",
-			project != null ? project.getName() : "null");
-
-		if (project == null) {
-			LOGGER.warn("countByProject called with null project");
-			return 0;
-		}
-		return ((CDecisionRepository) repository).countByProject(project);
 	}
 
 	/**
@@ -140,7 +126,7 @@ public class CDecisionService extends CAbstractNamedEntityService<CDecision> {
 			LOGGER.warn("findByAccountableUser called with null user");
 			return List.of();
 		}
-		return ((CDecisionRepository) repository).findByAccountableUser(user);
+		return decisionRepository.findByAccountableUser(user);
 	}
 
 	/**
@@ -156,7 +142,7 @@ public class CDecisionService extends CAbstractNamedEntityService<CDecision> {
 			LOGGER.warn("findByIdWithDecisionType called with null id");
 			return Optional.empty();
 		}
-		return ((CDecisionRepository) repository).findByIdWithDecisionType(id);
+		return decisionRepository.findByIdWithDecisionType(id);
 	}
 
 	/**
@@ -173,8 +159,7 @@ public class CDecisionService extends CAbstractNamedEntityService<CDecision> {
 			LOGGER.warn("findByProjectWithAllRelationships called with null project");
 			return List.of();
 		}
-		return ((CDecisionRepository) repository)
-			.findByProjectWithAllRelationships(project);
+		return decisionRepository.findByProjectWithAllRelationships(project);
 	}
 
 	/**
@@ -191,7 +176,7 @@ public class CDecisionService extends CAbstractNamedEntityService<CDecision> {
 			LOGGER.warn("findByTeamMember called with null user");
 			return List.of();
 		}
-		return ((CDecisionRepository) repository).findByTeamMembersContaining(user);
+		return decisionRepository.findByTeamMembersContaining(user);
 	}
 
 	/**
@@ -208,8 +193,7 @@ public class CDecisionService extends CAbstractNamedEntityService<CDecision> {
 			LOGGER.warn("findDecisionsPendingApprovalByUser called with null user");
 			return List.of();
 		}
-		return ((CDecisionRepository) repository)
-			.findDecisionsPendingApprovalByUser(user);
+		return decisionRepository.findDecisionsPendingApprovalByUser(user);
 	}
 
 	/**
@@ -229,7 +213,7 @@ public class CDecisionService extends CAbstractNamedEntityService<CDecision> {
 			return Optional.empty();
 		}
 		final Optional<CDecision> entity =
-			((CDecisionRepository) repository).findByIdWithAllRelationships(id);
+			decisionRepository.findByIdWithAllRelationships(id);
 		entity.ifPresent(this::initializeLazyFields);
 		return entity;
 	}

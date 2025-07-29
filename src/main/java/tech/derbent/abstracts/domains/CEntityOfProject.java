@@ -55,6 +55,14 @@ public abstract class CEntityOfProject extends CEntityNamed {
 		return (project != null) ? project.getName() : "No Project";
 	}
 
+	public CUser getAssignedTo() { return assignedTo; }
+
+	public void setAssignedTo(final CUser assignedTo) { this.assignedTo = assignedTo; }
+
+	public CUser getCreatedBy() { return createdBy; }
+
+	public void setCreatedBy(final CUser createdBy) { this.createdBy = createdBy; }
+
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
