@@ -11,6 +11,7 @@ import tech.derbent.abstracts.annotations.CSpringAuxillaries;
 import tech.derbent.abstracts.views.CAbstractMDPage;
 import tech.derbent.decisions.domain.CDecisionType;
 import tech.derbent.decisions.service.CDecisionTypeService;
+import tech.derbent.session.service.CSessionService;
 
 @Route("decision-types/:decisiontype_id?/:action?(edit)")
 @PageTitle("Decision Types")
@@ -26,9 +27,10 @@ public class CDecisionTypeView extends CAbstractMDPage<CDecisionType> {
 	/**
 	 * Constructor for CDecisionTypeView.
 	 * @param entityService the service for decision type operations
+	 * @param sessionService
 	 */
-	public CDecisionTypeView(final CDecisionTypeService entityService) {
-		super(CDecisionType.class, entityService);
+	public CDecisionTypeView(final CDecisionTypeService entityService, final CSessionService sessionService) {
+		super(CDecisionType.class, entityService, sessionService);
 		addClassNames("decision-types-view");
 		LOGGER.info("CDecisionTypeView initialized with route: "
 			+ CSpringAuxillaries.getRoutePath(this.getClass()));
@@ -55,7 +57,7 @@ public class CDecisionTypeView extends CAbstractMDPage<CDecisionType> {
 			colorDiv.getStyle().set("border-radius", "3px");
 			return colorDiv;
 		}).setHeader("Preview").setWidth("80px").setFlexGrow(0);
-		
+
 		grid.addComponentColumn(entity -> {
 			final Div approvalDiv = new Div();
 			approvalDiv.setText(entity.isRequiresApproval() ? "Yes" : "No");
@@ -72,7 +74,7 @@ public class CDecisionTypeView extends CAbstractMDPage<CDecisionType> {
 			}
 			return approvalDiv;
 		}).setHeader("Requires Approval").setWidth("150px").setFlexGrow(0);
-		
+
 		grid.addShortTextColumn(entity -> String.valueOf(entity.getSortOrder()), "Order", "sortOrder");
 	}
 

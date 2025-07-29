@@ -11,6 +11,7 @@ import tech.derbent.abstracts.annotations.CSpringAuxillaries;
 import tech.derbent.abstracts.views.CAbstractMDPage;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.service.CActivityStatusService;
+import tech.derbent.session.service.CSessionService;
 
 /**
  * CActivityStatusView - View for managing activity statuses. Layer: View (MVC) Provides
@@ -32,9 +33,10 @@ public class CActivityStatusView extends CAbstractMDPage<CActivityStatus> {
 	/**
 	 * Constructor for CActivityStatusView.
 	 * @param entityService the service for activity status operations
+	 * @param sessionService
 	 */
-	public CActivityStatusView(final CActivityStatusService entityService) {
-		super(CActivityStatus.class, entityService);
+	public CActivityStatusView(final CActivityStatusService entityService, final CSessionService sessionService) {
+		super(CActivityStatus.class, entityService, sessionService);
 		LOGGER.debug("CActivityStatusView constructor called with service: {}",
 			entityService.getClass().getSimpleName());
 		addClassNames("activity-statuses-view");

@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Configuration;
 
 import jakarta.annotation.PostConstruct;
 import tech.derbent.session.service.LayoutService;
-import tech.derbent.session.service.SessionService;
+import tech.derbent.session.service.CSessionService;
 
 /**
  * Configuration class to handle the circular dependency between SessionService and LayoutService.
@@ -12,10 +12,10 @@ import tech.derbent.session.service.SessionService;
 @Configuration
 public class SessionConfiguration {
     
-    private final SessionService sessionService;
+    private final CSessionService sessionService;
     private final LayoutService layoutService;
     
-    public SessionConfiguration(final SessionService sessionService, final LayoutService layoutService) {
+    public SessionConfiguration(final CSessionService sessionService, final LayoutService layoutService) {
         this.sessionService = sessionService;
         this.layoutService = layoutService;
     }

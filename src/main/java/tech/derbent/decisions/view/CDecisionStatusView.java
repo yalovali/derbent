@@ -11,9 +11,10 @@ import tech.derbent.abstracts.annotations.CSpringAuxillaries;
 import tech.derbent.abstracts.views.CAbstractMDPage;
 import tech.derbent.decisions.domain.CDecisionStatus;
 import tech.derbent.decisions.service.CDecisionStatusService;
+import tech.derbent.session.service.CSessionService;
 
 /**
- * CDecisionStatusView - View for managing decision statuses. Layer: View (MVC) 
+ * CDecisionStatusView - View for managing decision statuses. Layer: View (MVC)
  * Provides CRUD operations for decision statuses using the abstract master-detail pattern.
  * Manages different status types that decisions can have throughout their lifecycle.
  */
@@ -31,11 +32,12 @@ public class CDecisionStatusView extends CAbstractMDPage<CDecisionStatus> {
     /**
      * Constructor for CDecisionStatusView.
      * @param entityService the service for decision status operations
+     * @param sessionService
      */
-    public CDecisionStatusView(final CDecisionStatusService entityService) {
-        super(CDecisionStatus.class, entityService);
+    public CDecisionStatusView(final CDecisionStatusService entityService, final CSessionService sessionService) {
+        super(CDecisionStatus.class, entityService, sessionService);
         addClassNames("decision-statuses-view");
-        LOGGER.info("CDecisionStatusView initialized with route: " 
+        LOGGER.info("CDecisionStatusView initialized with route: "
             + CSpringAuxillaries.getRoutePath(this.getClass()));
     }
 
@@ -59,7 +61,7 @@ public class CDecisionStatusView extends CAbstractMDPage<CDecisionStatus> {
             colorDiv.getStyle().set("border-radius", "3px");
             return colorDiv;
         }).setHeader("Preview").setWidth("80px").setFlexGrow(0);
-        
+
         grid.addComponentColumn(entity -> {
             final Div statusDiv = new Div();
             statusDiv.setText(entity.isFinal() ? "Final" : "Active");
@@ -76,18 +78,18 @@ public class CDecisionStatusView extends CAbstractMDPage<CDecisionStatus> {
             }
             return statusDiv;
         }).setHeader("Type").setWidth("100px").setFlexGrow(0);
-        
+
         grid.addShortTextColumn(entity -> String.valueOf(entity.getSortOrder()), "Order", "sortOrder");
     }
 
     @Override
-    protected String getEntityRouteIdField() { 
-        return ENTITY_ID_FIELD; 
+    protected String getEntityRouteIdField() {
+        return ENTITY_ID_FIELD;
     }
 
     @Override
-    protected String getEntityRouteTemplateEdit() { 
-        return ENTITY_ROUTE_TEMPLATE_EDIT; 
+    protected String getEntityRouteTemplateEdit() {
+        return ENTITY_ROUTE_TEMPLATE_EDIT;
     }
 
     @Override

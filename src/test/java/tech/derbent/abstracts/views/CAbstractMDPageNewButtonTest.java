@@ -21,6 +21,7 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
+import tech.derbent.session.service.CSessionService;
 
 /**
  * Test class to verify the "New" button behavior in CAbstractMDPage Tests the core
@@ -35,8 +36,9 @@ public class CAbstractMDPageNewButtonTest {
 
 		private static final long serialVersionUID = 1L;
 
-		public TestProjectMDPage(final CAbstractService<CProject> entityService) {
-			super(CProject.class, entityService);
+		public TestProjectMDPage(final CAbstractService<CProject> entityService,
+			final CSessionService sessionService) {
+			super(CProject.class, entityService, sessionService);
 		}
 
 		@Override
@@ -93,7 +95,7 @@ public class CAbstractMDPageNewButtonTest {
 		// Setup mock service behavior
 		when(projectService.list(any(Pageable.class))).thenReturn(new ArrayList<>());
 		when(projectService.count()).thenReturn(0);
-		testPage = new TestProjectMDPage(projectService);
+		testPage = new TestProjectMDPage(projectService, null);
 	}
 
 	@Test

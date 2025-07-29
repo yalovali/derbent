@@ -31,12 +31,12 @@ public class SessionServiceProjectChangeTest {
     @Mock
     private CProjectService projectService;
 
-    private SessionService sessionService;
+    private CSessionService sessionService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        sessionService = new SessionService(authenticationContext, userService, projectService);
+        sessionService = new CSessionService(authenticationContext, userService, projectService);
     }
 
     @Test

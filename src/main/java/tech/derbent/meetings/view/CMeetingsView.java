@@ -11,7 +11,7 @@ import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.service.CMeetingService;
 import tech.derbent.meetings.service.CMeetingStatusService;
 import tech.derbent.meetings.service.CMeetingTypeService;
-import tech.derbent.session.service.SessionService;
+import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.service.CUserService;
 
 @Route ("meetings/:meeting_id?/:action?(edit)")
@@ -33,7 +33,7 @@ public class CMeetingsView extends CProjectAwareMDPage<CMeeting> {
 	private final CMeetingStatusService meetingStatusService;
 
 	public CMeetingsView(final CMeetingService entityService,
-		final SessionService sessionService, final CMeetingTypeService meetingTypeService,
+		final CSessionService sessionService, final CMeetingTypeService meetingTypeService,
 		final CUserService userService,
 		final CMeetingStatusService meetingStatusService) {
 		super(CMeeting.class, entityService, sessionService);

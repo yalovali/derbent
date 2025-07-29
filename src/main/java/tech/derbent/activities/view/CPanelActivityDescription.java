@@ -6,7 +6,6 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
-import tech.derbent.session.service.SessionService;
 
 public class CPanelActivityDescription extends CPanelActivityBase {
 
@@ -14,8 +13,8 @@ public class CPanelActivityDescription extends CPanelActivityBase {
 
 	public CPanelActivityDescription(final CActivity currentEntity,
 		final BeanValidationBinder<CActivity> beanValidationBinder,
-		final CActivityService entityService, final SessionService sessionService) {
-		super("Basic Information", currentEntity, beanValidationBinder, entityService, sessionService);
+		final CActivityService entityService) {
+		super("Basic Information", currentEntity, beanValidationBinder, entityService);
 		// only open this panel
 		openPanel();
 	}

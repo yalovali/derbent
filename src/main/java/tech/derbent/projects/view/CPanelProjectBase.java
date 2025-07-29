@@ -17,13 +17,6 @@ public abstract class CPanelProjectBase extends CAccordionDescription<CProject> 
 
 	private static final long serialVersionUID = 1L;
 
-	public CPanelProjectBase(final CProject currentEntity,
-		final BeanValidationBinder<CProject> beanValidationBinder,
-		final CProjectService entityService) {
-		super(currentEntity, beanValidationBinder, CProject.class, entityService);
-		createPanelContent();
-		closePanel();
-	}
 
 	/**
 	 * Constructor with custom panel title.

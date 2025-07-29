@@ -22,6 +22,7 @@ import tech.derbent.abstracts.views.CAbstractMDPage;
 import tech.derbent.abstracts.views.CButton;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
+import tech.derbent.session.service.CSessionService;
 
 /**
  * CProjectDetailsView - Enhanced project details view with modern UI design and multiple
@@ -68,8 +69,8 @@ public class CProjectDetailsView extends CAbstractMDPage<CProject> {
 
 	private Select<LayoutMode> layoutSelector;
 
-	public CProjectDetailsView(final CProjectService entityService) {
-		super(CProject.class, entityService);
+	public CProjectDetailsView(final CProjectService entityService, final CSessionService sessionService) {
+		super(CProject.class, entityService, sessionService);
 		addClassNames("project-details-view");
 		// Apply default layout mode CSS class
 		addClassName(currentLayoutMode.getCssClass());

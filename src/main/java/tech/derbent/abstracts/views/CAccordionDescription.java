@@ -26,22 +26,6 @@ public abstract class CAccordionDescription<EntityClass extends CEntityDB>
 	private final ComboBoxDataProvider detailsDataProvider;
 
 	/**
-	 * Default constructor for CAccordionDescription.
-	 * @param entityService
-	 */
-	public CAccordionDescription(final EntityClass currentEntity,
-		final BeanValidationBinder<EntityClass> beanValidationBinder,
-		final Class<EntityClass> entityClass,
-		final CAbstractService<EntityClass> entityService) {
-		super("Description");
-		this.entityClass = entityClass;
-		this.binder = beanValidationBinder;
-		this.entityService = entityService;
-		this.currentEntity = currentEntity;
-		this.detailsDataProvider = createComboBoxDataProvider();
-	}
-
-	/**
 	 * Constructor for CAccordionDescription with custom title.
 	 * @param title                custom title for the accordion panel
 	 * @param currentEntity        current entity instance
@@ -73,12 +57,19 @@ public abstract class CAccordionDescription<EntityClass extends CEntityDB>
 	public List<String> getEntityFields() { return EntityFields; }
 
 	public void populateForm(final EntityClass entity) {
-
+        LOGGER.debug("Populating form with entity: {}", entity);
+		currentEntity = entity;
 		if (entity == null) {
 			LOGGER.warn("Entity is null, clearing form");
-			return;
+			// Clear the form fields
+			binder.readBean(null);
 		}
-		currentEntity = entity;
+		else
+		{
+			LOGGER.debug("Populating form with entity: {}", entity);
+			// Populate the form fields with the entity data
+			binder.readBean(entity);
+		}
 	}
 
 	public void saveEventHandler() {}

@@ -13,7 +13,7 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 import tech.derbent.abstracts.views.CAccordionDescription;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
-import tech.derbent.session.service.SessionService;
+import tech.derbent.session.service.CSessionService;
 
 /**
  * Test class for CPanelActivityDescription to ensure it follows the same pattern as CPanelUserDescription.
@@ -24,9 +24,9 @@ class CPanelActivityDescriptionTest {
 
     @Mock
     private CActivityService activityService;
-    
+
     @Mock
-    private SessionService sessionService;
+    private CSessionService sessionService;
 
     private CAccordionDescription<CActivity> panel;
     private CActivity testActivity;
@@ -36,15 +36,15 @@ class CPanelActivityDescriptionTest {
     void setUp() {
         testActivity = new CActivity();
         testActivity.setName("Test Activity");
-        
+
         binder = new BeanValidationBinder<>(CActivity.class);
     }
 
     @Test
     void testPanelCreation() {
         // When
-        panel = new CPanelActivityDescription(testActivity, binder, activityService, sessionService);
-        
+        panel = new CPanelActivityDescription(testActivity, binder, activityService);
+
         // Then
         assertNotNull(panel, "Panel should be created successfully");
         assertNotNull(panel.getBaseLayout(), "Base layout should be initialized");
@@ -53,11 +53,11 @@ class CPanelActivityDescriptionTest {
     @Test
     void testPopulateFormWithNullEntity() {
         // Given
-        panel = new CPanelActivityDescription(testActivity, binder, activityService, sessionService);
-        
+        panel = new CPanelActivityDescription(testActivity, binder, activityService);
+
         // When - Should not throw exception when entity is null
         panel.populateForm(null);
-        
+
         // Then - No exception should be thrown
         // Test passes if no exception is thrown
     }
@@ -65,13 +65,13 @@ class CPanelActivityDescriptionTest {
     @Test
     void testPopulateFormWithValidEntity() {
         // Given
-        panel = new CPanelActivityDescription(testActivity, binder, activityService, sessionService);
+        panel = new CPanelActivityDescription(testActivity, binder, activityService);
         final CActivity newActivity = new CActivity();
         newActivity.setName("New Activity");
-        
+
         // When
         panel.populateForm(newActivity);
-        
+
         // Then - Should not throw exception
         // Test passes if no exception is thrown
     }
@@ -79,11 +79,11 @@ class CPanelActivityDescriptionTest {
     @Test
     void testSaveEventHandler() {
         // Given
-        panel = new CPanelActivityDescription(testActivity, binder, activityService, sessionService);
-        
+        panel = new CPanelActivityDescription(testActivity, binder, activityService);
+
         // When - Should not throw exception
         panel.saveEventHandler();
-        
+
         // Then - Test passes if no exception is thrown
     }
 }

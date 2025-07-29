@@ -27,13 +27,17 @@ import tech.derbent.users.service.CUserService;
  * Vaadin session to store session-specific information.
  */
 @Service
-public class SessionService {
+public class CSessionService {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(SessionService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CSessionService.class);
 
 	private static final String ACTIVE_PROJECT_KEY = "activeProject";
 
 	private static final String ACTIVE_USER_KEY = "activeUser";
+
+	private static final String ACTIVE_ID_KEY = "activeId";
+
+	private final Set<String> idAttributes = ConcurrentHashMap.newKeySet();
 
 	// Thread-safe set to store project change listeners
 	private final Set<CProjectChangeListener> projectChangeListeners =
@@ -52,7 +56,7 @@ public class SessionService {
 	private LayoutService layoutService; // Optional injection to avoid circular
 											// dependency
 
-	public SessionService(final AuthenticationContext authenticationContext,
+	public CSessionService(final AuthenticationContext authenticationContext,
 		final CUserService userService, final CProjectService projectService) {
 		this.authenticationContext = authenticationContext;
 		this.userService = userService;
@@ -96,6 +100,7 @@ public class SessionService {
 		if (session != null) {
 			session.setAttribute(ACTIVE_PROJECT_KEY, null);
 			session.setAttribute(ACTIVE_USER_KEY, null);
+			session.setAttribute(ACTIVE_ID_KEY, null);
 			LOGGER.info("Session data cleared");
 		}
 		// Clear all project change listeners when session is cleared
@@ -107,6 +112,31 @@ public class SessionService {
 		if (layoutService != null) {
 			layoutService.clearLayoutChangeListeners();
 		}
+	}
+
+	public void deleteAllActiveIds() {
+		final VaadinSession session = VaadinSession.getCurrent();
+
+		if (session == null) {
+			return;
+		}
+		// iterate over all attributes and remove those that start with ACTIVE_ID_KEY
+
+		for (final String attributeName : idAttributes) {
+
+			if (attributeName.startsWith(ACTIVE_ID_KEY)) {
+				session.setAttribute(attributeName, null);
+			}
+		}
+	}
+
+	public Long getActiveId(final String entityType) {
+		final VaadinSession session = VaadinSession.getCurrent();
+
+		if (session != null) {
+			return (Long) session.getAttribute(ACTIVE_ID_KEY + "_" + entityType);
+		}
+		return null;
 	}
 
 	/**
@@ -267,11 +297,25 @@ public class SessionService {
 		}
 	}
 
+	public void setActiveId(final String entityType, final Long id) {
+		final VaadinSession session = VaadinSession.getCurrent();
+
+		if (session == null) {
+			return;
+		}
+		final String key = ACTIVE_ID_KEY + "_" + entityType;
+		session.setAttribute(key, id);
+		LOGGER.info("Active ID set to: {}", id);
+		idAttributes.add(key);
+	}
+
 	/**
 	 * Sets the active project in the session and triggers UI refresh.
 	 */
 	public void setActiveProject(final CProject project) {
+		// reset active entity ID when changing project
 		final VaadinSession session = VaadinSession.getCurrent();
+		deleteAllActiveIds();
 
 		if (session != null) {
 			session.setAttribute(ACTIVE_PROJECT_KEY, project);
@@ -286,6 +330,7 @@ public class SessionService {
 	 * Sets the active user in the session.
 	 */
 	public void setActiveUser(final CUser user) {
+		clearSession(); // Clear session data before setting new user
 		final VaadinSession session = VaadinSession.getCurrent();
 
 		if (session != null) {

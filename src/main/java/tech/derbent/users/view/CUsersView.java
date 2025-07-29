@@ -17,6 +17,7 @@ import tech.derbent.abstracts.views.CButton;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.service.CProjectService;
+import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.CUserTypeService;
@@ -48,8 +49,8 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 	@Autowired
 	public CUsersView(final CUserService entityService,
 		final CProjectService projectService, final CUserTypeService userTypeService,
-		final CCompanyService companyService) {
-		super(CUser.class, entityService);
+		final CCompanyService companyService, final CSessionService sessionService) {
+		super(CUser.class, entityService, sessionService);
 		addClassNames("users-view");
 		this.userTypeService = userTypeService;
 		this.companyService = companyService;

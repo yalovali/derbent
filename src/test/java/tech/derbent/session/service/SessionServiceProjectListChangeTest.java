@@ -33,12 +33,12 @@ class SessionServiceProjectListChangeTest {
 	private CProjectService projectService;
 	@Mock
 	private VaadinSession vaadinSession;
-	private SessionService sessionService;
+	private CSessionService sessionService;
 
 	@BeforeEach
 	void setUp() {
 		sessionService =
-			new SessionService(authenticationContext, userService, projectService);
+			new CSessionService(authenticationContext, userService, projectService);
 		// Setup security context
 		final User testUser =
 			new User("testuser", "password", java.util.Collections.emptyList());

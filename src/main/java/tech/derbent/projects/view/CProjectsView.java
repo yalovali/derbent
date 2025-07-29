@@ -11,6 +11,7 @@ import tech.derbent.abstracts.views.CAbstractMDPage;
 import tech.derbent.abstracts.views.CAccordionDescription;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
+import tech.derbent.session.service.CSessionService;
 
 /**
  * CProjectsView - View for managing projects. Layer: View (MVC) Provides CRUD operations
@@ -28,8 +29,8 @@ public class CProjectsView extends CAbstractMDPage<CProject> {
 
 	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "projects/%s/edit";
 
-	public CProjectsView(final CProjectService entityService) {
-		super(CProject.class, entityService);
+	public CProjectsView(final CProjectService entityService, final CSessionService sessionService) {
+		super(CProject.class, entityService, sessionService);
 		addClassNames("projects-view");
 		// createDetailsLayout();
 		LOGGER.info("CProjectsView initialized successfully");

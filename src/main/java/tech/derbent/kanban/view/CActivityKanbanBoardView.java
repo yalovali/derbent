@@ -23,7 +23,7 @@ import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.service.CActivityService;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.session.service.SessionService;
+import tech.derbent.session.service.CSessionService;
 
 /**
  * CActivityKanbanBoardView - Main Kanban board view for displaying activities. Layer:
@@ -42,7 +42,7 @@ public class CActivityKanbanBoardView extends VerticalLayout
 	private static final Logger LOGGER =
 		LoggerFactory.getLogger(CActivityKanbanBoardView.class);
 	private final CActivityService activityService;
-	private final SessionService sessionService;
+	private final CSessionService sessionService;
 	private H2 titleElement;
 	private HorizontalLayout kanbanContainer;
 	private Div emptyStateContainer;
@@ -53,7 +53,7 @@ public class CActivityKanbanBoardView extends VerticalLayout
 	 * @param sessionService  the session service for project context
 	 */
 	public CActivityKanbanBoardView(final CActivityService activityService,
-		final SessionService sessionService) {
+		final CSessionService sessionService) {
 		LOGGER.info("Initializing CActivityKanbanBoardView");
 		if (activityService == null) {
 			throw new IllegalArgumentException("Activity service cannot be null");

@@ -39,7 +39,7 @@ import tech.derbent.base.ui.component.CHierarchicalSideMenu;
 import tech.derbent.base.ui.component.CViewToolbar;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
 import tech.derbent.session.service.LayoutService;
-import tech.derbent.session.service.SessionService;
+import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.view.CUserProfileDialog;
@@ -67,7 +67,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 
 	private final AuthenticationContext authenticationContext;
 
-	private final SessionService sessionService;
+	private final CSessionService sessionService;
 
 	private final LayoutService layoutService;
 
@@ -78,7 +78,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	private CViewToolbar mainToolbar;
 
 	MainLayout(final AuthenticationContext authenticationContext,
-		final SessionService sessionService, final LayoutService layoutService,
+		final CSessionService sessionService, final LayoutService layoutService,
 		final PasswordEncoder passwordEncoder, final CUserService userService) {
 		this.authenticationContext = authenticationContext;
 		this.sessionService = sessionService;

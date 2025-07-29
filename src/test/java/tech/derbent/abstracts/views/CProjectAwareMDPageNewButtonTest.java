@@ -24,7 +24,7 @@ import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.session.service.SessionService;
+import tech.derbent.session.service.CSessionService;
 
 /**
  * Test class to verify the "New" button behavior in CProjectAwareMDPage Tests the
@@ -40,7 +40,7 @@ public class CProjectAwareMDPageNewButtonTest {
 		private static final long serialVersionUID = 1L;
 
 		public TestActivityMDPage(final CAbstractService<CActivity> entityService,
-			final SessionService sessionService) {
+			final CSessionService sessionService) {
 			super(CActivity.class, entityService, sessionService);
 		}
 
@@ -95,7 +95,7 @@ public class CProjectAwareMDPageNewButtonTest {
 	private CActivityService activityService;
 
 	@Mock
-	private SessionService sessionService;
+	private CSessionService sessionService;
 
 	@Mock
 	private Clock clock;

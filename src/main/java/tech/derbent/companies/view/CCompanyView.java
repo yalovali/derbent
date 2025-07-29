@@ -17,6 +17,7 @@ import tech.derbent.abstracts.views.CButton;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
+import tech.derbent.session.service.CSessionService;
 
 /**
  * CCompanyView - View for managing companies Layer: View (MVC) Provides CRUD operations
@@ -65,8 +66,8 @@ public class CCompanyView extends CAbstractMDPage<CCompany> {
 	 * @param entityService the CCompanyService instance
 	 */
 	@Autowired
-	public CCompanyView(final CCompanyService entityService) {
-		super(CCompany.class, entityService);
+	public CCompanyView(final CCompanyService entityService, final CSessionService sessionService) {
+		super(CCompany.class, entityService, sessionService);
 		LOGGER.info("CCompanyView constructor called with entityService: {}",
 			entityService.getClass().getSimpleName());
 		addClassNames("companies-view");

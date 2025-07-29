@@ -17,13 +17,6 @@ public abstract class CPanelRiskBase extends CAccordionDescription<CRisk> {
 
 	private static final long serialVersionUID = 1L;
 
-	public CPanelRiskBase(final CRisk currentEntity,
-		final BeanValidationBinder<CRisk> beanValidationBinder,
-		final CRiskService entityService) {
-		super(currentEntity, beanValidationBinder, CRisk.class, entityService);
-		createPanelContent();
-		closePanel();
-	}
 
 	/**
 	 * Constructor with custom panel title.

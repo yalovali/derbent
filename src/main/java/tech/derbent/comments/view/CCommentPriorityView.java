@@ -11,9 +11,10 @@ import tech.derbent.abstracts.annotations.CSpringAuxillaries;
 import tech.derbent.abstracts.views.CAbstractMDPage;
 import tech.derbent.comments.domain.CCommentPriority;
 import tech.derbent.comments.service.CCommentPriorityService;
+import tech.derbent.session.service.CSessionService;
 
 /**
- * CCommentPriorityView - View for managing comment priorities. Layer: View (MVC) 
+ * CCommentPriorityView - View for managing comment priorities. Layer: View (MVC)
  * Provides CRUD operations for comment priorities using the abstract master-detail pattern.
  * Manages different priority levels that comments can have to categorize their importance.
  */
@@ -31,11 +32,12 @@ public class CCommentPriorityView extends CAbstractMDPage<CCommentPriority> {
     /**
      * Constructor for CCommentPriorityView.
      * @param entityService the service for comment priority operations
+     * @param sessionService
      */
-    public CCommentPriorityView(final CCommentPriorityService entityService) {
-        super(CCommentPriority.class, entityService);
+    public CCommentPriorityView(final CCommentPriorityService entityService, final CSessionService sessionService) {
+        super(CCommentPriority.class, entityService, sessionService);
         addClassNames("comment-priorities-view");
-        LOGGER.info("CCommentPriorityView initialized with route: " 
+        LOGGER.info("CCommentPriorityView initialized with route: "
             + CSpringAuxillaries.getRoutePath(this.getClass()));
     }
 
@@ -49,12 +51,12 @@ public class CCommentPriorityView extends CAbstractMDPage<CCommentPriority> {
     protected void createGridForEntity() {
         grid.addShortTextColumn(CCommentPriority::getName, "Name", "name");
         grid.addLongTextColumn(CCommentPriority::getDescription, "Description", "description");
-        
-        grid.addShortTextColumn(entity -> String.valueOf(entity.getPriorityLevel()), 
+
+        grid.addShortTextColumn(entity -> String.valueOf(entity.getPriorityLevel()),
             "Priority Level", "priorityLevel");
-            
+
         grid.addShortTextColumn(entity -> entity.getColor(), "Color", "color");
-        
+
         grid.addComponentColumn(entity -> {
             final Div colorDiv = new Div();
             colorDiv.getStyle().set("width", "20px");
@@ -64,7 +66,7 @@ public class CCommentPriorityView extends CAbstractMDPage<CCommentPriority> {
             colorDiv.getStyle().set("border-radius", "3px");
             return colorDiv;
         }).setHeader("Preview").setWidth("80px").setFlexGrow(0);
-        
+
         grid.addComponentColumn(entity -> {
             final Div defaultDiv = new Div();
             defaultDiv.setText(entity.isDefault() ? "Default" : "");
@@ -81,13 +83,13 @@ public class CCommentPriorityView extends CAbstractMDPage<CCommentPriority> {
     }
 
     @Override
-    protected String getEntityRouteIdField() { 
-        return ENTITY_ID_FIELD; 
+    protected String getEntityRouteIdField() {
+        return ENTITY_ID_FIELD;
     }
 
     @Override
-    protected String getEntityRouteTemplateEdit() { 
-        return ENTITY_ROUTE_TEMPLATE_EDIT; 
+    protected String getEntityRouteTemplateEdit() {
+        return ENTITY_ROUTE_TEMPLATE_EDIT;
     }
 
     @Override

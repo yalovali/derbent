@@ -16,6 +16,7 @@ import tech.derbent.administration.domain.CCompanySettings;
 import tech.derbent.administration.service.CCompanySettingsService;
 import tech.derbent.base.ui.dialogs.CConfirmationDialog;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
+import tech.derbent.session.service.CSessionService;
 
 /**
  * CCompanySettingsView - View for managing company-wide administration settings. Layer:
@@ -43,10 +44,11 @@ public class CCompanySettingsView extends CAbstractMDPage<CCompanySettings> {
 	 * Constructor for CCompanySettingsView. Annotated with @Autowired to let Spring
 	 * inject dependencies.
 	 * @param entityService the CCompanySettingsService instance
+	 * @param sessionService
 	 */
 	@Autowired
-	public CCompanySettingsView(final CCompanySettingsService entityService) {
-		super(CCompanySettings.class, entityService);
+	public CCompanySettingsView(final CCompanySettingsService entityService, final CSessionService sessionService) {
+		super(CCompanySettings.class, entityService, sessionService);
 		this.companySettingsService = entityService;
 		LOGGER.info("CCompanySettingsView constructor called with entityService: {}",
 			entityService.getClass().getSimpleName());

@@ -22,7 +22,6 @@ import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
 import jakarta.annotation.PostConstruct;
@@ -31,6 +30,7 @@ import tech.derbent.abstracts.interfaces.CLayoutChangeListener;
 import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.base.ui.dialogs.CConfirmationDialog;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
+import tech.derbent.session.service.CSessionService;
 import tech.derbent.session.service.LayoutService;
 
 public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAbstractPage
@@ -61,11 +61,15 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		new ArrayList<CAccordionDescription<EntityClass>>(); // List of accordions
 	{}
 
+	protected CSessionService sessionService;
+
 	protected CAbstractMDPage(final Class<EntityClass> entityClass,
-		final CAbstractService<EntityClass> entityService) {
+		final CAbstractService<EntityClass> entityService,
+		final CSessionService sessionService) {
 		super();
 		this.entityClass = entityClass;
 		this.entityService = entityService;
+		this.sessionService = sessionService;
 		binder = new BeanValidationBinder<>(entityClass);
 		addClassNames("md-page");
 		setSizeFull();
@@ -103,17 +107,19 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 			event.getRouteParameters().get(getEntityRouteIdField()).map(Long::parseLong);
 
 		if (entityID.isPresent()) {
-			final Optional<EntityClass> samplePersonFromBackend =
-				entityService.get(entityID.get());
+			final Optional<EntityClass> entityByRoute = entityService.get(entityID.get());
+			LOGGER.debug("Entity ID in URL: {}, looking up entity", entityID.get());
 
-			if (samplePersonFromBackend.isPresent()) {
-				final Optional<EntityClass> entity = entityService.get(entityID.get());
-				populateForm(entity.get());
+			if (entityByRoute.isPresent()) {
+				// final Optional<EntityClass> entity = entityService.get(entityID.get());
 
 				if (grid != null) {
-					grid.select(entity.get()); // Ensure grid selection matches the form
+					grid.select(entityByRoute.get());
 				}
-				setLastSelectedEntityId(entity.get().getId());
+				// it it necassary
+				sessionService.setActiveId(entityClass.getClass().getSimpleName(),
+					entityByRoute.get().getId());
+				populateForm(entityByRoute.get());
 			}
 			else {
 				Notification.show(
@@ -125,13 +131,13 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 				refreshGrid();
 			}
 		}
-		else if (getLastSelectedEntityId() != -1) {
+		else if (sessionService.getActiveId(entityClass.getSimpleName()) != null) {
 			// If no specific entity ID in URL, try to select the last selected entity
 			LOGGER.debug(
 				"No entity ID in URL, trying to select last selected entity ID: {}",
-				getLastSelectedEntityId());
-			final Optional<EntityClass> lastEntity =
-				entityService.get(getLastSelectedEntityId());
+				sessionService.getActiveId(entityClass.getSimpleName()));
+			final Optional<EntityClass> lastEntity = entityService
+				.get(sessionService.getActiveId(entityClass.getSimpleName()));
 
 			if (lastEntity.isPresent()) {
 				populateForm(lastEntity.get());
@@ -152,6 +158,8 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	}
 
 	protected void clearForm() {
+		LOGGER.debug("Clearing form for {}", getClass().getSimpleName());
+		sessionService.setActiveId(entityClass.getSimpleName(), null);
 
 		// First deselect grid to avoid conflicts
 		if (grid != null) {
@@ -175,22 +183,22 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	}
 
 	protected CButton createCancelButton(final String buttonText) {
-		LOGGER.info("Creating cancel button for {}", getClass().getSimpleName());
 		final CButton cancel = CButton.createTertiary(buttonText, e -> {
-			LOGGER.debug("Cancel button clicked, reverting to last selected entry");
-			
+
 			try {
 				// Get the last selected entity ID
-				final Long lastSelectedId = getLastSelectedEntityId();
-				
+				final Long lastSelectedId =
+					sessionService.getActiveId(getClass().getSimpleName());
+
 				if (lastSelectedId != null && lastSelectedId != -1) {
 					// Restore selection to the last selected entity
 					restoreGridSelection(lastSelectedId);
-					LOGGER.debug("Reverted to last selected entity with ID: {}", lastSelectedId);
-				} else {
+					LOGGER.debug("Reverted to last selected entity with ID: {}",
+						lastSelectedId);
+				}
+				else {
 					// If no previous selection, just clear the form
 					clearForm();
-					LOGGER.debug("No previous selection found, cleared form");
 				}
 			} catch (final Exception exception) {
 				LOGGER.error("Error reverting to last selected entry", exception);
@@ -315,7 +323,8 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 			populateForm(event.getValue());
 
 			if (event.getValue() != null) {
-				setLastSelectedEntityId(event.getValue().getId());
+				sessionService.setActiveId(entityClass.getClass().getSimpleName(),
+					event.getValue().getId());
 			}
 		});
 		final Div wrapper = new Div();
@@ -404,24 +413,6 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 
 	protected abstract String getEntityRouteIdField();
 	protected abstract String getEntityRouteTemplateEdit();
-
-	// if not present returns -1
-	public Long getLastSelectedEntityId() {
-		final String LAST_SELECTED_ID_KEY =
-			"lastSelectedEntityId_" + entityClass.getSimpleName();
-
-		if (VaadinSession.getCurrent() == null) {
-			return -1L; // Return -1 if session is not available
-		}
-
-		if (VaadinSession.getCurrent().getAttribute(LAST_SELECTED_ID_KEY) == null) {
-			return -1L; // Return -1 if attribute is not set
-		}
-		// Cast to Long since we expect the ID to be a Long
-		final Long lastId =
-			(Long) VaadinSession.getCurrent().getAttribute(LAST_SELECTED_ID_KEY);
-		return lastId;
-	}
 
 	private void initBaseDetailsLayout() {
 		baseDetailsLayout.setClassName("base-details-layout");
@@ -626,18 +617,6 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 
 	public void setCurrentEntity(final EntityClass currentEntity) {
 		this.currentEntity = currentEntity;
-	}
-
-	public void setLastSelectedEntityId(final Long lastSelectedEntityId) {
-
-		// this method conflicts with the currentEntity setter
-		if (lastSelectedEntityId == null) {
-			return;
-		}
-		final String LAST_SELECTED_ID_KEY =
-			"lastSelectedEntityId_" + entityClass.getSimpleName();
-		VaadinSession.getCurrent().setAttribute(LAST_SELECTED_ID_KEY,
-			lastSelectedEntityId);
 	}
 
 	/**

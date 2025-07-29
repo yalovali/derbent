@@ -13,7 +13,7 @@ import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.decisions.domain.CDecision;
 import tech.derbent.decisions.service.CDecisionService;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.session.service.SessionService;
+import tech.derbent.session.service.CSessionService;
 
 /**
  * CDecisionsView - Main view for decision management.
@@ -40,7 +40,7 @@ public class CDecisionsView extends CProjectAwareMDPage<CDecision> {
      * @param sessionService session service for project context
      */
     public CDecisionsView(final CDecisionService entityService,
-                         final SessionService sessionService) {
+                         final CSessionService sessionService) {
         super(CDecision.class, entityService, sessionService);
         addClassNames("decisions-view");
     }

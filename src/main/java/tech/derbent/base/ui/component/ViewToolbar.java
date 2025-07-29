@@ -37,7 +37,7 @@ import tech.derbent.abstracts.interfaces.CProjectListChangeListener;
 import tech.derbent.abstracts.views.CButton;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.LayoutService;
-import tech.derbent.session.service.SessionService;
+import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
 
 /* ViewToolbar.java
@@ -68,7 +68,7 @@ public final class ViewToolbar extends Composite<Header>
 
 	private final H1 title;
 
-	private final SessionService sessionService;
+	private final CSessionService sessionService;
 
 	private final LayoutService layoutService;
 
@@ -88,7 +88,7 @@ public final class ViewToolbar extends Composite<Header>
 	 * @param sessionService The session service for managing project selection.
 	 * @param components     Optional components to be added to the toolbar.
 	 */
-	public ViewToolbar(final String viewTitle, final SessionService sessionService,
+	public ViewToolbar(final String viewTitle, final CSessionService sessionService,
 		final Component... components) {
 		this(viewTitle, sessionService, null, null, components);
 	}
@@ -103,7 +103,7 @@ public final class ViewToolbar extends Composite<Header>
 	 *                              (optional).
 	 * @param components            Optional components to be added to the toolbar.
 	 */
-	public ViewToolbar(final String viewTitle, final SessionService sessionService,
+	public ViewToolbar(final String viewTitle, final CSessionService sessionService,
 		final LayoutService layoutService,
 		final AuthenticationContext authenticationContext,
 		final Component... components) {

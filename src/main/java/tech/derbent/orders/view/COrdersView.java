@@ -13,7 +13,7 @@ import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.orders.domain.COrder;
 import tech.derbent.orders.service.COrderService;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.session.service.SessionService;
+import tech.derbent.session.service.CSessionService;
 
 /**
  * COrdersView - Vaadin view for managing orders in the system.
@@ -51,7 +51,7 @@ public class COrdersView extends CProjectAwareMDPage<COrder> {
      * @param entityService the COrderService for business logic operations
      * @param sessionService the SessionService for session management
      */
-    public COrdersView(final COrderService entityService, final SessionService sessionService) {
+    public COrdersView(final COrderService entityService, final CSessionService sessionService) {
         super(COrder.class, entityService, sessionService);
         addClassNames("orders-view");
     }

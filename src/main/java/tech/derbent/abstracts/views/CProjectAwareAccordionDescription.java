@@ -1,7 +1,5 @@
 package tech.derbent.abstracts.views;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,18 +7,17 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 
-import tech.derbent.abstracts.annotations.CEntityFormBuilder.ComboBoxDataProvider;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.interfaces.CProjectChangeListener;
 import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.session.service.SessionService;
+import tech.derbent.session.service.CSessionService;
 
 /**
  * Project-aware accordion description that refreshes content when the active project changes.
  * This base class implements CProjectChangeListener to handle project switching scenarios
  * where panels need to update their content based on the new project context.
- * 
+ *
  * Layer: View (MVC)
  * Purpose: Extends CAccordionDescription with project change awareness for proper panel refresh
  */
@@ -28,28 +25,11 @@ public abstract class CProjectAwareAccordionDescription<EntityClass extends CEnt
     extends CAccordionDescription<EntityClass> implements CProjectChangeListener {
 
     private static final long serialVersionUID = 1L;
-    
-    private static final Logger LOGGER = LoggerFactory.getLogger(CProjectAwareAccordionDescription.class);
-    
-    protected final SessionService sessionService;
 
-    /**
-     * Default constructor for CProjectAwareAccordionDescription.
-     * @param currentEntity current entity instance
-     * @param beanValidationBinder validation binder
-     * @param entityClass entity class type
-     * @param entityService service for the entity
-     * @param sessionService session service for project change notifications
-     */
-    public CProjectAwareAccordionDescription(final EntityClass currentEntity,
-        final BeanValidationBinder<EntityClass> beanValidationBinder,
-        final Class<EntityClass> entityClass,
-        final CAbstractService<EntityClass> entityService,
-        final SessionService sessionService) {
-        super(currentEntity, beanValidationBinder, entityClass, entityService);
-        this.sessionService = sessionService;
-        LOGGER.debug("Created project-aware accordion panel: {}", getClass().getSimpleName());
-    }
+    private static final Logger LOGGER = LoggerFactory.getLogger(CProjectAwareAccordionDescription.class);
+
+    protected final CSessionService sessionService;
+
 
     /**
      * Constructor with custom title for CProjectAwareAccordionDescription.
@@ -64,10 +44,18 @@ public abstract class CProjectAwareAccordionDescription<EntityClass extends CEnt
         final BeanValidationBinder<EntityClass> beanValidationBinder,
         final Class<EntityClass> entityClass,
         final CAbstractService<EntityClass> entityService,
-        final SessionService sessionService) {
+        final CSessionService sessionService) {
         super(title, currentEntity, beanValidationBinder, entityClass, entityService);
         this.sessionService = sessionService;
         LOGGER.debug("Created project-aware accordion panel with title '{}': {}", title, getClass().getSimpleName());
+    }
+
+    /**
+     * Gets the session service for subclasses to use.
+     * @return the session service
+     */
+    protected CSessionService getSessionService() {
+        return sessionService;
     }
 
     @Override
@@ -97,20 +85,19 @@ public abstract class CProjectAwareAccordionDescription<EntityClass extends CEnt
      */
     @Override
     public void onProjectChanged(final CProject newProject) {
-        LOGGER.debug("Project change notification received in panel {}: {}", 
+        LOGGER.debug("Project change notification received in panel {}: {}",
             getClass().getSimpleName(), newProject != null ? newProject.getName() : "null");
-        
+
         // If no entity is currently selected, clear the panel content
         if (getCurrentEntity() == null) {
             LOGGER.debug("No entity selected, clearing panel content for project change");
             refreshPanelForProjectChange(newProject);
-        } else {
-            // Entity is selected - check if it belongs to the new project
-            if (shouldRefreshForProject(getCurrentEntity(), newProject)) {
-                LOGGER.debug("Entity project context changed, refreshing panel content");
-                refreshPanelForProjectChange(newProject);
-            }
         }
+		else // Entity is selected - check if it belongs to the new project
+		if (shouldRefreshForProject(getCurrentEntity(), newProject)) {
+		    LOGGER.debug("Entity project context changed, refreshing panel content");
+		    refreshPanelForProjectChange(newProject);
+		}
     }
 
     /**
@@ -119,19 +106,19 @@ public abstract class CProjectAwareAccordionDescription<EntityClass extends CEnt
      * @param newProject the newly selected project
      */
     protected void refreshPanelForProjectChange(final CProject newProject) {
-        LOGGER.debug("Refreshing panel content for project change: {}", 
+        LOGGER.debug("Refreshing panel content for project change: {}",
             newProject != null ? newProject.getName() : "null");
-        
+
         try {
             // Clear existing content
             getBaseLayout().removeAll();
-            
+
             // Recreate content if entity is available
             if (getCurrentEntity() != null) {
                 createPanelContent();
             }
         } catch (final Exception e) {
-            LOGGER.error("Error refreshing panel content for project change in {}: {}", 
+            LOGGER.error("Error refreshing panel content for project change in {}: {}",
                 getClass().getSimpleName(), e.getMessage(), e);
         }
     }
@@ -146,13 +133,5 @@ public abstract class CProjectAwareAccordionDescription<EntityClass extends CEnt
     protected boolean shouldRefreshForProject(final EntityClass entity, final CProject newProject) {
         // Default: always refresh on project change
         return true;
-    }
-
-    /**
-     * Gets the session service for subclasses to use.
-     * @return the session service
-     */
-    protected SessionService getSessionService() {
-        return sessionService;
     }
 }

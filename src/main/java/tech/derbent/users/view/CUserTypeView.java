@@ -8,6 +8,7 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.views.CAbstractMDPage;
+import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUserType;
 import tech.derbent.users.service.CUserTypeService;
 
@@ -30,9 +31,10 @@ public class CUserTypeView extends CAbstractMDPage<CUserType> {
 	/**
 	 * Constructor for CUserTypeView.
 	 * @param entityService the service for user type operations
+	 * @param sessionService
 	 */
-	public CUserTypeView(final CUserTypeService entityService) {
-		super(CUserType.class, entityService);
+	public CUserTypeView(final CUserTypeService entityService, final CSessionService sessionService) {
+		super(CUserType.class, entityService, sessionService);
 		addClassNames("user-types-view");
 	}
 

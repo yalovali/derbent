@@ -17,14 +17,6 @@ public abstract class CPanelCompanyBase extends CAccordionDescription<CCompany> 
 
 	private static final long serialVersionUID = 1L;
 
-	public CPanelCompanyBase(final CCompany currentEntity,
-		final BeanValidationBinder<CCompany> beanValidationBinder,
-		final CCompanyService entityService) {
-		super(currentEntity, beanValidationBinder, CCompany.class, entityService);
-		createPanelContent();
-		closePanel();
-	}
-
 	/**
 	 * Constructor with custom panel title.
 	 * @param title                custom title for the panel

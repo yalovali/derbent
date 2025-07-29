@@ -13,7 +13,7 @@ import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.interfaces.CProjectChangeListener;
 import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.session.service.SessionService;
+import tech.derbent.session.service.CSessionService;
 
 /**
  * Abstract project-aware MD page that filters entities by the currently active project.
@@ -25,12 +25,12 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB>
 
 	private static final long serialVersionUID = 1L;
 
-	protected final SessionService sessionService;
+	protected final CSessionService sessionService;
 
 	protected CProjectAwareMDPage(final Class<EntityClass> entityClass,
 		final CAbstractService<EntityClass> entityService,
-		final SessionService sessionService) {
-		super(entityClass, entityService);
+		final CSessionService sessionService) {
+		super(entityClass, entityService,sessionService);
 		this.sessionService = sessionService;
 		// Now that sessionService is set, we can populate the grid
 		refreshProjectAwareGrid();

@@ -264,11 +264,11 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		}
 		final Class<T> fieldType = (Class<T>) field.getType();
 		final ComboBox<T> comboBox = new ComboBox<>();
-		
-		// Following coding guidelines: All selective ComboBoxes must be selection only 
+
+		// Following coding guidelines: All selective ComboBoxes must be selection only
 		// (user must not be able to type arbitrary text)
 		comboBox.setAllowCustomValue(false);
-		
+
 		// Enhanced item label generator with null safety and proper display formatting
 		// Fix for combobox display issue: use getName() for CEntityNamed entities instead
 		// of toString()
@@ -352,12 +352,12 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		// Set items on ComboBox with validation
 		try {
 			comboBox.setItems(items);
-			
+
 			// Set default value to first item if available and no default value specified in metadata
 			// This ensures ComboBoxes are not empty when forms are created/cleared
 			if (!items.isEmpty() && (meta.defaultValue() == null || meta.defaultValue().trim().isEmpty())) {
 				comboBox.setValue(items.get(0));
-				LOGGER.debug("Set ComboBox default value to first item for field '{}': {}", 
+				LOGGER.debug("Set ComboBox default value to first item for field '{}': {}",
 					field.getName(), items.get(0));
 			}
 		} catch (final Exception e) {
@@ -544,11 +544,11 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		}
 		else {
 			final ComboBox<Enum> comboBox = new ComboBox<>();
-			
-			// Following coding guidelines: All selective ComboBoxes must be selection only 
+
+			// Following coding guidelines: All selective ComboBoxes must be selection only
 			// (user must not be able to type arbitrary text)
 			comboBox.setAllowCustomValue(false);
-			
+
 			comboBox.setItems(enumConstants);
 			comboBox.setItemLabelGenerator(Enum::name);
 			binder.bind(comboBox, field.getName());
@@ -710,23 +710,6 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			}
 			current = current.getSuperclass();
 		}
-
-		// Enhanced field debugging with null checking
-		for (final Field field : allFields) {
-
-			if (field != null) {
-				final MetaData metaData = field.getAnnotation(MetaData.class);
-
-				if (metaData != null) {}
-				else {
-					LOGGER.debug("No MetaData annotation found for field: {}",
-						field.getName());
-				}
-			}
-			else {
-				LOGGER.warn("Null field encountered in field list");
-			}
-		}
 	}
 
 	private static List<Field> getSortedFilteredFieldsList(final List<Field> allFields) {
@@ -807,6 +790,57 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		return processedComponents;
 	}
 
+	/**
+	 * Recursively searches for ComboBox components and resets them to their first item.
+	 */
+	@SuppressWarnings("unchecked")
+	private static void resetComboBoxesRecursively(final com.vaadin.flow.component.HasComponents container) {
+		container.getElement().getChildren().forEach(element -> {
+			// Get the component from the element
+			if (element.getComponent().isPresent()) {
+				final com.vaadin.flow.component.Component component = element.getComponent().get();
+
+				if (component instanceof ComboBox) {
+					final ComboBox<Object> comboBox = (ComboBox<Object>) component;
+					try {
+						// Get the first item from the ComboBox data provider
+						final java.util.Optional<Object> firstItem = comboBox.getDataProvider()
+							.fetch(new com.vaadin.flow.data.provider.Query<>())
+							.findFirst();
+
+						if (firstItem.isPresent()) {
+							comboBox.setValue(firstItem.get());
+							LOGGER.debug("Reset ComboBox to first item: {}", firstItem.get());
+						} else {
+							LOGGER.debug("ComboBox has no items to reset to");
+						}
+					} catch (final Exception e) {
+						LOGGER.warn("Error resetting ComboBox to first item: {}", e.getMessage());
+					}
+				} else if (component instanceof com.vaadin.flow.component.HasComponents) {
+					// Recursively check child components
+					resetComboBoxesRecursively((com.vaadin.flow.component.HasComponents) component);
+				}
+			}
+		});
+	}
+
+	/**
+	 * Resets all ComboBox components in a container to their first available item.
+	 * This method is useful for implementing "New" button behavior where ComboBoxes
+	 * should default to their first option instead of being empty.
+	 *
+	 * @param container the container component to search for ComboBoxes
+	 */
+	public static void resetComboBoxesToFirstItem(final com.vaadin.flow.component.HasComponents container) {
+		if (container == null) {
+			LOGGER.warn("Container is null in resetComboBoxesToFirstItem");
+			return;
+		}
+
+		resetComboBoxesRecursively(container);
+	}
+
 	private static void setComponentWidth(final Component component,
 		final MetaData meta) {
 
@@ -864,57 +898,6 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		}
 		((HasValueAndElement<?, ?>) field).setReadOnly(meta.readOnly());
 		((HasValueAndElement<?, ?>) field).setRequiredIndicatorVisible(meta.required());
-	}
-
-	/**
-	 * Resets all ComboBox components in a container to their first available item.
-	 * This method is useful for implementing "New" button behavior where ComboBoxes
-	 * should default to their first option instead of being empty.
-	 * 
-	 * @param container the container component to search for ComboBoxes
-	 */
-	public static void resetComboBoxesToFirstItem(final com.vaadin.flow.component.HasComponents container) {
-		if (container == null) {
-			LOGGER.warn("Container is null in resetComboBoxesToFirstItem");
-			return;
-		}
-		
-		resetComboBoxesRecursively(container);
-	}
-	
-	/**
-	 * Recursively searches for ComboBox components and resets them to their first item.
-	 */
-	@SuppressWarnings("unchecked")
-	private static void resetComboBoxesRecursively(final com.vaadin.flow.component.HasComponents container) {
-		container.getElement().getChildren().forEach(element -> {
-			// Get the component from the element
-			if (element.getComponent().isPresent()) {
-				final com.vaadin.flow.component.Component component = element.getComponent().get();
-				
-				if (component instanceof ComboBox) {
-					final ComboBox<Object> comboBox = (ComboBox<Object>) component;
-					try {
-						// Get the first item from the ComboBox data provider
-						final java.util.Optional<Object> firstItem = comboBox.getDataProvider()
-							.fetch(new com.vaadin.flow.data.provider.Query<>())
-							.findFirst();
-						
-						if (firstItem.isPresent()) {
-							comboBox.setValue(firstItem.get());
-							LOGGER.debug("Reset ComboBox to first item: {}", firstItem.get());
-						} else {
-							LOGGER.debug("ComboBox has no items to reset to");
-						}
-					} catch (final Exception e) {
-						LOGGER.warn("Error resetting ComboBox to first item: {}", e.getMessage());
-					}
-				} else if (component instanceof com.vaadin.flow.component.HasComponents) {
-					// Recursively check child components
-					resetComboBoxesRecursively((com.vaadin.flow.component.HasComponents) component);
-				}
-			}
-		});
 	}
 
 	private CEntityFormBuilder() {

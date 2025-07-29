@@ -15,6 +15,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.services.CAbstractService;
+import tech.derbent.session.service.CSessionService;
 
 /**
  * Test class for CAbstractMDPage to verify the details view tab functionality.
@@ -36,8 +37,8 @@ class CAbstractMDPageTest {
 
 		private static final long serialVersionUID = 1L;
 
-		public TestMDPage(final CAbstractService<TestEntity> entityService) {
-			super(TestEntity.class, entityService);
+		public TestMDPage(final CAbstractService<TestEntity> entityService, final CSessionService sessionService) {
+			super(TestEntity.class, entityService, sessionService);
 		}
 
 		@Override
@@ -78,7 +79,7 @@ class CAbstractMDPageTest {
 
 	@BeforeEach
 	void setUp() {
-		testPage = new TestMDPage(mockEntityService);
+		testPage = new TestMDPage(mockEntityService, null);
 	}
 
 	@Test
@@ -120,6 +121,15 @@ class CAbstractMDPageTest {
 	}
 
 	@Test
+	void testCreateNewButton() {
+		// Act
+		final CButton newButton = testPage.createNewButton("New");
+		// Assert
+		assertNotNull(newButton, "New button should not be null");
+		assertEquals("New", newButton.getText(), "New button should have correct text");
+	}
+
+	@Test
 	void testDetailsTabLayoutContainsButtons() {
 		// Act
 		testPage.createDetailsTabLayout();
@@ -136,14 +146,5 @@ class CAbstractMDPageTest {
 		assertNotNull(tabContent, "Tab content layout should exist");
 		assertTrue(tabContent.getClassName().contains("details-tab-content"),
 			"Tab content should have correct CSS class");
-	}
-
-	@Test
-	void testCreateNewButton() {
-		// Act
-		final CButton newButton = testPage.createNewButton("New");
-		// Assert
-		assertNotNull(newButton, "New button should not be null");
-		assertEquals("New", newButton.getText(), "New button should have correct text");
 	}
 }

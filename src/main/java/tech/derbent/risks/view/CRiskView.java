@@ -13,7 +13,7 @@ import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.risks.domain.CRisk;
 import tech.derbent.risks.service.CRiskService;
-import tech.derbent.session.service.SessionService;
+import tech.derbent.session.service.CSessionService;
 
 /**
  * CRiskView - View for managing project risks. Layer: View (MVC) Provides CRUD operations
@@ -32,7 +32,7 @@ public class CRiskView extends CProjectAwareMDPage<CRisk> {
 	private static final String ENTITY_ROUTE_TEMPLATE_EDIT = "risks/%s/edit";
 
 	public CRiskView(final CRiskService entityService,
-		final SessionService sessionService) {
+		final CSessionService sessionService) {
 		super(CRisk.class, entityService, sessionService);
 		addClassNames("risk-view");
 		// createDetailsLayout();

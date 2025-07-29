@@ -6,7 +6,6 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
-import tech.derbent.session.service.SessionService;
 
 public class CPanelActivityProject extends CPanelActivityBase {
 
@@ -14,13 +13,12 @@ public class CPanelActivityProject extends CPanelActivityBase {
 
 	public CPanelActivityProject(final CActivity currentEntity,
 		final BeanValidationBinder<CActivity> beanValidationBinder,
-		final CActivityService entityService, final SessionService sessionService) {
-		super(currentEntity, beanValidationBinder, entityService, sessionService);
+		final CActivityService entityService) {
+		super("Proje", currentEntity, beanValidationBinder, entityService);
 	}
 
 	@Override
 	protected void updatePanelEntityFields() {
-		setEntityFields(List.of("name", "description", "type", "status", "startDate",
-			"endDate", "project"));
+		setEntityFields(List.of("project"));
 	}
 }

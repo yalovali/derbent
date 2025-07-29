@@ -11,6 +11,7 @@ import tech.derbent.abstracts.annotations.CSpringAuxillaries;
 import tech.derbent.abstracts.views.CAbstractMDPage;
 import tech.derbent.activities.domain.CActivityType;
 import tech.derbent.activities.service.CActivityTypeService;
+import tech.derbent.session.service.CSessionService;
 
 /**
  * CActivityTypeView - View for managing activity types. Layer: View (MVC) Provides CRUD
@@ -31,9 +32,10 @@ public class CActivityTypeView extends CAbstractMDPage<CActivityType> {
 	/**
 	 * Constructor for CActivityTypeView.
 	 * @param entityService the service for activity type operations
+	 * @param sessionService
 	 */
-	public CActivityTypeView(final CActivityTypeService entityService) {
-		super(CActivityType.class, entityService);
+	public CActivityTypeView(final CActivityTypeService entityService, final CSessionService sessionService) {
+		super(CActivityType.class, entityService, sessionService);
 		addClassNames("activity-types-view");
 		// createDetailsLayout();
 		LOGGER.info("CActivityTypeView initialized with route: "

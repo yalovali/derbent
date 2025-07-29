@@ -50,6 +50,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	private static final String STANDARD_PASSWORD = "test123";
 
 	// Sample user profile pictures (base64 encoded SVG icons)
+	@SuppressWarnings ("unused")
 	private static final String PROFILE_PICTURE_USER =
 		"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDMTMuMSAyIDE0IDIuOSAxNCA0QzE0IDUuMSAxMy4xIDYgMTIgNkMxMC45IDYgMTAgNS4xIDEwIDRDMTAgMi45IDEwLjkgMiAxMiAyWk0yMSA5VjIySDNWOUwxMiA2TDIxIDlaIiBmaWxsPSIjMzMzIi8+Cjwvc3ZnPgo=";
 
@@ -95,18 +96,18 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		LOGGER.info("createAdminUser called - creating system administrator");
 		final CUser admin = userService.createLoginUser("admin", STANDARD_PASSWORD,
 			"Administrator", "admin@system.com", "ADMIN,USER");
-		
+
 		// Set user profile using auxiliary method
 		final byte[] profilePictureBytes = "profile-picture".getBytes();
 		userService.setUserProfile(admin, "System", "+1-555-1001", profilePictureBytes);
-		
+
 		// Set user role using auxiliary method
 		userService.setUserRole(admin, CUserRole.ADMIN, "ADMIN,USER");
-		
+
 		// Set company association using auxiliary method
 		final CCompany company = findCompanyByName("TechNova Solutions");
 		userService.setCompanyAssociation(admin, company);
-		
+
 		LOGGER.info("Administrator user created successfully");
 	}
 
@@ -126,9 +127,9 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 		// Create the activity using new auxiliary methods
 		final CActivity backendDev = new CActivity("Backend API Development", project);
-		
+
 		// Set activity type and description using auxiliary method
-		activityService.setActivityType(backendDev, null, 
+		activityService.setActivityType(backendDev, null,
 			"Develop REST API endpoints for user management and authentication");
 
 		// Set assigned users using auxiliary method
@@ -137,11 +138,11 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		activityService.setAssignedUsers(backendDev, manager, admin);
 
 		// Set time tracking using auxiliary method
-		activityService.setTimeTracking(backendDev, 
+		activityService.setTimeTracking(backendDev,
 			new BigDecimal("40.00"), new BigDecimal("35.50"), new BigDecimal("4.50"));
 
 		// Set date information using auxiliary method
-		activityService.setDateInfo(backendDev, 
+		activityService.setDateInfo(backendDev,
 			LocalDate.now().minusDays(10), LocalDate.now().plusDays(5), null);
 
 		// Create comments
@@ -212,19 +213,63 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		LOGGER.info("createProjectManagerUser called - creating project manager");
 		final CUser manager = userService.createLoginUser("jsmith", STANDARD_PASSWORD,
 			"John", "john.smith@technova.com", "MANAGER,USER");
-		
+
 		// Set user profile using auxiliary method
 		final byte[] profilePictureBytes = "profile-picture".getBytes();
 		userService.setUserProfile(manager, "Smith", "+1-555-1002", profilePictureBytes);
-		
+
 		// Set user role using auxiliary method
 		userService.setUserRole(manager, CUserRole.PROJECT_MANAGER, "MANAGER,USER");
-		
+
 		// Set company association using auxiliary method
 		final CCompany company = findCompanyByName("TechNova Solutions");
 		userService.setCompanyAssociation(manager, company);
-		
+
 		LOGGER.info("Project manager user created successfully");
+	}
+
+	/**
+	 * Creates sample project meeting using auxiliary service methods.
+	 * Demonstrates the use of auxiliary meeting service methods.
+	 */
+	private void createSampleProjectMeeting() {
+		LOGGER.info("createSampleProjectMeeting called - creating sample project meeting");
+		final CProject project = findProjectByName("Digital Transformation Initiative");
+
+		if (project == null) {
+			LOGGER.warn("Project 'Digital Transformation Initiative' not found, skipping meeting creation");
+			return;
+		}
+
+		// Create the meeting using new auxiliary methods
+		final CMeeting meeting = new CMeeting("Weekly Project Status Meeting", project);
+
+		// Set meeting details using auxiliary method
+		meetingService.setMeetingDetails(meeting, null,
+			LocalDateTime.now().plusDays(1).withHour(14).withMinute(0),
+			LocalDateTime.now().plusDays(1).withHour(15).withMinute(0),
+			"Conference Room A");
+
+		// Set meeting content using auxiliary method
+		final CUser responsible = findUserByLogin("jsmith");
+		meetingService.setMeetingContent(meeting,
+			"Weekly status update on project progress, blockers discussion, and next steps planning",
+			null, responsible);
+
+		// Set participants using auxiliary method
+		final Set<CUser> participants = new HashSet<>();
+		participants.add(findUserByLogin("admin"));
+		participants.add(findUserByLogin("jsmith"));
+		participants.add(findUserByLogin("bwilson"));
+		participants.add(findUserByLogin("mjohnson"));
+		meetingService.setParticipants(meeting, participants);
+
+		// Set meeting status using auxiliary method
+		meetingService.setMeetingStatus(meeting, null,
+			"Meeting agenda prepared, participants notified",
+			"Project management system");
+
+		LOGGER.info("Sample project meeting created successfully using auxiliary methods");
 	}
 
 	/**
@@ -243,9 +288,9 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 		// Create the activity using new auxiliary methods
 		final CActivity archDesign = new CActivity("System Architecture Design", project);
-		
+
 		// Set activity type and description using auxiliary method
-		activityService.setActivityType(archDesign, null, 
+		activityService.setActivityType(archDesign, null,
 			"Design scalable system architecture for infrastructure modernization");
 
 		// Set assigned users using auxiliary method
@@ -254,11 +299,11 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		activityService.setAssignedUsers(archDesign, teamMember2, admin);
 
 		// Set time tracking using auxiliary method
-		activityService.setTimeTracking(archDesign, 
+		activityService.setTimeTracking(archDesign,
 			new BigDecimal("60.00"), new BigDecimal("45.00"), new BigDecimal("15.00"));
 
 		// Set date information using auxiliary method
-		activityService.setDateInfo(archDesign, 
+		activityService.setDateInfo(archDesign,
 			LocalDate.now().minusDays(15), LocalDate.now().plusDays(10), null);
 
 		// Create comments
@@ -280,18 +325,18 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		LOGGER.info("createTeamMemberAlice called - creating Alice Davis");
 		final CUser analyst = userService.createLoginUser("adavis", STANDARD_PASSWORD,
 			"Alice", "alice.davis@medtechinnovations.com", "USER");
-		
+
 		// Set user profile using auxiliary method
 		final byte[] profilePictureBytes = "profile-picture".getBytes();
 		userService.setUserProfile(analyst, "Davis", "+1-555-1005", profilePictureBytes);
-		
+
 		// Set user role using auxiliary method
 		userService.setUserRole(analyst, CUserRole.TEAM_MEMBER, "USER");
-		
+
 		// Set company association using auxiliary method
 		final CCompany company = findCompanyByName("MedTech Innovations");
 		userService.setCompanyAssociation(analyst, company);
-		
+
 		LOGGER.info("Team member Alice Davis created successfully");
 	}
 
@@ -302,18 +347,18 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		LOGGER.info("createTeamMemberBob called - creating Bob Wilson");
 		final CUser developer = userService.createLoginUser("bwilson", STANDARD_PASSWORD,
 			"Bob", "bob.wilson@strategicadvisors.com", "USER");
-		
+
 		// Set user profile using auxiliary method
 		final byte[] profilePictureBytes = "profile-picture".getBytes();
 		userService.setUserProfile(developer, "Wilson", "+1-555-1004", profilePictureBytes);
-		
+
 		// Set user role using auxiliary method
 		userService.setUserRole(developer, CUserRole.TEAM_MEMBER, "USER");
-		
+
 		// Set company association using auxiliary method
 		final CCompany company = findCompanyByName("Strategic Advisors Ltd");
 		userService.setCompanyAssociation(developer, company);
-		
+
 		LOGGER.info("Team member Bob Wilson created successfully");
 	}
 
@@ -324,18 +369,18 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		LOGGER.info("createTeamMemberMary called - creating Mary Johnson");
 		final CUser teamMember = userService.createLoginUser("mjohnson",
 			STANDARD_PASSWORD, "Mary", "mary.johnson@industrialdynamics.com", "USER");
-		
+
 		// Set user profile using auxiliary method
 		final byte[] profilePictureBytes = "profile-picture".getBytes();
 		userService.setUserProfile(teamMember, "Johnson", "+1-555-1003", profilePictureBytes);
-		
+
 		// Set user role using auxiliary method
 		userService.setUserRole(teamMember, CUserRole.TEAM_MEMBER, "USER");
-		
+
 		// Set company association using auxiliary method
 		final CCompany company = findCompanyByName("Industrial Dynamics Corp");
 		userService.setCompanyAssociation(teamMember, company);
-		
+
 		LOGGER.info("Team member Mary Johnson created successfully");
 	}
 
@@ -383,9 +428,9 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 		// Create the activity using new auxiliary methods
 		final CActivity techDoc = new CActivity("Technical Documentation Update", project);
-		
+
 		// Set activity type and description using auxiliary method
-		activityService.setActivityType(techDoc, null, 
+		activityService.setActivityType(techDoc, null,
 			"Update and enhance technical documentation for customer experience features");
 
 		// Set assigned users using auxiliary method
@@ -394,11 +439,11 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		activityService.setAssignedUsers(techDoc, analyst, manager);
 
 		// Set time tracking using auxiliary method (completed activity)
-		activityService.setTimeTracking(techDoc, 
+		activityService.setTimeTracking(techDoc,
 			new BigDecimal("16.00"), new BigDecimal("16.00"), new BigDecimal("0.00"));
 
 		// Set date information using auxiliary method (completed activity)
-		activityService.setDateInfo(techDoc, 
+		activityService.setDateInfo(techDoc,
 			LocalDate.now().minusDays(5), LocalDate.now().minusDays(1), LocalDate.now().minusDays(1));
 
 		// Create comments
@@ -429,9 +474,9 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 		// Create the activity using new auxiliary methods
 		final CActivity uiTesting = new CActivity("User Interface Testing", project);
-		
+
 		// Set activity type and description using auxiliary method
-		activityService.setActivityType(uiTesting, null, 
+		activityService.setActivityType(uiTesting, null,
 			"Comprehensive testing of user interface components and workflows");
 
 		// Set assigned users using auxiliary method
@@ -440,58 +485,14 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		activityService.setAssignedUsers(uiTesting, teamMember1, manager);
 
 		// Set time tracking using auxiliary method
-		activityService.setTimeTracking(uiTesting, 
+		activityService.setTimeTracking(uiTesting,
 			new BigDecimal("24.00"), new BigDecimal("20.00"), new BigDecimal("4.00"));
 
 		// Set date information using auxiliary method
-		activityService.setDateInfo(uiTesting, 
+		activityService.setDateInfo(uiTesting,
 			LocalDate.now().minusDays(7), LocalDate.now().plusDays(3), null);
 
 		LOGGER.info("UI testing activity created successfully");
-	}
-
-	/**
-	 * Creates sample project meeting using auxiliary service methods.
-	 * Demonstrates the use of auxiliary meeting service methods.
-	 */
-	private void createSampleProjectMeeting() {
-		LOGGER.info("createSampleProjectMeeting called - creating sample project meeting");
-		final CProject project = findProjectByName("Digital Transformation Initiative");
-
-		if (project == null) {
-			LOGGER.warn("Project 'Digital Transformation Initiative' not found, skipping meeting creation");
-			return;
-		}
-
-		// Create the meeting using new auxiliary methods
-		final CMeeting meeting = new CMeeting("Weekly Project Status Meeting", project);
-
-		// Set meeting details using auxiliary method
-		meetingService.setMeetingDetails(meeting, null, 
-			LocalDateTime.now().plusDays(1).withHour(14).withMinute(0), 
-			LocalDateTime.now().plusDays(1).withHour(15).withMinute(0), 
-			"Conference Room A");
-
-		// Set meeting content using auxiliary method
-		final CUser responsible = findUserByLogin("jsmith");
-		meetingService.setMeetingContent(meeting, 
-			"Weekly status update on project progress, blockers discussion, and next steps planning",
-			null, responsible);
-
-		// Set participants using auxiliary method
-		final Set<CUser> participants = new HashSet<>();
-		participants.add(findUserByLogin("admin"));
-		participants.add(findUserByLogin("jsmith"));
-		participants.add(findUserByLogin("bwilson"));
-		participants.add(findUserByLogin("mjohnson"));
-		meetingService.setParticipants(meeting, participants);
-
-		// Set meeting status using auxiliary method
-		meetingService.setMeetingStatus(meeting, null, 
-			"Meeting agenda prepared, participants notified", 
-			"Project management system");
-
-		LOGGER.info("Sample project meeting created successfully using auxiliary methods");
 	}
 
 	/**
@@ -562,21 +563,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	}
 
 	/**
-	 * Initializes sample meetings with participants and content.
-	 */
-	private void initializeMeetings() {
-		LOGGER.info("initializeMeetings called - creating sample meetings");
-
-		try {
-			createSampleProjectMeeting();
-			LOGGER.info("Successfully created sample meetings");
-		} catch (final Exception e) {
-			LOGGER.error("Error creating sample meetings", e);
-			throw new RuntimeException("Failed to initialize meetings", e);
-		}
-	}
-
-	/**
 	 * Initializes activity types for categorizing different kinds of work.
 	 */
 	private void initializeActivityTypes() {
@@ -616,6 +602,21 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		} catch (final Exception e) {
 			LOGGER.error("Error creating sample companies", e);
 			throw new RuntimeException("Failed to initialize companies", e);
+		}
+	}
+
+	/**
+	 * Initializes sample meetings with participants and content.
+	 */
+	private void initializeMeetings() {
+		LOGGER.info("initializeMeetings called - creating sample meetings");
+
+		try {
+			createSampleProjectMeeting();
+			LOGGER.info("Successfully created sample meetings");
+		} catch (final Exception e) {
+			LOGGER.error("Error creating sample meetings", e);
+			throw new RuntimeException("Failed to initialize meetings", e);
 		}
 	}
 

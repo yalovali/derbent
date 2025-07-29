@@ -23,7 +23,7 @@ import tech.derbent.activities.service.CActivityService;
 import tech.derbent.activities.view.CPanelActivityBase;
 import tech.derbent.comments.domain.CComment;
 import tech.derbent.comments.service.CCommentService;
-import tech.derbent.session.service.SessionService;
+import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
 
 /**
@@ -40,7 +40,7 @@ public class CPanelActivityComments extends CPanelActivityBase {
 
 	private final CCommentService commentService;
 
-	private final SessionService sessionService;
+	private final CSessionService sessionService;
 
 	private VerticalLayout commentsContainer;
 
@@ -61,8 +61,8 @@ public class CPanelActivityComments extends CPanelActivityBase {
 	public CPanelActivityComments(final CActivity currentEntity,
 		final BeanValidationBinder<CActivity> binder,
 		final CActivityService activityService, final CCommentService commentService,
-		final SessionService sessionService) {
-		super("Comments", currentEntity, binder, activityService, sessionService);
+		final CSessionService sessionService) {
+		super("Comments", currentEntity, binder, activityService);
 		LOGGER.info("CPanelActivityComments constructor called with activity: {}",
 			currentEntity);
 		this.commentService = commentService;

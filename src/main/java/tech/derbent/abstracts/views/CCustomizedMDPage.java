@@ -7,6 +7,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.services.CAbstractService;
+import tech.derbent.session.service.CSessionService;
 
 /**
  * Example implementation showing how to customize the details view tab while maintaining consistent button placement
@@ -17,9 +18,15 @@ public abstract class CCustomizedMDPage<EntityClass extends CEntityDB> extends C
     private static final long serialVersionUID = 1L;
 
     protected CCustomizedMDPage(final Class<EntityClass> entityClass,
-            final CAbstractService<EntityClass> entityService) {
-        super(entityClass, entityService);
+            final CAbstractService<EntityClass> entityService, final CSessionService sessionService) {
+        super(entityClass, entityService, sessionService);
     }
+
+    /**
+     * Subclasses should override this to provide their custom label.
+     */
+    @Override
+    protected abstract Div createDetailsTabLeftContent();
 
     /**
      * Example of how to override the details tab with more complex content while keeping the standard button layout.
@@ -62,10 +69,4 @@ public abstract class CCustomizedMDPage<EntityClass extends CEntityDB> extends C
         tabContent.add(leftContent, buttonLayout);
         getDetailsTabLayout().add(tabContent);
     }
-
-    /**
-     * Subclasses should override this to provide their custom label.
-     */
-    @Override
-    protected abstract Div createDetailsTabLeftContent();
 }

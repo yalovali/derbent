@@ -16,7 +16,7 @@ import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
-import tech.derbent.session.service.SessionService;
+import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.service.CUserService;
 
@@ -40,7 +40,7 @@ public class NewButtonIntegrationTest {
 
 	@SuppressWarnings ("unused")
 	@Autowired
-	private SessionService sessionService;
+	private CSessionService sessionService;
 
 	@SuppressWarnings ("unused")
 	@Autowired

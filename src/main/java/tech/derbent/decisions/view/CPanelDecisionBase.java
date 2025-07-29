@@ -11,7 +11,7 @@ import tech.derbent.decisions.service.CDecisionService;
 /**
  * CPanelDecisionBase - Abstract base class for decision entity panels.
  * Layer: View (MVC)
- * 
+ *
  * Provides common functionality for all decision-related panels following
  * the established patterns from CPanelActivityBase.
  */
@@ -19,19 +19,6 @@ public abstract class CPanelDecisionBase extends CAccordionDescription<CDecision
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor with default title based on entity.
-     * @param currentEntity the current decision entity
-     * @param beanValidationBinder validation binder for the decision
-     * @param entityService decision service for data operations
-     */
-    public CPanelDecisionBase(final CDecision currentEntity,
-                             final BeanValidationBinder<CDecision> beanValidationBinder,
-                             final CDecisionService entityService) {
-        super(currentEntity, beanValidationBinder, CDecision.class, entityService);
-        createPanelContent();
-        closePanel();
-    }
 
     /**
      * Constructor with custom panel title.

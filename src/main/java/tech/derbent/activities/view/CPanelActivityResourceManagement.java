@@ -6,7 +6,6 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
-import tech.derbent.session.service.SessionService;
 
 /**
  * CPanelActivityResourceManagement - Panel for grouping resource management related fields
@@ -20,8 +19,8 @@ public class CPanelActivityResourceManagement extends CPanelActivityBase {
 
 	public CPanelActivityResourceManagement(final CActivity currentEntity,
 		final BeanValidationBinder<CActivity> beanValidationBinder,
-		final CActivityService entityService, final SessionService sessionService) {
-		super("Resource Management", currentEntity, beanValidationBinder, entityService, sessionService);
+		final CActivityService entityService) {
+		super("Resource Management", currentEntity, beanValidationBinder, entityService);
 	}
 
 	@Override

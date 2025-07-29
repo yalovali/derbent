@@ -8,6 +8,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.views.CAccordionDescription;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.activities.domain.CActivity;
@@ -15,7 +16,7 @@ import tech.derbent.activities.service.CActivityService;
 import tech.derbent.comments.service.CCommentService;
 import tech.derbent.comments.view.CPanelActivityComments;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.session.service.SessionService;
+import tech.derbent.session.service.CSessionService;
 
 @Route ("activities/:activity_id?/:action?(edit)")
 @PageTitle ("Activity Master Detail")
@@ -28,11 +29,11 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 	private final String ENTITY_ID_FIELD = "activity_id";
 
 	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "activities/%s/edit";
-	
+
 	private final CCommentService commentService;
 
 	public CActivitiesView(final CActivityService entityService,
-		final SessionService sessionService,
+		final CSessionService sessionService,
 		final CCommentService commentService) {
 		super(CActivity.class, entityService, sessionService);
 		this.commentService = commentService;
@@ -45,29 +46,30 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 	 */
 	@Override
 	protected void createDetailsLayout() {
+		getBaseDetailsLayout().add(CEntityFormBuilder.buildForm(CActivity.class, getBinder(),null));
 		CAccordionDescription<CActivity> panel;
 		panel = new CPanelActivityDescription(getCurrentEntity(), getBinder(),
-			(CActivityService) entityService, sessionService);
+			(CActivityService) entityService);
 		addAccordionPanel(panel);
 		panel = new CPanelActivityProject(getCurrentEntity(), getBinder(),
-			(CActivityService) entityService, sessionService);
+			(CActivityService) entityService);
 		addAccordionPanel(panel);
 		panel = new CPanelActivityResourceManagement(getCurrentEntity(), getBinder(),
-			(CActivityService) entityService, sessionService);
+			(CActivityService) entityService);
 		addAccordionPanel(panel);
 		panel = new CPanelActivityStatusPriority(getCurrentEntity(), getBinder(),
-			(CActivityService) entityService, sessionService);
+			(CActivityService) entityService);
 		addAccordionPanel(panel);
 		panel = new CPanelActivityTimeTracking(getCurrentEntity(), getBinder(),
-			(CActivityService) entityService, sessionService);
+			(CActivityService) entityService);
 		addAccordionPanel(panel);
 		panel = new CPanelActivityHierarchy(getCurrentEntity(), getBinder(),
-			(CActivityService) entityService, sessionService);
+			(CActivityService) entityService);
 		addAccordionPanel(panel);
 		panel = new CPanelActivityBudgetManagement(getCurrentEntity(), getBinder(),
-			(CActivityService) entityService, sessionService);
+			(CActivityService) entityService);
 		addAccordionPanel(panel);
-		
+
 		// Add comments panel
 		panel = new CPanelActivityComments(getCurrentEntity(), getBinder(),
 			(CActivityService) entityService, commentService, sessionService);
@@ -104,7 +106,7 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 		}, "Description", null);
 		// when a row is selected or deselected, populate form
 		grid.asSingleSelect().addValueChangeListener(event -> {
-
+			LOGGER.debug("Grid selection changed: {}", event.getValue());
 			if (event.getValue() != null) {
 				UI.getCurrent().navigate(
 					String.format(ENTITY_ROUTE_TEMPLATE_EDIT, event.getValue().getId()));
@@ -137,6 +139,7 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 	@Override
 	protected List<CActivity> getProjectFilteredData(final CProject project,
 		final org.springframework.data.domain.Pageable pageable) {
+		LOGGER.debug("Fetching activities for project: {}", project.getName());
 		return ((CActivityService) entityService).listByProject(project, pageable)
 			.getContent();
 	}

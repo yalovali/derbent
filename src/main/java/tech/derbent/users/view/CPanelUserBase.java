@@ -26,17 +26,6 @@ public abstract class CPanelUserBase extends CAccordionDescription<CUser> {
 
 	private final CCompanyService companyService;
 
-	public CPanelUserBase(final CUser currentEntity,
-		final BeanValidationBinder<CUser> beanValidationBinder,
-		final CUserService entityService, final CUserTypeService userTypeService,
-		final CCompanyService companyService) {
-		super(currentEntity, beanValidationBinder, CUser.class, entityService);
-		this.userTypeService = userTypeService;
-		this.companyService = companyService;
-		createPanelContent();
-		closePanel();
-	}
-
 	/**
 	 * Constructor with custom panel title.
 	 * @param title                custom title for the panel

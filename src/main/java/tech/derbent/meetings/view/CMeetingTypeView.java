@@ -11,6 +11,7 @@ import tech.derbent.abstracts.annotations.CSpringAuxillaries;
 import tech.derbent.abstracts.views.CAbstractMDPage;
 import tech.derbent.meetings.domain.CMeetingType;
 import tech.derbent.meetings.service.CMeetingTypeService;
+import tech.derbent.session.service.CSessionService;
 
 /**
  * CMeetingTypeView - View for managing meeting types. Layer: View (MVC) Provides CRUD
@@ -31,9 +32,10 @@ public class CMeetingTypeView extends CAbstractMDPage<CMeetingType> {
 	/**
 	 * Constructor for CMeetingTypeView.
 	 * @param entityService the service for meeting type operations
+	 * @param sessionService
 	 */
-	public CMeetingTypeView(final CMeetingTypeService entityService) {
-		super(CMeetingType.class, entityService);
+	public CMeetingTypeView(final CMeetingTypeService entityService, final CSessionService sessionService) {
+		super(CMeetingType.class, entityService, sessionService);
 		addClassNames("meeting-types-view");
 		// createDetailsLayout();
 		LOGGER.info("CMeetingTypeView initialized with route: "
