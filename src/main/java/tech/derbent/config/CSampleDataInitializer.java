@@ -19,8 +19,11 @@ import tech.derbent.activities.service.CActivityTypeService;
 import tech.derbent.comments.service.CCommentService;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
+import tech.derbent.decisions.service.CDecisionTypeService;
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.service.CMeetingService;
+import tech.derbent.meetings.service.CMeetingTypeService;
+import tech.derbent.orders.service.COrderTypeService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
@@ -65,6 +68,12 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 	private final CActivityTypeService activityTypeService;
 
+	private final CMeetingTypeService meetingTypeService;
+
+	private final CDecisionTypeService decisionTypeService;
+
+	private final COrderTypeService orderTypeService;
+
 	private final CCompanyService companyService;
 
 	private final CCommentService commentService;
@@ -75,6 +84,9 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CUserService userService, final CActivityService activityService,
 		final CUserTypeService userTypeService,
 		final CActivityTypeService activityTypeService,
+		final CMeetingTypeService meetingTypeService,
+		final CDecisionTypeService decisionTypeService,
+		final COrderTypeService orderTypeService,
 		final CCompanyService companyService, final CCommentService commentService,
 		final CMeetingService meetingService) {
 		LOGGER
@@ -84,6 +96,9 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		this.activityService = activityService;
 		this.userTypeService = userTypeService;
 		this.activityTypeService = activityTypeService;
+		this.meetingTypeService = meetingTypeService;
+		this.decisionTypeService = decisionTypeService;
+		this.orderTypeService = orderTypeService;
 		this.companyService = companyService;
 		this.commentService = commentService;
 		this.meetingService = meetingService;
@@ -564,30 +579,45 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 	/**
 	 * Initializes activity types for categorizing different kinds of work.
+	 * Creates types for all projects to ensure project-specific categorization.
 	 */
 	private void initializeActivityTypes() {
 		LOGGER.info(
-			"initializeActivityTypes called - creating activity type classifications");
+			"initializeActivityTypes called - creating activity type classifications for all projects");
 
 		try {
-			// Get the first project for now - later this should create types for all projects
-			final CProject project = findProjectByName("Digital Transformation Initiative");
-			if (project == null) {
-				LOGGER.warn("Project 'Digital Transformation Initiative' not found, skipping activity type creation");
-				return;
-			}
+			// Get all projects
+			final String[] projectNames = {
+				"Digital Transformation Initiative",
+				"Product Development Phase 2", 
+				"Infrastructure Modernization",
+				"Customer Experience Enhancement"
+			};
 
-			activityTypeService.createEntity("Development",
-				"Software development and coding tasks", project);
-			activityTypeService.createEntity("Testing",
-				"Quality assurance and testing activities", project);
-			activityTypeService.createEntity("Design",
-				"UI/UX design and system architecture", project);
-			activityTypeService.createEntity("Documentation",
-				"Technical writing and documentation", project);
-			activityTypeService.createEntity("Research",
-				"Research and analysis activities", project);
-			// LOGGER.info("Successfully created 5 activity types");
+			// Define activity types to create for each project
+			final String[][] activityTypes = {
+				{"Development", "Software development and coding tasks"},
+				{"Testing", "Quality assurance and testing activities"},
+				{"Design", "UI/UX design and system architecture"},
+				{"Documentation", "Technical writing and documentation"},
+				{"Research", "Research and analysis activities"}
+			};
+
+			// Create activity types for each project
+			for (final String projectName : projectNames) {
+				final CProject project = findProjectByName(projectName);
+				if (project == null) {
+					LOGGER.warn("Project '{}' not found, skipping activity type creation", projectName);
+					continue;
+				}
+
+				LOGGER.info("Creating activity types for project: {}", projectName);
+				for (final String[] typeData : activityTypes) {
+					activityTypeService.createEntity(typeData[0], typeData[1], project);
+				}
+			}
+			
+			LOGGER.info("Successfully created activity types for all projects");
 		} catch (final Exception e) {
 			LOGGER.error("Error creating activity types", e);
 			throw new RuntimeException("Failed to initialize activity types", e);
@@ -666,17 +696,181 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Initializes user types for role-based access control.
 	 */
 	private void initializeUserTypes() {
-		LOGGER.info("initializeUserTypes called - creating user type classifications");
+		LOGGER.info("initializeUserTypes called - creating user type classifications for all projects");
 
 		try {
-			userTypeService.createEntity("Employee");
-			userTypeService.createEntity("Manager");
-			userTypeService.createEntity("Executive");
-			userTypeService.createEntity("Contractor");
-			// LOGGER.info("Successfully created 4 user types");
+			// Get all projects
+			final String[] projectNames = {
+				"Digital Transformation Initiative",
+				"Product Development Phase 2", 
+				"Infrastructure Modernization",
+				"Customer Experience Enhancement"
+			};
+
+			// Define user types to create for each project
+			final String[][] userTypes = {
+				{"Employee", "Regular employee"},
+				{"Manager", "Team manager or lead"},
+				{"Executive", "Executive or senior management"},
+				{"Contractor", "External contractor or consultant"}
+			};
+
+			// Create user types for each project
+			for (final String projectName : projectNames) {
+				final CProject project = findProjectByName(projectName);
+				if (project == null) {
+					LOGGER.warn("Project '{}' not found, skipping user type creation", projectName);
+					continue;
+				}
+
+				LOGGER.info("Creating user types for project: {}", projectName);
+				for (final String[] typeData : userTypes) {
+					userTypeService.createEntity(typeData[0], typeData[1], project);
+				}
+			}
+			
+			LOGGER.info("Successfully created user types for all projects");
 		} catch (final Exception e) {
 			LOGGER.error("Error creating user types", e);
 			throw new RuntimeException("Failed to initialize user types", e);
+		}
+	}
+
+	/**
+	 * Initializes meeting types for categorizing different kinds of meetings.
+	 * Creates types for all projects to ensure project-specific categorization.
+	 */
+	private void initializeMeetingTypes() {
+		LOGGER.info("initializeMeetingTypes called - creating meeting type classifications for all projects");
+
+		try {
+			// Get all projects
+			final String[] projectNames = {
+				"Digital Transformation Initiative",
+				"Product Development Phase 2", 
+				"Infrastructure Modernization",
+				"Customer Experience Enhancement"
+			};
+
+			// Define meeting types to create for each project
+			final String[][] meetingTypes = {
+				{"Standup", "Daily standup meeting"},
+				{"Planning", "Sprint or project planning meeting"},
+				{"Review", "Review and feedback meeting"},
+				{"Retrospective", "Team retrospective meeting"},
+				{"One-on-One", "Individual meeting with team member"}
+			};
+
+			// Create meeting types for each project
+			for (final String projectName : projectNames) {
+				final CProject project = findProjectByName(projectName);
+				if (project == null) {
+					LOGGER.warn("Project '{}' not found, skipping meeting type creation", projectName);
+					continue;
+				}
+
+				LOGGER.info("Creating meeting types for project: {}", projectName);
+				for (final String[] typeData : meetingTypes) {
+					meetingTypeService.createEntity(typeData[0], typeData[1], project);
+				}
+			}
+			
+			LOGGER.info("Successfully created meeting types for all projects");
+		} catch (final Exception e) {
+			LOGGER.error("Error creating meeting types", e);
+			throw new RuntimeException("Failed to initialize meeting types", e);
+		}
+	}
+
+	/**
+	 * Initializes decision types for categorizing different kinds of decisions.
+	 * Creates types for all projects to ensure project-specific categorization.
+	 */
+	private void initializeDecisionTypes() {
+		LOGGER.info("initializeDecisionTypes called - creating decision type classifications for all projects");
+
+		try {
+			// Get all projects
+			final String[] projectNames = {
+				"Digital Transformation Initiative",
+				"Product Development Phase 2", 
+				"Infrastructure Modernization",
+				"Customer Experience Enhancement"
+			};
+
+			// Define decision types to create for each project
+			final String[][] decisionTypes = {
+				{"Strategic", "High-level strategic decisions"},
+				{"Technical", "Technical architecture decisions"},
+				{"Financial", "Budget and cost-related decisions"},
+				{"Operational", "Day-to-day operational decisions"},
+				{"Resource", "Resource allocation decisions"}
+			};
+
+			// Create decision types for each project
+			for (final String projectName : projectNames) {
+				final CProject project = findProjectByName(projectName);
+				if (project == null) {
+					LOGGER.warn("Project '{}' not found, skipping decision type creation", projectName);
+					continue;
+				}
+
+				LOGGER.info("Creating decision types for project: {}", projectName);
+				for (final String[] typeData : decisionTypes) {
+					decisionTypeService.createDecisionType(typeData[0], typeData[1], true, project);
+				}
+			}
+			
+			LOGGER.info("Successfully created decision types for all projects");
+		} catch (final Exception e) {
+			LOGGER.error("Error creating decision types", e);
+			throw new RuntimeException("Failed to initialize decision types", e);
+		}
+	}
+
+	/**
+	 * Initializes order types for categorizing different kinds of orders.
+	 * Creates types for all projects to ensure project-specific categorization.
+	 */
+	private void initializeOrderTypes() {
+		LOGGER.info("initializeOrderTypes called - creating order type classifications for all projects");
+
+		try {
+			// Get all projects
+			final String[] projectNames = {
+				"Digital Transformation Initiative",
+				"Product Development Phase 2", 
+				"Infrastructure Modernization",
+				"Customer Experience Enhancement"
+			};
+
+			// Define order types to create for each project
+			final String[][] orderTypes = {
+				{"Service Order", "Service-related orders"},
+				{"Purchase Order", "Purchase and procurement orders"},
+				{"Maintenance Order", "Maintenance and support orders"},
+				{"Change Order", "Change request orders"},
+				{"Support Order", "Customer support orders"}
+			};
+
+			// Create order types for each project
+			for (final String projectName : projectNames) {
+				final CProject project = findProjectByName(projectName);
+				if (project == null) {
+					LOGGER.warn("Project '{}' not found, skipping order type creation", projectName);
+					continue;
+				}
+
+				LOGGER.info("Creating order types for project: {}", projectName);
+				for (final String[] typeData : orderTypes) {
+					orderTypeService.createEntity(typeData[0], typeData[1], project);
+				}
+			}
+			
+			LOGGER.info("Successfully created order types for all projects");
+		} catch (final Exception e) {
+			LOGGER.error("Error creating order types", e);
+			throw new RuntimeException("Failed to initialize order types", e);
 		}
 	}
 
@@ -698,6 +892,9 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			// Initialize data in proper dependency order
 			initializeCompanies();
 			initializeUserTypes();
+			initializeMeetingTypes();
+			initializeDecisionTypes();
+			initializeOrderTypes();
 			initializeUsers();
 			initializeProjects();
 			initializeActivityTypes();
