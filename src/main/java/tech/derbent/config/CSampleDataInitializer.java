@@ -570,16 +570,23 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			"initializeActivityTypes called - creating activity type classifications");
 
 		try {
+			// Get the first project for now - later this should create types for all projects
+			final CProject project = findProjectByName("Digital Transformation Initiative");
+			if (project == null) {
+				LOGGER.warn("Project 'Digital Transformation Initiative' not found, skipping activity type creation");
+				return;
+			}
+
 			activityTypeService.createEntity("Development",
-				"Software development and coding tasks");
+				"Software development and coding tasks", project);
 			activityTypeService.createEntity("Testing",
-				"Quality assurance and testing activities");
+				"Quality assurance and testing activities", project);
 			activityTypeService.createEntity("Design",
-				"UI/UX design and system architecture");
+				"UI/UX design and system architecture", project);
 			activityTypeService.createEntity("Documentation",
-				"Technical writing and documentation");
+				"Technical writing and documentation", project);
 			activityTypeService.createEntity("Research",
-				"Research and analysis activities");
+				"Research and analysis activities", project);
 			// LOGGER.info("Successfully created 5 activity types");
 		} catch (final Exception e) {
 			LOGGER.error("Error creating activity types", e);

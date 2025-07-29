@@ -4,16 +4,17 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import tech.derbent.abstracts.domains.CTypeEntity;
+import tech.derbent.abstracts.domains.CEntityOfProject;
+import tech.derbent.projects.domain.CProject;
 
 /**
  * CUserType - Domain entity representing user types. Layer: Domain (MVC) Inherits from
- * CTypeEntity to provide type functionality for users.
+ * CEntityOfProject to provide project-aware type functionality for users.
  */
 @Entity
 @Table (name = "cusertype")
 @AttributeOverride (name = "id", column = @Column (name = "cusertype_id"))
-public class CUserType extends CTypeEntity {
+public class CUserType extends CEntityOfProject {
 
 	/**
 	 * Default constructor for JPA.
@@ -23,19 +24,22 @@ public class CUserType extends CTypeEntity {
 	}
 
 	/**
-	 * Constructor with name.
+	 * Constructor with name and project.
 	 * @param name the name of the user type
+	 * @param project the project this type belongs to
 	 */
-	public CUserType(final String name) {
-		super(name);
+	public CUserType(final String name, final CProject project) {
+		super(name, project);
 	}
 
 	/**
-	 * Constructor with name and description.
+	 * Constructor with name, description and project.
 	 * @param name        the name of the user type
 	 * @param description the description of the user type
+	 * @param project     the project this type belongs to
 	 */
-	public CUserType(final String name, final String description) {
-		super(name, description);
+	public CUserType(final String name, final String description, final CProject project) {
+		super(name, project);
+		setDescription(description);
 	}
 }
