@@ -95,17 +95,17 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	private void createAdminUser() {
 		LOGGER.info("createAdminUser called - creating system administrator");
 		final CUser admin = userService.createLoginUser("admin", STANDARD_PASSWORD,
-			"Administrator", "admin@system.com", "ADMIN,USER");
+			"Ahmet", "admin@of.gov.tr", "ADMIN,USER");
 
 		// Set user profile using auxiliary method
 		final byte[] profilePictureBytes = "profile-picture".getBytes();
-		userService.setUserProfile(admin, "System", "+1-555-1001", profilePictureBytes);
+		userService.setUserProfile(admin, "Yılmaz", "+90-462-751-1001", profilePictureBytes);
 
 		// Set user role using auxiliary method
 		userService.setUserRole(admin, CUserRole.ADMIN, "ADMIN,USER");
 
 		// Set company association using auxiliary method
-		final CCompany company = findCompanyByName("TechNova Solutions");
+		final CCompany company = findCompanyByName("Of Teknoloji Çözümleri");
 		userService.setCompanyAssociation(admin, company);
 
 		LOGGER.info("Administrator user created successfully");
@@ -133,7 +133,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			"Develop REST API endpoints for user management and authentication");
 
 		// Set assigned users using auxiliary method
-		final CUser manager = findUserByLogin("jsmith");
+		final CUser manager = findUserByLogin("mkaradeniz");
 		final CUser admin = findUserByLogin("admin");
 		activityService.setAssignedUsers(backendDev, manager, admin);
 
@@ -158,14 +158,14 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Creates consulting company.
 	 */
 	private void createConsultingCompany() {
-		LOGGER.info("createConsultingCompany called - creating Strategic Advisors Ltd");
-		final CCompany consulting = new CCompany("Strategic Advisors Ltd",
-			"Management consulting and strategic planning services");
-		consulting.setAddress("789 Business Center, New York, NY 10001");
-		consulting.setPhone("+1-555-0303");
-		consulting.setEmail("hello@strategicadvisors.com");
-		consulting.setWebsite("https://www.strategicadvisors.com");
-		consulting.setTaxNumber("TAX-456789123");
+		LOGGER.info("createConsultingCompany called - creating Of Stratejik Danışmanlık");
+		final CCompany consulting = new CCompany("Of Stratejik Danışmanlık",
+			"Yönetim danışmanlığı ve stratejik planlama hizmetleri");
+		consulting.setAddress("Merkez Mahallesi, Gülbahar Sokağı No:7, Of/Trabzon");
+		consulting.setPhone("+90-462-751-0303");
+		consulting.setEmail("merhaba@ofdanismanlik.com.tr");
+		consulting.setWebsite("https://www.ofdanismanlik.com.tr");
+		consulting.setTaxNumber("TR-456789123");
 		consulting.setEnabled(true);
 		companyService.save(consulting);
 		LOGGER.info("Consulting company created successfully");
@@ -175,14 +175,14 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Creates healthcare company.
 	 */
 	private void createHealthcareCompany() {
-		LOGGER.info("createHealthcareCompany called - creating MedTech Innovations");
-		final CCompany healthcare = new CCompany("MedTech Innovations",
-			"Advanced medical technology and healthcare solutions");
-		healthcare.setAddress("321 Medical Plaza, Boston, MA 02101");
-		healthcare.setPhone("+1-555-0404");
-		healthcare.setEmail("contact@medtechinnovations.com");
-		healthcare.setWebsite("https://www.medtechinnovations.com");
-		healthcare.setTaxNumber("TAX-789123456");
+		LOGGER.info("createHealthcareCompany called - creating Of Sağlık Teknolojileri");
+		final CCompany healthcare = new CCompany("Of Sağlık Teknolojileri",
+			"İleri tıp teknolojisi ve sağlık çözümleri");
+		healthcare.setAddress("Yeni Mahalle, Sağlık Sokağı No:21, Of/Trabzon");
+		healthcare.setPhone("+90-462-751-0404");
+		healthcare.setEmail("iletisim@ofsaglik.com.tr");
+		healthcare.setWebsite("https://www.ofsaglik.com.tr");
+		healthcare.setTaxNumber("TR-789123456");
 		healthcare.setEnabled(true);
 		companyService.save(healthcare);
 		LOGGER.info("Healthcare company created successfully");
@@ -193,14 +193,14 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 */
 	private void createManufacturingCompany() {
 		LOGGER.info(
-			"createManufacturingCompany called - creating Industrial Dynamics Corp");
-		final CCompany manufacturing = new CCompany("Industrial Dynamics Corp",
-			"Leading manufacturer of precision engineering components");
-		manufacturing.setAddress("456 Manufacturing Blvd, Detroit, MI 48201");
-		manufacturing.setPhone("+1-555-0202");
-		manufacturing.setEmail("info@industrialdynamics.com");
-		manufacturing.setWebsite("https://www.industrialdynamics.com");
-		manufacturing.setTaxNumber("TAX-987654321");
+			"createManufacturingCompany called - creating Of Endüstri Dinamikleri");
+		final CCompany manufacturing = new CCompany("Of Endüstri Dinamikleri",
+			"Hassas mühendislik bileşenlerinde lider üretici");
+		manufacturing.setAddress("Sanayi Mahallesi, İstiklal Caddesi No:42, Of/Trabzon");
+		manufacturing.setPhone("+90-462-751-0202");
+		manufacturing.setEmail("bilgi@ofendüstri.com.tr");
+		manufacturing.setWebsite("https://www.ofendüstri.com.tr");
+		manufacturing.setTaxNumber("TR-987654321");
 		manufacturing.setEnabled(true);
 		companyService.save(manufacturing);
 		LOGGER.info("Manufacturing company created successfully");
@@ -211,18 +211,18 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 */
 	private void createProjectManagerUser() {
 		LOGGER.info("createProjectManagerUser called - creating project manager");
-		final CUser manager = userService.createLoginUser("jsmith", STANDARD_PASSWORD,
-			"John", "john.smith@technova.com", "MANAGER,USER");
+		final CUser manager = userService.createLoginUser("mkaradeniz", STANDARD_PASSWORD,
+			"Mehmet Emin", "mehmet.karadeniz@ofteknoloji.com.tr", "MANAGER,USER");
 
 		// Set user profile using auxiliary method
 		final byte[] profilePictureBytes = "profile-picture".getBytes();
-		userService.setUserProfile(manager, "Smith", "+1-555-1002", profilePictureBytes);
+		userService.setUserProfile(manager, "Karadeniz", "+90-462-751-1002", profilePictureBytes);
 
 		// Set user role using auxiliary method
 		userService.setUserRole(manager, CUserRole.PROJECT_MANAGER, "MANAGER,USER");
 
 		// Set company association using auxiliary method
-		final CCompany company = findCompanyByName("TechNova Solutions");
+		final CCompany company = findCompanyByName("Of Teknoloji Çözümleri");
 		userService.setCompanyAssociation(manager, company);
 
 		LOGGER.info("Project manager user created successfully");
@@ -251,7 +251,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			"Conference Room A");
 
 		// Set meeting content using auxiliary method
-		final CUser responsible = findUserByLogin("jsmith");
+		final CUser responsible = findUserByLogin("mkaradeniz");
 		meetingService.setMeetingContent(meeting,
 			"Weekly status update on project progress, blockers discussion, and next steps planning",
 			null, responsible);
@@ -259,9 +259,9 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		// Set participants using auxiliary method
 		final Set<CUser> participants = new HashSet<>();
 		participants.add(findUserByLogin("admin"));
-		participants.add(findUserByLogin("jsmith"));
-		participants.add(findUserByLogin("bwilson"));
-		participants.add(findUserByLogin("mjohnson"));
+		participants.add(findUserByLogin("mkaradeniz"));
+		participants.add(findUserByLogin("bozkan"));
+		participants.add(findUserByLogin("msahin"));
 		meetingService.setParticipants(meeting, participants);
 
 		// Set meeting status using auxiliary method
@@ -294,7 +294,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			"Design scalable system architecture for infrastructure modernization");
 
 		// Set assigned users using auxiliary method
-		final CUser teamMember2 = findUserByLogin("bwilson");
+		final CUser teamMember2 = findUserByLogin("bozkan");
 		final CUser admin = findUserByLogin("admin");
 		activityService.setAssignedUsers(archDesign, teamMember2, admin);
 
@@ -322,66 +322,66 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Creates team member Alice Davis.
 	 */
 	private void createTeamMemberAlice() {
-		LOGGER.info("createTeamMemberAlice called - creating Alice Davis");
-		final CUser analyst = userService.createLoginUser("adavis", STANDARD_PASSWORD,
-			"Alice", "alice.davis@medtechinnovations.com", "USER");
+		LOGGER.info("createTeamMemberAlice called - creating Ayşe Demir from Günebakan village");
+		final CUser analyst = userService.createLoginUser("ademir", STANDARD_PASSWORD,
+			"Ayşe", "ayse.demir@ofsaglik.com.tr", "USER");
 
 		// Set user profile using auxiliary method
 		final byte[] profilePictureBytes = "profile-picture".getBytes();
-		userService.setUserProfile(analyst, "Davis", "+1-555-1005", profilePictureBytes);
+		userService.setUserProfile(analyst, "Demir", "+90-462-751-1005", profilePictureBytes);
 
 		// Set user role using auxiliary method
 		userService.setUserRole(analyst, CUserRole.TEAM_MEMBER, "USER");
 
 		// Set company association using auxiliary method
-		final CCompany company = findCompanyByName("MedTech Innovations");
+		final CCompany company = findCompanyByName("Of Sağlık Teknolojileri");
 		userService.setCompanyAssociation(analyst, company);
 
-		LOGGER.info("Team member Alice Davis created successfully");
+		LOGGER.info("Team member Ayşe Demir created successfully");
 	}
 
 	/**
 	 * Creates team member Bob Wilson.
 	 */
 	private void createTeamMemberBob() {
-		LOGGER.info("createTeamMemberBob called - creating Bob Wilson");
-		final CUser developer = userService.createLoginUser("bwilson", STANDARD_PASSWORD,
-			"Bob", "bob.wilson@strategicadvisors.com", "USER");
+		LOGGER.info("createTeamMemberBob called - creating Burak Özkan from Çamburnu village");
+		final CUser developer = userService.createLoginUser("bozkan", STANDARD_PASSWORD,
+			"Burak", "burak.ozkan@ofdanismanlik.com.tr", "USER");
 
 		// Set user profile using auxiliary method
 		final byte[] profilePictureBytes = "profile-picture".getBytes();
-		userService.setUserProfile(developer, "Wilson", "+1-555-1004", profilePictureBytes);
+		userService.setUserProfile(developer, "Özkan", "+90-462-751-1004", profilePictureBytes);
 
 		// Set user role using auxiliary method
 		userService.setUserRole(developer, CUserRole.TEAM_MEMBER, "USER");
 
 		// Set company association using auxiliary method
-		final CCompany company = findCompanyByName("Strategic Advisors Ltd");
+		final CCompany company = findCompanyByName("Of Stratejik Danışmanlık");
 		userService.setCompanyAssociation(developer, company);
 
-		LOGGER.info("Team member Bob Wilson created successfully");
+		LOGGER.info("Team member Burak Özkan created successfully");
 	}
 
 	/**
 	 * Creates team member Mary Johnson.
 	 */
 	private void createTeamMemberMary() {
-		LOGGER.info("createTeamMemberMary called - creating Mary Johnson");
-		final CUser teamMember = userService.createLoginUser("mjohnson",
-			STANDARD_PASSWORD, "Mary", "mary.johnson@industrialdynamics.com", "USER");
+		LOGGER.info("createTeamMemberMary called - creating Merve Şahin from Ballıköy village");
+		final CUser teamMember = userService.createLoginUser("msahin",
+			STANDARD_PASSWORD, "Merve", "merve.sahin@ofendüstri.com.tr", "USER");
 
 		// Set user profile using auxiliary method
 		final byte[] profilePictureBytes = "profile-picture".getBytes();
-		userService.setUserProfile(teamMember, "Johnson", "+1-555-1003", profilePictureBytes);
+		userService.setUserProfile(teamMember, "Şahin", "+90-462-751-1003", profilePictureBytes);
 
 		// Set user role using auxiliary method
 		userService.setUserRole(teamMember, CUserRole.TEAM_MEMBER, "USER");
 
 		// Set company association using auxiliary method
-		final CCompany company = findCompanyByName("Industrial Dynamics Corp");
+		final CCompany company = findCompanyByName("Of Endüstri Dinamikleri");
 		userService.setCompanyAssociation(teamMember, company);
 
-		LOGGER.info("Team member Mary Johnson created successfully");
+		LOGGER.info("Team member Merve Şahin created successfully");
 	}
 
 	/**
@@ -399,14 +399,14 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Creates technology startup company.
 	 */
 	private void createTechCompany() {
-		LOGGER.info("createTechCompany called - creating TechNova Solutions");
-		final CCompany techStartup = new CCompany("TechNova Solutions",
-			"Innovative technology solutions for digital transformation");
-		techStartup.setAddress("123 Innovation Drive, Silicon Valley, CA 94025");
-		techStartup.setPhone("+1-555-0101");
-		techStartup.setEmail("contact@technova.com");
-		techStartup.setWebsite("https://www.technova.com");
-		techStartup.setTaxNumber("TAX-123456789");
+		LOGGER.info("createTechCompany called - creating Of Teknoloji Çözümleri");
+		final CCompany techStartup = new CCompany("Of Teknoloji Çözümleri",
+			"Dijital dönüşüm için yenilikçi teknoloji çözümleri");
+		techStartup.setAddress("Cumhuriyet Mahallesi, Atatürk Caddesi No:15, Of/Trabzon");
+		techStartup.setPhone("+90-462-751-0101");
+		techStartup.setEmail("iletisim@ofteknoloji.com.tr");
+		techStartup.setWebsite("https://www.ofteknoloji.com.tr");
+		techStartup.setTaxNumber("TR-123456789");
 		techStartup.setEnabled(true);
 		companyService.save(techStartup);
 		LOGGER.info("Technology company created successfully");
@@ -434,8 +434,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			"Update and enhance technical documentation for customer experience features");
 
 		// Set assigned users using auxiliary method
-		final CUser analyst = findUserByLogin("adavis");
-		final CUser manager = findUserByLogin("jsmith");
+		final CUser analyst = findUserByLogin("ademir");
+		final CUser manager = findUserByLogin("mkaradeniz");
 		activityService.setAssignedUsers(techDoc, analyst, manager);
 
 		// Set time tracking using auxiliary method (completed activity)
@@ -480,8 +480,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			"Comprehensive testing of user interface components and workflows");
 
 		// Set assigned users using auxiliary method
-		final CUser teamMember1 = findUserByLogin("mjohnson");
-		final CUser manager = findUserByLogin("jsmith");
+		final CUser teamMember1 = findUserByLogin("msahin");
+		final CUser manager = findUserByLogin("mkaradeniz");
 		activityService.setAssignedUsers(uiTesting, teamMember1, manager);
 
 		// Set time tracking using auxiliary method
