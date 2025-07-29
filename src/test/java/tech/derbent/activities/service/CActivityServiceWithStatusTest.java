@@ -70,7 +70,7 @@ class CActivityServiceWithStatusTest {
 		// Given
 		final Long activityId = 1L;
 		final CActivity activity = createTestActivity();
-		when(repository.findByIdWithAllRelationships(activityId))
+		when(repository.findByIdWithActivityTypeAndStatus(activityId))
 			.thenReturn(Optional.of(activity));
 		// When
 		final Optional<CActivity> result =
