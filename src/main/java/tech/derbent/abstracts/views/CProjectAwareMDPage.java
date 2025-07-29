@@ -1,16 +1,21 @@
 package tech.derbent.abstracts.views;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+
+import org.springframework.data.domain.PageRequest;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
+import com.vaadin.flow.data.provider.DataProvider;
 
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.interfaces.CProjectChangeListener;
+import tech.derbent.abstracts.services.CAbstractNamedEntityService;
 import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
@@ -30,7 +35,7 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB>
 	protected CProjectAwareMDPage(final Class<EntityClass> entityClass,
 		final CAbstractService<EntityClass> entityService,
 		final CSessionService sessionService) {
-		super(entityClass, entityService,sessionService);
+		super(entityClass, entityService, sessionService);
 		this.sessionService = sessionService;
 		// Now that sessionService is set, we can populate the grid
 		refreshProjectAwareGrid();
@@ -59,11 +64,6 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB>
 	 * Creates a new instance of the entity.
 	 */
 	protected abstract EntityClass createNewEntityInstance();
-	/**
-	 * Gets filtered data for the current project.
-	 */
-	protected abstract java.util.List<EntityClass> getProjectFilteredData(
-		CProject project, org.springframework.data.domain.Pageable pageable);
 
 	@Override
 	protected EntityClass newEntity() {
@@ -141,13 +141,34 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB>
 		final Optional<CProject> activeProject = sessionService.getActiveProject();
 
 		if (activeProject.isPresent()) {
-			grid.setItems(query -> getProjectFilteredData(activeProject.get(),
-				VaadinSpringDataHelpers.toSpringPageRequest(query)).stream());
+			LOGGER.debug("Active project found: {}", activeProject.get().getName());
+			final List<CEntityNamed> entities =
+				((CAbstractNamedEntityService<CEntityNamed>) entityService)
+					.findByProject(activeProject.get(), PageRequest.of(0, 10));
+			grid.setItems((DataProvider<EntityClass, Void>) entities);
 		}
 		else {
 			// If no active project, show empty grid
+			LOGGER.debug("No active project found, clearing grid items");
 			grid.setItems(Collections.emptyList());
 		}
+	}
+
+	@Override
+	protected void selectFirstItemIfAvailable() {
+
+		if (grid == null) {
+			LOGGER.warn("Grid is null, cannot select first item");
+			return;
+		}
+		final CAbstractNamedEntityService<CEntityNamed> namedService =
+			(CAbstractNamedEntityService<CEntityNamed>) entityService;
+		final PageRequest pageable = PageRequest.of(0, 1); // first page, 10 items per
+		// page
+		final List<CEntityNamed> result =
+			namedService.findByProject(sessionService.getActiveProject().get(), pageable);
+		LOGGER.debug("Fetched {} activities for project", result.size());
+		grid.select(((EntityClass) result.get(0)));
 	}
 
 	/**

@@ -33,8 +33,8 @@ public class CMeetingsView extends CProjectAwareMDPage<CMeeting> {
 	private final CMeetingStatusService meetingStatusService;
 
 	public CMeetingsView(final CMeetingService entityService,
-		final CSessionService sessionService, final CMeetingTypeService meetingTypeService,
-		final CUserService userService,
+		final CSessionService sessionService,
+		final CMeetingTypeService meetingTypeService, final CUserService userService,
 		final CMeetingStatusService meetingStatusService) {
 		super(CMeeting.class, entityService, sessionService);
 		addClassNames("meetings-view");
@@ -132,14 +132,6 @@ public class CMeetingsView extends CProjectAwareMDPage<CMeeting> {
 
 	@Override
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	@Override
-	protected java.util.List<CMeeting> getProjectFilteredData(
-		final tech.derbent.projects.domain.CProject project,
-		final org.springframework.data.domain.Pageable pageable) {
-		return ((CMeetingService) entityService).listByProject(project, pageable)
-			.getContent();
-	}
 
 	@Override
 	protected CMeeting newEntity() {

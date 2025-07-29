@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,27 +74,6 @@ public class CActivityService extends CAbstractNamedEntityService<CActivity> {
 		return noType;
 	}
 
-	/**
-	 * Finds activities by project.
-	 * @param project the project to search for
-	 * @return list of activities for the project
-	 */
-	public List<CActivity> findByProject(final CProject project) {
-		LOGGER.info("findByProject called with project: {}", project);
-
-		if (project == null) {
-			return List.of();
-		}
-		return ((CActivityRepository) repository).findByProject(project);
-	}
-
-	/**
-	 * Overrides the base get method to eagerly load CActivityType and CActivityStatus
-	 * relationships. This prevents LazyInitializationException when the entity is used in
-	 * UI contexts.
-	 * @param id the activity ID
-	 * @return optional CActivity with loaded activityType and activityStatus
-	 */
 	@Override
 	@Transactional (readOnly = true)
 	public Optional<CActivity> get(final Long id) {
@@ -194,8 +171,8 @@ public class CActivityService extends CAbstractNamedEntityService<CActivity> {
 		if (entity == null) {
 			return;
 		}
-		LOGGER.debug("Initializing lazy fields for CActivity with ID: {}",
-			entity.getId());
+		LOGGER.debug("Initializing lazy fields for CActivity with ID: {} entity: {}",
+			entity.getId(), entity.getName());
 
 		try {
 			super.initializeLazyFields(entity);
@@ -213,88 +190,80 @@ public class CActivityService extends CAbstractNamedEntityService<CActivity> {
 	}
 
 	/**
-	 * Gets paginated activities by project with eagerly loaded relationships.
-	 */
-	@Transactional (readOnly = true)
-	public Page<CActivity> listByProject(final CProject project,
-		final Pageable pageable) {
-		LOGGER.debug("Getting paginated activities for project {} with eager loading",
-			project.getName());
-		return ((CActivityRepository) repository).findByProjectWithTypeAndStatus(project,
-			pageable);
-	}
-
-	// Auxiliary methods for sample data initialization and activity setup
-
-	/**
 	 * Auxiliary method to set activity type and basic properties for an activity.
-	 * Following coding guidelines to use service layer methods instead of direct field setting.
-	 * @param activity the activity to configure
+	 * Following coding guidelines to use service layer methods instead of direct field
+	 * setting.
+	 * @param activity     the activity to configure
 	 * @param activityType the activity type to set
-	 * @param description the description to set
+	 * @param description  the description to set
 	 * @return the configured activity
 	 */
 	@Transactional
-	public CActivity setActivityType(final CActivity activity, final CActivityType activityType, final String description) {
-		LOGGER.info("setActivityType called for activity: {} with type: {}", 
-			activity != null ? activity.getName() : "null", 
+	public CActivity setActivityType(final CActivity activity,
+		final CActivityType activityType, final String description) {
+		LOGGER.info("setActivityType called for activity: {} with type: {}",
+			activity != null ? activity.getName() : "null",
 			activityType != null ? activityType.getName() : "null");
 
 		if (activity == null) {
 			LOGGER.warn("Activity is null, cannot set activity type");
 			return null;
 		}
-
 		activity.setActivityType(activityType);
-		if (description != null && !description.isEmpty()) {
+
+		if ((description != null) && !description.isEmpty()) {
 			activity.setDescription(description);
 		}
-
 		return save(activity);
 	}
 
 	/**
-	 * Auxiliary method to set time tracking information for an activity.
-	 * @param activity the activity to configure
-	 * @param estimatedHours estimated hours for completion
-	 * @param actualHours actual hours spent
-	 * @param remainingHours remaining hours to complete
+	 * Auxiliary method to set additional information for an activity.
+	 * @param activity           the activity to configure
+	 * @param acceptanceCriteria criteria for completion
+	 * @param notes              additional notes
+	 * @param parentActivity     parent activity for hierarchical structure
 	 * @return the configured activity
 	 */
 	@Transactional
-	public CActivity setTimeTracking(final CActivity activity, final BigDecimal estimatedHours, 
-		final BigDecimal actualHours, final BigDecimal remainingHours) {
-		LOGGER.info("setTimeTracking called for activity: {} with estimated: {}, actual: {}, remaining: {}",
-			activity != null ? activity.getName() : "null", estimatedHours, actualHours, remainingHours);
+	public CActivity setAdditionalInfo(final CActivity activity,
+		final String acceptanceCriteria, final String notes,
+		final CActivity parentActivity) {
+		LOGGER.info("setAdditionalInfo called for activity: {} with parent: {}",
+			activity != null ? activity.getName() : "null",
+			parentActivity != null ? parentActivity.getName() : "null");
 
 		if (activity == null) {
-			LOGGER.warn("Activity is null, cannot set time tracking");
+			LOGGER.warn("Activity is null, cannot set additional info");
 			return null;
 		}
 
-		if (estimatedHours != null) {
-			activity.setEstimatedHours(estimatedHours);
-		}
-		if (actualHours != null) {
-			activity.setActualHours(actualHours);
-		}
-		if (remainingHours != null) {
-			activity.setRemainingHours(remainingHours);
+		if ((acceptanceCriteria != null) && !acceptanceCriteria.isEmpty()) {
+			activity.setAcceptanceCriteria(acceptanceCriteria);
 		}
 
+		if ((notes != null) && !notes.isEmpty()) {
+			activity.setNotes(notes);
+		}
+
+		if (parentActivity != null) {
+			activity.setParentActivity(parentActivity);
+		}
 		return save(activity);
 	}
 
 	/**
 	 * Auxiliary method to set assigned users and creator for an activity.
-	 * @param activity the activity to configure
+	 * @param activity   the activity to configure
 	 * @param assignedTo the user assigned to the activity
-	 * @param createdBy the user who created the activity
+	 * @param createdBy  the user who created the activity
 	 * @return the configured activity
 	 */
 	@Transactional
-	public CActivity setAssignedUsers(final CActivity activity, final CUser assignedTo, final CUser createdBy) {
-		LOGGER.info("setAssignedUsers called for activity: {} with assignedTo: {}, createdBy: {}",
+	public CActivity setAssignedUsers(final CActivity activity, final CUser assignedTo,
+		final CUser createdBy) {
+		LOGGER.info(
+			"setAssignedUsers called for activity: {} with assignedTo: {}, createdBy: {}",
 			activity != null ? activity.getName() : "null",
 			assignedTo != null ? assignedTo.getName() : "null",
 			createdBy != null ? createdBy.getName() : "null");
@@ -307,26 +276,29 @@ public class CActivityService extends CAbstractNamedEntityService<CActivity> {
 		if (assignedTo != null) {
 			activity.setAssignedTo(assignedTo);
 		}
+
 		if (createdBy != null) {
 			activity.setCreatedBy(createdBy);
 		}
-
 		return save(activity);
 	}
 
 	/**
 	 * Auxiliary method to set budget information for an activity.
-	 * @param activity the activity to configure
+	 * @param activity      the activity to configure
 	 * @param estimatedCost estimated cost for completion
-	 * @param actualCost actual cost spent
-	 * @param hourlyRate hourly rate for cost calculations
+	 * @param actualCost    actual cost spent
+	 * @param hourlyRate    hourly rate for cost calculations
 	 * @return the configured activity
 	 */
 	@Transactional
-	public CActivity setBudgetInfo(final CActivity activity, final BigDecimal estimatedCost, 
-		final BigDecimal actualCost, final BigDecimal hourlyRate) {
-		LOGGER.info("setBudgetInfo called for activity: {} with estimated cost: {}, actual cost: {}, hourly rate: {}",
-			activity != null ? activity.getName() : "null", estimatedCost, actualCost, hourlyRate);
+	public CActivity setBudgetInfo(final CActivity activity,
+		final BigDecimal estimatedCost, final BigDecimal actualCost,
+		final BigDecimal hourlyRate) {
+		LOGGER.info(
+			"setBudgetInfo called for activity: {} with estimated cost: {}, actual cost: {}, hourly rate: {}",
+			activity != null ? activity.getName() : "null", estimatedCost, actualCost,
+			hourlyRate);
 
 		if (activity == null) {
 			LOGGER.warn("Activity is null, cannot set budget info");
@@ -336,64 +308,32 @@ public class CActivityService extends CAbstractNamedEntityService<CActivity> {
 		if (estimatedCost != null) {
 			activity.setEstimatedCost(estimatedCost);
 		}
+
 		if (actualCost != null) {
 			activity.setActualCost(actualCost);
 		}
+
 		if (hourlyRate != null) {
 			activity.setHourlyRate(hourlyRate);
 		}
-
-		return save(activity);
-	}
-
-	/**
-	 * Auxiliary method to set status, priority and progress for an activity.
-	 * @param activity the activity to configure
-	 * @param status the activity status
-	 * @param priority the activity priority
-	 * @param progressPercentage completion percentage (0-100)
-	 * @return the configured activity
-	 */
-	@Transactional
-	public CActivity setStatusAndPriority(final CActivity activity, final CActivityStatus status, 
-		final CActivityPriority priority, final Integer progressPercentage) {
-		LOGGER.info("setStatusAndPriority called for activity: {} with status: {}, priority: {}, progress: {}%",
-			activity != null ? activity.getName() : "null",
-			status != null ? status.getName() : "null",
-			priority != null ? priority.getName() : "null",
-			progressPercentage);
-
-		if (activity == null) {
-			LOGGER.warn("Activity is null, cannot set status and priority");
-			return null;
-		}
-
-		if (status != null) {
-			activity.setStatus(status);
-		}
-		if (priority != null) {
-			activity.setPriority(priority);
-		}
-		if (progressPercentage != null) {
-			activity.setProgressPercentage(progressPercentage);
-		}
-
 		return save(activity);
 	}
 
 	/**
 	 * Auxiliary method to set date information for an activity.
-	 * @param activity the activity to configure
-	 * @param startDate planned start date
-	 * @param dueDate expected completion date
+	 * @param activity       the activity to configure
+	 * @param startDate      planned start date
+	 * @param dueDate        expected completion date
 	 * @param completionDate actual completion date (optional)
 	 * @return the configured activity
 	 */
 	@Transactional
-	public CActivity setDateInfo(final CActivity activity, final LocalDate startDate, 
+	public CActivity setDateInfo(final CActivity activity, final LocalDate startDate,
 		final LocalDate dueDate, final LocalDate completionDate) {
-		LOGGER.info("setDateInfo called for activity: {} with start: {}, due: {}, completion: {}",
-			activity != null ? activity.getName() : "null", startDate, dueDate, completionDate);
+		LOGGER.info(
+			"setDateInfo called for activity: {} with start: {}, due: {}, completion: {}",
+			activity != null ? activity.getName() : "null", startDate, dueDate,
+			completionDate);
 
 		if (activity == null) {
 			LOGGER.warn("Activity is null, cannot set date info");
@@ -403,64 +343,33 @@ public class CActivityService extends CAbstractNamedEntityService<CActivity> {
 		if (startDate != null) {
 			activity.setStartDate(startDate);
 		}
+
 		if (dueDate != null) {
 			activity.setDueDate(dueDate);
 		}
+
 		if (completionDate != null) {
 			activity.setCompletionDate(completionDate);
 		}
-
 		return save(activity);
 	}
 
 	/**
-	 * Auxiliary method to set additional information for an activity.
-	 * @param activity the activity to configure
-	 * @param acceptanceCriteria criteria for completion
-	 * @param notes additional notes
-	 * @param parentActivity parent activity for hierarchical structure
-	 * @return the configured activity
-	 */
-	@Transactional
-	public CActivity setAdditionalInfo(final CActivity activity, final String acceptanceCriteria, 
-		final String notes, final CActivity parentActivity) {
-		LOGGER.info("setAdditionalInfo called for activity: {} with parent: {}",
-			activity != null ? activity.getName() : "null",
-			parentActivity != null ? parentActivity.getName() : "null");
-
-		if (activity == null) {
-			LOGGER.warn("Activity is null, cannot set additional info");
-			return null;
-		}
-
-		if (acceptanceCriteria != null && !acceptanceCriteria.isEmpty()) {
-			activity.setAcceptanceCriteria(acceptanceCriteria);
-		}
-		if (notes != null && !notes.isEmpty()) {
-			activity.setNotes(notes);
-		}
-		if (parentActivity != null) {
-			activity.setParentActivity(parentActivity);
-		}
-
-		return save(activity);
-	}
-
-	/**
-	 * Auxiliary method to set comprehensive activity information in one call.
-	 * This demonstrates how auxiliary methods can be combined for complex setup scenarios.
-	 * @param activity the activity to configure
-	 * @param activityType the activity type
-	 * @param description activity description
-	 * @param assignedTo assigned user
+	 * Auxiliary method to set comprehensive activity information in one call. This
+	 * demonstrates how auxiliary methods can be combined for complex setup scenarios.
+	 * @param activity       the activity to configure
+	 * @param activityType   the activity type
+	 * @param description    activity description
+	 * @param assignedTo     assigned user
 	 * @param estimatedHours estimated time
-	 * @param startDate start date
-	 * @param dueDate due date
+	 * @param startDate      start date
+	 * @param dueDate        due date
 	 * @return the fully configured activity
 	 */
 	@Transactional
-	public CActivity setFullActivityInfo(final CActivity activity, final CActivityType activityType,
-		final String description, final CUser assignedTo, final BigDecimal estimatedHours,
+	public CActivity setFullActivityInfo(final CActivity activity,
+		final CActivityType activityType, final String description,
+		final CUser assignedTo, final BigDecimal estimatedHours,
 		final LocalDate startDate, final LocalDate dueDate) {
 		LOGGER.info("setFullActivityInfo called for comprehensive activity setup: {}",
 			activity != null ? activity.getName() : "null");
@@ -469,13 +378,84 @@ public class CActivityService extends CAbstractNamedEntityService<CActivity> {
 			LOGGER.warn("Activity is null, cannot set full activity info");
 			return null;
 		}
-
 		// Use other auxiliary methods for comprehensive setup
 		setActivityType(activity, activityType, description);
 		setAssignedUsers(activity, assignedTo, null);
 		setTimeTracking(activity, estimatedHours, null, null);
 		setDateInfo(activity, startDate, dueDate, null);
-
 		return activity;
+	}
+
+	/**
+	 * Auxiliary method to set status, priority and progress for an activity.
+	 * @param activity           the activity to configure
+	 * @param status             the activity status
+	 * @param priority           the activity priority
+	 * @param progressPercentage completion percentage (0-100)
+	 * @return the configured activity
+	 */
+	@Transactional
+	public CActivity setStatusAndPriority(final CActivity activity,
+		final CActivityStatus status, final CActivityPriority priority,
+		final Integer progressPercentage) {
+		LOGGER.info(
+			"setStatusAndPriority called for activity: {} with status: {}, priority: {}, progress: {}%",
+			activity != null ? activity.getName() : "null",
+			status != null ? status.getName() : "null",
+			priority != null ? priority.getName() : "null", progressPercentage);
+
+		if (activity == null) {
+			LOGGER.warn("Activity is null, cannot set status and priority");
+			return null;
+		}
+
+		if (status != null) {
+			activity.setStatus(status);
+		}
+
+		if (priority != null) {
+			activity.setPriority(priority);
+		}
+
+		if (progressPercentage != null) {
+			activity.setProgressPercentage(progressPercentage);
+		}
+		return save(activity);
+	}
+
+	/**
+	 * Auxiliary method to set time tracking information for an activity.
+	 * @param activity       the activity to configure
+	 * @param estimatedHours estimated hours for completion
+	 * @param actualHours    actual hours spent
+	 * @param remainingHours remaining hours to complete
+	 * @return the configured activity
+	 */
+	@Transactional
+	public CActivity setTimeTracking(final CActivity activity,
+		final BigDecimal estimatedHours, final BigDecimal actualHours,
+		final BigDecimal remainingHours) {
+		LOGGER.info(
+			"setTimeTracking called for activity: {} with estimated: {}, actual: {}, remaining: {}",
+			activity != null ? activity.getName() : "null", estimatedHours, actualHours,
+			remainingHours);
+
+		if (activity == null) {
+			LOGGER.warn("Activity is null, cannot set time tracking");
+			return null;
+		}
+
+		if (estimatedHours != null) {
+			activity.setEstimatedHours(estimatedHours);
+		}
+
+		if (actualHours != null) {
+			activity.setActualHours(actualHours);
+		}
+
+		if (remainingHours != null) {
+			activity.setRemainingHours(remainingHours);
+		}
+		return save(activity);
 	}
 }

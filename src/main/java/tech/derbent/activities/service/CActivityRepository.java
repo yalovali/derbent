@@ -48,8 +48,6 @@ public interface CActivityRepository extends CAbstractNamedRepository<CActivity>
 		"SELECT a FROM CActivity a LEFT JOIN FETCH a.activityType LEFT JOIN FETCH a.status LEFT JOIN FETCH a.project WHERE a.id = :id"
 	)
 	Optional<CActivity> findByIdWithActivityTypeStatusAndProject(@Param ("id") Long id);
-	List<CActivity> findByProject(CProject project);
-	Page<CActivity> findByProject(CProject project, Pageable pageable);
 	/**
 	 * Finds all activities by project with eagerly loaded CActivityType, CActivityStatus,
 	 * and CProject to prevent LazyInitializationException. This method returns all

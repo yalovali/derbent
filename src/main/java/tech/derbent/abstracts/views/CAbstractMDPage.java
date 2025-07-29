@@ -108,18 +108,22 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 
 		if (entityID.isPresent()) {
 			final Optional<EntityClass> entityByRoute = entityService.get(entityID.get());
-			LOGGER.debug("Entity ID in URL: {}, looking up entity", entityID.get());
+			LOGGER.debug("Entity ID in URL: {}, looking up entity: {}", entityID.get(),
+				entityByRoute);
 
 			if (entityByRoute.isPresent()) {
 				// final Optional<EntityClass> entity = entityService.get(entityID.get());
 
 				if (grid != null) {
+					// this already triggers change event and populates the form
 					grid.select(entityByRoute.get());
 				}
-				// it it necassary
-				sessionService.setActiveId(entityClass.getClass().getSimpleName(),
-					entityByRoute.get().getId());
-				populateForm(entityByRoute.get());
+				else {
+					// it it necassary
+					sessionService.setActiveId(entityClass.getClass().getSimpleName(),
+						entityByRoute.get().getId());
+					populateForm(entityByRoute.get());
+				}
 			}
 			else {
 				Notification.show(
@@ -149,10 +153,6 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 			}
 		}
 		else {
-			// No specific entity ID in URL (list mode), auto-select first item if
-			// available
-			LOGGER.debug("No entity ID in URL for {}, attempting auto-selection",
-				getClass().getSimpleName());
 			selectFirstItemIfAvailable();
 		}
 	}
@@ -190,7 +190,7 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 				final Long lastSelectedId =
 					sessionService.getActiveId(getClass().getSimpleName());
 
-				if (lastSelectedId != null && lastSelectedId != -1) {
+				if ((lastSelectedId != null) && (lastSelectedId != -1)) {
 					// Restore selection to the last selected entity
 					restoreGridSelection(lastSelectedId);
 					LOGGER.debug("Reverted to last selected entity with ID: {}",
@@ -445,9 +445,6 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 			// Update layout based on current mode
 			updateLayoutOrientation();
 		}
-		// this is called when the page is attached to the UI if you dont call it, the
-		// first item will not be selected
-		selectFirstItemIfAvailable();
 	}
 
 	@Override
@@ -580,42 +577,27 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	}
 
 	/**
-	 * Automatically selects the first item in the grid if available. This ensures that
-	 * details panels are populated when there is at least one item. Following the
-	 * requirement to always show details when data is available. Only applies when no
-	 * specific entity is already selected (i.e., in list mode).
+	 * Selects the first item in the grid if available. This is called when no specific
+	 * entity ID is provided in the URL.
 	 */
 	protected void selectFirstItemIfAvailable() {
+		LOGGER.debug("selectFirstItemIfAvailable called for {}",
+			getClass().getSimpleName());
 
-		if ((grid == null) || (currentEntity != null)) {
+		if (grid == null) {
+			LOGGER.warn("Grid is null, cannot select first item");
 			return;
 		}
-
-		try {
-			// Use UI.access to ensure this runs in the correct UI thread
-			getUI().ifPresent(ui -> ui.access(() -> {
-
-				try {
-					// Try to get the first item using a more direct approach Get the
-					// first page of results from the entity service
-					final var firstPageResults = entityService
-						.list(org.springframework.data.domain.PageRequest.of(0, 1));
-
-					if ((firstPageResults != null) && !firstPageResults.isEmpty()) {
-						grid.select(firstPageResults.get(0));
-					}
-				} catch (final Exception e) {
-					LOGGER.error("Error querying first item for {}: {}",
-						getClass().getSimpleName(), e.getMessage(), e);
-				}
-			}));
-		} catch (final Exception e) {
-			LOGGER.error("Error selecting first item for {}: {}",
-				getClass().getSimpleName(), e.getMessage(), e);
-		}
+		grid.getDataProvider().fetch(new com.vaadin.flow.data.provider.Query<>())
+			.findFirst().ifPresentOrElse(entity -> {
+				grid.select(entity);
+				LOGGER.debug("Auto-selected first item in grid: {}", entity.getId());
+			}, () -> LOGGER.debug("No items available in grid for {}",
+				getClass().getSimpleName()));
 	}
 
 	public void setCurrentEntity(final EntityClass currentEntity) {
+		LOGGER.debug("Setting current entity: {}", currentEntity);
 		this.currentEntity = currentEntity;
 	}
 

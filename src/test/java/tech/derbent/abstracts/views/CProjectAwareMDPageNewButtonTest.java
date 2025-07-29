@@ -8,8 +8,6 @@ import static org.mockito.Mockito.when;
 
 import java.time.Clock;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -66,13 +64,6 @@ public class CProjectAwareMDPageNewButtonTest {
 
 		@Override
 		protected String getEntityRouteTemplateEdit() { return "activities/%s/edit"; }
-
-		@Override
-		protected List<CActivity> getProjectFilteredData(final CProject project,
-			final Pageable pageable) {
-			// Mock implementation - return empty list for testing
-			return Collections.emptyList();
-		}
 
 		@Override
 		protected void initPage() {

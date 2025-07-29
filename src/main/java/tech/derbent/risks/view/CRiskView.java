@@ -1,7 +1,5 @@
 package tech.derbent.risks.view;
 
-import java.util.List;
-
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
@@ -84,13 +82,6 @@ public class CRiskView extends CProjectAwareMDPage<CRisk> {
 
 	@Override
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	@Override
-	protected List<CRisk> getProjectFilteredData(final CProject project,
-		final org.springframework.data.domain.Pageable pageable) {
-		return ((CRiskService) entityService).listByProject(project, pageable)
-			.getContent();
-	}
 
 	@Override
 	protected CRisk newEntity() {

@@ -158,6 +158,41 @@ public class CGrid<T extends CEntityDB> extends Grid<T> {
 		return addCustomColumn(valueProvider, header, WIDTH_ID, key, 0);
 	}
 
+	/**
+	 * Adds an image column with circular styling for profile pictures.
+	 * @param imageDataProvider Provider that returns byte array of image data
+	 * @param header            Column header text
+	 * @return The created column
+	 */
+	public Column<T> addImageColumn(final ValueProvider<T, byte[]> imageDataProvider,
+		final String header) {
+		LOGGER.info("Adding image column: {} with width: {}", header, WIDTH_IMAGE);
+		final Column<T> column = addComponentColumn(entity -> {
+			final byte[] imageData = imageDataProvider.apply(entity);
+			final Image image = new Image();
+			image.setWidth("40px");
+			image.setHeight("40px");
+			image.getStyle().set("border-radius", "50%");
+			image.getStyle().set("object-fit", "cover");
+
+			if ((imageData != null) && (imageData.length > 0)) {
+				final String dataUrl = CImageUtils.createDataUrl(imageData);
+
+				if (dataUrl != null) {
+					image.setSrc(dataUrl);
+				}
+				else {
+					image.setSrc(CImageUtils.getDefaultProfilePictureDataUrl());
+				}
+			}
+			else {
+				image.setSrc(CImageUtils.getDefaultProfilePictureDataUrl());
+			}
+			return image;
+		}).setHeader(header).setWidth(WIDTH_IMAGE).setFlexGrow(0).setSortable(false);
+		return column;
+	}
+
 	public Column<T> addIntegerColumn(final ValueProvider<T, Integer> valueProvider,
 		final String header, final String key) {
 		return addCustomColumn(valueProvider, header, WIDTH_INTEGER, key, 0);
@@ -179,46 +214,17 @@ public class CGrid<T extends CEntityDB> extends Grid<T> {
 	}
 
 	/**
-	 * Adds an image column with circular styling for profile pictures.
-	 * @param imageDataProvider Provider that returns byte array of image data
-	 * @param header            Column header text
-	 * @return The created column
-	 */
-	public Column<T> addImageColumn(final ValueProvider<T, byte[]> imageDataProvider,
-		final String header) {
-		LOGGER.info("Adding image column: {} with width: {}", header, WIDTH_IMAGE);
-		
-		final Column<T> column = addComponentColumn(entity -> {
-			final byte[] imageData = imageDataProvider.apply(entity);
-			final Image image = new Image();
-			image.setWidth("40px");
-			image.setHeight("40px");
-			image.getStyle().set("border-radius", "50%");
-			image.getStyle().set("object-fit", "cover");
-			
-			if (imageData != null && imageData.length > 0) {
-				final String dataUrl = CImageUtils.createDataUrl(imageData);
-				if (dataUrl != null) {
-					image.setSrc(dataUrl);
-				} else {
-					image.setSrc(CImageUtils.getDefaultProfilePictureDataUrl());
-				}
-			} else {
-				image.setSrc(CImageUtils.getDefaultProfilePictureDataUrl());
-			}
-			
-			return image;
-		}).setHeader(header).setWidth(WIDTH_IMAGE).setFlexGrow(0).setSortable(false);
-		
-		return column;
-	}
-
-	/**
 	 * Initialize grid with common settings and styling.
 	 */
 	private void initializeGrid() {
 		addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 		addThemeVariants(GridVariant.LUMO_COMPACT);
 		setHeightFull();
+	}
+
+	@Override
+	public void select(final T entity) {
+		LOGGER.info("Selecting entity in grip: {}", entity);
+		super.select(entity);
 	}
 }

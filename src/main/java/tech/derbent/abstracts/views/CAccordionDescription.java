@@ -57,15 +57,14 @@ public abstract class CAccordionDescription<EntityClass extends CEntityDB>
 	public List<String> getEntityFields() { return EntityFields; }
 
 	public void populateForm(final EntityClass entity) {
-        LOGGER.debug("Populating form with entity: {}", entity);
+		LOGGER.debug("Populating form with entity: {}", entity);
 		currentEntity = entity;
+
 		if (entity == null) {
-			LOGGER.warn("Entity is null, clearing form");
 			// Clear the form fields
 			binder.readBean(null);
 		}
-		else
-		{
+		else {
 			LOGGER.debug("Populating form with entity: {}", entity);
 			// Populate the form fields with the entity data
 			binder.readBean(entity);

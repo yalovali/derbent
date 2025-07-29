@@ -1,7 +1,5 @@
 package tech.derbent.activities.view;
 
-import java.util.List;
-
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
@@ -33,8 +31,7 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 	private final CCommentService commentService;
 
 	public CActivitiesView(final CActivityService entityService,
-		final CSessionService sessionService,
-		final CCommentService commentService) {
+		final CSessionService sessionService, final CCommentService commentService) {
 		super(CActivity.class, entityService, sessionService);
 		this.commentService = commentService;
 		addClassNames("activities-view");
@@ -46,7 +43,8 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 	 */
 	@Override
 	protected void createDetailsLayout() {
-		getBaseDetailsLayout().add(CEntityFormBuilder.buildForm(CActivity.class, getBinder(),null));
+		getBaseDetailsLayout()
+			.add(CEntityFormBuilder.buildForm(CActivity.class, getBinder(), null));
 		CAccordionDescription<CActivity> panel;
 		panel = new CPanelActivityDescription(getCurrentEntity(), getBinder(),
 			(CActivityService) entityService);
@@ -69,7 +67,6 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 		panel = new CPanelActivityBudgetManagement(getCurrentEntity(), getBinder(),
 			(CActivityService) entityService);
 		addAccordionPanel(panel);
-
 		// Add comments panel
 		panel = new CPanelActivityComments(getCurrentEntity(), getBinder(),
 			(CActivityService) entityService, commentService, sessionService);
@@ -78,7 +75,6 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 
 	@Override
 	protected void createGridForEntity() {
-
 		grid.addShortTextColumn(CActivity::getProjectName, "Project", "project");
 		grid.addShortTextColumn(CActivity::getName, "Activity Name", "name");
 		grid.addReferenceColumn(item -> item.getActivityType() != null
@@ -107,6 +103,7 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 		// when a row is selected or deselected, populate form
 		grid.asSingleSelect().addValueChangeListener(event -> {
 			LOGGER.debug("Grid selection changed: {}", event.getValue());
+
 			if (event.getValue() != null) {
 				UI.getCurrent().navigate(
 					String.format(ENTITY_ROUTE_TEMPLATE_EDIT, event.getValue().getId()));
@@ -134,14 +131,6 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 	@Override
 	protected String getEntityRouteTemplateEdit() { // TODO Auto-generated method stub
 		return ENTITY_ROUTE_TEMPLATE_EDIT;
-	}
-
-	@Override
-	protected List<CActivity> getProjectFilteredData(final CProject project,
-		final org.springframework.data.domain.Pageable pageable) {
-		LOGGER.debug("Fetching activities for project: {}", project.getName());
-		return ((CActivityService) entityService).listByProject(project, pageable)
-			.getContent();
 	}
 
 	@Override

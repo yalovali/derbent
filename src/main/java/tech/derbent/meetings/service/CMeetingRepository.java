@@ -14,60 +14,50 @@ import tech.derbent.projects.domain.CProject;
 
 public interface CMeetingRepository extends CAbstractNamedRepository<CMeeting> {
 
-    List<CMeeting> findByProject(CProject project);
-
-    Page<CMeeting> findByProject(CProject project, Pageable pageable);
-
-    /**
-     * Finds a meeting by ID with eagerly loaded relationships to prevent LazyInitializationException.
-     * 
-     * @param id the meeting ID
-     * @return optional CMeeting with loaded relationships
-     */
-    @Query("SELECT m FROM CMeeting m " +
-           "LEFT JOIN FETCH m.meetingType " +
-           "LEFT JOIN FETCH m.participants " +
-           "LEFT JOIN FETCH m.attendees " +
-           "LEFT JOIN FETCH m.status " +
-           "LEFT JOIN FETCH m.responsible " +
-           "LEFT JOIN FETCH m.relatedActivity " +
-           "WHERE m.id = :id")
-    Optional<CMeeting> findByIdWithMeetingTypeAndParticipants(@Param("id") Long id);
-
-    /**
-     * Finds meetings by project with eagerly loaded relationships to prevent LazyInitializationException.
-     * Loads project, meetingType, participants, attendees, status, responsible, and relatedActivity for grid display.
-     * 
-     * @param project the project to filter by
-     * @param pageable pagination information
-     * @return page of meetings with loaded relationships
-     */
-    @Query("SELECT DISTINCT m FROM CMeeting m " +
-           "LEFT JOIN FETCH m.project " +
-           "LEFT JOIN FETCH m.meetingType " +
-           "LEFT JOIN FETCH m.participants " +
-           "LEFT JOIN FETCH m.attendees " +
-           "LEFT JOIN FETCH m.status " +
-           "LEFT JOIN FETCH m.responsible " +
-           "LEFT JOIN FETCH m.relatedActivity " +
-           "WHERE m.project = :project")
-    Page<CMeeting> findByProjectWithRelationships(@Param("project") CProject project, Pageable pageable);
-
-    /**
-     * Finds meetings by participant user.
-     * 
-     * @param userId the user ID
-     * @return list of meetings where the user is a participant
-     */
-    @Query("SELECT m FROM CMeeting m JOIN m.participants p WHERE p.id = :userId")
-    List<CMeeting> findByParticipantId(@Param("userId") Long userId);
-
-    /**
-     * Finds meetings by attendee user.
-     * 
-     * @param userId the user ID
-     * @return list of meetings where the user is an attendee
-     */
-    @Query("SELECT m FROM CMeeting m JOIN m.attendees a WHERE a.id = :userId")
-    List<CMeeting> findByAttendeeId(@Param("userId") Long userId);
+	/**
+	 * Finds meetings by attendee user.
+	 * @param userId the user ID
+	 * @return list of meetings where the user is an attendee
+	 */
+	@Query ("SELECT m FROM CMeeting m JOIN m.attendees a WHERE a.id = :userId")
+	List<CMeeting> findByAttendeeId(@Param ("userId") Long userId);
+	/**
+	 * Finds a meeting by ID with eagerly loaded relationships to prevent
+	 * LazyInitializationException.
+	 * @param id the meeting ID
+	 * @return optional CMeeting with loaded relationships
+	 */
+	@Query (
+		"SELECT m FROM CMeeting m " + "LEFT JOIN FETCH m.meetingType "
+			+ "LEFT JOIN FETCH m.participants " + "LEFT JOIN FETCH m.attendees "
+			+ "LEFT JOIN FETCH m.status " + "LEFT JOIN FETCH m.responsible "
+			+ "LEFT JOIN FETCH m.relatedActivity " + "WHERE m.id = :id"
+	)
+	Optional<CMeeting> findByIdWithMeetingTypeAndParticipants(@Param ("id") Long id);
+	/**
+	 * Finds meetings by participant user.
+	 * @param userId the user ID
+	 * @return list of meetings where the user is a participant
+	 */
+	@Query ("SELECT m FROM CMeeting m JOIN m.participants p WHERE p.id = :userId")
+	List<CMeeting> findByParticipantId(@Param ("userId") Long userId);
+	@Override
+	List<CMeeting> findByProject(CProject project);
+	/**
+	 * Finds meetings by project with eagerly loaded relationships to prevent
+	 * LazyInitializationException. Loads project, meetingType, participants, attendees,
+	 * status, responsible, and relatedActivity for grid display.
+	 * @param project  the project to filter by
+	 * @param pageable pagination information
+	 * @return page of meetings with loaded relationships
+	 */
+	@Query (
+		"SELECT DISTINCT m FROM CMeeting m " + "LEFT JOIN FETCH m.project "
+			+ "LEFT JOIN FETCH m.meetingType " + "LEFT JOIN FETCH m.participants "
+			+ "LEFT JOIN FETCH m.attendees " + "LEFT JOIN FETCH m.status "
+			+ "LEFT JOIN FETCH m.responsible " + "LEFT JOIN FETCH m.relatedActivity "
+			+ "WHERE m.project = :project"
+	)
+	Page<CMeeting> findByProjectWithRelationships(@Param ("project") CProject project,
+		Pageable pageable);
 }
