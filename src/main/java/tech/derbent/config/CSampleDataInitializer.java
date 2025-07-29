@@ -26,6 +26,9 @@ import tech.derbent.meetings.service.CMeetingTypeService;
 import tech.derbent.orders.service.COrderTypeService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
+import tech.derbent.risks.domain.CRisk;
+import tech.derbent.risks.domain.ERiskSeverity;
+import tech.derbent.risks.service.CRiskService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserRole;
 import tech.derbent.users.service.CUserService;
@@ -79,6 +82,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	private final CCommentService commentService;
 
 	private final CMeetingService meetingService;
+	
+	private final CRiskService riskService;
 
 	public CSampleDataInitializer(final CProjectService projectService,
 		final CUserService userService, final CActivityService activityService,
@@ -88,7 +93,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CDecisionTypeService decisionTypeService,
 		final COrderTypeService orderTypeService,
 		final CCompanyService companyService, final CCommentService commentService,
-		final CMeetingService meetingService) {
+		final CMeetingService meetingService, final CRiskService riskService) {
 		LOGGER
 			.info("CSampleDataInitializer constructor called with service dependencies");
 		this.projectService = projectService;
@@ -102,6 +107,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		this.companyService = companyService;
 		this.commentService = commentService;
 		this.meetingService = meetingService;
+		this.riskService = riskService;
 	}
 
 	/**
@@ -650,10 +656,33 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 		try {
 			createSampleProjectMeeting();
-			LOGGER.info("Successfully created sample meetings");
+			createSampleStandupMeeting();
+			createSamplePlanningMeeting();
+			createSampleReviewMeeting();
+			createSampleRetrospectiveMeeting();
+			LOGGER.info("Successfully created 5 sample meetings");
 		} catch (final Exception e) {
 			LOGGER.error("Error creating sample meetings", e);
 			throw new RuntimeException("Failed to initialize meetings", e);
+		}
+	}
+
+	/**
+	 * Initializes sample risks with different severity levels and mitigation strategies.
+	 */
+	private void initializeRisks() {
+		LOGGER.info("initializeRisks called - creating sample risks");
+
+		try {
+			createHighPriorityTechnicalRisk();
+			createMediumPriorityBudgetRisk();
+			createLowPriorityResourceRisk();
+			createCriticalSecurityRisk();
+			createLowPriorityScheduleRisk();
+			LOGGER.info("Successfully created 5 sample risks");
+		} catch (final Exception e) {
+			LOGGER.error("Error creating sample risks", e);
+			throw new RuntimeException("Failed to initialize risks", e);
 		}
 	}
 
@@ -900,6 +929,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			initializeActivityTypes();
 			initializeActivities();
 			initializeMeetings();
+			initializeRisks();
 			LOGGER.info("Sample data initialization completed successfully");
 		} catch (final Exception e) {
 			LOGGER.error("Error loading sample data", e);
@@ -926,5 +956,240 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			LOGGER.error("Error during sample data initialization", e);
 			throw e;
 		}
+	}
+
+	// Additional meeting creation methods
+
+	/**
+	 * Creates sample standup meeting.
+	 */
+	private void createSampleStandupMeeting() {
+		LOGGER.info("createSampleStandupMeeting called - creating daily standup meeting");
+		
+		final CProject project = findProjectByName("Digital Transformation Initiative");
+		if (project == null) {
+			LOGGER.warn("Project not found for standup meeting");
+			return;
+		}
+		
+		final CMeeting meeting = new CMeeting("Daily Standup - Sprint 3", project);
+		meeting.setDescription("Daily progress sync and impediment discussion");
+		meeting.setMeetingDate(LocalDateTime.now().plusDays(1).withHour(9).withMinute(0));
+		meeting.setEndDate(LocalDateTime.now().plusDays(1).withHour(9).withMinute(30));
+		meeting.setLocation("Conference Room A");
+		
+		// Add participants
+		final Set<CUser> participants = new HashSet<>();
+		final CUser manager = findUserByLogin("mkaradeniz");
+		final CUser dev1 = findUserByLogin("ademir");
+		final CUser dev2 = findUserByLogin("msahin");
+		if (manager != null) participants.add(manager);
+		if (dev1 != null) participants.add(dev1);
+		if (dev2 != null) participants.add(dev2);
+		meeting.setParticipants(participants);
+		
+		meetingService.save(meeting);
+		LOGGER.info("Sample standup meeting created successfully");
+	}
+
+	/**
+	 * Creates sample planning meeting.
+	 */
+	private void createSamplePlanningMeeting() {
+		LOGGER.info("createSamplePlanningMeeting called - creating sprint planning meeting");
+		
+		final CProject project = findProjectByName("Product Development Phase 2");
+		if (project == null) {
+			LOGGER.warn("Project not found for planning meeting");
+			return;
+		}
+		
+		final CMeeting meeting = new CMeeting("Sprint Planning - Q1 2024", project);
+		meeting.setDescription("Planning for next sprint with story estimation and task assignment");
+		meeting.setMeetingDate(LocalDateTime.now().plusDays(3).withHour(14).withMinute(0));
+		meeting.setEndDate(LocalDateTime.now().plusDays(3).withHour(16).withMinute(0));
+		meeting.setLocation("Meeting Room B");
+		
+		// Add participants
+		final Set<CUser> participants = new HashSet<>();
+		final CUser manager = findUserByLogin("mkaradeniz");
+		final CUser analyst = findUserByLogin("ademir");
+		if (manager != null) participants.add(manager);
+		if (analyst != null) participants.add(analyst);
+		meeting.setParticipants(participants);
+		
+		meetingService.save(meeting);
+		LOGGER.info("Sample planning meeting created successfully");
+	}
+
+	/**
+	 * Creates sample review meeting.
+	 */
+	private void createSampleReviewMeeting() {
+		LOGGER.info("createSampleReviewMeeting called - creating code review meeting");
+		
+		final CProject project = findProjectByName("Infrastructure Modernization");
+		if (project == null) {
+			LOGGER.warn("Project not found for review meeting");
+			return;
+		}
+		
+		final CMeeting meeting = new CMeeting("Code Review Session", project);
+		meeting.setDescription("Review of architectural changes and code quality improvements");
+		meeting.setMeetingDate(LocalDateTime.now().minusDays(2).withHour(10).withMinute(0));
+		meeting.setEndDate(LocalDateTime.now().minusDays(2).withHour(11).withMinute(30));
+		meeting.setLocation("Virtual - Zoom");
+		
+		// Add participants
+		final Set<CUser> participants = new HashSet<>();
+		final CUser manager = findUserByLogin("mkaradeniz");
+		final CUser dev = findUserByLogin("msahin");
+		if (manager != null) participants.add(manager);
+		if (dev != null) participants.add(dev);
+		meeting.setParticipants(participants);
+		
+		meetingService.save(meeting);
+		LOGGER.info("Sample review meeting created successfully");
+	}
+
+	/**
+	 * Creates sample retrospective meeting.
+	 */
+	private void createSampleRetrospectiveMeeting() {
+		LOGGER.info("createSampleRetrospectiveMeeting called - creating sprint retrospective");
+		
+		final CProject project = findProjectByName("Customer Experience Enhancement");
+		if (project == null) {
+			LOGGER.warn("Project not found for retrospective meeting");
+			return;
+		}
+		
+		final CMeeting meeting = new CMeeting("Sprint Retrospective", project);
+		meeting.setDescription("Team reflection on what went well, what could be improved, and action items");
+		meeting.setMeetingDate(LocalDateTime.now().minusDays(7).withHour(15).withMinute(0));
+		meeting.setEndDate(LocalDateTime.now().minusDays(7).withHour(16).withMinute(0));
+		meeting.setLocation("Conference Room C");
+		
+		// Add participants and attendees
+		final Set<CUser> participants = new HashSet<>();
+		final Set<CUser> attendees = new HashSet<>();
+		final CUser manager = findUserByLogin("mkaradeniz");
+		final CUser dev1 = findUserByLogin("ademir");
+		final CUser dev2 = findUserByLogin("msahin");
+		
+		if (manager != null) {
+			participants.add(manager);
+			attendees.add(manager);
+		}
+		if (dev1 != null) {
+			participants.add(dev1);
+			attendees.add(dev1);
+		}
+		if (dev2 != null) {
+			participants.add(dev2);
+		}
+		
+		meeting.setParticipants(participants);
+		meeting.setAttendees(attendees);
+		
+		meetingService.save(meeting);
+		LOGGER.info("Sample retrospective meeting created successfully");
+	}
+
+	// Risk creation methods
+
+	/**
+	 * Creates high priority technical risk.
+	 */
+	private void createHighPriorityTechnicalRisk() {
+		LOGGER.info("createHighPriorityTechnicalRisk called - creating technical risk");
+		
+		final CProject project = findProjectByName("Digital Transformation Initiative");
+		if (project == null) {
+			LOGGER.warn("Project not found for technical risk");
+			return;
+		}
+		
+		final CRisk risk = new CRisk("Legacy System Integration Challenges", ERiskSeverity.HIGH, project);
+		risk.setDescription("Integration with legacy systems may cause compatibility issues and performance bottlenecks");
+		
+		riskService.save(risk);
+		LOGGER.info("High priority technical risk created successfully");
+	}
+
+	/**
+	 * Creates medium priority budget risk.
+	 */
+	private void createMediumPriorityBudgetRisk() {
+		LOGGER.info("createMediumPriorityBudgetRisk called - creating budget risk");
+		
+		final CProject project = findProjectByName("Product Development Phase 2");
+		if (project == null) {
+			LOGGER.warn("Project not found for budget risk");
+			return;
+		}
+		
+		final CRisk risk = new CRisk("Budget Overrun Due to Scope Creep", ERiskSeverity.MEDIUM, project);
+		risk.setDescription("Uncontrolled feature additions may cause budget to exceed allocated resources");
+		
+		riskService.save(risk);
+		LOGGER.info("Medium priority budget risk created successfully");
+	}
+
+	/**
+	 * Creates low priority resource risk.
+	 */
+	private void createLowPriorityResourceRisk() {
+		LOGGER.info("createLowPriorityResourceRisk called - creating resource risk");
+		
+		final CProject project = findProjectByName("Infrastructure Modernization");
+		if (project == null) {
+			LOGGER.warn("Project not found for resource risk");
+			return;
+		}
+		
+		final CRisk risk = new CRisk("Team Member Vacation Scheduling Conflicts", ERiskSeverity.LOW, project);
+		risk.setDescription("Overlapping vacation schedules may temporarily reduce team capacity");
+		
+		riskService.save(risk);
+		LOGGER.info("Low priority resource risk created successfully");
+	}
+
+	/**
+	 * Creates critical security risk.
+	 */
+	private void createCriticalSecurityRisk() {
+		LOGGER.info("createCriticalSecurityRisk called - creating security risk");
+		
+		final CProject project = findProjectByName("Customer Experience Enhancement");
+		if (project == null) {
+			LOGGER.warn("Project not found for security risk");
+			return;
+		}
+		
+		final CRisk risk = new CRisk("Data Privacy Compliance Gaps", ERiskSeverity.CRITICAL, project);
+		risk.setDescription("Current implementation may not fully comply with GDPR and data protection regulations");
+		
+		riskService.save(risk);
+		LOGGER.info("Critical security risk created successfully");
+	}
+
+	/**
+	 * Creates low priority schedule risk.
+	 */
+	private void createLowPriorityScheduleRisk() {
+		LOGGER.info("createLowPriorityScheduleRisk called - creating schedule risk");
+		
+		final CProject project = findProjectByName("Digital Transformation Initiative");
+		if (project == null) {
+			LOGGER.warn("Project not found for schedule risk");
+			return;
+		}
+		
+		final CRisk risk = new CRisk("Minor Delays in Third-Party Integrations", ERiskSeverity.LOW, project);
+		risk.setDescription("External vendor may experience minor delays in API delivery");
+		
+		riskService.save(risk);
+		LOGGER.info("Low priority schedule risk created successfully");
 	}
 }
