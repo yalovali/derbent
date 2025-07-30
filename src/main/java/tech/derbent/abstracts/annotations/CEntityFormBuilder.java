@@ -490,6 +490,13 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 				fieldType.getSimpleName(), field.getName());
 			return null;
 		}
+		// Null check before proceeding with component configuration
+		if (component == null) {
+			LOGGER.error("Component creation failed for field '{}' of type '{}'", 
+				field.getName(), fieldType.getSimpleName());
+			return null;
+		}
+		
 		setRequiredIndicatorVisible(meta, component);
 		setHelperText(meta, component);
 		setComponentWidth(component, meta);
