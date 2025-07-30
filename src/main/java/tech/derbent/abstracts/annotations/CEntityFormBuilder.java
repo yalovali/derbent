@@ -30,77 +30,13 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 
+import tech.derbent.abstracts.domains.CEntityConstants;
 import tech.derbent.abstracts.domains.CEntityDB;
 
-/**
- * CEntityFormBuilder - Utility class for building forms from entity classes using
- * MetaData annotations. Supports automatic form generation for various field types
- * including text, boolean, enum, numeric, and entity references.
- * <p>
- * <strong>Enhanced ComboBox Data Provider Support:</strong> This form builder now
- * supports annotation-based data provider configuration, making it more generic and
- * maintainable. ComboBox fields can specify their data providers using MetaData
- * annotations in three ways:
- * </p>
- * <ol>
- * <li><strong>Bean Name:</strong>
- * {@code @MetaData(dataProviderBean = "activityTypeService")}</li>
- * <li><strong>Bean Class:</strong>
- * {@code @MetaData(dataProviderClass = CActivityTypeService.class)}</li>
- * <li><strong>Automatic:</strong> Automatically resolves service by entity type naming
- * convention</li>
- * </ol>
- * <p>
- * <strong>Backward Compatibility:</strong> The traditional ComboBoxDataProvider approach
- * is still supported and takes precedence when provided. This allows existing code to
- * continue working while new code can benefit from the annotation-based approach.
- * </p>
- * <p>
- * <strong>Usage Examples:</strong>
- * </p>
- *
- * <pre>
- *
- * {
- * 	&#64;code
- * 	// New annotation-based approach - no data provider needed in view code
- * 	public class CActivity extends CEntityOfProject {
- *
- * 		&#64;MetaData (
- * 			displayName = "Activity Type", dataProviderBean = "activityTypeService"
- * 		)
- * 		private CActivityType activityType;
- *
- * 		@MetaData (
- * 			displayName = "Assigned User", dataProviderClass = CUserService.class,
- * 			dataProviderMethod = "findAllActive"
- * 		)
- * 		private CUser assignedUser;
- * 	}
- * 	// In view - much simpler now
- * 	Div form = CEntityFormBuilder.buildForm(CActivity.class, binder); // No data
- * 																		// provider
- * 																		// needed!
- * 	// Legacy approach still works
- * 	ComboBoxDataProvider provider = new ComboBoxDataProvider() {
- *
- * 		public List getItems(Class entityType) {
- * 			return customLogic(entityType);
- * 		}
- * 	};
- * 	Div form = CEntityFormBuilder.buildForm(CActivity.class, binder, provider);
- * }
- * </pre>
- *
- * Layer: Utility (MVC)
- * @author Derbent Framework
- * @since 1.0
- * @see tech.derbent.abstracts.annotations.MetaData
- * @see tech.derbent.abstracts.annotations.CDataProviderResolver
- */
 @org.springframework.stereotype.Component
 public final class CEntityFormBuilder implements ApplicationContextAware {
 
@@ -354,7 +290,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			// Set default value to first item if available and no default value specified
 			// in metadata This ensures ComboBoxes are not empty when forms are
 			// created/cleared
-			if (!items.isEmpty() && (meta.defaultValue() == null
+			if (!items.isEmpty() && ((meta.defaultValue() == null)
 				|| meta.defaultValue().trim().isEmpty())) {
 				comboBox.setValue(items.get(0));
 				LOGGER.debug(
@@ -459,7 +395,12 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		if ((fieldType == Boolean.class) || (fieldType == boolean.class)) {
 			component = createCheckbox(field, meta, binder);
 		}
-		else if (fieldType == String.class) {
+		else if ((fieldType == String.class)
+			&& (meta.maxLength() >= CEntityConstants.MAX_LENGTH_DESCRIPTION)) {
+			component = createTextArea(field, meta, binder);
+		}
+		else if ((fieldType == String.class)
+			&& (meta.maxLength() < CEntityConstants.MAX_LENGTH_DESCRIPTION)) {
 			component = createTextField(field, meta, binder);
 		}
 		else if ((fieldType == Integer.class) || (fieldType == int.class)
@@ -601,7 +542,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 	private static NumberField createFloatingPointField(final Field field,
 		final MetaData meta, final BeanValidationBinder<?> binder) {
 
-		if (field == null || meta == null || binder == null) {
+		if ((field == null) || (meta == null) || (binder == null)) {
 			LOGGER.error(
 				"Null parameters in createFloatingPointField - field: {}, meta: {}, binder: {}",
 				field != null ? field.getName() : "null",
@@ -613,7 +554,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		numberField.setStep(0.01);
 
 		// Set default value if specified
-		if (meta.defaultValue() != null && !meta.defaultValue().trim().isEmpty()) {
+		if ((meta.defaultValue() != null) && !meta.defaultValue().trim().isEmpty()) {
 
 			try {
 				final double defaultVal = Double.parseDouble(meta.defaultValue());
@@ -631,7 +572,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 
 		try {
 
-			if (fieldType == Float.class || fieldType == float.class) {
+			if ((fieldType == Float.class) || (fieldType == float.class)) {
 				binder.forField(numberField)
 					.withConverter(value -> value != null ? value.floatValue() : null,
 						value -> value != null ? value.doubleValue() : null)
@@ -659,7 +600,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 	private static NumberField createIntegerField(final Field field, final MetaData meta,
 		final BeanValidationBinder<?> binder) {
 
-		if (field == null || meta == null || binder == null) {
+		if ((field == null) || (meta == null) || (binder == null)) {
 			LOGGER.error(
 				"Null parameters in createIntegerField - field: {}, meta: {}, binder: {}",
 				field != null ? field.getName() : "null",
@@ -671,7 +612,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		numberField.setStep(1);
 
 		// Set default value if specified
-		if (meta.defaultValue() != null && !meta.defaultValue().trim().isEmpty()) {
+		if ((meta.defaultValue() != null) && !meta.defaultValue().trim().isEmpty()) {
 
 			try {
 				final double defaultVal = Double.parseDouble(meta.defaultValue());
@@ -689,13 +630,13 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 
 		try {
 
-			if (fieldType == Integer.class || fieldType == int.class) {
+			if ((fieldType == Integer.class) || (fieldType == int.class)) {
 				binder.forField(numberField)
 					.withConverter(value -> value != null ? value.intValue() : null,
 						value -> value != null ? value.doubleValue() : null)
 					.bind(field.getName());
 			}
-			else if (fieldType == Long.class || fieldType == long.class) {
+			else if ((fieldType == Long.class) || (fieldType == long.class)) {
 				binder.forField(numberField)
 					.withConverter(value -> value != null ? value.longValue() : null,
 						value -> value != null ? value.doubleValue() : null)
@@ -713,44 +654,79 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		return numberField;
 	}
 
-	private static TextField createTextField(final Field field, final MetaData meta,
+	private static TextArea createTextArea(final Field field, final MetaData meta,
 		final BeanValidationBinder<?> binder) {
 
-		if (field == null || meta == null || binder == null) {
+		if ((field == null) || (meta == null) || (binder == null)) {
 			LOGGER.error(
-				"Null parameters in createTextField - field: {}, meta: {}, binder: {}",
+				"Null parameters in createTextArea - field: {}, meta: {}, binder: {}",
 				field != null ? field.getName() : "null",
 				meta != null ? "present" : "null", binder != null ? "present" : "null");
 			return null;
 		}
-		final TextField textField = new TextField();
+		final TextArea item = new TextArea();
 
-		// Set max length if specified
 		if (meta.maxLength() > 0) {
-			textField.setMaxLength(meta.maxLength());
+			item.setMaxLength(meta.maxLength());
 		}
+		item.setWidthFull();
+		item.setMinHeight("100px");
 
-		// Set default value if specified
-		if (meta.defaultValue() != null && !meta.defaultValue().trim().isEmpty()) {
+		if ((meta.defaultValue() != null) && !meta.defaultValue().trim().isEmpty()) {
 
 			try {
-				textField.setValue(meta.defaultValue());
-				LOGGER.debug("Set default value '{}' for text field '{}'",
-					meta.defaultValue(), field.getName());
+				item.setValue(meta.defaultValue());
 			} catch (final Exception e) {
-				LOGGER.error("Failed to set default value '{}' for text field '{}': {}",
+				LOGGER.error("Failed to set default value '{}' for text area '{}': {}",
 					meta.defaultValue(), field.getName(), e.getMessage());
 			}
 		}
 
 		try {
-			binder.bind(textField, field.getName());
+			binder.bind(item, field.getName());
 		} catch (final Exception e) {
-			LOGGER.error("Failed to bind text field for field '{}': {}", field.getName(),
+			LOGGER.error("Failed to bind text area for field '{}': {}", field.getName(),
 				e.getMessage());
 			return null;
 		}
-		return textField;
+		return item;
+	}
+
+	private static TextField createTextField(final Field field, final MetaData meta,
+		final BeanValidationBinder<?> binder) {
+
+		if ((field == null) || (meta == null) || (binder == null)) {
+			LOGGER.error(
+				"Null parameters in createTextArea - field: {}, meta: {}, binder: {}",
+				field != null ? field.getName() : "null",
+				meta != null ? "present" : "null", binder != null ? "present" : "null");
+			return null;
+		}
+		final TextField item = new TextField();
+
+		if (meta.maxLength() > 0) {
+			item.setMaxLength(meta.maxLength());
+		}
+		item.setWidthFull();
+
+		if ((meta.defaultValue() != null) && !meta.defaultValue().trim().isEmpty()) {
+
+			try {
+				item.setValue(meta.defaultValue());
+			} catch (final Exception e) {
+				LOGGER.error("Failed to set default value '{}' for text area '{}': {}",
+					meta.defaultValue(), field.getName(), e.getMessage());
+			}
+		}
+
+		try {
+			binder.bind(item, field.getName());
+		} catch (final Exception e) {
+			LOGGER.error("Failed to bind text area for field '{}': {}", field.getName(),
+				e.getMessage());
+			return null;
+		}
+		return item;
 	}
 
 	private static void getListOfAllFields(final Class<?> entityClass,
@@ -913,13 +889,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 	private static void setComponentWidth(final Component component,
 		final MetaData meta) {
 
-		if (component == null) {
-			LOGGER.warn("Component is null in setComponentWidth - cannot set width");
-			return;
-		}
-
-		if (meta == null) {
-			LOGGER.warn("MetaData is null in setComponentWidth - using default width");
+		if ((component == null) || (meta == null)) {
 			return;
 		}
 

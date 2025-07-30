@@ -14,15 +14,25 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import tech.derbent.activities.domain.CActivity;
+import tech.derbent.activities.domain.CActivityStatus;
+import tech.derbent.activities.domain.CActivityType;
 import tech.derbent.activities.service.CActivityService;
+import tech.derbent.activities.service.CActivityStatusService;
 import tech.derbent.activities.service.CActivityTypeService;
 import tech.derbent.comments.service.CCommentService;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
+import tech.derbent.decisions.domain.CDecisionStatus;
+import tech.derbent.decisions.service.CDecisionStatusService;
 import tech.derbent.decisions.service.CDecisionTypeService;
 import tech.derbent.meetings.domain.CMeeting;
+import tech.derbent.meetings.domain.CMeetingStatus;
 import tech.derbent.meetings.service.CMeetingService;
+import tech.derbent.meetings.service.CMeetingStatusService;
 import tech.derbent.meetings.service.CMeetingTypeService;
+import tech.derbent.orders.domain.COrderStatus;
+import tech.derbent.orders.service.CApprovalStatusService;
+import tech.derbent.orders.service.COrderStatusService;
 import tech.derbent.orders.service.COrderTypeService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
@@ -33,17 +43,6 @@ import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserRole;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.CUserTypeService;
-import tech.derbent.meetings.service.CMeetingStatusService;
-import tech.derbent.decisions.service.CDecisionStatusService;
-import tech.derbent.activities.service.CActivityStatusService;
-import tech.derbent.orders.service.COrderStatusService;
-import tech.derbent.orders.service.CApprovalStatusService;
-import tech.derbent.meetings.domain.CMeetingStatus;
-import tech.derbent.decisions.domain.CDecisionStatus; 
-import tech.derbent.activities.domain.CActivityStatus;
-import tech.derbent.activities.domain.CActivityType;
-import tech.derbent.orders.domain.COrderStatus;
-import tech.derbent.orders.domain.CApprovalStatus;
 
 /**
  * CSampleDataInitializer - Enhanced sample data initializer following coding guidelines.
@@ -93,17 +92,17 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	private final CCommentService commentService;
 
 	private final CMeetingService meetingService;
-	
+
 	private final CRiskService riskService;
-	
+
 	private final CMeetingStatusService meetingStatusService;
-	
+
 	private final CDecisionStatusService decisionStatusService;
-	
+
 	private final CActivityStatusService activityStatusService;
-	
+
 	private final COrderStatusService orderStatusService;
-	
+
 	private final CApprovalStatusService approvalStatusService;
 
 	public CSampleDataInitializer(final CProjectService projectService,
@@ -112,10 +111,9 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivityTypeService activityTypeService,
 		final CMeetingTypeService meetingTypeService,
 		final CDecisionTypeService decisionTypeService,
-		final COrderTypeService orderTypeService,
-		final CCompanyService companyService, final CCommentService commentService,
-		final CMeetingService meetingService, final CRiskService riskService,
-		final CMeetingStatusService meetingStatusService,
+		final COrderTypeService orderTypeService, final CCompanyService companyService,
+		final CCommentService commentService, final CMeetingService meetingService,
+		final CRiskService riskService, final CMeetingStatusService meetingStatusService,
 		final CDecisionStatusService decisionStatusService,
 		final CActivityStatusService activityStatusService,
 		final COrderStatusService orderStatusService,
@@ -141,6 +139,18 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		this.approvalStatusService = approvalStatusService;
 	}
 
+	private void createActivityStatus(final String name, final String description,
+		final String color, final boolean isFinal, final int sortOrder) {
+		final CActivityStatus status = new CActivityStatus();
+		status.setName(name);
+		status.setDescription(description);
+		status.setColor(color);
+		status.setFinal(isFinal);
+		status.setSortOrder(sortOrder);
+		activityStatusService.save(status);
+		LOGGER.debug("Created activity status: {}", name);
+	}
+
 	/**
 	 * Creates system administrator user.
 	 */
@@ -148,18 +158,15 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		LOGGER.info("createAdminUser called - creating system administrator");
 		final CUser admin = userService.createLoginUser("admin", STANDARD_PASSWORD,
 			"Ahmet", "admin@of.gov.tr", "ADMIN,USER");
-
 		// Set user profile using auxiliary method
 		final byte[] profilePictureBytes = "profile-picture".getBytes();
-		userService.setUserProfile(admin, "Yılmaz", "+90-462-751-1001", profilePictureBytes);
-
+		userService.setUserProfile(admin, "Yılmaz", "+90-462-751-1001",
+			profilePictureBytes);
 		// Set user role using auxiliary method
 		userService.setUserRole(admin, CUserRole.ADMIN, "ADMIN,USER");
-
 		// Set company association using auxiliary method
 		final CCompany company = findCompanyByName("Of Teknoloji Çözümleri");
 		userService.setCompanyAssociation(admin, company);
-
 		LOGGER.info("Administrator user created successfully");
 	}
 
@@ -176,33 +183,28 @@ public class CSampleDataInitializer implements ApplicationRunner {
 				"Project 'Digital Transformation Initiative' not found, skipping backend activity");
 			return;
 		}
-
 		// Create the activity using new auxiliary methods
 		final CActivity backendDev = new CActivity("Backend API Development", project);
-
 		// Find and set the activity type
-		final CActivityType developmentType = findActivityTypeByNameAndProject("Development", project);
+		final CActivityType developmentType =
+			findActivityTypeByNameAndProject("Development", project);
+
 		if (developmentType == null) {
 			LOGGER.warn("Development activity type not found for project, using null");
 		}
-
 		// Set activity type and description using auxiliary method
 		activityService.setActivityType(backendDev, developmentType,
 			"Develop REST API endpoints for user management and authentication");
-
 		// Set assigned users using auxiliary method
 		final CUser manager = findUserByLogin("mkaradeniz");
 		final CUser admin = findUserByLogin("admin");
 		activityService.setAssignedUsers(backendDev, manager, admin);
-
 		// Set time tracking using auxiliary method
-		activityService.setTimeTracking(backendDev,
-			new BigDecimal("40.00"), new BigDecimal("35.50"), new BigDecimal("4.50"));
-
+		activityService.setTimeTracking(backendDev, new BigDecimal("40.00"),
+			new BigDecimal("35.50"), new BigDecimal("4.50"));
 		// Set date information using auxiliary method
-		activityService.setDateInfo(backendDev,
-			LocalDate.now().minusDays(10), LocalDate.now().plusDays(5), null);
-
+		activityService.setDateInfo(backendDev, LocalDate.now().minusDays(10),
+			LocalDate.now().plusDays(5), null);
 		// Create comments
 		commentService.createComment("Initial backend API development started",
 			backendDev, admin);
@@ -230,6 +232,37 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	}
 
 	/**
+	 * Creates critical security risk.
+	 */
+	private void createCriticalSecurityRisk() {
+		LOGGER.info("createCriticalSecurityRisk called - creating security risk");
+		final CProject project = findProjectByName("Customer Experience Enhancement");
+
+		if (project == null) {
+			LOGGER.warn("Project not found for security risk");
+			return;
+		}
+		final CRisk risk =
+			new CRisk("Data Privacy Compliance Gaps", ERiskSeverity.CRITICAL, project);
+		risk.setDescription(
+			"Current implementation may not fully comply with GDPR and data protection regulations");
+		riskService.save(risk);
+		LOGGER.info("Critical security risk created successfully");
+	}
+
+	private void createDecisionStatus(final String name, final String description,
+		final String color, final boolean isFinal, final int sortOrder) {
+		final CDecisionStatus status = new CDecisionStatus();
+		status.setName(name);
+		status.setDescription(description);
+		status.setColor(color);
+		status.setFinal(isFinal);
+		status.setSortOrder(sortOrder);
+		decisionStatusService.save(status);
+		LOGGER.debug("Created decision status: {}", name);
+	}
+
+	/**
 	 * Creates healthcare company.
 	 */
 	private void createHealthcareCompany() {
@@ -247,11 +280,68 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	}
 
 	/**
+	 * Creates high priority technical risk.
+	 */
+	private void createHighPriorityTechnicalRisk() {
+		LOGGER.info("createHighPriorityTechnicalRisk called - creating technical risk");
+		final CProject project = findProjectByName("Digital Transformation Initiative");
+
+		if (project == null) {
+			LOGGER.warn("Project not found for technical risk");
+			return;
+		}
+		final CRisk risk = new CRisk("Legacy System Integration Challenges",
+			ERiskSeverity.HIGH, project);
+		risk.setDescription(
+			"Integration with legacy systems may cause compatibility issues and performance bottlenecks");
+		riskService.save(risk);
+		LOGGER.info("High priority technical risk created successfully");
+	}
+
+	/**
+	 * Creates low priority resource risk.
+	 */
+	private void createLowPriorityResourceRisk() {
+		LOGGER.info("createLowPriorityResourceRisk called - creating resource risk");
+		final CProject project = findProjectByName("Infrastructure Modernization");
+
+		if (project == null) {
+			LOGGER.warn("Project not found for resource risk");
+			return;
+		}
+		final CRisk risk = new CRisk("Team Member Vacation Scheduling Conflicts",
+			ERiskSeverity.LOW, project);
+		risk.setDescription(
+			"Overlapping vacation schedules may temporarily reduce team capacity");
+		riskService.save(risk);
+		LOGGER.info("Low priority resource risk created successfully");
+	}
+
+	/**
+	 * Creates low priority schedule risk.
+	 */
+	private void createLowPriorityScheduleRisk() {
+		LOGGER.info("createLowPriorityScheduleRisk called - creating schedule risk");
+		final CProject project = findProjectByName("Digital Transformation Initiative");
+
+		if (project == null) {
+			LOGGER.warn("Project not found for schedule risk");
+			return;
+		}
+		final CRisk risk = new CRisk("Minor Delays in Third-Party Integrations",
+			ERiskSeverity.LOW, project);
+		risk.setDescription(
+			"External vendor may experience minor delays in API delivery");
+		riskService.save(risk);
+		LOGGER.info("Low priority schedule risk created successfully");
+	}
+
+	/**
 	 * Creates manufacturing company.
 	 */
 	private void createManufacturingCompany() {
-		LOGGER.info(
-			"createManufacturingCompany called - creating Of Endüstri Dinamikleri");
+		LOGGER
+			.info("createManufacturingCompany called - creating Of Endüstri Dinamikleri");
 		final CCompany manufacturing = new CCompany("Of Endüstri Dinamikleri",
 			"Hassas mühendislik bileşenlerinde lider üretici");
 		manufacturing.setAddress("Sanayi Mahallesi, İstiklal Caddesi No:42, Of/Trabzon");
@@ -265,56 +355,138 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	}
 
 	/**
+	 * Creates medium priority budget risk.
+	 */
+	private void createMediumPriorityBudgetRisk() {
+		final CProject project = findProjectByName("Product Development Phase 2");
+
+		if (project == null) {
+			LOGGER.warn("Project not found for budget risk");
+			return;
+		}
+		final CRisk risk =
+			new CRisk("Budget Overrun Due to Scope Creep", ERiskSeverity.MEDIUM, project);
+		risk.setDescription(
+			"Uncontrolled feature additions may cause budget to exceed allocated resources");
+		riskService.save(risk);
+		LOGGER.info("Medium priority budget risk created successfully");
+	}
+
+	private void createMeetingStatus(final String name, final String description,
+		final String color, final boolean isFinal, final int sortOrder) {
+		final CMeetingStatus status = new CMeetingStatus();
+		status.setName(name);
+		status.setDescription(description);
+		status.setColor(color);
+		status.setFinal(isFinal);
+		status.setSortOrder(sortOrder);
+		meetingStatusService.save(status);
+		LOGGER.debug("Created meeting status: {}", name);
+	}
+
+	private void createOrderStatus(final String name, final String description,
+		final String color, final boolean isFinal, final int sortOrder) {
+		final COrderStatus status = new COrderStatus();
+		status.setName(name);
+		status.setDescription(description);
+		// COrderStatus extends CEntityNamed, not CStatus, so it doesn't have color,
+		// isFinal, sortOrder
+		orderStatusService.save(status);
+		LOGGER.debug("Created order status: {}", name);
+	}
+
+	/**
 	 * Creates project manager user.
 	 */
 	private void createProjectManagerUser() {
 		LOGGER.info("createProjectManagerUser called - creating project manager");
 		final CUser manager = userService.createLoginUser("mkaradeniz", STANDARD_PASSWORD,
 			"Mehmet Emin", "mehmet.karadeniz@ofteknoloji.com.tr", "MANAGER,USER");
-
 		// Set user profile using auxiliary method
 		final byte[] profilePictureBytes = "profile-picture".getBytes();
-		userService.setUserProfile(manager, "Karadeniz", "+90-462-751-1002", profilePictureBytes);
-
+		userService.setUserProfile(manager, "Karadeniz", "+90-462-751-1002",
+			profilePictureBytes);
 		// Set user role using auxiliary method
 		userService.setUserRole(manager, CUserRole.PROJECT_MANAGER, "MANAGER,USER");
-
 		// Set company association using auxiliary method
 		final CCompany company = findCompanyByName("Of Teknoloji Çözümleri");
 		userService.setCompanyAssociation(manager, company);
-
 		LOGGER.info("Project manager user created successfully");
 	}
 
+	private void createProjectWithDescription(final String name,
+		final String description) {
+		final CProject project = new CProject();
+		project.setName(name);
+		project.setDescription(description);
+		projectService.save(project);
+		LOGGER.debug("Created project: {} with description", name);
+	}
+
 	/**
-	 * Creates sample project meeting using auxiliary service methods.
-	 * Demonstrates the use of auxiliary meeting service methods.
+	 * Creates sample planning meeting.
+	 */
+	private void createSamplePlanningMeeting() {
+		LOGGER.info(
+			"createSamplePlanningMeeting called - creating sprint planning meeting");
+		final CProject project = findProjectByName("Product Development Phase 2");
+
+		if (project == null) {
+			LOGGER.warn("Project not found for planning meeting");
+			return;
+		}
+		final CMeeting meeting = new CMeeting("Sprint Planning - Q1 2024", project);
+		meeting.setDescription(
+			"Planning for next sprint with story estimation and task assignment");
+		meeting
+			.setMeetingDate(LocalDateTime.now().plusDays(3).withHour(14).withMinute(0));
+		meeting.setEndDate(LocalDateTime.now().plusDays(3).withHour(16).withMinute(0));
+		meeting.setLocation("Meeting Room B");
+		// Add participants
+		final Set<CUser> participants = new HashSet<>();
+		final CUser manager = findUserByLogin("mkaradeniz");
+		final CUser analyst = findUserByLogin("ademir");
+
+		if (manager != null) {
+			participants.add(manager);
+		}
+
+		if (analyst != null) {
+			participants.add(analyst);
+		}
+		meeting.setParticipants(participants);
+		meetingService.save(meeting);
+		LOGGER.info("Sample planning meeting created successfully");
+	}
+
+	/**
+	 * Creates sample project meeting using auxiliary service methods. Demonstrates the
+	 * use of auxiliary meeting service methods.
 	 */
 	private void createSampleProjectMeeting() {
-		LOGGER.info("createSampleProjectMeeting called - creating sample project meeting");
+		LOGGER
+			.info("createSampleProjectMeeting called - creating sample project meeting");
 		final CProject project = findProjectByName("Digital Transformation Initiative");
 
 		if (project == null) {
-			LOGGER.warn("Project 'Digital Transformation Initiative' not found, skipping meeting creation");
+			LOGGER.warn(
+				"Project 'Digital Transformation Initiative' not found, skipping meeting creation");
 			return;
 		}
-
 		// Create the meeting using new auxiliary methods
 		final CMeeting meeting = new CMeeting("Weekly Project Status Meeting", project);
-		meeting.setDescription("Weekly status update on project progress, blockers discussion, and next steps planning");
-
+		meeting.setDescription(
+			"Weekly status update on project progress, blockers discussion, and next steps planning");
 		// Set meeting details using auxiliary method
 		meetingService.setMeetingDetails(meeting, null,
 			LocalDateTime.now().plusDays(1).withHour(14).withMinute(0),
 			LocalDateTime.now().plusDays(1).withHour(15).withMinute(0),
 			"Conference Room A");
-
 		// Set meeting content using auxiliary method
 		final CUser responsible = findUserByLogin("mkaradeniz");
 		meetingService.setMeetingContent(meeting,
 			"Weekly status update on project progress, blockers discussion, and next steps planning",
 			null, responsible);
-
 		// Set participants using auxiliary method
 		final Set<CUser> participants = new HashSet<>();
 		participants.add(findUserByLogin("admin"));
@@ -322,13 +494,130 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		participants.add(findUserByLogin("bozkan"));
 		participants.add(findUserByLogin("msahin"));
 		meetingService.setParticipants(meeting, participants);
-
 		// Set meeting status using auxiliary method
 		meetingService.setMeetingStatus(meeting, null,
 			"Meeting agenda prepared, participants notified",
 			"Project management system");
+		LOGGER
+			.info("Sample project meeting created successfully using auxiliary methods");
+	}
 
-		LOGGER.info("Sample project meeting created successfully using auxiliary methods");
+	/**
+	 * Creates sample retrospective meeting.
+	 */
+	private void createSampleRetrospectiveMeeting() {
+		LOGGER.info(
+			"createSampleRetrospectiveMeeting called - creating sprint retrospective");
+		final CProject project = findProjectByName("Customer Experience Enhancement");
+
+		if (project == null) {
+			LOGGER.warn("Project not found for retrospective meeting");
+			return;
+		}
+		final CMeeting meeting = new CMeeting("Sprint Retrospective", project);
+		meeting.setDescription(
+			"Team reflection on what went well, what could be improved, and action items");
+		meeting
+			.setMeetingDate(LocalDateTime.now().minusDays(7).withHour(15).withMinute(0));
+		meeting.setEndDate(LocalDateTime.now().minusDays(7).withHour(16).withMinute(0));
+		meeting.setLocation("Conference Room C");
+		// Add participants and attendees
+		final Set<CUser> participants = new HashSet<>();
+		final Set<CUser> attendees = new HashSet<>();
+		final CUser manager = findUserByLogin("mkaradeniz");
+		final CUser dev1 = findUserByLogin("ademir");
+		final CUser dev2 = findUserByLogin("msahin");
+
+		if (manager != null) {
+			participants.add(manager);
+			attendees.add(manager);
+		}
+
+		if (dev1 != null) {
+			participants.add(dev1);
+			attendees.add(dev1);
+		}
+
+		if (dev2 != null) {
+			participants.add(dev2);
+		}
+		meeting.setParticipants(participants);
+		meeting.setAttendees(attendees);
+		meetingService.save(meeting);
+		LOGGER.info("Sample retrospective meeting created successfully");
+	}
+
+	/**
+	 * Creates sample review meeting.
+	 */
+	private void createSampleReviewMeeting() {
+		LOGGER.info("createSampleReviewMeeting called - creating code review meeting");
+		final CProject project = findProjectByName("Infrastructure Modernization");
+
+		if (project == null) {
+			LOGGER.warn("Project not found for review meeting");
+			return;
+		}
+		final CMeeting meeting = new CMeeting("Code Review Session", project);
+		meeting.setDescription(
+			"Review of architectural changes and code quality improvements");
+		meeting
+			.setMeetingDate(LocalDateTime.now().minusDays(2).withHour(10).withMinute(0));
+		meeting.setEndDate(LocalDateTime.now().minusDays(2).withHour(11).withMinute(30));
+		meeting.setLocation("Virtual - Zoom");
+		// Add participants
+		final Set<CUser> participants = new HashSet<>();
+		final CUser manager = findUserByLogin("mkaradeniz");
+		final CUser dev = findUserByLogin("msahin");
+
+		if (manager != null) {
+			participants.add(manager);
+		}
+
+		if (dev != null) {
+			participants.add(dev);
+		}
+		meeting.setParticipants(participants);
+		meetingService.save(meeting);
+		LOGGER.info("Sample review meeting created successfully");
+	}
+
+	/**
+	 * Creates sample standup meeting.
+	 */
+	private void createSampleStandupMeeting() {
+		LOGGER.info("createSampleStandupMeeting called - creating daily standup meeting");
+		final CProject project = findProjectByName("Digital Transformation Initiative");
+
+		if (project == null) {
+			LOGGER.warn("Project not found for standup meeting");
+			return;
+		}
+		final CMeeting meeting = new CMeeting("Daily Standup - Sprint 3", project);
+		meeting.setDescription("Daily progress sync and impediment discussion");
+		meeting.setMeetingDate(LocalDateTime.now().plusDays(1).withHour(9).withMinute(0));
+		meeting.setEndDate(LocalDateTime.now().plusDays(1).withHour(9).withMinute(30));
+		meeting.setLocation("Conference Room A");
+		// Add participants
+		final Set<CUser> participants = new HashSet<>();
+		final CUser manager = findUserByLogin("mkaradeniz");
+		final CUser dev1 = findUserByLogin("ademir");
+		final CUser dev2 = findUserByLogin("msahin");
+
+		if (manager != null) {
+			participants.add(manager);
+		}
+
+		if (dev1 != null) {
+			participants.add(dev1);
+		}
+
+		if (dev2 != null) {
+			participants.add(dev2);
+		}
+		meeting.setParticipants(participants);
+		meetingService.save(meeting);
+		LOGGER.info("Sample standup meeting created successfully");
 	}
 
 	/**
@@ -344,33 +633,28 @@ public class CSampleDataInitializer implements ApplicationRunner {
 				"Project 'Infrastructure Modernization' not found, skipping architecture activity");
 			return;
 		}
-
 		// Create the activity using new auxiliary methods
 		final CActivity archDesign = new CActivity("System Architecture Design", project);
-
 		// Find and set the activity type
-		final CActivityType designType = findActivityTypeByNameAndProject("Design", project);
+		final CActivityType designType =
+			findActivityTypeByNameAndProject("Design", project);
+
 		if (designType == null) {
 			LOGGER.warn("Design activity type not found for project, using null");
 		}
-
 		// Set activity type and description using auxiliary method
 		activityService.setActivityType(archDesign, designType,
 			"Design scalable system architecture for infrastructure modernization");
-
 		// Set assigned users using auxiliary method
 		final CUser teamMember2 = findUserByLogin("bozkan");
 		final CUser admin = findUserByLogin("admin");
 		activityService.setAssignedUsers(archDesign, teamMember2, admin);
-
 		// Set time tracking using auxiliary method
-		activityService.setTimeTracking(archDesign,
-			new BigDecimal("60.00"), new BigDecimal("45.00"), new BigDecimal("15.00"));
-
+		activityService.setTimeTracking(archDesign, new BigDecimal("60.00"),
+			new BigDecimal("45.00"), new BigDecimal("15.00"));
 		// Set date information using auxiliary method
-		activityService.setDateInfo(archDesign,
-			LocalDate.now().minusDays(15), LocalDate.now().plusDays(10), null);
-
+		activityService.setDateInfo(archDesign, LocalDate.now().minusDays(15),
+			LocalDate.now().plusDays(10), null);
 		// Create comments
 		commentService.createComment("Initial system architecture design phase started",
 			archDesign, admin);
@@ -387,21 +671,19 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Creates team member Alice Davis.
 	 */
 	private void createTeamMemberAlice() {
-		LOGGER.info("createTeamMemberAlice called - creating Ayşe Demir from Günebakan village");
+		LOGGER.info(
+			"createTeamMemberAlice called - creating Ayşe Demir from Günebakan village");
 		final CUser analyst = userService.createLoginUser("ademir", STANDARD_PASSWORD,
 			"Ayşe", "ayse.demir@ofsaglik.com.tr", "USER");
-
 		// Set user profile using auxiliary method
 		final byte[] profilePictureBytes = "profile-picture".getBytes();
-		userService.setUserProfile(analyst, "Demir", "+90-462-751-1005", profilePictureBytes);
-
+		userService.setUserProfile(analyst, "Demir", "+90-462-751-1005",
+			profilePictureBytes);
 		// Set user role using auxiliary method
 		userService.setUserRole(analyst, CUserRole.TEAM_MEMBER, "USER");
-
 		// Set company association using auxiliary method
 		final CCompany company = findCompanyByName("Of Sağlık Teknolojileri");
 		userService.setCompanyAssociation(analyst, company);
-
 		LOGGER.info("Team member Ayşe Demir created successfully");
 	}
 
@@ -409,21 +691,19 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Creates team member Bob Wilson.
 	 */
 	private void createTeamMemberBob() {
-		LOGGER.info("createTeamMemberBob called - creating Burak Özkan from Çamburnu village");
+		LOGGER.info(
+			"createTeamMemberBob called - creating Burak Özkan from Çamburnu village");
 		final CUser developer = userService.createLoginUser("bozkan", STANDARD_PASSWORD,
 			"Burak", "burak.ozkan@ofdanismanlik.com.tr", "USER");
-
 		// Set user profile using auxiliary method
 		final byte[] profilePictureBytes = "profile-picture".getBytes();
-		userService.setUserProfile(developer, "Özkan", "+90-462-751-1004", profilePictureBytes);
-
+		userService.setUserProfile(developer, "Özkan", "+90-462-751-1004",
+			profilePictureBytes);
 		// Set user role using auxiliary method
 		userService.setUserRole(developer, CUserRole.TEAM_MEMBER, "USER");
-
 		// Set company association using auxiliary method
 		final CCompany company = findCompanyByName("Of Stratejik Danışmanlık");
 		userService.setCompanyAssociation(developer, company);
-
 		LOGGER.info("Team member Burak Özkan created successfully");
 	}
 
@@ -431,21 +711,19 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Creates team member Mary Johnson.
 	 */
 	private void createTeamMemberMary() {
-		LOGGER.info("createTeamMemberMary called - creating Merve Şahin from Ballıköy village");
-		final CUser teamMember = userService.createLoginUser("msahin",
-			STANDARD_PASSWORD, "Merve", "merve.sahin@ofendüstri.com.tr", "USER");
-
+		LOGGER.info(
+			"createTeamMemberMary called - creating Merve Şahin from Ballıköy village");
+		final CUser teamMember = userService.createLoginUser("msahin", STANDARD_PASSWORD,
+			"Merve", "merve.sahin@ofendüstri.com.tr", "USER");
 		// Set user profile using auxiliary method
 		final byte[] profilePictureBytes = "profile-picture".getBytes();
-		userService.setUserProfile(teamMember, "Şahin", "+90-462-751-1003", profilePictureBytes);
-
+		userService.setUserProfile(teamMember, "Şahin", "+90-462-751-1003",
+			profilePictureBytes);
 		// Set user role using auxiliary method
 		userService.setUserRole(teamMember, CUserRole.TEAM_MEMBER, "USER");
-
 		// Set company association using auxiliary method
 		final CCompany company = findCompanyByName("Of Endüstri Dinamikleri");
 		userService.setCompanyAssociation(teamMember, company);
-
 		LOGGER.info("Team member Merve Şahin created successfully");
 	}
 
@@ -490,33 +768,29 @@ public class CSampleDataInitializer implements ApplicationRunner {
 				"Project 'Customer Experience Enhancement' not found, skipping documentation activity");
 			return;
 		}
-
 		// Create the activity using new auxiliary methods
-		final CActivity techDoc = new CActivity("Technical Documentation Update", project);
-
+		final CActivity techDoc =
+			new CActivity("Technical Documentation Update", project);
 		// Find and set the activity type
-		final CActivityType documentationType = findActivityTypeByNameAndProject("Documentation", project);
+		final CActivityType documentationType =
+			findActivityTypeByNameAndProject("Documentation", project);
+
 		if (documentationType == null) {
 			LOGGER.warn("Documentation activity type not found for project, using null");
 		}
-
 		// Set activity type and description using auxiliary method
 		activityService.setActivityType(techDoc, documentationType,
 			"Update and enhance technical documentation for customer experience features");
-
 		// Set assigned users using auxiliary method
 		final CUser analyst = findUserByLogin("ademir");
 		final CUser manager = findUserByLogin("mkaradeniz");
 		activityService.setAssignedUsers(techDoc, analyst, manager);
-
 		// Set time tracking using auxiliary method (completed activity)
-		activityService.setTimeTracking(techDoc,
-			new BigDecimal("16.00"), new BigDecimal("16.00"), new BigDecimal("0.00"));
-
+		activityService.setTimeTracking(techDoc, new BigDecimal("16.00"),
+			new BigDecimal("16.00"), new BigDecimal("0.00"));
 		// Set date information using auxiliary method (completed activity)
-		activityService.setDateInfo(techDoc,
-			LocalDate.now().minusDays(5), LocalDate.now().minusDays(1), LocalDate.now().minusDays(1));
-
+		activityService.setDateInfo(techDoc, LocalDate.now().minusDays(5),
+			LocalDate.now().minusDays(1), LocalDate.now().minusDays(1));
 		// Create comments
 		commentService.createComment(
 			"Initial technical documentation review and updates started", techDoc,
@@ -542,34 +816,49 @@ public class CSampleDataInitializer implements ApplicationRunner {
 				"Project 'Product Development Phase 2' not found, skipping UI testing activity");
 			return;
 		}
-
 		// Create the activity using new auxiliary methods
 		final CActivity uiTesting = new CActivity("User Interface Testing", project);
-
 		// Find and set the activity type
-		final CActivityType testingType = findActivityTypeByNameAndProject("Testing", project);
+		final CActivityType testingType =
+			findActivityTypeByNameAndProject("Testing", project);
+
 		if (testingType == null) {
 			LOGGER.warn("Testing activity type not found for project, using null");
 		}
-
 		// Set activity type and description using auxiliary method
 		activityService.setActivityType(uiTesting, testingType,
 			"Comprehensive testing of user interface components and workflows");
-
 		// Set assigned users using auxiliary method
 		final CUser teamMember1 = findUserByLogin("msahin");
 		final CUser manager = findUserByLogin("mkaradeniz");
 		activityService.setAssignedUsers(uiTesting, teamMember1, manager);
-
 		// Set time tracking using auxiliary method
-		activityService.setTimeTracking(uiTesting,
-			new BigDecimal("24.00"), new BigDecimal("20.00"), new BigDecimal("4.00"));
-
+		activityService.setTimeTracking(uiTesting, new BigDecimal("24.00"),
+			new BigDecimal("20.00"), new BigDecimal("4.00"));
 		// Set date information using auxiliary method
-		activityService.setDateInfo(uiTesting,
-			LocalDate.now().minusDays(7), LocalDate.now().plusDays(3), null);
-
+		activityService.setDateInfo(uiTesting, LocalDate.now().minusDays(7),
+			LocalDate.now().plusDays(3), null);
 		LOGGER.info("UI testing activity created successfully");
+	}
+
+	private CActivityType findActivityTypeByNameAndProject(final String name,
+		final CProject project) {
+		LOGGER.debug(
+			"findActivityTypeByNameAndProject called with name: {} and project: {}", name,
+			project.getName());
+
+		try {
+			// Get all activity types for the project and find by name
+			final var activityTypes = activityTypeService
+				.list(org.springframework.data.domain.Pageable.unpaged());
+			return activityTypes.stream().filter(
+				type -> name.equals(type.getName()) && project.equals(type.getProject()))
+				.findFirst().orElse(null);
+		} catch (final Exception e) {
+			LOGGER.error("Error finding activity type by name: {} for project: {}", name,
+				project.getName(), e);
+			return null;
+		}
 	}
 
 	/**
@@ -600,21 +889,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			return projectService.findByName(name).orElse(null);
 		} catch (final Exception e) {
 			LOGGER.warn("Could not find project with name: {}", name);
-			return null;
-		}
-	}
-
-	private CActivityType findActivityTypeByNameAndProject(final String name, final CProject project) {
-		LOGGER.debug("findActivityTypeByNameAndProject called with name: {} and project: {}", name, project.getName());
-		try {
-			// Get all activity types for the project and find by name
-			var activityTypes = activityTypeService.list(org.springframework.data.domain.Pageable.unpaged());
-			return activityTypes.stream()
-				.filter(type -> name.equals(type.getName()) && project.equals(type.getProject()))
-				.findFirst()
-				.orElse(null);
-		} catch (final Exception e) {
-			LOGGER.error("Error finding activity type by name: {} for project: {}", name, project.getName(), e);
 			return null;
 		}
 	}
@@ -653,10 +927,36 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			throw new RuntimeException("Failed to initialize activities", e);
 		}
 	}
+	// Additional meeting creation methods
 
 	/**
-	 * Initializes activity types for categorizing different kinds of work.
-	 * Creates types for all projects to ensure project-specific categorization.
+	 * Initialize activity status entities with comprehensive sample data.
+	 */
+	private void initializeActivityStatuses() {
+		LOGGER.info(
+			"initializeActivityStatuses called - creating activity status classifications");
+
+		try {
+			createActivityStatus("Not Started", "Activity has not been started yet",
+				"#95a5a6", false, 1);
+			createActivityStatus("In Progress", "Activity is currently in progress",
+				"#3498db", false, 2);
+			createActivityStatus("On Hold", "Activity is temporarily on hold", "#f39c12",
+				false, 3);
+			createActivityStatus("Completed", "Activity has been completed", "#27ae60",
+				true, 4);
+			createActivityStatus("Cancelled", "Activity has been cancelled", "#e74c3c",
+				true, 5);
+			LOGGER.info("Activity statuses initialized successfully");
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing activity statuses", e);
+			throw new RuntimeException("Failed to initialize activity statuses", e);
+		}
+	}
+
+	/**
+	 * Initializes activity types for categorizing different kinds of work. Creates types
+	 * for all projects to ensure project-specific categorization.
 	 */
 	private void initializeActivityTypes() {
 		LOGGER.info(
@@ -665,35 +965,36 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		try {
 			// Get all projects
 			final String[] projectNames = {
-				"Digital Transformation Initiative",
-				"Product Development Phase 2", 
-				"Infrastructure Modernization",
-				"Customer Experience Enhancement"
-			};
-
+				"Digital Transformation Initiative", "Product Development Phase 2",
+				"Infrastructure Modernization", "Customer Experience Enhancement" };
 			// Define activity types to create for each project
 			final String[][] activityTypes = {
-				{"Development", "Software development and coding tasks"},
-				{"Testing", "Quality assurance and testing activities"},
-				{"Design", "UI/UX design and system architecture"},
-				{"Documentation", "Technical writing and documentation"},
-				{"Research", "Research and analysis activities"}
-			};
+				{
+					"Development", "Software development and coding tasks" },
+				{
+					"Testing", "Quality assurance and testing activities" },
+				{
+					"Design", "UI/UX design and system architecture" },
+				{
+					"Documentation", "Technical writing and documentation" },
+				{
+					"Research", "Research and analysis activities" } };
 
 			// Create activity types for each project
 			for (final String projectName : projectNames) {
 				final CProject project = findProjectByName(projectName);
+
 				if (project == null) {
-					LOGGER.warn("Project '{}' not found, skipping activity type creation", projectName);
+					LOGGER.warn("Project '{}' not found, skipping activity type creation",
+						projectName);
 					continue;
 				}
-
 				LOGGER.info("Creating activity types for project: {}", projectName);
+
 				for (final String[] typeData : activityTypes) {
 					activityTypeService.createEntity(typeData[0], typeData[1], project);
 				}
 			}
-			
 			LOGGER.info("Successfully created activity types for all projects");
 		} catch (final Exception e) {
 			LOGGER.error("Error creating activity types", e);
@@ -720,6 +1021,81 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	}
 
 	/**
+	 * Initialize decision status entities with comprehensive sample data.
+	 */
+	private void initializeDecisionStatuses() {
+		LOGGER.info(
+			"initializeDecisionStatuses called - creating decision status classifications");
+
+		try {
+			createDecisionStatus("Draft", "Decision is in draft state", "#95a5a6", false,
+				1);
+			createDecisionStatus("Under Review", "Decision is being reviewed", "#f39c12",
+				false, 2);
+			createDecisionStatus("Approved", "Decision has been approved", "#27ae60",
+				false, 3);
+			createDecisionStatus("Implemented", "Decision has been implemented",
+				"#2ecc71", true, 4);
+			createDecisionStatus("Rejected", "Decision has been rejected", "#e74c3c",
+				true, 5);
+			LOGGER.info("Decision statuses initialized successfully");
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing decision statuses", e);
+			throw new RuntimeException("Failed to initialize decision statuses", e);
+		}
+	}
+	// Risk creation methods
+
+	/**
+	 * Initializes decision types for categorizing different kinds of decisions. Creates
+	 * types for all projects to ensure project-specific categorization.
+	 */
+	private void initializeDecisionTypes() {
+		LOGGER.info(
+			"initializeDecisionTypes called - creating decision type classifications for all projects");
+
+		try {
+			// Get all projects
+			final String[] projectNames = {
+				"Digital Transformation Initiative", "Product Development Phase 2",
+				"Infrastructure Modernization", "Customer Experience Enhancement" };
+			// Define decision types to create for each project
+			final String[][] decisionTypes = {
+				{
+					"Strategic", "High-level strategic decisions" },
+				{
+					"Technical", "Technical architecture decisions" },
+				{
+					"Financial", "Budget and cost-related decisions" },
+				{
+					"Operational", "Day-to-day operational decisions" },
+				{
+					"Resource", "Resource allocation decisions" } };
+
+			// Create decision types for each project
+			for (final String projectName : projectNames) {
+				final CProject project = findProjectByName(projectName);
+
+				if (project == null) {
+					LOGGER.warn("Project '{}' not found, skipping decision type creation",
+						projectName);
+					continue;
+				}
+				LOGGER.info("Creating decision types for project: {}", projectName);
+
+				for (final String[] typeData : decisionTypes) {
+					decisionTypeService.createDecisionType(typeData[0], typeData[1], true,
+						project);
+				}
+			}
+			LOGGER.info("Successfully created decision types for all projects");
+		} catch (final Exception e) {
+			LOGGER.error("Error creating decision types", e);
+			throw new RuntimeException("Failed to initialize decision types", e);
+		}
+	}
+
+	/**
 	 * Initializes sample meetings with participants and content.
 	 */
 	private void initializeMeetings() {
@@ -735,6 +1111,171 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		} catch (final Exception e) {
 			LOGGER.error("Error creating sample meetings", e);
 			throw new RuntimeException("Failed to initialize meetings", e);
+		}
+	}
+
+	/**
+	 * Initialize meeting status entities with comprehensive sample data.
+	 */
+	private void initializeMeetingStatuses() {
+		LOGGER.info(
+			"initializeMeetingStatuses called - creating meeting status classifications");
+
+		try {
+			createMeetingStatus("Scheduled", "Meeting is scheduled but not yet started",
+				"#3498db", false, 1);
+			createMeetingStatus("In Progress", "Meeting is currently in progress",
+				"#f39c12", false, 2);
+			createMeetingStatus("Completed", "Meeting has been completed successfully",
+				"#27ae60", true, 3);
+			createMeetingStatus("Cancelled", "Meeting has been cancelled", "#e74c3c",
+				true, 4);
+			createMeetingStatus("Postponed", "Meeting has been postponed to a later date",
+				"#9b59b6", false, 5);
+			LOGGER.info("Meeting statuses initialized successfully");
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing meeting statuses", e);
+			throw new RuntimeException("Failed to initialize meeting statuses", e);
+		}
+	}
+
+	/**
+	 * Initializes meeting types for categorizing different kinds of meetings. Creates
+	 * types for all projects to ensure project-specific categorization.
+	 */
+	private void initializeMeetingTypes() {
+		LOGGER.info(
+			"initializeMeetingTypes called - creating meeting type classifications for all projects");
+
+		try {
+			// Get all projects
+			final String[] projectNames = {
+				"Digital Transformation Initiative", "Product Development Phase 2",
+				"Infrastructure Modernization", "Customer Experience Enhancement" };
+			// Define meeting types to create for each project
+			final String[][] meetingTypes = {
+				{
+					"Standup", "Daily standup meeting" },
+				{
+					"Planning", "Sprint or project planning meeting" },
+				{
+					"Review", "Review and feedback meeting" },
+				{
+					"Retrospective", "Team retrospective meeting" },
+				{
+					"One-on-One", "Individual meeting with team member" } };
+
+			// Create meeting types for each project
+			for (final String projectName : projectNames) {
+				final CProject project = findProjectByName(projectName);
+
+				if (project == null) {
+					LOGGER.warn("Project '{}' not found, skipping meeting type creation",
+						projectName);
+					continue;
+				}
+				LOGGER.info("Creating meeting types for project: {}", projectName);
+
+				for (final String[] typeData : meetingTypes) {
+					meetingTypeService.createEntity(typeData[0], typeData[1], project);
+				}
+			}
+			LOGGER.info("Successfully created meeting types for all projects");
+		} catch (final Exception e) {
+			LOGGER.error("Error creating meeting types", e);
+			throw new RuntimeException("Failed to initialize meeting types", e);
+		}
+	}
+
+	/**
+	 * Initialize order status entities with comprehensive sample data.
+	 */
+	private void initializeOrderStatuses() {
+		LOGGER.info(
+			"initializeOrderStatuses called - creating order status classifications");
+
+		try {
+			createOrderStatus("Draft", "Order is in draft state", "#95a5a6", false, 1);
+			createOrderStatus("Submitted", "Order has been submitted", "#3498db", false,
+				2);
+			createOrderStatus("Approved", "Order has been approved", "#27ae60", false, 3);
+			createOrderStatus("Fulfilled", "Order has been fulfilled", "#2ecc71", true,
+				4);
+			createOrderStatus("Rejected", "Order has been rejected", "#e74c3c", true, 5);
+			LOGGER.info("Order statuses initialized successfully");
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing order statuses", e);
+			throw new RuntimeException("Failed to initialize order statuses", e);
+		}
+	}
+
+	/**
+	 * Initializes order types for categorizing different kinds of orders. Creates types
+	 * for all projects to ensure project-specific categorization.
+	 */
+	private void initializeOrderTypes() {
+		LOGGER.info(
+			"initializeOrderTypes called - creating order type classifications for all projects");
+
+		try {
+			// Get all projects
+			final String[] projectNames = {
+				"Digital Transformation Initiative", "Product Development Phase 2",
+				"Infrastructure Modernization", "Customer Experience Enhancement" };
+			// Define order types to create for each project
+			final String[][] orderTypes = {
+				{
+					"Service Order", "Service-related orders" },
+				{
+					"Purchase Order", "Purchase and procurement orders" },
+				{
+					"Maintenance Order", "Maintenance and support orders" },
+				{
+					"Change Order", "Change request orders" },
+				{
+					"Support Order", "Customer support orders" } };
+
+			// Create order types for each project
+			for (final String projectName : projectNames) {
+				final CProject project = findProjectByName(projectName);
+
+				if (project == null) {
+					LOGGER.warn("Project '{}' not found, skipping order type creation",
+						projectName);
+					continue;
+				}
+				LOGGER.info("Creating order types for project: {}", projectName);
+
+				for (final String[] typeData : orderTypes) {
+					orderTypeService.createEntity(typeData[0], typeData[1], project);
+				}
+			}
+			LOGGER.info("Successfully created order types for all projects");
+		} catch (final Exception e) {
+			LOGGER.error("Error creating order types", e);
+			throw new RuntimeException("Failed to initialize order types", e);
+		}
+	}
+
+	/**
+	 * Initializes sample projects with different scopes and characteristics.
+	 */
+	private void initializeProjects() {
+		LOGGER.info("initializeProjects called - creating 4 sample projects");
+
+		try {
+			// Create projects with comprehensive descriptions
+			createProjectWithDescription("Digital Transformation Initiative",
+				"A comprehensive digital transformation project aimed at modernizing business processes and improving operational efficiency across all departments.");
+			createProjectWithDescription("Product Development Phase 2",
+				"Second phase of new product development focusing on advanced features, user experience improvements, and market expansion strategies.");
+			createProjectWithDescription("Infrastructure Modernization",
+				"Complete infrastructure overhaul including server upgrades, network optimization, security enhancements, and cloud migration initiatives.");
+			createProjectWithDescription("Customer Experience Enhancement",
+				"Strategic initiative to improve customer journey, implement feedback systems, and enhance service quality across all touchpoints.");
+		} catch (final Exception e) {
+			LOGGER.error("Error creating sample projects", e);
+			throw new RuntimeException("Failed to initialize projects", e);
 		}
 	}
 
@@ -758,36 +1299,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	}
 
 	/**
-	 * Initializes sample projects with different scopes and characteristics.
-	 */
-	private void initializeProjects() {
-		LOGGER.info("initializeProjects called - creating 4 sample projects");
-
-		try {
-			// Create projects with comprehensive descriptions
-			createProjectWithDescription("Digital Transformation Initiative", 
-				"A comprehensive digital transformation project aimed at modernizing business processes and improving operational efficiency across all departments.");
-			createProjectWithDescription("Product Development Phase 2", 
-				"Second phase of new product development focusing on advanced features, user experience improvements, and market expansion strategies.");
-			createProjectWithDescription("Infrastructure Modernization", 
-				"Complete infrastructure overhaul including server upgrades, network optimization, security enhancements, and cloud migration initiatives.");
-			createProjectWithDescription("Customer Experience Enhancement", 
-				"Strategic initiative to improve customer journey, implement feedback systems, and enhance service quality across all touchpoints.");
-		} catch (final Exception e) {
-			LOGGER.error("Error creating sample projects", e);
-			throw new RuntimeException("Failed to initialize projects", e);
-		}
-	}
-
-	private void createProjectWithDescription(String name, String description) {
-		CProject project = new CProject();
-		project.setName(name);
-		project.setDescription(description);
-		projectService.save(project);
-		LOGGER.debug("Created project: {} with description", name);
-	}
-
-	/**
 	 * Initializes comprehensive user data with different roles and companies.
 	 */
 	private void initializeUsers() {
@@ -808,181 +1319,44 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Initializes user types for role-based access control.
 	 */
 	private void initializeUserTypes() {
-		LOGGER.info("initializeUserTypes called - creating user type classifications for all projects");
+		LOGGER.info(
+			"initializeUserTypes called - creating user type classifications for all projects");
 
 		try {
 			// Get all projects
 			final String[] projectNames = {
-				"Digital Transformation Initiative",
-				"Product Development Phase 2", 
-				"Infrastructure Modernization",
-				"Customer Experience Enhancement"
-			};
-
+				"Digital Transformation Initiative", "Product Development Phase 2",
+				"Infrastructure Modernization", "Customer Experience Enhancement" };
 			// Define user types to create for each project
 			final String[][] userTypes = {
-				{"Employee", "Regular employee"},
-				{"Manager", "Team manager or lead"},
-				{"Executive", "Executive or senior management"},
-				{"Contractor", "External contractor or consultant"}
-			};
+				{
+					"Employee", "Regular employee" },
+				{
+					"Manager", "Team manager or lead" },
+				{
+					"Executive", "Executive or senior management" },
+				{
+					"Contractor", "External contractor or consultant" } };
 
 			// Create user types for each project
 			for (final String projectName : projectNames) {
 				final CProject project = findProjectByName(projectName);
+
 				if (project == null) {
-					LOGGER.warn("Project '{}' not found, skipping user type creation", projectName);
+					LOGGER.warn("Project '{}' not found, skipping user type creation",
+						projectName);
 					continue;
 				}
-
 				LOGGER.info("Creating user types for project: {}", projectName);
+
 				for (final String[] typeData : userTypes) {
 					userTypeService.createEntity(typeData[0], typeData[1], project);
 				}
 			}
-			
 			LOGGER.info("Successfully created user types for all projects");
 		} catch (final Exception e) {
 			LOGGER.error("Error creating user types", e);
 			throw new RuntimeException("Failed to initialize user types", e);
-		}
-	}
-
-	/**
-	 * Initializes meeting types for categorizing different kinds of meetings.
-	 * Creates types for all projects to ensure project-specific categorization.
-	 */
-	private void initializeMeetingTypes() {
-		LOGGER.info("initializeMeetingTypes called - creating meeting type classifications for all projects");
-
-		try {
-			// Get all projects
-			final String[] projectNames = {
-				"Digital Transformation Initiative",
-				"Product Development Phase 2", 
-				"Infrastructure Modernization",
-				"Customer Experience Enhancement"
-			};
-
-			// Define meeting types to create for each project
-			final String[][] meetingTypes = {
-				{"Standup", "Daily standup meeting"},
-				{"Planning", "Sprint or project planning meeting"},
-				{"Review", "Review and feedback meeting"},
-				{"Retrospective", "Team retrospective meeting"},
-				{"One-on-One", "Individual meeting with team member"}
-			};
-
-			// Create meeting types for each project
-			for (final String projectName : projectNames) {
-				final CProject project = findProjectByName(projectName);
-				if (project == null) {
-					LOGGER.warn("Project '{}' not found, skipping meeting type creation", projectName);
-					continue;
-				}
-
-				LOGGER.info("Creating meeting types for project: {}", projectName);
-				for (final String[] typeData : meetingTypes) {
-					meetingTypeService.createEntity(typeData[0], typeData[1], project);
-				}
-			}
-			
-			LOGGER.info("Successfully created meeting types for all projects");
-		} catch (final Exception e) {
-			LOGGER.error("Error creating meeting types", e);
-			throw new RuntimeException("Failed to initialize meeting types", e);
-		}
-	}
-
-	/**
-	 * Initializes decision types for categorizing different kinds of decisions.
-	 * Creates types for all projects to ensure project-specific categorization.
-	 */
-	private void initializeDecisionTypes() {
-		LOGGER.info("initializeDecisionTypes called - creating decision type classifications for all projects");
-
-		try {
-			// Get all projects
-			final String[] projectNames = {
-				"Digital Transformation Initiative",
-				"Product Development Phase 2", 
-				"Infrastructure Modernization",
-				"Customer Experience Enhancement"
-			};
-
-			// Define decision types to create for each project
-			final String[][] decisionTypes = {
-				{"Strategic", "High-level strategic decisions"},
-				{"Technical", "Technical architecture decisions"},
-				{"Financial", "Budget and cost-related decisions"},
-				{"Operational", "Day-to-day operational decisions"},
-				{"Resource", "Resource allocation decisions"}
-			};
-
-			// Create decision types for each project
-			for (final String projectName : projectNames) {
-				final CProject project = findProjectByName(projectName);
-				if (project == null) {
-					LOGGER.warn("Project '{}' not found, skipping decision type creation", projectName);
-					continue;
-				}
-
-				LOGGER.info("Creating decision types for project: {}", projectName);
-				for (final String[] typeData : decisionTypes) {
-					decisionTypeService.createDecisionType(typeData[0], typeData[1], true, project);
-				}
-			}
-			
-			LOGGER.info("Successfully created decision types for all projects");
-		} catch (final Exception e) {
-			LOGGER.error("Error creating decision types", e);
-			throw new RuntimeException("Failed to initialize decision types", e);
-		}
-	}
-
-	/**
-	 * Initializes order types for categorizing different kinds of orders.
-	 * Creates types for all projects to ensure project-specific categorization.
-	 */
-	private void initializeOrderTypes() {
-		LOGGER.info("initializeOrderTypes called - creating order type classifications for all projects");
-
-		try {
-			// Get all projects
-			final String[] projectNames = {
-				"Digital Transformation Initiative",
-				"Product Development Phase 2", 
-				"Infrastructure Modernization",
-				"Customer Experience Enhancement"
-			};
-
-			// Define order types to create for each project
-			final String[][] orderTypes = {
-				{"Service Order", "Service-related orders"},
-				{"Purchase Order", "Purchase and procurement orders"},
-				{"Maintenance Order", "Maintenance and support orders"},
-				{"Change Order", "Change request orders"},
-				{"Support Order", "Customer support orders"}
-			};
-
-			// Create order types for each project
-			for (final String projectName : projectNames) {
-				final CProject project = findProjectByName(projectName);
-				if (project == null) {
-					LOGGER.warn("Project '{}' not found, skipping order type creation", projectName);
-					continue;
-				}
-
-				LOGGER.info("Creating order types for project: {}", projectName);
-				for (final String[] typeData : orderTypes) {
-					orderTypeService.createEntity(typeData[0], typeData[1], project);
-				}
-			}
-			
-			LOGGER.info("Successfully created order types for all projects");
-		} catch (final Exception e) {
-			LOGGER.error("Error creating order types", e);
-			throw new RuntimeException("Failed to initialize order types", e);
 		}
 	}
 
@@ -1003,7 +1377,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		try {
 			// Initialize data in proper dependency order
 			initializeCompanies();
-			initializeProjects(); // Projects must be created before project-aware entities
+			initializeProjects(); // Projects must be created before project-aware
+									// entities
 			initializeMeetingStatuses(); // Initialize status entities first
 			initializeDecisionStatuses();
 			initializeActivityStatuses();
@@ -1043,362 +1418,5 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			LOGGER.error("Error during sample data initialization", e);
 			throw e;
 		}
-	}
-
-	// Additional meeting creation methods
-
-	/**
-	 * Creates sample standup meeting.
-	 */
-	private void createSampleStandupMeeting() {
-		LOGGER.info("createSampleStandupMeeting called - creating daily standup meeting");
-		
-		final CProject project = findProjectByName("Digital Transformation Initiative");
-		if (project == null) {
-			LOGGER.warn("Project not found for standup meeting");
-			return;
-		}
-		
-		final CMeeting meeting = new CMeeting("Daily Standup - Sprint 3", project);
-		meeting.setDescription("Daily progress sync and impediment discussion");
-		meeting.setMeetingDate(LocalDateTime.now().plusDays(1).withHour(9).withMinute(0));
-		meeting.setEndDate(LocalDateTime.now().plusDays(1).withHour(9).withMinute(30));
-		meeting.setLocation("Conference Room A");
-		
-		// Add participants
-		final Set<CUser> participants = new HashSet<>();
-		final CUser manager = findUserByLogin("mkaradeniz");
-		final CUser dev1 = findUserByLogin("ademir");
-		final CUser dev2 = findUserByLogin("msahin");
-		if (manager != null) participants.add(manager);
-		if (dev1 != null) participants.add(dev1);
-		if (dev2 != null) participants.add(dev2);
-		meeting.setParticipants(participants);
-		
-		meetingService.save(meeting);
-		LOGGER.info("Sample standup meeting created successfully");
-	}
-
-	/**
-	 * Creates sample planning meeting.
-	 */
-	private void createSamplePlanningMeeting() {
-		LOGGER.info("createSamplePlanningMeeting called - creating sprint planning meeting");
-		
-		final CProject project = findProjectByName("Product Development Phase 2");
-		if (project == null) {
-			LOGGER.warn("Project not found for planning meeting");
-			return;
-		}
-		
-		final CMeeting meeting = new CMeeting("Sprint Planning - Q1 2024", project);
-		meeting.setDescription("Planning for next sprint with story estimation and task assignment");
-		meeting.setMeetingDate(LocalDateTime.now().plusDays(3).withHour(14).withMinute(0));
-		meeting.setEndDate(LocalDateTime.now().plusDays(3).withHour(16).withMinute(0));
-		meeting.setLocation("Meeting Room B");
-		
-		// Add participants
-		final Set<CUser> participants = new HashSet<>();
-		final CUser manager = findUserByLogin("mkaradeniz");
-		final CUser analyst = findUserByLogin("ademir");
-		if (manager != null) participants.add(manager);
-		if (analyst != null) participants.add(analyst);
-		meeting.setParticipants(participants);
-		
-		meetingService.save(meeting);
-		LOGGER.info("Sample planning meeting created successfully");
-	}
-
-	/**
-	 * Creates sample review meeting.
-	 */
-	private void createSampleReviewMeeting() {
-		LOGGER.info("createSampleReviewMeeting called - creating code review meeting");
-		
-		final CProject project = findProjectByName("Infrastructure Modernization");
-		if (project == null) {
-			LOGGER.warn("Project not found for review meeting");
-			return;
-		}
-		
-		final CMeeting meeting = new CMeeting("Code Review Session", project);
-		meeting.setDescription("Review of architectural changes and code quality improvements");
-		meeting.setMeetingDate(LocalDateTime.now().minusDays(2).withHour(10).withMinute(0));
-		meeting.setEndDate(LocalDateTime.now().minusDays(2).withHour(11).withMinute(30));
-		meeting.setLocation("Virtual - Zoom");
-		
-		// Add participants
-		final Set<CUser> participants = new HashSet<>();
-		final CUser manager = findUserByLogin("mkaradeniz");
-		final CUser dev = findUserByLogin("msahin");
-		if (manager != null) participants.add(manager);
-		if (dev != null) participants.add(dev);
-		meeting.setParticipants(participants);
-		
-		meetingService.save(meeting);
-		LOGGER.info("Sample review meeting created successfully");
-	}
-
-	/**
-	 * Creates sample retrospective meeting.
-	 */
-	private void createSampleRetrospectiveMeeting() {
-		LOGGER.info("createSampleRetrospectiveMeeting called - creating sprint retrospective");
-		
-		final CProject project = findProjectByName("Customer Experience Enhancement");
-		if (project == null) {
-			LOGGER.warn("Project not found for retrospective meeting");
-			return;
-		}
-		
-		final CMeeting meeting = new CMeeting("Sprint Retrospective", project);
-		meeting.setDescription("Team reflection on what went well, what could be improved, and action items");
-		meeting.setMeetingDate(LocalDateTime.now().minusDays(7).withHour(15).withMinute(0));
-		meeting.setEndDate(LocalDateTime.now().minusDays(7).withHour(16).withMinute(0));
-		meeting.setLocation("Conference Room C");
-		
-		// Add participants and attendees
-		final Set<CUser> participants = new HashSet<>();
-		final Set<CUser> attendees = new HashSet<>();
-		final CUser manager = findUserByLogin("mkaradeniz");
-		final CUser dev1 = findUserByLogin("ademir");
-		final CUser dev2 = findUserByLogin("msahin");
-		
-		if (manager != null) {
-			participants.add(manager);
-			attendees.add(manager);
-		}
-		if (dev1 != null) {
-			participants.add(dev1);
-			attendees.add(dev1);
-		}
-		if (dev2 != null) {
-			participants.add(dev2);
-		}
-		
-		meeting.setParticipants(participants);
-		meeting.setAttendees(attendees);
-		
-		meetingService.save(meeting);
-		LOGGER.info("Sample retrospective meeting created successfully");
-	}
-
-	// Risk creation methods
-
-	/**
-	 * Creates high priority technical risk.
-	 */
-	private void createHighPriorityTechnicalRisk() {
-		LOGGER.info("createHighPriorityTechnicalRisk called - creating technical risk");
-		
-		final CProject project = findProjectByName("Digital Transformation Initiative");
-		if (project == null) {
-			LOGGER.warn("Project not found for technical risk");
-			return;
-		}
-		
-		final CRisk risk = new CRisk("Legacy System Integration Challenges", ERiskSeverity.HIGH, project);
-		risk.setDescription("Integration with legacy systems may cause compatibility issues and performance bottlenecks");
-		
-		riskService.save(risk);
-		LOGGER.info("High priority technical risk created successfully");
-	}
-
-	/**
-	 * Creates medium priority budget risk.
-	 */
-	private void createMediumPriorityBudgetRisk() {
-		LOGGER.info("createMediumPriorityBudgetRisk called - creating budget risk");
-		
-		final CProject project = findProjectByName("Product Development Phase 2");
-		if (project == null) {
-			LOGGER.warn("Project not found for budget risk");
-			return;
-		}
-		
-		final CRisk risk = new CRisk("Budget Overrun Due to Scope Creep", ERiskSeverity.MEDIUM, project);
-		risk.setDescription("Uncontrolled feature additions may cause budget to exceed allocated resources");
-		
-		riskService.save(risk);
-		LOGGER.info("Medium priority budget risk created successfully");
-	}
-
-	/**
-	 * Creates low priority resource risk.
-	 */
-	private void createLowPriorityResourceRisk() {
-		LOGGER.info("createLowPriorityResourceRisk called - creating resource risk");
-		
-		final CProject project = findProjectByName("Infrastructure Modernization");
-		if (project == null) {
-			LOGGER.warn("Project not found for resource risk");
-			return;
-		}
-		
-		final CRisk risk = new CRisk("Team Member Vacation Scheduling Conflicts", ERiskSeverity.LOW, project);
-		risk.setDescription("Overlapping vacation schedules may temporarily reduce team capacity");
-		
-		riskService.save(risk);
-		LOGGER.info("Low priority resource risk created successfully");
-	}
-
-	/**
-	 * Creates critical security risk.
-	 */
-	private void createCriticalSecurityRisk() {
-		LOGGER.info("createCriticalSecurityRisk called - creating security risk");
-		
-		final CProject project = findProjectByName("Customer Experience Enhancement");
-		if (project == null) {
-			LOGGER.warn("Project not found for security risk");
-			return;
-		}
-		
-		final CRisk risk = new CRisk("Data Privacy Compliance Gaps", ERiskSeverity.CRITICAL, project);
-		risk.setDescription("Current implementation may not fully comply with GDPR and data protection regulations");
-		
-		riskService.save(risk);
-		LOGGER.info("Critical security risk created successfully");
-	}
-
-	/**
-	 * Creates low priority schedule risk.
-	 */
-	private void createLowPriorityScheduleRisk() {
-		LOGGER.info("createLowPriorityScheduleRisk called - creating schedule risk");
-		
-		final CProject project = findProjectByName("Digital Transformation Initiative");
-		if (project == null) {
-			LOGGER.warn("Project not found for schedule risk");
-			return;
-		}
-		
-		final CRisk risk = new CRisk("Minor Delays in Third-Party Integrations", ERiskSeverity.LOW, project);
-		risk.setDescription("External vendor may experience minor delays in API delivery");
-		
-		riskService.save(risk);
-		LOGGER.info("Low priority schedule risk created successfully");
-	}
-
-	/**
-	 * Initialize meeting status entities with comprehensive sample data.
-	 */
-	private void initializeMeetingStatuses() {
-		LOGGER.info("initializeMeetingStatuses called - creating meeting status classifications");
-		
-		try {
-			createMeetingStatus("Scheduled", "Meeting is scheduled but not yet started", "#3498db", false, 1);
-			createMeetingStatus("In Progress", "Meeting is currently in progress", "#f39c12", false, 2);
-			createMeetingStatus("Completed", "Meeting has been completed successfully", "#27ae60", true, 3);
-			createMeetingStatus("Cancelled", "Meeting has been cancelled", "#e74c3c", true, 4);
-			createMeetingStatus("Postponed", "Meeting has been postponed to a later date", "#9b59b6", false, 5);
-			
-			LOGGER.info("Meeting statuses initialized successfully");
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing meeting statuses", e);
-			throw new RuntimeException("Failed to initialize meeting statuses", e);
-		}
-	}
-
-	private void createMeetingStatus(String name, String description, String color, boolean isFinal, int sortOrder) {
-		CMeetingStatus status = new CMeetingStatus();
-		status.setName(name);
-		status.setDescription(description);
-		status.setColor(color);
-		status.setFinal(isFinal);
-		status.setSortOrder(sortOrder);
-		meetingStatusService.save(status);
-		LOGGER.debug("Created meeting status: {}", name);
-	}
-
-	/**
-	 * Initialize decision status entities with comprehensive sample data.
-	 */
-	private void initializeDecisionStatuses() {
-		LOGGER.info("initializeDecisionStatuses called - creating decision status classifications");
-		
-		try {
-			createDecisionStatus("Draft", "Decision is in draft state", "#95a5a6", false, 1);
-			createDecisionStatus("Under Review", "Decision is being reviewed", "#f39c12", false, 2);
-			createDecisionStatus("Approved", "Decision has been approved", "#27ae60", false, 3);
-			createDecisionStatus("Implemented", "Decision has been implemented", "#2ecc71", true, 4);
-			createDecisionStatus("Rejected", "Decision has been rejected", "#e74c3c", true, 5);
-			
-			LOGGER.info("Decision statuses initialized successfully");
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing decision statuses", e);
-			throw new RuntimeException("Failed to initialize decision statuses", e);
-		}
-	}
-
-	private void createDecisionStatus(String name, String description, String color, boolean isFinal, int sortOrder) {
-		CDecisionStatus status = new CDecisionStatus();
-		status.setName(name);
-		status.setDescription(description);
-		status.setColor(color);
-		status.setFinal(isFinal);
-		status.setSortOrder(sortOrder);
-		decisionStatusService.save(status);
-		LOGGER.debug("Created decision status: {}", name);
-	}
-
-	/**
-	 * Initialize activity status entities with comprehensive sample data.
-	 */
-	private void initializeActivityStatuses() {
-		LOGGER.info("initializeActivityStatuses called - creating activity status classifications");
-		
-		try {
-			createActivityStatus("Not Started", "Activity has not been started yet", "#95a5a6", false, 1);
-			createActivityStatus("In Progress", "Activity is currently in progress", "#3498db", false, 2);
-			createActivityStatus("On Hold", "Activity is temporarily on hold", "#f39c12", false, 3);
-			createActivityStatus("Completed", "Activity has been completed", "#27ae60", true, 4);
-			createActivityStatus("Cancelled", "Activity has been cancelled", "#e74c3c", true, 5);
-			
-			LOGGER.info("Activity statuses initialized successfully");
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing activity statuses", e);
-			throw new RuntimeException("Failed to initialize activity statuses", e);
-		}
-	}
-
-	private void createActivityStatus(String name, String description, String color, boolean isFinal, int sortOrder) {
-		CActivityStatus status = new CActivityStatus();
-		status.setName(name);
-		status.setDescription(description);
-		status.setColor(color);
-		status.setFinal(isFinal);
-		status.setSortOrder(sortOrder);
-		activityStatusService.save(status);
-		LOGGER.debug("Created activity status: {}", name);
-	}
-
-	/**
-	 * Initialize order status entities with comprehensive sample data.
-	 */
-	private void initializeOrderStatuses() {
-		LOGGER.info("initializeOrderStatuses called - creating order status classifications");
-		
-		try {
-			createOrderStatus("Draft", "Order is in draft state", "#95a5a6", false, 1);
-			createOrderStatus("Submitted", "Order has been submitted", "#3498db", false, 2);
-			createOrderStatus("Approved", "Order has been approved", "#27ae60", false, 3);
-			createOrderStatus("Fulfilled", "Order has been fulfilled", "#2ecc71", true, 4);
-			createOrderStatus("Rejected", "Order has been rejected", "#e74c3c", true, 5);
-			
-			LOGGER.info("Order statuses initialized successfully");
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing order statuses", e);
-			throw new RuntimeException("Failed to initialize order statuses", e);
-		}
-	}
-
-	private void createOrderStatus(String name, String description, String color, boolean isFinal, int sortOrder) {
-		COrderStatus status = new COrderStatus();
-		status.setName(name);
-		status.setDescription(description);
-		// COrderStatus extends CEntityNamed, not CStatus, so it doesn't have color, isFinal, sortOrder
-		orderStatusService.save(status);
-		LOGGER.debug("Created order status: {}", name);
 	}
 }

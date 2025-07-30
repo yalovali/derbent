@@ -260,7 +260,7 @@ This project uses a sophisticated **@MetaData** annotation system for automatic 
     description = "User's first name",   // Tooltip/help text
     hidden = false,                      // Visibility control
     order = 1,                          // Display order in forms
-    maxLength = MAX_LENGTH_NAME,        // Field length constraints
+    maxLength = CEntityConstants.MAX_LENGTH_NAME,        // Field length constraints
     dataProviderBean = "CUserService"   // For ComboBox data source
 )
 private String name;
@@ -280,7 +280,7 @@ private CActivityType activityType;
 @MetaData(
     displayName = "User Name", required = true, readOnly = false,
     defaultValue = "", description = "User's first name", hidden = false,
-    order = 1, maxLength = MAX_LENGTH_NAME
+    order = 1, maxLength = CEntityConstants.MAX_LENGTH_NAME
 )
 private String name;
 ```

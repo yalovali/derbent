@@ -302,10 +302,12 @@ public class CActivity extends CEntityOfProject {
 		return actualHours != null ? actualHours : BigDecimal.ZERO;
 	}
 
+	@Override
 	public CUser getAssignedTo() { return assignedTo; }
 
 	public LocalDate getCompletionDate() { return completionDate; }
 
+	@Override
 	public CUser getCreatedBy() { return createdBy; }
 
 	public LocalDate getDueDate() { return dueDate; }
@@ -349,6 +351,38 @@ public class CActivity extends CEntityOfProject {
 
 		if (this.progressPercentage == null) {
 			this.progressPercentage = 0;
+		}
+
+		if (this.estimatedHours == null) {
+			this.estimatedHours = BigDecimal.ZERO;
+		}
+
+		if (this.estimatedCost == null) {
+			this.estimatedCost = BigDecimal.ZERO;
+		}
+
+		if (this.remainingHours == null) {
+			this.remainingHours = BigDecimal.ZERO;
+		}
+
+		if (this.hourlyRate == null) {
+			this.hourlyRate = BigDecimal.ZERO;
+		}
+
+		if (this.startDate == null) {
+			this.startDate = LocalDate.now();
+		}
+
+		if (this.dueDate == null) {
+			this.dueDate = LocalDate.now().plusDays(7); // Default to 1 week from today
+		}
+
+		if (this.completionDate == null) {
+			this.completionDate = null; // No completion date by default
+		}
+
+		if (this.activityType == null) {
+			this.activityType = new CActivityType(); // Default to a new activity type
 		}
 	}
 
@@ -415,6 +449,7 @@ public class CActivity extends CEntityOfProject {
 		updateLastModified();
 	}
 
+	@Override
 	public void setAssignedTo(final CUser assignedTo) {
 		this.assignedTo = assignedTo;
 		updateLastModified();
@@ -433,6 +468,7 @@ public class CActivity extends CEntityOfProject {
 		updateLastModified();
 	}
 
+	@Override
 	public void setCreatedBy(final CUser createdBy) { this.createdBy = createdBy; }
 
 	public void setDueDate(final LocalDate dueDate) {

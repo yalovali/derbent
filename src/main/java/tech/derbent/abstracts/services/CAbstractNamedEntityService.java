@@ -1,14 +1,11 @@
 package tech.derbent.abstracts.services;
 
 import java.time.Clock;
-import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import tech.derbent.abstracts.domains.CEntityNamed;
-import tech.derbent.projects.domain.CProject;
 
 /**
  * CAbstractNamedEntityService - Abstract service class for entities that extend
@@ -122,8 +119,6 @@ public abstract class CAbstractNamedEntityService<EntityClass extends CEntityNam
 			throw new RuntimeException("Failed to find entity by name", e);
 		}
 	}
-
-
 
 	/**
 	 * Validates if a name is unique (excluding the current entity being updated).

@@ -1,15 +1,12 @@
 package tech.derbent.abstracts.services;
 
-import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.query.Param;
 
 import tech.derbent.abstracts.domains.CEntityNamed;
-import tech.derbent.projects.domain.CProject;
 
 /**
  * CAbstractNamedRepository - Abstract repository interface for entities that extend
@@ -36,5 +33,4 @@ public interface CAbstractNamedRepository<EntityClass extends CEntityNamed>
 	 */
 	@Query ("SELECT e FROM #{#entityName} e WHERE LOWER(e.name) = LOWER(:name)")
 	Optional<EntityClass> findByNameIgnoreCase(@Param ("name") String name);
-
 }

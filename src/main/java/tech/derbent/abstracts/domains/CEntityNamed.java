@@ -15,22 +15,20 @@ public abstract class CEntityNamed extends CEntityDB {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityNamed.class);
 
-	protected static final int MAX_LENGTH_NAME = 100;
-
-	@Column (name = "name", nullable = false, length = MAX_LENGTH_NAME, unique = false)
-	@Size (max = MAX_LENGTH_NAME)
+	@Column (name = "name", nullable = false, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@MetaData (
 		displayName = "Name", required = true, readOnly = false, defaultValue = "",
-		description = "Name", hidden = false, order = 0, maxLength = MAX_LENGTH_NAME
+		description = "Name", hidden = false, order = 0, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String name;
 
 	@Column (name = "description", nullable = true, length = 2000)
-	@Size (max = 2000)
+	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@MetaData (
 		displayName = "Description", required = false, readOnly = false,
 		defaultValue = "", description = "Detailed description of the project",
-		hidden = false, order = 1, maxLength = 2000
+		hidden = false, order = 1, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
 	)
 	private String description;
 

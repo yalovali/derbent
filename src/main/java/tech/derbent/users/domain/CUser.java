@@ -15,6 +15,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.domains.CEntityConstants;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.companies.domain.CCompany;
 
@@ -27,49 +28,64 @@ public class CUser extends CEntityNamed {
 	public static final int MAX_LENGTH_NAME = 255; // Define maximum length for name
 													// fields
 
-	@Column (name = "name", nullable = false, length = MAX_LENGTH_NAME, unique = false)
-	@Size (max = MAX_LENGTH_NAME)
+	@Column (
+		name = "name", nullable = false, length = CEntityConstants.MAX_LENGTH_NAME,
+		unique = false
+	)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@MetaData (
 		displayName = "User Name", required = true, readOnly = false, defaultValue = "",
 		description = "User's first name", hidden = false, order = 1,
-		maxLength = MAX_LENGTH_NAME
+		maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String name;
 
-	@Column (name = "lastname", nullable = true, length = MAX_LENGTH_NAME, unique = false)
+	@Column (
+		name = "lastname", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME,
+		unique = false
+	)
 	@MetaData (
 		displayName = "Last Name", required = true, readOnly = false, defaultValue = "",
 		description = "User's last name", hidden = false, order = 2,
-		maxLength = MAX_LENGTH_NAME
+		maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
-	@Size (max = MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	private String lastname;
 
 	@MetaData (
 		displayName = "Login", required = true, readOnly = false, defaultValue = "",
 		description = "Login name for the system", hidden = false, order = 3,
-		maxLength = MAX_LENGTH_NAME
+		maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
-	@Column (name = "login", nullable = true, length = MAX_LENGTH_NAME, unique = true)
-	@Size (max = MAX_LENGTH_NAME)
+	@Column (
+		name = "login", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME,
+		unique = true
+	)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	private String login;
 
 	@MetaData (
 		displayName = "Email", required = true, readOnly = false, defaultValue = "",
 		description = "User's email address", hidden = false, order = 4,
-		maxLength = MAX_LENGTH_NAME
+		maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
-	@Column (name = "email", nullable = true, length = MAX_LENGTH_NAME, unique = false)
-	@Size (max = MAX_LENGTH_NAME)
+	@Column (
+		name = "email", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME,
+		unique = false
+	)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	private String email;
 
 	@MetaData (
 		displayName = "Phone", required = false, readOnly = false, defaultValue = "",
 		description = "Phone number", hidden = false, order = 5,
-		maxLength = MAX_LENGTH_NAME
+		maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
-	@Column (name = "phone", nullable = true, length = MAX_LENGTH_NAME, unique = false)
-	@Size (max = MAX_LENGTH_NAME)
+	@Column (
+		name = "phone", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME,
+		unique = false
+	)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	private String phone;
 
 	@Column (name = "roles", nullable = false, length = 255)
@@ -106,8 +122,9 @@ public class CUser extends CEntityNamed {
 	private boolean enabled = true; // User account status, default is enabled
 
 	@MetaData (
-		displayName = "Profile Picture", required = false, readOnly = false, defaultValue = "",
-		description = "User's profile picture stored as binary data", hidden = false, order = 11
+		displayName = "Profile Picture", required = false, readOnly = false,
+		defaultValue = "", description = "User's profile picture stored as binary data",
+		hidden = false, order = 11
 	)
 	@Column (name = "profile_picture_data", nullable = true)
 	private byte[] profilePictureData;
@@ -204,6 +221,8 @@ public class CUser extends CEntityNamed {
 
 	public String getPhone() { return phone; }
 
+	public byte[] getProfilePictureData() { return profilePictureData; }
+
 	// Getter and setter
 	public List<CUserProjectSettings> getProjectSettings() { return projectSettings; }
 
@@ -269,10 +288,8 @@ public class CUser extends CEntityNamed {
 
 	public void setPhone(final String phone) { this.phone = phone; }
 
-	public byte[] getProfilePictureData() { return profilePictureData; }
-
-	public void setProfilePictureData(final byte[] profilePictureData) { 
-		this.profilePictureData = profilePictureData; 
+	public void setProfilePictureData(final byte[] profilePictureData) {
+		this.profilePictureData = profilePictureData;
 	}
 
 	public void setProjectSettings(final List<CUserProjectSettings> projectSettings) {
@@ -295,8 +312,8 @@ public class CUser extends CEntityNamed {
 	 * Returns a comprehensive string representation of the user including all key fields.
 	 * Note: This method is used for debugging and logging purposes. For ComboBox display
 	 * in the UI, the CEntityFormBuilder now uses getName() method automatically to show
-	 * only the user's name instead of all fields. This resolves the combobox display issue
-	 * where users were listed with complete text with all fields.
+	 * only the user's name instead of all fields. This resolves the combobox display
+	 * issue where users were listed with complete text with all fields.
 	 * @return detailed string representation of the user
 	 */
 	@Override

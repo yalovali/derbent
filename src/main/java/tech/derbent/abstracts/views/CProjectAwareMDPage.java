@@ -10,18 +10,15 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.data.provider.DataProvider;
 
 import tech.derbent.abstracts.domains.CEntityDB;
-import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.interfaces.CProjectChangeListener;
-import tech.derbent.abstracts.services.CAbstractNamedEntityService;
 import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.abstracts.services.CEntityOfProjectService;
+import tech.derbent.abstracts.utils.PageableUtils;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
-import tech.derbent.abstracts.utils.PageableUtils;
 
 /**
  * Abstract project-aware MD page that filters entities by the currently active project.
@@ -144,22 +141,25 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB>
 		final Optional<CProject> activeProject = sessionService.getActiveProject();
 
 		if (activeProject.isPresent()) {
-			LOGGER.debug("Loading entities for active project: {}", activeProject.get().getName());
+			LOGGER.debug("Loading entities for active project: {}",
+				activeProject.get().getName());
 			List<? extends CEntityDB> entities;
-			
+
 			// Check if the entity service is for CEntityOfProject entities
 			if (entityService instanceof CEntityOfProjectService) {
-				@SuppressWarnings("unchecked")
-				final CEntityOfProjectService<CEntityOfProject> projectService = 
+				@SuppressWarnings ("unchecked")
+				final CEntityOfProjectService<CEntityOfProject> projectService =
 					(CEntityOfProjectService<CEntityOfProject>) entityService;
-				entities = projectService.findEntitiesByProject(activeProject.get(), PageableUtils.createSafe(0, 10));
-			} else {
-				// For non-project entities, show all entities (they don't have project filtering)
+				entities = projectService.findEntitiesByProject(activeProject.get(),
+					PageableUtils.createSafe(0, 10));
+			}
+			else {
+				// For non-project entities, show all entities (they don't have project
+				// filtering)
 				LOGGER.debug("Entity service is not project-aware, showing all entities");
 				entities = entityService.list(PageableUtils.createSafe(0, 10));
 			}
-			
-			@SuppressWarnings("unchecked")
+			@SuppressWarnings ("unchecked")
 			final List<EntityClass> typedEntities = (List<EntityClass>) entities;
 			grid.setItems(typedEntities);
 		}
@@ -177,31 +177,34 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB>
 			LOGGER.warn("Grid is null, cannot select first item");
 			return;
 		}
-		
+
 		if (!sessionService.getActiveProject().isPresent()) {
 			LOGGER.warn("No active project available for first item selection");
 			return;
 		}
-		
 		final Pageable pageable = PageableUtils.createSafe(0, 1); // first page, 1 item
 		List<? extends CEntityDB> result;
-		
+
 		// Check if the entity service is for CEntityOfProject entities
 		if (entityService instanceof CEntityOfProjectService) {
-			@SuppressWarnings("unchecked")
-			final CEntityOfProjectService<CEntityOfProject> projectService = 
+			@SuppressWarnings ("unchecked")
+			final CEntityOfProjectService<CEntityOfProject> projectService =
 				(CEntityOfProjectService<CEntityOfProject>) entityService;
-			result = projectService.findEntitiesByProject(sessionService.getActiveProject().get(), pageable);
-		} else {
-			// For non-project entities, just get the first entity from all entities
-			LOGGER.debug("Entity service is not project-aware, selecting from all entities");
-			final List<EntityClass> allEntities = entityService.list(pageable);
-			result = allEntities.isEmpty() ? Collections.emptyList() : allEntities.subList(0, Math.min(1, allEntities.size()));
+			result = projectService
+				.findEntitiesByProject(sessionService.getActiveProject().get(), pageable);
 		}
-		
+		else {
+			// For non-project entities, just get the first entity from all entities
+			LOGGER.debug(
+				"Entity service is not project-aware, selecting from all entities");
+			final List<EntityClass> allEntities = entityService.list(pageable);
+			result = allEntities.isEmpty() ? Collections.emptyList()
+				: allEntities.subList(0, Math.min(1, allEntities.size()));
+		}
 		LOGGER.debug("Fetched {} entities for project", result.size());
+
 		if (!result.isEmpty()) {
-			@SuppressWarnings("unchecked")
+			@SuppressWarnings ("unchecked")
 			final EntityClass firstEntity = (EntityClass) result.get(0);
 			grid.select(firstEntity);
 		}

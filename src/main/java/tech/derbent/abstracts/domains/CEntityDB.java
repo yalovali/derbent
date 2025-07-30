@@ -12,10 +12,6 @@ import jakarta.persistence.MappedSuperclass;
 @MappedSuperclass
 public abstract class CEntityDB extends CEntity {
 
-	public static final int MAX_LENGTH_DESCRIPTION = 255;
-
-	public static final int MAX_LENGTH_NAME = 100;
-
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
 	private Long id;

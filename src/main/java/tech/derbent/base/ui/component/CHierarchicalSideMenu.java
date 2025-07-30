@@ -289,7 +289,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	 */
 	private void buildMenuHierarchy() {
 		// LOGGER.debug("Building menu hierarchy from route annotations");
-		final var rootLevel = new CMenuLevel("root", "Root Menu", null);
+		final var rootLevel = new CMenuLevel("root", "Homepage", null);
 		menuLevels.put("root", rootLevel);
 		// Get menu entries from MenuConfiguration
 		final var menuEntries = MenuConfiguration.getMenuEntries();

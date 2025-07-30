@@ -23,7 +23,6 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
-import org.springframework.data.domain.Sort;
 
 import jakarta.annotation.PostConstruct;
 import tech.derbent.abstracts.domains.CEntityDB;
@@ -307,28 +306,30 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		grid = new CGrid<>(entityClass, false);
 		grid.getColumns().forEach(grid::removeColumn);
 		grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
-		// Use a custom data provider that properly handles pagination and sorting with safe validation
+		// Use a custom data provider that properly handles pagination and sorting with
+		// safe validation
 		grid.setItems(query -> {
 			LOGGER.debug("Grid query - offset: {}, limit: {}, sortOrders: {}",
 				query.getOffset(), query.getLimit(), query.getSortOrders());
-			
+
 			try {
 				// Convert Vaadin query to Spring Pageable using VaadinSpringDataHelpers
 				final org.springframework.data.domain.Pageable originalPageable =
 					VaadinSpringDataHelpers.toSpringPageRequest(query);
-				
-				// Validate and fix the pageable to prevent "max-results cannot be negative" error
-				final org.springframework.data.domain.Pageable safePageable = 
+				// Validate and fix the pageable to prevent "max-results cannot be
+				// negative" error
+				final org.springframework.data.domain.Pageable safePageable =
 					PageableUtils.validateAndFix(originalPageable);
-				
 				LOGGER.debug("Safe Pageable - pageNumber: {}, pageSize: {}, sort: {}",
-					safePageable.getPageNumber(), safePageable.getPageSize(), safePageable.getSort());
-				
-				final java.util.List<EntityClass> result = entityService.list(safePageable);
+					safePageable.getPageNumber(), safePageable.getPageSize(),
+					safePageable.getSort());
+				final java.util.List<EntityClass> result =
+					entityService.list(safePageable);
 				LOGGER.debug("Data provider returned {} items", result.size());
 				return result.stream();
-			} catch (Exception e) {
-				LOGGER.error("Error in grid data provider for {}: {}", entityClass.getSimpleName(), e.getMessage());
+			} catch (final Exception e) {
+				LOGGER.error("Error in grid data provider for {}: {}",
+					entityClass.getSimpleName(), e.getMessage());
 				// Return empty stream on error to prevent UI crashes
 				return java.util.stream.Stream.empty();
 			}

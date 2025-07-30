@@ -15,6 +15,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.domains.CEntityConstants;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.projects.domain.CProject;
@@ -43,12 +44,15 @@ public class CMeeting extends CEntityOfProject {
 	)
 	private CMeetingType meetingType;
 
-	@Column (name = "description", nullable = true, length = MAX_LENGTH_DESCRIPTION)
-	@Size (max = MAX_LENGTH_DESCRIPTION)
+	@Column (
+		name = "description", nullable = true,
+		length = CEntityConstants.MAX_LENGTH_DESCRIPTION
+	)
+	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@MetaData (
 		displayName = "Description", required = false, readOnly = false,
 		defaultValue = "", description = "Description of the meeting", hidden = false,
-		order = 3, maxLength = MAX_LENGTH_DESCRIPTION
+		order = 3, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
 	)
 	private String description;
 
@@ -66,12 +70,15 @@ public class CMeeting extends CEntityOfProject {
 	)
 	private LocalDateTime endDate;
 
-	@Column (name = "location", nullable = true, length = MAX_LENGTH_DESCRIPTION)
-	@Size (max = MAX_LENGTH_DESCRIPTION)
+	@Column (
+		name = "location", nullable = true,
+		length = CEntityConstants.MAX_LENGTH_DESCRIPTION
+	)
+	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@MetaData (
 		displayName = "Location", required = false, readOnly = false, defaultValue = "",
 		description = "Physical or virtual location of the meeting", hidden = false,
-		order = 6, maxLength = MAX_LENGTH_DESCRIPTION
+		order = 6, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
 	)
 	private String location;
 
@@ -144,13 +151,16 @@ public class CMeeting extends CEntityOfProject {
 	)
 	private Set<CUser> participants = new HashSet<>();
 
-	@Column (name = "linked_element", nullable = true, length = MAX_LENGTH_DESCRIPTION)
-	@Size (max = MAX_LENGTH_DESCRIPTION)
+	@Column (
+		name = "linked_element", nullable = true,
+		length = CEntityConstants.MAX_LENGTH_DESCRIPTION
+	)
+	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@MetaData (
 		displayName = "Linked Element", required = false, readOnly = false,
 		defaultValue = "",
 		description = "Reference to external documents, systems, or elements",
-		hidden = false, order = 14, maxLength = MAX_LENGTH_DESCRIPTION
+		hidden = false, order = 14, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
 	)
 	private String linkedElement;
 

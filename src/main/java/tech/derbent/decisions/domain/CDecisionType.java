@@ -14,9 +14,9 @@ import tech.derbent.projects.domain.CProject;
 
 /**
  * CDecisionType - Domain entity representing decision type categories. Layer: Domain
- * (MVC) Inherits from CEntityOfProject to provide project-aware type functionality for decision
- * categorization. Supports classification of decisions by type such as Strategic,
- * Operational, Technical, Financial, etc.
+ * (MVC) Inherits from CEntityOfProject to provide project-aware type functionality for
+ * decision categorization. Supports classification of decisions by type such as
+ * Strategic, Operational, Technical, Financial, etc.
  */
 @Entity
 @Table (name = "cdecisiontype")
@@ -66,18 +66,15 @@ public class CDecisionType extends CEntityOfProject {
 	 */
 	public CDecisionType() {
 		super();
-		LOGGER.debug("CDecisionType() - Creating new decision type instance");
 	}
 
 	/**
 	 * Constructor with name and project.
-	 * @param name the name of the decision type - must not be null or empty
+	 * @param name    the name of the decision type - must not be null or empty
 	 * @param project the project this type belongs to
 	 */
 	public CDecisionType(final String name, final CProject project) {
 		super(name, project);
-		LOGGER.debug("CDecisionType constructor called with name: {} for project: {}", 
-			name, project.getName());
 
 		if ((name == null) || name.trim().isEmpty()) {
 			LOGGER.warn("CDecisionType constructor - Name parameter is null or empty");
@@ -90,11 +87,10 @@ public class CDecisionType extends CEntityOfProject {
 	 * @param description detailed description of the decision type - can be null
 	 * @param project     the project this type belongs to
 	 */
-	public CDecisionType(final String name, final String description, final CProject project) {
+	public CDecisionType(final String name, final String description,
+		final CProject project) {
 		super(name, project);
 		setDescription(description);
-		LOGGER.debug("CDecisionType constructor called with name: {}, description: {} for project: {}",
-			name, description, project.getName());
 	}
 
 	/**
