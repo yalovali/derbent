@@ -49,25 +49,6 @@ public class CActivity extends CEntityOfProject {
 	)
 	private CActivityType activityType;
 
-	// Resource Management
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "assigned_to_id", nullable = true)
-	@MetaData (
-		displayName = "Assigned To", required = false, readOnly = false,
-		description = "User assigned to this activity", hidden = false, order = 10,
-		dataProviderBean = "CUserService"
-	)
-	private CUser assignedTo;
-
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "created_by_id", nullable = true)
-	@MetaData (
-		displayName = "Created By", required = false, readOnly = true,
-		description = "User who created this activity", hidden = false, order = 11,
-		dataProviderBean = "CUserService"
-	)
-	private CUser createdBy;
-
 	// Time Tracking
 	@Column (name = "estimated_hours", nullable = true, precision = 10, scale = 2)
 	@DecimalMin (value = "0.0", message = "Estimated hours must be positive")
@@ -247,16 +228,7 @@ public class CActivity extends CEntityOfProject {
 	 * @param assignedTo the user assigned to this activity - can be null
 	 */
 	public CActivity(final String name, final CProject project, final CUser assignedTo) {
-		super(name, project);
-
-		if (name == null) {
-			LOGGER.warn("CActivity constructor - Name parameter is null");
-		}
-
-		if (project == null) {
-			LOGGER.warn("CActivity constructor - Project parameter is null");
-		}
-		this.assignedTo = assignedTo;
+		super(name, project, assignedTo);
 		initializeDefaults();
 	}
 
@@ -302,13 +274,7 @@ public class CActivity extends CEntityOfProject {
 		return actualHours != null ? actualHours : BigDecimal.ZERO;
 	}
 
-	@Override
-	public CUser getAssignedTo() { return assignedTo; }
-
 	public LocalDate getCompletionDate() { return completionDate; }
-
-	@Override
-	public CUser getCreatedBy() { return createdBy; }
 
 	public LocalDate getDueDate() { return dueDate; }
 
@@ -449,12 +415,6 @@ public class CActivity extends CEntityOfProject {
 		updateLastModified();
 	}
 
-	@Override
-	public void setAssignedTo(final CUser assignedTo) {
-		this.assignedTo = assignedTo;
-		updateLastModified();
-	}
-
 	public void setCompletionDate(final LocalDate completionDate) {
 		this.completionDate = completionDate;
 
@@ -467,9 +427,6 @@ public class CActivity extends CEntityOfProject {
 		}
 		updateLastModified();
 	}
-
-	@Override
-	public void setCreatedBy(final CUser createdBy) { this.createdBy = createdBy; }
 
 	public void setDueDate(final LocalDate dueDate) {
 		this.dueDate = dueDate;

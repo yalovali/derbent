@@ -2,6 +2,8 @@
 @import url("login-background.css");
 @import url("kanban.css");
 @import url("project-details.css");
+@import url("accordion.css");
+
 
 /* CDashboardView styles */
 .cdashboard-view {
@@ -17,20 +19,6 @@ vaadin-scroller{
 }
 
 
-vaadin-accordion-heading{
-	
-    font-size: var(--lumo-font-size-m);
-    font-weight: 600;
-	    color: 	#5d6069;
-		font-size: 1.3em;
-		border-bottom: 1px solid var(--lumo-contrast-10pct);
-}
-
-.c-accordion {
-    margin: 0;
-    padding: 0;
-    /*max-width: 1000px;*/
-}
 
 /* Hierarchical Side Menu Styles */
 .hierarchical-side-menu {

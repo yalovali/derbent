@@ -14,6 +14,8 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
@@ -45,10 +47,11 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 
 	private final BeanValidationBinder<EntityClass> binder;
 
+	// divide screen into two parts
 	protected SplitLayout splitLayout = new SplitLayout();
 
-	// private final FlexLayout baseDetailsLayout = new FlexLayout();
-	private final VerticalLayout baseDetailsLayout = new VerticalLayout();
+	private final FlexLayout baseDetailsLayout = new FlexLayout();
+	// private final VerticalLayout baseDetailsLayout = new VerticalLayout();
 
 	private final Div detailsTabLayout = new Div();
 
@@ -84,6 +87,12 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		final Scroller scroller = new Scroller();
 		detailsBase.add(scroller);
 		initBaseDetailsLayout();
+		// FLEX LAYOUT///////////////////
+		baseDetailsLayout.setWidthFull();
+		baseDetailsLayout.setFlexWrap(FlexLayout.FlexWrap.WRAP);
+		baseDetailsLayout.setJustifyContentMode(JustifyContentMode.AROUND);
+		baseDetailsLayout.setAlignItems(Alignment.STRETCH);
+		//////////////////////////////////
 		scroller.setContent(baseDetailsLayout);
 		scroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
 		// baseDetailsLayout.add(baseDescriptionAccordion);
