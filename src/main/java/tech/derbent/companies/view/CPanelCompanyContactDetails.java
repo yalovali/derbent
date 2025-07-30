@@ -8,10 +8,8 @@ import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
 
 /**
- * CPanelCompanyContactDetails - Panel for grouping contact information fields
- * of CCompany entity.
- * Layer: View (MVC)
- * Groups fields: address, phone, email, website
+ * CPanelCompanyContactDetails - Panel for grouping contact information fields of CCompany
+ * entity. Layer: View (MVC) Groups fields: address, phone, email, website
  */
 public class CPanelCompanyContactDetails extends CPanelCompanyBase {
 

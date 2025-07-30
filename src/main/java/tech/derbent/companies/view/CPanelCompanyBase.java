@@ -2,9 +2,7 @@ package tech.derbent.companies.view;
 
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 
-import tech.derbent.abstracts.annotations.CEntityFormBuilder;
-import tech.derbent.abstracts.annotations.CEntityFormBuilder.ComboBoxDataProvider;
-import tech.derbent.abstracts.views.CAccordionDescription;
+import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
 
@@ -13,7 +11,7 @@ import tech.derbent.companies.service.CCompanyService;
  * Layer: View (MVC) Provides common functionality for company entity panels following the
  * same pattern as CPanelActivityBase.
  */
-public abstract class CPanelCompanyBase extends CAccordionDescription<CCompany> {
+public abstract class CPanelCompanyBase extends CAccordionDBEntity<CCompany> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -30,18 +28,5 @@ public abstract class CPanelCompanyBase extends CAccordionDescription<CCompany> 
 		super(title, currentEntity, beanValidationBinder, CCompany.class, entityService);
 		createPanelContent();
 		closePanel();
-	}
-
-	@Override
-	protected ComboBoxDataProvider createComboBoxDataProvider() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	protected void createPanelContent() {
-		updatePanelEntityFields(); // Set the entity fields first
-		getBaseLayout().add(
-			CEntityFormBuilder.buildForm(CCompany.class, getBinder(), getEntityFields()));
 	}
 }

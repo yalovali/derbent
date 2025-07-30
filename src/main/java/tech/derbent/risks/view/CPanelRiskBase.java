@@ -2,9 +2,7 @@ package tech.derbent.risks.view;
 
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 
-import tech.derbent.abstracts.annotations.CEntityFormBuilder;
-import tech.derbent.abstracts.annotations.CEntityFormBuilder.ComboBoxDataProvider;
-import tech.derbent.abstracts.views.CAccordionDescription;
+import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.risks.domain.CRisk;
 import tech.derbent.risks.service.CRiskService;
 
@@ -13,10 +11,9 @@ import tech.derbent.risks.service.CRiskService;
  * View (MVC) Provides common functionality for risk entity panels following the same
  * pattern as CPanelActivityBase.
  */
-public abstract class CPanelRiskBase extends CAccordionDescription<CRisk> {
+public abstract class CPanelRiskBase extends CAccordionDBEntity<CRisk> {
 
 	private static final long serialVersionUID = 1L;
-
 
 	/**
 	 * Constructor with custom panel title.
@@ -31,18 +28,5 @@ public abstract class CPanelRiskBase extends CAccordionDescription<CRisk> {
 		super(title, currentEntity, beanValidationBinder, CRisk.class, entityService);
 		createPanelContent();
 		closePanel();
-	}
-
-	@Override
-	protected ComboBoxDataProvider createComboBoxDataProvider() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	protected void createPanelContent() {
-		updatePanelEntityFields(); // Set the entity fields first
-		getBaseLayout().add(
-			CEntityFormBuilder.buildForm(CRisk.class, getBinder(), getEntityFields()));
 	}
 }

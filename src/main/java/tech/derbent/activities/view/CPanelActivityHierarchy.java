@@ -8,10 +8,8 @@ import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
 
 /**
- * CPanelActivityHierarchy - Panel for grouping hierarchy related fields
- * of CActivity entity.
- * Layer: View (MVC)
- * Groups fields: parentActivity
+ * CPanelActivityHierarchy - Panel for grouping hierarchy related fields of CActivity
+ * entity. Layer: View (MVC) Groups fields: parentActivity
  */
 public class CPanelActivityHierarchy extends CPanelActivityBase {
 

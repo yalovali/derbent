@@ -31,7 +31,7 @@ import tech.derbent.session.service.CSessionService;
  */
 @Route ("project-details/:project_id?/:action?(edit)")
 @PageTitle ("Project Details")
-@Menu (order = 3.2, icon = "vaadin:briefcase", title = "Project Details")
+@Menu (order = 1.3, icon = "vaadin:briefcase", title = "Project.Project Details")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CProjectDetailsView extends CAbstractMDPage<CProject> {
 
@@ -69,7 +69,8 @@ public class CProjectDetailsView extends CAbstractMDPage<CProject> {
 
 	private Select<LayoutMode> layoutSelector;
 
-	public CProjectDetailsView(final CProjectService entityService, final CSessionService sessionService) {
+	public CProjectDetailsView(final CProjectService entityService,
+		final CSessionService sessionService) {
 		super(CProject.class, entityService, sessionService);
 		addClassNames("project-details-view");
 		// Apply default layout mode CSS class

@@ -8,10 +8,8 @@ import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
 
 /**
- * CPanelActivityStatusPriority - Panel for grouping status and priority related fields
- * of CActivity entity.
- * Layer: View (MVC)
- * Groups fields: status, priority, progressPercentage
+ * CPanelActivityStatusPriority - Panel for grouping status and priority related fields of
+ * CActivity entity. Layer: View (MVC) Groups fields: status, priority, progressPercentage
  */
 public class CPanelActivityStatusPriority extends CPanelActivityBase {
 

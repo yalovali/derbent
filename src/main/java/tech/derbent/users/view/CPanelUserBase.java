@@ -5,7 +5,7 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder.ComboBoxDataProvider;
 import tech.derbent.abstracts.domains.CEntityDB;
-import tech.derbent.abstracts.views.CAccordionDescription;
+import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.users.domain.CUser;
@@ -18,7 +18,7 @@ import tech.derbent.users.service.CUserTypeService;
  * View (MVC) Provides common functionality for user entity panels following the same
  * pattern as CPanelActivityBase.
  */
-public abstract class CPanelUserBase extends CAccordionDescription<CUser> {
+public abstract class CPanelUserBase extends CAccordionDBEntity<CUser> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -79,7 +79,6 @@ public abstract class CPanelUserBase extends CAccordionDescription<CUser> {
 
 	@Override
 	protected void createPanelContent() {
-		updatePanelEntityFields(); // Set the entity fields first
 		getBaseLayout().add(CEntityFormBuilder.buildForm(CUser.class, getBinder(),
 			getDetailsDataProvider(), getEntityFields()));
 	}

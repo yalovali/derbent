@@ -4,11 +4,12 @@ import java.util.List;
 
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 
+import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder.ComboBoxDataProvider;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.services.CAbstractService;
 
-public abstract class CAccordionDescription<EntityClass extends CEntityDB>
+public abstract class CAccordionDBEntity<EntityClass extends CEntityDB>
 	extends CAccordion {
 
 	private static final long serialVersionUID = 1L;
@@ -33,7 +34,7 @@ public abstract class CAccordionDescription<EntityClass extends CEntityDB>
 	 * @param entityClass          entity class type
 	 * @param entityService        service for the entity
 	 */
-	public CAccordionDescription(final String title, final EntityClass currentEntity,
+	public CAccordionDBEntity(final String title, final EntityClass currentEntity,
 		final BeanValidationBinder<EntityClass> beanValidationBinder,
 		final Class<EntityClass> entityClass,
 		final CAbstractService<EntityClass> entityService) {
@@ -45,8 +46,20 @@ public abstract class CAccordionDescription<EntityClass extends CEntityDB>
 		this.detailsDataProvider = createComboBoxDataProvider();
 	}
 
-	protected abstract ComboBoxDataProvider createComboBoxDataProvider();
-	protected abstract void createPanelContent();
+	public void clearForm() {
+		binder.readBean(null);
+	}
+
+	protected ComboBoxDataProvider createComboBoxDataProvider() {
+		return null;
+	}
+
+	// Override if you need to customize the panel content creation
+	protected void createPanelContent() {
+		updatePanelEntityFields(); // Set the entity fields first
+		getBaseLayout().add(
+			CEntityFormBuilder.buildForm(entityClass, getBinder(), getEntityFields()));
+	}
 
 	public BeanValidationBinder<EntityClass> getBinder() { return binder; }
 
@@ -61,8 +74,7 @@ public abstract class CAccordionDescription<EntityClass extends CEntityDB>
 		currentEntity = entity;
 
 		if (entity == null) {
-			// Clear the form fields
-			binder.readBean(null);
+			clearForm();
 		}
 		else {
 			LOGGER.debug("Populating form with entity: {}", entity);
@@ -71,6 +83,7 @@ public abstract class CAccordionDescription<EntityClass extends CEntityDB>
 		}
 	}
 
+	// used if there is a specific save logic for the entity
 	public void saveEventHandler() {}
 
 	protected void setEntityFields(final List<String> fields) { EntityFields = fields; }

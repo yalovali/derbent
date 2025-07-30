@@ -12,7 +12,7 @@ import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.views.CAbstractMDPage;
-import tech.derbent.abstracts.views.CAccordionDescription;
+import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.abstracts.views.CButton;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
 import tech.derbent.companies.domain.CCompany;
@@ -75,7 +75,7 @@ public class CCompanyView extends CAbstractMDPage<CCompany> {
 
 	@Override
 	protected void createDetailsLayout() {
-		CAccordionDescription<CCompany> panel;
+		CAccordionDBEntity<CCompany> panel;
 		panel = new CPanelCompanyDescription(getCurrentEntity(), getBinder(),
 			(CCompanyService) entityService);
 		addAccordionPanel(panel);

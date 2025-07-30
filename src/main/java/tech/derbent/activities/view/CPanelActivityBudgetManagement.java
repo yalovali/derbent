@@ -8,10 +8,9 @@ import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
 
 /**
- * CPanelActivityBudgetManagement - Panel for grouping budget management related fields
- * of CActivity entity.
- * Layer: View (MVC)
- * Groups fields: estimatedCost, actualCost, hourlyRate
+ * CPanelActivityBudgetManagement - Panel for grouping budget management related fields of
+ * CActivity entity. Layer: View (MVC) Groups fields: estimatedCost, actualCost,
+ * hourlyRate
  */
 public class CPanelActivityBudgetManagement extends CPanelActivityBase {
 

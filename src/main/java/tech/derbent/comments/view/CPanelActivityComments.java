@@ -16,7 +16,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 
-import tech.derbent.abstracts.annotations.CEntityFormBuilder.ComboBoxDataProvider;
 import tech.derbent.abstracts.views.CButton;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
@@ -105,11 +104,6 @@ public class CPanelActivityComments extends CPanelActivityBase {
 			LOGGER.error("Error adding comment", e);
 			// Could show an error notification here
 		}
-	}
-
-	@Override
-	protected ComboBoxDataProvider createComboBoxDataProvider() {
-		return null;
 	}
 
 	/**

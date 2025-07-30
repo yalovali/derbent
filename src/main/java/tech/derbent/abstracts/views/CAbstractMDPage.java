@@ -59,8 +59,8 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 
 	protected LayoutService layoutService; // Optional injection
 
-	ArrayList<CAccordionDescription<EntityClass>> AccordionList =
-		new ArrayList<CAccordionDescription<EntityClass>>(); // List of accordions
+	ArrayList<CAccordionDBEntity<EntityClass>> AccordionList =
+		new ArrayList<CAccordionDBEntity<EntityClass>>(); // List of accordions
 	{}
 
 	protected CSessionService sessionService;
@@ -96,7 +96,7 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	}
 
 	// for details view
-	protected void addAccordionPanel(final CAccordionDescription<EntityClass> accordion) {
+	protected void addAccordionPanel(final CAccordionDBEntity<EntityClass> accordion) {
 		AccordionList.add(accordion);
 		getBaseDetailsLayout().add(accordion);
 	}

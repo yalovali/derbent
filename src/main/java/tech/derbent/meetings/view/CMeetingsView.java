@@ -5,7 +5,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.views.CAccordionDescription;
+import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.service.CMeetingService;
@@ -46,7 +46,7 @@ public class CMeetingsView extends CProjectAwareMDPage<CMeeting> {
 
 	@Override
 	protected void createDetailsLayout() {
-		CAccordionDescription<CMeeting> panel;
+		CAccordionDBEntity<CMeeting> panel;
 		panel = new CPanelMeetingBasicInfo(getCurrentEntity(), getBinder(),
 			(CMeetingService) entityService, meetingTypeService);
 		addAccordionPanel(panel);

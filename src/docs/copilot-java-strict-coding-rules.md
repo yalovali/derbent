@@ -483,13 +483,18 @@ class ManualVerificationTest {
 
 **Testing Guidelines:**
 - Write unit tests for all business logic and service methods
+- test all views, select all new items in grids, always test CRUD functions of views in all pages.
 - Use TestContainers for integration testing with PostgreSQL
 - Maintain test coverage above 80% for critical business logic
 - Test all validation scenarios and edge cases
 - Mock external dependencies appropriately
 - Include manual verification tests for complex UI interactions
-## 9.6. Database Rules and Sample Data
+- always create tests for ui functions
+- test agains grid selection changes for every page every view
+- test contents of every combobox
 
+## 9.6. Database Rules and Sample Data
+- never use privimitive data types in entities, such as int boolean, use Integer Boolean etc.
 - Password is always test123 for all users with hash code '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu'
 - Every entity should have an example in data.sql for per project, per company per user per activity etc...
 - Always ensure **PostgreSQL-only** configuration. Update `data.sql` with correct sample and initial database values after any database change

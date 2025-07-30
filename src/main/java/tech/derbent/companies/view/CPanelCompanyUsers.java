@@ -8,10 +8,8 @@ import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
 
 /**
- * CPanelCompanyUsers - Panel for grouping user relationship fields
- * of CCompany entity.
- * Layer: View (MVC)
- * Groups fields: users
+ * CPanelCompanyUsers - Panel for grouping user relationship fields of CCompany entity.
+ * Layer: View (MVC) Groups fields: users
  */
 public class CPanelCompanyUsers extends CPanelCompanyBase {
 

@@ -8,10 +8,8 @@ import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
 
 /**
- * CPanelActivityResourceManagement - Panel for grouping resource management related fields
- * of CActivity entity.
- * Layer: View (MVC)
- * Groups fields: assignedTo, createdBy
+ * CPanelActivityResourceManagement - Panel for grouping resource management related
+ * fields of CActivity entity. Layer: View (MVC) Groups fields: assignedTo, createdBy
  */
 public class CPanelActivityResourceManagement extends CPanelActivityBase {
 
@@ -21,11 +19,11 @@ public class CPanelActivityResourceManagement extends CPanelActivityBase {
 		final BeanValidationBinder<CActivity> beanValidationBinder,
 		final CActivityService entityService) {
 		super("Resource Management", currentEntity, beanValidationBinder, entityService);
+		setEntityFields(List.of("assignedTo", "createdBy"));
 	}
 
 	@Override
 	protected void updatePanelEntityFields() {
 		// Resource Management fields - user assignments and tracking
-		setEntityFields(List.of("assignedTo", "createdBy"));
 	}
 }

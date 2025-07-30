@@ -8,7 +8,7 @@ import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.views.CAbstractMDPage;
-import tech.derbent.abstracts.views.CAccordionDescription;
+import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.session.service.CSessionService;
@@ -38,7 +38,7 @@ public class CProjectsView extends CAbstractMDPage<CProject> {
 
 	@Override
 	protected void createDetailsLayout() {
-		CAccordionDescription<CProject> panel;
+		CAccordionDBEntity<CProject> panel;
 		panel = new CPanelProjectBasicInfo(getCurrentEntity(), getBinder(),
 			(CProjectService) entityService);
 		addAccordionPanel(panel);

@@ -9,9 +9,7 @@ import tech.derbent.companies.service.CCompanyService;
 
 /**
  * CPanelCompanySystemStatus - Panel for grouping system status and administrative fields
- * of CCompany entity.
- * Layer: View (MVC)
- * Groups fields: enabled, taxNumber
+ * of CCompany entity. Layer: View (MVC) Groups fields: enabled, taxNumber
  */
 public class CPanelCompanySystemStatus extends CPanelCompanyBase {
 

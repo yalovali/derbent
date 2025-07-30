@@ -6,7 +6,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.views.CAccordionDescription;
+import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.decisions.domain.CDecision;
 import tech.derbent.decisions.service.CDecisionService;
@@ -48,7 +48,7 @@ public class CDecisionsView extends CProjectAwareMDPage<CDecision> {
 	 */
 	@Override
 	protected void createDetailsLayout() {
-		CAccordionDescription<CDecision> panel;
+		CAccordionDBEntity<CDecision> panel;
 		// Basic Information Panel (opened by default)
 		panel = new CPanelDecisionDescription(getCurrentEntity(), getBinder(),
 			(CDecisionService) entityService);

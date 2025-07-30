@@ -22,7 +22,7 @@ import tech.derbent.session.service.CSessionService;
  * Purpose: Extends CAccordionDescription with project change awareness for proper panel refresh
  */
 public abstract class CProjectAwareAccordionDescription<EntityClass extends CEntityDB>
-    extends CAccordionDescription<EntityClass> implements CProjectChangeListener {
+    extends CAccordionDBEntity<EntityClass> implements CProjectChangeListener {
 
     private static final long serialVersionUID = 1L;
 

@@ -2,16 +2,13 @@ package tech.derbent.activities.view;
 
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 
-import tech.derbent.abstracts.annotations.CEntityFormBuilder;
-import tech.derbent.abstracts.annotations.CEntityFormBuilder.ComboBoxDataProvider;
-import tech.derbent.abstracts.views.CAccordionDescription;
+import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
 
-public abstract class CPanelActivityBase extends CAccordionDescription<CActivity> {
+public abstract class CPanelActivityBase extends CAccordionDBEntity<CActivity> {
 
 	private static final long serialVersionUID = 1L;
-
 
 	/**
 	 * Constructor with custom panel title.
@@ -26,17 +23,5 @@ public abstract class CPanelActivityBase extends CAccordionDescription<CActivity
 		super(title, currentEntity, beanValidationBinder, CActivity.class, entityService);
 		createPanelContent();
 		closePanel();
-	}
-
-	@Override
-	protected ComboBoxDataProvider createComboBoxDataProvider() {
-		return null;
-	}
-
-	@Override
-	protected void createPanelContent() {
-		updatePanelEntityFields(); // Set the entity fields first
-		getBaseLayout().add(CEntityFormBuilder.buildForm(CActivity.class, getBinder(),
-			getEntityFields()));
 	}
 }
