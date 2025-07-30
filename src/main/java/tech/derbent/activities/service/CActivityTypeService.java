@@ -1,6 +1,7 @@
 package tech.derbent.activities.service;
 
 import java.time.Clock;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,5 +61,20 @@ public class CActivityTypeService extends CEntityOfProjectService<CActivityType>
 	@Override
 	protected CActivityType createNewEntityInstance() {
 		return new CActivityType();
+	}
+
+	/**
+	 * Gets an activity type by ID with eagerly loaded relationships.
+	 * Overrides parent get() method to prevent LazyInitializationException.
+	 * @param id the activity type ID
+	 * @return Optional containing the activity type with loaded relationships
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public Optional<CActivityType> get(final Long id) {
+		LOGGER.debug("Getting CActivityType with ID {} (with eager loading)", id);
+		final Optional<CActivityType> entity = ((CActivityTypeRepository) repository).findByIdWithRelationships(id);
+		entity.ifPresent(this::initializeLazyFields);
+		return entity;
 	}
 }

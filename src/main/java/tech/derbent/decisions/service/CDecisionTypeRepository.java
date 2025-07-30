@@ -1,6 +1,7 @@
 package tech.derbent.decisions.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,9 +14,21 @@ import tech.derbent.projects.domain.CProject;
  * CDecisionTypeRepository - Repository interface for CDecisionType entities.
  * Layer: Data Access (MVC)
  * 
- * Provides data access methods for project-aware decision type entities.
+ * Provides data access methods for project-aware decision type entities with eager loading support.
  */
 public interface CDecisionTypeRepository extends CEntityOfProjectRepository<CDecisionType> {
+
+    /**
+     * Finds a decision type by ID with eagerly loaded relationships.
+     * @param id the decision type ID
+     * @return Optional containing the decision type with loaded relationships
+     */
+    @Query("SELECT dt FROM CDecisionType dt " +
+           "LEFT JOIN FETCH dt.project " +
+           "LEFT JOIN FETCH dt.assignedTo " +
+           "LEFT JOIN FETCH dt.createdBy " +
+           "WHERE dt.id = :id")
+    Optional<CDecisionType> findByIdWithRelationships(@Param("id") Long id);
 
     /**
      * Finds all active decision types for a project.

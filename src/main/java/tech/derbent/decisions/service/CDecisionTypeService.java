@@ -2,6 +2,7 @@ package tech.derbent.decisions.service;
 
 import java.time.Clock;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,21 @@ public class CDecisionTypeService extends CEntityOfProjectService<CDecisionType>
     @Override
     protected CDecisionType createNewEntityInstance() {
         return new CDecisionType();
+    }
+
+    /**
+     * Gets a decision type by ID with eagerly loaded relationships.
+     * Overrides parent get() method to prevent LazyInitializationException.
+     * @param id the decision type ID
+     * @return Optional containing the decision type with loaded relationships
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<CDecisionType> get(final Long id) {
+        LOGGER.debug("Getting CDecisionType with ID {} (with eager loading)", id);
+        final Optional<CDecisionType> entity = ((CDecisionTypeRepository) repository).findByIdWithRelationships(id);
+        entity.ifPresent(this::initializeLazyFields);
+        return entity;
     }
 
     /**
