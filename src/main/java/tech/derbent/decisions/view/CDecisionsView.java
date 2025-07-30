@@ -52,23 +52,19 @@ public class CDecisionsView extends CProjectAwareMDPage<CDecision> {
 		// Basic Information Panel (opened by default)
 		panel = new CPanelDecisionDescription(getCurrentEntity(), getBinder(),
 			(CDecisionService) entityService);
-		panel.addClassName("panel-decision-description");
-		getBaseDetailsLayout().add(panel);
+		addAccordionPanel(panel);
 		// Status & Workflow Panel
 		panel = new CPanelDecisionStatusManagement(getCurrentEntity(), getBinder(),
 			(CDecisionService) entityService);
-		panel.addClassName("panel-decision-status");
-		getBaseDetailsLayout().add(panel);
+		addAccordionPanel(panel);
 		// Cost & Financial Impact Panel
 		panel = new CPanelDecisionCostManagement(getCurrentEntity(), getBinder(),
 			(CDecisionService) entityService);
-		panel.addClassName("panel-decision-cost");
-		getBaseDetailsLayout().add(panel);
+		addAccordionPanel(panel);
 		// Team & Accountability Panel
 		panel = new CPanelDecisionTeamManagement(getCurrentEntity(), getBinder(),
 			(CDecisionService) entityService);
-		panel.addClassName("panel-decision-team");
-		getBaseDetailsLayout().add(panel);
+		addAccordionPanel(panel);
 	}
 
 	@Override

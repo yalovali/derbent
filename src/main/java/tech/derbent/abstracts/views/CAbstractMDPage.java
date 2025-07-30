@@ -23,11 +23,13 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
+import org.springframework.data.domain.Sort;
 
 import jakarta.annotation.PostConstruct;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.interfaces.CLayoutChangeListener;
 import tech.derbent.abstracts.services.CAbstractService;
+import tech.derbent.abstracts.utils.PageableUtils;
 import tech.derbent.base.ui.dialogs.CConfirmationDialog;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
 import tech.derbent.session.service.CSessionService;
@@ -305,17 +307,31 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		grid = new CGrid<>(entityClass, false);
 		grid.getColumns().forEach(grid::removeColumn);
 		grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
-		// Use a custom data provider that properly handles pagination and sorting
+		// Use a custom data provider that properly handles pagination and sorting with safe validation
 		grid.setItems(query -> {
 			LOGGER.debug("Grid query - offset: {}, limit: {}, sortOrders: {}",
 				query.getOffset(), query.getLimit(), query.getSortOrders());
-			final org.springframework.data.domain.Pageable pageable =
-				VaadinSpringDataHelpers.toSpringPageRequest(query);
-			LOGGER.debug("Spring Pageable - pageNumber: {}, pageSize: {}, sort: {}",
-				pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
-			final java.util.List<EntityClass> result = entityService.list(pageable);
-			LOGGER.debug("Data provider returned {} items", result.size());
-			return result.stream();
+			
+			try {
+				// Convert Vaadin query to Spring Pageable using VaadinSpringDataHelpers
+				final org.springframework.data.domain.Pageable originalPageable =
+					VaadinSpringDataHelpers.toSpringPageRequest(query);
+				
+				// Validate and fix the pageable to prevent "max-results cannot be negative" error
+				final org.springframework.data.domain.Pageable safePageable = 
+					PageableUtils.validateAndFix(originalPageable);
+				
+				LOGGER.debug("Safe Pageable - pageNumber: {}, pageSize: {}, sort: {}",
+					safePageable.getPageNumber(), safePageable.getPageSize(), safePageable.getSort());
+				
+				final java.util.List<EntityClass> result = entityService.list(safePageable);
+				LOGGER.debug("Data provider returned {} items", result.size());
+				return result.stream();
+			} catch (Exception e) {
+				LOGGER.error("Error in grid data provider for {}: {}", entityClass.getSimpleName(), e.getMessage());
+				// Return empty stream on error to prevent UI crashes
+				return java.util.stream.Stream.empty();
+			}
 		});
 		grid.addIdColumn(entity -> entity.getId().toString(), "ID", "id");
 		// Add selection listener to the grid

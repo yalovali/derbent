@@ -35,7 +35,7 @@ public class CPanelDecisionDescription extends CPanelDecisionBase {
 
     @Override
     protected void updatePanelEntityFields() {
-        // Basic Information panel - only fundamental fields
-        setEntityFields(List.of("name", "description", "decisionType", "project"));
+        // Basic Information panel - only fundamental fields that have @MetaData annotations
+        setEntityFields(List.of("name", "description", "decisionType"));
     }
 }

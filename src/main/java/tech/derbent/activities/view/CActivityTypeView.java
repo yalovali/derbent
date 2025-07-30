@@ -16,7 +16,8 @@ import tech.derbent.session.service.CSessionService;
 
 /**
  * CActivityTypeView - View for managing activity types. Layer: View (MVC) Provides CRUD
- * operations for activity types using the abstract master-detail pattern with project awareness.
+ * operations for activity types using the abstract master-detail pattern with project
+ * awareness.
  */
 @Route ("activity-types/:activity_type_id?/:action?(edit)")
 @PageTitle ("Activity Types")
@@ -32,20 +33,16 @@ public class CActivityTypeView extends CProjectAwareMDPage<CActivityType> {
 
 	/**
 	 * Constructor for CActivityTypeView.
-	 * @param entityService the service for activity type operations
+	 * @param entityService  the service for activity type operations
 	 * @param sessionService
 	 */
-	public CActivityTypeView(final CActivityTypeService entityService, final CSessionService sessionService) {
+	public CActivityTypeView(final CActivityTypeService entityService,
+		final CSessionService sessionService) {
 		super(CActivityType.class, entityService, sessionService);
 		addClassNames("activity-types-view");
 		// createDetailsLayout();
 		LOGGER.info("CActivityTypeView initialized with route: "
 			+ CSpringAuxillaries.getRoutePath(this.getClass()));
-	}
-
-	@Override
-	protected CActivityType createNewEntityInstance() {
-		return new CActivityType();
 	}
 
 	@Override
@@ -64,6 +61,11 @@ public class CActivityTypeView extends CProjectAwareMDPage<CActivityType> {
 	}
 
 	@Override
+	protected CActivityType createNewEntityInstance() {
+		return new CActivityType();
+	}
+
+	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
 
 	@Override
@@ -75,7 +77,8 @@ public class CActivityTypeView extends CProjectAwareMDPage<CActivityType> {
 	}
 
 	@Override
-	protected void setProjectForEntity(CActivityType entity, CProject project) {
+	protected void setProjectForEntity(final CActivityType entity,
+		final CProject project) {
 		entity.setProject(project);
 	}
 

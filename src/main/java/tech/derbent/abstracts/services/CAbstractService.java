@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import tech.derbent.abstracts.annotations.CSpringAuxillaries;
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.utils.PageableUtils;
 
 /**
  * CAbstractService - Abstract base service class for entity operations. Layer: Service
@@ -104,26 +105,11 @@ public abstract class CAbstractService<EntityClass extends CEntityDB> {
 
 	@Transactional (readOnly = true)
 	public List<EntityClass> list(final Pageable pageable) {
-		// Validate pageable to prevent "max-results cannot be negative" error
-		if (pageable == null) {
-			LOGGER.error("Pageable parameter is null in list method");
-			throw new IllegalArgumentException("Pageable cannot be null");
-		}
+		// Validate and fix pageable to prevent "max-results cannot be negative" error
+		final Pageable safePage = PageableUtils.validateAndFix(pageable);
 		
-		// Additional validation for pageable parameters
-		if (pageable.isPaged()) {
-			if (pageable.getPageSize() < 0) {
-				LOGGER.error("Negative page size detected: {}", pageable.getPageSize());
-				throw new IllegalArgumentException("Page size cannot be negative: " + pageable.getPageSize());
-			}
-			if (pageable.getPageNumber() < 0) {
-				LOGGER.error("Negative page number detected: {}", pageable.getPageNumber());
-				throw new IllegalArgumentException("Page number cannot be negative: " + pageable.getPageNumber());
-			}
-		}
-		
-		// LOGGER.debug("Listing entities with pageable: {}", pageable);
-		final List<EntityClass> entities = repository.findAllBy(pageable).toList();
+		// LOGGER.debug("Listing entities with pageable: {}", safePage);
+		final List<EntityClass> entities = repository.findAllBy(safePage).toList();
 		// Initialize lazy fields for all entities
 		entities.forEach(this::initializeLazyFields);
 		return entities;
@@ -132,26 +118,11 @@ public abstract class CAbstractService<EntityClass extends CEntityDB> {
 	@Transactional (readOnly = true)
 	public Page<EntityClass> list(final Pageable pageable,
 		final Specification<EntityClass> filter) {
-		// Validate pageable to prevent "max-results cannot be negative" error
-		if (pageable == null) {
-			LOGGER.error("Pageable parameter is null in list method with filter");
-			throw new IllegalArgumentException("Pageable cannot be null");
-		}
-		
-		// Additional validation for pageable parameters
-		if (pageable.isPaged()) {
-			if (pageable.getPageSize() < 0) {
-				LOGGER.error("Negative page size detected: {}", pageable.getPageSize());
-				throw new IllegalArgumentException("Page size cannot be negative: " + pageable.getPageSize());
-			}
-			if (pageable.getPageNumber() < 0) {
-				LOGGER.error("Negative page number detected: {}", pageable.getPageNumber());
-				throw new IllegalArgumentException("Page number cannot be negative: " + pageable.getPageNumber());
-			}
-		}
+		// Validate and fix pageable to prevent "max-results cannot be negative" error
+		final Pageable safePage = PageableUtils.validateAndFix(pageable);
 		
 		// LOGGER.debug("Listing entities with filter and pageable");
-		final Page<EntityClass> page = repository.findAll(filter, pageable);
+		final Page<EntityClass> page = repository.findAll(filter, safePage);
 		// Initialize lazy fields for all entities in the page
 		page.getContent().forEach(this::initializeLazyFields);
 		return page;

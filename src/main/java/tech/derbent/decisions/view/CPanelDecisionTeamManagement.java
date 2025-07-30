@@ -31,7 +31,7 @@ public class CPanelDecisionTeamManagement extends CPanelDecisionBase {
 
     @Override
     protected void updatePanelEntityFields() {
-        // Team and accountability management fields
-        setEntityFields(List.of("accountableUser", "assignedTo", "teamMembers"));
+        // Team and accountability management fields - using fields that exist with @MetaData annotations
+        setEntityFields(List.of("accountableUser", "teamMembers", "assignedTo"));
     }
 }

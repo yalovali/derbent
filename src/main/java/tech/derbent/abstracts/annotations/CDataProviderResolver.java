@@ -10,11 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.utils.PageableUtils;
 
 /**
  * CDataProviderResolver - Service for automatically resolving data providers for ComboBox
@@ -492,7 +492,7 @@ public final class CDataProviderResolver {
 			});
 
 			if (method != null) {
-				final Pageable pageable = PageRequest.of(0, DEFAULT_PAGE_SIZE);
+				final Pageable pageable = PageableUtils.createSafe(0, DEFAULT_PAGE_SIZE);
 				final Object result = method.invoke(serviceBean, pageable);
 
 				if (result instanceof org.springframework.data.domain.Page) {

@@ -50,7 +50,7 @@ public class CDecisionType extends CEntityOfProject {
 		description = "Indicates if decisions of this type require approval workflow",
 		hidden = false, order = 5
 	)
-	private boolean requiresApproval = true;
+	private Boolean requiresApproval = true;
 
 	@Column (name = "is_active", nullable = false)
 	@MetaData (
@@ -59,7 +59,7 @@ public class CDecisionType extends CEntityOfProject {
 		description = "Indicates if this decision type is currently active and available",
 		hidden = false, order = 6
 	)
-	private boolean isActive = true;
+	private Boolean isActive = true;
 
 	/**
 	 * Default constructor for JPA.

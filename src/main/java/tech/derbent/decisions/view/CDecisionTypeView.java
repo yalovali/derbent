@@ -1,5 +1,7 @@
 package tech.derbent.decisions.view;
 
+import java.util.List;
+
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
@@ -14,23 +16,25 @@ import tech.derbent.decisions.service.CDecisionTypeService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 
-@Route("decision-types/:decisiontype_id?/:action?(edit)")
-@PageTitle("Decision Types")
-@Menu(order = 11.1, icon = "vaadin:tags", title = "Types.Decision Types")
+@Route ("decision-types/:decisiontype_id?/:action?(edit)")
+@PageTitle ("Decision Types")
+@Menu (order = 11.1, icon = "vaadin:tags", title = "Types.Decision Types")
 @PermitAll
 public class CDecisionTypeView extends CProjectAwareMDPage<CDecisionType> {
 
 	private static final long serialVersionUID = 1L;
 
 	private final String ENTITY_ID_FIELD = "decisiontype_id";
+
 	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "decision-types/%s/edit";
 
 	/**
 	 * Constructor for CDecisionTypeView.
-	 * @param entityService the service for decision type operations
+	 * @param entityService  the service for decision type operations
 	 * @param sessionService
 	 */
-	public CDecisionTypeView(final CDecisionTypeService entityService, final CSessionService sessionService) {
+	public CDecisionTypeView(final CDecisionTypeService entityService,
+		final CSessionService sessionService) {
 		super(CDecisionType.class, entityService, sessionService);
 		addClassNames("decision-types-view");
 		LOGGER.info("CDecisionTypeView initialized with route: "
@@ -38,51 +42,29 @@ public class CDecisionTypeView extends CProjectAwareMDPage<CDecisionType> {
 	}
 
 	@Override
-	protected CDecisionType createNewEntityInstance() {
-		return new CDecisionType();
-	}
-
-	@Override
 	protected void createDetailsLayout() {
-		final Div detailsLayout =
-			CEntityFormBuilder.buildForm(CDecisionType.class, getBinder());
+		// Now we can include all fields with @MetaData annotation including the boolean
+		// fields
+		final Div detailsLayout = CEntityFormBuilder.buildForm(CDecisionType.class,
+			getBinder(), List.of("name", "description", "color"));
 		getBaseDetailsLayout().add(detailsLayout);
+		/*
+		 * final Div detailsLayout = CEntityFormBuilder.buildForm(CActivityType.class,
+		 * getBinder()); getBaseDetailsLayout().add(detailsLayout);
+		 */
 	}
 
 	@Override
 	protected void createGridForEntity() {
 		grid.addShortTextColumn(CDecisionType::getName, "Name", "name");
-		grid.addLongTextColumn(CDecisionType::getDescription, "Description", "description");
+		grid.addLongTextColumn(CDecisionType::getDescription, "Description",
+			"description");
 		grid.addShortTextColumn(CDecisionType::getProjectName, "Project", "project");
-		grid.addShortTextColumn(entity -> entity.getColor(), "Color", "color");
-		grid.addComponentColumn(entity -> {
-			final Div colorDiv = new Div();
-			colorDiv.getStyle().set("width", "20px");
-			colorDiv.getStyle().set("height", "20px");
-			colorDiv.getStyle().set("background-color", entity.getColor());
-			colorDiv.getStyle().set("border", "1px solid #ccc");
-			colorDiv.getStyle().set("border-radius", "3px");
-			return colorDiv;
-		}).setHeader("Preview").setWidth("80px").setFlexGrow(0);
+	}
 
-		grid.addComponentColumn(entity -> {
-			final Div approvalDiv = new Div();
-			approvalDiv.setText(entity.isRequiresApproval() ? "Yes" : "No");
-			approvalDiv.getStyle().set("padding", "4px 8px");
-			approvalDiv.getStyle().set("border-radius", "12px");
-			approvalDiv.getStyle().set("font-size", "12px");
-			approvalDiv.getStyle().set("font-weight", "bold");
-			if (entity.isRequiresApproval()) {
-				approvalDiv.getStyle().set("background-color", "#fff3e0");
-				approvalDiv.getStyle().set("color", "#ef6c00");
-			} else {
-				approvalDiv.getStyle().set("background-color", "#e8f5e8");
-				approvalDiv.getStyle().set("color", "#2e7d32");
-			}
-			return approvalDiv;
-		}).setHeader("Requires Approval").setWidth("150px").setFlexGrow(0);
-
-		grid.addShortTextColumn(entity -> String.valueOf(entity.getSortOrder()), "Order", "sortOrder");
+	@Override
+	protected CDecisionType createNewEntityInstance() {
+		return new CDecisionType();
 	}
 
 	@Override
@@ -100,7 +82,8 @@ public class CDecisionTypeView extends CProjectAwareMDPage<CDecisionType> {
 	}
 
 	@Override
-	protected void setProjectForEntity(CDecisionType entity, CProject project) {
+	protected void setProjectForEntity(final CDecisionType entity,
+		final CProject project) {
 		entity.setProject(project);
 	}
 

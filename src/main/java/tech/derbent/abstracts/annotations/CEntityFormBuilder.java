@@ -264,11 +264,9 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		}
 		final Class<T> fieldType = (Class<T>) field.getType();
 		final ComboBox<T> comboBox = new ComboBox<>();
-
 		// Following coding guidelines: All selective ComboBoxes must be selection only
 		// (user must not be able to type arbitrary text)
 		comboBox.setAllowCustomValue(false);
-
 		// Enhanced item label generator with null safety and proper display formatting
 		// Fix for combobox display issue: use getName() for CEntityNamed entities instead
 		// of toString()
@@ -353,11 +351,14 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		try {
 			comboBox.setItems(items);
 
-			// Set default value to first item if available and no default value specified in metadata
-			// This ensures ComboBoxes are not empty when forms are created/cleared
-			if (!items.isEmpty() && (meta.defaultValue() == null || meta.defaultValue().trim().isEmpty())) {
+			// Set default value to first item if available and no default value specified
+			// in metadata This ensures ComboBoxes are not empty when forms are
+			// created/cleared
+			if (!items.isEmpty() && (meta.defaultValue() == null
+				|| meta.defaultValue().trim().isEmpty())) {
 				comboBox.setValue(items.get(0));
-				LOGGER.debug("Set ComboBox default value to first item for field '{}': {}",
+				LOGGER.debug(
+					"Set ComboBox default value to first item for field '{}': {}",
 					field.getName(), items.get(0));
 			}
 		} catch (final Exception e) {
@@ -490,13 +491,13 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 				fieldType.getSimpleName(), field.getName());
 			return null;
 		}
+
 		// Null check before proceeding with component configuration
 		if (component == null) {
-			LOGGER.error("Component creation failed for field '{}' of type '{}'", 
+			LOGGER.error("Component creation failed for field '{}' of type '{}'",
 				field.getName(), fieldType.getSimpleName());
 			return null;
 		}
-		
 		setRequiredIndicatorVisible(meta, component);
 		setHelperText(meta, component);
 		setComponentWidth(component, meta);
@@ -551,11 +552,9 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		}
 		else {
 			final ComboBox<Enum> comboBox = new ComboBox<>();
-
-			// Following coding guidelines: All selective ComboBoxes must be selection only
-			// (user must not be able to type arbitrary text)
+			// Following coding guidelines: All selective ComboBoxes must be selection
+			// only (user must not be able to type arbitrary text)
 			comboBox.setAllowCustomValue(false);
-
 			comboBox.setItems(enumConstants);
 			comboBox.setItemLabelGenerator(Enum::name);
 			binder.bind(comboBox, field.getName());
@@ -601,34 +600,56 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 
 	private static NumberField createFloatingPointField(final Field field,
 		final MetaData meta, final BeanValidationBinder<?> binder) {
+
+		if (field == null || meta == null || binder == null) {
+			LOGGER.error(
+				"Null parameters in createFloatingPointField - field: {}, meta: {}, binder: {}",
+				field != null ? field.getName() : "null",
+				meta != null ? "present" : "null", binder != null ? "present" : "null");
+			return null;
+		}
 		final NumberField numberField = new NumberField();
+		// Set step for floating point fields
+		numberField.setStep(0.01);
+
+		// Set default value if specified
+		if (meta.defaultValue() != null && !meta.defaultValue().trim().isEmpty()) {
+
+			try {
+				final double defaultVal = Double.parseDouble(meta.defaultValue());
+				numberField.setValue(defaultVal);
+				LOGGER.debug("Set default value '{}' for floating point field '{}'",
+					defaultVal, field.getName());
+			} catch (final NumberFormatException e) {
+				LOGGER.error(
+					"Failed to parse default value '{}' as number for field '{}': {}",
+					meta.defaultValue(), field.getName(), e.getMessage());
+			}
+		}
+		// Handle different floating point types with proper conversion
+		final Class<?> fieldType = field.getType();
 
 		try {
 
-			if ((field.getType() == Double.class) || (field.getType() == double.class)) {
+			if (fieldType == Float.class || fieldType == float.class) {
 				binder.forField(numberField)
-					.withConverter(value -> value == null ? null : value.doubleValue(),
-						value -> value == null ? null : value, "Invalid double format")
+					.withConverter(value -> value != null ? value.floatValue() : null,
+						value -> value != null ? value.doubleValue() : null)
 					.bind(field.getName());
 			}
-			else if ((field.getType() == Float.class)
-				|| (field.getType() == float.class)) {
-				binder.forField(numberField)
-					.withConverter(value -> value == null ? null : value.floatValue(),
-						value -> value == null ? null : value.doubleValue(),
-						"Invalid float format")
-					.bind(field.getName());
-			}
-			else if (field.getType() == BigDecimal.class) {
+			else if (fieldType == BigDecimal.class) {
 				binder.forField(numberField)
 					.withConverter(
-						value -> value == null ? null : BigDecimal.valueOf(value),
-						value -> value == null ? null : value.doubleValue(),
-						"Invalid number format")
+						value -> value != null ? BigDecimal.valueOf(value) : null,
+						value -> value != null ? value.doubleValue() : null)
 					.bind(field.getName());
 			}
+			else {
+				// Default for Double/double
+				binder.bind(numberField, field.getName());
+			}
 		} catch (final Exception e) {
-			LOGGER.error("Failed to bind floating-point number field for field '{}': {}",
+			LOGGER.error("Failed to bind floating point field for field '{}': {}",
 				field.getName(), e.getMessage());
 			return null;
 		}
@@ -637,28 +658,55 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 
 	private static NumberField createIntegerField(final Field field, final MetaData meta,
 		final BeanValidationBinder<?> binder) {
+
+		if (field == null || meta == null || binder == null) {
+			LOGGER.error(
+				"Null parameters in createIntegerField - field: {}, meta: {}, binder: {}",
+				field != null ? field.getName() : "null",
+				meta != null ? "present" : "null", binder != null ? "present" : "null");
+			return null;
+		}
 		final NumberField numberField = new NumberField();
-		// Only allow integer values
+		// Set step for integer fields
 		numberField.setStep(1);
+
+		// Set default value if specified
+		if (meta.defaultValue() != null && !meta.defaultValue().trim().isEmpty()) {
+
+			try {
+				final double defaultVal = Double.parseDouble(meta.defaultValue());
+				numberField.setValue(defaultVal);
+				LOGGER.debug("Set default value '{}' for integer field '{}'", defaultVal,
+					field.getName());
+			} catch (final NumberFormatException e) {
+				LOGGER.error(
+					"Failed to parse default value '{}' as number for field '{}': {}",
+					meta.defaultValue(), field.getName(), e.getMessage());
+			}
+		}
+		// Handle different integer types with proper conversion
+		final Class<?> fieldType = field.getType();
 
 		try {
 
-			if ((field.getType() == Integer.class) || (field.getType() == int.class)) {
+			if (fieldType == Integer.class || fieldType == int.class) {
 				binder.forField(numberField)
-					.withConverter(value -> value == null ? null : value.intValue(),
-						value -> value == null ? null : value.doubleValue(),
-						"Invalid integer format")
+					.withConverter(value -> value != null ? value.intValue() : null,
+						value -> value != null ? value.doubleValue() : null)
 					.bind(field.getName());
 			}
-			else if ((field.getType() == Long.class) || (field.getType() == long.class)) {
+			else if (fieldType == Long.class || fieldType == long.class) {
 				binder.forField(numberField)
-					.withConverter(value -> value == null ? null : value.longValue(),
-						value -> value == null ? null : value.doubleValue(),
-						"Invalid long format")
+					.withConverter(value -> value != null ? value.longValue() : null,
+						value -> value != null ? value.doubleValue() : null)
 					.bind(field.getName());
+			}
+			else {
+				// Fallback for other integer types
+				binder.bind(numberField, field.getName());
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Failed to bind integer number field for field '{}': {}",
+			LOGGER.error("Failed to bind integer field for field '{}': {}",
 				field.getName(), e.getMessage());
 			return null;
 		}
@@ -668,7 +716,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 	private static TextField createTextField(final Field field, final MetaData meta,
 		final BeanValidationBinder<?> binder) {
 
-		if ((field == null) || (meta == null) || (binder == null)) {
+		if (field == null || meta == null || binder == null) {
 			LOGGER.error(
 				"Null parameters in createTextField - field: {}, meta: {}, binder: {}",
 				field != null ? field.getName() : "null",
@@ -677,18 +725,22 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		}
 		final TextField textField = new TextField();
 
-		// Safe null checking for default value
-		if ((meta.defaultValue() != null) && !meta.defaultValue().trim().isEmpty()) {
-			textField.setValue(meta.defaultValue());
-		}
-
-		// Validate and set max length
+		// Set max length if specified
 		if (meta.maxLength() > 0) {
 			textField.setMaxLength(meta.maxLength());
 		}
-		else if (meta.maxLength() < -1) {
-			LOGGER.warn("Invalid maxLength value {} for field '{}' - should be > 0 or -1",
-				meta.maxLength(), field.getName());
+
+		// Set default value if specified
+		if (meta.defaultValue() != null && !meta.defaultValue().trim().isEmpty()) {
+
+			try {
+				textField.setValue(meta.defaultValue());
+				LOGGER.debug("Set default value '{}' for text field '{}'",
+					meta.defaultValue(), field.getName());
+			} catch (final Exception e) {
+				LOGGER.error("Failed to set default value '{}' for text field '{}': {}",
+					meta.defaultValue(), field.getName(), e.getMessage());
+			}
 		}
 
 		try {
@@ -800,51 +852,61 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 	/**
 	 * Recursively searches for ComboBox components and resets them to their first item.
 	 */
-	@SuppressWarnings("unchecked")
-	private static void resetComboBoxesRecursively(final com.vaadin.flow.component.HasComponents container) {
+	@SuppressWarnings ("unchecked")
+	private static void resetComboBoxesRecursively(
+		final com.vaadin.flow.component.HasComponents container) {
 		container.getElement().getChildren().forEach(element -> {
+
 			// Get the component from the element
 			if (element.getComponent().isPresent()) {
-				final com.vaadin.flow.component.Component component = element.getComponent().get();
+				final com.vaadin.flow.component.Component component =
+					element.getComponent().get();
 
 				if (component instanceof ComboBox) {
 					final ComboBox<Object> comboBox = (ComboBox<Object>) component;
+
 					try {
 						// Get the first item from the ComboBox data provider
-						final java.util.Optional<Object> firstItem = comboBox.getDataProvider()
-							.fetch(new com.vaadin.flow.data.provider.Query<>())
-							.findFirst();
+						final java.util.Optional<Object> firstItem =
+							comboBox.getDataProvider()
+								.fetch(new com.vaadin.flow.data.provider.Query<>())
+								.findFirst();
 
 						if (firstItem.isPresent()) {
 							comboBox.setValue(firstItem.get());
-							LOGGER.debug("Reset ComboBox to first item: {}", firstItem.get());
-						} else {
+							LOGGER.debug("Reset ComboBox to first item: {}",
+								firstItem.get());
+						}
+						else {
 							LOGGER.debug("ComboBox has no items to reset to");
 						}
 					} catch (final Exception e) {
-						LOGGER.warn("Error resetting ComboBox to first item: {}", e.getMessage());
+						LOGGER.warn("Error resetting ComboBox to first item: {}",
+							e.getMessage());
 					}
-				} else if (component instanceof com.vaadin.flow.component.HasComponents) {
+				}
+				else if (component instanceof com.vaadin.flow.component.HasComponents) {
 					// Recursively check child components
-					resetComboBoxesRecursively((com.vaadin.flow.component.HasComponents) component);
+					resetComboBoxesRecursively(
+						(com.vaadin.flow.component.HasComponents) component);
 				}
 			}
 		});
 	}
 
 	/**
-	 * Resets all ComboBox components in a container to their first available item.
-	 * This method is useful for implementing "New" button behavior where ComboBoxes
-	 * should default to their first option instead of being empty.
-	 *
+	 * Resets all ComboBox components in a container to their first available item. This
+	 * method is useful for implementing "New" button behavior where ComboBoxes should
+	 * default to their first option instead of being empty.
 	 * @param container the container component to search for ComboBoxes
 	 */
-	public static void resetComboBoxesToFirstItem(final com.vaadin.flow.component.HasComponents container) {
+	public static void resetComboBoxesToFirstItem(
+		final com.vaadin.flow.component.HasComponents container) {
+
 		if (container == null) {
 			LOGGER.warn("Container is null in resetComboBoxesToFirstItem");
 			return;
 		}
-
 		resetComboBoxesRecursively(container);
 	}
 

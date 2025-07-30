@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -21,6 +21,7 @@ import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
+import tech.derbent.abstracts.utils.PageableUtils;
 
 /**
  * Abstract project-aware MD page that filters entities by the currently active project.
@@ -143,8 +144,7 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB>
 		final Optional<CProject> activeProject = sessionService.getActiveProject();
 
 		if (activeProject.isPresent()) {
-			LOGGER.debug("Active project found: {}", activeProject.get().getName());
-			
+			LOGGER.debug("Loading entities for active project: {}", activeProject.get().getName());
 			List<? extends CEntityDB> entities;
 			
 			// Check if the entity service is for CEntityOfProject entities
@@ -152,11 +152,11 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB>
 				@SuppressWarnings("unchecked")
 				final CEntityOfProjectService<CEntityOfProject> projectService = 
 					(CEntityOfProjectService<CEntityOfProject>) entityService;
-				entities = projectService.findEntitiesByProject(activeProject.get(), PageRequest.of(0, 10));
+				entities = projectService.findEntitiesByProject(activeProject.get(), PageableUtils.createSafe(0, 10));
 			} else {
 				// For non-project entities, show all entities (they don't have project filtering)
 				LOGGER.debug("Entity service is not project-aware, showing all entities");
-				entities = entityService.list(PageRequest.of(0, 10));
+				entities = entityService.list(PageableUtils.createSafe(0, 10));
 			}
 			
 			@SuppressWarnings("unchecked")
@@ -183,7 +183,7 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB>
 			return;
 		}
 		
-		final PageRequest pageable = PageRequest.of(0, 1); // first page, 1 item
+		final Pageable pageable = PageableUtils.createSafe(0, 1); // first page, 1 item
 		List<? extends CEntityDB> result;
 		
 		// Check if the entity service is for CEntityOfProject entities

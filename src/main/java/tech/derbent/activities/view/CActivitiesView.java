@@ -6,7 +6,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.views.CAccordionDescription;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.activities.domain.CActivity;
@@ -43,8 +42,8 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 	 */
 	@Override
 	protected void createDetailsLayout() {
-		getBaseDetailsLayout()
-			.add(CEntityFormBuilder.buildForm(CActivity.class, getBinder(), null));
+		// getBaseDetailsLayout().add(CEntityFormBuilder.buildForm(CActivity.class,
+		// getBinder(), null));
 		CAccordionDescription<CActivity> panel;
 		panel = new CPanelActivityDescription(getCurrentEntity(), getBinder(),
 			(CActivityService) entityService);
