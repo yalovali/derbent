@@ -27,9 +27,17 @@ public class DatabaseResetService {
 
 	public void resetDatabase() throws Exception {
 		LOGGER.info("Resetting database to initial state...");
-		final ResourceDatabasePopulator populator =
-			new ResourceDatabasePopulator(new ClassPathResource("data.sql"));
-		populator.execute(dataSource);
+		
+		// Check if data.sql exists before trying to execute it
+		final ClassPathResource dataResource = new ClassPathResource("data.sql");
+		if (dataResource.exists()) {
+			LOGGER.info("Found data.sql, executing SQL script...");
+			final ResourceDatabasePopulator populator = new ResourceDatabasePopulator(dataResource);
+			populator.execute(dataSource);
+		} else {
+			LOGGER.info("No data.sql found, skipping SQL script execution");
+		}
+		
 		// Reinitialize sample data
 		sampleDataInitializer.loadSampleData();
 	}
