@@ -1,6 +1,7 @@
 package tech.derbent.users.service;
 
 import java.time.Clock;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,5 +60,24 @@ public class CUserTypeService extends CEntityOfProjectService<CUserType> {
 	@Override
 	protected CUserType createNewEntityInstance() {
 		return new CUserType();
+	}
+
+	/**
+	 * Gets a user type by ID with eagerly loaded relationships.
+	 * Overrides parent get() method to prevent LazyInitializationException.
+	 * @param id the user type ID
+	 * @return Optional containing the user type with loaded relationships
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public Optional<CUserType> get(final Long id) {
+		if (id == null) {
+			LOGGER.debug("Getting CUserType with null ID - returning empty");
+			return Optional.empty();
+		}
+		LOGGER.debug("Getting CUserType with ID {} (with eager loading)", id);
+		final Optional<CUserType> entity = ((CUserTypeRepository) repository).findByIdWithRelationships(id);
+		entity.ifPresent(this::initializeLazyFields);
+		return entity;
 	}
 }

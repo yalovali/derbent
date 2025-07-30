@@ -1,6 +1,7 @@
 package tech.derbent.meetings.service;
 
 import java.time.Clock;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,5 +61,24 @@ public class CMeetingTypeService extends CEntityOfProjectService<CMeetingType> {
 	@Override
 	protected CMeetingType createNewEntityInstance() {
 		return new CMeetingType();
+	}
+
+	/**
+	 * Gets a meeting type by ID with eagerly loaded relationships.
+	 * Overrides parent get() method to prevent LazyInitializationException.
+	 * @param id the meeting type ID
+	 * @return Optional containing the meeting type with loaded relationships
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public Optional<CMeetingType> get(final Long id) {
+		if (id == null) {
+			LOGGER.debug("Getting CMeetingType with null ID - returning empty");
+			return Optional.empty();
+		}
+		LOGGER.debug("Getting CMeetingType with ID {} (with eager loading)", id);
+		final Optional<CMeetingType> entity = ((CMeetingTypeRepository) repository).findByIdWithRelationships(id);
+		entity.ifPresent(this::initializeLazyFields);
+		return entity;
 	}
 }
