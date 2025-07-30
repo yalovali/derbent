@@ -71,6 +71,10 @@ public class CUserTypeService extends CEntityOfProjectService<CUserType> {
 	@Override
 	@Transactional(readOnly = true)
 	public Optional<CUserType> get(final Long id) {
+		if (id == null) {
+			LOGGER.debug("Getting CUserType with null ID - returning empty");
+			return Optional.empty();
+		}
 		LOGGER.debug("Getting CUserType with ID {} (with eager loading)", id);
 		final Optional<CUserType> entity = ((CUserTypeRepository) repository).findByIdWithRelationships(id);
 		entity.ifPresent(this::initializeLazyFields);

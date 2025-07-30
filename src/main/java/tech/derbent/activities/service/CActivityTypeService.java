@@ -72,6 +72,10 @@ public class CActivityTypeService extends CEntityOfProjectService<CActivityType>
 	@Override
 	@Transactional(readOnly = true)
 	public Optional<CActivityType> get(final Long id) {
+		if (id == null) {
+			LOGGER.debug("Getting CActivityType with null ID - returning empty");
+			return Optional.empty();
+		}
 		LOGGER.debug("Getting CActivityType with ID {} (with eager loading)", id);
 		final Optional<CActivityType> entity = ((CActivityTypeRepository) repository).findByIdWithRelationships(id);
 		entity.ifPresent(this::initializeLazyFields);

@@ -41,6 +41,10 @@ public class CDecisionTypeService extends CEntityOfProjectService<CDecisionType>
     @Override
     @Transactional(readOnly = true)
     public Optional<CDecisionType> get(final Long id) {
+        if (id == null) {
+            LOGGER.debug("Getting CDecisionType with null ID - returning empty");
+            return Optional.empty();
+        }
         LOGGER.debug("Getting CDecisionType with ID {} (with eager loading)", id);
         final Optional<CDecisionType> entity = ((CDecisionTypeRepository) repository).findByIdWithRelationships(id);
         entity.ifPresent(this::initializeLazyFields);
