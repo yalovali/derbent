@@ -34,7 +34,7 @@ public class CCommentPriority extends CTypeEntity {
 		defaultValue = "3", description = "Priority level of the comment", hidden = false,
 		order = 2, useRadioButtons = false
 	)
-	Integer PriorityLevel = 3; // Default to normal priority
+	private Integer priorityLevel = 3; // Default to normal priority
 
 	/**
 	 * Indicates if this is the default priority.
@@ -74,7 +74,7 @@ public class CCommentPriority extends CTypeEntity {
 	public CCommentPriority(final String name, final Integer priorityLevel) {
 		super();
 		setName(name);
-		this.PriorityLevel = priorityLevel;
+		this.priorityLevel = priorityLevel;
 		LOGGER.debug("CCommentPriority constructor called with name: {} and priorityLevel: {}",
 			name, priorityLevel);
 	}
@@ -96,10 +96,10 @@ public class CCommentPriority extends CTypeEntity {
 			name, project, color, sortOrder);
 	}
 
-	public Integer getPriorityLevel() { return PriorityLevel; }
+	public Integer getPriorityLevel() { return priorityLevel; }
 
 	public void setPriorityLevel(final Integer priorityLevel) {
-		PriorityLevel = priorityLevel;
+		this.priorityLevel = priorityLevel;
 	}
 
 	/**
@@ -134,6 +134,6 @@ public class CCommentPriority extends CTypeEntity {
 		return String.format(
 			"CCommentPriority{id=%d, name='%s', color='%s', sortOrder=%d, isActive=%s, project=%s, priorityLevel=%d, isDefault=%s}",
 			getId(), getName(), getColor(), getSortOrder(), getIsActive(),
-			getProject() != null ? getProject().getName() : "null", PriorityLevel, isDefault);
+			getProject() != null ? getProject().getName() : "null", priorityLevel, isDefault);
 	}
 }
