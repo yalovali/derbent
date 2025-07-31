@@ -1,5 +1,6 @@
 package tech.derbent.base.data;
 
+import java.sql.Connection;
 import javax.sql.DataSource;
 
 import org.slf4j.Logger;
@@ -28,6 +29,23 @@ public class DatabaseResetService {
 	public void resetDatabase() throws Exception {
 		LOGGER.info("Resetting database to initial state...");
 		
+		try {
+			// Drop all tables to ensure clean state
+			LOGGER.info("Dropping all tables for clean reset...");
+			final Connection connection = dataSource.getConnection();
+			try {
+				// For H2, drop all objects to ensure clean state
+				connection.createStatement().execute("DROP ALL OBJECTS");
+				LOGGER.info("All database objects dropped successfully");
+			} catch (final Exception e) {
+				LOGGER.warn("Could not drop all objects, continuing with reset: {}", e.getMessage());
+			} finally {
+				connection.close();
+			}
+		} catch (final Exception e) {
+			LOGGER.warn("Error during database cleanup, continuing: {}", e.getMessage());
+		}
+		
 		// Check if data.sql exists before trying to execute it
 		final ClassPathResource dataResource = new ClassPathResource("data.sql");
 		if (dataResource.exists()) {
@@ -39,6 +57,8 @@ public class DatabaseResetService {
 		}
 		
 		// Reinitialize sample data
+		LOGGER.info("Reinitializing sample data...");
 		sampleDataInitializer.loadSampleData();
+		LOGGER.info("Database reset completed successfully");
 	}
 }

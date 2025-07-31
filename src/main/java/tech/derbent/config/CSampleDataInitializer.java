@@ -20,6 +20,8 @@ import tech.derbent.activities.service.CActivityService;
 import tech.derbent.activities.service.CActivityStatusService;
 import tech.derbent.activities.service.CActivityTypeService;
 import tech.derbent.comments.service.CCommentService;
+import tech.derbent.comments.service.CCommentPriorityService;
+import tech.derbent.comments.domain.CCommentPriority;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.decisions.domain.CDecisionStatus;
@@ -91,6 +93,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 	private final CCommentService commentService;
 
+	private final CCommentPriorityService commentPriorityService;
+
 	private final CMeetingService meetingService;
 
 	private final CRiskService riskService;
@@ -112,7 +116,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CMeetingTypeService meetingTypeService,
 		final CDecisionTypeService decisionTypeService,
 		final COrderTypeService orderTypeService, final CCompanyService companyService,
-		final CCommentService commentService, final CMeetingService meetingService,
+		final CCommentService commentService, final CCommentPriorityService commentPriorityService, final CMeetingService meetingService,
 		final CRiskService riskService, final CMeetingStatusService meetingStatusService,
 		final CDecisionStatusService decisionStatusService,
 		final CActivityStatusService activityStatusService,
@@ -130,6 +134,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		this.orderTypeService = orderTypeService;
 		this.companyService = companyService;
 		this.commentService = commentService;
+		this.commentPriorityService = commentPriorityService;
 		this.meetingService = meetingService;
 		this.riskService = riskService;
 		this.meetingStatusService = meetingStatusService;
@@ -398,6 +403,20 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		// isFinal, sortOrder
 		orderStatusService.save(status);
 		LOGGER.debug("Created order status: {}", name);
+	}
+
+	private void createCommentPriority(final String name, final String description,
+		final String color, final Integer priorityLevel, final boolean isDefault, final int sortOrder) {
+		final CProject project = findProjectByName("Digital Transformation Initiative");
+		if (project == null) {
+			LOGGER.warn("Project not found for comment priority creation, using null");
+		}
+		final CCommentPriority priority = new CCommentPriority(name, project, color, sortOrder);
+		priority.setDescription(description);
+		priority.setPriorityLevel(priorityLevel);
+		priority.setDefault(isDefault);
+		commentPriorityService.save(priority);
+		LOGGER.debug("Created comment priority: {}", name);
 	}
 
 	/**
@@ -1469,6 +1488,31 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	}
 
 	/**
+	 * Initialize comment priority entities with comprehensive sample data.
+	 */
+	private void initializeCommentPriorities() {
+		LOGGER.info(
+			"initializeCommentPriorities called - creating comment priority classifications");
+
+		try {
+			createCommentPriority("Critical", "Critical priority requiring immediate attention",
+				"#e74c3c", 1, false, 1);
+			createCommentPriority("High", "High priority requiring urgent attention",
+				"#f39c12", 2, false, 2);
+			createCommentPriority("Normal", "Normal priority for standard processing",
+				"#3498db", 3, true, 3);
+			createCommentPriority("Low", "Low priority for non-urgent matters",
+				"#95a5a6", 4, false, 4);
+			createCommentPriority("Info", "Informational priority for reference",
+				"#27ae60", 5, false, 5);
+			LOGGER.info("Comment priorities initialized successfully");
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing comment priorities", e);
+			throw new RuntimeException("Failed to initialize comment priorities", e);
+		}
+	}
+
+	/**
 	 * Initializes sample projects with different scopes and characteristics.
 	 */
 	private void initializeProjects() {
@@ -1594,6 +1638,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			initializeDecisionStatuses();
 			initializeActivityStatuses();
 			initializeOrderStatuses();
+			initializeCommentPriorities(); // Initialize comment priorities
 			initializeUserTypes(); // Now can use projects
 			initializeMeetingTypes();
 			initializeDecisionTypes();
@@ -1617,11 +1662,10 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			args);
 
 		try {
-
-			// Check if database already has data - if so, skip initialization
+			// Check if database already has data - if so, skip initialization only on app startup
 			if (!isDatabaseEmpty()) {
 				LOGGER.info(
-					"Database already contains data, skipping sample data initialization");
+					"Database already contains data, skipping sample data initialization on startup");
 				return;
 			}
 			loadSampleData(); // Load sample data
