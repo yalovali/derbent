@@ -31,10 +31,10 @@ public class CCommentPriority extends CTypeEntity {
 	@Column (name = "priority_level", nullable = false, length = 20)
 	@MetaData (
 		displayName = "Priority Level", required = false, readOnly = false,
-		defaultValue = "LOW", description = "Severity level of the risk", hidden = false,
+		defaultValue = "3", description = "Priority level of the comment", hidden = false,
 		order = 2, useRadioButtons = false
 	)
-	Integer PriorityLevel;
+	Integer PriorityLevel = 3; // Default to normal priority
 
 	/**
 	 * Indicates if this is the default priority.

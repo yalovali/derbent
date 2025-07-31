@@ -20,7 +20,7 @@ public interface CCommentPriorityRepository extends CAbstractNamedRepository<CCo
      * Finds all comment priorities ordered by priority level (highest first).
      * @return list of comment priorities ordered by priority level
      */
-    @Query("SELECT p FROM CCommentPriority p ORDER BY p.priorityLevel ASC")
+    @Query("SELECT p FROM CCommentPriority p ORDER BY p.PriorityLevel ASC")
     List<CCommentPriority> findAllOrderByPriorityLevel();
 
     /**
