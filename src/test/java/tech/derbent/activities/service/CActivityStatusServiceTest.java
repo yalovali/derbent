@@ -1,7 +1,12 @@
 package tech.derbent.activities.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Clock;
@@ -13,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import tech.derbent.activities.domain.CActivityStatus;
+import tech.derbent.projects.domain.CProject;
 
 /**
  * Test class for CActivityStatusService functionality. Tests CRUD operations, error
@@ -42,32 +48,75 @@ class CActivityStatusServiceTest {
 
 	@Test
 	void testCreateEntityWithBlankName() {
-		// TODO FIXME - should throw IllegalArgumentException
+		// Given
+		final CProject project = new CProject();
+		project.setName("Test Project");
+		
+		// When & Then
+		assertThrows(IllegalArgumentException.class, () -> {
+			new CActivityStatus("   ", project);
+		}, "Should throw IllegalArgumentException for blank name");
 	}
 
 	@Test
 	void testCreateEntityWithEmptyName() {
-		// TODO FIXME - should throw IllegalArgumentException
-	}
-
-	@Test
-	void testCreateEntityWithFailName() {
-		// TODO FIXME - should throw IllegalArgumentException
-	}
-
-	@Test
-	void testCreateEntityWithName() {
-		// TODO FIXME - should throw IllegalArgumentException
-	}
-
-	@Test
-	void testCreateEntityWithNameAndDescription() {
-		// TODO FIXME - should throw IllegalArgumentException
+		// Given
+		final CProject project = new CProject();
+		project.setName("Test Project");
+		
+		// When & Then
+		assertThrows(IllegalArgumentException.class, () -> {
+			new CActivityStatus("", project);
+		}, "Should throw IllegalArgumentException for empty name");
 	}
 
 	@Test
 	void testCreateEntityWithNullName() {
-		// TODO FIXME - should throw IllegalArgumentException
+		// Given
+		final CProject project = new CProject();
+		project.setName("Test Project");
+		
+		// When & Then
+		assertThrows(IllegalArgumentException.class, () -> {
+			new CActivityStatus(null, project);
+		}, "Should throw IllegalArgumentException for null name");
+	}
+
+	@Test
+	void testCreateEntityWithValidName() {
+		// Given
+		final CProject project = new CProject();
+		project.setName("Test Project");
+		final String validName = "TODO";
+		
+		// When
+		final CActivityStatus status = new CActivityStatus(validName, project);
+		
+		// Then
+		assertNotNull(status);
+		assertEquals(validName, status.getName());
+		assertEquals(project, status.getProject());
+		assertFalse(status.isFinal());
+	}
+
+	@Test
+	void testCreateEntityWithNameAndDescription() {
+		// Given
+		final CProject project = new CProject();
+		project.setName("Test Project");
+		final String name = "IN_PROGRESS";
+		final String description = "Work is in progress";
+		final String color = "#0066cc";
+		
+		// When
+		final CActivityStatus status = new CActivityStatus(name, project, description, color, false);
+		
+		// Then
+		assertNotNull(status);
+		assertEquals(name, status.getName());
+		assertEquals(description, status.getDescription());
+		assertEquals(project, status.getProject());
+		assertFalse(status.isFinal());
 	}
 
 	@Test
@@ -91,12 +140,20 @@ class CActivityStatusServiceTest {
 
 	@Test
 	void testGetWithValidId() {
-		// todo FIXME - should throw IllegalArgumentException
-	}
-
-	@Test
-	void testInitializeLazyFieldsWithNullEntity() {
-		// TODO FIXME - should throw IllegalArgumentException
+		// Given
+		final Long statusId = 1L;
+		final CProject project = new CProject();
+		project.setName("Test Project");
+		final CActivityStatus expectedStatus = new CActivityStatus("TODO", project);
+		when(repository.findById(statusId)).thenReturn(Optional.of(expectedStatus));
+		
+		// When
+		final Optional<CActivityStatus> result = activityStatusService.get(statusId);
+		
+		// Then
+		assertTrue(result.isPresent());
+		assertEquals(expectedStatus, result.get());
+		verify(repository).findById(statusId);
 	}
 
 	@Test
