@@ -12,9 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.service.CMeetingService;
-import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
-import tech.derbent.users.service.CUserService;
 
 /**
  * Test class for meeting participants display issues. Addresses the problem where
@@ -25,12 +23,6 @@ public class CMeetingParticipantsDisplayTest {
 
 	@Autowired
 	private CMeetingService meetingService;
-
-	@Autowired
-	private CUserService userService;
-
-	@Autowired
-	private CProjectService projectService;
 
 	@Test
 	public void testMeetingParticipantsDisplayCorrectly() {

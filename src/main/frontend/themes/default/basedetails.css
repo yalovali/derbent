@@ -1,0 +1,134 @@
+:root {
+  --form-field-label-width: 150px;
+  --form-field-max-width: 180px;
+  --form-field-margin-right: 12px;
+}
+
+.baseDetailsLayout {
+	row-gap: 10px;
+	column-gap: 0px;
+}
+
+.form-field-NumberField{
+	max-width: var(--form-field-max-width);	
+	
+}
+
+.form-field-DatePicker{
+	max-width: var(--form-field-max-width);
+}
+
+::part(input-field) {
+    background-color: transparent;
+    box-shadow: none;
+    padding: 0;
+	border-bottom: 1px solid transparent;
+	/*background: linear-gradient(to right, gray, transparent);*/
+
+
+}
+
+::part(input-field):focus-within {
+    background-color: var(--lumo-base-color);
+    border-radius: var(--lumo-border-radius);
+	border-bottom: 1px solid var(--lumo-primary-color);
+}
+
+.form-field-ComboBox{
+    max-width: var(--form-field-max-width);
+	background-color: transparent;
+}
+
+.form-field-ComboBox::part(input-field) {
+    max-width: var(--form-field-max-width);
+	background-color: transparent;
+}
+
+
+.form-field-label{
+	text-align: right;
+    font-size: var(--lumo-font-size-m);
+    font-weight: 500;
+    color: var(--lumo-body-text-color);
+    margin-bottom: 0.5em;
+	min-width: var(--form-field-max-width);
+	max-width: var(--form-field-max-width);
+	margin-right: 10px;
+}
+
+.form-field-TextField {
+    background-color: transparent;
+    box-shadow: none;
+    padding: 0;
+}
+
+.form-field-layout{
+	/*border: 1px solid var(--lumo-primary-color);*/
+	margin: 0 !important;
+	padding: 0 !important;
+	gap: 0 !important;	
+}
+
+xvaadin-vertical-layout{
+	width: 100%;
+    padding: 0px;
+    margin: 0px;
+    spacing: 0px;
+}
+
+
+.editor-layout{
+	width:100%;
+	/*background-color:yellow;*/
+	padding: 0px;
+	margin: 0px;
+	spacing: 0px;
+}
+
+/* Enhanced tabs styling */
+.details-tab-layout {
+    background: linear-gradient(135deg, var(--lumo-primary-color-10pct), var(--lumo-base-color));
+    border-radius: var(--lumo-border-radius-m);
+    padding: 0;
+    margin-bottom: 2px;
+    box-shadow: var(--lumo-box-shadow-xs);
+    border: 1px solid var(--lumo-contrast-10pct);
+    width: 99%;
+}
+
+.details-tab-content {
+    display: flex;
+    align-items: center;
+}
+
+.details-tab-label {
+    font-size: var(--lumo-font-size-l);
+    font-weight: 600;
+    color: var(--lumo-header-text-color);
+    display: flex;
+    align-items: center;
+    gap: var(--lumo-space-s);
+}
+
+.details-tab-label vaadin-icon {
+    color: var(--lumo-primary-color);
+}
+
+/* Button improvements */
+.details-tab-button-layout vaadin-button {
+    margin-left: var(--lumo-space-s);
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.details-tab-button-layout vaadin-button:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--lumo-box-shadow-s);
+}
+
+/* Grid wrapper improvements */
+.grid-wrapper {
+    padding: var(--lumo-space-m);
+    background: var(--lumo-contrast-5pct);
+    border-radius: var(--lumo-border-radius-m);
+}

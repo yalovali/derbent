@@ -20,8 +20,6 @@ import tech.derbent.activities.domain.CActivityType;
 import tech.derbent.activities.service.CActivityService;
 import tech.derbent.activities.service.CActivityStatusService;
 import tech.derbent.activities.service.CActivityTypeService;
-import tech.derbent.comments.domain.CComment;
-import tech.derbent.comments.domain.CCommentPriority;
 import tech.derbent.comments.service.CCommentPriorityService;
 import tech.derbent.comments.service.CCommentService;
 import tech.derbent.companies.domain.CCompany;
@@ -38,7 +36,6 @@ import tech.derbent.meetings.domain.CMeetingType;
 // Import all services needed for comprehensive testing
 import tech.derbent.meetings.service.CMeetingService;
 import tech.derbent.meetings.service.CMeetingTypeService;
-import tech.derbent.orders.domain.COrder;
 import tech.derbent.orders.service.COrderService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
@@ -222,13 +219,8 @@ public class ComprehensiveViewCRUDTest {
 	 */
 	@Test
 	public void testCommentViewsCRUD() {
-		// Test CCommentView - comment management
-		final List<CComment> comments = commentService.list(Pageable.unpaged());
-		// Comments might be empty initially, but test if they exist Test
-		// CCommentPriorityView - comment priority management
-		final List<CCommentPriority> commentPriorities =
-			commentPriorityService.list(Pageable.unpaged());
-		// Comment priorities might be empty initially, that's acceptable
+		commentService.list(Pageable.unpaged());
+		commentPriorityService.list(Pageable.unpaged());
 	}
 
 	/**
@@ -379,9 +371,7 @@ public class ComprehensiveViewCRUDTest {
 	 */
 	@Test
 	public void testOrderViewsCRUD() {
-		// Test COrdersView - order management
-		final List<COrder> orders = orderService.list(Pageable.unpaged());
-		// Orders might be empty initially, but test if they exist
+		orderService.list(Pageable.unpaged());
 	}
 
 	/**

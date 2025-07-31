@@ -23,11 +23,11 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
-import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -94,8 +94,14 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		}
 		final Div panel = new Div();
 		panel.setClassName("editor-layout");
-		final FormLayout formLayout = new FormLayout();
-		// Collect all fields from the class hierarchy with enhanced logging
+		// final FormLayout formLayout = new FormLayout();
+		final VerticalLayout formLayout = new VerticalLayout();
+		// no spacing, no margin, no padding
+		formLayout.setPadding(false);
+		formLayout.setMargin(false);
+		formLayout.setSpacing(false);
+		// formLayout.setLabelsAside(true); formLayout.addFormItem(firstName, "First
+		// name"); Collect all fields from the class hierarchy with enhanced logging
 		final List<Field> allFields = new ArrayList<>();
 		getListOfAllFields(entityClass, allFields);
 		// LOGGER.debug("Total fields collected from hierarchy: {}", allFields.size());
@@ -440,7 +446,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			return null;
 		}
 		setRequiredIndicatorVisible(meta, component);
-		setHelperText(meta, component);
+		// dont use helper text for Checkbox components setHelperText(meta, component);
 		setComponentWidth(component, meta);
 		// setclass name for styling in format of form-field{ComponentType}
 		component.setClassName("form-field-" + component.getClass().getSimpleName());
@@ -517,6 +523,8 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			return null;
 		}
 		final HorizontalLayout horizontalLayout = new HorizontalLayout();
+		horizontalLayout.setClassName("form-field-layout");
+		horizontalLayout.setWidthFull();
 		horizontalLayout.setPadding(false);
 		horizontalLayout.setSpacing(false);
 		horizontalLayout.setMargin(false);
@@ -527,7 +535,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			((meta.displayName() != null) && !meta.displayName().trim().isEmpty())
 				? meta.displayName() : "Field";
 		final Div labelDiv = new Div(displayName);
-		labelDiv.setMinWidth(LabelMinWidth_210PX);
+		labelDiv.setClassName("form-field-label");
 
 		if (meta.required()) {
 			labelDiv.getStyle().set("font-weight", "bold");
@@ -559,8 +567,6 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			try {
 				final double defaultVal = Double.parseDouble(meta.defaultValue());
 				numberField.setValue(defaultVal);
-				LOGGER.debug("Set default value '{}' for floating point field '{}'",
-					defaultVal, field.getName());
 			} catch (final NumberFormatException e) {
 				LOGGER.error(
 					"Failed to parse default value '{}' as number for field '{}': {}",
@@ -703,6 +709,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			return null;
 		}
 		final TextField item = new TextField();
+		item.setClassName("plain-look-textfield");
 
 		if (meta.maxLength() > 0) {
 			item.setMaxLength(meta.maxLength());
@@ -777,7 +784,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 
 	private static <EntityClass> int processMetaForField(
 		final BeanValidationBinder<EntityClass> binder,
-		final ComboBoxDataProvider dataProvider, final FormLayout formLayout,
+		final ComboBoxDataProvider dataProvider, final VerticalLayout formLayout,
 		int processedComponents, final Field field) {
 
 		if (field == null) {

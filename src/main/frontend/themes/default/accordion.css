@@ -1,4 +1,3 @@
-
 vaadin-accordion-heading{
 	
     font-size: var(--lumo-font-size-m);
@@ -8,8 +7,24 @@ vaadin-accordion-heading{
 		border-bottom: 1px solid var(--lumo-contrast-10pct);
 }
 
+vaadin-accordion-panel {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+vaadin-accordion {
+    gap: 0 !important;
+}
+
 .c-accordion {
-    margin: 0;
-    padding: 0;
-	width: 50%;
+    margin: 0px;
+    padding: 0px;
+	width: 50%;	 
+}
+
+.c-accordion-content-layout{
+	/*background-color:green;*/
+	margin: 10px;
+	padding: 0;
+	gap: 0 !important;
 }

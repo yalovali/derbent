@@ -32,6 +32,10 @@ public class CAccordion extends Accordion {
 		addClassName("c-accordion");
 		// getStyle().("min-width", "300px"); setWidthFull(); setMin
 		add(title, baseLayout);
+		baseLayout.setWidthFull();
+		baseLayout.setPadding(false);
+		baseLayout.setMargin(false);
+		baseLayout.setClassName("c-accordion-content-layout");
 	}
 
 	/**
