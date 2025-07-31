@@ -2,99 +2,101 @@ package tech.derbent.ui.automation;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.File;
-import java.time.Duration;
+import java.nio.file.Paths;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
+import com.microsoft.playwright.Browser;
+import com.microsoft.playwright.BrowserContext;
+import com.microsoft.playwright.BrowserType;
+import com.microsoft.playwright.Page;
+import com.microsoft.playwright.Playwright;
 
 /**
- * SimpleUIDemo - A standalone demo of browser automation without Spring Boot dependency.
+ * SimpleUIDemo - A standalone demo of browser automation using Playwright.
  * 
  * This test demonstrates basic browser automation capabilities:
- * - Opens a real Chrome browser
- * - Navigates to a website
+ * - Opens a real browser using Playwright
+ * - Navigates to websites
  * - Takes screenshots
  * - Verifies page content
+ * - Shows form interactions
  * 
  * This test works independently of the application and shows the testing infrastructure.
+ * Playwright provides better performance and reliability compared to Selenium.
  */
 public class SimpleUIDemo {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleUIDemo.class);
-    private WebDriver driver;
+    
+    private Playwright playwright;
+    private Browser browser;
+    private BrowserContext context;
+    private Page page;
 
     @BeforeEach
     void setUp() {
-        LOGGER.info("Setting up browser automation demo...");
+        LOGGER.info("Setting up Playwright browser automation demo...");
         
-        // Setup WebDriver using WebDriverManager
-        WebDriverManager.chromedriver().setup();
+        // Initialize Playwright
+        playwright = Playwright.create();
         
-        // Configure Chrome options
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless"); // Run headless for demo
-        options.addArguments("--no-sandbox");
-        options.addArguments("--disable-dev-shm-usage");
-        options.addArguments("--window-size=1920,1080");
+        // Launch browser (Chromium)
+        browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
+            .setHeadless(true)  // Run headless for demo
+            .setSlowMo(100));   // Add small delay between actions
         
-        driver = new ChromeDriver(options);
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+        // Create context and page
+        context = browser.newContext();
+        page = context.newPage();
         
-        LOGGER.info("Browser automation setup completed");
+        LOGGER.info("Playwright browser automation setup completed");
     }
 
     @AfterEach
     void tearDown() {
-        if (driver != null) {
+        if (page != null) {
             takeScreenshot("demo-final");
-            driver.quit();
-            LOGGER.info("Browser closed");
+            page.close();
         }
+        if (context != null) context.close();
+        if (browser != null) browser.close();
+        if (playwright != null) playwright.close();
+        
+        LOGGER.info("Playwright browser closed");
     }
 
     @Test
     void demonstrateBrowserAutomation() {
-        LOGGER.info("=== Browser Automation Demo ===");
+        LOGGER.info("=== Playwright Browser Automation Demo ===");
         
         // Navigate to a simple webpage
         LOGGER.info("Navigating to example.com...");
-        driver.get("https://example.com");
+        page.navigate("https://example.com");
         
         // Wait for page to load
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        page.waitForLoadState();
         
         // Take screenshot
         takeScreenshot("demo-example-page");
         
         // Verify page content
-        String title = driver.getTitle();
+        String title = page.title();
         LOGGER.info("Page title: {}", title);
         assertTrue(title.contains("Example"), "Page should contain 'Example' in title");
         
         // Find and verify content
-        String pageText = driver.findElement(By.tagName("body")).getText();
+        String pageText = page.locator("body").textContent();
         LOGGER.info("Page contains {} characters of text", pageText.length());
         
         // Verify specific content
         assertTrue(pageText.contains("Example Domain"), "Page should contain 'Example Domain'");
         
-        LOGGER.info("✅ Browser automation demo completed successfully!");
+        LOGGER.info("✅ Playwright browser automation demo completed successfully!");
         LOGGER.info("📸 Screenshots saved to target/screenshots/");
         
         // This demonstrates what the UI tests would do:
@@ -112,33 +114,32 @@ public class SimpleUIDemo {
 
     @Test
     void demonstrateFormInteraction() {
-        LOGGER.info("=== Form Interaction Demo ===");
+        LOGGER.info("=== Playwright Form Interaction Demo ===");
         
         // Navigate to a page with forms (using httpbin.org which has form examples)
         LOGGER.info("Navigating to httpbin.org form demo...");
-        driver.get("https://httpbin.org/forms/post");
+        page.navigate("https://httpbin.org/forms/post");
         
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        // Wait for page to load
+        page.waitForLoadState();
         
         takeScreenshot("demo-form-page");
         
         // This demonstrates form interaction capabilities
         try {
             // Find form elements (similar to what we'd do in Vaadin app)
-            var inputs = driver.findElements(By.cssSelector("input[type='text']"));
-            LOGGER.info("Found {} text input fields", inputs.size());
+            var inputs = page.locator("input[type='text']");
+            int inputCount = inputs.count();
+            LOGGER.info("Found {} text input fields", inputCount);
             
-            if (!inputs.isEmpty()) {
-                inputs.get(0).sendKeys("Test Name");
+            if (inputCount > 0) {
+                inputs.first().fill("Test Name");
                 LOGGER.info("✅ Successfully filled text field");
             }
             
-            var buttons = driver.findElements(By.cssSelector("button, input[type='submit']"));
-            LOGGER.info("Found {} buttons/submit elements", buttons.size());
+            var buttons = page.locator("button, input[type='submit']");
+            int buttonCount = buttons.count();
+            LOGGER.info("Found {} buttons/submit elements", buttonCount);
             
             takeScreenshot("demo-form-filled");
             
@@ -146,21 +147,58 @@ public class SimpleUIDemo {
             LOGGER.warn("Form interaction demo encountered issues: {}", e.getMessage());
         }
         
-        LOGGER.info("✅ Form interaction demo completed!");
+        LOGGER.info("✅ Playwright form interaction demo completed!");
+    }
+
+    @Test
+    void demonstrateAdvancedFeatures() {
+        LOGGER.info("=== Playwright Advanced Features Demo ===");
+        
+        // Navigate to a dynamic page
+        LOGGER.info("Navigating to httpbin.org...");
+        page.navigate("https://httpbin.org/");
+        
+        page.waitForLoadState();
+        takeScreenshot("demo-httpbin-main");
+        
+        // Demonstrate waiting for elements
+        LOGGER.info("Testing element waiting...");
+        var links = page.locator("a");
+        int linkCount = links.count();
+        LOGGER.info("Found {} links on the page", linkCount);
+        
+        // Demonstrate network interception capabilities
+        LOGGER.info("Page URL: {}", page.url());
+        
+        // Demonstrate responsive testing
+        LOGGER.info("Testing responsive design...");
+        page.setViewportSize(768, 1024); // Tablet size
+        takeScreenshot("demo-tablet-view");
+        
+        page.setViewportSize(375, 667); // Mobile size
+        takeScreenshot("demo-mobile-view");
+        
+        // Reset to desktop
+        page.setViewportSize(1200, 800);
+        takeScreenshot("demo-desktop-view");
+        
+        LOGGER.info("✅ Advanced features demo completed!");
+        LOGGER.info("");
+        LOGGER.info("🎭 Playwright provides these advantages:");
+        LOGGER.info("   ✅ Faster and more reliable than Selenium");
+        LOGGER.info("   ✅ Built-in waiting for elements and network requests");
+        LOGGER.info("   ✅ Cross-browser testing (Chrome, Firefox, Safari, Edge)");
+        LOGGER.info("   ✅ Mobile testing capabilities");
+        LOGGER.info("   ✅ Network interception and mocking");
+        LOGGER.info("   ✅ Better debugging with trace viewer");
+        LOGGER.info("   ✅ No external driver management needed");
     }
 
     private void takeScreenshot(String name) {
         try {
-            if (driver instanceof TakesScreenshot) {
-                File screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-                File targetFile = new File("target/screenshots", name + "-demo.png");
-                targetFile.getParentFile().mkdirs();
-                
-                java.nio.file.Files.copy(screenshot.toPath(), targetFile.toPath(), 
-                    java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-                
-                LOGGER.info("📸 Screenshot saved: {}", targetFile.getName());
-            }
+            String screenshotPath = "target/screenshots/" + name + "-demo.png";
+            page.screenshot(new Page.ScreenshotOptions().setPath(Paths.get(screenshotPath)));
+            LOGGER.info("📸 Screenshot saved: {}", screenshotPath);
         } catch (Exception e) {
             LOGGER.warn("Failed to take screenshot: {}", e.getMessage());
         }

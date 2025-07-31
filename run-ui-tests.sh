@@ -1,22 +1,21 @@
 #!/bin/bash
 
 # UI Test Automation Runner for Derbent Application
-# This script provides easy ways to run the browser automation tests
+# This script provides easy ways to run the Playwright browser automation tests
 
 set -e
 
-echo "🚀 Derbent UI Test Automation Runner"
-echo "=================================="
+echo "🚀 Derbent UI Test Automation Runner (Playwright)"
+echo "=============================================="
 
-# Function to check if Chrome is installed
-check_chrome() {
-    if command -v google-chrome &> /dev/null || command -v chromium-browser &> /dev/null || command -v chrome &> /dev/null; then
-        echo "✅ Chrome browser found"
+# Function to install Playwright browsers
+install_playwright_browsers() {
+    echo "🔄 Installing Playwright browsers..."
+    mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install" > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        echo "✅ Playwright browsers installed successfully"
     else
-        echo "❌ Chrome browser not found. Please install Chrome to run UI tests."
-        echo "   Ubuntu: sudo apt-get install google-chrome-stable"
-        echo "   macOS: brew install --cask google-chrome"
-        exit 1
+        echo "⚠️ Playwright browser installation may have failed, but continuing..."
     fi
 }
 
@@ -63,6 +62,9 @@ run_tests() {
     # Create screenshots directory
     mkdir -p target/screenshots
     
+    # Install Playwright browsers if needed
+    install_playwright_browsers
+    
     # Run the tests
     if mvn test -Dtest="$test_class" -Dspring.profiles.active=test; then
         echo "✅ $test_name completed successfully!"
@@ -92,15 +94,16 @@ show_usage() {
     echo ""
     echo "Options:"
     echo "  all           Run all UI automation tests"
-    echo "  testbench     Run Vaadin TestBench tests only"
-    echo "  selenium      Run Selenium WebDriver tests only"
+    echo "  playwright    Run Playwright browser automation tests"
     echo "  unit          Run existing unit tests first"
     echo "  clean         Clean previous test results"
+    echo "  install       Install Playwright browsers"
     echo "  help          Show this help message"
     echo ""
     echo "Examples:"
     echo "  $0 all        # Run all browser automation tests"
-    echo "  $0 selenium   # Run only the free Selenium tests"
+    echo "  $0 playwright # Run only the Playwright tests"
+    echo "  $0 install    # Install Playwright browsers"
     echo "  $0 clean      # Clean up test artifacts"
 }
 
@@ -109,22 +112,9 @@ main() {
     local command=${1:-help}
     
     case $command in
-        "all")
-            check_chrome
-            echo "🎯 Running ALL UI automation tests..."
-            run_tests "*UIAutomationTest" "All UI Automation Tests"
-            ;;
-            
-        "testbench")
-            check_chrome
-            echo "🎯 Running Vaadin TestBench tests..."
-            run_tests "ComprehensiveUIAutomationTest" "Vaadin TestBench Tests"
-            ;;
-            
-        "selenium")
-            check_chrome
-            echo "🎯 Running Selenium WebDriver tests..."
-            run_tests "SeleniumUIAutomationTest" "Selenium WebDriver Tests"
+        "all"|"playwright")
+            echo "🎯 Running Playwright UI automation tests..."
+            run_tests "PlaywrightUIAutomationTest" "Playwright UI Automation Tests"
             ;;
             
         "unit")
@@ -135,6 +125,11 @@ main() {
                 echo "❌ Unit tests failed!"
                 return 1
             fi
+            ;;
+            
+        "install")
+            echo "🔧 Installing Playwright browsers..."
+            install_playwright_browsers
             ;;
             
         "clean")
