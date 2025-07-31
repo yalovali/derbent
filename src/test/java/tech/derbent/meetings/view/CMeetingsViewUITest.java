@@ -2,6 +2,7 @@ package tech.derbent.meetings.view;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.*;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -12,6 +13,7 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.springframework.data.domain.Pageable;
 
 import tech.derbent.abstracts.ui.CAbstractUITest;
 import tech.derbent.meetings.domain.CMeeting;
@@ -68,8 +70,21 @@ class CMeetingsViewUITest extends CAbstractUITest<CMeeting> {
         );
     }
 
+    @Override
+    protected void setupServiceMocks() {
+        super.setupServiceMocks();
+        
+        // Mock project-aware methods specific to meetings service
+        when(mockMeetingService.findEntitiesByProject(eq(testProject), any(Pageable.class)))
+            .thenReturn(testEntities);
+            
+        // Mock meeting type and status services with pageable
+        when(mockMeetingTypeService.list(any(Pageable.class))).thenReturn(Arrays.asList(testMeetingType));
+        when(mockMeetingStatusService.list(any(Pageable.class))).thenReturn(Arrays.asList(testMeetingStatus));
+        when(mockUserService.list(any(Pageable.class))).thenReturn(Arrays.asList(testUser1, testUser2));
+    }
+
     private void setupTestEntities() {
-        // Create test project
         testProject = new CProject();
         testProject.setName("Test Project");
         testProject.setDescription("Test project for meetings");
@@ -102,6 +117,9 @@ class CMeetingsViewUITest extends CAbstractUITest<CMeeting> {
 
     @Override
     protected void setupTestData() {
+        // Ensure test entities are created first
+        setupTestEntities();
+        
         CMeeting meeting1 = createTestEntity(1L, "Sprint Planning");
         CMeeting meeting2 = createTestEntity(2L, "Daily Standup");
         CMeeting meeting3 = createTestEntity(3L, "Retrospective");
@@ -196,8 +214,8 @@ class CMeetingsViewUITest extends CAbstractUITest<CMeeting> {
         // Test that grid can load data without exceptions
         testGridDataLoading(meetingsView.getGrid());
         
-        // Verify service was called
-        verify(mockMeetingService, atLeastOnce()).list(any());
+        // Verify project-aware service was called (meetings are project-aware)
+        verify(mockMeetingService, atLeastOnce()).findEntitiesByProject(any(), any());
     }
 
     @Test
