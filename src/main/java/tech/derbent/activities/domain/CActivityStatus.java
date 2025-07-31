@@ -22,17 +22,6 @@ import tech.derbent.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "cactivitystatus_id"))
 public class CActivityStatus extends CStatus {
 
-	@Column (name = "color", nullable = true, length = 7)
-	@Size (max = 7)
-	@Pattern (regexp = "^#[0-9A-Fa-f]{6}$", message = "Color must be a valid hex code")
-	@MetaData (
-		displayName = "Color", required = false, readOnly = false,
-		defaultValue = "#808080",
-		description = "Hex color code for status visualization (e.g., #FF0000)",
-		hidden = false, order = 3, maxLength = 7
-	)
-	private String color = "#808080";
-
 	@Column (name = "is_final", nullable = false)
 	@MetaData (
 		displayName = "Is Final Status", required = true, readOnly = false,
@@ -41,14 +30,6 @@ public class CActivityStatus extends CStatus {
 		hidden = false, order = 4
 	)
 	private boolean isFinal = false;
-
-	@Column (name = "sort_order", nullable = false)
-	@MetaData (
-		displayName = "Sort Order", required = true, readOnly = false,
-		defaultValue = "100", description = "Display order for status sorting",
-		hidden = false, order = 5
-	)
-	private Integer sortOrder = 100;
 
 	/**
 	 * Default constructor for JPA.
@@ -84,35 +65,13 @@ public class CActivityStatus extends CStatus {
 	}
 
 	@Override
-	public String getColor() { return color != null ? color : "#808080"; }
-
-	@Override
-	public Integer getSortOrder() { return sortOrder != null ? sortOrder : 100; }
-
-	@Override
 	public int hashCode() {
-		return Objects.hash(super.hashCode(), color, isFinal, sortOrder);
+		return Objects.hash(super.hashCode(), isFinal);
 	}
 
 	public boolean isFinal() { return isFinal; }
 
-	@Override
-	public void setColor(final String color) {
-
-		if ((color != null) && color.matches("^#[0-9A-Fa-f]{6}$")) {
-			this.color = color;
-		}
-		else {
-			this.color = "#808080";
-		}
-	}
-
 	public void setFinal(final boolean isFinal) { this.isFinal = isFinal; }
-
-	@Override
-	public void setSortOrder(final Integer sortOrder) {
-		this.sortOrder = sortOrder != null ? sortOrder : 100;
-	}
 
 	@Override
 	public String toString() {

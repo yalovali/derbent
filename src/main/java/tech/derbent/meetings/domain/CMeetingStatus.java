@@ -1,5 +1,7 @@
 package tech.derbent.meetings.domain;
 
+import java.util.Objects;
+
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,16 +22,6 @@ import tech.derbent.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "cmeetingstatus_id"))
 public class CMeetingStatus extends CStatus {
 
-	@Column (name = "color", nullable = true, length = 7)
-	@Size (max = 7)
-	@MetaData (
-		displayName = "Color", required = false, readOnly = false,
-		defaultValue = "#808080",
-		description = "Hex color code for status visualization (e.g., #FF0000)",
-		hidden = false, order = 3, maxLength = 7
-	)
-	private String color = "#808080";
-
 	@Column (name = "is_final", nullable = false)
 	@MetaData (
 		displayName = "Is Final Status", required = true, readOnly = false,
@@ -38,14 +30,6 @@ public class CMeetingStatus extends CStatus {
 		hidden = false, order = 4
 	)
 	private boolean isFinal = false;
-
-	@Column (name = "sort_order", nullable = false)
-	@MetaData (
-		displayName = "Sort Order", required = true, readOnly = false,
-		defaultValue = "100", description = "Display order for status sorting",
-		hidden = false, order = 5
-	)
-	private Integer sortOrder = 100;
 
 	/**
 	 * Default constructor for JPA.
@@ -62,7 +46,7 @@ public class CMeetingStatus extends CStatus {
 		final String description, final String color, final boolean isFinal) {
 		super(name, project);
 		setDescription(description);
-		this.color = color != null ? color : "#808080";
+		setColor(color != null ? color : "#808080");
 		this.isFinal = isFinal;
 	}
 
@@ -81,26 +65,13 @@ public class CMeetingStatus extends CStatus {
 	}
 
 	@Override
-	public String getColor() {
-		return ((color != null) && !color.trim().isEmpty()) ? color : "#808080";
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), isFinal);
 	}
-
-	@Override
-	public Integer getSortOrder() { return sortOrder != null ? sortOrder : 100; }
 
 	public boolean isFinal() { return isFinal; }
 
-	@Override
-	public void setColor(final String color) {
-		this.color = ((color != null) && !color.trim().isEmpty()) ? color : "#808080";
-	}
-
 	public void setFinal(final boolean isFinal) { this.isFinal = isFinal; }
-
-	@Override
-	public void setSortOrder(final Integer sortOrder) {
-		this.sortOrder = sortOrder != null ? sortOrder : 100;
-	}
 
 	@Override
 	public String toString() {
