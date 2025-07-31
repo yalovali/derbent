@@ -340,6 +340,13 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 			} catch (final Exception e) {
 				LOGGER.error("Error in grid data provider for {}: {}",
 					entityClass.getSimpleName(), e.getMessage());
+				
+				// Check if this is a lazy loading exception
+				if (e.getCause() instanceof org.hibernate.LazyInitializationException) {
+					LOGGER.error("LazyInitializationException detected - check repository fetch joins for {}", 
+						entityClass.getSimpleName());
+				}
+				
 				// Return empty stream on error to prevent UI crashes
 				return java.util.stream.Stream.empty();
 			}
