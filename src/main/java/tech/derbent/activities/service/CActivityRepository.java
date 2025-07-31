@@ -48,6 +48,7 @@ public interface CActivityRepository extends CEntityOfProjectRepository<CActivit
 		"LEFT JOIN FETCH a.createdBy " +
 		"LEFT JOIN FETCH a.activityType " +
 		"LEFT JOIN FETCH a.status " +
+		"LEFT JOIN FETCH a.parentActivity " +
 		"WHERE a.id = :id"
 	)
 	Optional<CActivity> findByIdWithAllRelationships(@Param ("id") Long id);
@@ -66,6 +67,7 @@ public interface CActivityRepository extends CEntityOfProjectRepository<CActivit
 		"LEFT JOIN FETCH a.createdBy " +
 		"LEFT JOIN FETCH a.activityType " +
 		"LEFT JOIN FETCH a.status " +
+		"LEFT JOIN FETCH a.parentActivity " +
 		"WHERE a.project = :project"
 	)
 	List<CActivity> findByProjectWithAllRelationships(@Param ("project") CProject project);
@@ -84,6 +86,7 @@ public interface CActivityRepository extends CEntityOfProjectRepository<CActivit
 		"LEFT JOIN FETCH a.createdBy " +
 		"LEFT JOIN FETCH a.activityType " +
 		"LEFT JOIN FETCH a.status " +
+		"LEFT JOIN FETCH a.parentActivity " +
 		"WHERE a.project = :project"
 	)
 	Page<CActivity> findByProjectWithAllRelationships(@Param ("project") CProject project,

@@ -25,8 +25,6 @@ public interface CDecisionTypeRepository extends CEntityOfProjectRepository<CDec
      */
     @Query("SELECT dt FROM CDecisionType dt " +
            "LEFT JOIN FETCH dt.project " +
-           "LEFT JOIN FETCH dt.assignedTo " +
-           "LEFT JOIN FETCH dt.createdBy " +
            "WHERE dt.id = :id")
     Optional<CDecisionType> findByIdWithRelationships(@Param("id") Long id);
 
@@ -35,7 +33,7 @@ public interface CDecisionTypeRepository extends CEntityOfProjectRepository<CDec
      * @param project the project
      * @return list of active decision types for the project
      */
-    @Query("SELECT dt FROM CDecisionType dt WHERE dt.project = :project AND dt.isActive = true ORDER BY dt.sortOrder ASC")
+    @Query("SELECT dt FROM CDecisionType dt WHERE dt.project = :project AND dt.isActive = true")
     List<CDecisionType> findByProjectAndIsActiveTrue(@Param("project") CProject project);
 
     /**
@@ -43,7 +41,7 @@ public interface CDecisionTypeRepository extends CEntityOfProjectRepository<CDec
      * @param project the project
      * @return list of inactive decision types for the project
      */
-    @Query("SELECT dt FROM CDecisionType dt WHERE dt.project = :project AND dt.isActive = false ORDER BY dt.sortOrder ASC")
+    @Query("SELECT dt FROM CDecisionType dt WHERE dt.project = :project AND dt.isActive = false")
     List<CDecisionType> findByProjectAndIsActiveFalse(@Param("project") CProject project);
 
     /**
@@ -51,7 +49,7 @@ public interface CDecisionTypeRepository extends CEntityOfProjectRepository<CDec
      * @param project the project
      * @return list of decision types that require approval for the project
      */
-    @Query("SELECT dt FROM CDecisionType dt WHERE dt.project = :project AND dt.requiresApproval = true ORDER BY dt.sortOrder ASC")
+    @Query("SELECT dt FROM CDecisionType dt WHERE dt.project = :project AND dt.requiresApproval = true")
     List<CDecisionType> findByProjectAndRequiresApprovalTrue(@Param("project") CProject project);
 
     /**
@@ -59,6 +57,6 @@ public interface CDecisionTypeRepository extends CEntityOfProjectRepository<CDec
      * @param project the project
      * @return list of decision types for the project sorted by sort order
      */
-    @Query("SELECT dt FROM CDecisionType dt WHERE dt.project = :project ORDER BY dt.sortOrder ASC")
+    @Query("SELECT dt FROM CDecisionType dt WHERE dt.project = :project")
     List<CDecisionType> findByProjectOrderBySortOrderAsc(@Param("project") CProject project);
 }

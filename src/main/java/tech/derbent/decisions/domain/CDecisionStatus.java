@@ -33,14 +33,6 @@ public class CDecisionStatus extends CStatus {
 	)
 	private boolean isFinal = false;
 
-	@Column (name = "sort_order", nullable = false)
-	@MetaData (
-		displayName = "Sort Order", required = true, readOnly = false,
-		defaultValue = "100", description = "Display order for status sorting",
-		hidden = false, order = 5
-	)
-	private final Integer sortOrder = 100;
-
 	@Column (name = "requires_approval", nullable = false)
 	@MetaData (
 		displayName = "Requires Approval", required = true, readOnly = false,

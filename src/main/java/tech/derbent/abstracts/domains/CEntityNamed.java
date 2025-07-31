@@ -55,13 +55,15 @@ public abstract class CEntityNamed extends CEntityDB {
 
 	public CEntityNamed(final String name) {
 		this();
-		this.name = name;
-		this.description = null; // Default description is null
-
+		LOGGER.debug("CEntityNamed constructor called with name: {} for {}", name, getClass().getSimpleName());
+		
 		if ((name == null) || name.trim().isEmpty()) {
-			LOGGER.warn("constructor called with null or empty name for {}",
-				getClass().getSimpleName());
+			LOGGER.error("Constructor called with null or empty name for {}", getClass().getSimpleName());
+			throw new IllegalArgumentException("Name cannot be null or empty for " + getClass().getSimpleName());
 		}
+		
+		this.name = name.trim();
+		this.description = null; // Default description is null
 	}
 
 	public CEntityNamed(final String name, final String description) {

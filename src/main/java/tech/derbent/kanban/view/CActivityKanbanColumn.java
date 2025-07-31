@@ -169,8 +169,16 @@ public class CActivityKanbanColumn extends Div {
 		final Map<String,
 			List<CActivity>> activitiesByType = activities.stream()
 				.collect(Collectors.groupingBy(
-					activity -> activity.getActivityType() != null
-						? activity.getActivityType().getName() : "No Type",
+					activity -> {
+						if (activity == null) {
+							return "No Type";
+						}
+						if (activity.getActivityType() == null) {
+							return "No Type";
+						}
+						final String typeName = activity.getActivityType().getName();
+						return typeName != null ? typeName : "No Type";
+					},
 					Collectors.toList()));
 
 		// Create a type section for each group

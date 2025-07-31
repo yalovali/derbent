@@ -2,6 +2,7 @@ package tech.derbent.activities.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -9,6 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import tech.derbent.projects.domain.CProject;
 
 /**
  * Unit tests for CActivityStatus class. Tests the activity status entity functionality.
@@ -37,25 +40,64 @@ class CActivityStatusTest {
 	@Test
 	@DisplayName ("Should create with full constructor")
 	void shouldCreateWithFullConstructor() {
-		// TODO write test for full constructor
-	}
-
-	@Test
-	@DisplayName ("Should create with name and description constructor")
-	void shouldCreateWithNameAndDescriptionConstructor() {
-		// TODO write test for name and description constructor
+		// Given
+		final CProject project = new CProject();
+		project.setName("Test Project");
+		final String name = "DONE";
+		final String description = "Task completed successfully";
+		final String color = "#00cc00";
+		final boolean isFinal = true;
+		
+		// When
+		final CActivityStatus status = new CActivityStatus(name, project, description, color, isFinal);
+		
+		// Then
+		assertNotNull(status);
+		assertEquals(name, status.getName());
+		assertEquals(description, status.getDescription());
+		assertEquals(project, status.getProject());
+		assertEquals(isFinal, status.isFinal());
 	}
 
 	@Test
 	@DisplayName ("Should create with name constructor")
 	void shouldCreateWithNameConstructor() {
-		// todo write test for name constructor
+		// Given
+		final CProject project = new CProject();
+		project.setName("Test Project");
+		final String name = "TODO";
+		
+		// When
+		final CActivityStatus status = new CActivityStatus(name, project);
+		
+		// Then
+		assertNotNull(status);
+		assertEquals(name, status.getName());
+		assertEquals(project, status.getProject());
+		assertFalse(status.isFinal()); // Default should be false
 	}
 
 	@Test
 	@DisplayName ("Should handle equals and hashCode correctly")
 	void shouldHandleEqualsAndHashCodeCorrectly() {
-		// write test for equals and hashCode
+		// Given
+		final CProject project = new CProject();
+		project.setName("Test Project");
+		final CActivityStatus status1 = new CActivityStatus("TODO", project);
+		final CActivityStatus status2 = new CActivityStatus("TODO", project);
+		final CActivityStatus status3 = new CActivityStatus("DONE", project);
+		
+		// When & Then
+		assertEquals(status1, status2, "Statuses with same name and project should be equal");
+		assertNotEquals(status1, status3, "Statuses with different names should not be equal");
+		assertEquals(status1.hashCode(), status2.hashCode(), "Equal objects should have same hash code");
+		
+		// Test reflexivity
+		assertEquals(status1, status1, "Status should equal itself");
+		
+		// Test null and different class
+		assertNotEquals(status1, null, "Status should not equal null");
+		assertNotEquals(status1, "not a status", "Status should not equal different class");
 	}
 
 	@Test
