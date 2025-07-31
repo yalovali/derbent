@@ -512,7 +512,388 @@ class ManualVerificationTest {
   ';
   ```
 
-## 9.7. Documentation & Modularity
+## 9.8. UI Test Automation Guidelines
+
+The project implements comprehensive UI test automation using both **Playwright** and **Selenium WebDriver** frameworks to ensure robust cross-browser testing and validation.
+
+### Framework Selection Criteria
+
+**Use Playwright when:**
+- Speed is critical (development/regression testing)
+- Modern browser support is sufficient
+- Advanced debugging capabilities are needed
+- Network interception/monitoring is required
+- Mobile device emulation is important
+
+**Use Selenium when:**
+- Industry-standard compliance is required
+- Legacy browser support is needed
+- Enterprise tool integration is necessary
+- Grid/distributed testing is planned
+- Existing Selenium infrastructure exists
+
+### UI Testing Architecture
+
+```java
+// Base test structure pattern
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@TestPropertySource(properties = {
+    "spring.datasource.url=jdbc:h2:mem:testdb",
+    "spring.jpa.hibernate.ddl-auto=create-drop"
+})
+public class UIAutomationTest {
+    
+    @LocalServerPort
+    private int port;
+    
+    private String baseUrl;
+    
+    // Framework-specific setup
+    @BeforeEach
+    void setUp() {
+        baseUrl = "http://localhost:" + port;
+        // Initialize browser automation framework
+    }
+    
+    @AfterEach  
+    void tearDown() {
+        // Clean up resources properly
+    }
+}
+```
+
+### UI Testing Standards
+
+1. **Test Categories Implementation**:
+   ```java
+   // Authentication tests
+   void testLoginFunctionality()
+   void testLogoutFunctionality()
+   void testInvalidLoginHandling()
+   
+   // Navigation tests
+   void testNavigationBetweenViews()
+   void testMenuInteractions()
+   
+   // CRUD operation tests
+   void testCreateOperation(String viewName, String entityName)
+   void testReadOperation(String viewName)
+   void testUpdateOperation(String viewName, String newData)
+   void testDeleteOperation(String viewName)
+   
+   // Grid interaction tests
+   void testGridSorting()
+   void testGridFiltering()
+   void testGridCellInteractions()
+   
+   // Form validation tests
+   void testRequiredFieldValidation()
+   void testDataTypeValidation()
+   void testBusinessRuleValidation()
+   
+   // Responsive design tests
+   void testDesktopLayout()
+   void testTabletLayout()
+   void testMobileLayout()
+   ```
+
+2. **Element Location Strategy**:
+   ```java
+   // ✅ Preferred - Vaadin component selectors
+   page.locator("vaadin-button:has-text('Save')");
+   driver.findElement(By.cssSelector("vaadin-text-field[label='Name']"));
+   
+   // ✅ Good - Data attributes
+   page.locator("[data-testid='submit-button']");
+   driver.findElement(By.cssSelector("[data-testid='grid-row']"));
+   
+   // ❌ Avoid - Fragile selectors
+   page.locator("div.v-button.v-widget.v-has-width");
+   driver.findElement(By.className("complex-generated-class"));
+   ```
+
+3. **Wait Strategies**:
+   ```java
+   // Playwright - automatic waiting
+   page.waitForSelector("vaadin-grid");
+   page.waitForLoadState(LoadState.NETWORKIDLE);
+   
+   // Selenium - explicit waits
+   WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+   wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("vaadin-grid")));
+   wait.until(ExpectedConditions.elementToBeClickable(saveButton));
+   ```
+
+4. **Screenshot Strategy**:
+   ```java
+   // Take screenshots at key verification points
+   takeScreenshot("login-successful");
+   takeScreenshot("form-filled-" + entityName);
+   takeScreenshot("grid-data-loaded");
+   takeScreenshot("validation-error-displayed");
+   
+   // Always take screenshot on test failure
+   @Test
+   void testScenario() {
+       try {
+           // Test implementation
+       } catch (Exception e) {
+           takeScreenshot("test-failure-" + testName);
+           throw e;
+       }
+   }
+   ```
+
+5. **Test Data Management**:
+   ```java
+   // Use consistent test credentials
+   private static final String TEST_USERNAME = "admin";
+   private static final String TEST_PASSWORD = "test123"; // Project standard
+   
+   // Generate unique test data
+   String entityName = "Test Entity " + System.currentTimeMillis();
+   String uniqueEmail = "test" + System.currentTimeMillis() + "@example.com";
+   ```
+
+### Helper Method Patterns
+
+1. **Login Helper**:
+   ```java
+   // Playwright implementation
+   private void loginToApplication() {
+       page.navigate(baseUrl);
+       page.waitForSelector("vaadin-login-overlay");
+       page.locator("vaadin-login-overlay vaadin-text-field").fill(TEST_USERNAME);
+       page.locator("vaadin-login-overlay vaadin-password-field").fill(TEST_PASSWORD);
+       page.locator("vaadin-login-overlay vaadin-button[theme~='primary']").click();
+       page.waitForSelector("vaadin-app-layout");
+   }
+   
+   // Selenium implementation
+   private void performLogin() {
+       WebElement usernameField = wait.until(ExpectedConditions.presenceOfElementLocated(
+           By.cssSelector("vaadin-login-overlay vaadin-text-field")));
+       usernameField.sendKeys(TEST_USERNAME);
+       
+       WebElement passwordField = driver.findElement(
+           By.cssSelector("vaadin-login-overlay vaadin-password-field"));
+       passwordField.sendKeys(TEST_PASSWORD);
+       
+       WebElement loginButton = driver.findElement(
+           By.cssSelector("vaadin-login-overlay vaadin-button[theme~='primary']"));
+       loginButton.click();
+   }
+   ```
+
+2. **Navigation Helper**:
+   ```java
+   private boolean navigateToView(String viewName) {
+       // Try side navigation first
+       var navItems = page.locator("vaadin-side-nav-item");
+       for (int i = 0; i < navItems.count(); i++) {
+           if (navItems.nth(i).textContent().contains(viewName)) {
+               navItems.nth(i).click();
+               page.waitForTimeout(1000);
+               return true;
+           }
+       }
+       return false;
+   }
+   ```
+
+3. **CRUD Operation Helpers**:
+   ```java
+   private void performCreateOperation(String entityName) {
+       // Open create form
+       page.locator("vaadin-button:has-text('New')").click();
+       
+       // Fill form
+       page.locator("vaadin-text-field").first().fill(entityName);
+       
+       // Save
+       page.locator("vaadin-button:has-text('Save')").click();
+       page.waitForTimeout(1000);
+   }
+   ```
+
+### Test Execution Strategy
+
+1. **Execution Scripts**:
+   ```bash
+   # Master script - both frameworks
+   ./run-ui-tests.sh all           # Run both Playwright and Selenium
+   ./run-ui-tests.sh playwright    # Playwright only
+   ./run-ui-tests.sh selenium      # Selenium only
+   
+   # Framework-specific scripts
+   ./run-playwright-tests.sh all   # Complete Playwright suite
+   ./run-selenium-tests.sh all     # Complete Selenium suite
+   
+   # Category-specific execution
+   ./run-ui-tests.sh login         # Login tests in both frameworks
+   ./run-ui-tests.sh crud          # CRUD tests in both frameworks
+   ./run-ui-tests.sh grid          # Grid tests in both frameworks
+   ```
+
+2. **CI/CD Integration**:
+   ```yaml
+   # GitHub Actions example
+   - name: Run UI Tests
+     run: |
+       ./run-ui-tests.sh install  # Install dependencies
+       ./run-ui-tests.sh all      # Run both frameworks
+   
+   - name: Upload Screenshots
+     uses: actions/upload-artifact@v3
+     if: always()
+     with:
+       name: test-screenshots
+       path: target/screenshots/
+   ```
+
+### Error Handling and Debugging
+
+1. **Exception Handling**:
+   ```java
+   @Test
+   void testWithProperErrorHandling() {
+       try {
+           loginToApplication();
+           performBusinessLogic();
+           verifyResults();
+           
+       } catch (Exception e) {
+           logger.error("Test failed at step: {}", getCurrentStep(), e);
+           takeScreenshot("test-failure-" + testMethodName);
+           
+           // Additional debug information
+           logger.error("Current URL: {}", page.url());
+           logger.error("Page title: {}", page.title());
+           
+           throw e; // Re-throw to fail the test
+       }
+   }
+   ```
+
+2. **Debug Mode Configuration**:
+   ```java
+   // Playwright debug mode
+   browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
+       .setHeadless(false)    // Show browser
+       .setSlowMo(1000));     // Slow down actions
+   
+   // Selenium debug mode
+   ChromeOptions options = new ChromeOptions();
+   // Remove --headless argument to show browser
+   options.addArguments("--start-maximized");
+   ```
+
+### Performance Optimization
+
+1. **Parallel Execution Support**:
+   ```xml
+   <!-- Maven Surefire configuration -->
+   <plugin>
+       <groupId>org.apache.maven.plugins</groupId>
+       <artifactId>maven-surefire-plugin</artifactId>
+       <configuration>
+           <parallel>methods</parallel>
+           <threadCount>4</threadCount>
+           <forkCount>2</forkCount>
+       </configuration>
+   </plugin>
+   ```
+
+2. **Resource Management**:
+   ```java
+   // Proper cleanup to prevent memory leaks
+   @AfterEach
+   void cleanupResources() {
+       if (page != null) page.close();
+       if (context != null) context.close();
+       if (browser != null) browser.close();
+       if (playwright != null) playwright.close();
+       
+       if (driver != null) {
+           driver.quit(); // Closes all windows and ends session
+       }
+   }
+   ```
+
+### Documentation Requirements
+
+1. **Test Documentation**: Each UI test framework must have comprehensive documentation:
+   - `UI_TEST_AUTOMATION_FRAMEWORK.md` - Overview and comparison
+   - `PLAYWRIGHT_IMPLEMENTATION_GUIDE.md` - Playwright-specific guide
+   - `SELENIUM_IMPLEMENTATION_GUIDE.md` - Selenium-specific guide
+
+2. **Code Comments**: All UI test methods must include:
+   ```java
+   /**
+    * Tests login functionality with valid credentials.
+    * 
+    * Scenario:
+    * 1. Navigate to application
+    * 2. Wait for login overlay to appear
+    * 3. Enter valid credentials
+    * 4. Click login button
+    * 5. Verify successful redirect to main application
+    * 
+    * Verification Points:
+    * - Login form is displayed
+    * - Credentials are accepted
+    * - Main application layout is visible
+    * - No error messages are shown
+    */
+   @Test
+   void testLoginFunctionality() {
+       // Implementation with step-by-step logging
+   }
+   ```
+
+3. **Logging Standards**:
+   ```java
+   // Detailed logging for test execution flow
+   logger.info("🧪 Starting login functionality test...");
+   logger.info("📍 Navigating to application URL: {}", baseUrl);
+   logger.info("⏳ Waiting for login overlay to appear...");
+   logger.info("✅ Login overlay found, proceeding with authentication");
+   logger.info("🔐 Entering credentials for user: {}", TEST_USERNAME);
+   logger.info("✅ Login successful, main application loaded");
+   ```
+
+### Quality Assurance Standards
+
+1. **Test Coverage Requirements**:
+   - All major user workflows must be covered
+   - Both happy path and error scenarios
+   - Cross-browser compatibility validation
+   - Responsive design verification across device sizes
+
+2. **Maintenance Guidelines**:
+   - Regular review and update of element selectors
+   - Periodic framework version updates
+   - Screenshot archive management
+   - Test execution time monitoring
+
+3. **Integration with Project Standards**:
+   - Follow project naming conventions (prefix classes with "C")
+   - Use project standard test credentials
+   - Align with database initialization patterns
+   - Maintain consistency with existing logging patterns
+
+### UI Testing Best Practices Summary
+
+1. **Always** implement tests in both frameworks for critical workflows
+2. **Always** take screenshots at verification points and failures
+3. **Always** use proper wait strategies - avoid Thread.sleep()
+4. **Always** clean up resources in tearDown methods
+5. **Always** log test execution steps with meaningful messages
+6. **Never** hardcode delays - use dynamic waits
+7. **Never** ignore test failures - investigate and fix promptly
+8. **Never** use fragile element selectors
+9. **Never** skip error handling and exception logging
+10. **Never** commit tests that consistently fail due to environmental issues
 - Update the `docs` folder for every significant change:
   - Add new documentation for each project design concept (one file per concept)
   - For complex or Spring-based solutions, create a step-by-step solution file

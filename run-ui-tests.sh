@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # UI Test Automation Runner for Derbent Application
-# This script provides easy ways to run the Playwright browser automation tests
+# This script provides easy ways to run both Playwright and Selenium browser automation tests
 
 set -e
 
-echo "🚀 Derbent UI Test Automation Runner (Playwright)"
-echo "=============================================="
+echo "🚀 Derbent UI Test Automation Runner (Dual Framework)"
+echo "====================================================="
 
 # Function to install Playwright browsers
 install_playwright_browsers() {
@@ -17,6 +17,12 @@ install_playwright_browsers() {
     else
         echo "⚠️ Playwright browser installation may have failed, but continuing..."
     fi
+}
+
+# Function to install Selenium WebDriver binaries
+install_selenium_drivers() {
+    echo "🔄 Selenium WebDriver binaries managed automatically by WebDriverManager..."
+    echo "✅ Chrome driver will be downloaded automatically when needed"
 }
 
 # Function to start the application in background
@@ -55,15 +61,20 @@ stop_application() {
 run_tests() {
     local test_class=$1
     local test_name=$2
+    local framework=$3
     
-    echo "🧪 Running $test_name..."
+    echo "🧪 Running $test_name ($framework)..."
     echo "=================================="
     
     # Create screenshots directory
     mkdir -p target/screenshots
     
-    # Install Playwright browsers if needed
-    install_playwright_browsers
+    # Install browsers/drivers based on framework
+    if [[ "$framework" == "Playwright" ]]; then
+        install_playwright_browsers
+    elif [[ "$framework" == "Selenium" ]]; then
+        install_selenium_drivers
+    fi
     
     # Run the tests
     if mvn test -Dtest="$test_class" -Dspring.profiles.active=test; then
@@ -88,23 +99,136 @@ run_tests() {
     fi
 }
 
+# Function to run both frameworks
+run_both_frameworks() {
+    echo "🎯 Running UI tests with both Playwright and Selenium frameworks..."
+    
+    local success=true
+    
+    # Run Playwright tests
+    if ! run_tests "PlaywrightUIAutomationTest" "Playwright UI Automation Tests" "Playwright"; then
+        success=false
+    fi
+    
+    echo ""
+    echo "---"
+    echo ""
+    
+    # Run Selenium tests
+    if ! run_tests "SeleniumUIAutomationTest" "Selenium UI Automation Tests" "Selenium"; then
+        success=false
+    fi
+    
+    if $success; then
+        echo ""
+        echo "🎉 All UI automation tests completed successfully!"
+    else
+        echo ""
+        echo "⚠️ Some tests failed - check logs and screenshots for details"
+        return 1
+    fi
+}
+
 # Function to show usage
 show_usage() {
     echo "Usage: $0 [option]"
     echo ""
-    echo "Options:"
-    echo "  all           Run all UI automation tests"
-    echo "  playwright    Run Playwright browser automation tests"
-    echo "  unit          Run existing unit tests first"
+    echo "Framework Options:"
+    echo "  all           Run all UI automation tests (both frameworks)"
+    echo "  both          Run both Playwright and Selenium test suites"
+    echo "  playwright    Run Playwright browser automation tests only"
+    echo "  selenium      Run Selenium WebDriver automation tests only"
+    echo ""
+    echo "Test Category Options:"
+    echo "  login         Run login/logout tests (both frameworks)"
+    echo "  crud          Run CRUD operation tests (both frameworks)"
+    echo "  grid          Run grid interaction tests (both frameworks)"
+    echo "  navigation    Run navigation tests (both frameworks)"
+    echo "  responsive    Run responsive design tests (both frameworks)"
+    echo "  validation    Run form validation tests (both frameworks)"
+    echo ""
+    echo "Utility Options:"
+    echo "  install       Install browsers and drivers for both frameworks"
     echo "  clean         Clean previous test results"
-    echo "  install       Install Playwright browsers"
+    echo "  compare       Run same tests in both frameworks for comparison"
     echo "  help          Show this help message"
     echo ""
     echo "Examples:"
-    echo "  $0 all        # Run all browser automation tests"
-    echo "  $0 playwright # Run only the Playwright tests"
-    echo "  $0 install    # Install Playwright browsers"
+    echo "  $0 all        # Run all tests with both frameworks"
+    echo "  $0 playwright # Run only Playwright tests"
+    echo "  $0 selenium   # Run only Selenium tests"
+    echo "  $0 login      # Run login tests with both frameworks"
+    echo "  $0 compare    # Run identical tests in both frameworks"
+    echo "  $0 install    # Install all browsers and drivers"
     echo "  $0 clean      # Clean up test artifacts"
+}
+
+# Function to run comparative tests
+run_comparative_tests() {
+    echo "🔄 Running comparative tests with both frameworks..."
+    
+    local test_categories=("login" "navigation" "grid")
+    local success=true
+    
+    for category in "${test_categories[@]}"; do
+        echo ""
+        echo "📊 Comparing $category tests..."
+        echo "==============================="
+        
+        # Run with Playwright
+        echo "🎭 Running $category with Playwright..."
+        case $category in
+            "login")
+                if ! run_tests "PlaywrightUIAutomationTest#testLoginFunctionality" "Playwright Login Test" "Playwright"; then
+                    success=false
+                fi
+                ;;
+            "navigation")
+                if ! run_tests "PlaywrightUIAutomationTest#testNavigationBetweenViews" "Playwright Navigation Test" "Playwright"; then
+                    success=false
+                fi
+                ;;
+            "grid")
+                if ! run_tests "PlaywrightUIAutomationTest#testGridInteractions" "Playwright Grid Test" "Playwright"; then
+                    success=false
+                fi
+                ;;
+        esac
+        
+        echo ""
+        
+        # Run with Selenium
+        echo "🌐 Running $category with Selenium..."
+        case $category in
+            "login")
+                if ! run_tests "SeleniumUIAutomationTest#testApplicationLoadsAndLoginFunctionality" "Selenium Login Test" "Selenium"; then
+                    success=false
+                fi
+                ;;
+            "navigation")
+                if ! run_tests "SeleniumUIAutomationTest#testNavigationBetweenViews" "Selenium Navigation Test" "Selenium"; then
+                    success=false
+                fi
+                ;;
+            "grid")
+                if ! run_tests "SeleniumUIAutomationTest#testGridInteractions" "Selenium Grid Test" "Selenium"; then
+                    success=false
+                fi
+                ;;
+        esac
+        
+        echo "---"
+    done
+    
+    if $success; then
+        echo ""
+        echo "🎉 Comparative testing completed successfully!"
+        echo "📊 Check screenshots to compare framework behaviors"
+    else
+        echo ""
+        echo "⚠️ Some comparative tests failed"
+        return 1
+    fi
 }
 
 # Main execution
@@ -112,24 +236,70 @@ main() {
     local command=${1:-help}
     
     case $command in
-        "all"|"playwright")
-            echo "🎯 Running Playwright UI automation tests..."
-            run_tests "PlaywrightUIAutomationTest" "Playwright UI Automation Tests"
+        "all"|"both")
+            run_both_frameworks
             ;;
             
-        "unit")
-            echo "🧪 Running existing unit tests first..."
-            if mvn test -Dtest="CMeetingsViewUITest"; then
-                echo "✅ Unit tests passed!"
-            else
-                echo "❌ Unit tests failed!"
-                return 1
-            fi
+        "playwright")
+            echo "🎭 Running Playwright UI automation tests..."
+            run_tests "PlaywrightUIAutomationTest" "Playwright UI Automation Tests" "Playwright"
+            ;;
+            
+        "selenium")
+            echo "🌐 Running Selenium UI automation tests..."
+            run_tests "SeleniumUIAutomationTest" "Selenium UI Automation Tests" "Selenium"
+            ;;
+            
+        "login")
+            echo "🔐 Running login/logout tests with both frameworks..."
+            run_tests "PlaywrightUIAutomationTest#testLoginFunctionality,PlaywrightUIAutomationTest#testLogoutFunctionality" "Playwright Login Tests" "Playwright"
+            echo ""
+            run_tests "SeleniumUIAutomationTest#testApplicationLoadsAndLoginFunctionality,SeleniumUIAutomationTest#testLogoutFunctionality" "Selenium Login Tests" "Selenium"
+            ;;
+            
+        "crud")
+            echo "📝 Running CRUD operation tests with both frameworks..."
+            run_tests "PlaywrightUIAutomationTest#testCRUDOperationsInProjects" "Playwright CRUD Tests" "Playwright"
+            echo ""
+            run_tests "SeleniumUIAutomationTest#testCRUDOperations" "Selenium CRUD Tests" "Selenium"
+            ;;
+            
+        "grid")
+            echo "📊 Running grid interaction tests with both frameworks..."
+            run_tests "PlaywrightUIAutomationTest#testGridInteractions" "Playwright Grid Tests" "Playwright"
+            echo ""
+            run_tests "SeleniumUIAutomationTest#testGridInteractions" "Selenium Grid Tests" "Selenium"
+            ;;
+            
+        "navigation")
+            echo "🧭 Running navigation tests with both frameworks..."
+            run_tests "PlaywrightUIAutomationTest#testNavigationBetweenViews" "Playwright Navigation Tests" "Playwright"
+            echo ""
+            run_tests "SeleniumUIAutomationTest#testNavigationBetweenViews" "Selenium Navigation Tests" "Selenium"
+            ;;
+            
+        "responsive")
+            echo "📱 Running responsive design tests with both frameworks..."
+            run_tests "PlaywrightUIAutomationTest#testResponsiveDesign" "Playwright Responsive Tests" "Playwright"
+            echo ""
+            run_tests "SeleniumUIAutomationTest#testResponsiveDesignAndMobileView" "Selenium Responsive Tests" "Selenium"
+            ;;
+            
+        "validation")
+            echo "✅ Running form validation tests with both frameworks..."
+            run_tests "PlaywrightUIAutomationTest#testFormValidationAndErrorHandling" "Playwright Validation Tests" "Playwright"
+            echo ""
+            run_tests "SeleniumUIAutomationTest#testFormValidationAndErrorHandling" "Selenium Validation Tests" "Selenium"
+            ;;
+            
+        "compare")
+            run_comparative_tests
             ;;
             
         "install")
-            echo "🔧 Installing Playwright browsers..."
+            echo "🔧 Installing browsers and drivers for both frameworks..."
             install_playwright_browsers
+            install_selenium_drivers
             ;;
             
         "clean")
