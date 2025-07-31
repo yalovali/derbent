@@ -32,18 +32,16 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> {
 
 	/**
 	 * Adds an approval requirement to a decision.
-	 * @param decision   the decision - must not be null
-	 * @param approver   the approver user - must not be null
-	 * @param isRequired whether the approval is required
+	 * @param decision the decision - must not be null
+	 * @param approver the approver user - must not be null
 	 * @return the created approval
 	 */
 	@Transactional
 	public CDecisionApproval addApprovalRequirement(final CDecision decision,
-		final CUser approver, final boolean isRequired) {
-		LOGGER.info(
-			"addApprovalRequirement called with decision: {}, approver: {}, isRequired: {}",
+		final CUser approver) {
+		LOGGER.info("addApprovalRequirement called with decision: {}, approver: {}",
 			decision != null ? decision.getName() : "null",
-			approver != null ? approver.getName() : "null", isRequired);
+			approver != null ? approver.getName() : "null");
 
 		if (decision == null) {
 			LOGGER.error("addApprovalRequirement called with null decision");
@@ -54,10 +52,8 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> {
 			LOGGER.error("addApprovalRequirement called with null approver");
 			throw new IllegalArgumentException("Approver cannot be null");
 		}
-		final CDecisionApproval approval =
-			new CDecisionApproval(decision, approver, isRequired, 3, null);
+		final CDecisionApproval approval = new CDecisionApproval(decision, approver);
 		decision.addApproval(approval);
-		// Save the decision which will cascade to the approval
 		repository.saveAndFlush(decision);
 		return approval;
 	}
@@ -84,27 +80,6 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> {
 		}
 		final CDecision decision = new CDecision(name.trim(), project);
 		return repository.saveAndFlush(decision);
-	}
-
-	/**
-	 * Creates a new decision with description.
-	 * @param name        the decision name - must not be null or empty
-	 * @param project     the project - must not be null
-	 * @param description the description - can be null
-	 * @return the created decision
-	 */
-	@Transactional
-	public CDecision createDecision(final String name, final CProject project,
-		final String description) {
-		LOGGER.info("createDecision called with name: {}, project: {}, description: {}",
-			name, project != null ? project.getName() : "null", description);
-		final CDecision decision = createDecision(name, project);
-
-		if ((description != null) && !description.trim().isEmpty()) {
-			decision.setDescription(description.trim());
-			return repository.saveAndFlush(decision);
-		}
-		return decision;
 	}
 
 	@Override
@@ -198,8 +173,7 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> {
 
 	/**
 	 * Override get() method to eagerly load relationships and prevent
-	 * LazyInitializationException. Following the comprehensive lazy loading fix pattern
-	 * from the guidelines.
+	 * LazyInitializationException.
 	 * @param id the decision ID
 	 * @return optional CDecision with all relationships loaded
 	 */

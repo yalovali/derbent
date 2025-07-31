@@ -40,6 +40,7 @@ Check [project_design_description.md](./project_design_description.md) file for 
 - [9. Documentation & Modularity](#9-documentation--modularity)
 - [10. Strict Prohibitions](#10-strict-prohibitions)
 - [11. Additional Best Practices](#11-additional-best-practices)
+- [Java Strict Coding Rules for Derbent Project](#java-strict-coding-rules-for-derbent-project)
 - [Related Documentation](#related-documentation)
 
 ---
@@ -560,6 +561,121 @@ class ManualVerificationTest {
 
 ---
 
+# Java Strict Coding Rules for Derbent Project
+
+## 1. Class Structure and Design Principles
+
+### 1.1 Entity Classes
+- All entity classes must extend appropriate base classes (CEntityDB, CEntityNamed, CEntityOfProject, CTypeEntity)
+- Type entities MUST extend CTypeEntity for consistency
+- Fields must be private with proper getters/setters
+- Use appropriate JPA annotations (@Entity, @Table, @AttributeOverride)
+- Include comprehensive JavaDoc comments
+
+### 1.2 Field Declarations
+- All fields must be private unless specifically required otherwise
+- Use final for immutable fields
+- Initialize collections at declaration
+- Use appropriate validation annotations (@NotNull, @Size, @Column)
+
+### 1.3 Constructor Guidelines
+- Provide default constructor for JPA
+- Provide parameterized constructors for required fields
+- Use constructor chaining with super() calls
+- Include parameter validation
+
+## 2. Code Quality Standards
+
+### 2.1 Logging
+- Use SLF4J Logger with correct class reference
+- Logger must be static final and named LOGGER
+- Use appropriate log levels (DEBUG, INFO, WARN, ERROR)
+
+### 2.2 Method Implementation
+- All public methods must have JavaDoc
+- Use defensive programming (null checks, validation)
+- Follow single responsibility principle
+- Implement proper equals(), hashCode(), and toString() methods
+
+### 2.3 Exception Handling
+- Use specific exception types
+- Include meaningful error messages
+- Log exceptions appropriately
+- Don't catch and ignore exceptions
+
+## 3. JPA and Database Standards
+
+### 3.1 Entity Annotations
+- Use @Entity for all entity classes
+- Specify @Table name explicitly
+- Use @AttributeOverride for inherited ID fields
+- Apply proper fetch strategies (LAZY vs EAGER)
+
+### 3.2 Relationship Mapping
+- Use appropriate relationship annotations (@ManyToOne, @OneToMany, etc.)
+- Specify join columns explicitly
+- Consider cascade operations carefully
+- Use fetch = FetchType.LAZY for performance
+
+## 4. Metadata and Validation
+
+### 4.1 MetaData Annotations
+- Use @MetaData for UI generation
+- Specify display names, descriptions, and order
+- Set appropriate maxLength values
+- Define data provider beans for relationships
+
+### 4.2 Bean Validation
+- Use @NotNull, @Size, @Pattern as appropriate
+- Validate at entity level, not just UI level
+- Include custom validators when needed
+
+## 5. Testing Standards
+
+### 5.1 Unit Tests
+- Test all public methods
+- Include edge cases and error conditions
+- Use meaningful test names
+- Follow AAA pattern (Arrange, Act, Assert)
+
+### 5.2 Integration Tests
+- Test entity persistence and retrieval
+- Verify relationship mappings
+- Test validation constraints
+- Include performance tests for critical paths
+
+## 6. Sample Implementation Guidelines
+
+### 6.1 Type Entity Pattern
+All type entities should follow this pattern:
+- Extend CTypeEntity
+- Provide proper constructors
+- Include complete getters/setters
+- Add comprehensive JavaDoc
+- Implement equals/hashCode based on business key
+
+### 6.2 Service Layer Pattern
+- Extend appropriate base service classes
+- Implement proper error handling
+- Use transactions appropriately
+- Include logging and monitoring
+
+## 7. Code Organization
+
+### 7.1 Package Structure
+- Follow domain-driven design principles
+- Separate concerns (domain, service, controller)
+- Use consistent naming conventions
+- Keep related classes together
+
+### 7.2 Import Organization
+- Group imports logically
+- Remove unused imports
+- Use specific imports, avoid wildcards
+- Follow IDE formatting rules
+
+---
+
 ## Related Documentation
 
 For comprehensive development guidance, refer to these additional documents:
@@ -589,4 +705,3 @@ For comprehensive development guidance, refer to these additional documents:
 > - Link to this file in your README and in your PR/issue templates.
 > - Remind contributors (and Copilot) to always follow these rules in every code review and commit.
 > - Reference the related documentation above for specific implementation patterns.
-

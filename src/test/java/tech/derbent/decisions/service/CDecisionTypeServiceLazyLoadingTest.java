@@ -41,7 +41,9 @@ public class CDecisionTypeServiceLazyLoadingTest {
         final Long decisionTypeId = 1L;
         final CProject project = new CProject();
         project.setName("Test Project");
-        final CDecisionType decisionType = new CDecisionType("Test Decision Type", "Description", project);
+        final CDecisionType decisionType = new CDecisionType("Test Decision Type", project);
+        // Set description using the setter method if needed
+        decisionType.setDescription("Test Description");
         // Note: ID is typically set by JPA, so we'll mock the return directly
 
         when(repository.findByIdWithRelationships(decisionTypeId))

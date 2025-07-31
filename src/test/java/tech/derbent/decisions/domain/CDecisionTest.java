@@ -116,7 +116,8 @@ class CDecisionTest {
 		final CProject project = new CProject();
 		final CDecision decision = new CDecision("Test Decision", project);
 		final CDecisionType decisionType = new CDecisionType("Strategic", project);
-		final CDecisionStatus decisionStatus = new CDecisionStatus("Under Review");
+		final CDecisionStatus decisionStatus =
+			new CDecisionStatus("Under Review", project);
 		// When
 		decision.setDecisionType(decisionType);
 		decision.setDecisionStatus(decisionStatus);

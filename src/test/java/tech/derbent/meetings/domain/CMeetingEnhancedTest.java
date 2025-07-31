@@ -49,7 +49,7 @@ class CMeetingEnhancedTest {
 		meetingType = new CMeetingType("Test Meeting Type",
 			"Test meeting type description", project);
 		// Create test meeting status
-		status = new CMeetingStatus("SCHEDULED", "Meeting is scheduled");
+		status = new CMeetingStatus("SCHEDULED", project);
 		// Create test users
 		responsible = new CUser();
 		responsible.setName("John Doe");

@@ -1051,48 +1051,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * types for all projects to ensure project-specific categorization.
 	 */
 	private void initializeDecisionTypes() {
-		LOGGER.info(
-			"initializeDecisionTypes called - creating decision type classifications for all projects");
-
-		try {
-			// Get all projects
-			final String[] projectNames = {
-				"Digital Transformation Initiative", "Product Development Phase 2",
-				"Infrastructure Modernization", "Customer Experience Enhancement" };
-			// Define decision types to create for each project
-			final String[][] decisionTypes = {
-				{
-					"Strategic", "High-level strategic decisions" },
-				{
-					"Technical", "Technical architecture decisions" },
-				{
-					"Financial", "Budget and cost-related decisions" },
-				{
-					"Operational", "Day-to-day operational decisions" },
-				{
-					"Resource", "Resource allocation decisions" } };
-
-			// Create decision types for each project
-			for (final String projectName : projectNames) {
-				final CProject project = findProjectByName(projectName);
-
-				if (project == null) {
-					LOGGER.warn("Project '{}' not found, skipping decision type creation",
-						projectName);
-					continue;
-				}
-				LOGGER.info("Creating decision types for project: {}", projectName);
-
-				for (final String[] typeData : decisionTypes) {
-					decisionTypeService.createDecisionType(typeData[0], typeData[1], true,
-						project);
-				}
-			}
-			LOGGER.info("Successfully created decision types for all projects");
-		} catch (final Exception e) {
-			LOGGER.error("Error creating decision types", e);
-			throw new RuntimeException("Failed to initialize decision types", e);
-		}
+		// TODO fix
 	}
 
 	/**

@@ -23,7 +23,7 @@ public abstract class CEntityOfProject extends CEntityNamed {
 		description = "User assigned to this activity", hidden = false, order = 10,
 		dataProviderBean = "CUserService"
 	)
-	CUser assignedTo;
+	private CUser assignedTo;
 
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "created_by_id", nullable = true)
@@ -32,7 +32,7 @@ public abstract class CEntityOfProject extends CEntityNamed {
 		description = "User who created this activity", hidden = false, order = 11,
 		dataProviderBean = "CUserService"
 	)
-	CUser createdBy;
+	private CUser createdBy;
 
 	// Default constructor for JPA
 	public CEntityOfProject() {
@@ -56,11 +56,59 @@ public abstract class CEntityOfProject extends CEntityNamed {
 		this.assignedTo = assignedTo;
 	}
 
-	public CUser getAssignedTo() { return assignedTo; }
+	/**
+	 * Gets the assigned user for this entity.
+	 * 
+	 * @return the assigned user
+	 */
+	public CUser getAssignedTo() {
+		return assignedTo;
+	}
 
-	public CUser getCreatedBy() { return createdBy; }
+	/**
+	 * Sets the assigned user for this entity.
+	 * 
+	 * @param assignedTo the user to assign
+	 */
+	public void setAssignedTo(final CUser assignedTo) {
+		this.assignedTo = assignedTo;
+	}
 
-	public CProject getProject() { return project; }
+	/**
+	 * Gets the user who created this entity.
+	 * 
+	 * @return the creator user
+	 */
+	public CUser getCreatedBy() {
+		return createdBy;
+	}
+
+	/**
+	 * Sets the user who created this entity.
+	 * 
+	 * @param createdBy the creator user
+	 */
+	public void setCreatedBy(final CUser createdBy) {
+		this.createdBy = createdBy;
+	}
+
+	/**
+	 * Gets the project this entity belongs to.
+	 * 
+	 * @return the project
+	 */
+	public CProject getProject() {
+		return project;
+	}
+
+	/**
+	 * Sets the project this entity belongs to.
+	 * 
+	 * @param project the project to set
+	 */
+	public void setProject(final CProject project) {
+		this.project = project;
+	}
 
 	public String getProjectName() {
 		return (project != null) ? project.getName() : "No Project";
@@ -70,10 +118,4 @@ public abstract class CEntityOfProject extends CEntityNamed {
 	protected void initializeDefaults() {
 		super.initializeDefaults();
 	}
-
-	public void setAssignedTo(final CUser assignedTo) { this.assignedTo = assignedTo; }
-
-	public void setCreatedBy(final CUser createdBy) { this.createdBy = createdBy; }
-
-	public void setProject(final CProject project) { this.project = project; }
 }

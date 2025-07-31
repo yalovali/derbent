@@ -1,12 +1,16 @@
 package tech.derbent.activities.domain;
 
+import java.util.Objects;
+
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.MetaData;
 import tech.derbent.base.domain.CStatus;
+import tech.derbent.projects.domain.CProject;
 
 /**
  * CActivityStatus - Domain entity representing activity status types. Layer: Domain (MVC)
@@ -20,6 +24,7 @@ public class CActivityStatus extends CStatus {
 
 	@Column (name = "color", nullable = true, length = 7)
 	@Size (max = 7)
+	@Pattern (regexp = "^#[0-9A-Fa-f]{6}$", message = "Color must be a valid hex code")
 	@MetaData (
 		displayName = "Color", required = false, readOnly = false,
 		defaultValue = "#808080",
@@ -53,18 +58,15 @@ public class CActivityStatus extends CStatus {
 		// logger.debug("CActivityStatus() - Creating new activity status instance");
 	}
 
-	public CActivityStatus(final String name) {
-		super(name);
+	public CActivityStatus(final String name, final CProject project) {
+		super(name, project);
 	}
 
-	public CActivityStatus(final String name, final String description) {
-		super(name, description);
-	}
-
-	public CActivityStatus(final String name, final String description,
-		final String color, final boolean isFinal) {
-		super(name, description);
-		this.color = color != null ? color : "#808080";
+	public CActivityStatus(final String name, final CProject project,
+		final String description, final String color, final boolean isFinal) {
+		super(name, project);
+		setDescription(description);
+		setColor(color);
 		this.isFinal = isFinal;
 	}
 
@@ -78,24 +80,36 @@ public class CActivityStatus extends CStatus {
 		if (!(o instanceof CActivityStatus)) {
 			return false;
 		}
-		final CActivityStatus that = (CActivityStatus) o;
-		return super.equals(that);
+		return super.equals(o);
 	}
 
-	public String getColor() {
-		return ((color != null) && !color.trim().isEmpty()) ? color : "#808080";
-	}
+	@Override
+	public String getColor() { return color != null ? color : "#808080"; }
 
+	@Override
 	public Integer getSortOrder() { return sortOrder != null ? sortOrder : 100; }
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), color, isFinal, sortOrder);
+	}
 
 	public boolean isFinal() { return isFinal; }
 
+	@Override
 	public void setColor(final String color) {
-		this.color = ((color != null) && !color.trim().isEmpty()) ? color : "#808080";
+
+		if ((color != null) && color.matches("^#[0-9A-Fa-f]{6}$")) {
+			this.color = color;
+		}
+		else {
+			this.color = "#808080";
+		}
 	}
 
 	public void setFinal(final boolean isFinal) { this.isFinal = isFinal; }
 
+	@Override
 	public void setSortOrder(final Integer sortOrder) {
 		this.sortOrder = sortOrder != null ? sortOrder : 100;
 	}

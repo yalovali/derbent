@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.persistence.MappedSuperclass;
 import tech.derbent.abstracts.domains.CTypeEntity;
+import tech.derbent.projects.domain.CProject;
 
 /**
  * CStatus - Abstract base entity for all status types in the system. Layer: Domain (MVC)
@@ -19,28 +20,29 @@ public abstract class CStatus extends CTypeEntity {
 	/**
 	 * Default constructor for JPA.
 	 */
-	public CStatus() {
+	protected CStatus() {
 		super();
 	}
 
 	/**
-	 * Constructor with name.
+	 * Constructor with name (required field).
 	 * @param name the name of the status
 	 */
-	public CStatus(final String name) {
-		super(name);
+	protected CStatus(final String name, final CProject project) {
+		super(name, project);
+		LOGGER.debug("CStatus constructor called with name: {} for {}", name,
+			getClass().getSimpleName());
 	}
 
 	/**
-	 * Constructor with name and description.
-	 * @param name        the name of the status
+	 * Sets the description for this status.
 	 * @param description the description of the status
 	 */
-	public CStatus(final String name, final String description) {
-		super(name, description);
-		LOGGER.debug(
-			"CStatus constructor called with name: {} and description: {} for {}", name,
-			description, getClass().getSimpleName());
+	@Override
+	public void setDescription(final String description) {
+		super.setDescription(description);
+		LOGGER.debug("Setting description: {} for {}", description,
+			getClass().getSimpleName());
 	}
 
 	@Override

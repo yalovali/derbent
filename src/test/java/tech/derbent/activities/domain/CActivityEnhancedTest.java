@@ -51,10 +51,11 @@ class CActivityEnhancedTest {
 		user2.setName("Jane");
 		user2.setLogin("jane.smith");
 		// Create test status
-		todoStatus = new CActivityStatus("TODO", "Task ready to start");
-		doneStatus = new CActivityStatus("DONE", "Task completed", "#00AA00", true);
+		todoStatus = new CActivityStatus("TODO", project);
+		doneStatus =
+			new CActivityStatus("DONE", project, "Task completed", "#00AA00", true);
 		// Create test priority
-		highPriority = new CActivityPriority("HIGH", 2, "High priority task");
+		highPriority = new CActivityPriority("HIGH", project);
 		// Create test activity
 		activity = new CActivity("Test Activity", project);
 	}

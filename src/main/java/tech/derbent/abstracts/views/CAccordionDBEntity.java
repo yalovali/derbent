@@ -77,8 +77,8 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB>
 			clearForm();
 		}
 		else {
-			LOGGER.debug("Populating form with entity: {}", entity);
-			// Populate the form fields with the entity data
+			// LOGGER.debug("Populating form with entity: {}", entity); Populate the form
+			// fields with the entity data
 			binder.readBean(entity);
 		}
 	}

@@ -38,14 +38,12 @@ class CActivityServiceWithStatusTest {
 	private CActivity createTestActivity() {
 		final CActivity activity = new CActivity();
 		activity.setName("Test Activity");
-		
 		// Create test project for the type
 		final CProject testProject = new CProject();
 		testProject.setName("Test Project");
-		
 		final CActivityType activityType = new CActivityType("Development", testProject);
 		activity.setActivityType(activityType);
-		final CActivityStatus status = new CActivityStatus("IN_PROGRESS");
+		final CActivityStatus status = new CActivityStatus("IN_PROGRESS", testProject);
 		activity.setStatus(status);
 		return activity;
 	}
@@ -100,11 +98,9 @@ class CActivityServiceWithStatusTest {
 		// Given
 		final CActivity activity = new CActivity();
 		activity.setName("Test Activity");
-		
 		// Create test project for the type
 		final CProject testProject = new CProject();
 		testProject.setName("Test Project");
-		
 		final CActivityType type = new CActivityType("Development", testProject);
 		activity.setActivityType(type);
 		// activityStatus is null When/Then - should not throw exception
@@ -116,7 +112,7 @@ class CActivityServiceWithStatusTest {
 		// Given
 		final CActivity activity = new CActivity();
 		activity.setName("Test Activity");
-		final CActivityStatus status = new CActivityStatus("TODO");
+		final CActivityStatus status = new CActivityStatus("TODO", new CProject());
 		activity.setStatus(status);
 		// activityType is null When/Then - should not throw exception
 		assertDoesNotThrow(() -> activityService.initializeLazyFields(activity));

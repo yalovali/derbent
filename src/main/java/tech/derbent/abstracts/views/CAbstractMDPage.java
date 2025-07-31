@@ -93,6 +93,7 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		baseDetailsLayout.setFlexWrap(FlexLayout.FlexWrap.WRAP);
 		baseDetailsLayout.setJustifyContentMode(JustifyContentMode.AROUND);
 		baseDetailsLayout.setAlignItems(Alignment.STRETCH);
+		baseDetailsLayout.setFlexDirection(FlexLayout.FlexDirection.ROW);
 		scroller.setContent(baseDetailsLayout);
 		scroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
 		// baseDetailsLayout.add(baseDescriptionAccordion);

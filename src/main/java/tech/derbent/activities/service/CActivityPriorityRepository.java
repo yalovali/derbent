@@ -1,9 +1,9 @@
 package tech.derbent.activities.service;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import tech.derbent.abstracts.services.CEntityOfProjectRepository;
 import tech.derbent.activities.domain.CActivityPriority;
 
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.Optional;
  * Provides data access operations for activity priority management.
  */
 @Repository
-public interface CActivityPriorityRepository extends JpaRepository<CActivityPriority, Long> {
+public interface CActivityPriorityRepository extends CEntityOfProjectRepository<CActivityPriority> {
 
     /**
      * Find activity priority by name (case-insensitive).
@@ -51,29 +51,5 @@ public interface CActivityPriorityRepository extends JpaRepository<CActivityPrio
      * @return Optional containing the default priority if found
      */
     @Query("SELECT p FROM CActivityPriority p WHERE p.isDefault = true")
-    Optional<CActivityPriority> findDefaultPriority();
-
-    /**
-     * Find priority by priority level.
-     * @param priorityLevel the numeric priority level - must not be null
-     * @return Optional containing the priority if found, empty otherwise
-     */
-    @Query("SELECT p FROM CActivityPriority p WHERE p.priorityLevel = :priorityLevel")
-    Optional<CActivityPriority> findByPriorityLevel(@Param("priorityLevel") Integer priorityLevel);
-
-    /**
-     * Check if a priority name already exists (case-insensitive).
-     * @param name the priority name to check - must not be null
-     * @return true if the name exists, false otherwise
-     */
-    @Query("SELECT COUNT(p) > 0 FROM CActivityPriority p WHERE LOWER(p.name) = LOWER(:name)")
-    boolean existsByNameIgnoreCase(@Param("name") String name);
-
-    /**
-     * Check if a priority level already exists.
-     * @param priorityLevel the priority level to check - must not be null  
-     * @return true if the level exists, false otherwise
-     */
-    @Query("SELECT COUNT(p) > 0 FROM CActivityPriority p WHERE p.priorityLevel = :priorityLevel")
-    boolean existsByPriorityLevel(@Param("priorityLevel") Integer priorityLevel);
+    Optional<CActivityPriority> findByIsDefaultTrue();
 }

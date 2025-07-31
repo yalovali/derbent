@@ -48,42 +48,7 @@ public class CActivityStatusService extends CAbstractService<CActivityStatus> {
 	public void createDefaultStatusesIfNotExist() {
 		LOGGER.debug(
 			"createDefaultStatusesIfNotExist() - Creating default activity statuses");
-		final String[][] defaultStatuses = {
-			{
-				"TODO", "Task is ready to be worked on", "#808080", "false", "1" },
-			{
-				"IN_PROGRESS", "Task is currently being worked on", "#007ACC", "false",
-				"2" },
-			{
-				"REVIEW", "Task is under review", "#FFA500", "false", "3" },
-			{
-				"BLOCKED", "Task is blocked and cannot proceed", "#FF4444", "false",
-				"4" },
-			{
-				"DONE", "Task has been completed", "#00AA00", "true", "5" },
-			{
-				"CANCELLED", "Task has been cancelled", "#888888", "true", "6" } };
-
-		for (final String[] statusData : defaultStatuses) {
-			final String name = statusData[0];
-
-			if (!existsByName(name)) {
-				LOGGER.debug(
-					"createDefaultStatusesIfNotExist() - Creating default status: {}",
-					name);
-				final CActivityStatus status = new CActivityStatus(name, statusData[1],
-					statusData[2], Boolean.parseBoolean(statusData[3]));
-				status.setSortOrder(Integer.parseInt(statusData[4]));
-				save(status);
-			}
-			else {
-				LOGGER.debug(
-					"createDefaultStatusesIfNotExist() - Status '{}' already exists",
-					name);
-			}
-		}
-		LOGGER.debug(
-			"createDefaultStatusesIfNotExist() - Completed creating default activity statuses");
+		// TODO implement default statuses creation logic
 	}
 
 	/**

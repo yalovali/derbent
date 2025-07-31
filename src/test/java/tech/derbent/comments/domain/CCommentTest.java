@@ -45,7 +45,7 @@ class CCommentTest {
 		author.setName("John Doe");
 		author.setLogin("john.doe");
 		// Create test priority
-		priority = new CCommentPriority("High", 1, "High priority comment");
+		priority = new CCommentPriority("High", new CProject());
 		priority.setColor("#FF0000");
 	}
 

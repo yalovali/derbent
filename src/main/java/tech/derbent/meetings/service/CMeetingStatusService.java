@@ -28,8 +28,8 @@ public class CMeetingStatusService extends CAbstractService<CMeetingStatus> {
 	private final CMeetingStatusRepository meetingStatusRepository;
 
 	@Autowired
-	public CMeetingStatusService(
-		final CMeetingStatusRepository meetingStatusRepository, final Clock clock) {
+	public CMeetingStatusService(final CMeetingStatusRepository meetingStatusRepository,
+		final Clock clock) {
 		super(meetingStatusRepository, clock);
 
 		if (meetingStatusRepository == null) {
@@ -46,43 +46,7 @@ public class CMeetingStatusService extends CAbstractService<CMeetingStatus> {
 	 * during application startup.
 	 */
 	public void createDefaultStatusesIfNotExist() {
-		LOGGER.debug(
-			"createDefaultStatusesIfNotExist() - Creating default meeting statuses");
-		final String[][] defaultStatuses = {
-			{
-				"PLANNED", "Meeting is planned but not yet scheduled", "#808080", "false", "1" },
-			{
-				"SCHEDULED", "Meeting is scheduled and participants notified", "#007ACC", "false",
-				"2" },
-			{
-				"IN_PROGRESS", "Meeting is currently in progress", "#FFA500", "false", "3" },
-			{
-				"COMPLETED", "Meeting has been completed", "#00AA00", "true", "4" },
-			{
-				"CANCELLED", "Meeting has been cancelled", "#FF4444", "true", "5" },
-			{
-				"POSTPONED", "Meeting has been postponed", "#888888", "false", "6" } };
-
-		for (final String[] statusData : defaultStatuses) {
-			final String name = statusData[0];
-
-			if (!existsByName(name)) {
-				LOGGER.debug(
-					"createDefaultStatusesIfNotExist() - Creating default status: {}",
-					name);
-				final CMeetingStatus status = new CMeetingStatus(name, statusData[1],
-					statusData[2], Boolean.parseBoolean(statusData[3]));
-				status.setSortOrder(Integer.parseInt(statusData[4]));
-				save(status);
-			}
-			else {
-				LOGGER.debug(
-					"createDefaultStatusesIfNotExist() - Status '{}' already exists",
-					name);
-			}
-		}
-		LOGGER.debug(
-			"createDefaultStatusesIfNotExist() - Completed creating default meeting statuses");
+		// TODO implement default statuses creation logic
 	}
 
 	/**
@@ -119,7 +83,7 @@ public class CMeetingStatusService extends CAbstractService<CMeetingStatus> {
 	 * @param name the name to check - must not be null
 	 * @return true if the name exists, false otherwise
 	 */
-	@Transactional(readOnly = true)
+	@Transactional (readOnly = true)
 	public boolean existsByName(final String name) {
 		LOGGER.debug("existsByName(name={}) - Checking if meeting status name exists",
 			name);
@@ -138,7 +102,7 @@ public class CMeetingStatusService extends CAbstractService<CMeetingStatus> {
 	 * Find all meeting statuses ordered by sort order.
 	 * @return List of all meeting statuses
 	 */
-	@Transactional(readOnly = true)
+	@Transactional (readOnly = true)
 	public List<CMeetingStatus> findAll() {
 		LOGGER.debug("findAll() - Finding all meeting statuses");
 		final List<CMeetingStatus> statuses =
@@ -151,7 +115,7 @@ public class CMeetingStatusService extends CAbstractService<CMeetingStatus> {
 	 * Find all active (non-final) statuses.
 	 * @return List of active statuses
 	 */
-	@Transactional(readOnly = true)
+	@Transactional (readOnly = true)
 	public List<CMeetingStatus> findAllActiveStatuses() {
 		LOGGER.debug("findAllActiveStatuses() - Finding all active meeting statuses");
 		final List<CMeetingStatus> statuses =
@@ -165,7 +129,7 @@ public class CMeetingStatusService extends CAbstractService<CMeetingStatus> {
 	 * Find all final statuses (completed/cancelled states).
 	 * @return List of final statuses
 	 */
-	@Transactional(readOnly = true)
+	@Transactional (readOnly = true)
 	public List<CMeetingStatus> findAllFinalStatuses() {
 		LOGGER.debug("findAllFinalStatuses() - Finding all final meeting statuses");
 		final List<CMeetingStatus> statuses =
@@ -179,7 +143,7 @@ public class CMeetingStatusService extends CAbstractService<CMeetingStatus> {
 	 * @param id the status ID - must not be null
 	 * @return Optional containing the status if found, empty otherwise
 	 */
-	@Transactional(readOnly = true)
+	@Transactional (readOnly = true)
 	public Optional<CMeetingStatus> findById(final Long id) {
 		LOGGER.debug("findById(id={}) - Finding meeting status by ID", id);
 
@@ -197,7 +161,7 @@ public class CMeetingStatusService extends CAbstractService<CMeetingStatus> {
 	 * @param name the status name - must not be null or empty
 	 * @return Optional containing the status if found, empty otherwise
 	 */
-	@Transactional(readOnly = true)
+	@Transactional (readOnly = true)
 	public Optional<CMeetingStatus> findByName(final String name) {
 		LOGGER.debug("findByName(name={}) - Finding meeting status by name", name);
 
@@ -215,7 +179,7 @@ public class CMeetingStatusService extends CAbstractService<CMeetingStatus> {
 	 * Find the default status for new meetings.
 	 * @return Optional containing the default status if found
 	 */
-	@Transactional(readOnly = true)
+	@Transactional (readOnly = true)
 	public Optional<CMeetingStatus> findDefaultStatus() {
 		LOGGER.debug("findDefaultStatus() - Finding default meeting status");
 		final Optional<CMeetingStatus> status =
@@ -242,8 +206,7 @@ public class CMeetingStatusService extends CAbstractService<CMeetingStatus> {
 		}
 
 		if ((status.getName() == null) || status.getName().trim().isEmpty()) {
-			LOGGER.error(
-				"save() - Meeting status name is null or empty for status id={}",
+			LOGGER.error("save() - Meeting status name is null or empty for status id={}",
 				status.getId());
 			throw new IllegalArgumentException(
 				"Meeting status name cannot be null or empty");
@@ -254,8 +217,7 @@ public class CMeetingStatusService extends CAbstractService<CMeetingStatus> {
 			meetingStatusRepository.findByNameIgnoreCase(trimmedName);
 
 		if (existing.isPresent() && !existing.get().getId().equals(status.getId())) {
-			LOGGER.error("save() - Meeting status name '{}' already exists",
-				trimmedName);
+			LOGGER.error("save() - Meeting status name '{}' already exists", trimmedName);
 			throw new IllegalArgumentException(
 				"Meeting status name '" + trimmedName + "' already exists");
 		}

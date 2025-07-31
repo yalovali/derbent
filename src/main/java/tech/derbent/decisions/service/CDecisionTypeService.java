@@ -13,203 +13,138 @@ import tech.derbent.decisions.domain.CDecisionType;
 import tech.derbent.projects.domain.CProject;
 
 /**
- * CDecisionTypeService - Service class for CDecisionType entities.
- * Layer: Service (MVC)
- * 
+ * CDecisionTypeService - Service class for CDecisionType entities. Layer: Service (MVC)
  * Provides business logic operations for project-aware decision type management including
  * validation, creation, and status management.
  */
 @Service
-@PreAuthorize("isAuthenticated()")
+@PreAuthorize ("isAuthenticated()")
 public class CDecisionTypeService extends CEntityOfProjectService<CDecisionType> {
 
-    public CDecisionTypeService(final CDecisionTypeRepository repository, final Clock clock) {
-        super(repository, clock);
-    }
+	private final CDecisionTypeRepository decisionTypeRepository;
 
-    @Override
-    protected CDecisionType createNewEntityInstance() {
-        return new CDecisionType();
-    }
+	public CDecisionTypeService(final CDecisionTypeRepository repository,
+		final Clock clock) {
+		super(repository, clock);
+		this.decisionTypeRepository = repository;
+	}
 
-    /**
-     * Gets a decision type by ID with eagerly loaded relationships.
-     * Overrides parent get() method to prevent LazyInitializationException.
-     * @param id the decision type ID
-     * @return Optional containing the decision type with loaded relationships
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<CDecisionType> get(final Long id) {
-        if (id == null) {
-            LOGGER.debug("Getting CDecisionType with null ID - returning empty");
-            return Optional.empty();
-        }
-        LOGGER.debug("Getting CDecisionType with ID {} (with eager loading)", id);
-        final Optional<CDecisionType> entity = ((CDecisionTypeRepository) repository).findByIdWithRelationships(id);
-        entity.ifPresent(this::initializeLazyFields);
-        return entity;
-    }
+	/**
+	 * Creates a new decision type with only required fields.
+	 * @param name    the decision type name - must not be null or empty
+	 * @param project the project this type belongs to - must not be null
+	 * @return the created decision type
+	 */
+	@Transactional
+	public CDecisionType createDecisionType(final String name, final CProject project) {
+		LOGGER.info("createDecisionType called with name: {} for project: {}", name,
+			project != null ? project.getName() : "null");
 
-    /**
-     * Finds all active decision types for a project.
-     * @param project the project
-     * @return list of active decision types for the project
-     */
-    @Transactional(readOnly = true)
-    public List<CDecisionType> findAllActiveByProject(final CProject project) {
-        LOGGER.info("findAllActiveByProject called for project: {}", project.getName());
-        return ((CDecisionTypeRepository) repository).findByProjectAndIsActiveTrue(project);
-    }
+		if ((name == null) || name.trim().isEmpty()) {
+			LOGGER.error("createDecisionType called with null or empty name");
+			throw new IllegalArgumentException(
+				"Decision type name cannot be null or empty");
+		}
 
-    /**
-     * Finds all decision types for a project ordered by sort order.
-     * @param project the project
-     * @return list of decision types for the project sorted by sort order
-     */
-    @Transactional(readOnly = true)
-    public List<CDecisionType> findAllByProjectOrdered(final CProject project) {
-        LOGGER.info("findAllByProjectOrdered called for project: {}", project.getName());
-        return ((CDecisionTypeRepository) repository).findByProjectOrderBySortOrderAsc(project);
-    }
+		if (project == null) {
+			LOGGER.error("createDecisionType called with null project");
+			throw new IllegalArgumentException("Project cannot be null");
+		}
+		final CDecisionType decisionType = new CDecisionType(name.trim(), project);
+		return repository.saveAndFlush(decisionType);
+	}
 
-    /**
-     * Finds decision types that require approval for a project.
-     * @param project the project
-     * @return list of decision types that require approval for the project
-     */
-    @Transactional(readOnly = true)
-    public List<CDecisionType> findRequiringApprovalByProject(final CProject project) {
-        LOGGER.info("findRequiringApprovalByProject called for project: {}", project.getName());
-        return ((CDecisionTypeRepository) repository).findByProjectAndRequiresApprovalTrue(project);
-    }
+	@Override
+	protected CDecisionType createNewEntityInstance() {
+		return new CDecisionType();
+	}
 
-    /**
-     * Creates a new decision type with basic properties.
-     * @param name the decision type name - must not be null or empty
-     * @param description the description - can be null
-     * @param requiresApproval whether decisions of this type require approval
-     * @param project the project this type belongs to
-     * @return the created decision type
-     */
-    @Transactional
-    public CDecisionType createDecisionType(final String name, final String description, 
-                                          final boolean requiresApproval, final CProject project) {
-        LOGGER.info("createDecisionType called with name: {}, description: {}, requiresApproval: {} for project: {}", 
-                   name, description, requiresApproval, project.getName());
-        
-        if (name == null || name.trim().isEmpty()) {
-            LOGGER.error("createDecisionType called with null or empty name");
-            throw new IllegalArgumentException("Decision type name cannot be null or empty");
-        }
-        
-        final CDecisionType decisionType = new CDecisionType(name.trim(), description, project);
-        decisionType.setRequiresApproval(requiresApproval);
-        
-        return repository.saveAndFlush(decisionType);
-    }
+	/**
+	 * Finds all active decision types for a project.
+	 * @param project the project
+	 * @return list of active decision types for the project
+	 */
+	@Transactional (readOnly = true)
+	public List<CDecisionType> findAllActiveByProject(final CProject project) {
+		LOGGER.info("findAllActiveByProject called for project: {}",
+			project != null ? project.getName() : "null");
 
-    /**
-     * Creates a new decision type with all properties.
-     * @param name the decision type name - must not be null or empty
-     * @param description the description - can be null
-     * @param color the hex color code - can be null
-     * @param requiresApproval whether decisions of this type require approval
-     * @param sortOrder the display sort order
-     * @param project the project this type belongs to
-     * @return the created decision type
-     */
-    @Transactional
-    public CDecisionType createDecisionType(final String name, final String description, 
-                                          final String color, final boolean requiresApproval, 
-                                          final Integer sortOrder, final CProject project) {
-        LOGGER.info("createDecisionType called with name: {}, description: {}, color: {}, requiresApproval: {}, sortOrder: {} for project: {}", 
-                   name, description, color, requiresApproval, sortOrder, project.getName());
-        
-        if (name == null || name.trim().isEmpty()) {
-            LOGGER.error("createDecisionType called with null or empty name");
-            throw new IllegalArgumentException("Decision type name cannot be null or empty");
-        }
-        
-        final CDecisionType decisionType = new CDecisionType(name.trim(), description, color, 
-                                                           requiresApproval, sortOrder, project);
-        
-        return repository.saveAndFlush(decisionType);
-    }
+		if (project == null) {
+			return List.of();
+		}
+		return decisionTypeRepository.findByProjectAndIsActiveTrue(project);
+	}
 
-    /**
-     * Activates a decision type.
-     * @param decisionType the decision type to activate - must not be null
-     * @return the updated decision type
-     */
-    @Transactional
-    public CDecisionType activateDecisionType(final CDecisionType decisionType) {
-        LOGGER.info("activateDecisionType called with decisionType: {}", 
-                   decisionType != null ? decisionType.getName() : "null");
-        
-        if (decisionType == null) {
-            LOGGER.error("activateDecisionType called with null decisionType");
-            throw new IllegalArgumentException("Decision type cannot be null");
-        }
-        
-        decisionType.activate();
-        return repository.saveAndFlush(decisionType);
-    }
+	/**
+	 * Finds all decision types for a project ordered by sort order.
+	 * @param project the project
+	 * @return list of decision types for the project sorted by sort order
+	 */
+	@Transactional (readOnly = true)
+	public List<CDecisionType> findAllByProjectOrdered(final CProject project) {
+		LOGGER.info("findAllByProjectOrdered called for project: {}",
+			project != null ? project.getName() : "null");
 
-    /**
-     * Deactivates a decision type.
-     * @param decisionType the decision type to deactivate - must not be null
-     * @return the updated decision type
-     */
-    @Transactional
-    public CDecisionType deactivateDecisionType(final CDecisionType decisionType) {
-        LOGGER.info("deactivateDecisionType called with decisionType: {}", 
-                   decisionType != null ? decisionType.getName() : "null");
-        
-        if (decisionType == null) {
-            LOGGER.error("deactivateDecisionType called with null decisionType");
-            throw new IllegalArgumentException("Decision type cannot be null");
-        }
-        
-        decisionType.deactivate();
-        return repository.saveAndFlush(decisionType);
-    }
+		if (project == null) {
+			return List.of();
+		}
+		return decisionTypeRepository.findByProjectOrderBySortOrderAsc(project);
+	}
 
-    /**
-     * Updates the sort order of a decision type.
-     * @param decisionType the decision type to update - must not be null
-     * @param sortOrder the new sort order
-     * @return the updated decision type
-     */
-    @Transactional
-    public CDecisionType updateSortOrder(final CDecisionType decisionType, final Integer sortOrder) {
-        LOGGER.info("updateSortOrder called with decisionType: {}, sortOrder: {}", 
-                   decisionType != null ? decisionType.getName() : "null", sortOrder);
-        
-        if (decisionType == null) {
-            LOGGER.error("updateSortOrder called with null decisionType");
-            throw new IllegalArgumentException("Decision type cannot be null");
-        }
-        
-        decisionType.setSortOrder(sortOrder);
-        return repository.saveAndFlush(decisionType);
-    }
+	/**
+	 * Finds decision types that require approval for a project.
+	 * @param project the project
+	 * @return list of decision types that require approval for the project
+	 */
+	@Transactional (readOnly = true)
+	public List<CDecisionType> findRequiringApprovalByProject(final CProject project) {
+		LOGGER.info("findRequiringApprovalByProject called for project: {}",
+			project != null ? project.getName() : "null");
 
-    /**
-     * Checks if a decision type is available for use.
-     * @param decisionType the decision type to check
-     * @return true if the decision type is active and available
-     */
-    @Transactional(readOnly = true)
-    public boolean isDecisionTypeAvailable(final CDecisionType decisionType) {
-        LOGGER.info("isDecisionTypeAvailable called with decisionType: {}", 
-                   decisionType != null ? decisionType.getName() : "null");
-        
-        if (decisionType == null) {
-            LOGGER.warn("isDecisionTypeAvailable called with null decisionType");
-            return false;
-        }
-        
-        return decisionType.isAvailable();
-    }
+		if (project == null) {
+			return List.of();
+		}
+		return decisionTypeRepository.findByProjectAndRequiresApprovalTrue(project);
+	}
+
+	/**
+	 * Gets a decision type by ID with eagerly loaded relationships. Overrides parent
+	 * get() method to prevent LazyInitializationException.
+	 * @param id the decision type ID
+	 * @return Optional containing the decision type with loaded relationships
+	 */
+	@Override
+	@Transactional (readOnly = true)
+	public Optional<CDecisionType> get(final Long id) {
+
+		if (id == null) {
+			LOGGER.debug("Getting CDecisionType with null ID - returning empty");
+			return Optional.empty();
+		}
+		LOGGER.debug("Getting CDecisionType with ID {} (with eager loading)", id);
+		final Optional<CDecisionType> entity =
+			decisionTypeRepository.findByIdWithRelationships(id);
+		entity.ifPresent(this::initializeLazyFields);
+		return entity;
+	}
+
+	/**
+	 * Updates the sort order of a decision type.
+	 * @param decisionType the decision type to update - must not be null
+	 * @param sortOrder    the new sort order
+	 * @return the updated decision type
+	 */
+	@Transactional
+	public CDecisionType updateSortOrder(final CDecisionType decisionType,
+		final Integer sortOrder) {
+		LOGGER.info("updateSortOrder called with decisionType: {}, sortOrder: {}",
+			decisionType != null ? decisionType.getName() : "null", sortOrder);
+
+		if (decisionType == null) {
+			LOGGER.error("updateSortOrder called with null decisionType");
+			throw new IllegalArgumentException("Decision type cannot be null");
+		}
+		decisionType.setSortOrder(sortOrder);
+		return repository.saveAndFlush(decisionType);
+	}
 }

@@ -37,7 +37,7 @@ public class CActivityTypeService extends CEntityOfProjectService<CActivityType>
 	/**
 	 * Creates a new activity type entity with name, description and project.
 	 * @param name        the name of the activity type
-	 * @param description the description of the activity type  
+	 * @param description the description of the activity type
 	 * @param project     the project this type belongs to
 	 */
 	@Transactional
@@ -45,14 +45,13 @@ public class CActivityTypeService extends CEntityOfProjectService<CActivityType>
 		LOGGER.info("Creating new activity type: {} with description: {} for project: {}", 
 			name, description, project.getName());
 
-		// Standard test failure logic for error handler testing
 		if ("fail".equals(name)) {
 			LOGGER.warn("Test failure requested for name: {}", name);
 			throw new RuntimeException("This is for testing the error handler");
 		}
-		// Validate name using parent validation
 		validateEntityName(name);
-		final CActivityType entity = new CActivityType(name, description, project);
+		final CActivityType entity = new CActivityType(name, project);
+		entity.setDescription(description);
 		repository.saveAndFlush(entity);
 		LOGGER.info("Activity type created successfully with name: {} for project: {}", 
 			name, project.getName());
