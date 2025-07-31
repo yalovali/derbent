@@ -216,10 +216,11 @@ public class CActivityStatusService extends CAbstractService<CActivityStatus> {
 		}
 		// Check for duplicate names (excluding self for updates)
 		final String trimmedName = status.getName().trim();
-		final Optional<CActivityStatus> existing =
-			activityStatusRepository.findByNameIgnoreCase(trimmedName);
+		// search with same name and same project
+		final Optional<CActivityStatus> existing = activityStatusRepository
+			.findByNameAndProject(trimmedName, status.getProject());
 
-		if (existing.isPresent() && !existing.get().getId().equals(status.getId())) {
+		if (existing.isPresent()) {
 			LOGGER.error("save() - Activity status name '{}' already exists",
 				trimmedName);
 			throw new IllegalArgumentException(
@@ -228,8 +229,6 @@ public class CActivityStatusService extends CAbstractService<CActivityStatus> {
 
 		try {
 			final CActivityStatus savedStatus = activityStatusRepository.save(status);
-			LOGGER.debug("save() - Successfully saved activity status with id={}",
-				savedStatus.getId());
 			return savedStatus;
 		} catch (final Exception e) {
 			LOGGER.error("save() - Error saving activity status: {}", e.getMessage(), e);

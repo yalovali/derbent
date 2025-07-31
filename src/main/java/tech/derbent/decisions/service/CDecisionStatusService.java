@@ -115,16 +115,6 @@ public class CDecisionStatusService extends CAbstractNamedEntityService<CDecisio
 	}
 
 	/**
-	 * Finds decision statuses that allow editing.
-	 * @return list of decision statuses that allow editing
-	 */
-	@Transactional (readOnly = true)
-	public List<CDecisionStatus> findAllowingEditing() {
-		LOGGER.info("findAllowingEditing called for decision statuses");
-		return ((CDecisionStatusRepository) repository).findByAllowsEditingTrue();
-	}
-
-	/**
 	 * Finds decision statuses that require approval.
 	 * @return list of decision statuses that require approval
 	 */

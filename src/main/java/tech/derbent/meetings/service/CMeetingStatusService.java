@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.meetings.domain.CMeetingStatus;
+import tech.derbent.projects.domain.CProject;
 
 /**
  * CMeetingStatusService - Service class for managing CMeetingStatus entities. Layer:
@@ -171,7 +172,22 @@ public class CMeetingStatusService extends CAbstractService<CMeetingStatus> {
 		}
 		final Optional<CMeetingStatus> status =
 			meetingStatusRepository.findByNameIgnoreCase(name.trim());
-		LOGGER.debug("findByName(name={}) - Found status: {}", name, status.isPresent());
+		return status;
+	}
+
+	@Transactional (readOnly = true)
+	public Optional<CMeetingStatus> findByNameAndProject(final String name,
+		final CProject project) {
+		LOGGER.debug("findByNameAndProject(name={}, project={}) - Finding meeting status",
+			name, project != null ? project.getName() : "null");
+
+		if ((name == null) || name.trim().isEmpty()) {
+			LOGGER.warn("findByNameAndProject() - Name parameter is null or empty");
+			return Optional.empty();
+		}
+		final Optional<CMeetingStatus> status =
+			meetingStatusRepository.findByNameAndProject(name.trim(), project);
+		LOGGER.debug("findByNameAndProject() - Found status: {}", status.isPresent());
 		return status;
 	}
 
@@ -184,8 +200,6 @@ public class CMeetingStatusService extends CAbstractService<CMeetingStatus> {
 		LOGGER.debug("findDefaultStatus() - Finding default meeting status");
 		final Optional<CMeetingStatus> status =
 			meetingStatusRepository.findDefaultStatus();
-		LOGGER.debug("findDefaultStatus() - Found default status: {}",
-			status.isPresent());
 		return status;
 	}
 
@@ -213,10 +227,11 @@ public class CMeetingStatusService extends CAbstractService<CMeetingStatus> {
 		}
 		// Check for duplicate names (excluding self for updates)
 		final String trimmedName = status.getName().trim();
-		final Optional<CMeetingStatus> existing =
-			meetingStatusRepository.findByNameIgnoreCase(trimmedName);
+		// search with same name and same project
+		final Optional<CMeetingStatus> existing = meetingStatusRepository
+			.findByNameAndProject(trimmedName, status.getProject());
 
-		if (existing.isPresent() && !existing.get().getId().equals(status.getId())) {
+		if (existing.isPresent()) {
 			LOGGER.error("save() - Meeting status name '{}' already exists", trimmedName);
 			throw new IllegalArgumentException(
 				"Meeting status name '" + trimmedName + "' already exists");

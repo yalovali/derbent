@@ -19,9 +19,9 @@ import tech.derbent.activities.domain.CActivityType;
 import tech.derbent.activities.service.CActivityService;
 import tech.derbent.activities.service.CActivityStatusService;
 import tech.derbent.activities.service.CActivityTypeService;
-import tech.derbent.comments.service.CCommentService;
-import tech.derbent.comments.service.CCommentPriorityService;
 import tech.derbent.comments.domain.CCommentPriority;
+import tech.derbent.comments.service.CCommentPriorityService;
+import tech.derbent.comments.service.CCommentService;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.decisions.domain.CDecisionStatus;
@@ -116,8 +116,10 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CMeetingTypeService meetingTypeService,
 		final CDecisionTypeService decisionTypeService,
 		final COrderTypeService orderTypeService, final CCompanyService companyService,
-		final CCommentService commentService, final CCommentPriorityService commentPriorityService, final CMeetingService meetingService,
-		final CRiskService riskService, final CMeetingStatusService meetingStatusService,
+		final CCommentService commentService,
+		final CCommentPriorityService commentPriorityService,
+		final CMeetingService meetingService, final CRiskService riskService,
+		final CMeetingStatusService meetingStatusService,
 		final CDecisionStatusService decisionStatusService,
 		final CActivityStatusService activityStatusService,
 		final COrderStatusService orderStatusService,
@@ -144,16 +146,215 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		this.approvalStatusService = approvalStatusService;
 	}
 
-	private void createActivityStatus(final String name, final String description,
-		final String color, final boolean isFinal, final int sortOrder) {
-		final CActivityStatus status = new CActivityStatus();
-		status.setName(name);
+	private void createActivityStatus(final String name, final CProject project,
+		final String description, final String color, final boolean isFinal,
+		final int sortOrder) {
+		final CActivityStatus status = new CActivityStatus(name, project);
 		status.setDescription(description);
 		status.setColor(color);
 		status.setFinal(isFinal);
 		status.setSortOrder(sortOrder);
 		activityStatusService.save(status);
 		LOGGER.debug("Created activity status: {}", name);
+	}
+
+	/**
+	 * Creates additional activities for Customer Experience Enhancement project.
+	 */
+	private void createAdditionalCustomerExperienceActivities() {
+		final CProject project = findProjectByName("Customer Experience Enhancement");
+
+		if (project == null) {
+			return;
+		}
+		// User Research Activity
+		final CActivity userResearch = new CActivity("User Research & Analysis", project);
+		final CActivityType researchType =
+			findActivityTypeByNameAndProject("Research", project);
+		activityService.setActivityType(userResearch, researchType,
+			"Conduct user interviews and analyze customer feedback");
+		final CUser analyst = findUserByLogin("ademir");
+		final CUser manager = findUserByLogin("mkaradeniz");
+		activityService.setAssignedUsers(userResearch, analyst, manager);
+		activityService.setTimeTracking(userResearch, new BigDecimal("22.00"),
+			new BigDecimal("22.00"), new BigDecimal("0.00"));
+		activityService.setDateInfo(userResearch, LocalDate.now().minusDays(20),
+			LocalDate.now().minusDays(10), LocalDate.now().minusDays(10));
+		final CActivityStatus completedStatus = findActivityStatusByName("Completed");
+		activityService.setStatusAndPriority(userResearch, completedStatus, null, 100);
+		commentService.createComment("User research methodology defined", userResearch,
+			manager);
+		commentService.createComment("Conducted 15 user interviews", userResearch,
+			analyst);
+		commentService.createComment("Analysis complete, insights documented",
+			userResearch, analyst);
+		// UI/UX Design Activity
+		final CActivity uxDesign = new CActivity("UI/UX Design Improvements", project);
+		final CActivityType designType =
+			findActivityTypeByNameAndProject("Design", project);
+		activityService.setActivityType(uxDesign, designType,
+			"Design improved user interface based on research findings");
+		final CUser dev2 = findUserByLogin("msahin");
+		activityService.setAssignedUsers(uxDesign, dev2, analyst);
+		activityService.setTimeTracking(uxDesign, new BigDecimal("28.00"),
+			new BigDecimal("15.00"), new BigDecimal("13.00"));
+		activityService.setDateInfo(uxDesign, LocalDate.now().minusDays(8),
+			LocalDate.now().plusDays(5), null);
+		final CActivityStatus inProgressStatus = findActivityStatusByName("In Progress");
+		activityService.setStatusAndPriority(uxDesign, inProgressStatus, null, 55);
+		commentService.createComment("Design system updated with new patterns", uxDesign,
+			dev2);
+		commentService.createComment("Wireframes created for key user journeys", uxDesign,
+			dev2);
+		commentService.createComment("Prototypes ready for user testing", uxDesign,
+			analyst);
+	}
+	// Additional meeting creation methods
+
+	/**
+	 * Creates additional activities for Digital Transformation Initiative project.
+	 */
+	private void createAdditionalDigitalTransformationActivities() {
+		final CProject project = findProjectByName("Digital Transformation Initiative");
+
+		if (project == null) {
+			return;
+		}
+		// Frontend Development Activity
+		final CActivity frontendDev = new CActivity("Frontend Development", project);
+		final CActivityType developmentType =
+			findActivityTypeByNameAndProject("Development", project);
+		activityService.setActivityType(frontendDev, developmentType,
+			"Develop responsive user interface components using modern frameworks");
+		final CUser dev1 = findUserByLogin("msahin");
+		final CUser manager = findUserByLogin("mkaradeniz");
+		activityService.setAssignedUsers(frontendDev, dev1, manager);
+		activityService.setTimeTracking(frontendDev, new BigDecimal("32.00"),
+			new BigDecimal("28.00"), new BigDecimal("4.00"));
+		activityService.setDateInfo(frontendDev, LocalDate.now().minusDays(12),
+			LocalDate.now().plusDays(8), null);
+		final CActivityStatus inProgressStatus = findActivityStatusByName("In Progress");
+		activityService.setStatusAndPriority(frontendDev, inProgressStatus, null, 70);
+		commentService.createComment("Frontend development started with React components",
+			frontendDev, dev1);
+		commentService.createComment("Implemented responsive design patterns",
+			frontendDev, dev1);
+		commentService.createComment("Working on integration with backend APIs",
+			frontendDev, manager);
+		// Database Migration Activity
+		final CActivity dbMigration = new CActivity("Database Migration", project);
+		activityService.setActivityType(dbMigration, developmentType,
+			"Migrate legacy data to new database schema");
+		final CUser admin = findUserByLogin("admin");
+		activityService.setAssignedUsers(dbMigration, admin, manager);
+		activityService.setTimeTracking(dbMigration, new BigDecimal("20.00"),
+			new BigDecimal("5.00"), new BigDecimal("15.00"));
+		activityService.setDateInfo(dbMigration, LocalDate.now().plusDays(5),
+			LocalDate.now().plusDays(15), null);
+		final CActivityStatus notStartedStatus = findActivityStatusByName("Not Started");
+		activityService.setStatusAndPriority(dbMigration, notStartedStatus, null, 0);
+		commentService.createComment("Database migration plan prepared", dbMigration,
+			admin);
+		commentService.createComment("Waiting for backend API completion", dbMigration,
+			manager);
+	}
+
+	/**
+	 * Creates additional activities for Infrastructure Modernization project.
+	 */
+	private void createAdditionalInfrastructureActivities() {
+		final CProject project = findProjectByName("Infrastructure Modernization");
+
+		if (project == null) {
+			return;
+		}
+		// Security Audit Activity
+		final CActivity securityAudit = new CActivity("Security Audit", project);
+		final CActivityType researchType =
+			findActivityTypeByNameAndProject("Research", project);
+		activityService.setActivityType(securityAudit, researchType,
+			"Comprehensive security assessment and vulnerability analysis");
+		final CUser admin = findUserByLogin("admin");
+		final CUser manager = findUserByLogin("mkaradeniz");
+		activityService.setAssignedUsers(securityAudit, admin, manager);
+		activityService.setTimeTracking(securityAudit, new BigDecimal("25.00"),
+			new BigDecimal("0.00"), new BigDecimal("25.00"));
+		activityService.setDateInfo(securityAudit, LocalDate.now().plusDays(10),
+			LocalDate.now().plusDays(18), null);
+		final CActivityStatus notStartedStatus = findActivityStatusByName("Not Started");
+		activityService.setStatusAndPriority(securityAudit, notStartedStatus, null, 0);
+		commentService.createComment("Security audit requirements defined", securityAudit,
+			admin);
+		commentService.createComment("External security firm selected for audit",
+			securityAudit, manager);
+		// Server Migration Activity
+		final CActivity serverMigration = new CActivity("Server Migration", project);
+		final CActivityType developmentType =
+			findActivityTypeByNameAndProject("Development", project);
+		activityService.setActivityType(serverMigration, developmentType,
+			"Migrate applications to new server infrastructure");
+		final CUser dev1 = findUserByLogin("bozkan");
+		activityService.setAssignedUsers(serverMigration, dev1, admin);
+		activityService.setTimeTracking(serverMigration, new BigDecimal("35.00"),
+			new BigDecimal("20.00"), new BigDecimal("15.00"));
+		activityService.setDateInfo(serverMigration, LocalDate.now().minusDays(8),
+			LocalDate.now().plusDays(12), null);
+		final CActivityStatus onHoldStatus = findActivityStatusByName("On Hold");
+		activityService.setStatusAndPriority(serverMigration, onHoldStatus, null, 55);
+		commentService.createComment("Server migration plan created", serverMigration,
+			dev1);
+		commentService.createComment("Testing environment successfully migrated",
+			serverMigration, dev1);
+		commentService.createComment("Production migration on hold pending approval",
+			serverMigration, admin);
+	}
+
+	/**
+	 * Creates additional activities for Product Development Phase 2 project.
+	 */
+	private void createAdditionalProductDevelopmentActivities() {
+		final CProject project = findProjectByName("Product Development Phase 2");
+
+		if (project == null) {
+			return;
+		}
+		// Code Review Activity
+		final CActivity codeReview = new CActivity("Code Review Process", project);
+		final CActivityType testingType =
+			findActivityTypeByNameAndProject("Testing", project);
+		activityService.setActivityType(codeReview, testingType,
+			"Comprehensive code review and quality assurance");
+		final CUser analyst = findUserByLogin("ademir");
+		final CUser manager = findUserByLogin("mkaradeniz");
+		activityService.setAssignedUsers(codeReview, analyst, manager);
+		activityService.setTimeTracking(codeReview, new BigDecimal("12.00"),
+			new BigDecimal("12.00"), new BigDecimal("0.00"));
+		activityService.setDateInfo(codeReview, LocalDate.now().minusDays(3),
+			LocalDate.now().minusDays(1), LocalDate.now().minusDays(1));
+		final CActivityStatus completedStatus = findActivityStatusByName("Completed");
+		activityService.setStatusAndPriority(codeReview, completedStatus, null, 100);
+		commentService.createComment("Code review process initiated", codeReview,
+			manager);
+		commentService.createComment("Found minor issues, created fix recommendations",
+			codeReview, analyst);
+		commentService.createComment("All issues resolved, code approved", codeReview,
+			analyst);
+		// Performance Testing Activity
+		final CActivity perfTesting = new CActivity("Performance Testing", project);
+		activityService.setActivityType(perfTesting, testingType,
+			"Load testing and performance optimization");
+		final CUser dev2 = findUserByLogin("bozkan");
+		activityService.setAssignedUsers(perfTesting, dev2, manager);
+		activityService.setTimeTracking(perfTesting, new BigDecimal("18.00"),
+			new BigDecimal("10.00"), new BigDecimal("8.00"));
+		activityService.setDateInfo(perfTesting, LocalDate.now().minusDays(5),
+			LocalDate.now().plusDays(2), null);
+		final CActivityStatus inProgressStatus = findActivityStatusByName("In Progress");
+		activityService.setStatusAndPriority(perfTesting, inProgressStatus, null, 60);
+		commentService.createComment("Performance testing framework setup", perfTesting,
+			dev2);
+		commentService.createComment("Baseline performance metrics collected",
+			perfTesting, dev2);
 	}
 
 	/**
@@ -224,6 +425,23 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		LOGGER.info("Backend development activity created successfully");
 	}
 
+	private void createCommentPriority(final String name, final String description,
+		final String color, final Integer priorityLevel, final boolean isDefault,
+		final int sortOrder) {
+		final CProject project = findProjectByName("Digital Transformation Initiative");
+
+		if (project == null) {
+			LOGGER.warn("Project not found for comment priority creation, using null");
+		}
+		final CCommentPriority priority =
+			new CCommentPriority(name, project, color, sortOrder);
+		priority.setDescription(description);
+		priority.setPriorityLevel(priorityLevel);
+		priority.setDefault(isDefault);
+		commentPriorityService.save(priority);
+		LOGGER.debug("Created comment priority: {}", name);
+	}
+
 	/**
 	 * Creates consulting company.
 	 */
@@ -260,10 +478,10 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		LOGGER.info("Critical security risk created successfully");
 	}
 
-	private void createDecisionStatus(final String name, final String description,
-		final String color, final boolean isFinal, final int sortOrder) {
-		final CDecisionStatus status = new CDecisionStatus();
-		status.setName(name);
+	private void createDecisionStatus(final String name, final CProject project,
+		final String description, final String color, final boolean isFinal,
+		final int sortOrder) {
+		final CDecisionStatus status = new CDecisionStatus(name, project);
 		status.setDescription(description);
 		status.setColor(color);
 		status.setFinal(isFinal);
@@ -382,9 +600,11 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		LOGGER.info("Medium priority budget risk created successfully");
 	}
 
-	private void createMeetingStatus(final String name, final String description,
-		final String color, final boolean isFinal, final int sortOrder) {
+	private void createMeetingStatus(final String name, final CProject project,
+		final String description, final String color, final boolean isFinal,
+		final int sortOrder) {
 		final CMeetingStatus status = new CMeetingStatus();
+		status.setProject(project); // Set the project to avoid NULL constraint violation
 		status.setName(name);
 		status.setDescription(description);
 		status.setColor(color);
@@ -403,20 +623,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		// isFinal, sortOrder
 		orderStatusService.save(status);
 		LOGGER.debug("Created order status: {}", name);
-	}
-
-	private void createCommentPriority(final String name, final String description,
-		final String color, final Integer priorityLevel, final boolean isDefault, final int sortOrder) {
-		final CProject project = findProjectByName("Digital Transformation Initiative");
-		if (project == null) {
-			LOGGER.warn("Project not found for comment priority creation, using null");
-		}
-		final CCommentPriority priority = new CCommentPriority(name, project, color, sortOrder);
-		priority.setDescription(description);
-		priority.setPriorityLevel(priorityLevel);
-		priority.setDefault(isDefault);
-		commentPriorityService.save(priority);
-		LOGGER.debug("Created comment priority: {}", name);
 	}
 
 	/**
@@ -899,6 +1105,25 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		LOGGER.info("UI testing activity created successfully");
 	}
 
+	/**
+	 * Helper method to find activity status by name.
+	 * @param name the status name to search for
+	 * @return the CActivityStatus entity or null if not found
+	 */
+	private CActivityStatus findActivityStatusByName(final String name) {
+		LOGGER.debug("findActivityStatusByName called with name: {}", name);
+
+		try {
+			final var statuses = activityStatusService
+				.list(org.springframework.data.domain.Pageable.unpaged());
+			return statuses.stream().filter(status -> name.equals(status.getName()))
+				.findFirst().orElse(null);
+		} catch (final Exception e) {
+			LOGGER.error("Error finding activity status by name: {}", name, e);
+			return null;
+		}
+	}
+
 	private CActivityType findActivityTypeByNameAndProject(final String name,
 		final CProject project) {
 		LOGGER.debug(
@@ -920,20 +1145,17 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	}
 
 	/**
-	 * Helper method to find activity status by name.
-	 * @param name the status name to search for
-	 * @return the CActivityStatus entity or null if not found
+	 * Helper method to find company by name.
+	 * @param name the company name to search for
+	 * @return the CCompany entity or null if not found
 	 */
-	private CActivityStatus findActivityStatusByName(final String name) {
-		LOGGER.debug("findActivityStatusByName called with name: {}", name);
+	private CCompany findCompanyByName(final String name) {
+		LOGGER.info("findCompanyByName called with name: {}", name);
 
 		try {
-			final var statuses = activityStatusService
-				.list(org.springframework.data.domain.Pageable.unpaged());
-			return statuses.stream().filter(status -> name.equals(status.getName()))
-				.findFirst().orElse(null);
+			return companyService.findByName(name).orElse(null);
 		} catch (final Exception e) {
-			LOGGER.error("Error finding activity status by name: {}", name, e);
+			LOGGER.warn("Could not find company with name: {}", name);
 			return null;
 		}
 	}
@@ -953,22 +1175,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 				.findFirst().orElse(null);
 		} catch (final Exception e) {
 			LOGGER.error("Error finding meeting status by name: {}", name, e);
-			return null;
-		}
-	}
-
-	/**
-	 * Helper method to find company by name.
-	 * @param name the company name to search for
-	 * @return the CCompany entity or null if not found
-	 */
-	private CCompany findCompanyByName(final String name) {
-		LOGGER.info("findCompanyByName called with name: {}", name);
-
-		try {
-			return companyService.findByName(name).orElse(null);
-		} catch (final Exception e) {
-			LOGGER.warn("Could not find company with name: {}", name);
 			return null;
 		}
 	}
@@ -1018,187 +1224,17 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			createUITestingActivity();
 			createSystemArchitectureActivity();
 			createTechnicalDocumentationActivity();
-			
 			// Additional activities to meet 3+ per project requirement
 			createAdditionalDigitalTransformationActivities();
 			createAdditionalProductDevelopmentActivities();
 			createAdditionalInfrastructureActivities();
 			createAdditionalCustomerExperienceActivities();
-			
 			// LOGGER.info("Successfully created comprehensive activity samples");
 		} catch (final Exception e) {
 			LOGGER.error("Error creating sample activities", e);
 			throw new RuntimeException("Failed to initialize activities", e);
 		}
 	}
-
-	/**
-	 * Creates additional activities for Digital Transformation Initiative project.
-	 */
-	private void createAdditionalDigitalTransformationActivities() {
-		final CProject project = findProjectByName("Digital Transformation Initiative");
-		if (project == null) return;
-
-		// Frontend Development Activity
-		final CActivity frontendDev = new CActivity("Frontend Development", project);
-		final CActivityType developmentType = findActivityTypeByNameAndProject("Development", project);
-		activityService.setActivityType(frontendDev, developmentType,
-			"Develop responsive user interface components using modern frameworks");
-		final CUser dev1 = findUserByLogin("msahin");
-		final CUser manager = findUserByLogin("mkaradeniz");
-		activityService.setAssignedUsers(frontendDev, dev1, manager);
-		activityService.setTimeTracking(frontendDev, new BigDecimal("32.00"),
-			new BigDecimal("28.00"), new BigDecimal("4.00"));
-		activityService.setDateInfo(frontendDev, LocalDate.now().minusDays(12),
-			LocalDate.now().plusDays(8), null);
-		final CActivityStatus inProgressStatus = findActivityStatusByName("In Progress");
-		activityService.setStatusAndPriority(frontendDev, inProgressStatus, null, 70);
-		commentService.createComment("Frontend development started with React components", frontendDev, dev1);
-		commentService.createComment("Implemented responsive design patterns", frontendDev, dev1);
-		commentService.createComment("Working on integration with backend APIs", frontendDev, manager);
-
-		// Database Migration Activity
-		final CActivity dbMigration = new CActivity("Database Migration", project);
-		activityService.setActivityType(dbMigration, developmentType,
-			"Migrate legacy data to new database schema");
-		final CUser admin = findUserByLogin("admin");
-		activityService.setAssignedUsers(dbMigration, admin, manager);
-		activityService.setTimeTracking(dbMigration, new BigDecimal("20.00"),
-			new BigDecimal("5.00"), new BigDecimal("15.00"));
-		activityService.setDateInfo(dbMigration, LocalDate.now().plusDays(5),
-			LocalDate.now().plusDays(15), null);
-		final CActivityStatus notStartedStatus = findActivityStatusByName("Not Started");
-		activityService.setStatusAndPriority(dbMigration, notStartedStatus, null, 0);
-		commentService.createComment("Database migration plan prepared", dbMigration, admin);
-		commentService.createComment("Waiting for backend API completion", dbMigration, manager);
-	}
-
-	/**
-	 * Creates additional activities for Product Development Phase 2 project.
-	 */
-	private void createAdditionalProductDevelopmentActivities() {
-		final CProject project = findProjectByName("Product Development Phase 2");
-		if (project == null) return;
-
-		// Code Review Activity
-		final CActivity codeReview = new CActivity("Code Review Process", project);
-		final CActivityType testingType = findActivityTypeByNameAndProject("Testing", project);
-		activityService.setActivityType(codeReview, testingType,
-			"Comprehensive code review and quality assurance");
-		final CUser analyst = findUserByLogin("ademir");
-		final CUser manager = findUserByLogin("mkaradeniz");
-		activityService.setAssignedUsers(codeReview, analyst, manager);
-		activityService.setTimeTracking(codeReview, new BigDecimal("12.00"),
-			new BigDecimal("12.00"), new BigDecimal("0.00"));
-		activityService.setDateInfo(codeReview, LocalDate.now().minusDays(3),
-			LocalDate.now().minusDays(1), LocalDate.now().minusDays(1));
-		final CActivityStatus completedStatus = findActivityStatusByName("Completed");
-		activityService.setStatusAndPriority(codeReview, completedStatus, null, 100);
-		commentService.createComment("Code review process initiated", codeReview, manager);
-		commentService.createComment("Found minor issues, created fix recommendations", codeReview, analyst);
-		commentService.createComment("All issues resolved, code approved", codeReview, analyst);
-
-		// Performance Testing Activity
-		final CActivity perfTesting = new CActivity("Performance Testing", project);
-		activityService.setActivityType(perfTesting, testingType,
-			"Load testing and performance optimization");
-		final CUser dev2 = findUserByLogin("bozkan");
-		activityService.setAssignedUsers(perfTesting, dev2, manager);
-		activityService.setTimeTracking(perfTesting, new BigDecimal("18.00"),
-			new BigDecimal("10.00"), new BigDecimal("8.00"));
-		activityService.setDateInfo(perfTesting, LocalDate.now().minusDays(5),
-			LocalDate.now().plusDays(2), null);
-		final CActivityStatus inProgressStatus = findActivityStatusByName("In Progress");
-		activityService.setStatusAndPriority(perfTesting, inProgressStatus, null, 60);
-		commentService.createComment("Performance testing framework setup", perfTesting, dev2);
-		commentService.createComment("Baseline performance metrics collected", perfTesting, dev2);
-	}
-
-	/**
-	 * Creates additional activities for Infrastructure Modernization project.
-	 */
-	private void createAdditionalInfrastructureActivities() {
-		final CProject project = findProjectByName("Infrastructure Modernization");
-		if (project == null) return;
-
-		// Security Audit Activity
-		final CActivity securityAudit = new CActivity("Security Audit", project);
-		final CActivityType researchType = findActivityTypeByNameAndProject("Research", project);
-		activityService.setActivityType(securityAudit, researchType,
-			"Comprehensive security assessment and vulnerability analysis");
-		final CUser admin = findUserByLogin("admin");
-		final CUser manager = findUserByLogin("mkaradeniz");
-		activityService.setAssignedUsers(securityAudit, admin, manager);
-		activityService.setTimeTracking(securityAudit, new BigDecimal("25.00"),
-			new BigDecimal("0.00"), new BigDecimal("25.00"));
-		activityService.setDateInfo(securityAudit, LocalDate.now().plusDays(10),
-			LocalDate.now().plusDays(18), null);
-		final CActivityStatus notStartedStatus = findActivityStatusByName("Not Started");
-		activityService.setStatusAndPriority(securityAudit, notStartedStatus, null, 0);
-		commentService.createComment("Security audit requirements defined", securityAudit, admin);
-		commentService.createComment("External security firm selected for audit", securityAudit, manager);
-
-		// Server Migration Activity
-		final CActivity serverMigration = new CActivity("Server Migration", project);
-		final CActivityType developmentType = findActivityTypeByNameAndProject("Development", project);
-		activityService.setActivityType(serverMigration, developmentType,
-			"Migrate applications to new server infrastructure");
-		final CUser dev1 = findUserByLogin("bozkan");
-		activityService.setAssignedUsers(serverMigration, dev1, admin);
-		activityService.setTimeTracking(serverMigration, new BigDecimal("35.00"),
-			new BigDecimal("20.00"), new BigDecimal("15.00"));
-		activityService.setDateInfo(serverMigration, LocalDate.now().minusDays(8),
-			LocalDate.now().plusDays(12), null);
-		final CActivityStatus onHoldStatus = findActivityStatusByName("On Hold");
-		activityService.setStatusAndPriority(serverMigration, onHoldStatus, null, 55);
-		commentService.createComment("Server migration plan created", serverMigration, dev1);
-		commentService.createComment("Testing environment successfully migrated", serverMigration, dev1);
-		commentService.createComment("Production migration on hold pending approval", serverMigration, admin);
-	}
-
-	/**
-	 * Creates additional activities for Customer Experience Enhancement project.
-	 */
-	private void createAdditionalCustomerExperienceActivities() {
-		final CProject project = findProjectByName("Customer Experience Enhancement");
-		if (project == null) return;
-
-		// User Research Activity
-		final CActivity userResearch = new CActivity("User Research & Analysis", project);
-		final CActivityType researchType = findActivityTypeByNameAndProject("Research", project);
-		activityService.setActivityType(userResearch, researchType,
-			"Conduct user interviews and analyze customer feedback");
-		final CUser analyst = findUserByLogin("ademir");
-		final CUser manager = findUserByLogin("mkaradeniz");
-		activityService.setAssignedUsers(userResearch, analyst, manager);
-		activityService.setTimeTracking(userResearch, new BigDecimal("22.00"),
-			new BigDecimal("22.00"), new BigDecimal("0.00"));
-		activityService.setDateInfo(userResearch, LocalDate.now().minusDays(20),
-			LocalDate.now().minusDays(10), LocalDate.now().minusDays(10));
-		final CActivityStatus completedStatus = findActivityStatusByName("Completed");
-		activityService.setStatusAndPriority(userResearch, completedStatus, null, 100);
-		commentService.createComment("User research methodology defined", userResearch, manager);
-		commentService.createComment("Conducted 15 user interviews", userResearch, analyst);
-		commentService.createComment("Analysis complete, insights documented", userResearch, analyst);
-
-		// UI/UX Design Activity
-		final CActivity uxDesign = new CActivity("UI/UX Design Improvements", project);
-		final CActivityType designType = findActivityTypeByNameAndProject("Design", project);
-		activityService.setActivityType(uxDesign, designType,
-			"Design improved user interface based on research findings");
-		final CUser dev2 = findUserByLogin("msahin");
-		activityService.setAssignedUsers(uxDesign, dev2, analyst);
-		activityService.setTimeTracking(uxDesign, new BigDecimal("28.00"),
-			new BigDecimal("15.00"), new BigDecimal("13.00"));
-		activityService.setDateInfo(uxDesign, LocalDate.now().minusDays(8),
-			LocalDate.now().plusDays(5), null);
-		final CActivityStatus inProgressStatus = findActivityStatusByName("In Progress");
-		activityService.setStatusAndPriority(uxDesign, inProgressStatus, null, 55);
-		commentService.createComment("Design system updated with new patterns", uxDesign, dev2);
-		commentService.createComment("Wireframes created for key user journeys", uxDesign, dev2);
-		commentService.createComment("Prototypes ready for user testing", uxDesign, analyst);
-	}
-	// Additional meeting creation methods
 
 	/**
 	 * Initialize activity status entities with comprehensive sample data.
@@ -1208,17 +1244,32 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			"initializeActivityStatuses called - creating activity status classifications");
 
 		try {
-			createActivityStatus("Not Started", "Activity has not been started yet",
-				"#95a5a6", false, 1);
-			createActivityStatus("In Progress", "Activity is currently in progress",
-				"#3498db", false, 2);
-			createActivityStatus("On Hold", "Activity is temporarily on hold", "#f39c12",
-				false, 3);
-			createActivityStatus("Completed", "Activity has been completed", "#27ae60",
-				true, 4);
-			createActivityStatus("Cancelled", "Activity has been cancelled", "#e74c3c",
-				true, 5);
-			LOGGER.info("Activity statuses initialized successfully");
+			// Get all projects
+			final String[] projectNames = {
+				"Digital Transformation Initiative", "Product Development Phase 2",
+				"Infrastructure Modernization", "Customer Experience Enhancement" };
+
+			// Define meeting types to create for each project
+			for (final String projectName : projectNames) {
+				final CProject project = findProjectByName(projectName);
+
+				if (project == null) {
+					LOGGER.warn("Project '{}' not found, skipping meeting type creation",
+						projectName);
+					continue;
+				}
+				createActivityStatus("Not Started", project,
+					"Activity has not been started yet", "#95a5a6", false, 1);
+				createActivityStatus("In Progress", project,
+					"Activity is currently in progress", "#3498db", false, 2);
+				createActivityStatus("On Hold", project,
+					"Activity is temporarily on hold", "#f39c12", false, 3);
+				createActivityStatus("Completed", project, "Activity has been completed",
+					"#27ae60", true, 4);
+				createActivityStatus("Cancelled", project, "Activity has been cancelled",
+					"#e74c3c", true, 5);
+				LOGGER.info("Activity statuses initialized successfully");
+			}
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing activity statuses", e);
 			throw new RuntimeException("Failed to initialize activity statuses", e);
@@ -1274,6 +1325,32 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	}
 
 	/**
+	 * Initialize comment priority entities with comprehensive sample data.
+	 */
+	private void initializeCommentPriorities() {
+		LOGGER.info(
+			"initializeCommentPriorities called - creating comment priority classifications");
+
+		try {
+			createCommentPriority("Critical",
+				"Critical priority requiring immediate attention", "#e74c3c", 1, false,
+				1);
+			createCommentPriority("High", "High priority requiring urgent attention",
+				"#f39c12", 2, false, 2);
+			createCommentPriority("Normal", "Normal priority for standard processing",
+				"#3498db", 3, true, 3);
+			createCommentPriority("Low", "Low priority for non-urgent matters", "#95a5a6",
+				4, false, 4);
+			createCommentPriority("Info", "Informational priority for reference",
+				"#27ae60", 5, false, 5);
+			LOGGER.info("Comment priorities initialized successfully");
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing comment priorities", e);
+			throw new RuntimeException("Failed to initialize comment priorities", e);
+		}
+	}
+
+	/**
 	 * Initializes sample companies with full details.
 	 */
 	private void initializeCompanies() {
@@ -1299,16 +1376,31 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			"initializeDecisionStatuses called - creating decision status classifications");
 
 		try {
-			createDecisionStatus("Draft", "Decision is in draft state", "#95a5a6", false,
-				1);
-			createDecisionStatus("Under Review", "Decision is being reviewed", "#f39c12",
-				false, 2);
-			createDecisionStatus("Approved", "Decision has been approved", "#27ae60",
-				false, 3);
-			createDecisionStatus("Implemented", "Decision has been implemented",
-				"#2ecc71", true, 4);
-			createDecisionStatus("Rejected", "Decision has been rejected", "#e74c3c",
-				true, 5);
+			// Get all projects
+			final String[] projectNames = {
+				"Digital Transformation Initiative", "Product Development Phase 2",
+				"Infrastructure Modernization", "Customer Experience Enhancement" };
+
+			// Define meeting types to create for each project
+			for (final String projectName : projectNames) {
+				final CProject project = findProjectByName(projectName);
+
+				if (project == null) {
+					LOGGER.warn("Project '{}' not found, skipping meeting type creation",
+						projectName);
+					continue;
+				}
+				createDecisionStatus("Draft", project, "Decision is in draft state",
+					"#95a5a6", false, 1);
+				createDecisionStatus("Under Review", project,
+					"Decision is being reviewed", "#f39c12", false, 2);
+				createDecisionStatus("Approved", project, "Decision has been approved",
+					"#27ae60", false, 3);
+				createDecisionStatus("Implemented", project,
+					"Decision has been implemented", "#2ecc71", true, 4);
+				createDecisionStatus("Rejected", project, "Decision has been rejected",
+					"#e74c3c", true, 5);
+			}
 			LOGGER.info("Decision statuses initialized successfully");
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing decision statuses", e);
@@ -1352,16 +1444,32 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			"initializeMeetingStatuses called - creating meeting status classifications");
 
 		try {
-			createMeetingStatus("Scheduled", "Meeting is scheduled but not yet started",
-				"#3498db", false, 1);
-			createMeetingStatus("In Progress", "Meeting is currently in progress",
-				"#f39c12", false, 2);
-			createMeetingStatus("Completed", "Meeting has been completed successfully",
-				"#27ae60", true, 3);
-			createMeetingStatus("Cancelled", "Meeting has been cancelled", "#e74c3c",
-				true, 4);
-			createMeetingStatus("Postponed", "Meeting has been postponed to a later date",
-				"#9b59b6", false, 5);
+			// Get all projects
+			final String[] projectNames = {
+				"Digital Transformation Initiative", "Product Development Phase 2",
+				"Infrastructure Modernization", "Customer Experience Enhancement" };
+
+			// Define meeting types to create for each project
+			for (final String projectName : projectNames) {
+				final CProject project = findProjectByName(projectName);
+
+				if (project == null) {
+					LOGGER.warn("Project '{}' not found, skipping meeting type creation",
+						projectName);
+					continue;
+				}
+				LOGGER.info("Creating meeting types for project: {}", projectName);
+				createMeetingStatus("Scheduled", project,
+					"Meeting is scheduled but not yet started", "#3498db", false, 1);
+				createMeetingStatus("In Progress", project,
+					"Meeting is currently in progress", "#f39c12", false, 2);
+				createMeetingStatus("Completed", project,
+					"Meeting has been completed successfully", "#27ae60", true, 3);
+				createMeetingStatus("Cancelled", project, "Meeting has been cancelled",
+					"#e74c3c", true, 4);
+				createMeetingStatus("Postponed", project,
+					"Meeting has been postponed to a later date", "#9b59b6", false, 5);
+			}
 			LOGGER.info("Meeting statuses initialized successfully");
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing meeting statuses", e);
@@ -1484,31 +1592,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		} catch (final Exception e) {
 			LOGGER.error("Error creating order types", e);
 			throw new RuntimeException("Failed to initialize order types", e);
-		}
-	}
-
-	/**
-	 * Initialize comment priority entities with comprehensive sample data.
-	 */
-	private void initializeCommentPriorities() {
-		LOGGER.info(
-			"initializeCommentPriorities called - creating comment priority classifications");
-
-		try {
-			createCommentPriority("Critical", "Critical priority requiring immediate attention",
-				"#e74c3c", 1, false, 1);
-			createCommentPriority("High", "High priority requiring urgent attention",
-				"#f39c12", 2, false, 2);
-			createCommentPriority("Normal", "Normal priority for standard processing",
-				"#3498db", 3, true, 3);
-			createCommentPriority("Low", "Low priority for non-urgent matters",
-				"#95a5a6", 4, false, 4);
-			createCommentPriority("Info", "Informational priority for reference",
-				"#27ae60", 5, false, 5);
-			LOGGER.info("Comment priorities initialized successfully");
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing comment priorities", e);
-			throw new RuntimeException("Failed to initialize comment priorities", e);
 		}
 	}
 
@@ -1662,7 +1745,9 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			args);
 
 		try {
-			// Check if database already has data - if so, skip initialization only on app startup
+
+			// Check if database already has data - if so, skip initialization only on app
+			// startup
 			if (!isDatabaseEmpty()) {
 				LOGGER.info(
 					"Database already contains data, skipping sample data initialization on startup");
