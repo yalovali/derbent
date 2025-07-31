@@ -7,6 +7,8 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+import tech.derbent.abstracts.annotations.MetaData;
 import tech.derbent.abstracts.domains.CTypeEntity;
 import tech.derbent.projects.domain.CProject;
 
@@ -24,6 +26,16 @@ import tech.derbent.projects.domain.CProject;
 public class CDecisionType extends CTypeEntity {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDecisionType.class);
+
+	@Column(name = "requires_approval", nullable = false)
+	@NotNull
+	@MetaData(
+		displayName = "Requires Approval", required = true, readOnly = false,
+		defaultValue = "false",
+		description = "Whether decisions of this type require approval to proceed",
+		hidden = false, order = 7
+	)
+	private Boolean requiresApproval = false;
 
 	/**
 	 * Default constructor for JPA.
@@ -51,15 +63,59 @@ public class CDecisionType extends CTypeEntity {
 	public CDecisionType(final String name, final CProject project, final String color,
 		final Integer sortOrder) {
 		super(name, project);
+		LOGGER.debug("CDecisionType constructor called with name: {}, project: {}, color: {}, sortOrder: {}", 
+			name, project, color, sortOrder);
 		setColor(color);
 		setSortOrder(sortOrder);
+	}
+
+	/**
+	 * Constructor with all fields including requires approval.
+	 * @param name             the name of the decision type
+	 * @param project          the project this decision type belongs to
+	 * @param color            the hex color code for UI display
+	 * @param sortOrder        the display order
+	 * @param requiresApproval whether decisions of this type require approval
+	 */
+	public CDecisionType(final String name, final CProject project, final String color,
+		final Integer sortOrder, final Boolean requiresApproval) {
+		super(name, project);
+		LOGGER.debug("CDecisionType constructor called with name: {}, project: {}, color: {}, sortOrder: {}, requiresApproval: {}", 
+			name, project, color, sortOrder, requiresApproval);
+		setColor(color);
+		setSortOrder(sortOrder);
+		this.requiresApproval = requiresApproval;
+	}
+
+	/**
+	 * Gets the requires approval flag.
+	 * @return true if decisions of this type require approval
+	 */
+	public Boolean getRequiresApproval() {
+		return requiresApproval;
+	}
+
+	/**
+	 * Sets the requires approval flag.
+	 * @param requiresApproval whether decisions of this type require approval
+	 */
+	public void setRequiresApproval(final Boolean requiresApproval) {
+		this.requiresApproval = requiresApproval;
+	}
+
+	/**
+	 * Convenience method to check if this decision type requires approval.
+	 * @return true if approval is required, false otherwise
+	 */
+	public boolean requiresApproval() {
+		return Boolean.TRUE.equals(requiresApproval);
 	}
 
 	@Override
 	public String toString() {
 		return String.format(
-			"CDecisionType{id=%d, name='%s', color='%s', sortOrder=%d, isActive=%s, project=%s}",
-			getId(), getName(), getColor(), getSortOrder(), getIsActive(),
+			"CDecisionType{id=%d, name='%s', color='%s', sortOrder=%d, isActive=%s, requiresApproval=%s, project=%s}",
+			getId(), getName(), getColor(), getSortOrder(), getIsActive(), requiresApproval,
 			getProject() != null ? getProject().getName() : "null");
 	}
 }
