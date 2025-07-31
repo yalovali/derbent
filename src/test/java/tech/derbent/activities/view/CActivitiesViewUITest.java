@@ -50,27 +50,24 @@ class CActivitiesViewUITest extends CAbstractUITest<CActivity> {
         setupTestEntities();
         activitiesView = new CActivitiesView(
             mockActivityService, 
-            mockCommentService, 
-            mockSessionService
+            mockSessionService,
+            mockCommentService
         );
     }
 
     private void setupTestEntities() {
         // Create test project
         testProject = new CProject();
-        testProject.setId(1L);
         testProject.setName("Test Project");
         testProject.setDescription("Test project for activities");
 
         // Create test activity type
         testActivityType = new CActivityType();
-        testActivityType.setId(1L);
         testActivityType.setName("Development");
         testActivityType.setDescription("Development activities");
 
         // Create test activity status
         testActivityStatus = new CActivityStatus();
-        testActivityStatus.setId(1L);
         testActivityStatus.setName("In Progress");
         testActivityStatus.setDescription("Activity is in progress");
         testActivityStatus.setColor("#FFA500");
@@ -78,7 +75,6 @@ class CActivitiesViewUITest extends CAbstractUITest<CActivity> {
 
         // Create test user
         testUser = new CUser();
-        testUser.setId(1L);
         testUser.setName("Test");
         testUser.setLastname("User");
         testUser.setLogin("testuser");
@@ -103,7 +99,7 @@ class CActivitiesViewUITest extends CAbstractUITest<CActivity> {
     @Override
     protected CActivity createTestEntity(Long id, String name) {
         CActivity activity = new CActivity();
-        activity.setId(id);
+        // Note: ID is auto-generated, not set manually
         activity.setName(name);
         activity.setDescription("Test activity description for " + name);
         activity.setStartDate(LocalDate.now());
@@ -142,15 +138,15 @@ class CActivitiesViewUITest extends CAbstractUITest<CActivity> {
     void testGridCreation() {
         LOGGER.info("Testing activities grid creation");
         
-        assertNotNull(activitiesView.grid, "Grid should be created");
-        assertTrue(activitiesView.grid.getColumns().size() > 0, "Grid should have columns");
+        assertNotNull(activitiesView.getGrid(), "Grid should be created");
+        assertTrue(activitiesView.getGrid().getColumns().size() > 0, "Grid should have columns");
         
         // Verify expected columns exist
-        boolean hasProjectColumn = activitiesView.grid.getColumns().stream()
+        boolean hasProjectColumn = activitiesView.getGrid().getColumns().stream()
             .anyMatch(col -> "project".equals(col.getKey()));
         assertTrue(hasProjectColumn, "Grid should have project column");
         
-        boolean hasNameColumn = activitiesView.grid.getColumns().stream()
+        boolean hasNameColumn = activitiesView.getGrid().getColumns().stream()
             .anyMatch(col -> "name".equals(col.getKey()));
         assertTrue(hasNameColumn, "Grid should have name column");
     }
@@ -160,7 +156,7 @@ class CActivitiesViewUITest extends CAbstractUITest<CActivity> {
         LOGGER.info("Testing activities grid data loading");
         
         // Test that grid can load data without exceptions
-        testGridDataLoading(activitiesView.grid);
+        testGridDataLoading(activitiesView.getGrid());
         
         // Verify service was called
         verify(mockActivityService, atLeastOnce()).list(any());
@@ -171,7 +167,7 @@ class CActivitiesViewUITest extends CAbstractUITest<CActivity> {
         LOGGER.info("Testing activities grid column access for lazy loading issues");
         
         // This tests all columns to ensure no lazy loading exceptions occur
-        testGridColumnAccess(activitiesView.grid);
+        testGridColumnAccess(activitiesView.getGrid());
         
         // Specifically test problematic columns
         testEntities.forEach(activity -> {
@@ -183,7 +179,7 @@ class CActivitiesViewUITest extends CAbstractUITest<CActivity> {
     void testGridSelection() {
         LOGGER.info("Testing activities grid selection");
         
-        testGridSelection(activitiesView.grid);
+        testGridSelection(activitiesView.getGrid());
     }
 
     @Test
@@ -238,7 +234,7 @@ class CActivitiesViewUITest extends CAbstractUITest<CActivity> {
         
         // Should not throw exceptions
         assertDoesNotThrow(() -> {
-            testGridDataLoading(activitiesView.grid);
+            testGridDataLoading(activitiesView.getGrid());
         }, "Grid should handle empty data gracefully");
     }
 
@@ -248,7 +244,6 @@ class CActivitiesViewUITest extends CAbstractUITest<CActivity> {
         
         // Create activity with null relationships
         CActivity activityWithNulls = new CActivity();
-        activityWithNulls.setId(99L);
         activityWithNulls.setName("Activity With Nulls");
         // Leave all relationships null
         
@@ -280,7 +275,7 @@ class CActivitiesViewUITest extends CAbstractUITest<CActivity> {
         LOGGER.info("Testing activities view initialization");
         
         assertNotNull(activitiesView, "Activities view should be created");
-        assertNotNull(activitiesView.grid, "Grid should be initialized");
+        assertNotNull(activitiesView.getGrid(), "Grid should be initialized");
         
         // Verify view is properly configured
         assertTrue(activitiesView.getClassNames().contains("activities-view"),
@@ -296,7 +291,7 @@ class CActivitiesViewUITest extends CAbstractUITest<CActivity> {
             
             // Test form population doesn't throw exceptions
             assertDoesNotThrow(() -> {
-                activitiesView.populateForm(testActivity);
+                activitiesView.testPopulateForm(testActivity);
             }, "Form population should not throw exceptions");
         }
     }

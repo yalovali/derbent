@@ -63,13 +63,11 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
     private void setupTestEntities() {
         // Create test user type
         testUserType = new CUserType();
-        testUserType.setId(1L);
         testUserType.setName("Administrator");
         testUserType.setDescription("System administrator");
 
         // Create test company
         testCompany = new CCompany();
-        testCompany.setId(1L);
         testCompany.setName("Test Company");
         testCompany.setDescription("Test company for users");
     }
@@ -86,7 +84,6 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
     @Override
     protected CUser createTestEntity(Long id, String name) {
         CUser user = new CUser();
-        user.setId(id);
         user.setName(name);
         user.setLastname("Doe");
         user.setLogin(name.toLowerCase() + "doe");
@@ -126,15 +123,15 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
     void testGridCreation() {
         LOGGER.info("Testing users grid creation");
         
-        assertNotNull(usersView.grid, "Grid should be created");
-        assertTrue(usersView.grid.getColumns().size() > 0, "Grid should have columns");
+        assertNotNull(usersView.getGrid(), "Grid should be created");
+        assertTrue(usersView.getGrid().getColumns().size() > 0, "Grid should have columns");
         
         // Verify expected columns exist
-        boolean hasNameColumn = usersView.grid.getColumns().stream()
+        boolean hasNameColumn = usersView.getGrid().getColumns().stream()
             .anyMatch(col -> "name".equals(col.getKey()));
         assertTrue(hasNameColumn, "Grid should have name column");
         
-        boolean hasEmailColumn = usersView.grid.getColumns().stream()
+        boolean hasEmailColumn = usersView.getGrid().getColumns().stream()
             .anyMatch(col -> "email".equals(col.getKey()));
         assertTrue(hasEmailColumn, "Grid should have email column");
     }
@@ -144,7 +141,7 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
         LOGGER.info("Testing users grid data loading");
         
         // Test that grid can load data without exceptions
-        testGridDataLoading(usersView.grid);
+        testGridDataLoading(usersView.getGrid());
         
         // Verify service was called
         verify(mockUserService, atLeastOnce()).list(any());
@@ -155,7 +152,7 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
         LOGGER.info("Testing users grid column access for lazy loading issues");
         
         // This tests all columns to ensure no lazy loading exceptions occur
-        testGridColumnAccess(usersView.grid);
+        testGridColumnAccess(usersView.getGrid());
         
         // Specifically test relationships
         testEntities.forEach(user -> {
@@ -167,7 +164,7 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
     void testGridSelection() {
         LOGGER.info("Testing users grid selection");
         
-        testGridSelection(usersView.grid);
+        testGridSelection(usersView.getGrid());
     }
 
     @Test
@@ -232,7 +229,6 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
         
         // Create user with null relationships
         CUser userWithNulls = new CUser();
-        userWithNulls.setId(99L);
         userWithNulls.setName("User");
         userWithNulls.setLastname("WithNulls");
         userWithNulls.setLogin("usernulls");
@@ -270,7 +266,7 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
             
             // Test that loading user with projects doesn't cause exceptions
             assertDoesNotThrow(() -> {
-                usersView.populateForm(testUser);
+                usersView.testPopulateForm(testUser);
             }, "Loading user with projects should not throw exceptions");
         }
     }
@@ -284,7 +280,7 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
         
         // Should not throw exceptions
         assertDoesNotThrow(() -> {
-            testGridDataLoading(usersView.grid);
+            testGridDataLoading(usersView.getGrid());
         }, "Grid should handle empty data gracefully");
     }
 
@@ -293,7 +289,7 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
         LOGGER.info("Testing users view initialization");
         
         assertNotNull(usersView, "Users view should be created");
-        assertNotNull(usersView.grid, "Grid should be initialized");
+        assertNotNull(usersView.getGrid(), "Grid should be initialized");
         
         // Verify view is properly configured
         assertTrue(usersView.getClassNames().contains("users-view"),
@@ -313,7 +309,7 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
             
             // Test form population doesn't throw exceptions
             assertDoesNotThrow(() -> {
-                usersView.populateForm(testUser);
+                usersView.testPopulateForm(testUser);
             }, "Form population should not throw exceptions");
         }
     }

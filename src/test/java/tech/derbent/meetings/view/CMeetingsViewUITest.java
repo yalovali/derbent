@@ -14,13 +14,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import tech.derbent.abstracts.ui.CAbstractUITest;
-import tech.derbent.comments.service.CCommentService;
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.domain.CMeetingStatus;
 import tech.derbent.meetings.domain.CMeetingType;
 import tech.derbent.meetings.service.CMeetingService;
+import tech.derbent.meetings.service.CMeetingTypeService;
+import tech.derbent.meetings.service.CMeetingStatusService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
+import tech.derbent.users.service.CUserService;
 
 /**
  * CMeetingsViewUITest - Comprehensive UI tests for the Meetings view.
@@ -35,7 +37,13 @@ class CMeetingsViewUITest extends CAbstractUITest<CMeeting> {
     private CMeetingService mockMeetingService;
 
     @Mock
-    private CCommentService mockCommentService;
+    private CMeetingTypeService mockMeetingTypeService;
+
+    @Mock
+    private CUserService mockUserService;
+
+    @Mock
+    private CMeetingStatusService mockMeetingStatusService;
 
     private CMeetingsView meetingsView;
     private CProject testProject;
@@ -53,27 +61,26 @@ class CMeetingsViewUITest extends CAbstractUITest<CMeeting> {
         setupTestEntities();
         meetingsView = new CMeetingsView(
             mockMeetingService,
-            mockCommentService,
-            mockSessionService
+            mockSessionService,
+            mockMeetingTypeService,
+            mockUserService,
+            mockMeetingStatusService
         );
     }
 
     private void setupTestEntities() {
         // Create test project
         testProject = new CProject();
-        testProject.setId(1L);
         testProject.setName("Test Project");
         testProject.setDescription("Test project for meetings");
 
         // Create test meeting type
         testMeetingType = new CMeetingType();
-        testMeetingType.setId(1L);
         testMeetingType.setName("Planning Meeting");
         testMeetingType.setDescription("Project planning meetings");
 
         // Create test meeting status
         testMeetingStatus = new CMeetingStatus();
-        testMeetingStatus.setId(1L);
         testMeetingStatus.setName("Scheduled");
         testMeetingStatus.setDescription("Meeting is scheduled");
         testMeetingStatus.setColor("#00AA00");
@@ -81,14 +88,12 @@ class CMeetingsViewUITest extends CAbstractUITest<CMeeting> {
 
         // Create test users
         testUser1 = new CUser();
-        testUser1.setId(1L);
         testUser1.setName("John");
         testUser1.setLastname("Doe");
         testUser1.setLogin("johndoe");
         testUser1.setEmail("john@example.com");
 
         testUser2 = new CUser();
-        testUser2.setId(2L);
         testUser2.setName("Jane");
         testUser2.setLastname("Smith");
         testUser2.setLogin("janesmith");
@@ -110,7 +115,6 @@ class CMeetingsViewUITest extends CAbstractUITest<CMeeting> {
     @Override
     protected CMeeting createTestEntity(Long id, String name) {
         CMeeting meeting = new CMeeting();
-        meeting.setId(id);
         meeting.setName(name);
         meeting.setDescription("Test meeting: " + name);
         meeting.setMeetingDate(LocalDateTime.now().plusDays(1));
@@ -172,15 +176,15 @@ class CMeetingsViewUITest extends CAbstractUITest<CMeeting> {
     void testGridCreation() {
         LOGGER.info("Testing meetings grid creation");
         
-        assertNotNull(meetingsView.grid, "Grid should be created");
-        assertTrue(meetingsView.grid.getColumns().size() > 0, "Grid should have columns");
+        assertNotNull(meetingsView.getGrid(), "Grid should be created");
+        assertTrue(meetingsView.getGrid().getColumns().size() > 0, "Grid should have columns");
         
         // Check for key columns that are likely to cause lazy loading issues
-        boolean hasProjectColumn = meetingsView.grid.getColumns().stream()
+        boolean hasProjectColumn = meetingsView.getGrid().getColumns().stream()
             .anyMatch(col -> col.getHeaderText().contains("Project"));
         assertTrue(hasProjectColumn, "Grid should have project column");
         
-        boolean hasParticipantsColumn = meetingsView.grid.getColumns().stream()
+        boolean hasParticipantsColumn = meetingsView.getGrid().getColumns().stream()
             .anyMatch(col -> col.getHeaderText().contains("Participants"));
         assertTrue(hasParticipantsColumn, "Grid should have participants column");
     }
@@ -190,7 +194,7 @@ class CMeetingsViewUITest extends CAbstractUITest<CMeeting> {
         LOGGER.info("Testing meetings grid data loading");
         
         // Test that grid can load data without exceptions
-        testGridDataLoading(meetingsView.grid);
+        testGridDataLoading(meetingsView.getGrid());
         
         // Verify service was called
         verify(mockMeetingService, atLeastOnce()).list(any());
@@ -201,7 +205,7 @@ class CMeetingsViewUITest extends CAbstractUITest<CMeeting> {
         LOGGER.info("Testing meetings grid column access for lazy loading issues");
         
         // This tests all columns to ensure no lazy loading exceptions occur
-        testGridColumnAccess(meetingsView.grid);
+        testGridColumnAccess(meetingsView.getGrid());
         
         // Specifically test relationships
         testEntities.forEach(meeting -> {
@@ -304,7 +308,6 @@ class CMeetingsViewUITest extends CAbstractUITest<CMeeting> {
         
         // Create meeting with null relationships
         CMeeting meetingWithNulls = new CMeeting();
-        meetingWithNulls.setId(99L);
         meetingWithNulls.setName("Meeting With Nulls");
         meetingWithNulls.setParticipants(new HashSet<>()); // Empty but not null
         
@@ -333,7 +336,7 @@ class CMeetingsViewUITest extends CAbstractUITest<CMeeting> {
     void testGridSelection() {
         LOGGER.info("Testing meetings grid selection");
         
-        testGridSelection(meetingsView.grid);
+        testGridSelection(meetingsView.getGrid());
     }
 
     @Test
@@ -341,7 +344,7 @@ class CMeetingsViewUITest extends CAbstractUITest<CMeeting> {
         LOGGER.info("Testing meetings view initialization");
         
         assertNotNull(meetingsView, "Meetings view should be created");
-        assertNotNull(meetingsView.grid, "Grid should be initialized");
+        assertNotNull(meetingsView.getGrid(), "Grid should be initialized");
         
         // Verify view is properly configured
         assertTrue(meetingsView.getClassNames().contains("meetings-view"),
@@ -357,7 +360,7 @@ class CMeetingsViewUITest extends CAbstractUITest<CMeeting> {
             
             // Test form population doesn't throw exceptions
             assertDoesNotThrow(() -> {
-                meetingsView.populateForm(testMeeting);
+                meetingsView.testPopulateForm(testMeeting);
             }, "Form population should not throw exceptions");
         }
     }

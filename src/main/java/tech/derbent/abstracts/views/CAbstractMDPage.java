@@ -45,6 +45,22 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 
 	protected CGrid<EntityClass> grid;// = new CGrid<>(EntityClass.class, false);
 
+	/**
+	 * Gets the grid component for testing purposes.
+	 * @return the grid component
+	 */
+	public CGrid<EntityClass> getGrid() {
+		return grid;
+	}
+
+	/**
+	 * Populates the form with entity data - public wrapper for testing.
+	 * @param entity the entity to populate the form with
+	 */
+	public void testPopulateForm(EntityClass entity) {
+		populateForm(entity);
+	}
+
 	private final BeanValidationBinder<EntityClass> binder;
 
 	// divide screen into two parts
