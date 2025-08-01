@@ -51,6 +51,11 @@ public class CLoginView extends Main implements BeforeEnterObserver {
 		setSizeFull();
 		final Paragraph passwordHint = new Paragraph("admin/test123");
 		passwordHint.addClassName(LumoUtility.TextAlignment.CENTER);
+		// JavaScript ile inputlara id atama
+		loginOverlay.getElement().executeJs("const form = this;"
+			+ "form.shadowRoot.querySelector('vaadin-text-field[type=\"text\"]').id = 'username-input';"
+			+ "form.shadowRoot.querySelector('vaadin-password-field').id = 'password-input';"
+			+ "form.shadowRoot.querySelector('vaadin-button[type=\"submit\"]').id = 'submit-button';");
 		loginOverlay.setTitle("Derbent ");
 		loginOverlay.setDescription("control the progress");
 		loginOverlay.setAction("login"); // Set action
@@ -67,6 +72,7 @@ public class CLoginView extends Main implements BeforeEnterObserver {
 					Notification.Position.MIDDLE);
 			}
 		});
+		// CAuxillaries.setId(resetDbButton);
 		resetDbButton.addClassName(LumoUtility.Margin.Top.SMALL);
 		loginOverlay.getFooter().add(resetDbButton);
 		loginOverlay.getFooter().add(passwordHint);

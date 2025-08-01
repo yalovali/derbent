@@ -48,7 +48,6 @@ public class CCurrency extends CEntityNamed {
 	 */
 	public CCurrency() {
 		super();
-		LOGGER.debug("CCurrency default constructor called");
 	}
 
 	/**

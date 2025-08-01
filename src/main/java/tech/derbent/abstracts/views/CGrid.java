@@ -13,6 +13,7 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.function.ValueProvider;
 
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.utils.CAuxillaries;
 import tech.derbent.base.utils.CImageUtils;
 
 /**
@@ -220,6 +221,7 @@ public class CGrid<T extends CEntityDB> extends Grid<T> {
 		addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 		addThemeVariants(GridVariant.LUMO_COMPACT);
 		setHeightFull();
+		CAuxillaries.setId(this);
 	}
 
 	@Override

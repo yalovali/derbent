@@ -30,7 +30,6 @@ public class CActivityService extends CEntityOfProjectService<CActivity> {
 		super(repository, clock);
 		this.activityRepository = repository;
 	}
-
 	// Now using the inherited createEntity(String name) method from
 	// CEntityOfProjectService which includes createEntityForProject method.
 
@@ -70,7 +69,8 @@ public class CActivityService extends CEntityOfProjectService<CActivity> {
 		if (id == null) {
 			return Optional.empty();
 		}
-		final Optional<CActivity> entity = activityRepository.findByIdWithAllRelationships(id);
+		final Optional<CActivity> entity =
+			activityRepository.findByIdWithAllRelationships(id);
 		// Initialize lazy fields if entity is present (for any other potential lazy
 		// relationships)
 		entity.ifPresent(this::initializeLazyFields);
@@ -421,10 +421,6 @@ public class CActivityService extends CEntityOfProjectService<CActivity> {
 	public CActivity setTimeTracking(final CActivity activity,
 		final BigDecimal estimatedHours, final BigDecimal actualHours,
 		final BigDecimal remainingHours) {
-		LOGGER.info(
-			"setTimeTracking called for activity: {} with estimated: {}, actual: {}, remaining: {}",
-			activity != null ? activity.getName() : "null", estimatedHours, actualHours,
-			remainingHours);
 
 		if (activity == null) {
 			LOGGER.warn("Activity is null, cannot set time tracking");

@@ -86,9 +86,6 @@ public class CComment extends CEvent {
 	public CComment(final String commentText, final CActivity activity,
 		final CUser author) {
 		super(author);
-		LOGGER.info(
-			"CComment constructor called with commentText: {}, activity: {}, author: {}",
-			commentText, activity, author);
 
 		if ((commentText == null) || commentText.trim().isEmpty()) {
 			LOGGER.warn("CComment constructor - Comment text is null or empty");
@@ -121,15 +118,20 @@ public class CComment extends CEvent {
 	public CActivity getActivity() { return activity; }
 
 	public String getActivityName() {
+
 		if (activity == null) {
 			return "No Activity";
 		}
+
 		try {
 			// Safe access to avoid LazyInitializationException
 			return activity.getName();
 		} catch (final org.hibernate.LazyInitializationException e) {
-			LOGGER.debug("LazyInitializationException accessing activity name, returning safe value", e);
-			return "Activity#" + (activity.getId() != null ? activity.getId() : "unknown");
+			LOGGER.debug(
+				"LazyInitializationException accessing activity name, returning safe value",
+				e);
+			return "Activity#"
+				+ (activity.getId() != null ? activity.getId() : "unknown");
 		}
 	}
 

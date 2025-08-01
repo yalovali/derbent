@@ -15,11 +15,15 @@ public abstract class CEntityNamed extends CEntityDB {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityNamed.class);
 
-	@Column (name = "name", nullable = false, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
+	@Column (
+		name = "name", nullable = false, length = CEntityConstants.MAX_LENGTH_NAME,
+		unique = false
+	)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@MetaData (
 		displayName = "Name", required = true, readOnly = false, defaultValue = "",
-		description = "Name", hidden = false, order = 0, maxLength = CEntityConstants.MAX_LENGTH_NAME
+		description = "Name", hidden = false, order = 0,
+		maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String name;
 
@@ -55,13 +59,13 @@ public abstract class CEntityNamed extends CEntityDB {
 
 	public CEntityNamed(final String name) {
 		this();
-		LOGGER.debug("CEntityNamed constructor called with name: {} for {}", name, getClass().getSimpleName());
-		
+
 		if ((name == null) || name.trim().isEmpty()) {
-			LOGGER.error("Constructor called with null or empty name for {}", getClass().getSimpleName());
-			throw new IllegalArgumentException("Name cannot be null or empty for " + getClass().getSimpleName());
+			LOGGER.error("Constructor called with null or empty name for {}",
+				getClass().getSimpleName());
+			throw new IllegalArgumentException(
+				"Name cannot be null or empty for " + getClass().getSimpleName());
 		}
-		
 		this.name = name.trim();
 		this.description = null; // Default description is null
 	}

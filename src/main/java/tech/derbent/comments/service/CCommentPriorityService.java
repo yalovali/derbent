@@ -38,6 +38,55 @@ public class CCommentPriorityService
 	}
 
 	/**
+	 * Creates a new comment priority with name and priority level.
+	 * @param name          the priority name
+	 * @param priorityLevel the priority level (1=Highest, 4=Lowest)
+	 * @return the created comment priority
+	 */
+	@Transactional
+	public CCommentPriority createPriority(final String name,
+		final Integer priorityLevel) {
+		LOGGER.info("createPriority called with name: {}, priorityLevel: {}", name,
+			priorityLevel);
+
+		if ((name == null) || name.trim().isEmpty()) {
+			throw new IllegalArgumentException("Priority name cannot be null or empty");
+		}
+
+		if ((priorityLevel == null) || (priorityLevel < 1) || (priorityLevel > 4)) {
+			throw new IllegalArgumentException("Priority level must be between 1 and 4");
+		}
+		final CCommentPriority priority = new CCommentPriority(name, priorityLevel);
+		return save(priority);
+	}
+
+	/**
+	 * Creates a new comment priority with name, priority level, and description.
+	 * @param name          the priority name
+	 * @param priorityLevel the priority level (1=Highest, 4=Lowest)
+	 * @param description   the priority description
+	 * @return the created comment priority
+	 */
+	@Transactional
+	public CCommentPriority createPriority(final String name, final Integer priorityLevel,
+		final String description) {
+		LOGGER.info(
+			"createPriority called with name: {}, priorityLevel: {}, description: {}",
+			name, priorityLevel, description);
+
+		if ((name == null) || name.trim().isEmpty()) {
+			throw new IllegalArgumentException("Priority name cannot be null or empty");
+		}
+
+		if ((priorityLevel == null) || (priorityLevel < 1) || (priorityLevel > 4)) {
+			throw new IllegalArgumentException("Priority level must be between 1 and 4");
+		}
+		final CCommentPriority priority = new CCommentPriority(name, priorityLevel);
+		priority.setDescription(description);
+		return save(priority);
+	}
+
+	/**
 	 * Finds all comment priorities ordered by priority level.
 	 * @return list of comment priorities ordered by priority level (highest first)
 	 */
@@ -45,16 +94,6 @@ public class CCommentPriorityService
 	public List<CCommentPriority> findAllOrderByPriorityLevel() {
 		LOGGER.info("findAllOrderByPriorityLevel called");
 		return ((CCommentPriorityRepository) repository).findAllOrderByPriorityLevel();
-	}
-
-	/**
-	 * Finds the default comment priority.
-	 * @return optional containing the default priority if found
-	 */
-	@PreAuthorize ("permitAll()")
-	public Optional<CCommentPriority> findDefaultPriority() {
-		LOGGER.info("findDefaultPriority called");
-		return ((CCommentPriorityRepository) repository).findByIsDefaultTrue();
 	}
 
 	/**
@@ -72,6 +111,35 @@ public class CCommentPriorityService
 		}
 		return ((CCommentPriorityRepository) repository)
 			.findByPriorityLevel(priorityLevel);
+	}
+
+	/**
+	 * Finds the default comment priority.
+	 * @return optional containing the default priority if found
+	 */
+	@PreAuthorize ("permitAll()")
+	public Optional<CCommentPriority> findDefaultPriority() {
+		return ((CCommentPriorityRepository) repository).findByIsDefaultTrue();
+	}
+
+	/**
+	 * Gets or creates the default NORMAL priority.
+	 * @return the default normal priority
+	 */
+	@Transactional
+	public CCommentPriority getOrCreateDefaultPriority() {
+		LOGGER.info("getOrCreateDefaultPriority called");
+		final Optional<CCommentPriority> defaultPriority = findDefaultPriority();
+
+		if (defaultPriority.isPresent()) {
+			return defaultPriority.get();
+		}
+		// Create default normal priority if none exists
+		final CCommentPriority normalPriority =
+			createPriority("Normal", 2, "Standard priority for comments");
+		normalPriority.setColor("#0066CC");
+		normalPriority.setDefault(true);
+		return save(normalPriority);
 	}
 
 	/**
@@ -96,74 +164,5 @@ public class CCommentPriorityService
 		// Set the new default
 		priority.setDefault(true);
 		save(priority);
-	}
-
-	/**
-	 * Creates a new comment priority with name and priority level.
-	 * @param name          the priority name
-	 * @param priorityLevel the priority level (1=Highest, 4=Lowest)
-	 * @return the created comment priority
-	 */
-	@Transactional
-	public CCommentPriority createPriority(final String name,
-		final Integer priorityLevel) {
-		LOGGER.info("createPriority called with name: {}, priorityLevel: {}", name,
-			priorityLevel);
-
-		if ((name == null) || name.trim().isEmpty()) {
-			throw new IllegalArgumentException("Priority name cannot be null or empty");
-		}
-
-		if ((priorityLevel == null) || (priorityLevel < 1) || (priorityLevel > 4)) {
-			throw new IllegalArgumentException("Priority level must be between 1 and 4");
-		}
-		final CCommentPriority priority = new CCommentPriority(name, priorityLevel);
-		return save(priority);
-	}
-
-	/**
-     * Creates a new comment priority with name, priority level, and description.
-     * @param name the priority name
-     * @param priorityLevel the priority level (1=Highest, 4=Lowest)
-     * @param description the priority description
-     * @return the created comment priority
-     */
-    @Transactional
-    public CCommentPriority createPriority(final String name, final Integer priorityLevel, final String description) {
-        LOGGER.info("createPriority called with name: {}, priorityLevel: {}, description: {}",
-            name, priorityLevel, description);
-
-        if ((name == null) || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("Priority name cannot be null or empty");
-        }
-
-        if ((priorityLevel == null) || (priorityLevel < 1) || (priorityLevel > 4)) {
-            throw new IllegalArgumentException("Priority level must be between 1 and 4");
-        }
-
-        final CCommentPriority priority = new CCommentPriority(name, priorityLevel);
-        priority.setDescription(description);
-
-        return save(priority);
-    }
-
-	/**
-	 * Gets or creates the default NORMAL priority.
-	 * @return the default normal priority
-	 */
-	@Transactional
-	public CCommentPriority getOrCreateDefaultPriority() {
-		LOGGER.info("getOrCreateDefaultPriority called");
-		final Optional<CCommentPriority> defaultPriority = findDefaultPriority();
-
-		if (defaultPriority.isPresent()) {
-			return defaultPriority.get();
-		}
-		// Create default normal priority if none exists
-		final CCommentPriority normalPriority =
-			createPriority("Normal", 2, "Standard priority for comments");
-		normalPriority.setColor("#0066CC");
-		normalPriority.setDefault(true);
-		return save(normalPriority);
 	}
 }

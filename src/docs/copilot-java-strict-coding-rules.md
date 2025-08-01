@@ -482,18 +482,6 @@ class ManualVerificationTest {
 }
 ```
 
-**Testing Guidelines:**
-- Write unit tests for all business logic and service methods
-- test all views, select all new items in grids, always test CRUD functions of views in all pages.
-- Use TestContainers for integration testing with PostgreSQL
-- Maintain test coverage above 80% for critical business logic
-- Test all validation scenarios and edge cases
-- Mock external dependencies appropriately
-- Include manual verification tests for complex UI interactions
-- always create tests for ui functions
-- test agains grid selection changes for every page every view
-- test contents of every combobox
-
 ## 9.6. Database Rules and Sample Data
 - never use privimitive data types in entities, such as int boolean, use Integer Boolean etc.
 - Password is always test123 for all users with hash code '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu'
@@ -637,12 +625,35 @@ class ManualVerificationTest {
 - Include edge cases and error conditions
 - Use meaningful test names
 - Follow AAA pattern (Arrange, Act, Assert)
+- Write unit tests for all business logic and service methods
+- test all views, select all new items in grids, always test CRUD functions of views in all pages.
+- Use TestContainers for integration testing with PostgreSQL
+- Maintain test coverage above 80% for critical business logic
+- Test all validation scenarios and edge cases
+- Mock external dependencies appropriately
+- Include manual verification tests for complex UI interactions
+- always create tests for ui functions
+- test agains grid selection changes for every page every view
+- test contents of every combobox
 
 ### 5.2 Integration Tests
 - Test entity persistence and retrieval
 - Verify relationship mappings
 - Test validation constraints
 - Include performance tests for critical paths
+
+
+### 5.3 UI Automated Tests
+- Always fail all tests with fail assertion
+- Always generate for all views and functions a selenium and playwright tests
+- Always try to use selection by ID not by CSS or tag
+- try to insert ID to used components in test in java
+- keep tests in non headless chromium execution
+- Test entity persistence and retrieval
+- Verify relationship mappings
+- Test validation constraints
+- Include performance tests for critical paths
+
 
 ## 6. Sample Implementation Guidelines
 

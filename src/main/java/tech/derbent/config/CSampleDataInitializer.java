@@ -1126,9 +1126,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 	private CActivityType findActivityTypeByNameAndProject(final String name,
 		final CProject project) {
-		LOGGER.debug(
-			"findActivityTypeByNameAndProject called with name: {} and project: {}", name,
-			project.getName());
 
 		try {
 			// Get all activity types for the project and find by name

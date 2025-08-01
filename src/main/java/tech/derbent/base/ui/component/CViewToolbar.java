@@ -36,8 +36,8 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import tech.derbent.abstracts.interfaces.CProjectListChangeListener;
 import tech.derbent.abstracts.views.CButton;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.session.service.LayoutService;
 import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.LayoutService;
 import tech.derbent.users.domain.CUser;
 
 /* CViewToolbar.java
@@ -173,8 +173,6 @@ public final class CViewToolbar extends Composite<Header>
 	 * Creates the layout toggle button.
 	 */
 	private void createLayoutToggleButton() {
-		LOGGER.debug("Creating layout toggle button with layoutService: {}",
-			layoutService != null ? layoutService.getClass().getSimpleName() : "null");
 
 		if (layoutService != null) {
 			layoutToggleButton = new CButton();

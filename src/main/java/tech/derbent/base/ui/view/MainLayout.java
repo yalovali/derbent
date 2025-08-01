@@ -35,11 +35,12 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.abstracts.utils.CAuxillaries;
 import tech.derbent.base.ui.component.CHierarchicalSideMenu;
 import tech.derbent.base.ui.component.CViewToolbar;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
-import tech.derbent.session.service.LayoutService;
 import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.LayoutService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.view.CUserProfileDialog;
@@ -107,8 +108,8 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		final String pageTitle =
 			MenuConfiguration.getPageHeader(getContent()).orElse("Main Layout");
 		mainToolbar.setPageTitle(pageTitle); // Set the page title in the toolbar
-		// addToNavbar(true, new CViewToolbar(pageTitle)); // Add the toolbar with the page
-		// title
+		// addToNavbar(true, new CViewToolbar(pageTitle)); // Add the toolbar with the
+		// page title
 		/*
 		 * Component content = getContent(); if (content instanceof HasDynamicTitle) {
 		 * String title = ((HasDynamicTitle) content).getPageTitle();
@@ -195,8 +196,9 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		String title = menuEntry.title();
 		final String path = menuEntry.path();
 		final String icon = menuEntry.icon();
-
+		SideNavItem navItem = null; // Initialize the SideNavItem
 		// if title contains a dot, it is a sub-menu entry
+
 		if (title.contains(".")) {
 			final var parts = title.split("\\.");
 			title = parts[parts.length - 1]; // Use the last part as the title
@@ -214,16 +216,18 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 				nav.addItem(parentItem); // Add the parent item to the navigation
 			}
 			// Create a sub-menu item under the parent entry
-			parentItem.addItem(new SideNavItem(title, path, new Icon(icon)));
+			navItem = new SideNavItem(title, path, new Icon(icon));
+			parentItem.addItem(navItem);
 		}
 		else {
+			navItem = new SideNavItem(title, path, new Icon(icon));
 			// Create a top-level menu item
-			nav.addItem(new SideNavItem(title, path, new Icon(icon))); // Create item with
+			nav.addItem(navItem); // Create item with
 		}
+		CAuxillaries.generateId(navItem); // Generate an ID for the item
 	}
 
 	private Div createSlidingHeader() {
-		LOGGER.info("Creating sliding header with hierarchical side menu");
 		// Add hierarchical side menu below the header content
 		final var hierarchicalMenu = new CHierarchicalSideMenu();
 		hierarchicalMenu.addClassNames(Margin.Top.MEDIUM);

@@ -9,6 +9,8 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.Icon;
 
+import tech.derbent.abstracts.utils.CAuxillaries;
+
 /**
  * CButton - Abstract base class for all buttons in the application. Layer: View (MVC)
  * Provides common initialization patterns, logging, and standardized button
@@ -219,7 +221,6 @@ public class CButton extends Button {
 	 * subclasses to provide additional initialization.
 	 */
 	protected void initializeButton() {
-		// Common initialization logic for all buttons This can be extended in the future
-		// for application-wide button behaviors
+		CAuxillaries.generateId(this);
 	}
 }
