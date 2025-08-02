@@ -10,8 +10,8 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.TestPropertySource;
 
 import tech.derbent.meetings.view.CMeetingsView;
-import tech.derbent.ui.automation.CBaseUITest;
 import tech.derbent.projects.view.CProjectsView;
+import tech.derbent.ui.automation.CApplicationGeneric_UITest;
 
 /**
  * CMeetingsViewPlaywrightTest - Comprehensive Playwright tests for the Meetings view.
@@ -24,19 +24,10 @@ import tech.derbent.projects.view.CProjectsView;
 	"spring.datasource.url=jdbc:h2:mem:testdb",
 	"spring.jpa.hibernate.ddl-auto=create-drop", "server.port=8080" }
 )
-public class CMeetingsViewPlaywrightTest extends CBaseUITest {
+public class CMeetingsViewPlaywrightTest extends CApplicationGeneric_UITest {
 
 	private static final Logger LOGGER =
 		LoggerFactory.getLogger(CMeetingsViewPlaywrightTest.class);
-
-	@Test
-	void testMeetingsAccessibility() {
-		LOGGER.info("🧪 Testing Meetings accessibility...");
-		assertTrue(navigateToViewByClass(CMeetingsView.class), "Should navigate to view");
-		// Use auxiliary accessibility testing method
-		testAccessibilityBasics("Meetings");
-		LOGGER.info("✅ Meetings accessibility test completed");
-	}
 
 	@Test
 	void testMeetingsComboBoxes() {
@@ -167,48 +158,35 @@ public class CMeetingsViewPlaywrightTest extends CBaseUITest {
 	void testMeetingsDateTimeHandling() {
 		LOGGER.info("🧪 Testing Meetings date/time handling...");
 		assertTrue(navigateToViewByClass(CMeetingsView.class), "Should navigate to view");
-		// Open new meeting form
-		final var newButtons =
-			page.locator("vaadin-button:has-text('New'), vaadin-button:has-text('Add')");
+		clickNew(); // Open new meeting form
+		// Test date pickers
+		final var datePickers = page.locator("vaadin-date-picker");
 
-		if (newButtons.count() > 0) {
-			newButtons.first().click();
-			wait_1000();
-			// Test date pickers
-			final var datePickers = page.locator("vaadin-date-picker");
-
-			if (datePickers.count() > 0) {
-				LOGGER.debug("Testing date picker");
-				datePickers.first().fill("2024-03-15");
-				wait_500();
-				takeScreenshot("meetings-date-picker");
-			}
-			// Test time pickers
-			final var timePickers = page.locator("vaadin-time-picker");
-
-			if (timePickers.count() > 0) {
-				LOGGER.debug("Testing time picker");
-				timePickers.first().fill("14:30");
-				wait_500();
-				takeScreenshot("meetings-time-picker");
-			}
-			// Test date-time pickers
-			final var dateTimePickers = page.locator("vaadin-date-time-picker");
-
-			if (dateTimePickers.count() > 0) {
-				LOGGER.debug("Testing date-time picker");
-				dateTimePickers.first().fill("2024-03-15T14:30");
-				wait_500();
-				takeScreenshot("meetings-datetime-picker");
-			}
-			// Close form
-			final var cancelButtons = page.locator("vaadin-button:has-text('Cancel')");
-
-			if (cancelButtons.count() > 0) {
-				cancelButtons.first().click();
-				wait_500();
-			}
+		if (datePickers.count() > 0) {
+			LOGGER.debug("Testing date picker");
+			datePickers.first().fill("2024-03-15");
+			wait_500();
+			takeScreenshot("meetings-date-picker");
 		}
+		// Test time pickers
+		final var timePickers = page.locator("vaadin-time-picker");
+
+		if (timePickers.count() > 0) {
+			LOGGER.debug("Testing time picker");
+			timePickers.first().fill("14:30");
+			wait_500();
+			takeScreenshot("meetings-time-picker");
+		}
+		// Test date-time pickers
+		final var dateTimePickers = page.locator("vaadin-date-time-picker");
+
+		if (dateTimePickers.count() > 0) {
+			LOGGER.debug("Testing date-time picker");
+			dateTimePickers.first().fill("2024-03-15T14:30");
+			wait_500();
+			takeScreenshot("meetings-datetime-picker");
+		}
+		clickCancel(); // Close form
 		LOGGER.info("✅ Meetings date/time handling test completed");
 	}
 
@@ -216,89 +194,20 @@ public class CMeetingsViewPlaywrightTest extends CBaseUITest {
 	void testMeetingsFormValidation() {
 		LOGGER.info("🧪 Testing Meetings form validation...");
 		assertTrue(navigateToViewByClass(CMeetingsView.class), "Should navigate to view");
-		// Try to create new meeting
-		final var newButtons =
-			page.locator("vaadin-button:has-text('New'), vaadin-button:has-text('Add')");
-
-		if (newButtons.count() > 0) {
-			newButtons.first().click();
-			wait_1000();
-			// Test form validation using auxiliary method
-			final boolean validationWorking = testFormValidationById("save-button");
-			LOGGER.debug("Form validation working: {}", validationWorking);
-			takeScreenshot("meetings-form-validation");
-			// Close form
-			final var cancelButtons = page.locator("vaadin-button:has-text('Cancel')");
-
-			if (cancelButtons.count() > 0) {
-				cancelButtons.first().click();
-				wait_500();
-			}
-		}
+		clickNew();
+		final boolean validationWorking = testFormValidationById("save-button");
+		takeScreenshot("meetings-form-validation");
+		clickCancel();
 		LOGGER.info("✅ Meetings form validation test completed");
 	}
 
 	@Test
 	void testMeetingsGridInteractions() {
-		LOGGER.info("🧪 Testing Meetings grid interactions...");
-		assertTrue(navigateToViewByClass(CMeetingsView.class), "Should navigate to view");
-		// Test grid selection
-		final int rowCount = getGridRowCount();
-
-		if (rowCount > 0) {
-			LOGGER.debug("Testing grid selection with {} rows", rowCount);
-			assertTrue(clickGridRowByIndex(0), "Should be able to click first grid row");
-			wait_1000();
-			takeScreenshot("meetings-grid-row-selected");
-		}
-		// Test grid sorting if available
-		final var sorters = page.locator("vaadin-grid-sorter");
-
-		if (sorters.count() > 0) {
-			LOGGER.debug("Testing grid sorting");
-			sorters.first().click();
-			wait_1000();
-			takeScreenshot("meetings-grid-sorted");
-		}
-		LOGGER.info("✅ Meetings grid interactions test completed");
+		testAdvancedGridInView(CMeetingsView.class);
 	}
 
 	@Test
 	void testMeetingsNavigation() {
-		LOGGER.info("🧪 Testing Meetings view navigation...");
-		// Test navigation to Meetings
-		assertTrue(navigateToViewByClass(CMeetingsView.class), "Should navigate to view");
-		takeScreenshot("meetings-navigation-arrival");
-
-		// Test navigation to related views
-		if (navigateToViewByClass(CProjectsView.class)) {
-			takeScreenshot("meetings-navigation-to-projects");
-			assertTrue(navigateToViewByClass(CMeetingsView.class),
-				"Should navigate to view");
-			takeScreenshot("meetings-navigation-return");
-		}
-		LOGGER.info("✅ Meetings navigation test completed");
-	}
-
-	@Test
-	void testMeetingsResponsiveDesign() {
-		LOGGER.info("🧪 Testing Meetings responsive design...");
-		assertTrue(navigateToViewByClass(CMeetingsView.class), "Should navigate to view");
-		// Use auxiliary responsive testing method
-		testResponsiveDesign("Meetings");
-		LOGGER.info("✅ Meetings responsive design test completed");
-	}
-
-	@Test
-	void testMeetingsViewLoading() {
-		LOGGER.info("🧪 Testing Meetings view loading...");
-		// Login and navigate to Meetings view Navigate to Meetings view using navigation
-		assertTrue(navigateToViewByClass(CMeetingsView.class),
-			"Should navigate to Activities view");
-		// Verify the view loaded properly
-		takeScreenshot("meetings-view-loaded");
-		// Check if grid is present
-		assertTrue(getGridRowCount() >= 0, "Meetings grid should be present");
-		LOGGER.info("✅ Meetings view loading test completed");
+		testNavigationTo(CMeetingsView.class, CProjectsView.class);
 	}
 }

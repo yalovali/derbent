@@ -1,4 +1,4 @@
-package tech.derbent.users.view;
+package tech.derbent.users.tests;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,6 +24,7 @@ import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserType;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.CUserTypeService;
+import tech.derbent.users.view.CUsersView;
 
 /**
  * CUsersViewUITest - Comprehensive UI tests for the Users view. Layer: Testing (MVC)

@@ -24,19 +24,9 @@ import tech.derbent.users.view.CUsersView;
 	"spring.datasource.url=jdbc:h2:mem:testdb",
 	"spring.jpa.hibernate.ddl-auto=create-drop", "server.port=8080" }
 )
-public class CUsersViewPlaywrightTest extends CBaseUITest {
+public class CUsersView_UITest extends CBaseUITest {
 
-	private static final Logger LOGGER =
-		LoggerFactory.getLogger(CUsersViewPlaywrightTest.class);
-
-	@Test
-	void testUsersAccessibility() {
-		LOGGER.info("🧪 Testing Users accessibility...");
-		assertTrue(navigateToViewByClass(CUsersView.class), "Should navigate to view");
-		// Use auxiliary accessibility testing method
-		testAccessibilityBasics("Users");
-		LOGGER.info("✅ Users accessibility test completed");
-	}
+	private static final Logger LOGGER = LoggerFactory.getLogger(CUsersView_UITest.class);
 
 	@Test
 	void testUsersComboBoxes() {
@@ -162,43 +152,12 @@ public class CUsersViewPlaywrightTest extends CBaseUITest {
 
 	@Test
 	void testUsersGridInteractions() {
-		LOGGER.info("🧪 Testing Users grid interactions...");
-		assertTrue(navigateToViewByClass(CUsersView.class), "Should navigate to view");
-		// Test grid selection
-		final int rowCount = getGridRowCount();
-
-		if (rowCount > 0) {
-			LOGGER.debug("Testing grid selection with {} rows", rowCount);
-			assertTrue(clickGridRowByIndex(0), "Should be able to click first grid row");
-			wait_1000();
-			takeScreenshot("users-grid-row-selected");
-		}
-		// Test grid sorting if available
-		final var sorters = page.locator("vaadin-grid-sorter");
-
-		if (sorters.count() > 0) {
-			LOGGER.debug("Testing grid sorting");
-			sorters.first().click();
-			wait_1000();
-			takeScreenshot("users-grid-sorted");
-		}
-		LOGGER.info("✅ Users grid interactions test completed");
+		testAdvancedGridInView(CUsersView.class);
 	}
 
 	@Test
 	void testUsersNavigation() {
-		LOGGER.info("🧪 Testing Users view navigation...");
-		// Test navigation to Users
-		assertTrue(navigateToViewByClass(CUsersView.class), "Should navigate to view");
-
-		// Test navigation to related views
-		if (navigateToViewByClass(CProjectsView.class)) {
-			takeScreenshot("users-navigation-to-projects");
-			assertTrue(navigateToViewByClass(CUsersView.class),
-				"Should navigate to view");
-			takeScreenshot("users-navigation-return");
-		}
-		LOGGER.info("✅ Users navigation test completed");
+		testNavigationTo(CUsersView.class, CProjectsView.class);
 	}
 
 	@Test
@@ -222,26 +181,5 @@ public class CUsersViewPlaywrightTest extends CBaseUITest {
 		}
 		clickCancel();
 		LOGGER.info("✅ Users profile picture handling test completed");
-	}
-
-	@Test
-	void testUsersResponsiveDesign() {
-		LOGGER.info("🧪 Testing Users responsive design...");
-		assertTrue(navigateToViewByClass(CUsersView.class), "Should navigate to view");
-		// Use auxiliary responsive testing method
-		testResponsiveDesign("Users");
-		LOGGER.info("✅ Users responsive design test completed");
-	}
-
-	@Test
-	void testUsersViewLoading() {
-		LOGGER.info("🧪 Testing Users view loading...");
-		// Login and navigate to Users view Navigate to Users view using navigation
-		assertTrue(navigateToViewByClass(CUsersView.class),
-			"Should navigate to Users view");
-		takeScreenshot("users-view-loaded");
-		// Check if grid is present
-		assertTrue(getGridRowCount() >= 0, "Users grid should be present");
-		LOGGER.info("✅ Users view loading test completed");
 	}
 }
