@@ -6,8 +6,6 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.MetaData;
 import tech.derbent.base.domain.CStatus;
 import tech.derbent.projects.domain.CProject;

@@ -30,16 +30,6 @@ Check [project_design_description.md](./project_design_description.md) file for 
 
 ## Table of Contents
 - [1. MVC Architecture Principles](#1-mvc-architecture-principles)
-- [2. Commenting Standards](#2-commenting-standards)
-- [3. Java Checks Before Submission](#3-java-checks-before-submission)
-- [4. Pull Request Checklist](#4-pull-request-checklist)
-- [5. Copilot Review Protocol](#5-copilot-review-protocol)
-- [6. Coding Styles & Best Practices](#6-coding-styles--best-practices)
-- [7. CSS Guidelines](#7-css-guidelines)
-- [8. Database Rules](#8-database-rules)
-- [9. Documentation & Modularity](#9-documentation--modularity)
-- [10. Strict Prohibitions](#10-strict-prohibitions)
-- [11. Additional Best Practices](#11-additional-best-practices)
 - [Java Strict Coding Rules for Derbent Project](#java-strict-coding-rules-for-derbent-project)
 - [Related Documentation](#related-documentation)
 
@@ -62,13 +52,16 @@ src/main/java/tech/derbent/
 │   ├── domains/         # Base domain entities (CEntityNamed, CEntityOfProject)
 │   ├── services/        # Base service classes
 │   └── views/           # Base UI components (CButton, CDialog, CGrid)
+│   └── tests/           # Tests UI, unit etc.
 ├── activities/          # Activity management module
 │   ├── domain/         # CActivity, CActivityStatus, CActivityPriority
 │   ├── service/        # Activity business logic
 │   └── view/           # Activity UI components
+│   └── tests/           # Tests UI, unit etc.
 ├── users/              # User management module
 │   ├── domain/         # CUser, CUserRole, CUserType
 │   ├── service/        # User business logic
+│   └── tests/           # Tests UI, unit etc.
 │   └── view/           # User UI components
 ├── projects/           # Project management module
 ├── meetings/           # Meeting management module
@@ -644,6 +637,9 @@ class ManualVerificationTest {
 
 
 ### 5.3 UI Automated Tests
+- Don't call applicationLogin in every @test, just use it in the setup
+- Don't wait after every navigation etc, if there is a wait in the previous call it is enough
+- Try to navigate between views using class annotations.
 - Always fail all tests with fail assertion
 - Always generate for all views and functions a playwright tests
 - create auxillary functions for playwright tester for simpler commands
@@ -658,6 +654,10 @@ class ManualVerificationTest {
 - write short if blocks, quick returns to increase maintainance
 - dont have repeating blocks
 - check /derbent/src/docs/copilot-java-strict-coding-rules.md file for errors such as link errors
+- only take screen shot if there is a fail in tests, reduce the number of log messages
+- put all test classes in tests folder of that class group
+- create or use common functions like clickCancel, clickNew, clickGrid
+- if possible generate super class tests with classname, entity class parameters to run the tests, such as navigation tests, new item tests etc, which have all common pattern. 
 
 
 ## 6. Sample Implementation Guidelines

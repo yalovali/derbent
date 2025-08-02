@@ -41,7 +41,7 @@ import tech.derbent.projects.view.CProjectsView;
 )
 public class CUIAutomationTest extends CBaseUITest {
 
-	static final Logger logger = LoggerFactory.getLogger(CUIAutomationTest.class);
+	static final Logger LOGGER = LoggerFactory.getLogger(CUIAutomationTest.class);
 
 	/**
 	 * Tests advanced grid interactions including sorting and filtering
@@ -49,7 +49,7 @@ public class CUIAutomationTest extends CBaseUITest {
 	private void testAdvancedGridInView(final Class<?> viewClass) {
 
 		try {
-			logger.info("Testing advanced grid interactions in {} view...", viewClass);
+			LOGGER.info("Testing advanced grid interactions in {} view...", viewClass);
 
 			if (!navigateToViewByClass(viewClass)) {
 				fail("Failed to navigate to view:" + viewClass.getSimpleName());
@@ -83,7 +83,7 @@ public class CUIAutomationTest extends CBaseUITest {
 					emptyCells = true;
 				}
 				else {
-					logger.info("Grid cell text: {}", gridCell.textContent());
+					LOGGER.info("Grid cell text: {}", gridCell.textContent());
 
 					if (emptyCells) {
 						firstDataCell = i;
@@ -104,7 +104,7 @@ public class CUIAutomationTest extends CBaseUITest {
 			final var sorters = grid.locator("vaadin-grid-sorter");
 
 			if (sorters.count() > 0) {
-				logger.info(" Testing grid sorting in {} view...", viewClass);
+				LOGGER.info(" Testing grid sorting in {} view...", viewClass);
 				sorters.first().click();
 				wait_1000();
 				takeScreenshot("grid-sorted-" + viewClass.getSimpleName());
@@ -113,7 +113,7 @@ public class CUIAutomationTest extends CBaseUITest {
 			final var filters = grid.locator("vaadin-text-field[slot='filter']");
 
 			if (filters.count() > 0) {
-				logger.info("Testing grid filtering in {} view...", viewClass);
+				LOGGER.info("Testing grid filtering in {} view...", viewClass);
 				filters.first().fill("test");
 				wait_1000();
 				takeScreenshot("grid-filtered-" + viewClass.getSimpleName());
@@ -121,9 +121,9 @@ public class CUIAutomationTest extends CBaseUITest {
 				filters.first().fill("");
 				page.waitForTimeout(500);
 			}
-			logger.info("✅ Advanced grid test completed for {} view", viewClass);
+			LOGGER.info("✅ Advanced grid test completed for {} view", viewClass);
 		} catch (final Exception e) {
-			logger.warn("Advanced grid test failed in {} view: {}", viewClass,
+			LOGGER.warn("Advanced grid test failed in {} view: {}", viewClass,
 				e.getMessage());
 			takeScreenshot("grid-test-error-" + viewClass.getSimpleName());
 		}
@@ -131,7 +131,7 @@ public class CUIAutomationTest extends CBaseUITest {
 
 	@Test
 	void testApplicationLoadsSuccessfully() {
-		logger.info("🧪 Testing application loads successfully...");
+		LOGGER.info("🧪 Testing application loads successfully...");
 		// Navigate to application
 		page.navigate(baseUrl);
 		// Wait for login overlay to be visible (application should require login)
@@ -142,16 +142,15 @@ public class CUIAutomationTest extends CBaseUITest {
 		// Verify page title contains expected text
 		final String title = page.title();
 		assertNotNull(title);
-		logger.info("✅ Application loaded successfully. Title: {}", title);
+		LOGGER.info("✅ Application loaded successfully. Title: {}", title);
 		// Check that login overlay is present
 		assertTrue(page.locator("vaadin-login-overlay").isVisible());
-		logger.info("✅ Application loads successfully test completed");
+		LOGGER.info("✅ Application loads successfully test completed");
 	}
 
 	@Test
 	void testCompleteApplicationFlow() {
-		logger.info("🧪 Testing complete application workflow...");
-		loginToApplication();
+		LOGGER.info("🧪 Testing complete application workflow...");
 		// Test workflow across different views
 		final Class<?>[] views = {
 			CProjectsView.class, CMeetingsView.class, CActivitiesView.class,
@@ -160,7 +159,7 @@ public class CUIAutomationTest extends CBaseUITest {
 		for (final Class<?> view : views) {
 			performWorkflowInView(view);
 		}
-		logger.info("✅ Complete application workflow test completed");
+		LOGGER.info("✅ Complete application workflow test completed");
 	}
 
 	/**
@@ -169,7 +168,7 @@ public class CUIAutomationTest extends CBaseUITest {
 	private void testCreateOperation(final String viewName, final String entityName) {
 
 		try {
-			logger.info("Testing CREATE operation in {} view...", viewName);
+			LOGGER.info("Testing CREATE operation in {} view...", viewName);
 			// Look for "New" or "Add" buttons
 			final var createButtons = page.locator(
 				"vaadin-button:has-text('New'), vaadin-button:has-text('Add'), vaadin-button:has-text('Create')");
@@ -199,16 +198,16 @@ public class CUIAutomationTest extends CBaseUITest {
 						saveButtons.first().click();
 						page.waitForTimeout(1500);
 						takeScreenshot("create-saved-" + viewName.toLowerCase());
-						logger.info("✅ CREATE operation completed for {} in {} view",
+						LOGGER.info("✅ CREATE operation completed for {} in {} view",
 							entityName, viewName);
 					}
 				}
 			}
 			else {
-				logger.info("No create button found in {} view", viewName);
+				LOGGER.info("No create button found in {} view", viewName);
 			}
 		} catch (final Exception e) {
-			logger.warn("CREATE operation failed in {} view: {}", viewName,
+			LOGGER.warn("CREATE operation failed in {} view: {}", viewName,
 				e.getMessage());
 			takeScreenshot("create-error-" + viewName.toLowerCase());
 		}
@@ -216,10 +215,9 @@ public class CUIAutomationTest extends CBaseUITest {
 
 	@Test
 	void testCRUDOperationsInMeetings() {
-		logger.info("🧪 Testing CRUD operations in Meetings view...");
+		LOGGER.info("🧪 Testing CRUD operations in Meetings view...");
 		// Login and navigate to Meetings
-		loginToApplication();
-		navigateToViewByText("Meetings");
+		assertTrue(navigateToViewByClass(CMeetingsView.class), "Should navigate to view");
 		// Test Create operation
 		testCreateOperation("Meetings", "Test Meeting " + System.currentTimeMillis());
 		// Test Read operation
@@ -228,16 +226,15 @@ public class CUIAutomationTest extends CBaseUITest {
 		testUpdateOperation("Meetings", "Updated Meeting Title");
 		// Test Delete operation (with caution)
 		testDeleteOperation("Meetings");
-		logger.info("✅ CRUD operations test completed for Meetings");
+		LOGGER.info("✅ CRUD operations test completed for Meetings");
 	}
 	// Helper methods
 
 	@Test
 	void testCRUDOperationsInProjects() {
-		logger.info("🧪 Testing CRUD operations in Projects view...");
+		LOGGER.info("🧪 Testing CRUD operations in Projects view...");
 		// Login and navigate to Projects
-		loginToApplication();
-		navigateToViewByText("Projects");
+		assertTrue(navigateToViewByClass(CProjectsView.class), "Should navigate to view");
 		// Test Create operation
 		testCreateOperation("Projects", "Test Project " + System.currentTimeMillis());
 		// Test Read operation
@@ -246,7 +243,7 @@ public class CUIAutomationTest extends CBaseUITest {
 		testUpdateOperation("Projects", "Updated Project Name");
 		// Test Delete operation (with caution)
 		testDeleteOperation("Projects");
-		logger.info("✅ CRUD operations test completed for Projects");
+		LOGGER.info("✅ CRUD operations test completed for Projects");
 	}
 
 	/**
@@ -255,7 +252,7 @@ public class CUIAutomationTest extends CBaseUITest {
 	private void testDeleteOperation(final String viewName) {
 
 		try {
-			logger.info("Testing DELETE operation in {} view...", viewName);
+			LOGGER.info("Testing DELETE operation in {} view...", viewName);
 			// Look for delete buttons
 			final var deleteButtons = page.locator(
 				"vaadin-button:has-text('Delete'), vaadin-button:has-text('Remove')");
@@ -272,18 +269,18 @@ public class CUIAutomationTest extends CBaseUITest {
 					confirmButtons.first().click();
 					page.waitForTimeout(1500);
 					takeScreenshot("delete-completed-" + viewName.toLowerCase());
-					logger.info("✅ DELETE operation completed for {} view", viewName);
+					LOGGER.info("✅ DELETE operation completed for {} view", viewName);
 				}
 				else {
-					logger.info("No confirmation dialog found for delete in {} view",
+					LOGGER.info("No confirmation dialog found for delete in {} view",
 						viewName);
 				}
 			}
 			else {
-				logger.info("No delete button found in {} view", viewName);
+				LOGGER.info("No delete button found in {} view", viewName);
 			}
 		} catch (final Exception e) {
-			logger.warn("DELETE operation failed in {} view: {}", viewName,
+			LOGGER.warn("DELETE operation failed in {} view: {}", viewName,
 				e.getMessage());
 			takeScreenshot("delete-error-" + viewName.toLowerCase());
 		}
@@ -291,32 +288,31 @@ public class CUIAutomationTest extends CBaseUITest {
 
 	@Test
 	void testFormInteractions() {
-		logger.info("🧪 Testing form interactions...");
-		// Navigate to application page.navigate(baseUrl);
-		loginToApplication();
-		// Try to find and interact with forms in different views
+		LOGGER.info("🧪 Testing form interactions...");
+		// Navigate to application page.navigate(baseUrl); Try to find and interact with
+		// forms in different views
 		testFormInView("Projects", "/projects");
 		testFormInView("Meetings", "/meetings");
 		testFormInView("Decisions", "/decisions");
-		logger.info("✅ Form interactions test completed");
+		LOGGER.info("✅ Form interactions test completed");
 	}
 
 	private void testFormInView(final String viewName, final String path) {
 
 		try {
-			logger.info("Testing form interactions in {} view...", viewName);
+			LOGGER.info("Testing form interactions in {} view...", viewName);
 			page.navigate(baseUrl + path);
 			wait_1000();
 
 			if (!clickIfExists(
 				"vaadin-button:has-text('New'), vaadin-button:has-text('Add')")) {
-				logger.info("No 'New' or 'Add' button found in {} view", viewName);
+				LOGGER.info("No 'New' or 'Add' button found in {} view", viewName);
 				return;
 			}
 			wait_1000();
 
 			if (!fillFirstTextField("Test " + viewName + " Entry")) {
-				logger.info("No text field found in {} view", viewName);
+				LOGGER.info("No text field found in {} view", viewName);
 				return;
 			}
 			fillFirstDateField("2024-01-15");
@@ -327,9 +323,9 @@ public class CUIAutomationTest extends CBaseUITest {
 				wait_1000();
 				takeScreenshot("form-saved-" + viewName.toLowerCase());
 			}
-			logger.info("✅ Form interaction test completed for {} view", viewName);
+			LOGGER.info("✅ Form interaction test completed for {} view", viewName);
 		} catch (final Exception e) {
-			logger.warn("⚠️ Form interaction failed in {} view: {}", viewName,
+			LOGGER.warn("⚠️ Form interaction failed in {} view: {}", viewName,
 				e.getMessage(), e);
 			takeScreenshot("form-error-" + viewName.toLowerCase());
 		}
@@ -341,7 +337,7 @@ public class CUIAutomationTest extends CBaseUITest {
 	private void testFormValidation(final String viewName) {
 
 		try {
-			logger.info("Testing form validation in {} view...", viewName);
+			LOGGER.info("Testing form validation in {} view...", viewName);
 			// Open new form
 			final var createButtons = page
 				.locator("vaadin-button:has-text('New'), vaadin-button:has-text('Add')");
@@ -361,13 +357,13 @@ public class CUIAutomationTest extends CBaseUITest {
 						"vaadin-text-field[invalid], .error-message, [role='alert']");
 
 					if (errorMessages.count() > 0) {
-						logger.info(
+						LOGGER.info(
 							"✅ Form validation working - found {} validation messages in {} view",
 							errorMessages.count(), viewName);
 						takeScreenshot("form-validation-" + viewName.toLowerCase());
 					}
 					else {
-						logger.info("No validation messages found in {} view form",
+						LOGGER.info("No validation messages found in {} view form",
 							viewName);
 						takeScreenshot("form-no-validation-" + viewName.toLowerCase());
 					}
@@ -382,7 +378,7 @@ public class CUIAutomationTest extends CBaseUITest {
 				}
 			}
 		} catch (final Exception e) {
-			logger.warn("Form validation test failed in {} view: {}", viewName,
+			LOGGER.warn("Form validation test failed in {} view: {}", viewName,
 				e.getMessage());
 			takeScreenshot("form-validation-error-" + viewName.toLowerCase());
 		}
@@ -390,65 +386,59 @@ public class CUIAutomationTest extends CBaseUITest {
 
 	@Test
 	void testFormValidationAndErrorHandling() {
-		logger.info("🧪 Testing form validation and error handling...");
-		// Login first
-		loginToApplication();
+		LOGGER.info("🧪 Testing form validation and error handling...");
 
 		// Test form validation in Projects view
-		if (navigateToViewByText("Projects")) {
+		if (navigateToViewByClass(CProjectsView.class)) {
 			testFormValidation("Projects");
 		}
 
 		// Test form validation in Meetings view
-		if (navigateToViewByText("Meetings")) {
+		if (navigateToViewByClass(CProjectsView.class)) {
 			testFormValidation("Meetings");
 		}
-		logger.info("✅ Form validation and error handling test completed");
+		LOGGER.info("✅ Form validation and error handling test completed");
 	}
 
 	@Test
 	void testGridInteractions() {
-		logger.info("🧪 Testing grid interactions...");
-		// Login first
-		loginToApplication();
-		// navigateToViewByClass(CProjectsView.class); Test grid interactions in different
-		// views
+		LOGGER.info("🧪 Testing grid interactions...");
 		testAdvancedGridInView(CProjectsView.class);
 		testAdvancedGridInView(CMeetingsView.class);
 		testAdvancedGridInView(CActivitiesView.class);
-		logger.info("✅ Grid interactions test completed");
+		LOGGER.info("✅ Grid interactions test completed");
 	}
 
-	private void testGridInView(final String viewName) {
+	private void testGridInView(final Class<?> viewName) {
 
 		try {
-			logger.info("Testing grid in {} view...", viewName);
+			LOGGER.info("Testing grid in {} view...", viewName);
 
 			// Navigate to view
-			if (navigateToViewByText(viewName)) {
+			if (navigateToViewByClass(viewName)) {
 				wait_1000();
 				// Look for grids
 				final var grids = page.locator("vaadin-grid, table");
 
 				if (grids.count() > 0) {
-					logger.info("Found {} grid(s) in {} view", grids.count(), viewName);
+					LOGGER.info("Found {} grid(s) in {} view", grids.count(), viewName);
 					// Check if grid has data
 					final var rows =
 						page.locator("vaadin-grid vaadin-grid-cell-content, tr");
-					logger.info("Grid has {} rows in {} view", rows.count(), viewName);
-					takeScreenshot("grid-" + viewName.toLowerCase());
+					LOGGER.info("Grid has {} rows in {} view", rows.count(), viewName);
+					takeScreenshot("grid-" + viewName.getSimpleName());
 				}
 			}
-			logger.info("✅ Grid test completed for {} view", viewName);
+			LOGGER.info("✅ Grid test completed for {} view", viewName);
 		} catch (final Exception e) {
-			logger.warn("⚠️ Grid test failed in {} view: {}", viewName, e.getMessage());
-			takeScreenshot("grid-error-" + viewName.toLowerCase());
+			LOGGER.warn("⚠️ Grid test failed in {} view: {}", viewName, e.getMessage());
+			takeScreenshot("grid-error-" + viewName.getSimpleName());
 		}
 	}
 
 	@Test
 	void testInvalidLoginHandling() {
-		logger.info("🧪 Testing invalid login handling...");
+		LOGGER.info("🧪 Testing invalid login handling...");
 		// Navigate to application
 		page.navigate(baseUrl);
 		// Wait for login overlay
@@ -461,24 +451,22 @@ public class CUIAutomationTest extends CBaseUITest {
 		takeScreenshot("invalid-login-attempt");
 		// Verify we're still at login overlay
 		assertTrue(page.locator("vaadin-login-overlay").isVisible());
-		logger.info("✅ Invalid login handling test completed");
+		LOGGER.info("✅ Invalid login handling test completed");
 	}
 
 	@Test
 	void testLoginFunctionality() {
-		logger.info("🧪 Testing login functionality...");
+		LOGGER.info("🧪 Testing login functionality...");
 		page.navigate(baseUrl);
 		performLogin("admin", "test123");
 		takeScreenshot("successful-login");
 		assertTrue(page.locator("vaadin-app-layout").isVisible());
-		logger.info("✅ Login functionality test completed successfully");
+		LOGGER.info("✅ Login functionality test completed successfully");
 	}
 
 	@Test
 	void testLogoutFunctionality() {
-		logger.info("🧪 Testing logout functionality...");
-		// Login first
-		loginToApplication();
+		LOGGER.info("🧪 Testing logout functionality...");
 
 		// Look for logout option
 		if (performLogout()) {
@@ -486,31 +474,30 @@ public class CUIAutomationTest extends CBaseUITest {
 			wait_loginscreen();
 			takeScreenshot("after-logout");
 			assertTrue(page.locator("vaadin-login-overlay").isVisible());
-			logger.info("✅ Logout functionality test completed successfully");
+			LOGGER.info("✅ Logout functionality test completed successfully");
 		}
 		else {
-			logger.warn("⚠️ Logout functionality not tested - logout button not found");
+			LOGGER.warn("⚠️ Logout functionality not tested - logout button not found");
 		}
 	}
 
 	@Test
 	void testNavigationBetweenViews() {
-		logger.info("🧪 Testing navigation between views...");
-		// Login first
-		loginToApplication();
+		LOGGER.info("🧪 Testing navigation between views...");
 		// Test navigation to different views
 		final String[] viewSelectors = {
 			"vaadin-side-nav-item[path='/projects']",
 			"vaadin-side-nav-item[path='/meetings']",
 			"vaadin-side-nav-item[path='/activities']",
 			"vaadin-side-nav-item[path='/decisions']" };
-		final String[] viewNames = {
-			"Projects", "Meetings", "Activities", "Decisions" };
+		final Class<?>[] viewClasses = {
+			CProjectsView.class, CMeetingsView.class, CActivitiesView.class,
+			CDecisionsView.class };
 
 		for (int i = 0; i < viewSelectors.length; i++) {
 
 			try {
-				logger.info("Navigating to {} view...", viewNames[i]);
+				LOGGER.info("Navigating to {} view...", viewClasses[i].getSimpleName());
 
 				// Click on navigation item
 				if (page.locator(viewSelectors[i]).isVisible()) {
@@ -518,29 +505,32 @@ public class CUIAutomationTest extends CBaseUITest {
 					// Wait for view to load
 					wait_1000();
 					// Take screenshot
-					takeScreenshot(viewNames[i].toLowerCase() + "-view");
-					logger.info("✅ Successfully navigated to {} view", viewNames[i]);
+					takeScreenshot(
+						viewClasses[i].getSimpleName().toLowerCase() + "-view");
+					LOGGER.info("✅ Successfully navigated to {} view",
+						viewClasses[i].getSimpleName());
 				}
 				else {
-					logger.warn(
+					LOGGER.warn(
 						"⚠️ Navigation item for {} not found, checking alternative selectors",
-						viewNames[i]);
+						viewClasses[i].getSimpleName());
 
 					// Try alternative navigation approaches
-					if (navigateToViewByText(viewNames[i])) {
-						takeScreenshot(viewNames[i].toLowerCase() + "-view-alt");
-						logger.info(
+					if (navigateToViewByClass(viewClasses[i])) {
+						takeScreenshot(viewClasses[i].getSimpleName() + "-view-alt");
+						LOGGER.info(
 							"✅ Successfully navigated to {} view using alternative method",
-							viewNames[i]);
+							viewClasses[i].getSimpleName());
 					}
 				}
 			} catch (final Exception e) {
-				logger.warn("⚠️ Could not navigate to {} view: {}", viewNames[i],
-					e.getMessage());
-				takeScreenshot("navigation-error-" + viewNames[i].toLowerCase());
+				LOGGER.warn("⚠️ Could not navigate to {} view: {}",
+					viewClasses[i].getSimpleName(), e.getMessage());
+				takeScreenshot(
+					"navigation-error-" + viewClasses[i].getSimpleName().toLowerCase());
 			}
 		}
-		logger.info("✅ Navigation between views test completed");
+		LOGGER.info("✅ Navigation between views test completed");
 	}
 
 	/**
@@ -549,7 +539,7 @@ public class CUIAutomationTest extends CBaseUITest {
 	private void testReadOperation(final String viewName) {
 
 		try {
-			logger.info("Testing READ operation in {} view...", viewName);
+			LOGGER.info("Testing READ operation in {} view...", viewName);
 			// Look for grids with data
 			final var grids = page.locator("vaadin-grid");
 
@@ -558,24 +548,24 @@ public class CUIAutomationTest extends CBaseUITest {
 				final var gridCells = grid.locator("vaadin-grid-cell-content");
 
 				if (gridCells.count() > 0) {
-					logger.info("Found {} data items in {} view", gridCells.count(),
+					LOGGER.info("Found {} data items in {} view", gridCells.count(),
 						viewName);
 					takeScreenshot("read-data-" + viewName.toLowerCase());
 					// Click on first row to view details
 					gridCells.first().click();
 					wait_1000();
 					takeScreenshot("read-details-" + viewName.toLowerCase());
-					logger.info("✅ READ operation completed for {} view", viewName);
+					LOGGER.info("✅ READ operation completed for {} view", viewName);
 				}
 				else {
-					logger.info("No data found in {} view grid", viewName);
+					LOGGER.info("No data found in {} view grid", viewName);
 				}
 			}
 			else {
-				logger.info("No grid found in {} view", viewName);
+				LOGGER.info("No grid found in {} view", viewName);
 			}
 		} catch (final Exception e) {
-			logger.warn("READ operation failed in {} view: {}", viewName, e.getMessage());
+			LOGGER.warn("READ operation failed in {} view: {}", viewName, e.getMessage());
 			takeScreenshot("read-error-" + viewName.toLowerCase());
 		}
 	}
@@ -586,7 +576,7 @@ public class CUIAutomationTest extends CBaseUITest {
 	private void testUpdateOperation(final String viewName, final String newName) {
 
 		try {
-			logger.info("Testing UPDATE operation in {} view...", viewName);
+			LOGGER.info("Testing UPDATE operation in {} view...", viewName);
 			// Look for edit buttons
 			final var editButtons = page.locator(
 				"vaadin-button:has-text('Edit'), vaadin-button:has-text('Modify')");
@@ -609,15 +599,15 @@ public class CUIAutomationTest extends CBaseUITest {
 						saveButtons.first().click();
 						wait_1000();
 						takeScreenshot("update-saved-" + viewName.toLowerCase());
-						logger.info("✅ UPDATE operation completed for {} view", viewName);
+						LOGGER.info("✅ UPDATE operation completed for {} view", viewName);
 					}
 				}
 			}
 			else {
-				logger.info("No edit button found in {} view", viewName);
+				LOGGER.info("No edit button found in {} view", viewName);
 			}
 		} catch (final Exception e) {
-			logger.warn("UPDATE operation failed in {} view: {}", viewName,
+			LOGGER.warn("UPDATE operation failed in {} view: {}", viewName,
 				e.getMessage());
 			takeScreenshot("update-error-" + viewName.toLowerCase());
 		}
