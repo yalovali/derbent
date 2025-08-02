@@ -654,6 +654,10 @@ class ManualVerificationTest {
 - Verify relationship mappings
 - Test validation constraints
 - Include performance tests for critical paths
+- write separete test classes for each view to keep code easy to understand
+- write short if blocks, quick returns to increase maintainance
+- dont have repeating blocks
+- check /derbent/src/docs/copilot-java-strict-coding-rules.md file for errors such as link errors
 
 
 ## 6. Sample Implementation Guidelines
