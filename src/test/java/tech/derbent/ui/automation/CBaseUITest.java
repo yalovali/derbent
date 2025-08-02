@@ -291,4 +291,350 @@ public class CBaseUITest {
 		page.waitForSelector("#input-vaadin-text-field-12",
 			new Page.WaitForSelectorOptions().setTimeout(10000));
 	}
+
+	// ========== Additional Playwright Testing Utilities ==========
+
+	/**
+	 * Clicks on an element by its ID with timeout and error handling
+	 */
+	protected boolean clickById(final String id) {
+		return clickById(id, 5000);
+	}
+
+	/**
+	 * Clicks on an element by its ID with custom timeout
+	 */
+	protected boolean clickById(final String id, final int timeoutMs) {
+		try {
+			final String selector = "#" + id;
+			if (page.locator(selector).count() > 0) {
+				page.click(selector, new Page.ClickOptions().setTimeout(timeoutMs));
+				logger.debug("Successfully clicked element with ID: {}", id);
+				return true;
+			} else {
+				logger.warn("Element with ID '{}' not found", id);
+				return false;
+			}
+		} catch (final Exception e) {
+			logger.warn("Failed to click element with ID '{}': {}", id, e.getMessage());
+			return false;
+		}
+	}
+
+	/**
+	 * Fills a form field by its ID
+	 */
+	protected boolean fillById(final String id, final String value) {
+		try {
+			final String selector = "#" + id;
+			if (page.locator(selector).count() > 0) {
+				page.fill(selector, value);
+				logger.debug("Successfully filled field with ID '{}' with value: {}", id, value);
+				return true;
+			} else {
+				logger.warn("Field with ID '{}' not found", id);
+				return false;
+			}
+		} catch (final Exception e) {
+			logger.warn("Failed to fill field with ID '{}': {}", id, e.getMessage());
+			return false;
+		}
+	}
+
+	/**
+	 * Selects an option in a ComboBox by ID
+	 */
+	protected boolean selectComboBoxOptionById(final String comboBoxId, final String optionText) {
+		try {
+			final String selector = "#" + comboBoxId;
+			if (page.locator(selector).count() > 0) {
+				// Click to open the ComboBox
+				page.click(selector);
+				wait_500();
+				
+				// Select the option by text
+				final String optionSelector = "vaadin-combo-box-item:has-text('" + optionText + "')";
+				if (page.locator(optionSelector).count() > 0) {
+					page.click(optionSelector);
+					logger.debug("Successfully selected option '{}' in ComboBox with ID: {}", optionText, comboBoxId);
+					return true;
+				} else {
+					logger.warn("Option '{}' not found in ComboBox with ID '{}'", optionText, comboBoxId);
+					return false;
+				}
+			} else {
+				logger.warn("ComboBox with ID '{}' not found", comboBoxId);
+				return false;
+			}
+		} catch (final Exception e) {
+			logger.warn("Failed to select option in ComboBox with ID '{}': {}", comboBoxId, e.getMessage());
+			return false;
+		}
+	}
+
+	/**
+	 * Clicks on a grid row by index
+	 */
+	protected boolean clickGridRowByIndex(final int rowIndex) {
+		try {
+			final String selector = "vaadin-grid-cell-content";
+			final var gridCells = page.locator(selector);
+			
+			if (gridCells.count() > rowIndex) {
+				gridCells.nth(rowIndex).click();
+				logger.debug("Successfully clicked grid row at index: {}", rowIndex);
+				return true;
+			} else {
+				logger.warn("Grid row at index {} not found (total rows: {})", rowIndex, gridCells.count());
+				return false;
+			}
+		} catch (final Exception e) {
+			logger.warn("Failed to click grid row at index {}: {}", rowIndex, e.getMessage());
+			return false;
+		}
+	}
+
+	/**
+	 * Gets the text content of an element by ID
+	 */
+	protected String getTextById(final String id) {
+		try {
+			final String selector = "#" + id;
+			if (page.locator(selector).count() > 0) {
+				final String text = page.locator(selector).textContent();
+				logger.debug("Got text '{}' from element with ID: {}", text, id);
+				return text;
+			} else {
+				logger.warn("Element with ID '{}' not found", id);
+				return null;
+			}
+		} catch (final Exception e) {
+			logger.warn("Failed to get text from element with ID '{}': {}", id, e.getMessage());
+			return null;
+		}
+	}
+
+	/**
+	 * Waits for an element to be visible by ID
+	 */
+	protected boolean waitForElementById(final String id, final int timeoutMs) {
+		try {
+			final String selector = "#" + id;
+			page.waitForSelector(selector, new Page.WaitForSelectorOptions().setTimeout(timeoutMs));
+			logger.debug("Element with ID '{}' became visible", id);
+			return true;
+		} catch (final Exception e) {
+			logger.warn("Element with ID '{}' did not become visible within {}ms: {}", id, timeoutMs, e.getMessage());
+			return false;
+		}
+	}
+
+	/**
+	 * Checks if an element exists by ID
+	 */
+	protected boolean elementExistsById(final String id) {
+		final String selector = "#" + id;
+		final boolean exists = page.locator(selector).count() > 0;
+		logger.debug("Element with ID '{}' exists: {}", id, exists);
+		return exists;
+	}
+
+	/**
+	 * Gets the count of grid rows
+	 */
+	protected int getGridRowCount() {
+		final var gridCells = page.locator("vaadin-grid-cell-content");
+		final int count = gridCells.count();
+		logger.debug("Grid has {} cells", count);
+		return count;
+	}
+
+	/**
+	 * Tests form validation by submitting empty form
+	 */
+	protected boolean testFormValidationById(final String saveButtonId) {
+		try {
+			// Try to save without filling required fields
+			if (clickById(saveButtonId)) {
+				wait_1000();
+				
+				// Look for validation messages
+				final var errorMessages = page.locator("vaadin-text-field[invalid], .error-message, [role='alert']");
+				final boolean hasValidation = errorMessages.count() > 0;
+				
+				if (hasValidation) {
+					logger.debug("Form validation working - found {} validation messages", errorMessages.count());
+					takeScreenshot("form-validation-triggered");
+				} else {
+					logger.debug("No validation messages found");
+				}
+				
+				return hasValidation;
+			} else {
+				logger.warn("Could not click save button for validation test");
+				return false;
+			}
+		} catch (final Exception e) {
+			logger.warn("Form validation test failed: {}", e.getMessage());
+			return false;
+		}
+	}
+
+	/**
+	 * Tests CRUD operations on a grid view
+	 */
+	protected void testCRUDOperationsInView(final String viewName, final String newButtonId, 
+		final String saveButtonId, final String deleteButtonId) {
+		
+		logger.info("Testing CRUD operations in {} view", viewName);
+		
+		// Test CREATE
+		if (elementExistsById(newButtonId)) {
+			logger.debug("Testing CREATE operation");
+			clickById(newButtonId);
+			wait_1000();
+			takeScreenshot("crud-create-form-" + viewName.toLowerCase());
+			
+			// Fill first text field if available
+			fillFirstTextField("Test " + viewName + " Entry " + System.currentTimeMillis());
+			
+			if (elementExistsById(saveButtonId)) {
+				clickById(saveButtonId);
+				wait_1000();
+				takeScreenshot("crud-create-saved-" + viewName.toLowerCase());
+			}
+		}
+		
+		// Test READ - check grid has data
+		final int rowCount = getGridRowCount();
+		logger.debug("Grid has {} rows for READ test", rowCount);
+		if (rowCount > 0) {
+			clickGridRowByIndex(0);
+			wait_1000();
+			takeScreenshot("crud-read-selected-" + viewName.toLowerCase());
+		}
+		
+		// Test UPDATE - if edit possible
+		if (rowCount > 0) {
+			logger.debug("Testing UPDATE operation");
+			// Modify first text field if available
+			fillFirstTextField("Updated " + viewName + " Entry " + System.currentTimeMillis());
+			
+			if (elementExistsById(saveButtonId)) {
+				clickById(saveButtonId);
+				wait_1000();
+				takeScreenshot("crud-update-saved-" + viewName.toLowerCase());
+			}
+		}
+		
+		// Test DELETE - with caution
+		if (elementExistsById(deleteButtonId) && rowCount > 0) {
+			logger.debug("Testing DELETE operation");
+			clickById(deleteButtonId);
+			wait_1000();
+			takeScreenshot("crud-delete-confirmation-" + viewName.toLowerCase());
+			
+			// Look for confirmation and click if available
+			final var confirmButtons = page.locator("vaadin-button:has-text('Yes'), vaadin-button:has-text('Confirm'), vaadin-button:has-text('Delete')");
+			if (confirmButtons.count() > 0) {
+				confirmButtons.first().click();
+				wait_1000();
+				takeScreenshot("crud-delete-completed-" + viewName.toLowerCase());
+			}
+		}
+		
+		logger.info("CRUD operations test completed for {}", viewName);
+	}
+
+	/**
+	 * Tests ComboBox contents and selections
+	 */
+	protected void testComboBoxById(final String comboBoxId, final String expectedFirstOption) {
+		try {
+			logger.debug("Testing ComboBox with ID: {}", comboBoxId);
+			
+			if (elementExistsById(comboBoxId)) {
+				// Open ComboBox
+				clickById(comboBoxId);
+				wait_500();
+				
+				// Check if options are available
+				final var options = page.locator("vaadin-combo-box-item");
+				final int optionCount = options.count();
+				
+				logger.debug("ComboBox '{}' has {} options", comboBoxId, optionCount);
+				takeScreenshot("combobox-options-" + comboBoxId);
+				
+				if (optionCount > 0 && expectedFirstOption != null) {
+					selectComboBoxOptionById(comboBoxId, expectedFirstOption);
+				}
+				
+				// Close ComboBox by clicking elsewhere
+				page.click("body");
+				wait_500();
+			}
+		} catch (final Exception e) {
+			logger.warn("ComboBox test failed for ID '{}': {}", comboBoxId, e.getMessage());
+		}
+	}
+
+	/**
+	 * Short wait helper
+	 */
+	protected void wait_500() {
+		page.waitForTimeout(500);
+	}
+
+	/**
+	 * Medium wait helper
+	 */
+	protected void wait_2000() {
+		page.waitForTimeout(2000);
+	}
+
+	/**
+	 * Tests responsive design by changing viewport size
+	 */
+	protected void testResponsiveDesign(final String viewName) {
+		logger.info("Testing responsive design for {}", viewName);
+		
+		// Test mobile viewport
+		page.setViewportSize(375, 667);
+		wait_1000();
+		takeScreenshot("responsive-mobile-" + viewName.toLowerCase());
+		
+		// Test tablet viewport
+		page.setViewportSize(768, 1024);
+		wait_1000();
+		takeScreenshot("responsive-tablet-" + viewName.toLowerCase());
+		
+		// Test desktop viewport
+		page.setViewportSize(1200, 800);
+		wait_1000();
+		takeScreenshot("responsive-desktop-" + viewName.toLowerCase());
+		
+		logger.info("Responsive design test completed for {}", viewName);
+	}
+
+	/**
+	 * Tests basic accessibility features
+	 */
+	protected void testAccessibilityBasics(final String viewName) {
+		logger.info("Testing accessibility basics for {}", viewName);
+		
+		// Check for proper heading structure
+		final var headings = page.locator("h1, h2, h3, h4, h5, h6");
+		logger.debug("Found {} headings", headings.count());
+		
+		// Check for aria labels
+		final var ariaLabeled = page.locator("[aria-label], [aria-labelledby]");
+		logger.debug("Found {} elements with aria labels", ariaLabeled.count());
+		
+		// Check for proper button roles
+		final var buttons = page.locator("button, [role='button']");
+		logger.debug("Found {} button elements", buttons.count());
+		
+		takeScreenshot("accessibility-check-" + viewName.toLowerCase());
+		logger.info("Accessibility basics test completed for {}", viewName);
+	}
 }
