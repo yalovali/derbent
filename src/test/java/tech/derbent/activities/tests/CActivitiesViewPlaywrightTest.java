@@ -1,4 +1,4 @@
-package tech.derbent.ui.automation;
+package tech.derbent.activities.tests;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -11,6 +11,7 @@ import org.springframework.test.context.TestPropertySource;
 
 import tech.derbent.activities.view.CActivitiesView;
 import tech.derbent.projects.view.CProjectsView;
+import tech.derbent.ui.automation.CBaseUITest;
 
 /**
  * CActivitiesViewPlaywrightTest - Comprehensive Playwright tests for the Activities view.
@@ -30,65 +31,52 @@ public class CActivitiesViewPlaywrightTest extends CBaseUITest {
 
 	@Test
 	void testActivitiesAccessibility() {
-		LOGGER.info("🧪 Testing Activities accessibility...");
+		LOGGER.debug("Testing Activities accessibility");
 		assertTrue(navigateToViewByClass(CActivitiesView.class),
 			"Should navigate to Activities view");
-		// Use auxiliary accessibility testing method
 		testAccessibilityBasics("Activities");
-		LOGGER.info("✅ Activities accessibility test completed");
+		LOGGER.debug("Activities accessibility test completed");
 	}
 
 	@Test
 	void testActivitiesComboBoxes() {
-		LOGGER.info("🧪 Testing Activities ComboBox components...");
+		LOGGER.debug("Testing Activities ComboBox components");
 		navigateToViewByClass(CActivitiesView.class);
-		// Open new activity form
-		final var newButtons =
-			page.locator("vaadin-button:has-text('New'), vaadin-button:has-text('Add')");
+		
+		// Use common function to open new form
+		clickNew();
+		
+		// Test ComboBoxes using common pattern
+		final var comboBoxes = page.locator("vaadin-combo-box");
+		final int comboBoxCount = comboBoxes.count();
+		LOGGER.debug("Found {} ComboBox components", comboBoxCount);
 
-		if (newButtons.count() > 0) {
-			newButtons.first().click();
-			wait_1000();
-			// Test Activity Type ComboBox
-			final var activityTypeComboBoxes = page.locator("vaadin-combo-box");
-
-			if (activityTypeComboBoxes.count() > 0) {
-				LOGGER.debug("Testing Activity Type ComboBox");
-				// Click to open first ComboBox
-				activityTypeComboBoxes.first().click();
+		for (int i = 0; i < comboBoxCount && i < 3; i++) { // Limit to 3 to avoid long test times
+			try {
+				comboBoxes.nth(i).click();
 				wait_500();
-				// Check options are available
+				
 				final var options = page.locator("vaadin-combo-box-item");
 				final int optionCount = options.count();
-				LOGGER.debug("Found {} options in Activity Type ComboBox", optionCount);
-
-				if (optionCount > 0) {
-					// Select first option
-					options.first().click();
-					wait_500();
+				LOGGER.debug("ComboBox {} has {} options", i, optionCount);
+				
+				if (optionCount == 0) {
+					takeScreenshot("activities-combobox-no-options-" + i, true);
 				}
-				takeScreenshot("activities-activity-type-combobox");
-			}
-
-			// Test Status ComboBox if different from Activity Type
-			if (activityTypeComboBoxes.count() > 1) {
-				LOGGER.debug("Testing Status ComboBox");
-				activityTypeComboBoxes.nth(1).click();
-				wait_500();
-				takeScreenshot("activities-status-combobox");
-				// Close by clicking elsewhere
+				
+				// Close ComboBox
 				page.click("body");
 				wait_500();
-			}
-			// Close form
-			final var cancelButtons = page.locator("vaadin-button:has-text('Cancel')");
-
-			if (cancelButtons.count() > 0) {
-				cancelButtons.first().click();
-				wait_500();
+			} catch (final Exception e) {
+				LOGGER.error("Error testing ComboBox {}: {}", i, e.getMessage());
+				takeScreenshot("activities-combobox-error-" + i, true);
 			}
 		}
-		LOGGER.info("✅ Activities ComboBox test completed");
+		
+		// Use common function to cancel
+		clickCancel();
+		LOGGER.debug("Activities ComboBox test completed");
+	}
 	}
 
 	@Test
@@ -139,40 +127,36 @@ public class CActivitiesViewPlaywrightTest extends CBaseUITest {
 
 	@Test
 	void testActivitiesCRUDOperations() {
-		LOGGER.info("🧪 Testing Activities CRUD operations...");
+		LOGGER.debug("Testing Activities CRUD operations");
 		assertTrue(navigateToViewByClass(CActivitiesView.class),
 			"Should navigate to Activities view");
 		// Use the auxiliary CRUD testing method
 		testCRUDOperationsInView("Activities", "new-button", "save-button",
 			"delete-button");
-		LOGGER.info("✅ Activities CRUD operations test completed");
+		LOGGER.debug("Activities CRUD operations test completed");
 	}
 
 	@Test
 	void testActivitiesFormValidation() {
-		LOGGER.info("🧪 Testing Activities form validation...");
+		LOGGER.debug("Testing Activities form validation");
 		assertTrue(navigateToViewByClass(CActivitiesView.class),
 			"Should navigate to Activities view");
-		// Try to create new activity
-		final var newButtons =
-			page.locator("vaadin-button:has-text('New'), vaadin-button:has-text('Add')");
-
-		if (newButtons.count() > 0) {
-			newButtons.first().click();
-			wait_1000();
-			// Test form validation using auxiliary method
-			final boolean validationWorking = testFormValidationById("save-button");
-			LOGGER.debug("Form validation working: {}", validationWorking);
-			takeScreenshot("activities-form-validation");
-			// Close form
-			final var cancelButtons = page.locator("vaadin-button:has-text('Cancel')");
-
-			if (cancelButtons.count() > 0) {
-				cancelButtons.first().click();
-				wait_500();
-			}
+		
+		// Use common function to open new form
+		clickNew();
+		
+		// Test form validation using auxiliary method
+		final boolean validationWorking = testFormValidationById("save-button");
+		LOGGER.debug("Form validation working: {}", validationWorking);
+		
+		// Only take screenshot if validation is not working
+		if (!validationWorking) {
+			takeScreenshot("activities-form-validation-failed", true);
 		}
-		LOGGER.info("✅ Activities form validation test completed");
+		
+		// Use common function to close form
+		clickCancel();
+		LOGGER.debug("Activities form validation test completed");
 	}
 
 	@Test

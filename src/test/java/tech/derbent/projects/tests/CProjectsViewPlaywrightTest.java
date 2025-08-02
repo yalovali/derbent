@@ -1,4 +1,4 @@
-package tech.derbent.ui.automation;
+package tech.derbent.projects.tests;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -11,6 +11,7 @@ import org.springframework.test.context.TestPropertySource;
 
 import tech.derbent.activities.view.CActivitiesView;
 import tech.derbent.projects.view.CProjectsView;
+import tech.derbent.ui.automation.CBaseUITest;
 
 /**
  * CProjectsViewPlaywrightTest - Comprehensive Playwright tests for the Projects view.

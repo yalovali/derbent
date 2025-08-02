@@ -1,4 +1,4 @@
-package tech.derbent.ui.automation;
+package tech.derbent.meetings.tests;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.TestPropertySource;
 
 import tech.derbent.meetings.view.CMeetingsView;
+import tech.derbent.ui.automation.CBaseUITest;
 import tech.derbent.projects.view.CProjectsView;
 
 /**

@@ -1,4 +1,4 @@
-package tech.derbent.ui.automation;
+package tech.derbent.users.tests;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.TestPropertySource;
 
 import tech.derbent.projects.view.CProjectsView;
+import tech.derbent.ui.automation.CBaseUITest;
 import tech.derbent.users.view.CUsersView;
 
 /**
@@ -41,7 +42,7 @@ public class CUsersViewPlaywrightTest extends CBaseUITest {
 	void testUsersComboBoxes() {
 		LOGGER.info("🧪 Testing Users ComboBox components...");
 		assertTrue(navigateToViewByClass(CUsersView.class), "Should navigate to view");
-		clickNewButton();
+		clickNew();
 		// Test User Role ComboBox
 		final var comboBoxes = page.locator("vaadin-combo-box");
 
@@ -88,7 +89,7 @@ public class CUsersViewPlaywrightTest extends CBaseUITest {
 			page.click("body");
 			wait_500();
 		}
-		clickCancelButton();
+		clickCancel();
 		LOGGER.info("✅ Users ComboBox test completed");
 	}
 
@@ -98,7 +99,7 @@ public class CUsersViewPlaywrightTest extends CBaseUITest {
 		assertTrue(navigateToViewByClass(CUsersView.class), "Should navigate to view");
 		LOGGER.debug("Initial grid has {} rows", getGridRowCount());
 		// Create new user
-		clickNewButton();
+		clickNew();
 		takeScreenshot("users-workflow-new-form");
 		// Fill user name (first name)
 		final String firstName = "TestUser" + System.currentTimeMillis();
@@ -124,7 +125,7 @@ public class CUsersViewPlaywrightTest extends CBaseUITest {
 		}
 		takeScreenshot("users-workflow-form-filled");
 		// Save
-		clickSaveButton();
+		clickSave();
 		LOGGER.info("✅ Users complete workflow test completed");
 	}
 
@@ -142,7 +143,7 @@ public class CUsersViewPlaywrightTest extends CBaseUITest {
 		LOGGER.info("🧪 Testing Users form validation...");
 		assertTrue(navigateToViewByClass(CUsersView.class), "Should navigate to view");
 		// Try to create new user
-		clickNewButton();
+		clickNew();
 		final boolean validationWorking = testFormValidationById("save-button");
 		LOGGER.debug("Form validation working: {}", validationWorking);
 		takeScreenshot("users-form-validation");
@@ -155,7 +156,7 @@ public class CUsersViewPlaywrightTest extends CBaseUITest {
 			wait_500();
 			takeScreenshot("users-email-validation");
 		}
-		clickCancelButton();
+		clickCancel();
 		LOGGER.info("✅ Users form validation test completed");
 	}
 
@@ -211,7 +212,7 @@ public class CUsersViewPlaywrightTest extends CBaseUITest {
 			LOGGER.debug("Found {} profile images in grid", profileImages.count());
 			takeScreenshot("users-profile-pictures-grid");
 		}
-		clickNewButton();
+		clickNew();
 		// Check if profile picture upload is available
 		final var uploadComponents = page.locator("vaadin-upload, input[type='file']");
 
@@ -219,7 +220,7 @@ public class CUsersViewPlaywrightTest extends CBaseUITest {
 			LOGGER.debug("Profile picture upload component found");
 			takeScreenshot("users-profile-picture-upload");
 		}
-		clickCancelButton();
+		clickCancel();
 		LOGGER.info("✅ Users profile picture handling test completed");
 	}
 
