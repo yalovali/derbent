@@ -645,7 +645,8 @@ class ManualVerificationTest {
 
 ### 5.3 UI Automated Tests
 - Always fail all tests with fail assertion
-- Always generate for all views and functions a selenium and playwright tests
+- Always generate for all views and functions a playwright tests
+- create auxillary functions for playwright tester for simpler commands
 - Always try to use selection by ID not by CSS or tag
 - try to insert ID to used components in test in java
 - keep tests in non headless chromium execution

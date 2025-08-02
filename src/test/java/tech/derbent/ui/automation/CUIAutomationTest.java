@@ -4,28 +4,19 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.nio.file.Paths;
-
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.TestPropertySource;
 
-import com.microsoft.playwright.Browser;
-import com.microsoft.playwright.BrowserContext;
-import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Locator.ClickOptions;
 import com.microsoft.playwright.Page;
-import com.microsoft.playwright.Playwright;
-import com.vaadin.flow.router.Route;
 
 import tech.derbent.activities.view.CActivitiesView;
+import tech.derbent.decisions.view.CDecisionsView;
 import tech.derbent.meetings.view.CMeetingsView;
 import tech.derbent.projects.view.CProjectsView;
 
@@ -48,242 +39,9 @@ import tech.derbent.projects.view.CProjectsView;
 	"spring.datasource.url=jdbc:h2:mem:testdb",
 	"spring.jpa.hibernate.ddl-auto=create-drop", "server.port=8080" }
 )
-public class PlaywrightUIAutomationTest {
+public class CUIAutomationTest extends CBaseUITest {
 
-	private static final Logger logger =
-		LoggerFactory.getLogger(PlaywrightUIAutomationTest.class);
-
-	@LocalServerPort
-	private int port;
-
-	private Playwright playwright;
-
-	private Browser browser;
-
-	private BrowserContext context;
-
-	private Page page;
-
-	private String baseUrl;
-
-	private void checkAccessibilityElement(final String selector,
-		final String description) {
-
-		try {
-			final var elements = page.locator(selector);
-
-			if (elements.count() > 0) {
-				logger.info("✅ Found {} {} element(s)", elements.count(), description);
-			}
-			else {
-				logger.warn("⚠️ No {} found", description);
-			}
-		} catch (final Exception e) {
-			logger.warn("⚠️ Accessibility check failed for {}: {}", description,
-				e.getMessage());
-		}
-	}
-
-	/**
-	 * Helper method to login to the application with default credentials
-	 */
-	private void loginToApplication() {
-		page.navigate(baseUrl);
-		page.waitForSelector("#input-vaadin-text-field-12",
-			new Page.WaitForSelectorOptions().setTimeout(10000));
-		performLogin("admin", "test123");
-		page.waitForSelector("vaadin-app-layout",
-			new Page.WaitForSelectorOptions().setTimeout(10000));
-	}
-
-	private boolean navigateToViewByClass(final Class<?> viewClass) {
-
-		try {
-			final Route routeAnnotation = viewClass.getAnnotation(Route.class);
-
-			if (routeAnnotation == null) {
-				logger.error("Class {} has no @Route annotation!", viewClass.getName());
-				return false;
-			}
-			final String route = routeAnnotation.value().split("/")[0];
-
-			if (route.isEmpty()) {
-				logger.error("Route value is empty for class: {}", viewClass.getName());
-				return false;
-			}
-			String url = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
-			url += route.startsWith("/") ? route.substring(1) : route;
-			logger.info("Navigating to view by class: {}", url);
-			page.navigate(url);
-			page.waitForTimeout(2000); // waits for 1 second
-			return true;
-		} catch (final Exception e) {
-			logger.warn("Failed to navigate to view {}: {}", viewClass.getSimpleName(),
-				e.getMessage());
-			return false;
-		}
-	}
-
-	private boolean navigateToViewByText(final String viewName) {
-
-		try {
-			// the viewName should match the text in the navigation menu it can only click
-			// first Parent item. if the target menu is submenu of another menu, it will
-			// not work like: "Projects > Active Projects" TODO fix this limitation
-			final Locator activities = page.locator(".hierarchical-menu-item");
-			logger.info("" + activities.count() + " activities found in navigation");
-			// Find the view by its text
-			final Locator viewLink = activities.locator("span",
-				new Locator.LocatorOptions().setHasText(viewName));
-
-			if (viewLink.count() == 0) {
-				logger.warn("View '{}' not found in navigation", viewName);
-				return false;
-			}
-			logger.info("Navigating to view: {}", viewName);
-			// Click the view link
-			viewLink.first().click();
-			page.waitForTimeout(1000);
-			return true;
-		} catch (final Exception e) {
-			logger.warn("Failed to navigate to view {}: {}", viewName, e.getMessage());
-			return false;
-		}
-	}
-
-	/**
-	 * Performs login with specified credentials
-	 */
-	private void performLogin(final String username, final String password) {
-
-		try {
-			/*
-			 * page.locator("id=vaadin-text-field-0").fill("TST");
-			 * page.locator("id=vaadin-text-field-1").fill("Test");
-			 * page.locator("id=edit-save").click();
-			 */
-			logger.info("Performing login with username: {}", username);
-			page.fill("vaadin-text-field[name='username'] > input", username);
-			page.fill("vaadin-password-field[name='password'] > input", password);
-			page.click("vaadin-button");
-		} catch (final Exception e) {
-			logger.error("❌ Login failed: {}", e.getMessage());
-			takeScreenshot("login-failed");
-			throw new RuntimeException("Login failed", e);
-		}
-	}
-
-	/**
-	 * Attempts to perform logout
-	 */
-	private boolean performLogout() {
-
-		try {
-			// Look for logout button or menu
-			final var logoutButtons = page.locator(
-				"vaadin-button:has-text('Logout'), a:has-text('Logout'), vaadin-menu-bar-button:has-text('Logout')");
-
-			if (logoutButtons.count() > 0) {
-				logoutButtons.first().click();
-				page.waitForTimeout(1000);
-				return true;
-			}
-			// Alternative: look for user menu that might contain logout
-			final var userMenus =
-				page.locator("vaadin-menu-bar, [role='button']:has-text('User')");
-
-			if (userMenus.count() > 0) {
-				userMenus.first().click();
-				page.waitForTimeout(500);
-				final var logoutInMenu =
-					page.locator("vaadin-menu-bar-item:has-text('Logout')");
-
-				if (logoutInMenu.count() > 0) {
-					logoutInMenu.click();
-					return true;
-				}
-			}
-			return false;
-		} catch (final Exception e) {
-			logger.warn("Logout attempt failed: {}", e.getMessage());
-			return false;
-		}
-	}
-
-	private void performWorkflowInView(final String viewName) {
-
-		try {
-			logger.info("Performing workflow in {} view...", viewName);
-
-			// Navigate to view by finding navigation elements
-			if (navigateToViewByText(viewName)) {
-				page.waitForTimeout(1000);
-				// Check if view loaded
-				assertTrue(page.url().contains(viewName.toLowerCase())
-					|| page.locator("body").textContent().contains(viewName));
-				takeScreenshot("workflow-" + viewName.toLowerCase());
-				logger.info("✅ Workflow step completed for {} view", viewName);
-			}
-		} catch (final Exception e) {
-			logger.warn("⚠️ Workflow failed in {} view: {}", viewName, e.getMessage());
-			takeScreenshot("workflow-error-" + viewName.toLowerCase());
-		}
-	}
-
-	@BeforeEach
-	void setUp() {
-		baseUrl = "http://localhost:" + port;
-		// Initialize Playwright
-		playwright = Playwright.create();
-		// Launch browser (use Chromium by default, can be changed to firefox() or
-		// webkit())
-		browser = playwright.chromium()
-			.launch(new BrowserType.LaunchOptions().setHeadless(false) // Set to false for
-																		// debugging
-				.setSlowMo(100)); // Add small delay between actions for visibility
-		// Create context with desktop viewport
-		context = browser
-			.newContext(new Browser.NewContextOptions().setViewportSize(1200, 800));
-		// Create page
-		page = context.newPage();
-		// Enable console logging page.onConsoleMessage(msg -> logger.info("Browser
-		// console: {}", msg.text()));
-		logger.info("Playwright test setup completed. Application URL: {}", baseUrl);
-	}
-
-	private void takeScreenshot(final String name) {
-
-		try {
-			final String screenshotPath =
-				"target/screenshots/" + name + "-" + System.currentTimeMillis() + ".png";
-			page.screenshot(
-				new Page.ScreenshotOptions().setPath(Paths.get(screenshotPath)));
-			logger.info("📸 Screenshot saved: {}", screenshotPath);
-		} catch (final Exception e) {
-			logger.warn("⚠️ Failed to take screenshot '{}': {}", name, e.getMessage());
-		}
-	}
-
-	@AfterEach
-	void tearDown() {
-
-		if (page != null) {
-			page.close();
-		}
-
-		if (context != null) {
-			context.close();
-		}
-
-		if (browser != null) {
-			browser.close();
-		}
-
-		if (playwright != null) {
-			playwright.close();
-		}
-		logger.info("Playwright test cleanup completed");
-	}
+	static final Logger logger = LoggerFactory.getLogger(CUIAutomationTest.class);
 
 	/**
 	 * Tests advanced grid interactions including sorting and filtering
@@ -348,7 +106,7 @@ public class PlaywrightUIAutomationTest {
 			if (sorters.count() > 0) {
 				logger.info(" Testing grid sorting in {} view...", viewClass);
 				sorters.first().click();
-				page.waitForTimeout(1000);
+				wait_1000();
 				takeScreenshot("grid-sorted-" + viewClass.getSimpleName());
 			}
 			// Test column filtering if available
@@ -357,7 +115,7 @@ public class PlaywrightUIAutomationTest {
 			if (filters.count() > 0) {
 				logger.info("Testing grid filtering in {} view...", viewClass);
 				filters.first().fill("test");
-				page.waitForTimeout(1000);
+				wait_1000();
 				takeScreenshot("grid-filtered-" + viewClass.getSimpleName());
 				// Clear filter
 				filters.first().fill("");
@@ -393,16 +151,15 @@ public class PlaywrightUIAutomationTest {
 	@Test
 	void testCompleteApplicationFlow() {
 		logger.info("🧪 Testing complete application workflow...");
-		// Navigate to application
-		page.navigate(baseUrl);
-		page.waitForSelector("vaadin-app-layout",
-			new Page.WaitForSelectorOptions().setTimeout(10000));
-		takeScreenshot("workflow-start");
+		loginToApplication();
 		// Test workflow across different views
-		performWorkflowInView("Projects");
-		performWorkflowInView("Meetings");
-		performWorkflowInView("Decisions");
-		takeScreenshot("workflow-completed");
+		final Class<?>[] views = {
+			CProjectsView.class, CMeetingsView.class, CActivitiesView.class,
+			CDecisionsView.class };
+
+		for (final Class<?> view : views) {
+			performWorkflowInView(view);
+		}
 		logger.info("✅ Complete application workflow test completed");
 	}
 
@@ -419,7 +176,7 @@ public class PlaywrightUIAutomationTest {
 
 			if (createButtons.count() > 0) {
 				createButtons.first().click();
-				page.waitForTimeout(1000);
+				wait_1000();
 				takeScreenshot("create-form-opened-" + viewName.toLowerCase());
 				// Fill form fields
 				final var textFields =
@@ -505,7 +262,7 @@ public class PlaywrightUIAutomationTest {
 
 			if (deleteButtons.count() > 0) {
 				deleteButtons.first().click();
-				page.waitForTimeout(1000);
+				wait_1000();
 				takeScreenshot("delete-confirmation-" + viewName.toLowerCase());
 				// Look for confirmation dialog
 				final var confirmButtons = page.locator(
@@ -535,10 +292,8 @@ public class PlaywrightUIAutomationTest {
 	@Test
 	void testFormInteractions() {
 		logger.info("🧪 Testing form interactions...");
-		// Navigate to application
-		page.navigate(baseUrl);
-		page.waitForSelector("vaadin-app-layout",
-			new Page.WaitForSelectorOptions().setTimeout(10000));
+		// Navigate to application page.navigate(baseUrl);
+		loginToApplication();
 		// Try to find and interact with forms in different views
 		testFormInView("Projects", "/projects");
 		testFormInView("Meetings", "/meetings");
@@ -550,46 +305,32 @@ public class PlaywrightUIAutomationTest {
 
 		try {
 			logger.info("Testing form interactions in {} view...", viewName);
-			// Navigate to view
 			page.navigate(baseUrl + path);
-			page.waitForTimeout(2000);
-			// Look for "New" or "Add" buttons
-			final var newButtons = page
-				.locator("vaadin-button:has-text('New'), vaadin-button:has-text('Add')");
+			wait_1000();
 
-			if (newButtons.count() > 0) {
-				newButtons.first().click();
-				page.waitForTimeout(1000);
-				// Look for form fields
-				final var textFields = page
-					.locator("vaadin-text-field, vaadin-text-area, input[type='text']");
+			if (!clickIfExists(
+				"vaadin-button:has-text('New'), vaadin-button:has-text('Add')")) {
+				logger.info("No 'New' or 'Add' button found in {} view", viewName);
+				return;
+			}
+			wait_1000();
 
-				if (textFields.count() > 0) {
-					// Fill first text field
-					textFields.first().fill("Test " + viewName + " Entry");
-					// Look for date fields
-					final var dateFields =
-						page.locator("vaadin-date-picker, input[type='date']");
+			if (!fillFirstTextField("Test " + viewName + " Entry")) {
+				logger.info("No text field found in {} view", viewName);
+				return;
+			}
+			fillFirstDateField("2024-01-15");
+			takeScreenshot("form-filled-" + viewName.toLowerCase());
 
-					if (dateFields.count() > 0) {
-						dateFields.first().fill("2024-01-15");
-					}
-					takeScreenshot("form-filled-" + viewName.toLowerCase());
-					// Look for save button
-					final var saveButtons = page.locator(
-						"vaadin-button:has-text('Save'), vaadin-button:has-text('Create')");
-
-					if (saveButtons.count() > 0) {
-						saveButtons.first().click();
-						page.waitForTimeout(1000);
-						takeScreenshot("form-saved-" + viewName.toLowerCase());
-					}
-				}
+			if (clickIfExists(
+				"vaadin-button:has-text('Save'), vaadin-button:has-text('Create')")) {
+				wait_1000();
+				takeScreenshot("form-saved-" + viewName.toLowerCase());
 			}
 			logger.info("✅ Form interaction test completed for {} view", viewName);
 		} catch (final Exception e) {
 			logger.warn("⚠️ Form interaction failed in {} view: {}", viewName,
-				e.getMessage());
+				e.getMessage(), e);
 			takeScreenshot("form-error-" + viewName.toLowerCase());
 		}
 	}
@@ -607,14 +348,14 @@ public class PlaywrightUIAutomationTest {
 
 			if (createButtons.count() > 0) {
 				createButtons.first().click();
-				page.waitForTimeout(1000);
+				wait_1000();
 				// Try to save without filling required fields
 				final var saveButtons = page.locator(
 					"vaadin-button:has-text('Save'), vaadin-button:has-text('Create')");
 
 				if (saveButtons.count() > 0) {
 					saveButtons.first().click();
-					page.waitForTimeout(1000);
+					wait_1000();
 					// Look for validation messages
 					final var errorMessages = page.locator(
 						"vaadin-text-field[invalid], .error-message, [role='alert']");
@@ -685,7 +426,7 @@ public class PlaywrightUIAutomationTest {
 
 			// Navigate to view
 			if (navigateToViewByText(viewName)) {
-				page.waitForTimeout(1000);
+				wait_1000();
 				// Look for grids
 				final var grids = page.locator("vaadin-grid, table");
 
@@ -742,8 +483,7 @@ public class PlaywrightUIAutomationTest {
 		// Look for logout option
 		if (performLogout()) {
 			// Verify we're back at login page
-			page.waitForSelector("vaadin-login-overlay",
-				new Page.WaitForSelectorOptions().setTimeout(10000));
+			wait_loginscreen();
 			takeScreenshot("after-logout");
 			assertTrue(page.locator("vaadin-login-overlay").isVisible());
 			logger.info("✅ Logout functionality test completed successfully");
@@ -776,7 +516,7 @@ public class PlaywrightUIAutomationTest {
 				if (page.locator(viewSelectors[i]).isVisible()) {
 					page.locator(viewSelectors[i]).click();
 					// Wait for view to load
-					page.waitForTimeout(1000);
+					wait_1000();
 					// Take screenshot
 					takeScreenshot(viewNames[i].toLowerCase() + "-view");
 					logger.info("✅ Successfully navigated to {} view", viewNames[i]);
@@ -823,7 +563,7 @@ public class PlaywrightUIAutomationTest {
 					takeScreenshot("read-data-" + viewName.toLowerCase());
 					// Click on first row to view details
 					gridCells.first().click();
-					page.waitForTimeout(1000);
+					wait_1000();
 					takeScreenshot("read-details-" + viewName.toLowerCase());
 					logger.info("✅ READ operation completed for {} view", viewName);
 				}
@@ -853,7 +593,7 @@ public class PlaywrightUIAutomationTest {
 
 			if (editButtons.count() > 0) {
 				editButtons.first().click();
-				page.waitForTimeout(1000);
+				wait_1000();
 				takeScreenshot("update-form-opened-" + viewName.toLowerCase());
 				// Modify form fields
 				final var textFields = page.locator("vaadin-text-field");
@@ -867,7 +607,7 @@ public class PlaywrightUIAutomationTest {
 
 					if (saveButtons.count() > 0) {
 						saveButtons.first().click();
-						page.waitForTimeout(1500);
+						wait_1000();
 						takeScreenshot("update-saved-" + viewName.toLowerCase());
 						logger.info("✅ UPDATE operation completed for {} view", viewName);
 					}
