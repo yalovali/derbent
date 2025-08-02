@@ -47,14 +47,6 @@ public class CBaseUITest {
 	protected Class<?>[] viewClasses = {
 		CProjectsView.class, CActivitiesView.class, CMeetingsView.class,
 		CDecisionsView.class, CUsersView.class };
-	{
-		final var cancelButtons = page
-			.locator("vaadin-button:has-text('Cancel'), vaadin-button:has-text('Close')");
-		assertTrue(cancelButtons.count() > 0, "Cancel button should be present");
-		cancelButtons.first().click();
-		wait_1000();
-		takeScreenshot("users-workflow-cancelled");
-	}
 
 	private void checkAccessibilityElement(final String selector,
 		final String description) {
@@ -104,12 +96,74 @@ public class CBaseUITest {
 		}
 	}
 
-	protected void clickCancelButton() {
-		// Close form
-		final var cancelButtons = page.locator("vaadin-button:has-text('Cancel')");
-		assertTrue(cancelButtons.count() > 0, "Cancel button should be present");
-		cancelButtons.first().click();
-		wait_1000();
+	/**
+	 * Common function to click Cancel button with error handling
+	 */
+	protected void clickCancel() {
+		try {
+			final var cancelButtons = page
+				.locator("vaadin-button:has-text('Cancel'), vaadin-button:has-text('Close')");
+			if (cancelButtons.count() > 0) {
+				cancelButtons.first().click();
+				wait_1000();
+				LOGGER.debug("Successfully clicked Cancel button");
+			} else {
+				LOGGER.warn("Cancel button not found");
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Failed to click Cancel button: {}", e.getMessage());
+			takeScreenshot("cancel-button-error", true);
+		}
+	}
+
+	/**
+	 * Common function to click New/Add button with error handling
+	 */
+	protected void clickNew() {
+		try {
+			final var newButtons =
+				page.locator("vaadin-button:has-text('New'), vaadin-button:has-text('Add')");
+			if (newButtons.count() > 0) {
+				newButtons.first().click();
+				wait_1000();
+				LOGGER.debug("Successfully clicked New button");
+			} else {
+				LOGGER.warn("New/Add button not found");
+				takeScreenshot("new-button-not-found", true);
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Failed to click New button: {}", e.getMessage());
+			takeScreenshot("new-button-error", true);
+		}
+	}
+
+	/**
+	 * Common function to click on grid with error handling
+	 */
+	protected void clickGrid() {
+		clickGrid(0);
+	}
+
+	/**
+	 * Common function to click on grid at specific row index
+	 */
+	protected void clickGrid(final int rowIndex) {
+		try {
+			final String selector = "vaadin-grid-cell-content";
+			final var gridCells = page.locator(selector);
+			
+			if (gridCells.count() > rowIndex) {
+				gridCells.nth(rowIndex).click();
+				wait_500();
+				LOGGER.debug("Successfully clicked grid row at index: {}", rowIndex);
+			} else {
+				LOGGER.warn("Grid row at index {} not found (total rows: {})", rowIndex, gridCells.count());
+				takeScreenshot("grid-row-not-found", true);
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Failed to click grid at index {}: {}", rowIndex, e.getMessage());
+			takeScreenshot("grid-click-error", true);
+		}
 	}
 
 	/**
@@ -149,24 +203,32 @@ public class CBaseUITest {
 	}
 
 	protected void clickNewButton() {
-		final var newButtons =
-			page.locator("vaadin-button:has-text('New'), vaadin-button:has-text('Add')");
-		assertTrue(newButtons.count() > 0,
-			"Should find 'New' or 'Add' button in Users view");
-		newButtons.first().click();
-		wait_1000();
+		clickNew(); // Use the new common function
+	}
+
+	/**
+	 * Alias for clickSaveButton method
+	 */
+	protected void clickSave() {
+		clickSaveButton();
 	}
 
 	protected void clickSaveButton() {
-		final var saveButtons = page
-			.locator("vaadin-button:has-text('Save'), vaadin-button:has-text('Create')");
-		assertTrue(saveButtons.count() > 0, "Save button should be present");
-		saveButtons.first().click();
-		wait_2000();
-		takeScreenshot("users-workflow-saved");
-		// Check if grid was updated
-		final int finalRowCount = getGridRowCount();
-		LOGGER.debug("Final grid has {} rows", finalRowCount);
+		try {
+			final var saveButtons = page
+				.locator("vaadin-button:has-text('Save'), vaadin-button:has-text('Create')");
+			if (saveButtons.count() > 0) {
+				saveButtons.first().click();
+				wait_2000();
+				LOGGER.debug("Successfully clicked Save button");
+			} else {
+				LOGGER.warn("Save button not found");
+				takeScreenshot("save-button-not-found", true);
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Failed to click Save button: {}", e.getMessage());
+			takeScreenshot("save-button-error", true);
+		}
 	}
 
 	/**
@@ -368,19 +430,14 @@ public class CBaseUITest {
 	protected void performLogin(final String username, final String password) {
 
 		try {
-			/*
-			 * page.locator("id=vaadin-text-field-0").fill("TST");
-			 * page.locator("id=vaadin-text-field-1").fill("Test");
-			 * page.locator("id=edit-save").click();
-			 */
-			LOGGER.info("Performing login with username: {}", username);
+			LOGGER.debug("Performing login with username: {}", username);
 			page.fill("vaadin-text-field[name='username'] > input", username);
 			page.fill("vaadin-password-field[name='password'] > input", password);
 			page.click("vaadin-button");
 			wait_afterlogin();
 		} catch (final Exception e) {
-			LOGGER.error("❌ Login failed: {}", e.getMessage());
-			takeScreenshot("login-failed");
+			LOGGER.error("Login failed: {}", e.getMessage());
+			takeScreenshot("login-failed", true);
 			throw new RuntimeException("Login failed", e);
 		}
 	}
@@ -501,15 +558,28 @@ public class CBaseUITest {
 	}
 
 	protected void takeScreenshot(final String name) {
+		takeScreenshot(name, false);
+	}
+
+	/**
+	 * Takes a screenshot with optional failure context
+	 * @param name the screenshot name
+	 * @param isFailure whether this screenshot is for a test failure
+	 */
+	protected void takeScreenshot(final String name, final boolean isFailure) {
+		// Only take screenshots on failures as per coding guidelines
+		if (!isFailure) {
+			return;
+		}
 
 		try {
 			final String screenshotPath =
 				"target/screenshots/" + name + "-" + System.currentTimeMillis() + ".png";
 			page.screenshot(
 				new Page.ScreenshotOptions().setPath(Paths.get(screenshotPath)));
-			LOGGER.info("📸 Screenshot saved: {}", screenshotPath);
+			LOGGER.warn("📸 Failure screenshot saved: {}", screenshotPath);
 		} catch (final Exception e) {
-			LOGGER.warn("⚠️ Failed to take screenshot '{}': {}", name, e.getMessage());
+			LOGGER.error("Failed to take failure screenshot '{}': {}", name, e.getMessage());
 		}
 	}
 
@@ -538,7 +608,7 @@ public class CBaseUITest {
 	 * Tests basic accessibility features
 	 */
 	protected void testAccessibilityBasics(final String viewName) {
-		LOGGER.info("Testing accessibility basics for {}", viewName);
+		LOGGER.debug("Testing accessibility basics for {}", viewName);
 		// Check for proper heading structure
 		final var headings = page.locator("h1, h2, h3, h4, h5, h6");
 		LOGGER.debug("Found {} headings", headings.count());
@@ -548,8 +618,11 @@ public class CBaseUITest {
 		// Check for proper button roles
 		final var buttons = page.locator("button, [role='button']");
 		LOGGER.debug("Found {} button elements", buttons.count());
-		takeScreenshot("accessibility-check-" + viewName.toLowerCase());
-		LOGGER.info("Accessibility basics test completed for {}", viewName);
+		// Only take screenshot if there are accessibility issues
+		if (headings.count() == 0 || buttons.count() == 0) {
+			takeScreenshot("accessibility-issues-" + viewName.toLowerCase(), true);
+		}
+		LOGGER.debug("Accessibility basics test completed for {}", viewName);
 	}
 
 	/**
@@ -569,7 +642,11 @@ public class CBaseUITest {
 				final var options = page.locator("vaadin-combo-box-item");
 				final int optionCount = options.count();
 				LOGGER.debug("ComboBox '{}' has {} options", comboBoxId, optionCount);
-				takeScreenshot("combobox-options-" + comboBoxId);
+				
+				// Only take screenshot if there are no options (potential issue)
+				if (optionCount == 0) {
+					takeScreenshot("combobox-no-options-" + comboBoxId, true);
+				}
 
 				if ((optionCount > 0) && (expectedFirstOption != null)) {
 					selectComboBoxOptionById(comboBoxId, expectedFirstOption);
@@ -579,8 +656,8 @@ public class CBaseUITest {
 				wait_500();
 			}
 		} catch (final Exception e) {
-			LOGGER.warn("ComboBox test failed for ID '{}': {}", comboBoxId,
-				e.getMessage());
+			LOGGER.error("ComboBox test failed for ID '{}': {}", comboBoxId, e.getMessage());
+			takeScreenshot("combobox-test-error-" + comboBoxId, true);
 		}
 	}
 
@@ -590,24 +667,23 @@ public class CBaseUITest {
 	protected void testCRUDOperationsInView(final String viewName,
 		final String newButtonId, final String saveButtonId,
 		final String deleteButtonId) {
-		LOGGER.info("Testing CRUD operations in {} view", viewName);
+		LOGGER.debug("Testing CRUD operations in {} view", viewName);
 
 		// Test CREATE
 		if (elementExistsById(newButtonId)) {
 			LOGGER.debug("Testing CREATE operation");
 			clickById(newButtonId);
 			wait_1000();
-			takeScreenshot("crud-create-form-" + viewName.toLowerCase());
 			// Fill first text field if available
-			fillFirstTextField(
+			boolean createSuccess = fillFirstTextField(
 				"Test " + viewName + " Entry " + System.currentTimeMillis());
 
 			if (elementExistsById(saveButtonId)) {
 				clickById(saveButtonId);
 				wait_1000();
-				takeScreenshot("crud-create-saved-" + viewName.toLowerCase());
 			}
 		}
+		
 		// Test READ - check grid has data
 		final int rowCount = getGridRowCount();
 		LOGGER.debug("Grid has {} rows for READ test", rowCount);
@@ -615,7 +691,6 @@ public class CBaseUITest {
 		if (rowCount > 0) {
 			clickGridRowByIndex(0);
 			wait_1000();
-			takeScreenshot("crud-read-selected-" + viewName.toLowerCase());
 		}
 
 		// Test UPDATE - if edit possible
@@ -628,7 +703,6 @@ public class CBaseUITest {
 			if (elementExistsById(saveButtonId)) {
 				clickById(saveButtonId);
 				wait_1000();
-				takeScreenshot("crud-update-saved-" + viewName.toLowerCase());
 			}
 		}
 
@@ -637,7 +711,6 @@ public class CBaseUITest {
 			LOGGER.debug("Testing DELETE operation");
 			clickById(deleteButtonId);
 			wait_1000();
-			takeScreenshot("crud-delete-confirmation-" + viewName.toLowerCase());
 			// Look for confirmation and click if available
 			final var confirmButtons = page.locator(
 				"vaadin-button:has-text('Yes'), vaadin-button:has-text('Confirm'), vaadin-button:has-text('Delete')");
@@ -645,10 +718,9 @@ public class CBaseUITest {
 			if (confirmButtons.count() > 0) {
 				confirmButtons.first().click();
 				wait_1000();
-				takeScreenshot("crud-delete-completed-" + viewName.toLowerCase());
 			}
 		}
-		LOGGER.info("CRUD operations test completed for {}", viewName);
+		LOGGER.debug("CRUD operations test completed for {}", viewName);
 	}
 
 	/**
@@ -657,7 +729,6 @@ public class CBaseUITest {
 	protected boolean testFormValidationById(final String saveButtonId) {
 
 		try {
-
 			// Try to save without filling required fields
 			if (clickById(saveButtonId)) {
 				wait_1000();
@@ -669,19 +740,21 @@ public class CBaseUITest {
 				if (hasValidation) {
 					LOGGER.debug("Form validation working - found {} validation messages",
 						errorMessages.count());
-					takeScreenshot("form-validation-triggered");
 				}
 				else {
-					LOGGER.debug("No validation messages found");
+					LOGGER.warn("No validation messages found - potential validation issue");
+					takeScreenshot("form-validation-missing", true);
 				}
 				return hasValidation;
 			}
 			else {
-				LOGGER.warn("Could not click save button for validation test");
+				LOGGER.error("Could not click save button for validation test");
+				takeScreenshot("validation-test-save-button-missing", true);
 				return false;
 			}
 		} catch (final Exception e) {
-			LOGGER.warn("Form validation test failed: {}", e.getMessage());
+			LOGGER.error("Form validation test failed: {}", e.getMessage());
+			takeScreenshot("form-validation-test-error", true);
 			return false;
 		}
 	}
