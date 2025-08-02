@@ -10,12 +10,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.vaadin.flow.server.streams.UploadMetadata;
 
+import tech.derbent.abstracts.domains.CTestBase;
 import tech.derbent.users.domain.CUser;
 
 /**
  * Test class to verify the modern Upload API integration works correctly.
  */
-public class CUserProfileDialogUploadTest {
+public class CUserProfileDialogUploadTest extends CTestBase {
 
 	@Test
 	public void testProfileDialogCreation() {
@@ -48,5 +49,11 @@ public class CUserProfileDialogUploadTest {
 		assertEquals("image/jpeg", metadata.contentType());
 		assertEquals(1024, metadata.contentLength());
 		assertArrayEquals(testData, receivedData[0]);
+	}
+
+	@Override
+	protected void setupForTest() {
+		// TODO Auto-generated method stub
+		
 	}
 }

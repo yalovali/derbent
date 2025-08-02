@@ -18,7 +18,8 @@ import tech.derbent.projects.domain.CProject;
  * LazyInitializationException.
  */
 @NoRepositoryBean
-public interface CEntityOfProjectRepository<EntityClass extends CEntityOfProject>
+public interface CEntityOfProjectRepository<
+	EntityClass extends CEntityOfProject<EntityClass>>
 	extends CAbstractNamedRepository<EntityClass> {
 
 	/**

@@ -9,10 +9,12 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
 
+import tech.derbent.abstracts.domains.CTestBase;
+
 /**
  * Test class for CButton to verify functionality and inheritance.
  */
-class CButtonTest {
+class CButtonTest extends CTestBase {
 
 	@Test
 	void testBasicConstructor() {
@@ -22,11 +24,21 @@ class CButtonTest {
 	}
 
 	@Test
+	void testCreateError() {
+		final CButton button = CButton.createError("Error Button");
+		assertNotNull(button);
+		assertEquals("Error Button", button.getText());
+		assertTrue(
+			button.getThemeNames().contains(ButtonVariant.LUMO_ERROR.getVariantName()));
+	}
+
+	@Test
 	void testCreatePrimary() {
 		final CButton button = CButton.createPrimary("Primary Button");
 		assertNotNull(button);
 		assertEquals("Primary Button", button.getText());
-		assertTrue(button.getThemeNames().contains(ButtonVariant.LUMO_PRIMARY.getVariantName()));
+		assertTrue(
+			button.getThemeNames().contains(ButtonVariant.LUMO_PRIMARY.getVariantName()));
 	}
 
 	@Test
@@ -34,15 +46,8 @@ class CButtonTest {
 		final CButton button = CButton.createTertiary("Tertiary Button");
 		assertNotNull(button);
 		assertEquals("Tertiary Button", button.getText());
-		assertTrue(button.getThemeNames().contains(ButtonVariant.LUMO_TERTIARY.getVariantName()));
-	}
-
-	@Test
-	void testCreateError() {
-		final CButton button = CButton.createError("Error Button");
-		assertNotNull(button);
-		assertEquals("Error Button", button.getText());
-		assertTrue(button.getThemeNames().contains(ButtonVariant.LUMO_ERROR.getVariantName()));
+		assertTrue(button.getThemeNames()
+			.contains(ButtonVariant.LUMO_TERTIARY.getVariantName()));
 	}
 
 	@Test
@@ -51,6 +56,13 @@ class CButtonTest {
 		assertNotNull(button);
 		assertEquals("Save", button.getText());
 		assertNotNull(button.getIcon());
-		assertTrue(button.getThemeNames().contains(ButtonVariant.LUMO_PRIMARY.getVariantName()));
+		assertTrue(
+			button.getThemeNames().contains(ButtonVariant.LUMO_PRIMARY.getVariantName()));
+	}
+
+	@Override
+	protected void setupForTest() {
+		// TODO Auto-generated method stub
+		
 	}
 }

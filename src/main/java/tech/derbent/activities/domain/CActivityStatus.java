@@ -18,7 +18,7 @@ import tech.derbent.projects.domain.CProject;
 @Entity
 @Table (name = "cactivitystatus")
 @AttributeOverride (name = "id", column = @Column (name = "cactivitystatus_id"))
-public class CActivityStatus extends CStatus {
+public class CActivityStatus extends CStatus<CActivityStatus> {
 
 	@Column (name = "is_final", nullable = false)
 	@MetaData (
@@ -29,21 +29,13 @@ public class CActivityStatus extends CStatus {
 	)
 	private boolean isFinal = false;
 
-	/**
-	 * Default constructor for JPA.
-	 */
-	public CActivityStatus() {
-		super();
-		// logger.debug("CActivityStatus() - Creating new activity status instance");
-	}
-
 	public CActivityStatus(final String name, final CProject project) {
-		super(name, project);
+		super(CActivityStatus.class, name, project);
 	}
 
 	public CActivityStatus(final String name, final CProject project,
 		final String description, final String color, final boolean isFinal) {
-		super(name, project);
+		super(CActivityStatus.class, name, project);
 		setDescription(description);
 		setColor(color);
 		this.isFinal = isFinal;

@@ -26,7 +26,7 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 
 	@Override
 	@Transactional
-	public void createEntity(final String name) {
+	public CProject createEntity(final String name) {
 		LOGGER.info("Creating project with name: {}", name);
 		// Use parent validation and creation logic
 		super.createEntity(name);
@@ -36,11 +36,7 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 		// Publish project list change event
 		eventPublisher.publishEvent(new ProjectListChangeEvent(this, entity,
 			ProjectListChangeEvent.ChangeType.CREATED));
-	}
-
-	@Override
-	protected CProject createNewEntityInstance() {
-		return new CProject();
+		return entity;
 	}
 
 	@Override
@@ -57,6 +53,11 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 	public List<CProject> findAll() {
 		LOGGER.info("Fetching all projects");
 		return repository.findAll();
+	}
+
+	@Override
+	protected Class<CProject> getEntityClass() { // TODO Auto-generated method stub
+		return CProject.class;
 	}
 
 	@PreAuthorize ("permitAll()")

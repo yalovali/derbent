@@ -11,7 +11,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.views.CAbstractMDPage;
+import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
 import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.abstracts.views.CButton;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
@@ -27,7 +27,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Company Master Detail")
 @Menu (order = 3.4, icon = "vaadin:building", title = "Settings.Companies")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CCompanyView extends CAbstractMDPage<CCompany> {
+public class CCompanyView extends CAbstractNamedEntityPage<CCompany> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -66,7 +66,8 @@ public class CCompanyView extends CAbstractMDPage<CCompany> {
 	 * @param entityService the CCompanyService instance
 	 */
 	@Autowired
-	public CCompanyView(final CCompanyService entityService, final CSessionService sessionService) {
+	public CCompanyView(final CCompanyService entityService,
+		final CSessionService sessionService) {
 		super(CCompany.class, entityService, sessionService);
 		LOGGER.info("CCompanyView constructor called with entityService: {}",
 			entityService.getClass().getSimpleName());
@@ -194,14 +195,6 @@ public class CCompanyView extends CAbstractMDPage<CCompany> {
 		}
 		final String urlRegex = "^(https?|ftp)://[^\\s/$.?#].[^\\s]*$";
 		return url.matches(urlRegex);
-	}
-
-	@Override
-	protected CCompany newEntity() {
-		LOGGER.debug("Creating new CCompany entity");
-		final CCompany company = new CCompany();
-		company.setEnabled(true); // Default to enabled
-		return company;
 	}
 
 	@Override

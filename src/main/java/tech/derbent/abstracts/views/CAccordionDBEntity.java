@@ -9,7 +9,7 @@ import tech.derbent.abstracts.annotations.CEntityFormBuilder.ComboBoxDataProvide
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.services.CAbstractService;
 
-public abstract class CAccordionDBEntity<EntityClass extends CEntityDB>
+public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityClass>>
 	extends CAccordion {
 
 	private static final long serialVersionUID = 1L;

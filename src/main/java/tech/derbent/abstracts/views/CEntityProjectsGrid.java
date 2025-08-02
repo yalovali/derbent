@@ -14,7 +14,7 @@ import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 
-public class CEntityProjectsGrid<T extends CEntityDB> extends VerticalLayout {
+public class CEntityProjectsGrid<T extends CEntityDB<T>> extends VerticalLayout {
 
 	private static final long serialVersionUID = 1L;
 
@@ -37,7 +37,7 @@ public class CEntityProjectsGrid<T extends CEntityDB> extends VerticalLayout {
 		add(grid);
 		// ComboBox to select a project
 		projectComboBox = new ComboBox<>("Select Project");
-		// Following coding guidelines: All selective ComboBoxes must be selection only 
+		// Following coding guidelines: All selective ComboBoxes must be selection only
 		// (user must not be able to type arbitrary text)
 		projectComboBox.setAllowCustomValue(false);
 		projectComboBox.setItemLabelGenerator(CProject::getName);

@@ -37,35 +37,6 @@ public class COrderService extends CEntityOfProjectService<COrder> {
 	}
 
 	/**
-	 * Creates a new order entity with name and description.
-	 * @param name        the name of the order
-	 * @param description the description of the order
-	 */
-	@Transactional
-	public void createEntity(final String name, final String description) {
-		LOGGER.info("createEntity called with name: {} and description: {}", name,
-			description);
-
-		// Standard test failure logic for error handler testing
-		if ("fail".equals(name)) {
-			LOGGER.warn("Test failure requested for name: {}", name);
-			throw new RuntimeException("This is for testing the error handler");
-		}
-		// Validate name using parent validation
-		validateEntityName(name);
-		final COrder entity = new COrder();
-		entity.setName(name);
-		entity.setDescription(description);
-		repository.saveAndFlush(entity);
-		LOGGER.info("Order created successfully with name: {}", name);
-	}
-
-	@Override
-	protected COrder createNewEntityInstance() {
-		return new COrder();
-	}
-
-	/**
 	 * Finds an order by ID with eagerly loaded relationships.
 	 * @param id the order ID
 	 * @return optional COrder with loaded relationships
@@ -144,4 +115,7 @@ public class COrderService extends CEntityOfProjectService<COrder> {
 		entity.ifPresent(this::initializeLazyFields);
 		return entity;
 	}
+
+	@Override
+	protected Class<COrder> getEntityClass() { return COrder.class; }
 }

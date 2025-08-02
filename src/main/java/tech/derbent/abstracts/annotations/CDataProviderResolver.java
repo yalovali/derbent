@@ -127,7 +127,7 @@ public final class CDataProviderResolver {
 	 * @param entityType  the entity class for logging purposes
 	 * @return list of entities from the method call
 	 */
-	private <T extends CEntityDB> List<T> callDataMethod(final Object serviceBean,
+	private <T extends CEntityDB<T>> List<T> callDataMethod(final Object serviceBean,
 		final String methodName, final Class<T> entityType) {
 
 		if (serviceBean == null) {
@@ -248,7 +248,7 @@ public final class CDataProviderResolver {
 	 * @return list of entities for the ComboBox, never null but may be empty
 	 * @throws IllegalArgumentException if parameters are null
 	 */
-	public <T extends CEntityDB> List<T> resolveData(final Class<T> entityType,
+	public <T extends CEntityDB<T>> List<T> resolveData(final Class<T> entityType,
 		final MetaData metaData) {
 
 		// Enhanced null pointer checking with detailed logging
@@ -313,7 +313,7 @@ public final class CDataProviderResolver {
 	 * @param methodName the method name to call on the bean
 	 * @return list of entities from automatically resolved service
 	 */
-	private <T extends CEntityDB> List<T>
+	private <T extends CEntityDB<T>> List<T>
 		resolveDataAutomatically(final Class<T> entityType, final String methodName) {
 		LOGGER.debug(
 			"Attempting automatic resolution for entity type: {} using method: {}",
@@ -352,8 +352,8 @@ public final class CDataProviderResolver {
 	 * @param methodName the method name to call on the bean
 	 * @return list of entities from the specified bean
 	 */
-	private <T extends CEntityDB> List<T> resolveDataFromBean(final Class<T> entityType,
-		final String beanName, final String methodName) {
+	private <T extends CEntityDB<T>> List<T> resolveDataFromBean(
+		final Class<T> entityType, final String beanName, final String methodName) {
 		LOGGER.debug(
 			"Resolving data from bean '{}' using method '{}' for entity type: {}",
 			beanName, methodName, entityType.getSimpleName());
@@ -394,8 +394,8 @@ public final class CDataProviderResolver {
 	 * @param methodName   the method name to call on the bean
 	 * @return list of entities from the specified bean type
 	 */
-	private <T extends CEntityDB> List<T> resolveDataFromClass(final Class<T> entityType,
-		final Class<?> serviceClass, final String methodName) {
+	private <T extends CEntityDB<T>> List<T> resolveDataFromClass(
+		final Class<T> entityType, final Class<?> serviceClass, final String methodName) {
 		LOGGER.debug(
 			"Resolving data from bean class '{}' using method '{}' for entity type: {}",
 			serviceClass.getSimpleName(), methodName, entityType.getSimpleName());
@@ -438,8 +438,8 @@ public final class CDataProviderResolver {
 	 * @return list of entities or null if method not found/failed
 	 */
 	@SuppressWarnings ("unchecked")
-	private <T extends CEntityDB> List<T> tryMethodWithoutParams(final Object serviceBean,
-		final String methodName, final Class<T> entityType) {
+	private <T extends CEntityDB<T>> List<T> tryMethodWithoutParams(
+		final Object serviceBean, final String methodName, final Class<T> entityType) {
 		final String cacheKey = serviceBean.getClass().getName() + ":" + methodName
 			+ ":noparams:" + entityType.getSimpleName();
 
@@ -476,8 +476,8 @@ public final class CDataProviderResolver {
 	 * @return list of entities or null if method not found/failed
 	 */
 	@SuppressWarnings ("unchecked")
-	private <T extends CEntityDB> List<T> tryMethodWithPageable(final Object serviceBean,
-		final String methodName, final Class<T> entityType) {
+	private <T extends CEntityDB<T>> List<T> tryMethodWithPageable(
+		final Object serviceBean, final String methodName, final Class<T> entityType) {
 		final String cacheKey = serviceBean.getClass().getName() + ":" + methodName
 			+ ":pageable:" + entityType.getSimpleName();
 

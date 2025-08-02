@@ -26,26 +26,19 @@ public class CActivityService extends CEntityOfProjectService<CActivity> {
 
 	private final CActivityRepository activityRepository;
 
-	CActivityService(final CActivityRepository repository, final Clock clock) {
+	public CActivityService(final CActivityRepository repository, final Clock clock) {
 		super(repository, clock);
 		this.activityRepository = repository;
-	}
-	// Now using the inherited createEntity(String name) method from
-	// CEntityOfProjectService which includes createEntityForProject method.
-
-	@Override
-	protected CActivity createNewEntityInstance() {
-		return new CActivity();
 	}
 
 	/**
 	 * Helper method to create a placeholder CActivityStatus for activities without a
 	 * status.
+	 * @param project
 	 * @return a CActivityStatus instance representing "No Status"
 	 */
-	private CActivityStatus createNoStatusInstance() {
-		final CActivityStatus noStatus = new CActivityStatus();
-		noStatus.setName("No Status");
+	private CActivityStatus createNoStatusInstance(final CProject project) {
+		final CActivityStatus noStatus = new CActivityStatus("No Status", project);
 		noStatus.setDescription("Activities without an assigned status");
 		return noStatus;
 	}
@@ -54,9 +47,8 @@ public class CActivityService extends CEntityOfProjectService<CActivity> {
 	 * Helper method to create a placeholder CActivityType for activities without a type.
 	 * @return a CActivityType instance representing "No Type"
 	 */
-	private CActivityType createNoTypeInstance() {
-		final CActivityType noType = new CActivityType();
-		noType.setName("No Type");
+	private CActivityType createNoTypeInstance(final CProject project) {
+		final CActivityType noType = new CActivityType("No Type", project);
 		noType.setDescription("Activities without an assigned type");
 		return noType;
 	}
@@ -92,7 +84,8 @@ public class CActivityService extends CEntityOfProjectService<CActivity> {
 		// Group by activity status, handling null statuses
 		return activities.stream()
 			.collect(Collectors.groupingBy(activity -> activity.getStatus() != null
-				? activity.getStatus() : createNoStatusInstance(), Collectors.toList()));
+				? activity.getStatus() : createNoStatusInstance(project),
+				Collectors.toList()));
 	}
 
 	/**
@@ -113,9 +106,12 @@ public class CActivityService extends CEntityOfProjectService<CActivity> {
 		return activities.stream()
 			.collect(Collectors.groupingBy(
 				activity -> activity.getActivityType() != null
-					? activity.getActivityType() : createNoTypeInstance(),
+					? activity.getActivityType() : createNoTypeInstance(project),
 				Collectors.toList()));
 	}
+
+	@Override
+	protected Class<CActivity> getEntityClass() { return CActivity.class; }
 
 	/**
 	 * Gets an activity by ID with eagerly loaded CActivityType relationship. This method

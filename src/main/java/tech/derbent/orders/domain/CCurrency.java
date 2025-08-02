@@ -1,8 +1,5 @@
 package tech.derbent.orders.domain;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,9 +18,7 @@ import tech.derbent.abstracts.domains.CEntityNamed;
 @Entity
 @Table (name = "ccurrency")
 @AttributeOverride (name = "id", column = @Column (name = "currency_id"))
-public class CCurrency extends CEntityNamed {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(CCurrency.class);
+public class CCurrency extends CEntityNamed<CCurrency> {
 
 	@Column (name = "currency_code", nullable = false, length = 3, unique = false)
 	@Size (max = 3, min = 3, message = "Currency code must be exactly 3 characters")
@@ -44,37 +39,12 @@ public class CCurrency extends CEntityNamed {
 	private String currencySymbol;
 
 	/**
-	 * Default constructor for JPA.
-	 */
-	public CCurrency() {
-		super();
-	}
-
-	/**
 	 * Constructor with name and currency code.
 	 * @param name         the name of the currency
 	 * @param currencyCode the ISO currency code
 	 */
-	public CCurrency(final String name, final String currencyCode) {
-		super(name);
-		this.currencyCode = currencyCode;
-		LOGGER.debug("CCurrency constructor called with name: {} and code: {}", name,
-			currencyCode);
-	}
-
-	/**
-	 * Constructor with name, currency code and symbol.
-	 * @param name           the name of the currency
-	 * @param currencyCode   the ISO currency code
-	 * @param currencySymbol the currency symbol
-	 */
-	public CCurrency(final String name, final String currencyCode,
-		final String currencySymbol) {
-		super(name);
-		this.currencyCode = currencyCode;
-		this.currencySymbol = currencySymbol;
-		LOGGER.debug("CCurrency constructor called with name: {}, code: {}, symbol: {}",
-			name, currencyCode, currencySymbol);
+	public CCurrency(final String name) {
+		super(CCurrency.class, name);
 	}
 
 	public String getCurrencyCode() { return currencyCode; }

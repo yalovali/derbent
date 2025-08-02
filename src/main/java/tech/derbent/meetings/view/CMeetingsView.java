@@ -123,20 +123,10 @@ public class CMeetingsView extends CProjectAwareMDPage<CMeeting> {
 	}
 
 	@Override
-	protected CMeeting createNewEntityInstance() {
-		return new CMeeting();
-	}
-
-	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
 
 	@Override
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	@Override
-	protected CMeeting newEntity() {
-		return super.newEntity(); // Uses the project-aware implementation from parent
-	}
 
 	@Override
 	protected void setProjectForEntity(final CMeeting entity,

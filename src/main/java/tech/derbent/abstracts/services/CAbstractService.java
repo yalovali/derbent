@@ -13,13 +13,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import tech.derbent.abstracts.annotations.CSpringAuxillaries;
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.utils.PageableUtils;
 
 /**
  * CAbstractService - Abstract base service class for entity operations. Layer: Service
  * (MVC) Provides common CRUD operations and lazy loading support for all entity types.
  */
-public abstract class CAbstractService<EntityClass extends CEntityDB> {
+public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass>> {
 
 	protected final Clock clock;
 
@@ -38,25 +39,36 @@ public abstract class CAbstractService<EntityClass extends CEntityDB> {
 		return (int) repository.count();
 	}
 
+	@Transactional
+	public EntityClass createEntity() {
+
+		try {
+			final EntityClass entity = newEntity();
+			repository.saveAndFlush(entity);
+			return entity;
+		} catch (final Exception e) {
+			throw new RuntimeException(
+				"Failed to create instance of " + getEntityClass().getName(), e);
+		}
+	}
+
 	public void delete(final EntityClass entity) {
-		// LOGGER.info("Deleting entity with ID: {}",
-		// CSpringAuxillaries.safeGetId(entity));
 		repository.delete(entity);
 	}
 
 	public void delete(final Long id) {
-		// LOGGER.info("Deleting entity by ID: {}", id);
 		repository.deleteById(id);
 	}
 
 	@Transactional (readOnly = true)
 	public Optional<EntityClass> get(final Long id) {
-		// LOGGER.debug("Getting entity by ID: {}", id);
 		final Optional<EntityClass> entity = repository.findById(id);
 		// Initialize lazy fields if entity is present
 		entity.ifPresent(this::initializeLazyFields);
 		return entity;
 	}
+
+	protected abstract Class<EntityClass> getEntityClass();
 
 	/**
 	 * Initializes lazy fields for an entity to prevent LazyInitializationException.
@@ -74,9 +86,9 @@ public abstract class CAbstractService<EntityClass extends CEntityDB> {
 			CSpringAuxillaries.initializeLazily(entity);
 
 			// Automatically handle CEntityOfProject's lazy project relationship
-			if (entity instanceof tech.derbent.abstracts.domains.CEntityOfProject) {
-				final tech.derbent.abstracts.domains.CEntityOfProject projectEntity =
-					(tech.derbent.abstracts.domains.CEntityOfProject) entity;
+			if (entity instanceof CEntityOfProject) {
+				final CEntityOfProject<EntityClass> projectEntity =
+					(CEntityOfProject<EntityClass>) entity;
 				initializeLazyRelationship(projectEntity.getProject());
 			}
 		} catch (final Exception e) {
@@ -107,7 +119,6 @@ public abstract class CAbstractService<EntityClass extends CEntityDB> {
 	public List<EntityClass> list(final Pageable pageable) {
 		// Validate and fix pageable to prevent "max-results cannot be negative" error
 		final Pageable safePage = PageableUtils.validateAndFix(pageable);
-		
 		// LOGGER.debug("Listing entities with pageable: {}", safePage);
 		final List<EntityClass> entities = repository.findAllBy(safePage).toList();
 		// Initialize lazy fields for all entities
@@ -120,12 +131,29 @@ public abstract class CAbstractService<EntityClass extends CEntityDB> {
 		final Specification<EntityClass> filter) {
 		// Validate and fix pageable to prevent "max-results cannot be negative" error
 		final Pageable safePage = PageableUtils.validateAndFix(pageable);
-		
 		// LOGGER.debug("Listing entities with filter and pageable");
 		final Page<EntityClass> page = repository.findAll(filter, safePage);
 		// Initialize lazy fields for all entities in the page
 		page.getContent().forEach(this::initializeLazyFields);
 		return page;
+	}
+
+	public EntityClass newEntity() {
+
+		try {
+			// Get constructor that takes a String parameter and invoke it with the name
+			final Object instance =
+				getEntityClass().getDeclaredConstructor().newInstance();
+
+			if (!getEntityClass().isInstance(instance)) {
+				throw new IllegalStateException("Created object is not instance of T");
+			}
+			final EntityClass entity = ((EntityClass) instance);
+			return entity;
+		} catch (final Exception e) {
+			throw new RuntimeException(
+				"Failed to create instance of " + getEntityClass().getName(), e);
+		}
 	}
 
 	@Transactional

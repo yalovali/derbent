@@ -23,7 +23,7 @@ import tech.derbent.companies.domain.CCompany;
 @Table (name = "cuser") // table name for the entity as the default is the class name in
 						// lowercase
 @AttributeOverride (name = "id", column = @Column (name = "user_id"))
-public class CUser extends CEntityNamed {
+public class CUser extends CEntityNamed<CUser> {
 
 	public static final int MAX_LENGTH_NAME = 255; // Define maximum length for name
 													// fields
@@ -148,13 +148,13 @@ public class CUser extends CEntityNamed {
 	)
 	private CCompany company;
 
-	public CUser() {
-		super();
+	public CUser(final String name) {
+		super(CUser.class, name);
 	}
 
 	public CUser(final String username, final String password, final String name,
 		final String email) {
-		super(name);
+		super(CUser.class, name);
 		this.login = username;
 		this.name = name;
 		this.email = email;
@@ -166,7 +166,7 @@ public class CUser extends CEntityNamed {
 	 */
 	public CUser(final String username, final String password, final String name,
 		final String email, final CUserRole userRole) {
-		super(name);
+		super(CUser.class, name);
 		this.login = username;
 		this.name = name;
 		this.email = email;
@@ -177,7 +177,7 @@ public class CUser extends CEntityNamed {
 
 	public CUser(final String username, final String password, final String name,
 		final String email, final String roles) {
-		super(name);
+		super(CUser.class, name);
 		this.login = username;
 		this.name = name;
 		this.email = email;

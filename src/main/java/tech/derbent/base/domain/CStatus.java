@@ -13,40 +13,16 @@ import tech.derbent.projects.domain.CProject;
  * description. All status types (like CActivityStatus) should inherit from this class.
  */
 @MappedSuperclass
-public abstract class CStatus extends CTypeEntity {
+public abstract class CStatus<EntityType> extends CTypeEntity<EntityType> {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CStatus.class);
-
-	/**
-	 * Default constructor for JPA.
-	 */
-	protected CStatus() {
-		super();
-	}
 
 	/**
 	 * Constructor with name (required field).
 	 * @param name the name of the status
 	 */
-	protected CStatus(final String name, final CProject project) {
-		super(name, project);
-		LOGGER.debug("CStatus constructor called with name: {} for {}", name,
-			getClass().getSimpleName());
-	}
-
-	/**
-	 * Sets the description for this status.
-	 * @param description the description of the status
-	 */
-	@Override
-	public void setDescription(final String description) {
-		super.setDescription(description);
-		LOGGER.debug("Setting description: {} for {}", description,
-			getClass().getSimpleName());
-	}
-
-	@Override
-	public String toString() {
-		return super.toString();
+	protected CStatus(final Class<EntityType> clazz, final String name,
+		final CProject project) {
+		super(clazz, name, project);
 	}
 }

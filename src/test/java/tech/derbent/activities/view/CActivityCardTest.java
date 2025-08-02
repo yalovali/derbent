@@ -6,18 +6,19 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
+import tech.derbent.abstracts.domains.CTestBase;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.projects.domain.CProject;
 
 /**
  * Unit tests for CActivityCard component.
  */
-class CActivityCardTest {
+class CActivityCardTest extends CTestBase {
 
 	@Test
 	void testActivityCardCreation() {
 		// Given
-		final CProject project = new CProject();
+		final CProject project = new CProject("asdf");
 		project.setName("Test Project");
 		final CActivity activity = new CActivity("Test Activity", project);
 		// When
@@ -30,7 +31,7 @@ class CActivityCardTest {
 	@Test
 	void testActivityCardRefresh() {
 		// Given
-		final CProject project = new CProject();
+		final CProject project = new CProject("asdf");
 		project.setName("Test Project");
 		final CActivity activity = new CActivity("Test Activity", project);
 		final CActivityCard card = new CActivityCard(activity);
@@ -46,5 +47,11 @@ class CActivityCardTest {
 		assertThrows(IllegalArgumentException.class, () -> {
 			new CActivityCard(null);
 		});
+	}
+
+	@Override
+	protected void setupForTest() {
+		// TODO Auto-generated method stub
+		
 	}
 }

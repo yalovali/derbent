@@ -13,8 +13,20 @@ import tech.derbent.abstracts.domains.CEntityNamed;
  * entities including validation, creation, and name-based queries with consistent error
  * handling and logging.
  */
-public abstract class CAbstractNamedEntityService<EntityClass extends CEntityNamed>
-	extends CAbstractService<EntityClass> {
+public abstract class CAbstractNamedEntityService<
+	EntityClass extends CEntityNamed<EntityClass>> extends CAbstractService<EntityClass> {
+
+	/**
+	 * Validates an entity name.
+	 * @param name the name to validate
+	 * @throws IllegalArgumentException if the name is null or empty
+	 */
+	protected static void validateEntityName(final String name) {
+
+		if ((name == null) || name.trim().isEmpty()) {
+			throw new IllegalArgumentException("Entity name cannot be null or empty");
+		}
+	}
 
 	protected final CAbstractNamedRepository<EntityClass> namedRepository;
 
@@ -29,39 +41,18 @@ public abstract class CAbstractNamedEntityService<EntityClass extends CEntityNam
 		this.namedRepository = repository;
 	}
 
-	/**
-	 * Creates a new entity with the given name. This method includes the standard test
-	 * failure logic for error handler testing.
-	 * @param name the entity name
-	 * @throws RuntimeException         if name is "fail" (for testing error handling)
-	 * @throws IllegalArgumentException if name is null or empty
-	 */
 	@Transactional
-	public void createEntity(final String name) {
-		LOGGER.debug("createEntity called with name: {} for {}", name,
-			getClass().getSimpleName());
+	public EntityClass createEntity(final String name) {
 
-		// Standard test failure logic for error handler testing
-		if ("fail".equals(name)) {
-			LOGGER.warn("Test failure requested for name: {}", name);
-			throw new RuntimeException("This is for testing the error handler");
+		try {
+			final EntityClass entity = newEntity(name);
+			repository.saveAndFlush(entity);
+			return entity;
+		} catch (final Exception e) {
+			throw new RuntimeException(
+				"Failed to create instance of " + getEntityClass().getName(), e);
 		}
-		// Validate name
-		validateEntityName(name);
-		// Create and save entity
-		final EntityClass entity = createNewEntityInstance();
-		entity.setName(name.trim());
-		repository.saveAndFlush(entity);
-		LOGGER.info("Entity created successfully with name: {} for {}", name,
-			getClass().getSimpleName());
 	}
-
-	/**
-	 * Creates a new instance of the entity class. Subclasses must implement this method
-	 * to provide the specific entity type.
-	 * @return a new instance of the entity class
-	 */
-	protected abstract EntityClass createNewEntityInstance();
 
 	/**
 	 * Checks if an entity name exists (case-insensitive).
@@ -163,17 +154,36 @@ public abstract class CAbstractNamedEntityService<EntityClass extends CEntityNam
 		}
 	}
 
-	/**
-	 * Validates an entity name.
-	 * @param name the name to validate
-	 * @throws IllegalArgumentException if the name is null or empty
-	 */
-	protected void validateEntityName(final String name) {
+	@Override
+	@SuppressWarnings ("unchecked")
+	@Transactional
+	public EntityClass newEntity() {
+		return newEntity("New " + getEntityClass().getSimpleName());
+	}
 
-		if ((name == null) || name.trim().isEmpty()) {
-			LOGGER.warn("validateEntityName called with null or empty name for {}",
-				getClass().getSimpleName());
-			throw new IllegalArgumentException("Entity name cannot be null or empty");
+	@SuppressWarnings ("unchecked")
+	@Transactional
+	public EntityClass newEntity(final String name) {
+
+		if ("fail".equals(name)) {
+			throw new RuntimeException("This is for testing the error handler");
+		}
+		// Validate inputs
+		validateEntityName(name);
+
+		try {
+			// Get constructor that takes a String parameter and invoke it with the name
+			final Object instance = getEntityClass().getDeclaredConstructor(String.class)
+				.newInstance(name.trim());
+
+			if (!getEntityClass().isInstance(instance)) {
+				throw new IllegalStateException("Created object is not instance of T");
+			}
+			final EntityClass entity = ((EntityClass) instance);
+			return entity;
+		} catch (final Exception e) {
+			throw new RuntimeException(
+				"Failed to create instance of " + getEntityClass().getName(), e);
 		}
 	}
 }

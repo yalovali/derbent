@@ -446,9 +446,9 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Creates consulting company.
 	 */
 	private void createConsultingCompany() {
-		LOGGER.info("createConsultingCompany called - creating Of Stratejik Danışmanlık");
-		final CCompany consulting = new CCompany("Of Stratejik Danışmanlık",
-			"Yönetim danışmanlığı ve stratejik planlama hizmetleri");
+		final CCompany consulting = new CCompany("Of Stratejik Danışmanlık");
+		consulting
+			.setDescription("Yönetim danışmanlığı ve stratejik planlama hizmetleri");
 		consulting.setAddress("Merkez Mahallesi, Gülbahar Sokağı No:7, Of/Trabzon");
 		consulting.setPhone("+90-462-751-0303");
 		consulting.setEmail("merhaba@ofdanismanlik.com.tr");
@@ -463,7 +463,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Creates critical security risk.
 	 */
 	private void createCriticalSecurityRisk() {
-		LOGGER.info("createCriticalSecurityRisk called - creating security risk");
 		final CProject project = findProjectByName("Customer Experience Enhancement");
 
 		if (project == null) {
@@ -471,7 +470,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			return;
 		}
 		final CRisk risk =
-			new CRisk("Data Privacy Compliance Gaps", ERiskSeverity.CRITICAL, project);
+			new CRisk("Data Privacy Compliance Gaps", project, ERiskSeverity.CRITICAL);
 		risk.setDescription(
 			"Current implementation may not fully comply with GDPR and data protection regulations");
 		riskService.save(risk);
@@ -494,9 +493,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Creates healthcare company.
 	 */
 	private void createHealthcareCompany() {
-		LOGGER.info("createHealthcareCompany called - creating Of Sağlık Teknolojileri");
-		final CCompany healthcare = new CCompany("Of Sağlık Teknolojileri",
-			"İleri tıp teknolojisi ve sağlık çözümleri");
+		final CCompany healthcare = new CCompany("Of Sağlık Teknolojileri");
+		healthcare.setDescription("İleri tıp teknolojisi ve sağlık çözümleri");
 		healthcare.setAddress("Yeni Mahalle, Sağlık Sokağı No:21, Of/Trabzon");
 		healthcare.setPhone("+90-462-751-0404");
 		healthcare.setEmail("iletisim@ofsaglik.com.tr");
@@ -518,8 +516,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			LOGGER.warn("Project not found for technical risk");
 			return;
 		}
-		final CRisk risk = new CRisk("Legacy System Integration Challenges",
-			ERiskSeverity.HIGH, project);
+		final CRisk risk = new CRisk("Legacy System Integration Challenges", project,
+			ERiskSeverity.HIGH);
 		risk.setDescription(
 			"Integration with legacy systems may cause compatibility issues and performance bottlenecks");
 		riskService.save(risk);
@@ -537,8 +535,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			LOGGER.warn("Project not found for resource risk");
 			return;
 		}
-		final CRisk risk = new CRisk("Team Member Vacation Scheduling Conflicts",
-			ERiskSeverity.LOW, project);
+		final CRisk risk = new CRisk("Team Member Vacation Scheduling Conflicts", project,
+			ERiskSeverity.LOW);
 		risk.setDescription(
 			"Overlapping vacation schedules may temporarily reduce team capacity");
 		riskService.save(risk);
@@ -556,8 +554,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			LOGGER.warn("Project not found for schedule risk");
 			return;
 		}
-		final CRisk risk = new CRisk("Minor Delays in Third-Party Integrations",
-			ERiskSeverity.LOW, project);
+		final CRisk risk = new CRisk("Minor Delays in Third-Party Integrations", project,
+			ERiskSeverity.LOW);
 		risk.setDescription(
 			"External vendor may experience minor delays in API delivery");
 		riskService.save(risk);
@@ -570,8 +568,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	private void createManufacturingCompany() {
 		LOGGER
 			.info("createManufacturingCompany called - creating Of Endüstri Dinamikleri");
-		final CCompany manufacturing = new CCompany("Of Endüstri Dinamikleri",
-			"Hassas mühendislik bileşenlerinde lider üretici");
+		final CCompany manufacturing = new CCompany("Of Endüstri Dinamikleri");
+		manufacturing.setDescription("Hassas mühendislik bileşenlerinde lider üretici");
 		manufacturing.setAddress("Sanayi Mahallesi, İstiklal Caddesi No:42, Of/Trabzon");
 		manufacturing.setPhone("+90-462-751-0202");
 		manufacturing.setEmail("bilgi@ofendüstri.com.tr");
@@ -593,7 +591,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			return;
 		}
 		final CRisk risk =
-			new CRisk("Budget Overrun Due to Scope Creep", ERiskSeverity.MEDIUM, project);
+			new CRisk("Budget Overrun Due to Scope Creep", project, ERiskSeverity.MEDIUM);
 		risk.setDescription(
 			"Uncontrolled feature additions may cause budget to exceed allocated resources");
 		riskService.save(risk);
@@ -603,9 +601,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	private void createMeetingStatus(final String name, final CProject project,
 		final String description, final String color, final boolean isFinal,
 		final int sortOrder) {
-		final CMeetingStatus status = new CMeetingStatus();
-		status.setProject(project); // Set the project to avoid NULL constraint violation
-		status.setName(name);
+		final CMeetingStatus status = new CMeetingStatus(name, project);
 		status.setDescription(description);
 		status.setColor(color);
 		status.setFinal(isFinal);
@@ -614,9 +610,10 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		LOGGER.debug("Created meeting status: {}", name);
 	}
 
-	private void createOrderStatus(final String name, final String description,
-		final String color, final boolean isFinal, final int sortOrder) {
-		final COrderStatus status = new COrderStatus();
+	private void createOrderStatus(final String name, final CProject project,
+		final String description, final String color, final boolean isFinal,
+		final int sortOrder) {
+		final COrderStatus status = new COrderStatus(name, project);
 		status.setName(name);
 		status.setDescription(description);
 		// COrderStatus extends CEntityNamed, not CStatus, so it doesn't have color,
@@ -646,8 +643,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 	private void createProjectWithDescription(final String name,
 		final String description) {
-		final CProject project = new CProject();
-		project.setName(name);
+		final CProject project = new CProject(name);
 		project.setDescription(description);
 		projectService.save(project);
 		LOGGER.debug("Created project: {} with description", name);
@@ -988,8 +984,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 */
 	private void createTechCompany() {
 		LOGGER.info("createTechCompany called - creating Of Teknoloji Çözümleri");
-		final CCompany techStartup = new CCompany("Of Teknoloji Çözümleri",
-			"Dijital dönüşüm için yenilikçi teknoloji çözümleri");
+		final CCompany techStartup = new CCompany("Of Teknoloji Çözümleri");
+		techStartup.setDescription("Dijital dönüşüm için yenilikçi teknoloji çözümleri");
 		techStartup.setAddress("Cumhuriyet Mahallesi, Atatürk Caddesi No:15, Of/Trabzon");
 		techStartup.setPhone("+90-462-751-0101");
 		techStartup.setEmail("iletisim@ofteknoloji.com.tr");
@@ -1311,7 +1307,9 @@ public class CSampleDataInitializer implements ApplicationRunner {
 				LOGGER.info("Creating activity types for project: {}", projectName);
 
 				for (final String[] typeData : activityTypes) {
-					activityTypeService.createEntity(typeData[0], typeData[1], project);
+					final CActivityType item =
+						activityTypeService.createEntity(typeData[0], project);
+					item.setDescription(typeData[1]);
 				}
 			}
 			LOGGER.info("Successfully created activity types for all projects");
@@ -1490,15 +1488,15 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			// Define meeting types to create for each project
 			final String[][] meetingTypes = {
 				{
-					"Standup", "Daily standup meeting" },
+					"Standup" },
 				{
-					"Planning", "Sprint or project planning meeting" },
+					"Planning" },
 				{
-					"Review", "Review and feedback meeting" },
+					"Review" },
 				{
-					"Retrospective", "Team retrospective meeting" },
+					"Retrospective" },
 				{
-					"One-on-One", "Individual meeting with team member" } };
+					"One-on-One" } };
 
 			// Create meeting types for each project
 			for (final String projectName : projectNames) {
@@ -1512,7 +1510,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 				LOGGER.info("Creating meeting types for project: {}", projectName);
 
 				for (final String[] typeData : meetingTypes) {
-					meetingTypeService.createEntity(typeData[0], typeData[1], project);
+					meetingTypeService.createEntity(typeData[0], project);
 				}
 			}
 			LOGGER.info("Successfully created meeting types for all projects");
@@ -1528,20 +1526,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	private void initializeOrderStatuses() {
 		LOGGER.info(
 			"initializeOrderStatuses called - creating order status classifications");
-
-		try {
-			createOrderStatus("Draft", "Order is in draft state", "#95a5a6", false, 1);
-			createOrderStatus("Submitted", "Order has been submitted", "#3498db", false,
-				2);
-			createOrderStatus("Approved", "Order has been approved", "#27ae60", false, 3);
-			createOrderStatus("Fulfilled", "Order has been fulfilled", "#2ecc71", true,
-				4);
-			createOrderStatus("Rejected", "Order has been rejected", "#e74c3c", true, 5);
-			LOGGER.info("Order statuses initialized successfully");
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing order statuses", e);
-			throw new RuntimeException("Failed to initialize order statuses", e);
-		}
 	}
 
 	/**
@@ -1560,15 +1544,15 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			// Define order types to create for each project
 			final String[][] orderTypes = {
 				{
-					"Service Order", "Service-related orders" },
+					"Service Order" },
 				{
-					"Purchase Order", "Purchase and procurement orders" },
+					"Purchase Order" },
 				{
-					"Maintenance Order", "Maintenance and support orders" },
+					"Maintenance Order" },
 				{
-					"Change Order", "Change request orders" },
+					"Change Order" },
 				{
-					"Support Order", "Customer support orders" } };
+					"Support Order" } };
 
 			// Create order types for each project
 			for (final String projectName : projectNames) {
@@ -1582,7 +1566,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 				LOGGER.info("Creating order types for project: {}", projectName);
 
 				for (final String[] typeData : orderTypes) {
-					orderTypeService.createEntity(typeData[0], typeData[1], project);
+					orderTypeService.createEntity(typeData[0], project);
 				}
 			}
 			LOGGER.info("Successfully created order types for all projects");
@@ -1665,13 +1649,13 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			// Define user types to create for each project
 			final String[][] userTypes = {
 				{
-					"Employee", "Regular employee" },
+					"Employee" },
 				{
-					"Manager", "Team manager or lead" },
+					"Manager" },
 				{
-					"Executive", "Executive or senior management" },
+					"Executive" },
 				{
-					"Contractor", "External contractor or consultant" } };
+					"Contractor" } };
 
 			// Create user types for each project
 			for (final String projectName : projectNames) {
@@ -1685,7 +1669,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 				LOGGER.info("Creating user types for project: {}", projectName);
 
 				for (final String[] typeData : userTypes) {
-					userTypeService.createEntity(typeData[0], typeData[1], project);
+					userTypeService.createEntity(typeData[0], project);
 				}
 			}
 			LOGGER.info("Successfully created user types for all projects");

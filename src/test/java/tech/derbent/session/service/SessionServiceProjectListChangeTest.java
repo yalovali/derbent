@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.User;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 
+import tech.derbent.abstracts.domains.CTestBase;
 import tech.derbent.abstracts.interfaces.CProjectListChangeListener;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.service.CUserService;
@@ -22,17 +23,21 @@ import tech.derbent.users.service.CUserService;
 /**
  * Test class for project list change listener functionality in SessionService.
  */
-@ExtendWith(MockitoExtension.class)
-class SessionServiceProjectListChangeTest {
+@ExtendWith (MockitoExtension.class)
+class SessionServiceProjectListChangeTest extends CTestBase {
 
 	@Mock
 	private AuthenticationContext authenticationContext;
+
 	@Mock
 	private CUserService userService;
+
 	@Mock
 	private CProjectService projectService;
+
 	@Mock
 	private VaadinSession vaadinSession;
+
 	private CSessionService sessionService;
 
 	@BeforeEach
@@ -76,5 +81,11 @@ class SessionServiceProjectListChangeTest {
 		// Remove the listener
 		sessionService.removeProjectListChangeListener(listener);
 		assertTrue(true, "Listener removal completed without errors");
+	}
+
+	@Override
+	protected void setupForTest() {
+		// TODO Auto-generated method stub
+		
 	}
 }

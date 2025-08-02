@@ -4,46 +4,33 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
-import java.time.Clock;
 import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
+import tech.derbent.abstracts.domains.CTestBase;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.domain.CActivityType;
-import tech.derbent.projects.domain.CProject;
 
 /**
  * Test class for CActivityService lazy loading functionality. Specifically tests the fix
  * for LazyInitializationException with CActivityType.
  */
-class CActivityServiceLazyLoadingTest {
+class CActivityServiceLazyLoadingTest extends CTestBase {
 
-	@Mock
-	private CActivityRepository repository;
-	@Mock
-	private Clock clock;
-	private CActivityService activityService;
-
-	@BeforeEach
-	void setUp() {
-		MockitoAnnotations.openMocks(this);
-		activityService = new CActivityService(repository, clock);
+	@Override
+	protected void setupForTest() {
+		// TODO Auto-generated method stub
 	}
 
 	@Test
 	void testGetWithActivityTypeUsesEagerLoading() {
 		// Given
 		final Long activityId = 1L;
-		final CActivity activity = new CActivity();
-		activity.setName("Test Activity");
-		final CActivityType activityType = new CActivityType();
-		activityType.setName("Test Activity Type");
+		final CActivity activity = new CActivity("Test Activity", project);
+		final CActivityType activityType = new CActivityType("Test Type", project);
 		activity.setActivityType(activityType);
-		when(repository.findByIdWithActivityType(activityId))
+		when(activityRepository.findByIdWithActivityType(activityId))
 			.thenReturn(Optional.of(activity));
 		// When
 		final Optional<CActivity> result =
@@ -68,20 +55,21 @@ class CActivityServiceLazyLoadingTest {
 	void testOverriddenGetMethodUsesEagerLoading() {
 		// Given
 		final Long activityId = 1L;
-		final CActivity activity = new CActivity();
-		activity.setName("Test Activity");
-		final CActivityType activityType = new CActivityType();
-		activityType.setName("Test Activity Type");
+		final CActivity activity = new CActivity("Test Activity", project);
+		final CActivityType activityType =
+			new CActivityType("Test Activity Type", project);
 		activity.setActivityType(activityType);
-		when(repository.findByIdWithAllRelationships(activityId))
+		when(activityRepository.findByIdWithAllRelationships(activityId))
 			.thenReturn(Optional.of(activity));
 		// When & Then - Should not throw LazyInitializationException
 		assertDoesNotThrow(() -> {
 			final Optional<CActivity> result = activityService.get(activityId);
+
 			if (result.isPresent()) {
 				// Access the lazy loaded field - this would throw
 				// LazyInitializationException before the fix
 				final CActivityType type = result.get().getActivityType();
+
 				if (type != null) {
 					type.getName(); // Access a property to trigger lazy loading
 				}
@@ -93,26 +81,20 @@ class CActivityServiceLazyLoadingTest {
 	void testProjectNameAccessForGridDisplay() {
 		// Given
 		final Long activityId = 1L;
-		final CActivity activity = new CActivity();
-		activity.setName("Test Activity");
-		
-		// Create a mock project
-		final CProject project = new CProject();
-		project.setName("Test Project");
-		activity.setProject(project);
-		
-		final CActivityType activityType = new CActivityType();
-		activityType.setName("Test Activity Type");
+		final CActivity activity = new CActivity("Test Activity", project);
+		final CActivityType activityType =
+			new CActivityType("Test Activity Type", project);
 		activity.setActivityType(activityType);
-		
-		when(repository.findByIdWithAllRelationships(activityId))
+		when(activityRepository.findByIdWithAllRelationships(activityId))
 			.thenReturn(Optional.of(activity));
-		
-		// When & Then - Should not throw LazyInitializationException when accessing project name
+		// When & Then - Should not throw LazyInitializationException when accessing
+		// project name
 		assertDoesNotThrow(() -> {
 			final Optional<CActivity> result = activityService.get(activityId);
+
 			if (result.isPresent()) {
-				// This is what the grid calls - should not throw LazyInitializationException
+				// This is what the grid calls - should not throw
+				// LazyInitializationException
 				final String projectName = result.get().getProjectName();
 				assertNotNull(projectName);
 			}

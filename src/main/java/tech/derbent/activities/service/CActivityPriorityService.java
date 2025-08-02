@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.activities.domain.CActivityPriority;
-import tech.derbent.projects.domain.CProject;
 
 @Service
 @Transactional
@@ -20,33 +19,6 @@ public class CActivityPriorityService extends CEntityOfProjectService<CActivityP
 		final Clock clock) {
 		super(repository, clock);
 		this.activityPriorityRepository = repository;
-	}
-
-	@Override
-	protected CActivityPriority createNewEntityInstance() {
-		return new CActivityPriority();
-	}
-
-	/**
-	 * Creates a new activity priority.
-	 * @param name    the priority name - must not be null or empty
-	 * @param project the project - must not be null
-	 * @return the created priority
-	 */
-	@Transactional
-	public CActivityPriority createPriority(final String name, final CProject project) {
-		LOGGER.info("createPriority called with name: {}, project: {}", name,
-			project != null ? project.getName() : "null");
-
-		if ((name == null) || name.trim().isEmpty()) {
-			throw new IllegalArgumentException("Priority name cannot be null or empty");
-		}
-
-		if (project == null) {
-			throw new IllegalArgumentException("Project cannot be null");
-		}
-		final CActivityPriority priority = new CActivityPriority(name.trim(), project);
-		return repository.saveAndFlush(priority);
 	}
 
 	@Override
@@ -62,5 +34,10 @@ public class CActivityPriorityService extends CEntityOfProjectService<CActivityP
 	@Transactional (readOnly = true)
 	public Optional<CActivityPriority> findDefaultPriority() {
 		return activityPriorityRepository.findByIsDefaultTrue();
+	}
+
+	@Override
+	protected Class<CActivityPriority> getEntityClass() {
+		return CActivityPriority.class;
 	}
 }

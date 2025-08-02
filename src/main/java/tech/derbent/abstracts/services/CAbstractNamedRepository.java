@@ -14,7 +14,7 @@ import tech.derbent.abstracts.domains.CEntityNamed;
  * for named entities with case-insensitive operations.
  */
 @NoRepositoryBean
-public interface CAbstractNamedRepository<EntityClass extends CEntityNamed>
+public interface CAbstractNamedRepository<EntityClass extends CEntityNamed<EntityClass>>
 	extends CAbstractRepository<EntityClass> {
 
 	/**

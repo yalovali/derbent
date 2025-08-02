@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
+import tech.derbent.abstracts.domains.CTestBase;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.domain.CActivityType;
@@ -53,7 +54,7 @@ import tech.derbent.users.service.CUserTypeService;
  */
 @SpringBootTest
 @Transactional
-public class ComprehensiveViewCRUDTest {
+public class ComprehensiveViewCRUDTest extends CTestBase {
 
 	// Meeting services
 	@Autowired
@@ -455,5 +456,11 @@ public class ComprehensiveViewCRUDTest {
 				"User type description should not be null");
 			assertNotNull(type.getProject(), "User type project should not be null");
 		}
+	}
+
+	@Override
+	protected void setupForTest() {
+		// TODO Auto-generated method stub
+		
 	}
 }

@@ -2,9 +2,6 @@ package tech.derbent.abstracts.domains;
 
 import java.util.Objects;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.NotNull;
@@ -20,9 +17,7 @@ import tech.derbent.projects.domain.CProject;
  * @since 1.0
  */
 @MappedSuperclass
-public abstract class CTypeEntity extends CEntityOfProject {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(CTypeEntity.class);
+public abstract class CTypeEntity<EntityType> extends CEntityOfProject<EntityType> {
 
 	@Column (name = "color", nullable = true, length = 7)
 	@Size (max = 7)
@@ -54,19 +49,13 @@ public abstract class CTypeEntity extends CEntityOfProject {
 	private Boolean isActive = true;
 
 	/**
-	 * Default constructor for JPA.
-	 */
-	public CTypeEntity() {
-		super();
-	}
-
-	/**
 	 * Constructor with required fields.
 	 * @param name    the name of the type entity
 	 * @param project the project this type belongs to
 	 */
-	public CTypeEntity(final String name, final CProject project) {
-		super(name, project);
+	public CTypeEntity(final Class<EntityType> clazz, final String name,
+		final CProject project) {
+		super(clazz, name, project);
 	}
 
 	@Override
@@ -83,7 +72,7 @@ public abstract class CTypeEntity extends CEntityOfProject {
 		if (!(obj instanceof CTypeEntity)) {
 			return false;
 		}
-		final CTypeEntity other = (CTypeEntity) obj;
+		final CTypeEntity<EntityType> other = (CTypeEntity<EntityType>) obj;
 		return Objects.equals(getName(), other.getName())
 			&& Objects.equals(getProject(), other.getProject());
 	}

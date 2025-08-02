@@ -16,7 +16,8 @@ import tech.derbent.session.service.CSessionService;
 
 /**
  * CMeetingTypeView - View for managing meeting types. Layer: View (MVC) Provides CRUD
- * operations for meeting types using the abstract master-detail pattern with project awareness.
+ * operations for meeting types using the abstract master-detail pattern with project
+ * awareness.
  */
 @Route ("meeting-types/:meetingtype_id?/:action?(edit)")
 @PageTitle ("Meeting Types")
@@ -32,20 +33,16 @@ public class CMeetingTypeView extends CProjectAwareMDPage<CMeetingType> {
 
 	/**
 	 * Constructor for CMeetingTypeView.
-	 * @param entityService the service for meeting type operations
+	 * @param entityService  the service for meeting type operations
 	 * @param sessionService
 	 */
-	public CMeetingTypeView(final CMeetingTypeService entityService, final CSessionService sessionService) {
+	public CMeetingTypeView(final CMeetingTypeService entityService,
+		final CSessionService sessionService) {
 		super(CMeetingType.class, entityService, sessionService);
 		addClassNames("meeting-types-view");
 		// createDetailsLayout();
 		LOGGER.info("CMeetingTypeView initialized with route: "
 			+ CSpringAuxillaries.getRoutePath(this.getClass()));
-	}
-
-	@Override
-	protected CMeetingType createNewEntityInstance() {
-		return new CMeetingType();
 	}
 
 	@Override
@@ -73,12 +70,8 @@ public class CMeetingTypeView extends CProjectAwareMDPage<CMeetingType> {
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
 
 	@Override
-	protected CMeetingType newEntity() {
-		return new CMeetingType();
-	}
-
-	@Override
-	protected void setProjectForEntity(CMeetingType entity, CProject project) {
+	protected void setProjectForEntity(final CMeetingType entity,
+		final CProject project) {
 		entity.setProject(project);
 	}
 

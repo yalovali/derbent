@@ -4,7 +4,7 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import tech.derbent.abstracts.domains.CEntityOfProject;
+import tech.derbent.abstracts.domains.CTypeEntity;
 import tech.derbent.projects.domain.CProject;
 
 /**
@@ -14,32 +14,9 @@ import tech.derbent.projects.domain.CProject;
 @Entity
 @Table (name = "cmeetingtype")
 @AttributeOverride (name = "id", column = @Column (name = "cmeetingtype_id"))
-public class CMeetingType extends CEntityOfProject {
+public class CMeetingType extends CTypeEntity<CMeetingType> {
 
-	/**
-	 * Default constructor for JPA.
-	 */
-	public CMeetingType() {
-		super();
-	}
-
-	/**
-	 * Constructor with name and project.
-	 * @param name the name of the meeting type
-	 * @param project the project this type belongs to
-	 */
 	public CMeetingType(final String name, final CProject project) {
-		super(name, project);
-	}
-
-	/**
-	 * Constructor with name, description and project.
-	 * @param name        the name of the meeting type
-	 * @param description the description of the meeting type
-	 * @param project     the project this type belongs to
-	 */
-	public CMeetingType(final String name, final String description, final CProject project) {
-		super(name, project);
-		setDescription(description);
+		super(CMeetingType.class, name, project);
 	}
 }

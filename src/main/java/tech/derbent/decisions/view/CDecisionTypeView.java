@@ -63,23 +63,10 @@ public class CDecisionTypeView extends CProjectAwareMDPage<CDecisionType> {
 	}
 
 	@Override
-	protected CDecisionType createNewEntityInstance() {
-		return new CDecisionType();
-	}
-
-	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
 
 	@Override
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	@Override
-	protected CDecisionType newEntity() {
-		LOGGER.info("newEntity called - creating new CDecisionType with defaults");
-		final CDecisionType newType = new CDecisionType();
-		// Default values are set via MetaData annotations and constructor
-		return newType;
-	}
 
 	@Override
 	protected void setProjectForEntity(final CDecisionType entity,

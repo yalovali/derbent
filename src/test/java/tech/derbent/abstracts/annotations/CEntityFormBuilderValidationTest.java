@@ -11,23 +11,30 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 
+import tech.derbent.abstracts.domains.CTestBase;
+
 /**
  * Test class to verify CEntityFormBuilder improvements including: - Enhanced null pointer
  * checking - Better logging and error handling - Robust parameter validation
  */
-class CEntityFormBuilderValidationTest {
+class CEntityFormBuilderValidationTest extends CTestBase {
 
 	/**
 	 * Test entity with various MetaData annotations and proper getters/setters
 	 */
 	public static class TestEntity {
 
-		@MetaData(displayName = "Test String", required = true,
+		@MetaData (
+			displayName = "Test String", required = true,
 			description = "A test string field", order = 1, maxLength = 50,
-			defaultValue = "test")
+			defaultValue = "test"
+		)
 		private String testString;
-		@MetaData(displayName = "Test Boolean", required = false,
-			description = "A test boolean field", order = 2, defaultValue = "false")
+
+		@MetaData (
+			displayName = "Test Boolean", required = false,
+			description = "A test boolean field", order = 2, defaultValue = "false"
+		)
 		private Boolean testBoolean;
 
 		public Boolean getTestBoolean() { return testBoolean; }
@@ -45,7 +52,7 @@ class CEntityFormBuilderValidationTest {
 	}
 
 	@Test
-	@DisplayName("buildForm should handle null binder gracefully")
+	@DisplayName ("buildForm should handle null binder gracefully")
 	void testBuildFormWithNullBinder() {
 		final IllegalArgumentException exception =
 			assertThrows(IllegalArgumentException.class,
@@ -54,7 +61,7 @@ class CEntityFormBuilderValidationTest {
 	}
 
 	@Test
-	@DisplayName("buildForm should handle null entity class gracefully")
+	@DisplayName ("buildForm should handle null entity class gracefully")
 	void testBuildFormWithNullEntityClass() {
 		final BeanValidationBinder<TestEntity> binder =
 			new BeanValidationBinder<>(TestEntity.class);
@@ -65,12 +72,12 @@ class CEntityFormBuilderValidationTest {
 	}
 
 	@Test
-	@DisplayName("buildForm should handle entity class without MetaData annotations")
+	@DisplayName ("buildForm should handle entity class without MetaData annotations")
 	void testBuildFormWithoutMetaData() {
 		// Test entity without MetaData annotations
 		class EntityWithoutMetaData {
 
-			@SuppressWarnings("unused")
+			@SuppressWarnings ("unused")
 			private String plainField;
 		}
 		final BeanValidationBinder<EntityWithoutMetaData> binder =
@@ -83,7 +90,7 @@ class CEntityFormBuilderValidationTest {
 	}
 
 	@Test
-	@DisplayName("buildForm should successfully create form with valid parameters")
+	@DisplayName ("buildForm should successfully create form with valid parameters")
 	void testBuildFormWithValidParameters() {
 		final BeanValidationBinder<TestEntity> binder =
 			new BeanValidationBinder<>(TestEntity.class);
@@ -91,5 +98,11 @@ class CEntityFormBuilderValidationTest {
 		assertNotNull(result, "Form should be created successfully");
 		assertEquals("editor-layout", result.getClassName());
 		assertTrue(result.getChildren().count() > 0, "Form should contain components");
+	}
+
+	@Override
+	protected void setupForTest() {
+		// TODO Auto-generated method stub
+		
 	}
 }

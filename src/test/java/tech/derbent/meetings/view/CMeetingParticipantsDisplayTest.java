@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import tech.derbent.abstracts.domains.CTestBase;
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.service.CMeetingService;
 import tech.derbent.users.domain.CUser;
@@ -19,7 +20,7 @@ import tech.derbent.users.domain.CUser;
  * participants are displayed as JSON strings instead of names.
  */
 @SpringBootTest
-public class CMeetingParticipantsDisplayTest {
+public class CMeetingParticipantsDisplayTest extends CTestBase {
 
 	@Autowired
 	private CMeetingService meetingService;
@@ -76,5 +77,11 @@ public class CMeetingParticipantsDisplayTest {
 		System.out.println("Meeting: " + meetingWithParticipants.getName());
 		System.out.println("Participants display: " + participantsDisplay);
 		System.out.println("Raw participants toString: " + participants.toString());
+	}
+
+	@Override
+	protected void setupForTest() {
+		// TODO Auto-generated method stub
+		
 	}
 }

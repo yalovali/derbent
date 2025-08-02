@@ -8,9 +8,10 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.annotations.CSpringAuxillaries;
-import tech.derbent.abstracts.views.CAbstractMDPage;
+import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.service.CActivityStatusService;
+import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 
 /**
@@ -22,7 +23,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Activity Statuses")
 @Menu (order = 2.1, icon = "vaadin:flag", title = "Types.Activity Statuses")
 @PermitAll
-public class CActivityStatusView extends CAbstractMDPage<CActivityStatus> {
+public class CActivityStatusView extends CProjectAwareMDPage<CActivityStatus> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -32,10 +33,11 @@ public class CActivityStatusView extends CAbstractMDPage<CActivityStatus> {
 
 	/**
 	 * Constructor for CActivityStatusView.
-	 * @param entityService the service for activity status operations
+	 * @param entityService  the service for activity status operations
 	 * @param sessionService
 	 */
-	public CActivityStatusView(final CActivityStatusService entityService, final CSessionService sessionService) {
+	public CActivityStatusView(final CActivityStatusService entityService,
+		final CSessionService sessionService) {
 		super(CActivityStatus.class, entityService, sessionService);
 		LOGGER.debug("CActivityStatusView constructor called with service: {}",
 			entityService.getClass().getSimpleName());
@@ -74,7 +76,8 @@ public class CActivityStatusView extends CAbstractMDPage<CActivityStatus> {
 	@Override
 	protected void createGridForEntity() {
 		grid.addShortTextColumn(CActivityStatus::getName, "Status Name", "name");
-		grid.addLongTextColumn(CActivityStatus::getDescription, "Description", "description");
+		grid.addLongTextColumn(CActivityStatus::getDescription, "Description",
+			"description");
 	}
 
 	@Override
@@ -83,14 +86,10 @@ public class CActivityStatusView extends CAbstractMDPage<CActivityStatus> {
 	@Override
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
 
-	/**
-	 * Creates a new CActivityStatus entity instance.
-	 * @return a new CActivityStatus entity
-	 */
 	@Override
-	protected CActivityStatus newEntity() {
-		LOGGER.debug("Creating new CActivityStatus entity");
-		return new CActivityStatus();
+	protected void setProjectForEntity(final CActivityStatus entity,
+		final CProject project) {
+		entity.setProject(project);
 	}
 
 	@Override

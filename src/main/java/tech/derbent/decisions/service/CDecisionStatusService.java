@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import tech.derbent.abstracts.services.CAbstractNamedEntityService;
 import tech.derbent.decisions.domain.CDecisionStatus;
-import tech.derbent.projects.domain.CProject;
 
 /**
  * CDecisionStatusService - Service class for CDecisionStatus entities. Layer: Service
@@ -23,64 +22,6 @@ public class CDecisionStatusService extends CAbstractNamedEntityService<CDecisio
 	public CDecisionStatusService(final CDecisionStatusRepository repository,
 		final Clock clock) {
 		super(repository, clock);
-	}
-
-	/**
-	 * Creates a new decision status with basic properties.
-	 * @param name        the decision status name - must not be null or empty
-	 * @param description the description - can be null
-	 * @param isFinal     whether this is a final status
-	 * @return the created decision status
-	 */
-	@Transactional
-	public CDecisionStatus createDecisionStatus(final String name, final CProject project,
-		final String description, final boolean isFinal) {
-		LOGGER.info(
-			"createDecisionStatus called with name: {}, description: {}, isFinal: {}",
-			name, description, isFinal);
-
-		if ((name == null) || name.trim().isEmpty()) {
-			LOGGER.error("createDecisionStatus called with null or empty name");
-			throw new IllegalArgumentException(
-				"Decision status name cannot be null or empty");
-		}
-		final CDecisionStatus decisionStatus = new CDecisionStatus(name.trim(), project);
-		decisionStatus.setFinal(isFinal);
-		decisionStatus.setDescription(description);
-		return repository.saveAndFlush(decisionStatus);
-	}
-
-	/**
-	 * Creates a new decision status with all properties.
-	 * @param name             the decision status name - must not be null or empty
-	 * @param description      the description - can be null
-	 * @param color            the hex color code - can be null
-	 * @param isFinal          whether this is a final status
-	 * @param allowsEditing    whether decisions with this status can be edited
-	 * @param requiresApproval whether decisions with this status require approval
-	 * @return the created decision status
-	 */
-	@Transactional
-	public CDecisionStatus createDecisionStatus(final String name, final CProject project,
-		final String description, final String color, final boolean isFinal,
-		final boolean requiresApproval) {
-		LOGGER.info(
-			"createDecisionStatus called with name: {}, description: {}, color: {}, isFinal: {}, requiresApproval: {}",
-			name, description, color, isFinal, requiresApproval);
-
-		if ((name == null) || name.trim().isEmpty()) {
-			LOGGER.error("createDecisionStatus called with null or empty name");
-			throw new IllegalArgumentException(
-				"Decision status name cannot be null or empty");
-		}
-		final CDecisionStatus decisionStatus = new CDecisionStatus(name.trim(), project,
-			description, color, isFinal, requiresApproval);
-		return repository.saveAndFlush(decisionStatus);
-	}
-
-	@Override
-	protected CDecisionStatus createNewEntityInstance() {
-		return new CDecisionStatus();
 	}
 
 	/**
@@ -123,6 +64,9 @@ public class CDecisionStatusService extends CAbstractNamedEntityService<CDecisio
 		LOGGER.info("findRequiringApproval called for decision statuses");
 		return ((CDecisionStatusRepository) repository).findByRequiresApprovalTrue();
 	}
+
+	@Override
+	protected Class<CDecisionStatus> getEntityClass() { return CDecisionStatus.class; }
 
 	/**
 	 * Checks if this status indicates completion of the decision process.

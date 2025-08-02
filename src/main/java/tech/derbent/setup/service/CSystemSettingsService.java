@@ -22,8 +22,7 @@ import tech.derbent.setup.domain.CSystemSettings;
  */
 @Service
 @PreAuthorize ("isAuthenticated()")
-@Transactional (readOnly = true) // Default to read-only transactions for better
-									// performance
+@Transactional (readOnly = true)
 public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 
 	private static final Logger LOGGER =
@@ -99,6 +98,9 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 				".zip" };
 		}
 	}
+
+	@Override
+	protected Class<CSystemSettings> getEntityClass() { return CSystemSettings.class; }
 
 	/**
 	 * Gets the current maintenance message if maintenance mode is enabled.

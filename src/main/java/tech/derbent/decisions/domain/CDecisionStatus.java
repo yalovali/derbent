@@ -1,8 +1,5 @@
 package tech.derbent.decisions.domain;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,9 +17,7 @@ import tech.derbent.projects.domain.CProject;
 @Entity
 @Table (name = "cdecisionstatus")
 @AttributeOverride (name = "id", column = @Column (name = "decision_status_id"))
-public class CDecisionStatus extends CStatus {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(CDecisionStatus.class);
+public class CDecisionStatus extends CStatus<CDecisionStatus> {
 
 	@Column (name = "is_final", nullable = false)
 	@MetaData (
@@ -43,41 +38,12 @@ public class CDecisionStatus extends CStatus {
 	private boolean requiresApproval = false;
 
 	/**
-	 * Default constructor for JPA.
-	 */
-	public CDecisionStatus() {
-		super();
-	}
-
-	/**
 	 * Constructor with name and description.
 	 * @param name        the name of the decision status - must not be null or empty
 	 * @param description detailed description of the decision status - can be null
 	 */
 	public CDecisionStatus(final String name, final CProject project) {
-		super(name, project);
-	}
-
-	/**
-	 * Constructor with all main fields.
-	 * @param name             the name of the decision status - must not be null or empty
-	 * @param description      detailed description of the decision status - can be null
-	 * @param color            the hex color code - can be null, defaults to gray
-	 * @param isFinal          whether this is a final status
-	 * @param allowsEditing    whether decisions with this status can be edited
-	 * @param requiresApproval whether decisions with this status require approval
-	 */
-	public CDecisionStatus(final String name, final CProject project,
-		final String description, final String color, final boolean isFinal,
-		final boolean requiresApproval) {
-		super(name, project);
-		LOGGER.debug(
-			"CDecisionStatus constructor called with name: {}, description: {}, color: {}, isFinal: {}, requiresApproval: {}",
-			name, description, color, isFinal, requiresApproval);
-		setColor(color);
-		setDescription(description);
-		this.isFinal = isFinal;
-		this.requiresApproval = requiresApproval;
+		super(CDecisionStatus.class, name, project);
 	}
 
 	@Override

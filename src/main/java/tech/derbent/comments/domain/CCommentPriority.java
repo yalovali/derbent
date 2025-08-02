@@ -21,13 +21,10 @@ import tech.derbent.projects.domain.CProject;
 @Entity
 @Table (name = "ccommentpriority")
 @AttributeOverride (name = "id", column = @Column (name = "ccommentpriority_id"))
-public class CCommentPriority extends CTypeEntity {
+public class CCommentPriority extends CTypeEntity<CCommentPriority> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCommentPriority.class);
 
-	/**
-	 * Priority level for the comment (1=Highest, 4=Lowest).
-	 */
 	@Column (name = "priority_level", nullable = false, length = 20)
 	@MetaData (
 		displayName = "Priority Level", required = false, readOnly = false,
@@ -36,59 +33,23 @@ public class CCommentPriority extends CTypeEntity {
 	)
 	private Integer priorityLevel = 3; // Default to normal priority
 
-	/**
-	 * Indicates if this is the default priority.
-	 */
 	@Column (name = "is_default", nullable = false)
 	@MetaData (
 		displayName = "Is Default", required = false, readOnly = false,
-		defaultValue = "false", description = "Indicates if this is the default priority", 
+		defaultValue = "false", description = "Indicates if this is the default priority",
 		hidden = false, order = 7
 	)
 	private Boolean isDefault = false;
 
-	/**
-	 * Default constructor for JPA.
-	 */
-	public CCommentPriority() {
-		super();
-		LOGGER.debug("CCommentPriority default constructor called");
-	}
-
-	/**
-	 * Constructor with required fields only.
-	 * @param name    the name of the comment priority (e.g., "URGENT", "NORMAL")
-	 * @param project the project this priority belongs to
-	 */
 	public CCommentPriority(final String name, final CProject project) {
-		super(name, project);
+		super(CCommentPriority.class, name, project);
 		LOGGER.debug("CCommentPriority constructor called with name: {} and project: {}",
 			name, project);
 	}
 
-	/**
-	 * Constructor with name and priority level.
-	 * @param name the name of the comment priority
-	 * @param priorityLevel the priority level (1=Highest, 4=Lowest)
-	 */
-	public CCommentPriority(final String name, final Integer priorityLevel) {
-		super();
-		setName(name);
-		this.priorityLevel = priorityLevel;
-		LOGGER.debug("CCommentPriority constructor called with name: {} and priorityLevel: {}",
-			name, priorityLevel);
-	}
-
-	/**
-	 * Constructor with all common fields.
-	 * @param name      the name of the comment priority
-	 * @param project   the project this priority belongs to
-	 * @param color     the hex color code for UI display
-	 * @param sortOrder the display order
-	 */
 	public CCommentPriority(final String name, final CProject project, final String color,
 		final Integer sortOrder) {
-		super(name, project);
+		super(CCommentPriority.class, name, project);
 		setColor(color);
 		setSortOrder(sortOrder);
 		LOGGER.debug(
@@ -96,37 +57,28 @@ public class CCommentPriority extends CTypeEntity {
 			name, project, color, sortOrder);
 	}
 
-	public Integer getPriorityLevel() { return priorityLevel; }
-
-	public void setPriorityLevel(final Integer priorityLevel) {
-		this.priorityLevel = priorityLevel;
-	}
-
 	/**
 	 * Gets the default status of this priority.
-	 * 
 	 * @return true if this is the default priority, false otherwise
 	 */
-	public Boolean getIsDefault() {
-		return isDefault;
-	}
+	public Boolean getIsDefault() { return isDefault; }
 
-	/**
-	 * Sets the default status of this priority.
-	 * 
-	 * @param isDefault true to set as default, false otherwise
-	 */
-	public void setDefault(final Boolean isDefault) {
-		this.isDefault = isDefault;
-	}
+	public Integer getPriorityLevel() { return priorityLevel; }
 
 	/**
 	 * Convenience method to check if this is the default priority.
-	 * 
 	 * @return true if this is the default priority, false otherwise
 	 */
-	public boolean isDefault() {
-		return Boolean.TRUE.equals(isDefault);
+	public boolean isDefault() { return Boolean.TRUE.equals(isDefault); }
+
+	/**
+	 * Sets the default status of this priority.
+	 * @param isDefault true to set as default, false otherwise
+	 */
+	public void setDefault(final Boolean isDefault) { this.isDefault = isDefault; }
+
+	public void setPriorityLevel(final Integer priorityLevel) {
+		this.priorityLevel = priorityLevel;
 	}
 
 	@Override
@@ -134,6 +86,7 @@ public class CCommentPriority extends CTypeEntity {
 		return String.format(
 			"CCommentPriority{id=%d, name='%s', color='%s', sortOrder=%d, isActive=%s, project=%s, priorityLevel=%d, isDefault=%s}",
 			getId(), getName(), getColor(), getSortOrder(), getIsActive(),
-			getProject() != null ? getProject().getName() : "null", priorityLevel, isDefault);
+			getProject() != null ? getProject().getName() : "null", priorityLevel,
+			isDefault);
 	}
 }

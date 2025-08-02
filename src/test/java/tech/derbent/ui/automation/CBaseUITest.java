@@ -323,7 +323,6 @@ public class CBaseUITest {
 		int columns = 0;
 		boolean emptyCells = false;
 		int emptyCellCount = 0;
-		int firstDataCell = -1;
 
 		for (int i = 0; i < gridCellCount; i++) {
 			final Locator gridCell = gridCells.nth(i);
@@ -336,7 +335,6 @@ public class CBaseUITest {
 				// logger.info("Grid cell text: {}", gridCell.textContent());
 
 				if (emptyCells) {
-					firstDataCell = i;
 					break;
 				}
 				columns++;

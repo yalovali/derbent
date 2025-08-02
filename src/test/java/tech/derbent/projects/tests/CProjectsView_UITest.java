@@ -62,9 +62,6 @@ public class CProjectsView_UITest extends CBaseUITest {
 	void testProjectsCompleteWorkflow() {
 		LOGGER.info("🧪 Testing Projects complete workflow...");
 		assertTrue(navigateToViewByClass(CProjectsView.class), "Should navigate to view");
-		// Test complete workflow: navigate -> view grid -> create new -> fill form ->
-		// save -> view result
-		final int initialRowCount = getGridRowCount();
 		clickNew(); // Open new project form
 		takeScreenshot("projects-workflow-new-form");
 		// Fill project name

@@ -1,7 +1,12 @@
 package tech.derbent.users.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.time.Clock;
 import java.util.Optional;
@@ -15,96 +20,101 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import tech.derbent.abstracts.domains.CTestBase;
 import tech.derbent.users.domain.CUser;
 
-@ExtendWith(MockitoExtension.class)
-class CUserServiceTest {
+@ExtendWith (MockitoExtension.class)
+class CUserServiceTest extends CTestBase {
 
-    @Mock
-    private CUserRepository repository;
+	@Mock
+	private CUserRepository repository;
 
-    @Mock
-    private Clock clock;
+	@Mock
+	private Clock clock;
 
-    private CUserService userService;
+	private CUserService userService;
 
-    @BeforeEach
-    void setUp() {
-        userService = new CUserService(repository, clock);
-    }
+	@BeforeEach
+	void setUp() {
+		userService = new CUserService(repository, clock);
+	}
 
-    @Test
-    void testLoadUserByUsername_UserExists() {
-        // Given
-        String username = "testuser";
-        String encodedPassword = new BCryptPasswordEncoder().encode("password123");
-        CUser user = new CUser(username, encodedPassword, "Test User", "test@example.com", "USER");
-        user.setEnabled(true);
+	@Test
+	void testCreateLoginUser() {
+		// Given
+		final String username = "newuser";
+		final String plainPassword = "password123";
+		final String name = "New User";
+		final String email = "new@example.com";
+		final String roles = "USER,ADMIN";
+		final CUser savedUser =
+			new CUser(username, "encodedPassword", name, email, roles);
 
-        when(repository.findByUsername(username)).thenReturn(Optional.of(user));
+		// Set ID via reflection to simulate saved entity
+		try {
+			final java.lang.reflect.Field idField =
+				savedUser.getClass().getSuperclass().getDeclaredField("id");
+			idField.setAccessible(true);
+			idField.set(savedUser, 1L);
+		} catch (final Exception e) {
+			// Ignore for test
+		}
+		when(repository.findByUsername(username)).thenReturn(Optional.empty());
+		when(repository.saveAndFlush(any(CUser.class))).thenReturn(savedUser);
+		// When
+		final CUser result =
+			userService.createLoginUser(username, plainPassword, name, email, roles);
+		// Then
+		assertNotNull(result);
+		verify(repository).findByUsername(username);
+		verify(repository).saveAndFlush(any(CUser.class));
+	}
 
-        // When
-        UserDetails userDetails = userService.loadUserByUsername(username);
+	@Test
+	void testCreateLoginUser_UsernameAlreadyExists() {
+		// Given
+		final String username = "existinguser";
+		final CUser existingUser = new CUser(username);
+		when(repository.findByUsername(username)).thenReturn(Optional.of(existingUser));
+		// When/Then
+		assertThrows(IllegalArgumentException.class, () -> userService
+			.createLoginUser(username, "password", "name", "email", "roles"));
+	}
 
-        // Then
-        assertNotNull(userDetails);
-        assertEquals(username, userDetails.getUsername());
-        assertEquals(encodedPassword, userDetails.getPassword());
-        assertTrue(userDetails.isEnabled());
-        assertEquals(1, userDetails.getAuthorities().size());
-        assertTrue(userDetails.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_USER")));
-    }
+	@Test
+	void testLoadUserByUsername_UserExists() {
+		// Given
+		final String username = "testuser";
+		final String encodedPassword = new BCryptPasswordEncoder().encode("password123");
+		final CUser user =
+			new CUser(username, encodedPassword, "Test User", "test@example.com", "USER");
+		user.setEnabled(true);
+		when(repository.findByUsername(username)).thenReturn(Optional.of(user));
+		// When
+		final UserDetails userDetails = userService.loadUserByUsername(username);
+		// Then
+		assertNotNull(userDetails);
+		assertEquals(username, userDetails.getUsername());
+		assertEquals(encodedPassword, userDetails.getPassword());
+		assertTrue(userDetails.isEnabled());
+		assertEquals(1, userDetails.getAuthorities().size());
+		assertTrue(userDetails.getAuthorities().stream()
+			.anyMatch(auth -> auth.getAuthority().equals("ROLE_USER")));
+	}
 
-    @Test
-    void testLoadUserByUsername_UserNotFound() {
-        // Given
-        String username = "nonexistent";
-        when(repository.findByUsername(username)).thenReturn(Optional.empty());
+	@Test
+	void testLoadUserByUsername_UserNotFound() {
+		// Given
+		final String username = "nonexistent";
+		when(repository.findByUsername(username)).thenReturn(Optional.empty());
+		// When/Then
+		assertThrows(UsernameNotFoundException.class,
+			() -> userService.loadUserByUsername(username));
+	}
 
-        // When/Then
-        assertThrows(UsernameNotFoundException.class, () -> userService.loadUserByUsername(username));
-    }
-
-    @Test
-    void testCreateLoginUser() {
-        // Given
-        String username = "newuser";
-        String plainPassword = "password123";
-        String name = "New User";
-        String email = "new@example.com";
-        String roles = "USER,ADMIN";
-
-        CUser savedUser = new CUser(username, "encodedPassword", name, email, roles);
-        // Set ID via reflection to simulate saved entity
-        try {
-            java.lang.reflect.Field idField = savedUser.getClass().getSuperclass().getDeclaredField("id");
-            idField.setAccessible(true);
-            idField.set(savedUser, 1L);
-        } catch (Exception e) {
-            // Ignore for test
-        }
-
-        when(repository.findByUsername(username)).thenReturn(Optional.empty());
-        when(repository.saveAndFlush(any(CUser.class))).thenReturn(savedUser);
-
-        // When
-        CUser result = userService.createLoginUser(username, plainPassword, name, email, roles);
-
-        // Then
-        assertNotNull(result);
-        verify(repository).findByUsername(username);
-        verify(repository).saveAndFlush(any(CUser.class));
-    }
-
-    @Test
-    void testCreateLoginUser_UsernameAlreadyExists() {
-        // Given
-        String username = "existinguser";
-        CUser existingUser = new CUser();
-        when(repository.findByUsername(username)).thenReturn(Optional.of(existingUser));
-
-        // When/Then
-        assertThrows(IllegalArgumentException.class,
-                () -> userService.createLoginUser(username, "password", "name", "email", "roles"));
-    }
+	@Override
+	protected void setupForTest() {
+		// TODO Auto-generated method stub
+		
+	}
 }

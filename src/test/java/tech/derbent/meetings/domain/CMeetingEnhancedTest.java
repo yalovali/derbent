@@ -12,6 +12,7 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import tech.derbent.abstracts.domains.CTestBase;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
@@ -19,7 +20,7 @@ import tech.derbent.users.domain.CUser;
 /**
  * Unit tests for CMeeting domain enhancements
  */
-class CMeetingEnhancedTest {
+class CMeetingEnhancedTest extends CTestBase {
 
 	private CMeeting meeting;
 
@@ -42,26 +43,20 @@ class CMeetingEnhancedTest {
 	@BeforeEach
 	void setUp() {
 		// Create test project
-		project = new CProject();
-		project.setName("Test Project");
+		project = new CProject("Test Project");
 		project.setDescription("Test project description");
 		// Create test meeting type
-		meetingType = new CMeetingType("Test Meeting Type",
-			"Test meeting type description", project);
+		meetingType = new CMeetingType("Test Meeting Type", project);
 		// Create test meeting status
 		status = new CMeetingStatus("SCHEDULED", project);
 		// Create test users
-		responsible = new CUser();
-		responsible.setName("John Doe");
+		responsible = new CUser("John Doe");
 		responsible.setEmail("john@example.com");
-		participant1 = new CUser();
-		participant1.setName("Jane Smith");
+		participant1 = new CUser("Jane Smith");
 		participant1.setEmail("jane@example.com");
-		participant2 = new CUser();
-		participant2.setName("Bob Johnson");
+		participant2 = new CUser("Bob Johnson");
 		participant2.setEmail("bob@example.com");
-		attendee1 = new CUser();
-		attendee1.setName("Alice Brown");
+		attendee1 = new CUser("Alice Brown");
 		attendee1.setEmail("alice@example.com");
 		// Create test activity
 		relatedActivity = new CActivity("Test Activity", project);
@@ -178,5 +173,11 @@ class CMeetingEnhancedTest {
 		meeting.setParticipants(null);
 		assertNotNull(meeting.getParticipants());
 		assertEquals(0, meeting.getParticipants().size());
+	}
+
+	@Override
+	protected void setupForTest() {
+		// TODO Auto-generated method stub
+		
 	}
 }

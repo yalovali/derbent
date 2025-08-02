@@ -52,39 +52,11 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> {
 			LOGGER.error("addApprovalRequirement called with null approver");
 			throw new IllegalArgumentException("Approver cannot be null");
 		}
-		final CDecisionApproval approval = new CDecisionApproval(decision, approver);
+		final CDecisionApproval approval = new CDecisionApproval("approval");
+		approval.setDecision(decision);
 		decision.addApproval(approval);
 		repository.saveAndFlush(decision);
 		return approval;
-	}
-
-	/**
-	 * Creates a new decision for a project.
-	 * @param name    the decision name - must not be null or empty
-	 * @param project the project - must not be null
-	 * @return the created decision
-	 */
-	@Transactional
-	public CDecision createDecision(final String name, final CProject project) {
-		LOGGER.info("createDecision called with name: {}, project: {}", name,
-			project != null ? project.getName() : "null");
-
-		if ((name == null) || name.trim().isEmpty()) {
-			LOGGER.error("createDecision called with null or empty name");
-			throw new IllegalArgumentException("Decision name cannot be null or empty");
-		}
-
-		if (project == null) {
-			LOGGER.error("createDecision called with null project");
-			throw new IllegalArgumentException("Project cannot be null");
-		}
-		final CDecision decision = new CDecision(name.trim(), project);
-		return repository.saveAndFlush(decision);
-	}
-
-	@Override
-	protected CDecision createNewEntityInstance() {
-		return new CDecision();
 	}
 
 	/**
@@ -210,6 +182,9 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> {
 		final int totalCount = decision.getApprovalCount();
 		return String.format("%d/%d approved", approvedCount, totalCount);
 	}
+
+	@Override
+	protected Class<CDecision> getEntityClass() { return CDecision.class; }
 
 	/**
 	 * Checks if a decision is fully approved.

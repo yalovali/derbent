@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.meetings.domain.CMeetingType;
-import tech.derbent.projects.domain.CProject;
 
 /**
  * CMeetingTypeService - Service layer for CMeetingType entity. Layer: Service (MVC)
@@ -35,50 +34,26 @@ public class CMeetingTypeService extends CEntityOfProjectService<CMeetingType> {
 	}
 
 	/**
-	 * Creates a new meeting type entity with name, description and project.
-	 * @param name        the name of the meeting type
-	 * @param description the description of the meeting type
-	 * @param project     the project this type belongs to
-	 */
-	@Transactional
-	public void createEntity(final String name, final String description, final CProject project) {
-		LOGGER.info("Creating new meeting type: {} with description: {} for project: {}", 
-			name, description, project.getName());
-
-		// Standard test failure logic for error handler testing
-		if ("fail".equals(name)) {
-			LOGGER.warn("Test failure requested for name: {}", name);
-			throw new RuntimeException("This is for testing the error handler");
-		}
-		// Validate name using parent validation
-		validateEntityName(name);
-		final CMeetingType entity = new CMeetingType(name, description, project);
-		repository.saveAndFlush(entity);
-		LOGGER.info("Meeting type created successfully with name: {} for project: {}", 
-			name, project.getName());
-	}
-
-	@Override
-	protected CMeetingType createNewEntityInstance() {
-		return new CMeetingType();
-	}
-
-	/**
-	 * Gets a meeting type by ID with eagerly loaded relationships.
-	 * Overrides parent get() method to prevent LazyInitializationException.
+	 * Gets a meeting type by ID with eagerly loaded relationships. Overrides parent get()
+	 * method to prevent LazyInitializationException.
 	 * @param id the meeting type ID
 	 * @return Optional containing the meeting type with loaded relationships
 	 */
 	@Override
-	@Transactional(readOnly = true)
+	@Transactional (readOnly = true)
 	public Optional<CMeetingType> get(final Long id) {
+
 		if (id == null) {
 			LOGGER.debug("Getting CMeetingType with null ID - returning empty");
 			return Optional.empty();
 		}
 		LOGGER.debug("Getting CMeetingType with ID {} (with eager loading)", id);
-		final Optional<CMeetingType> entity = ((CMeetingTypeRepository) repository).findByIdWithRelationships(id);
+		final Optional<CMeetingType> entity =
+			((CMeetingTypeRepository) repository).findByIdWithRelationships(id);
 		entity.ifPresent(this::initializeLazyFields);
 		return entity;
 	}
+
+	@Override
+	protected Class<CMeetingType> getEntityClass() { return CMeetingType.class; }
 }

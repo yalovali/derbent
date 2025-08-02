@@ -6,7 +6,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.stereotype.Component;
 
-import tech.derbent.abstracts.views.CAbstractMDPage;
+import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
 import tech.derbent.session.service.LayoutService;
 
 /**
@@ -32,9 +32,9 @@ public class LayoutServiceInjector implements BeanPostProcessor {
 		throws BeansException {
 		// LOGGER.debug("Processing bean: {} (type: {})", beanName, bean != null ?
 		// bean.getClass().getSimpleName() : "null");
-		if (bean instanceof CAbstractMDPage) {
+		if (bean instanceof CAbstractNamedEntityPage) {
 			if (layoutService != null) {
-				((CAbstractMDPage<?>) bean).setLayoutService(layoutService);
+				((CAbstractNamedEntityPage<?>) bean).setLayoutService(layoutService);
 				LOGGER.debug("Injected LayoutService into CAbstractMDPage: {}", beanName);
 			}
 			else {

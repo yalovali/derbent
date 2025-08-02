@@ -27,8 +27,6 @@ import tech.derbent.users.domain.CUser;
 @PreAuthorize ("isAuthenticated()")
 public class CCommentService extends CAbstractService<CComment> {
 
-	private final CCommentPriorityService commentPriorityService;
-
 	/**
 	 * Constructor for CCommentService.
 	 * @param repository             the comment repository
@@ -38,7 +36,6 @@ public class CCommentService extends CAbstractService<CComment> {
 	CCommentService(final CCommentRepository repository,
 		final CCommentPriorityService commentPriorityService, final Clock clock) {
 		super(repository, clock);
-		this.commentPriorityService = commentPriorityService;
 	}
 
 	/**
@@ -82,13 +79,6 @@ public class CCommentService extends CAbstractService<CComment> {
 			throw new IllegalArgumentException("Author cannot be null");
 		}
 		final CComment comment = new CComment(commentText, activity, author);
-		// Set default priority if none specified
-		final Optional<CCommentPriority> defaultPriority =
-			commentPriorityService.findDefaultPriority();
-
-		if (defaultPriority.isPresent()) {
-			comment.setPriority(defaultPriority.get());
-		}
 		return save(comment);
 	}
 
@@ -224,6 +214,9 @@ public class CCommentService extends CAbstractService<CComment> {
 		}
 		return ((CCommentRepository) repository).findByIdWithRelationships(id);
 	}
+
+	@Override
+	protected Class<CComment> getEntityClass() { return CComment.class; }
 
 	/**
 	 * Toggles the important flag of a comment.

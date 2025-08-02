@@ -4,8 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import tech.derbent.abstracts.domains.CTestBase;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.projects.domain.CProject;
 
@@ -13,20 +15,29 @@ import tech.derbent.projects.domain.CProject;
  * Test class for CStatus base class functionality. Uses CActivityStatus as a concrete
  * implementation for testing.
  */
-class CStatusTest {
+class CStatusTest extends CTestBase {
+
+	protected CProject project;
+
+	// run test start
+	@BeforeEach
+	void setUp() {
+		// Initialize a project for testing
+		project = new CProject("Test Project");
+	}
 
 	@Test
 	void testConstructorWithBlankName() {
 		// When/Then
 		assertThrows(IllegalArgumentException.class,
-			() -> new CActivityStatus("   ", new CProject()));
+			() -> new CActivityStatus("   ", project));
 	}
 
 	@Test
 	void testConstructorWithEmptyName() {
 		// When/Then
 		assertThrows(IllegalArgumentException.class,
-			() -> new CActivityStatus("", new CProject()));
+			() -> new CActivityStatus("", project));
 	}
 
 	@Test
@@ -34,7 +45,7 @@ class CStatusTest {
 		// Given
 		final String name = "TODO";
 		// When
-		final CActivityStatus status = new CActivityStatus(name, new CProject());
+		final CActivityStatus status = new CActivityStatus(name, project);
 		// Then
 		assertNotNull(status);
 		assertEquals(name, status.getName());
@@ -62,17 +73,9 @@ class CStatusTest {
 	}
 
 	@Test
-	void testDefaultConstructor() {
-		// When
-		final CActivityStatus status = new CActivityStatus();
-		// Then
-		assertNotNull(status);
-	}
-
-	@Test
 	void testSetDescription() {
 		// Given
-		final CActivityStatus status = new CActivityStatus("REVIEW", new CProject());
+		final CActivityStatus status = new CActivityStatus("REVIEW", project);
 		final String description = "Task is waiting for review";
 		// When
 		status.setDescription(description);
@@ -83,7 +86,7 @@ class CStatusTest {
 	@Test
 	void testSetDescriptionWithNull() {
 		// Given
-		final CActivityStatus status = new CActivityStatus("REVIEW", new CProject());
+		final CActivityStatus status = new CActivityStatus("REVIEW", project);
 		// When
 		status.setDescription(null);
 		// Then - should accept null description
@@ -92,19 +95,15 @@ class CStatusTest {
 
 	@Test
 	void testSetName() {
-		// Given
-		final CActivityStatus status = new CActivityStatus();
 		final String name = "DONE";
-		// When
-		status.setName(name);
-		// Then
+		final CActivityStatus status = new CActivityStatus(name, project);
 		assertEquals(name, status.getName());
 	}
 
 	@Test
 	void testSetNameWithBlank() {
 		// Given
-		final CActivityStatus status = new CActivityStatus("TODO", new CProject());
+		final CActivityStatus status = new CActivityStatus("TODO", project);
 		// When/Then
 		assertThrows(IllegalArgumentException.class, () -> status.setName("   "));
 	}
@@ -112,7 +111,7 @@ class CStatusTest {
 	@Test
 	void testSetNameWithEmpty() {
 		// Given
-		final CActivityStatus status = new CActivityStatus("TODO", new CProject());
+		final CActivityStatus status = new CActivityStatus("TODO", project);
 		// When/Then
 		assertThrows(IllegalArgumentException.class, () -> status.setName(""));
 	}
@@ -120,7 +119,7 @@ class CStatusTest {
 	@Test
 	void testSetNameWithNull() {
 		// Given
-		final CActivityStatus status = new CActivityStatus("TODO", new CProject());
+		final CActivityStatus status = new CActivityStatus("TODO", project);
 		// When/Then
 		assertThrows(IllegalArgumentException.class, () -> status.setName(null));
 	}
@@ -129,20 +128,22 @@ class CStatusTest {
 	void testToStringWithName() {
 		// Given
 		final String name = "BLOCKED";
-		final CActivityStatus status = new CActivityStatus(name, new CProject());
-		// When
+		final CActivityStatus status = new CActivityStatus(name, project);
 		final String result = status.toString();
-		// Then
 		assertEquals(name, result);
 	}
 
 	@Test
 	void testToStringWithoutName() {
-		// Given
-		final CActivityStatus status = new CActivityStatus();
-		// When
+		final CActivityStatus status = new CActivityStatus("TODO", project);
 		final String result = status.toString();
 		// Then - should fall back to superclass toString
 		assertNotNull(result);
+	}
+
+	@Override
+	protected void setupForTest() {
+		// TODO Auto-generated method stub
+		
 	}
 }

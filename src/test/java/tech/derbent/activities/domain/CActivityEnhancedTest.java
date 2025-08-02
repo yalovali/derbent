@@ -10,11 +10,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import tech.derbent.projects.domain.CProject;
+import tech.derbent.abstracts.domains.CTestBase;
 import tech.derbent.users.domain.CUser;
 
 /**
@@ -22,11 +21,9 @@ import tech.derbent.users.domain.CUser;
  * comprehensive project management.
  */
 @DisplayName ("Enhanced CActivity Tests")
-class CActivityEnhancedTest {
+class CActivityEnhancedTest extends CTestBase {
 
 	private CActivity activity;
-
-	private CProject project;
 
 	private CUser user1;
 
@@ -38,17 +35,12 @@ class CActivityEnhancedTest {
 
 	private CActivityPriority highPriority;
 
-	@BeforeEach
-	void setUp() {
-		// Create test project
-		project = new CProject();
-		project.setName("Test Project");
-		// Create test users
-		user1 = new CUser();
-		user1.setName("John");
+	@Override
+	protected void setupForTest() {
+		// Create test project Create test users
+		user1 = new CUser("John");
 		user1.setLogin("john.doe");
-		user2 = new CUser();
-		user2.setName("Jane");
+		user2 = new CUser("Jane");
 		user2.setLogin("jane.smith");
 		// Create test status
 		todoStatus = new CActivityStatus("TODO", project);

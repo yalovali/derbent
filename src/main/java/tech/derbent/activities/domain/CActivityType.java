@@ -8,27 +8,15 @@ import tech.derbent.abstracts.domains.CTypeEntity;
 import tech.derbent.projects.domain.CProject;
 
 /**
- * CActivityType - Domain entity representing activity types. Layer: Domain (MVC)
- * Inherits from CTypeEntity to provide project-aware type functionality for activities.
+ * CActivityType - Domain entity representing activity types. Layer: Domain (MVC) Inherits
+ * from CTypeEntity to provide project-aware type functionality for activities.
  */
 @Entity
-@Table(name = "cactivitytype")
-@AttributeOverride(name = "id", column = @Column(name = "cactivitytype_id"))
-public class CActivityType extends CTypeEntity {
+@Table (name = "cactivitytype")
+@AttributeOverride (name = "id", column = @Column (name = "cactivitytype_id"))
+public class CActivityType extends CTypeEntity<CActivityType> {
 
-    /**
-     * Default constructor for JPA.
-     */
-    public CActivityType() {
-        super();
-    }
-
-    /**
-     * Constructor with required fields only.
-     * @param name    the name of the activity type
-     * @param project the project this type belongs to
-     */
-    public CActivityType(final String name, final CProject project) {
-        super(name, project);
-    }
+	public CActivityType(final String name, final CProject project) {
+		super(CActivityType.class, name, project);
+	}
 }

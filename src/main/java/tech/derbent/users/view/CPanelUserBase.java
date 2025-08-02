@@ -51,7 +51,7 @@ public abstract class CPanelUserBase extends CAccordionDBEntity<CUser> {
 
 				@Override
 				@SuppressWarnings ("unchecked")
-				public <T extends CEntityDB> java.util.List<T>
+				public <T extends CEntityDB<T>> java.util.List<T>
 					getItems(final Class<T> entityType) {
 					LOGGER.debug("Getting items for entity type: {}",
 						entityType.getSimpleName());

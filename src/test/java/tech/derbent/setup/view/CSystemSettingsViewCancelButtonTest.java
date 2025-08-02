@@ -17,6 +17,7 @@ import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 
+import tech.derbent.abstracts.domains.CTestBase;
 import tech.derbent.setup.domain.CSystemSettings;
 import tech.derbent.setup.service.CSystemSettingsService;
 
@@ -25,7 +26,7 @@ import tech.derbent.setup.service.CSystemSettingsService;
  * rejecting changes as required by the coding guidelines.
  */
 @ExtendWith (MockitoExtension.class)
-class CSystemSettingsViewCancelButtonTest {
+class CSystemSettingsViewCancelButtonTest extends CTestBase {
 
 	@Mock
 	private CSystemSettingsService systemSettingsService;
@@ -94,5 +95,11 @@ class CSystemSettingsViewCancelButtonTest {
 		assertNotNull(view, "CSystemSettingsView should be initialized");
 		assertNotNull(systemSettingsService,
 			"System settings service should be injected");
+	}
+
+	@Override
+	protected void setupForTest() {
+		// TODO Auto-generated method stub
+		
 	}
 }

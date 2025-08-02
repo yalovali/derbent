@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import tech.derbent.abstracts.services.CAbstractService;
+import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.activities.domain.CActivityStatus;
 
 /**
@@ -20,7 +20,7 @@ import tech.derbent.activities.domain.CActivityStatus;
  */
 @Service
 @Transactional
-public class CActivityStatusService extends CAbstractService<CActivityStatus> {
+public class CActivityStatusService extends CEntityOfProjectService<CActivityStatus> {
 
 	private static final Logger LOGGER =
 		LoggerFactory.getLogger(CActivityStatusService.class);
@@ -190,6 +190,9 @@ public class CActivityStatusService extends CAbstractService<CActivityStatus> {
 			status.isPresent());
 		return status;
 	}
+
+	@Override
+	protected Class<CActivityStatus> getEntityClass() { return CActivityStatus.class; }
 
 	/**
 	 * Save or update an activity status.

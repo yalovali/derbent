@@ -28,7 +28,7 @@ import tech.derbent.companies.domain.CCompany;
 @Entity
 @Table (name = "ccompanysettings")
 @AttributeOverride (name = "id", column = @Column (name = "company_settings_id"))
-public class CCompanySettings extends CEntityDB {
+public class CCompanySettings extends CEntityDB<CCompanySettings> {
 
 	@ManyToOne
 	@JoinColumn (name = "company_id", nullable = false)
@@ -234,17 +234,7 @@ public class CCompanySettings extends CEntityDB {
 	 * Default constructor required by JPA. Initializes entity with default values.
 	 */
 	public CCompanySettings() {
-		super();
-		initializeDefaults();
-	}
-
-	/**
-	 * Constructor with company.
-	 * @param company The company these settings belong to
-	 */
-	public CCompanySettings(final CCompany company) {
-		super();
-		this.company = company;
+		super(CCompanySettings.class);
 		initializeDefaults();
 	}
 

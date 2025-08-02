@@ -36,30 +36,14 @@ import tech.derbent.base.ui.dialogs.CWarningDialog;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.session.service.LayoutService;
 
-public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAbstractPage
-	implements CLayoutChangeListener {
+public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<EntityClass>>
+	extends CAbstractPage implements CLayoutChangeListener {
 
 	private static final long serialVersionUID = 1L;
 
 	protected final Class<EntityClass> entityClass;
 
 	protected CGrid<EntityClass> grid;// = new CGrid<>(EntityClass.class, false);
-
-	/**
-	 * Gets the grid component for testing purposes.
-	 * @return the grid component
-	 */
-	public CGrid<EntityClass> getGrid() {
-		return grid;
-	}
-
-	/**
-	 * Populates the form with entity data - public wrapper for testing.
-	 * @param entity the entity to populate the form with
-	 */
-	public void testPopulateForm(EntityClass entity) {
-		populateForm(entity);
-	}
 
 	private final BeanValidationBinder<EntityClass> binder;
 
@@ -83,7 +67,7 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 
 	protected CSessionService sessionService;
 
-	protected CAbstractMDPage(final Class<EntityClass> entityClass,
+	protected CAbstractEntityDBPage(final Class<EntityClass> entityClass,
 		final CAbstractService<EntityClass> entityService,
 		final CSessionService sessionService) {
 		super();
@@ -356,13 +340,13 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 			} catch (final Exception e) {
 				LOGGER.error("Error in grid data provider for {}: {}",
 					entityClass.getSimpleName(), e.getMessage());
-				
+
 				// Check if this is a lazy loading exception
 				if (e.getCause() instanceof org.hibernate.LazyInitializationException) {
-					LOGGER.error("LazyInitializationException detected - check repository fetch joins for {}", 
+					LOGGER.error(
+						"LazyInitializationException detected - check repository fetch joins for {}",
 						entityClass.getSimpleName());
 				}
-				
 				// Return empty stream on error to prevent UI crashes
 				return java.util.stream.Stream.empty();
 			}
@@ -392,7 +376,7 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 
 			try {
 				// Empty the bound fields by creating new entity and binding it
-				final EntityClass newEntityInstance = newEntity();
+				final EntityClass newEntityInstance = createNewEntity();
 				setCurrentEntity(newEntityInstance);
 				populateForm(newEntityInstance);
 				LOGGER.debug("Bound fields emptied for new entity: {}",
@@ -405,6 +389,10 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		return newButton;
 	}
 
+	protected EntityClass createNewEntity() {
+		return entityService.newEntity();
+	}
+
 	protected CButton createSaveButton(final String buttonText) {
 		LOGGER.info("Creating save button for {}", getClass().getSimpleName());
 		final CButton save = CButton.createPrimary(buttonText, e -> {
@@ -415,7 +403,7 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 				if (currentEntity == null) {
 					LOGGER.warn(
 						"No current entity for save operation, creating new entity");
-					currentEntity = newEntity();
+					currentEntity = createNewEntity();
 					populateForm(currentEntity);
 				}
 				// Write form data to entity
@@ -464,6 +452,12 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	protected abstract String getEntityRouteIdField();
 	protected abstract String getEntityRouteTemplateEdit();
 
+	/**
+	 * Gets the grid component for testing purposes.
+	 * @return the grid component
+	 */
+	public CGrid<EntityClass> getGrid() { return grid; }
+
 	private void initBaseDetailsLayout() {
 		baseDetailsLayout.setClassName("base-details-layout");
 		baseDetailsLayout.setSizeFull();
@@ -480,8 +474,6 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 		splitLayout.addToSecondary(detailsBase);
 		add(splitLayout);
 	}
-
-	protected abstract EntityClass newEntity();
 
 	// this method is called when the page is attached to the UI
 	@Override
@@ -666,6 +658,14 @@ public abstract class CAbstractMDPage<EntityClass extends CEntityDB> extends CAb
 	 */
 	@Override
 	protected abstract void setupToolbar();
+
+	/**
+	 * Populates the form with entity data - public wrapper for testing.
+	 * @param entity the entity to populate the form with
+	 */
+	public void testPopulateForm(final EntityClass entity) {
+		populateForm(entity);
+	}
 
 	/**
 	 * Updates the split layout orientation based on the current layout mode.

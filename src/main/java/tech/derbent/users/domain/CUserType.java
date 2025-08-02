@@ -14,32 +14,14 @@ import tech.derbent.projects.domain.CProject;
 @Entity
 @Table (name = "cusertype")
 @AttributeOverride (name = "id", column = @Column (name = "cusertype_id"))
-public class CUserType extends CEntityOfProject {
-
-	/**
-	 * Default constructor for JPA.
-	 */
-	public CUserType() {
-		super();
-	}
+public class CUserType extends CEntityOfProject<CUserType> {
 
 	/**
 	 * Constructor with name and project.
-	 * @param name the name of the user type
+	 * @param name    the name of the user type
 	 * @param project the project this type belongs to
 	 */
 	public CUserType(final String name, final CProject project) {
-		super(name, project);
-	}
-
-	/**
-	 * Constructor with name, description and project.
-	 * @param name        the name of the user type
-	 * @param description the description of the user type
-	 * @param project     the project this type belongs to
-	 */
-	public CUserType(final String name, final String description, final CProject project) {
-		super(name, project);
-		setDescription(description);
+		super(CUserType.class, name, project);
 	}
 }

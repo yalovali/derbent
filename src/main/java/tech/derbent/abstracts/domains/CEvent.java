@@ -20,7 +20,7 @@ import tech.derbent.users.domain.CUser;
  * CEntityOfProject to maintain project context for all events.
  */
 @MappedSuperclass
-public abstract class CEvent extends CEntityDB {
+public abstract class CEvent<EntityClass> extends CEntityDB<EntityClass> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEvent.class);
 
@@ -43,14 +43,8 @@ public abstract class CEvent extends CEntityDB {
 	private CUser author;
 
 	// Default constructor for JPA
-	public CEvent() {
-		super();
-		this.eventDate = LocalDateTime.now();
-	}
-
-	public CEvent(final CUser author) {
-		super();
-		this.author = author;
+	public CEvent(final Class<EntityClass> clazz) {
+		super(clazz);
 		this.eventDate = LocalDateTime.now();
 	}
 

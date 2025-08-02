@@ -11,7 +11,7 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.MetaData;
 
 @MappedSuperclass
-public abstract class CEntityNamed extends CEntityDB {
+public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityNamed.class);
 
@@ -53,12 +53,8 @@ public abstract class CEntityNamed extends CEntityDB {
 	)
 	private LocalDateTime lastModifiedDate;
 
-	public CEntityNamed() {
-		super();
-	}
-
-	public CEntityNamed(final String name) {
-		this();
+	public CEntityNamed(final Class<EntityClass> clazz, final String name) {
+		super(clazz);
 
 		if ((name == null) || name.trim().isEmpty()) {
 			LOGGER.error("Constructor called with null or empty name for {}",
@@ -68,11 +64,6 @@ public abstract class CEntityNamed extends CEntityDB {
 		}
 		this.name = name.trim();
 		this.description = null; // Default description is null
-	}
-
-	public CEntityNamed(final String name, final String description) {
-		this(name);
-		this.description = description;
 	}
 
 	public LocalDateTime getCreatedDate() { return createdDate; }

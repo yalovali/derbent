@@ -73,20 +73,10 @@ public class CRiskView extends CProjectAwareMDPage<CRisk> {
 	}
 
 	@Override
-	protected CRisk createNewEntityInstance() {
-		return new CRisk();
-	}
-
-	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
 
 	@Override
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	@Override
-	protected CRisk newEntity() {
-		return super.newEntity(); // Uses the project-aware implementation from parent
-	}
 
 	@Override
 	protected void setProjectForEntity(final CRisk entity, final CProject project) {

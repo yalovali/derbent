@@ -10,20 +10,17 @@ import jakarta.persistence.MappedSuperclass;
 //mapped superclass is a class that is not
 
 @MappedSuperclass
-public abstract class CEntityDB extends CEntity {
+public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> {
 
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	public CEntityDB() {
-		super();
+	public CEntityDB(final Class<EntityClass> clazz) {
+		super(clazz);
 	}
 
-	public CEntityDB(final String name) {
-		this();
-	}
-
+	@SuppressWarnings ("unchecked")
 	@Override
 	public boolean equals(final Object obj) {
 
@@ -38,7 +35,7 @@ public abstract class CEntityDB extends CEntity {
 		if (!(obj instanceof CEntityDB)) {
 			return false;
 		}
-		final CEntityDB other = (CEntityDB) obj;
+		final CEntityDB<EntityClass> other = (CEntityDB<EntityClass>) obj;
 		final Class<?> thisClass = ProxyUtils.getUserClass(getClass());
 		final Class<?> otherClass = ProxyUtils.getUserClass(other.getClass());
 

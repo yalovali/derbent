@@ -87,11 +87,6 @@ public class COrdersView extends CProjectAwareMDPage<COrder> {
 	}
 
 	@Override
-	protected COrder createNewEntityInstance() {
-		return new COrder();
-	}
-
-	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
 
 	@Override

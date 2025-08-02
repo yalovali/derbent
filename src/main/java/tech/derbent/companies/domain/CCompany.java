@@ -22,7 +22,7 @@ import tech.derbent.abstracts.domains.CEntityNamed;
 @Table (name = "ccompany") // table name for the entity as the default is the class name
 							// in lowercase
 @AttributeOverride (name = "id", column = @Column (name = "company_id"))
-public class CCompany extends CEntityNamed {
+public class CCompany extends CEntityNamed<CCompany> {
 	// name and description fields are now inherited from CEntityNamed
 
 	@Column (
@@ -89,18 +89,9 @@ public class CCompany extends CEntityNamed {
 	)
 	private List<tech.derbent.users.domain.CUser> users;
 
-	public CCompany() {
-		super();
-	}
-
 	public CCompany(final String name) {
-		super(name); // Use the CEntityNamed constructor
+		super(CCompany.class, name); // Use the CEntityNamed constructor
 	}
-
-	public CCompany(final String name, final String description) {
-		super(name, description); // Use the CEntityNamed constructor
-	}
-	// name, description getters and setters are now inherited from CEntityNamed
 
 	public String getAddress() { return address; }
 

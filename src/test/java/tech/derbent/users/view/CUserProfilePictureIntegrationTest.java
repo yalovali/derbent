@@ -13,6 +13,7 @@ import javax.imageio.ImageIO;
 
 import org.junit.jupiter.api.Test;
 
+import tech.derbent.abstracts.domains.CTestBase;
 import tech.derbent.base.utils.CImageUtils;
 import tech.derbent.users.domain.CUser;
 
@@ -20,7 +21,7 @@ import tech.derbent.users.domain.CUser;
  * Integration test for profile picture database storage functionality. Tests the
  * end-to-end flow of storing and retrieving profile pictures from database.
  */
-public class CUserProfilePictureIntegrationTest {
+public class CUserProfilePictureIntegrationTest extends CTestBase {
 
 	/**
 	 * Creates a simple test image as byte array.
@@ -87,5 +88,11 @@ public class CUserProfilePictureIntegrationTest {
 			final String dataUrl = CImageUtils.createDataUrl(retrievedData);
 			// Should return null for null input
 		});
+	}
+
+	@Override
+	protected void setupForTest() {
+		// TODO Auto-generated method stub
+		
 	}
 }

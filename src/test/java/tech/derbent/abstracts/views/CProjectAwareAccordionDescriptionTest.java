@@ -9,6 +9,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 
+import tech.derbent.abstracts.domains.CTestBase;
 import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.projects.domain.CProject;
@@ -19,7 +20,7 @@ import tech.derbent.session.service.CSessionService;
  * functionality. This test verifies that panels properly register/unregister as project
  * change listeners and refresh when project changes occur.
  */
-public class CProjectAwareAccordionDescriptionTest {
+public class CProjectAwareAccordionDescriptionTest extends CTestBase {
 
 	/**
 	 * Test implementation of CProjectAwareAccordionDescription for testing purposes.
@@ -70,6 +71,8 @@ public class CProjectAwareAccordionDescriptionTest {
 		}
 	}
 
+	private CProject project;
+
 	@Mock
 	private BeanValidationBinder<CActivity> mockBinder;
 
@@ -84,7 +87,8 @@ public class CProjectAwareAccordionDescriptionTest {
 	@BeforeEach
 	void setUp() {
 		MockitoAnnotations.openMocks(this);
-		final CActivity mockActivity = new CActivity();
+		project = new CProject("Test Project");
+		final CActivity mockActivity = new CActivity("Test Activity", project);
 		mockActivity.setName("Test Activity");
 		testPanel = new TestProjectAwarePanel(mockActivity, mockBinder, mockService,
 			mockSessionService);
@@ -92,48 +96,36 @@ public class CProjectAwareAccordionDescriptionTest {
 
 	@Test
 	void testNullProjectHandling() {
-		// Test that null project is handled gracefully
 		testPanel.resetRefreshFlag();
 		testPanel.onProjectChanged(null);
-		// Should not throw exception
 		assertNotNull(testPanel);
 	}
 
 	@Test
 	void testPanelCreation() {
-		// Verify that the panel can be created successfully
 		assertNotNull(testPanel);
 		assertNotNull(testPanel.getSessionService());
 	}
 
 	@Test
 	void testProjectChangeNotification() {
-		// Create test projects
-		final CProject oldProject = new CProject();
-		oldProject.setName("Old Project");
-		final CProject newProject = new CProject();
-		newProject.setName("New Project");
-		// Reset refresh flag
+		final CProject newProject = new CProject("New Project");
 		testPanel.resetRefreshFlag();
-		// Simulate project change
 		testPanel.onProjectChanged(newProject);
-		// Verify that refresh was called Note: This would be true if we have an entity
-		// and it belongs to a different project For this test, since we don't set a
-		// project on the activity, it should refresh
-		// assertThat(testPanel.wasRefreshCalled()).isTrue();
 	}
 
 	@Test
 	void testShouldRefreshForProjectDefaultBehavior() {
-		// Create test activity and project
-		final CActivity testActivity = new CActivity();
-		testActivity.setName("Test Activity");
-		final CProject newProject = new CProject();
-		newProject.setName("New Project");
-		// Test default behavior - should always return true
+		final CProject newProject = new CProject("New Project");
+		final CActivity testActivity = new CActivity("Test Activity", newProject);
 		final boolean shouldRefresh =
 			testPanel.shouldRefreshForProject(testActivity, newProject);
-		// Default implementation should return true
 		assertNotNull(shouldRefresh);
+	}
+
+	@Override
+	protected void setupForTest() {
+		// TODO Auto-generated method stub
+		
 	}
 }

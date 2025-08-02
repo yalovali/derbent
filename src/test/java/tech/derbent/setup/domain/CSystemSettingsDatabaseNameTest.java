@@ -13,11 +13,12 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import tech.derbent.abstracts.domains.CTestBase;
 
 /**
  * Test class to verify database name field validation in CSystemSettings
  */
-public class CSystemSettingsDatabaseNameTest {
+public class CSystemSettingsDatabaseNameTest extends CTestBase {
 
 	private Validator validator;
 
@@ -81,5 +82,11 @@ public class CSystemSettingsDatabaseNameTest {
 			.anyMatch(v -> v.getPropertyPath().toString().equals("databaseName"));
 		assertFalse(hasDatabaseNameViolation,
 			"Should not have validation error for valid database name");
+	}
+
+	@Override
+	protected void setupForTest() {
+		// TODO Auto-generated method stub
+		
 	}
 }

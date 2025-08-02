@@ -11,7 +11,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.views.CAbstractMDPage;
+import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
 import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.abstracts.views.CButton;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
@@ -26,7 +26,7 @@ import tech.derbent.users.service.CUserTypeService;
 @PageTitle ("User Master Detail")
 @Menu (order = 3.2, icon = "vaadin:users", title = "Settings.Users")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CUsersView extends CAbstractMDPage<CUser> {
+public class CUsersView extends CAbstractNamedEntityPage<CUser> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -132,7 +132,7 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 
 					if (getCurrentEntity() == null) {
 						// why dont you use populateForm(
-						setCurrentEntity(newEntity());
+						setCurrentEntity(entityService.createEntity());
 					}
 					getBinder().writeBean(getCurrentEntity());
 					// Handle password update if a new password was entered
@@ -175,11 +175,6 @@ public class CUsersView extends CAbstractMDPage<CUser> {
 
 	@Override
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	@Override
-	protected CUser newEntity() {
-		return new CUser();
-	}
 
 	@Override
 	protected void populateForm(final CUser value) {

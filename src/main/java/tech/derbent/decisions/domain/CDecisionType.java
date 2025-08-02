@@ -23,13 +23,13 @@ import tech.derbent.projects.domain.CProject;
 @Entity
 @Table (name = "cdecisiontype")
 @AttributeOverride (name = "id", column = @Column (name = "cdecisiontype_id"))
-public class CDecisionType extends CTypeEntity {
+public class CDecisionType extends CTypeEntity<CDecisionType> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDecisionType.class);
 
-	@Column(name = "requires_approval", nullable = false)
+	@Column (name = "requires_approval", nullable = false)
 	@NotNull
-	@MetaData(
+	@MetaData (
 		displayName = "Requires Approval", required = true, readOnly = false,
 		defaultValue = "false",
 		description = "Whether decisions of this type require approval to proceed",
@@ -38,35 +38,12 @@ public class CDecisionType extends CTypeEntity {
 	private Boolean requiresApproval = false;
 
 	/**
-	 * Default constructor for JPA.
-	 */
-	public CDecisionType() {
-		super();
-	}
-
-	/**
 	 * Constructor with required fields only.
 	 * @param name    the name of the decision type (e.g., "STRATEGIC", "TECHNICAL")
 	 * @param project the project this decision type belongs to
 	 */
 	public CDecisionType(final String name, final CProject project) {
-		super(name, project);
-	}
-
-	/**
-	 * Constructor with all common fields.
-	 * @param name      the name of the decision type
-	 * @param project   the project this decision type belongs to
-	 * @param color     the hex color code for UI display
-	 * @param sortOrder the display order
-	 */
-	public CDecisionType(final String name, final CProject project, final String color,
-		final Integer sortOrder) {
-		super(name, project);
-		LOGGER.debug("CDecisionType constructor called with name: {}, project: {}, color: {}, sortOrder: {}", 
-			name, project, color, sortOrder);
-		setColor(color);
-		setSortOrder(sortOrder);
+		super(CDecisionType.class, name, project);
 	}
 
 	/**
@@ -79,8 +56,9 @@ public class CDecisionType extends CTypeEntity {
 	 */
 	public CDecisionType(final String name, final CProject project, final String color,
 		final Integer sortOrder, final Boolean requiresApproval) {
-		super(name, project);
-		LOGGER.debug("CDecisionType constructor called with name: {}, project: {}, color: {}, sortOrder: {}, requiresApproval: {}", 
+		super(CDecisionType.class, name, project);
+		LOGGER.debug(
+			"CDecisionType constructor called with name: {}, project: {}, color: {}, sortOrder: {}, requiresApproval: {}",
 			name, project, color, sortOrder, requiresApproval);
 		setColor(color);
 		setSortOrder(sortOrder);
@@ -91,8 +69,14 @@ public class CDecisionType extends CTypeEntity {
 	 * Gets the requires approval flag.
 	 * @return true if decisions of this type require approval
 	 */
-	public Boolean getRequiresApproval() {
-		return requiresApproval;
+	public Boolean getRequiresApproval() { return requiresApproval; }
+
+	/**
+	 * Convenience method to check if this decision type requires approval.
+	 * @return true if approval is required, false otherwise
+	 */
+	public boolean requiresApproval() {
+		return Boolean.TRUE.equals(requiresApproval);
 	}
 
 	/**
@@ -103,19 +87,11 @@ public class CDecisionType extends CTypeEntity {
 		this.requiresApproval = requiresApproval;
 	}
 
-	/**
-	 * Convenience method to check if this decision type requires approval.
-	 * @return true if approval is required, false otherwise
-	 */
-	public boolean requiresApproval() {
-		return Boolean.TRUE.equals(requiresApproval);
-	}
-
 	@Override
 	public String toString() {
 		return String.format(
 			"CDecisionType{id=%d, name='%s', color='%s', sortOrder=%d, isActive=%s, requiresApproval=%s, project=%s}",
-			getId(), getName(), getColor(), getSortOrder(), getIsActive(), requiresApproval,
-			getProject() != null ? getProject().getName() : "null");
+			getId(), getName(), getColor(), getSortOrder(), getIsActive(),
+			requiresApproval, getProject() != null ? getProject().getName() : "null");
 	}
 }

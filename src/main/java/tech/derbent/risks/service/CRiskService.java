@@ -20,12 +20,7 @@ public class CRiskService extends CEntityOfProjectService<CRisk> {
 	CRiskService(final CRiskRepository repository, final Clock clock) {
 		super(repository, clock);
 	}
-	// Now using the inherited createEntity(String name) method from
-	// CEntityOfProjectService. The original createEntity method is replaced by the
-	// parent class implementation which includes createEntityForProject method.
 
 	@Override
-	protected CRisk createNewEntityInstance() {
-		return new CRisk();
-	}
+	protected Class<CRisk> getEntityClass() { return CRisk.class; }
 }

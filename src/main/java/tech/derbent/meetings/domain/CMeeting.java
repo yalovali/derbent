@@ -28,12 +28,8 @@ import tech.derbent.users.domain.CUser;
 @Entity
 @Table (name = "cmeeting") // table name for the entity as the default is the class name
 							// in lowercase
-@AttributeOverride (name = "id", column = @Column (name = "meeting_id")) // Override the
-																			// default
-																			// column name
-																			// for the ID
-																			// field
-public class CMeeting extends CEntityOfProject {
+@AttributeOverride (name = "id", column = @Column (name = "meeting_id"))
+public class CMeeting extends CEntityOfProject<CMeeting> {
 
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "cmeetingtype_id", nullable = true)
@@ -164,13 +160,8 @@ public class CMeeting extends CEntityOfProject {
 	)
 	private String linkedElement;
 
-	public CMeeting() {
-		super();
-		// Default constructor - project will be set later
-	}
-
 	public CMeeting(final String name, final CProject project) {
-		super(name, project);
+		super(CMeeting.class, name, project);
 	}
 
 	/**
@@ -181,7 +172,7 @@ public class CMeeting extends CEntityOfProject {
 	 */
 	public CMeeting(final String name, final CProject project,
 		final CMeetingType meetingType) {
-		super(name, project);
+		super(CMeeting.class, name, project);
 		this.meetingType = meetingType;
 	}
 

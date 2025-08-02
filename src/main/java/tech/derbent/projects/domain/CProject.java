@@ -11,12 +11,11 @@ import tech.derbent.abstracts.domains.CEntityNamed;
  * CEntityDB to provide database functionality.
  */
 @Entity
-@Table (name = "cproject") // table name for the entity as the default is the class name
-							// in lowercase
-@AttributeOverride (name = "id", column = @Column (name = "project_id")) // Override the
-																			// default
-																			// column name
-																			// for the ID
-																			// field
-public class CProject extends CEntityNamed {
+@Table (name = "cproject")
+@AttributeOverride (name = "id", column = @Column (name = "project_id"))
+public class CProject extends CEntityNamed<CProject> {
+
+	public CProject(final String name) {
+		super(CProject.class, name);
+	}
 }

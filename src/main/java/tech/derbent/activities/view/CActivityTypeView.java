@@ -61,20 +61,10 @@ public class CActivityTypeView extends CProjectAwareMDPage<CActivityType> {
 	}
 
 	@Override
-	protected CActivityType createNewEntityInstance() {
-		return new CActivityType();
-	}
-
-	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
 
 	@Override
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	@Override
-	protected CActivityType newEntity() {
-		return new CActivityType();
-	}
 
 	@Override
 	protected void setProjectForEntity(final CActivityType entity,

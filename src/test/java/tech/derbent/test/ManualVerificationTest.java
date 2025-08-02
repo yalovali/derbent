@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
+import tech.derbent.abstracts.domains.CTestBase;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.users.domain.CUser;
@@ -27,7 +28,7 @@ import tech.derbent.users.service.CUserTypeService;
 	"spring.jpa.hibernate.ddl-auto=create-drop" }
 )
 @Transactional
-public class ManualVerificationTest {
+public class ManualVerificationTest extends CTestBase {
 
 	@Autowired
 	private CUserService userService;
@@ -44,7 +45,8 @@ public class ManualVerificationTest {
 		// Test that company service can provide data for ComboBox
 		assertNotNull(companyService, "Company service should be available");
 		// Create a test company
-		final CCompany testCompany = new CCompany("Test Company", "Test Description");
+		final CCompany testCompany = new CCompany("Test Company");
+		testCompany.setDescription("Test Description");
 		testCompany.setEnabled(true);
 		companyService.save(testCompany);
 		// Verify that findEnabledCompanies returns the company
@@ -99,5 +101,11 @@ public class ManualVerificationTest {
 			"Company name should match");
 		System.out.println(
 			"✓ User-Company relationship verified: Users can be assigned to companies");
+	}
+
+	@Override
+	protected void setupForTest() {
+		// TODO Auto-generated method stub
+		
 	}
 }

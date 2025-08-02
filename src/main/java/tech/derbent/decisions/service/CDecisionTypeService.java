@@ -30,36 +30,6 @@ public class CDecisionTypeService extends CEntityOfProjectService<CDecisionType>
 	}
 
 	/**
-	 * Creates a new decision type with only required fields.
-	 * @param name    the decision type name - must not be null or empty
-	 * @param project the project this type belongs to - must not be null
-	 * @return the created decision type
-	 */
-	@Transactional
-	public CDecisionType createDecisionType(final String name, final CProject project) {
-		LOGGER.info("createDecisionType called with name: {} for project: {}", name,
-			project != null ? project.getName() : "null");
-
-		if ((name == null) || name.trim().isEmpty()) {
-			LOGGER.error("createDecisionType called with null or empty name");
-			throw new IllegalArgumentException(
-				"Decision type name cannot be null or empty");
-		}
-
-		if (project == null) {
-			LOGGER.error("createDecisionType called with null project");
-			throw new IllegalArgumentException("Project cannot be null");
-		}
-		final CDecisionType decisionType = new CDecisionType(name.trim(), project);
-		return repository.saveAndFlush(decisionType);
-	}
-
-	@Override
-	protected CDecisionType createNewEntityInstance() {
-		return new CDecisionType();
-	}
-
-	/**
 	 * Finds all active decision types for a project.
 	 * @param project the project
 	 * @return list of active decision types for the project
@@ -127,6 +97,9 @@ public class CDecisionTypeService extends CEntityOfProjectService<CDecisionType>
 		entity.ifPresent(this::initializeLazyFields);
 		return entity;
 	}
+
+	@Override
+	protected Class<CDecisionType> getEntityClass() { return CDecisionType.class; }
 
 	/**
 	 * Updates the sort order of a decision type.

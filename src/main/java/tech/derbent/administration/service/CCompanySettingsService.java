@@ -70,7 +70,8 @@ public class CCompanySettingsService extends CAbstractService<CCompanySettings> 
 		}
 
 		try {
-			final CCompanySettings newSettings = new CCompanySettings(company);
+			final CCompanySettings newSettings = new CCompanySettings();
+			newSettings.setCompany(company);
 			final CCompanySettings savedSettings =
 				companySettingsRepository.saveAndFlush(newSettings);
 			LOGGER.info("Default company settings created successfully for company: {}",
@@ -231,6 +232,9 @@ public class CCompanySettingsService extends CAbstractService<CCompanySettings> 
 				e);
 		}
 	}
+
+	@Override
+	protected Class<CCompanySettings> getEntityClass() { return CCompanySettings.class; }
 
 	/**
 	 * Gets or creates company settings for a company. If settings don't exist, creates

@@ -27,7 +27,7 @@ import tech.derbent.users.domain.CUser;
 @Entity
 @Table (name = "ccomment")
 @AttributeOverride (name = "id", column = @Column (name = "comment_id"))
-public class CComment extends CEvent {
+public class CComment extends CEvent<CComment> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComment.class);
 
@@ -71,13 +71,6 @@ public class CComment extends CEvent {
 	private boolean important = false;
 
 	/**
-	 * Default constructor for JPA.
-	 */
-	public CComment() {
-		super();
-	}
-
-	/**
 	 * Constructor with comment text, activity, and author.
 	 * @param commentText the comment content text - must not be null or empty
 	 * @param activity    the activity this comment belongs to - must not be null
@@ -85,19 +78,8 @@ public class CComment extends CEvent {
 	 */
 	public CComment(final String commentText, final CActivity activity,
 		final CUser author) {
-		super(author);
-
-		if ((commentText == null) || commentText.trim().isEmpty()) {
-			LOGGER.warn("CComment constructor - Comment text is null or empty");
-		}
-
-		if (activity == null) {
-			LOGGER.warn("CComment constructor - Activity parameter is null");
-		}
-
-		if (author == null) {
-			LOGGER.warn("CComment constructor - Author parameter is null");
-		}
+		super(CComment.class);
+		setAuthor(author);
 		this.commentText = commentText;
 		this.activity = activity;
 	}

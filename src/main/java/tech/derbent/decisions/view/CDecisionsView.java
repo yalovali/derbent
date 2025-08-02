@@ -103,11 +103,6 @@ public class CDecisionsView extends CProjectAwareMDPage<CDecision> {
 		});
 	}
 
-	@Override
-	protected CDecision createNewEntityInstance() {
-		return new CDecision();
-	}
-
 	/**
 	 * Shows approval status for a decision.
 	 * @param decision the decision to show approval status for

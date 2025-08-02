@@ -36,6 +36,7 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 
 import tech.derbent.abstracts.domains.CEntityConstants;
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.utils.CAuxillaries;
 
 @org.springframework.stereotype.Component
@@ -59,7 +60,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		 * @param entityType the class type of the entity
 		 * @return list of entities to populate the ComboBox
 		 */
-		<T extends CEntityDB> List<T> getItems(Class<T> entityType);
+		<T extends CEntityDB<T>> List<T> getItems(Class<T> entityType);
 	}
 
 	private static final Logger LOGGER =
@@ -188,7 +189,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 	}
 
 	@SuppressWarnings ("unchecked")
-	private static <T extends CEntityDB> ComboBox<T> createComboBox(final Field field,
+	private static <T extends CEntityDB<T>> ComboBox<T> createComboBox(final Field field,
 		final MetaData meta, final BeanValidationBinder<?> binder,
 		final ComboBoxDataProvider dataProvider) {
 
@@ -229,8 +230,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 				// etc.) and has a getName() method - use it for better display instead of
 				// toString()
 				if (item instanceof tech.derbent.abstracts.domains.CEntityNamed) {
-					final tech.derbent.abstracts.domains.CEntityNamed namedEntity =
-						(tech.derbent.abstracts.domains.CEntityNamed) item;
+					final CEntityNamed<T> namedEntity = (CEntityNamed<T>) item;
 					final String name = namedEntity.getName();
 					return ((name != null) && !name.trim().isEmpty()) ? name : "Unnamed "
 						+ item.getClass().getSimpleName() + " #" + namedEntity.getId();

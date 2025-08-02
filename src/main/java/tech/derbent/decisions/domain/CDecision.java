@@ -35,7 +35,7 @@ import tech.derbent.users.domain.CUser;
 @Entity
 @Table (name = "cdecision")
 @AttributeOverride (name = "id", column = @Column (name = "decision_id"))
-public class CDecision extends CEntityOfProject {
+public class CDecision extends CEntityOfProject<CDecision> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDecision.class);
 
@@ -114,20 +114,12 @@ public class CDecision extends CEntityOfProject {
 	private LocalDateTime reviewDate;
 
 	/**
-	 * Default constructor for JPA.
-	 */
-	public CDecision() {
-		super();
-		LOGGER.debug("CDecision() - Creating new decision instance");
-	}
-
-	/**
 	 * Constructor with name and project.
 	 * @param name    the decision name - must not be null or empty
 	 * @param project the project this decision belongs to - must not be null
 	 */
 	public CDecision(final String name, final CProject project) {
-		super(name, project);
+		super(CDecision.class, name, project);
 		LOGGER.debug("CDecision constructor called with name: {} and project: {}", name,
 			project != null ? project.getName() : "null");
 
@@ -148,7 +140,7 @@ public class CDecision extends CEntityOfProject {
 	 */
 	public CDecision(final String name, final CProject project,
 		final String description) {
-		super(name, project);
+		super(CDecision.class, name, project);
 		setDescription(description);
 		LOGGER.debug(
 			"CDecision constructor called with name: {}, project: {}, description: {}",

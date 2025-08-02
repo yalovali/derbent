@@ -32,7 +32,7 @@ public class CGridTestUtils {
 	 * @param grid       the grid to test
 	 * @param testEntity sample entity with initialized relationships
 	 */
-	public static <T extends CEntityDB> void
+	public static <T extends CEntityDB<T>> void
 		testGridColumnsForLazyLoading(final Grid<T> grid, final T testEntity) {
 		LOGGER.info("Testing grid columns for lazy loading issues");
 		assertNotNull(testEntity, "Test entity must not be null");
@@ -48,7 +48,7 @@ public class CGridTestUtils {
 	 * @param grid     the grid to test
 	 * @param testData sample data for testing
 	 */
-	public static <T extends CEntityDB> void testGridDataProvider(final Grid<T> grid,
+	public static <T extends CEntityDB<T>> void testGridDataProvider(final Grid<T> grid,
 		final List<T> testData) {
 		LOGGER.info("Testing grid data provider for {}", grid.getClass().getSimpleName());
 		final DataProvider<T, ?> dataProvider = grid.getDataProvider();
@@ -61,7 +61,7 @@ public class CGridTestUtils {
 	 * @param <T>  the entity type
 	 * @param grid the grid to test
 	 */
-	public static <T extends CEntityDB> void
+	public static <T extends CEntityDB<T>> void
 		testGridDataProviderVariousQueries(final Grid<T> grid) {
 		LOGGER.info("Testing grid data provider with various query parameters");
 		final DataProvider<T, ?> dataProvider = grid.getDataProvider();
@@ -75,7 +75,7 @@ public class CGridTestUtils {
 	 * @param grid              the grid to test
 	 * @param problematicEntity entity with null relationships or problematic data
 	 */
-	public static <T extends CEntityDB> void testGridErrorHandling(final Grid<T> grid,
+	public static <T extends CEntityDB<T>> void testGridErrorHandling(final Grid<T> grid,
 		final T problematicEntity) {
 		LOGGER.info("Testing grid error handling with problematic data");
 		assertNotNull(problematicEntity, "Problematic entity must not be null");
@@ -92,7 +92,7 @@ public class CGridTestUtils {
 	 * @param grid         the grid to test
 	 * @param largeDataset large dataset for performance testing
 	 */
-	public static <T extends CEntityDB> void testGridPerformance(final Grid<T> grid,
+	public static <T extends CEntityDB<T>> void testGridPerformance(final Grid<T> grid,
 		final List<T> largeDataset) {
 		LOGGER.info("Testing grid performance with {} items", largeDataset.size());
 		final long startTime = System.currentTimeMillis();
@@ -115,7 +115,7 @@ public class CGridTestUtils {
 	 * @param grid         the grid to test
 	 * @param testEntities sample entities for selection testing
 	 */
-	public static <T extends CEntityDB> void testGridSelection(final Grid<T> grid,
+	public static <T extends CEntityDB<T>> void testGridSelection(final Grid<T> grid,
 		final List<T> testEntities) {
 		LOGGER.info("Testing grid selection functionality");
 
@@ -143,7 +143,7 @@ public class CGridTestUtils {
 	 * @param grid               the grid to test
 	 * @param expectedColumnKeys expected column keys
 	 */
-	public static <T extends CEntityDB> void validateGridColumns(final Grid<T> grid,
+	public static <T extends CEntityDB<T>> void validateGridColumns(final Grid<T> grid,
 		final String... expectedColumnKeys) {
 		LOGGER.info("Validating grid has expected columns");
 

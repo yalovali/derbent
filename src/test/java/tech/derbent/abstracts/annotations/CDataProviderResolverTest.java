@@ -20,6 +20,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.context.ApplicationContext;
 
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.domains.CTestBase;
 
 /**
  * Test class for CDataProviderResolver to verify annotation-based data provider
@@ -28,22 +29,17 @@ import tech.derbent.abstracts.domains.CEntityDB;
  * resolver's logic rather than actual Spring integration. Integration tests are handled
  * separately to test the full Spring context integration.
  */
-class CDataProviderResolverTest {
+class CDataProviderResolverTest extends CTestBase {
 
 	/**
 	 * Test entity for ComboBox testing
 	 */
-	public static class TestEntity extends CEntityDB {
+	public static class TestEntity extends CEntityDB<TestEntity> {
 
 		private String name;
 
 		public TestEntity() {
-			super();
-		}
-
-		public TestEntity(final String name) {
-			super();
-			this.name = name;
+			super(TestEntity.class);
 		}
 
 		public String getName() { return name; }
@@ -58,6 +54,7 @@ class CDataProviderResolverTest {
 
 	@Mock
 	private ApplicationContext applicationContext;
+
 	private CDataProviderResolver resolver;
 
 	/**
@@ -79,7 +76,7 @@ class CDataProviderResolverTest {
 	}
 
 	@Test
-	@DisplayName("should try automatic resolution when no explicit provider specified")
+	@DisplayName ("should try automatic resolution when no explicit provider specified")
 	void testAutomaticResolutionAttempt() {
 		// Given
 		final MetaData metaData = createMetaData("", "", Object.class, "list");
@@ -98,7 +95,7 @@ class CDataProviderResolverTest {
 	}
 
 	@Test
-	@DisplayName("should prioritize explicit bean name over class")
+	@DisplayName ("should prioritize explicit bean name over class")
 	void testBeanNamePriorityOverClass() {
 		// Given - both bean name and class specified
 		final MetaData metaData =
@@ -115,7 +112,7 @@ class CDataProviderResolverTest {
 	}
 
 	@Test
-	@DisplayName("should return empty list when bean is not found by class")
+	@DisplayName ("should return empty list when bean is not found by class")
 	void testBeanNotFoundByClass() {
 		// Given
 		final MetaData metaData = createMetaData("", "", String.class, "list");
@@ -130,7 +127,7 @@ class CDataProviderResolverTest {
 	}
 
 	@Test
-	@DisplayName("should return empty list when bean is not found by name")
+	@DisplayName ("should return empty list when bean is not found by name")
 	void testBeanNotFoundByName() {
 		// Given
 		final MetaData metaData =
@@ -146,7 +143,7 @@ class CDataProviderResolverTest {
 	}
 
 	@Test
-	@DisplayName("should prioritize explicit class when no bean name specified")
+	@DisplayName ("should prioritize explicit class when no bean name specified")
 	void testClassResolutionWhenNoBeanName() {
 		// Given - only class specified
 		final MetaData metaData = createMetaData("", "", String.class, "list");
@@ -162,7 +159,7 @@ class CDataProviderResolverTest {
 	}
 
 	@Test
-	@DisplayName("should clear caches successfully")
+	@DisplayName ("should clear caches successfully")
 	void testClearCaches() {
 		// When
 		resolver.clearCaches();
@@ -175,7 +172,7 @@ class CDataProviderResolverTest {
 	}
 
 	@Test
-	@DisplayName("should provide cache statistics")
+	@DisplayName ("should provide cache statistics")
 	void testGetCacheStats() {
 		// When
 		final String stats = resolver.getCacheStats();
@@ -187,7 +184,7 @@ class CDataProviderResolverTest {
 	}
 
 	@Test
-	@DisplayName("should handle null entity type gracefully")
+	@DisplayName ("should handle null entity type gracefully")
 	void testNullEntityType() {
 		// Given
 		final MetaData metaData = createMetaData("testService", "", Object.class, "list");
@@ -198,7 +195,7 @@ class CDataProviderResolverTest {
 	}
 
 	@Test
-	@DisplayName("should handle null metadata gracefully")
+	@DisplayName ("should handle null metadata gracefully")
 	void testNullMetaData() {
 		// When & Then
 		final IllegalArgumentException exception =
@@ -208,7 +205,7 @@ class CDataProviderResolverTest {
 	}
 
 	@Test
-	@DisplayName("should handle service method invocation errors gracefully")
+	@DisplayName ("should handle service method invocation errors gracefully")
 	void testServiceMethodInvocationError() {
 		// Given
 		final MetaData metaData = createMetaData("testService", "", Object.class, "list");
@@ -221,5 +218,11 @@ class CDataProviderResolverTest {
 		assertNotNull(result, "Result should not be null");
 		assertTrue(result.isEmpty(),
 			"Result should be empty when method invocation fails");
+	}
+
+	@Override
+	protected void setupForTest() {
+		// TODO Auto-generated method stub
+		
 	}
 }

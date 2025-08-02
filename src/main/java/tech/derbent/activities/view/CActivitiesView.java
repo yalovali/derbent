@@ -114,14 +114,6 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 		});
 	}
 
-	// private final BeanValidationBinder<CProject> binder; private final CProjectService
-	// userService; private final Grid<CProject> grid;// = new Grid<>(CProject.class,
-	// false);
-	@Override
-	protected CActivity createNewEntityInstance() {
-		return new CActivity();
-	}
-
 	@Override
 	protected String getEntityRouteIdField() { // TODO Auto-generated method stub
 		return ENTITY_ID_FIELD;
@@ -130,11 +122,6 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 	@Override
 	protected String getEntityRouteTemplateEdit() { // TODO Auto-generated method stub
 		return ENTITY_ROUTE_TEMPLATE_EDIT;
-	}
-
-	@Override
-	protected CActivity newEntity() {
-		return super.newEntity(); // Uses the project-aware implementation from parent
 	}
 
 	@Override

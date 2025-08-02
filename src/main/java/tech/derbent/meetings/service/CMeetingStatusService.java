@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import tech.derbent.abstracts.services.CAbstractService;
+import tech.derbent.abstracts.services.CAbstractNamedEntityService;
 import tech.derbent.meetings.domain.CMeetingStatus;
 import tech.derbent.projects.domain.CProject;
 
@@ -21,7 +21,7 @@ import tech.derbent.projects.domain.CProject;
  */
 @Service
 @Transactional
-public class CMeetingStatusService extends CAbstractService<CMeetingStatus> {
+public class CMeetingStatusService extends CAbstractNamedEntityService<CMeetingStatus> {
 
 	private static final Logger LOGGER =
 		LoggerFactory.getLogger(CMeetingStatusService.class);
@@ -84,6 +84,7 @@ public class CMeetingStatusService extends CAbstractService<CMeetingStatus> {
 	 * @param name the name to check - must not be null
 	 * @return true if the name exists, false otherwise
 	 */
+	@Override
 	@Transactional (readOnly = true)
 	public boolean existsByName(final String name) {
 		LOGGER.debug("existsByName(name={}) - Checking if meeting status name exists",
@@ -162,6 +163,7 @@ public class CMeetingStatusService extends CAbstractService<CMeetingStatus> {
 	 * @param name the status name - must not be null or empty
 	 * @return Optional containing the status if found, empty otherwise
 	 */
+	@Override
 	@Transactional (readOnly = true)
 	public Optional<CMeetingStatus> findByName(final String name) {
 		LOGGER.debug("findByName(name={}) - Finding meeting status by name", name);
@@ -202,6 +204,9 @@ public class CMeetingStatusService extends CAbstractService<CMeetingStatus> {
 			meetingStatusRepository.findDefaultStatus();
 		return status;
 	}
+
+	@Override
+	protected Class<CMeetingStatus> getEntityClass() { return CMeetingStatus.class; }
 
 	/**
 	 * Save or update a meeting status.

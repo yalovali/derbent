@@ -28,13 +28,6 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting> {
 		super(repository, clock);
 		this.meetingRepository = repository;
 	}
-	// Now using the inherited createEntity(String name) method from
-	// CEntityOfProjectService which includes createEntityForProject method.
-
-	@Override
-	protected CMeeting createNewEntityInstance() {
-		return new CMeeting();
-	}
 
 	/**
 	 * Finds meetings where the specified user is an attendee.
@@ -64,13 +57,12 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting> {
 
 	/**
 	 * Finds meetings by project with all relationships loaded to prevent
-	 * LazyInitializationException. This method provides meeting-specific
-	 * relationship loading beyond the base implementation.
-	 * 
+	 * LazyInitializationException. This method provides meeting-specific relationship
+	 * loading beyond the base implementation.
 	 * @param project the project
 	 * @return list of meetings with all relationships loaded
 	 */
-	@Transactional(readOnly = true)
+	@Transactional (readOnly = true)
 	public List<CMeeting> findByProjectWithAllRelationships(final CProject project) {
 		LOGGER.info("findByProjectWithAllRelationships called with project: {}",
 			project != null ? project.getName() : "null");
@@ -83,9 +75,11 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting> {
 		try {
 			return meetingRepository.findByProjectWithAllRelationships(project);
 		} catch (final Exception e) {
-			LOGGER.error("Error finding meetings by project with all relationships '{}': {}",
+			LOGGER.error(
+				"Error finding meetings by project with all relationships '{}': {}",
 				project.getName(), e.getMessage(), e);
-			throw new RuntimeException("Failed to find meetings by project with all relationships", e);
+			throw new RuntimeException(
+				"Failed to find meetings by project with all relationships", e);
 		}
 	}
 
@@ -110,6 +104,9 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting> {
 		entity.ifPresent(this::initializeLazyFields);
 		return entity;
 	}
+
+	@Override
+	protected Class<CMeeting> getEntityClass() { return CMeeting.class; }
 
 	/**
 	 * Initializes lazy fields for CMeeting entity to prevent LazyInitializationException.

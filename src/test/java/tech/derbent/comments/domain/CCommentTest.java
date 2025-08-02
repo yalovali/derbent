@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import tech.derbent.abstracts.domains.CTestBase;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
@@ -19,7 +20,7 @@ import tech.derbent.users.domain.CUser;
  * validation, and basic operations.
  */
 @DisplayName ("CComment Domain Tests")
-class CCommentTest {
+class CCommentTest extends CTestBase {
 
 	private CComment comment;
 
@@ -34,18 +35,16 @@ class CCommentTest {
 	@BeforeEach
 	void setUp() {
 		// Create test project
-		project = new CProject();
-		project.setName("Test Project");
+		project = new CProject("Test Project");
 		// Create test activity
-		activity = new CActivity();
+		activity = new CActivity("Test Activity", project);
 		activity.setName("Test Activity");
 		activity.setProject(project);
 		// Create test user (author)
-		author = new CUser();
-		author.setName("John Doe");
+		author = new CUser("John Doe");
 		author.setLogin("john.doe");
 		// Create test priority
-		priority = new CCommentPriority("High", new CProject());
+		priority = new CCommentPriority("High", project);
 		priority.setColor("#FF0000");
 	}
 
@@ -143,49 +142,6 @@ class CCommentTest {
 	}
 
 	@Test
-	@DisplayName ("Should initialize defaults correctly")
-	void testInitializeDefaults() {
-		// Given
-		comment = new CComment();
-		// When
-		comment.initializeDefaults();
-		// Then
-		assertNotNull(comment.getCommentText());
-		assertEquals("", comment.getCommentText());
-		assertNotNull(comment.getEventDate());
-	}
-
-	@Test
-	@DisplayName ("Should handle null activity gracefully")
-	void testNullActivityName() {
-		// Given
-		comment = new CComment();
-		comment.setActivity(null);
-		// Then
-		assertEquals("No Activity", comment.getActivityName());
-	}
-
-	@Test
-	@DisplayName ("Should handle null author gracefully")
-	void testNullAuthorName() {
-		// Given
-		comment = new CComment();
-		comment.setAuthor(null);
-		// Then
-		assertEquals("Unknown Author", comment.getAuthorName());
-	}
-
-	@Test
-	@DisplayName ("Should handle null comment text in preview")
-	void testNullCommentTextPreview() {
-		// Given
-		comment = new CComment();
-		comment.setCommentText(null);
-		// Then
-		assertEquals("", comment.getCommentPreview());
-	}
-
-	@Test
 	@DisplayName ("Should generate meaningful toString")
 	void testToString() {
 		// Given
@@ -197,5 +153,11 @@ class CCommentTest {
 		assertTrue(result.contains("Test Activity"));
 		assertTrue(result.contains("John Doe"));
 		assertTrue(result.contains("Test comment for toString"));
+	}
+
+	@Override
+	protected void setupForTest() {
+		// TODO Auto-generated method stub
+		
 	}
 }

@@ -8,12 +8,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import tech.derbent.abstracts.domains.CTestBase;
+
 /**
  * Test class for CHierarchicalSideMenu component. Tests the menu hierarchy parsing and
  * structure creation.
  */
-@ExtendWith(MockitoExtension.class)
-class CHierarchicalSideMenuTest {
+@ExtendWith (MockitoExtension.class)
+class CHierarchicalSideMenuTest extends CTestBase {
 
 	private CHierarchicalSideMenu hierarchicalSideMenu;
 
@@ -82,8 +84,7 @@ class CHierarchicalSideMenuTest {
 	@Test
 	void testMenuStructureCreation() {
 		// The menu should have been built from MenuConfiguration and should contain at
-		// least the basic structure components
-		// Verify menu container exists
+		// least the basic structure components Verify menu container exists
 		assertNotNull(hierarchicalSideMenu, "Menu container should exist");
 		// Verify the menu has components (header, level container, etc.)
 		final long childCount = hierarchicalSideMenu.getChildren().count();
@@ -96,5 +97,11 @@ class CHierarchicalSideMenuTest {
 			.println("✅ Menu includes sliding animations and back button functionality");
 		System.out.println(
 			"✅ Menu parses route annotations in format: parentItem2.childItem1.childofchileitem1");
+	}
+
+	@Override
+	protected void setupForTest() {
+		// TODO Auto-generated method stub
+		
 	}
 }

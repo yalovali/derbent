@@ -19,7 +19,7 @@ import tech.derbent.projects.domain.CProject;
 @Entity
 @Table (name = "cmeetingstatus")
 @AttributeOverride (name = "id", column = @Column (name = "cmeetingstatus_id"))
-public class CMeetingStatus extends CStatus {
+public class CMeetingStatus extends CStatus<CMeetingStatus> {
 
 	@Column (name = "is_final", nullable = false)
 	@MetaData (
@@ -30,20 +30,13 @@ public class CMeetingStatus extends CStatus {
 	)
 	private boolean isFinal = false;
 
-	/**
-	 * Default constructor for JPA.
-	 */
-	public CMeetingStatus() {
-		super();
-	}
-
 	public CMeetingStatus(final String name, final CProject project) {
-		super(name, project);
+		super(CMeetingStatus.class, name, project);
 	}
 
 	public CMeetingStatus(final String name, final CProject project,
 		final String description, final String color, final boolean isFinal) {
-		super(name, project);
+		super(CMeetingStatus.class, name, project);
 		setDescription(description);
 		setColor(color != null ? color : "#808080");
 		this.isFinal = isFinal;

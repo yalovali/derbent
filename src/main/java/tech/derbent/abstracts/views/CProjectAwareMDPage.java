@@ -11,10 +11,9 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 
-import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.interfaces.CProjectChangeListener;
-import tech.derbent.abstracts.services.CAbstractService;
+import tech.derbent.abstracts.services.CAbstractNamedEntityService;
 import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.abstracts.utils.PageableUtils;
 import tech.derbent.projects.domain.CProject;
@@ -25,15 +24,16 @@ import tech.derbent.session.service.CSessionService;
  * Implements CProjectChangeListener to receive immediate notifications when the active
  * project changes.
  */
-public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB>
-	extends CAbstractMDPage<EntityClass> implements CProjectChangeListener {
+public abstract class CProjectAwareMDPage<
+	EntityClass extends CEntityOfProject<EntityClass>>
+	extends CAbstractNamedEntityPage<EntityClass> implements CProjectChangeListener {
 
 	private static final long serialVersionUID = 1L;
 
 	protected final CSessionService sessionService;
 
 	protected CProjectAwareMDPage(final Class<EntityClass> entityClass,
-		final CAbstractService<EntityClass> entityService,
+		final CAbstractNamedEntityService<EntityClass> entityService,
 		final CSessionService sessionService) {
 		super(entityClass, entityService, sessionService);
 		this.sessionService = sessionService;
@@ -60,19 +60,13 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB>
 		splitLayout.addToPrimary(wrapper);
 	}
 
-	/**
-	 * Creates a new instance of the entity.
-	 */
-	protected abstract EntityClass createNewEntityInstance();
-
 	@Override
-	protected EntityClass newEntity() {
-		// LOGGER.debug("Creating new entity instance for project-aware MD page");
-		final EntityClass entity = createNewEntityInstance();
-		// Set the active project if available
-		sessionService.getActiveProject()
-			.ifPresent(project -> setProjectForEntity(entity, project));
-		return entity;
+	protected EntityClass createNewEntity() {
+		final String name = "New Item";
+		final CProject project = sessionService.getActiveProject().orElseThrow(
+			() -> new IllegalStateException("No current project set in session"));
+		return ((CEntityOfProjectService<EntityClass>) entityService).newEntity(name,
+			project);
 	}
 
 	@Override
@@ -143,13 +137,12 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB>
 		if (activeProject.isPresent()) {
 			LOGGER.debug("Loading entities for active project: {}",
 				activeProject.get().getName());
-			List<? extends CEntityDB> entities;
+			List<EntityClass> entities;
 
 			// Check if the entity service is for CEntityOfProject entities
 			if (entityService instanceof CEntityOfProjectService) {
-				@SuppressWarnings ("unchecked")
-				final CEntityOfProjectService<CEntityOfProject> projectService =
-					(CEntityOfProjectService<CEntityOfProject>) entityService;
+				final CEntityOfProjectService<EntityClass> projectService =
+					(CEntityOfProjectService<EntityClass>) entityService;
 				entities = projectService.findEntitiesByProject(activeProject.get(),
 					PageableUtils.createSafe(0, 10));
 			}
@@ -159,9 +152,7 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB>
 				LOGGER.debug("Entity service is not project-aware, showing all entities");
 				entities = entityService.list(PageableUtils.createSafe(0, 10));
 			}
-			@SuppressWarnings ("unchecked")
-			final List<EntityClass> typedEntities = (List<EntityClass>) entities;
-			grid.setItems(typedEntities);
+			grid.setItems(entities);
 		}
 		else {
 			// If no active project, show empty grid
@@ -183,13 +174,12 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB>
 			return;
 		}
 		final Pageable pageable = PageableUtils.createSafe(0, 1); // first page, 1 item
-		List<? extends CEntityDB> result;
+		List<EntityClass> result;
 
 		// Check if the entity service is for CEntityOfProject entities
 		if (entityService instanceof CEntityOfProjectService) {
-			@SuppressWarnings ("unchecked")
-			final CEntityOfProjectService<CEntityOfProject> projectService =
-				(CEntityOfProjectService<CEntityOfProject>) entityService;
+			final CEntityOfProjectService<EntityClass> projectService =
+				(CEntityOfProjectService<EntityClass>) entityService;
 			result = projectService
 				.findEntitiesByProject(sessionService.getActiveProject().get(), pageable);
 		}
@@ -197,15 +187,12 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityDB>
 			// For non-project entities, just get the first entity from all entities
 			LOGGER.debug(
 				"Entity service is not project-aware, selecting from all entities");
-			final List<EntityClass> allEntities = entityService.list(pageable);
-			result = allEntities.isEmpty() ? Collections.emptyList()
-				: allEntities.subList(0, Math.min(1, allEntities.size()));
+			result = entityService.list(pageable);
 		}
 		LOGGER.debug("Fetched {} entities for project", result.size());
 
 		if (!result.isEmpty()) {
-			@SuppressWarnings ("unchecked")
-			final EntityClass firstEntity = (EntityClass) result.get(0);
+			final EntityClass firstEntity = result.get(0);
 			grid.select(firstEntity);
 		}
 	}

@@ -23,7 +23,7 @@ import tech.derbent.abstracts.domains.CEntityDB;
 @Entity
 @Table (name = "csystemsettings")
 @AttributeOverride (name = "id", column = @Column (name = "system_settings_id"))
-public class CSystemSettings extends CEntityDB {
+public class CSystemSettings extends CEntityDB<CSystemSettings> {
 
 	// Application Configuration
 	@Column (
@@ -353,7 +353,7 @@ public class CSystemSettings extends CEntityDB {
 	 * Default constructor required by JPA. Initializes entity with default values.
 	 */
 	public CSystemSettings() {
-		super();
+		super(CSystemSettings.class);
 		initializeDefaults();
 	}
 

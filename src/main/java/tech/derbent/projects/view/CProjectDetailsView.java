@@ -18,7 +18,7 @@ import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
-import tech.derbent.abstracts.views.CAbstractMDPage;
+import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
 import tech.derbent.abstracts.views.CButton;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
@@ -33,7 +33,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Project Details")
 @Menu (order = 1.3, icon = "vaadin:briefcase", title = "Project.Project Details")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CProjectDetailsView extends CAbstractMDPage<CProject> {
+public class CProjectDetailsView extends CAbstractNamedEntityPage<CProject> {
 
 	// Layout modes enum
 	public enum LayoutMode {
@@ -689,11 +689,6 @@ public class CProjectDetailsView extends CAbstractMDPage<CProject> {
 	protected void initPage() {
 		// Initialize the page components and layout This method can be overridden to set
 		// up the view's components
-	}
-
-	@Override
-	protected CProject newEntity() {
-		return new CProject();
 	}
 
 	/**

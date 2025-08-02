@@ -9,20 +9,24 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import tech.derbent.abstracts.domains.CTestBase;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.kanban.view.CActivityKanbanColumn;
-import tech.derbent.projects.domain.CProject;
 
 /**
  * Unit tests for CActivityKanbanColumn component.
  */
-class CActivityKanbanColumnTest {
+class CActivityKanbanColumnTest extends CTestBase {
+
+	@Override
+	protected void setupForTest() {
+		// TODO Auto-generated method stub
+	}
 
 	@Test
 	void testKanbanColumnCreation() {
 		// Given
-		final CProject project = new CProject();
 		final CActivityStatus status = new CActivityStatus("TODO", project);
 		project.setName("Test Project");
 		final CActivity activity1 = new CActivity("Activity 1", project);
@@ -40,7 +44,6 @@ class CActivityKanbanColumnTest {
 	@Test
 	void testKanbanColumnWithEmptyActivities() {
 		// Given
-		final CProject project = new CProject();
 		final CActivityStatus status = new CActivityStatus("IN_PROGRESS", project);
 		final List<CActivity> activities = List.of();
 		// When
@@ -65,7 +68,6 @@ class CActivityKanbanColumnTest {
 	@Test
 	void testRefresh() {
 		// Given
-		final CProject project = new CProject();
 		final CActivityStatus status = new CActivityStatus("DONE", project);
 		final List<CActivity> activities = List.of();
 		final CActivityKanbanColumn column =
@@ -79,7 +81,6 @@ class CActivityKanbanColumnTest {
 	@Test
 	void testUpdateActivities() {
 		// Given
-		final CProject project = new CProject();
 		final CActivityStatus status = new CActivityStatus("REVIEW", project);
 		project.setName("Test Project");
 		final CActivity activity1 = new CActivity("Activity 1", project);

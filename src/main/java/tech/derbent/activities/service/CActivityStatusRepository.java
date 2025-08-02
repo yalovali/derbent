@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import tech.derbent.abstracts.services.CAbstractRepository;
+import tech.derbent.abstracts.services.CEntityOfProjectRepository;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.projects.domain.CProject;
 
@@ -16,7 +16,8 @@ import tech.derbent.projects.domain.CProject;
  * Data Access (MVC) Provides data access operations for activity status management.
  */
 @Repository
-public interface CActivityStatusRepository extends CAbstractRepository<CActivityStatus> {
+public interface CActivityStatusRepository
+	extends CEntityOfProjectRepository<CActivityStatus> {
 
 	/**
 	 * Check if a status name already exists (case-insensitive).

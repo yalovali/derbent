@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import tech.derbent.abstracts.domains.CTestBase;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserRole;
 
@@ -20,7 +21,7 @@ import tech.derbent.users.domain.CUserRole;
  * Unit tests for CUserProfileDialog. Tests the dialog creation and basic functionality.
  */
 @ExtendWith (MockitoExtension.class)
-class CUserProfileDialogTest {
+class CUserProfileDialogTest extends CTestBase {
 
 	@Mock
 	private PasswordEncoder passwordEncoder;
@@ -81,5 +82,11 @@ class CUserProfileDialogTest {
 		final CUserProfileDialog dialog =
 			new CUserProfileDialog(testUser, onSave, passwordEncoder);
 		assertEquals("Profile updated successfully", dialog.getSuccessUpdateMessage());
+	}
+
+	@Override
+	protected void setupForTest() {
+		// TODO Auto-generated method stub
+		
 	}
 }

@@ -7,7 +7,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.views.CAbstractMDPage;
+import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
 import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
@@ -21,7 +21,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Project Master Detail")
 @Menu (order = 1.1, icon = "vaadin:briefcase", title = "Settings.Projects")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CProjectsView extends CAbstractMDPage<CProject> {
+public class CProjectsView extends CAbstractNamedEntityPage<CProject> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -29,7 +29,8 @@ public class CProjectsView extends CAbstractMDPage<CProject> {
 
 	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "projects/%s/edit";
 
-	public CProjectsView(final CProjectService entityService, final CSessionService sessionService) {
+	public CProjectsView(final CProjectService entityService,
+		final CSessionService sessionService) {
 		super(CProject.class, entityService, sessionService);
 		addClassNames("projects-view");
 		// createDetailsLayout();
@@ -90,11 +91,6 @@ public class CProjectsView extends CAbstractMDPage<CProject> {
 	protected void initPage() {
 		// Initialize the page components and layout This method can be overridden to set
 		// up the view's components
-	}
-
-	@Override
-	protected CProject newEntity() {
-		return new CProject();
 	}
 
 	@Override

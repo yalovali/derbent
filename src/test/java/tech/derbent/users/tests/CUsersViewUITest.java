@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import tech.derbent.abstracts.ui.CAbstractUITest;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
+import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserType;
@@ -51,14 +52,15 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
 
 	private CCompany testCompany;
 
+	private CProject project;
+
 	public CUsersViewUITest() {
 		super(CUser.class);
 	}
 
 	@Override
 	protected CUser createTestEntity(final Long id, final String name) {
-		final CUser user = new CUser();
-		user.setName(name);
+		final CUser user = new CUser(name);
 		user.setLastname("Doe");
 		user.setLogin(name.toLowerCase() + "doe");
 		user.setEmail(name.toLowerCase() + "@example.com");
@@ -84,12 +86,10 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
 
 	private void setupTestEntities() {
 		// Create test user type
-		testUserType = new CUserType();
-		testUserType.setName("Administrator");
+		testUserType = new CUserType("Administrator", project);
 		testUserType.setDescription("System administrator");
 		// Create test company
-		testCompany = new CCompany();
-		testCompany.setName("Test Company");
+		testCompany = new CCompany("Test Company");
 		testCompany.setDescription("Test company for users");
 	}
 
@@ -98,6 +98,7 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
 		setupTestEntities();
 		usersView = new CUsersView(mockUserService, mockProjectService,
 			mockUserTypeService, mockCompanyService, mockSessionService);
+		project = new CProject("Test Project");
 	}
 
 	@Test
@@ -204,14 +205,13 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
 	void testGridWithNullRelationships() {
 		LOGGER.info("Testing grid behavior with null relationships");
 		// Create user with null relationships
-		final CUser userWithNulls = new CUser();
-		userWithNulls.setName("User");
+		final CUser userWithNulls = new CUser("User");
 		userWithNulls.setLastname("WithNulls");
 		userWithNulls.setLogin("usernulls");
 		userWithNulls.setEmail("nulls@example.com");
 		userWithNulls.setEnabled(false);
-		// Leave userType and company null
-		// Test that columns handle null relationships gracefully
+		// Leave userType and company null Test that columns handle null relationships
+		// gracefully
 		assertDoesNotThrow(() -> {
 			// Test user type column
 			final String userTypeDisplay = userWithNulls.getUserType() != null

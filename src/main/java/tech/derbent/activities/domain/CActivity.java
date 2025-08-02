@@ -35,7 +35,7 @@ import tech.derbent.users.domain.CUser;
 @Table (name = "cactivity") // table name for the entity as the default is the class name
 							// in lowercase
 @AttributeOverride (name = "id", column = @Column (name = "activity_id"))
-public class CActivity extends CEntityOfProject {
+public class CActivity extends CEntityOfProject<CActivity> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivity.class);
 
@@ -196,20 +196,12 @@ public class CActivity extends CEntityOfProject {
 	private String notes;
 
 	/**
-	 * Default constructor for JPA.
-	 */
-	public CActivity() {
-		super();
-		initializeDefaults();
-	}
-
-	/**
 	 * Constructor with name and project.
 	 * @param name    the name of the activity - must not be null
 	 * @param project the project this activity belongs to - must not be null
 	 */
 	public CActivity(final String name, final CProject project) {
-		super(name, project);
+		super(CActivity.class, name, project);
 
 		if (name == null) {
 			LOGGER.warn("CActivity constructor - Name parameter is null");
@@ -228,8 +220,9 @@ public class CActivity extends CEntityOfProject {
 	 * @param assignedTo the user assigned to this activity - can be null
 	 */
 	public CActivity(final String name, final CProject project, final CUser assignedTo) {
-		super(name, project, assignedTo);
+		super(CActivity.class, name, project);
 		initializeDefaults();
+		setAssignedTo(assignedTo);
 	}
 
 	/**
@@ -345,10 +338,6 @@ public class CActivity extends CEntityOfProject {
 
 		if (this.completionDate == null) {
 			this.completionDate = null; // No completion date by default
-		}
-
-		if (this.activityType == null) {
-			this.activityType = new CActivityType(); // Default to a new activity type
 		}
 	}
 

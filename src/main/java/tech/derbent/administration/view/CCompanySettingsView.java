@@ -10,7 +10,7 @@ import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
-import tech.derbent.abstracts.views.CAbstractMDPage;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.abstracts.views.CButton;
 import tech.derbent.administration.domain.CCompanySettings;
 import tech.derbent.administration.service.CCompanySettingsService;
@@ -29,7 +29,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Company Administration Settings")
 @Menu (order = 3.5, icon = "vaadin:cogs", title = "Settings.Company Settings")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CCompanySettingsView extends CAbstractMDPage<CCompanySettings> {
+public class CCompanySettingsView extends CAbstractEntityDBPage<CCompanySettings> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -43,11 +43,12 @@ public class CCompanySettingsView extends CAbstractMDPage<CCompanySettings> {
 	/**
 	 * Constructor for CCompanySettingsView. Annotated with @Autowired to let Spring
 	 * inject dependencies.
-	 * @param entityService the CCompanySettingsService instance
+	 * @param entityService  the CCompanySettingsService instance
 	 * @param sessionService
 	 */
 	@Autowired
-	public CCompanySettingsView(final CCompanySettingsService entityService, final CSessionService sessionService) {
+	public CCompanySettingsView(final CCompanySettingsService entityService,
+		final CSessionService sessionService) {
 		super(CCompanySettings.class, entityService, sessionService);
 		this.companySettingsService = entityService;
 		LOGGER.info("CCompanySettingsView constructor called with entityService: {}",
@@ -122,6 +123,12 @@ public class CCompanySettingsView extends CAbstractMDPage<CCompanySettings> {
 	}
 
 	@Override
+	protected CCompanySettings createNewEntity() {
+		final CCompanySettings settings = entityService.createEntity();
+		return settings;
+	}
+
+	@Override
 	protected CButton createSaveButton(final String buttonText) {
 		LOGGER.debug("createSaveButton called with buttonText: {}", buttonText);
 		return CButton.createPrimary(buttonText, event -> {
@@ -163,14 +170,6 @@ public class CCompanySettingsView extends CAbstractMDPage<CCompanySettings> {
 
 	@Override
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	@Override
-	protected CCompanySettings newEntity() {
-		LOGGER.debug("Creating new CCompanySettings entity");
-		// Create a new company settings entity with default values
-		final CCompanySettings settings = new CCompanySettings();
-		return settings;
-	}
 
 	@Override
 	public void onLayoutModeChanged(

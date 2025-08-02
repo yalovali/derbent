@@ -25,7 +25,7 @@ import tech.derbent.base.utils.CImageUtils;
  * width (100px) - Short text fields: Medium width (200px) - Long text fields: Large width
  * (300px+) - Reference fields: Medium width (200px)
  */
-public class CGrid<T extends CEntityDB> extends Grid<T> {
+public class CGrid<T extends CEntityDB<T>> extends Grid<T> {
 
 	private static final long serialVersionUID = 1L;
 

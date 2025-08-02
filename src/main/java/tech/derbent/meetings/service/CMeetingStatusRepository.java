@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import tech.derbent.abstracts.services.CAbstractRepository;
+import tech.derbent.abstracts.services.CAbstractNamedRepository;
 import tech.derbent.meetings.domain.CMeetingStatus;
 import tech.derbent.projects.domain.CProject;
 
@@ -16,13 +16,15 @@ import tech.derbent.projects.domain.CProject;
  * Data Access (MVC) Provides data access operations for meeting status management.
  */
 @Repository
-public interface CMeetingStatusRepository extends CAbstractRepository<CMeetingStatus> {
+public interface CMeetingStatusRepository
+	extends CAbstractNamedRepository<CMeetingStatus> {
 
 	/**
 	 * Check if a status name already exists (case-insensitive).
 	 * @param name the status name to check - must not be null
 	 * @return true if the name exists, false otherwise
 	 */
+	@Override
 	@Query (
 		"SELECT COUNT(s) > 0 FROM CMeetingStatus s WHERE LOWER(s.name) = LOWER(:name)"
 	)
@@ -74,6 +76,7 @@ public interface CMeetingStatusRepository extends CAbstractRepository<CMeetingSt
 	 * @param name the status name to search for - must not be null
 	 * @return Optional containing the status if found, empty otherwise
 	 */
+	@Override
 	@Query ("SELECT s FROM CMeetingStatus s WHERE LOWER(s.name) = LOWER(:name)")
 	Optional<CMeetingStatus> findByNameIgnoreCase(@Param ("name") String name);
 	/**
