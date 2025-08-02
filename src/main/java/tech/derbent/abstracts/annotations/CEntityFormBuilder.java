@@ -36,6 +36,7 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 
 import tech.derbent.abstracts.domains.CEntityConstants;
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.utils.CAuxillaries;
 
 @org.springframework.stereotype.Component
 public final class CEntityFormBuilder implements ApplicationContextAware {
@@ -160,6 +161,8 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			return null;
 		}
 		final Checkbox checkbox = new Checkbox();
+		// Set ID for better test automation
+		CAuxillaries.setId(checkbox);
 
 		// Safe null checking and parsing for default value
 		if ((meta.defaultValue() != null) && !meta.defaultValue().trim().isEmpty()) {
@@ -206,6 +209,8 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		}
 		final Class<T> fieldType = (Class<T>) field.getType();
 		final ComboBox<T> comboBox = new ComboBox<>();
+		// Set ID for better test automation
+		CAuxillaries.setId(comboBox);
 		// Following coding guidelines: All selective ComboBoxes must be selection only
 		// (user must not be able to type arbitrary text)
 		comboBox.setAllowCustomValue(false);
@@ -457,6 +462,8 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 	private static DatePicker createDatePicker(final Field field, final MetaData meta,
 		final BeanValidationBinder<?> binder) {
 		final DatePicker datePicker = new DatePicker();
+		// Set ID for better test automation
+		CAuxillaries.setId(datePicker);
 		binder.bind(datePicker, field.getName());
 		return datePicker;
 	}
@@ -464,6 +471,8 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 	private static DateTimePicker createDateTimePicker(final Field field,
 		final MetaData meta, final BeanValidationBinder<?> binder) {
 		final DateTimePicker dateTimePicker = new DateTimePicker();
+		// Set ID for better test automation
+		CAuxillaries.setId(dateTimePicker);
 
 		// For Instant fields, we need a custom converter
 		if (field.getType() == Instant.class) {
@@ -499,6 +508,8 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		}
 		else {
 			final ComboBox<Enum> comboBox = new ComboBox<>();
+			// Set ID for better test automation
+			CAuxillaries.setId(comboBox);
 			// Following coding guidelines: All selective ComboBoxes must be selection
 			// only (user must not be able to type arbitrary text)
 			comboBox.setAllowCustomValue(false);
@@ -558,6 +569,8 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			return null;
 		}
 		final NumberField numberField = new NumberField();
+		// Set ID for better test automation
+		CAuxillaries.setId(numberField);
 		// Set step for floating point fields
 		numberField.setStep(0.01);
 
@@ -614,6 +627,8 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			return null;
 		}
 		final NumberField numberField = new NumberField();
+		// Set ID for better test automation
+		CAuxillaries.setId(numberField);
 		// Set step for integer fields
 		numberField.setStep(1);
 
@@ -709,6 +724,8 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			return null;
 		}
 		final TextField item = new TextField();
+		// Set ID for better test automation
+		CAuxillaries.setId(item);
 		item.setClassName("plain-look-textfield");
 
 		if (meta.maxLength() > 0) {

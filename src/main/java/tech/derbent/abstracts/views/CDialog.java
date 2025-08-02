@@ -9,6 +9,8 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
+import tech.derbent.abstracts.utils.CAuxillaries;
+
 public abstract class CDialog extends Dialog {
 
 	private static final long serialVersionUID = 1L;
@@ -21,6 +23,15 @@ public abstract class CDialog extends Dialog {
 	 */
 	public CDialog() {
 		super();
+		initializeDialog();
+	}
+
+	/**
+	 * Common initialization for all CDialog instances.
+	 */
+	protected void initializeDialog() {
+		CAuxillaries.setId(this);
+		LOGGER.debug("CDialog initialized with ID: {}", getId().orElse("none"));
 	}
 
 	/** Child must implement: form title. */
