@@ -43,11 +43,12 @@ class CActivitiesViewUITest extends CAbstractUITest<CActivity> {
 
     public CActivitiesViewUITest() {
         super(CActivity.class);
+        // Initialize test entities early so they're available for setupTestData
+        setupTestEntities();
     }
 
     @BeforeEach
     void setupActivityTests() {
-        setupTestEntities();
         activitiesView = new CActivitiesView(
             mockActivityService, 
             mockSessionService,
@@ -92,7 +93,7 @@ class CActivitiesViewUITest extends CAbstractUITest<CActivity> {
         
         testEntities = Arrays.asList(activity1, activity2, activity3);
         
-        // Mock active project
+        // Mock active project - testProject should be initialized by now
         when(mockSessionService.getActiveProject()).thenReturn(Optional.of(testProject));
     }
 

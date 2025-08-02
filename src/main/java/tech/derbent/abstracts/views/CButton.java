@@ -221,6 +221,7 @@ public class CButton extends Button {
 	 * subclasses to provide additional initialization.
 	 */
 	protected void initializeButton() {
-		CAuxillaries.generateId(this);
+		CAuxillaries.setId(this);
+		LOGGER.debug("CButton initialized with ID: {}", getId().orElse("none"));
 	}
 }
