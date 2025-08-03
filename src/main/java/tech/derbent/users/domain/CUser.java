@@ -73,7 +73,7 @@ public class CUser extends CEntityNamed<CUser> {
     private Boolean enabled = Boolean.TRUE; // User account status, default is enabled
 
     @MetaData(displayName = "Profile Picture", required = false, readOnly = false, defaultValue = "", description = "User's profile picture stored as binary data", hidden = false, order = 11)
-    @Column(name = "profile_picture_data", nullable = true)
+    @Column(name = "profile_picture_data", nullable = true, length = 10000)
     private byte[] profilePictureData;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

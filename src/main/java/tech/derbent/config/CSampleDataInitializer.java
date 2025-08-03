@@ -71,10 +71,14 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	// Standard password for all users as per coding guidelines
 	private static final String STANDARD_PASSWORD = "test123";
 
-	// Sample user profile pictures (base64 encoded SVG icons)
-	@SuppressWarnings ("unused")
-	private static final String PROFILE_PICTURE_USER =
-		"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJDMTMuMSAyIDE0IDIuOSAxNCA0QzE0IDUuMSAxMy4xIDYgMTIgNkMxMC45IDYgMTAgNS4xIDEwIDRDMTAgMi45IDEwLjkgMiAxMiAyWk0yMSA5VjIySDNWOUwxMiA2TDIxIDlaIiBmaWxsPSIjMzMzIi8+Cjwvc3ZnPgo=";
+	// Profile picture filenames mapping for users
+	private static final java.util.Map<String, String> PROFILE_PICTURE_MAPPING = java.util.Map.of(
+		"admin", "admin.svg",
+		"mkaradeniz", "michael_chen.svg", 
+		"msahin", "sophia_brown.svg",
+		"bozkan", "david_kim.svg",
+		"ademir", "emma_wilson.svg"
+	);
 
 	// Service dependencies - injected via constructor
 	private final CProjectService projectService;
@@ -367,8 +371,9 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		LOGGER.info("createAdminUser called - creating system administrator");
 		final CUser admin = userService.createLoginUser("admin", STANDARD_PASSWORD,
 			"Ahmet", "admin@of.gov.tr", "ADMIN,USER");
-		// Set user profile using auxiliary method
-		final byte[] profilePictureBytes = "profile-picture".getBytes();
+		// Set user profile using auxiliary method with actual profile picture
+		final String profilePictureFile = PROFILE_PICTURE_MAPPING.get("admin");
+		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
 		userService.setUserProfile(admin, "Yılmaz", "+90-462-751-1001",
 			profilePictureBytes);
 		// Set user role using auxiliary method
@@ -617,8 +622,9 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		LOGGER.info("createProjectManagerUser called - creating project manager");
 		final CUser manager = userService.createLoginUser("mkaradeniz", STANDARD_PASSWORD,
 			"Mehmet Emin", "mehmet.karadeniz@ofteknoloji.com.tr", "MANAGER,USER");
-		// Set user profile using auxiliary method
-		final byte[] profilePictureBytes = "profile-picture".getBytes();
+		// Set user profile using auxiliary method with actual profile picture
+		final String profilePictureFile = PROFILE_PICTURE_MAPPING.get("mkaradeniz");
+		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
 		userService.setUserProfile(manager, "Karadeniz", "+90-462-751-1002",
 			profilePictureBytes);
 		// Set user role using auxiliary method
@@ -1011,8 +1017,9 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			"createTeamMemberAlice called - creating Ayşe Demir from Günebakan village");
 		final CUser analyst = userService.createLoginUser("ademir", STANDARD_PASSWORD,
 			"Ayşe", "ayse.demir@ofsaglik.com.tr", "USER");
-		// Set user profile using auxiliary method
-		final byte[] profilePictureBytes = "profile-picture".getBytes();
+		// Set user profile using auxiliary method with actual profile picture
+		final String profilePictureFile = PROFILE_PICTURE_MAPPING.get("ademir");
+		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
 		userService.setUserProfile(analyst, "Demir", "+90-462-751-1005",
 			profilePictureBytes);
 		// Set user role using auxiliary method
@@ -1031,8 +1038,9 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			"createTeamMemberBob called - creating Burak Özkan from Çamburnu village");
 		final CUser developer = userService.createLoginUser("bozkan", STANDARD_PASSWORD,
 			"Burak", "burak.ozkan@ofdanismanlik.com.tr", "USER");
-		// Set user profile using auxiliary method
-		final byte[] profilePictureBytes = "profile-picture".getBytes();
+		// Set user profile using auxiliary method with actual profile picture
+		final String profilePictureFile = PROFILE_PICTURE_MAPPING.get("bozkan");
+		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
 		userService.setUserProfile(developer, "Özkan", "+90-462-751-1004",
 			profilePictureBytes);
 		// Set user role using auxiliary method
@@ -1051,8 +1059,9 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			"createTeamMemberMary called - creating Merve Şahin from Ballıköy village");
 		final CUser teamMember = userService.createLoginUser("msahin", STANDARD_PASSWORD,
 			"Merve", "merve.sahin@ofendüstri.com.tr", "USER");
-		// Set user profile using auxiliary method
-		final byte[] profilePictureBytes = "profile-picture".getBytes();
+		// Set user profile using auxiliary method with actual profile picture
+		final String profilePictureFile = PROFILE_PICTURE_MAPPING.get("msahin");
+		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
 		userService.setUserProfile(teamMember, "Şahin", "+90-462-751-1003",
 			profilePictureBytes);
 		// Set user role using auxiliary method
@@ -1783,6 +1792,31 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final long userCount = userService.count();
 		LOGGER.info("User count in database: {}", userCount);
 		return userCount == 0;
+	}
+
+	/**
+	 * Loads profile picture data from the profile-pictures directory.
+	 * @param filename The SVG filename to load
+	 * @return byte array of the SVG content, or null if not found
+	 */
+	private byte[] loadProfilePictureData(final String filename) {
+		try {
+			// Load from classpath resources
+			final var resource = getClass().getClassLoader().getResourceAsStream("../profile-pictures/" + filename);
+			if (resource == null) {
+				// Fallback: try direct file path
+				final java.nio.file.Path filePath = java.nio.file.Paths.get("profile-pictures", filename);
+				if (java.nio.file.Files.exists(filePath)) {
+					return java.nio.file.Files.readAllBytes(filePath);
+				}
+				LOGGER.warn("Profile picture file not found: {}", filename);
+				return null;
+			}
+			return resource.readAllBytes();
+		} catch (final Exception e) {
+			LOGGER.error("Error loading profile picture: {}", filename, e);
+			return null;
+		}
 	}
 
 	public void loadSampleData() {
