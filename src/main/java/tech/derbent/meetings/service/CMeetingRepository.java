@@ -25,17 +25,15 @@ public interface CMeetingRepository extends CEntityOfProjectRepository<CMeeting>
     List<CMeeting> findByAttendeeId(@Param("userId") Long userId);
 
     /**
-     * Finds a meeting by ID with eagerly loaded relationships to prevent LazyInitializationException. This extends the
-     * base method with meeting-specific relationships.
+     * Finds a meeting by ID with eagerly loaded relationships to prevent 
+     * LazyInitializationException. Only fetches relationships that are still lazy
+     * (participants, attendees, relatedActivity).
      * 
-     * @param id
-     *            the meeting ID
+     * @param id the meeting ID
      * @return optional CMeeting with loaded relationships
      */
-    @Query("SELECT m FROM CMeeting m " + "LEFT JOIN FETCH m.project " + "LEFT JOIN FETCH m.assignedTo "
-            + "LEFT JOIN FETCH m.createdBy " + "LEFT JOIN FETCH m.meetingType " + "LEFT JOIN FETCH m.participants "
-            + "LEFT JOIN FETCH m.attendees " + "LEFT JOIN FETCH m.status " + "LEFT JOIN FETCH m.responsible "
-            + "LEFT JOIN FETCH m.relatedActivity " + "WHERE m.id = :id")
+    @Query("SELECT m FROM CMeeting m " + "LEFT JOIN FETCH m.project " + "LEFT JOIN FETCH m.participants "
+            + "LEFT JOIN FETCH m.attendees " + "LEFT JOIN FETCH m.relatedActivity " + "WHERE m.id = :id")
     Optional<CMeeting> findByIdWithAllRelationships(@Param("id") Long id);
 
     /**
@@ -49,31 +47,24 @@ public interface CMeetingRepository extends CEntityOfProjectRepository<CMeeting>
     List<CMeeting> findByParticipantId(@Param("userId") Long userId);
 
     /**
-     * Finds meetings by project with eagerly loaded relationships to prevent LazyInitializationException. Loads all
-     * meeting-specific relationships for comprehensive grid display.
+     * Finds meetings by project with eagerly loaded relationships to prevent 
+     * LazyInitializationException. Only fetches relationships that are still lazy.
      * 
-     * @param project
-     *            the project to filter by
-     * @param pageable
-     *            pagination information
+     * @param project the project to filter by
+     * @param pageable pagination information
      * @return page of meetings with loaded relationships
      */
-    @Query("SELECT DISTINCT m FROM CMeeting m " + "LEFT JOIN FETCH m.project " + "LEFT JOIN FETCH m.assignedTo "
-            + "LEFT JOIN FETCH m.createdBy " + "LEFT JOIN FETCH m.meetingType " + "LEFT JOIN FETCH m.participants "
-            + "LEFT JOIN FETCH m.attendees " + "LEFT JOIN FETCH m.status " + "LEFT JOIN FETCH m.responsible "
-            + "LEFT JOIN FETCH m.relatedActivity " + "WHERE m.project = :project")
+    @Query("SELECT DISTINCT m FROM CMeeting m " + "LEFT JOIN FETCH m.project " + "LEFT JOIN FETCH m.participants "
+            + "LEFT JOIN FETCH m.attendees " + "LEFT JOIN FETCH m.relatedActivity " + "WHERE m.project = :project")
     Page<CMeeting> findByProjectWithAllRelationships(@Param("project") CProject project, Pageable pageable);
 
     /**
      * Finds meetings by project with eagerly loaded relationships (non-paginated version).
      * 
-     * @param project
-     *            the project to filter by
+     * @param project the project to filter by
      * @return list of meetings with loaded relationships
      */
-    @Query("SELECT DISTINCT m FROM CMeeting m " + "LEFT JOIN FETCH m.project " + "LEFT JOIN FETCH m.assignedTo "
-            + "LEFT JOIN FETCH m.createdBy " + "LEFT JOIN FETCH m.meetingType " + "LEFT JOIN FETCH m.participants "
-            + "LEFT JOIN FETCH m.attendees " + "LEFT JOIN FETCH m.status " + "LEFT JOIN FETCH m.responsible "
-            + "LEFT JOIN FETCH m.relatedActivity " + "WHERE m.project = :project")
+    @Query("SELECT DISTINCT m FROM CMeeting m " + "LEFT JOIN FETCH m.project " + "LEFT JOIN FETCH m.participants "
+            + "LEFT JOIN FETCH m.attendees " + "LEFT JOIN FETCH m.relatedActivity " + "WHERE m.project = :project")
     List<CMeeting> findByProjectWithAllRelationships(@Param("project") CProject project);
 }

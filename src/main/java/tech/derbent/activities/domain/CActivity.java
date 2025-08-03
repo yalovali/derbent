@@ -43,9 +43,9 @@ public class CActivity extends CEntityOfProject<CActivity> implements CKanbanEnt
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivity.class);
 
 	// Basic Activity Information
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "cactivitytype_id", nullable = true)
-	@MetaData (
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "cactivitytype_id", nullable = true)
+	@MetaData(
 		displayName = "Activity Type", required = false, readOnly = false,
 		description = "Type category of the activity", hidden = false, order = 2,
 		dataProviderBean = "CActivityTypeService"
@@ -86,21 +86,21 @@ public class CActivity extends CEntityOfProject<CActivity> implements CKanbanEnt
 	private BigDecimal remainingHours;
 
 	// Status and Priority Management
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "cactivitystatus_id", nullable = true)
-	@MetaData (
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "cactivitystatus_id", nullable = true)
+	@MetaData(
 		displayName = "Status", required = false, readOnly = false,
 		description = "Current status of the activity", hidden = false, order = 30,
 		dataProviderBean = "CActivityStatusService"
 	)
-	@tech.derbent.abstracts.annotations.ColorAwareComboBox (
+	@tech.derbent.abstracts.annotations.ColorAwareComboBox(
 		roundedCorners = true, autoContrast = true
 	)
 	private CActivityStatus status;
 
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "cactivitypriority_id", nullable = true)
-	@MetaData (
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "cactivitypriority_id", nullable = true)
+	@MetaData(
 		displayName = "Priority", required = false, readOnly = false,
 		description = "Priority level of the activity", hidden = false, order = 31,
 		dataProviderBean = "CActivityPriorityService"

@@ -59,30 +59,30 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting>
 	}
 
 	/**
-	 * Finds meetings by project with all relationships loaded to prevent
-	 * LazyInitializationException. This method provides meeting-specific relationship
-	 * loading beyond the base implementation.
-	 * @param project the project
-	 * @return list of meetings with all relationships loaded
+	 * Overrides the standard getById method to use repository method with all
+	 * relationships loaded for CMeeting specific needs.
+	 * 
+	 * @param id the meeting ID
+	 * @return optional CMeeting with loaded relationships
 	 */
-	@Transactional (readOnly = true)
-	public List<CMeeting> findByProjectWithAllRelationships(final CProject project) {
-		LOGGER.info("findByProjectWithAllRelationships called with project: {}",
-			project != null ? project.getName() : "null");
+	@Override
+	@Transactional(readOnly = true)
+	public Optional<CMeeting> getById(final Long id) {
+		LOGGER.info("getById called with id: {}", id);
 
-		if (project == null) {
-			LOGGER.warn("findByProjectWithAllRelationships called with null project");
-			return List.of();
+		if (id == null) {
+			return Optional.empty();
 		}
 
 		try {
-			return meetingRepository.findByProjectWithAllRelationships(project);
+			final Optional<CMeeting> entity =
+				meetingRepository.findByIdWithAllRelationships(id);
+			// With eager loading of small entities, minimal lazy field initialization needed
+			entity.ifPresent(this::initializeLazyFields);
+			return entity;
 		} catch (final Exception e) {
-			LOGGER.error(
-				"Error finding meetings by project with all relationships '{}': {}",
-				project.getName(), e.getMessage(), e);
-			throw new RuntimeException(
-				"Failed to find meetings by project with all relationships", e);
+			LOGGER.error("Error getting meeting by id '{}': {}", id, e.getMessage(), e);
+			throw new RuntimeException("Failed to get meeting by id", e);
 		}
 	}
 
@@ -91,28 +91,6 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting>
 		// This would need to be implemented by calling the status service For minimal
 		// changes, returning empty list for now
 		return List.of();
-	}
-
-	/**
-	 * Overrides the base get method to eagerly load all relationships to prevent
-	 * LazyInitializationException when the entity is used in UI contexts.
-	 * @param id the meeting ID
-	 * @return optional CMeeting with loaded relationships
-	 */
-	@Override
-	@Transactional (readOnly = true)
-	public Optional<CMeeting> getById(final Long id) {
-		LOGGER.info("get called with id: {}", id);
-
-		if (id == null) {
-			return Optional.empty();
-		}
-		final Optional<CMeeting> entity =
-			meetingRepository.findByIdWithAllRelationships(id);
-		// Initialize lazy fields if entity is present (for any other potential lazy
-		// relationships)
-		entity.ifPresent(this::initializeLazyFields);
-		return entity;
 	}
 
 	// CKanbanService implementation methods
@@ -128,9 +106,10 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting>
 	protected Class<CMeeting> getEntityClass() { return CMeeting.class; }
 
 	/**
-	 * Initializes lazy fields for CMeeting entity to prevent LazyInitializationException.
-	 * Specifically handles the lazy-loaded relationships including meetingType,
-	 * participants, attendees, status, responsible, and relatedActivity.
+	 * Simplified lazy field initialization for CMeeting entity. With eager loading of
+	 * small entities (meetingType, status, responsible), this mainly handles complex
+	 * collections like participants and attendees.
+	 * 
 	 * @param entity the CMeeting entity to initialize
 	 */
 	@Override
@@ -144,11 +123,9 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting>
 		try {
 			// Initialize the entity itself first
 			super.initializeLazyFields(entity);
-			initializeLazyRelationship(entity.getMeetingType());
+			// Initialize remaining lazy collections (participants, attendees are still lazy)
 			initializeLazyRelationship(entity.getParticipants());
 			initializeLazyRelationship(entity.getAttendees());
-			initializeLazyRelationship(entity.getStatus());
-			initializeLazyRelationship(entity.getResponsible());
 			initializeLazyRelationship(entity.getRelatedActivity());
 		} catch (final Exception e) {
 			LOGGER.warn("Error initializing lazy fields for CMeeting with ID: {}",

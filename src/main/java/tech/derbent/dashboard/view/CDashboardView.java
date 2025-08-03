@@ -129,7 +129,7 @@ public final class CDashboardView extends CAbstractPage {
                                 LOGGER.warn("ActivityService is null");
                                 return 0L;
                             }
-                            final var activities = activityService.findEntitiesByProject(project);
+                            final var activities = activityService.findEntriesByProject(project);
                             final long activityCount = activities != null ? activities.size() : 0L;
                             LOGGER.debug("Project {} has {} activities", project.getName(), activityCount);
                             return activityCount;
