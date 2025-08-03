@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.function.ValueProvider;
 
 import tech.derbent.abstracts.annotations.ColorAwareGrid;
+import tech.derbent.abstracts.components.CGridCell;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.views.CGrid;
 
@@ -111,16 +112,12 @@ public class CEntityGrid<EntityClass extends CEntityDB<EntityClass>>
 		}
 		final Column<EntityClass> column = addComponentColumn(entity -> {
 			final S status = statusProvider.apply(entity);
-			final CGridCellStatus statusCell = new CGridCellStatus();
+			final CGridCell statusCell = new CGridCell();
 
 			// Configure styling from annotation if provided
 			if (annotation != null) {
-				statusCell.setRoundedCorners(this.roundedCorners);
-				statusCell.setPadding(this.padding);
+				// Apply annotation-based configuration to the cell
 				statusCell.setAutoContrast(this.autoContrast);
-				statusCell.setMinWidth(this.minWidth);
-				statusCell.setCenterAlign(this.centerAlign);
-				statusCell.setFontWeight(this.fontWeight);
 			}
 			// Configure icon display (always from grid setting)
 			statusCell.setShowIcon(this.showIcon);

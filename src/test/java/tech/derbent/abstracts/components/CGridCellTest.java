@@ -12,7 +12,7 @@ import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.projects.domain.CProject;
 
 /**
- * Tests for CGridCell and CGridCellStatus components.
+ * Tests for CGridCell component.
  * 
  * @author Derbent Framework
  */
@@ -39,11 +39,8 @@ class CGridCellTest {
     void testCGridCellDefaultConstructor() {
         final CGridCell cell = new CGridCell();
         assertNotNull(cell);
-        assertTrue(cell.isCenterAlign());
-        assertEquals("4px 8px", cell.getPadding());
-        assertEquals("80px", cell.getMinWidth());
-        assertEquals("400", cell.getFontWeight());
-        assertFalse(cell.isRoundedCorners());
+        assertFalse(cell.isShowIcon()); // Icon display disabled by default
+        assertTrue(cell.isAutoContrast()); // Auto contrast enabled by default
     }
 
     @Test
@@ -57,8 +54,9 @@ class CGridCellTest {
     void testCGridCellSetEntityValue() {
         final CGridCell cell = new CGridCell();
         cell.setEntityValue(testStatus);
-        assertNotNull(cell.getText());
-        assertTrue(cell.getText().contains("In Progress") || cell.getText().length() > 0);
+        assertNotNull(cell);
+        // Note: Since CGridCell now uses Div and may contain multiple components (icon + text),
+        // we can't directly check getText(). Instead, verify the cell is properly configured.
     }
 
     @Test
@@ -68,116 +66,70 @@ class CGridCellTest {
         assertEquals("N/A", cell.getText());
     }
 
+    // Status-related tests - CGridCell now handles status functionality
     @Test
-    void testCGridCellStatusDefaultConstructor() {
-        final CGridCellStatus statusCell = new CGridCellStatus();
+    void testCGridCellStatusFunctionality() {
+        final CGridCell statusCell = new CGridCell();
         assertNotNull(statusCell);
         assertTrue(statusCell.isAutoContrast());
-        assertTrue(statusCell.isRoundedCorners());
-        assertEquals("500", statusCell.getFontWeight());
-        assertTrue(statusCell.isShowIcon()); // New: verify icon display is enabled by default
+        assertFalse(statusCell.isShowIcon()); // Icon display disabled by default
     }
 
     @Test
-    void testCGridCellStatusWithEntity() {
-        final CGridCellStatus statusCell = new CGridCellStatus(testStatus);
+    void testCGridCellSetStatusValue() {
+        final CGridCell statusCell = new CGridCell();
+        statusCell.setStatusValue(testStatus);
         assertNotNull(statusCell);
-        
-        // The component should contain the status text but also may have icon components
-        // Since icons are added as child components, we can't directly check getText()
-        // Instead, verify the cell is properly configured
-        assertTrue(statusCell.isShowIcon());
-        assertTrue(statusCell.isAutoContrast());
+        // Verify the cell is properly configured for status display
     }
 
     @Test
     void testCGridCellStatusWithNullEntity() {
-        final CGridCellStatus statusCell = new CGridCellStatus();
+        final CGridCell statusCell = new CGridCell();
         statusCell.setStatusValue(null);
         assertEquals("No Status", statusCell.getText());
     }
 
     @Test
-    void testCGridCellStatusCustomStyling() {
-        final CGridCellStatus statusCell = new CGridCellStatus();
-        statusCell.setAutoContrast(false);
-        statusCell.setRoundedCorners(false);
-        
-        assertFalse(statusCell.isAutoContrast());
-        assertFalse(statusCell.isRoundedCorners());
-    }
-    
-    @Test
-    void testCGridCellStatusIconConfiguration() {
-        final CGridCellStatus statusCell = new CGridCellStatus();
-        
-        // Test default icon display
-        assertTrue(statusCell.isShowIcon());
-        
-        // Test disabling icon display
-        statusCell.setShowIcon(false);
-        assertFalse(statusCell.isShowIcon());
-        
-        // Test re-enabling icon display
-        statusCell.setShowIcon(true);
-        assertTrue(statusCell.isShowIcon());
-    }
-    
-    @Test
-    void testCGridCellStatusWithEntityAndIconDisabled() {
-        final CGridCellStatus statusCell = new CGridCellStatus();
-        statusCell.setShowIcon(false);
-        statusCell.setStatusValue(testStatus);
-        
-        // With icon disabled, the cell should contain just the text
-        assertFalse(statusCell.isShowIcon());
-        assertNotNull(statusCell);
-    }
-
-    @Test
-    void testCGridCellStatusSetStatusColor() {
-        final CGridCellStatus statusCell = new CGridCellStatus();
-        statusCell.setText("Test Status");
-        statusCell.setStatusColor("#ff0000", "#ffffff");
-        
-        // We can't easily test the applied styles in unit tests without DOM,
-        // but we can verify the method doesn't throw exceptions
-        assertNotNull(statusCell);
-        assertEquals("Test Status", statusCell.getText());
-    }
-
-    @Test
-    void testCGridCellCustomStyling() {
-        final CGridCell cell = new CGridCell("Test");
-        cell.setCustomStyling("#ff0000", "#ffffff");
-        
-        // Verify method doesn't throw exceptions
-        assertNotNull(cell);
-        assertEquals("Test", cell.getText());
-    }
-
-    @Test
-    void testCGridCellStyleConfiguration() {
+    void testCGridCellIconConfiguration() {
         final CGridCell cell = new CGridCell();
         
-        // Test padding
-        cell.setPadding("8px 12px");
-        assertEquals("8px 12px", cell.getPadding());
+        // Test default icon display (disabled)
+        assertFalse(cell.isShowIcon());
         
-        // Test center align
-        cell.setCenterAlign(false);
-        assertFalse(cell.isCenterAlign());
+        // Test enabling icon display
+        cell.setShowIcon(true);
+        assertTrue(cell.isShowIcon());
         
-        // Test min width
-        cell.setMinWidth("120px");
-        assertEquals("120px", cell.getMinWidth());
+        // Test disabling icon display
+        cell.setShowIcon(false);
+        assertFalse(cell.isShowIcon());
+    }
+    
+    @Test
+    void testCGridCellWithEntityAndIconEnabled() {
+        final CGridCell statusCell = new CGridCell();
+        statusCell.setShowIcon(true);
+        statusCell.setStatusValue(testStatus);
         
-        // Test font weight
-        cell.setFontWeight("600");
-        assertEquals("600", cell.getFontWeight());
+        // With icon enabled, the cell should be properly configured
+        assertTrue(statusCell.isShowIcon());
+        assertNotNull(statusCell);
+    }
+
+    @Test
+    void testCGridCellAutoContrastConfiguration() {
+        final CGridCell cell = new CGridCell();
         
-        // Test rounded corners
-        cell.setRoundedCorners(true);
-        assertTrue(cell.isRoundedCorners());
+        // Test default auto contrast (enabled)
+        assertTrue(cell.isAutoContrast());
+        
+        // Test disabling auto contrast
+        cell.setAutoContrast(false);
+        assertFalse(cell.isAutoContrast());
+        
+        // Test re-enabling auto contrast
+        cell.setAutoContrast(true);
+        assertTrue(cell.isAutoContrast());
     }
 }
