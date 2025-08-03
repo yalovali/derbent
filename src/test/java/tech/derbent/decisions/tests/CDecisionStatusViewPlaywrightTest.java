@@ -16,11 +16,10 @@ import tech.derbent.ui.automation.CApplicationGeneric_UITest;
  * CDecisionStatusViewPlaywrightTest - Tests for decision status view focusing on 
  * lazy loading fixes and navigation behavior after save operations.
  */
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @TestPropertySource(properties = {
     "spring.datasource.url=jdbc:h2:mem:testdb",
-    "spring.jpa.hibernate.ddl-auto=create-drop", 
-    "server.port=8080"
+    "spring.jpa.hibernate.ddl-auto=create-drop"
 })
 public class CDecisionStatusViewPlaywrightTest extends CApplicationGeneric_UITest {
 
