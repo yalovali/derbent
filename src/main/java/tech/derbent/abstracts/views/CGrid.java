@@ -230,55 +230,24 @@ public class CGrid<T extends CEntityDB<T>> extends Grid<T> {
                 return span;
             }
             
-            // Set the text content
-            String displayText = "Unknown Status";
-            try {
-                if (status instanceof CEntityNamed) {
-                    final CEntityNamed<?> namedStatus = (CEntityNamed<?>) status;
-                    final String name = namedStatus.getName();
-                    displayText = ((name != null) && !name.trim().isEmpty())
-                            ? name
-                            : "Unnamed Status #" + namedStatus.getId();
-                } else {
-                    displayText = status.toString();
-                }
-            } catch (final Exception e) {
-                LOGGER.warn("Error generating display text for status in grid: {}", e.getMessage());
-                displayText = "Error: " + status.getClass().getSimpleName();
-            }
+            // Set the text content using utility method
+            final String displayText = tech.derbent.abstracts.utils.CColorUtils.getDisplayTextFromEntity(status);
             span.setText(displayText);
             
-            // Apply background color if available
-            try {
-                String color = getStatusColor(status);
-                if ((color != null) && !color.trim().isEmpty()) {
-                    // Ensure color starts with #
-                    if (!color.startsWith("#")) {
-                        color = "#" + color;
-                    }
-                    span.getStyle().set("background-color", color);
-                    span.getStyle().set("color", getContrastTextColor(color));
-                    span.getStyle().set("padding", "4px 8px");
-                    span.getStyle().set("border-radius", "4px");
-                    span.getStyle().set("display", "inline-block");
-                    span.getStyle().set("min-width", "80px");
-                    span.getStyle().set("text-align", "center");
-                    span.getStyle().set("font-weight", "500");
-                    LOGGER.debug("Applied color {} to grid status cell: {}", color, displayText);
-                } else {
-                    // Default styling for status without color
-                    span.getStyle().set("background-color", "#f8f9fa");
-                    span.getStyle().set("color", "#495057");
-                    span.getStyle().set("padding", "4px 8px");
-                    span.getStyle().set("border-radius", "4px");
-                    span.getStyle().set("display", "inline-block");
-                    span.getStyle().set("min-width", "80px");
-                    span.getStyle().set("text-align", "center");
-                    span.getStyle().set("border", "1px solid #dee2e6");
-                }
-            } catch (final Exception e) {
-                LOGGER.warn("Error applying color to grid status cell: {}", e.getMessage());
-            }
+            // Apply background color if available using utility method
+            final String color = tech.derbent.abstracts.utils.CColorUtils.getColorWithFallback(status, 
+                    tech.derbent.abstracts.utils.CColorUtils.DEFAULT_COLOR);
+            
+            span.getStyle().set("background-color", color);
+            span.getStyle().set("color", tech.derbent.abstracts.utils.CColorUtils.getContrastTextColor(color));
+            span.getStyle().set("padding", "4px 8px");
+            span.getStyle().set("border-radius", "4px");
+            span.getStyle().set("display", "inline-block");
+            span.getStyle().set("min-width", "80px");
+            span.getStyle().set("text-align", "center");
+            span.getStyle().set("font-weight", "500");
+            
+            LOGGER.debug("Applied color {} to grid status cell: {}", color, displayText);
             
             return span;
         }).setHeader(header).setWidth(WIDTH_REFERENCE).setFlexGrow(0).setSortable(true);
@@ -304,79 +273,5 @@ public class CGrid<T extends CEntityDB<T>> extends Grid<T> {
     public void select(final T entity) {
         LOGGER.info("Selecting entity in grip: {}", entity);
         super.select(entity);
-    }
-
-    /**
-     * Helper method to extract color from a status entity using reflection.
-     * Supports entities that extend CTypeEntity (which have getColor() method).
-     * 
-     * @param statusEntity the status entity instance to extract color from
-     * @return the color string or null if not available
-     */
-    private String getStatusColor(final CEntityDB<?> statusEntity) {
-        if (statusEntity == null) {
-            return null;
-        }
-        
-        try {
-            // If entity extends CTypeEntity, it should have getColor() method
-            if (statusEntity instanceof CTypeEntity) {
-                final CTypeEntity<?> typeEntity = (CTypeEntity<?>) statusEntity;
-                return typeEntity.getColor();
-            }
-            
-            // Fallback: try to get color using reflection
-            try {
-                final java.lang.reflect.Method getColorMethod = statusEntity.getClass().getMethod("getColor");
-                final Object colorValue = getColorMethod.invoke(statusEntity);
-                return colorValue != null ? colorValue.toString() : null;
-            } catch (final NoSuchMethodException e) {
-                // This is expected for entities that don't have getColor method
-                LOGGER.debug("Status entity type {} does not have getColor method", statusEntity.getClass().getSimpleName());
-                return null;
-            }
-        } catch (final Exception e) {
-            LOGGER.warn("Error extracting color from status entity {}: {}", 
-                       statusEntity.getClass().getSimpleName(), e.getMessage());
-            return null;
-        }
-    }
-    
-    /**
-     * Helper method to determine appropriate text color based on background color.
-     * Uses a simple brightness calculation to determine if white or black text would be more readable.
-     * 
-     * @param backgroundColor the background color in hex format (e.g., "#FF0000")
-     * @return "white" for dark backgrounds, "black" for light backgrounds
-     */
-    private String getContrastTextColor(final String backgroundColor) {
-        if ((backgroundColor == null) || backgroundColor.trim().isEmpty()) {
-            return "black"; // Default to black text
-        }
-        
-        try {
-            String color = backgroundColor.trim();
-            // Remove # if present
-            if (color.startsWith("#")) {
-                color = color.substring(1);
-            }
-            
-            // Parse RGB values
-            if (color.length() == 6) {
-                final int r = Integer.parseInt(color.substring(0, 2), 16);
-                final int g = Integer.parseInt(color.substring(2, 4), 16);
-                final int b = Integer.parseInt(color.substring(4, 6), 16);
-                
-                // Calculate brightness using relative luminance formula
-                final double brightness = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-                
-                // Return white text for dark backgrounds, black text for light backgrounds
-                return brightness < 0.5 ? "white" : "black";
-            }
-        } catch (final Exception e) {
-            LOGGER.debug("Error calculating contrast color for background {}: {}", backgroundColor, e.getMessage());
-        }
-        
-        return "black"; // Default fallback
     }
 }

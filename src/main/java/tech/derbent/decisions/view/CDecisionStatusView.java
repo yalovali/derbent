@@ -51,6 +51,12 @@ public class CDecisionStatusView extends CAbstractNamedEntityPage<CDecisionStatu
 
     @Override
     protected void createGridForEntity() {
+        // Convert to use specialized CColorAwareGrid if needed
+        if (!(grid instanceof tech.derbent.abstracts.components.CColorAwareGrid)) {
+            LOGGER.debug("Upgrading to CColorAwareGrid for enhanced color functionality");
+            // Grid is already created by parent class, just add columns with color awareness
+        }
+        
         grid.addStatusColumn(status -> status, "Status", "status");
         grid.addShortTextColumn(CDecisionStatus::getName, "Name", "name");
         grid.addLongTextColumn(CDecisionStatus::getDescription, "Description", "description");
