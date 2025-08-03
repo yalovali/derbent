@@ -28,7 +28,7 @@ public class CActivityStatus extends CStatus<CActivityStatus> implements CKanban
 		displayName = "Is Final Status", required = true, readOnly = false,
 		defaultValue = "false",
 		description = "Indicates if this is a final status (completed/cancelled)",
-		hidden = false, order = 4
+		hidden = true, order = 4
 	)
 	private Boolean isFinal = Boolean.FALSE;
 
