@@ -51,25 +51,15 @@ public class CDecisionStatusView extends CAbstractNamedEntityPage<CDecisionStatu
 
     @Override
     protected void createGridForEntity() {
-        // Convert to use specialized CColorAwareGrid if needed
-        if (!(grid instanceof tech.derbent.abstracts.components.CColorAwareGrid)) {
-            LOGGER.debug("Upgrading to CColorAwareGrid for enhanced color functionality");
-            // Grid is already created by parent class, just add columns with color awareness
-        }
-        
+        // Use enhanced color-aware status column that shows both color and icon
         grid.addStatusColumn(status -> status, "Status", "status");
         grid.addShortTextColumn(CDecisionStatus::getName, "Name", "name");
         grid.addLongTextColumn(CDecisionStatus::getDescription, "Description", "description");
+        
+        // Color column for reference (hex value)
         grid.addShortTextColumn(entity -> entity.getColor(), "Color", "color");
-        grid.addComponentColumn(entity -> {
-            final Div colorDiv = new Div();
-            colorDiv.getStyle().set("width", "20px");
-            colorDiv.getStyle().set("height", "20px");
-            colorDiv.getStyle().set("background-color", entity.getColor());
-            colorDiv.getStyle().set("border", "1px solid #ccc");
-            colorDiv.getStyle().set("border-radius", "3px");
-            return colorDiv;
-        }).setHeader("Preview").setWidth("80px").setFlexGrow(0);
+        
+        // Enhanced Type column that shows Final/Active status with better styling
         grid.addComponentColumn(entity -> {
             final Div statusDiv = new Div();
             statusDiv.setText(entity.isFinal() ? "Final" : "Active");
@@ -77,6 +67,7 @@ public class CDecisionStatusView extends CAbstractNamedEntityPage<CDecisionStatu
             statusDiv.getStyle().set("border-radius", "12px");
             statusDiv.getStyle().set("font-size", "12px");
             statusDiv.getStyle().set("font-weight", "bold");
+            statusDiv.getStyle().set("text-align", "center");
 
             if (entity.isFinal()) {
                 statusDiv.getStyle().set("background-color", "#ffebee");
@@ -87,6 +78,7 @@ public class CDecisionStatusView extends CAbstractNamedEntityPage<CDecisionStatu
             }
             return statusDiv;
         }).setHeader("Type").setWidth("100px").setFlexGrow(0);
+        
         grid.addShortTextColumn(entity -> String.valueOf(entity.getSortOrder()), "Order", "sortOrder");
     }
 

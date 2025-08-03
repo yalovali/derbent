@@ -3,20 +3,25 @@ package tech.derbent.abstracts.components;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.html.Span;
+
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.utils.CColorUtils;
 
 /**
- * CGridCellStatus - Specialized grid cell component for status entities with color-aware rendering.
+ * CGridCellStatus - Specialized grid cell component for status entities with color-aware rendering and icon support.
  * 
  * <p>
- * This class extends CGridCell to provide automatic color rendering for status entities.
- * It detects status entities and renders them with colored backgrounds based on their color properties.
+ * This class extends CGridCell to provide automatic color rendering for status entities
+ * and optional icon display. It detects status entities and renders them with colored 
+ * backgrounds based on their color properties, and displays appropriate icons alongside the text.
  * </p>
  * 
  * <p>
  * The class follows the project's coding guidelines by extending the base CGridCell class
- * and incorporating the existing color utility methods for consistent color handling.
+ * and incorporating the existing color utility methods for consistent color handling
+ * and the comprehensive icon system for entity visualization.
  * </p>
  * 
  * <p>
@@ -24,8 +29,13 @@ import tech.derbent.abstracts.utils.CColorUtils;
  * </p>
  * 
  * <pre>{@code
+ * // Basic usage - shows color and icon
  * CGridCellStatus statusCell = new CGridCellStatus(statusEntity);
- * // Color will be automatically applied based on the status entity's color property
+ * 
+ * // Disable icon display
+ * CGridCellStatus statusCell = new CGridCellStatus();
+ * statusCell.setShowIcon(false);
+ * statusCell.setStatusValue(statusEntity);
  * }</pre>
  * 
  * @author Derbent Framework
@@ -42,6 +52,7 @@ public class CGridCellStatus extends CGridCell {
     
     // Status-specific styling configuration
     private boolean autoContrast = true;
+    private boolean showIcon = true; // New: Enable/disable icon display
     
     /**
      * Default constructor for CGridCellStatus.
@@ -76,7 +87,7 @@ public class CGridCellStatus extends CGridCell {
     }
     
     /**
-     * Set status entity value with color-aware rendering.
+     * Set status entity value with color-aware rendering and optional icon display.
      * 
      * @param statusEntity the status entity to display
      */
@@ -91,7 +102,34 @@ public class CGridCellStatus extends CGridCell {
         try {
             // Set the text content using utility method
             final String displayText = CColorUtils.getDisplayTextFromEntity(statusEntity);
-            setText(displayText);
+            
+            // Create content with icon if enabled
+            if (showIcon && CColorUtils.shouldDisplayIcon(statusEntity)) {
+                final Icon icon = CColorUtils.createIconForEntity(statusEntity);
+                if (icon != null) {
+                    // Configure icon styling
+                    icon.setSize("16px");
+                    icon.getStyle().set("margin-right", "6px");
+                    icon.getStyle().set("vertical-align", "middle");
+                    
+                    // Clear any existing content and add icon + text
+                    removeAll();
+                    add(icon);
+                    
+                    // Add text as a span to maintain styling control
+                    final Span textSpan = new Span(displayText);
+                    textSpan.getStyle().set("vertical-align", "middle");
+                    add(textSpan);
+                    
+                    LOGGER.debug("Added icon and text for status: {}", displayText);
+                } else {
+                    setText(displayText);
+                    LOGGER.debug("No icon available for status: {}", displayText);
+                }
+            } else {
+                setText(displayText);
+                LOGGER.debug("Icon disabled or not applicable for status: {}", displayText);
+            }
             
             // Apply color-aware styling
             applyStatusColorStyling(statusEntity);
@@ -177,6 +215,25 @@ public class CGridCellStatus extends CGridCell {
             
             LOGGER.debug("Applied custom status color - background: {}, text: {}", backgroundColor, textColor);
         }
+    }
+    
+    /**
+     * Check if icon display is enabled.
+     * 
+     * @return true if icons are displayed alongside status text
+     */
+    public boolean isShowIcon() {
+        return showIcon;
+    }
+    
+    /**
+     * Enable or disable icon display in status cells.
+     * 
+     * @param showIcon true to show icons alongside status text
+     */
+    public void setShowIcon(final boolean showIcon) {
+        this.showIcon = showIcon;
+        LOGGER.debug("Icon display set to: {}", showIcon);
     }
     
     /**

@@ -52,19 +52,16 @@ public class CCommentPriorityView extends CProjectAwareMDPage<CCommentPriority> 
 
     @Override
     protected void createGridForEntity() {
+        // Use enhanced color-aware status column that shows both color and icon
+        grid.addStatusColumn(priority -> priority, "Priority", "priority");
         grid.addShortTextColumn(CCommentPriority::getName, "Name", "name");
         grid.addLongTextColumn(CCommentPriority::getDescription, "Description", "description");
-        grid.addShortTextColumn(entity -> String.valueOf(entity.getPriorityLevel()), "Priority Level", "priorityLevel");
+        grid.addShortTextColumn(entity -> String.valueOf(entity.getPriorityLevel()), "Level", "priorityLevel");
+        
+        // Color column for reference (hex value)
         grid.addShortTextColumn(entity -> entity.getColor(), "Color", "color");
-        grid.addComponentColumn(entity -> {
-            final Div colorDiv = new Div();
-            colorDiv.getStyle().set("width", "20px");
-            colorDiv.getStyle().set("height", "20px");
-            colorDiv.getStyle().set("background-color", entity.getColor());
-            colorDiv.getStyle().set("border", "1px solid #ccc");
-            colorDiv.getStyle().set("border-radius", "3px");
-            return colorDiv;
-        }).setHeader("Preview").setWidth("80px").setFlexGrow(0);
+        
+        // Default priority indicator
         grid.addComponentColumn(entity -> {
             final Div defaultDiv = new Div();
             defaultDiv.setText(entity.isDefault() ? "Default" : "");
@@ -76,6 +73,7 @@ public class CCommentPriorityView extends CProjectAwareMDPage<CCommentPriority> 
                 defaultDiv.getStyle().set("color", "#1976d2");
                 defaultDiv.getStyle().set("font-size", "12px");
                 defaultDiv.getStyle().set("font-weight", "bold");
+                defaultDiv.getStyle().set("text-align", "center");
             }
             return defaultDiv;
         }).setHeader("Default").setWidth("80px").setFlexGrow(0);

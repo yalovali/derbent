@@ -54,6 +54,7 @@ public class CColorAwareGrid<T extends CEntityDB<T>> extends CGrid<T> {
     private String minWidth = "80px";
     private boolean centerAlign = true;
     private String fontWeight = "500";
+    private boolean showIcon = true; // New: Enable/disable icon display in status cells
     
     /**
      * Constructor for CColorAwareGrid with entity class.
@@ -130,6 +131,9 @@ public class CColorAwareGrid<T extends CEntityDB<T>> extends CGrid<T> {
                 statusCell.setCenterAlign(this.centerAlign);
                 statusCell.setFontWeight(this.fontWeight);
             }
+            
+            // Configure icon display (always from grid setting)
+            statusCell.setShowIcon(this.showIcon);
             
             statusCell.setStatusValue(status);
             
@@ -271,5 +275,13 @@ public class CColorAwareGrid<T extends CEntityDB<T>> extends CGrid<T> {
     
     public void setFontWeight(final String fontWeight) {
         this.fontWeight = fontWeight;
+    }
+    
+    public boolean isShowIcon() {
+        return showIcon;
+    }
+    
+    public void setShowIcon(final boolean showIcon) {
+        this.showIcon = showIcon;
     }
 }
