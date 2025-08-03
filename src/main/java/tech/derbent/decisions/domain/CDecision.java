@@ -114,6 +114,16 @@ public class CDecision extends CEntityOfProject<CDecision> {
 	private LocalDateTime reviewDate;
 
 	/**
+	 * Default constructor for JPA.
+	 */
+	public CDecision() {
+		super();
+		// Initialize collections for JPA
+		this.teamMembers = new ArrayList<>();
+		this.approvals = new ArrayList<>();
+	}
+
+	/**
 	 * Constructor with name and project.
 	 * @param name    the decision name - must not be null or empty
 	 * @param project the project this decision belongs to - must not be null
