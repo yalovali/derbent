@@ -590,9 +590,33 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 					meta.defaultValue(), field.getName(), e.getMessage());
 			}
 		}
-		// Use simple binding for now to avoid incomplete forField bindings
-		// TODO: Add back type-specific converters once binding issue is resolved
-		safeBindComponent(binder, numberField, field.getName(), "NumberField");
+		// Handle different integer types with proper conversion
+		final Class<?> fieldType = field.getType();
+
+		try {
+			if ((fieldType == Integer.class) || (fieldType == int.class)) {
+				binder.forField(numberField)
+					.withConverter(value -> value != null ? value.intValue() : null,
+						value -> value != null ? value.doubleValue() : null)
+					.bind(field.getName());
+				LOGGER.debug("Successfully bound NumberField with Integer converter for field '{}'", field.getName());
+			}
+			else if ((fieldType == Long.class) || (fieldType == long.class)) {
+				binder.forField(numberField)
+					.withConverter(value -> value != null ? value.longValue() : null,
+						value -> value != null ? value.doubleValue() : null)
+					.bind(field.getName());
+				LOGGER.debug("Successfully bound NumberField with Long converter for field '{}'", field.getName());
+			}
+			else {
+				// Fallback for other number types (Double, etc.)
+				safeBindComponent(binder, numberField, field.getName(), "NumberField");
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Failed to bind integer field for field '{}': {} - trying simple binding",
+				field.getName(), e.getMessage());
+			safeBindComponent(binder, numberField, field.getName(), "NumberField");
+		}
 		return numberField;
 	}
 
