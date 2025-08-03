@@ -52,20 +52,15 @@ public class CMeetingStatusView extends CProjectAwareMDPage<CMeetingStatus> {
 
     @Override
     protected void createGridForEntity() {
-        // Color-aware status column using refactored CGrid functionality
+        // Use enhanced color-aware status column that shows both color and icon
         grid.addStatusColumn(status -> status, "Status", "status");
         grid.addShortTextColumn(CMeetingStatus::getName, "Name", "name");
         grid.addLongTextColumn(CMeetingStatus::getDescription, "Description", "description");
+        
+        // Color column for reference (hex value)
         grid.addShortTextColumn(entity -> entity.getColor(), "Color", "color");
-        grid.addComponentColumn(entity -> {
-            final Div colorDiv = new Div();
-            colorDiv.getStyle().set("width", "20px");
-            colorDiv.getStyle().set("height", "20px");
-            colorDiv.getStyle().set("background-color", entity.getColor());
-            colorDiv.getStyle().set("border", "1px solid #ccc");
-            colorDiv.getStyle().set("border-radius", "3px");
-            return colorDiv;
-        }).setHeader("Preview").setWidth("80px").setFlexGrow(0);
+        
+        // Enhanced Type column that shows Final/Active status with better styling
         grid.addComponentColumn(entity -> {
             final Div statusDiv = new Div();
             statusDiv.setText(entity.isFinal() ? "Final" : "Active");
@@ -73,6 +68,7 @@ public class CMeetingStatusView extends CProjectAwareMDPage<CMeetingStatus> {
             statusDiv.getStyle().set("border-radius", "12px");
             statusDiv.getStyle().set("font-size", "12px");
             statusDiv.getStyle().set("font-weight", "bold");
+            statusDiv.getStyle().set("text-align", "center");
 
             if (entity.isFinal()) {
                 statusDiv.getStyle().set("background-color", "#ffebee");
@@ -83,6 +79,7 @@ public class CMeetingStatusView extends CProjectAwareMDPage<CMeetingStatus> {
             }
             return statusDiv;
         }).setHeader("Type").setWidth("100px").setFlexGrow(0);
+        
         grid.addShortTextColumn(entity -> String.valueOf(entity.getSortOrder()), "Order", "sortOrder");
     }
 

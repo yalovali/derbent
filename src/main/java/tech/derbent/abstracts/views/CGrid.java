@@ -51,6 +51,9 @@ public class CGrid<T extends CEntityDB<T>> extends Grid<T> {
 	public static final String WIDTH_IMAGE = "60px";
 
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+	
+	/** Configuration for icon display in status columns */
+	protected boolean showIconInStatusColumns = true;
 
 	/**
 	 * Constructor for CGrid with entity class.
@@ -231,8 +234,11 @@ public class CGrid<T extends CEntityDB<T>> extends Grid<T> {
 			final tech.derbent.abstracts.components.CGridCellStatus statusCell = 
 				new tech.derbent.abstracts.components.CGridCellStatus();
 			
+			// Configure icon display based on grid setting
+			statusCell.setShowIcon(showIconInStatusColumns);
+			
 			statusCell.setStatusValue(status);
-			LOGGER.debug("Created CGridCellStatus for entity: {}", entity);
+			LOGGER.debug("Created CGridCellStatus for entity: {} with icon display: {}", entity, showIconInStatusColumns);
 			return statusCell;
 		}).setHeader(header).setWidth(WIDTH_REFERENCE).setFlexGrow(0).setSortable(true);
 
@@ -256,5 +262,23 @@ public class CGrid<T extends CEntityDB<T>> extends Grid<T> {
 	public void select(final T entity) {
 		LOGGER.info("Selecting entity in grip: {}", entity);
 		super.select(entity);
+	}
+	
+	/**
+	 * Check if icons are displayed in status columns.
+	 * @return true if icons are shown in status columns
+	 */
+	public boolean isShowIconInStatusColumns() {
+		return showIconInStatusColumns;
+	}
+	
+	/**
+	 * Enable or disable icon display in status columns.
+	 * Note: This setting only affects future status columns created after this call.
+	 * @param showIconInStatusColumns true to show icons in status columns
+	 */
+	public void setShowIconInStatusColumns(final boolean showIconInStatusColumns) {
+		this.showIconInStatusColumns = showIconInStatusColumns;
+		LOGGER.info("Icon display in status columns set to: {}", showIconInStatusColumns);
 	}
 }
