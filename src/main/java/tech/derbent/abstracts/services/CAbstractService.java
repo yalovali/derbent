@@ -87,6 +87,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 
 			// Automatically handle CEntityOfProject's lazy project relationship
 			if (entity instanceof CEntityOfProject) {
+				@SuppressWarnings("unchecked")
 				final CEntityOfProject<EntityClass> projectEntity =
 					(CEntityOfProject<EntityClass>) entity;
 				initializeLazyRelationship(projectEntity.getProject());
