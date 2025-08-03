@@ -193,6 +193,26 @@ public class CActivityStatusService extends CEntityOfProjectService<CActivitySta
     }
 
     /**
+     * Override get() method to eagerly load project relationship and prevent LazyInitializationException.
+     * 
+     * @param id
+     *            the activity status ID
+     * @return optional CActivityStatus with all relationships loaded
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<CActivityStatus> get(final Long id) {
+        LOGGER.debug("get called with id: {} (overridden to eagerly load project)", id);
+
+        if (id == null) {
+            return Optional.empty();
+        }
+        final Optional<CActivityStatus> entity = activityStatusRepository.findByIdWithProject(id);
+        entity.ifPresent(this::initializeLazyFields);
+        return entity;
+    }
+
+    /**
      * Save or update an activity status.
      * 
      * @param status

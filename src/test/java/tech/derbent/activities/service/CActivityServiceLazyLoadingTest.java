@@ -4,23 +4,38 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
+import java.time.Clock;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-import tech.derbent.abstracts.domains.CTestBase;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.domain.CActivityType;
+import tech.derbent.projects.domain.CProject;
 
 /**
  * Test class for CActivityService lazy loading functionality. Specifically tests the fix for
  * LazyInitializationException with CActivityType.
  */
-class CActivityServiceLazyLoadingTest extends CTestBase {
+class CActivityServiceLazyLoadingTest {
 
-    @Override
-    protected void setupForTest() {
-        // TODO Auto-generated method stub
+    @Mock
+    private CActivityRepository activityRepository;
+    
+    @Mock
+    private Clock clock;
+    
+    private CActivityService activityService;
+    private CProject project;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        activityService = new CActivityService(activityRepository, clock);
+        project = new CProject("Test Project");
     }
 
     @Test
@@ -43,8 +58,9 @@ class CActivityServiceLazyLoadingTest extends CTestBase {
     void testInitializeLazyFieldsHandlesNullEntity() {
         // When & Then - Should not throw any exception
         assertDoesNotThrow(() -> {
-            // Use reflection to access the protected method for testing
-            activityService.getClass().getDeclaredMethod("initializeLazyFields", CActivity.class);
+            // The method is inherited from the base class and uses generic type
+            // Just verify the service handles null entity gracefully
+            activityService.get(null);
         });
     }
 
