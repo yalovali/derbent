@@ -80,12 +80,15 @@ class CSystemSettingsViewCancelButtonTest extends CTestBase {
 		// exceptions The cancel functionality reloads settings from the service to reject
 		// unsaved changes
 		assertDoesNotThrow(() -> {
-			// The cancel button functionality is tested implicitly through view
-			// initialization and service mocking. The cancel button should reload fresh
-			// settings from the service which is what we've mocked to return the original
-			// test settings
-			view.toString(); // This ensures the view is properly constructed with all
-								// buttons
+			// Test the binding functionality that should trigger the IllegalStateException
+			// if forField is not properly completed with bind()
+			var binder = view.getBinder();
+			assertNotNull(binder, "Binder should be available");
+			
+			// This will trigger the IllegalStateException if there are incomplete forField bindings
+			if (view.getCurrentSettings() != null) {
+				binder.readBean(view.getCurrentSettings());
+			}
 		}, "Cancel button functionality should not throw exceptions");
 	}
 
