@@ -243,59 +243,6 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
             }
         });
         
-        // Check if this is a status entity (extends CStatus or CTypeEntity) and configure color-aware rendering
-        if (isStatusEntity(fieldType)) {
-            LOGGER.debug("Configuring color-aware ComboBox for status entity type: {}", fieldType.getSimpleName());
-            comboBox.setRenderer(new ComponentRenderer<>(item -> {
-                final Span span = new Span();
-                
-                if (item == null) {
-                    span.setText("N/A");
-                    return span;
-                }
-                
-                // Set the text content
-                String displayText = "Unknown";
-                try {
-                    if (item instanceof CEntityNamed) {
-                        final CEntityNamed<?> namedEntity = (CEntityNamed<?>) item;
-                        final String name = namedEntity.getName();
-                        displayText = ((name != null) && !name.trim().isEmpty())
-                                ? name
-                                : "Unnamed " + item.getClass().getSimpleName() + " #" + namedEntity.getId();
-                    } else {
-                        displayText = item.toString();
-                    }
-                } catch (final Exception e) {
-                    LOGGER.warn("Error generating display text for status ComboBox item: {}", e.getMessage());
-                    displayText = "Error: " + item.getClass().getSimpleName();
-                }
-                span.setText(displayText);
-                
-                // Apply background color if available
-                try {
-                    String color = getColorFromEntity(item);
-                    if ((color != null) && !color.trim().isEmpty()) {
-                        // Ensure color starts with #
-                        if (!color.startsWith("#")) {
-                            color = "#" + color;
-                        }
-                        span.getStyle().set("background-color", color);
-                        span.getStyle().set("color", getContrastTextColor(color));
-                        span.getStyle().set("padding", "4px 8px");
-                        span.getStyle().set("border-radius", "4px");
-                        span.getStyle().set("display", "inline-block");
-                        span.getStyle().set("min-width", "100%");
-                        LOGGER.debug("Applied color {} to ComboBox item: {}", color, displayText);
-                    }
-                } catch (final Exception e) {
-                    LOGGER.warn("Error applying color to ComboBox item: {}", e.getMessage());
-                }
-                
-                return span;
-            }));
-        }
-        
         // Data provider resolution with priority order: 1. Legacy ComboBoxDataProvider
         // (if provided) - for backward compatibility 2. Annotation-based resolution using
         // CDataProviderResolver 3. Empty list as fallback
@@ -411,6 +358,61 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
                         return null;
                     }
                 }).bind(field.getName());
+        
+        // Check if this is a status entity (extends CStatus or CTypeEntity) and configure color-aware rendering
+        // This is done after binding to avoid interfering with the binding process
+        if (isStatusEntity(fieldType)) {
+            LOGGER.debug("Configuring color-aware ComboBox for status entity type: {}", fieldType.getSimpleName());
+            comboBox.setRenderer(new ComponentRenderer<>(item -> {
+                final Span span = new Span();
+                
+                if (item == null) {
+                    span.setText("N/A");
+                    return span;
+                }
+                
+                // Set the text content
+                String displayText = "Unknown";
+                try {
+                    if (item instanceof CEntityNamed) {
+                        final CEntityNamed<?> namedEntity = (CEntityNamed<?>) item;
+                        final String name = namedEntity.getName();
+                        displayText = ((name != null) && !name.trim().isEmpty())
+                                ? name
+                                : "Unnamed " + item.getClass().getSimpleName() + " #" + namedEntity.getId();
+                    } else {
+                        displayText = item.toString();
+                    }
+                } catch (final Exception e) {
+                    LOGGER.warn("Error generating display text for status ComboBox item: {}", e.getMessage());
+                    displayText = "Error: " + item.getClass().getSimpleName();
+                }
+                span.setText(displayText);
+                
+                // Apply background color if available
+                try {
+                    String color = getColorFromEntity(item);
+                    if ((color != null) && !color.trim().isEmpty()) {
+                        // Ensure color starts with #
+                        if (!color.startsWith("#")) {
+                            color = "#" + color;
+                        }
+                        span.getStyle().set("background-color", color);
+                        span.getStyle().set("color", getContrastTextColor(color));
+                        span.getStyle().set("padding", "4px 8px");
+                        span.getStyle().set("border-radius", "4px");
+                        span.getStyle().set("display", "inline-block");
+                        span.getStyle().set("min-width", "100%");
+                        LOGGER.debug("Applied color {} to ComboBox item: {}", color, displayText);
+                    }
+                } catch (final Exception e) {
+                    LOGGER.warn("Error applying color to ComboBox item: {}", e.getMessage());
+                }
+                
+                return span;
+            }));
+        }
+        
         return comboBox;
     }
 
