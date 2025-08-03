@@ -11,15 +11,15 @@ import tech.derbent.session.service.CSessionService;
  */
 @Configuration
 public class SessionConfiguration {
-    
+
     private final CSessionService sessionService;
     private final LayoutService layoutService;
-    
+
     public SessionConfiguration(final CSessionService sessionService, final LayoutService layoutService) {
         this.sessionService = sessionService;
         this.layoutService = layoutService;
     }
-    
+
     @PostConstruct
     public void configureServices() {
         sessionService.setLayoutService(layoutService);

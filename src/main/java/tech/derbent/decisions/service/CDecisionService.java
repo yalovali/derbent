@@ -15,191 +15,201 @@ import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
 
 /**
- * CDecisionService - Service class for CDecision entities. Layer: Service (MVC) Provides
- * business logic operations for decision management including validation, creation,
- * approval workflow management, and project-based queries.
+ * CDecisionService - Service class for CDecision entities. Layer: Service (MVC) Provides business logic operations for
+ * decision management including validation, creation, approval workflow management, and project-based queries.
  */
 @Service
-@PreAuthorize ("isAuthenticated()")
+@PreAuthorize("isAuthenticated()")
 public class CDecisionService extends CEntityOfProjectService<CDecision> {
 
-	private final CDecisionRepository decisionRepository;
+    private final CDecisionRepository decisionRepository;
 
-	public CDecisionService(final CDecisionRepository repository, final Clock clock) {
-		super(repository, clock);
-		this.decisionRepository = repository;
-	}
+    public CDecisionService(final CDecisionRepository repository, final Clock clock) {
+        super(repository, clock);
+        this.decisionRepository = repository;
+    }
 
-	/**
-	 * Adds an approval requirement to a decision.
-	 * @param decision the decision - must not be null
-	 * @param approver the approver user - must not be null
-	 * @return the created approval
-	 */
-	@Transactional
-	public CDecisionApproval addApprovalRequirement(final CDecision decision,
-		final CUser approver) {
-		LOGGER.info("addApprovalRequirement called with decision: {}, approver: {}",
-			decision != null ? decision.getName() : "null",
-			approver != null ? approver.getName() : "null");
+    /**
+     * Adds an approval requirement to a decision.
+     * 
+     * @param decision
+     *            the decision - must not be null
+     * @param approver
+     *            the approver user - must not be null
+     * @return the created approval
+     */
+    @Transactional
+    public CDecisionApproval addApprovalRequirement(final CDecision decision, final CUser approver) {
+        LOGGER.info("addApprovalRequirement called with decision: {}, approver: {}",
+                decision != null ? decision.getName() : "null", approver != null ? approver.getName() : "null");
 
-		if (decision == null) {
-			LOGGER.error("addApprovalRequirement called with null decision");
-			throw new IllegalArgumentException("Decision cannot be null");
-		}
+        if (decision == null) {
+            LOGGER.error("addApprovalRequirement called with null decision");
+            throw new IllegalArgumentException("Decision cannot be null");
+        }
 
-		if (approver == null) {
-			LOGGER.error("addApprovalRequirement called with null approver");
-			throw new IllegalArgumentException("Approver cannot be null");
-		}
-		final CDecisionApproval approval = new CDecisionApproval("approval");
-		approval.setDecision(decision);
-		decision.addApproval(approval);
-		repository.saveAndFlush(decision);
-		return approval;
-	}
+        if (approver == null) {
+            LOGGER.error("addApprovalRequirement called with null approver");
+            throw new IllegalArgumentException("Approver cannot be null");
+        }
+        final CDecisionApproval approval = new CDecisionApproval("approval");
+        approval.setDecision(decision);
+        decision.addApproval(approval);
+        repository.saveAndFlush(decision);
+        return approval;
+    }
 
-	/**
-	 * Finds decisions by accountable user.
-	 * @param user the accountable user
-	 * @return list of decisions where the user is accountable
-	 */
-	@Transactional (readOnly = true)
-	public List<CDecision> findByAccountableUser(final CUser user) {
-		LOGGER.info("findByAccountableUser called with user: {}",
-			user != null ? user.getName() : "null");
+    /**
+     * Finds decisions by accountable user.
+     * 
+     * @param user
+     *            the accountable user
+     * @return list of decisions where the user is accountable
+     */
+    @Transactional(readOnly = true)
+    public List<CDecision> findByAccountableUser(final CUser user) {
+        LOGGER.info("findByAccountableUser called with user: {}", user != null ? user.getName() : "null");
 
-		if (user == null) {
-			LOGGER.warn("findByAccountableUser called with null user");
-			return List.of();
-		}
-		return decisionRepository.findByAccountableUser(user);
-	}
+        if (user == null) {
+            LOGGER.warn("findByAccountableUser called with null user");
+            return List.of();
+        }
+        return decisionRepository.findByAccountableUser(user);
+    }
 
-	/**
-	 * Finds a decision by ID with eagerly loaded decision type.
-	 * @param id the decision ID
-	 * @return optional CDecision with loaded decisionType
-	 */
-	@Transactional (readOnly = true)
-	public Optional<CDecision> findByIdWithDecisionType(final Long id) {
-		LOGGER.info("findByIdWithDecisionType called with id: {}", id);
+    /**
+     * Finds a decision by ID with eagerly loaded decision type.
+     * 
+     * @param id
+     *            the decision ID
+     * @return optional CDecision with loaded decisionType
+     */
+    @Transactional(readOnly = true)
+    public Optional<CDecision> findByIdWithDecisionType(final Long id) {
+        LOGGER.info("findByIdWithDecisionType called with id: {}", id);
 
-		if (id == null) {
-			LOGGER.warn("findByIdWithDecisionType called with null id");
-			return Optional.empty();
-		}
-		return decisionRepository.findByIdWithDecisionType(id);
-	}
+        if (id == null) {
+            LOGGER.warn("findByIdWithDecisionType called with null id");
+            return Optional.empty();
+        }
+        return decisionRepository.findByIdWithDecisionType(id);
+    }
 
-	/**
-	 * Finds all decisions by project with eagerly loaded relationships.
-	 * @param project the project
-	 * @return list of CDecision with loaded relationships
-	 */
-	@Transactional (readOnly = true)
-	public List<CDecision> findByProjectWithAllRelationships(final CProject project) {
-		LOGGER.info("findByProjectWithAllRelationships called with project: {}",
-			project != null ? project.getName() : "null");
+    /**
+     * Finds all decisions by project with eagerly loaded relationships.
+     * 
+     * @param project
+     *            the project
+     * @return list of CDecision with loaded relationships
+     */
+    @Transactional(readOnly = true)
+    public List<CDecision> findByProjectWithAllRelationships(final CProject project) {
+        LOGGER.info("findByProjectWithAllRelationships called with project: {}",
+                project != null ? project.getName() : "null");
 
-		if (project == null) {
-			LOGGER.warn("findByProjectWithAllRelationships called with null project");
-			return List.of();
-		}
-		return decisionRepository.findByProjectWithAllRelationships(project);
-	}
+        if (project == null) {
+            LOGGER.warn("findByProjectWithAllRelationships called with null project");
+            return List.of();
+        }
+        return decisionRepository.findByProjectWithAllRelationships(project);
+    }
 
-	/**
-	 * Finds decisions where the user is a team member.
-	 * @param user the team member user
-	 * @return list of decisions where the user is a team member
-	 */
-	@Transactional (readOnly = true)
-	public List<CDecision> findByTeamMember(final CUser user) {
-		LOGGER.info("findByTeamMember called with user: {}",
-			user != null ? user.getName() : "null");
+    /**
+     * Finds decisions where the user is a team member.
+     * 
+     * @param user
+     *            the team member user
+     * @return list of decisions where the user is a team member
+     */
+    @Transactional(readOnly = true)
+    public List<CDecision> findByTeamMember(final CUser user) {
+        LOGGER.info("findByTeamMember called with user: {}", user != null ? user.getName() : "null");
 
-		if (user == null) {
-			LOGGER.warn("findByTeamMember called with null user");
-			return List.of();
-		}
-		return decisionRepository.findByTeamMembersContaining(user);
-	}
+        if (user == null) {
+            LOGGER.warn("findByTeamMember called with null user");
+            return List.of();
+        }
+        return decisionRepository.findByTeamMembersContaining(user);
+    }
 
-	/**
-	 * Finds decisions that require approval from a specific user.
-	 * @param user the approver user
-	 * @return list of decisions that need approval from the user
-	 */
-	@Transactional (readOnly = true)
-	public List<CDecision> findDecisionsPendingApprovalByUser(final CUser user) {
-		LOGGER.info("findDecisionsPendingApprovalByUser called with user: {}",
-			user != null ? user.getName() : "null");
+    /**
+     * Finds decisions that require approval from a specific user.
+     * 
+     * @param user
+     *            the approver user
+     * @return list of decisions that need approval from the user
+     */
+    @Transactional(readOnly = true)
+    public List<CDecision> findDecisionsPendingApprovalByUser(final CUser user) {
+        LOGGER.info("findDecisionsPendingApprovalByUser called with user: {}", user != null ? user.getName() : "null");
 
-		if (user == null) {
-			LOGGER.warn("findDecisionsPendingApprovalByUser called with null user");
-			return List.of();
-		}
-		return decisionRepository.findDecisionsPendingApprovalByUser(user);
-	}
+        if (user == null) {
+            LOGGER.warn("findDecisionsPendingApprovalByUser called with null user");
+            return List.of();
+        }
+        return decisionRepository.findDecisionsPendingApprovalByUser(user);
+    }
 
-	/**
-	 * Override get() method to eagerly load relationships and prevent
-	 * LazyInitializationException.
-	 * @param id the decision ID
-	 * @return optional CDecision with all relationships loaded
-	 */
-	@Override
-	@Transactional (readOnly = true)
-	public Optional<CDecision> get(final Long id) {
-		LOGGER.info("get called with id: {} (overridden to eagerly load relationships)",
-			id);
+    /**
+     * Override get() method to eagerly load relationships and prevent LazyInitializationException.
+     * 
+     * @param id
+     *            the decision ID
+     * @return optional CDecision with all relationships loaded
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<CDecision> get(final Long id) {
+        LOGGER.info("get called with id: {} (overridden to eagerly load relationships)", id);
 
-		if (id == null) {
-			return Optional.empty();
-		}
-		final Optional<CDecision> entity =
-			decisionRepository.findByIdWithAllRelationships(id);
-		entity.ifPresent(this::initializeLazyFields);
-		return entity;
-	}
+        if (id == null) {
+            return Optional.empty();
+        }
+        final Optional<CDecision> entity = decisionRepository.findByIdWithAllRelationships(id);
+        entity.ifPresent(this::initializeLazyFields);
+        return entity;
+    }
 
-	/**
-	 * Gets the approval progress for a decision.
-	 * @param decision the decision
-	 * @return string representation of approval progress (e.g., "2/5 approved")
-	 */
-	@Transactional (readOnly = true)
-	public String getApprovalProgress(final CDecision decision) {
-		LOGGER.info("getApprovalProgress called with decision: {}",
-			decision != null ? decision.getName() : "null");
+    /**
+     * Gets the approval progress for a decision.
+     * 
+     * @param decision
+     *            the decision
+     * @return string representation of approval progress (e.g., "2/5 approved")
+     */
+    @Transactional(readOnly = true)
+    public String getApprovalProgress(final CDecision decision) {
+        LOGGER.info("getApprovalProgress called with decision: {}", decision != null ? decision.getName() : "null");
 
-		if (decision == null) {
-			LOGGER.warn("getApprovalProgress called with null decision");
-			return "0/0 approved";
-		}
-		final int approvedCount = decision.getApprovedCount();
-		final int totalCount = decision.getApprovalCount();
-		return String.format("%d/%d approved", approvedCount, totalCount);
-	}
+        if (decision == null) {
+            LOGGER.warn("getApprovalProgress called with null decision");
+            return "0/0 approved";
+        }
+        final int approvedCount = decision.getApprovedCount();
+        final int totalCount = decision.getApprovalCount();
+        return String.format("%d/%d approved", approvedCount, totalCount);
+    }
 
-	@Override
-	protected Class<CDecision> getEntityClass() { return CDecision.class; }
+    @Override
+    protected Class<CDecision> getEntityClass() {
+        return CDecision.class;
+    }
 
-	/**
-	 * Checks if a decision is fully approved.
-	 * @param decision the decision to check
-	 * @return true if all required approvals are granted
-	 */
-	@Transactional (readOnly = true)
-	public boolean isDecisionFullyApproved(final CDecision decision) {
-		LOGGER.info("isDecisionFullyApproved called with decision: {}",
-			decision != null ? decision.getName() : "null");
+    /**
+     * Checks if a decision is fully approved.
+     * 
+     * @param decision
+     *            the decision to check
+     * @return true if all required approvals are granted
+     */
+    @Transactional(readOnly = true)
+    public boolean isDecisionFullyApproved(final CDecision decision) {
+        LOGGER.info("isDecisionFullyApproved called with decision: {}", decision != null ? decision.getName() : "null");
 
-		if (decision == null) {
-			LOGGER.warn("isDecisionFullyApproved called with null decision");
-			return false;
-		}
-		return decision.isFullyApproved();
-	}
+        if (decision == null) {
+            LOGGER.warn("isDecisionFullyApproved called with null decision");
+            return false;
+        }
+        return decision.isFullyApproved();
+    }
 }

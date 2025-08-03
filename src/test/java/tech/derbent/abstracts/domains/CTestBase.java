@@ -21,54 +21,53 @@ import tech.derbent.users.service.CUserService;
 
 public abstract class CTestBase {
 
-	@Mock
-	protected Clock clock;
+    @Mock
+    protected Clock clock;
 
-	@Mock
-	protected CUserService userService;
+    @Mock
+    protected CUserService userService;
 
-	@Mock
-	protected CActivityStatusRepository activityStatusRepository;
+    @Mock
+    protected CActivityStatusRepository activityStatusRepository;
 
-	@Mock
-	protected CActivityStatusService activityStatusService;
+    @Mock
+    protected CActivityStatusService activityStatusService;
 
-	protected CUser testUser;
+    protected CUser testUser;
 
-	@Mock
-	protected CProject project;
+    @Mock
+    protected CProject project;
 
-	@Autowired
-	protected CProjectService projectService;
+    @Autowired
+    protected CProjectService projectService;
 
-	@Mock
-	protected CActivityTypeService activityTypeService;
+    @Mock
+    protected CActivityTypeService activityTypeService;
 
-	@Mock
-	protected CActivityTypeRepository activityTypeRepository;
+    @Mock
+    protected CActivityTypeRepository activityTypeRepository;
 
-	@Mock
-	public CUserRepository userRepository;
+    @Mock
+    public CUserRepository userRepository;
 
-	@Mock
-	protected CActivityRepository activityRepository;
+    @Mock
+    protected CActivityRepository activityRepository;
 
-	protected CActivityService activityService;
+    protected CActivityService activityService;
 
-	@BeforeEach
-	void setUp() {
-		MockitoAnnotations.openMocks(this);
-		testUser = new CUser("Test User");
-		testUser.setLogin("testuser");
-		activityService = new CActivityService(activityRepository, clock);
-		userService = new CUserService(userRepository, clock);
-		project = new CProject("Test Project");
-		activityTypeService = new CActivityTypeService(activityTypeRepository, clock);
-		activityStatusService =
-			new CActivityStatusService(activityStatusRepository, clock);
-		project = new CProject("Test Project");
-		setupForTest();
-	}
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        testUser = new CUser("Test User");
+        testUser.setLogin("testuser");
+        activityService = new CActivityService(activityRepository, clock);
+        userService = new CUserService(userRepository, clock);
+        project = new CProject("Test Project");
+        activityTypeService = new CActivityTypeService(activityTypeRepository, clock);
+        activityStatusService = new CActivityStatusService(activityStatusRepository, clock);
+        project = new CProject("Test Project");
+        setupForTest();
+    }
 
-	protected abstract void setupForTest();
+    protected abstract void setupForTest();
 }

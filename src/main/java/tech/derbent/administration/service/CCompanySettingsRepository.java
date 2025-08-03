@@ -11,19 +11,19 @@ import tech.derbent.administration.domain.CCompanySettings;
 import tech.derbent.companies.domain.CCompany;
 
 /**
- * CCompanySettingsRepository - Data access layer for CCompanySettings entities.
- * Layer: Service (MVC) - Repository interface
+ * CCompanySettingsRepository - Data access layer for CCompanySettings entities. Layer: Service (MVC) - Repository
+ * interface
  * 
- * Provides database access methods for company-wide administration settings,
- * including CRUD operations and specialized queries for settings management.
+ * Provides database access methods for company-wide administration settings, including CRUD operations and specialized
+ * queries for settings management.
  */
 public interface CCompanySettingsRepository extends CAbstractRepository<CCompanySettings> {
 
     /**
-     * Finds company settings by the associated company.
-     * Each company should have only one settings record.
+     * Finds company settings by the associated company. Each company should have only one settings record.
      * 
-     * @param company the company to find settings for
+     * @param company
+     *            the company to find settings for
      * @return Optional containing the CCompanySettings if found, empty otherwise
      */
     @Query("SELECT cs FROM CCompanySettings cs WHERE cs.company = :company")
@@ -32,15 +32,15 @@ public interface CCompanySettingsRepository extends CAbstractRepository<CCompany
     /**
      * Finds company settings by company ID.
      * 
-     * @param companyId the ID of the company
+     * @param companyId
+     *            the ID of the company
      * @return Optional containing the CCompanySettings if found, empty otherwise
      */
     @Query("SELECT cs FROM CCompanySettings cs WHERE cs.company.id = :companyId")
     Optional<CCompanySettings> findByCompanyId(@Param("companyId") Long companyId);
 
     /**
-     * Finds all companies that have email notifications enabled.
-     * Useful for system-wide email processing.
+     * Finds all companies that have email notifications enabled. Useful for system-wide email processing.
      * 
      * @return List of CCompanySettings with email notifications enabled
      */
@@ -50,17 +50,18 @@ public interface CCompanySettingsRepository extends CAbstractRepository<CCompany
     /**
      * Finds companies with specific default project status.
      * 
-     * @param defaultProjectStatus the project status to search for
+     * @param defaultProjectStatus
+     *            the project status to search for
      * @return List of CCompanySettings with the specified default project status
      */
     @Query("SELECT cs FROM CCompanySettings cs WHERE cs.defaultProjectStatus = :defaultProjectStatus ORDER BY cs.company.name")
     List<CCompanySettings> findByDefaultProjectStatus(@Param("defaultProjectStatus") String defaultProjectStatus);
 
     /**
-     * Finds companies in a specific timezone.
-     * Useful for time-based operations and scheduling.
+     * Finds companies in a specific timezone. Useful for time-based operations and scheduling.
      * 
-     * @param timezone the timezone to search for
+     * @param timezone
+     *            the timezone to search for
      * @return List of CCompanySettings in the specified timezone
      */
     @Query("SELECT cs FROM CCompanySettings cs WHERE cs.companyTimezone = :timezone ORDER BY cs.company.name")
@@ -69,7 +70,8 @@ public interface CCompanySettingsRepository extends CAbstractRepository<CCompany
     /**
      * Finds companies with time tracking requirements.
      * 
-     * @param requireTimeTracking true to find companies requiring time tracking
+     * @param requireTimeTracking
+     *            true to find companies requiring time tracking
      * @return List of CCompanySettings with the specified time tracking requirement
      */
     @Query("SELECT cs FROM CCompanySettings cs WHERE cs.requireTimeTracking = :requireTimeTracking ORDER BY cs.company.name")
@@ -84,8 +86,7 @@ public interface CCompanySettingsRepository extends CAbstractRepository<CCompany
     List<CCompanySettings> findByEnableGanttCharts();
 
     /**
-     * Finds companies with overdue notifications enabled.
-     * Useful for automated notification processing.
+     * Finds companies with overdue notifications enabled. Useful for automated notification processing.
      * 
      * @return List of CCompanySettings with overdue notifications enabled
      */
@@ -95,7 +96,8 @@ public interface CCompanySettingsRepository extends CAbstractRepository<CCompany
     /**
      * Checks if company settings exist for a specific company.
      * 
-     * @param companyId the ID of the company
+     * @param companyId
+     *            the ID of the company
      * @return true if settings exist, false otherwise
      */
     @Query("SELECT COUNT(cs) > 0 FROM CCompanySettings cs WHERE cs.company.id = :companyId")

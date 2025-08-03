@@ -11,8 +11,7 @@ import tech.derbent.decisions.domain.CDecisionType;
 import tech.derbent.projects.domain.CProject;
 
 /**
- * CDecisionTypeRepository - Repository interface for CDecisionType entities.
- * Layer: Data Access (MVC)
+ * CDecisionTypeRepository - Repository interface for CDecisionType entities. Layer: Data Access (MVC)
  * 
  * Provides data access methods for project-aware decision type entities with eager loading support.
  */
@@ -20,17 +19,19 @@ public interface CDecisionTypeRepository extends CEntityOfProjectRepository<CDec
 
     /**
      * Finds a decision type by ID with eagerly loaded relationships.
-     * @param id the decision type ID
+     * 
+     * @param id
+     *            the decision type ID
      * @return Optional containing the decision type with loaded relationships
      */
-    @Query("SELECT dt FROM CDecisionType dt " +
-           "LEFT JOIN FETCH dt.project " +
-           "WHERE dt.id = :id")
+    @Query("SELECT dt FROM CDecisionType dt " + "LEFT JOIN FETCH dt.project " + "WHERE dt.id = :id")
     Optional<CDecisionType> findByIdWithRelationships(@Param("id") Long id);
 
     /**
      * Finds all active decision types for a project.
-     * @param project the project
+     * 
+     * @param project
+     *            the project
      * @return list of active decision types for the project
      */
     @Query("SELECT dt FROM CDecisionType dt WHERE dt.project = :project AND dt.isActive = true")
@@ -38,7 +39,9 @@ public interface CDecisionTypeRepository extends CEntityOfProjectRepository<CDec
 
     /**
      * Finds all inactive decision types for a project.
-     * @param project the project
+     * 
+     * @param project
+     *            the project
      * @return list of inactive decision types for the project
      */
     @Query("SELECT dt FROM CDecisionType dt WHERE dt.project = :project AND dt.isActive = false")
@@ -46,7 +49,9 @@ public interface CDecisionTypeRepository extends CEntityOfProjectRepository<CDec
 
     /**
      * Finds decision types that require approval for a project.
-     * @param project the project
+     * 
+     * @param project
+     *            the project
      * @return list of decision types that require approval for the project
      */
     @Query("SELECT dt FROM CDecisionType dt WHERE dt.project = :project AND dt.requiresApproval = true")
@@ -54,7 +59,9 @@ public interface CDecisionTypeRepository extends CEntityOfProjectRepository<CDec
 
     /**
      * Finds all decision types for a project ordered by sort order.
-     * @param project the project
+     * 
+     * @param project
+     *            the project
      * @return list of decision types for the project sorted by sort order
      */
     @Query("SELECT dt FROM CDecisionType dt WHERE dt.project = :project")

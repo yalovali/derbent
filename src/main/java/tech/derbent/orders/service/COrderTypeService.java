@@ -10,24 +10,28 @@ import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.orders.domain.COrderType;
 
 /**
- * COrderTypeService - Service layer for COrderType entity. Layer: Service (MVC) Handles
- * business logic for project-aware order type operations including creation, validation,
- * and management of order type entities.
+ * COrderTypeService - Service layer for COrderType entity. Layer: Service (MVC) Handles business logic for
+ * project-aware order type operations including creation, validation, and management of order type entities.
  */
 @Service
-@PreAuthorize ("isAuthenticated()")
-@Transactional (readOnly = true)
+@PreAuthorize("isAuthenticated()")
+@Transactional(readOnly = true)
 public class COrderTypeService extends CEntityOfProjectService<COrderType> {
 
-	/**
-	 * Constructor for COrderTypeService.
-	 * @param repository the COrderTypeRepository to use for data access
-	 * @param clock      the Clock instance for time-related operations
-	 */
-	COrderTypeService(final COrderTypeRepository repository, final Clock clock) {
-		super(repository, clock);
-	}
+    /**
+     * Constructor for COrderTypeService.
+     * 
+     * @param repository
+     *            the COrderTypeRepository to use for data access
+     * @param clock
+     *            the Clock instance for time-related operations
+     */
+    COrderTypeService(final COrderTypeRepository repository, final Clock clock) {
+        super(repository, clock);
+    }
 
-	@Override
-	protected Class<COrderType> getEntityClass() { return COrderType.class; }
+    @Override
+    protected Class<COrderType> getEntityClass() {
+        return COrderType.class;
+    }
 }

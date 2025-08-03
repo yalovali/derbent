@@ -10,20 +10,20 @@ import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.orders.domain.CApprovalStatus;
 
 /**
- * CApprovalStatusService - Service layer for CApprovalStatus entity. Layer: Service (MVC)
- * Handles business logic for approval status operations including creation, validation,
- * and management of approval status entities.
+ * CApprovalStatusService - Service layer for CApprovalStatus entity. Layer: Service (MVC) Handles business logic for
+ * approval status operations including creation, validation, and management of approval status entities.
  */
 @Service
-@PreAuthorize ("isAuthenticated()")
-@Transactional (readOnly = true)
+@PreAuthorize("isAuthenticated()")
+@Transactional(readOnly = true)
 public class CApprovalStatusService extends CEntityOfProjectService<CApprovalStatus> {
 
-	CApprovalStatusService(final CApprovalStatusRepository repository,
-		final Clock clock) {
-		super(repository, clock);
-	}
+    CApprovalStatusService(final CApprovalStatusRepository repository, final Clock clock) {
+        super(repository, clock);
+    }
 
-	@Override
-	protected Class<CApprovalStatus> getEntityClass() { return CApprovalStatus.class; }
+    @Override
+    protected Class<CApprovalStatus> getEntityClass() {
+        return CApprovalStatus.class;
+    }
 }

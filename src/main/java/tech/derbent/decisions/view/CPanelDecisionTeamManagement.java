@@ -8,8 +8,7 @@ import tech.derbent.decisions.domain.CDecision;
 import tech.derbent.decisions.service.CDecisionService;
 
 /**
- * CPanelDecisionTeamManagement - Panel for decision team and accountability management.
- * Layer: View (MVC)
+ * CPanelDecisionTeamManagement - Panel for decision team and accountability management. Layer: View (MVC)
  * 
  * Displays and allows editing of decision team members and accountable personnel.
  */
@@ -19,13 +18,16 @@ public class CPanelDecisionTeamManagement extends CPanelDecisionBase {
 
     /**
      * Constructor for decision team management panel.
-     * @param currentEntity the current decision entity
-     * @param beanValidationBinder validation binder for the decision
-     * @param entityService decision service for data operations
+     * 
+     * @param currentEntity
+     *            the current decision entity
+     * @param beanValidationBinder
+     *            validation binder for the decision
+     * @param entityService
+     *            decision service for data operations
      */
     public CPanelDecisionTeamManagement(final CDecision currentEntity,
-                                      final BeanValidationBinder<CDecision> beanValidationBinder,
-                                      final CDecisionService entityService) {
+            final BeanValidationBinder<CDecision> beanValidationBinder, final CDecisionService entityService) {
         super("Team & Accountability", currentEntity, beanValidationBinder, entityService);
     }
 

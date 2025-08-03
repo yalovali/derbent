@@ -16,58 +16,58 @@ import tech.derbent.activities.service.CActivityService;
 import tech.derbent.session.service.CSessionService;
 
 /**
- * Test class for CPanelActivityDescription to ensure it follows the same pattern as
- * CPanelUserDescription. Updated to use annotation-based data provider resolution.
+ * Test class for CPanelActivityDescription to ensure it follows the same pattern as CPanelUserDescription. Updated to
+ * use annotation-based data provider resolution.
  */
-@ExtendWith (MockitoExtension.class)
+@ExtendWith(MockitoExtension.class)
 class CPanelActivityDescriptionTest extends CTestBase {
 
-	@Mock
-	private CActivityService activityService;
+    @Mock
+    private CActivityService activityService;
 
-	@Mock
-	private CSessionService sessionService;
+    @Mock
+    private CSessionService sessionService;
 
-	private CAccordionDBEntity<CActivity> panel;
+    private CAccordionDBEntity<CActivity> panel;
 
-	private CActivity testActivity;
+    private CActivity testActivity;
 
-	private BeanValidationBinder<CActivity> binder;
+    private BeanValidationBinder<CActivity> binder;
 
-	@Override
-	protected void setupForTest() {
-		testActivity = new CActivity("Test Activity", project);
-		testActivity.setName("Test Activity");
-		binder = new BeanValidationBinder<>(CActivity.class);
-	}
+    @Override
+    protected void setupForTest() {
+        testActivity = new CActivity("Test Activity", project);
+        testActivity.setName("Test Activity");
+        binder = new BeanValidationBinder<>(CActivity.class);
+    }
 
-	@Test
-	void testPanelCreation() {
-		// When
-		panel = new CPanelActivityDescription(testActivity, binder, activityService);
-		// Then
-		assertNotNull(panel, "Panel should be created successfully");
-		assertNotNull(panel.getBaseLayout(), "Base layout should be initialized");
-	}
+    @Test
+    void testPanelCreation() {
+        // When
+        panel = new CPanelActivityDescription(testActivity, binder, activityService);
+        // Then
+        assertNotNull(panel, "Panel should be created successfully");
+        assertNotNull(panel.getBaseLayout(), "Base layout should be initialized");
+    }
 
-	@Test
-	void testPopulateFormWithNullEntity() {
-		// Given
-		panel = new CPanelActivityDescription(testActivity, binder, activityService);
-		panel.populateForm(null);
-	}
+    @Test
+    void testPopulateFormWithNullEntity() {
+        // Given
+        panel = new CPanelActivityDescription(testActivity, binder, activityService);
+        panel.populateForm(null);
+    }
 
-	@Test
-	void testPopulateFormWithValidEntity() {
-		panel = new CPanelActivityDescription(testActivity, binder, activityService);
-		final CActivity newActivity = new CActivity("Test Activity", project);
-		newActivity.setName("New Activity");
-		panel.populateForm(newActivity);
-	}
+    @Test
+    void testPopulateFormWithValidEntity() {
+        panel = new CPanelActivityDescription(testActivity, binder, activityService);
+        final CActivity newActivity = new CActivity("Test Activity", project);
+        newActivity.setName("New Activity");
+        panel.populateForm(newActivity);
+    }
 
-	@Test
-	void testSaveEventHandler() {
-		panel = new CPanelActivityDescription(testActivity, binder, activityService);
-		panel.saveEventHandler();
-	}
+    @Test
+    void testSaveEventHandler() {
+        panel = new CPanelActivityDescription(testActivity, binder, activityService);
+        panel.saveEventHandler();
+    }
 }

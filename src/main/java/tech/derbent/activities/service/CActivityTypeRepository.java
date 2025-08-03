@@ -13,16 +13,15 @@ import tech.derbent.activities.domain.CActivityType;
  * operations for project-aware activity types with eager loading support.
  */
 public interface CActivityTypeRepository extends CEntityOfProjectRepository<CActivityType> {
-    
+
     /**
      * Finds an activity type by ID with eagerly loaded relationships.
-     * @param id the activity type ID
+     * 
+     * @param id
+     *            the activity type ID
      * @return Optional containing the activity type with loaded relationships
      */
-    @Query("SELECT at FROM CActivityType at " +
-           "LEFT JOIN FETCH at.project " +
-           "LEFT JOIN FETCH at.assignedTo " +
-           "LEFT JOIN FETCH at.createdBy " +
-           "WHERE at.id = :id")
+    @Query("SELECT at FROM CActivityType at " + "LEFT JOIN FETCH at.project " + "LEFT JOIN FETCH at.assignedTo "
+            + "LEFT JOIN FETCH at.createdBy " + "WHERE at.id = :id")
     Optional<CActivityType> findByIdWithRelationships(@Param("id") Long id);
 }

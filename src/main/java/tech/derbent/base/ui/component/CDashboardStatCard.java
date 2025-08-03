@@ -24,9 +24,8 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 
 /**
- * CDashboardStatCard - Reusable dashboard statistic card component.
- * Layer: View (MVC)
- * Provides a consistent card layout for displaying key metrics on the dashboard.
+ * CDashboardStatCard - Reusable dashboard statistic card component. Layer: View (MVC) Provides a consistent card layout
+ * for displaying key metrics on the dashboard.
  */
 public final class CDashboardStatCard extends Div {
 
@@ -40,17 +39,20 @@ public final class CDashboardStatCard extends Div {
     /**
      * Constructor for CDashboardStatCard.
      * 
-     * @param title the title of the statistic
-     * @param value the value to display
-     * @param icon the icon to display
+     * @param title
+     *            the title of the statistic
+     * @param value
+     *            the value to display
+     * @param icon
+     *            the icon to display
      */
     public CDashboardStatCard(final String title, final String value, final Icon icon) {
         LOGGER.debug("Creating CDashboardStatCard with title: {}, value: {}", title, value);
-        
+
         this.icon = icon;
         this.titleLabel = new Span(title);
         this.valueLabel = new H2(value);
-        
+
         initializeCard();
         createCardContent();
     }
@@ -58,9 +60,12 @@ public final class CDashboardStatCard extends Div {
     /**
      * Constructor for CDashboardStatCard with long value.
      * 
-     * @param title the title of the statistic
-     * @param value the numeric value to display
-     * @param icon the icon to display
+     * @param title
+     *            the title of the statistic
+     * @param value
+     *            the numeric value to display
+     * @param icon
+     *            the icon to display
      */
     public CDashboardStatCard(final String title, final long value, final Icon icon) {
         this(title, String.valueOf(value), icon);
@@ -69,7 +74,8 @@ public final class CDashboardStatCard extends Div {
     /**
      * Updates the value displayed on the card.
      * 
-     * @param value the new value to display
+     * @param value
+     *            the new value to display
      */
     public void updateValue(final String value) {
         LOGGER.debug("Updating card value to: {}", value);
@@ -79,7 +85,8 @@ public final class CDashboardStatCard extends Div {
     /**
      * Updates the value displayed on the card.
      * 
-     * @param value the new numeric value to display
+     * @param value
+     *            the new numeric value to display
      */
     public void updateValue(final long value) {
         updateValue(String.valueOf(value));
@@ -88,7 +95,8 @@ public final class CDashboardStatCard extends Div {
     /**
      * Updates the title displayed on the card.
      * 
-     * @param title the new title to display
+     * @param title
+     *            the new title to display
      */
     public void updateTitle(final String title) {
         LOGGER.debug("Updating card title to: {}", title);
@@ -102,18 +110,11 @@ public final class CDashboardStatCard extends Div {
         // Apply responsive width and height
         setWidthFull();
         setMinHeight("120px");
-        
+
         // Apply card styling using Lumo utility classes
-        addClassNames(
-            Background.BASE,
-            BorderRadius.MEDIUM,
-            BoxShadow.SMALL,
-            Padding.MEDIUM,
-            Display.FLEX,
-            AlignItems.CENTER,
-            JustifyContent.CENTER
-        );
-        
+        addClassNames(Background.BASE, BorderRadius.MEDIUM, BoxShadow.SMALL, Padding.MEDIUM, Display.FLEX,
+                AlignItems.CENTER, JustifyContent.CENTER);
+
         // Add hover effect
         getStyle().set("transition", "all 0.2s ease-in-out");
         getStyle().set("cursor", "default");
@@ -133,20 +134,20 @@ public final class CDashboardStatCard extends Div {
     private void createCardContent() {
         // Icon styling
         icon.addClassNames(IconSize.LARGE, TextColor.PRIMARY, Margin.Right.MEDIUM);
-        
+
         // Value styling
         valueLabel.addClassNames(FontSize.XXLARGE, FontWeight.BOLD, TextColor.PRIMARY, Margin.NONE);
-        
+
         // Title styling  
         titleLabel.addClassNames(FontSize.SMALL, TextColor.SECONDARY, FontWeight.MEDIUM);
-        
+
         // Content layout
         final VerticalLayout textContent = new VerticalLayout();
         textContent.setPadding(false);
         textContent.setSpacing(false);
         textContent.addClassNames(AlignItems.START);
         textContent.add(valueLabel, titleLabel);
-        
+
         // Main layout combining icon and text
         final HorizontalLayout mainLayout = new HorizontalLayout();
         mainLayout.setSizeFull();
@@ -154,7 +155,7 @@ public final class CDashboardStatCard extends Div {
         mainLayout.setSpacing(true);
         mainLayout.addClassNames(AlignItems.CENTER, Gap.MEDIUM);
         mainLayout.add(icon, textContent);
-        
+
         add(mainLayout);
     }
 }
