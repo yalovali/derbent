@@ -73,4 +73,14 @@ public interface CActivityStatusRepository extends CEntityOfProjectRepository<CA
      */
     @Query("SELECT s FROM CActivityStatus s WHERE LOWER(s.name) IN ('todo', 'new', 'open', 'pending') ORDER BY s.sortOrder ASC")
     Optional<CActivityStatus> findDefaultStatus();
+
+    /**
+     * Finds an activity status by ID with eagerly loaded project relationship to prevent LazyInitializationException.
+     * 
+     * @param id
+     *            the activity status ID
+     * @return optional CActivityStatus with loaded project
+     */
+    @Query("SELECT s FROM CActivityStatus s LEFT JOIN FETCH s.project WHERE s.id = :id")
+    Optional<CActivityStatus> findByIdWithProject(@Param("id") Long id);
 }

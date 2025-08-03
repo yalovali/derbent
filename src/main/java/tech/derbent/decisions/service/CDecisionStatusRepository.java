@@ -1,6 +1,10 @@
 package tech.derbent.decisions.service;
 
 import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import tech.derbent.abstracts.services.CAbstractNamedRepository;
 import tech.derbent.decisions.domain.CDecisionStatus;
@@ -45,4 +49,16 @@ public interface CDecisionStatusRepository extends CAbstractNamedRepository<CDec
      * @return list of decision statuses that require approval
      */
     List<CDecisionStatus> findByRequiresApprovalTrue();
+
+    /**
+     * Finds a decision status by ID with eagerly loaded relationships to prevent LazyInitializationException.
+     * Note: CDecisionStatus extends CStatus which doesn't have project relationship like CEntityOfProject,
+     * but we add this for consistency and future extensibility.
+     * 
+     * @param id
+     *            the decision status ID
+     * @return optional CDecisionStatus with loaded relationships
+     */
+    @Query("SELECT s FROM CDecisionStatus s WHERE s.id = :id")
+    Optional<CDecisionStatus> findByIdWithEagerLoading(@Param("id") Long id);
 }

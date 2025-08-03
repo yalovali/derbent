@@ -2,6 +2,7 @@ package tech.derbent.decisions.service;
 
 import java.time.Clock;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -69,6 +70,26 @@ public class CDecisionStatusService extends CAbstractNamedEntityService<CDecisio
     @Override
     protected Class<CDecisionStatus> getEntityClass() {
         return CDecisionStatus.class;
+    }
+
+    /**
+     * Override get() method to use eager loading and prevent LazyInitializationException.
+     * 
+     * @param id
+     *            the decision status ID
+     * @return optional CDecisionStatus with relationships loaded
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<CDecisionStatus> get(final Long id) {
+        LOGGER.info("get called with id: {} (overridden to use eager loading)", id);
+
+        if (id == null) {
+            return Optional.empty();
+        }
+        final Optional<CDecisionStatus> entity = ((CDecisionStatusRepository) repository).findByIdWithEagerLoading(id);
+        entity.ifPresent(this::initializeLazyFields);
+        return entity;
     }
 
     /**
