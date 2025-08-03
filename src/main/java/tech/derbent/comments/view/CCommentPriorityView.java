@@ -7,6 +7,7 @@ import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
+import tech.derbent.abstracts.components.CGridCell;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.comments.domain.CCommentPriority;
 import tech.derbent.comments.service.CCommentPriorityService;
@@ -64,21 +65,11 @@ public class CCommentPriorityView extends CProjectAwareMDPage<CCommentPriority> 
 		// String.valueOf(entity.getPriorityLevel()),"Level", "priorityLevel"); Color
 		// column for reference (hex value)
 		grid.addEntityColumn(entity -> entity.getColor(), "Color", "color");
-		// Default priority indicator
+		// Default priority indicator using CGridCell
 		grid.addComponentColumn(entity -> {
-			final Div defaultDiv = new Div();
-			defaultDiv.setText(entity.isDefault() ? "Default" : "");
-
-			if (entity.isDefault()) {
-				defaultDiv.getStyle().set("padding", "4px 8px");
-				defaultDiv.getStyle().set("border-radius", "12px");
-				defaultDiv.getStyle().set("background-color", "#e3f2fd");
-				defaultDiv.getStyle().set("color", "#1976d2");
-				defaultDiv.getStyle().set("font-size", "12px");
-				defaultDiv.getStyle().set("font-weight", "bold");
-				defaultDiv.getStyle().set("text-align", "center");
-			}
-			return defaultDiv;
+			final CGridCell defaultCell = new CGridCell();
+			defaultCell.setDefaultValue(entity.isDefault());
+			return defaultCell;
 		}).setHeader("Default").setWidth("80px").setFlexGrow(0);
 	}
 
