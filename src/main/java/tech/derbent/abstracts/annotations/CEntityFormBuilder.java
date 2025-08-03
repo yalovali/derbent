@@ -313,61 +313,70 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			comboBox.setItems(List.of()); // Fallback to empty list
 		}
 		// Enhanced converter with better error handling for lazy loading and proxy
-		// objects
-		binder.forField(comboBox).withConverter(
-			// Convert from ComboBox value to entity (forward conversion)
-			comboBoxValue -> {
+		// objects - wrapped in try-catch to prevent incomplete bindings
+		try {
+			binder.forField(comboBox).withConverter(
+				// Convert from ComboBox value to entity (forward conversion)
+				comboBoxValue -> {
 
-				if (comboBoxValue == null) {
-					return null;
-				}
-				return comboBoxValue;
-			},
-			// Convert from entity to ComboBox value (reverse conversion) - handles lazy
-			// loading
-			entityValue -> {
-
-				if (entityValue == null) {
-					return null;
-				}
-
-				try {
-					// Get the entity ID for comparison - handles proxy objects safely
-					final Long entityId = entityValue.getId();
-
-					if (entityId == null) {
-						LOGGER.warn(
-							"Entity has null ID for field '{}' - cannot match with ComboBox items",
-							field.getName());
+					if (comboBoxValue == null) {
 						return null;
 					}
-					// Find matching item in ComboBox by comparing IDs
-					final List<T> allItems = comboBox.getDataProvider()
-						.fetch(new com.vaadin.flow.data.provider.Query<>())
-						.collect(java.util.stream.Collectors.toList());
-					final T matchingItem = allItems.stream().filter(item -> {
+					return comboBoxValue;
+				},
+				// Convert from entity to ComboBox value (reverse conversion) - handles lazy
+				// loading
+				entityValue -> {
 
-						if (item == null) {
-							return false;
-						}
-						final Long itemId = item.getId();
-						return (itemId != null) && itemId.equals(entityId);
-					}).findFirst().orElse(null);
-
-					if (matchingItem != null) {}
-					else {
-						LOGGER.warn(
-							"No matching ComboBox item found for entity ID {} in field '{}'",
-							entityId, field.getName());
+					if (entityValue == null) {
+						return null;
 					}
-					return matchingItem;
-				} catch (final Exception e) {
-					LOGGER.error(
-						"Error converting entity to ComboBox value for field '{}': {}",
-						field.getName(), e.getMessage(), e);
-					return null;
-				}
-			}).bind(field.getName());
+
+					try {
+						// Get the entity ID for comparison - handles proxy objects safely
+						final Long entityId = entityValue.getId();
+
+						if (entityId == null) {
+							LOGGER.warn(
+								"Entity has null ID for field '{}' - cannot match with ComboBox items",
+								field.getName());
+							return null;
+						}
+						// Find matching item in ComboBox by comparing IDs
+						final List<T> allItems = comboBox.getDataProvider()
+							.fetch(new com.vaadin.flow.data.provider.Query<>())
+							.collect(java.util.stream.Collectors.toList());
+						final T matchingItem = allItems.stream().filter(item -> {
+
+							if (item == null) {
+								return false;
+							}
+							final Long itemId = item.getId();
+							return (itemId != null) && itemId.equals(entityId);
+						}).findFirst().orElse(null);
+
+						if (matchingItem != null) {}
+						else {
+							LOGGER.warn(
+								"No matching ComboBox item found for entity ID {} in field '{}'",
+								entityId, field.getName());
+						}
+						return matchingItem;
+					} catch (final Exception e) {
+						LOGGER.error(
+							"Error converting entity to ComboBox value for field '{}': {}",
+							field.getName(), e.getMessage(), e);
+						return null;
+					}
+				}).bind(field.getName());
+		} catch (final Exception e) {
+			LOGGER.error(
+				"Error binding ComboBox for field '{}': {}",
+				field.getName(), e.getMessage(), e);
+			// If binding fails, we should not leave an incomplete binding
+			// Instead, create a simple binding without converter
+			binder.bind(comboBox, field.getName());
+		}
 		return comboBox;
 	}
 
@@ -463,7 +472,13 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		final DatePicker datePicker = new DatePicker();
 		// Set ID for better test automation
 		CAuxillaries.setId(datePicker);
-		binder.bind(datePicker, field.getName());
+		try {
+			binder.bind(datePicker, field.getName());
+		} catch (final Exception e) {
+			LOGGER.error(
+				"Error binding DatePicker for field '{}': {}",
+				field.getName(), e.getMessage(), e);
+		}
 		return datePicker;
 	}
 
@@ -473,19 +488,34 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		// Set ID for better test automation
 		CAuxillaries.setId(dateTimePicker);
 
-		// For Instant fields, we need a custom converter
+		// For Instant fields, we need a custom converter - wrapped in try-catch to prevent incomplete bindings
 		if (field.getType() == Instant.class) {
-			binder.forField(dateTimePicker)
-				.withConverter(localDateTime -> localDateTime != null
-					? localDateTime.atZone(java.time.ZoneId.systemDefault()).toInstant()
-					: null,
-					instant -> instant != null ? instant
-						.atZone(java.time.ZoneId.systemDefault()).toLocalDateTime()
-						: null)
-				.bind(field.getName());
+			try {
+				binder.forField(dateTimePicker)
+					.withConverter(localDateTime -> localDateTime != null
+						? localDateTime.atZone(java.time.ZoneId.systemDefault()).toInstant()
+						: null,
+						instant -> instant != null ? instant
+							.atZone(java.time.ZoneId.systemDefault()).toLocalDateTime()
+							: null)
+					.bind(field.getName());
+			} catch (final Exception e) {
+				LOGGER.error(
+					"Error binding DateTimePicker with converter for field '{}': {}",
+					field.getName(), e.getMessage(), e);
+				// Fallback to simple binding if converter binding fails
+				binder.bind(dateTimePicker, field.getName());
+			}
 		}
 		else {
-			binder.bind(dateTimePicker, field.getName());
+			try {
+				binder.bind(dateTimePicker, field.getName());
+			} catch (final Exception e) {
+				LOGGER.error(
+					"Error binding DateTimePicker for field '{}': {}",
+					field.getName(), e.getMessage(), e);
+				// Log the error but don't try to bind again as it would likely fail again
+			}
 		}
 		return dateTimePicker;
 	}
