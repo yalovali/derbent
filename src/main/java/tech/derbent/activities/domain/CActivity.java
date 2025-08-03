@@ -69,6 +69,7 @@ public class CActivity extends CEntityOfProject<CActivity> implements CKanbanEnt
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cactivitystatus_id", nullable = true)
     @MetaData(displayName = "Status", required = false, readOnly = false, description = "Current status of the activity", hidden = false, order = 30, dataProviderBean = "CActivityStatusService")
+    @tech.derbent.abstracts.annotations.ColorAwareComboBox(roundedCorners = true, autoContrast = true)
     private CActivityStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -130,6 +131,11 @@ public class CActivity extends CEntityOfProject<CActivity> implements CKanbanEnt
     @Size(max = 2000)
     @MetaData(displayName = "Notes", required = false, readOnly = false, defaultValue = "", description = "Additional notes and comments", hidden = false, order = 71, maxLength = 2000)
     private String notes;
+
+    @Column(name = "results", nullable = true, length = 2000)
+    @Size(max = 2000)
+    @MetaData(displayName = "Results", required = false, readOnly = false, defaultValue = "", description = "Results and outcomes of the activity", hidden = false, order = 72, maxLength = 2000)
+    private String results;
 
     /**
      * Default constructor for JPA.
@@ -428,6 +434,15 @@ public class CActivity extends CEntityOfProject<CActivity> implements CKanbanEnt
 
     public void setNotes(final String notes) {
         this.notes = notes;
+        updateLastModified();
+    }
+
+    public String getResults() {
+        return results;
+    }
+
+    public void setResults(final String results) {
+        this.results = results;
         updateLastModified();
     }
 
