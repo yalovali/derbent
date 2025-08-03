@@ -1762,22 +1762,26 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	private byte[] loadProfilePictureData(final String filename) {
 
 		try {
-			// Load from classpath resources
-			final var resource = getClass().getClassLoader()
-				.getResourceAsStream("../profile-pictures/" + filename);
+			// Try direct file path first (since profile-pictures is in project root)
+			final java.nio.file.Path filePath =
+				java.nio.file.Paths.get("profile-pictures", filename);
 
-			if (resource == null) {
-				// Fallback: try direct file path
-				final java.nio.file.Path filePath =
-					java.nio.file.Paths.get("profile-pictures", filename);
-
-				if (java.nio.file.Files.exists(filePath)) {
-					return java.nio.file.Files.readAllBytes(filePath);
-				}
-				LOGGER.warn("Profile picture file not found: {}", filename);
-				return null;
+			if (java.nio.file.Files.exists(filePath)) {
+				LOGGER.debug("Loading profile picture from file path: {}", filePath);
+				return java.nio.file.Files.readAllBytes(filePath);
 			}
-			return resource.readAllBytes();
+			
+			// Fallback: Load from classpath resources
+			final var resource = getClass().getClassLoader()
+				.getResourceAsStream("profile-pictures/" + filename);
+
+			if (resource != null) {
+				LOGGER.debug("Loading profile picture from classpath: {}", filename);
+				return resource.readAllBytes();
+			}
+			
+			LOGGER.warn("Profile picture file not found: {}", filename);
+			return null;
 		} catch (final Exception e) {
 			LOGGER.error("Error loading profile picture: {}", filename, e);
 			return null;
