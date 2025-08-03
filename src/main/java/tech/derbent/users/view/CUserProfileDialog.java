@@ -141,6 +141,7 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
         sectionTitle.getStyle().set("margin-top", "20px");
         // Profile picture preview
         profilePicturePreview = new Image();
+        profilePicturePreview.setId("profile-picture-preview");
         profilePicturePreview.setWidth("100px");
         profilePicturePreview.setHeight("100px");
         profilePicturePreview.getStyle().set("border-radius", "50%");
@@ -159,6 +160,7 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
         };
         final InMemoryUploadHandler uploadHandler = new InMemoryUploadHandler(uploadCallback);
         profilePictureUpload = new Upload();
+        profilePictureUpload.setId("profile-picture-upload");
         profilePictureUpload.setUploadHandler(uploadHandler);
         profilePictureUpload.setAcceptedFileTypes("image/jpeg", "image/png", "image/gif");
         profilePictureUpload.setMaxFileSize((int) MAX_FILE_SIZE);
@@ -173,6 +175,7 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
         });
         // Delete button
         deleteProfilePictureButton = CButton.createError("Remove Picture", e -> deleteProfilePicture());
+        deleteProfilePictureButton.setId("profile-picture-delete-button");
         final HorizontalLayout pictureControls = new HorizontalLayout();
         pictureControls.add(profilePictureUpload, deleteProfilePictureButton);
         pictureControls.setAlignItems(HorizontalLayout.Alignment.END);

@@ -1,5 +1,7 @@
 package tech.derbent.users.tests;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -154,6 +156,34 @@ public class CUsersView_UITest extends CBaseUITest {
     @Test
     void testUsersNavigation() {
         testNavigationTo(CUsersView.class, CProjectsView.class);
+    }
+
+    @Test
+    void testUsersProfilePictureDisplay() {
+        LOGGER.info("🧪 Testing Users profile picture display in grid...");
+        assertTrue(navigateToViewByClass(CUsersView.class), "Should navigate to view");
+        
+        // Wait for grid to load
+        wait_2000();
+        
+        // Check if profile pictures are displayed in the grid
+        final var profileImages = page.locator("vaadin-grid img");
+        final int imageCount = profileImages.count();
+        
+        LOGGER.debug("Found {} profile images in grid", imageCount);
+        assertTrue(imageCount > 0, "Should find profile images in the grid");
+        
+        // Check that images have src attributes (not broken)
+        for (int i = 0; i < Math.min(imageCount, 5); i++) {
+            final var image = profileImages.nth(i);
+            final String src = image.getAttribute("src");
+            assertNotNull(src, "Profile image should have src attribute");
+            assertFalse(src.isEmpty(), "Profile image src should not be empty");
+            LOGGER.debug("Profile image {} src: {}", i, src.length() > 50 ? src.substring(0, 50) + "..." : src);
+        }
+        
+        takeScreenshot("users-profile-pictures-grid-validation");
+        LOGGER.info("✅ Users profile picture display test completed");
     }
 
     @Test
