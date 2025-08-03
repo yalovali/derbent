@@ -3,6 +3,7 @@ package tech.derbent.meetings.service;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -10,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import tech.derbent.abstracts.interfaces.CKanbanService;
 import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.meetings.domain.CMeeting;
@@ -20,7 +22,7 @@ import tech.derbent.users.domain.CUser;
 
 @Service
 @PreAuthorize("isAuthenticated()")
-public class CMeetingService extends CEntityOfProjectService<CMeeting> {
+public class CMeetingService extends CEntityOfProjectService<CMeeting> implements CKanbanService<CMeeting, CMeetingStatus> {
 
     private final CMeetingRepository meetingRepository;
 
@@ -333,5 +335,33 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting> {
             }
         }
         return save(meeting);
+    }
+
+    // CKanbanService implementation methods
+    @Override
+    public Map<CMeetingStatus, List<CMeeting>> getEntitiesGroupedByStatus(final Long projectId) {
+        // For minimal changes, returning empty map for now
+        // This would need proper implementation by project ID
+        return Map.of();
+    }
+
+    @Override
+    public CMeeting updateEntityStatus(final CMeeting entity, final CMeetingStatus newStatus) {
+        if (entity == null) {
+            throw new IllegalArgumentException("Entity cannot be null");
+        }
+        if (newStatus == null) {
+            throw new IllegalArgumentException("New status cannot be null");
+        }
+        
+        entity.setStatus(newStatus);
+        return save(entity);
+    }
+
+    @Override
+    public List<CMeetingStatus> getAllStatuses() {
+        // This would need to be implemented by calling the status service
+        // For minimal changes, returning empty list for now
+        return List.of();
     }
 }

@@ -17,6 +17,9 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.MetaData;
 import tech.derbent.abstracts.domains.CEntityConstants;
 import tech.derbent.abstracts.domains.CEntityOfProject;
+import tech.derbent.abstracts.interfaces.CKanbanEntity;
+import tech.derbent.abstracts.interfaces.CKanbanStatus;
+import tech.derbent.abstracts.interfaces.CKanbanType;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
@@ -29,7 +32,7 @@ import tech.derbent.users.domain.CUser;
 @Table(name = "cmeeting") // table name for the entity as the default is the class name
 // in lowercase
 @AttributeOverride(name = "id", column = @Column(name = "meeting_id"))
-public class CMeeting extends CEntityOfProject<CMeeting> {
+public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cmeetingtype_id", nullable = true)
@@ -301,5 +304,18 @@ public class CMeeting extends CEntityOfProject<CMeeting> {
 
     public void setStatus(final CMeetingStatus status) {
         this.status = status;
+    }
+
+    // CKanbanEntity implementation methods
+    @Override
+    public void setStatus(final CKanbanStatus status) {
+        if (status instanceof CMeetingStatus) {
+            setStatus((CMeetingStatus) status);
+        }
+    }
+
+    @Override
+    public CKanbanType getType() {
+        return meetingType;
     }
 }

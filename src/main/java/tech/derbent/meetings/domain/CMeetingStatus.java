@@ -7,6 +7,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.interfaces.CKanbanStatus;
 import tech.derbent.base.domain.CStatus;
 import tech.derbent.projects.domain.CProject;
 
@@ -18,7 +19,7 @@ import tech.derbent.projects.domain.CProject;
 @Entity
 @Table(name = "cmeetingstatus")
 @AttributeOverride(name = "id", column = @Column(name = "cmeetingstatus_id"))
-public class CMeetingStatus extends CStatus<CMeetingStatus> {
+public class CMeetingStatus extends CStatus<CMeetingStatus> implements CKanbanStatus {
 
     @Column(name = "is_final", nullable = false)
     @MetaData(displayName = "Is Final Status", required = true, readOnly = false, defaultValue = "false", description = "Indicates if this is a final status (completed/cancelled)", hidden = false, order = 4)

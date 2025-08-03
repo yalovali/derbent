@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.abstracts.domains.CTypeEntity;
+import tech.derbent.abstracts.interfaces.CKanbanType;
 import tech.derbent.projects.domain.CProject;
 
 /**
@@ -14,7 +15,7 @@ import tech.derbent.projects.domain.CProject;
 @Entity
 @Table(name = "cmeetingtype")
 @AttributeOverride(name = "id", column = @Column(name = "cmeetingtype_id"))
-public class CMeetingType extends CTypeEntity<CMeetingType> {
+public class CMeetingType extends CTypeEntity<CMeetingType> implements CKanbanType {
 
     /**
      * Default constructor for JPA.
