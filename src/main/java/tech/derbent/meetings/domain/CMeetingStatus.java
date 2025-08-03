@@ -7,6 +7,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.annotations.StatusEntity;
 import tech.derbent.base.domain.CStatus;
 import tech.derbent.projects.domain.CProject;
 
@@ -15,6 +16,7 @@ import tech.derbent.projects.domain.CProject;
  * provide status functionality for meetings. This entity defines the possible statuses a meeting can have (e.g.,
  * PLANNED, IN_PROGRESS, COMPLETED, CANCELLED).
  */
+@StatusEntity(category = "meeting", colorField = "color", nameField = "name")
 @Entity
 @Table(name = "cmeetingstatus")
 @AttributeOverride(name = "id", column = @Column(name = "cmeetingstatus_id"))

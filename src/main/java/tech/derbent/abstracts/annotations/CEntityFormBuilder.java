@@ -24,6 +24,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -33,11 +34,14 @@ import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 
 import tech.derbent.abstracts.domains.CEntityConstants;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
+import tech.derbent.abstracts.domains.CTypeEntity;
 import tech.derbent.abstracts.utils.CAuxillaries;
+import tech.derbent.base.domain.CStatus;
 
 @org.springframework.stereotype.Component
 public final class CEntityFormBuilder implements ApplicationContextAware {
@@ -203,7 +207,29 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
             return null;
         }
         final Class<T> fieldType = (Class<T>) field.getType();
-        final ComboBox<T> comboBox = new ComboBox<>();
+        
+        // Check if this field has @ColorAwareComboBox annotation
+        final tech.derbent.abstracts.annotations.ColorAwareComboBox colorAnnotation = 
+                field.getAnnotation(tech.derbent.abstracts.annotations.ColorAwareComboBox.class);
+        
+        final ComboBox<T> comboBox;
+        
+        // Use specialized color-aware ComboBox if annotation is present or if it's a status entity
+        if (colorAnnotation != null || tech.derbent.abstracts.utils.CColorUtils.isStatusEntity(fieldType)) {
+            LOGGER.debug("Creating CColorAwareComboBox for field: {}", field.getName());
+            final tech.derbent.abstracts.components.CColorAwareComboBox<T> colorAwareComboBox = 
+                    new tech.derbent.abstracts.components.CColorAwareComboBox<>(fieldType);
+            
+            if (colorAnnotation != null) {
+                colorAwareComboBox.setAnnotationConfig(colorAnnotation);
+            }
+            
+            comboBox = colorAwareComboBox;
+        } else {
+            LOGGER.debug("Creating standard ComboBox for field: {}", field.getName());
+            comboBox = new ComboBox<>();
+        }
+        
         // Set ID for better test automation
         CAuxillaries.setId(comboBox);
         // Following coding guidelines: All selective ComboBoxes must be selection only
@@ -212,32 +238,8 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
         // Enhanced item label generator with null safety and proper display formatting
         // Fix for combobox display issue: use getName() for CEntityNamed entities instead
         // of toString()
-        comboBox.setItemLabelGenerator(item -> {
-
-            if (item == null) {
-                return "N/A";
-            }
-
-            try {
-
-                // Check if the item is a CEntityNamed subclass (like CUser, CProject,
-                // etc.) and has a getName() method - use it for better display instead of
-                // toString()
-                if (item instanceof tech.derbent.abstracts.domains.CEntityNamed) {
-                    final CEntityNamed<T> namedEntity = (CEntityNamed<T>) item;
-                    final String name = namedEntity.getName();
-                    return ((name != null) && !name.trim().isEmpty())
-                            ? name
-                            : "Unnamed " + item.getClass().getSimpleName() + " #" + namedEntity.getId();
-                }
-                // For non-named entities, fall back to toString()
-                return item.toString();
-            } catch (final Exception e) {
-                LOGGER.warn("Error generating label for ComboBox item of type {}: {}", item.getClass().getSimpleName(),
-                        e.getMessage());
-                return "Error: " + item.getClass().getSimpleName();
-            }
-        });
+        comboBox.setItemLabelGenerator(item -> tech.derbent.abstracts.utils.CColorUtils.getDisplayTextFromEntity(item));
+        
         // Data provider resolution with priority order: 1. Legacy ComboBoxDataProvider
         // (if provided) - for backward compatibility 2. Annotation-based resolution using
         // CDataProviderResolver 3. Empty list as fallback
@@ -353,6 +355,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
                         return null;
                     }
                 }).bind(field.getName());
+        
         return comboBox;
     }
 

@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.annotations.StatusEntity;
 import tech.derbent.base.domain.CStatus;
 import tech.derbent.projects.domain.CProject;
 
@@ -13,6 +14,7 @@ import tech.derbent.projects.domain.CProject;
  * provide status functionality for decisions. This entity defines the possible statuses a decision can have (e.g.,
  * DRAFT, UNDER_REVIEW, APPROVED, REJECTED, IMPLEMENTED).
  */
+@StatusEntity(category = "decision", colorField = "color", nameField = "name")
 @Entity
 @Table(name = "cdecisionstatus")
 @AttributeOverride(name = "id", column = @Column(name = "decision_status_id"))

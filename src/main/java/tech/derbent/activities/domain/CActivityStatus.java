@@ -7,6 +7,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.annotations.StatusEntity;
 import tech.derbent.base.domain.CStatus;
 import tech.derbent.projects.domain.CProject;
 
@@ -15,6 +16,7 @@ import tech.derbent.projects.domain.CProject;
  * provide status functionality for activities. This entity defines the possible statuses an activity can have (e.g.,
  * TODO, IN_PROGRESS, DONE).
  */
+@StatusEntity(category = "activity", colorField = "color", nameField = "name")
 @Entity
 @Table(name = "cactivitystatus")
 @AttributeOverride(name = "id", column = @Column(name = "cactivitystatus_id"))

@@ -54,6 +54,7 @@ public class CDecision extends CEntityOfProject<CDecision> {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "decision_status_id", nullable = true)
     @MetaData(displayName = "Decision Status", required = false, readOnly = false, description = "Current status of the decision", hidden = false, order = 4, dataProviderBean = "CDecisionStatusService")
+    @tech.derbent.abstracts.annotations.ColorAwareComboBox(roundedCorners = true, autoContrast = true)
     private CDecisionStatus decisionStatus;
 
     // Accountable Personnel

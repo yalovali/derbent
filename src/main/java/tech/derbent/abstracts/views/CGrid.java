@@ -10,10 +10,14 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.function.ValueProvider;
 
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.domains.CEntityNamed;
+import tech.derbent.abstracts.domains.CTypeEntity;
 import tech.derbent.abstracts.utils.CAuxillaries;
+import tech.derbent.base.domain.CStatus;
 import tech.derbent.base.utils.CImageUtils;
 
 /**
@@ -200,6 +204,59 @@ public class CGrid<T extends CEntityDB<T>> extends Grid<T> {
     public Column<T> addShortTextColumn(final ValueProvider<T, String> valueProvider, final String header,
             final String key) {
         return addCustomColumn(valueProvider, header, WIDTH_SHORT_TEXT, key, 0);
+    }
+
+    /**
+     * Adds a status column with color-aware rendering.
+     * This method creates a column that displays status entities with their associated colors as background.
+     * 
+     * @param statusProvider Provider that returns the status entity
+     * @param header Column header text
+     * @param key Column key for identification
+     * @return The created column
+     */
+    public <S extends CEntityDB<S>> Column<T> addStatusColumn(final ValueProvider<T, S> statusProvider, 
+            final String header, final String key) {
+        LOGGER.info("Adding status column: {} with color-aware rendering", header);
+        
+        final Column<T> column = addComponentColumn(entity -> {
+            final S status = statusProvider.apply(entity);
+            final Span span = new Span();
+            
+            if (status == null) {
+                span.setText("No Status");
+                span.getStyle().set("color", "#666666");
+                span.getStyle().set("font-style", "italic");
+                return span;
+            }
+            
+            // Set the text content using utility method
+            final String displayText = tech.derbent.abstracts.utils.CColorUtils.getDisplayTextFromEntity(status);
+            span.setText(displayText);
+            
+            // Apply background color if available using utility method
+            final String color = tech.derbent.abstracts.utils.CColorUtils.getColorWithFallback(status, 
+                    tech.derbent.abstracts.utils.CColorUtils.DEFAULT_COLOR);
+            
+            span.getStyle().set("background-color", color);
+            span.getStyle().set("color", tech.derbent.abstracts.utils.CColorUtils.getContrastTextColor(color));
+            span.getStyle().set("padding", "4px 8px");
+            span.getStyle().set("border-radius", "4px");
+            span.getStyle().set("display", "inline-block");
+            span.getStyle().set("min-width", "80px");
+            span.getStyle().set("text-align", "center");
+            span.getStyle().set("font-weight", "500");
+            
+            LOGGER.debug("Applied color {} to grid status cell: {}", color, displayText);
+            
+            return span;
+        }).setHeader(header).setWidth(WIDTH_REFERENCE).setFlexGrow(0).setSortable(true);
+        
+        if (key != null) {
+            column.setKey(key);
+        }
+        
+        return column;
     }
 
     /**
