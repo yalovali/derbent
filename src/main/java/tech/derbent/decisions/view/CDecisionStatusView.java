@@ -8,6 +8,7 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.annotations.CSpringAuxillaries;
+import tech.derbent.abstracts.components.CGridCell;
 import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
 import tech.derbent.decisions.domain.CDecisionStatus;
 import tech.derbent.decisions.service.CDecisionStatusService;
@@ -59,24 +60,11 @@ public class CDecisionStatusView extends CAbstractNamedEntityPage<CDecisionStatu
         // Color column for reference (hex value)
         grid.addShortTextColumn(entity -> entity.getColor(), "Color", "color");
         
-        // Enhanced Type column that shows Final/Active status with better styling
+        // Enhanced Type column that shows Final/Active status using CGridCell
         grid.addComponentColumn(entity -> {
-            final Div statusDiv = new Div();
-            statusDiv.setText(entity.isFinal() ? "Final" : "Active");
-            statusDiv.getStyle().set("padding", "4px 8px");
-            statusDiv.getStyle().set("border-radius", "12px");
-            statusDiv.getStyle().set("font-size", "12px");
-            statusDiv.getStyle().set("font-weight", "bold");
-            statusDiv.getStyle().set("text-align", "center");
-
-            if (entity.isFinal()) {
-                statusDiv.getStyle().set("background-color", "#ffebee");
-                statusDiv.getStyle().set("color", "#c62828");
-            } else {
-                statusDiv.getStyle().set("background-color", "#e8f5e8");
-                statusDiv.getStyle().set("color", "#2e7d32");
-            }
-            return statusDiv;
+            final CGridCell statusCell = new CGridCell();
+            statusCell.setFinalActiveValue(entity.isFinal());
+            return statusCell;
         }).setHeader("Type").setWidth("100px").setFlexGrow(0);
         
         grid.addShortTextColumn(entity -> String.valueOf(entity.getSortOrder()), "Order", "sortOrder");

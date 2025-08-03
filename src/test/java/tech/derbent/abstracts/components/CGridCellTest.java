@@ -132,4 +132,47 @@ class CGridCellTest {
         cell.setAutoContrast(true);
         assertTrue(cell.isAutoContrast());
     }
+
+    @Test
+    void testCGridCellBooleanValue() {
+        final CGridCell cell = new CGridCell();
+        
+        // Test boolean value with custom colors
+        cell.setBooleanValue(true, "Yes", "No", "#00ff00", "#ff0000");
+        assertEquals("Yes", cell.getText());
+        
+        // Test false value
+        cell.setBooleanValue(false, "Yes", "No", "#00ff00", "#ff0000");
+        assertEquals("No", cell.getText());
+        
+        // Test empty false text
+        cell.setBooleanValue(false, "Yes", "", "#00ff00", null);
+        assertTrue(cell.getText().isEmpty() || cell.getText().isBlank());
+    }
+
+    @Test
+    void testCGridCellFinalActiveValue() {
+        final CGridCell cell = new CGridCell();
+        
+        // Test final status
+        cell.setFinalActiveValue(true);
+        assertEquals("Final", cell.getText());
+        
+        // Test active status
+        cell.setFinalActiveValue(false);
+        assertEquals("Active", cell.getText());
+    }
+
+    @Test
+    void testCGridCellDefaultValue() {
+        final CGridCell cell = new CGridCell();
+        
+        // Test default value true
+        cell.setDefaultValue(true);
+        assertEquals("Default", cell.getText());
+        
+        // Test default value false (should be empty)
+        cell.setDefaultValue(false);
+        assertTrue(cell.getText().isEmpty() || cell.getText().isBlank());
+    }
 }
