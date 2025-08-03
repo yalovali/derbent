@@ -51,6 +51,7 @@ public class CDecisionStatusView extends CAbstractNamedEntityPage<CDecisionStatu
 
     @Override
     protected void createGridForEntity() {
+        grid.addStatusColumn(status -> status, "Status", "status");
         grid.addShortTextColumn(CDecisionStatus::getName, "Name", "name");
         grid.addLongTextColumn(CDecisionStatus::getDescription, "Description", "description");
         grid.addShortTextColumn(entity -> entity.getColor(), "Color", "color");

@@ -24,6 +24,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -33,11 +34,14 @@ import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 
 import tech.derbent.abstracts.domains.CEntityConstants;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
+import tech.derbent.abstracts.domains.CTypeEntity;
 import tech.derbent.abstracts.utils.CAuxillaries;
+import tech.derbent.base.domain.CStatus;
 
 @org.springframework.stereotype.Component
 public final class CEntityFormBuilder implements ApplicationContextAware {
@@ -238,6 +242,60 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
                 return "Error: " + item.getClass().getSimpleName();
             }
         });
+        
+        // Check if this is a status entity (extends CStatus or CTypeEntity) and configure color-aware rendering
+        if (isStatusEntity(fieldType)) {
+            LOGGER.debug("Configuring color-aware ComboBox for status entity type: {}", fieldType.getSimpleName());
+            comboBox.setRenderer(new ComponentRenderer<>(item -> {
+                final Span span = new Span();
+                
+                if (item == null) {
+                    span.setText("N/A");
+                    return span;
+                }
+                
+                // Set the text content
+                String displayText = "Unknown";
+                try {
+                    if (item instanceof CEntityNamed) {
+                        final CEntityNamed<?> namedEntity = (CEntityNamed<?>) item;
+                        final String name = namedEntity.getName();
+                        displayText = ((name != null) && !name.trim().isEmpty())
+                                ? name
+                                : "Unnamed " + item.getClass().getSimpleName() + " #" + namedEntity.getId();
+                    } else {
+                        displayText = item.toString();
+                    }
+                } catch (final Exception e) {
+                    LOGGER.warn("Error generating display text for status ComboBox item: {}", e.getMessage());
+                    displayText = "Error: " + item.getClass().getSimpleName();
+                }
+                span.setText(displayText);
+                
+                // Apply background color if available
+                try {
+                    String color = getColorFromEntity(item);
+                    if ((color != null) && !color.trim().isEmpty()) {
+                        // Ensure color starts with #
+                        if (!color.startsWith("#")) {
+                            color = "#" + color;
+                        }
+                        span.getStyle().set("background-color", color);
+                        span.getStyle().set("color", getContrastTextColor(color));
+                        span.getStyle().set("padding", "4px 8px");
+                        span.getStyle().set("border-radius", "4px");
+                        span.getStyle().set("display", "inline-block");
+                        span.getStyle().set("min-width", "100%");
+                        LOGGER.debug("Applied color {} to ComboBox item: {}", color, displayText);
+                    }
+                } catch (final Exception e) {
+                    LOGGER.warn("Error applying color to ComboBox item: {}", e.getMessage());
+                }
+                
+                return span;
+            }));
+        }
+        
         // Data provider resolution with priority order: 1. Legacy ComboBoxDataProvider
         // (if provided) - for backward compatibility 2. Annotation-based resolution using
         // CDataProviderResolver 3. Empty list as fallback
@@ -896,5 +954,116 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
                     e.getMessage());
             CEntityFormBuilder.dataProviderResolver = null;
         }
+    }
+    
+    /**
+     * Helper method to check if an entity type is a status entity (extends CStatus or CTypeEntity).
+     * Uses reflection to determine inheritance hierarchy.
+     * 
+     * @param entityType the entity class to check
+     * @return true if the entity is a status entity, false otherwise
+     */
+    private static boolean isStatusEntity(final Class<?> entityType) {
+        if (entityType == null) {
+            return false;
+        }
+        
+        try {
+            // Check if the class extends CStatus
+            if (CStatus.class.isAssignableFrom(entityType)) {
+                return true;
+            }
+            
+            // Check if the class extends CTypeEntity (which status entities inherit from)
+            if (CTypeEntity.class.isAssignableFrom(entityType)) {
+                return true;
+            }
+            
+            // Also check by class name pattern for status entities
+            final String className = entityType.getSimpleName();
+            if (className.endsWith("Status") || className.contains("Status")) {
+                return true;
+            }
+            
+            return false;
+        } catch (final Exception e) {
+            LOGGER.warn("Error checking if entity type {} is a status entity: {}", 
+                       entityType.getSimpleName(), e.getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Helper method to extract color from an entity using reflection.
+     * Supports entities that extend CTypeEntity (which have getColor() method).
+     * 
+     * @param entity the entity instance to extract color from
+     * @return the color string or null if not available
+     */
+    private static String getColorFromEntity(final Object entity) {
+        if (entity == null) {
+            return null;
+        }
+        
+        try {
+            // If entity extends CTypeEntity, it should have getColor() method
+            if (entity instanceof CTypeEntity) {
+                final CTypeEntity<?> typeEntity = (CTypeEntity<?>) entity;
+                return typeEntity.getColor();
+            }
+            
+            // Fallback: try to get color using reflection
+            try {
+                final java.lang.reflect.Method getColorMethod = entity.getClass().getMethod("getColor");
+                final Object colorValue = getColorMethod.invoke(entity);
+                return colorValue != null ? colorValue.toString() : null;
+            } catch (final NoSuchMethodException e) {
+                // This is expected for entities that don't have getColor method
+                LOGGER.debug("Entity type {} does not have getColor method", entity.getClass().getSimpleName());
+                return null;
+            }
+        } catch (final Exception e) {
+            LOGGER.warn("Error extracting color from entity {}: {}", 
+                       entity.getClass().getSimpleName(), e.getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Helper method to determine appropriate text color based on background color.
+     * Uses a simple brightness calculation to determine if white or black text would be more readable.
+     * 
+     * @param backgroundColor the background color in hex format (e.g., "#FF0000")
+     * @return "white" for dark backgrounds, "black" for light backgrounds
+     */
+    private static String getContrastTextColor(final String backgroundColor) {
+        if ((backgroundColor == null) || backgroundColor.trim().isEmpty()) {
+            return "black"; // Default to black text
+        }
+        
+        try {
+            String color = backgroundColor.trim();
+            // Remove # if present
+            if (color.startsWith("#")) {
+                color = color.substring(1);
+            }
+            
+            // Parse RGB values
+            if (color.length() == 6) {
+                final int r = Integer.parseInt(color.substring(0, 2), 16);
+                final int g = Integer.parseInt(color.substring(2, 4), 16);
+                final int b = Integer.parseInt(color.substring(4, 6), 16);
+                
+                // Calculate brightness using relative luminance formula
+                final double brightness = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+                
+                // Return white text for dark backgrounds, black text for light backgrounds
+                return brightness < 0.5 ? "white" : "black";
+            }
+        } catch (final Exception e) {
+            LOGGER.debug("Error calculating contrast color for background {}: {}", backgroundColor, e.getMessage());
+        }
+        
+        return "black"; // Default fallback
     }
 }

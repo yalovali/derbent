@@ -68,12 +68,15 @@ public class CActivityStatusView extends CProjectAwareMDPage<CActivityStatus> {
 
     /**
      * Creates the grid for displaying activity status entities. Sets up columns for name and description with
-     * appropriate headers and sorting.
+     * appropriate headers and sorting. Also includes a color-aware column to show the status colors.
      */
     @Override
     protected void createGridForEntity() {
+        grid.addStatusColumn(status -> status, "Status", "status");
         grid.addShortTextColumn(CActivityStatus::getName, "Status Name", "name");
         grid.addLongTextColumn(CActivityStatus::getDescription, "Description", "description");
+        grid.addShortTextColumn(CActivityStatus::getColor, "Color Code", "color");
+        grid.addBooleanColumn(CActivityStatus::isFinal, "Is Final", "Final", "Not Final");
     }
 
     @Override
