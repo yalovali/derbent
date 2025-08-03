@@ -214,7 +214,15 @@ public class CCompanySettings extends CEntityDB<CCompanySettings> {
         return autoAssignProjectManager;
     }
 
+    public Boolean getAutoAssignProjectManager() {
+        return autoAssignProjectManager;
+    }
+
     public Boolean isEmailNotificationsEnabled() {
+        return emailNotificationsEnabled;
+    }
+
+    public Boolean getEmailNotificationsEnabled() {
         return emailNotificationsEnabled;
     }
 
@@ -222,7 +230,15 @@ public class CCompanySettings extends CEntityDB<CCompanySettings> {
         return enableGanttCharts;
     }
 
+    public Boolean getEnableGanttCharts() {
+        return enableGanttCharts;
+    }
+
     public Boolean isOverdueNotificationEnabled() {
+        return overdueNotificationEnabled;
+    }
+
+    public Boolean getOverdueNotificationEnabled() {
         return overdueNotificationEnabled;
     }
 
@@ -230,11 +246,23 @@ public class CCompanySettings extends CEntityDB<CCompanySettings> {
         return requireApprovalForTimeEntries;
     }
 
+    public Boolean getRequireApprovalForTimeEntries() {
+        return requireApprovalForTimeEntries;
+    }
+
     public Boolean isRequireTimeTracking() {
         return requireTimeTracking;
     }
 
+    public Boolean getRequireTimeTracking() {
+        return requireTimeTracking;
+    }
+
     public Boolean isShowBudgetInfo() {
+        return showBudgetInfo;
+    }
+
+    public Boolean getShowBudgetInfo() {
         return showBudgetInfo;
     }
 

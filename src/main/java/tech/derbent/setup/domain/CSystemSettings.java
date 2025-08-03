@@ -292,7 +292,15 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
         return enableAutomaticBackups;
     }
 
+    public Boolean getEnableAutomaticBackups() {
+        return enableAutomaticBackups;
+    }
+
     public Boolean isEnableCaching() {
+        return enableCaching;
+    }
+
+    public Boolean getEnableCaching() {
         return enableCaching;
     }
 
@@ -300,7 +308,15 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
         return enableDarkMode;
     }
 
+    public Boolean getEnableDarkMode() {
+        return enableDarkMode;
+    }
+
     public Boolean isEnableDatabaseLogging() {
+        return enableDatabaseLogging;
+    }
+
+    public Boolean getEnableDatabaseLogging() {
         return enableDatabaseLogging;
     }
 
@@ -308,7 +324,15 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
         return enableFileVersioning;
     }
 
+    public Boolean getEnableFileVersioning() {
+        return enableFileVersioning;
+    }
+
     public Boolean isMaintenanceModeEnabled() {
+        return maintenanceModeEnabled;
+    }
+
+    public Boolean getMaintenanceModeEnabled() {
         return maintenanceModeEnabled;
     }
 
@@ -316,11 +340,23 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
         return requireStrongPasswords;
     }
 
+    public Boolean getRequireStrongPasswords() {
+        return requireStrongPasswords;
+    }
+
     public Boolean isShowSystemInfo() {
         return showSystemInfo;
     }
 
+    public Boolean getShowSystemInfo() {
+        return showSystemInfo;
+    }
+
     public Boolean isSmtpUseTls() {
+        return smtpUseTls;
+    }
+
+    public Boolean getSmtpUseTls() {
         return smtpUseTls;
     }
 
