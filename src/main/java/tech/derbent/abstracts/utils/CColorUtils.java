@@ -3,9 +3,13 @@ package tech.derbent.abstracts.utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CTypeEntity;
 import tech.derbent.base.domain.CStatus;
+import tech.derbent.users.domain.CUser;
 
 /**
  * CColorUtils - Utility class for color operations and status entity color management.
@@ -224,6 +228,93 @@ public final class CColorUtils {
         return defaultColor != null ? defaultColor : DEFAULT_COLOR;
     }
     
+    /**
+     * Gets an appropriate icon for an entity based on its type.
+     * Returns null if no suitable icon is found.
+     * 
+     * @param entity the entity to get an icon for
+     * @return the VaadinIcon for the entity type, or null if no icon is appropriate
+     */
+    public static VaadinIcon getIconForEntity(final Object entity) {
+        if (entity == null) {
+            return null;
+        }
+        
+        try {
+            // Check for user entities
+            if (entity instanceof CUser) {
+                return VaadinIcon.USER;
+            }
+            
+            // Check by class name patterns for entities that should have icons
+            final String className = entity.getClass().getSimpleName();
+            
+            // User-related entities
+            if (className.contains("User") || className.contains("user")) {
+                return VaadinIcon.USER;
+            }
+            
+            // Company-related entities
+            if (className.contains("Company") || className.contains("company")) {
+                return VaadinIcon.BUILDING;
+            }
+            
+            // Project-related entities
+            if (className.contains("Project") || className.contains("project")) {
+                return VaadinIcon.FOLDER;
+            }
+            
+            // Meeting-related entities
+            if (className.contains("Meeting") || className.contains("meeting")) {
+                return VaadinIcon.CALENDAR;
+            }
+            
+            // Activity-related entities
+            if (className.contains("Activity") || className.contains("activity")) {
+                return VaadinIcon.TASKS;
+            }
+            
+            // Decision-related entities
+            if (className.contains("Decision") || className.contains("decision")) {
+                return VaadinIcon.CHECK_CIRCLE;
+            }
+            
+            // Comment-related entities
+            if (className.contains("Comment") || className.contains("comment")) {
+                return VaadinIcon.COMMENT;
+            }
+            
+            // No suitable icon found
+            return null;
+            
+        } catch (final Exception e) {
+            LOGGER.warn("Error determining icon for entity {}: {}", 
+                       entity.getClass().getSimpleName(), e.getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Checks if an entity should have an icon displayed.
+     * 
+     * @param entity the entity to check
+     * @return true if the entity should display an icon, false otherwise
+     */
+    public static boolean shouldDisplayIcon(final Object entity) {
+        return getIconForEntity(entity) != null;
+    }
+    
+    /**
+     * Creates a Vaadin Icon component for an entity if appropriate.
+     * 
+     * @param entity the entity to create an icon for
+     * @return the Icon component or null if no icon is appropriate
+     */
+    public static Icon createIconForEntity(final Object entity) {
+        final VaadinIcon iconType = getIconForEntity(entity);
+        return iconType != null ? iconType.create() : null;
+    }
+
     /**
      * Applies color styling to a component using CSS styles.
      * This is a helper method that can be used with any component that has getStyle() method.

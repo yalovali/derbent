@@ -1,10 +1,22 @@
 # Color-Aware Components Usage Guide
 
-This document explains how to use the new meta annotations and specialized superclasses for color-aware UI components in the Derbent framework.
+This document explains how to use the new meta annotations and specialized superclasses for color-aware and icon-aware UI components in the Derbent framework.
 
 ## Overview
 
-The framework now provides a clean, annotation-driven approach to create color-aware ComboBox and Grid components for status entities. This eliminates code duplication and provides consistent behavior across the application.
+The framework now provides a clean, annotation-driven approach to create enhanced ComboBox and Grid components for status entities and other entity types. This eliminates code duplication and provides consistent behavior across the application.
+
+## Enhanced Features
+
+### Color Support
+- Automatic background colors for status entities
+- Automatic contrast text color calculation
+- Customizable styling options
+
+### Icon Support (NEW)
+- Automatic icons for entity types (users, companies, projects, etc.)
+- Icon display alongside colors
+- Consistent icon styling
 
 ## Meta Annotations
 
@@ -22,12 +34,17 @@ public class CDecisionStatus extends CStatus {
 
 ### @ColorAwareComboBox
 
-Use on entity fields to create color-aware ComboBox components:
+Use on entity fields to create enhanced ComboBox components:
 
 ```java
 @MetaData(displayName = "Decision Status", required = false, order = 4)
 @ColorAwareComboBox(roundedCorners = true, autoContrast = true)
 private CDecisionStatus decisionStatus;
+
+// For user selection with icons
+@MetaData(displayName = "Assigned User", required = false, order = 5)
+@ColorAwareComboBox
+private CUser assignedUser;
 ```
 
 ### @ColorAwareGrid
@@ -45,13 +62,18 @@ public void addStatusColumn() {
 
 ### CColorAwareComboBox
 
-A specialized ComboBox that automatically renders status entities with colors:
+A specialized ComboBox that automatically renders entities with colors and icons:
 
 ```java
-// Create a color-aware ComboBox
+// Create a color-aware ComboBox for status entities
 CColorAwareComboBox<CDecisionStatus> statusComboBox = 
     new CColorAwareComboBox<>(CDecisionStatus.class, "Status");
 statusComboBox.setItems(statusList);
+
+// Create an icon-aware ComboBox for users
+CColorAwareComboBox<CUser> userComboBox = 
+    new CColorAwareComboBox<>(CUser.class, "Select User");
+userComboBox.setItems(userList);
 
 // Configure styling
 statusComboBox.setRoundedCorners(true);
@@ -82,7 +104,7 @@ grid.setFontWeight("600");
 
 ## Utility Class: CColorUtils
 
-Centralized utility methods for color operations:
+Centralized utility methods for color and icon operations:
 
 ```java
 // Check if an entity is a status entity
@@ -102,7 +124,23 @@ String normalizedColor = CColorUtils.normalizeColor("3498db"); // Returns "#3498
 
 // Get color with fallback
 String safeColor = CColorUtils.getColorWithFallback(entity, "#95a5a6");
+
+// NEW: Icon support
+VaadinIcon icon = CColorUtils.getIconForEntity(userEntity);
+boolean hasIcon = CColorUtils.shouldDisplayIcon(userEntity);
+Icon iconComponent = CColorUtils.createIconForEntity(userEntity);
 ```
+
+## Supported Entity Types for Icons
+
+The framework automatically provides icons for the following entity types:
+- **Users** (`CUser`, entities containing "User"): `VaadinIcon.USER`
+- **Companies** (entities containing "Company"): `VaadinIcon.BUILDING`
+- **Projects** (entities containing "Project"): `VaadinIcon.FOLDER`
+- **Meetings** (entities containing "Meeting"): `VaadinIcon.CALENDAR`
+- **Activities** (entities containing "Activity"): `VaadinIcon.TASKS`
+- **Decisions** (entities containing "Decision"): `VaadinIcon.CHECK_CIRCLE`
+- **Comments** (entities containing "Comment"): `VaadinIcon.COMMENT`
 
 ## Migration from Old Implementation
 
@@ -117,25 +155,24 @@ comboBox.setRenderer(new ComponentRenderer<>(item -> {
     return span;
 }));
 
-// Manual grid column with color
-grid.addComponentColumn(entity -> {
-    Span span = new Span(entity.getStatus().getName());
-    span.getStyle().set("background-color", entity.getStatus().getColor());
-    // Manual styling...
-    return span;
-});
+// Manual user ComboBox with no icons
+ComboBox<CUser> userComboBox = new ComboBox<>();
+userComboBox.setItemLabelGenerator(CUser::getName);
 ```
 
 ### After (New Approach)
 ```java
-// Automatic color-aware ComboBox (via annotation detection)
+// Automatic enhanced ComboBox (via annotation detection)
 // Just use @ColorAwareComboBox annotation on the field
 // CEntityFormBuilder automatically creates CColorAwareComboBox
 
-// Automatic color-aware grid column
-grid.addStatusColumn(Entity::getStatus, "Status", "status");
-// or for enhanced features:
-grid.addColorAwareStatusColumn(Entity::getStatus, "Status", "status");
+// For status entities - gets colors automatically
+CColorAwareComboBox<CDecisionStatus> statusComboBox = 
+    new CColorAwareComboBox<>(CDecisionStatus.class);
+
+// For user entities - gets icons automatically  
+CColorAwareComboBox<CUser> userComboBox = 
+    new CColorAwareComboBox<>(CUser.class);
 ```
 
 ## Configuration Options
@@ -179,9 +216,10 @@ For automatic color detection, status entities must:
 ## Benefits
 
 1. **Code Reuse**: Eliminated duplication between ComboBox and Grid color rendering
-2. **Consistency**: Unified styling and behavior across all status components
-3. **Maintainability**: Centralized color logic in `CColorUtils`
+2. **Consistency**: Unified styling and behavior across all enhanced components
+3. **Maintainability**: Centralized color and icon logic in `CColorUtils`
 4. **Type Safety**: Specialized generic classes provide compile-time type checking
 5. **Configuration**: Annotation-driven configuration for easy customization
-6. **Automatic Detection**: Framework automatically detects status entities
-7. **Backward Compatibility**: Existing code continues to work without changes
+6. **Automatic Detection**: Framework automatically detects status entities and icon-capable entities
+7. **Icon Support**: Automatic icons for common entity types (users, companies, projects, etc.)
+8. **Backward Compatibility**: Existing code continues to work without changes
