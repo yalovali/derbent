@@ -4,103 +4,68 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import tech.derbent.abstracts.domains.CTestBase;
-import tech.derbent.activities.domain.CActivity;
 import tech.derbent.comments.domain.CComment;
-import tech.derbent.comments.domain.CCommentPriority;
-import tech.derbent.projects.domain.CProject;
-import tech.derbent.users.domain.CUser;
 
 /**
- * Unit tests for CCommentService. Tests service layer business logic with mocked dependencies.
+ * Unit tests for CCommentService. Tests service layer business logic with mocked
+ * dependencies.
  */
-@DisplayName("CCommentService Tests")
-@ExtendWith(MockitoExtension.class)
+@DisplayName ("CCommentService Tests")
+@ExtendWith (MockitoExtension.class)
 class CCommentServiceTest extends CTestBase {
 
-    @Mock
-    private CCommentRepository commentRepository;
+	@Override
+	protected void setupForTest() {
+		// TODO Auto-generated method stub
+	}
 
-    @Mock
-    private CCommentPriorityService commentPriorityService;
+	@Test
+	@DisplayName ("Should count comments by activity")
+	void testCountByActivity() {
+		// Given
+		final long expectedCount = 5L;
+		when(commentRepository.countByActivity(testActivity)).thenReturn(expectedCount);
+		// When
+		final long result = commentService.countByActivity(testActivity);
+		// Then
+		assertEquals(expectedCount, result);
+	}
 
-    private CCommentService commentService;
+	@Test
+	@DisplayName ("Should find comments by activity ordered by date")
+	void testFindByActivityOrderByEventDateAsc() {
+		// Given
+		final CComment comment1 = new CComment("First comment", testActivity, testUser);
+		final CComment comment2 = new CComment("Second comment", testActivity, testUser);
+		final List<CComment> expectedComments = Arrays.asList(comment1, comment2);
+		when(commentRepository.findByActivityOrderByEventDateAsc(testActivity))
+			.thenReturn(expectedComments);
+		// When
+		final List<CComment> result =
+			commentService.findByActivityOrderByEventDateAsc(testActivity);
+		// Then
+		assertNotNull(result);
+		assertEquals(2, result.size());
+		assertEquals(expectedComments, result);
+	}
 
-    private CActivity testActivity;
-
-    private CUser testUser;
-
-    private CProject project;
-
-    private final Clock fixedClock = Clock.fixed(Instant.parse("2024-01-15T10:30:00Z"), ZoneId.systemDefault());
-
-    @BeforeEach
-    void setUp() {
-        commentService = new CCommentService(commentRepository, commentPriorityService, fixedClock);
-        // Set up test data
-        project = new CProject("Test Project");
-        testActivity = new CActivity("Test Activity", project);
-        testActivity.setName("Test Activity");
-        testActivity.setProject(project);
-        testUser = new CUser("Test User");
-        testUser.setLogin("test.user");
-        new CCommentPriority("Normal", project);
-    }
-
-    @Test
-    @DisplayName("Should count comments by activity")
-    void testCountByActivity() {
-        // Given
-        final long expectedCount = 5L;
-        when(commentRepository.countByActivity(testActivity)).thenReturn(expectedCount);
-        // When
-        final long result = commentService.countByActivity(testActivity);
-        // Then
-        assertEquals(expectedCount, result);
-    }
-
-    @Test
-    @DisplayName("Should find comments by activity ordered by date")
-    void testFindByActivityOrderByEventDateAsc() {
-        // Given
-        final CComment comment1 = new CComment("First comment", testActivity, testUser);
-        final CComment comment2 = new CComment("Second comment", testActivity, testUser);
-        final List<CComment> expectedComments = Arrays.asList(comment1, comment2);
-        when(commentRepository.findByActivityOrderByEventDateAsc(testActivity)).thenReturn(expectedComments);
-        // When
-        final List<CComment> result = commentService.findByActivityOrderByEventDateAsc(testActivity);
-        // Then
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        assertEquals(expectedComments, result);
-    }
-
-    @Test
-    @DisplayName("Should handle null activity gracefully")
-    void testFindByActivityWithNullActivity() {
-        // When
-        final List<CComment> result = commentService.findByActivityOrderByEventDateAsc(null);
-        // Then
-        assertNotNull(result);
-        assertEquals(0, result.size());
-    }
-
-    @Override
-    protected void setupForTest() {
-        // TODO Auto-generated method stub
-
-    }
+	@Test
+	@DisplayName ("Should handle null activity gracefully")
+	void testFindByActivityWithNullActivity() {
+		// When
+		final List<CComment> result =
+			commentService.findByActivityOrderByEventDateAsc(null);
+		// Then
+		assertNotNull(result);
+		assertEquals(0, result.size());
+	}
 }
