@@ -15,6 +15,13 @@ import tech.derbent.abstracts.domains.CEntityNamed;
 @AttributeOverride (name = "id", column = @Column (name = "project_id"))
 public class CProject extends CEntityNamed<CProject> {
 
+	/**
+	 * Default constructor for JPA.
+	 */
+	public CProject() {
+		super();
+	}
+
 	public CProject(final String name) {
 		super(CProject.class, name);
 	}

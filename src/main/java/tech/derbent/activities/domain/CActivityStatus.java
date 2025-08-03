@@ -29,6 +29,15 @@ public class CActivityStatus extends CStatus<CActivityStatus> {
 	)
 	private boolean isFinal = false;
 
+	/**
+	 * Default constructor for JPA.
+	 */
+	public CActivityStatus() {
+		super();
+		// Initialize with default values for JPA
+		this.isFinal = false;
+	}
+
 	public CActivityStatus(final String name, final CProject project) {
 		super(CActivityStatus.class, name, project);
 	}

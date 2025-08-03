@@ -42,6 +42,14 @@ public abstract class CEvent<EntityClass> extends CEntityDB<EntityClass> {
 	)
 	private CUser author;
 
+	/**
+	 * Default constructor for JPA.
+	 */
+	protected CEvent() {
+		super();
+		this.eventDate = LocalDateTime.now();
+	}
+
 	// Default constructor for JPA
 	public CEvent(final Class<EntityClass> clazz) {
 		super(clazz);

@@ -41,6 +41,16 @@ public class CCommentPriority extends CTypeEntity<CCommentPriority> {
 	)
 	private Boolean isDefault = false;
 
+	/**
+	 * Default constructor for JPA.
+	 */
+	public CCommentPriority() {
+		super();
+		// Initialize with default values for JPA
+		this.priorityLevel = 3;
+		this.isDefault = false;
+	}
+
 	public CCommentPriority(final String name, final CProject project) {
 		super(CCommentPriority.class, name, project);
 		LOGGER.debug("CCommentPriority constructor called with name: {} and project: {}",

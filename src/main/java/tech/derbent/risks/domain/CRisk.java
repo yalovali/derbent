@@ -25,6 +25,15 @@ public class CRisk extends CEntityOfProject<CRisk> {
 	)
 	private ERiskSeverity riskSeverity;
 
+	/**
+	 * Default constructor for JPA.
+	 */
+	public CRisk() {
+		super();
+		// Initialize with default values for JPA
+		this.riskSeverity = ERiskSeverity.LOW;
+	}
+
 	public CRisk(final String name, final CProject project,
 		final ERiskSeverity riskSeverity) {
 		super(CRisk.class, name, project);

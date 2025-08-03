@@ -148,6 +148,17 @@ public class CUser extends CEntityNamed<CUser> {
 	)
 	private CCompany company;
 
+	/**
+	 * Default constructor for JPA.
+	 */
+	public CUser() {
+		super();
+		// Initialize with default values for JPA
+		this.roles = "USER";
+		this.userRole = CUserRole.TEAM_MEMBER;
+		this.enabled = true;
+	}
+
 	public CUser(final String name) {
 		super(CUser.class, name);
 	}

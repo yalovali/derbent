@@ -9,6 +9,15 @@ public abstract class CEntity<EntityClass> {
 
 	protected final Class<EntityClass> clazz;
 
+	/**
+	 * Default constructor for JPA. Uses reflection to determine the entity class.
+	 */
+	@SuppressWarnings("unchecked")
+	protected CEntity() {
+		// For JPA compatibility - derive class from generic type information
+		this.clazz = (Class<EntityClass>) getClass();
+	}
+
 	public CEntity(final Class<EntityClass> clazz) {
 		this.clazz = clazz;
 	}

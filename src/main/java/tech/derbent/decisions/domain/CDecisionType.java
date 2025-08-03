@@ -38,6 +38,15 @@ public class CDecisionType extends CTypeEntity<CDecisionType> {
 	private Boolean requiresApproval = false;
 
 	/**
+	 * Default constructor for JPA.
+	 */
+	public CDecisionType() {
+		super();
+		// Initialize with default values for JPA
+		this.requiresApproval = false;
+	}
+
+	/**
 	 * Constructor with required fields only.
 	 * @param name    the name of the decision type (e.g., "STRATEGIC", "TECHNICAL")
 	 * @param project the project this decision type belongs to

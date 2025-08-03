@@ -17,6 +17,13 @@ import tech.derbent.projects.domain.CProject;
 public class CUserType extends CEntityOfProject<CUserType> {
 
 	/**
+	 * Default constructor for JPA.
+	 */
+	public CUserType() {
+		super();
+	}
+
+	/**
 	 * Constructor with name and project.
 	 * @param name    the name of the user type
 	 * @param project the project this type belongs to

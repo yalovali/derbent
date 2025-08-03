@@ -53,6 +53,16 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	)
 	private LocalDateTime lastModifiedDate;
 
+	/**
+	 * Default constructor for JPA.
+	 */
+	protected CEntityNamed() {
+		super();
+		// Initialize with default values for JPA
+		this.name = "";
+		this.description = null;
+	}
+
 	public CEntityNamed(final Class<EntityClass> clazz, final String name) {
 		super(clazz);
 

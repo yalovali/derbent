@@ -71,6 +71,15 @@ public class CComment extends CEvent<CComment> {
 	private boolean important = false;
 
 	/**
+	 * Default constructor for JPA.
+	 */
+	public CComment() {
+		super();
+		// Initialize with default values for JPA
+		this.important = false;
+	}
+
+	/**
 	 * Constructor with comment text, activity, and author.
 	 * @param commentText the comment content text - must not be null or empty
 	 * @param activity    the activity this comment belongs to - must not be null

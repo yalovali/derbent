@@ -18,6 +18,13 @@ public abstract class CStatus<EntityType> extends CTypeEntity<EntityType> {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CStatus.class);
 
 	/**
+	 * Default constructor for JPA.
+	 */
+	protected CStatus() {
+		super();
+	}
+
+	/**
 	 * Constructor with name (required field).
 	 * @param name the name of the status
 	 */
