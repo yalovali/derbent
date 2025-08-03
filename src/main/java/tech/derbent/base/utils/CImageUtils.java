@@ -48,7 +48,6 @@ public final class CImageUtils {
             return null;
         }
         
-        // Detect image type based on content
         String mimeType = detectImageMimeType(imageData);
         LOGGER.debug("Detected MIME type: {}", mimeType);
         
@@ -57,6 +56,7 @@ public final class CImageUtils {
         String dataUrl = "data:" + mimeType + ";base64," + base64Image;
         LOGGER.debug("Created data URL with length: {}", dataUrl.length());
         return dataUrl;
+
     }
 
     /**

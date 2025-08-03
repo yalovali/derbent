@@ -237,6 +237,81 @@ public class CGridCell extends Div {
 	}
 
 	/**
+	 * Set boolean value with custom styling for true/false states.
+	 * This method provides consistent styling for boolean-based grid cells.
+	 * @param value the boolean value to display
+	 * @param trueText text to display when value is true
+	 * @param falseText text to display when value is false (can be empty)
+	 * @param trueColor background color for true state
+	 * @param falseColor background color for false state (can be null for no background)
+	 */
+	public void setBooleanValue(final boolean value, final String trueText, final String falseText, 
+			final String trueColor, final String falseColor) {
+		removeAll(); // Clear any existing content
+		
+		final String displayText = value ? trueText : falseText;
+		
+		// Only show content if there's text to display
+		if (displayText != null && !displayText.isBlank()) {
+			setText(displayText);
+			
+			// Apply boolean-specific styling
+			getStyle().set("padding", "4px 8px");
+			getStyle().set("border-radius", "12px");
+			getStyle().set("font-size", "12px");
+			getStyle().set("font-weight", "bold");
+			getStyle().set("text-align", "center");
+			
+			// Apply colors based on the boolean value
+			if (value && trueColor != null) {
+				getStyle().set("background-color", trueColor);
+				if (autoContrast) {
+					final String textColor = CColorUtils.getContrastTextColor(trueColor);
+					getStyle().set("color", textColor);
+				}
+			} else if (!value && falseColor != null) {
+				getStyle().set("background-color", falseColor);
+				if (autoContrast) {
+					final String textColor = CColorUtils.getContrastTextColor(falseColor);
+					getStyle().set("color", textColor);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Set boolean value with predefined Final/Active styling.
+	 * This is a convenience method for common Final/Active status display.
+	 * @param isFinal true if the status is final, false if active
+	 */
+	public void setFinalActiveValue(final boolean isFinal) {
+		setBooleanValue(isFinal, "Final", "Active", "#ffebee", "#e8f5e8");
+		
+		// Apply specific text colors for Final/Active
+		if (isFinal) {
+			getStyle().set("color", "#c62828");
+		} else {
+			getStyle().set("color", "#2e7d32");
+		}
+	}
+	
+	/**
+	 * Set boolean value with predefined Default styling.
+	 * This is a convenience method for default status indicators.
+	 * @param isDefault true if this is the default item
+	 */
+	public void setDefaultValue(final boolean isDefault) {
+		if (isDefault) {
+			setBooleanValue(true, "Default", "", "#e3f2fd", null);
+			getStyle().set("color", "#1976d2");
+		} else {
+			// For non-default, show nothing
+			removeAll();
+			setText("");
+		}
+	}
+
+	/**
 	 * Apply default styling for status cells when color is not available.
 	 */
 	private void applyDefaultStatusStyling() {

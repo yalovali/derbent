@@ -121,7 +121,7 @@ class CMeetingsViewUITest extends CAbstractUITest<CMeeting> {
     protected void setupServiceMocks() {
         super.setupServiceMocks();
         // Mock project-aware methods specific to meetings service
-        when(mockMeetingService.findEntitiesByProject(eq(testProject), any(Pageable.class))).thenReturn(testEntities);
+        when(mockMeetingService.findEntriesByProject(eq(testProject), any(Pageable.class))).thenReturn(testEntities);
         // Mock meeting type and status services with pageable
         when(mockMeetingTypeService.list(any(Pageable.class))).thenReturn(Arrays.asList(testMeetingType));
         when(mockMeetingStatusService.list(any(Pageable.class))).thenReturn(Arrays.asList(testMeetingStatus));
@@ -248,7 +248,7 @@ class CMeetingsViewUITest extends CAbstractUITest<CMeeting> {
         // Test that grid can load data without exceptions
         testGridDataLoading(meetingsView.getGrid());
         // Verify project-aware service was called (meetings are project-aware)
-        verify(mockMeetingService, atLeastOnce()).findEntitiesByProject(any(), any());
+        verify(mockMeetingService, atLeastOnce()).findEntriesByProject(any(), any());
     }
 
     @Test

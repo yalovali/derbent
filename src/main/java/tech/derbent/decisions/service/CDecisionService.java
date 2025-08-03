@@ -59,34 +59,7 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> {
 		return approval;
 	}
 
-	/**
-	 * Finds all decisions by project with eagerly loaded relationships.
-	 * @param project the project
-	 * @return list of CDecision with loaded relationships
-	 */
-	@Transactional (readOnly = true)
-	public List<CDecision> findByProjectWithAllRelationships(final CProject project) {
 
-		if (project == null) {
-			LOGGER.warn("findByProjectWithAllRelationships called with null project");
-			return List.of();
-		}
-		// pageable is not used here, so we can directly call the repository method
-		return decisionRepository.findByProjectWithAllRelationships(project, null)
-			.toList();
-	}
-
-	/**
-	 * Finds decisions for a project with their relationships eagerly loaded to prevent
-	 * LazyInitializationException. Use this method when loading data for the UI grid
-	 * where lazy-loaded associations will be accessed.
-	 * @param project the project to find decisions for
-	 * @return list of decisions with eagerly loaded relationships
-	 */
-	@Transactional (readOnly = true)
-	public List<CDecision> findByProjectWithEagerRelationships(final CProject project) {
-		return findByProjectWithAllRelationships(project);
-	}
 
 	/**
 	 * Finds decisions where the user is a team member.
