@@ -52,6 +52,7 @@ public class CMeetingStatusView extends CProjectAwareMDPage<CMeetingStatus> {
 
     @Override
     protected void createGridForEntity() {
+        // Color-aware status column using refactored CGrid functionality
         grid.addStatusColumn(status -> status, "Status", "status");
         grid.addShortTextColumn(CMeetingStatus::getName, "Name", "name");
         grid.addLongTextColumn(CMeetingStatus::getDescription, "Description", "description");
