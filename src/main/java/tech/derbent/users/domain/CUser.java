@@ -119,7 +119,7 @@ public class CUser extends CEntityNamed<CUser> {
 		description = "Is user account enabled?", hidden = false, order = 8
 	)
 	@Column (name = "enabled", nullable = false)
-	private boolean enabled = true; // User account status, default is enabled
+	private Boolean enabled = Boolean.TRUE; // User account status, default is enabled
 
 	@MetaData (
 		displayName = "Profile Picture", required = false, readOnly = false,
@@ -247,7 +247,7 @@ public class CUser extends CEntityNamed<CUser> {
 
 	public CUserType getUserType() { return userType; }
 
-	public boolean isEnabled() {
+	public Boolean isEnabled() {
 		return enabled; // Return the enabled status
 	}
 
@@ -281,7 +281,7 @@ public class CUser extends CEntityNamed<CUser> {
 
 	public void setEmail(final String email) { this.email = email; }
 
-	public void setEnabled(final boolean enabled) {
+	public void setEnabled(final Boolean enabled) {
 		this.enabled = enabled; // Set the enabled status
 	}
 

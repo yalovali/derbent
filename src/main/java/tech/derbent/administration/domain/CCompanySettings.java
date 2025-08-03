@@ -135,7 +135,7 @@ public class CCompanySettings extends CEntityDB<CCompanySettings> {
 		defaultValue = "true", description = "Enable email notifications", hidden = false,
 		order = 10
 	)
-	private boolean emailNotificationsEnabled = true;
+	private Boolean emailNotificationsEnabled = Boolean.TRUE;
 
 	@Column (name = "due_date_reminder_days", nullable = false)
 	@Min (value = 0, message = "Reminder days must be non-negative")
@@ -153,7 +153,7 @@ public class CCompanySettings extends CEntityDB<CCompanySettings> {
 		defaultValue = "true", description = "Enable overdue task notifications",
 		hidden = false, order = 12
 	)
-	private boolean overdueNotificationEnabled = true;
+	private Boolean overdueNotificationEnabled = Boolean.TRUE;
 
 	// Project Management Preferences
 	@Column (name = "auto_assign_project_manager", nullable = false)
@@ -163,7 +163,7 @@ public class CCompanySettings extends CEntityDB<CCompanySettings> {
 		description = "Automatically assign project manager to new projects",
 		hidden = false, order = 13
 	)
-	private boolean autoAssignProjectManager = false;
+	private Boolean autoAssignProjectManager = Boolean.FALSE;
 
 	@Column (name = "require_time_tracking", nullable = false)
 	@MetaData (
@@ -171,7 +171,7 @@ public class CCompanySettings extends CEntityDB<CCompanySettings> {
 		defaultValue = "true", description = "Require time tracking for all activities",
 		hidden = false, order = 14
 	)
-	private boolean requireTimeTracking = true;
+	private Boolean requireTimeTracking = Boolean.TRUE;
 
 	@Column (name = "default_hourly_rate", nullable = true, precision = 10, scale = 2)
 	@DecimalMin (value = "0.0", message = "Hourly rate must be non-negative")
@@ -199,7 +199,7 @@ public class CCompanySettings extends CEntityDB<CCompanySettings> {
 		description = "Display budget information in project views", hidden = false,
 		order = 17
 	)
-	private boolean showBudgetInfo = true;
+	private Boolean showBudgetInfo = Boolean.TRUE;
 
 	@Column (name = "enable_gantt_charts", nullable = false)
 	@MetaData (
@@ -207,7 +207,7 @@ public class CCompanySettings extends CEntityDB<CCompanySettings> {
 		defaultValue = "true", description = "Enable Gantt chart functionality",
 		hidden = false, order = 18
 	)
-	private boolean enableGanttCharts = true;
+	private Boolean enableGanttCharts = Boolean.TRUE;
 
 	// Security and Permissions
 	@Column (
@@ -228,7 +228,7 @@ public class CCompanySettings extends CEntityDB<CCompanySettings> {
 		defaultValue = "false", description = "Require manager approval for time entries",
 		hidden = false, order = 20
 	)
-	private boolean requireApprovalForTimeEntries = false;
+	private Boolean requireApprovalForTimeEntries = Boolean.FALSE;
 
 	/**
 	 * Default constructor required by JPA. Initializes entity with default values.
@@ -281,23 +281,23 @@ public class CCompanySettings extends CEntityDB<CCompanySettings> {
 		}
 	}
 
-	public boolean isAutoAssignProjectManager() { return autoAssignProjectManager; }
+	public Boolean isAutoAssignProjectManager() { return autoAssignProjectManager; }
 
-	public boolean isEmailNotificationsEnabled() { return emailNotificationsEnabled; }
+	public Boolean isEmailNotificationsEnabled() { return emailNotificationsEnabled; }
 
-	public boolean isEnableGanttCharts() { return enableGanttCharts; }
+	public Boolean isEnableGanttCharts() { return enableGanttCharts; }
 
-	public boolean isOverdueNotificationEnabled() { return overdueNotificationEnabled; }
+	public Boolean isOverdueNotificationEnabled() { return overdueNotificationEnabled; }
 
-	public boolean isRequireApprovalForTimeEntries() {
+	public Boolean isRequireApprovalForTimeEntries() {
 		return requireApprovalForTimeEntries;
 	}
 
-	public boolean isRequireTimeTracking() { return requireTimeTracking; }
+	public Boolean isRequireTimeTracking() { return requireTimeTracking; }
 
-	public boolean isShowBudgetInfo() { return showBudgetInfo; }
+	public Boolean isShowBudgetInfo() { return showBudgetInfo; }
 
-	public void setAutoAssignProjectManager(final boolean autoAssignProjectManager) {
+	public void setAutoAssignProjectManager(final Boolean autoAssignProjectManager) {
 		this.autoAssignProjectManager = autoAssignProjectManager;
 	}
 
@@ -335,11 +335,11 @@ public class CCompanySettings extends CEntityDB<CCompanySettings> {
 		this.dueDateReminderDays = dueDateReminderDays;
 	}
 
-	public void setEmailNotificationsEnabled(final boolean emailNotificationsEnabled) {
+	public void setEmailNotificationsEnabled(final Boolean emailNotificationsEnabled) {
 		this.emailNotificationsEnabled = emailNotificationsEnabled;
 	}
 
-	public void setEnableGanttCharts(final boolean enableGanttCharts) {
+	public void setEnableGanttCharts(final Boolean enableGanttCharts) {
 		this.enableGanttCharts = enableGanttCharts;
 	}
 
@@ -347,20 +347,20 @@ public class CCompanySettings extends CEntityDB<CCompanySettings> {
 		this.endWorkHour = endWorkHour;
 	}
 
-	public void setOverdueNotificationEnabled(final boolean overdueNotificationEnabled) {
+	public void setOverdueNotificationEnabled(final Boolean overdueNotificationEnabled) {
 		this.overdueNotificationEnabled = overdueNotificationEnabled;
 	}
 
 	public void
-		setRequireApprovalForTimeEntries(final boolean requireApprovalForTimeEntries) {
+		setRequireApprovalForTimeEntries(final Boolean requireApprovalForTimeEntries) {
 		this.requireApprovalForTimeEntries = requireApprovalForTimeEntries;
 	}
 
-	public void setRequireTimeTracking(final boolean requireTimeTracking) {
+	public void setRequireTimeTracking(final Boolean requireTimeTracking) {
 		this.requireTimeTracking = requireTimeTracking;
 	}
 
-	public void setShowBudgetInfo(final boolean showBudgetInfo) {
+	public void setShowBudgetInfo(final Boolean showBudgetInfo) {
 		this.showBudgetInfo = showBudgetInfo;
 	}
 
