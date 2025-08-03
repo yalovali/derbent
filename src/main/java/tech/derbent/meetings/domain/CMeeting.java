@@ -62,7 +62,7 @@ public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntit
     @MetaData(displayName = "Agenda", required = false, readOnly = false, defaultValue = "", description = "Meeting agenda and topics to be discussed", hidden = false, order = 7, maxLength = 4000)
     private String agenda;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "related_activity_id", nullable = true)
     @MetaData(displayName = "Related Activity", required = false, readOnly = false, description = "Project activity related to this meeting", hidden = false, order = 8, dataProviderBean = "CActivityService")
     private CActivity relatedActivity;

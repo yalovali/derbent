@@ -28,7 +28,7 @@ public abstract class CEvent<EntityClass> extends CEntityDB<EntityClass> {
 	private LocalDateTime eventDate;
 
 	// Author of the event
-	@ManyToOne (fetch = FetchType.LAZY)
+	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "author_id", nullable = false)
 	@MetaData (
 		displayName = "Author", required = true, readOnly = true,

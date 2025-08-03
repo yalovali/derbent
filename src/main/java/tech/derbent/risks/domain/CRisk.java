@@ -24,7 +24,7 @@ public class CRisk extends CEntityOfProject<CRisk> {
     @MetaData(displayName = "Risk Severity", required = true, readOnly = false, defaultValue = "LOW", description = "Severity level of the risk", hidden = false, order = 2, useRadioButtons = false)
     private ERiskSeverity riskSeverity;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "criskstatus_id", nullable = true)
     @MetaData(displayName = "Status", required = false, readOnly = false, description = "Current status of the risk", hidden = false, order = 3, dataProviderBean = "CRiskStatusService")
     private CRiskStatus status;

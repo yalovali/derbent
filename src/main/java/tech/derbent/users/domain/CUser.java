@@ -79,12 +79,12 @@ public class CUser extends CEntityNamed<CUser> {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CUserProjectSettings> projectSettings;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "cusertype_id", nullable = true)
     @MetaData(displayName = "User Type", required = false, readOnly = false, description = "Type category of the user", hidden = false, order = 9)
     private CUserType userType;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "company_id", nullable = true)
     @MetaData(displayName = "Company", required = false, readOnly = false, description = "Company the user belongs to", hidden = false, order = 10)
     private CCompany company;

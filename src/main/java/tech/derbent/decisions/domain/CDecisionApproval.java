@@ -35,7 +35,7 @@ public class CDecisionApproval extends CEntityNamed<CDecisionApproval> {
     private CDecision decision;
 
     // The user who needs to provide approval
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "approver_user_id", nullable = false)
     @MetaData(displayName = "Approver", required = true, readOnly = false, description = "User who needs to provide approval", hidden = false, order = 2, dataProviderBean = "CUserService")
     private CUser approver;

@@ -73,7 +73,7 @@ public class CDecision extends CEntityOfProject<CDecision> {
 	private CDecisionStatus decisionStatus;
 
 	// Accountable Personnel
-	@ManyToOne (fetch = FetchType.LAZY)
+	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "accountable_user_id", nullable = true)
 	@MetaData (
 		displayName = "Accountable Personnel", required = false, readOnly = false,
