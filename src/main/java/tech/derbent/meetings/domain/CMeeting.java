@@ -160,6 +160,16 @@ public class CMeeting extends CEntityOfProject<CMeeting> {
 	)
 	private String linkedElement;
 
+	/**
+	 * Default constructor for JPA.
+	 */
+	public CMeeting() {
+		super();
+		// Initialize collections for JPA
+		this.attendees = new HashSet<>();
+		this.participants = new HashSet<>();
+	}
+
 	public CMeeting(final String name, final CProject project) {
 		super(CMeeting.class, name, project);
 	}

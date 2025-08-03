@@ -16,6 +16,13 @@ import tech.derbent.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "cmeetingtype_id"))
 public class CMeetingType extends CTypeEntity<CMeetingType> {
 
+	/**
+	 * Default constructor for JPA.
+	 */
+	public CMeetingType() {
+		super();
+	}
+
 	public CMeetingType(final String name, final CProject project) {
 		super(CMeetingType.class, name, project);
 	}

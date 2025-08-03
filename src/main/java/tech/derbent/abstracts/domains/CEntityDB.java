@@ -16,6 +16,13 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> {
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	/**
+	 * Default constructor for JPA.
+	 */
+	protected CEntityDB() {
+		super();
+	}
+
 	public CEntityDB(final Class<EntityClass> clazz) {
 		super(clazz);
 	}

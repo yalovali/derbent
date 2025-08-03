@@ -48,6 +48,16 @@ public class CActivityPriority extends CTypeEntity<CActivityPriority> {
 	private Boolean isDefault = false;
 
 	/**
+	 * Default constructor for JPA.
+	 */
+	public CActivityPriority() {
+		super();
+		// Initialize with default values for JPA
+		this.priorityLevel = 3;
+		this.isDefault = false;
+	}
+
+	/**
 	 * Constructor with required fields only.
 	 * @param name    the name of the activity priority (e.g., "HIGH", "MEDIUM")
 	 * @param project the project this priority belongs to

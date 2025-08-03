@@ -49,6 +49,17 @@ public abstract class CTypeEntity<EntityType> extends CEntityOfProject<EntityTyp
 	private Boolean isActive = true;
 
 	/**
+	 * Default constructor for JPA.
+	 */
+	protected CTypeEntity() {
+		super();
+		// Initialize with default values for JPA
+		this.color = "#4A90E2";
+		this.sortOrder = 100;
+		this.isActive = true;
+	}
+
+	/**
 	 * Constructor with required fields.
 	 * @param name    the name of the type entity
 	 * @param project the project this type belongs to

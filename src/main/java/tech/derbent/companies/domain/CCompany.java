@@ -89,6 +89,15 @@ public class CCompany extends CEntityNamed<CCompany> {
 	)
 	private List<tech.derbent.users.domain.CUser> users;
 
+	/**
+	 * Default constructor for JPA.
+	 */
+	public CCompany() {
+		super();
+		// Initialize with default values for JPA
+		this.enabled = true;
+	}
+
 	public CCompany(final String name) {
 		super(CCompany.class, name); // Use the CEntityNamed constructor
 	}

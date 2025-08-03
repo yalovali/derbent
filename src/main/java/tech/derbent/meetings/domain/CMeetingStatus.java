@@ -30,6 +30,15 @@ public class CMeetingStatus extends CStatus<CMeetingStatus> {
 	)
 	private boolean isFinal = false;
 
+	/**
+	 * Default constructor for JPA.
+	 */
+	public CMeetingStatus() {
+		super();
+		// Initialize with default values for JPA
+		this.isFinal = false;
+	}
+
 	public CMeetingStatus(final String name, final CProject project) {
 		super(CMeetingStatus.class, name, project);
 	}

@@ -196,6 +196,15 @@ public class CActivity extends CEntityOfProject<CActivity> {
 	private String notes;
 
 	/**
+	 * Default constructor for JPA.
+	 */
+	public CActivity() {
+		super();
+		// Initialize with default values for JPA
+		initializeDefaults();
+	}
+
+	/**
 	 * Constructor with name and project.
 	 * @param name    the name of the activity - must not be null
 	 * @param project the project this activity belongs to - must not be null

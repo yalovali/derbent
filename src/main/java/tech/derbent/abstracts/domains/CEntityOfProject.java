@@ -34,6 +34,15 @@ public abstract class CEntityOfProject<EntityClass> extends CEntityNamed<EntityC
 	)
 	private CUser createdBy;
 
+	/**
+	 * Default constructor for JPA.
+	 */
+	protected CEntityOfProject() {
+		super();
+		// Initialize with default values for JPA
+		this.project = null;
+	}
+
 	public CEntityOfProject(final Class<EntityClass> clazz, final String name,
 		final CProject project) {
 		super(clazz, name);
