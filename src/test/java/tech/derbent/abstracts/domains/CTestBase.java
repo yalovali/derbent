@@ -15,6 +15,8 @@ import tech.derbent.activities.service.CActivityTypeRepository;
 import tech.derbent.activities.service.CActivityTypeService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
+import tech.derbent.risks.service.CRiskStatusRepository;
+import tech.derbent.risks.service.CRiskStatusService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.service.CUserRepository;
 import tech.derbent.users.service.CUserService;
@@ -55,6 +57,11 @@ public abstract class CTestBase {
 
     protected CActivityService activityService;
 
+    @Mock
+    protected CRiskStatusRepository riskStatusRepository;
+
+    protected CRiskStatusService riskStatusService;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -65,6 +72,7 @@ public abstract class CTestBase {
         project = new CProject("Test Project");
         activityTypeService = new CActivityTypeService(activityTypeRepository, clock);
         activityStatusService = new CActivityStatusService(activityStatusRepository, clock);
+        riskStatusService = new CRiskStatusService(riskStatusRepository, clock);
         project = new CProject("Test Project");
         setupForTest();
     }
