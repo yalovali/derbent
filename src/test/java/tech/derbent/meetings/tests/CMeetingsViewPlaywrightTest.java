@@ -19,10 +19,10 @@ import tech.derbent.ui.automation.CApplicationGeneric_UITest;
  * form validation, ComboBox selections, and UI behaviors following the strict coding
  * guidelines for Playwright testing.
  */
-@SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT)
+@SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT)
 @TestPropertySource (properties = {
 	"spring.datasource.url=jdbc:h2:mem:testdb",
-	"spring.jpa.hibernate.ddl-auto=create-drop", "server.port=8080" }
+	"spring.jpa.hibernate.ddl-auto=create-drop" }
 )
 public class CMeetingsViewPlaywrightTest extends CApplicationGeneric_UITest {
 
