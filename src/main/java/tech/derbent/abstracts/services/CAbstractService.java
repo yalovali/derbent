@@ -16,164 +16,164 @@ import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.utils.PageableUtils;
 
 /**
- * CAbstractService - Abstract base service class for entity operations. Layer: Service
- * (MVC) Provides common CRUD operations and lazy loading support for all entity types.
+ * CAbstractService - Abstract base service class for entity operations. Layer: Service (MVC) Provides common CRUD
+ * operations and lazy loading support for all entity types.
  */
 public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass>> {
 
-	protected final Clock clock;
+    protected final Clock clock;
 
-	protected final CAbstractRepository<EntityClass> repository;
+    protected final CAbstractRepository<EntityClass> repository;
 
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
-	public CAbstractService(final CAbstractRepository<EntityClass> repository,
-		final Clock clock) {
-		this.clock = clock;
-		this.repository = repository;
-	}
+    public CAbstractService(final CAbstractRepository<EntityClass> repository, final Clock clock) {
+        this.clock = clock;
+        this.repository = repository;
+    }
 
-	public int count() {
-		// LOGGER.debug("Counting entities in {}", getClass().getSimpleName());
-		return (int) repository.count();
-	}
+    public int count() {
+        // LOGGER.debug("Counting entities in {}", getClass().getSimpleName());
+        return (int) repository.count();
+    }
 
-	@Transactional
-	public EntityClass createEntity() {
+    @Transactional
+    public EntityClass createEntity() {
 
-		try {
-			final EntityClass entity = newEntity();
-			repository.saveAndFlush(entity);
-			return entity;
-		} catch (final Exception e) {
-			throw new RuntimeException(
-				"Failed to create instance of " + getEntityClass().getName(), e);
-		}
-	}
+        try {
+            final EntityClass entity = newEntity();
+            repository.saveAndFlush(entity);
+            return entity;
+        } catch (final Exception e) {
+            throw new RuntimeException("Failed to create instance of " + getEntityClass().getName(), e);
+        }
+    }
 
-	public void delete(final EntityClass entity) {
-		repository.delete(entity);
-	}
+    public void delete(final EntityClass entity) {
+        repository.delete(entity);
+    }
 
-	public void delete(final Long id) {
-		repository.deleteById(id);
-	}
+    public void delete(final Long id) {
+        repository.deleteById(id);
+    }
 
-	@Transactional (readOnly = true)
-	public Optional<EntityClass> getById(final Long id) {
-		final Optional<EntityClass> entity = repository.findById(id);
-		// Initialize lazy fields if entity is present
-		entity.ifPresent(this::initializeLazyFields);
-		return entity;
-	}
+    @Transactional(readOnly = true)
+    public Optional<EntityClass> getById(final Long id) {
+        final Optional<EntityClass> entity = repository.findById(id);
+        // Initialize lazy fields if entity is present
+        entity.ifPresent(this::initializeLazyFields);
+        return entity;
+    }
 
-	protected abstract Class<EntityClass> getEntityClass();
+    protected abstract Class<EntityClass> getEntityClass();
 
-	/**
-	 * Initializes lazy fields for an entity to prevent LazyInitializationException.
-	 * Subclasses can override this method to specify which fields need initialization.
-	 * This base implementation automatically handles CEntityOfProject entities.
-	 * @param entity the entity to initialize
-	 */
-	protected void initializeLazyFields(final EntityClass entity) {
+    /**
+     * Initializes lazy fields for an entity to prevent LazyInitializationException. Subclasses can override this method
+     * to specify which fields need initialization. This base implementation automatically handles CEntityOfProject
+     * entities.
+     * 
+     * @param entity
+     *            the entity to initialize
+     */
+    protected void initializeLazyFields(final EntityClass entity) {
 
-		if (entity == null) {
-			return;
-		}
+        if (entity == null) {
+            return;
+        }
 
-		try {
-			CSpringAuxillaries.initializeLazily(entity);
-		} catch (final Exception e) {
-			LOGGER.warn("Error initializing lazy fields for entity: {}",
-				CSpringAuxillaries.safeToString(entity), e);
-		}
-	}
+        try {
+            CSpringAuxillaries.initializeLazily(entity);
+        } catch (final Exception e) {
+            LOGGER.warn("Error initializing lazy fields for entity: {}", CSpringAuxillaries.safeToString(entity), e);
+        }
+    }
 
-	/**
-	 * Helper method to safely initialize a specific lazy relationship.
-	 * @param relationshipEntity the related entity to initialize
-	 * @param relationshipName   the name of the relationship (for logging)
-	 */
-	protected void initializeLazyRelationship(final Object relationshipEntity) {
+    /**
+     * Helper method to safely initialize a specific lazy relationship.
+     * 
+     * @param relationshipEntity
+     *            the related entity to initialize
+     * @param relationshipName
+     *            the name of the relationship (for logging)
+     */
+    protected void initializeLazyRelationship(final Object relationshipEntity) {
 
-		if (relationshipEntity == null) {
-			return;
-		}
-		final boolean success = CSpringAuxillaries.initializeLazily(relationshipEntity);
+        if (relationshipEntity == null) {
+            return;
+        }
+        final boolean success = CSpringAuxillaries.initializeLazily(relationshipEntity);
 
-		if (!success) {
-			LOGGER.warn("Failed to initialize lazy relationship: {}",
-				CSpringAuxillaries.safeToString(relationshipEntity));
-		}
-	}
+        if (!success) {
+            LOGGER.warn("Failed to initialize lazy relationship: {}",
+                    CSpringAuxillaries.safeToString(relationshipEntity));
+        }
+    }
 
-	@Transactional (readOnly = true)
-	public List<EntityClass> list(final Pageable pageable) {
-		// Validate and fix pageable to prevent "max-results cannot be negative" error
-		final Pageable safePage = PageableUtils.validateAndFix(pageable);
-		// LOGGER.debug("Listing entities with pageable: {}", safePage);
-		final List<EntityClass> entities = repository.findAllBy(safePage).toList();
-		// Initialize lazy fields for all entities
-		entities.forEach(this::initializeLazyFields);
-		return entities;
-	}
+    @Transactional(readOnly = true)
+    public List<EntityClass> list(final Pageable pageable) {
+        // Validate and fix pageable to prevent "max-results cannot be negative" error
+        final Pageable safePage = PageableUtils.validateAndFix(pageable);
+        // LOGGER.debug("Listing entities with pageable: {}", safePage);
+        final List<EntityClass> entities = repository.findAllBy(safePage).toList();
+        // Initialize lazy fields for all entities
+        entities.forEach(this::initializeLazyFields);
+        return entities;
+    }
 
-	@Transactional (readOnly = true)
-	public Page<EntityClass> list(final Pageable pageable,
-		final Specification<EntityClass> filter) {
-		// Validate and fix pageable to prevent "max-results cannot be negative" error
-		final Pageable safePage = PageableUtils.validateAndFix(pageable);
-		// LOGGER.debug("Listing entities with filter and pageable");
-		final Page<EntityClass> page = repository.findAll(filter, safePage);
-		// Initialize lazy fields for all entities in the page
-		page.getContent().forEach(this::initializeLazyFields);
-		return page;
-	}
+    @Transactional(readOnly = true)
+    public Page<EntityClass> list(final Pageable pageable, final Specification<EntityClass> filter) {
+        // Validate and fix pageable to prevent "max-results cannot be negative" error
+        final Pageable safePage = PageableUtils.validateAndFix(pageable);
+        // LOGGER.debug("Listing entities with filter and pageable");
+        final Page<EntityClass> page = repository.findAll(filter, safePage);
+        // Initialize lazy fields for all entities in the page
+        page.getContent().forEach(this::initializeLazyFields);
+        return page;
+    }
 
-	public EntityClass newEntity() {
+    public EntityClass newEntity() {
 
-		try {
-			// Get constructor that takes a String parameter and invoke it with the name
-			final Object instance =
-				getEntityClass().getDeclaredConstructor().newInstance();
+        try {
+            // Get constructor that takes a String parameter and invoke it with the name
+            final Object instance = getEntityClass().getDeclaredConstructor().newInstance();
 
-			if (!getEntityClass().isInstance(instance)) {
-				throw new IllegalStateException("Created object is not instance of T");
-			}
-			@SuppressWarnings ("unchecked")
-			final EntityClass entity = ((EntityClass) instance);
-			return entity;
-		} catch (final Exception e) {
-			throw new RuntimeException(
-				"Failed to create instance of " + getEntityClass().getName(), e);
-		}
-	}
+            if (!getEntityClass().isInstance(instance)) {
+                throw new IllegalStateException("Created object is not instance of T");
+            }
+            @SuppressWarnings("unchecked")
+            final EntityClass entity = ((EntityClass) instance);
+            return entity;
+        } catch (final Exception e) {
+            throw new RuntimeException("Failed to create instance of " + getEntityClass().getName(), e);
+        }
+    }
 
-	@Transactional
-	public EntityClass save(final EntityClass entity) {
-		// LOGGER.info("Saving entity: {}", CSpringAuxillaries.safeToString(entity));
+    @Transactional
+    public EntityClass save(final EntityClass entity) {
+        // LOGGER.info("Saving entity: {}", CSpringAuxillaries.safeToString(entity));
 
-		try {
-			final EntityClass savedEntity = repository.save(entity);
-			return savedEntity;
-		} catch (final Exception e) {
-			LOGGER.error("Error saving entity: {}",
-				CSpringAuxillaries.safeToString(entity), e);
-			throw e;
-		}
-	}
+        try {
+            final EntityClass savedEntity = repository.save(entity);
+            return savedEntity;
+        } catch (final Exception e) {
+            LOGGER.error("Error saving entity: {}", CSpringAuxillaries.safeToString(entity), e);
+            throw e;
+        }
+    }
 
-	/**
-	 * Validates an entity before saving. Subclasses can override this method to add
-	 * custom validation logic.
-	 * @param entity the entity to validate
-	 * @throws IllegalArgumentException if validation fails
-	 */
-	protected void validateEntity(final EntityClass entity) {
+    /**
+     * Validates an entity before saving. Subclasses can override this method to add custom validation logic.
+     * 
+     * @param entity
+     *            the entity to validate
+     * @throws IllegalArgumentException
+     *             if validation fails
+     */
+    protected void validateEntity(final EntityClass entity) {
 
-		if (entity == null) {
-			throw new IllegalArgumentException("Entity cannot be null");
-		}
-		// Add more validation logic in subclasses if needed
-	}
+        if (entity == null) {
+            throw new IllegalArgumentException("Entity cannot be null");
+        }
+        // Add more validation logic in subclasses if needed
+    }
 }

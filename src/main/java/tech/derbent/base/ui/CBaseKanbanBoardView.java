@@ -22,21 +22,22 @@ import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 
 /**
- * CBaseKanbanBoardView - Abstract base class for Kanban board views.
- * Layer: Base View (MVC)
+ * CBaseKanbanBoardView - Abstract base class for Kanban board views. Layer: Base View (MVC)
  * 
- * Provides common functionality for any kanban board implementation.
- * Handles project awareness, layout setup, and basic kanban operations.
+ * Provides common functionality for any kanban board implementation. Handles project awareness, layout setup, and basic
+ * kanban operations.
  * 
- * @param <T> the type of entity displayed in this kanban board
- * @param <S> the type of status used for organizing entities
+ * @param <T>
+ *            the type of entity displayed in this kanban board
+ * @param <S>
+ *            the type of status used for organizing entities
  */
-public abstract class CBaseKanbanBoardView<T extends CKanbanEntity, S extends CKanbanStatus> 
-        extends VerticalLayout implements CProjectChangeListener {
+public abstract class CBaseKanbanBoardView<T extends CKanbanEntity, S extends CKanbanStatus> extends VerticalLayout
+        implements CProjectChangeListener {
 
     private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = LoggerFactory.getLogger(CBaseKanbanBoardView.class);
-    
+
     protected final CKanbanService<T, S> kanbanService;
     protected final CSessionService sessionService;
     protected H2 titleElement;
@@ -46,8 +47,10 @@ public abstract class CBaseKanbanBoardView<T extends CKanbanEntity, S extends CK
     /**
      * Constructor for CBaseKanbanBoardView.
      * 
-     * @param kanbanService the service for data operations
-     * @param sessionService the session service for project context
+     * @param kanbanService
+     *            the service for data operations
+     * @param sessionService
+     *            the session service for project context
      */
     protected CBaseKanbanBoardView(final CKanbanService<T, S> kanbanService, final CSessionService sessionService) {
         LOGGER.info("Initializing CBaseKanbanBoardView");
@@ -64,37 +67,38 @@ public abstract class CBaseKanbanBoardView<T extends CKanbanEntity, S extends CK
     }
 
     /**
-     * Gets the title for this kanban board.
-     * Subclasses should override this to provide specific titles.
+     * Gets the title for this kanban board. Subclasses should override this to provide specific titles.
      * 
      * @return the board title
      */
     protected abstract String getBoardTitle();
 
     /**
-     * Gets the CSS class name for this kanban board.
-     * Subclasses should override this to provide specific styling.
+     * Gets the CSS class name for this kanban board. Subclasses should override this to provide specific styling.
      * 
      * @return the CSS class name
      */
     protected abstract String getBoardCssClass();
 
     /**
-     * Creates a kanban column for the given status and entities.
-     * Subclasses must implement this to create specific column types.
+     * Creates a kanban column for the given status and entities. Subclasses must implement this to create specific
+     * column types.
      * 
-     * @param status the status for this column
-     * @param entities the entities for this column
+     * @param status
+     *            the status for this column
+     * @param entities
+     *            the entities for this column
      * @return the created kanban column
      */
     protected abstract CBaseKanbanColumn<T, S> createKanbanColumn(S status, List<T> entities);
 
     /**
-     * Handles when an entity status is updated via drag and drop.
-     * Subclasses can override this to add custom behavior.
+     * Handles when an entity status is updated via drag and drop. Subclasses can override this to add custom behavior.
      * 
-     * @param entity the entity that was moved
-     * @param newStatus the new status
+     * @param entity
+     *            the entity that was moved
+     * @param newStatus
+     *            the new status
      */
     protected void onEntityStatusUpdated(final T entity, final S newStatus) {
         LOGGER.debug("Entity status updated: {} -> {}", entity.getName(), newStatus.getName());
@@ -186,7 +190,8 @@ public abstract class CBaseKanbanBoardView<T extends CKanbanEntity, S extends CK
     /**
      * Shows empty state with given message.
      * 
-     * @param message the message to display
+     * @param message
+     *            the message to display
      */
     private void showEmptyState(final String message) {
         LOGGER.debug("Showing empty state: {}", message);
@@ -198,10 +203,11 @@ public abstract class CBaseKanbanBoardView<T extends CKanbanEntity, S extends CK
     }
 
     /**
-     * Implementation of CProjectChangeListener interface.
-     * Called when the active project changes via the SessionService.
+     * Implementation of CProjectChangeListener interface. Called when the active project changes via the
+     * SessionService.
      * 
-     * @param newProject the newly selected project
+     * @param newProject
+     *            the newly selected project
      */
     @Override
     public void onProjectChanged(final CProject newProject) {
@@ -211,8 +217,7 @@ public abstract class CBaseKanbanBoardView<T extends CKanbanEntity, S extends CK
     }
 
     /**
-     * Called when the component is attached to the UI.
-     * Registers the project change listener.
+     * Called when the component is attached to the UI. Registers the project change listener.
      */
     @Override
     protected void onAttach(final AttachEvent attachEvent) {
@@ -222,8 +227,8 @@ public abstract class CBaseKanbanBoardView<T extends CKanbanEntity, S extends CK
     }
 
     /**
-     * Called when the component is detached from the UI.
-     * Unregisters the project change listener to prevent memory leaks.
+     * Called when the component is detached from the UI. Unregisters the project change listener to prevent memory
+     * leaks.
      */
     @Override
     protected void onDetach(final DetachEvent detachEvent) {

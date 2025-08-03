@@ -18,42 +18,47 @@ import tech.derbent.base.ui.CBaseKanbanColumn;
 import tech.derbent.session.service.CSessionService;
 
 /**
- * CGenericActivityKanbanBoardView - Generic Kanban board view for activities using the
- * base kanban classes. Layer: View (MVC) This implementation uses the new generic kanban
- * base classes to provide drag-and-drop functionality and better organization.
+ * CGenericActivityKanbanBoardView - Generic Kanban board view for activities using the base kanban classes. Layer: View
+ * (MVC) This implementation uses the new generic kanban base classes to provide drag-and-drop functionality and better
+ * organization.
  */
-@Route ("activities-kanban-generic")
-@PageTitle ("Activity Kanban Board (Generic)")
-@Menu (order = 1.3, icon = "vaadin:grid-big", title = "Project.Generic Kanban")
+@Route("activities-kanban-generic")
+@PageTitle("Activity Kanban Board (Generic)")
+@Menu(order = 1.3, icon = "vaadin:grid-big", title = "Project.Generic Kanban")
 @PermitAll
-public class CGenericActivityKanbanBoardView
-	extends CBaseKanbanBoardView<CActivity, CActivityStatus> {
+public class CGenericActivityKanbanBoardView extends CBaseKanbanBoardView<CActivity, CActivityStatus> {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private static final Logger LOGGER =
-		LoggerFactory.getLogger(CGenericActivityKanbanBoardView.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CGenericActivityKanbanBoardView.class);
 
-	/**
-	 * Constructor for CGenericActivityKanbanBoardView.
-	 * @param activityService the activity service for data operations
-	 * @param sessionService  the session service for project context
-	 */
-	public CGenericActivityKanbanBoardView(final CActivityService activityService,
-		final CSessionService sessionService) {
-		super(activityService, sessionService);
-		LOGGER.info("Initialized CGenericActivityKanbanBoardView");
-	}
+    /**
+     * Constructor for CGenericActivityKanbanBoardView.
+     * 
+     * @param activityService
+     *            the activity service for data operations
+     * @param sessionService
+     *            the session service for project context
+     */
+    public CGenericActivityKanbanBoardView(final CActivityService activityService,
+            final CSessionService sessionService) {
+        super(activityService, sessionService);
+        LOGGER.info("Initialized CGenericActivityKanbanBoardView");
+    }
 
-	@Override
-	protected CBaseKanbanColumn<CActivity, CActivityStatus>
-		createKanbanColumn(final CActivityStatus status, final List<CActivity> entities) {
-		return new CGenericActivityKanbanColumn(status, entities);
-	}
+    @Override
+    protected CBaseKanbanColumn<CActivity, CActivityStatus> createKanbanColumn(final CActivityStatus status,
+            final List<CActivity> entities) {
+        return new CGenericActivityKanbanColumn(status, entities);
+    }
 
-	@Override
-	protected String getBoardCssClass() { return "activity-kanban-board"; }
+    @Override
+    protected String getBoardCssClass() {
+        return "activity-kanban-board";
+    }
 
-	@Override
-	protected String getBoardTitle() { return "Activity Kanban Board (Generic)"; }
+    @Override
+    protected String getBoardTitle() {
+        return "Activity Kanban Board (Generic)";
+    }
 }

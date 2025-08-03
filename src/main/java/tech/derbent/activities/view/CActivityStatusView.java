@@ -68,8 +68,8 @@ public class CActivityStatusView extends CProjectAwareMDPage<CActivityStatus> {
 
     /**
      * Creates the grid for displaying activity status entities. Sets up columns for name and description with
-     * appropriate headers and sorting. Also includes a color-aware column to show the status colors.
-     * Now uses the refactored color-aware functionality from CGrid.addStatusColumn().
+     * appropriate headers and sorting. Also includes a color-aware column to show the status colors. Now uses the
+     * refactored color-aware functionality from CGrid.addStatusColumn().
      */
     @Override
     protected void createGridForEntity() {
@@ -104,8 +104,7 @@ public class CActivityStatusView extends CProjectAwareMDPage<CActivityStatus> {
     }
 
     /**
-     * Test method to expose populateForm for testing binding issues.
-     * This method should only be used in tests.
+     * Test method to expose populateForm for testing binding issues. This method should only be used in tests.
      */
     public void testPopulateForm(CActivityStatus entity) {
         populateForm(entity);

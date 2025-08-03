@@ -51,9 +51,9 @@ public interface CDecisionStatusRepository extends CAbstractNamedRepository<CDec
     List<CDecisionStatus> findByRequiresApprovalTrue();
 
     /**
-     * Finds a decision status by ID with eagerly loaded relationships to prevent LazyInitializationException.
-     * Note: CDecisionStatus extends CStatus which doesn't have project relationship like CEntityOfProject,
-     * but we add this for consistency and future extensibility.
+     * Finds a decision status by ID with eagerly loaded relationships to prevent LazyInitializationException. Note:
+     * CDecisionStatus extends CStatus which doesn't have project relationship like CEntityOfProject, but we add this
+     * for consistency and future extensibility.
      * 
      * @param id
      *            the decision status ID

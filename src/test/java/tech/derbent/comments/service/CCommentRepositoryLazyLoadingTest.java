@@ -6,15 +6,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import tech.derbent.abstracts.domains.CTestBase;
 
 /**
- * Test class for verifying the lazy loading fix in CCommentRepository.findRecentByProject
- * method. This test ensures that the query validation error is resolved and the method
- * works correctly.
+ * Test class for verifying the lazy loading fix in CCommentRepository.findRecentByProject method. This test ensures
+ * that the query validation error is resolved and the method works correctly.
  */
-@ExtendWith (MockitoExtension.class)
+@ExtendWith(MockitoExtension.class)
 class CCommentRepositoryLazyLoadingTest extends CTestBase {
 
-	@Override
-	protected void setupForTest() {
-		// TODO Auto-generated method stub
-	}
+    @Override
+    protected void setupForTest() {
+        // TODO Auto-generated method stub
+    }
 }

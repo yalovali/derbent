@@ -57,17 +57,17 @@ public class CMeetingStatusView extends CProjectAwareMDPage<CMeetingStatus> {
         grid.addStatusColumn(status -> status, "Status", "status");
         grid.addShortTextColumn(CMeetingStatus::getName, "Name", "name");
         grid.addLongTextColumn(CMeetingStatus::getDescription, "Description", "description");
-        
+
         // Color column for reference (hex value)
         grid.addShortTextColumn(entity -> entity.getColor(), "Color", "color");
-        
+
         // Enhanced Type column that shows Final/Active status using CGridCell
         grid.addComponentColumn(entity -> {
             final CGridCell statusCell = new CGridCell();
             statusCell.setFinalActiveValue(entity.isFinal());
             return statusCell;
         }).setHeader("Type").setWidth("100px").setFlexGrow(0);
-        
+
         grid.addShortTextColumn(entity -> String.valueOf(entity.getSortOrder()), "Order", "sortOrder");
     }
 
