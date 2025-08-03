@@ -46,9 +46,21 @@ public final class CImageUtils {
         if ((imageData == null) || (imageData.length == 0)) {
             return null;
         }
+        
+        // Detect MIME type based on data content
+        String mimeType = "image/jpeg"; // Default for processed images
+        
+        // Check if it's SVG data by looking for SVG markers
+        if (imageData.length > 4) {
+            final String dataStart = new String(imageData, 0, Math.min(100, imageData.length)).toLowerCase();
+            if (dataStart.contains("<svg") || dataStart.startsWith("<?xml")) {
+                mimeType = "image/svg+xml";
+            }
+        }
+        
         // Convert byte array to base64
         final String base64Image = java.util.Base64.getEncoder().encodeToString(imageData);
-        return "data:image/jpeg;base64," + base64Image;
+        return "data:" + mimeType + ";base64," + base64Image;
     }
 
     /**
