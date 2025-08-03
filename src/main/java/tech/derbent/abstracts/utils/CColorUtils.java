@@ -3,9 +3,13 @@ package tech.derbent.abstracts.utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CTypeEntity;
 import tech.derbent.base.domain.CStatus;
+import tech.derbent.users.domain.CUser;
 
 /**
  * CColorUtils - Utility class for color operations and status entity color management.
@@ -224,6 +228,198 @@ public final class CColorUtils {
         return defaultColor != null ? defaultColor : DEFAULT_COLOR;
     }
     
+    /**
+     * Gets an appropriate icon for an entity based on its type.
+     * Now supports ALL entity types in the system with specific icons.
+     * 
+     * @param entity the entity to get an icon for
+     * @return the VaadinIcon for the entity type, or a default icon if no specific match
+     */
+    public static VaadinIcon getIconForEntity(final Object entity) {
+        if (entity == null) {
+            return null;
+        }
+        
+        try {
+            // Check for user entities first (most specific)
+            if (entity instanceof CUser) {
+                return VaadinIcon.USER;
+            }
+            
+            // Get class name for pattern matching
+            final String className = entity.getClass().getSimpleName();
+            final String fullClassName = entity.getClass().getName();
+            
+            // ===== USER-RELATED ENTITIES =====
+            if (className.contains("User") || className.contains("user")) {
+                if (className.contains("Role")) {
+                    return VaadinIcon.USER_CARD; // User roles
+                } else if (className.contains("Type")) {
+                    return VaadinIcon.USERS; // User types/categories
+                } else if (className.contains("Settings") || className.contains("Project")) {
+                    return VaadinIcon.COG; // User settings
+                } else {
+                    return VaadinIcon.USER; // Default user icon
+                }
+            }
+            
+            // ===== COMPANY-RELATED ENTITIES =====
+            if (className.contains("Company") || className.contains("company")) {
+                if (className.contains("Settings")) {
+                    return VaadinIcon.COG_O; // Company settings
+                } else {
+                    return VaadinIcon.BUILDING; // Companies
+                }
+            }
+            
+            // ===== PROJECT-RELATED ENTITIES =====
+            if (className.contains("Project") || className.contains("project")) {
+                return VaadinIcon.FOLDER; // Projects
+            }
+            
+            // ===== MEETING-RELATED ENTITIES =====
+            if (className.contains("Meeting") || className.contains("meeting")) {
+                if (className.contains("Status")) {
+                    return VaadinIcon.CIRCLE; // Meeting status
+                } else if (className.contains("Type")) {
+                    return VaadinIcon.CALENDAR_CLOCK; // Meeting types
+                } else {
+                    return VaadinIcon.CALENDAR; // Meetings
+                }
+            }
+            
+            // ===== ACTIVITY-RELATED ENTITIES =====
+            if (className.contains("Activity") || className.contains("activity")) {
+                if (className.contains("Status")) {
+                    return VaadinIcon.CIRCLE; // Activity status
+                } else if (className.contains("Type")) {
+                    return VaadinIcon.LIST; // Activity types
+                } else if (className.contains("Priority")) {
+                    return VaadinIcon.EXCLAMATION_CIRCLE; // Activity priority
+                } else {
+                    return VaadinIcon.TASKS; // Activities
+                }
+            }
+            
+            // ===== DECISION-RELATED ENTITIES =====
+            if (className.contains("Decision") || className.contains("decision")) {
+                if (className.contains("Status")) {
+                    return VaadinIcon.CIRCLE; // Decision status
+                } else if (className.contains("Type")) {
+                    return VaadinIcon.CLIPBOARD_CHECK; // Decision types
+                } else if (className.contains("Approval")) {
+                    return VaadinIcon.THUMBS_UP; // Decision approvals
+                } else {
+                    return VaadinIcon.CHECK_CIRCLE; // Decisions
+                }
+            }
+            
+            // ===== COMMENT-RELATED ENTITIES =====
+            if (className.contains("Comment") || className.contains("comment")) {
+                if (className.contains("Priority")) {
+                    return VaadinIcon.EXCLAMATION; // Comment priority
+                } else {
+                    return VaadinIcon.COMMENT; // Comments
+                }
+            }
+            
+            // ===== ORDER-RELATED ENTITIES =====
+            if (className.contains("Order") || className.contains("order")) {
+                if (className.contains("Status")) {
+                    return VaadinIcon.CIRCLE; // Order status
+                } else if (className.contains("Type")) {
+                    return VaadinIcon.CLIPBOARD_TEXT; // Order types
+                } else if (className.contains("Approval")) {
+                    return VaadinIcon.THUMBS_UP; // Order approvals
+                } else {
+                    return VaadinIcon.INVOICE; // Orders
+                }
+            }
+            
+            // ===== CURRENCY ENTITIES =====
+            if (className.contains("Currency") || className.contains("currency")) {
+                return VaadinIcon.DOLLAR; // Currency
+            }
+            
+            // ===== APPROVAL ENTITIES =====
+            if (className.contains("Approval") && !className.contains("Order") && !className.contains("Decision")) {
+                return VaadinIcon.THUMBS_UP; // Generic approvals
+            }
+            
+            // ===== RISK-RELATED ENTITIES =====
+            if (className.contains("Risk") || className.contains("risk")) {
+                if (className.contains("Status")) {
+                    return VaadinIcon.CIRCLE; // Risk status
+                } else if (className.contains("Severity")) {
+                    return VaadinIcon.WARNING; // Risk severity
+                } else {
+                    return VaadinIcon.EXCLAMATION; // Risks
+                }
+            }
+            
+            // ===== SYSTEM/SETTINGS ENTITIES =====
+            if (className.contains("Settings") || className.contains("settings")) {
+                if (className.contains("System")) {
+                    return VaadinIcon.TOOLS; // System settings
+                } else {
+                    return VaadinIcon.COG; // General settings
+                }
+            }
+            
+            // ===== STATUS ENTITIES (Generic) =====
+            if (className.contains("Status") || className.contains("status")) {
+                return VaadinIcon.CIRCLE; // Generic status
+            }
+            
+            // ===== TYPE ENTITIES (Generic) =====
+            if (className.contains("Type") || className.contains("type")) {
+                return VaadinIcon.LIST; // Generic type/category
+            }
+            
+            // ===== PRIORITY ENTITIES (Generic) =====
+            if (className.contains("Priority") || className.contains("priority")) {
+                return VaadinIcon.EXCLAMATION_CIRCLE; // Generic priority
+            }
+            
+            // ===== FALLBACK FOR ENTITIES =====
+            // Check if it's likely an entity by package structure or inheritance
+            if (fullClassName.contains(".domain.") || fullClassName.contains(".entity.")) {
+                return VaadinIcon.RECORDS; // Generic entity icon
+            }
+            
+            // No suitable icon found
+            LOGGER.debug("No specific icon found for entity type: {}", className);
+            return VaadinIcon.RECORDS; // Default fallback icon for entities
+            
+        } catch (final Exception e) {
+            LOGGER.warn("Error determining icon for entity {}: {}", 
+                       entity.getClass().getSimpleName(), e.getMessage());
+            return VaadinIcon.RECORDS; // Safe fallback
+        }
+    }
+    
+    /**
+     * Checks if an entity should have an icon displayed.
+     * Now returns true for all entities since all entities have icons.
+     * 
+     * @param entity the entity to check
+     * @return true if the entity should display an icon (always true for non-null entities)
+     */
+    public static boolean shouldDisplayIcon(final Object entity) {
+        return entity != null; // All entities now have icons
+    }
+    
+    /**
+     * Creates a Vaadin Icon component for an entity if appropriate.
+     * 
+     * @param entity the entity to create an icon for
+     * @return the Icon component or null if no icon is appropriate
+     */
+    public static Icon createIconForEntity(final Object entity) {
+        final VaadinIcon iconType = getIconForEntity(entity);
+        return iconType != null ? iconType.create() : null;
+    }
+
     /**
      * Applies color styling to a component using CSS styles.
      * This is a helper method that can be used with any component that has getStyle() method.
