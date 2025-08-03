@@ -113,7 +113,7 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 		defaultValue = "true", description = "Enforce strong password requirements",
 		hidden = false, order = 8
 	)
-	private boolean requireStrongPasswords = true;
+	private Boolean requireStrongPasswords = Boolean.TRUE;
 
 	@Column (name = "password_expiry_days", nullable = true)
 	@Min (value = 1, message = "Password expiry must be at least 1 day")
@@ -168,7 +168,7 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 		defaultValue = "true", description = "Enable file version tracking",
 		hidden = false, order = 13
 	)
-	private boolean enableFileVersioning = true;
+	private Boolean enableFileVersioning = Boolean.TRUE;
 
 	// Email Configuration
 	@Column (
@@ -197,7 +197,7 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 		defaultValue = "true", description = "Use TLS for SMTP connection",
 		hidden = false, order = 16
 	)
-	private boolean smtpUseTls = true;
+	private Boolean smtpUseTls = Boolean.TRUE;
 
 	@Column (
 		name = "system_email_from", nullable = true,
@@ -236,7 +236,7 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 		defaultValue = "false", description = "Enable detailed database query logging",
 		hidden = false, order = 18
 	)
-	private boolean enableDatabaseLogging = false;
+	private Boolean enableDatabaseLogging = Boolean.FALSE;
 
 	@Column (name = "database_connection_pool_size", nullable = false)
 	@Min (value = 1, message = "Connection pool size must be at least 1")
@@ -254,7 +254,7 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 		defaultValue = "true", description = "Enable application-level caching",
 		hidden = false, order = 20
 	)
-	private boolean enableCaching = true;
+	private Boolean enableCaching = Boolean.TRUE;
 
 	@Column (name = "cache_ttl_minutes", nullable = false)
 	@Min (value = 1, message = "Cache TTL must be at least 1 minute")
@@ -273,7 +273,7 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 		defaultValue = "true", description = "Enable scheduled database backups",
 		hidden = false, order = 22
 	)
-	private boolean enableAutomaticBackups = true;
+	private Boolean enableAutomaticBackups = Boolean.TRUE;
 
 	@Column (
 		name = "backup_schedule_cron", nullable = true,
@@ -303,7 +303,7 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 		defaultValue = "false", description = "Enable maintenance mode", hidden = false,
 		order = 25
 	)
-	private boolean maintenanceModeEnabled = false;
+	private Boolean maintenanceModeEnabled = Boolean.FALSE;
 
 	@Column (
 		name = "maintenance_message", nullable = true,
@@ -338,7 +338,7 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 		defaultValue = "true", description = "Allow users to switch to dark mode",
 		hidden = false, order = 28
 	)
-	private boolean enableDarkMode = true;
+	private Boolean enableDarkMode = Boolean.TRUE;
 
 	@Column (name = "show_system_info", nullable = false)
 	@MetaData (
@@ -347,7 +347,7 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 		description = "Display system information to administrators", hidden = false,
 		order = 29
 	)
-	private boolean showSystemInfo = true;
+	private Boolean showSystemInfo = Boolean.TRUE;
 
 	/**
 	 * Default constructor required by JPA. Initializes entity with default values.
@@ -414,23 +414,23 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 		}
 	}
 
-	public boolean isEnableAutomaticBackups() { return enableAutomaticBackups; }
+	public Boolean isEnableAutomaticBackups() { return enableAutomaticBackups; }
 
-	public boolean isEnableCaching() { return enableCaching; }
+	public Boolean isEnableCaching() { return enableCaching; }
 
-	public boolean isEnableDarkMode() { return enableDarkMode; }
+	public Boolean isEnableDarkMode() { return enableDarkMode; }
 
-	public boolean isEnableDatabaseLogging() { return enableDatabaseLogging; }
+	public Boolean isEnableDatabaseLogging() { return enableDatabaseLogging; }
 
-	public boolean isEnableFileVersioning() { return enableFileVersioning; }
+	public Boolean isEnableFileVersioning() { return enableFileVersioning; }
 
-	public boolean isMaintenanceModeEnabled() { return maintenanceModeEnabled; }
+	public Boolean isMaintenanceModeEnabled() { return maintenanceModeEnabled; }
 
-	public boolean isRequireStrongPasswords() { return requireStrongPasswords; }
+	public Boolean isRequireStrongPasswords() { return requireStrongPasswords; }
 
-	public boolean isShowSystemInfo() { return showSystemInfo; }
+	public Boolean isShowSystemInfo() { return showSystemInfo; }
 
-	public boolean isSmtpUseTls() { return smtpUseTls; }
+	public Boolean isSmtpUseTls() { return smtpUseTls; }
 
 	public void
 		setAccountLockoutDurationMinutes(final Integer accountLockoutDurationMinutes) {
@@ -477,23 +477,23 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 		this.defaultSystemTheme = defaultSystemTheme;
 	}
 
-	public void setEnableAutomaticBackups(final boolean enableAutomaticBackups) {
+	public void setEnableAutomaticBackups(final Boolean enableAutomaticBackups) {
 		this.enableAutomaticBackups = enableAutomaticBackups;
 	}
 
-	public void setEnableCaching(final boolean enableCaching) {
+	public void setEnableCaching(final Boolean enableCaching) {
 		this.enableCaching = enableCaching;
 	}
 
-	public void setEnableDarkMode(final boolean enableDarkMode) {
+	public void setEnableDarkMode(final Boolean enableDarkMode) {
 		this.enableDarkMode = enableDarkMode;
 	}
 
-	public void setEnableDatabaseLogging(final boolean enableDatabaseLogging) {
+	public void setEnableDatabaseLogging(final Boolean enableDatabaseLogging) {
 		this.enableDatabaseLogging = enableDatabaseLogging;
 	}
 
-	public void setEnableFileVersioning(final boolean enableFileVersioning) {
+	public void setEnableFileVersioning(final Boolean enableFileVersioning) {
 		this.enableFileVersioning = enableFileVersioning;
 	}
 
@@ -505,7 +505,7 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 		this.maintenanceMessage = maintenanceMessage;
 	}
 
-	public void setMaintenanceModeEnabled(final boolean maintenanceModeEnabled) {
+	public void setMaintenanceModeEnabled(final Boolean maintenanceModeEnabled) {
 		this.maintenanceModeEnabled = maintenanceModeEnabled;
 	}
 
@@ -521,7 +521,7 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 		this.passwordExpiryDays = passwordExpiryDays;
 	}
 
-	public void setRequireStrongPasswords(final boolean requireStrongPasswords) {
+	public void setRequireStrongPasswords(final Boolean requireStrongPasswords) {
 		this.requireStrongPasswords = requireStrongPasswords;
 	}
 
@@ -529,7 +529,7 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 		this.sessionTimeoutMinutes = sessionTimeoutMinutes;
 	}
 
-	public void setShowSystemInfo(final boolean showSystemInfo) {
+	public void setShowSystemInfo(final Boolean showSystemInfo) {
 		this.showSystemInfo = showSystemInfo;
 	}
 
@@ -537,7 +537,7 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 
 	public void setSmtpServer(final String smtpServer) { this.smtpServer = smtpServer; }
 
-	public void setSmtpUseTls(final boolean smtpUseTls) { this.smtpUseTls = smtpUseTls; }
+	public void setSmtpUseTls(final Boolean smtpUseTls) { this.smtpUseTls = smtpUseTls; }
 
 	public void setSupportEmail(final String supportEmail) {
 		this.supportEmail = supportEmail;

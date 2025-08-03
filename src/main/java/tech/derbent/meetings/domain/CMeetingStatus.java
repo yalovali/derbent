@@ -28,7 +28,7 @@ public class CMeetingStatus extends CStatus<CMeetingStatus> {
 		description = "Indicates if this is a final status (completed/cancelled)",
 		hidden = false, order = 4
 	)
-	private boolean isFinal = false;
+	private Boolean isFinal = false;
 
 	/**
 	 * Default constructor for JPA.
@@ -36,7 +36,7 @@ public class CMeetingStatus extends CStatus<CMeetingStatus> {
 	public CMeetingStatus() {
 		super();
 		// Initialize with default values for JPA
-		this.isFinal = false;
+		this.isFinal = Boolean.FALSE;
 	}
 
 	public CMeetingStatus(final String name, final CProject project) {
@@ -44,7 +44,7 @@ public class CMeetingStatus extends CStatus<CMeetingStatus> {
 	}
 
 	public CMeetingStatus(final String name, final CProject project,
-		final String description, final String color, final boolean isFinal) {
+		final String description, final String color, final Boolean isFinal) {
 		super(CMeetingStatus.class, name, project);
 		setDescription(description);
 		setColor(color != null ? color : "#808080");
@@ -70,9 +70,9 @@ public class CMeetingStatus extends CStatus<CMeetingStatus> {
 		return Objects.hash(super.hashCode(), isFinal);
 	}
 
-	public boolean isFinal() { return isFinal; }
+	public Boolean isFinal() { return isFinal; }
 
-	public void setFinal(final boolean isFinal) { this.isFinal = isFinal; }
+	public void setFinal(final Boolean isFinal) { this.isFinal = isFinal; }
 
 	@Override
 	public String toString() {

@@ -68,7 +68,7 @@ public class CComment extends CEvent<CComment> {
 		defaultValue = "false", description = "Mark this comment as important",
 		hidden = false, order = 4
 	)
-	private boolean important = false;
+	private Boolean important = Boolean.FALSE;
 
 	/**
 	 * Default constructor for JPA.
@@ -156,7 +156,7 @@ public class CComment extends CEvent<CComment> {
 		}
 	}
 
-	public boolean isImportant() { return important; }
+	public Boolean isImportant() { return important; }
 
 	public void setActivity(final CActivity activity) {
 
@@ -174,7 +174,7 @@ public class CComment extends CEvent<CComment> {
 		this.commentText = commentText;
 	}
 
-	public void setImportant(final boolean important) { this.important = important; }
+	public void setImportant(final Boolean important) { this.important = important; }
 
 	public void setPriority(final CCommentPriority priority) { this.priority = priority; }
 

@@ -27,7 +27,7 @@ public class CActivityStatus extends CStatus<CActivityStatus> {
 		description = "Indicates if this is a final status (completed/cancelled)",
 		hidden = false, order = 4
 	)
-	private boolean isFinal = false;
+	private Boolean isFinal = Boolean.FALSE;
 
 	/**
 	 * Default constructor for JPA.
@@ -35,7 +35,7 @@ public class CActivityStatus extends CStatus<CActivityStatus> {
 	public CActivityStatus() {
 		super();
 		// Initialize with default values for JPA
-		this.isFinal = false;
+		this.isFinal = Boolean.FALSE;
 	}
 
 	public CActivityStatus(final String name, final CProject project) {
@@ -43,7 +43,7 @@ public class CActivityStatus extends CStatus<CActivityStatus> {
 	}
 
 	public CActivityStatus(final String name, final CProject project,
-		final String description, final String color, final boolean isFinal) {
+		final String description, final String color, final Boolean isFinal) {
 		super(CActivityStatus.class, name, project);
 		setDescription(description);
 		setColor(color);
@@ -68,9 +68,9 @@ public class CActivityStatus extends CStatus<CActivityStatus> {
 		return Objects.hash(super.hashCode(), isFinal);
 	}
 
-	public boolean isFinal() { return isFinal; }
+	public Boolean isFinal() { return isFinal; }
 
-	public void setFinal(final boolean isFinal) { this.isFinal = isFinal; }
+	public void setFinal(final Boolean isFinal) { this.isFinal = isFinal; }
 
 	@Override
 	public String toString() {

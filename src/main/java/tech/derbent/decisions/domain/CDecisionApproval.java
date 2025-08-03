@@ -90,7 +90,7 @@ public class CDecisionApproval extends CEntityNamed<CDecisionApproval> {
 		description = "Whether this approval is required for decision progression",
 		hidden = false, order = 7
 	)
-	private boolean isRequired = true;
+	private Boolean isRequired = Boolean.TRUE;
 
 	// Due date for the approval
 	@Column (name = "due_date", nullable = true)
@@ -198,7 +198,7 @@ public class CDecisionApproval extends CEntityNamed<CDecisionApproval> {
 	 */
 	public boolean isRejected() { return Boolean.FALSE.equals(isApproved); }
 
-	public boolean isRequired() { return isRequired; }
+	public Boolean isRequired() { return isRequired; }
 	// Business Logic Methods
 
 	/**
@@ -269,7 +269,7 @@ public class CDecisionApproval extends CEntityNamed<CDecisionApproval> {
 		updateLastModified();
 	}
 
-	public void setRequired(final boolean isRequired) {
+	public void setRequired(final Boolean isRequired) {
 		this.isRequired = isRequired;
 		updateLastModified();
 	}

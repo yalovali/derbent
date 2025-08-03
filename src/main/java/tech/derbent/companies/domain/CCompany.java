@@ -80,7 +80,7 @@ public class CCompany extends CEntityNamed<CCompany> {
 		displayName = "Active", required = true, readOnly = false, defaultValue = "true",
 		description = "Is company active?", hidden = false, order = 8
 	)
-	private boolean enabled = true;
+	private Boolean enabled = Boolean.TRUE;
 
 	@OneToMany (mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@MetaData (
@@ -114,13 +114,13 @@ public class CCompany extends CEntityNamed<CCompany> {
 
 	public String getWebsite() { return website; }
 
-	public boolean isEnabled() { return enabled; }
+	public Boolean isEnabled() { return enabled; }
 
 	public void setAddress(final String address) { this.address = address; }
 
 	public void setEmail(final String email) { this.email = email; }
 
-	public void setEnabled(final boolean enabled) { this.enabled = enabled; }
+	public void setEnabled(final Boolean enabled) { this.enabled = enabled; }
 
 	public void setPhone(final String phone) { this.phone = phone; }
 

@@ -83,6 +83,7 @@ public abstract class CTypeEntity<EntityType> extends CEntityOfProject<EntityTyp
 		if (!(obj instanceof CTypeEntity)) {
 			return false;
 		}
+		@SuppressWarnings("unchecked")
 		final CTypeEntity<EntityType> other = (CTypeEntity<EntityType>) obj;
 		return Objects.equals(getName(), other.getName())
 			&& Objects.equals(getProject(), other.getProject());

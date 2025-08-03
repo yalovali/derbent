@@ -26,7 +26,7 @@ public class CDecisionStatus extends CStatus<CDecisionStatus> {
 		description = "Indicates if this is a final status (implemented/rejected)",
 		hidden = false, order = 4
 	)
-	private boolean isFinal = false;
+	private Boolean isFinal = Boolean.FALSE;
 
 	@Column (name = "requires_approval", nullable = false)
 	@MetaData (
@@ -35,7 +35,7 @@ public class CDecisionStatus extends CStatus<CDecisionStatus> {
 		description = "Whether decisions with this status require approval to proceed",
 		hidden = false, order = 7
 	)
-	private boolean requiresApproval = false;
+	private Boolean requiresApproval = Boolean.FALSE;
 
 	/**
 	 * Constructor with name and description.
@@ -63,24 +63,26 @@ public class CDecisionStatus extends CStatus<CDecisionStatus> {
 	 * Checks if this status indicates completion of the decision process.
 	 * @return true if this is a final status
 	 */
-	public boolean isCompleted() { return isFinal; }
+	public Boolean isCompleted() { return Boolean.TRUE.equals(isFinal); }
 
-	public boolean isFinal() { return isFinal; }
+	public Boolean isFinal() { return isFinal; }
 
 	/**
 	 * Checks if decisions with this status are pending approval.
 	 * @return true if approval is required and status is not final
 	 */
-	public boolean isPendingApproval() { return requiresApproval && !isFinal; }
+	public Boolean isPendingApproval() { 
+		return Boolean.TRUE.equals(requiresApproval) && !Boolean.TRUE.equals(isFinal); 
+	}
 
-	public boolean isRequiresApproval() { return requiresApproval; }
+	public Boolean isRequiresApproval() { return requiresApproval; }
 
-	public void setFinal(final boolean isFinal) {
+	public void setFinal(final Boolean isFinal) {
 		this.isFinal = isFinal;
 		updateLastModified();
 	}
 
-	public void setRequiresApproval(final boolean requiresApproval) {
+	public void setRequiresApproval(final Boolean requiresApproval) {
 		this.requiresApproval = requiresApproval;
 		updateLastModified();
 	}
