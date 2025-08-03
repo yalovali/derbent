@@ -109,90 +109,16 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 
 	/**
 	 * Configures the enhanced renderer for entities with colors and/or icons.
-	 * Creates appropriate rendering based on entity capabilities:
-	 * - Icons for entity types like users, companies, projects, etc.
-	 * - Background colors for status entities
-	 * - Automatic contrast text colors
+	 * Now uses the new CEntityLabel base class for consistent rendering.
 	 */
 	private void configureColorRenderer() {
 		setRenderer(new ComponentRenderer<>(item -> {
 			if (item == null) {
-				final Span span = new Span("N/A");
-				return span;
+				return new Span("N/A");
 			}
 
-			// Check if item should have an icon
-			final Icon icon = CColorUtils.createIconForEntity(item);
-			final String displayText = CColorUtils.getDisplayTextFromEntity(item);
-
-			if (icon != null) {
-				// Create a horizontal layout to hold both icon and text
-				final HorizontalLayout layout = new HorizontalLayout();
-				layout.setSpacing(false);
-				layout.setPadding(false);
-				layout.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
-
-				// Style the icon
-				icon.getStyle().set("margin-right", "6px");
-				icon.getStyle().set("width", "16px");
-				icon.getStyle().set("height", "16px");
-
-				// Create span for text
-				final Span textSpan = new Span(displayText);
-
-				// Apply background color if available
-				try {
-					final String color =
-						CColorUtils.getColorWithFallback(item, CColorUtils.DEFAULT_COLOR);
-					layout.getStyle().set("background-color", color);
-
-					if (autoContrast) {
-						layout.getStyle().set("color", CColorUtils.getContrastTextColor(color));
-						// Also apply color to icon for consistency
-						icon.getStyle().set("color", CColorUtils.getContrastTextColor(color));
-					}
-					layout.getStyle().set("padding", padding);
-					layout.getStyle().set("display", "inline-flex");
-					layout.getStyle().set("min-width", minWidth);
-					layout.getStyle().set("width", "100%");
-
-					if (roundedCorners) {
-						layout.getStyle().set("border-radius", "4px");
-					}
-					LOGGER.debug("Applied color {} and icon to ComboBox item: {}", color, displayText);
-				} catch (final Exception e) {
-					LOGGER.warn("Error applying color to ComboBox item: {}", e.getMessage());
-				}
-
-				layout.add(icon, textSpan);
-				return layout;
-			} else {
-				// No icon, use original span-based rendering
-				final Span span = new Span();
-				span.setText(displayText);
-
-				// Apply background color if available
-				try {
-					final String color =
-						CColorUtils.getColorWithFallback(item, CColorUtils.DEFAULT_COLOR);
-					span.getStyle().set("background-color", color);
-
-					if (autoContrast) {
-						span.getStyle().set("color", CColorUtils.getContrastTextColor(color));
-					}
-					span.getStyle().set("padding", padding);
-					span.getStyle().set("display", "inline-block");
-					span.getStyle().set("min-width", minWidth);
-
-					if (roundedCorners) {
-						span.getStyle().set("border-radius", "4px");
-					}
-					LOGGER.debug("Applied color {} to ComboBox item: {}", color, displayText);
-				} catch (final Exception e) {
-					LOGGER.warn("Error applying color to ComboBox item: {}", e.getMessage());
-				}
-				return span;
-			}
+			// Use the new CEntityLabel for consistent entity display
+			return new CEntityLabel(item, padding, autoContrast, roundedCorners);
 		}));
 	}
 
@@ -208,58 +134,18 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 	public String getPadding() { return padding; }
 
 	/**
-	 * Checks if this entity type should support icon rendering.
+	 * Checks if this entity type should support enhanced rendering.
+	 * Now returns true for all entities since all entities have icons.
 	 * 
-	 * @return true if icons should be displayed for this entity type
+	 * @return true (all entities now support enhanced rendering)
 	 */
 	private boolean hasEntityIconSupport() {
-		if (entityType == null) {
-			return false;
-		}
-		
-		// Check by class name patterns for entities that should have icons
-		final String className = entityType.getSimpleName();
-		
-		// User-related entities
-		if (className.contains("User") || className.contains("user")) {
-			return true;
-		}
-		
-		// Company-related entities  
-		if (className.contains("Company") || className.contains("company")) {
-			return true;
-		}
-		
-		// Project-related entities
-		if (className.contains("Project") || className.contains("project")) {
-			return true;
-		}
-		
-		// Meeting-related entities
-		if (className.contains("Meeting") || className.contains("meeting")) {
-			return true;
-		}
-		
-		// Activity-related entities
-		if (className.contains("Activity") || className.contains("activity")) {
-			return true;
-		}
-		
-		// Decision-related entities
-		if (className.contains("Decision") || className.contains("decision")) {
-			return true;
-		}
-		
-		// Comment-related entities
-		if (className.contains("Comment") || className.contains("comment")) {
-			return true;
-		}
-		
-		return false;
+		return entityType != null; // All entities now have icons
 	}
 
 	/**
-	 * Initializes the ComboBox with color-aware rendering if applicable.
+	 * Initializes the ComboBox with enhanced rendering for all entities.
+	 * All entities now use the enhanced rendering with icons and colors.
 	 */
 	private void initializeComboBox() {
 		LOGGER.debug("Initializing CColorAwareComboBox for entity type: {}",
@@ -269,20 +155,10 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 		// Set up item label generator
 		setItemLabelGenerator(item -> CColorUtils.getDisplayTextFromEntity(item));
 
-		// Check if this is a status entity or an entity that should have special rendering
-		final boolean isStatusEntity = CColorUtils.isStatusEntity(entityType);
-		final boolean hasEntityIcons = hasEntityIconSupport();
-		
-		if (isStatusEntity || hasEntityIcons) {
-			LOGGER.debug("Configuring enhanced rendering for entity type: {} (status: {}, icons: {})",
-				entityType.getSimpleName(), isStatusEntity, hasEntityIcons);
-			configureColorRenderer();
-		}
-		else {
-			LOGGER.debug(
-				"Entity type {} uses standard rendering (no colors or icons)",
-				entityType.getSimpleName());
-		}
+		// All entities now use enhanced rendering with the CEntityLabel base class
+		LOGGER.debug("Configuring enhanced rendering for entity type: {}",
+			entityType.getSimpleName());
+		configureColorRenderer();
 	}
 	// Getter and setter methods for styling configuration
 
@@ -290,10 +166,10 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 
 	/**
 	 * Checks if this ComboBox is configured for enhanced rendering (colors and/or icons).
-	 * @return true if enhanced rendering is enabled
+	 * @return true (all entities now use enhanced rendering)
 	 */
 	public boolean isColorAware() { 
-		return CColorUtils.isStatusEntity(entityType) || hasEntityIconSupport(); 
+		return entityType != null; // All entities now use enhanced rendering
 	}
 
 	public boolean isRoundedCorners() { return roundedCorners; }
@@ -310,10 +186,8 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 			this.autoContrast = annotation.autoContrast();
 			this.minWidth = annotation.minWidth();
 
-			// Reconfigure renderer if this is a status entity
-			if (CColorUtils.isStatusEntity(entityType)) {
-				configureColorRenderer();
-			}
+			// Reconfigure renderer for all entities
+			configureColorRenderer();
 		}
 	}
 
