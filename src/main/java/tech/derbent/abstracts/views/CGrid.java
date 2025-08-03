@@ -217,7 +217,7 @@ public class CGrid<T extends CEntityDB<T>> extends Grid<T> {
 
 	/**
 	 * Adds a status column with color-aware rendering. This method creates a column that
-	 * displays status entities with their associated colors as background.
+	 * displays status entities with their associated colors as background using custom cell components.
 	 * @param statusProvider Provider that returns the status entity
 	 * @param header         Column header text
 	 * @param key            Column key for identification
@@ -225,36 +225,15 @@ public class CGrid<T extends CEntityDB<T>> extends Grid<T> {
 	 */
 	public <S extends CEntityDB<S>> Column<T> addStatusColumn(
 		final ValueProvider<T, S> statusProvider, final String header, final String key) {
-		LOGGER.info("Adding status column: {} with color-aware rendering", header);
+		LOGGER.info("Adding status column: {} with color-aware rendering using CGridCellStatus", header);
 		final Column<T> column = addComponentColumn(entity -> {
 			final S status = statusProvider.apply(entity);
-			final Span span = new Span();
-
-			if (status == null) {
-				span.setText("No Status");
-				span.getStyle().set("color", "#666666");
-				span.getStyle().set("font-style", "italic");
-				return span;
-			}
-			// Set the text content using utility method
-			final String displayText =
-				tech.derbent.abstracts.utils.CColorUtils.getDisplayTextFromEntity(status);
-			span.setText(displayText);
-			// Apply background color if available using utility method
-			final String color =
-				tech.derbent.abstracts.utils.CColorUtils.getColorWithFallback(status,
-					tech.derbent.abstracts.utils.CColorUtils.DEFAULT_COLOR);
-			span.getStyle().set("background-color", color);
-			span.getStyle().set("color",
-				tech.derbent.abstracts.utils.CColorUtils.getContrastTextColor(color));
-			span.getStyle().set("padding", "4px 8px");
-			span.getStyle().set("border-radius", "4px");
-			span.getStyle().set("display", "inline-block");
-			span.getStyle().set("min-width", "80px");
-			span.getStyle().set("text-align", "center");
-			span.getStyle().set("font-weight", "500");
-			LOGGER.debug("Applied color {} to grid status cell: {}", color, displayText);
-			return span;
+			final tech.derbent.abstracts.components.CGridCellStatus statusCell = 
+				new tech.derbent.abstracts.components.CGridCellStatus();
+			
+			statusCell.setStatusValue(status);
+			LOGGER.debug("Created CGridCellStatus for entity: {}", entity);
+			return statusCell;
 		}).setHeader(header).setWidth(WIDTH_REFERENCE).setFlexGrow(0).setSortable(true);
 
 		if (key != null) {

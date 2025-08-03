@@ -119,23 +119,21 @@ public class CColorAwareGrid<T extends CEntityDB<T>> extends CGrid<T> {
         
         final Column<T> column = addComponentColumn(entity -> {
             final S status = statusProvider.apply(entity);
-            final Span span = new Span();
+            final CGridCellStatus statusCell = new CGridCellStatus();
             
-            if (status == null) {
-                span.setText("No Status");
-                span.getStyle().set("color", "#666666");
-                span.getStyle().set("font-style", "italic");
-                return span;
+            // Configure styling from annotation if provided
+            if (annotation != null) {
+                statusCell.setRoundedCorners(this.roundedCorners);
+                statusCell.setPadding(this.padding);
+                statusCell.setAutoContrast(this.autoContrast);
+                statusCell.setMinWidth(this.minWidth);
+                statusCell.setCenterAlign(this.centerAlign);
+                statusCell.setFontWeight(this.fontWeight);
             }
             
-            // Set the text content
-            final String displayText = CColorUtils.getDisplayTextFromEntity(status);
-            span.setText(displayText);
+            statusCell.setStatusValue(status);
             
-            // Apply background color styling
-            applyColorStyling(span, status);
-            
-            return span;
+            return statusCell;
         }).setHeader(header).setWidth(WIDTH_REFERENCE).setFlexGrow(0).setSortable(true);
         
         if (key != null) {
