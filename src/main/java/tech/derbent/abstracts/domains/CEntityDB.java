@@ -12,67 +12,66 @@ import jakarta.persistence.MappedSuperclass;
 @MappedSuperclass
 public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue (strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    /**
-     * Default constructor for JPA.
-     */
-    protected CEntityDB() {
-        super();
-    }
+	/**
+	 * Default constructor for JPA.
+	 */
+	protected CEntityDB() {
+		super();
+	}
 
-    public CEntityDB(final Class<EntityClass> clazz) {
-        super(clazz);
-    }
+	public CEntityDB(final Class<EntityClass> clazz) {
+		super(clazz);
+	}
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public boolean equals(final Object obj) {
+	@SuppressWarnings ("unchecked")
+	@Override
+	public boolean equals(final Object obj) {
 
-        if (this == obj) {
-            return true;
-        }
+		if (this == obj) {
+			return true;
+		}
 
-        if (obj == null) {
-            return false;
-        }
+		if (obj == null) {
+			return false;
+		}
 
-        if (!(obj instanceof CEntityDB)) {
-            return false;
-        }
-        final CEntityDB<EntityClass> other = (CEntityDB<EntityClass>) obj;
-        final Class<?> thisClass = ProxyUtils.getUserClass(getClass());
-        final Class<?> otherClass = ProxyUtils.getUserClass(other.getClass());
+		if (!(obj instanceof CEntityDB)) {
+			return false;
+		}
+		final CEntityDB<EntityClass> other = (CEntityDB<EntityClass>) obj;
+		final Class<?> thisClass = ProxyUtils.getUserClass(getClass());
+		final Class<?> otherClass = ProxyUtils.getUserClass(other.getClass());
 
-        if (!thisClass.equals(otherClass)) {
-            return false;
-        }
-        final Long id = getId();
-        return (id != null) && id.equals(other.getId());
-    }
+		if (!thisClass.equals(otherClass)) {
+			return false;
+		}
+		final Long id = getId();
+		return (id != null) && id.equals(other.getId());
+	}
 
-    @Nullable
-    public Long getId() {
-        return id;
-    }
+	public String getColor() { return null; }
 
-    @Override
-    public int hashCode() {
-        final Long id = getId();
+	@Nullable
+	public Long getId() { return id; }
 
-        if (id != null) {
-            return id.hashCode();
-        }
-        return ProxyUtils.getUserClass(getClass()).hashCode();
-    }
+	@Override
+	public int hashCode() {
+		final Long id = getId();
 
-    protected void initializeDefaults() {
-    }
+		if (id != null) {
+			return id.hashCode();
+		}
+		return ProxyUtils.getUserClass(getClass()).hashCode();
+	}
 
-    @Override
-    public String toString() {
-        return "%s{id=%s}".formatted(getClass().getSimpleName(), getId());
-    }
+	protected void initializeDefaults() {}
+
+	@Override
+	public String toString() {
+		return "%s{id=%s}".formatted(getClass().getSimpleName(), getId());
+	}
 }

@@ -37,7 +37,7 @@ import java.lang.annotation.Target;
  * 
  * @author Derbent Framework
  * @since 1.0
- * @see tech.derbent.abstracts.views.CColorAwareGrid
+ * @see tech.derbent.abstracts.views.CEntityGrid
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

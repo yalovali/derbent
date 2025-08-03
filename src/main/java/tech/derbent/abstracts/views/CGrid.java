@@ -1,5 +1,6 @@
 package tech.derbent.abstracts.views;
 
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -9,12 +10,16 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.function.ValueProvider;
 
+import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.components.CGridCellStatus;
+import tech.derbent.abstracts.domains.CEntityConstants;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.utils.CAuxillaries;
+import tech.derbent.abstracts.utils.CColorUtils;
 import tech.derbent.base.utils.CImageUtils;
 
 /**
@@ -26,11 +31,10 @@ import tech.derbent.base.utils.CImageUtils;
  * width (100px) - Short text fields: Medium width (200px) - Long text fields: Large width
  * (300px+) - Reference fields: Medium width (200px)
  */
-public class CGrid<T extends CEntityDB<T>> extends Grid<T> {
+public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<EntityClass> {
 
 	private static final long serialVersionUID = 1L;
 
-	// Width constants for different field types
 	public static final String WIDTH_ID = "80px";
 
 	public static final String WIDTH_INTEGER = "100px";
@@ -47,52 +51,39 @@ public class CGrid<T extends CEntityDB<T>> extends Grid<T> {
 
 	public static final String WIDTH_REFERENCE = "200px";
 
-	/** Width for image columns (profile pictures, etc.) */
 	public static final String WIDTH_IMAGE = "60px";
 
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
-	
-	/** Configuration for icon display in status columns */
+
 	protected boolean showIconInStatusColumns = true;
 
 	/**
 	 * Constructor for CGrid with entity class.
-	 * @param beanType The entity class for the grid
+	 * @param entityClass The entity class for the grid
 	 */
-	public CGrid(final Class<T> beanType) {
-		super(beanType, false);
-		LOGGER.info("CGrid constructor called for entity type: {}",
-			beanType.getSimpleName());
+	Class<EntityClass> clazz;
+
+	public CGrid(final Class<EntityClass> entityClass) {
+		super(entityClass, false);
+		clazz = entityClass;
 		initializeGrid();
 	}
 
-	/**
-	 * Constructor for CGrid with entity class and automatic column creation.
-	 * @param beanType          The entity class for the grid
-	 * @param autoCreateColumns Whether to automatically create columns
-	 */
-	public CGrid(final Class<T> beanType, final boolean autoCreateColumns) {
-		super(beanType, autoCreateColumns);
-		LOGGER.info(
-			"CGrid constructor called for entity type: {} with autoCreateColumns: {}",
-			beanType.getSimpleName(), autoCreateColumns);
-		initializeGrid();
-	}
-
-	public Column<T> addBooleanColumn(final ValueProvider<T, Boolean> valueProvider,
-		final String header, final String trueText, final String falseText) {
-		LOGGER.info("Adding boolean column: {} with width: {}", header, WIDTH_BOOLEAN);
-		final Column<T> column = addColumn(entity -> {
+	public Column<EntityClass> addBooleanColumn(
+		final ValueProvider<EntityClass, Boolean> valueProvider, final String header,
+		final String trueText, final String falseText) {
+		final Column<EntityClass> column = addColumn(entity -> {
 			final Boolean value = valueProvider.apply(entity);
 			return (value != null) && value ? trueText : falseText;
 		}).setHeader(header).setWidth(WIDTH_BOOLEAN).setFlexGrow(0).setSortable(true);
 		return column;
 	}
 
-	public Column<T> addColumn(final ValueProvider<T, String> valueProvider,
-		final String header, final String key) {
+	public Column<EntityClass> addColumn(
+		final ValueProvider<EntityClass, String> valueProvider, final String header,
+		final String key) {
 		// flexglow set to 1 to allow the column to grow and fill available space
-		final Column<T> column =
+		final Column<EntityClass> column =
 			addColumn(valueProvider).setHeader(header).setFlexGrow(1).setSortable(true);
 
 		if (key != null) {
@@ -101,10 +92,11 @@ public class CGrid<T extends CEntityDB<T>> extends Grid<T> {
 		return column;
 	}
 
-	public Column<T> addColumnByProperty(final String propertyName, final String header) {
+	public Column<EntityClass> addColumnByProperty(final String propertyName,
+		final String header) {
 		LOGGER.info("Adding column by property: {} with header: {}", propertyName,
 			header);
-		final Column<T> column =
+		final Column<EntityClass> column =
 			addColumn(propertyName).setHeader(header).setSortable(true);
 
 		// Apply width based on property name patterns
@@ -129,11 +121,10 @@ public class CGrid<T extends CEntityDB<T>> extends Grid<T> {
 		return column;
 	}
 
-	public Column<T> addCustomColumn(final ValueProvider<T, ?> valueProvider,
-		final String header, final String width, final String key, final int flexGrow) {
-		LOGGER.info("Adding custom column: {} with width: {} and flexGrow: {}", header,
-			width, flexGrow);
-		final Column<T> column = addColumn(valueProvider).setHeader(header)
+	public Column<EntityClass> addCustomColumn(
+		final ValueProvider<EntityClass, ?> valueProvider, final String header,
+		final String width, final String key, final int flexGrow) {
+		final Column<EntityClass> column = addColumn(valueProvider).setHeader(header)
 			.setWidth(width).setFlexGrow(flexGrow).setSortable(true);
 
 		if (key != null) {
@@ -142,24 +133,98 @@ public class CGrid<T extends CEntityDB<T>> extends Grid<T> {
 		return column;
 	}
 
-	public Column<T> addDateColumn(final ValueProvider<T, LocalDate> valueProvider,
-		final String header, final String key) {
-		return addCustomColumn(valueProvider, header, WIDTH_DATE, key, 0);
-	}
-
-	public Column<T> addDateTimeColumn(
-		final ValueProvider<T, LocalDateTime> valueProvider, final String header,
+	public Column<EntityClass> addDateColumn(
+		final ValueProvider<EntityClass, LocalDate> valueProvider, final String header,
 		final String key) {
 		return addCustomColumn(valueProvider, header, WIDTH_DATE, key, 0);
 	}
 
-	public Column<T> addDecimalColumn(final ValueProvider<T, BigDecimal> valueProvider,
+	public Column<EntityClass> addDateTimeColumn(
+		final ValueProvider<EntityClass, LocalDateTime> valueProvider,
 		final String header, final String key) {
+		return addCustomColumn(valueProvider, header, WIDTH_DATE, key, 0);
+	}
+
+	public Column<EntityClass> addDecimalColumn(
+		final ValueProvider<EntityClass, BigDecimal> valueProvider, final String header,
+		final String key) {
 		return addCustomColumn(valueProvider, header, WIDTH_DECIMAL, key, 0);
 	}
 
-	public Column<T> addIdColumn(final ValueProvider<T, ?> valueProvider,
-		final String header, final String key) {
+	public Column<EntityClass> addEntityColumn(
+		final ValueProvider<EntityClass, ?> valueProvider, final String header,
+		final String key) {
+		Field field;
+
+		try {
+			field = getFieldRecursive(clazz, key);
+		} catch (final RuntimeException e) {
+			LOGGER.warn("Field not found: {} in class {}", key, clazz.getSimpleName(), e);
+			return addShortTextColumn((ValueProvider<EntityClass, String>) valueProvider,
+				header, key);
+		}
+		final MetaData meta = field.getAnnotation(MetaData.class);
+		String width;
+
+		switch (field.getType().getSimpleName()) {
+		case "Integer":
+		case "int":
+			width = WIDTH_INTEGER;
+			break;
+		case "BigDecimal":
+			width = WIDTH_DECIMAL;
+			break;
+		case "LocalDate":
+		case "LocalDateTime":
+			width = WIDTH_DATE;
+			break;
+		case "Boolean":
+		case "boolean":
+			width = WIDTH_BOOLEAN;
+			break;
+		case "String":
+			if ((meta != null) && (meta.maxLength() > CEntityConstants.MAX_LENGTH_NAME)) {
+				width = WIDTH_LONG_TEXT;
+			}
+			else {
+				width = WIDTH_SHORT_TEXT;
+			}
+			break;
+		default:
+			width = WIDTH_SHORT_TEXT;
+		}
+
+		// Renkli hücre gerekiyorsa component ile çiz
+		if ((meta != null) && meta.setBackgroundFromColor()) {
+			return addComponentColumn(item -> {
+				final Object value = valueProvider.apply(item);
+				// final Span span = new Span(value != null ? value.toString() : "");
+				final Div cell = new Div();
+				cell.setText(value != null ? value.toString() : "");
+				cell.getStyle().set("width", "100%");
+				cell.getStyle().set("height", "100%");
+				// cell.getStyle().set("box-sizing", "border-box");
+
+				if (item instanceof CEntityDB) {
+					final CEntityDB<?> entity = item;
+					final String color = entity.getColor();
+
+					if ((color != null) && !color.isBlank()) {
+						final String textColor = CColorUtils.getContrastTextColor(color);
+						cell.getStyle().set("color", textColor);
+						cell.getStyle().set("background-color", color);
+					}
+				}
+				return cell;
+			}).setHeader(header).setWidth(width).setFlexGrow(0).setSortable(true);
+		}
+		// Normal sütun
+		return addCustomColumn(valueProvider, header, width, key, 0);
+	}
+
+	public Column<EntityClass> addIdColumn(
+		final ValueProvider<EntityClass, ?> valueProvider, final String header,
+		final String key) {
 		return addCustomColumn(valueProvider, header, WIDTH_ID, key, 0);
 	}
 
@@ -169,10 +234,9 @@ public class CGrid<T extends CEntityDB<T>> extends Grid<T> {
 	 * @param header            Column header text
 	 * @return The created column
 	 */
-	public Column<T> addImageColumn(final ValueProvider<T, byte[]> imageDataProvider,
-		final String header) {
-		LOGGER.info("Adding image column: {} with width: {}", header, WIDTH_IMAGE);
-		final Column<T> column = addComponentColumn(entity -> {
+	public Column<EntityClass> addImageColumn(
+		final ValueProvider<EntityClass, byte[]> imageDataProvider, final String header) {
+		final Column<EntityClass> column = addComponentColumn(entity -> {
 			final byte[] imageData = imageDataProvider.apply(entity);
 			final Image image = new Image();
 			image.setWidth("40px");
@@ -198,47 +262,47 @@ public class CGrid<T extends CEntityDB<T>> extends Grid<T> {
 		return column;
 	}
 
-	public Column<T> addIntegerColumn(final ValueProvider<T, Integer> valueProvider,
-		final String header, final String key) {
+	public Column<EntityClass> addIntegerColumn(
+		final ValueProvider<EntityClass, Integer> valueProvider, final String header,
+		final String key) {
 		return addCustomColumn(valueProvider, header, WIDTH_INTEGER, key, 0);
 	}
 
-	public Column<T> addLongTextColumn(final ValueProvider<T, String> valueProvider,
-		final String header, final String key) {
+	public Column<EntityClass> addLongTextColumn(
+		final ValueProvider<EntityClass, String> valueProvider, final String header,
+		final String key) {
 		return addCustomColumn(valueProvider, header, WIDTH_LONG_TEXT, key, 0);
 	}
 
-	public Column<T> addReferenceColumn(final ValueProvider<T, String> valueProvider,
-		final String header) {
+	public Column<EntityClass> addReferenceColumn(
+		final ValueProvider<EntityClass, String> valueProvider, final String header) {
 		return addCustomColumn(valueProvider, header, WIDTH_REFERENCE, null, 0);
 	}
 
-	public Column<T> addShortTextColumn(final ValueProvider<T, String> valueProvider,
-		final String header, final String key) {
+	public Column<EntityClass> addShortTextColumn(
+		final ValueProvider<EntityClass, String> valueProvider, final String header,
+		final String key) {
 		return addCustomColumn(valueProvider, header, WIDTH_SHORT_TEXT, key, 0);
 	}
 
 	/**
 	 * Adds a status column with color-aware rendering. This method creates a column that
-	 * displays status entities with their associated colors as background using custom cell components.
+	 * displays status entities with their associated colors as background using custom
+	 * cell components.
 	 * @param statusProvider Provider that returns the status entity
 	 * @param header         Column header text
 	 * @param key            Column key for identification
 	 * @return The created column
 	 */
-	public <S extends CEntityDB<S>> Column<T> addStatusColumn(
-		final ValueProvider<T, S> statusProvider, final String header, final String key) {
-		LOGGER.info("Adding status column: {} with color-aware rendering using CGridCellStatus", header);
-		final Column<T> column = addComponentColumn(entity -> {
+	public <S extends CEntityDB<S>> Column<EntityClass> addStatusColumn(
+		final ValueProvider<EntityClass, S> statusProvider, final String header,
+		final String key) {
+		final Column<EntityClass> column = addComponentColumn(entity -> {
 			final S status = statusProvider.apply(entity);
-			final tech.derbent.abstracts.components.CGridCellStatus statusCell = 
-				new tech.derbent.abstracts.components.CGridCellStatus();
-			
+			final CGridCellStatus statusCell = new CGridCellStatus();
 			// Configure icon display based on grid setting
 			statusCell.setShowIcon(showIconInStatusColumns);
-			
 			statusCell.setStatusValue(status);
-			LOGGER.debug("Created CGridCellStatus for entity: {} with icon display: {}", entity, showIconInStatusColumns);
 			return statusCell;
 		}).setHeader(header).setWidth(WIDTH_REFERENCE).setFlexGrow(0).setSortable(true);
 
@@ -246,6 +310,19 @@ public class CGrid<T extends CEntityDB<T>> extends Grid<T> {
 			column.setKey(key);
 		}
 		return column;
+	}
+
+	private Field getFieldRecursive(Class<?> type, final String fieldName) {
+
+		while ((type != null) && (type != Object.class)) {
+
+			try {
+				return type.getDeclaredField(fieldName);
+			} catch (final NoSuchFieldException e) {
+				type = type.getSuperclass(); // bir üst sınıfa bak
+			}
+		}
+		throw new RuntimeException("Field not found: " + fieldName);
 	}
 
 	/**
@@ -258,27 +335,23 @@ public class CGrid<T extends CEntityDB<T>> extends Grid<T> {
 		CAuxillaries.setId(this);
 	}
 
-	@Override
-	public void select(final T entity) {
-		LOGGER.info("Selecting entity in grip: {}", entity);
-		super.select(entity);
-	}
-	
 	/**
 	 * Check if icons are displayed in status columns.
 	 * @return true if icons are shown in status columns
 	 */
-	public boolean isShowIconInStatusColumns() {
-		return showIconInStatusColumns;
+	public boolean isShowIconInStatusColumns() { return showIconInStatusColumns; }
+
+	@Override
+	public void select(final EntityClass entity) {
+		super.select(entity);
 	}
-	
+
 	/**
-	 * Enable or disable icon display in status columns.
-	 * Note: This setting only affects future status columns created after this call.
+	 * Enable or disable icon display in status columns. Note: This setting only affects
+	 * future status columns created after this call.
 	 * @param showIconInStatusColumns true to show icons in status columns
 	 */
 	public void setShowIconInStatusColumns(final boolean showIconInStatusColumns) {
 		this.showIconInStatusColumns = showIconInStatusColumns;
-		LOGGER.info("Icon display in status columns set to: {}", showIconInStatusColumns);
 	}
 }

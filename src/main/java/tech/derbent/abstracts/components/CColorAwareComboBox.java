@@ -7,8 +7,6 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 
 import tech.derbent.abstracts.annotations.ColorAwareComboBox;
@@ -16,18 +14,18 @@ import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.utils.CColorUtils;
 
 /**
- * CColorAwareComboBox - Specialized ComboBox superclass for entities with
- * color and icon-aware rendering.
+ * CColorAwareComboBox - Specialized ComboBox superclass for entities with color and
+ * icon-aware rendering.
  * <p>
- * This class extends the standard Vaadin ComboBox to provide automatic color and icon rendering
- * for entities. It detects status entities and renders them with colored
+ * This class extends the standard Vaadin ComboBox to provide automatic color and icon
+ * rendering for entities. It detects status entities and renders them with colored
  * backgrounds based on their color properties. Additionally, it displays appropriate
  * icons for entity types such as users, companies, projects, etc.
  * </p>
  * <p>
  * The class follows the project's coding guidelines by providing a reusable superclass
- * for all enhanced ComboBox components, ensuring consistent styling and behavior
- * across the application.
+ * for all enhanced ComboBox components, ensuring consistent styling and behavior across
+ * the application.
  * </p>
  * <p>
  * <strong>Usage Example:</strong>
@@ -36,9 +34,7 @@ import tech.derbent.abstracts.utils.CColorUtils;
  * <pre>{@code
  * // For status entities with colors
  * CColorAwareComboBox<CDecisionStatus> statusComboBox =
- * 	new CColorAwareComboBox<>(CDecisionStatus.class);
- * statusComboBox.setItems(statusList);
- * 
+ * 	statusComboBox.setItems(statusList);
  * // For entities with icons (like users)
  * CColorAwareComboBox<CUser> userComboBox =
  * 	new CColorAwareComboBox<>(CUser.class, "Select User");
@@ -108,15 +104,15 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 	}
 
 	/**
-	 * Configures the enhanced renderer for entities with colors and/or icons.
-	 * Now uses the new CEntityLabel base class for consistent rendering.
+	 * Configures the enhanced renderer for entities with colors and/or icons. Now uses
+	 * the new CEntityLabel base class for consistent rendering.
 	 */
 	private void configureColorRenderer() {
 		setRenderer(new ComponentRenderer<>(item -> {
+
 			if (item == null) {
 				return new Span("N/A");
 			}
-
 			// Use the new CEntityLabel for consistent entity display
 			return new CEntityLabel(item, padding, autoContrast, roundedCorners);
 		}));
@@ -134,18 +130,8 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 	public String getPadding() { return padding; }
 
 	/**
-	 * Checks if this entity type should support enhanced rendering.
-	 * Now returns true for all entities since all entities have icons.
-	 * 
-	 * @return true (all entities now support enhanced rendering)
-	 */
-	private boolean hasEntityIconSupport() {
-		return entityType != null; // All entities now have icons
-	}
-
-	/**
-	 * Initializes the ComboBox with enhanced rendering for all entities.
-	 * All entities now use the enhanced rendering with icons and colors.
+	 * Initializes the ComboBox with enhanced rendering for all entities. All entities now
+	 * use the enhanced rendering with icons and colors.
 	 */
 	private void initializeComboBox() {
 		LOGGER.debug("Initializing CColorAwareComboBox for entity type: {}",
@@ -154,7 +140,6 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 		setAllowCustomValue(false);
 		// Set up item label generator
 		setItemLabelGenerator(item -> CColorUtils.getDisplayTextFromEntity(item));
-
 		// All entities now use enhanced rendering with the CEntityLabel base class
 		LOGGER.debug("Configuring enhanced rendering for entity type: {}",
 			entityType.getSimpleName());
@@ -163,14 +148,6 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 	// Getter and setter methods for styling configuration
 
 	public boolean isAutoContrast() { return autoContrast; }
-
-	/**
-	 * Checks if this ComboBox is configured for enhanced rendering (colors and/or icons).
-	 * @return true (all entities now use enhanced rendering)
-	 */
-	public boolean isColorAware() { 
-		return entityType != null; // All entities now use enhanced rendering
-	}
 
 	public boolean isRoundedCorners() { return roundedCorners; }
 
@@ -185,7 +162,6 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 			this.padding = annotation.padding();
 			this.autoContrast = annotation.autoContrast();
 			this.minWidth = annotation.minWidth();
-
 			// Reconfigure renderer for all entities
 			configureColorRenderer();
 		}
@@ -193,34 +169,22 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 
 	public void setAutoContrast(final boolean autoContrast) {
 		this.autoContrast = autoContrast;
-
-		if (isColorAware()) {
-			configureColorRenderer();
-		}
+		configureColorRenderer();
 	}
 
 	@Override
 	public void setMinWidth(final String minWidth) {
 		this.minWidth = minWidth;
-
-		if (isColorAware()) {
-			configureColorRenderer();
-		}
+		configureColorRenderer();
 	}
 
 	public void setPadding(final String padding) {
 		this.padding = padding;
-
-		if (isColorAware()) {
-			configureColorRenderer();
-		}
+		configureColorRenderer();
 	}
 
 	public void setRoundedCorners(final boolean roundedCorners) {
 		this.roundedCorners = roundedCorners;
-
-		if (isColorAware()) {
-			configureColorRenderer();
-		}
+		configureColorRenderer();
 	}
 }
