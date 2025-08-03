@@ -5,6 +5,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import tech.derbent.abstracts.annotations.MetaData;
 import tech.derbent.abstracts.domains.CEntityOfProject;
@@ -21,6 +24,11 @@ public class CRisk extends CEntityOfProject<CRisk> {
     @MetaData(displayName = "Risk Severity", required = true, readOnly = false, defaultValue = "LOW", description = "Severity level of the risk", hidden = false, order = 2, useRadioButtons = false)
     private ERiskSeverity riskSeverity;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "criskstatus_id", nullable = true)
+    @MetaData(displayName = "Status", required = false, readOnly = false, description = "Current status of the risk", hidden = false, order = 3, dataProviderBean = "CRiskStatusService")
+    private CRiskStatus status;
+
     /**
      * Default constructor for JPA.
      */
@@ -35,11 +43,25 @@ public class CRisk extends CEntityOfProject<CRisk> {
         this.riskSeverity = riskSeverity;
     }
 
+    public CRisk(final String name, final CProject project, final ERiskSeverity riskSeverity, final CRiskStatus status) {
+        super(CRisk.class, name, project);
+        this.riskSeverity = riskSeverity;
+        this.status = status;
+    }
+
     public ERiskSeverity getRiskSeverity() {
         return riskSeverity;
     }
 
     public void setRiskSeverity(final ERiskSeverity riskSeverity) {
         this.riskSeverity = riskSeverity;
+    }
+
+    public CRiskStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(final CRiskStatus status) {
+        this.status = status;
     }
 }

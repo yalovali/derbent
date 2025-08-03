@@ -128,6 +128,11 @@ public class CActivity extends CEntityOfProject<CActivity> {
     @MetaData(displayName = "Notes", required = false, readOnly = false, defaultValue = "", description = "Additional notes and comments", hidden = false, order = 71, maxLength = 2000)
     private String notes;
 
+    @Column(name = "results", nullable = true, length = 2000)
+    @Size(max = 2000)
+    @MetaData(displayName = "Results", required = false, readOnly = false, defaultValue = "", description = "Results and outcomes of the activity", hidden = false, order = 72, maxLength = 2000)
+    private String results;
+
     /**
      * Default constructor for JPA.
      */
@@ -425,6 +430,15 @@ public class CActivity extends CEntityOfProject<CActivity> {
 
     public void setNotes(final String notes) {
         this.notes = notes;
+        updateLastModified();
+    }
+
+    public String getResults() {
+        return results;
+    }
+
+    public void setResults(final String results) {
+        this.results = results;
         updateLastModified();
     }
 
