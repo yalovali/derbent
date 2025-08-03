@@ -20,6 +20,9 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.MetaData;
 import tech.derbent.abstracts.domains.CEntityOfProject;
+import tech.derbent.abstracts.interfaces.CKanbanEntity;
+import tech.derbent.abstracts.interfaces.CKanbanStatus;
+import tech.derbent.abstracts.interfaces.CKanbanType;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
 
@@ -33,7 +36,7 @@ import tech.derbent.users.domain.CUser;
 @Table(name = "cactivity") // table name for the entity as the default is the class name
 // in lowercase
 @AttributeOverride(name = "id", column = @Column(name = "activity_id"))
-public class CActivity extends CEntityOfProject<CActivity> {
+public class CActivity extends CEntityOfProject<CActivity> implements CKanbanEntity {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CActivity.class);
 
@@ -501,5 +504,18 @@ public class CActivity extends CEntityOfProject<CActivity> {
             }
         }
         updateLastModified();
+    }
+
+    // CKanbanEntity implementation methods
+    @Override
+    public void setStatus(final CKanbanStatus status) {
+        if (status instanceof CActivityStatus) {
+            setStatus((CActivityStatus) status);
+        }
+    }
+
+    @Override
+    public CKanbanType getType() {
+        return activityType;
     }
 }
