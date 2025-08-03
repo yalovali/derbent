@@ -46,9 +46,13 @@ public class CActivityTypeView extends CProjectAwareMDPage<CActivityType> {
 
 	@Override
 	protected void createGridForEntity() {
+		// Add color-aware type column to show the type with color
+		grid.addStatusColumn(type -> type, "Type", "type");
 		grid.addShortTextColumn(CActivityType::getName, "Name", "name");
 		grid.addLongTextColumn(CActivityType::getDescription, "Description",
 			"description");
+		grid.addShortTextColumn(CActivityType::getColor, "Color", "color");
+		grid.addBooleanColumn(CActivityType::isActive, "Active", "Active", "Inactive");
 		grid.addShortTextColumn(CActivityType::getProjectName, "Project", "project");
 	}
 

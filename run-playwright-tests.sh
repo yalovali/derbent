@@ -67,6 +67,7 @@ show_usage() {
     echo "  accessibility Run accessibility tests only"
     echo "  validation    Run form validation tests only"
     echo "  workflow      Run complete workflow tests"
+    echo "  colors        Run user color and entry views tests only"
     echo "  clean         Clean previous test results"
     echo "  install       Install Playwright browsers"
     echo "  help          Show this help message"
@@ -75,6 +76,7 @@ show_usage() {
     echo "  $0 all        # Run all Playwright automation tests"
     echo "  $0 playwright # Run complete Playwright test suite"
     echo "  $0 login      # Run only login/logout tests"
+    echo "  $0 colors     # Run only user color and entry views tests"
     echo "  $0 install    # Install Playwright browsers"
     echo "  $0 clean      # Clean up test artifacts"
 }
@@ -84,6 +86,11 @@ main() {
     local command=${1:-help}
     
     case $command in
+        "colors")
+            echo "🎨 Running user color and entry views tests..."
+            run_playwright_tests "UserColorAndEntryViewsPlaywrightTest" "User Color and Entry Views Tests"
+            ;;
+            
         "all"|"playwright")
             echo "🎯 Running complete Playwright UI automation test suite..."
             run_playwright_tests "PlaywrightUIAutomationTest" "Playwright UI Automation Tests"
