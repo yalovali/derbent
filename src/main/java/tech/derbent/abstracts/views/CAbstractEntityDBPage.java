@@ -118,7 +118,8 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 			event.getRouteParameters().get(getEntityRouteIdField()).map(Long::parseLong);
 
 		if (entityID.isPresent()) {
-			final Optional<EntityClass> entityByRoute = entityService.get(entityID.get());
+			final Optional<EntityClass> entityByRoute =
+				entityService.getById(entityID.get());
 			LOGGER.debug("Entity ID in URL: {}, looking up entity: {}", entityID.get(),
 				entityByRoute);
 
@@ -152,7 +153,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				"No entity ID in URL, trying to select last selected entity ID: {}",
 				sessionService.getActiveId(entityClass.getSimpleName()));
 			final Optional<EntityClass> lastEntity = entityService
-				.get(sessionService.getActiveId(entityClass.getSimpleName()));
+				.getById(sessionService.getActiveId(entityClass.getSimpleName()));
 
 			if (lastEntity.isPresent()) {
 				populateForm(lastEntity.get());

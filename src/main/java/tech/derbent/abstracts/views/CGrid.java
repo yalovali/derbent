@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.function.ValueProvider;
 
@@ -19,7 +18,6 @@ import tech.derbent.abstracts.components.CGridCell;
 import tech.derbent.abstracts.domains.CEntityConstants;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.utils.CAuxillaries;
-import tech.derbent.abstracts.utils.CColorUtils;
 import tech.derbent.base.utils.CImageUtils;
 
 /**
@@ -151,6 +149,7 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 		return addCustomColumn(valueProvider, header, WIDTH_DECIMAL, key, 0);
 	}
 
+	@SuppressWarnings ("unchecked")
 	public Column<EntityClass> addEntityColumn(
 		final ValueProvider<EntityClass, ?> valueProvider, final String header,
 		final String key) {
@@ -199,14 +198,14 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 			return addComponentColumn(item -> {
 				final Object value = valueProvider.apply(item);
 				final CGridCell cell = new CGridCell();
-				
+
 				// Set the value which will handle color rendering if entity has color
 				if (value instanceof CEntityDB) {
 					cell.setEntityValue((CEntityDB<?>) value);
-				} else {
+				}
+				else {
 					cell.setText(value != null ? value.toString() : "");
 				}
-				
 				return cell;
 			}).setHeader(header).setWidth(width).setFlexGrow(0).setSortable(true);
 		}
@@ -279,7 +278,8 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 
 	/**
 	 * Adds a status column with color-aware rendering. This method creates a column that
-	 * displays status entities with their associated colors as background using CGridCell.
+	 * displays status entities with their associated colors as background using
+	 * CGridCell.
 	 * @param statusProvider Provider that returns the status entity
 	 * @param header         Column header text
 	 * @param key            Column key for identification

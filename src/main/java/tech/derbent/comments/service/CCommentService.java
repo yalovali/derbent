@@ -64,8 +64,6 @@ public class CCommentService extends CAbstractService<CComment> {
 	@Transactional
 	public CComment createComment(final String commentText, final CActivity activity,
 		final CUser author) {
-		LOGGER.info("createComment called with commentText: {}, activity: {}, author: {}",
-			commentText, activity, author);
 
 		if ((commentText == null) || commentText.trim().isEmpty()) {
 			throw new IllegalArgumentException("Comment text cannot be null or empty");
@@ -93,9 +91,6 @@ public class CCommentService extends CAbstractService<CComment> {
 	@Transactional
 	public CComment createComment(final String commentText, final CActivity activity,
 		final CUser author, final CCommentPriority priority) {
-		LOGGER.info(
-			"createComment called with commentText: {}, activity: {}, author: {}, priority: {}",
-			commentText, activity, author, priority);
 
 		if ((commentText == null) || commentText.trim().isEmpty()) {
 			throw new IllegalArgumentException("Comment text cannot be null or empty");
@@ -205,7 +200,7 @@ public class CCommentService extends CAbstractService<CComment> {
 	 * LazyInitializationException when the entity is used in UI components.
 	 */
 	@Override
-	public Optional<CComment> get(final Long id) {
+	public Optional<CComment> getById(final Long id) {
 		LOGGER.info("get called with id: {}", id);
 
 		if (id == null) {
@@ -217,6 +212,31 @@ public class CCommentService extends CAbstractService<CComment> {
 
 	@Override
 	protected Class<CComment> getEntityClass() { return CComment.class; }
+
+	/**
+	 * Enhanced initialization of lazy-loaded fields specific to Comment entities. Based
+	 * on CActivityService implementation style.
+	 * @param entity the comment entity to initialize
+	 */
+	@Override
+	protected void initializeLazyFields(final CComment entity) {
+
+		if (entity == null) {
+			return;
+		}
+
+		try {
+			// First call the parent implementation to handle common fields
+			super.initializeLazyFields(entity);
+			// Initialize Comment-specific relationships
+			initializeLazyRelationship(entity.getAuthor());
+			initializeLazyRelationship(entity.getActivity());
+			initializeLazyRelationship(entity.getPriority());
+		} catch (final Exception e) {
+			LOGGER.warn("Error initializing lazy fields for Comment with ID: {}",
+				entity.getId(), e);
+		}
+	}
 
 	/**
 	 * Toggles the important flag of a comment.

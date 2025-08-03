@@ -63,7 +63,7 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
 			assertNotNull(activity.getActivityType(), "Activity type should not be null");
 			// Test grid selection and field updates
 			final CActivity selectedActivity =
-				activityService.get(activity.getId()).orElse(null);
+				activityService.getById(activity.getId()).orElse(null);
 			assertNotNull(selectedActivity, "Should be able to retrieve activity by ID");
 			assertEquals(activity.getName(), selectedActivity.getName(),
 				"Retrieved activity should match");
@@ -168,7 +168,7 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
 			assertNotNull(company.getEmail(), "Company email should not be null");
 			// Test grid selection and field updates
 			final CCompany selectedCompany =
-				companyService.get(company.getId()).orElse(null);
+				companyService.getById(company.getId()).orElse(null);
 			assertNotNull(selectedCompany, "Should be able to retrieve company by ID");
 			assertEquals(company.getName(), selectedCompany.getName(),
 				"Retrieved company should match");
@@ -194,7 +194,7 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
 					"Decision project should not be null");
 				// Test grid selection and field updates
 				final CDecision selectedDecision =
-					decisionService.get(decision.getId()).orElse(null);
+					decisionService.getById(decision.getId()).orElse(null);
 				assertNotNull(selectedDecision,
 					"Should be able to retrieve decision by ID");
 				assertEquals(decision.getName(), selectedDecision.getName(),
@@ -267,7 +267,7 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
 			assertNotNull(meeting.getProject(), "Meeting project should not be null");
 			// Test grid selection and field updates
 			final CMeeting selectedMeeting =
-				meetingService.get(meeting.getId()).orElse(null);
+				meetingService.getById(meeting.getId()).orElse(null);
 			assertNotNull(selectedMeeting, "Should be able to retrieve meeting by ID");
 			assertEquals(meeting.getName(), selectedMeeting.getName(),
 				"Retrieved meeting should match");
@@ -284,7 +284,7 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
 				"Meeting type description should not be null");
 			// Test CRUD operations
 			final CMeetingType retrieved =
-				meetingTypeService.get(type.getId()).orElse(null);
+				meetingTypeService.getById(type.getId()).orElse(null);
 			assertNotNull(retrieved, "Should be able to retrieve meeting type by ID");
 			assertEquals(type.getName(), retrieved.getName(),
 				"Retrieved meeting type should match");
@@ -317,7 +317,7 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
 			// CProject only has name and description from CEntityNamed Test grid
 			// selection and field updates
 			final CProject selectedProject =
-				projectService.get(project.getId()).orElse(null);
+				projectService.getById(project.getId()).orElse(null);
 			assertNotNull(selectedProject, "Should be able to retrieve project by ID");
 			assertEquals(project.getName(), selectedProject.getName(),
 				"Retrieved project should match");
@@ -341,7 +341,7 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
 			// Risk doesn't have getProbability() method - it only has severity
 			assertNotNull(risk.getProject(), "Risk project should not be null");
 			// Test grid selection and field updates
-			final CRisk selectedRisk = riskService.get(risk.getId()).orElse(null);
+			final CRisk selectedRisk = riskService.getById(risk.getId()).orElse(null);
 			assertNotNull(selectedRisk, "Should be able to retrieve risk by ID");
 			assertEquals(risk.getName(), selectedRisk.getName(),
 				"Retrieved risk should match");
@@ -364,7 +364,7 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
 			assertNotNull(user.getUserRole(), "User role should not be null");
 			assertNotNull(user.getCompany(), "User company should not be null");
 			// Test grid selection and field updates
-			final CUser selectedUser = userService.get(user.getId()).orElse(null);
+			final CUser selectedUser = userService.getById(user.getId()).orElse(null);
 			assertNotNull(selectedUser, "Should be able to retrieve user by ID");
 			assertEquals(user.getName(), selectedUser.getName(),
 				"Retrieved user should match");

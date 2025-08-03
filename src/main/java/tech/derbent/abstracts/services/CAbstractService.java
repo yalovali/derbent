@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import tech.derbent.abstracts.annotations.CSpringAuxillaries;
 import tech.derbent.abstracts.domains.CEntityDB;
-import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.utils.PageableUtils;
 
 /**
@@ -61,7 +60,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	}
 
 	@Transactional (readOnly = true)
-	public Optional<EntityClass> get(final Long id) {
+	public Optional<EntityClass> getById(final Long id) {
 		final Optional<EntityClass> entity = repository.findById(id);
 		// Initialize lazy fields if entity is present
 		entity.ifPresent(this::initializeLazyFields);
@@ -84,14 +83,6 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 
 		try {
 			CSpringAuxillaries.initializeLazily(entity);
-
-			// Automatically handle CEntityOfProject's lazy project relationship
-			if (entity instanceof CEntityOfProject) {
-				@SuppressWarnings ("unchecked")
-				final CEntityOfProject<EntityClass> projectEntity =
-					(CEntityOfProject<EntityClass>) entity;
-				initializeLazyRelationship(projectEntity.getProject());
-			}
 		} catch (final Exception e) {
 			LOGGER.warn("Error initializing lazy fields for entity: {}",
 				CSpringAuxillaries.safeToString(entity), e);

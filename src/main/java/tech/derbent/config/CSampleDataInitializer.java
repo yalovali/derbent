@@ -72,13 +72,10 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	private static final String STANDARD_PASSWORD = "test123";
 
 	// Profile picture filenames mapping for users
-	private static final java.util.Map<String, String> PROFILE_PICTURE_MAPPING = java.util.Map.of(
-		"admin", "admin.svg",
-		"mkaradeniz", "michael_chen.svg", 
-		"msahin", "sophia_brown.svg",
-		"bozkan", "david_kim.svg",
-		"ademir", "emma_wilson.svg"
-	);
+	private static final java.util.Map<String,
+		String> PROFILE_PICTURE_MAPPING = java.util.Map.of("admin", "admin.svg",
+			"mkaradeniz", "michael_chen.svg", "msahin", "sophia_brown.svg", "bozkan",
+			"david_kim.svg", "ademir", "emma_wilson.svg");
 
 	// Service dependencies - injected via constructor
 	private final CProjectService projectService;
@@ -368,7 +365,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Creates system administrator user.
 	 */
 	private void createAdminUser() {
-		LOGGER.info("createAdminUser called - creating system administrator");
 		final CUser admin = userService.createLoginUser("admin", STANDARD_PASSWORD,
 			"Ahmet", "admin@of.gov.tr", "ADMIN,USER");
 		// Set user profile using auxiliary method with actual profile picture
@@ -533,7 +529,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Creates low priority resource risk.
 	 */
 	private void createLowPriorityResourceRisk() {
-		LOGGER.info("createLowPriorityResourceRisk called - creating resource risk");
 		final CProject project = findProjectByName("Infrastructure Modernization");
 
 		if (project == null) {
@@ -552,7 +547,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Creates low priority schedule risk.
 	 */
 	private void createLowPriorityScheduleRisk() {
-		LOGGER.info("createLowPriorityScheduleRisk called - creating schedule risk");
 		final CProject project = findProjectByName("Digital Transformation Initiative");
 
 		if (project == null) {
@@ -647,7 +641,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Creates sample currencies for order management.
 	 */
 	private void createSampleCurrencies() {
-		LOGGER.info("createSampleCurrencies called - creating sample currencies");
 
 		try {
 			// Create basic currencies
@@ -682,7 +675,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Creates sample decisions for project management.
 	 */
 	private void createSampleDecisions() {
-		LOGGER.info("createSampleDecisions called - creating sample decisions");
 
 		try {
 			final CProject project1 =
@@ -754,8 +746,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Creates sample planning meeting.
 	 */
 	private void createSamplePlanningMeeting() {
-		LOGGER.info(
-			"createSamplePlanningMeeting called - creating sprint planning meeting");
 		final CProject project = findProjectByName("Product Development Phase 2");
 
 		if (project == null) {
@@ -836,8 +826,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Creates sample retrospective meeting.
 	 */
 	private void createSampleRetrospectiveMeeting() {
-		LOGGER.info(
-			"createSampleRetrospectiveMeeting called - creating sprint retrospective");
 		final CProject project = findProjectByName("Customer Experience Enhancement");
 
 		if (project == null) {
@@ -960,8 +948,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Creates system architecture design activity.
 	 */
 	private void createSystemArchitectureActivity() {
-		LOGGER.info(
-			"createSystemArchitectureActivity called - creating system architecture design activity");
 		final CProject project = findProjectByName("Infrastructure Modernization");
 
 		if (project == null) {
@@ -1013,8 +999,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Creates team member Alice Davis.
 	 */
 	private void createTeamMemberAlice() {
-		LOGGER.info(
-			"createTeamMemberAlice called - creating Ayşe Demir from Günebakan village");
 		final CUser analyst = userService.createLoginUser("ademir", STANDARD_PASSWORD,
 			"Ayşe", "ayse.demir@ofsaglik.com.tr", "USER");
 		// Set user profile using auxiliary method with actual profile picture
@@ -1055,8 +1039,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Creates team member Mary Johnson.
 	 */
 	private void createTeamMemberMary() {
-		LOGGER.info(
-			"createTeamMemberMary called - creating Merve Şahin from Ballıköy village");
 		final CUser teamMember = userService.createLoginUser("msahin", STANDARD_PASSWORD,
 			"Merve", "merve.sahin@ofendüstri.com.tr", "USER");
 		// Set user profile using auxiliary method with actual profile picture
@@ -1211,7 +1193,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * @return the CActivityStatus entity or null if not found
 	 */
 	private CActivityStatus findActivityStatusByName(final String name) {
-		LOGGER.debug("findActivityStatusByName called with name: {}", name);
 
 		try {
 			final var statuses = activityStatusService
@@ -1247,7 +1228,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * @return the CCompany entity or null if not found
 	 */
 	private CCompany findCompanyByName(final String name) {
-		LOGGER.info("findCompanyByName called with name: {}", name);
 
 		try {
 			return companyService.findByName(name).orElse(null);
@@ -1282,7 +1262,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * @return the CProject entity or null if not found
 	 */
 	private CProject findProjectByName(final String name) {
-		LOGGER.info("findProjectByName called with name: {}", name);
 
 		try {
 			return projectService.findByName(name).orElse(null);
@@ -1312,8 +1291,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Initializes comprehensive activity data with available fields populated.
 	 */
 	private void initializeActivities() {
-		LOGGER.info(
-			"initializeActivities called - creating comprehensive activity samples");
 
 		try {
 			// Create at least 3 activities per project
@@ -1337,8 +1314,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Initialize activity status entities with comprehensive sample data.
 	 */
 	private void initializeActivityStatuses() {
-		LOGGER.info(
-			"initializeActivityStatuses called - creating activity status classifications");
 
 		try {
 			// Get all projects
@@ -1520,7 +1495,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Initializes sample meetings with participants and content.
 	 */
 	private void initializeMeetings() {
-		LOGGER.info("initializeMeetings called - creating sample meetings");
 
 		try {
 			createSampleProjectMeeting();
@@ -1539,8 +1513,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Initialize meeting status entities with comprehensive sample data.
 	 */
 	private void initializeMeetingStatuses() {
-		LOGGER.info(
-			"initializeMeetingStatuses called - creating meeting status classifications");
 
 		try {
 			// Get all projects
@@ -1557,7 +1529,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 						projectName);
 					continue;
 				}
-				LOGGER.info("Creating meeting types for project: {}", projectName);
 				createMeetingStatus("Scheduled", project,
 					"Meeting is scheduled but not yet started", "#3498db", false, 1);
 				createMeetingStatus("In Progress", project,
@@ -1581,8 +1552,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * types for all projects to ensure project-specific categorization.
 	 */
 	private void initializeMeetingTypes() {
-		LOGGER.info(
-			"initializeMeetingTypes called - creating meeting type classifications for all projects");
 
 		try {
 			// Get all projects
@@ -1611,7 +1580,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 						projectName);
 					continue;
 				}
-				LOGGER.info("Creating meeting types for project: {}", projectName);
 
 				for (final String[] typeData : meetingTypes) {
 					meetingTypeService.createEntity(typeData[0], project);
@@ -1637,8 +1605,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * for all projects to ensure project-specific categorization.
 	 */
 	private void initializeOrderTypes() {
-		LOGGER.info(
-			"initializeOrderTypes called - creating order type classifications for all projects");
 
 		try {
 			// Get all projects
@@ -1667,7 +1633,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 						projectName);
 					continue;
 				}
-				LOGGER.info("Creating order types for project: {}", projectName);
 
 				for (final String[] typeData : orderTypes) {
 					orderTypeService.createEntity(typeData[0], project);
@@ -1684,7 +1649,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Initializes sample projects with different scopes and characteristics.
 	 */
 	private void initializeProjects() {
-		LOGGER.info("initializeProjects called - creating 4 sample projects");
 
 		try {
 			// Create projects with comprehensive descriptions
@@ -1706,7 +1670,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Initializes sample risks with different severity levels and mitigation strategies.
 	 */
 	private void initializeRisks() {
-		LOGGER.info("initializeRisks called - creating sample risks");
 
 		try {
 			createHighPriorityTechnicalRisk();
@@ -1742,8 +1705,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Initializes user types for role-based access control.
 	 */
 	private void initializeUserTypes() {
-		LOGGER.info(
-			"initializeUserTypes called - creating user type classifications for all projects");
 
 		try {
 			// Get all projects
@@ -1770,7 +1731,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 						projectName);
 					continue;
 				}
-				LOGGER.info("Creating user types for project: {}", projectName);
 
 				for (final String[] typeData : userTypes) {
 					userTypeService.createEntity(typeData[0], project);
@@ -1800,12 +1760,17 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * @return byte array of the SVG content, or null if not found
 	 */
 	private byte[] loadProfilePictureData(final String filename) {
+
 		try {
 			// Load from classpath resources
-			final var resource = getClass().getClassLoader().getResourceAsStream("../profile-pictures/" + filename);
+			final var resource = getClass().getClassLoader()
+				.getResourceAsStream("../profile-pictures/" + filename);
+
 			if (resource == null) {
 				// Fallback: try direct file path
-				final java.nio.file.Path filePath = java.nio.file.Paths.get("profile-pictures", filename);
+				final java.nio.file.Path filePath =
+					java.nio.file.Paths.get("profile-pictures", filename);
+
 				if (java.nio.file.Files.exists(filePath)) {
 					return java.nio.file.Files.readAllBytes(filePath);
 				}

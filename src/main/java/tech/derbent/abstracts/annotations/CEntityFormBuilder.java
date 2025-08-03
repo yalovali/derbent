@@ -66,35 +66,6 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 
 	protected static final String LabelMinWidth_210PX = "210px";
 
-	/**
-	 * Cached instance of the data provider resolver for performance.
-	 */
-	/**
-	 * Safely binds a component to a field, ensuring no incomplete bindings are left.
-	 * This method prevents the "All bindings created with forField must be completed" error.
-	 */
-	private static void safeBindComponent(final BeanValidationBinder<?> binder, 
-		final HasValueAndElement<?, ?> component, final String fieldName, 
-		final String componentType) {
-		if (binder == null || component == null || fieldName == null) {
-			LOGGER.error("Null parameters in safeBindComponent - binder: {}, component: {}, fieldName: {}", 
-				binder != null ? "present" : "null", 
-				component != null ? "present" : "null", 
-				fieldName != null ? fieldName : "null");
-			return;
-		}
-		
-		try {
-			binder.bind(component, fieldName);
-			LOGGER.debug("Successfully bound {} for field '{}'", componentType, fieldName);
-		} catch (final Exception e) {
-			LOGGER.error("Failed to bind {} for field '{}': {} - this may cause incomplete bindings", 
-				componentType, fieldName, e.getMessage(), e);
-			// Don't throw - just log the error to prevent form generation failure
-			// But warn that this might cause incomplete bindings
-		}
-	}
-
 	private static CDataProviderResolver dataProviderResolver;
 
 	public static <EntityClass> Div buildForm(final Class<?> entityClass,
@@ -160,7 +131,6 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		LOGGER.info(
 			"Form generation completed. Successfully processed {} out of {} components",
 			processedComponents, sortedFields.size());
-		
 		panel.add(formLayout);
 		return panel;
 	}
@@ -174,6 +144,39 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		final BeanValidationBinder<EntityClass> binder,
 		final ComboBoxDataProvider dataProvider) {
 		return buildForm(entityClass, binder, dataProvider, null);
+	}
+
+	private static NumberField createBigDecimalField(final Field field,
+		final MetaData meta, final BeanValidationBinder<?> binder) {
+
+		if ((field == null) || (meta == null) || (binder == null)) {
+			LOGGER.error(
+				"Null parameters in createIntegerField - field: {}, meta: {}, binder: {}",
+				field != null ? field.getName() : "null",
+				meta != null ? "present" : "null", binder != null ? "present" : "null");
+			return null;
+		}
+		final NumberField numberField = new NumberField();
+		CAuxillaries.setId(numberField);
+		numberField.setStep(1);
+
+		if ((meta.defaultValue() != null) && !meta.defaultValue().trim().isEmpty()) {
+
+			try {
+				final int defaultVal = Integer.parseInt(meta.defaultValue());
+				numberField.setValue((double) defaultVal);
+			} catch (final NumberFormatException e) {
+				LOGGER.error(
+					"Failed to parse default value '{}' as number for field '{}': {}",
+					meta.defaultValue(), field.getName(), e.getMessage());
+			}
+		}
+		binder.forField(numberField)
+			.withConverter(
+				value -> value != null ? new BigDecimal(value.toString()) : null,
+				value -> value != null ? value.doubleValue() : null)
+			.bind(field.getName());
+		return numberField;
 	}
 
 	private static Checkbox createCheckbox(final Field field, final MetaData meta,
@@ -308,7 +311,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			} catch (final Exception e) {
 				LOGGER.error(
 					"Error using annotation-based data resolver for field '{}' of type '{}': {}",
-					field.getName(), fieldType.getSimpleName(), e.getMessage(), e);
+					field.getName(), fieldType.getSimpleName(), e);
 			}
 		}
 
@@ -339,8 +342,8 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 				field.getName(), e.getMessage(), e);
 			comboBox.setItems(List.of()); // Fallback to empty list
 		}
-		// Use simple binding for ComboBox to avoid incomplete forField bindings
-		// The complex converter logic was causing incomplete bindings
+		// Use simple binding for ComboBox to avoid incomplete forField bindings The
+		// complex converter logic was causing incomplete bindings
 		safeBindComponent(binder, comboBox, field.getName(), "ComboBox");
 		return comboBox;
 	}
@@ -392,9 +395,11 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			// Integer types
 			component = createIntegerField(field, meta, binder);
 		}
+		else if (fieldType == BigDecimal.class) {
+			component = createBigDecimalField(field, meta, binder);
+		}
 		else if ((fieldType == Double.class) || (fieldType == double.class)
-			|| (fieldType == Float.class) || (fieldType == float.class)
-			|| (fieldType == BigDecimal.class)) {
+			|| (fieldType == Float.class) || (fieldType == float.class)) {
 			// Floating-point types
 			component = createFloatingPointField(field, meta, binder);
 		}
@@ -437,12 +442,12 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		final DatePicker datePicker = new DatePicker();
 		// Set ID for better test automation
 		CAuxillaries.setId(datePicker);
+
 		try {
 			safeBindComponent(binder, datePicker, field.getName(), "DatePicker");
 		} catch (final Exception e) {
-			LOGGER.error(
-				"Error binding DatePicker for field '{}': {}",
-				field.getName(), e.getMessage(), e);
+			LOGGER.error("Error binding DatePicker for field '{}': {}", field.getName(),
+				e.getMessage(), e);
 		}
 		return datePicker;
 	}
@@ -452,9 +457,8 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		final DateTimePicker dateTimePicker = new DateTimePicker();
 		// Set ID for better test automation
 		CAuxillaries.setId(dateTimePicker);
-
-		// Use simple binding for now to avoid incomplete forField bindings
-		// TODO: Add back converter for Instant fields once binding issue is resolved
+		// Use simple binding for now to avoid incomplete forField bindings TODO: Add back
+		// converter for Instant fields once binding issue is resolved
 		safeBindComponent(binder, dateTimePicker, field.getName(), "DateTimePicker");
 		return dateTimePicker;
 	}
@@ -554,8 +558,6 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 					meta.defaultValue(), field.getName(), e.getMessage());
 			}
 		}
-		// Use simple binding for now to avoid incomplete forField bindings
-		// TODO: Add back type-specific converters once binding issue is resolved
 		safeBindComponent(binder, numberField, field.getName(), "NumberField");
 		return numberField;
 	}
@@ -594,26 +596,32 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		final Class<?> fieldType = field.getType();
 
 		try {
+
 			if ((fieldType == Integer.class) || (fieldType == int.class)) {
 				binder.forField(numberField)
 					.withConverter(value -> value != null ? value.intValue() : null,
 						value -> value != null ? value.doubleValue() : null)
 					.bind(field.getName());
-				LOGGER.debug("Successfully bound NumberField with Integer converter for field '{}'", field.getName());
+				LOGGER.debug(
+					"Successfully bound NumberField with Integer converter for field '{}'",
+					field.getName());
 			}
 			else if ((fieldType == Long.class) || (fieldType == long.class)) {
 				binder.forField(numberField)
 					.withConverter(value -> value != null ? value.longValue() : null,
 						value -> value != null ? value.doubleValue() : null)
 					.bind(field.getName());
-				LOGGER.debug("Successfully bound NumberField with Long converter for field '{}'", field.getName());
+				LOGGER.debug(
+					"Successfully bound NumberField with Long converter for field '{}'",
+					field.getName());
 			}
 			else {
 				// Fallback for other number types (Double, etc.)
 				safeBindComponent(binder, numberField, field.getName(), "NumberField");
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Failed to bind integer field for field '{}': {} - trying simple binding",
+			LOGGER.error(
+				"Failed to bind integer field for field '{}': {} - trying simple binding",
 				field.getName(), e.getMessage());
 			safeBindComponent(binder, numberField, field.getName(), "NumberField");
 		}
@@ -853,6 +861,39 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			return;
 		}
 		resetComboBoxesRecursively(container);
+	}
+
+	/**
+	 * Cached instance of the data provider resolver for performance.
+	 */
+	/**
+	 * Safely binds a component to a field, ensuring no incomplete bindings are left. This
+	 * method prevents the "All bindings created with forField must be completed" error.
+	 */
+	private static void safeBindComponent(final BeanValidationBinder<?> binder,
+		final HasValueAndElement<?, ?> component, final String fieldName,
+		final String componentType) {
+
+		if ((binder == null) || (component == null) || (fieldName == null)) {
+			LOGGER.error(
+				"Null parameters in safeBindComponent - binder: {}, component: {}, fieldName: {}",
+				binder != null ? "present" : "null",
+				component != null ? "present" : "null",
+				fieldName != null ? fieldName : "null");
+			return;
+		}
+
+		try {
+			binder.bind(component, fieldName);
+			LOGGER.debug("Successfully bound {} for field '{}'", componentType,
+				fieldName);
+		} catch (final Exception e) {
+			LOGGER.error(
+				"Failed to bind {} for field '{}': {} - this may cause incomplete bindings",
+				componentType, fieldName, e.getMessage(), e);
+			// Don't throw - just log the error to prevent form generation failure But
+			// warn that this might cause incomplete bindings
+		}
 	}
 
 	private static void setComponentWidth(final Component component,

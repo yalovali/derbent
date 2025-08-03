@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.function.ValueProvider;
 
 import tech.derbent.abstracts.annotations.ColorAwareGrid;
-import tech.derbent.abstracts.components.CGridCell;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.views.CGrid;
 

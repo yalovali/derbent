@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.projects.domain.CProject;
@@ -71,6 +72,24 @@ public abstract class CEntityOfProjectService<
 	}
 
 	/**
+	 * Finds all entities by project with all relationships eagerly loaded. This
+	 * implementation is similar to CActivityService but without explicit null checks or
+	 * triggering lazy loading through getter methods.
+	 * @param project the project to find entities for
+	 * @return list of entities with all relationships initialized
+	 */
+	@Transactional (readOnly = true)
+	public List<EntityClass> findByProjectWithAllRelationships(final CProject project) {
+		LOGGER.info("findByProjectWithAllRelationships called for project: {}",
+			project != null ? project.getName() : "null");
+		// Direct repository call
+		final List<EntityClass> entities = projectRepository.findByProject(project);
+		// Initialize lazy fields without null checks or triggering loading
+		entities.forEach(this::initializeLazyFields);
+		return entities;
+	}
+
+	/**
 	 * Finds entities by project with properly loaded relationships to prevent
 	 * LazyInitializationException. This method provides the correct generic type for
 	 * CEntityOfProject entities.
@@ -79,14 +98,8 @@ public abstract class CEntityOfProjectService<
 	 */
 	@Transactional (readOnly = true)
 	public List<EntityClass> findEntitiesByProject(final CProject project) {
-		LOGGER.info("findEntitiesByProject called with project: {} for {}",
-			project != null ? project.getName() : "null", getClass().getSimpleName());
-
-		if (project == null) {
-			LOGGER.warn("findEntitiesByProject called with null project for {}",
-				getClass().getSimpleName());
-			return List.of();
-		}
+		Assert.notNull(project,
+			"Project must not be null for " + getClass().getSimpleName());
 
 		try {
 			final List<EntityClass> entities = projectRepository.findByProject(project);
@@ -142,7 +155,7 @@ public abstract class CEntityOfProjectService<
 	 */
 	@Override
 	@Transactional (readOnly = true)
-	public Optional<EntityClass> get(final Long id) {
+	public Optional<EntityClass> getById(final Long id) {
 		LOGGER.info("get called with id: {} for {}", id, getClass().getSimpleName());
 
 		if (id == null) {
@@ -163,9 +176,8 @@ public abstract class CEntityOfProjectService<
 	}
 
 	/**
-	 * Enhanced lazy field initialization for CEntityOfProject entities. This method
-	 * handles the common lazy relationships and can be overridden by subclasses for
-	 * additional entity-specific lazy loading.
+	 * Enhanced initialization of lazy-loaded fields for CEntityOfProject entities. Based
+	 * on CActivityService implementation style without null checks or explicit loading.
 	 * @param entity the entity to initialize
 	 */
 	@Override
@@ -180,18 +192,11 @@ public abstract class CEntityOfProjectService<
 			super.initializeLazyFields(entity);
 			// Initialize CEntityOfProject specific relationships
 			initializeLazyRelationship(entity.getProject());
-
-			// Safe initialization of assignedTo and createdBy if they exist
-			if (entity.getAssignedTo() != null) {
-				initializeLazyRelationship(entity.getAssignedTo());
-			}
-
-			if (entity.getCreatedBy() != null) {
-				initializeLazyRelationship(entity.getCreatedBy());
-			}
+			initializeLazyRelationship(entity.getAssignedTo());
+			initializeLazyRelationship(entity.getCreatedBy());
 		} catch (final Exception e) {
-			LOGGER.warn("Error initializing lazy fields for CEntityOfProject: {}",
-				entity.getName(), e);
+			LOGGER.warn("Error initializing lazy fields for {} with ID: {}",
+				getEntityClass().getSimpleName(), entity.getId(), e);
 		}
 	}
 

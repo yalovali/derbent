@@ -61,8 +61,6 @@ public abstract class CAbstractNamedEntityService<
 	 */
 	@Transactional (readOnly = true)
 	public boolean existsByName(final String name) {
-		LOGGER.debug("existsByName called with name: {} for {}", name,
-			getClass().getSimpleName());
 
 		if ((name == null) || name.trim().isEmpty()) {
 			LOGGER.warn("existsByName called with null or empty name for {}",
@@ -72,8 +70,6 @@ public abstract class CAbstractNamedEntityService<
 
 		try {
 			final boolean exists = namedRepository.existsByNameIgnoreCase(name.trim());
-			LOGGER.debug("existsByName for name '{}' exists: {} in {}", name, exists,
-				getClass().getSimpleName());
 			return exists;
 		} catch (final Exception e) {
 			LOGGER.error("Error checking name existence '{}' in {}: {}", name,
@@ -89,8 +85,6 @@ public abstract class CAbstractNamedEntityService<
 	 */
 	@Transactional (readOnly = true)
 	public Optional<EntityClass> findByName(final String name) {
-		LOGGER.debug("findByName called with name: {} for {}", name,
-			getClass().getSimpleName());
 
 		if ((name == null) || name.trim().isEmpty()) {
 			LOGGER.warn("findByName called with null or empty name for {}",
@@ -101,8 +95,6 @@ public abstract class CAbstractNamedEntityService<
 		try {
 			final Optional<EntityClass> entity =
 				namedRepository.findByNameIgnoreCase(name.trim());
-			LOGGER.debug("findByName for name '{}' found: {} in {}", name,
-				entity.isPresent(), getClass().getSimpleName());
 			return entity;
 		} catch (final Exception e) {
 			LOGGER.error("Error finding entity by name '{}' in {}: {}", name,
@@ -119,8 +111,6 @@ public abstract class CAbstractNamedEntityService<
 	 */
 	@Transactional (readOnly = true)
 	public boolean isNameUnique(final String name, final Long currentId) {
-		LOGGER.debug("isNameUnique called with name: {}, currentId: {} for {}", name,
-			currentId, getClass().getSimpleName());
 
 		if ((name == null) || name.trim().isEmpty()) {
 			LOGGER.warn("Name uniqueness check called with null or empty name for {}",
@@ -133,19 +123,13 @@ public abstract class CAbstractNamedEntityService<
 				namedRepository.findByNameIgnoreCase(name.trim());
 
 			if (existingEntity.isEmpty()) {
-				LOGGER.debug("Name '{}' is unique in {}", name,
-					getClass().getSimpleName());
 				return true;
 			}
 
 			// If we're updating an existing entity, check if it's the same entity
 			if ((currentId != null) && existingEntity.get().getId().equals(currentId)) {
-				LOGGER.debug("Name '{}' belongs to current entity being updated in {}",
-					name, getClass().getSimpleName());
 				return true;
 			}
-			LOGGER.debug("Name '{}' is not unique in {}", name,
-				getClass().getSimpleName());
 			return false;
 		} catch (final Exception e) {
 			LOGGER.error("Error checking name uniqueness for '{}' in {}: {}", name,

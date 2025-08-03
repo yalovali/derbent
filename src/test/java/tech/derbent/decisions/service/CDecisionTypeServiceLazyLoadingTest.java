@@ -29,7 +29,7 @@ public class CDecisionTypeServiceLazyLoadingTest extends CTestBase {
 	@Test
 	void testGetHandlesNullId() {
 		// When
-		final Optional<CDecisionType> result = decisionTypeService.get(null);
+		final Optional<CDecisionType> result = decisionTypeService.getById(null);
 		// Then
 		assertFalse(result.isPresent());
 		verify(decisionTypeRepository, never()).findByIdWithRelationships(any());
@@ -47,7 +47,8 @@ public class CDecisionTypeServiceLazyLoadingTest extends CTestBase {
 		when(decisionTypeRepository.findByIdWithRelationships(decisionTypeId))
 			.thenReturn(Optional.of(decisionType));
 		// When
-		final Optional<CDecisionType> result = decisionTypeService.get(decisionTypeId);
+		final Optional<CDecisionType> result =
+			decisionTypeService.getById(decisionTypeId);
 		// Then
 		assertTrue(result.isPresent());
 		assertEquals("Test Decision Type", result.get().getName());
@@ -64,7 +65,7 @@ public class CDecisionTypeServiceLazyLoadingTest extends CTestBase {
 		when(decisionTypeRepository.findByIdWithRelationships(nonExistentId))
 			.thenReturn(Optional.empty());
 		// When
-		final Optional<CDecisionType> result = decisionTypeService.get(nonExistentId);
+		final Optional<CDecisionType> result = decisionTypeService.getById(nonExistentId);
 		// Then
 		assertFalse(result.isPresent());
 		verify(decisionTypeRepository).findByIdWithRelationships(nonExistentId);
