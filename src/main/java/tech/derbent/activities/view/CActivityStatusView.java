@@ -102,4 +102,12 @@ public class CActivityStatusView extends CProjectAwareMDPage<CActivityStatus> {
         // TODO: Implement toolbar setup if needed Currently using default toolbar from
         // parent class
     }
+
+    /**
+     * Test method to expose populateForm for testing binding issues.
+     * This method should only be used in tests.
+     */
+    public void testPopulateForm(CActivityStatus entity) {
+        populateForm(entity);
+    }
 }
