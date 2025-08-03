@@ -40,9 +40,9 @@ public class CDecision extends CEntityOfProject<CDecision> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDecision.class);
 
 	// Decision Type Classification
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "decisiontype_id", nullable = true)
-	@MetaData (
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "decisiontype_id", nullable = true)
+	@MetaData(
 		displayName = "Decision Type", required = false, readOnly = false,
 		description = "Category or type of the decision", hidden = false, order = 2,
 		dataProviderBean = "CDecisionTypeService"
@@ -60,14 +60,14 @@ public class CDecision extends CEntityOfProject<CDecision> {
 	private BigDecimal estimatedCost;
 
 	// Status Management
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "decision_status_id", nullable = true)
-	@MetaData (
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "decision_status_id", nullable = true)
+	@MetaData(
 		displayName = "Decision Status", required = false, readOnly = false,
 		description = "Current status of the decision", hidden = false, order = 4,
 		dataProviderBean = "CDecisionStatusService"
 	)
-	@tech.derbent.abstracts.annotations.ColorAwareComboBox (
+	@tech.derbent.abstracts.annotations.ColorAwareComboBox(
 		roundedCorners = true, autoContrast = true
 	)
 	private CDecisionStatus decisionStatus;

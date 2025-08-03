@@ -16,12 +16,12 @@ public abstract class CEntityOfProject<EntityClass> extends CEntityNamed<EntityC
     @JoinColumn(name = "project_id", nullable = false)
     private CProject project;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "assigned_to_id", nullable = true)
     @MetaData(displayName = "Assigned To", required = false, readOnly = false, description = "User assigned to this activity", hidden = false, order = 10, dataProviderBean = "CUserService")
     private CUser assignedTo;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "created_by_id", nullable = true)
     @MetaData(displayName = "Created By", required = false, readOnly = true, description = "User who created this activity", hidden = false, order = 11, dataProviderBean = "CUserService")
     private CUser createdBy;

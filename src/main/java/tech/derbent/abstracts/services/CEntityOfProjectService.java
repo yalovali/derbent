@@ -72,38 +72,27 @@ public abstract class CEntityOfProjectService<
 	}
 
 	/**
-	 * Finds all entities by project with all relationships eagerly loaded. This
-	 * implementation is similar to CActivityService but without explicit null checks or
-	 * triggering lazy loading through getter methods.
+	 * Finds entities by project with all relationships eagerly loaded. This is the
+	 * standard method for project-based queries that loads all necessary relationships
+	 * to prevent LazyInitializationException.
+	 * 
 	 * @param project the project to find entities for
 	 * @return list of entities with all relationships initialized
 	 */
-	@Transactional (readOnly = true)
-	public List<EntityClass> findByProjectWithAllRelationships(final CProject project) {
-		LOGGER.info("findByProjectWithAllRelationships called for project: {}",
+	@Transactional(readOnly = true)
+	public List<EntityClass> findEntriesByProject(final CProject project) {
+		LOGGER.info("findEntriesByProject called for project: {}",
 			project != null ? project.getName() : "null");
-		// Direct repository call
-		final List<EntityClass> entities = projectRepository.findByProject(project);
-		// Initialize lazy fields without null checks or triggering loading
-		entities.forEach(this::initializeLazyFields);
-		return entities;
-	}
 
-	/**
-	 * Finds entities by project with properly loaded relationships to prevent
-	 * LazyInitializationException. This method provides the correct generic type for
-	 * CEntityOfProject entities.
-	 * @param project the project
-	 * @return list of entities with loaded relationships
-	 */
-	@Transactional (readOnly = true)
-	public List<EntityClass> findEntitiesByProject(final CProject project) {
-		Assert.notNull(project,
-			"Project must not be null for " + getClass().getSimpleName());
+		if (project == null) {
+			LOGGER.warn("findEntriesByProject called with null project for {}",
+				getClass().getSimpleName());
+			return List.of();
+		}
 
 		try {
 			final List<EntityClass> entities = projectRepository.findByProject(project);
-			// Additional lazy field initialization if needed
+			// Initialize any additional lazy fields that weren't loaded by the query
 			entities.forEach(this::initializeLazyFields);
 			return entities;
 		} catch (final Exception e) {
@@ -114,20 +103,21 @@ public abstract class CEntityOfProjectService<
 	}
 
 	/**
-	 * Finds entities by project with pagination and properly loaded relationships. This
-	 * method provides the correct generic type for CEntityOfProject entities.
+	 * Finds entities by project with pagination support. This method supports grid
+	 * functionality while maintaining eager loading of all relationships.
+	 * 
 	 * @param project  the project
 	 * @param pageable pagination information
 	 * @return list of entities with loaded relationships
 	 */
-	@Transactional (readOnly = true)
-	public List<EntityClass> findEntitiesByProject(final CProject project,
+	@Transactional(readOnly = true)
+	public List<EntityClass> findEntriesByProject(final CProject project,
 		final Pageable pageable) {
-		LOGGER.info("findEntitiesByProject called with project: {} and pageable for {}",
+		LOGGER.info("findEntriesByProject called with project: {} and pageable for {}",
 			project != null ? project.getName() : "null", getClass().getSimpleName());
 
 		if (project == null) {
-			LOGGER.warn("findEntitiesByProject called with null project for {}",
+			LOGGER.warn("findEntriesByProject called with null project for {}",
 				getClass().getSimpleName());
 			return List.of();
 		}
@@ -135,7 +125,7 @@ public abstract class CEntityOfProjectService<
 		try {
 			final List<EntityClass> entities =
 				projectRepository.findByProject(project, pageable);
-			// Additional lazy field initialization if needed
+			// Initialize any additional lazy fields that weren't loaded by the query
 			entities.forEach(this::initializeLazyFields);
 			return entities;
 		} catch (final Exception e) {
@@ -148,15 +138,17 @@ public abstract class CEntityOfProjectService<
 	}
 
 	/**
-	 * Override get() method to use the repository method that eagerly loads project
-	 * relationships to prevent LazyInitializationException.
+	 * Gets an entity by ID with all relationships eagerly loaded. This is the standard
+	 * method for single entity retrieval that loads all necessary relationships to
+	 * prevent LazyInitializationException.
+	 * 
 	 * @param id the entity ID
 	 * @return optional entity with loaded relationships
 	 */
 	@Override
-	@Transactional (readOnly = true)
+	@Transactional(readOnly = true)
 	public Optional<EntityClass> getById(final Long id) {
-		LOGGER.info("get called with id: {} for {}", id, getClass().getSimpleName());
+		LOGGER.info("getById called with id: {} for {}", id, getClass().getSimpleName());
 
 		if (id == null) {
 			return Optional.empty();
@@ -165,7 +157,7 @@ public abstract class CEntityOfProjectService<
 		try {
 			final Optional<EntityClass> entity =
 				projectRepository.findByIdWithProjectRelationships(id);
-			// Initialize any additional lazy fields
+			// With eager loading of small entities, minimal lazy field initialization needed
 			entity.ifPresent(this::initializeLazyFields);
 			return entity;
 		} catch (final Exception e) {
@@ -176,8 +168,10 @@ public abstract class CEntityOfProjectService<
 	}
 
 	/**
-	 * Enhanced initialization of lazy-loaded fields for CEntityOfProject entities. Based
-	 * on CActivityService implementation style without null checks or explicit loading.
+	 * Minimal lazy field initialization for CEntityOfProject entities. With eager
+	 * loading of small entities (status, type, user references), this mainly handles
+	 * any remaining complex relationships.
+	 * 
 	 * @param entity the entity to initialize
 	 */
 	@Override
@@ -188,12 +182,13 @@ public abstract class CEntityOfProjectService<
 		}
 
 		try {
-			// First call parent initialization
+			// Call parent initialization for basic entity relationships
 			super.initializeLazyFields(entity);
-			// Initialize CEntityOfProject specific relationships
-			initializeLazyRelationship(entity.getProject());
-			initializeLazyRelationship(entity.getAssignedTo());
-			initializeLazyRelationship(entity.getCreatedBy());
+			// Most relationships are now eager-loaded, minimal initialization needed
+			// Only initialize complex collections if present
+			if (entity.getProject() != null) {
+				initializeLazyRelationship(entity.getProject());
+			}
 		} catch (final Exception e) {
 			LOGGER.warn("Error initializing lazy fields for {} with ID: {}",
 				getEntityClass().getSimpleName(), entity.getId(), e);

@@ -143,7 +143,7 @@ public abstract class CProjectAwareMDPage<
 			if (entityService instanceof CEntityOfProjectService) {
 				final CEntityOfProjectService<EntityClass> projectService =
 					(CEntityOfProjectService<EntityClass>) entityService;
-				entities = projectService.findEntitiesByProject(activeProject.get(),
+				entities = projectService.findEntriesByProject(activeProject.get(),
 					PageableUtils.createSafe(0, 10));
 			}
 			else {
@@ -181,7 +181,7 @@ public abstract class CProjectAwareMDPage<
 			final CEntityOfProjectService<EntityClass> projectService =
 				(CEntityOfProjectService<EntityClass>) entityService;
 			result = projectService
-				.findEntitiesByProject(sessionService.getActiveProject().get(), pageable);
+				.findEntriesByProject(sessionService.getActiveProject().get(), pageable);
 		}
 		else {
 			// For non-project entities, just get the first entity from all entities

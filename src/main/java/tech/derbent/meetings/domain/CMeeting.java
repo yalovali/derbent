@@ -34,7 +34,7 @@ import tech.derbent.users.domain.CUser;
 @AttributeOverride(name = "id", column = @Column(name = "meeting_id"))
 public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "cmeetingtype_id", nullable = true)
     @MetaData(displayName = "Meeting Type", required = false, readOnly = false, description = "Type category of the meeting", hidden = false, order = 2, dataProviderBean = "CMeetingTypeService")
     private CMeetingType meetingType;
@@ -67,13 +67,13 @@ public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntit
     @MetaData(displayName = "Related Activity", required = false, readOnly = false, description = "Project activity related to this meeting", hidden = false, order = 8, dataProviderBean = "CActivityService")
     private CActivity relatedActivity;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "meeting_status_id", nullable = true)
     @MetaData(displayName = "Status", required = false, readOnly = false, description = "Current status of the meeting", hidden = false, order = 9, dataProviderBean = "CMeetingStatusService")
     @tech.derbent.abstracts.annotations.ColorAwareComboBox(roundedCorners = true, autoContrast = true)
     private CMeetingStatus status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "responsible_id", nullable = true)
     @MetaData(displayName = "Responsible", required = false, readOnly = false, description = "Person responsible for organizing and leading the meeting", hidden = false, order = 10, dataProviderBean = "CUserService")
     private CUser responsible;
