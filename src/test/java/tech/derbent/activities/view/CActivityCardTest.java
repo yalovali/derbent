@@ -15,43 +15,43 @@ import tech.derbent.projects.domain.CProject;
  */
 class CActivityCardTest extends CTestBase {
 
-	@Test
-	void testActivityCardCreation() {
-		// Given
-		final CProject project = new CProject("asdf");
-		project.setName("Test Project");
-		final CActivity activity = new CActivity("Test Activity", project);
-		// When
-		final CActivityCard card = new CActivityCard(activity);
-		// Then
-		assertNotNull(card);
-		assertEquals(activity, card.getActivity());
-	}
+    @Test
+    void testActivityCardCreation() {
+        // Given
+        final CProject project = new CProject("asdf");
+        project.setName("Test Project");
+        final CActivity activity = new CActivity("Test Activity", project);
+        // When
+        final CActivityCard card = new CActivityCard(activity);
+        // Then
+        assertNotNull(card);
+        assertEquals(activity, card.getActivity());
+    }
 
-	@Test
-	void testActivityCardRefresh() {
-		// Given
-		final CProject project = new CProject("asdf");
-		project.setName("Test Project");
-		final CActivity activity = new CActivity("Test Activity", project);
-		final CActivityCard card = new CActivityCard(activity);
-		// When
-		card.refresh();
-		// Then - should not throw exception
-		assertNotNull(card);
-	}
+    @Test
+    void testActivityCardRefresh() {
+        // Given
+        final CProject project = new CProject("asdf");
+        project.setName("Test Project");
+        final CActivity activity = new CActivity("Test Activity", project);
+        final CActivityCard card = new CActivityCard(activity);
+        // When
+        card.refresh();
+        // Then - should not throw exception
+        assertNotNull(card);
+    }
 
-	@Test
-	void testActivityCardWithNullThrowsException() {
-		// Given - null activity When & Then
-		assertThrows(IllegalArgumentException.class, () -> {
-			new CActivityCard(null);
-		});
-	}
+    @Test
+    void testActivityCardWithNullThrowsException() {
+        // Given - null activity When & Then
+        assertThrows(IllegalArgumentException.class, () -> {
+            new CActivityCard(null);
+        });
+    }
 
-	@Override
-	protected void setupForTest() {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    protected void setupForTest() {
+        // TODO Auto-generated method stub
+
+    }
 }

@@ -11,14 +11,14 @@ import tech.derbent.users.domain.CUser;
 /**
  * Test class for CPanelUserBasicInfo to ensure proper field grouping.
  */
-@ExtendWith (MockitoExtension.class)
+@ExtendWith(MockitoExtension.class)
 class CPanelUserBasicInfoTest extends CTestBase {
 
-	@SuppressWarnings ("unused")
-	private BeanValidationBinder<CUser> binder;
+    @SuppressWarnings("unused")
+    private BeanValidationBinder<CUser> binder;
 
-	@Override
-	protected void setupForTest() {
-		binder = new BeanValidationBinder<>(CUser.class);
-	}
+    @Override
+    protected void setupForTest() {
+        binder = new BeanValidationBinder<>(CUser.class);
+    }
 }

@@ -9,16 +9,15 @@ import tech.derbent.activities.service.CActivityService;
 
 public class CPanelActivityResourceManagement extends CPanelActivityBase {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public CPanelActivityResourceManagement(final CActivity currentEntity,
-		final BeanValidationBinder<CActivity> beanValidationBinder,
-		final CActivityService entityService) {
-		super("Resource Management", currentEntity, beanValidationBinder, entityService);
-	}
+    public CPanelActivityResourceManagement(final CActivity currentEntity,
+            final BeanValidationBinder<CActivity> beanValidationBinder, final CActivityService entityService) {
+        super("Resource Management", currentEntity, beanValidationBinder, entityService);
+    }
 
-	@Override
-	protected void updatePanelEntityFields() {
-		setEntityFields(List.of("assignedTo", "createdBy"));
-	}
+    @Override
+    protected void updatePanelEntityFields() {
+        setEntityFields(List.of("assignedTo", "createdBy"));
+    }
 }

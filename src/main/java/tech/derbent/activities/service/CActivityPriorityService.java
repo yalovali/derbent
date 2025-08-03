@@ -13,31 +13,30 @@ import tech.derbent.activities.domain.CActivityPriority;
 @Transactional
 public class CActivityPriorityService extends CEntityOfProjectService<CActivityPriority> {
 
-	private final CActivityPriorityRepository activityPriorityRepository;
+    private final CActivityPriorityRepository activityPriorityRepository;
 
-	public CActivityPriorityService(final CActivityPriorityRepository repository,
-		final Clock clock) {
-		super(repository, clock);
-		this.activityPriorityRepository = repository;
-	}
+    public CActivityPriorityService(final CActivityPriorityRepository repository, final Clock clock) {
+        super(repository, clock);
+        this.activityPriorityRepository = repository;
+    }
 
-	@Override
-	@Transactional (readOnly = true)
-	public Optional<CActivityPriority> findByName(final String name) {
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<CActivityPriority> findByName(final String name) {
 
-		if ((name == null) || name.trim().isEmpty()) {
-			return Optional.empty();
-		}
-		return activityPriorityRepository.findByNameIgnoreCase(name.trim());
-	}
+        if ((name == null) || name.trim().isEmpty()) {
+            return Optional.empty();
+        }
+        return activityPriorityRepository.findByNameIgnoreCase(name.trim());
+    }
 
-	@Transactional (readOnly = true)
-	public Optional<CActivityPriority> findDefaultPriority() {
-		return activityPriorityRepository.findByIsDefaultTrue();
-	}
+    @Transactional(readOnly = true)
+    public Optional<CActivityPriority> findDefaultPriority() {
+        return activityPriorityRepository.findByIsDefaultTrue();
+    }
 
-	@Override
-	protected Class<CActivityPriority> getEntityClass() {
-		return CActivityPriority.class;
-	}
+    @Override
+    protected Class<CActivityPriority> getEntityClass() {
+        return CActivityPriority.class;
+    }
 }

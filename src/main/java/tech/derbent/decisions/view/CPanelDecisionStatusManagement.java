@@ -8,8 +8,7 @@ import tech.derbent.decisions.domain.CDecision;
 import tech.derbent.decisions.service.CDecisionService;
 
 /**
- * CPanelDecisionStatusManagement - Panel for decision status and workflow management.
- * Layer: View (MVC)
+ * CPanelDecisionStatusManagement - Panel for decision status and workflow management. Layer: View (MVC)
  * 
  * Displays and allows editing of decision status information and workflow controls.
  */
@@ -19,13 +18,16 @@ public class CPanelDecisionStatusManagement extends CPanelDecisionBase {
 
     /**
      * Constructor for decision status management panel.
-     * @param currentEntity the current decision entity
-     * @param beanValidationBinder validation binder for the decision
-     * @param entityService decision service for data operations
+     * 
+     * @param currentEntity
+     *            the current decision entity
+     * @param beanValidationBinder
+     *            validation binder for the decision
+     * @param entityService
+     *            decision service for data operations
      */
     public CPanelDecisionStatusManagement(final CDecision currentEntity,
-                                        final BeanValidationBinder<CDecision> beanValidationBinder,
-                                        final CDecisionService entityService) {
+            final BeanValidationBinder<CDecision> beanValidationBinder, final CDecisionService entityService) {
         super("Status & Workflow", currentEntity, beanValidationBinder, entityService);
     }
 

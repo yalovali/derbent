@@ -10,24 +10,28 @@ import tech.derbent.abstracts.services.CAbstractNamedEntityService;
 import tech.derbent.orders.domain.COrderStatus;
 
 /**
- * COrderStatusService - Service layer for COrderStatus entity. Layer: Service (MVC)
- * Handles business logic for order status operations including creation, validation, and
- * management of order status entities.
+ * COrderStatusService - Service layer for COrderStatus entity. Layer: Service (MVC) Handles business logic for order
+ * status operations including creation, validation, and management of order status entities.
  */
 @Service
-@PreAuthorize ("isAuthenticated()")
-@Transactional (readOnly = true)
+@PreAuthorize("isAuthenticated()")
+@Transactional(readOnly = true)
 public class COrderStatusService extends CAbstractNamedEntityService<COrderStatus> {
 
-	/**
-	 * Constructor for COrderStatusService.
-	 * @param repository the COrderStatusRepository to use for data access
-	 * @param clock      the Clock instance for time-related operations
-	 */
-	COrderStatusService(final COrderStatusRepository repository, final Clock clock) {
-		super(repository, clock);
-	}
+    /**
+     * Constructor for COrderStatusService.
+     * 
+     * @param repository
+     *            the COrderStatusRepository to use for data access
+     * @param clock
+     *            the Clock instance for time-related operations
+     */
+    COrderStatusService(final COrderStatusRepository repository, final Clock clock) {
+        super(repository, clock);
+    }
 
-	@Override
-	protected Class<COrderStatus> getEntityClass() { return COrderStatus.class; }
+    @Override
+    protected Class<COrderStatus> getEntityClass() {
+        return COrderStatus.class;
+    }
 }

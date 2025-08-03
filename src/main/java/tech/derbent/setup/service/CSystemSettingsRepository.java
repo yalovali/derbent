@@ -9,18 +9,17 @@ import tech.derbent.abstracts.services.CAbstractRepository;
 import tech.derbent.setup.domain.CSystemSettings;
 
 /**
- * CSystemSettingsRepository - Data access layer for CSystemSettings entities.
- * Layer: Service (MVC) - Repository interface
+ * CSystemSettingsRepository - Data access layer for CSystemSettings entities. Layer: Service (MVC) - Repository
+ * interface
  * 
- * Provides database access methods for system-wide configuration settings.
- * Since system settings are singleton by design, most operations focus on
- * retrieving and updating the single system settings record.
+ * Provides database access methods for system-wide configuration settings. Since system settings are singleton by
+ * design, most operations focus on retrieving and updating the single system settings record.
  */
 public interface CSystemSettingsRepository extends CAbstractRepository<CSystemSettings> {
 
     /**
-     * Finds the current system settings.
-     * Since there should be only one system settings record, this returns the first one.
+     * Finds the current system settings. Since there should be only one system settings record, this returns the first
+     * one.
      * 
      * @return Optional containing the CSystemSettings if found, empty otherwise
      */
@@ -30,7 +29,8 @@ public interface CSystemSettingsRepository extends CAbstractRepository<CSystemSe
     /**
      * Finds system settings by application name.
      * 
-     * @param applicationName the name of the application
+     * @param applicationName
+     *            the name of the application
      * @return Optional containing the CSystemSettings if found, empty otherwise
      */
     @Query("SELECT ss FROM CSystemSettings ss WHERE ss.applicationName = :applicationName")
@@ -39,7 +39,8 @@ public interface CSystemSettingsRepository extends CAbstractRepository<CSystemSe
     /**
      * Finds system settings by application version.
      * 
-     * @param applicationVersion the version of the application
+     * @param applicationVersion
+     *            the version of the application
      * @return Optional containing the CSystemSettings if found, empty otherwise
      */
     @Query("SELECT ss FROM CSystemSettings ss WHERE ss.applicationVersion = :applicationVersion")
@@ -118,8 +119,7 @@ public interface CSystemSettingsRepository extends CAbstractRepository<CSystemSe
     Optional<Integer> getMaxLoginAttempts();
 
     /**
-     * Checks if any system settings record exists.
-     * Used to determine if initial setup is needed.
+     * Checks if any system settings record exists. Used to determine if initial setup is needed.
      * 
      * @return true if system settings exist, false otherwise
      */

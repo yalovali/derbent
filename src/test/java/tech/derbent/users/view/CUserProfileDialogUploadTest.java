@@ -18,42 +18,40 @@ import tech.derbent.users.domain.CUser;
  */
 public class CUserProfileDialogUploadTest extends CTestBase {
 
-	@Test
-	public void testProfileDialogCreation() {
-		// Test that the dialog can be created without deprecated API usage
-		final CUser testUser =
-			new CUser("testuser", "password", "Test", "test@example.com");
-		final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-		assertDoesNotThrow(() -> {
-			final CUserProfileDialog dialog =
-				new CUserProfileDialog(testUser, user -> {}, passwordEncoder);
-			assertNotNull(dialog);
-		});
-	}
+    @Test
+    public void testProfileDialogCreation() {
+        // Test that the dialog can be created without deprecated API usage
+        final CUser testUser = new CUser("testuser", "password", "Test", "test@example.com");
+        final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        assertDoesNotThrow(() -> {
+            final CUserProfileDialog dialog = new CUserProfileDialog(testUser, user -> {
+            }, passwordEncoder);
+            assertNotNull(dialog);
+        });
+    }
 
-	@Test
-	public void testUploadHandlerCallback() {
-		// Test that our upload callback works correctly
-		final String[] receivedFileName = new String[1];
-		final byte[][] receivedData = new byte[1][];
-		// Create a metadata record
-		final UploadMetadata metadata =
-			new UploadMetadata("test-image.jpg", "image/jpeg", 1024);
-		final byte[] testData = "test image data".getBytes();
-		// Test the callback pattern we're using
-		assertDoesNotThrow(() -> {
-			receivedFileName[0] = metadata.fileName();
-			receivedData[0] = testData;
-		});
-		assertEquals("test-image.jpg", receivedFileName[0]);
-		assertEquals("image/jpeg", metadata.contentType());
-		assertEquals(1024, metadata.contentLength());
-		assertArrayEquals(testData, receivedData[0]);
-	}
+    @Test
+    public void testUploadHandlerCallback() {
+        // Test that our upload callback works correctly
+        final String[] receivedFileName = new String[1];
+        final byte[][] receivedData = new byte[1][];
+        // Create a metadata record
+        final UploadMetadata metadata = new UploadMetadata("test-image.jpg", "image/jpeg", 1024);
+        final byte[] testData = "test image data".getBytes();
+        // Test the callback pattern we're using
+        assertDoesNotThrow(() -> {
+            receivedFileName[0] = metadata.fileName();
+            receivedData[0] = testData;
+        });
+        assertEquals("test-image.jpg", receivedFileName[0]);
+        assertEquals("image/jpeg", metadata.contentType());
+        assertEquals(1024, metadata.contentLength());
+        assertArrayEquals(testData, receivedData[0]);
+    }
 
-	@Override
-	protected void setupForTest() {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    protected void setupForTest() {
+        // TODO Auto-generated method stub
+
+    }
 }
