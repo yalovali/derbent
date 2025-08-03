@@ -15,7 +15,7 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.function.ValueProvider;
 
 import tech.derbent.abstracts.annotations.MetaData;
-import tech.derbent.abstracts.components.CGridCellStatus;
+import tech.derbent.abstracts.components.CGridCell;
 import tech.derbent.abstracts.domains.CEntityConstants;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.utils.CAuxillaries;
@@ -198,23 +198,15 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 		if ((meta != null) && meta.setBackgroundFromColor()) {
 			return addComponentColumn(item -> {
 				final Object value = valueProvider.apply(item);
-				// final Span span = new Span(value != null ? value.toString() : "");
-				final Div cell = new Div();
-				cell.setText(value != null ? value.toString() : "");
-				cell.getStyle().set("width", "100%");
-				cell.getStyle().set("height", "100%");
-				// cell.getStyle().set("box-sizing", "border-box");
-
-				if (item instanceof CEntityDB) {
-					final CEntityDB<?> entity = item;
-					final String color = entity.getColor();
-
-					if ((color != null) && !color.isBlank()) {
-						final String textColor = CColorUtils.getContrastTextColor(color);
-						cell.getStyle().set("color", textColor);
-						cell.getStyle().set("background-color", color);
-					}
+				final CGridCell cell = new CGridCell();
+				
+				// Set the value which will handle color rendering if entity has color
+				if (value instanceof CEntityDB) {
+					cell.setEntityValue((CEntityDB<?>) value);
+				} else {
+					cell.setText(value != null ? value.toString() : "");
 				}
+				
 				return cell;
 			}).setHeader(header).setWidth(width).setFlexGrow(0).setSortable(true);
 		}
@@ -287,8 +279,7 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 
 	/**
 	 * Adds a status column with color-aware rendering. This method creates a column that
-	 * displays status entities with their associated colors as background using custom
-	 * cell components.
+	 * displays status entities with their associated colors as background using CGridCell.
 	 * @param statusProvider Provider that returns the status entity
 	 * @param header         Column header text
 	 * @param key            Column key for identification
@@ -299,7 +290,7 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 		final String key) {
 		final Column<EntityClass> column = addComponentColumn(entity -> {
 			final S status = statusProvider.apply(entity);
-			final CGridCellStatus statusCell = new CGridCellStatus();
+			final CGridCell statusCell = new CGridCell();
 			// Configure icon display based on grid setting
 			statusCell.setShowIcon(showIconInStatusColumns);
 			statusCell.setStatusValue(status);
