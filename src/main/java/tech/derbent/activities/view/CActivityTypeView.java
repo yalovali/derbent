@@ -8,6 +8,7 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
+import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.activities.domain.CActivityType;
 import tech.derbent.activities.service.CActivityTypeService;
 import tech.derbent.projects.domain.CProject;
@@ -19,11 +20,17 @@ import tech.derbent.session.service.CSessionService;
  */
 @Route("activity-types/:activity_type_id?/:action?(edit)")
 @PageTitle("Activity Types")
-@Menu(order = 10.4, icon = "vaadin:tags", title = "Types.Activity Types")
+@Menu(order = 10.4, icon = "class:tech.derbent.activities.view.CActivityTypeView", title = "Types.Activity Types")
 @PermitAll
-public class CActivityTypeView extends CProjectAwareMDPage<CActivityType> {
+public class CActivityTypeView extends CProjectAwareMDPage<CActivityType> implements CInterfaceIconSet {
 
     private static final long serialVersionUID = 1L;
+
+    public static String getIconColorCode() {
+        return CActivityType.getIconColorCode(); // Use the static method from CActivityType
+    }
+
+    public static String getIconFilename() { return CActivityType.getIconFilename(); }
 
     private final String ENTITY_ID_FIELD = "activity_type_id";
 

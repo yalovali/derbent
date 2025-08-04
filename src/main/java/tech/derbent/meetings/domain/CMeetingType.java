@@ -27,4 +27,10 @@ public class CMeetingType extends CTypeEntity<CMeetingType> implements CKanbanTy
     public CMeetingType(final String name, final CProject project) {
         super(CMeetingType.class, name, project);
     }
+
+    public static String getIconColorCode() {
+        return "#28a745"; // Green color for meeting type entities
+    }
+
+    public static String getIconFilename() { return "vaadin:tags"; }
 }

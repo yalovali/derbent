@@ -408,6 +408,7 @@ public final class ViewToolbar extends Composite<Header> implements CProjectList
             final Icon icon = currentMode == LayoutService.LayoutMode.HORIZONTAL
                     ? VaadinIcon.GRID_H.create()
                     : VaadinIcon.GRID_V.create();
+            icon.addClassNames(IconSize.MEDIUM); // Use same size as menu icons
             layoutToggleButton.setIcon(icon);
             layoutToggleButton.getElement().setAttribute("title", "Current: " + currentMode + " - Click to toggle");
         }

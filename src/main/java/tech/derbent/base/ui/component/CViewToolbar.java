@@ -412,6 +412,7 @@ public final class CViewToolbar extends Composite<Header> implements CProjectLis
             final Icon icon = currentMode == LayoutService.LayoutMode.HORIZONTAL
                     ? VaadinIcon.GRID_H.create()
                     : VaadinIcon.GRID_V.create();
+            icon.addClassNames(IconSize.MEDIUM); // Use same size as menu icons
             layoutToggleButton.setIcon(icon);
             layoutToggleButton.getElement().setAttribute("title", "Current: " + currentMode + " - Click to toggle");
         }
@@ -447,7 +448,7 @@ public final class CViewToolbar extends Composite<Header> implements CProjectLis
      */
     private CButton createColorfulIconButton(VaadinIcon iconType, String tooltip, String color, String route) {
         final Icon icon = iconType.create();
-        icon.addClassNames(IconSize.SMALL);
+        icon.addClassNames(IconSize.MEDIUM); // Use same size as menu icons
         icon.getStyle().set("color", color);
         
         final CButton button = new CButton(icon);

@@ -18,6 +18,7 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
+import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.service.CMeetingService;
 import tech.derbent.meetings.service.CMeetingStatusService;
@@ -27,11 +28,17 @@ import tech.derbent.users.service.CUserService;
 
 @Route ("meetings/:meeting_id?/:action?(edit)")
 @PageTitle ("Meeting Master Detail")
-@Menu (order = 1.4, icon = "vaadin:group", title = "Project.Meetings")
+@Menu (order = 1.4, icon = "class:tech.derbent.meetings.view.CMeetingsView", title = "Project.Meetings")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CMeetingsView extends CProjectAwareMDPage<CMeeting> {
+public class CMeetingsView extends CProjectAwareMDPage<CMeeting> implements CInterfaceIconSet {
 
 	private static final long serialVersionUID = 1L;
+
+	public static String getIconColorCode() {
+		return CMeeting.getIconColorCode(); // Use the static method from CMeeting
+	}
+
+	public static String getIconFilename() { return CMeeting.getIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "meeting_id";
 

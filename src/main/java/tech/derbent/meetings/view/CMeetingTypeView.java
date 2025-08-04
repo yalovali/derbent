@@ -9,6 +9,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.annotations.CSpringAuxillaries;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
+import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.meetings.domain.CMeetingType;
 import tech.derbent.meetings.service.CMeetingTypeService;
 import tech.derbent.projects.domain.CProject;
@@ -20,11 +21,17 @@ import tech.derbent.session.service.CSessionService;
  */
 @Route("meeting-types/:meetingtype_id?/:action?(edit)")
 @PageTitle("Meeting Types")
-@Menu(order = 10.2, icon = "vaadin:tags", title = "Types.Meeting Types")
+@Menu(order = 10.2, icon = "class:tech.derbent.meetings.view.CMeetingTypeView", title = "Types.Meeting Types")
 @PermitAll
-public class CMeetingTypeView extends CProjectAwareMDPage<CMeetingType> {
+public class CMeetingTypeView extends CProjectAwareMDPage<CMeetingType> implements CInterfaceIconSet {
 
     private static final long serialVersionUID = 1L;
+
+    public static String getIconColorCode() {
+        return CMeetingType.getIconColorCode(); // Use the static method from CMeetingType
+    }
+
+    public static String getIconFilename() { return CMeetingType.getIconFilename(); }
 
     private final String ENTITY_ID_FIELD = "meetingtype_id";
 

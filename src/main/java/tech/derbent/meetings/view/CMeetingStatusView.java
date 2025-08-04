@@ -10,6 +10,7 @@ import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.annotations.CSpringAuxillaries;
 import tech.derbent.abstracts.components.CGridCell;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
+import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.meetings.domain.CMeetingStatus;
 import tech.derbent.meetings.service.CMeetingStatusService;
 import tech.derbent.projects.domain.CProject;
@@ -22,11 +23,17 @@ import tech.derbent.session.service.CSessionService;
  */
 @Route("meeting-statuses/:meeting_status_id?/:action?(edit)")
 @PageTitle("Meeting Statuses")
-@Menu(order = 11.3, icon = "vaadin:flag", title = "Types.Meeting Statuses")
+@Menu(order = 11.3, icon = "class:tech.derbent.meetings.view.CMeetingStatusView", title = "Types.Meeting Statuses")
 @PermitAll
-public class CMeetingStatusView extends CProjectAwareMDPage<CMeetingStatus> {
+public class CMeetingStatusView extends CProjectAwareMDPage<CMeetingStatus> implements CInterfaceIconSet {
 
     private static final long serialVersionUID = 1L;
+
+    public static String getIconColorCode() {
+        return CMeetingStatus.getIconColorCode(); // Use the static method from CMeetingStatus
+    }
+
+    public static String getIconFilename() { return CMeetingStatus.getIconFilename(); }
 
     private final String ENTITY_ID_FIELD = "meeting_status_id";
 

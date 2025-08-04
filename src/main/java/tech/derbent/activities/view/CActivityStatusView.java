@@ -9,6 +9,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.annotations.CSpringAuxillaries;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
+import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.service.CActivityStatusService;
 import tech.derbent.projects.domain.CProject;
@@ -21,11 +22,17 @@ import tech.derbent.session.service.CSessionService;
  */
 @Route ("activity-statuses/:activity_status_id?/:action?(edit)")
 @PageTitle ("Activity Statuses")
-@Menu (order = 2.1, icon = "vaadin:flag", title = "Types.Activity Statuses")
+@Menu (order = 2.1, icon = "class:tech.derbent.activities.view.CActivityStatusView", title = "Types.Activity Statuses")
 @PermitAll
-public class CActivityStatusView extends CProjectAwareMDPage<CActivityStatus> {
+public class CActivityStatusView extends CProjectAwareMDPage<CActivityStatus> implements CInterfaceIconSet {
 
 	private static final long serialVersionUID = 1L;
+
+	public static String getIconColorCode() {
+		return CActivityStatus.getIconColorCode(); // Use the static method from CActivityStatus
+	}
+
+	public static String getIconFilename() { return CActivityStatus.getIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "activity_status_id";
 

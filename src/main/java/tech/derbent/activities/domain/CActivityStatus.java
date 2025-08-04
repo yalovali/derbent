@@ -23,6 +23,12 @@ import tech.derbent.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "cactivitystatus_id"))
 public class CActivityStatus extends CStatus<CActivityStatus> implements CKanbanStatus {
 
+	public static String getIconColorCode() {
+		return "#007bff"; // Blue color for activity status entities
+	}
+
+	public static String getIconFilename() { return "vaadin:flag"; }
+
 	@Column (name = "is_final", nullable = false)
 	@MetaData (
 		displayName = "Is Final Status", required = true, readOnly = false,

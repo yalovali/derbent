@@ -8,6 +8,7 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
+import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.risks.domain.CRisk;
 import tech.derbent.risks.service.CRiskService;
@@ -19,11 +20,17 @@ import tech.derbent.session.service.CSessionService;
  */
 @PageTitle("Project Risks")
 @Route("risks/:risk_id?/:action?(edit)")
-@Menu(order = 1.3, icon = "vaadin:warning", title = "Project.Risks")
+@Menu(order = 1.3, icon = "class:tech.derbent.risks.view.CRiskView", title = "Project.Risks")
 @PermitAll
-public class CRiskView extends CProjectAwareMDPage<CRisk> {
+public class CRiskView extends CProjectAwareMDPage<CRisk> implements CInterfaceIconSet {
 
     private static final long serialVersionUID = 1L;
+
+    public static String getIconColorCode() {
+        return CRisk.getIconColorCode(); // Use the static method from CRisk
+    }
+
+    public static String getIconFilename() { return CRisk.getIconFilename(); }
 
     private static final String ENTITY_ID_FIELD = "risk_id";
 
