@@ -11,68 +11,75 @@ import tech.derbent.base.domain.CStatus;
 import tech.derbent.projects.domain.CProject;
 
 /**
- * CRiskStatus - Domain entity representing risk status types. Layer: Domain (MVC) Inherits from CStatus to provide
- * status functionality for risks. This entity defines the possible statuses a risk can have (e.g., IDENTIFIED,
- * MITIGATED, RESOLVED, CLOSED).
+ * CRiskStatus - Domain entity representing risk status types. Layer: Domain (MVC)
+ * Inherits from CStatus to provide status functionality for risks. This entity defines
+ * the possible statuses a risk can have (e.g., IDENTIFIED, MITIGATED, RESOLVED, CLOSED).
  */
 @Entity
-@Table(name = "criskstatus")
-@AttributeOverride(name = "id", column = @Column(name = "criskstatus_id"))
+@Table (name = "criskstatus")
+@AttributeOverride (name = "id", column = @Column (name = "criskstatus_id"))
 public class CRiskStatus extends CStatus<CRiskStatus> {
 
-    @Column(name = "is_final", nullable = false)
-    @MetaData(displayName = "Is Final Status", required = true, readOnly = false, defaultValue = "false", description = "Indicates if this is a final status (resolved/closed)", hidden = false, order = 4)
-    private Boolean isFinal = Boolean.FALSE;
+	public static String getIconColorCode() {
+		return "#6c757d"; // Gray color for status entities
+	}
 
-    /**
-     * Default constructor for JPA.
-     */
-    public CRiskStatus() {
-        super();
-        // Initialize with default values for JPA
-        this.isFinal = Boolean.FALSE;
-    }
+	public static String getIconFilename() { return "vaadin:flag"; }
 
-    public CRiskStatus(final String name, final CProject project) {
-        super(CRiskStatus.class, name, project);
-    }
+	@Column (name = "is_final", nullable = false)
+	@MetaData (
+		displayName = "Is Final Status", required = true, readOnly = false,
+		defaultValue = "false",
+		description = "Indicates if this is a final status (resolved/closed)",
+		hidden = false, order = 4
+	)
+	private Boolean isFinal = Boolean.FALSE;
 
-    public CRiskStatus(final String name, final CProject project, final String description, final String color,
-            final Boolean isFinal) {
-        super(CRiskStatus.class, name, project);
-        setDescription(description);
-        setColor(color);
-        this.isFinal = isFinal;
-    }
+	/**
+	 * Default constructor for JPA.
+	 */
+	public CRiskStatus() {
+		super();
+		// Initialize with default values for JPA
+		this.isFinal = Boolean.FALSE;
+	}
 
-    @Override
-    public boolean equals(final Object o) {
+	public CRiskStatus(final String name, final CProject project) {
+		super(CRiskStatus.class, name, project);
+	}
 
-        if (this == o) {
-            return true;
-        }
+	public CRiskStatus(final String name, final CProject project,
+		final String description, final String color, final Boolean isFinal) {
+		super(CRiskStatus.class, name, project);
+		setDescription(description);
+		setColor(color);
+		this.isFinal = isFinal;
+	}
 
-        if (!(o instanceof CRiskStatus)) {
-            return false;
-        }
-        return super.equals(o);
-    }
+	@Override
+	public boolean equals(final Object o) {
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), isFinal);
-    }
+		if (this == o) {
+			return true;
+		}
 
-    public Boolean isFinal() {
-        return isFinal;
-    }
+		if (!(o instanceof CRiskStatus)) {
+			return false;
+		}
+		return super.equals(o);
+	}
 
-    public void setFinal(final Boolean isFinal) {
-        this.isFinal = isFinal;
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), isFinal);
+	}
 
-    @Override
-    public String toString() {
-        return getName() != null ? getName() : super.toString();
-    }
+	public Boolean isFinal() { return isFinal; }
+
+	public void setFinal(final Boolean isFinal) { this.isFinal = isFinal; }
+
+	@Override
+	public String toString() {
+		return getName() != null ? getName() : super.toString();
+	}
 }

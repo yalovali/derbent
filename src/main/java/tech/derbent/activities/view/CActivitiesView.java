@@ -15,111 +15,131 @@ import tech.derbent.comments.view.CPanelActivityComments;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 
-@Route("activities/:activity_id?/:action?(edit)")
-@PageTitle("Activity Master Detail")
-@Menu(order = 1.1, icon = "vaadin:calendar-clock", title = "Project.Activities")
+@Route ("activities/:activity_id?/:action?(edit)")
+@PageTitle ("Activity Master Detail")
+@Menu (
+	order = 1.1, icon = "class:tech.derbent.activities.view.CActivitiesView",
+	title = "Project.Activities"
+)
 @PermitAll // When security is enabled, allow all authenticated users
 public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    private final String ENTITY_ID_FIELD = "activity_id";
+	public static String getIconColorCode() {
+		return CActivity.getIconColorCode(); // Use the static method from CActivity
+	}
 
-    private final String ENTITY_ROUTE_TEMPLATE_EDIT = "activities/%s/edit";
+	public static String getIconFilename() { return CActivity.getIconFilename(); }
 
-    private final CCommentService commentService;
+	private final String ENTITY_ID_FIELD = "activity_id";
 
-    public CActivitiesView(final CActivityService entityService, final CSessionService sessionService,
-            final CCommentService commentService) {
-        super(CActivity.class, entityService, sessionService);
-        this.commentService = commentService;
-        addClassNames("activities-view");
-    }
+	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "activities/%s/edit";
 
-    /**
-     * Creates the entity details section using CPanelActivityDescription. Follows the same pattern as CUsersView for
-     * consistency.
-     */
-    @Override
-    protected void createDetailsLayout() {
-        // getBaseDetailsLayout().add(CEntityFormBuilder.buildForm(CActivity.class,
-        // getBinder(), null));
-        CAccordionDBEntity<CActivity> panel;
-        panel = new CPanelActivityDescription(getCurrentEntity(), getBinder(), (CActivityService) entityService);
-        addAccordionPanel(panel);
-        panel = new CPanelActivityStatusPriority(getCurrentEntity(), getBinder(), (CActivityService) entityService);
-        addAccordionPanel(panel);
-        panel = new CPanelActivityResourceManagement(getCurrentEntity(), getBinder(), (CActivityService) entityService);
-        addAccordionPanel(panel);
-        panel = new CPanelActivityTimeTracking(getCurrentEntity(), getBinder(), (CActivityService) entityService);
-        addAccordionPanel(panel);
-        panel = new CPanelActivityHierarchy(getCurrentEntity(), getBinder(), (CActivityService) entityService);
-        addAccordionPanel(panel);
-        panel = new CPanelActivityProject(getCurrentEntity(), getBinder(), (CActivityService) entityService);
-        addAccordionPanel(panel);
-        panel = new CPanelActivityBudgetManagement(getCurrentEntity(), getBinder(), (CActivityService) entityService);
-        addAccordionPanel(panel);
-        // Add comments panel
-        panel = new CPanelActivityComments(getCurrentEntity(), getBinder(), (CActivityService) entityService,
-                commentService, sessionService);
-        addAccordionPanel(panel);
-    }
+	private final CCommentService commentService;
 
-    @Override
-    protected void createGridForEntity() {
-        grid.addShortTextColumn(CActivity::getProjectName, "Project", "project");
-        grid.addShortTextColumn(CActivity::getName, "Activity Name", "name");
-        grid.addReferenceColumn(item -> item.getActivityType() != null ? item.getActivityType().getName() : "No Type",
-                "Type");
-        grid.addShortTextColumn(item -> item.getStatus() != null ? item.getStatus().getName() : "No Status", "Status",
-                null);
-        // grid.addShortTextColumn(activity -> activity.getPriority() != null ?
-        // activity.getPriority().getName() : "No Priority", "Priority", null);
-        grid.addShortTextColumn(item -> item.getStartDate() != null ? item.getStartDate().toString() : "", "Start Date",
-                null);
-        grid.addShortTextColumn(item -> item.getDueDate() != null ? item.getDueDate().toString() : "", "Due Date",
-                null);
-        grid.addShortTextColumn(
-                item -> item.getParentActivity() != null ? item.getParentActivity().getName() : "No Parent Activity",
-                "Parent", null);
-        grid.addColumn(item -> {
-            final String desc = item.getDescription();
+	public CActivitiesView(final CActivityService entityService,
+		final CSessionService sessionService, final CCommentService commentService) {
+		super(CActivity.class, entityService, sessionService);
+		this.commentService = commentService;
+		addClassNames("activities-view");
+	}
 
-            if (desc == null) {
-                return "Not set";
-            }
-            return desc.length() > 50 ? desc.substring(0, 50) + "..." : desc;
-        }, "Description", null);
-        // when a row is selected or deselected, populate form
-        grid.asSingleSelect().addValueChangeListener(event -> {
-            LOGGER.debug("Grid selection changed: {}", event.getValue());
+	/**
+	 * Creates the entity details section using CPanelActivityDescription. Follows the
+	 * same pattern as CUsersView for consistency.
+	 */
+	@Override
+	protected void createDetailsLayout() {
+		// getBaseDetailsLayout().add(CEntityFormBuilder.buildForm(CActivity.class,
+		// getBinder(), null));
+		CAccordionDBEntity<CActivity> panel;
+		panel = new CPanelActivityDescription(getCurrentEntity(), getBinder(),
+			(CActivityService) entityService);
+		addAccordionPanel(panel);
+		panel = new CPanelActivityStatusPriority(getCurrentEntity(), getBinder(),
+			(CActivityService) entityService);
+		addAccordionPanel(panel);
+		panel = new CPanelActivityResourceManagement(getCurrentEntity(), getBinder(),
+			(CActivityService) entityService);
+		addAccordionPanel(panel);
+		panel = new CPanelActivityTimeTracking(getCurrentEntity(), getBinder(),
+			(CActivityService) entityService);
+		addAccordionPanel(panel);
+		panel = new CPanelActivityHierarchy(getCurrentEntity(), getBinder(),
+			(CActivityService) entityService);
+		addAccordionPanel(panel);
+		panel = new CPanelActivityProject(getCurrentEntity(), getBinder(),
+			(CActivityService) entityService);
+		addAccordionPanel(panel);
+		panel = new CPanelActivityBudgetManagement(getCurrentEntity(), getBinder(),
+			(CActivityService) entityService);
+		addAccordionPanel(panel);
+		// Add comments panel
+		panel = new CPanelActivityComments(getCurrentEntity(), getBinder(),
+			(CActivityService) entityService, commentService, sessionService);
+		addAccordionPanel(panel);
+	}
 
-            if (event.getValue() != null) {
-                UI.getCurrent().navigate(String.format(ENTITY_ROUTE_TEMPLATE_EDIT, event.getValue().getId()));
-            } else {
-                clearForm();
-                UI.getCurrent().navigate(CActivitiesView.class);
-            }
-        });
-    }
+	@Override
+	protected void createGridForEntity() {
+		grid.addShortTextColumn(CActivity::getProjectName, "Project", "project");
+		grid.addShortTextColumn(CActivity::getName, "Activity Name", "name");
+		grid.addReferenceColumn(item -> item.getActivityType() != null
+			? item.getActivityType().getName() : "No Type", "Type");
+		grid.addShortTextColumn(
+			item -> item.getStatus() != null ? item.getStatus().getName() : "No Status",
+			"Status", null);
+		// grid.addShortTextColumn(activity -> activity.getPriority() != null ?
+		// activity.getPriority().getName() : "No Priority", "Priority", null);
+		grid.addShortTextColumn(
+			item -> item.getStartDate() != null ? item.getStartDate().toString() : "",
+			"Start Date", null);
+		grid.addShortTextColumn(
+			item -> item.getDueDate() != null ? item.getDueDate().toString() : "",
+			"Due Date", null);
+		grid.addShortTextColumn(item -> item.getParentActivity() != null
+			? item.getParentActivity().getName() : "No Parent Activity", "Parent", null);
+		grid.addColumn(item -> {
+			final String desc = item.getDescription();
 
-    @Override
-    protected String getEntityRouteIdField() { // TODO Auto-generated method stub
-        return ENTITY_ID_FIELD;
-    }
+			if (desc == null) {
+				return "Not set";
+			}
+			return desc.length() > 50 ? desc.substring(0, 50) + "..." : desc;
+		}, "Description", null);
+		// when a row is selected or deselected, populate form
+		grid.asSingleSelect().addValueChangeListener(event -> {
+			LOGGER.debug("Grid selection changed: {}", event.getValue());
 
-    @Override
-    protected String getEntityRouteTemplateEdit() { // TODO Auto-generated method stub
-        return ENTITY_ROUTE_TEMPLATE_EDIT;
-    }
+			if (event.getValue() != null) {
+				UI.getCurrent().navigate(
+					String.format(ENTITY_ROUTE_TEMPLATE_EDIT, event.getValue().getId()));
+			}
+			else {
+				clearForm();
+				UI.getCurrent().navigate(CActivitiesView.class);
+			}
+		});
+	}
 
-    @Override
-    protected void setProjectForEntity(final CActivity entity, final CProject project) {
-        entity.setProject(project);
-    }
+	@Override
+	protected String getEntityRouteIdField() { // TODO Auto-generated method stub
+		return ENTITY_ID_FIELD;
+	}
 
-    @Override
-    protected void setupToolbar() {
-        // TODO Auto-generated method stub
-    }
+	@Override
+	protected String getEntityRouteTemplateEdit() { // TODO Auto-generated method stub
+		return ENTITY_ROUTE_TEMPLATE_EDIT;
+	}
+
+	@Override
+	protected void setProjectForEntity(final CActivity entity, final CProject project) {
+		entity.setProject(project);
+	}
+
+	@Override
+	protected void setupToolbar() {
+		// TODO Auto-generated method stub
+	}
 }

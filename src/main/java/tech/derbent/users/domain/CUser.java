@@ -27,6 +27,12 @@ public class CUser extends CEntityNamed<CUser> {
 
 	public static final int MAX_LENGTH_NAME = 255;
 
+	public static String getIconColorCode() {
+		return "#6f42c1"; // Purple color for user entities
+	}
+
+	public static String getIconFilename() { return "vaadin:user"; }
+
 	@Column (
 		name = "lastname", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME,
 		unique = false
@@ -185,8 +191,9 @@ public class CUser extends CEntityNamed<CUser> {
 
 	@Override
 	public boolean equals(final Object o) {
-		// Use the superclass (CEntityNamed -> CEntityDB) equals method which properly handles 
-		// ID-based equality and proxy classes. This is the standard approach for JPA entities.
+		// Use the superclass (CEntityNamed -> CEntityDB) equals method which properly
+		// handles ID-based equality and proxy classes. This is the standard approach for
+		// JPA entities.
 		return super.equals(o);
 	}
 
@@ -265,7 +272,9 @@ public class CUser extends CEntityNamed<CUser> {
 	public void setLogin(final String login) { this.login = login; }
 
 	@Override
-	public void setName(final String name) { super.setName(name); }
+	public void setName(final String name) {
+		super.setName(name);
+	}
 
 	public void setPassword(final String password) {
 		// Password should be encoded before setting
@@ -306,15 +315,15 @@ public class CUser extends CEntityNamed<CUser> {
 	public String toString() {
 
 		// Return user-friendly representation for UI display
-		if (getName() != null && !getName().trim().isEmpty()) {
+		if ((getName() != null) && !getName().trim().isEmpty()) {
 
-			if (lastname != null && !lastname.trim().isEmpty()) {
+			if ((lastname != null) && !lastname.trim().isEmpty()) {
 				return getName() + " " + lastname;
 			}
 			return getName();
 		}
 
-		if (login != null && !login.trim().isEmpty()) {
+		if ((login != null) && !login.trim().isEmpty()) {
 			return login;
 		}
 		return "User #" + getId();

@@ -113,6 +113,74 @@ private Div createSlidingHeader() {
 
 ## Styling and Animations
 
+### Icon Color Methodology
+
+The menu uses a consistent color system for icons based on functionality, implemented in the `getIconColor()` method of `CHierarchicalSideMenu`:
+
+```java
+private String getIconColor(final String iconName) {
+    // Remove vaadin: prefix if present
+    final String cleanIconName = iconName.replace("vaadin:", "").toLowerCase();
+    
+    // Functional color groupings
+    // Meetings - Green
+    if ("group".equals(cleanIconName) || "calendar".equals(cleanIconName)) {
+        return "#28a745";
+    }
+    // Activities - Blue  
+    if ("calendar-clock".equals(cleanIconName) || "tasks".equals(cleanIconName) || "flag".equals(cleanIconName)) {
+        return "#007bff";
+    }
+    // Projects - Orange
+    if ("briefcase".equals(cleanIconName) || "folder".equals(cleanIconName) || "dashboard".equals(cleanIconName) || "grid-big".equals(cleanIconName)) {
+        return "#fd7e14";
+    }
+    // Users - Purple
+    if ("users".equals(cleanIconName)) {
+        return "#6f42c1";
+    }
+    // Settings & Administration - Gray
+    if ("cogs".equals(cleanIconName) || "building".equals(cleanIconName) || "tags".equals(cleanIconName)) {
+        return "#6c757d";
+    }
+    // Decisions - Red
+    if ("gavel".equals(cleanIconName)) {
+        return "#dc3545";
+    }
+    // Commerce - Teal
+    if ("cart".equals(cleanIconName)) {
+        return "#20c997";
+    }
+    // Navigation & General - Primary
+    if ("home".equals(cleanIconName) || "cubes".equals(cleanIconName) || "arrow-left".equals(cleanIconName) || 
+        "tree-table".equals(cleanIconName) || "chevron-right".equals(cleanIconName)) {
+        return "var(--lumo-primary-color)";
+    }
+    
+    // Default fallback
+    return "var(--lumo-primary-color)";
+}
+```
+
+**Color Groups By Functionality:**
+- **Meetings (Green #28a745)**: group, calendar
+- **Activities (Blue #007bff)**: calendar-clock, tasks, flag
+- **Projects (Orange #fd7e14)**: briefcase, folder, dashboard, grid-big
+- **Users (Purple #6f42c1)**: users
+- **Settings & Administration (Gray #6c757d)**: cogs, building, tags
+- **Decisions (Red #dc3545)**: gavel
+- **Commerce (Teal #20c997)**: cart
+- **Navigation & General (Theme Primary)**: home, cubes, arrow-left, tree-table, chevron-right
+
+**Implementation Details:**
+- Colors are applied in the `CMenuItem.createComponent()` method using:
+  ```java
+  final String iconColor = getIconColor(iconName);
+  icon.getStyle().set("color", iconColor);
+  ```
+- The system automatically handles Vaadin icon prefixes
+- Default color for unknown icons is the primary theme color
+
 ### CSS Classes
 
 1. **`.hierarchical-side-menu`** - Main container styling

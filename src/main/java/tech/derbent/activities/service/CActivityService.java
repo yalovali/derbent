@@ -22,7 +22,7 @@ import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
 
 @Service
-@PreAuthorize("isAuthenticated()")
+@PreAuthorize ("isAuthenticated()")
 public class CActivityService extends CEntityOfProjectService<CActivity>
 	implements CKanbanService<CActivity, CActivityStatus> {
 
@@ -58,7 +58,7 @@ public class CActivityService extends CEntityOfProjectService<CActivity>
 	 * @param project the project to get activities for
 	 * @return map of activity status to list of activities
 	 */
-	@Transactional(readOnly = true)
+	@Transactional (readOnly = true)
 	public Map<CActivityStatus, List<CActivity>>
 		getActivitiesGroupedByStatus(final CProject project) {
 		// Get all activities for the project with type and status loaded
@@ -77,7 +77,7 @@ public class CActivityService extends CEntityOfProjectService<CActivity>
 	 * @param project the project to get activities for
 	 * @return map of activity type to list of activities
 	 */
-	@Transactional(readOnly = true)
+	@Transactional (readOnly = true)
 	public Map<CActivityType, List<CActivity>>
 		getActivitiesGroupedByType(final CProject project) {
 		LOGGER.debug("Getting activities grouped by type for project: {}",
@@ -120,7 +120,7 @@ public class CActivityService extends CEntityOfProjectService<CActivity>
 	 * @param entity the CActivity entity to initialize
 	 */
 	@Override
-	protected void initializeLazyFields(final CActivity entity) {
+	public void initializeLazyFields(final CActivity entity) {
 
 		if (entity == null) {
 			return;
@@ -144,79 +144,128 @@ public class CActivityService extends CEntityOfProjectService<CActivity>
 	}
 
 	/**
-	 * @deprecated Use entity setters directly instead of this auxiliary method.
-	 * This method is temporary for compatibility and will be removed.
+	 * @deprecated Use entity setters directly instead of this auxiliary method. This
+	 *             method is temporary for compatibility and will be removed.
 	 */
 	@Deprecated
 	@Transactional
 	public CActivity setActivityType(final CActivity activity,
 		final CActivityType activityType, final String description) {
-		if (activity == null) return null;
+
+		if (activity == null) {
+			return null;
+		}
 		activity.setActivityType(activityType);
-		if (description != null && !description.isEmpty()) {
+
+		if ((description != null) && !description.isEmpty()) {
 			activity.setDescription(description);
 		}
 		return save(activity);
 	}
 
 	/**
-	 * @deprecated Use entity setters directly instead of this auxiliary method.
-	 * This method is temporary for compatibility and will be removed.
+	 * @deprecated Use entity setters directly instead of this auxiliary method. This
+	 *             method is temporary for compatibility and will be removed.
 	 */
 	@Deprecated
 	@Transactional
 	public CActivity setAssignedUsers(final CActivity activity, final CUser assignedTo,
 		final CUser createdBy) {
-		if (activity == null) return null;
-		if (assignedTo != null) activity.setAssignedTo(assignedTo);
-		if (createdBy != null) activity.setCreatedBy(createdBy);
+
+		if (activity == null) {
+			return null;
+		}
+
+		if (assignedTo != null) {
+			activity.setAssignedTo(assignedTo);
+		}
+
+		if (createdBy != null) {
+			activity.setCreatedBy(createdBy);
+		}
 		return save(activity);
 	}
 
 	/**
-	 * @deprecated Use entity setters directly instead of this auxiliary method.
-	 * This method is temporary for compatibility and will be removed.
-	 */
-	@Deprecated
-	@Transactional
-	public CActivity setTimeTracking(final CActivity activity,
-		final BigDecimal estimatedHours, final BigDecimal actualHours,
-		final BigDecimal remainingHours) {
-		if (activity == null) return null;
-		if (estimatedHours != null) activity.setEstimatedHours(estimatedHours);
-		if (actualHours != null) activity.setActualHours(actualHours);
-		if (remainingHours != null) activity.setRemainingHours(remainingHours);
-		return save(activity);
-	}
-
-	/**
-	 * @deprecated Use entity setters directly instead of this auxiliary method.
-	 * This method is temporary for compatibility and will be removed.
+	 * @deprecated Use entity setters directly instead of this auxiliary method. This
+	 *             method is temporary for compatibility and will be removed.
 	 */
 	@Deprecated
 	@Transactional
 	public CActivity setDateInfo(final CActivity activity, final LocalDate startDate,
 		final LocalDate dueDate, final LocalDate completionDate) {
-		if (activity == null) return null;
-		if (startDate != null) activity.setStartDate(startDate);
-		if (dueDate != null) activity.setDueDate(dueDate);
-		if (completionDate != null) activity.setCompletionDate(completionDate);
+
+		if (activity == null) {
+			return null;
+		}
+
+		if (startDate != null) {
+			activity.setStartDate(startDate);
+		}
+
+		if (dueDate != null) {
+			activity.setDueDate(dueDate);
+		}
+
+		if (completionDate != null) {
+			activity.setCompletionDate(completionDate);
+		}
 		return save(activity);
 	}
 
 	/**
-	 * @deprecated Use entity setters directly instead of this auxiliary method.
-	 * This method is temporary for compatibility and will be removed.
+	 * @deprecated Use entity setters directly instead of this auxiliary method. This
+	 *             method is temporary for compatibility and will be removed.
 	 */
 	@Deprecated
 	@Transactional
 	public CActivity setStatusAndPriority(final CActivity activity,
 		final CActivityStatus status, final CActivityPriority priority,
 		final Integer progressPercentage) {
-		if (activity == null) return null;
-		if (status != null) activity.setStatus(status);
-		if (priority != null) activity.setPriority(priority);
-		if (progressPercentage != null) activity.setProgressPercentage(progressPercentage);
+
+		if (activity == null) {
+			return null;
+		}
+
+		if (status != null) {
+			activity.setStatus(status);
+		}
+
+		if (priority != null) {
+			activity.setPriority(priority);
+		}
+
+		if (progressPercentage != null) {
+			activity.setProgressPercentage(progressPercentage);
+		}
+		return save(activity);
+	}
+
+	/**
+	 * @deprecated Use entity setters directly instead of this auxiliary method. This
+	 *             method is temporary for compatibility and will be removed.
+	 */
+	@Deprecated
+	@Transactional
+	public CActivity setTimeTracking(final CActivity activity,
+		final BigDecimal estimatedHours, final BigDecimal actualHours,
+		final BigDecimal remainingHours) {
+
+		if (activity == null) {
+			return null;
+		}
+
+		if (estimatedHours != null) {
+			activity.setEstimatedHours(estimatedHours);
+		}
+
+		if (actualHours != null) {
+			activity.setActualHours(actualHours);
+		}
+
+		if (remainingHours != null) {
+			activity.setRemainingHours(remainingHours);
+		}
 		return save(activity);
 	}
 

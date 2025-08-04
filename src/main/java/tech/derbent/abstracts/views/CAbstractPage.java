@@ -7,29 +7,31 @@ import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
-public abstract class CAbstractPage extends Main implements BeforeEnterObserver {
+import tech.derbent.abstracts.domains.CInterfaceIconSet;
 
-    private static final long serialVersionUID = 1L;
+public abstract class CAbstractPage extends Main
+	implements BeforeEnterObserver, CInterfaceIconSet {
 
-    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+	private static final long serialVersionUID = 1L;
 
-    public CAbstractPage() {
-        super();
-        setSizeFull();
-        addClassNames(LumoUtility.BoxSizing.BORDER, LumoUtility.Display.FLEX, LumoUtility.FlexDirection.COLUMN,
-                LumoUtility.Gap.SMALL);
-        initPage();
-        setupToolbar();
-    }
+	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
-    /**
-     * Initializes the page with necessary components and layout.
-     */
-    protected void initPage() {
-    };
+	public CAbstractPage() {
+		super();
+		setSizeFull();
+		addClassNames(LumoUtility.BoxSizing.BORDER, LumoUtility.Display.FLEX,
+			LumoUtility.FlexDirection.COLUMN, LumoUtility.Gap.SMALL);
+		initPage();
+		setupToolbar();
+	}
 
-    /**
-     * Sets up the toolbar for the page.
-     */
-    protected abstract void setupToolbar();
+	/**
+	 * Initializes the page with necessary components and layout.
+	 */
+	protected void initPage() {};
+
+	/**
+	 * Sets up the toolbar for the page.
+	 */
+	protected abstract void setupToolbar();
 }

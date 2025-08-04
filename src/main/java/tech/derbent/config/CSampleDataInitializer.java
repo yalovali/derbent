@@ -158,7 +158,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		status.setColor(color);
 		status.setSortOrder(sortOrder);
 		activityStatusService.save(status);
-		LOGGER.debug("Created activity status: {}", name);
 	}
 
 	/**
@@ -175,7 +174,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivityType researchType =
 			findActivityTypeByNameAndProject("Research", project);
 		userResearch.setActivityType(researchType);
-		userResearch.setDescription("Conduct user interviews and analyze customer feedback");
+		userResearch
+			.setDescription("Conduct user interviews and analyze customer feedback");
 		final CUser analyst = findUserByLogin("ademir");
 		final CUser manager = findUserByLogin("mkaradeniz");
 		userResearch.setAssignedTo(analyst);
@@ -189,18 +189,12 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivityStatus completedStatus = findActivityStatusByName("Completed");
 		userResearch.setStatus(completedStatus);
 		userResearch.setProgressPercentage(100);
-		commentService.createComment("User research methodology defined", userResearch,
-			manager);
-		commentService.createComment("Conducted 15 user interviews", userResearch,
-			analyst);
-		commentService.createComment("Analysis complete, insights documented",
-			userResearch, analyst);
-		// UI/UX Design Activity
 		final CActivity uxDesign = new CActivity("UI/UX Design Improvements", project);
 		final CActivityType designType =
 			findActivityTypeByNameAndProject("Design", project);
 		uxDesign.setActivityType(designType);
-		uxDesign.setDescription("Design improved user interface based on research findings");
+		uxDesign
+			.setDescription("Design improved user interface based on research findings");
 		final CUser dev2 = findUserByLogin("msahin");
 		uxDesign.setAssignedTo(dev2);
 		uxDesign.setCreatedBy(analyst);
@@ -212,12 +206,21 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivityStatus inProgressStatus = findActivityStatusByName("In Progress");
 		uxDesign.setStatus(inProgressStatus);
 		uxDesign.setProgressPercentage(55);
+		activityService.save(userResearch);
+		activityService.save(uxDesign);
 		commentService.createComment("Design system updated with new patterns", uxDesign,
 			dev2);
 		commentService.createComment("Wireframes created for key user journeys", uxDesign,
 			dev2);
 		commentService.createComment("Prototypes ready for user testing", uxDesign,
 			analyst);
+		commentService.createComment("User research methodology defined", userResearch,
+			manager);
+		commentService.createComment("Conducted 15 user interviews", userResearch,
+			analyst);
+		commentService.createComment("Analysis complete, insights documented",
+			userResearch, analyst);
+		// UI/UX Design Activity
 	}
 	// Additional meeting creation methods
 
@@ -429,7 +432,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			admin);
 		commentService.createComment(
 			"Working on authentication and authorization features", backendDev, manager);
-		LOGGER.info("Backend development activity created successfully");
 	}
 
 	private void createCommentPriority(final String name, final String description,
@@ -446,7 +448,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		priority.setPriorityLevel(priorityLevel);
 		priority.setDefault(isDefault);
 		commentPriorityService.save(priority);
-		LOGGER.debug("Created comment priority: {}", name);
 	}
 
 	/**
@@ -463,7 +464,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		consulting.setTaxNumber("TR-456789123");
 		consulting.setEnabled(true);
 		companyService.save(consulting);
-		LOGGER.info("Consulting company created successfully");
 	}
 
 	private void createCriticalSecurityRisk() {
@@ -478,7 +478,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		risk.setDescription(
 			"Current implementation may not fully comply with GDPR and data protection regulations");
 		riskService.save(risk);
-		LOGGER.info("Critical security risk created successfully");
 	}
 
 	private void createDecisionStatus(final String name, final CProject project,
@@ -490,7 +489,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		status.setFinal(isFinal);
 		status.setSortOrder(sortOrder);
 		decisionStatusService.save(status);
-		LOGGER.debug("Created decision status: {}", name);
 	}
 
 	/**
@@ -506,7 +504,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		healthcare.setTaxNumber("TR-789123456");
 		healthcare.setEnabled(true);
 		companyService.save(healthcare);
-		LOGGER.info("Healthcare company created successfully");
 	}
 
 	/**
@@ -524,7 +521,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		risk.setDescription(
 			"Integration with legacy systems may cause compatibility issues and performance bottlenecks");
 		riskService.save(risk);
-		LOGGER.info("High priority technical risk created successfully");
 	}
 
 	/**
@@ -542,7 +538,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		risk.setDescription(
 			"Overlapping vacation schedules may temporarily reduce team capacity");
 		riskService.save(risk);
-		LOGGER.info("Low priority resource risk created successfully");
 	}
 
 	/**
@@ -576,7 +571,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		manufacturing.setTaxNumber("TR-987654321");
 		manufacturing.setEnabled(true);
 		companyService.save(manufacturing);
-		LOGGER.info("Manufacturing company created successfully");
 	}
 
 	/**
@@ -594,7 +588,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		risk.setDescription(
 			"Uncontrolled feature additions may cause budget to exceed allocated resources");
 		riskService.save(risk);
-		LOGGER.info("Medium priority budget risk created successfully");
 	}
 
 	private void createMeetingStatus(final String name, final CProject project,
@@ -606,7 +599,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		status.setFinalStatus(isFinal);
 		status.setSortOrder(sortOrder);
 		meetingStatusService.save(status);
-		LOGGER.debug("Created meeting status: {}", name);
 	}
 
 	/**
@@ -626,7 +618,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		// Set company association using auxiliary method
 		final CCompany company = findCompanyByName("Of Teknoloji Çözümleri");
 		userService.setCompanyAssociation(manager, company);
-		LOGGER.info("Project manager user created successfully");
 	}
 
 	private void createProjectWithDescription(final String name,
@@ -634,7 +625,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CProject project = new CProject(name);
 		project.setDescription(description);
 		projectService.save(project);
-		LOGGER.debug("Created project: {} with description", name);
 	}
 
 	/**
@@ -664,7 +654,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			gbp.setCurrencyCode("GBP");
 			gbp.setCurrencySymbol("£");
 			currencyService.save(gbp);
-			LOGGER.info("Sample currencies created successfully");
 		} catch (final Exception e) {
 			LOGGER.error("Error creating sample currencies", e);
 			throw new RuntimeException("Failed to create sample currencies", e);
@@ -735,7 +724,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 				securityDecision.setAccountableUser(admin);
 			}
 			decisionService.save(securityDecision);
-			LOGGER.info("Sample decisions created successfully");
 		} catch (final Exception e) {
 			LOGGER.error("Error creating sample decisions", e);
 			throw new RuntimeException("Failed to create sample decisions", e);
@@ -781,8 +769,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * use of auxiliary meeting service methods.
 	 */
 	private void createSampleProjectMeeting() {
-		LOGGER
-			.info("createSampleProjectMeeting called - creating sample project meeting");
 		final CProject project = findProjectByName("Digital Transformation Initiative");
 
 		if (project == null) {
@@ -940,7 +926,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		}
 		meeting.setParticipants(participants);
 		meetingService.save(meeting);
-		LOGGER.info("Sample standup meeting created successfully");
 	}
 
 	/**
@@ -1242,7 +1227,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * @return the CMeetingStatus entity or null if not found
 	 */
 	private CMeetingStatus findMeetingStatusByName(final String name) {
-		LOGGER.debug("findMeetingStatusByName called with name: {}", name);
 
 		try {
 			final var statuses = meetingStatusService

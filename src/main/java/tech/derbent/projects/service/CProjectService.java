@@ -42,7 +42,6 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 	@Override
 	@Transactional
 	public void delete(final CProject entity) {
-		LOGGER.info("delete called with entity: {}", entity);
 		super.delete(entity);
 		// Publish project list change event after deletion
 		eventPublisher.publishEvent(new ProjectListChangeEvent(this, entity,
@@ -51,7 +50,6 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 
 	@PreAuthorize ("permitAll()")
 	public List<CProject> findAll() {
-		LOGGER.info("Fetching all projects");
 		return repository.findAll();
 	}
 
@@ -61,10 +59,7 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 	}
 
 	@PreAuthorize ("permitAll()")
-	public long getTotalProjectCount() {
-		LOGGER.info("Counting total number of projects");
-		return repository.count();
-	}
+	public long getTotalProjectCount() { return repository.count(); }
 
 	@Override
 	@Transactional
