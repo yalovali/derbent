@@ -128,7 +128,9 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		slidingHeader.getStyle().set("flex-wrap", "nowrap"); // Ensure single line
 		// Original header content (logo and app name) - version removed
 		final var appLogo = VaadinIcon.CUBES.create();
-		appLogo.addClassNames(TextColor.PRIMARY, IconSize.LARGE);
+		appLogo.addClassNames(IconSize.LARGE);
+		// Apply colorful styling
+		appLogo.getStyle().set("color", "var(--lumo-primary-color)");
 		slidingHeader.add(appLogo);
 		final var appName = new Span("Derbent");
 		appName.addClassNames(FontWeight.SEMIBOLD, FontSize.LARGE);
@@ -140,7 +142,9 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	private Div createHeader() {
 		// TODO Replace with real application logo and name
 		final var appLogo = VaadinIcon.HOME.create();
-		appLogo.addClassNames(TextColor.PRIMARY, IconSize.LARGE);
+		appLogo.addClassNames(IconSize.LARGE);
+		// Apply colorful styling to match navigation theme
+		appLogo.getStyle().set("color", "var(--lumo-primary-color)");
 		final var appName = new Span("Derbent");
 		appName.addClassNames(FontWeight.SEMIBOLD, FontSize.LARGE);
 		final var header = new Div(appLogo, appName);
