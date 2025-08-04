@@ -59,21 +59,9 @@ public abstract class CTypeEntity<EntityType> extends CEntityOfProject<EntityTyp
 
     @Override
     public boolean equals(final Object obj) {
-
-        if (this == obj) {
-            return true;
-        }
-
-        if (!super.equals(obj)) {
-            return false;
-        }
-
-        if (!(obj instanceof CTypeEntity)) {
-            return false;
-        }
-        @SuppressWarnings("unchecked")
-        final CTypeEntity<EntityType> other = (CTypeEntity<EntityType>) obj;
-        return Objects.equals(getName(), other.getName()) && Objects.equals(getProject(), other.getProject());
+        // Use the superclass equals method which properly handles ID-based equality
+        // and proxy classes. This is the standard approach for JPA entities.
+        return super.equals(obj);
     }
 
     /**
@@ -106,7 +94,8 @@ public abstract class CTypeEntity<EntityType> extends CEntityOfProject<EntityTyp
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getName(), getProject());
+        // Use the superclass hashCode method for consistency with equals method
+        return super.hashCode();
     }
 
     /**

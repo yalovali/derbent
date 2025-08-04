@@ -1,7 +1,6 @@
 package tech.derbent.comments.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,8 +14,8 @@ import tech.derbent.users.domain.CUser;
 
 /**
  * CCommentRepository - Repository interface for CComment entities. Layer: Service (MVC) - Repository interface Provides
- * data access methods for comment entities with support for: - Activity-based queries - Project-based queries -
- * Author-based queries - Chronological ordering - Eager loading to prevent lazy initialization exceptions
+ * data access methods for comment entities with support for: - Activity-based queries - Author-based queries -
+ * Chronological ordering - Pagination support
  */
 public interface CCommentRepository extends CAbstractRepository<CComment> {
 
@@ -52,42 +51,22 @@ public interface CCommentRepository extends CAbstractRepository<CComment> {
     Page<CComment> findByActivityOrderByEventDateAsc(@Param("activity") CActivity activity, Pageable pageable);
 
     /**
-     * Finds all comments for an activity with eagerly loaded relationships.
-     * 
-     * @param activity
-     *            the activity
-     * @return list of comments with loaded relationships ordered by event date
-     */
-    @Query("SELECT c FROM CComment c LEFT JOIN FETCH c.author LEFT JOIN FETCH c.priority WHERE c.activity = :activity ORDER BY c.eventDate ASC")
-    List<CComment> findByActivityWithRelationships(@Param("activity") CActivity activity);
-
-    /**
-     * Finds all comments by a specific author, ordered by event date with eagerly loaded relationships.
+     * Finds all comments by a specific author, ordered by event date.
      * 
      * @param author
      *            the comment author
      * @return list of comments by the author ordered by event date
      */
-    @Query("SELECT c FROM CComment c LEFT JOIN FETCH c.priority WHERE c.author = :author ORDER BY c.eventDate DESC")
+    @Query("SELECT c FROM CComment c WHERE c.author = :author ORDER BY c.eventDate DESC")
     List<CComment> findByAuthorOrderByEventDateDesc(@Param("author") CUser author);
 
     /**
-     * Finds comment by ID with eagerly loaded activity, author, and priority.
-     * 
-     * @param id
-     *            the comment ID
-     * @return optional CComment with loaded relationships
-     */
-    @Query("SELECT c FROM CComment c LEFT JOIN FETCH c.activity LEFT JOIN FETCH c.author LEFT JOIN FETCH c.priority WHERE c.id = :id")
-    Optional<CComment> findByIdWithRelationships(@Param("id") Long id);
-
-    /**
-     * Finds important comments for an activity with eagerly loaded relationships.
+     * Finds important comments for an activity.
      * 
      * @param activity
      *            the activity
      * @return list of important comments for the activity ordered by event date
      */
-    @Query("SELECT c FROM CComment c LEFT JOIN FETCH c.author LEFT JOIN FETCH c.priority WHERE c.activity = :activity AND c.important = true ORDER BY c.eventDate ASC")
+    @Query("SELECT c FROM CComment c WHERE c.activity = :activity AND c.important = true ORDER BY c.eventDate ASC")
     List<CComment> findImportantByActivity(@Param("activity") CActivity activity);
 }

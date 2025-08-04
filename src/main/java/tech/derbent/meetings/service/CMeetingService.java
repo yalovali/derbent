@@ -80,11 +80,8 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting>
 		}
 
 		try {
-			final Optional<CMeeting> entity =
-				meetingRepository.findByIdWithAllRelationships(id);
-			// With eager loading of small entities, minimal lazy field initialization
-			// needed
-			entity.ifPresent(this::initializeLazyFields);
+			// Use standard findById method - lazy loading will be handled at transaction boundary
+			final Optional<CMeeting> entity = meetingRepository.findById(id);
 			return entity;
 		} catch (final Exception e) {
 			LOGGER.error("Error getting meeting by id '{}': {}", id, e.getMessage(), e);

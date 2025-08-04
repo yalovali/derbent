@@ -175,7 +175,7 @@ public class CUser extends CEntityNamed<CUser> {
 		final String email, final String roles) {
 		super(CUser.class, name);
 		this.login = username;
-		this.name = name;
+		super.setName(name);
 		this.email = email;
 		this.setPassword(password);
 		this.setRoles(roles);
@@ -185,18 +185,9 @@ public class CUser extends CEntityNamed<CUser> {
 
 	@Override
 	public boolean equals(final Object o) {
-
-		if (super.equals(o)) {
-			return true; // Use superclass equals for ID comparison
-		}
-		final CUser cUser = (CUser) o;
-
-		if (cUser == null) {
-			return false; // Null check
-		}
-		return (enabled == cUser.enabled) && lastname.equals(cUser.lastname)
-			&& login.equals(cUser.login) && email.equals(cUser.email)
-			&& phone.equals(cUser.phone) && roles.equals(cUser.roles);
+		// Use the superclass (CEntityNamed -> CEntityDB) equals method which properly handles 
+		// ID-based equality and proxy classes. This is the standard approach for JPA entities.
+		return super.equals(o);
 	}
 
 	public CCompany getCompany() { return company; }
@@ -208,7 +199,7 @@ public class CUser extends CEntityNamed<CUser> {
 	public String getLogin() { return login; }
 
 	@Override
-	public String getName() { return name; }
+	public String getName() { return super.getName(); }
 
 	public String getPassword() {
 		return password; // Return the encoded password
@@ -274,7 +265,7 @@ public class CUser extends CEntityNamed<CUser> {
 	public void setLogin(final String login) { this.login = login; }
 
 	@Override
-	public void setName(final String name) { this.name = name; }
+	public void setName(final String name) { super.setName(name); }
 
 	public void setPassword(final String password) {
 		// Password should be encoded before setting
@@ -315,12 +306,12 @@ public class CUser extends CEntityNamed<CUser> {
 	public String toString() {
 
 		// Return user-friendly representation for UI display
-		if (name != null && !name.trim().isEmpty()) {
+		if (getName() != null && !getName().trim().isEmpty()) {
 
 			if (lastname != null && !lastname.trim().isEmpty()) {
-				return name + " " + lastname;
+				return getName() + " " + lastname;
 			}
-			return name;
+			return getName();
 		}
 
 		if (login != null && !login.trim().isEmpty()) {

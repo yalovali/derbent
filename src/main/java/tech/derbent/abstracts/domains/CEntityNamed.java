@@ -73,43 +73,11 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 		this.name = name.trim();
 	}
 
-	@SuppressWarnings ("unchecked")
 	@Override
 	public boolean equals(final Object obj) {
-		final boolean superEquals = super.equals(obj);
-
-		if (obj == null) {
-			return false;
-		}
-
-		if (!(obj instanceof CEntityDB)) {
-			return false;
-		}
-		final CEntityNamed<EntityClass> other = (CEntityNamed<EntityClass>) obj;
-
-		if (!superEquals) {
-			return false;
-		}
-
-		if ((name != null) ? !name.equals(other.name) : (other.name != null)) {
-			return false;
-		}
-
-		if ((description != null) ? !description.equals(other.description)
-			: (other.description != null)) {
-			return false;
-		}
-
-		if ((createdDate != null) ? !createdDate.equals(other.createdDate)
-			: (other.createdDate != null)) {
-			return false;
-		}
-
-		if ((lastModifiedDate != null) ? !lastModifiedDate.equals(other.lastModifiedDate)
-			: (other.lastModifiedDate != null)) {
-			return false;
-		}
-		return true;
+		// Use the superclass (CEntityDB) equals method which properly handles ID-based equality
+		// and proxy classes. This is the standard approach for JPA entities.
+		return super.equals(obj);
 	}
 
 	public LocalDateTime getCreatedDate() { return createdDate; }
