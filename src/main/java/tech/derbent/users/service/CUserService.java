@@ -232,7 +232,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 
 		if (user.getProjectSettings() != null) {
 			user.getProjectSettings()
-				.removeIf(setting -> setting.getProjectId().equals(projectId));
+				.removeIf(setting -> setting.getProject().getId().equals(projectId));
 			repository.saveAndFlush(user);
 		}
 	}
@@ -246,7 +246,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 	public CUserProjectSettings
 		saveUserProjectSetting(final CUserProjectSettings userProjectSetting) {
 		LOGGER.info("Saving user project setting for user ID: {} and project ID: {}",
-			userProjectSetting.getUser().getId(), userProjectSetting.getProjectId());
+			userProjectSetting.getUser().getId(), userProjectSetting.getProject().getId());
 		// Ensure the user exists and reload with project settings
 		final CUser user = getUserWithProjects(userProjectSetting.getUser().getId());
 
@@ -259,7 +259,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 
 		for (final CUserProjectSettings existing : user.getProjectSettings()) {
 
-			if (existing.getProjectId().equals(userProjectSetting.getProjectId())) {
+			if (existing.getProject().getId().equals(userProjectSetting.getProject().getId())) {
 				existing.setRole(userProjectSetting.getRole());
 				existing.setPermission(userProjectSetting.getPermission());
 				updated = true;

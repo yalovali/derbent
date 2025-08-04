@@ -193,8 +193,8 @@ public final class CDashboardView extends CAbstractPage implements CInterfaceIco
 							.flatMap(user -> user.getProjectSettings().stream())
 							.filter(settings -> settings instanceof CUserProjectSettings)
 							.map(settings -> settings)
-							.filter(settings -> settings.getProjectId() != null)
-							.filter(settings -> settings.getProjectId()
+							.filter(settings -> settings.getProject() != null)
+							.filter(settings -> settings.getProject().getId()
 								.equals(project.getId()))
 							.count();
 						LOGGER.debug("Project {} has {} users", project.getName(),

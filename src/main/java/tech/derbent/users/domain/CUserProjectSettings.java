@@ -7,58 +7,44 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.projects.domain.CProject;
 
 @Entity
-@Table(name = "cuserprojectsettings") // table name for the entity
-@AttributeOverride(name = "id", column = @Column(name = "cuserprojectsettings_id"))
+@Table (name = "cuserprojectsettings") // table name for the entity
+@AttributeOverride (name = "id", column = @Column (name = "cuserprojectsettings_id"))
 public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private CUser user;
+	@ManyToOne
+	@JoinColumn (name = "user_id", nullable = false)
+	private CUser user;
 
-    @Column(name = "project_id", nullable = false)
-    private Long projectId;
+	@ManyToOne
+	@JoinColumn (name = "project_id", nullable = false)
+	private CProject project;
 
-    @Column(name = "role")
-    private String role;
+	@Column (name = "role")
+	private String role;
 
-    @Column
-    private String permission;
+	@Column
+	private String permission;
 
-    public CUserProjectSettings() {
-        super(CUserProjectSettings.class);
-    }
+	public CUserProjectSettings() {
+		super(CUserProjectSettings.class);
+	}
 
-    public String getPermission() {
-        return permission;
-    }
+	public String getPermission() { return permission; }
 
-    public Long getProjectId() {
-        return projectId;
-    }
+	public CProject getProject() { return project; }
 
-    public String getRole() {
-        return role;
-    }
+	public String getRole() { return role; }
 
-    public CUser getUser() {
-        return user;
-    }
+	public CUser getUser() { return user; }
 
-    public void setPermission(final String permission) {
-        this.permission = permission;
-    }
+	public void setPermission(final String permission) { this.permission = permission; }
 
-    public void setProjectId(final Long projectId) {
-        this.projectId = projectId;
-    }
+	public void setProject(final CProject project) { this.project = project; }
 
-    public void setRole(final String role) {
-        this.role = role;
-    }
+	public void setRole(final String role) { this.role = role; }
 
-    public void setUser(final CUser user) {
-        this.user = user;
-    }
+	public void setUser(final CUser user) { this.user = user; }
 }

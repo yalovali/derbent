@@ -1,10 +1,16 @@
 package tech.derbent.projects.domain;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import tech.derbent.abstracts.domains.CEntityNamed;
+import tech.derbent.users.domain.CUserProjectSettings;
 
 /**
  * CProject - Domain entity representing projects. Layer: Domain (MVC) Inherits from
@@ -20,6 +26,9 @@ public class CProject extends CEntityNamed<CProject> {
 	}
 
 	public static String getIconFilename() { return "vaadin:briefcase"; }
+
+	@OneToMany (mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+	private final List<CUserProjectSettings> userSettings = new ArrayList<>();
 
 	/**
 	 * Default constructor for JPA.

@@ -48,8 +48,8 @@ public class CUserProjectSettingsDialog extends CDBEditDialog<CUserProjectSettin
     private List<CProject> getAvailableProjects() {
         final List<CProject> allProjects = projectService.findAll();
 
-        if (!isNew && (data.getProjectId() != null)) {
-            projectService.getById(data.getProjectId()).ifPresent(project -> {
+        if (!isNew && (data.getProject() != null)) {
+            projectService.getById(data.getProject().getId()).ifPresent(project -> {
 
                 if (!allProjects.contains(project)) {
                     allProjects.add(project);
@@ -113,8 +113,8 @@ public class CUserProjectSettingsDialog extends CDBEditDialog<CUserProjectSettin
 
         if (!isNew) {
 
-            if (data.getProjectId() != null) {
-                projectService.getById(data.getProjectId()).ifPresent(projectComboBox::setValue);
+            if (data.getProject() != null) {
+                projectService.getById(data.getProject().getId()).ifPresent(projectComboBox::setValue);
             }
 
             if (data.getRole() != null) {
@@ -139,7 +139,7 @@ public class CUserProjectSettingsDialog extends CDBEditDialog<CUserProjectSettin
         final CProject selectedProject = projectComboBox.getValue();
 
         if (selectedProject != null) {
-            data.setProjectId(selectedProject.getId());
+            data.setProject(selectedProject);
         }
         data.setRole(rolesField.getValue());
         data.setPermission(permissionsField.getValue());

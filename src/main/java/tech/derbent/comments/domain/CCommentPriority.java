@@ -25,6 +25,12 @@ public class CCommentPriority extends CTypeEntity<CCommentPriority> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCommentPriority.class);
 
+	public static String getIconColorCode() {
+		return "#FF9800"; // Default color for comment priority icon
+	}
+
+	public static String getIconFileName() { return "vaadin:exclamation-circle"; }
+
 	@Column (name = "priority_level", nullable = false, length = 20)
 	@MetaData (
 		displayName = "Priority Level", required = false, readOnly = false,
