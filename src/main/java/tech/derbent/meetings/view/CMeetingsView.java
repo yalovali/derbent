@@ -1,10 +1,20 @@
 package tech.derbent.meetings.view;
 
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.abstracts.utils.PageableUtils;
 import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.meetings.domain.CMeeting;
@@ -31,6 +41,8 @@ public class CMeetingsView extends CProjectAwareMDPage<CMeeting> {
     private final CUserService userService;
 
     private final CMeetingStatusService meetingStatusService;
+
+    private TextField searchField;
 
     public CMeetingsView(final CMeetingService entityService, final CSessionService sessionService,
             final CMeetingTypeService meetingTypeService, final CUserService userService,
@@ -130,6 +142,118 @@ public class CMeetingsView extends CProjectAwareMDPage<CMeeting> {
 
     @Override
     protected void setupToolbar() {
-        // TODO: Implement toolbar setup if needed
+        // Create search field
+        searchField = new TextField();
+        searchField.setPlaceholder("Search meetings...");
+        searchField.setPrefixComponent(new com.vaadin.flow.component.icon.Icon(com.vaadin.flow.component.icon.VaadinIcon.SEARCH));
+        searchField.setWidthFull();
+        searchField.setValueChangeMode(ValueChangeMode.LAZY);
+        searchField.setValueChangeTimeout(300); // 300ms delay
+        
+        // Add value change listener to filter the grid
+        searchField.addValueChangeListener(event -> {
+            String searchText = event.getValue();
+            if (searchText == null || searchText.trim().isEmpty()) {
+                // Clear filter - use the existing grid refresh mechanism
+                refreshProjectAwareGrid();
+            } else {
+                // Apply filter
+                if (entityService instanceof tech.derbent.abstracts.services.CEntityOfProjectService) {
+                    final tech.derbent.abstracts.services.CEntityOfProjectService<CMeeting> projectService = 
+                            (tech.derbent.abstracts.services.CEntityOfProjectService<CMeeting>) entityService;
+                    
+                    final Optional<tech.derbent.projects.domain.CProject> activeProject = sessionService.getActiveProject();
+                    if (activeProject.isPresent()) {
+                        List<CMeeting> allMeetings = projectService.findAllByProject(activeProject.get(), 
+                                org.springframework.data.domain.Pageable.unpaged());
+                        List<CMeeting> filteredMeetings = allMeetings.stream()
+                                .filter(meeting -> matchesSearchText(meeting, searchText.toLowerCase().trim()))
+                                .collect(java.util.stream.Collectors.toList());
+                        grid.setItems(filteredMeetings);
+                    } else {
+                        grid.setItems(Collections.emptyList());
+                    }
+                }
+            }
+        });
+        
+        // Create toolbar layout
+        HorizontalLayout toolbar = new HorizontalLayout();
+        toolbar.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
+        toolbar.setWidthFull();
+        toolbar.setPadding(true);
+        toolbar.add(searchField);
+        
+        // Add toolbar to the top of the page
+        Div toolbarWrapper = new Div();
+        toolbarWrapper.setClassName("toolbar-wrapper");
+        toolbarWrapper.add(toolbar);
+        
+        // Insert toolbar at the beginning of the page
+        getElement().insertChild(0, toolbarWrapper.getElement());
+        
+        LOGGER.info("Search toolbar added to meetings view");
+    }
+    
+    /**
+     * Checks if a meeting matches the search text by searching across all string fields.
+     */
+    private boolean matchesSearchText(CMeeting meeting, String searchText) {
+        if (meeting == null || searchText == null || searchText.isEmpty()) {
+            return true;
+        }
+        
+        // Search in project name
+        if (meeting.getProject() != null && meeting.getProject().getName() != null) {
+            if (meeting.getProject().getName().toLowerCase().contains(searchText)) {
+                return true;
+            }
+        }
+        
+        // Search in meeting name
+        if (meeting.getName() != null && meeting.getName().toLowerCase().contains(searchText)) {
+            return true;
+        }
+        
+        // Search in meeting type name
+        if (meeting.getMeetingType() != null && meeting.getMeetingType().getName() != null) {
+            if (meeting.getMeetingType().getName().toLowerCase().contains(searchText)) {
+                return true;
+            }
+        }
+        
+        // Search in formatted dates (start and end time)
+        if (meeting.getMeetingDate() != null) {
+            String formattedStartTime = meeting.getMeetingDate()
+                    .format(java.time.format.DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm"));
+            if (formattedStartTime.toLowerCase().contains(searchText)) {
+                return true;
+            }
+        }
+        
+        if (meeting.getEndDate() != null) {
+            String formattedEndTime = meeting.getEndDate()
+                    .format(java.time.format.DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm"));
+            if (formattedEndTime.toLowerCase().contains(searchText)) {
+                return true;
+            }
+        }
+        
+        // Search in participants names
+        if (!meeting.getParticipants().isEmpty()) {
+            String participants = meeting.getParticipants().stream()
+                    .map(user -> user.getName() != null ? user.getName() : "User #" + user.getId())
+                    .collect(java.util.stream.Collectors.joining(", "));
+            if (participants.toLowerCase().contains(searchText)) {
+                return true;
+            }
+        }
+        
+        // Search in description
+        if (meeting.getDescription() != null && meeting.getDescription().toLowerCase().contains(searchText)) {
+            return true;
+        }
+        
+        return false;
     }
 }
