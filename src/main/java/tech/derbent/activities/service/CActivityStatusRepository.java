@@ -33,7 +33,7 @@ public interface CActivityStatusRepository extends CEntityOfProjectRepository<CA
      * 
      * @return List of non-final status types, ordered by sortOrder
      */
-    @Query("SELECT s FROM CActivityStatus s WHERE s.isFinal = false ORDER BY s.sortOrder ASC")
+    @Query("SELECT s FROM CActivityStatus s WHERE s.finalStatus = false ORDER BY s.sortOrder ASC")
     List<CActivityStatus> findAllActiveStatuses();
 
     /**
@@ -41,7 +41,7 @@ public interface CActivityStatusRepository extends CEntityOfProjectRepository<CA
      * 
      * @return List of final status types, ordered by sortOrder
      */
-    @Query("SELECT s FROM CActivityStatus s WHERE s.isFinal = true ORDER BY s.sortOrder ASC")
+    @Query("SELECT s FROM CActivityStatus s WHERE s.finalStatus = true ORDER BY s.sortOrder ASC")
     List<CActivityStatus> findAllFinalStatuses();
 
     /**

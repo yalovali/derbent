@@ -25,7 +25,7 @@ public class CMeetingStatus extends CStatus<CMeetingStatus> implements CKanbanSt
 
     @Column(name = "is_final", nullable = false)
     @MetaData(displayName = "Is Final Status", required = true, readOnly = false, defaultValue = "false", description = "Indicates if this is a final status (completed/cancelled)", hidden = false, order = 4)
-    private Boolean isFinal = false;
+    private Boolean finalStatus = false;
 
     /**
      * Default constructor for JPA.
@@ -33,7 +33,7 @@ public class CMeetingStatus extends CStatus<CMeetingStatus> implements CKanbanSt
     public CMeetingStatus() {
         super();
         // Initialize with default values for JPA
-        this.isFinal = Boolean.FALSE;
+        this.finalStatus = Boolean.FALSE;
     }
 
     public CMeetingStatus(final String name, final CProject project) {
@@ -41,11 +41,11 @@ public class CMeetingStatus extends CStatus<CMeetingStatus> implements CKanbanSt
     }
 
     public CMeetingStatus(final String name, final CProject project, final String description, final String color,
-            final Boolean isFinal) {
+            final Boolean finalStatus) {
         super(CMeetingStatus.class, name, project);
         setDescription(description);
         setColor(color != null ? color : "#808080");
-        this.isFinal = isFinal;
+        this.finalStatus = finalStatus;
     }
 
     @Override
@@ -64,15 +64,23 @@ public class CMeetingStatus extends CStatus<CMeetingStatus> implements CKanbanSt
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), isFinal);
+        return Objects.hash(super.hashCode(), finalStatus);
     }
 
+    public Boolean getFinalStatus() {
+        return finalStatus;
+    }
+
+    public void setFinalStatus(final Boolean finalStatus) {
+        this.finalStatus = finalStatus;
+    }
+
+    /**
+     * @deprecated Use getFinalStatus() instead for consistency
+     */
+    @Deprecated
     public Boolean isFinal() {
-        return isFinal;
-    }
-
-    public void setFinal(final Boolean isFinal) {
-        this.isFinal = isFinal;
+        return getFinalStatus();
     }
 
     @Override
