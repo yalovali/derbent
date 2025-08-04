@@ -92,10 +92,10 @@ class CActivityStatusTest extends CTestBase {
         // Initially not final
         assertFalse(status.isFinal());
         // Set to final
-        status.setFinal(true);
+        status.setFinalStatus(true);
         assertTrue(status.isFinal());
         // Set back to non-final
-        status.setFinal(false);
+        status.setFinalStatus(false);
         assertFalse(status.isFinal());
     }
 
@@ -151,7 +151,7 @@ class CActivityStatusTest extends CTestBase {
         status.setName("REVIEW");
         status.setDescription("Under review");
         status.setColor("#FFA500");
-        status.setFinal(false);
+        status.setFinalStatus(false);
         status.setSortOrder(3);
         assertEquals("REVIEW", status.getName());
         assertEquals("Under review", status.getDescription());

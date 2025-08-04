@@ -239,7 +239,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 
         final var user = currentUser;
         final var avatar = new Avatar();
-        avatar.addThemeVariants(AvatarVariant.LUMO_XSMALL);
+        avatar.addThemeVariants(AvatarVariant.LUMO_SMALL); // Changed from XSMALL to SMALL for better visibility
         avatar.addClassNames(Margin.Right.SMALL);
         avatar.setColorIndex(5);
 

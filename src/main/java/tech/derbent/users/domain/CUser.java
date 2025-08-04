@@ -306,8 +306,16 @@ public class CUser extends CEntityNamed<CUser> {
      */
     @Override
     public String toString() {
-        return "CUser{" + "name='" + name + '\'' + ", lastname='" + lastname + '\'' + ", login='" + login + '\''
-                + ", email='" + email + '\'' + ", phone='" + phone + '\'' + ", roles='" + roles + '\'' + ", enabled="
-                + enabled + '}';
+        // Return user-friendly representation for UI display
+        if (name != null && !name.trim().isEmpty()) {
+            if (lastname != null && !lastname.trim().isEmpty()) {
+                return name + " " + lastname;
+            }
+            return name;
+        }
+        if (login != null && !login.trim().isEmpty()) {
+            return login;
+        }
+        return "User #" + getId();
     }
 }

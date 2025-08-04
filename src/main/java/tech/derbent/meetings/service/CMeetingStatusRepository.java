@@ -41,6 +41,7 @@ public interface CMeetingStatusRepository extends CEntityOfProjectRepository<CMe
     @Query("SELECT s FROM CMeetingStatus s WHERE s.isFinal = false AND s.project = :project ORDER BY s.sortOrder ASC")
     List<CMeetingStatus> findAllActiveStatusesByProject(@Param("project") CProject project);
 
+
     /**
      * Find all final status types (completed/cancelled) for a specific project.
      * This replaces the non-project-aware findAllFinalStatuses method.
@@ -50,6 +51,7 @@ public interface CMeetingStatusRepository extends CEntityOfProjectRepository<CMe
      */
     @Query("SELECT s FROM CMeetingStatus s WHERE s.isFinal = true AND s.project = :project ORDER BY s.sortOrder ASC")
     List<CMeetingStatus> findAllFinalStatusesByProject(@Param("project") CProject project);
+
 
     /**
      * Find all statuses ordered by sort order.
