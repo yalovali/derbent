@@ -398,7 +398,7 @@ vaadin-accordion-heading {
 ```java
 public class CPanelActivityDescription extends CPanelActivityBase {
     public CPanelActivityDescription(CActivity currentEntity,
-        BeanValidationBinder<CActivity> binder, CActivityService service) {
+        CEnhancedBinder<CActivity> binder, CActivityService service) {
         super("Basic Information", currentEntity, binder, service);
         openPanel(); // Only open this panel by default
     }

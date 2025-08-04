@@ -26,7 +26,7 @@ The `CPanelUserDescription` class demonstrates the following pattern:
 Following the same pattern, `CPanelActivityDescription`:
 
 1. **Inheritance**: Extends `CAccordionDescription<CActivity>`
-2. **Constructor Pattern**: Takes `CActivity`, `BeanValidationBinder<CActivity>`, `CActivityService`, and `CActivityTypeService`
+2. **Constructor Pattern**: Takes `CActivity`, `CEnhancedBinder<CActivity>`, `CActivityService`, and `CActivityTypeService`
 3. **Service Injection**: Injects `CActivityTypeService` for ComboBox data providers
 4. **Form Building**: Uses `CEntityFormBuilder.buildForm()` with custom data provider for `CActivityType` ComboBox
 5. **Lifecycle Methods**: Implements all required abstract methods with proper logging
@@ -42,7 +42,7 @@ public class CPanelActivityDescription extends CAccordionDescription<CActivity>
 ### Constructor
 ```java
 public CPanelActivityDescription(final CActivity currentEntity,
-    final BeanValidationBinder<CActivity> beanValidationBinder,
+    final CEnhancedBinder<CActivity> beanValidationBinder,
     final CActivityService entityService, 
     final CActivityTypeService activityTypeService)
 ```

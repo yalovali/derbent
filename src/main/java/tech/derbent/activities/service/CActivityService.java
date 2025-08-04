@@ -5,7 +5,6 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import tech.derbent.abstracts.interfaces.CKanbanService;
+import tech.derbent.abstracts.services.CEntityOfProjectRepository;
 import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.domain.CActivityPriority;
@@ -26,11 +26,8 @@ import tech.derbent.users.domain.CUser;
 public class CActivityService extends CEntityOfProjectService<CActivity>
 	implements CKanbanService<CActivity, CActivityStatus> {
 
-	private final CActivityRepository activityRepository;
-
 	public CActivityService(final CActivityRepository repository, final Clock clock) {
 		super(repository, clock);
-		this.activityRepository = repository;
 	}
 
 	/**
@@ -65,7 +62,8 @@ public class CActivityService extends CEntityOfProjectService<CActivity>
 	public Map<CActivityStatus, List<CActivity>>
 		getActivitiesGroupedByStatus(final CProject project) {
 		// Get all activities for the project with type and status loaded
-		final List<CActivity> activities = activityRepository.findByProject(project);
+		final List<CActivity> activities =
+			((CEntityOfProjectRepository<CActivity>) repository).findByProject(project);
 		// Group by activity status, handling null statuses
 		return activities.stream()
 			.collect(Collectors.groupingBy(activity -> activity.getStatus() != null
@@ -85,7 +83,8 @@ public class CActivityService extends CEntityOfProjectService<CActivity>
 		LOGGER.debug("Getting activities grouped by type for project: {}",
 			project.getName());
 		// Get all activities for the project with type and status loaded
-		final List<CActivity> activities = activityRepository.findByProject(project);
+		final List<CActivity> activities =
+			((CEntityOfProjectRepository<CActivity>) repository).findByProject(project);
 		// Group by activity type, handling null types
 		return activities.stream()
 			.collect(Collectors.groupingBy(
@@ -99,19 +98,6 @@ public class CActivityService extends CEntityOfProjectService<CActivity>
 		// This would need to be implemented by calling the status service For minimal
 		// changes, returning empty list for now
 		return List.of();
-	}
-
-	@Override
-	@Transactional (readOnly = true)
-	public Optional<CActivity> getById(final Long id) {
-
-		if (id == null) {
-			return Optional.empty();
-		}
-		final Optional<CActivity> entity = activityRepository.findByIdWithEagerLoading(id);
-		// Initialize lazy fields if entity is present
-		entity.ifPresent(this::initializeLazyFields);
-		return entity;
 	}
 
 	// CKanbanService implementation methods
@@ -134,7 +120,7 @@ public class CActivityService extends CEntityOfProjectService<CActivity>
 	 * @param entity the CActivity entity to initialize
 	 */
 	@Override
-	protected void initializeLazyFields(final CActivity entity) {
+	public void initializeLazyFields(final CActivity entity) {
 
 		if (entity == null) {
 			return;

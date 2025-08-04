@@ -28,8 +28,6 @@ public class CMeetingStatusService extends CEntityOfProjectService<CMeetingStatu
 	private static final Logger LOGGER =
 		LoggerFactory.getLogger(CMeetingStatusService.class);
 
-	private final CMeetingStatusRepository meetingStatusRepository;
-
 	@Autowired
 	public CMeetingStatusService(final CMeetingStatusRepository meetingStatusRepository,
 		final Clock clock) {
@@ -41,7 +39,6 @@ public class CMeetingStatusService extends CEntityOfProjectService<CMeetingStatu
 			throw new IllegalArgumentException(
 				"Meeting status repository cannot be null");
 		}
-		this.meetingStatusRepository = meetingStatusRepository;
 	}
 
 	/**
@@ -50,56 +47,6 @@ public class CMeetingStatusService extends CEntityOfProjectService<CMeetingStatu
 	 */
 	public void createDefaultStatusesIfNotExist() {
 		// TODO implement default statuses creation logic
-	}
-
-	/**
-	 * Delete a meeting status by ID.
-	 * @param id the status ID - must not be null
-	 * @throws IllegalArgumentException if the ID is null
-	 */
-	public void deleteById(final Long id) {
-		LOGGER.debug("deleteById(id={}) - Deleting meeting status", id);
-
-		if (id == null) {
-			LOGGER.error("deleteById(id=null) - ID parameter is null");
-			throw new IllegalArgumentException("Meeting status ID cannot be null");
-		}
-		final Optional<CMeetingStatus> existing = meetingStatusRepository.findById(id);
-
-		if (!existing.isPresent()) {
-			LOGGER.warn("deleteById(id={}) - Meeting status not found", id);
-			return;
-		}
-
-		try {
-			meetingStatusRepository.deleteById(id);
-			LOGGER.debug("deleteById(id={}) - Successfully deleted meeting status", id);
-		} catch (final Exception e) {
-			LOGGER.error("deleteById(id={}) - Error deleting meeting status: {}", id,
-				e.getMessage(), e);
-			throw new RuntimeException("Failed to delete meeting status", e);
-		}
-	}
-
-	/**
-	 * Check if a meeting status name exists (case-insensitive).
-	 * @param name the name to check - must not be null
-	 * @return true if the name exists, false otherwise
-	 */
-	@Override
-	@Transactional (readOnly = true)
-	public boolean existsByName(final String name) {
-		LOGGER.debug("existsByName(name={}) - Checking if meeting status name exists",
-			name);
-
-		if ((name == null) || name.trim().isEmpty()) {
-			LOGGER.warn("existsByName(name={}) - Name parameter is null or empty", name);
-			return false;
-		}
-		final boolean exists =
-			meetingStatusRepository.existsByNameIgnoreCase(name.trim());
-		LOGGER.debug("existsByName(name={}) - Name exists: {}", name, exists);
-		return exists;
 	}
 
 	/**
@@ -122,55 +69,10 @@ public class CMeetingStatusService extends CEntityOfProjectService<CMeetingStatu
 	public Optional<CMeetingStatus> findDefaultStatus(final CProject project) {
 		LOGGER.debug("findDefaultStatus() - Finding default meeting status");
 		final Optional<CMeetingStatus> status =
-			meetingStatusRepository.findDefaultStatus(project);
+			((CMeetingStatusService) repository).findDefaultStatus(project);
 		return status;
 	}
 
 	@Override
 	protected Class<CMeetingStatus> getEntityClass() { return CMeetingStatus.class; }
-
-	/**
-	 * Save or update a meeting status.
-	 * @param status the status to save - must not be null
-	 * @return the saved status
-	 * @throws IllegalArgumentException if the status is null or invalid
-	 */
-	@Override
-	public CMeetingStatus save(final CMeetingStatus status) {
-		LOGGER.debug("save(status={}) - Saving meeting status",
-			status != null ? status.getName() : "null");
-
-		if (status == null) {
-			LOGGER.error("save(meetingStatus=null) - Meeting status parameter is null");
-			throw new IllegalArgumentException("Meeting status cannot be null");
-		}
-
-		if ((status.getName() == null) || status.getName().trim().isEmpty()) {
-			LOGGER.error("save() - Meeting status name is null or empty for status id={}",
-				status.getId());
-			throw new IllegalArgumentException(
-				"Meeting status name cannot be null or empty");
-		}
-		// Check for duplicate names (excluding self for updates)
-		final String trimmedName = status.getName().trim();
-		// search with same name and same project
-		final Optional<CMeetingStatus> existing = meetingStatusRepository
-			.findByNameAndProject(trimmedName, status.getProject());
-
-		if (existing.isPresent()) {
-			LOGGER.error("save() - Meeting status name '{}' already exists", trimmedName);
-			throw new IllegalArgumentException(
-				"Meeting status name '" + trimmedName + "' already exists");
-		}
-
-		try {
-			final CMeetingStatus savedStatus = meetingStatusRepository.save(status);
-			LOGGER.debug("save() - Successfully saved meeting status with id={}",
-				savedStatus.getId());
-			return savedStatus;
-		} catch (final Exception e) {
-			LOGGER.error("save() - Error saving meeting status: {}", e.getMessage(), e);
-			throw new RuntimeException("Failed to save meeting status", e);
-		}
-	}
 }

@@ -1,6 +1,6 @@
 package tech.derbent.projects.view;
 
-import com.vaadin.flow.data.binder.BeanValidationBinder;
+import tech.derbent.abstracts.components.CEnhancedBinder;
 
 import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.projects.domain.CProject;
@@ -15,7 +15,7 @@ public abstract class CPanelProjectBase extends CAccordionDBEntity<CProject> {
     private static final long serialVersionUID = 1L;
 
     public CPanelProjectBase(final String title, final CProject currentEntity,
-            final BeanValidationBinder<CProject> beanValidationBinder, final CProjectService entityService) {
+            final CEnhancedBinder<CProject> beanValidationBinder, final CProjectService entityService) {
         super(title, currentEntity, beanValidationBinder, CProject.class, entityService);
         createPanelContent();
         closePanel();

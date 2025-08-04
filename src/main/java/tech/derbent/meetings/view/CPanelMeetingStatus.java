@@ -2,7 +2,7 @@ package tech.derbent.meetings.view;
 
 import java.util.List;
 
-import com.vaadin.flow.data.binder.BeanValidationBinder;
+import tech.derbent.abstracts.components.CEnhancedBinder;
 
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.service.CMeetingService;
@@ -16,7 +16,7 @@ public class CPanelMeetingStatus extends CPanelMeetingBase {
 
     private static final long serialVersionUID = 1L;
 
-    public CPanelMeetingStatus(final CMeeting currentEntity, final BeanValidationBinder<CMeeting> beanValidationBinder,
+    public CPanelMeetingStatus(final CMeeting currentEntity, final CEnhancedBinder<CMeeting> beanValidationBinder,
             final CMeetingService entityService, final CMeetingStatusService meetingStatusService) {
         super("Status & Responsibility", currentEntity, beanValidationBinder, entityService, null);
     }

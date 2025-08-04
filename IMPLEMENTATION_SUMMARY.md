@@ -52,7 +52,7 @@ Added methods to existing form builder for enhanced binder support:
 
 **BEFORE (Standard):**
 ```java
-BeanValidationBinder<CMeetingStatus> binder = new BeanValidationBinder<>(CMeetingStatus.class);
+CEnhancedBinder<CMeetingStatus> binder = new CEnhancedBinder<>(CMeetingStatus.class);
 Div form = CEntityFormBuilder.buildForm(CMeetingStatus.class, binder);
 
 try {

@@ -20,8 +20,6 @@ public abstract class CEntityOfProjectService<
 	EntityClass extends CEntityOfProject<EntityClass>>
 	extends CAbstractNamedEntityService<EntityClass> {
 
-	protected final CEntityOfProjectRepository<EntityClass> projectRepository;
-
 	/**
 	 * Constructor for CEntityOfProjectService.
 	 * @param repository the repository for data access operations
@@ -30,7 +28,6 @@ public abstract class CEntityOfProjectService<
 	public CEntityOfProjectService(
 		final CEntityOfProjectRepository<EntityClass> repository, final Clock clock) {
 		super(repository, clock);
-		this.projectRepository = repository;
 	}
 
 	/**
@@ -50,7 +47,8 @@ public abstract class CEntityOfProjectService<
 		}
 
 		try {
-			return projectRepository.countByProject(project);
+			return ((CEntityOfProjectRepository<EntityClass>) repository)
+				.countByProject(project);
 		} catch (final Exception e) {
 			LOGGER.error("Error counting entities by project '{}' in {}: {}",
 				project.getName(), getClass().getSimpleName(), e.getMessage(), e);
@@ -89,7 +87,9 @@ public abstract class CEntityOfProjectService<
 		}
 
 		try {
-			final List<EntityClass> entities = projectRepository.findByProject(project);
+			final List<EntityClass> entities =
+				((CEntityOfProjectRepository<EntityClass>) repository)
+					.findByProject(project);
 			// Initialize any additional lazy fields that weren't loaded by the query
 			entities.forEach(this::initializeLazyFields);
 			return entities;
@@ -121,7 +121,8 @@ public abstract class CEntityOfProjectService<
 
 		try {
 			final List<EntityClass> entities =
-				projectRepository.findByProject(project, pageable);
+				((CEntityOfProjectRepository<EntityClass>) repository)
+					.findByProject(project, pageable);
 			// Initialize any additional lazy fields that weren't loaded by the query
 			entities.forEach(this::initializeLazyFields);
 			return entities;
@@ -150,7 +151,7 @@ public abstract class CEntityOfProjectService<
 		}
 
 		try {
-			final Optional<EntityClass> entity = projectRepository.findById(id);
+			final Optional<EntityClass> entity = repository.findById(id);
 			// With eager loading of small entities, minimal lazy field initialization
 			// needed
 			entity.ifPresent(this::initializeLazyFields);
@@ -226,6 +227,54 @@ public abstract class CEntityOfProjectService<
 		} catch (final Exception e) {
 			throw new RuntimeException(
 				"Failed to create instance of " + getEntityClass().getName(), e);
+		}
+	}
+
+	@Override
+	@Transactional
+	public EntityClass save(final EntityClass entity) {
+
+		if (entity == null) {
+			LOGGER.error("save(entity=null) - Entity parameter is null");
+			throw new IllegalArgumentException("Entity cannot be null");
+		}
+
+		if ((entity.getName() == null) || entity.getName().trim().isEmpty()) {
+			LOGGER.error("name is null or empty for id={}", entity.getId());
+			throw new IllegalArgumentException("name cannot be null or empty");
+		}
+
+		if (entity.getProject() == null) {
+			LOGGER.error("project is null for id={}", entity.getId());
+			throw new IllegalArgumentException("project cannot be null");
+		}
+		// Check for duplicate names (excluding self for updates)
+		final String trimmedName = entity.getName().trim();
+		// search with same name and same project exclude self if updating
+		final Optional<EntityClass> existing =
+			((CEntityOfProjectRepository<EntityClass>) repository)
+				.findByNameAndProject(trimmedName, entity.getProject())
+				.filter(existingStatus -> {
+					// Exclude self if updating
+					return (entity.getId() == null)
+						|| !existingStatus.getId().equals(entity.getId());
+				});
+
+		if (existing.isPresent()) {
+			LOGGER.error(
+				"save(entity={}) - Entity with name '{}' already exists in project {}",
+				entity.getId(), trimmedName, entity.getProject().getName());
+			throw new IllegalArgumentException("Entity with name '" + trimmedName
+				+ "' already exists in project '" + entity.getProject().getName() + "'");
+		}
+
+		try {
+			final EntityClass savedStatus = repository.save(entity);
+			return savedStatus;
+		} catch (final Exception e) {
+			LOGGER.error("save(entity={}) - Error saving entity: {}", entity.getId(),
+				e.getMessage(), e);
+			throw new RuntimeException("Failed to save entity", e);
 		}
 	}
 }

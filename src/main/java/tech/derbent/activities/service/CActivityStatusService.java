@@ -1,7 +1,6 @@
 package tech.derbent.activities.service;
 
 import java.time.Clock;
-import java.util.List;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -26,8 +25,6 @@ public class CActivityStatusService extends CEntityOfProjectService<CActivitySta
 	private static final Logger LOGGER =
 		LoggerFactory.getLogger(CActivityStatusService.class);
 
-	private final CActivityStatusRepository activityStatusRepository;
-
 	@Autowired
 	public CActivityStatusService(
 		final CActivityStatusRepository activityStatusRepository, final Clock clock) {
@@ -39,7 +36,6 @@ public class CActivityStatusService extends CEntityOfProjectService<CActivitySta
 			throw new IllegalArgumentException(
 				"Activity status repository cannot be null");
 		}
-		this.activityStatusRepository = activityStatusRepository;
 	}
 
 	/**
@@ -50,48 +46,6 @@ public class CActivityStatusService extends CEntityOfProjectService<CActivitySta
 		LOGGER.debug(
 			"createDefaultStatusesIfNotExist() - Creating default activity statuses");
 		// TODO implement default statuses creation logic
-	}
-
-	/**
-	 * Delete an activity status by ID.
-	 * @param id the status ID - must not be null
-	 * @throws IllegalArgumentException if the ID is null
-	 */
-	public void deleteById(final Long id) {
-		LOGGER.debug("deleteById(id={}) - Deleting activity status", id);
-
-		if (id == null) {
-			LOGGER.error("deleteById(id=null) - ID parameter is null");
-			throw new IllegalArgumentException("Activity status ID cannot be null");
-		}
-		final Optional<CActivityStatus> existing = activityStatusRepository.findById(id);
-
-		if (!existing.isPresent()) {
-			LOGGER.warn("deleteById(id={}) - Activity status not found", id);
-			return;
-		}
-
-		try {
-			activityStatusRepository.deleteById(id);
-			LOGGER.debug("deleteById(id={}) - Successfully deleted activity status", id);
-		} catch (final Exception e) {
-			LOGGER.error("deleteById(id={}) - Error deleting activity status: {}", id,
-				e.getMessage(), e);
-			throw new RuntimeException("Failed to delete activity status", e);
-		}
-	}
-
-	/**
-	 * Find all activity statuses ordered by sort order.
-	 * @return List of all activity statuses
-	 */
-	@Transactional (readOnly = true)
-	public List<CActivityStatus> findAll() {
-		LOGGER.debug("findAll() - Finding all activity statuses");
-		final List<CActivityStatus> statuses =
-			activityStatusRepository.findAllOrderedBySortOrder();
-		LOGGER.debug("findAll() - Found {} activity statuses", statuses.size());
-		return statuses;
 	}
 
 	/**
@@ -107,28 +61,8 @@ public class CActivityStatusService extends CEntityOfProjectService<CActivitySta
 			LOGGER.warn("findById(id=null) - ID parameter is null");
 			return Optional.empty();
 		}
-		final Optional<CActivityStatus> status = activityStatusRepository.findById(id);
+		final Optional<CActivityStatus> status = repository.findById(id);
 		LOGGER.debug("findById(id={}) - Found status: {}", id, status.isPresent());
-		return status;
-	}
-
-	/**
-	 * Find activity status by name (case-insensitive).
-	 * @param name the status name - must not be null or empty
-	 * @return Optional containing the status if found, empty otherwise
-	 */
-	@Override
-	@Transactional (readOnly = true)
-	public Optional<CActivityStatus> findByName(final String name) {
-		LOGGER.debug("findByName(name={}) - Finding activity status by name", name);
-
-		if ((name == null) || name.trim().isEmpty()) {
-			LOGGER.warn("findByName(name={}) - Name parameter is null or empty", name);
-			return Optional.empty();
-		}
-		final Optional<CActivityStatus> status =
-			activityStatusRepository.findByNameIgnoreCase(name.trim());
-		LOGGER.debug("findByName(name={}) - Found status: {}", name, status.isPresent());
 		return status;
 	}
 
@@ -137,10 +71,10 @@ public class CActivityStatusService extends CEntityOfProjectService<CActivitySta
 	 * @return Optional containing the default status if found
 	 */
 	@Transactional (readOnly = true)
-	public Optional<CActivityStatus> findDefaultStatus(CProject project) {
+	public Optional<CActivityStatus> findDefaultStatus(final CProject project) {
 		LOGGER.debug("findDefaultStatus() - Finding default activity status");
 		final Optional<CActivityStatus> status =
-			activityStatusRepository.findDefaultStatus(project);
+			((CActivityStatusService) repository).findDefaultStatus(project);
 		LOGGER.debug("findDefaultStatus() - Found default status: {}",
 			status.isPresent());
 		return status;
@@ -160,56 +94,11 @@ public class CActivityStatusService extends CEntityOfProjectService<CActivitySta
 		if (id == null) {
 			return Optional.empty();
 		}
-		final Optional<CActivityStatus> entity = activityStatusRepository.findById(id);
+		final Optional<CActivityStatus> entity = repository.findById(id);
 		entity.ifPresent(this::initializeLazyFields);
 		return entity;
 	}
 
 	@Override
 	protected Class<CActivityStatus> getEntityClass() { return CActivityStatus.class; }
-
-	/**
-	 * Save or update an activity status.
-	 * @param status the status to save - must not be null
-	 * @return the saved status
-	 * @throws IllegalArgumentException if the status is null or invalid
-	 */
-	@Override
-	public CActivityStatus save(final CActivityStatus status) {
-		LOGGER.debug("save(status={}) - Saving activity status",
-			status != null ? status.getName() : "null");
-
-		if (status == null) {
-			LOGGER.error("save(activityStatus=null) - Activity status parameter is null");
-			throw new IllegalArgumentException("Activity status cannot be null");
-		}
-
-		if ((status.getName() == null) || status.getName().trim().isEmpty()) {
-			LOGGER.error(
-				"save() - Activity status name is null or empty for status id={}",
-				status.getId());
-			throw new IllegalArgumentException(
-				"Activity status name cannot be null or empty");
-		}
-		// Check for duplicate names (excluding self for updates)
-		final String trimmedName = status.getName().trim();
-		// search with same name and same project
-		final Optional<CActivityStatus> existing = activityStatusRepository
-			.findByNameAndProject(trimmedName, status.getProject());
-
-		if (existing.isPresent()) {
-			LOGGER.error("save() - Activity status name '{}' already exists",
-				trimmedName);
-			throw new IllegalArgumentException(
-				"Activity status name '" + trimmedName + "' already exists");
-		}
-
-		try {
-			final CActivityStatus savedStatus = activityStatusRepository.save(status);
-			return savedStatus;
-		} catch (final Exception e) {
-			LOGGER.error("save() - Error saving activity status: {}", e.getMessage(), e);
-			throw new RuntimeException("Failed to save activity status", e);
-		}
-	}
 }

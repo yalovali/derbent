@@ -3,7 +3,7 @@ package tech.derbent.users.view;
 import java.util.List;
 
 import com.vaadin.flow.component.textfield.PasswordField;
-import com.vaadin.flow.data.binder.BeanValidationBinder;
+import tech.derbent.abstracts.components.CEnhancedBinder;
 
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.users.domain.CUser;
@@ -30,7 +30,7 @@ public class CPanelUserDescription extends CPanelUserBase {
      * @param companyService
      *            the company service
      */
-    public CPanelUserDescription(final CUser currentEntity, final BeanValidationBinder<CUser> beanValidationBinder,
+    public CPanelUserDescription(final CUser currentEntity, final CEnhancedBinder<CUser> beanValidationBinder,
             final CUserService entityService, final CUserTypeService userTypeService,
             final CCompanyService companyService) {
         super("Basic Information", currentEntity, beanValidationBinder, entityService, userTypeService, companyService);

@@ -1,6 +1,6 @@
 package tech.derbent.risks.view;
 
-import com.vaadin.flow.data.binder.BeanValidationBinder;
+import tech.derbent.abstracts.components.CEnhancedBinder;
 
 import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.risks.domain.CRisk;
@@ -27,7 +27,7 @@ public abstract class CPanelRiskBase extends CAccordionDBEntity<CRisk> {
      *            risk service
      */
     public CPanelRiskBase(final String title, final CRisk currentEntity,
-            final BeanValidationBinder<CRisk> beanValidationBinder, final CRiskService entityService) {
+            final CEnhancedBinder<CRisk> beanValidationBinder, final CRiskService entityService) {
         super(title, currentEntity, beanValidationBinder, CRisk.class, entityService);
         createPanelContent();
         closePanel();

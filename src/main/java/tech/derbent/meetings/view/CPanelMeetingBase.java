@@ -1,6 +1,6 @@
 package tech.derbent.meetings.view;
 
-import com.vaadin.flow.data.binder.BeanValidationBinder;
+import tech.derbent.abstracts.components.CEnhancedBinder;
 
 import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.meetings.domain.CMeeting;
@@ -18,7 +18,7 @@ public abstract class CPanelMeetingBase extends CAccordionDBEntity<CMeeting> {
     CMeetingTypeService meetingTypeService;
 
     public CPanelMeetingBase(final String string, final CMeeting currentEntity,
-            final BeanValidationBinder<CMeeting> beanValidationBinder, final CMeetingService entityService,
+            final CEnhancedBinder<CMeeting> beanValidationBinder, final CMeetingService entityService,
             final CMeetingTypeService meetingTypeService) {
         super(string, currentEntity, beanValidationBinder, CMeeting.class, entityService);
         this.meetingTypeService = meetingTypeService;

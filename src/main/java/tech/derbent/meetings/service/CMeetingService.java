@@ -4,7 +4,6 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,11 +23,8 @@ import tech.derbent.users.domain.CUser;
 public class CMeetingService extends CEntityOfProjectService<CMeeting>
 	implements CKanbanService<CMeeting, CMeetingStatus> {
 
-	private final CMeetingRepository meetingRepository;
-
 	CMeetingService(final CMeetingRepository repository, final Clock clock) {
 		super(repository, clock);
-		this.meetingRepository = repository;
 	}
 
 	/**
@@ -41,7 +37,7 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting>
 		if ((user == null) || (user.getId() == null)) {
 			return List.of();
 		}
-		return meetingRepository.findByAttendeeId(user.getId());
+		return ((CMeetingRepository) repository).findByAttendeeId(user.getId());
 	}
 
 	/**
@@ -54,7 +50,7 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting>
 		if ((user == null) || (user.getId() == null)) {
 			return List.of();
 		}
-		return meetingRepository.findByParticipantId(user.getId());
+		return ((CMeetingRepository) repository).findByParticipantId(user.getId());
 	}
 
 	@Override
@@ -62,31 +58,6 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting>
 		// This would need to be implemented by calling the status service For minimal
 		// changes, returning empty list for now
 		return List.of();
-	}
-
-	/**
-	 * Overrides the standard getById method to use repository method with all
-	 * relationships loaded for CMeeting specific needs.
-	 * @param id the meeting ID
-	 * @return optional CMeeting with loaded relationships
-	 */
-	@Override
-	@Transactional (readOnly = true)
-	public Optional<CMeeting> getById(final Long id) {
-		LOGGER.info("getById called with id: {}", id);
-
-		if (id == null) {
-			return Optional.empty();
-		}
-
-		try {
-			// Use standard findById method - lazy loading will be handled at transaction boundary
-			final Optional<CMeeting> entity = meetingRepository.findById(id);
-			return entity;
-		} catch (final Exception e) {
-			LOGGER.error("Error getting meeting by id '{}': {}", id, e.getMessage(), e);
-			throw new RuntimeException("Failed to get meeting by id", e);
-		}
 	}
 
 	// CKanbanService implementation methods
@@ -210,10 +181,6 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting>
 	public CMeeting setMeetingDetails(final CMeeting meeting,
 		final CMeetingType meetingType, final LocalDateTime meetingDate,
 		final LocalDateTime endDate, final String location) {
-		LOGGER.info(
-			"setMeetingDetails called for meeting: {} with type: {}, date: {}, location: {}",
-			meeting != null ? meeting.getName() : "null",
-			meetingType != null ? meetingType.getName() : "null", meetingDate, location);
 
 		if (meeting == null) {
 			LOGGER.warn("Meeting is null, cannot set meeting details");

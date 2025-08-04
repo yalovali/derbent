@@ -21,12 +21,12 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
-import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
 import jakarta.annotation.PostConstruct;
+import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.interfaces.CLayoutChangeListener;
 import tech.derbent.abstracts.services.CAbstractService;
@@ -45,7 +45,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	protected CGrid<EntityClass> grid;// = new CGrid<>(EntityClass.class, false);
 
-	private final BeanValidationBinder<EntityClass> binder;
+	private final CEnhancedBinder<EntityClass> binder;
 
 	// divide screen into two parts
 	protected SplitLayout splitLayout = new SplitLayout();
@@ -74,7 +74,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		this.entityClass = entityClass;
 		this.entityService = entityService;
 		this.sessionService = sessionService;
-		binder = new BeanValidationBinder<>(entityClass);
+		binder = new CEnhancedBinder<>(entityClass);
 		addClassNames("md-page");
 		setSizeFull();
 		createGridLayout();
@@ -98,7 +98,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		scroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
 		// baseDetailsLayout.add(baseDescriptionAccordion);
 		createGridForEntity();
-		// binder = new BeanValidationBinder<>(entityClass
+		// binder = new CEnhancedBinder<>(entityClass
 		initSplitLayout(detailsBase);
 		// Initial layout setup - will be updated when layout service is available
 		updateLayoutOrientation();
@@ -444,7 +444,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	public HasOrderedComponents getBaseDetailsLayout() { return baseDetailsLayout; }
 
-	public BeanValidationBinder<EntityClass> getBinder() { return binder; }
+	public CEnhancedBinder<EntityClass> getBinder() { return binder; }
 
 	public EntityClass getCurrentEntity() { return currentEntity; }
 

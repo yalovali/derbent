@@ -1,6 +1,6 @@
 package tech.derbent.users.view;
 
-import com.vaadin.flow.data.binder.BeanValidationBinder;
+import tech.derbent.abstracts.components.CEnhancedBinder;
 
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder.ComboBoxDataProvider;
@@ -38,7 +38,7 @@ public abstract class CPanelUserBase extends CAccordionDBEntity<CUser> {
      *            user service
      */
     public CPanelUserBase(final String title, final CUser currentEntity,
-            final BeanValidationBinder<CUser> beanValidationBinder, final CUserService entityService,
+            final CEnhancedBinder<CUser> beanValidationBinder, final CUserService entityService,
             final CUserTypeService userTypeService, final CCompanyService companyService) {
         super(title, currentEntity, beanValidationBinder, CUser.class, entityService);
         this.userTypeService = userTypeService;

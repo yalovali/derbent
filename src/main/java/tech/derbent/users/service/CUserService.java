@@ -129,7 +129,8 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 	@Override
 	@Transactional (readOnly = true)
 	public Optional<CUser> getById(final Long id) {
-		// Use standard findById method - lazy loading will be handled at transaction boundary
+		// Use standard findById method - lazy loading will be handled at transaction
+		// boundary
 		return repository.findById(id);
 	}
 
@@ -154,7 +155,8 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 	@Transactional (readOnly = true)
 	public CUser getUserWithProjects(final Long id) {
 		LOGGER.debug("Getting user with projects for ID: {}", id);
-		// Use standard findById method - projects will be loaded when accessed within transaction
+		// Use standard findById method - projects will be loaded when accessed within
+		// transaction
 		final CUser user = repository.findById(id).orElseThrow(
 			() -> new EntityNotFoundException("User not found with ID: " + id));
 		return user;
@@ -166,7 +168,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 	 * @param user the user entity to initialize
 	 */
 	@Override
-	protected void initializeLazyFields(final CUser user) {
+	public void initializeLazyFields(final CUser user) {
 
 		if (user == null) {
 			return;

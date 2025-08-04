@@ -2,7 +2,6 @@ package tech.derbent.decisions.service;
 
 import java.time.Clock;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -22,11 +21,8 @@ import tech.derbent.users.domain.CUser;
 @PreAuthorize ("isAuthenticated()")
 public class CDecisionService extends CEntityOfProjectService<CDecision> {
 
-	private final CDecisionRepository decisionRepository;
-
 	public CDecisionService(final CDecisionRepository repository, final Clock clock) {
 		super(repository, clock);
-		this.decisionRepository = repository;
 	}
 
 	/**
@@ -72,7 +68,7 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> {
 			LOGGER.warn("findByTeamMember called with null user");
 			return List.of();
 		}
-		return decisionRepository.findByTeamMembersContaining(user);
+		return ((CDecisionRepository) repository).findByTeamMembersContaining(user);
 	}
 
 	/**
@@ -89,7 +85,7 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> {
 			LOGGER.warn("findDecisionsPendingApprovalByUser called with null user");
 			return List.of();
 		}
-		return decisionRepository.findDecisionsPendingApprovalByUser(user);
+		return ((CDecisionService) repository).findDecisionsPendingApprovalByUser(user);
 	}
 
 	/**
@@ -109,30 +105,6 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> {
 		final int approvedCount = decision.getApprovedCount();
 		final int totalCount = decision.getApprovalCount();
 		return String.format("%d/%d approved", approvedCount, totalCount);
-	}
-
-	/**
-	 * Gets a decision by ID with all relationships eagerly loaded to prevent
-	 * LazyInitializationException. Use this method when loading a single decision for
-	 * detailed view where lazy-loaded associations will be accessed.
-	 * @param id the decision ID
-	 * @return optional containing the decision with loaded relationships if found
-	 */
-	@Override
-	@Transactional (readOnly = true)
-	public Optional<CDecision> getById(final Long id) {
-		LOGGER.info("get called with id: {} (overridden to eagerly load relationships)",
-			id);
-
-		if (id == null) {
-			return Optional.empty();
-		}
-		// Use the repository method that eagerly fetches relationships
-		final Optional<CDecision> decision =
-			decisionRepository.findByIdWithAllRelationships(id);
-		// Initialize any other lazy collections if needed
-		decision.ifPresent(this::initializeLazyFields);
-		return decision;
 	}
 
 	@Override
@@ -161,11 +133,11 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> {
 			initializeLazyRelationship(entity.getAccountableUser());
 
 			// Handle collections
-			if (entity.getTeamMembers() != null && !entity.getTeamMembers().isEmpty()) {
+			if ((entity.getTeamMembers() != null) && !entity.getTeamMembers().isEmpty()) {
 				entity.getTeamMembers().forEach(this::initializeLazyRelationship);
 			}
 
-			if (entity.getApprovals() != null && !entity.getApprovals().isEmpty()) {
+			if ((entity.getApprovals() != null) && !entity.getApprovals().isEmpty()) {
 				entity.getApprovals().forEach(this::initializeLazyRelationship);
 			}
 		} catch (final Exception e) {

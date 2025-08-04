@@ -506,7 +506,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Creates high priority technical risk.
 	 */
 	private void createHighPriorityTechnicalRisk() {
-		LOGGER.info("createHighPriorityTechnicalRisk called - creating technical risk");
 		final CProject project = findProjectByName("Digital Transformation Initiative");
 
 		if (project == null) {
@@ -859,7 +858,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		meeting.setParticipants(participants);
 		meeting.setAttendees(attendees);
 		meetingService.save(meeting);
-		LOGGER.info("Sample retrospective meeting created successfully");
 	}
 
 	/**

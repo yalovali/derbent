@@ -52,7 +52,7 @@ Create tests to verify form binding works correctly:
 @Test
 void testFormBindingWithReadBean() {
     assertDoesNotThrow(() -> {
-        var binder = new BeanValidationBinder<>(YourEntity.class);
+        var binder = new CEnhancedBinder<>(YourEntity.class);
         var formLayout = CEntityFormBuilder.buildForm(YourEntity.class, binder);
         assertNotNull(formLayout, "Form layout should be created");
         

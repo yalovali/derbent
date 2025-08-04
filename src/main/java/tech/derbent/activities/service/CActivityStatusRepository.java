@@ -23,8 +23,6 @@ public interface CActivityStatusRepository
 		"SELECT s FROM CActivityStatus s WHERE s.finalStatus = true and s.project = :project ORDER BY s.sortOrder ASC"
 	)
 	List<CActivityStatus> findAllFinalStatuses(@Param ("project") CProject project);
-	@Query ("SELECT s FROM CActivityStatus s ORDER BY s.sortOrder ASC, s.name ASC")
-	List<CActivityStatus> findAllOrderedBySortOrder();
 	@Query (
 		"SELECT s FROM CActivityStatus s WHERE LOWER(s.name) IN ('todo', 'new', 'open', 'pending') AND s.project = :project ORDER BY s.sortOrder ASC"
 	)

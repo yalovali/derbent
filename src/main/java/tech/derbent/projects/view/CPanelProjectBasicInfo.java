@@ -2,7 +2,7 @@ package tech.derbent.projects.view;
 
 import java.util.List;
 
-import com.vaadin.flow.data.binder.BeanValidationBinder;
+import tech.derbent.abstracts.components.CEnhancedBinder;
 
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
@@ -16,7 +16,7 @@ public class CPanelProjectBasicInfo extends CPanelProjectBase {
     private static final long serialVersionUID = 1L;
 
     public CPanelProjectBasicInfo(final CProject currentEntity,
-            final BeanValidationBinder<CProject> beanValidationBinder, final CProjectService entityService) {
+            final CEnhancedBinder<CProject> beanValidationBinder, final CProjectService entityService) {
         super("Basic Information", currentEntity, beanValidationBinder, entityService);
         // only open this panel
         openPanel();

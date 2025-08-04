@@ -2,7 +2,7 @@ package tech.derbent.risks.view;
 
 import java.util.List;
 
-import com.vaadin.flow.data.binder.BeanValidationBinder;
+import tech.derbent.abstracts.components.CEnhancedBinder;
 
 import tech.derbent.risks.domain.CRisk;
 import tech.derbent.risks.service.CRiskService;
@@ -15,7 +15,7 @@ public class CPanelRiskAssessment extends CPanelRiskBase {
 
     private static final long serialVersionUID = 1L;
 
-    public CPanelRiskAssessment(final CRisk currentEntity, final BeanValidationBinder<CRisk> beanValidationBinder,
+    public CPanelRiskAssessment(final CRisk currentEntity, final CEnhancedBinder<CRisk> beanValidationBinder,
             final CRiskService entityService) {
         super("Risk Assessment", currentEntity, beanValidationBinder, entityService);
     }

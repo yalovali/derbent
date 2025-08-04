@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.data.binder.BeanValidationBinder;
+import tech.derbent.abstracts.components.CEnhancedBinder;
 
 import tech.derbent.abstracts.views.CButton;
 import tech.derbent.base.ui.dialogs.CConfirmationDialog;
@@ -41,7 +41,7 @@ public class CPanelUserProjectSettings extends CPanelUserBase {
 
     private CUser currentUser;
 
-    public CPanelUserProjectSettings(final CUser currentEntity, final BeanValidationBinder<CUser> beanValidationBinder,
+    public CPanelUserProjectSettings(final CUser currentEntity, final CEnhancedBinder<CUser> beanValidationBinder,
             final CUserService entityService, final CUserTypeService userTypeService,
             final CCompanyService companyService, final CProjectService projectService) {
         super("Project Settings", currentEntity, beanValidationBinder, entityService, userTypeService, companyService);

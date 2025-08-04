@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
-import com.vaadin.flow.data.binder.BeanValidationBinder;
+import tech.derbent.abstracts.components.CEnhancedBinder;
 
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.service.CMeetingService;
@@ -27,7 +27,7 @@ public class CPanelMeetingParticipants extends CPanelMeetingBase {
     private final CUserService userService;
 
     public CPanelMeetingParticipants(final CMeeting currentEntity,
-            final BeanValidationBinder<CMeeting> beanValidationBinder, final CMeetingService entityService,
+            final CEnhancedBinder<CMeeting> beanValidationBinder, final CMeetingService entityService,
             final CMeetingTypeService meetingTypeService, final CUserService userService) {
         super("Participants & Attendees", currentEntity, beanValidationBinder, entityService, meetingTypeService);
         this.userService = userService;

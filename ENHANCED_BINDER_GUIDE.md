@@ -48,7 +48,7 @@ Utility class for enhanced validation error handling and reporting.
 
 ```java
 // OLD CODE (replace this):
-BeanValidationBinder<CMeetingStatus> binder = new BeanValidationBinder<>(CMeetingStatus.class);
+CEnhancedBinder<CMeetingStatus> binder = new CEnhancedBinder<>(CMeetingStatus.class);
 
 // NEW CODE (minimal change):
 var binder = CBinderFactory.createEnhancedBinder(CMeetingStatus.class);
