@@ -521,99 +521,111 @@ class ManualVerificationTest {
 }
 ```
 
-## 9.6. Lazy Loading Architecture Guidelines
+## 9.6. Lazy Loading Architecture Guidelines (Current Implementation)
 
-**Critical**: All new tasks must include proper lazy loading architecture comments and implementation patterns.
+**Critical**: Follow the established lazy loading architecture. See `COMPREHENSIVE_LAZY_LOADING_FIX.md` for complete implementation details.
 
-### 9.6.1. Lazy Loading Comments for New Tasks
-Every new task involving entity relationships must include comments addressing:
+### 9.6.1. Current Lazy Loading Architecture
+The application uses a comprehensive lazy loading solution implemented in base classes:
 
-```java
-/**
- * LAZY LOADING ARCHITECTURE:
- * - This entity uses @ManyToOne(fetch = FetchType.LAZY) for [relationship_name]
- * - Service layer implements eager loading via custom repository query: findByIdWith[RelationshipName]()
- * - Base class CAbstractService.initializeLazyFields() handles common relationships
- * - UI components must access relationships through service layer to avoid LazyInitializationException
- * - See: COMPREHENSIVE_LAZY_LOADING_FIX.md for implementation patterns
- */
-@Entity
-public class CNewEntity extends CEntityOfProject {
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "type_id")
-    private CNewEntityType entityType; // Lazy loaded - requires service layer access
-}
-```
+**Base Architecture**:
+- **CAbstractService**: Provides `initializeLazyFields()` with automatic `CEntityOfProject` detection
+- **CEntityOfProjectService**: Enhanced lazy field initialization for project-aware entities  
+- **Repository Layer**: Uses `LEFT JOIN FETCH` queries for eager loading
+- **Service Layer**: Overrides `getById()` methods for entity-specific eager loading
 
-### 9.6.2. Mandatory Lazy Loading Implementation Pattern
-All new entities with relationships must follow this pattern:
+### 9.6.2. Implementation Pattern for New Entities
+All new entities with lazy relationships must follow this established pattern:
 
-**1. Repository Layer** - Custom eager loading queries:
+**1. Repository Layer** - Add eager loading queries when needed:
 ```java
 @Repository
-public interface CNewEntityRepository extends CEntityRepository<CNewEntity> {
-    @Query("SELECT e FROM CNewEntity e LEFT JOIN FETCH e.entityType WHERE e.id = :id")
-    Optional<CNewEntity> findByIdWithEntityType(@Param("id") Long id);
-    
-    @Query("SELECT e FROM CNewEntity e LEFT JOIN FETCH e.entityType LEFT JOIN FETCH e.project WHERE e.id = :id")
-    Optional<CNewEntity> findByIdWithFullData(@Param("id") Long id);
+public interface CNewEntityRepository extends CEntityOfProjectRepository<CNewEntity> {
+    // Only add custom queries if base class methods are insufficient
+    @Query("SELECT e FROM CNewEntity e LEFT JOIN FETCH e.entityType WHERE e.project = :project")
+    List<CNewEntity> findByProject(@Param("project") CProject project);
 }
 ```
 
-**2. Service Layer** - Override get() method and lazy field initialization:
+**2. Service Layer** - Minimal overrides, leverage base class functionality:
 ```java
 @Service
 public class CNewEntityService extends CEntityOfProjectService<CNewEntity> {
+    
+    // Only override getById() if custom eager loading is needed
     @Override
     @Transactional(readOnly = true)
-    public Optional<CNewEntity> get(final Long id) {
-        LOGGER.info("get called with id: {} (eager loading entityType)", id);
-        final Optional<CNewEntity> entity = ((CNewEntityRepository) repository).findByIdWithEntityType(id);
+    public Optional<CNewEntity> getById(final Long id) {
+        final Optional<CNewEntity> entity = repository.findById(id);
         entity.ifPresent(this::initializeLazyFields);
         return entity;
     }
     
+    // Only override initializeLazyFields() if entity has specific lazy relationships
     @Override
     protected void initializeLazyFields(final CNewEntity entity) {
-        super.initializeLazyFields(entity); // Handles CEntityOfProject relationships
-        initializeLazyRelationship(entity.getEntityType(), "entityType");
-        // Add other lazy relationships as needed
+        super.initializeLazyFields(entity); // Handles CEntityOfProject automatically
+        initializeLazyRelationship(entity.getSpecificField());
     }
+    
+    @Override
+    protected Class<CNewEntity> getEntityClass() { return CNewEntity.class; }
 }
 ```
 
-**3. UI Layer** - Access through service, never direct entity navigation:
+**3. UI Layer** - Use service methods, avoid direct entity access:
 ```java
-// ✅ CORRECT: Access through service layer
+// ✅ CORRECT: Use service.getById() which handles lazy loading
 public class CNewEntityView extends CProjectAwareMDPage<CNewEntity> {
-    private void displayEntityDetails(final CNewEntity entity) {
-        // Service.get() ensures lazy fields are initialized
-        final Optional<CNewEntity> fullEntity = service.get(entity.getId());
-        fullEntity.ifPresent(e -> {
-            // Safe to access e.getEntityType() - no LazyInitializationException
+    private void displayEntityDetails(final Long entityId) {
+        final Optional<CNewEntity> entity = service.getById(entityId);
+        entity.ifPresent(e -> {
+            // All lazy fields are properly initialized
             typeField.setValue(e.getEntityType());
         });
     }
 }
+```
 
-// ❌ INCORRECT: Direct entity navigation in UI
-private void displayEntityDetails(final CNewEntity entity) {
-    // This will cause LazyInitializationException
-    typeField.setValue(entity.getEntityType());
+### 9.6.3. Prohibited Service Patterns
+**❌ DO NOT create unnecessary auxiliary service methods**:
+
+```java
+// ❌ PROHIBITED: Unnecessary auxiliary setter methods
+@Transactional
+public CNewEntity setEntityType(final CNewEntity entity, final CNewEntityType type) {
+    entity.setEntityType(type);
+    return save(entity);
+}
+
+// ✅ CORRECT: Use entity setters directly
+entity.setEntityType(type);
+service.save(entity);
+```
+
+**❌ DO NOT create redundant find methods**:
+```java
+// ❌ PROHIBITED: Redundant find methods when base class provides equivalent
+public List<CNewEntity> findEntitiesByProject(final CProject project) {
+    return findEntriesByProject(project); // Base class already provides this
 }
 ```
 
-### 9.6.3. Lazy Loading Risk Assessment Comments
-Include these risk assessment comments in code reviews:
+### 9.6.4. Migration from Auxiliary Methods
+Existing auxiliary methods are being deprecated in favor of direct entity manipulation:
 
 ```java
-/**
- * LAZY LOADING RISK ASSESSMENT:
- * HIGH RISK: Direct access to lazy relationships in UI components
- * MEDIUM RISK: Accessing relationships in @PostConstruct methods
- * LOW RISK: Service layer access with proper eager loading
- * MITIGATION: Always use service.get() for entity access in UI layer
- */
+// ❌ DEPRECATED: Auxiliary service methods (being phased out)
+@Deprecated
+@Transactional
+public CActivity setActivityType(final CActivity activity, final CActivityType type, final String description) {
+    // Implementation
+}
+
+// ✅ PREFERRED: Direct entity setters + service save
+activity.setActivityType(type);
+activity.setDescription(description);
+activityService.save(activity);
 ```
 
 ## 9.7. Database Rules and Sample Data
@@ -1060,6 +1072,105 @@ public class CEntityService extends CEntityOfProjectService<CEntity> {
 - [Annotation-Based ComboBox Data Providers](./ANNOTATION_BASED_COMBOBOX_DATA_PROVIDERS.md) - Form building patterns
 - [Hierarchical Side Menu Implementation](./HIERARCHICAL_SIDE_MENU_IMPLEMENTATION.md) - Navigation patterns
 
+
+## 9.12. Service Layer Best Practices - Avoiding Unnecessary Functions
+
+### 9.12.1. Core Principle: Minimal Service Functions
+Services should contain only essential business logic, not simple wrapper methods around entity setters.
+
+**✅ REQUIRED Service Functions:**
+- CRUD operations (`save`, `getById`, `findEntriesByProject`)
+- Complex business logic with validation
+- Multi-entity transactions  
+- Security-sensitive operations
+- Domain-specific queries and calculations
+
+**❌ PROHIBITED Service Functions:**
+- Simple wrapper methods around entity setters
+- Methods that just set multiple fields sequentially
+- Auxiliary methods that provide no business value
+
+### 9.12.2. Current Refactoring: Deprecated Auxiliary Methods
+
+**Services Currently Being Refactored:**
+```java
+// CActivityService - Following methods are deprecated:
+@Deprecated setActivityType()    // Use: activity.setActivityType() + save()
+@Deprecated setAssignedUsers()   // Use: activity.setAssignedTo() + save()
+@Deprecated setTimeTracking()    // Use: activity.setEstimatedHours() + save()
+@Deprecated setDateInfo()        // Use: activity.setStartDate() + save()
+@Deprecated setStatusAndPriority() // Use: activity.setStatus() + save()
+
+// CUserService - Following methods are deprecated:
+@Deprecated setUserProfile()     // Use: user.setLastname() + save()
+@Deprecated setUserRole()        // Use: user.setUserRole() + save()
+@Deprecated setCompanyAssociation() // Use: user.setCompany() + save()
+
+// CMeetingService - Following methods are deprecated:
+@Deprecated setParticipants()    // Use: meeting.addParticipant() + save()
+@Deprecated setAttendees()       // Use: meeting.addAttendee() + save()
+@Deprecated setMeetingDetails()  // Use: meeting.setMeetingType() + save()
+```
+
+### 9.12.3. Recommended Migration Pattern
+
+**Old Pattern (Deprecated):**
+```java
+// Sample data initialization - OLD WAY
+activityService.setActivityType(activity, type, "description");
+activityService.setAssignedUsers(activity, user1, user2);
+activityService.setTimeTracking(activity, hours1, hours2, hours3);
+activityService.save(activity);
+```
+
+**New Pattern (Preferred):**
+```java
+// Sample data initialization - NEW WAY  
+activity.setActivityType(type);
+activity.setDescription("description");
+activity.setAssignedTo(user1);
+activity.setCreatedBy(user2);
+activity.setEstimatedHours(hours1);
+activity.setActualHours(hours2);
+activity.setRemainingHours(hours3);
+activityService.save(activity); // Single save operation
+```
+
+### 9.12.4. When Service Methods Are Justified
+
+**✅ Business Logic Examples:**
+```java
+// Complex validation and business rules
+@Transactional
+public CActivity startActivity(final CActivity activity) {
+    validateActivityCanBeStarted(activity);
+    activity.setStatus(findStatusByName("IN_PROGRESS"));
+    activity.setStartDate(LocalDate.now());
+    updateRelatedActivities(activity);
+    return save(activity);
+}
+
+// Multi-entity operations
+@Transactional  
+public CProject completeProject(final CProject project) {
+    validateAllActivitiesCompleted(project);
+    updateProjectStatus(project);
+    notifyStakeholders(project);
+    generateCompletionReport(project);
+    return save(project);
+}
+
+// Domain-specific calculations
+public BigDecimal calculateProjectProgress(final CProject project) {
+    final List<CActivity> activities = findEntriesByProject(project);
+    return activities.stream()
+        .map(CActivity::getProgressPercentage)
+        .collect(averagingInt(Integer::intValue))
+        .toBigDecimal();
+}
+```
+
+---
 
 ## 10. Strict Prohibitions
 

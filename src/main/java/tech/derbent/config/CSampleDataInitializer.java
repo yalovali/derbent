@@ -174,17 +174,21 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivity userResearch = new CActivity("User Research & Analysis", project);
 		final CActivityType researchType =
 			findActivityTypeByNameAndProject("Research", project);
-		activityService.setActivityType(userResearch, researchType,
-			"Conduct user interviews and analyze customer feedback");
+		userResearch.setActivityType(researchType);
+		userResearch.setDescription("Conduct user interviews and analyze customer feedback");
 		final CUser analyst = findUserByLogin("ademir");
 		final CUser manager = findUserByLogin("mkaradeniz");
-		activityService.setAssignedUsers(userResearch, analyst, manager);
-		activityService.setTimeTracking(userResearch, new BigDecimal("22.00"),
-			new BigDecimal("22.00"), new BigDecimal("0.00"));
-		activityService.setDateInfo(userResearch, LocalDate.now().minusDays(20),
-			LocalDate.now().minusDays(10), LocalDate.now().minusDays(10));
+		userResearch.setAssignedTo(analyst);
+		userResearch.setCreatedBy(manager);
+		userResearch.setEstimatedHours(new BigDecimal("22.00"));
+		userResearch.setActualHours(new BigDecimal("22.00"));
+		userResearch.setRemainingHours(new BigDecimal("0.00"));
+		userResearch.setStartDate(LocalDate.now().minusDays(20));
+		userResearch.setDueDate(LocalDate.now().minusDays(10));
+		userResearch.setCompletionDate(LocalDate.now().minusDays(10));
 		final CActivityStatus completedStatus = findActivityStatusByName("Completed");
-		activityService.setStatusAndPriority(userResearch, completedStatus, null, 100);
+		userResearch.setStatus(completedStatus);
+		userResearch.setProgressPercentage(100);
 		commentService.createComment("User research methodology defined", userResearch,
 			manager);
 		commentService.createComment("Conducted 15 user interviews", userResearch,
@@ -195,16 +199,19 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivity uxDesign = new CActivity("UI/UX Design Improvements", project);
 		final CActivityType designType =
 			findActivityTypeByNameAndProject("Design", project);
-		activityService.setActivityType(uxDesign, designType,
-			"Design improved user interface based on research findings");
+		uxDesign.setActivityType(designType);
+		uxDesign.setDescription("Design improved user interface based on research findings");
 		final CUser dev2 = findUserByLogin("msahin");
-		activityService.setAssignedUsers(uxDesign, dev2, analyst);
-		activityService.setTimeTracking(uxDesign, new BigDecimal("28.00"),
-			new BigDecimal("15.00"), new BigDecimal("13.00"));
-		activityService.setDateInfo(uxDesign, LocalDate.now().minusDays(8),
-			LocalDate.now().plusDays(5), null);
+		uxDesign.setAssignedTo(dev2);
+		uxDesign.setCreatedBy(analyst);
+		uxDesign.setEstimatedHours(new BigDecimal("28.00"));
+		uxDesign.setActualHours(new BigDecimal("15.00"));
+		uxDesign.setRemainingHours(new BigDecimal("13.00"));
+		uxDesign.setStartDate(LocalDate.now().minusDays(8));
+		uxDesign.setDueDate(LocalDate.now().plusDays(5));
 		final CActivityStatus inProgressStatus = findActivityStatusByName("In Progress");
-		activityService.setStatusAndPriority(uxDesign, inProgressStatus, null, 55);
+		uxDesign.setStatus(inProgressStatus);
+		uxDesign.setProgressPercentage(55);
 		commentService.createComment("Design system updated with new patterns", uxDesign,
 			dev2);
 		commentService.createComment("Wireframes created for key user journeys", uxDesign,
