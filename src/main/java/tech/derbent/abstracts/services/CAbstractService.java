@@ -101,7 +101,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		// Validate and fix pageable to prevent "max-results cannot be negative" error
 		final Pageable safePage = PageableUtils.validateAndFix(pageable);
 		// LOGGER.debug("Listing entities with pageable: {}", safePage);
-		final List<EntityClass> entities = repository.findAllBy(safePage).toList();
+		final List<EntityClass> entities = repository.findAll(safePage).toList();
 		// Initialize lazy fields for all entities
 		entities.forEach(this::initializeLazyFields);
 		return entities;

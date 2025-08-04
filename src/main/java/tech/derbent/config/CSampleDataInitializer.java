@@ -1,6 +1,8 @@
 package tech.derbent.config;
 
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -555,7 +557,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		risk.setDescription(
 			"External vendor may experience minor delays in API delivery");
 		riskService.save(risk);
-		LOGGER.info("Low priority schedule risk created successfully");
 	}
 
 	/**
@@ -857,7 +858,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Creates sample review meeting.
 	 */
 	private void createSampleReviewMeeting() {
-		LOGGER.info("createSampleReviewMeeting called - creating code review meeting");
 		final CProject project = findProjectByName("Infrastructure Modernization");
 
 		if (project == null) {
@@ -885,14 +885,12 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		}
 		meeting.setParticipants(participants);
 		meetingService.save(meeting);
-		LOGGER.info("Sample review meeting created successfully");
 	}
 
 	/**
 	 * Creates sample standup meeting.
 	 */
 	private void createSampleStandupMeeting() {
-		LOGGER.info("createSampleStandupMeeting called - creating daily standup meeting");
 		final CProject project = findProjectByName("Digital Transformation Initiative");
 
 		if (project == null) {
@@ -1042,18 +1040,15 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Creates team member users across different companies.
 	 */
 	private void createTeamMemberUsers() {
-		LOGGER.info("createTeamMemberUsers called - creating team member users");
 		createTeamMemberMary();
 		createTeamMemberBob();
 		createTeamMemberAlice();
-		LOGGER.info("Team member users created successfully");
 	}
 
 	/**
 	 * Creates technology startup company.
 	 */
 	private void createTechCompany() {
-		LOGGER.info("createTechCompany called - creating Of Teknoloji Çözümleri");
 		final CCompany techStartup = new CCompany("Of Teknoloji Çözümleri");
 		techStartup.setDescription("Dijital dönüşüm için yenilikçi teknoloji çözümleri");
 		techStartup.setAddress("Cumhuriyet Mahallesi, Atatürk Caddesi No:15, Of/Trabzon");
@@ -1063,15 +1058,12 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		techStartup.setTaxNumber("TR-123456789");
 		techStartup.setEnabled(true);
 		companyService.save(techStartup);
-		LOGGER.info("Technology company created successfully");
 	}
 
 	/**
 	 * Creates technical documentation activity.
 	 */
 	private void createTechnicalDocumentationActivity() {
-		LOGGER.info(
-			"createTechnicalDocumentationActivity called - creating technical documentation activity");
 		final CProject project = findProjectByName("Customer Experience Enhancement");
 
 		if (project == null) {
@@ -1117,7 +1109,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		commentService.createComment(
 			"Documentation successfully updated and approved by stakeholders", techDoc,
 			manager);
-		LOGGER.info("Technical documentation activity created successfully");
 	}
 
 	/**
@@ -1323,7 +1314,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 					"#27ae60", true, 4);
 				createActivityStatus("Cancelled", project, "Activity has been cancelled",
 					"#e74c3c", true, 5);
-				LOGGER.info("Activity statuses initialized successfully");
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing activity statuses", e);
@@ -1336,8 +1326,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * for all projects to ensure project-specific categorization.
 	 */
 	private void initializeActivityTypes() {
-		LOGGER.info(
-			"initializeActivityTypes called - creating activity type classifications for all projects");
 
 		try {
 			// Get all projects
@@ -1366,7 +1354,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 						projectName);
 					continue;
 				}
-				LOGGER.info("Creating activity types for project: {}", projectName);
 
 				for (final String[] typeData : activityTypes) {
 					final CActivityType item =
@@ -1385,8 +1372,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Initialize comment priority entities with comprehensive sample data.
 	 */
 	private void initializeCommentPriorities() {
-		LOGGER.info(
-			"initializeCommentPriorities called - creating comment priority classifications");
 
 		try {
 			createCommentPriority("Critical",
@@ -1411,7 +1396,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Initializes sample companies with full details.
 	 */
 	private void initializeCompanies() {
-		LOGGER.info("initializeCompanies called - creating 4 sample companies");
 
 		try {
 			createTechCompany();
@@ -1578,10 +1562,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	/**
 	 * Initialize order status entities with comprehensive sample data.
 	 */
-	private void initializeOrderStatuses() {
-		LOGGER.info(
-			"initializeOrderStatuses called - creating order status classifications");
-	}
+	private void initializeOrderStatuses() {}
 
 	/**
 	 * Initializes order types for categorizing different kinds of orders. Creates types
@@ -1746,12 +1727,11 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 		try {
 			// Try direct file path first (since profile-pictures is in project root)
-			final java.nio.file.Path filePath =
-				java.nio.file.Paths.get("profile-pictures", filename);
+			final Path filePath = java.nio.file.Paths.get("profile-pictures", filename);
 
-			if (java.nio.file.Files.exists(filePath)) {
+			if (Files.exists(filePath)) {
 				LOGGER.debug("Loading profile picture from file path: {}", filePath);
-				return java.nio.file.Files.readAllBytes(filePath);
+				return Files.readAllBytes(filePath);
 			}
 			// Fallback: Load from classpath resources
 			final var resource = getClass().getClassLoader()

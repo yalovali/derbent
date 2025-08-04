@@ -207,7 +207,6 @@ public class CSessionService {
 	 */
 	@EventListener
 	public void handleProjectListChange(final ProjectListChangeEvent event) {
-		LOGGER.debug("Received project list change event: {}", event);
 		notifyProjectListChanged();
 	}
 
@@ -217,8 +216,6 @@ public class CSessionService {
 	 * @param newProject The newly selected project
 	 */
 	private void notifyProjectChangeListeners(final CProject newProject) {
-		LOGGER.debug("Notifying {} project change listeners of project change",
-			projectChangeListeners.size());
 		// Use UI.access to safely notify listeners that may be in different UI contexts
 		final UI ui = UI.getCurrent();
 

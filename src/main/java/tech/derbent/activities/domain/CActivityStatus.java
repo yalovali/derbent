@@ -13,77 +13,72 @@ import tech.derbent.base.domain.CStatus;
 import tech.derbent.projects.domain.CProject;
 
 /**
- * CActivityStatus - Domain entity representing activity status types. Layer: Domain (MVC) Inherits from CStatus to
- * provide status functionality for activities. This entity defines the possible statuses an activity can have (e.g.,
- * TODO, IN_PROGRESS, DONE).
+ * CActivityStatus - Domain entity representing activity status types. Layer: Domain (MVC)
+ * Inherits from CStatus to provide status functionality for activities. This entity
+ * defines the possible statuses an activity can have (e.g., TODO, IN_PROGRESS, DONE).
  */
-@StatusEntity(category = "activity", colorField = "color", nameField = "name")
+@StatusEntity (category = "activity", colorField = "color", nameField = "name")
 @Entity
-@Table(name = "cactivitystatus")
-@AttributeOverride(name = "id", column = @Column(name = "cactivitystatus_id"))
+@Table (name = "cactivitystatus")
+@AttributeOverride (name = "id", column = @Column (name = "cactivitystatus_id"))
 public class CActivityStatus extends CStatus<CActivityStatus> implements CKanbanStatus {
 
-    @Column(name = "is_final", nullable = false)
-    @MetaData(displayName = "Is Final Status", required = true, readOnly = false, defaultValue = "false", description = "Indicates if this is a final status (completed/cancelled)", hidden = true, order = 4)
-    private Boolean finalStatus = Boolean.FALSE;
+	@Column (name = "is_final", nullable = false)
+	@MetaData (
+		displayName = "Is Final Status", required = true, readOnly = false,
+		defaultValue = "false",
+		description = "Indicates if this is a final status (completed/cancelled)",
+		hidden = true, order = 4
+	)
+	private Boolean finalStatus = Boolean.FALSE;
 
-    /**
-     * Default constructor for JPA.
-     */
-    public CActivityStatus() {
-        super();
-        // Initialize with default values for JPA
-        this.finalStatus = Boolean.FALSE;
-    }
+	/**
+	 * Default constructor for JPA.
+	 */
+	public CActivityStatus() {
+		super();
+		// Initialize with default values for JPA
+		this.finalStatus = Boolean.FALSE;
+	}
 
-    public CActivityStatus(final String name, final CProject project) {
-        super(CActivityStatus.class, name, project);
-    }
+	public CActivityStatus(final String name, final CProject project) {
+		super(CActivityStatus.class, name, project);
+	}
 
-    public CActivityStatus(final String name, final CProject project, final String description, final String color,
-            final Boolean finalStatus) {
-        super(CActivityStatus.class, name, project);
-        setDescription(description);
-        setColor(color);
-        this.finalStatus = finalStatus;
-    }
+	public CActivityStatus(final String name, final CProject project,
+		final String description, final String color, final Boolean finalStatus) {
+		super(CActivityStatus.class, name, project);
+		setDescription(description);
+		setColor(color);
+		this.finalStatus = finalStatus;
+	}
 
-    @Override
-    public boolean equals(final Object o) {
+	@Override
+	public boolean equals(final Object o) {
 
-        if (this == o) {
-            return true;
-        }
+		if (this == o) {
+			return true;
+		}
 
-        if (!(o instanceof CActivityStatus)) {
-            return false;
-        }
-        return super.equals(o);
-    }
+		if (!(o instanceof CActivityStatus)) {
+			return false;
+		}
+		return super.equals(o);
+	}
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), finalStatus);
-    }
+	public Boolean getFinalStatus() { return finalStatus; }
 
-    public Boolean getFinalStatus() {
-        return finalStatus;
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), finalStatus);
+	}
 
-    public void setFinalStatus(final Boolean finalStatus) {
-        this.finalStatus = finalStatus;
-    }
+	public void setFinalStatus(final Boolean finalStatus) {
+		this.finalStatus = finalStatus;
+	}
 
-    /**
-     * @deprecated Use getFinalStatus() instead for consistency
-     */
-    @Deprecated
-    public Boolean isFinal() {
-        return getFinalStatus();
-    }
-
-    @Override
-    public String toString() {
-        return getName() != null ? getName() : super.toString();
-    }
+	@Override
+	public String toString() {
+		return getName() != null ? getName() : super.toString();
+	}
 }

@@ -65,7 +65,7 @@ class CActivityStatusServiceTest extends CTestBase {
 		assertEquals(name, status.getName());
 		assertEquals(description, status.getDescription());
 		assertEquals(project, status.getProject());
-		assertFalse(status.isFinal());
+		assertFalse(status.getFinalStatus());
 	}
 
 	@Test
@@ -84,7 +84,7 @@ class CActivityStatusServiceTest extends CTestBase {
 		assertNotNull(status);
 		assertEquals(validName, status.getName());
 		assertEquals(project, status.getProject());
-		assertFalse(status.isFinal());
+		assertFalse(status.getFinalStatus());
 	}
 
 	@Test

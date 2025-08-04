@@ -3,11 +3,13 @@ package tech.derbent.users.service;
 import java.time.Clock;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -179,6 +181,14 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 			LOGGER.warn("Error initializing lazy fields for user with ID: {}",
 				CSpringAuxillaries.safeGetId(user), e);
 		}
+	}
+
+	@Override
+	@Transactional (readOnly = true)
+	public List<CUser> list(final Pageable pageable) {
+		LOGGER.warn("list(Pageable) not implemented yet in this class:" + " {}",
+			getClass().getSimpleName());
+		throw new UnsupportedOperationException("list(Pageable) method not implemented");
 	}
 
 	/**

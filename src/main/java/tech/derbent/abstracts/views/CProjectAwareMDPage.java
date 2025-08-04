@@ -74,8 +74,6 @@ public abstract class CProjectAwareMDPage<
 		super.onAttach(attachEvent);
 		// Register this component to receive project change notifications
 		sessionService.addProjectChangeListener(this);
-		LOGGER.debug("Registered project change listener for: {}",
-			getClass().getSimpleName());
 	}
 
 	/**
@@ -87,8 +85,6 @@ public abstract class CProjectAwareMDPage<
 		super.onDetach(detachEvent);
 		// Unregister this component to prevent memory leaks
 		sessionService.removeProjectChangeListener(this);
-		LOGGER.debug("Unregistered project change listener for: {}",
-			getClass().getSimpleName());
 	}
 
 	/**

@@ -385,7 +385,7 @@ public class CActivity extends CEntityOfProject<CActivity> implements CKanbanEnt
 		final boolean hasCompletionDate = completionDate != null;
 		final boolean isFullProgress =
 			(progressPercentage != null) && (progressPercentage >= 100);
-		final boolean isFinalStatus = (status != null) && status.isFinal();
+		final boolean isFinalStatus = (status != null) && status.getFinalStatus();
 		final boolean completed = hasCompletionDate || isFullProgress || isFinalStatus;
 		LOGGER.debug(
 			"isCompleted() - Activity id={} completed={} (completionDate={}, progress={}, finalStatus={})",
@@ -554,7 +554,7 @@ public class CActivity extends CEntityOfProject<CActivity> implements CKanbanEnt
 		this.status = status;
 
 		// Auto-set completion date if status is final
-		if ((status != null) && status.isFinal() && (completionDate == null)) {
+		if ((status != null) && status.getFinalStatus() && (completionDate == null)) {
 			this.completionDate = LocalDate.now();
 
 			if ((progressPercentage != null) && (progressPercentage < 100)) {

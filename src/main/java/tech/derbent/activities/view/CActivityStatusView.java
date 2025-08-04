@@ -83,7 +83,8 @@ public class CActivityStatusView extends CProjectAwareMDPage<CActivityStatus> {
 		grid.addLongTextColumn(CActivityStatus::getDescription, "Description",
 			"description");
 		grid.addShortTextColumn(CActivityStatus::getColor, "Color Code", "color");
-		grid.addBooleanColumn(CActivityStatus::isFinal, "Is Final", "Final", "Not Final");
+		grid.addBooleanColumn(CActivityStatus::getFinalStatus, "Is Final", "Final",
+			"Not Final");
 	}
 
 	@Override

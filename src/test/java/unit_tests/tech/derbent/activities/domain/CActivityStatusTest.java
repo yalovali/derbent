@@ -36,7 +36,7 @@ class CActivityStatusTest extends CTestBase {
 		assertNull(status.getName());
 		assertNull(status.getDescription());
 		assertEquals("#808080", status.getColor()); // Default gray color
-		assertFalse(status.isFinal());
+		assertFalse(status.getFinalStatus());
 		assertEquals(100, status.getSortOrder()); // Default sort order
 	}
 
@@ -55,7 +55,7 @@ class CActivityStatusTest extends CTestBase {
 		assertEquals(name, status.getName());
 		assertEquals(description, status.getDescription());
 		assertEquals(project, status.getProject());
-		assertEquals(isFinal, status.isFinal());
+		assertEquals(isFinal, status.getFinalStatus());
 	}
 
 	@Test
@@ -68,7 +68,7 @@ class CActivityStatusTest extends CTestBase {
 		assertNotNull(status);
 		assertEquals(name, status.getName());
 		assertEquals(project, status.getProject());
-		assertFalse(status.isFinal()); // Default should be false
+		assertFalse(status.getFinalStatus()); // Default should be false
 	}
 
 	@Test
@@ -96,13 +96,13 @@ class CActivityStatusTest extends CTestBase {
 	@DisplayName ("Should handle final status flag correctly")
 	void shouldHandleFinalStatusFlagCorrectly() {
 		// Initially not final
-		assertFalse(status.isFinal());
+		assertFalse(status.getFinalStatus());
 		// Set to final
 		status.setFinalStatus(true);
-		assertTrue(status.isFinal());
+		assertTrue(status.getFinalStatus());
 		// Set back to non-final
 		status.setFinalStatus(false);
-		assertFalse(status.isFinal());
+		assertFalse(status.getFinalStatus());
 	}
 
 	@Test
@@ -163,7 +163,7 @@ class CActivityStatusTest extends CTestBase {
 		assertEquals("REVIEW", status.getName());
 		assertEquals("Under review", status.getDescription());
 		assertEquals("#FFA500", status.getColor());
-		assertFalse(status.isFinal());
+		assertFalse(status.getFinalStatus());
 		assertEquals(3, status.getSortOrder());
 	}
 
