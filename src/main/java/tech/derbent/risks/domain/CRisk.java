@@ -23,7 +23,7 @@ public class CRisk extends CEntityOfProject<CRisk> {
 		return "#dc3545"; // Red color for risk entities
 	}
 
-	public static String getIconFilename() { return "vaadin:exclamation-circle"; }
+	public static String getIconFilename() { return "vaadin:warning"; }
 
 	@Enumerated (EnumType.STRING)
 	@Column (name = "risk_severity", nullable = false, length = 20)
