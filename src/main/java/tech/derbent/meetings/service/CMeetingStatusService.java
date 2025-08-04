@@ -10,17 +10,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import tech.derbent.abstracts.services.CAbstractNamedEntityService;
+import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.meetings.domain.CMeetingStatus;
 import tech.derbent.projects.domain.CProject;
 
 /**
  * CMeetingStatusService - Service class for managing CMeetingStatus entities. Layer: Service (MVC) Provides business
  * logic for meeting status management including CRUD operations, validation, and workflow management.
+ * Since CMeetingStatus extends CStatus which extends CTypeEntity which extends CEntityOfProject,
+ * this service must extend CEntityOfProjectService to enforce project-based queries.
  */
 @Service
 @Transactional
-public class CMeetingStatusService extends CAbstractNamedEntityService<CMeetingStatus> {
+public class CMeetingStatusService extends CEntityOfProjectService<CMeetingStatus> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingStatusService.class);
 
@@ -35,6 +37,11 @@ public class CMeetingStatusService extends CAbstractNamedEntityService<CMeetingS
             throw new IllegalArgumentException("Meeting status repository cannot be null");
         }
         this.meetingStatusRepository = meetingStatusRepository;
+    }
+
+    @Override
+    protected Class<CMeetingStatus> getEntityClass() {
+        return CMeetingStatus.class;
     }
 
     /**
@@ -97,42 +104,69 @@ public class CMeetingStatusService extends CAbstractNamedEntityService<CMeetingS
     }
 
     /**
-     * Find all meeting statuses ordered by sort order.
+     * Find all meeting statuses for a specific project ordered by sort order.
+     * This replaces the problematic findAll() method that didn't require project.
      * 
-     * @return List of all meeting statuses
+     * @param project the project to find statuses for
+     * @return List of meeting statuses for the project
      */
     @Transactional(readOnly = true)
-    public List<CMeetingStatus> findAll() {
-        LOGGER.debug("findAll() - Finding all meeting statuses");
-        final List<CMeetingStatus> statuses = meetingStatusRepository.findAllOrderedBySortOrder();
-        LOGGER.debug("findAll() - Found {} meeting statuses", statuses.size());
+    public List<CMeetingStatus> findAllByProject(final CProject project) {
+        LOGGER.debug("findAllByProject() - Finding all meeting statuses for project: {}", 
+                project != null ? project.getName() : "null");
+        
+        if (project == null) {
+            LOGGER.warn("findAllByProject called with null project");
+            return List.of();
+        }
+        
+        final List<CMeetingStatus> statuses = super.findAllByProject(project);
+        LOGGER.debug("findAllByProject() - Found {} meeting statuses", statuses.size());
         return statuses;
     }
 
     /**
-     * Find all active (non-final) statuses.
+     * Find all active (non-final) statuses for a specific project.
      * 
-     * @return List of active statuses
+     * @param project the project to find statuses for
+     * @return List of active statuses for the project
      */
     @Transactional(readOnly = true)
-    public List<CMeetingStatus> findAllActiveStatuses() {
-        LOGGER.debug("findAllActiveStatuses() - Finding all active meeting statuses");
-        final List<CMeetingStatus> statuses = meetingStatusRepository.findAllActiveStatuses();
-        LOGGER.debug("findAllActiveStatuses() - Found {} active statuses", statuses.size());
-        return statuses;
+    public List<CMeetingStatus> findAllActiveStatusesByProject(final CProject project) {
+        LOGGER.debug("findAllActiveStatusesByProject() - Finding all active meeting statuses for project: {}", 
+                project != null ? project.getName() : "null");
+        
+        if (project == null) {
+            LOGGER.warn("findAllActiveStatusesByProject called with null project");
+            return List.of();
+        }
+        
+        // Use the inherited findAllByProject and filter for active statuses
+        return findAllByProject(project).stream()
+                .filter(status -> !status.isFinal())
+                .toList();
     }
 
     /**
-     * Find all final statuses (completed/cancelled states).
+     * Find all final statuses (completed/cancelled states) for a specific project.
      * 
-     * @return List of final statuses
+     * @param project the project to find statuses for
+     * @return List of final statuses for the project
      */
     @Transactional(readOnly = true)
-    public List<CMeetingStatus> findAllFinalStatuses() {
-        LOGGER.debug("findAllFinalStatuses() - Finding all final meeting statuses");
-        final List<CMeetingStatus> statuses = meetingStatusRepository.findAllFinalStatuses();
-        LOGGER.debug("findAllFinalStatuses() - Found {} final statuses", statuses.size());
-        return statuses;
+    public List<CMeetingStatus> findAllFinalStatusesByProject(final CProject project) {
+        LOGGER.debug("findAllFinalStatusesByProject() - Finding all final meeting statuses for project: {}", 
+                project != null ? project.getName() : "null");
+        
+        if (project == null) {
+            LOGGER.warn("findAllFinalStatusesByProject called with null project");
+            return List.of();
+        }
+        
+        // Use the inherited findAllByProject and filter for final statuses
+        return findAllByProject(project).stream()
+                .filter(status -> status.isFinal())
+                .toList();
     }
 
     /**
@@ -199,11 +233,6 @@ public class CMeetingStatusService extends CAbstractNamedEntityService<CMeetingS
         LOGGER.debug("findDefaultStatus() - Finding default meeting status");
         final Optional<CMeetingStatus> status = meetingStatusRepository.findDefaultStatus();
         return status;
-    }
-
-    @Override
-    protected Class<CMeetingStatus> getEntityClass() {
-        return CMeetingStatus.class;
     }
 
     /**
