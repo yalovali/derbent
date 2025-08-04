@@ -29,7 +29,7 @@ public interface CMeetingStatusRepository
 	 * @return List of final status types for the project, ordered by sortOrder
 	 */
 	@Query (
-		"SELECT s FROM CMeetingStatus s WHERE s.isFinal = true AND s.project = :project ORDER BY s.sortOrder ASC"
+		"SELECT s FROM CMeetingStatus s WHERE s.finalStatus = true AND s.project = :project ORDER BY s.sortOrder ASC"
 	)
 	List<CMeetingStatus>
 		findAllFinalStatusesByProject(@Param ("project") CProject project);
@@ -39,7 +39,7 @@ public interface CMeetingStatusRepository
 	 * @return Optional containing the default status if found
 	 */
 	@Query (
-		"SELECT s FROM CMeetingStatus s WHERE LOWER(s.name) IN ('planned', 'scheduled', 'new', 'pending') AND AND s.project = :project ORDER BY s.sortOrder ASC"
+		"SELECT s FROM CMeetingStatus s WHERE LOWER(s.name) IN ('planned', 'scheduled', 'new', 'pending') AND s.project = :project ORDER BY s.sortOrder ASC"
 	)
 	Optional<CMeetingStatus> findDefaultStatus(@Param ("project") CProject project);
 }
