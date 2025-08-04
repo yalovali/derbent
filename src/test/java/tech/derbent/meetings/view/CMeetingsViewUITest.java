@@ -86,7 +86,10 @@ class CMeetingsViewUITest extends CAbstractUITest<CMeeting> {
         // Initialize participants collection (critical for lazy loading test)
         final Set<CUser> participants = new HashSet<>();
         participants.add(testUser1);
-        participants.add(testUser2);
+        // Only add testUser2 if it's different and properly initialized
+        if (testUser2 != null && !testUser1.equals(testUser2)) {
+            participants.add(testUser2);
+        }
         meeting.setParticipants(participants);
         // Initialize attendees collection
         final Set<CUser> attendees = new HashSet<>();
@@ -105,18 +108,6 @@ class CMeetingsViewUITest extends CAbstractUITest<CMeeting> {
                 .collect(java.util.stream.Collectors.joining(", "));
     }
 
-    @BeforeEach
-    void setUp() {
-        project = new CProject("Test Project");
-    }
-
-    @BeforeEach
-    void setupMeetingTests() {
-        setupTestEntities();
-        meetingsView = new CMeetingsView(mockMeetingService, mockSessionService, mockMeetingTypeService,
-                mockUserService, mockMeetingStatusService);
-    }
-
     @Override
     protected void setupServiceMocks() {
         super.setupServiceMocks();
@@ -130,6 +121,14 @@ class CMeetingsViewUITest extends CAbstractUITest<CMeeting> {
 
     @Override
     protected void setupTestData() {
+        // Initialize projects first before any test entities
+        if (project == null) {
+            project = new CProject("Test Project");
+        }
+        if (testProject == null) {
+            testProject = project;
+        }
+        
         // Ensure test entities are created first
         setupTestEntities();
         final CMeeting meeting1 = createTestEntity(1L, "Sprint Planning");
@@ -138,10 +137,14 @@ class CMeetingsViewUITest extends CAbstractUITest<CMeeting> {
         testEntities = Arrays.asList(meeting1, meeting2, meeting3);
         // Mock active project
         when(mockSessionService.getActiveProject()).thenReturn(Optional.of(testProject));
+        
+        // Create the view after all test data is set up
+        meetingsView = new CMeetingsView(mockMeetingService, mockSessionService, mockMeetingTypeService,
+                mockUserService, mockMeetingStatusService);
     }
 
     private void setupTestEntities() {
-        project.setDescription("Test project for meetings");
+        testProject.setDescription("Test project for meetings");
         // Create test meeting type
         testMeetingType = new CMeetingType("Planning Meeting", testProject);
         testMeetingType.setDescription("Project planning meetings");
@@ -152,10 +155,12 @@ class CMeetingsViewUITest extends CAbstractUITest<CMeeting> {
         testMeetingStatus.setSortOrder(1);
         // Create test users
         testUser1 = new CUser("John");
+        testUser1.setName("John"); // Explicitly set name to ensure it's not null
         testUser1.setLastname("Doe");
         testUser1.setLogin("johndoe");
         testUser1.setEmail("john@example.com");
         testUser2 = new CUser("Jane");
+        testUser2.setName("Jane"); // Explicitly set name to ensure it's not null
         testUser2.setLastname("Smith");
         testUser2.setLogin("janesmith");
         testUser2.setEmail("jane@example.com");
@@ -273,7 +278,7 @@ class CMeetingsViewUITest extends CAbstractUITest<CMeeting> {
     void testGridWithNullRelationships() {
         LOGGER.info("Testing grid behavior with null relationships");
         // Create meeting with null relationships
-        final CMeeting meetingWithNulls = new CMeeting("Meeting With Nulls", project);
+        final CMeeting meetingWithNulls = new CMeeting("Meeting With Nulls", null); // Use null project to test null handling
         meetingWithNulls.setParticipants(new HashSet<>()); // Empty but not null
         // Test that columns handle null relationships gracefully
         assertDoesNotThrow(() -> {
