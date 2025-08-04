@@ -115,69 +115,36 @@ private Div createSlidingHeader() {
 
 ### Icon Color Methodology
 
-The menu uses a consistent color system for icons based on functionality, implemented in the `getIconColor()` method of `CHierarchicalSideMenu`:
+The menu now uses the CInterfaceIconSet pattern for consistent icon coloring. Icons and their colors are defined at the view level rather than in the menu component:
 
 ```java
-private String getIconColor(final String iconName) {
-    // Remove vaadin: prefix if present
-    final String cleanIconName = iconName.replace("vaadin:", "").toLowerCase();
+@Menu(order = 1, icon = "class:tech.derbent.activities.view.CActivitiesView", title = "Project.Activities")
+public class CActivitiesView extends CProjectAwareMDPage<CActivity> implements CInterfaceIconSet {
     
-    // Functional color groupings
-    // Meetings - Green
-    if ("group".equals(cleanIconName) || "calendar".equals(cleanIconName)) {
-        return "#28a745";
+    public static String getIconColorCode() {
+        return CActivity.getIconColorCode(); // Delegate to domain object
     }
-    // Activities - Blue  
-    if ("calendar-clock".equals(cleanIconName) || "tasks".equals(cleanIconName) || "flag".equals(cleanIconName)) {
-        return "#007bff";
+
+    public static String getIconFilename() { 
+        return CActivity.getIconFilename(); 
     }
-    // Projects - Orange
-    if ("briefcase".equals(cleanIconName) || "folder".equals(cleanIconName) || "dashboard".equals(cleanIconName) || "grid-big".equals(cleanIconName)) {
-        return "#fd7e14";
-    }
-    // Users - Purple
-    if ("users".equals(cleanIconName)) {
-        return "#6f42c1";
-    }
-    // Settings & Administration - Gray
-    if ("cogs".equals(cleanIconName) || "building".equals(cleanIconName) || "tags".equals(cleanIconName)) {
-        return "#6c757d";
-    }
-    // Decisions - Red
-    if ("gavel".equals(cleanIconName)) {
-        return "#dc3545";
-    }
-    // Commerce - Teal
-    if ("cart".equals(cleanIconName)) {
-        return "#20c997";
-    }
-    // Navigation & General - Primary
-    if ("home".equals(cleanIconName) || "cubes".equals(cleanIconName) || "arrow-left".equals(cleanIconName) || 
-        "tree-table".equals(cleanIconName) || "chevron-right".equals(cleanIconName)) {
-        return "var(--lumo-primary-color)";
-    }
-    
-    // Default fallback
-    return "var(--lumo-primary-color)";
 }
 ```
 
 **Color Groups By Functionality:**
-- **Meetings (Green #28a745)**: group, calendar
-- **Activities (Blue #007bff)**: calendar-clock, tasks, flag
-- **Projects (Orange #fd7e14)**: briefcase, folder, dashboard, grid-big
-- **Users (Purple #6f42c1)**: users
-- **Settings & Administration (Gray #6c757d)**: cogs, building, tags
-- **Decisions (Red #dc3545)**: gavel
-- **Commerce (Teal #20c997)**: cart
-- **Navigation & General (Theme Primary)**: home, cubes, arrow-left, tree-table, chevron-right
+- **Meetings (Green #28a745)**: Meeting-related views
+- **Activities (Blue #007bff)**: Activity and task-related views  
+- **Projects (Orange #fd7e14)**: Project management and Kanban views
+- **Users (Purple #6f42c1)**: User management views
+- **Settings & Administration (Gray #6c757d)**: Configuration and admin views
+- **Decisions (Red #dc3545)**: Decision tracking views
+- **Commerce (Teal #20c997)**: Order and commerce views
+- **Navigation & General (Theme Primary)**: Dashboard and navigation views
 
 **Implementation Details:**
-- Colors are applied in the `CMenuItem.createComponent()` method using:
-  ```java
-  final String iconColor = getIconColor(iconName);
-  icon.getStyle().set("color", iconColor);
-  ```
+- Colors are defined in each view class via the CInterfaceIconSet interface
+- Icon names can reference Vaadin icons while colors are handled consistently
+- The CHierarchicalSideMenu uses CIconSetLoader to retrieve icon information
 - The system automatically handles Vaadin icon prefixes
 - Default color for unknown icons is the primary theme color
 
@@ -214,9 +181,18 @@ private String getIconColor(final String iconName) {
 
 ```java
 @Route("projects/settings")
-@Menu(order = 1, icon = "vaadin:cog", title = "Settings.Projects.Configuration")
+@Menu(order = 1, icon = "class:tech.derbent.projects.view.CProjectSettingsView", title = "Settings.Projects.Configuration")
 @PermitAll
-public class ProjectSettingsView extends VerticalLayout {
+public class CProjectSettingsView extends VerticalLayout implements CInterfaceIconSet {
+    
+    public static String getIconColorCode() {
+        return "#6c757d"; // Gray for settings
+    }
+
+    public static String getIconFilename() { 
+        return "vaadin:cog"; 
+    }
+    
     // View implementation
 }
 ```
