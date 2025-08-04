@@ -26,15 +26,14 @@ import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
 
 /**
- * CDecision - Domain entity representing project decisions with comprehensive management
- * features. Layer: Domain (MVC) Supports: - Decision type categorization - Cost
- * estimation and tracking - Team collaboration and assignments - Multi-stage approval
- * workflow - Accountable personnel management - Descriptive documentation Follows the
- * established patterns from CActivity for consistency.
+ * CDecision - Domain entity representing project decisions with comprehensive management features. Layer: Domain (MVC)
+ * Supports: - Decision type categorization - Cost estimation and tracking - Team collaboration and assignments -
+ * Multi-stage approval workflow - Accountable personnel management - Descriptive documentation Follows the established
+ * patterns from CActivity for consistency.
  */
 @Entity
-@Table (name = "cdecision")
-@AttributeOverride (name = "id", column = @Column (name = "decision_id"))
+@Table(name = "cdecision")
+@AttributeOverride(name = "id", column = @Column(name = "decision_id"))
 public class CDecision extends CEntityOfProject<CDecision> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDecision.class);
@@ -341,4 +340,5 @@ public class CDecision extends CEntityOfProject<CDecision> {
 	public String toString() {
 		return getName() != null ? getName() : super.toString();
 	}
+
 }

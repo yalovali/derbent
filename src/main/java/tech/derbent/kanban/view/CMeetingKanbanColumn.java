@@ -13,11 +13,9 @@ import tech.derbent.meetings.domain.CMeetingStatus;
 import tech.derbent.meetings.view.CMeetingCard;
 
 /**
- * CMeetingKanbanColumn - Kanban column for meetings using the base kanban classes.
- * Layer: View (MVC)
+ * CMeetingKanbanColumn - Kanban column for meetings using the base kanban classes. Layer: View (MVC)
  * 
- * This implementation uses the generic kanban base classes to provide
- * drag-and-drop functionality for meeting cards.
+ * This implementation uses the generic kanban base classes to provide drag-and-drop functionality for meeting cards.
  */
 public class CMeetingKanbanColumn extends CBaseKanbanColumn<CMeeting, CMeetingStatus> {
 
@@ -27,13 +25,14 @@ public class CMeetingKanbanColumn extends CBaseKanbanColumn<CMeeting, CMeetingSt
     /**
      * Constructor for CMeetingKanbanColumn.
      * 
-     * @param status the meeting status this column represents
-     * @param meetings the list of meetings for this status
+     * @param status
+     *            the meeting status this column represents
+     * @param meetings
+     *            the list of meetings for this status
      */
     public CMeetingKanbanColumn(final CMeetingStatus status, final List<CMeeting> meetings) {
         super(status, meetings);
-        LOGGER.debug("Created CMeetingKanbanColumn for status: {} with {} meetings", 
-                status.getName(), meetings.size());
+        LOGGER.debug("Created CMeetingKanbanColumn for status: {} with {} meetings", status.getName(), meetings.size());
     }
 
     @Override

@@ -30,22 +30,22 @@ public interface CEntityOfProjectRepository<EntityClass extends CEntityOfProject
     long countByProject(CProject project);
 
     /**
-     * Finds an entity by ID with eagerly loaded project relationship to prevent 
-     * LazyInitializationException. Since small entities (assignedTo, createdBy) are 
-     * now eager-loaded, we only need to fetch the project relationship.
+     * Finds an entity by ID with eagerly loaded project relationship to prevent LazyInitializationException. Since
+     * small entities (assignedTo, createdBy) are now eager-loaded, we only need to fetch the project relationship.
      * 
-     * @param id the entity ID
+     * @param id
+     *            the entity ID
      * @return optional entity with loaded relationships
      */
     @Query("SELECT e FROM #{#entityName} e " + "LEFT JOIN FETCH e.project " + "WHERE e.id = :id")
     Optional<EntityClass> findByIdWithProjectRelationships(@Param("id") Long id);
 
     /**
-     * Finds entities by project with eagerly loaded project relationship to prevent 
-     * LazyInitializationException. Since small entities (assignedTo, createdBy) are 
-     * now eager-loaded, we only need to fetch the project relationship.
+     * Finds entities by project with eagerly loaded project relationship to prevent LazyInitializationException. Since
+     * small entities (assignedTo, createdBy) are now eager-loaded, we only need to fetch the project relationship.
      * 
-     * @param project the project
+     * @param project
+     *            the project
      * @return list of entities with loaded project relationship
      */
     @Query("SELECT e FROM #{#entityName} e " + "LEFT JOIN FETCH e.project " + "WHERE e.project = :project")
@@ -54,8 +54,10 @@ public interface CEntityOfProjectRepository<EntityClass extends CEntityOfProject
     /**
      * Finds entities by project with eagerly loaded project relationship and pagination.
      * 
-     * @param project the project
-     * @param pageable pagination information
+     * @param project
+     *            the project
+     * @param pageable
+     *            pagination information
      * @return page of entities with loaded project relationship
      */
     @Query("SELECT e FROM #{#entityName} e " + "LEFT JOIN FETCH e.project " + "WHERE e.project = :project")

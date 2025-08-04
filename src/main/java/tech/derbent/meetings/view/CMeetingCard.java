@@ -12,8 +12,7 @@ import com.vaadin.flow.component.html.Span;
 import tech.derbent.meetings.domain.CMeeting;
 
 /**
- * CMeetingCard - UI component representing a meeting card in Kanban boards.
- * Layer: View (MVC)
+ * CMeetingCard - UI component representing a meeting card in Kanban boards. Layer: View (MVC)
  * 
  * Displays meeting information in a compact card format suitable for kanban columns.
  */
@@ -28,7 +27,8 @@ public class CMeetingCard extends Div {
     /**
      * Constructor for CMeetingCard.
      * 
-     * @param meeting the meeting to display
+     * @param meeting
+     *            the meeting to display
      */
     public CMeetingCard(final CMeeting meeting) {
         if (meeting == null) {
@@ -52,14 +52,14 @@ public class CMeetingCard extends Div {
      */
     private void initializeCard() {
         LOGGER.debug("Creating meeting card for: {}", meeting.getName());
-        
+
         // Set CSS class for styling
         addClassName("meeting-card");
-        
+
         // Create title
         final H4 title = new H4(meeting.getName() != null ? meeting.getName() : "Unnamed Meeting");
         title.addClassName("meeting-card-title");
-        
+
         // Create description if available
         if (meeting.getDescription() != null && !meeting.getDescription().trim().isEmpty()) {
             final Span description = new Span(meeting.getDescription());
@@ -68,28 +68,28 @@ public class CMeetingCard extends Div {
         } else {
             add(title);
         }
-        
+
         // Create meeting date info
         if (meeting.getMeetingDate() != null) {
             final Span dateInfo = new Span("📅 " + meeting.getMeetingDate().format(DATE_FORMATTER));
             dateInfo.addClassName("meeting-card-date");
             add(dateInfo);
         }
-        
+
         // Create meeting type info
         if (meeting.getMeetingType() != null) {
             final Span typeInfo = new Span("Type: " + meeting.getMeetingType().getName());
             typeInfo.addClassName("meeting-card-type");
             add(typeInfo);
         }
-        
+
         // Create participants count
         if (meeting.getParticipants() != null && !meeting.getParticipants().isEmpty()) {
             final Span participantsInfo = new Span("👥 " + meeting.getParticipants().size() + " participants");
             participantsInfo.addClassName("meeting-card-participants");
             add(participantsInfo);
         }
-        
+
         // Create status badge
         if (meeting.getStatus() != null) {
             final Span statusBadge = new Span(meeting.getStatus().getName());

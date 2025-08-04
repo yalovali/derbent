@@ -11,21 +11,17 @@ import tech.derbent.abstracts.annotations.MetaData;
 import tech.derbent.users.domain.CUser;
 
 /**
- * CEvent - Abstract base class for event-based entities in the system. Layer: Domain
- * (MVC) Provides common fields and functionality for event-like entities such as: -
- * Comments - Notifications - Activity logs - Status changes This class extends
- * CEntityOfProject to maintain project context for all events.
+ * CEvent - Abstract base class for event-based entities in the system. Layer: Domain (MVC) Provides common fields and
+ * functionality for event-like entities such as: - Comments - Notifications - Activity logs - Status changes This class
+ * extends CEntityOfProject to maintain project context for all events.
  */
 @MappedSuperclass
 public abstract class CEvent<EntityClass> extends CEntityDB<EntityClass> {
 
-	// Event timestamp - when the event occurred
-	@Column (name = "event_date", nullable = false)
-	@MetaData (
-		displayName = "Event Date", required = true, readOnly = true,
-		description = "Date and time when the event occurred", hidden = false, order = 90
-	)
-	private LocalDateTime eventDate;
+    // Event timestamp - when the event occurred
+    @Column(name = "event_date", nullable = false)
+    @MetaData(displayName = "Event Date", required = true, readOnly = true, description = "Date and time when the event occurred", hidden = false, order = 90)
+    private LocalDateTime eventDate;
 
 	// Author of the event
 	@ManyToOne (fetch = FetchType.EAGER)
@@ -37,46 +33,52 @@ public abstract class CEvent<EntityClass> extends CEntityDB<EntityClass> {
 	)
 	private CUser author;
 
-	/**
-	 * Default constructor for JPA.
-	 */
-	protected CEvent() {
-		super();
-		this.eventDate = LocalDateTime.now();
-	}
 
-	// Default constructor for JPA
-	public CEvent(final Class<EntityClass> clazz) {
-		super(clazz);
-		this.eventDate = LocalDateTime.now();
-	}
+    /**
+     * Default constructor for JPA.
+     */
+    protected CEvent() {
+        super();
+        this.eventDate = LocalDateTime.now();
+    }
 
-	public CUser getAuthor() { return author; }
+    // Default constructor for JPA
+    public CEvent(final Class<EntityClass> clazz) {
+        super(clazz);
+        this.eventDate = LocalDateTime.now();
+    }
 
-	public String getAuthorName() {
-		return (author != null) ? author.getName() : "Unknown Author";
-	}
+    public CUser getAuthor() {
+        return author;
+    }
 
-	public LocalDateTime getEventDate() { return eventDate; }
+    public String getAuthorName() {
+        return (author != null) ? author.getName() : "Unknown Author";
+    }
 
-	@Override
-	protected void initializeDefaults() {
-		super.initializeDefaults();
+    public LocalDateTime getEventDate() {
+        return eventDate;
+    }
 
-		if (this.eventDate == null) {
-			this.eventDate = LocalDateTime.now();
-		}
-	}
+    @Override
+    protected void initializeDefaults() {
+        super.initializeDefaults();
 
-	public void setAuthor(final CUser author) { this.author = author; }
+        if (this.eventDate == null) {
+            this.eventDate = LocalDateTime.now();
+        }
+    }
 
-	public void setEventDate(final LocalDateTime eventDate) {
-		this.eventDate = eventDate;
-	}
+    public void setAuthor(final CUser author) {
+        this.author = author;
+    }
 
-	@Override
-	public String toString() {
-		return String.format("%s{eventDate=%s, author=%s}", super.toString(), eventDate,
-			getAuthorName());
-	}
+    public void setEventDate(final LocalDateTime eventDate) {
+        this.eventDate = eventDate;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s{eventDate=%s, author=%s}", super.toString(), eventDate, getAuthorName());
+    }
 }

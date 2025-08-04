@@ -30,10 +30,10 @@ class CRiskStatusServiceTest extends CTestBase {
     void testCreateEntityWithValidName() {
         // Given
         final String validName = "IDENTIFIED";
-        
+
         // When
         final CRiskStatus status = new CRiskStatus(validName, project);
-        
+
         // Then
         assertNotNull(status);
         assertEquals(validName, status.getName());
@@ -46,10 +46,10 @@ class CRiskStatusServiceTest extends CTestBase {
         final String name = "MITIGATED";
         final String description = "Risk has been mitigated";
         final String color = "#00cc66";
-        
+
         // When
         final CRiskStatus status = new CRiskStatus(name, project, description, color, false);
-        
+
         // Then
         assertNotNull(status);
         assertEquals(name, status.getName());

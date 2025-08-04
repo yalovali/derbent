@@ -55,8 +55,12 @@ public class CMeetingTypeView extends CProjectAwareMDPage<CMeetingType> {
 
     @Override
     protected void createGridForEntity() {
+        // Add color-aware type column to show the type with color
+        grid.addStatusColumn(type -> type, "Type", "type");
         grid.addShortTextColumn(CMeetingType::getName, "Name", "name");
         grid.addLongTextColumn(CMeetingType::getDescription, "Description", "description");
+        grid.addShortTextColumn(CMeetingType::getColor, "Color", "color");
+        grid.addBooleanColumn(CMeetingType::isActive, "Active", "Active", "Inactive");
         grid.addShortTextColumn(CMeetingType::getProjectName, "Project", "project");
     }
 

@@ -16,57 +16,53 @@ import tech.derbent.abstracts.domains.CTestBase;
 import tech.derbent.activities.domain.CActivityType;
 
 /**
- * Tests for CActivityTypeService lazy loading functionality. Verifies that the service
- * properly loads related entities to prevent LazyInitializationException.
+ * Tests for CActivityTypeService lazy loading functionality. Verifies that the service properly loads related entities
+ * to prevent LazyInitializationException.
  */
 public class CActivityTypeServiceLazyLoadingTest extends CTestBase {
 
-	@Override
-	protected void setupForTest() {
-		// TODO Auto-generated method stub
-	}
+    @Override
+    protected void setupForTest() {
+        // TODO Auto-generated method stub
+    }
 
-	@Test
-	void testGetHandlesNullId() {
-		// When
-		final Optional<CActivityType> result = activityTypeService.getById(null);
-		// Then
-		assertFalse(result.isPresent());
-		verify(activityTypeRepository, never()).findByIdWithRelationships(any());
-	}
+    @Test
+    void testGetHandlesNullId() {
+        // When
+        final Optional<CActivityType> result = activityTypeService.getById(null);
+        // Then
+        assertFalse(result.isPresent());
+        verify(activityTypeRepository, never()).findByIdWithRelationships(any());
+    }
 
-	@Test
-	void testGetUsesEagerLoadingQuery() {
-		// Given
-		final Long activityTypeId = 1L;
-		project.setName("Test Project");
-		final CActivityType activityType =
-			new CActivityType("Test Activity Type", project);
-		// Note: ID is typically set by JPA, so we'll mock the return directly
-		when(activityTypeRepository.findByIdWithRelationships(activityTypeId))
-			.thenReturn(Optional.of(activityType));
-		// When
-		final Optional<CActivityType> result =
-			activityTypeService.getById(activityTypeId);
-		// Then
-		assertTrue(result.isPresent());
-		assertEquals("Test Activity Type", result.get().getName());
-		assertEquals("Test Project", result.get().getProject().getName());
-		// Verify that the eager loading method was called
-		verify(activityTypeRepository).findByIdWithRelationships(activityTypeId);
-		verify(activityTypeRepository, never()).findById(activityTypeId);
-	}
+    @Test
+    void testGetUsesEagerLoadingQuery() {
+        // Given
+        final Long activityTypeId = 1L;
+        project.setName("Test Project");
+        final CActivityType activityType = new CActivityType("Test Activity Type", project);
+        // Note: ID is typically set by JPA, so we'll mock the return directly
+        when(activityTypeRepository.findByIdWithRelationships(activityTypeId)).thenReturn(Optional.of(activityType));
+        // When
+        final Optional<CActivityType> result = activityTypeService.getById(activityTypeId);
+        // Then
+        assertTrue(result.isPresent());
+        assertEquals("Test Activity Type", result.get().getName());
+        assertEquals("Test Project", result.get().getProject().getName());
+        // Verify that the eager loading method was called
+        verify(activityTypeRepository).findByIdWithRelationships(activityTypeId);
+        verify(activityTypeRepository, never()).findById(activityTypeId);
+    }
 
-	@Test
-	void testGetWithNonExistentId() {
-		// Given
-		final Long nonExistentId = 999L;
-		when(activityTypeRepository.findByIdWithRelationships(nonExistentId))
-			.thenReturn(Optional.empty());
-		// When
-		final Optional<CActivityType> result = activityTypeService.getById(nonExistentId);
-		// Then
-		assertFalse(result.isPresent());
-		verify(activityTypeRepository).findByIdWithRelationships(nonExistentId);
-	}
+    @Test
+    void testGetWithNonExistentId() {
+        // Given
+        final Long nonExistentId = 999L;
+        when(activityTypeRepository.findByIdWithRelationships(nonExistentId)).thenReturn(Optional.empty());
+        // When
+        final Optional<CActivityType> result = activityTypeService.getById(nonExistentId);
+        // Then
+        assertFalse(result.isPresent());
+        verify(activityTypeRepository).findByIdWithRelationships(nonExistentId);
+    }
 }

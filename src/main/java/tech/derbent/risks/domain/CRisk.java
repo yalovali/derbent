@@ -43,7 +43,8 @@ public class CRisk extends CEntityOfProject<CRisk> {
         this.riskSeverity = riskSeverity;
     }
 
-    public CRisk(final String name, final CProject project, final ERiskSeverity riskSeverity, final CRiskStatus status) {
+    public CRisk(final String name, final CProject project, final ERiskSeverity riskSeverity,
+            final CRiskStatus status) {
         super(CRisk.class, name, project);
         this.riskSeverity = riskSeverity;
         this.status = status;

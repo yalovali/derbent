@@ -47,128 +47,125 @@ import tech.derbent.users.service.CUserTypeService;
 
 public abstract class CTestBase {
 
-	@Mock
-	protected CActivityRepository activityRepository;
+    @Mock
+    protected CActivityRepository activityRepository;
 
-	@Autowired
-	protected CActivityService activityService;
+    @Autowired
+    protected CActivityService activityService;
 
-	@Mock
-	protected CActivityStatusRepository activityStatusRepository;
+    @Mock
+    protected CActivityStatusRepository activityStatusRepository;
 
-	@Autowired
-	protected CActivityStatusService activityStatusService;
+    @Autowired
+    protected CActivityStatusService activityStatusService;
 
-	@Mock
-	protected CActivityTypeRepository activityTypeRepository;
+    @Mock
+    protected CActivityTypeRepository activityTypeRepository;
 
-	@Autowired
-	protected CActivityTypeService activityTypeService;
+    @Autowired
+    protected CActivityTypeService activityTypeService;
 
-	@Mock
-	protected Clock clock;
+    @Mock
+    protected Clock clock;
 
-	@Autowired
-	protected CCommentPriorityService commentPriorityService;
+    @Autowired
+    protected CCommentPriorityService commentPriorityService;
 
-	@Mock
-	protected CCommentRepository commentRepository;
+    @Mock
+    protected CCommentRepository commentRepository;
 
-	// Comment services
-	@Autowired
-	protected CCommentService commentService;
+    // Comment services
+    @Autowired
+    protected CCommentService commentService;
 
-	// Company services
-	@Autowired
-	protected CCompanyService companyService;
+    // Company services
+    @Autowired
+    protected CCompanyService companyService;
 
-	// Decision services
-	@Autowired
-	protected CDecisionService decisionService;
+    // Decision services
+    @Autowired
+    protected CDecisionService decisionService;
 
-	@Autowired
-	protected CDecisionStatusService decisionStatusService;
+    @Autowired
+    protected CDecisionStatusService decisionStatusService;
 
-	@Mock
-	protected CDecisionTypeRepository decisionTypeRepository;
+    @Mock
+    protected CDecisionTypeRepository decisionTypeRepository;
 
-	@Autowired
-	protected CDecisionTypeService decisionTypeService;
+    @Autowired
+    protected CDecisionTypeService decisionTypeService;
 
-	protected CMeeting meeting;
+    protected CMeeting meeting;
 
-	@Autowired
-	protected CMeetingService meetingService;
+    @Autowired
+    protected CMeetingService meetingService;
 
-	protected CMeetingType meetingType;
+    protected CMeetingType meetingType;
 
-	@Autowired
-	protected CMeetingTypeService meetingTypeService;
+    @Autowired
+    protected CMeetingTypeService meetingTypeService;
 
-	// Order services
-	@Autowired
-	protected COrderService orderService;
+    // Order services
+    @Autowired
+    protected COrderService orderService;
 
-	protected CCommentPriority priority;
+    protected CCommentPriority priority;
 
-	@Mock
-	protected CProject project;
+    @Mock
+    protected CProject project;
 
-	@Autowired
-	protected CProjectService projectService;
+    @Autowired
+    protected CProjectService projectService;
 
-	// Risk services
-	@Autowired
-	protected CRiskService riskService;
+    // Risk services
+    @Autowired
+    protected CRiskService riskService;
 
-	@Mock
-	protected CRiskStatusRepository riskStatusRepository;
+    @Mock
+    protected CRiskStatusRepository riskStatusRepository;
 
-	@Autowired
-	protected CRiskStatusService riskStatusService;
+    @Autowired
+    protected CRiskStatusService riskStatusService;
 
-	protected CMeetingStatus status;
+    protected CMeetingStatus status;
 
-	protected CActivity testActivity;
+    protected CActivity testActivity;
 
-	protected CUser testUser;
+    protected CUser testUser;
 
-	protected CSessionService sessionService;
+    protected CSessionService sessionService;
 
-	@Mock
-	protected CUserRepository userRepository;
+    @Mock
+    protected CUserRepository userRepository;
 
-	@Autowired
-	protected CUserService userService;
+    @Autowired
+    protected CUserService userService;
 
-	@Autowired
-	protected CUserTypeService userTypeService;
+    @Autowired
+    protected CUserTypeService userTypeService;
 
-	@Mock
-	protected AuthenticationContext authenticationContext;
+    @Mock
+    protected AuthenticationContext authenticationContext;
 
-	@BeforeEach
-	void setUp() {
-		MockitoAnnotations.openMocks(this);
-		testUser = new CUser("Test User");
-		testUser.setLogin("testuser");
-		project = new CProject("Test Project");
-		testActivity = new CActivity("Test Activity", project);
-		priority = new CCommentPriority("High", project);
-		priority.setColor("#FF0000");
-		meetingType = new CMeetingType("Test Meeting Type", project);
-		status = new CMeetingStatus("SCHEDULED", project);
-		meeting = new CMeeting("Test Meeting", project, meetingType);
-		sessionService =
-			new CSessionService(authenticationContext, userService, projectService);
-		final User authUser =
-			new User("testuser", "password", java.util.Collections.emptyList());
-		final UsernamePasswordAuthenticationToken authentication =
-			new UsernamePasswordAuthenticationToken(testUser, null,
-				authUser.getAuthorities());
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-		setupForTest();
-	}
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        testUser = new CUser("Test User");
+        testUser.setLogin("testuser");
+        project = new CProject("Test Project");
+        testActivity = new CActivity("Test Activity", project);
+        priority = new CCommentPriority("High", project);
+        priority.setColor("#FF0000");
+        meetingType = new CMeetingType("Test Meeting Type", project);
+        status = new CMeetingStatus("SCHEDULED", project);
+        meeting = new CMeeting("Test Meeting", project, meetingType);
+        sessionService = new CSessionService(authenticationContext, userService, projectService);
+        final User authUser = new User("testuser", "password", java.util.Collections.emptyList());
+        final UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(testUser,
+                null, authUser.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        setupForTest();
+    }
 
-	protected abstract void setupForTest();
+    protected abstract void setupForTest();
 }

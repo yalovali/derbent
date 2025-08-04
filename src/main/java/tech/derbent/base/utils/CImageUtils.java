@@ -47,10 +47,10 @@ public final class CImageUtils {
             LOGGER.debug("Image data is null or empty, returning null");
             return null;
         }
-        
+
         String mimeType = detectImageMimeType(imageData);
         LOGGER.debug("Detected MIME type: {}", mimeType);
-        
+
         // Convert byte array to base64
         final String base64Image = java.util.Base64.getEncoder().encodeToString(imageData);
         String dataUrl = "data:" + mimeType + ";base64," + base64Image;
@@ -80,29 +80,24 @@ public final class CImageUtils {
         if ((imageData == null) || (imageData.length < 4)) {
             return "image/jpeg"; // Default fallback
         }
-        
+
         // Check for SVG (starts with "<svg" or "<?xml")
         String start = new String(imageData, 0, Math.min(20, imageData.length)).toLowerCase();
         if (start.contains("<svg") || start.contains("<?xml")) {
             return "image/svg+xml";
         }
-        
+
         // Check for PNG signature (89 50 4E 47)
-        if (imageData.length >= 4 && 
-            (imageData[0] & 0xFF) == 0x89 && 
-            (imageData[1] & 0xFF) == 0x50 && 
-            (imageData[2] & 0xFF) == 0x4E && 
-            (imageData[3] & 0xFF) == 0x47) {
+        if (imageData.length >= 4 && (imageData[0] & 0xFF) == 0x89 && (imageData[1] & 0xFF) == 0x50
+                && (imageData[2] & 0xFF) == 0x4E && (imageData[3] & 0xFF) == 0x47) {
             return "image/png";
         }
-        
+
         // Check for JPEG signature (FF D8)
-        if (imageData.length >= 2 && 
-            (imageData[0] & 0xFF) == 0xFF && 
-            (imageData[1] & 0xFF) == 0xD8) {
+        if (imageData.length >= 2 && (imageData[0] & 0xFF) == 0xFF && (imageData[1] & 0xFF) == 0xD8) {
             return "image/jpeg";
         }
-        
+
         // Check for GIF signature (GIF87a or GIF89a)
         if (imageData.length >= 6) {
             String gifStart = new String(imageData, 0, 6);
@@ -110,7 +105,7 @@ public final class CImageUtils {
                 return "image/gif";
             }
         }
-        
+
         // Check for WebP signature (RIFF...WEBP)
         if (imageData.length >= 12) {
             String riffStart = new String(imageData, 0, 4);
@@ -119,7 +114,7 @@ public final class CImageUtils {
                 return "image/webp";
             }
         }
-        
+
         // Default fallback to JPEG
         return "image/jpeg";
     }

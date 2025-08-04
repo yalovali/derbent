@@ -11,9 +11,9 @@ import tech.derbent.base.domain.CStatus;
 import tech.derbent.projects.domain.CProject;
 
 /**
- * CRiskStatus - Domain entity representing risk status types. Layer: Domain (MVC) Inherits from CStatus to
- * provide status functionality for risks. This entity defines the possible statuses a risk can have (e.g.,
- * IDENTIFIED, MITIGATED, RESOLVED, CLOSED).
+ * CRiskStatus - Domain entity representing risk status types. Layer: Domain (MVC) Inherits from CStatus to provide
+ * status functionality for risks. This entity defines the possible statuses a risk can have (e.g., IDENTIFIED,
+ * MITIGATED, RESOLVED, CLOSED).
  */
 @Entity
 @Table(name = "criskstatus")

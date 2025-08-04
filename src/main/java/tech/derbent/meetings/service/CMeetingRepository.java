@@ -25,11 +25,11 @@ public interface CMeetingRepository extends CEntityOfProjectRepository<CMeeting>
     List<CMeeting> findByAttendeeId(@Param("userId") Long userId);
 
     /**
-     * Finds a meeting by ID with eagerly loaded relationships to prevent 
-     * LazyInitializationException. Only fetches relationships that are still lazy
-     * (participants, attendees, relatedActivity).
+     * Finds a meeting by ID with eagerly loaded relationships to prevent LazyInitializationException. Only fetches
+     * relationships that are still lazy (participants, attendees, relatedActivity).
      * 
-     * @param id the meeting ID
+     * @param id
+     *            the meeting ID
      * @return optional CMeeting with loaded relationships
      */
     @Query("SELECT m FROM CMeeting m " + "LEFT JOIN FETCH m.project " + "LEFT JOIN FETCH m.participants "
@@ -47,11 +47,13 @@ public interface CMeetingRepository extends CEntityOfProjectRepository<CMeeting>
     List<CMeeting> findByParticipantId(@Param("userId") Long userId);
 
     /**
-     * Finds meetings by project with eagerly loaded relationships to prevent 
-     * LazyInitializationException. Only fetches relationships that are still lazy.
+     * Finds meetings by project with eagerly loaded relationships to prevent LazyInitializationException. Only fetches
+     * relationships that are still lazy.
      * 
-     * @param project the project to filter by
-     * @param pageable pagination information
+     * @param project
+     *            the project to filter by
+     * @param pageable
+     *            pagination information
      * @return page of meetings with loaded relationships
      */
     @Query("SELECT DISTINCT m FROM CMeeting m " + "LEFT JOIN FETCH m.project " + "LEFT JOIN FETCH m.participants "
@@ -61,7 +63,8 @@ public interface CMeetingRepository extends CEntityOfProjectRepository<CMeeting>
     /**
      * Finds meetings by project with eagerly loaded relationships (non-paginated version).
      * 
-     * @param project the project to filter by
+     * @param project
+     *            the project to filter by
      * @return list of meetings with loaded relationships
      */
     @Query("SELECT DISTINCT m FROM CMeeting m " + "LEFT JOIN FETCH m.project " + "LEFT JOIN FETCH m.participants "

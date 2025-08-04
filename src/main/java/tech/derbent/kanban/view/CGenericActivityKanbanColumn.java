@@ -13,11 +13,10 @@ import tech.derbent.activities.view.CActivityCard;
 import tech.derbent.base.ui.CBaseKanbanColumn;
 
 /**
- * CGenericActivityKanbanColumn - Generic Kanban column for activities using the base kanban classes.
- * Layer: View (MVC)
+ * CGenericActivityKanbanColumn - Generic Kanban column for activities using the base kanban classes. Layer: View (MVC)
  * 
- * This implementation uses the new generic kanban base classes to provide
- * drag-and-drop functionality for activity cards.
+ * This implementation uses the new generic kanban base classes to provide drag-and-drop functionality for activity
+ * cards.
  */
 public class CGenericActivityKanbanColumn extends CBaseKanbanColumn<CActivity, CActivityStatus> {
 
@@ -27,13 +26,15 @@ public class CGenericActivityKanbanColumn extends CBaseKanbanColumn<CActivity, C
     /**
      * Constructor for CGenericActivityKanbanColumn.
      * 
-     * @param status the activity status this column represents
-     * @param activities the list of activities for this status
+     * @param status
+     *            the activity status this column represents
+     * @param activities
+     *            the list of activities for this status
      */
     public CGenericActivityKanbanColumn(final CActivityStatus status, final List<CActivity> activities) {
         super(status, activities);
-        LOGGER.debug("Created CGenericActivityKanbanColumn for status: {} with {} activities", 
-                status.getName(), activities.size());
+        LOGGER.debug("Created CGenericActivityKanbanColumn for status: {} with {} activities", status.getName(),
+                activities.size());
     }
 
     @Override
