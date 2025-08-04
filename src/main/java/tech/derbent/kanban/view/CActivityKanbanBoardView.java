@@ -130,13 +130,41 @@ public class CActivityKanbanBoardView extends VerticalLayout implements CProject
                 final CActivityStatus status = entry.getKey();
                 final List<CActivity> activities = entry.getValue();
                 LOGGER.debug("Creating column for status: {} with {} activities", status.getName(), activities.size());
-                final CActivityKanbanColumn column = new CActivityKanbanColumn(status, activities);
+                
+                // Create column with drop handler
+                final CActivityKanbanColumn column = new CActivityKanbanColumn(status, activities, 
+                    droppedActivity -> handleActivityDropped(droppedActivity));
                 kanbanContainer.add(column);
                 kanbanContainer.setFlexGrow(1, column);
             }
         } catch (final Exception e) {
             LOGGER.error("Error loading kanban data for project: {}", project.getName(), e);
             showEmptyState("Error loading activities: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Handles when an activity is dropped into a different column.
+     * Updates the activity status in the database and refreshes the kanban board.
+     * 
+     * @param droppedActivity the activity that was dropped
+     */
+    private void handleActivityDropped(final CActivity droppedActivity) {
+        LOGGER.info("Handling dropped activity: {} with new status: {}", 
+            droppedActivity.getName(), droppedActivity.getStatus().getName());
+        
+        try {
+            // Update the activity status in the database
+            activityService.updateEntityStatus(droppedActivity, droppedActivity.getStatus());
+            
+            // Refresh the kanban board to reflect the changes
+            loadKanbanData();
+            
+            LOGGER.info("Successfully updated activity status for: {}", droppedActivity.getName());
+        } catch (final Exception e) {
+            LOGGER.error("Error updating activity status for: {}", droppedActivity.getName(), e);
+            // Refresh the board to revert visual changes
+            loadKanbanData();
         }
     }
 

@@ -2,11 +2,14 @@ package tech.derbent.kanban.view;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.dnd.DropEffect;
+import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.H5;
@@ -39,6 +42,8 @@ public class CActivityKanbanColumn extends Div {
 
     private List<CActivity> activities;
 
+    private Consumer<CActivity> onActivityDropped;
+
     /**
      * Constructor for CActivityKanbanColumn.
      * 
@@ -48,6 +53,21 @@ public class CActivityKanbanColumn extends Div {
      *            the list of activities for this status
      */
     public CActivityKanbanColumn(final CActivityStatus activityStatus, final List<CActivity> activities) {
+        this(activityStatus, activities, null);
+    }
+
+    /**
+     * Constructor for CActivityKanbanColumn with drop handler.
+     * 
+     * @param activityStatus
+     *            the activity status this column represents
+     * @param activities
+     *            the list of activities for this status
+     * @param onActivityDropped
+     *            callback function to handle dropped activities
+     */
+    public CActivityKanbanColumn(final CActivityStatus activityStatus, final List<CActivity> activities, 
+            final Consumer<CActivity> onActivityDropped) {
         LOGGER.debug("Creating CActivityKanbanColumn for status: {} with {} activities",
                 activityStatus != null ? activityStatus.getName() : "null", activities != null ? activities.size() : 0);
 
@@ -56,6 +76,7 @@ public class CActivityKanbanColumn extends Div {
         }
         this.activityStatus = activityStatus;
         this.activities = activities != null ? activities : List.of();
+        this.onActivityDropped = onActivityDropped;
         initializeColumn();
     }
 
@@ -132,6 +153,10 @@ public class CActivityKanbanColumn extends Div {
         LOGGER.debug("Initializing column layout for status: {}", activityStatus.getName());
         // Set CSS class for styling
         addClassName("kanban-column");
+        
+        // Configure drag and drop
+        setupDropTarget();
+        
         // Create header container
         final Div headerContainer = new Div();
         headerContainer.addClassName("kanban-column-header");
@@ -153,6 +178,42 @@ public class CActivityKanbanColumn extends Div {
         populateCards();
         // Add components to column
         add(headerContainer, cardsContainer);
+    }
+
+    /**
+     * Sets up drop target functionality for the kanban column.
+     */
+    private void setupDropTarget() {
+        LOGGER.debug("Setting up drop target for column: {}", activityStatus.getName());
+        
+        final DropTarget<CActivityKanbanColumn> dropTarget = DropTarget.create(this);
+        dropTarget.setDropEffect(DropEffect.MOVE);
+        
+        // Add drop listener to handle the actual drop
+        dropTarget.addDropListener(event -> {
+            LOGGER.debug("Drop event in column: {}", activityStatus.getName());
+            
+            // Get the dragged activity from the drag source
+            if (event.getDragSourceComponent().isPresent() && 
+                event.getDragSourceComponent().get() instanceof CActivityCard) {
+                
+                final CActivityCard draggedCard = (CActivityCard) event.getDragSourceComponent().get();
+                final CActivity droppedActivity = draggedCard.getActivity();
+                
+                LOGGER.info("Activity dropped: {} into status: {}", 
+                    droppedActivity.getName(), activityStatus.getName());
+                
+                // Only process if the activity is being dropped into a different status
+                if (!activityStatus.equals(droppedActivity.getStatus())) {
+                    droppedActivity.setStatus(activityStatus);
+                    
+                    // Call the callback if provided
+                    if (onActivityDropped != null) {
+                        onActivityDropped.accept(droppedActivity);
+                    }
+                }
+            }
+        });
     }
 
     /**
