@@ -128,6 +128,51 @@ src/main/java/tech/derbent/
 - Test all validation scenarios and edge cases
 - Mock external dependencies appropriately
 
+### 5.1 Test Organization Structure
+
+Tests are organized into three main directories under `src/test/java/`:
+
+1. **Unit Tests** (`src/test/java/unit-tests/`):
+   - Business logic tests
+   - Service layer tests  
+   - Domain entity tests
+   - Validation tests
+   - Integration tests
+   - Manual verification tests
+
+2. **UI Tests** (`src/test/java/ui-tests/`):
+   - Vaadin UI component tests
+   - View tests without browser automation
+   - Form validation UI tests
+   - Component interaction tests
+
+3. **Automated Tests** (`src/test/java/automated-tests/`):
+   - Playwright browser automation tests
+   - End-to-end testing scenarios
+   - Full application workflow tests
+   - Cross-browser compatibility tests
+
+### 5.2 Running Tests
+
+Use the following commands to run specific test categories:
+
+```bash
+# Run all tests
+mvn test
+
+# Run only unit tests
+mvn test -Dtest="**/unit-tests/**/*Test"
+
+# Run only UI tests  
+mvn test -Dtest="**/ui-tests/**/*Test"
+
+# Run only automated tests
+mvn test -Dtest="**/automated-tests/**/*Test"
+
+# Run Playwright tests using script
+./run-playwright-tests.sh all
+```
+
 ---
 
 ## 6. Java Build and Quality Checks
@@ -174,6 +219,7 @@ After accepting Copilot suggestions, manually review for:
 - Favor abstraction: if two or more features are similar, create an abstract base class with abstract fields and methods
 - Always start class names with a capital "C" (e.g., `CUser`, `CSettings`). Do not use standard Java class naming for domain classes
 - Check for lazy loading issues using best practices (e.g., `@Transactional`, `fetch = FetchType.LAZY`). Add comments explaining lazy loading risks or solutions
+- **Lazy Loading Best Practices**: Use eager loading queries in repositories (e.g., `LEFT JOIN FETCH`) for commonly accessed relationships to prevent `LazyInitializationException`
 - Always check for `null` values and possible `NullPointerException` in every function. If necessary, also check for empty strings
 - Always prefer using base classes to avoid code duplication
 - Every important function must start with a logger statement detailing function name and parameter values (do not log at function end)
@@ -1111,28 +1157,27 @@ public class CEntityService extends CEntityOfProjectService<CEntity> {
 
 ## 5. Testing Standards
 
-### 5.1 Unit Tests
+### 5.3 Unit Tests  
 - Test all public methods
 - Include edge cases and error conditions
 - Use meaningful test names
 - Follow AAA pattern (Arrange, Act, Assert)
 - Write unit tests for all business logic and service methods
-- test all views, select all new items in grids, always test CRUD functions of views in all pages.
+- Test all views, select all new items in grids, always test CRUD functions of views in all pages
 - Use TestContainers for integration testing with PostgreSQL
 - Maintain test coverage above 80% for critical business logic
 - Test all validation scenarios and edge cases
 - Mock external dependencies appropriately
 - Include manual verification tests for complex UI interactions
-- always create tests for ui functions
-- test agains grid selection changes for every page every view
-- test contents of every combobox
+- Always create tests for UI functions
+- Test against grid selection changes for every page every view
+- Test contents of every combobox
 
-### 5.2 Integration Tests
+### 5.4 Integration Tests
 - Test entity persistence and retrieval
 - Verify relationship mappings
 - Test validation constraints
 - Include performance tests for critical paths
-
 
 ### 5.3 Test Structure and Guidelines
 
@@ -1221,7 +1266,6 @@ takeScreenshot(String name, boolean isFailure); // Conditional screenshots
 - Include manual verification tests for complex UI interactions
 - Test all navigation paths between views
 - Maintain test coverage above 80% for critical business logic 
-
 
 ## 6. Sample Implementation Guidelines
 
