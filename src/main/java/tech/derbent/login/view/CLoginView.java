@@ -10,6 +10,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
@@ -71,8 +72,14 @@ public class CLoginView extends Main implements BeforeEnterObserver {
         });
         // CAuxillaries.setId(resetDbButton);
         resetDbButton.addClassName(LumoUtility.Margin.Top.SMALL);
+        
+        // Add link to custom login for testing
+        final RouterLink customLoginLink = new RouterLink("Try Custom Login", CCustomLoginView.class);
+        customLoginLink.addClassName(LumoUtility.FontSize.SMALL);
+        
         loginOverlay.getFooter().add(resetDbButton);
         loginOverlay.getFooter().add(passwordHint);
+        loginOverlay.getFooter().add(customLoginLink);
         add(loginOverlay);
         // cannot add components after the overlay is opened, so we set it up first
         loginOverlay.setOpened(true);
