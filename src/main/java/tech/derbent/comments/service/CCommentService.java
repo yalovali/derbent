@@ -169,10 +169,10 @@ public class CCommentService extends CAbstractService<CComment> {
         LOGGER.info("findByActivityWithRelationships called with activity: {}", activity);
 
         if (activity == null) {
-            LOGGER.warn("findByActivityWithRelationships called with null activity");
+            LOGGER.warn("findByActivityOrderByEventDateAsc called with null activity");
             return List.of();
         }
-        return ((CCommentRepository) repository).findByActivityWithRelationships(activity);
+        return ((CCommentRepository) repository).findByActivityOrderByEventDateAsc(activity);
     }
 
     /**
@@ -223,7 +223,7 @@ public class CCommentService extends CAbstractService<CComment> {
             LOGGER.warn("get called with null id");
             return Optional.empty();
         }
-        return ((CCommentRepository) repository).findByIdWithRelationships(id);
+        return repository.findById(id);
     }
 
     @Override

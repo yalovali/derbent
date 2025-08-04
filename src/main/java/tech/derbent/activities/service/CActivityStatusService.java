@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.activities.domain.CActivityStatus;
+import tech.derbent.projects.domain.CProject;
 
 /**
  * CActivityStatusService - Service class for managing CActivityStatus entities. Layer:
@@ -94,33 +95,6 @@ public class CActivityStatusService extends CEntityOfProjectService<CActivitySta
 	}
 
 	/**
-	 * Find all active (non-final) statuses.
-	 * @return List of active statuses
-	 */
-	@Transactional (readOnly = true)
-	public List<CActivityStatus> findAllActiveStatuses() {
-		LOGGER.debug("findAllActiveStatuses() - Finding all active activity statuses");
-		final List<CActivityStatus> statuses =
-			activityStatusRepository.findAllActiveStatuses();
-		LOGGER.debug("findAllActiveStatuses() - Found {} active statuses",
-			statuses.size());
-		return statuses;
-	}
-
-	/**
-	 * Find all final statuses (completed/cancelled states).
-	 * @return List of final statuses
-	 */
-	@Transactional (readOnly = true)
-	public List<CActivityStatus> findAllFinalStatuses() {
-		LOGGER.debug("findAllFinalStatuses() - Finding all final activity statuses");
-		final List<CActivityStatus> statuses =
-			activityStatusRepository.findAllFinalStatuses();
-		LOGGER.debug("findAllFinalStatuses() - Found {} final statuses", statuses.size());
-		return statuses;
-	}
-
-	/**
 	 * Find activity status by ID.
 	 * @param id the status ID - must not be null
 	 * @return Optional containing the status if found, empty otherwise
@@ -163,10 +137,10 @@ public class CActivityStatusService extends CEntityOfProjectService<CActivitySta
 	 * @return Optional containing the default status if found
 	 */
 	@Transactional (readOnly = true)
-	public Optional<CActivityStatus> findDefaultStatus() {
+	public Optional<CActivityStatus> findDefaultStatus(CProject project) {
 		LOGGER.debug("findDefaultStatus() - Finding default activity status");
 		final Optional<CActivityStatus> status =
-			activityStatusRepository.findDefaultStatus();
+			activityStatusRepository.findDefaultStatus(project);
 		LOGGER.debug("findDefaultStatus() - Found default status: {}",
 			status.isPresent());
 		return status;
@@ -186,8 +160,7 @@ public class CActivityStatusService extends CEntityOfProjectService<CActivitySta
 		if (id == null) {
 			return Optional.empty();
 		}
-		final Optional<CActivityStatus> entity =
-			activityStatusRepository.findByIdWithProject(id);
+		final Optional<CActivityStatus> entity = activityStatusRepository.findById(id);
 		entity.ifPresent(this::initializeLazyFields);
 		return entity;
 	}

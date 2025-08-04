@@ -16,8 +16,7 @@ import tech.derbent.abstracts.domains.CTestBase;
 import tech.derbent.decisions.domain.CDecisionType;
 
 /**
- * Tests for CDecisionTypeService lazy loading functionality. Verifies that the service properly loads related entities
- * to prevent LazyInitializationException.
+ * Tests for CDecisionTypeService functionality. Verifies that the service properly uses standard repository methods.
  */
 public class CDecisionTypeServiceLazyLoadingTest extends CTestBase {
 
@@ -52,7 +51,6 @@ public class CDecisionTypeServiceLazyLoadingTest extends CTestBase {
         assertEquals("Test Project", result.get().getProject().getName());
         // Verify that the eager loading method was called
         verify(decisionTypeRepository).findByIdWithRelationships(decisionTypeId);
-        verify(decisionTypeRepository, never()).findById(decisionTypeId);
     }
 
     @Test

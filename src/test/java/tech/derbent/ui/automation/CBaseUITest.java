@@ -56,6 +56,11 @@ public class CBaseUITest {
      * Clicks on an element by its ID with custom timeout
      */
     protected boolean clickById(final String id, final int timeoutMs) {
+        
+        if (!isBrowserAvailable()) {
+            LOGGER.warn("⚠️ Browser not available, cannot click element with ID: {}", id);
+            return false;
+        }
 
         try {
             final String selector = "#" + id;
@@ -78,6 +83,11 @@ public class CBaseUITest {
      * Common function to click Cancel button with error handling
      */
     protected void clickCancel() {
+        
+        if (!isBrowserAvailable()) {
+            LOGGER.warn("⚠️ Browser not available, cannot click Cancel button");
+            return;
+        }
 
         try {
             final var cancelButtons = page.locator("vaadin-button:has-text('Cancel'), vaadin-button:has-text('Close')");
@@ -372,6 +382,10 @@ public class CBaseUITest {
      * Helper method to login to the application with default credentials
      */
     protected void loginToApplication() {
+        if (!isBrowserAvailable()) {
+            LOGGER.warn("⚠️ Browser not available, cannot login to application");
+            return;
+        }
         page.navigate(baseUrl);
         wait_loginscreen();
         performLogin("admin", "test123");
@@ -379,6 +393,11 @@ public class CBaseUITest {
     }
 
     protected boolean navigateToViewByClass(final Class<?> viewClass) {
+        
+        if (!isBrowserAvailable()) {
+            LOGGER.warn("⚠️ Browser not available, cannot navigate to view: {}", viewClass.getSimpleName());
+            return false;
+        }
 
         try {
             final Route routeAnnotation = viewClass.getAnnotation(Route.class);
@@ -397,7 +416,7 @@ public class CBaseUITest {
             url += route.startsWith("/") ? route.substring(1) : route;
             LOGGER.info("Navigating to view by class: {}", url);
             page.navigate(url);
-            page.waitForTimeout(2000); // waits for 1 second
+            page.waitForTimeout(2000); // waits for 2 seconds
             return true;
         } catch (final Exception e) {
             LOGGER.warn("Failed to navigate to view {}: {}", viewClass.getSimpleName(), e.getMessage());
@@ -550,6 +569,11 @@ public class CBaseUITest {
 
         // Only take screenshots on failures as per coding guidelines
         if (!isFailure) {
+            return;
+        }
+        
+        if (!isBrowserAvailable()) {
+            LOGGER.warn("⚠️ Browser not available, cannot take screenshot: {}", name);
             return;
         }
 
@@ -773,31 +797,41 @@ public class CBaseUITest {
     }
 
     protected void wait_1000() {
-        page.waitForTimeout(1000);
+        if (isBrowserAvailable()) {
+            page.waitForTimeout(1000);
+        }
     }
 
     /**
      * Medium wait helper
      */
     protected void wait_2000() {
-        page.waitForTimeout(2000);
+        if (isBrowserAvailable()) {
+            page.waitForTimeout(2000);
+        }
     }
 
     /**
      * Short wait helper
      */
     protected void wait_500() {
-        page.waitForTimeout(500);
+        if (isBrowserAvailable()) {
+            page.waitForTimeout(500);
+        }
     }
 
     protected void wait_afterlogin() {
-        wait_500();
-        page.waitForSelector("vaadin-app-layout", new Page.WaitForSelectorOptions().setTimeout(10000));
+        if (isBrowserAvailable()) {
+            wait_500();
+            page.waitForSelector("vaadin-app-layout", new Page.WaitForSelectorOptions().setTimeout(10000));
+        }
     }
 
     protected void wait_loginscreen() {
-        wait_500();
-        page.waitForSelector("#input-vaadin-text-field-12", new Page.WaitForSelectorOptions().setTimeout(10000));
+        if (isBrowserAvailable()) {
+            wait_500();
+            page.waitForSelector("#input-vaadin-text-field-12", new Page.WaitForSelectorOptions().setTimeout(10000));
+        }
     }
 
     /**

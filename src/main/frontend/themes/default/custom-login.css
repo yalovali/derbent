@@ -1,0 +1,24 @@
+/* Custom login view styling */
+.custom-login-view {
+    background-image: url('./images/background1.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+.custom-login-view .custom-login-card {
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.custom-login-view vaadin-text-field,
+.custom-login-view vaadin-password-field {
+    --lumo-border-radius: var(--lumo-border-radius-m);
+}
+
+.custom-login-view vaadin-button[theme~="primary"] {
+    --lumo-primary-color: #1976d2;
+    margin-top: var(--lumo-space-m);
+}

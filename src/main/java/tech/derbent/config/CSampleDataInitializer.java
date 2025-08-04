@@ -156,7 +156,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivityStatus status = new CActivityStatus(name, project);
 		status.setDescription(description);
 		status.setColor(color);
-		status.setFinal(isFinal);
 		status.setSortOrder(sortOrder);
 		activityStatusService.save(status);
 		LOGGER.debug("Created activity status: {}", name);
@@ -377,15 +376,12 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		// Set company association using auxiliary method
 		final CCompany company = findCompanyByName("Of Teknoloji Çözümleri");
 		userService.setCompanyAssociation(admin, company);
-		LOGGER.info("Administrator user created successfully");
 	}
 
 	/**
 	 * Creates backend development activity.
 	 */
 	private void createBackendDevActivity() {
-		LOGGER.info(
-			"createBackendDevActivity called - creating backend API development activity");
 		final CProject project = findProjectByName("Digital Transformation Initiative");
 
 		if (project == null) {
@@ -601,7 +597,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CMeetingStatus status = new CMeetingStatus(name, project);
 		status.setDescription(description);
 		status.setColor(color);
-		status.setFinal(isFinal);
+		status.setFinalStatus(isFinal);
 		status.setSortOrder(sortOrder);
 		meetingStatusService.save(status);
 		LOGGER.debug("Created meeting status: {}", name);
@@ -611,6 +607,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Creates project manager user.
 	 */
 	private void createProjectManagerUser() {
+		LOGGER.info("createProjectManagerUser called - creating project manager");
 		final CUser manager = userService.createLoginUser("mkaradeniz", STANDARD_PASSWORD,
 			"Mehmet Emin", "mehmet.karadeniz@ofteknoloji.com.tr", "MANAGER,USER");
 		// Set user profile using auxiliary method with actual profile picture
@@ -778,6 +775,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * use of auxiliary meeting service methods.
 	 */
 	private void createSampleProjectMeeting() {
+		LOGGER
+			.info("createSampleProjectMeeting called - creating sample project meeting");
 		final CProject project = findProjectByName("Digital Transformation Initiative");
 
 		if (project == null) {
@@ -867,6 +866,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Creates sample review meeting.
 	 */
 	private void createSampleReviewMeeting() {
+		LOGGER.info("createSampleReviewMeeting called - creating code review meeting");
 		final CProject project = findProjectByName("Infrastructure Modernization");
 
 		if (project == null) {
@@ -901,6 +901,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Creates sample standup meeting.
 	 */
 	private void createSampleStandupMeeting() {
+		LOGGER.info("createSampleStandupMeeting called - creating daily standup meeting");
 		final CProject project = findProjectByName("Digital Transformation Initiative");
 
 		if (project == null) {
@@ -1011,6 +1012,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Creates team member Bob Wilson.
 	 */
 	private void createTeamMemberBob() {
+		LOGGER.info(
+			"createTeamMemberBob called - creating Burak Özkan from Çamburnu village");
 		final CUser developer = userService.createLoginUser("bozkan", STANDARD_PASSWORD,
 			"Burak", "burak.ozkan@ofdanismanlik.com.tr", "USER");
 		// Set user profile using auxiliary method with actual profile picture
@@ -1053,12 +1056,14 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		createTeamMemberMary();
 		createTeamMemberBob();
 		createTeamMemberAlice();
+		LOGGER.info("Team member users created successfully");
 	}
 
 	/**
 	 * Creates technology startup company.
 	 */
 	private void createTechCompany() {
+		LOGGER.info("createTechCompany called - creating Of Teknoloji Çözümleri");
 		final CCompany techStartup = new CCompany("Of Teknoloji Çözümleri");
 		techStartup.setDescription("Dijital dönüşüm için yenilikçi teknoloji çözümleri");
 		techStartup.setAddress("Cumhuriyet Mahallesi, Atatürk Caddesi No:15, Of/Trabzon");

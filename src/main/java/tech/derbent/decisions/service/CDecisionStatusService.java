@@ -8,63 +8,107 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import tech.derbent.abstracts.services.CAbstractNamedEntityService;
+import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.decisions.domain.CDecisionStatus;
+import tech.derbent.projects.domain.CProject;
 
 /**
  * CDecisionStatusService - Service class for CDecisionStatus entities. Layer: Service (MVC) Provides business logic
  * operations for decision status management including validation, creation, and workflow management.
+ * Since CDecisionStatus extends CStatus which extends CTypeEntity which extends CEntityOfProject,
+ * this service must extend CEntityOfProjectService to enforce project-based queries.
  */
 @Service
 @PreAuthorize("isAuthenticated()")
-public class CDecisionStatusService extends CAbstractNamedEntityService<CDecisionStatus> {
+public class CDecisionStatusService extends CEntityOfProjectService<CDecisionStatus> {
 
     public CDecisionStatusService(final CDecisionStatusRepository repository, final Clock clock) {
         super(repository, clock);
     }
 
-    /**
-     * Finds all non-final decision statuses ordered by sort order.
-     * 
-     * @return list of non-final decision statuses sorted by sort order
-     */
-    @Transactional(readOnly = true)
-    public List<CDecisionStatus> findAllActiveOrdered() {
-        LOGGER.info("findAllActiveOrdered called for decision statuses");
-        return ((CDecisionStatusRepository) repository).findByIsFinalFalseOrderBySortOrderAsc();
+    @Override
+    protected Class<CDecisionStatus> getEntityClass() {
+        return CDecisionStatus.class;
     }
 
     /**
-     * Finds all final decision statuses.
+     * Finds all non-final decision statuses for a specific project ordered by sort order.
+     * This replaces the problematic findAllActiveOrdered() method that didn't require project.
      * 
-     * @return list of final decision statuses
+     * @param project the project to find statuses for
+     * @return list of non-final decision statuses sorted by sort order for the project
      */
     @Transactional(readOnly = true)
-    public List<CDecisionStatus> findAllFinal() {
-        LOGGER.info("findAllFinal called for decision statuses");
-        return ((CDecisionStatusRepository) repository).findByIsFinalTrue();
+    public List<CDecisionStatus> findAllActiveOrderedByProject(final CProject project) {
+        LOGGER.info("findAllActiveOrderedByProject called for decision statuses in project: {}", 
+                project != null ? project.getName() : "null");
+        
+        if (project == null) {
+            LOGGER.warn("findAllActiveOrderedByProject called with null project");
+            return List.of();
+        }
+        
+        return ((CDecisionStatusRepository) repository).findByProjectAndIsFinalFalseOrderBySortOrderAsc(project);
     }
 
     /**
-     * Finds all decision statuses ordered by sort order.
+     * Finds all final decision statuses for a specific project.
+     * This replaces the problematic findAllFinal() method that didn't require project.
      * 
-     * @return list of decision statuses sorted by sort order
+     * @param project the project to find statuses for
+     * @return list of final decision statuses for the project
      */
     @Transactional(readOnly = true)
-    public List<CDecisionStatus> findAllOrdered() {
-        LOGGER.info("findAllOrdered called for decision statuses");
-        return ((CDecisionStatusRepository) repository).findAllByOrderBySortOrderAsc();
+    public List<CDecisionStatus> findAllFinalByProject(final CProject project) {
+        LOGGER.info("findAllFinalByProject called for decision statuses in project: {}", 
+                project != null ? project.getName() : "null");
+        
+        if (project == null) {
+            LOGGER.warn("findAllFinalByProject called with null project");
+            return List.of();
+        }
+        
+        return ((CDecisionStatusRepository) repository).findByProjectAndIsFinalTrue(project);
     }
 
     /**
-     * Finds decision statuses that require approval.
+     * Finds all decision statuses for a specific project ordered by sort order.
+     * This replaces the problematic findAllOrdered() method that didn't require project.
      * 
-     * @return list of decision statuses that require approval
+     * @param project the project to find statuses for
+     * @return list of decision statuses sorted by sort order for the project
      */
     @Transactional(readOnly = true)
-    public List<CDecisionStatus> findRequiringApproval() {
-        LOGGER.info("findRequiringApproval called for decision statuses");
-        return ((CDecisionStatusRepository) repository).findByRequiresApprovalTrue();
+    public List<CDecisionStatus> findAllOrderedByProject(final CProject project) {
+        LOGGER.info("findAllOrderedByProject called for decision statuses in project: {}", 
+                project != null ? project.getName() : "null");
+        
+        if (project == null) {
+            LOGGER.warn("findAllOrderedByProject called with null project");
+            return List.of();
+        }
+        
+        return ((CDecisionStatusRepository) repository).findAllByProjectOrderBySortOrderAsc(project);
+    }
+
+    /**
+     * Finds decision statuses that require approval for a specific project.
+     * This replaces the problematic findRequiringApproval() method that didn't require project.
+     * 
+     * @param project the project to find statuses for
+     * @return list of decision statuses that require approval for the project
+     */
+    @Transactional(readOnly = true)
+    public List<CDecisionStatus> findRequiringApprovalByProject(final CProject project) {
+        LOGGER.info("findRequiringApprovalByProject called for decision statuses in project: {}", 
+                project != null ? project.getName() : "null");
+        
+        if (project == null) {
+            LOGGER.warn("findRequiringApprovalByProject called with null project");
+            return List.of();
+        }
+        
+        return ((CDecisionStatusRepository) repository).findByProjectAndRequiresApprovalTrue(project);
     }
 
     /**
@@ -85,11 +129,6 @@ public class CDecisionStatusService extends CAbstractNamedEntityService<CDecisio
         final Optional<CDecisionStatus> entity = ((CDecisionStatusRepository) repository).findByIdWithEagerLoading(id);
         entity.ifPresent(this::initializeLazyFields);
         return entity;
-    }
-
-    @Override
-    protected Class<CDecisionStatus> getEntityClass() {
-        return CDecisionStatus.class;
     }
 
     /**

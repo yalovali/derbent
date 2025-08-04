@@ -150,8 +150,7 @@ public abstract class CEntityOfProjectService<
 		}
 
 		try {
-			final Optional<EntityClass> entity =
-				projectRepository.findByIdWithProjectRelationships(id);
+			final Optional<EntityClass> entity = projectRepository.findById(id);
 			// With eager loading of small entities, minimal lazy field initialization
 			// needed
 			entity.ifPresent(this::initializeLazyFields);

@@ -13,104 +13,122 @@ import tech.derbent.abstracts.annotations.MetaData;
 @MappedSuperclass
 public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CEntityNamed.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityNamed.class);
 
-    @Column(name = "name", nullable = false, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
-    @Size(max = CEntityConstants.MAX_LENGTH_NAME)
-    @MetaData(displayName = "Name", required = true, readOnly = false, defaultValue = "", description = "Name", hidden = false, order = 0, maxLength = CEntityConstants.MAX_LENGTH_NAME, setBackgroundFromColor = true)
-    private String name;
+	@Column (
+		name = "name", nullable = false, length = CEntityConstants.MAX_LENGTH_NAME,
+		unique = false
+	)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@MetaData (
+		displayName = "Name", required = true, readOnly = false, defaultValue = "",
+		description = "Name", hidden = false, order = 0,
+		maxLength = CEntityConstants.MAX_LENGTH_NAME, setBackgroundFromColor = true
+	)
+	private String name;
 
-    @Column(name = "description", nullable = true, length = 2000)
-    @Size(max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
-    @MetaData(displayName = "Description", required = false, readOnly = false, defaultValue = "", description = "Detailed description of the project", hidden = false, order = 1, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION)
-    private String description;
+	@Column (name = "description", nullable = true, length = 2000)
+	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
+	@MetaData (
+		displayName = "Description", required = false, readOnly = false,
+		defaultValue = "", description = "Detailed description of the project",
+		hidden = false, order = 1, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
+	)
+	private String description;
 
-    // Audit fields
-    @Column(name = "created_date", nullable = true)
-    @MetaData(displayName = "Created Date", required = false, readOnly = true, description = "Date and time when the activity was created", hidden = false, order = 80)
-    private LocalDateTime createdDate;
+	// Audit fields
+	@Column (name = "created_date", nullable = true)
+	@MetaData (
+		displayName = "Created Date", required = false, readOnly = true,
+		description = "Date and time when the activity was created", hidden = false,
+		order = 80
+	)
+	private LocalDateTime createdDate;
 
-    @Column(name = "last_modified_date", nullable = true)
-    @MetaData(displayName = "Last Modified", required = false, readOnly = true, description = "Date and time when the activity was last modified", hidden = false, order = 81)
-    private LocalDateTime lastModifiedDate;
+	@Column (name = "last_modified_date", nullable = true)
+	@MetaData (
+		displayName = "Last Modified", required = false, readOnly = true,
+		description = "Date and time when the activity was last modified", hidden = false,
+		order = 81
+	)
+	private LocalDateTime lastModifiedDate;
 
-    /**
-     * Default constructor for JPA.
-     */
-    protected CEntityNamed() {
-        super();
-        // Initialize with default values for JPA
-        this.name = "";
-        this.description = null;
-    }
+	/**
+	 * Default constructor for JPA.
+	 */
+	protected CEntityNamed() {
+		super();
+		this.name = null;
+	}
 
-    public CEntityNamed(final Class<EntityClass> clazz, final String name) {
-        super(clazz);
+	public CEntityNamed(final Class<EntityClass> clazz, final String name) {
+		super(clazz);
 
-        if ((name == null) || name.trim().isEmpty()) {
-            LOGGER.error("Constructor called with null or empty name for {}", getClass().getSimpleName());
-            throw new IllegalArgumentException("Name cannot be null or empty for " + getClass().getSimpleName());
-        }
-        this.name = name.trim();
-        this.description = null; // Default description is null
-    }
+		if ((name == null) || name.trim().isEmpty()) {
+			LOGGER.error("Constructor called with null or empty name for {}",
+				getClass().getSimpleName());
+			throw new IllegalArgumentException(
+				"Name cannot be null or empty for " + getClass().getSimpleName());
+		}
+		this.name = name.trim();
+	}
 
-    public LocalDateTime getCreatedDate() {
-        return createdDate;
-    }
+	@Override
+	public boolean equals(final Object obj) {
+		// Use the superclass (CEntityDB) equals method which properly handles ID-based equality
+		// and proxy classes. This is the standard approach for JPA entities.
+		return super.equals(obj);
+	}
 
-    public String getDescription() {
-        return description;
-    }
+	public LocalDateTime getCreatedDate() { return createdDate; }
 
-    public LocalDateTime getLastModifiedDate() {
-        return lastModifiedDate;
-    }
+	public String getDescription() { return description; }
 
-    public String getName() {
-        return name;
-    }
+	public LocalDateTime getLastModifiedDate() { return lastModifiedDate; }
 
-    @Override
-    protected void initializeDefaults() {
-        super.initializeDefaults();
+	public String getName() { return name; }
 
-        if (this.createdDate == null) {
-            this.createdDate = LocalDateTime.now();
-        }
-        this.lastModifiedDate = LocalDateTime.now();
-    }
+	@Override
+	protected void initializeDefaults() {
+		super.initializeDefaults();
 
-    public void setCreatedDate(final LocalDateTime createdDate) {
-        this.createdDate = createdDate;
-    }
+		if (this.createdDate == null) {
+			this.createdDate = LocalDateTime.now();
+		}
+		this.lastModifiedDate = LocalDateTime.now();
+	}
 
-    public void setDescription(final String description) {
-        this.description = description;
-        updateLastModified();
-    }
+	public void setCreatedDate(final LocalDateTime createdDate) {
+		this.createdDate = createdDate;
+	}
 
-    public void setLastModifiedDate(final LocalDateTime lastModifiedDate) {
-        this.lastModifiedDate = lastModifiedDate;
-    }
+	public void setDescription(final String description) {
+		this.description = description;
+		updateLastModified();
+	}
 
-    public void setName(final String name) {
+	public void setLastModifiedDate(final LocalDateTime lastModifiedDate) {
+		this.lastModifiedDate = lastModifiedDate;
+	}
 
-        if ((name == null) || name.trim().isEmpty()) {
-            LOGGER.warn("setname called with null or empty name for {}", getClass().getSimpleName());
-        }
-        this.name = name;
-    }
+	public void setName(final String name) {
 
-    @Override
-    public String toString() {
-        return name != null ? name : super.toString();
-    }
+		if ((name == null) || name.trim().isEmpty()) {
+			LOGGER.warn("setname called with null or empty name for {}",
+				getClass().getSimpleName());
+		}
+		this.name = name;
+	}
 
-    /**
-     * Update the last modified date to now.
-     */
-    protected void updateLastModified() {
-        this.lastModifiedDate = LocalDateTime.now();
-    }
+	@Override
+	public String toString() {
+		return name != null ? name : super.toString();
+	}
+
+	/**
+	 * Update the last modified date to now.
+	 */
+	protected void updateLastModified() {
+		this.lastModifiedDate = LocalDateTime.now();
+	}
 }

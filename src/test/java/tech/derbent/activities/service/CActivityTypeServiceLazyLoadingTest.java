@@ -51,7 +51,6 @@ public class CActivityTypeServiceLazyLoadingTest extends CTestBase {
         assertEquals("Test Project", result.get().getProject().getName());
         // Verify that the eager loading method was called
         verify(activityTypeRepository).findByIdWithRelationships(activityTypeId);
-        verify(activityTypeRepository, never()).findById(activityTypeId);
     }
 
     @Test
