@@ -34,7 +34,7 @@ public interface CMeetingStatusRepository extends CAbstractNamedRepository<CMeet
      * 
      * @return List of non-final status types, ordered by sortOrder
      */
-    @Query("SELECT s FROM CMeetingStatus s WHERE s.isFinal = false ORDER BY s.sortOrder ASC")
+    @Query("SELECT s FROM CMeetingStatus s WHERE s.finalStatus = false ORDER BY s.sortOrder ASC")
     List<CMeetingStatus> findAllActiveStatuses();
 
     /**
@@ -52,7 +52,7 @@ public interface CMeetingStatusRepository extends CAbstractNamedRepository<CMeet
      * 
      * @return List of final status types, ordered by sortOrder
      */
-    @Query("SELECT s FROM CMeetingStatus s WHERE s.isFinal = true ORDER BY s.sortOrder ASC")
+    @Query("SELECT s FROM CMeetingStatus s WHERE s.finalStatus = true ORDER BY s.sortOrder ASC")
     List<CMeetingStatus> findAllFinalStatuses();
 
     /**
