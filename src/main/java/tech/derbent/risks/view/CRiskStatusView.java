@@ -9,6 +9,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.annotations.CSpringAuxillaries;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
+import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.risks.domain.CRiskStatus;
 import tech.derbent.risks.service.CRiskStatusService;
 import tech.derbent.projects.domain.CProject;
@@ -20,11 +21,17 @@ import tech.derbent.session.service.CSessionService;
  */
 @Route("risk-statuses/:risk_status_id?/:action?(edit)")
 @PageTitle("Risk Statuses")
-@Menu(order = 4.1, icon = "vaadin:flag", title = "Types.Risk Statuses")
+@Menu(order = 4.1, icon = "class:tech.derbent.risks.view.CRiskStatusView", title = "Types.Risk Statuses")
 @PermitAll
-public class CRiskStatusView extends CProjectAwareMDPage<CRiskStatus> {
+public class CRiskStatusView extends CProjectAwareMDPage<CRiskStatus> implements CInterfaceIconSet {
 
     private static final long serialVersionUID = 1L;
+
+    public static String getIconColorCode() {
+        return CRiskStatus.getIconColorCode(); // Use the static method from CRiskStatus
+    }
+
+    public static String getIconFilename() { return CRiskStatus.getIconFilename(); }
 
     private final String ENTITY_ID_FIELD = "risk_status_id";
 

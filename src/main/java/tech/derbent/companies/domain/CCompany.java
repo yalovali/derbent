@@ -133,4 +133,10 @@ public class CCompany extends CEntityNamed<CCompany> {
                 + address + '\'' + ", phone='" + phone + '\'' + ", email='" + email + '\'' + ", website='" + website
                 + '\'' + ", taxNumber='" + taxNumber + '\'' + ", enabled=" + enabled + '}';
     }
+
+    public static String getIconColorCode() {
+        return "#6c757d"; // Gray color for company entities
+    }
+
+    public static String getIconFilename() { return "vaadin:building"; }
 }

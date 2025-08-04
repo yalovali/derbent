@@ -93,4 +93,10 @@ public class CDecisionStatus extends CStatus<CDecisionStatus> {
     public String toString() {
         return getName() != null ? getName() : super.toString();
     }
+
+    public static String getIconColorCode() {
+        return "#dc3545"; // Red color for decision status entities
+    }
+
+    public static String getIconFilename() { return "vaadin:flag"; }
 }

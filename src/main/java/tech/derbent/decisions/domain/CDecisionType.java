@@ -113,4 +113,10 @@ public class CDecisionType extends CTypeEntity<CDecisionType> {
                 getId(), getName(), getColor(), getSortOrder(), getIsActive(), requiresApproval,
                 getProject() != null ? getProject().getName() : "null");
     }
+
+    public static String getIconColorCode() {
+        return "#dc3545"; // Red color for decision type entities
+    }
+
+    public static String getIconFilename() { return "vaadin:tags"; }
 }

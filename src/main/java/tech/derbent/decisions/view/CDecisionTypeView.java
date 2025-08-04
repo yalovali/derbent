@@ -11,6 +11,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.annotations.CSpringAuxillaries;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
+import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.decisions.domain.CDecisionType;
 import tech.derbent.decisions.service.CDecisionTypeService;
 import tech.derbent.projects.domain.CProject;
@@ -18,11 +19,17 @@ import tech.derbent.session.service.CSessionService;
 
 @Route("decision-types/:decisiontype_id?/:action?(edit)")
 @PageTitle("Decision Types")
-@Menu(order = 11.1, icon = "vaadin:tags", title = "Types.Decision Types")
+@Menu(order = 11.1, icon = "class:tech.derbent.decisions.view.CDecisionTypeView", title = "Types.Decision Types")
 @PermitAll
-public class CDecisionTypeView extends CProjectAwareMDPage<CDecisionType> {
+public class CDecisionTypeView extends CProjectAwareMDPage<CDecisionType> implements CInterfaceIconSet {
 
     private static final long serialVersionUID = 1L;
+
+    public static String getIconColorCode() {
+        return CDecisionType.getIconColorCode(); // Use the static method from CDecisionType
+    }
+
+    public static String getIconFilename() { return CDecisionType.getIconFilename(); }
 
     private final String ENTITY_ID_FIELD = "decisiontype_id";
 

@@ -23,6 +23,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.views.CAbstractPage;
+import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.activities.service.CActivityService;
 import tech.derbent.base.ui.dialogs.CExceptionDialog;
 import tech.derbent.projects.domain.CProject;
@@ -38,11 +39,17 @@ import tech.derbent.users.service.CUserService;
  */
 @Route ("dashboard")
 @PageTitle ("Home")
-@Menu (order = 0, icon = "vaadin:home", title = "Home")
+@Menu (order = 0, icon = "class:tech.derbent.dashboard.view.CDashboardView", title = "Home")
 @PermitAll
-public final class CDashboardView extends CAbstractPage {
+public final class CDashboardView extends CAbstractPage implements CInterfaceIconSet {
 
 	private static final long serialVersionUID = 1L;
+
+	public static String getIconColorCode() {
+		return "var(--lumo-primary-color)"; // Primary color for dashboard
+	}
+
+	public static String getIconFilename() { return "vaadin:home"; }
 
 	private final CProjectService projectService;
 

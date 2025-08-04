@@ -10,6 +10,7 @@ import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.annotations.CSpringAuxillaries;
 import tech.derbent.abstracts.components.CGridCell;
 import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
+import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.decisions.domain.CDecisionStatus;
 import tech.derbent.decisions.service.CDecisionStatusService;
 import tech.derbent.session.service.CSessionService;
@@ -21,11 +22,17 @@ import tech.derbent.session.service.CSessionService;
  */
 @Route("decision-statuses/:decision_status_id?/:action?(edit)")
 @PageTitle("Decision Statuses")
-@Menu(order = 11.2, icon = "vaadin:flag", title = "Types.Decision Statuses")
+@Menu(order = 11.2, icon = "class:tech.derbent.decisions.view.CDecisionStatusView", title = "Types.Decision Statuses")
 @PermitAll
-public class CDecisionStatusView extends CAbstractNamedEntityPage<CDecisionStatus> {
+public class CDecisionStatusView extends CAbstractNamedEntityPage<CDecisionStatus> implements CInterfaceIconSet {
 
     private static final long serialVersionUID = 1L;
+
+    public static String getIconColorCode() {
+        return CDecisionStatus.getIconColorCode(); // Use the static method from CDecisionStatus
+    }
+
+    public static String getIconFilename() { return CDecisionStatus.getIconFilename(); }
 
     private final String ENTITY_ID_FIELD = "decision_status_id";
 

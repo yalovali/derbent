@@ -6,6 +6,7 @@ import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
+import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.orders.domain.COrder;
 import tech.derbent.orders.service.COrderService;
 import tech.derbent.projects.domain.CProject;
@@ -22,11 +23,17 @@ import tech.derbent.session.service.CSessionService;
  */
 @Route("orders/:order_id?/:action?(edit)")
 @PageTitle("Orders Master Detail")
-@Menu(order = 7.1, icon = "vaadin:cart", title = "Project.Orders")
+@Menu(order = 7.1, icon = "class:tech.derbent.orders.view.COrdersView", title = "Project.Orders")
 @PermitAll // When security is enabled, allow all authenticated users
-public class COrdersView extends CProjectAwareMDPage<COrder> {
+public class COrdersView extends CProjectAwareMDPage<COrder> implements CInterfaceIconSet {
 
     private static final long serialVersionUID = 1L;
+
+    public static String getIconColorCode() {
+        return COrder.getIconColorCode(); // Use the static method from COrder
+    }
+
+    public static String getIconFilename() { return COrder.getIconFilename(); }
 
     private final String ENTITY_ID_FIELD = "order_id";
 

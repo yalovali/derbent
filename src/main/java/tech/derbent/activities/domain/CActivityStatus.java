@@ -86,4 +86,10 @@ public class CActivityStatus extends CStatus<CActivityStatus> implements CKanban
     public String toString() {
         return getName() != null ? getName() : super.toString();
     }
+
+    public static String getIconColorCode() {
+        return "#007bff"; // Blue color for activity status entities
+    }
+
+    public static String getIconFilename() { return "vaadin:flag"; }
 }

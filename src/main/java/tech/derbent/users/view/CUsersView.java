@@ -14,6 +14,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
 import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.abstracts.views.CButton;
+import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.service.CProjectService;
@@ -24,11 +25,17 @@ import tech.derbent.users.service.CUserTypeService;
 
 @Route("users/:user_id?/:action?(edit)")
 @PageTitle("User Master Detail")
-@Menu(order = 3.2, icon = "vaadin:users", title = "Settings.Users")
+@Menu(order = 3.2, icon = "class:tech.derbent.users.view.CUsersView", title = "Settings.Users")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CUsersView extends CAbstractNamedEntityPage<CUser> {
+public class CUsersView extends CAbstractNamedEntityPage<CUser> implements CInterfaceIconSet {
 
     private static final long serialVersionUID = 1L;
+
+    public static String getIconColorCode() {
+        return CUser.getIconColorCode(); // Use the static method from CUser
+    }
+
+    public static String getIconFilename() { return CUser.getIconFilename(); }
 
     private final String ENTITY_ID_FIELD = "user_id";
 

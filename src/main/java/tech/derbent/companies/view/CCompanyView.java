@@ -14,6 +14,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
 import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.abstracts.views.CButton;
+import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
@@ -25,11 +26,17 @@ import tech.derbent.session.service.CSessionService;
  */
 @Route("companies/:company_id?/:action?(edit)")
 @PageTitle("Company Master Detail")
-@Menu(order = 3.4, icon = "vaadin:building", title = "Settings.Companies")
+@Menu(order = 3.4, icon = "class:tech.derbent.companies.view.CCompanyView", title = "Settings.Companies")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CCompanyView extends CAbstractNamedEntityPage<CCompany> {
+public class CCompanyView extends CAbstractNamedEntityPage<CCompany> implements CInterfaceIconSet {
 
     private static final long serialVersionUID = 1L;
+
+    public static String getIconColorCode() {
+        return CCompany.getIconColorCode(); // Use the static method from CCompany
+    }
+
+    public static String getIconFilename() { return CCompany.getIconFilename(); }
 
     /**
      * Navigates to the company view

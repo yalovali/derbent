@@ -8,6 +8,7 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
+import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUserType;
@@ -19,11 +20,17 @@ import tech.derbent.users.service.CUserTypeService;
  */
 @Route("user-types/:user_type_id?/:action?(edit)")
 @PageTitle("User Types")
-@Menu(order = 10.3, icon = "vaadin:group", title = "Settings.User Types")
+@Menu(order = 10.3, icon = "class:tech.derbent.users.view.CUserTypeView", title = "Settings.User Types")
 @PermitAll
-public class CUserTypeView extends CProjectAwareMDPage<CUserType> {
+public class CUserTypeView extends CProjectAwareMDPage<CUserType> implements CInterfaceIconSet {
 
     private static final long serialVersionUID = 1L;
+
+    public static String getIconColorCode() {
+        return CUserType.getIconColorCode(); // Use the static method from CUserType
+    }
+
+    public static String getIconFilename() { return CUserType.getIconFilename(); }
 
     private final String ENTITY_ID_FIELD = "user_type_id";
 

@@ -309,4 +309,10 @@ public class COrder extends CEntityOfProject<COrder> {
         this.status = status;
         updateLastModified();
     }
+
+    public static String getIconColorCode() {
+        return "#20c997"; // Teal color for order entities
+    }
+
+    public static String getIconFilename() { return "vaadin:cart"; }
 }
