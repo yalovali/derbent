@@ -143,7 +143,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
         final CActivityStatus status = new CActivityStatus(name, project);
         status.setDescription(description);
         status.setColor(color);
-        status.setFinal(isFinal);
+        status.setFinalStatus(isFinal);
         status.setSortOrder(sortOrder);
         activityStatusService.save(status);
         LOGGER.debug("Created activity status: {}", name);
@@ -530,7 +530,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
         final CMeetingStatus status = new CMeetingStatus(name, project);
         status.setDescription(description);
         status.setColor(color);
-        status.setFinal(isFinal);
+        status.setFinalStatus(isFinal);
         status.setSortOrder(sortOrder);
         meetingStatusService.save(status);
         LOGGER.debug("Created meeting status: {}", name);
