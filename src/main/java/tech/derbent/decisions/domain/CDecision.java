@@ -341,4 +341,10 @@ public class CDecision extends CEntityOfProject<CDecision> {
 		return getName() != null ? getName() : super.toString();
 	}
 
+	public static String getIconColorCode() {
+		return "#dc3545"; // Red color for decision entities
+	}
+
+	public static String getIconFilename() { return "vaadin:gavel"; }
+
 }

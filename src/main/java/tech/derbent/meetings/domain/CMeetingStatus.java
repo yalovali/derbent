@@ -87,4 +87,10 @@ public class CMeetingStatus extends CStatus<CMeetingStatus> implements CKanbanSt
     public String toString() {
         return getName() != null ? getName() : super.toString();
     }
+
+    public static String getIconColorCode() {
+        return "#28a745"; // Green color for meeting status entities
+    }
+
+    public static String getIconFilename() { return "vaadin:flag"; }
 }

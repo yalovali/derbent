@@ -13,6 +13,7 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
+import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.decisions.domain.CDecision;
 import tech.derbent.decisions.service.CDecisionService;
 import tech.derbent.projects.domain.CProject;
@@ -26,11 +27,17 @@ import tech.derbent.session.service.CSessionService;
  */
 @Route ("decisions/:decision_id?/:action?(edit)")
 @PageTitle ("Decision Master Detail")
-@Menu (order = 1.5, icon = "vaadin:gavel", title = "Project.Decisions")
+@Menu (order = 1.5, icon = "class:tech.derbent.decisions.view.CDecisionsView", title = "Project.Decisions")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CDecisionsView extends CProjectAwareMDPage<CDecision> {
+public class CDecisionsView extends CProjectAwareMDPage<CDecision> implements CInterfaceIconSet {
 
 	private static final long serialVersionUID = 1L;
+
+	public static String getIconColorCode() {
+		return CDecision.getIconColorCode(); // Use the static method from CDecision
+	}
+
+	public static String getIconFilename() { return CDecision.getIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "decision_id";
 
