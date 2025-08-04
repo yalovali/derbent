@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.activities.domain.CActivityStatus;
+import tech.derbent.projects.domain.CProject;
 
 /**
  * CActivityStatusService - Service class for managing CActivityStatus entities. Layer: Service (MVC) Provides business
@@ -97,42 +98,70 @@ public class CActivityStatusService extends CEntityOfProjectService<CActivitySta
     }
 
     /**
-     * Find all activity statuses ordered by sort order.
+     * Find all activity statuses for a specific project ordered by sort order.
+     * This replaces the problematic findAll() method that didn't require project.
      * 
-     * @return List of all activity statuses
+     * @param project the project to find statuses for
+     * @return List of activity statuses for the project
      */
     @Transactional(readOnly = true)
-    public List<CActivityStatus> findAll() {
-        LOGGER.debug("findAll() - Finding all activity statuses");
-        final List<CActivityStatus> statuses = activityStatusRepository.findAllOrderedBySortOrder();
-        LOGGER.debug("findAll() - Found {} activity statuses", statuses.size());
-        return statuses;
+    public List<CActivityStatus> findAllByProject(final CProject project) {
+        LOGGER.debug("findAllByProject() - Finding all activity statuses for project: {}", 
+                project != null ? project.getName() : "null");
+        
+        if (project == null) {
+            LOGGER.warn("findAllByProject called with null project");
+            return List.of();
+        }
+        
+        // Use the inherited method from CEntityOfProjectService
+        return super.findAllByProject(project);
     }
 
     /**
-     * Find all active (non-final) statuses.
+     * Find all active (non-final) statuses for a specific project.
+     * This replaces the problematic findAllActiveStatuses() method that didn't require project.
      * 
-     * @return List of active statuses
+     * @param project the project to find statuses for
+     * @return List of active statuses for the project
      */
     @Transactional(readOnly = true)
-    public List<CActivityStatus> findAllActiveStatuses() {
-        LOGGER.debug("findAllActiveStatuses() - Finding all active activity statuses");
-        final List<CActivityStatus> statuses = activityStatusRepository.findAllActiveStatuses();
-        LOGGER.debug("findAllActiveStatuses() - Found {} active statuses", statuses.size());
-        return statuses;
+    public List<CActivityStatus> findAllActiveStatusesByProject(final CProject project) {
+        LOGGER.debug("findAllActiveStatusesByProject() - Finding all active activity statuses for project: {}", 
+                project != null ? project.getName() : "null");
+        
+        if (project == null) {
+            LOGGER.warn("findAllActiveStatusesByProject called with null project");
+            return List.of();
+        }
+        
+        // Use the inherited method and filter for active statuses
+        return findAllByProject(project).stream()
+                .filter(status -> !status.isFinal())
+                .toList();
     }
 
     /**
-     * Find all final statuses (completed/cancelled states).
+     * Find all final statuses (completed/cancelled states) for a specific project.
+     * This replaces the problematic findAllFinalStatuses() method that didn't require project.
      * 
-     * @return List of final statuses
+     * @param project the project to find statuses for
+     * @return List of final statuses for the project
      */
     @Transactional(readOnly = true)
-    public List<CActivityStatus> findAllFinalStatuses() {
-        LOGGER.debug("findAllFinalStatuses() - Finding all final activity statuses");
-        final List<CActivityStatus> statuses = activityStatusRepository.findAllFinalStatuses();
-        LOGGER.debug("findAllFinalStatuses() - Found {} final statuses", statuses.size());
-        return statuses;
+    public List<CActivityStatus> findAllFinalStatusesByProject(final CProject project) {
+        LOGGER.debug("findAllFinalStatusesByProject() - Finding all final activity statuses for project: {}", 
+                project != null ? project.getName() : "null");
+        
+        if (project == null) {
+            LOGGER.warn("findAllFinalStatusesByProject called with null project");
+            return List.of();
+        }
+        
+        // Use the inherited method and filter for final statuses
+        return findAllByProject(project).stream()
+                .filter(status -> status.isFinal())
+                .toList();
     }
 
     /**

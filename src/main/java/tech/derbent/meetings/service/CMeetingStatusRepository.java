@@ -7,16 +7,18 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import tech.derbent.abstracts.services.CAbstractNamedRepository;
+import tech.derbent.abstracts.services.CEntityOfProjectRepository;
 import tech.derbent.meetings.domain.CMeetingStatus;
 import tech.derbent.projects.domain.CProject;
 
 /**
  * CMeetingStatusRepository - Repository interface for CMeetingStatus entities. Layer: Data Access (MVC) Provides data
  * access operations for meeting status management.
+ * Since CMeetingStatus extends CStatus which extends CTypeEntity which extends CEntityOfProject,
+ * this repository must extend CEntityOfProjectRepository to provide project-aware operations.
  */
 @Repository
-public interface CMeetingStatusRepository extends CAbstractNamedRepository<CMeetingStatus> {
+public interface CMeetingStatusRepository extends CEntityOfProjectRepository<CMeetingStatus> {
 
     /**
      * Check if a status name already exists (case-insensitive).
@@ -30,36 +32,35 @@ public interface CMeetingStatusRepository extends CAbstractNamedRepository<CMeet
     boolean existsByNameIgnoreCase(@Param("name") String name);
 
     /**
-     * Find all non-final status types.
+     * Find all non-final status types for a specific project.
+     * This replaces the non-project-aware findAllActiveStatuses method.
      * 
-     * @return List of non-final status types, ordered by sortOrder
+     * @param project the project to filter by
+     * @return List of non-final status types for the project, ordered by sortOrder
      */
-    @Query("SELECT s FROM CMeetingStatus s WHERE s.finalStatus = false ORDER BY s.sortOrder ASC")
-    List<CMeetingStatus> findAllActiveStatuses();
+    @Query("SELECT s FROM CMeetingStatus s WHERE s.isFinal = false AND s.project = :project ORDER BY s.sortOrder ASC")
+    List<CMeetingStatus> findAllActiveStatusesByProject(@Param("project") CProject project);
+
 
     /**
-     * Find all meeting statuses for a specific project.
+     * Find all final status types (completed/cancelled) for a specific project.
+     * This replaces the non-project-aware findAllFinalStatuses method.
      * 
-     * @param project
-     *            the project to filter by
-     * @return List of meeting statuses for the specified project, ordered by sortOrder
+     * @param project the project to filter by
+     * @return List of final status types for the project, ordered by sortOrder
      */
-    @Query("SELECT s FROM CMeetingStatus s WHERE s.project = :project ORDER BY s.sortOrder ASC, s.name ASC")
-    List<CMeetingStatus> findAllByProject(@Param("project") CProject project);
+    @Query("SELECT s FROM CMeetingStatus s WHERE s.isFinal = true AND s.project = :project ORDER BY s.sortOrder ASC")
+    List<CMeetingStatus> findAllFinalStatusesByProject(@Param("project") CProject project);
 
-    /**
-     * Find all final status types (completed/cancelled).
-     * 
-     * @return List of final status types, ordered by sortOrder
-     */
-    @Query("SELECT s FROM CMeetingStatus s WHERE s.finalStatus = true ORDER BY s.sortOrder ASC")
-    List<CMeetingStatus> findAllFinalStatuses();
 
     /**
      * Find all statuses ordered by sort order.
+     * @deprecated Use findAllByProject(CProject) instead for project-aware queries.
+     * This method violates the project-scoped query requirement.
      * 
      * @return List of all statuses in sort order
      */
+    @Deprecated
     @Query("SELECT s FROM CMeetingStatus s ORDER BY s.sortOrder ASC, s.name ASC")
     List<CMeetingStatus> findAllOrderedBySortOrder();
 

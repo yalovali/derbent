@@ -224,4 +224,42 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
             throw new RuntimeException("Failed to create instance of " + getEntityClass().getName(), e);
         }
     }
+
+    /**
+     * Override parent count() method to enforce project-based queries.
+     * Project-aware entities should not allow counting all entities regardless of project.
+     * Use countByProject(CProject project) instead.
+     */
+    @Override
+    public int count() {
+        throw new UnsupportedOperationException(
+                "Project-aware entities must use countByProject(CProject project) instead of count(). "
+                + "All queries must be scoped to a specific project.");
+    }
+
+    /**
+     * Generic method to find all entities by project with proper type safety.
+     * This reduces code duplication across service implementations.
+     * 
+     * @param project the project to find entities for
+     * @return list of entities for the specified project
+     */
+    @Transactional(readOnly = true)
+    public List<EntityClass> findAllByProject(final CProject project) {
+        LOGGER.info("findAllByProject called for project: {} in {}", 
+                project != null ? project.getName() : "null", getClass().getSimpleName());
+
+        if (project == null) {
+            LOGGER.warn("findAllByProject called with null project for {}", getClass().getSimpleName());
+            return List.of();
+        }
+
+        try {
+            return findEntriesByProject(project);
+        } catch (final Exception e) {
+            LOGGER.error("Error finding all entities by project '{}' in {}: {}", project.getName(),
+                    getClass().getSimpleName(), e.getMessage(), e);
+            throw new RuntimeException("Failed to find all entities by project", e);
+        }
+    }
 }
