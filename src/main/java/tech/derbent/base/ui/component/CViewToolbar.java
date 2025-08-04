@@ -124,10 +124,12 @@ public final class CViewToolbar extends Composite<Header> implements CProjectLis
         title.addClassNames(FontSize.XLARGE, Margin.NONE, FontWeight.LIGHT);
         // Create project selection combobox
         createProjectComboBox();
-        // Left side: toggle, home button, title, and project selector
+        // Create quick access toolbar with colorful icons
+        final var quickAccessToolbar = createQuickAccessToolbar();
+        // Left side: toggle, home button, title, quick access, and project selector
         final var projectSelector = new Div(new Span("Active Project:"), projectComboBox);
         projectSelector.addClassNames(Display.FLEX, AlignItems.CENTER, Gap.SMALL);
-        final var leftSide = new Div(drawerToggle, homeButton, title, projectSelector);
+        final var leftSide = new Div(drawerToggle, homeButton, title, quickAccessToolbar, projectSelector);
         leftSide.addClassNames(Display.FLEX, AlignItems.CENTER, Gap.MEDIUM);
         // Spacer to push user info and layout toggle to the right
         final var spacer = new Div();
@@ -158,10 +160,17 @@ public final class CViewToolbar extends Composite<Header> implements CProjectLis
     private CButton createHomeButton() {
         final Icon homeIcon = VaadinIcon.HOME.create();
         homeIcon.addClassNames(IconSize.MEDIUM);
+        // Add colorful styling to the home icon
+        homeIcon.getStyle().set("color", "var(--lumo-primary-color)");
         final CButton homeButton = new CButton(homeIcon);
         homeButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ICON);
         homeButton.getElement().setAttribute("title", "Go to Dashboard");
         homeButton.addClassNames(Margin.NONE);
+        // Add hover effect for better UX
+        homeButton.getElement().addEventListener("mouseenter",
+                e -> homeIcon.getStyle().set("color", "var(--lumo-primary-color-50pct)"));
+        homeButton.getElement().addEventListener("mouseleave",
+                e -> homeIcon.getStyle().set("color", "var(--lumo-primary-color)"));
         // Handle home button click - navigate to dashboard
         homeButton.addClickListener(event -> {
             LOGGER.info("Home button clicked, navigating to dashboard");
@@ -406,5 +415,60 @@ public final class CViewToolbar extends Composite<Header> implements CProjectLis
             layoutToggleButton.setIcon(icon);
             layoutToggleButton.getElement().setAttribute("title", "Current: " + currentMode + " - Click to toggle");
         }
+    }
+
+    /**
+     * Creates a quick access toolbar with colorful icons for commonly used features.
+     * 
+     * @return the quick access toolbar
+     */
+    private Div createQuickAccessToolbar() {
+        final var quickAccessDiv = new Div();
+        quickAccessDiv.addClassNames(Display.FLEX, AlignItems.CENTER, Gap.SMALL);
+        
+        // Meetings icon - green
+        final var meetingsButton = createColorfulIconButton(VaadinIcon.CALENDAR, "Meetings", "#28a745", "meetings");
+        
+        // Activities icon - blue
+        final var activitiesButton = createColorfulIconButton(VaadinIcon.TASKS, "Activities", "#007bff", "activities");
+        
+        // Projects icon - orange
+        final var projectsButton = createColorfulIconButton(VaadinIcon.FOLDER, "Projects", "#fd7e14", "projects");
+        
+        // Users icon - purple
+        final var usersButton = createColorfulIconButton(VaadinIcon.USERS, "Users", "#6f42c1", "users");
+        
+        quickAccessDiv.add(meetingsButton, activitiesButton, projectsButton, usersButton);
+        return quickAccessDiv;
+    }
+
+    /**
+     * Creates a colorful icon button for the quick access toolbar.
+     */
+    private CButton createColorfulIconButton(VaadinIcon iconType, String tooltip, String color, String route) {
+        final Icon icon = iconType.create();
+        icon.addClassNames(IconSize.SMALL);
+        icon.getStyle().set("color", color);
+        
+        final CButton button = new CButton(icon);
+        button.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ICON);
+        button.getElement().setAttribute("title", tooltip);
+        button.addClassNames(Margin.NONE);
+        
+        // Add hover effect
+        final String originalColor = color;
+        final String hoverColor = color + "99"; // Add transparency for hover
+        button.getElement().addEventListener("mouseenter",
+                e -> icon.getStyle().set("color", hoverColor));
+        button.getElement().addEventListener("mouseleave",
+                e -> icon.getStyle().set("color", originalColor));
+        
+        // Navigate to route
+        button.addClickListener(event -> {
+            LOGGER.info("{} button clicked, navigating to {}", tooltip, route);
+            com.vaadin.flow.component.UI.getCurrent().navigate(route);
+        });
+        
+        return button;
     }
 }
