@@ -521,12 +521,107 @@ class ManualVerificationTest {
 }
 ```
 
-## 9.6. Database Rules and Sample Data
-- never use privimitive data types in entities, such as int boolean, use Integer Boolean etc.
-- Password is always test123 for all users with hash code '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu'
-- Every entity should have an example in data.sql for per project, per company per user per activity etc...
+## 9.6. Lazy Loading Architecture Guidelines
+
+**Critical**: All new tasks must include proper lazy loading architecture comments and implementation patterns.
+
+### 9.6.1. Lazy Loading Comments for New Tasks
+Every new task involving entity relationships must include comments addressing:
+
+```java
+/**
+ * LAZY LOADING ARCHITECTURE:
+ * - This entity uses @ManyToOne(fetch = FetchType.LAZY) for [relationship_name]
+ * - Service layer implements eager loading via custom repository query: findByIdWith[RelationshipName]()
+ * - Base class CAbstractService.initializeLazyFields() handles common relationships
+ * - UI components must access relationships through service layer to avoid LazyInitializationException
+ * - See: COMPREHENSIVE_LAZY_LOADING_FIX.md for implementation patterns
+ */
+@Entity
+public class CNewEntity extends CEntityOfProject {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "type_id")
+    private CNewEntityType entityType; // Lazy loaded - requires service layer access
+}
+```
+
+### 9.6.2. Mandatory Lazy Loading Implementation Pattern
+All new entities with relationships must follow this pattern:
+
+**1. Repository Layer** - Custom eager loading queries:
+```java
+@Repository
+public interface CNewEntityRepository extends CEntityRepository<CNewEntity> {
+    @Query("SELECT e FROM CNewEntity e LEFT JOIN FETCH e.entityType WHERE e.id = :id")
+    Optional<CNewEntity> findByIdWithEntityType(@Param("id") Long id);
+    
+    @Query("SELECT e FROM CNewEntity e LEFT JOIN FETCH e.entityType LEFT JOIN FETCH e.project WHERE e.id = :id")
+    Optional<CNewEntity> findByIdWithFullData(@Param("id") Long id);
+}
+```
+
+**2. Service Layer** - Override get() method and lazy field initialization:
+```java
+@Service
+public class CNewEntityService extends CEntityOfProjectService<CNewEntity> {
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<CNewEntity> get(final Long id) {
+        LOGGER.info("get called with id: {} (eager loading entityType)", id);
+        final Optional<CNewEntity> entity = ((CNewEntityRepository) repository).findByIdWithEntityType(id);
+        entity.ifPresent(this::initializeLazyFields);
+        return entity;
+    }
+    
+    @Override
+    protected void initializeLazyFields(final CNewEntity entity) {
+        super.initializeLazyFields(entity); // Handles CEntityOfProject relationships
+        initializeLazyRelationship(entity.getEntityType(), "entityType");
+        // Add other lazy relationships as needed
+    }
+}
+```
+
+**3. UI Layer** - Access through service, never direct entity navigation:
+```java
+// ✅ CORRECT: Access through service layer
+public class CNewEntityView extends CProjectAwareMDPage<CNewEntity> {
+    private void displayEntityDetails(final CNewEntity entity) {
+        // Service.get() ensures lazy fields are initialized
+        final Optional<CNewEntity> fullEntity = service.get(entity.getId());
+        fullEntity.ifPresent(e -> {
+            // Safe to access e.getEntityType() - no LazyInitializationException
+            typeField.setValue(e.getEntityType());
+        });
+    }
+}
+
+// ❌ INCORRECT: Direct entity navigation in UI
+private void displayEntityDetails(final CNewEntity entity) {
+    // This will cause LazyInitializationException
+    typeField.setValue(entity.getEntityType());
+}
+```
+
+### 9.6.3. Lazy Loading Risk Assessment Comments
+Include these risk assessment comments in code reviews:
+
+```java
+/**
+ * LAZY LOADING RISK ASSESSMENT:
+ * HIGH RISK: Direct access to lazy relationships in UI components
+ * MEDIUM RISK: Accessing relationships in @PostConstruct methods
+ * LOW RISK: Service layer access with proper eager loading
+ * MITIGATION: Always use service.get() for entity access in UI layer
+ */
+```
+
+## 9.7. Database Rules and Sample Data
+- **Never use primitive data types in entities** (int, boolean, etc.) - use wrapper types (Integer, Boolean, etc.)
+- Password is always **test123** for all users with hash code `$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu`
+- Every entity should have examples in data.sql for per project, per company, per user, per activity etc.
 - Always ensure **PostgreSQL-only** configuration. Update `data.sql` with correct sample and initial database values after any database change
-- Keep spring.jpa.defer-datasource-initialization=true
+- Keep `spring.jpa.defer-datasource-initialization=true`
 - Don't use memory database H2 in production
 - Always delete tables at top of data.sql before you insert values into it. Check them before they exist
 - Delete constraints etc. if there is change in the DB structure
@@ -546,7 +641,410 @@ class ManualVerificationTest {
   ';
   ```
 
-## 9.7. Documentation & Modularity
+## 9.8. Project Parameter Requirements for Project-Related Classes
+
+### 9.8.1. Mandatory Project Context in Queries
+
+**CRITICAL RULE**: All project-related entity classes (extending `CEntityOfProject`) must ALWAYS include project parameter in queries. Never execute queries without project context.
+
+**Repository Layer - Project-Aware Queries:**
+```java
+@Repository
+public interface CActivityRepository extends CEntityRepository<CActivity> {
+    
+    // ✅ REQUIRED: Always include project parameter
+    @Query("SELECT a FROM CActivity a WHERE a.project.id = :projectId")
+    List<CActivity> findByProjectId(@Param("projectId") Long projectId);
+    
+    // ✅ REQUIRED: Project parameter with additional filters
+    @Query("SELECT a FROM CActivity a WHERE a.project.id = :projectId AND a.activityStatus.id = :statusId")
+    List<CActivity> findByProjectIdAndStatus(@Param("projectId") Long projectId, @Param("statusId") Long statusId);
+    
+    // ✅ REQUIRED: Project parameter with eager loading
+    @Query("SELECT a FROM CActivity a LEFT JOIN FETCH a.activityType WHERE a.project.id = :projectId")
+    List<CActivity> findByProjectIdWithActivityType(@Param("projectId") Long projectId);
+    
+    // ❌ FORBIDDEN: Queries without project parameter
+    @Query("SELECT a FROM CActivity a WHERE a.activityStatus.id = :statusId")
+    List<CActivity> findByStatus(@Param("statusId") Long statusId); // VIOLATION!
+    
+    // ❌ FORBIDDEN: findAll() usage for project entities
+    List<CActivity> findAll(); // VIOLATION - returns data from all projects!
+}
+```
+
+**Service Layer - Project Context Enforcement:**
+```java
+@Service
+public class CActivityService extends CEntityOfProjectService<CActivity> {
+    
+    // ✅ REQUIRED: Override methods to enforce project context
+    @Override
+    public List<CActivity> findAll() {
+        throw new UnsupportedOperationException(
+            "findAll() is not allowed for project entities. Use findByProjectId(Long projectId) instead."
+        );
+    }
+    
+    // ✅ REQUIRED: Project-aware method implementations
+    public List<CActivity> findByProjectId(final Long projectId) {
+        LOGGER.info("findByProjectId called with projectId: {}", projectId);
+        
+        if (projectId == null) {
+            throw new ServiceException("Project ID cannot be null for project-related queries");
+        }
+        
+        return ((CActivityRepository) repository).findByProjectId(projectId);
+    }
+    
+    // ✅ REQUIRED: Always validate project context in save operations
+    @Override
+    public CActivity save(final CActivity activity) {
+        LOGGER.info("save called with activity: {}", activity);
+        
+        if (activity.getProject() == null || activity.getProject().getId() == null) {
+            throw new ServiceException("Activity must be associated with a valid project before saving");
+        }
+        
+        return super.save(activity);
+    }
+    
+    // ✅ REQUIRED: Project context in search methods
+    public List<CActivity> searchByNameAndProject(final String name, final Long projectId) {
+        LOGGER.info("searchByNameAndProject called with name: {}, projectId: {}", name, projectId);
+        
+        if (projectId == null) {
+            throw new ServiceException("Project ID is required for activity search");
+        }
+        
+        return ((CActivityRepository) repository).findByNameContainingIgnoreCaseAndProjectId(name, projectId);
+    }
+}
+```
+
+### 9.8.2. UI Layer Project Context
+
+**View Layer - Project-Aware Components:**
+```java
+public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
+    
+    // ✅ REQUIRED: Always use current project from session
+    @Override
+    protected void refreshGrid() {
+        final Long currentProjectId = getCurrentProjectId();
+        if (currentProjectId == null) {
+            showWarning("Please select a project to view activities");
+            grid.setItems(Collections.emptyList());
+            return;
+        }
+        
+        final List<CActivity> activities = service.findByProjectId(currentProjectId);
+        grid.setItems(activities);
+    }
+    
+    // ✅ REQUIRED: Project validation in create operations
+    @Override
+    protected void createNewEntity() {
+        final Long currentProjectId = getCurrentProjectId();
+        if (currentProjectId == null) {
+            showWarning("Please select a project before creating a new activity");
+            return;
+        }
+        
+        final CActivity newActivity = new CActivity();
+        newActivity.setProject(getCurrentProject());
+        openEntityDialog(newActivity);
+    }
+    
+    // ✅ REQUIRED: Project context in filter operations
+    private void applyStatusFilter(final CActivityStatus selectedStatus) {
+        final Long currentProjectId = getCurrentProjectId();
+        if (currentProjectId == null) {
+            return;
+        }
+        
+        if (selectedStatus == null) {
+            refreshGrid(); // Shows all activities for current project
+        } else {
+            final List<CActivity> filteredActivities = 
+                service.findByProjectIdAndStatus(currentProjectId, selectedStatus.getId());
+            grid.setItems(filteredActivities);
+        }
+    }
+}
+```
+
+### 9.8.3. Session Management for Project Context
+
+**Project Session Service:**
+```java
+@Service
+@Component
+@Scope("session")
+public class CProjectSessionService {
+    
+    private Long currentProjectId;
+    private CProject currentProject;
+    
+    // ✅ REQUIRED: Always validate project context
+    public Long getCurrentProjectId() {
+        if (currentProjectId == null) {
+            throw new SessionException("No project selected in current session");
+        }
+        return currentProjectId;
+    }
+    
+    // ✅ REQUIRED: Project context change notifications
+    public void setCurrentProject(final CProject project) {
+        LOGGER.info("setCurrentProject called with project: {}", project);
+        
+        if (project == null || project.getId() == null) {
+            throw new SessionException("Cannot set null project as current project");
+        }
+        
+        this.currentProject = project;
+        this.currentProjectId = project.getId();
+        
+        // Notify all project-aware components
+        eventBus.fireEvent(new ProjectChangeEvent(project));
+    }
+}
+```
+
+### 9.8.4. Query Security and Validation
+
+**Repository Security Patterns:**
+```java
+@Repository
+public interface CRiskRepository extends CEntityRepository<CRisk> {
+    
+    // ✅ REQUIRED: Security through project filtering
+    @Query("SELECT r FROM CRisk r WHERE r.project.id = :projectId AND r.createdBy.id = :userId")
+    List<CRisk> findByProjectIdAndCreatedBy(@Param("projectId") Long projectId, @Param("userId") Long userId);
+    
+    // ✅ REQUIRED: Always include project in count queries
+    @Query("SELECT COUNT(r) FROM CRisk r WHERE r.project.id = :projectId")
+    Long countByProjectId(@Param("projectId") Long projectId);
+    
+    // ✅ REQUIRED: Project context in complex queries
+    @Query("SELECT r FROM CRisk r WHERE r.project.id = :projectId AND r.severity = :severity AND r.status = 'OPEN'")
+    List<CRisk> findOpenRisksBySeverityAndProject(@Param("projectId") Long projectId, @Param("severity") String severity);
+}
+```
+
+## 9.9. Repository and Service Class Guidelines
+
+### 9.8.1. Avoiding Lazy Loading Issues
+
+**Repository Layer - Always Provide Eager Loading Queries:**
+```java
+@Repository
+public interface CEntityRepository extends CEntityRepository<CEntity> {
+    // ✅ REQUIRED: Eager loading query for main relationships
+    @Query("SELECT e FROM CEntity e LEFT JOIN FETCH e.entityType WHERE e.id = :id")
+    Optional<CEntity> findByIdWithEntityType(@Param("id") Long id);
+    
+    // ✅ REQUIRED: Full eager loading for complex views
+    @Query("SELECT e FROM CEntity e LEFT JOIN FETCH e.entityType LEFT JOIN FETCH e.project WHERE e.id = :id")
+    Optional<CEntity> findByIdWithFullData(@Param("id") Long id);
+    
+    // ✅ REQUIRED: Project-aware queries (see section 9.9)
+    @Query("SELECT e FROM CEntity e LEFT JOIN FETCH e.entityType WHERE e.project.id = :projectId")
+    List<CEntity> findByProjectIdWithEntityType(@Param("projectId") Long projectId);
+}
+```
+
+**Service Layer - Mandatory Overrides and Patterns:**
+```java
+@Service
+public class CEntityService extends CEntityOfProjectService<CEntity> {
+    
+    // ✅ REQUIRED: Override get() method for eager loading
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<CEntity> get(final Long id) {
+        LOGGER.info("get called with id: {} (eager loading relationships)", id);
+        final Optional<CEntity> entity = ((CEntityRepository) repository).findByIdWithEntityType(id);
+        entity.ifPresent(this::initializeLazyFields);
+        return entity;
+    }
+    
+    // ✅ REQUIRED: Override initializeLazyFields for custom relationships
+    @Override
+    protected void initializeLazyFields(final CEntity entity) {
+        super.initializeLazyFields(entity); // Handles CEntityOfProject relationships
+        initializeLazyRelationship(entity.getEntityType(), "entityType");
+        // Initialize other lazy relationships as needed
+    }
+}
+```
+
+### 9.8.2. Reflection Usage Guidelines
+
+**Proper Reflection Implementation:**
+```java
+public class CEntityService extends CEntityOfProjectService<CEntity> {
+    
+    // ✅ CORRECT: Use reflection for generic field initialization
+    private void initializeFieldsUsingReflection(final Object entity) {
+        final Field[] fields = entity.getClass().getDeclaredFields();
+        for (final Field field : fields) {
+            try {
+                if (field.isAnnotationPresent(ManyToOne.class) || field.isAnnotationPresent(OneToOne.class)) {
+                    field.setAccessible(true);
+                    final Object relationshipValue = field.get(entity);
+                    if (relationshipValue != null) {
+                        // Force initialization to avoid lazy loading
+                        Hibernate.initialize(relationshipValue);
+                    }
+                }
+            } catch (final IllegalAccessException e) {
+                LOGGER.warn("Could not access field {} for lazy initialization", field.getName(), e);
+            }
+        }
+    }
+    
+    // ✅ CORRECT: Use reflection for dynamic method invocation
+    public Object invokeMethodDynamically(final String methodName, final Object... args) {
+        try {
+            final Method method = this.getClass().getDeclaredMethod(methodName, 
+                Arrays.stream(args).map(Object::getClass).toArray(Class[]::new));
+            method.setAccessible(true);
+            return method.invoke(this, args);
+        } catch (final ReflectiveOperationException e) {
+            LOGGER.error("Failed to invoke method {} dynamically", methodName, e);
+            throw new ServiceException("Dynamic method invocation failed", e);
+        }
+    }
+}
+```
+
+### 9.8.3. Avoiding Primitive Data Types
+
+**Mandatory Wrapper Type Usage:**
+```java
+@Entity
+public class CEntity extends CEntityOfProject {
+    
+    // ❌ FORBIDDEN: Primitive types
+    private int count;
+    private boolean active;
+    private double amount;
+    private long timestamp;
+    
+    // ✅ REQUIRED: Wrapper types only
+    private Integer count;
+    private Boolean active;
+    private Double amount;
+    private Long timestamp;
+    
+    @MetaData(
+        displayName = "Count", required = false, readOnly = false,
+        description = "Number of items", hidden = false, order = 1
+    )
+    @Column(name = "count_value")
+    private Integer count; // Always nullable wrapper types
+    
+    @MetaData(
+        displayName = "Active Status", required = false, readOnly = false,
+        description = "Whether the entity is active", hidden = false, order = 2
+    )
+    @Column(name = "is_active")
+    private Boolean active; // Allows null values for better data integrity
+}
+```
+
+**Validation and Null Handling:**
+```java
+public class CEntityService extends CEntityOfProjectService<CEntity> {
+    
+    public CEntity updateCount(final Long entityId, final Integer newCount) {
+        LOGGER.info("updateCount called with entityId: {}, newCount: {}", entityId, newCount);
+        
+        // ✅ REQUIRED: Always validate wrapper types for null
+        if (entityId == null) {
+            throw new ServiceException("Entity ID cannot be null");
+        }
+        
+        final Optional<CEntity> entityOpt = get(entityId);
+        if (entityOpt.isEmpty()) {
+            throw new ServiceException("Entity not found with ID: " + entityId);
+        }
+        
+        final CEntity entity = entityOpt.get();
+        
+        // ✅ REQUIRED: Handle null wrapper types appropriately
+        entity.setCount(newCount != null ? newCount : 0);
+        
+        return save(entity);
+    }
+}
+```
+
+### 9.8.4. Service Layer Best Practices
+
+**Transaction Management:**
+```java
+@Service
+@Transactional
+public class CEntityService extends CEntityOfProjectService<CEntity> {
+    
+    // ✅ REQUIRED: Read-only transactions for queries
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<CEntity> get(final Long id) {
+        // Implementation
+    }
+    
+    // ✅ REQUIRED: Write transactions for modifications
+    @Override
+    @Transactional
+    public CEntity save(final CEntity entity) {
+        // Implementation
+    }
+    
+    // ✅ REQUIRED: Custom transaction boundaries for complex operations
+    @Transactional(rollbackFor = {ServiceException.class, DataIntegrityViolationException.class})
+    public CEntity performComplexOperation(final CEntity entity) {
+        // Implementation
+    }
+}
+```
+
+**Error Handling and Validation:**
+```java
+public class CEntityService extends CEntityOfProjectService<CEntity> {
+    
+    // ✅ REQUIRED: Comprehensive validation
+    private void validateEntity(final CEntity entity) {
+        if (entity == null) {
+            throw new ServiceException("Entity cannot be null");
+        }
+        if (entity.getProject() == null) {
+            throw new ServiceException("Entity must be associated with a project");
+        }
+        if (entity.getName() == null || entity.getName().trim().isEmpty()) {
+            throw new ServiceException("Entity name cannot be null or empty");
+        }
+    }
+    
+    // ✅ REQUIRED: Proper exception handling
+    @Override
+    public CEntity save(final CEntity entity) {
+        LOGGER.info("save called with entity: {}", entity);
+        
+        try {
+            validateEntity(entity);
+            return super.save(entity);
+        } catch (final DataIntegrityViolationException e) {
+            LOGGER.error("Data integrity violation while saving entity: {}", entity, e);
+            throw new ServiceException("Failed to save entity due to data integrity violation", e);
+        } catch (final Exception e) {
+            LOGGER.error("Unexpected error while saving entity: {}", entity, e);
+            throw new ServiceException("Failed to save entity", e);
+        }
+    }
+}
 - Update the `docs` folder for every significant change:
   - Add new documentation for each project design concept (one file per concept)
   - For complex or Spring-based solutions, create a step-by-step solution file
@@ -681,15 +1179,71 @@ class ManualVerificationTest {
 - Test validation constraints
 - Include performance tests for critical paths
 
-### 5.5 UI Automated Tests
+### 5.3 Test Structure and Guidelines
+
+**Test Organization Structure:**
+Tests must be organized in module-specific directories following this structure:
+```
+src/test/java/tech/derbent/
+├── abstracts/tests/           # Generic test superclasses and utilities
+│   ├── CGenericViewTest.java  # Generic view test patterns
+│   └── CTestUtils.java        # Common utility functions
+├── activities/tests/          # Activity-related tests
+├── users/tests/               # User-related tests  
+├── meetings/tests/            # Meeting-related tests
+├── projects/tests/            # Project-related tests
+└── ui/automation/             # Base UI test infrastructure
+```
+
+**Test Super Classes and Inheritance:**
+All UI tests must extend appropriate super classes:
+
+```java
+// Generic test superclass - provides common patterns
+public abstract class CGenericViewTest<T> extends CBaseUITest {
+    protected abstract Class<?> getViewClass();
+    protected abstract Class<T> getEntityClass();
+    
+    @Test
+    public void testViewNavigation() { /* Common navigation testing */ }
+    @Test
+    public void testNewItemCreation() { /* Common creation testing */ }
+    @Test
+    public void testGridInteractions() { /* Common grid testing */ }
+    @Test
+    public void testViewComboBoxes() { /* Common combobox testing */ }
+}
+
+// Concrete implementation - minimal code required
+public class CActivitiesViewGenericTest extends CGenericViewTest<CActivity> {
+    @Override
+    protected Class<?> getViewClass() { return CActivitiesView.class; }
+    
+    @Override
+    protected Class<CActivity> getEntityClass() { return CActivity.class; }
+}
+```
+
+**Common Test Utility Functions:**
+All tests must use these standardized utility functions:
+```java
+// From CTestUtils and CBaseUITest
+clickCancel();        // Standard cancel button interaction
+clickNew();           // Standard new/add button interaction  
+clickSave();          // Standard save/create button interaction
+clickGrid(int index); // Standard grid row selection
+takeScreenshot(String name, boolean isFailure); // Conditional screenshots
+```
+
+### 5.4 UI Automated Tests
 - Don't call applicationLogin in every @test, just use it in the setup
 - Don't wait after every navigation etc, if there is a wait in the previous call it is enough
-- Try to navigate between views using class annotations
+- Try to navigate between views using class annotations via `getRouteFromClass(Class<?> viewClass)`
 - Always fail all tests with fail assertion
 - Always generate for all views and functions a playwright tests
 - Create auxiliary functions for playwright tester for simpler commands
 - Always try to use selection by ID not by CSS or tag
-- Try to insert ID to used components in test in Java
+- Try to insert ID to used components in test in java
 - Keep tests in non headless chromium execution
 - Test entity persistence and retrieval
 - Verify relationship mappings
@@ -697,13 +1251,21 @@ class ManualVerificationTest {
 - Include performance tests for critical paths
 - Write separate test classes for each view to keep code easy to understand
 - Write short if blocks, quick returns to increase maintenance
-- Don't have repeating blocks
-- Check /derbent/src/docs/copilot-java-strict-coding-rules.md file for errors such as link errors
-- Only take screen shot if there is a fail in tests, reduce the number of log messages
+- Don't have repeating blocks - extract to super classes
+- **Only take screenshot if there is a fail in tests** - use `takeScreenshot(name, true)` for failures only
+- **Reduce the number of log messages** - use DEBUG level for routine operations
 - Put all test classes in tests folder of that class group
-- Create or use common functions like clickCancel, clickNew, clickGrid
-- If possible generate super class tests with classname, entity class parameters to run the tests, such as navigation tests, new item tests etc, which have all common pattern 
+- Create or use common functions like `clickCancel()`, `clickNew()`, `clickGrid()`
+- **Generate super class tests with classname, entity class parameters** to run common test patterns
 
+**Test Coverage Requirements:**
+- Test all CRUD operations for every entity view
+- Test grid selection changes for every page/view  
+- Test contents of every combobox and data provider
+- Test against all validation scenarios
+- Include manual verification tests for complex UI interactions
+- Test all navigation paths between views
+- Maintain test coverage above 80% for critical business logic 
 
 ## 6. Sample Implementation Guidelines
 
@@ -734,6 +1296,546 @@ All type entities should follow this pattern:
 - Remove unused imports
 - Use specific imports, avoid wildcards
 - Follow IDE formatting rules
+
+## 9.10. Color and Icon Usage Guidelines for UI Components
+
+### 9.10.1. Component Color Standards
+
+**Grid Component Colors:**
+```java
+public class CActivitiesGrid extends CGrid<CActivity> {
+    
+    // ✅ REQUIRED: Use Lumo design tokens for consistent colors
+    private void setupGridStyling() {
+        // Status-based row styling
+        setClassNameGenerator(activity -> {
+            if (activity.getActivityStatus() != null) {
+                switch (activity.getActivityStatus().getName()) {
+                    case "COMPLETED":
+                        return "activity-completed"; // Green background
+                    case "IN_PROGRESS": 
+                        return "activity-in-progress"; // Blue background
+                    case "BLOCKED":
+                        return "activity-blocked"; // Red background
+                    case "TODO":
+                        return "activity-todo"; // Gray background
+                    default:
+                        return null;
+                }
+            }
+            return null;
+        });
+    }
+}
+
+// CSS styling using Lumo design tokens
+.activity-completed {
+    background-color: var(--lumo-success-color-10pct);
+    color: var(--lumo-success-text-color);
+}
+
+.activity-in-progress {
+    background-color: var(--lumo-primary-color-10pct);
+    color: var(--lumo-primary-text-color);
+}
+
+.activity-blocked {
+    background-color: var(--lumo-error-color-10pct);
+    color: var(--lumo-error-text-color);
+}
+
+.activity-todo {
+    background-color: var(--lumo-contrast-5pct);
+    color: var(--lumo-body-text-color);
+}
+```
+
+**TextBox and ComboBox Colors:**
+```java
+public class CProjectFormPanel extends CPanel<CProject> {
+    
+    // ✅ REQUIRED: Validation-based coloring
+    private void setupFieldStyling() {
+        nameField.addValueChangeListener(event -> {
+            final String value = event.getValue();
+            if (value == null || value.trim().isEmpty()) {
+                nameField.addThemeVariants(TextFieldVariant.LUMO_ERROR);
+                nameField.setErrorMessage("Project name is required");
+            } else {
+                nameField.removeThemeVariants(TextFieldVariant.LUMO_ERROR);
+                nameField.setErrorMessage(null);
+            }
+        });
+        
+        // ComboBox styling for required fields
+        statusComboBox.addThemeVariants(ComboBoxVariant.LUMO_SMALL);
+        if (isRequired()) {
+            statusComboBox.getStyle().set("--lumo-primary-color", "var(--lumo-primary-color)");
+        }
+    }
+}
+```
+
+### 9.10.2. Icon Usage Standards
+
+**Component Icon Guidelines:**
+```java
+public class CActivityButtons extends CHorizontalLayout {
+    
+    // ✅ REQUIRED: Consistent icon usage with actions
+    private void createActionButtons() {
+        // Create button with standard icon
+        final CButton newButton = CButton.createPrimary("New Activity", VaadinIcon.PLUS);
+        newButton.addClickListener(e -> createNewActivity());
+        
+        // Edit button with edit icon
+        final CButton editButton = CButton.createSecondary("Edit", VaadinIcon.EDIT);
+        editButton.addClickListener(e -> editSelectedActivity());
+        
+        // Delete button with warning coloring
+        final CButton deleteButton = CButton.createTertiary("Delete", VaadinIcon.TRASH);
+        deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
+        deleteButton.addClickListener(e -> deleteSelectedActivity());
+        
+        // Status action buttons with specific icons
+        final CButton startButton = CButton.createSuccess("Start", VaadinIcon.PLAY);
+        final CButton pauseButton = CButton.createSecondary("Pause", VaadinIcon.PAUSE);
+        final CButton completeButton = CButton.createPrimary("Complete", VaadinIcon.CHECK);
+        
+        add(newButton, editButton, deleteButton, startButton, pauseButton, completeButton);
+    }
+}
+```
+
+### 9.10.3. ComboBox Styling Guidelines
+
+**Data Provider ComboBox Colors:**
+```java
+public class CActivityTypeComboBox extends ComboBox<CActivityType> {
+    
+    public CActivityTypeComboBox() {
+        super("Activity Type");
+        setupStyling();
+        setupDataProvider();
+    }
+    
+    // ✅ REQUIRED: Consistent ComboBox styling
+    private void setupStyling() {
+        addThemeVariants(ComboBoxVariant.LUMO_SMALL);
+        setItemLabelGenerator(CActivityType::getName);
+        
+        // Add icon to ComboBox items
+        setRenderer(new ComponentRenderer<>(activityType -> {
+            final CHorizontalLayout layout = new CHorizontalLayout();
+            
+            // Type-specific icons
+            final Icon typeIcon = getActivityTypeIcon(activityType.getName());
+            typeIcon.getStyle().set("color", getActivityTypeColor(activityType.getName()));
+            
+            final Span typeName = new Span(activityType.getName());
+            typeName.getStyle().set("margin-left", "var(--lumo-space-s)");
+            
+            layout.add(typeIcon, typeName);
+            layout.setAlignItems(Alignment.CENTER);
+            return layout;
+        }));
+    }
+    
+    // ✅ REQUIRED: Type-specific icon mapping
+    private Icon getActivityTypeIcon(final String typeName) {
+        switch (typeName.toUpperCase()) {
+            case "DEVELOPMENT": return new Icon(VaadinIcon.CODE);
+            case "TESTING": return new Icon(VaadinIcon.BUG);
+            case "DOCUMENTATION": return new Icon(VaadinIcon.FILE_TEXT);
+            case "MEETING": return new Icon(VaadinIcon.USERS);
+            case "RESEARCH": return new Icon(VaadinIcon.SEARCH);
+            default: return new Icon(VaadinIcon.DOT_CIRCLE);
+        }
+    }
+}
+```
+
+### 9.10.4. Button Color and Icon Standards
+
+**Button Hierarchy and Colors:**
+```java
+public class CButtonFactory {
+    
+    // ✅ REQUIRED: Standardized button creation methods
+    public static CButton createPrimary(final String text, final VaadinIcon icon) {
+        final CButton button = new CButton(text);
+        button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        if (icon != null) {
+            button.setIcon(new Icon(icon));
+        }
+        return button;
+    }
+    
+    public static CButton createSecondary(final String text, final VaadinIcon icon) {
+        final CButton button = new CButton(text);
+        // Default secondary styling
+        if (icon != null) {
+            button.setIcon(new Icon(icon));
+        }
+        return button;
+    }
+    
+    public static CButton createSuccess(final String text, final VaadinIcon icon) {
+        final CButton button = new CButton(text);
+        button.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
+        if (icon != null) {
+            button.setIcon(new Icon(icon));
+        }
+        return button;
+    }
+    
+    public static CButton createError(final String text, final VaadinIcon icon) {
+        final CButton button = new CButton(text);
+        button.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_ERROR);
+        if (icon != null) {
+            button.setIcon(new Icon(icon));
+        }
+        return button;
+    }
+}
+```
+
+### 9.10.5. CSS Color Variables
+
+**Standard Color Palette:**
+```css
+/* Custom color extensions for specific use cases */
+:root {
+    /* Status colors */
+    --status-todo-color: var(--lumo-contrast-60pct);
+    --status-progress-color: var(--lumo-primary-color);
+    --status-review-color: var(--lumo-warning-color);
+    --status-completed-color: var(--lumo-success-color);
+    --status-blocked-color: var(--lumo-error-color);
+    
+    /* Priority colors */
+    --priority-critical-color: #ff4757;
+    --priority-high-color: #ff6b35;
+    --priority-medium-color: #ffa726;
+    --priority-low-color: #66bb6a;
+    --priority-lowest-color: var(--lumo-contrast-40pct);
+    
+    /* Background variations */
+    --status-todo-bg: var(--lumo-contrast-5pct);
+    --status-progress-bg: var(--lumo-primary-color-10pct);
+    --status-review-bg: var(--lumo-warning-color-10pct);
+    --status-completed-bg: var(--lumo-success-color-10pct);
+    --status-blocked-bg: var(--lumo-error-color-10pct);
+}
+
+/* Component-specific color applications */
+.activity-grid vaadin-grid-cell-content {
+    border-left: 3px solid transparent;
+}
+
+.activity-grid .activity-critical {
+    border-left-color: var(--priority-critical-color);
+}
+
+.activity-grid .activity-high {
+    border-left-color: var(--priority-high-color);
+}
+
+.activity-grid .activity-medium {
+    border-left-color: var(--priority-medium-color);
+}
+```
+
+## 9.11. Child Class Simplicity and Super Class Usage Guidelines
+
+### 9.11.1. Keep Child Classes Simple
+
+**Principle**: Child classes should contain only specific business logic while delegating common functionality to super classes through polymorphism, reflection, and proxy patterns.
+
+**Simple Child Class Pattern:**
+```java
+// ✅ REQUIRED: Minimal child class with specific behavior only
+@Entity
+@Table(name = "cactivity")
+public class CActivity extends CEntityOfProject {
+    
+    // Only specific fields for this entity
+    @MetaData(displayName = "Activity Type", order = 2, 
+              dataProviderBean = "CActivityTypeService")
+    private CActivityType activityType;
+    
+    @MetaData(displayName = "Priority", order = 3,
+              dataProviderBean = "CActivityPriorityService")
+    private CActivityPriority activityPriority;
+    
+    // Simple constructors delegating to super
+    public CActivity() {
+        super();
+    }
+    
+    public CActivity(final String name, final CProject project) {
+        super(name, project);
+    }
+    
+    // Only entity-specific business logic
+    public Boolean isHighPriority() {
+        return activityPriority != null && 
+               "HIGH".equals(activityPriority.getName());
+    }
+    
+    // Delegate complex operations to service layer
+    public Boolean canBeStarted() {
+        // Delegate to service for complex business rules
+        return CActivityService.getInstance().canActivityBeStarted(this);
+    }
+}
+```
+
+### 9.11.2. Generic Super Class Functions with Polymorphism
+
+**Super Class with Generic Operations:**
+```java
+public abstract class CEntityOfProjectService<T extends CEntityOfProject> 
+    extends CEntityService<T> {
+    
+    // ✅ REQUIRED: Generic method using reflection and polymorphism
+    public List<T> findByProjectIdWithDynamicEagerLoading(final Long projectId) {
+        LOGGER.info("findByProjectIdWithDynamicEagerLoading called for {} with projectId: {}", 
+                   getEntityClass().getSimpleName(), projectId);
+        
+        // Use reflection to determine entity-specific eager loading strategy
+        final String entityName = getEntityClass().getSimpleName();
+        final String methodName = "findByProjectIdWith" + getEagerLoadingStrategy(entityName);
+        
+        try {
+            // Dynamic method invocation using reflection
+            final Method method = getRepository().getClass().getMethod(methodName, Long.class);
+            @SuppressWarnings("unchecked")
+            final List<T> result = (List<T>) method.invoke(getRepository(), projectId);
+            
+            // Apply lazy field initialization to all entities
+            result.forEach(this::initializeLazyFields);
+            
+            return result;
+        } catch (final ReflectiveOperationException e) {
+            LOGGER.warn("Dynamic eager loading failed for {}, falling back to standard query", 
+                       entityName, e);
+            return findByProjectIdStandard(projectId);
+        }
+    }
+    
+    // ✅ REQUIRED: Polymorphic method overridden by child classes
+    protected abstract String getEagerLoadingStrategy(String entityName);
+    
+    // ✅ REQUIRED: Generic validation using reflection
+    protected void validateEntityUsingReflection(final T entity) {
+        final Field[] fields = entity.getClass().getDeclaredFields();
+        
+        for (final Field field : fields) {
+            if (field.isAnnotationPresent(MetaData.class)) {
+                final MetaData metadata = field.getAnnotation(MetaData.class);
+                if (metadata.required()) {
+                    validateRequiredField(entity, field, metadata.displayName());
+                }
+            }
+        }
+    }
+    
+    // ✅ REQUIRED: Generic method using class proxy pattern
+    public T createEntityProxy(final Class<T> entityClass) {
+        return (T) Proxy.newProxyInstance(
+            entityClass.getClassLoader(),
+            new Class<?>[]{entityClass},
+            new CEntityInvocationHandler<>(entityClass)
+        );
+    }
+}
+```
+
+### 9.11.3. Service Layer Simplicity
+
+**Simple Child Service Implementation:**
+```java
+@Service
+public class CActivityService extends CEntityOfProjectService<CActivity> {
+    
+    // ✅ REQUIRED: Override only to provide entity-specific behavior
+    @Override
+    protected String getEagerLoadingStrategy(final String entityName) {
+        // Specific eager loading strategy for activities
+        return "ActivityTypeAndPriority";
+    }
+    
+    // ✅ REQUIRED: Delegate complex operations to super class
+    @Override
+    public CActivity save(final CActivity activity) {
+        LOGGER.info("save called with activity: {}", activity);
+        
+        // Use super class generic validation
+        validateEntityUsingReflection(activity);
+        
+        // Entity-specific validation only
+        validateActivitySpecificRules(activity);
+        
+        // Delegate to super class
+        return super.save(activity);
+    }
+    
+    // Only activity-specific business logic
+    private void validateActivitySpecificRules(final CActivity activity) {
+        if (activity.getActivityPriority() == null) {
+            throw new ServiceException("Activity must have a priority assigned");
+        }
+    }
+    
+    // ✅ REQUIRED: Use super class functionality with entity-specific parameters
+    public List<CActivity> findActivitiesByProject(final Long projectId) {
+        // Delegate to super class generic method
+        return findByProjectIdWithDynamicEagerLoading(projectId);
+    }
+}
+```
+
+### 9.11.4. UI Layer Child Class Simplicity
+
+**Simple Child View Implementation:**
+```java
+@Route("activities")
+@PageTitle("Activities")
+public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
+    
+    // ✅ REQUIRED: Minimal setup, delegate to super class
+    @Override
+    protected void setupView() {
+        super.setupView(); // Handles common UI setup
+        
+        // Only activity-specific customizations
+        setupActivitySpecificButtons();
+        setupActivitySpecificFilters();
+    }
+    
+    // ✅ REQUIRED: Override only to provide entity-specific behavior
+    @Override
+    protected CActivity createNewEntity() {
+        final CActivity activity = super.createNewEntity();
+        
+        // Activity-specific initialization only
+        activity.setActivityPriority(getDefaultPriority());
+        
+        return activity;
+    }
+    
+    // ✅ REQUIRED: Use super class generic functionality
+    @Override
+    protected void refreshGrid() {
+        // Delegate complex refresh logic to super class
+        super.refreshGrid();
+        
+        // Apply activity-specific styling only
+        applyActivityGridStyling();
+    }
+    
+    // Minimal entity-specific logic
+    private void setupActivitySpecificButtons() {
+        final CButton startButton = CButton.createSuccess("Start Selected", VaadinIcon.PLAY);
+        startButton.addClickListener(e -> startSelectedActivity());
+        addCustomButton(startButton);
+    }
+    
+    private void startSelectedActivity() {
+        final CActivity selected = getSelectedEntity();
+        if (selected != null) {
+            // Delegate business logic to service
+            service.startActivity(selected);
+            refreshGrid(); // Use super class method
+        }
+    }
+}
+```
+
+### 9.11.5. Reflection and Invoke Functions Best Practices
+
+**Generic Function Invocation:**
+```java
+public class CGenericEntityOperations {
+    
+    // ✅ REQUIRED: Generic method invocation using reflection
+    public static <T> Object invokeEntityMethod(final T entity, final String methodName, 
+                                               final Object... parameters) {
+        try {
+            final Class<?>[] parameterTypes = Arrays.stream(parameters)
+                .map(Object::getClass)
+                .toArray(Class<?>[]::new);
+            
+            final Method method = entity.getClass().getMethod(methodName, parameterTypes);
+            method.setAccessible(true);
+            
+            return method.invoke(entity, parameters);
+        } catch (final ReflectiveOperationException e) {
+            LOGGER.error("Failed to invoke method {} on entity {}", methodName, 
+                        entity.getClass().getSimpleName(), e);
+            throw new RuntimeException("Method invocation failed", e);
+        }
+    }
+    
+    // ✅ REQUIRED: Generic field access using reflection
+    public static <T> void setEntityFieldValue(final T entity, final String fieldName, 
+                                             final Object value) {
+        try {
+            final Field field = entity.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.set(entity, value);
+        } catch (final ReflectiveOperationException e) {
+            LOGGER.error("Failed to set field {} on entity {}", fieldName, 
+                        entity.getClass().getSimpleName(), e);
+            throw new RuntimeException("Field access failed", e);
+        }
+    }
+}
+```
+
+### 9.11.6. Class Proxy Pattern Implementation
+
+**Entity Proxy for Lazy Loading:**
+```java
+public class CEntityInvocationHandler<T extends CEntityBase> implements InvocationHandler {
+    
+    private final T targetEntity;
+    private final CEntityService<T> entityService;
+    
+    public CEntityInvocationHandler(final T targetEntity, final CEntityService<T> service) {
+        this.targetEntity = targetEntity;
+        this.entityService = service;
+    }
+    
+    @Override
+    public Object invoke(final Object proxy, final Method method, final Object[] args) 
+            throws Throwable {
+        
+        // ✅ REQUIRED: Automatic lazy loading for getter methods
+        if (method.getName().startsWith("get") && isLazyField(method)) {
+            // Ensure entity is fully loaded before accessing lazy fields
+            final T fullEntity = entityService.get(targetEntity.getId()).orElse(targetEntity);
+            return method.invoke(fullEntity, args);
+        }
+        
+        // Delegate to original entity for other methods
+        return method.invoke(targetEntity, args);
+    }
+    
+    private boolean isLazyField(final Method method) {
+        try {
+            final String fieldName = getFieldNameFromGetter(method.getName());
+            final Field field = targetEntity.getClass().getDeclaredField(fieldName);
+            
+            return field.isAnnotationPresent(ManyToOne.class) && 
+                   field.getAnnotation(ManyToOne.class).fetch() == FetchType.LAZY;
+        } catch (final NoSuchFieldException e) {
+            return false;
+        }
+    }
+}
+```
 
 ---
 
