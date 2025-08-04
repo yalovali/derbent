@@ -36,6 +36,8 @@ public class CProjectsView extends CAbstractNamedEntityPage<CProject> implements
 
     private final String ENTITY_ROUTE_TEMPLATE_EDIT = "projects/%s/edit";
 
+    private CPanelProjectUsers projectUsersPanel;
+
     public CProjectsView(final CProjectService entityService, final CSessionService sessionService) {
         super(CProject.class, entityService, sessionService);
         addClassNames("projects-view");
@@ -48,6 +50,11 @@ public class CProjectsView extends CAbstractNamedEntityPage<CProject> implements
         CAccordionDBEntity<CProject> panel;
         panel = new CPanelProjectBasicInfo(getCurrentEntity(), getBinder(), (CProjectService) entityService);
         addAccordionPanel(panel);
+        
+        // Add the project users panel for managing users in this project
+        projectUsersPanel = new CPanelProjectUsers(getCurrentEntity(), getBinder(), 
+                (CProjectService) entityService, (CProjectService) entityService);
+        addAccordionPanel(projectUsersPanel);
     }
 
     @Override
@@ -98,6 +105,49 @@ public class CProjectsView extends CAbstractNamedEntityPage<CProject> implements
     protected void initPage() {
         // Initialize the page components and layout This method can be overridden to set
         // up the view's components
+    }
+
+    @Override
+    protected void populateForm(final CProject value) {
+        super.populateForm(value);
+        LOGGER.info("Populating form with project data: {}", value != null ? value.getName() : "null");
+
+        // Update the project users panel when a project is selected (check if initialized)
+        if (projectUsersPanel != null) {
+            if (value != null) {
+                // Load project with user settings to avoid lazy initialization issues
+                final CProject projectWithUsers = ((CProjectService) entityService).getProjectWithUsers(value.getId());
+                projectUsersPanel.setCurrentProject(projectWithUsers);
+                projectUsersPanel.setProjectUsersAccessors(
+                    () -> projectWithUsers.getUserSettings() != null
+                        ? projectWithUsers.getUserSettings()
+                        : java.util.Collections.emptyList(), 
+                    (users) -> {
+                        projectWithUsers.getUserSettings().clear();
+                        projectWithUsers.getUserSettings().addAll(users);
+                        // Save the project when user settings are updated
+                        entityService.save(projectWithUsers);
+                    }, 
+                    () -> {
+                        // Refresh the current entity after save
+                        try {
+                            final CProject refreshedProject = ((CProjectService) entityService)
+                                    .getProjectWithUsers(projectWithUsers.getId());
+                            populateForm(refreshedProject);
+                        } catch (final Exception e) {
+                            LOGGER.error("Error refreshing project after user settings update", e);
+                        }
+                    });
+            } else {
+                projectUsersPanel.setCurrentProject(null);
+                projectUsersPanel.setProjectUsersAccessors(
+                    () -> java.util.Collections.emptyList(), 
+                    (users) -> {}, 
+                    () -> {});
+            }
+        } else {
+            LOGGER.debug("Project users panel not yet initialized, skipping populate");
+        }
     }
 
     @Override

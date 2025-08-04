@@ -1,121 +1,48 @@
 package tech.derbent.users.view;
 
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import tech.derbent.abstracts.components.CEnhancedBinder;
-import tech.derbent.abstracts.views.CButton;
-import tech.derbent.base.ui.dialogs.CConfirmationDialog;
+import tech.derbent.abstracts.views.CPanelUserProjectBase;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
 import tech.derbent.companies.service.CCompanyService;
-import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserProjectSettings;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.CUserTypeService;
 
-public class CPanelUserProjectSettings extends CPanelUserBase {
+public class CPanelUserProjectSettings extends CPanelUserProjectBase<CUser> {
 
 	private static final long serialVersionUID = 1L;
 
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
-
-	private final Grid<CUserProjectSettings> grid =
-		new Grid<>(CUserProjectSettings.class, false);
-
-	private final CProjectService projectService;
-
-	private Supplier<List<CUserProjectSettings>> getProjectSettings;
-
-	private Consumer<List<CUserProjectSettings>> setProjectSettings;
-
-	private Runnable saveEntity;
-
 	private CUser currentUser;
+	private final CUserTypeService userTypeService;
+	private final CCompanyService companyService;
 
 	public CPanelUserProjectSettings(final CUser currentEntity,
 		final CEnhancedBinder<CUser> beanValidationBinder,
 		final CUserService entityService, final CUserTypeService userTypeService,
 		final CCompanyService companyService, final CProjectService projectService) {
-		super("Project Settings", currentEntity, beanValidationBinder, entityService,
-			userTypeService, companyService);
-		this.projectService = projectService;
-		setupGrid();
-		setupButtons();
-		// start accordion collapsed using the new convenience method
-		closePanel();
+		super("Project Settings", currentEntity, beanValidationBinder, CUser.class, entityService, projectService);
+		this.userTypeService = userTypeService;
+		this.companyService = companyService;
 	}
 
-	private void deleteSelected() {
-		final CUserProjectSettings selected = grid.asSingleSelect().getValue();
-
-		if (selected == null) {
-			new CWarningDialog("Please select a project setting to delete.").open();
-			return;
-		}
-
-		if ((getProjectSettings == null) || (setProjectSettings == null)) {
-			new CWarningDialog(
-				"Project settings handlers are not available. Please refresh the page.")
-				.open();
-			return;
-		}
-		// Show confirmation dialog for delete operation
+	@Override
+	protected String createDeleteConfirmationMessage(final CUserProjectSettings selected) {
 		final String projectName = getProjectName(selected);
-		final String confirmMessage = String.format(
+		return String.format(
 			"Are you sure you want to delete the project setting for '%s'? This action cannot be undone.",
 			projectName);
-		new CConfirmationDialog(confirmMessage, () -> {
-			final List<CUserProjectSettings> settings = getProjectSettings.get();
-			settings.remove(selected);
-			setProjectSettings.accept(settings);
-
-			if (saveEntity != null) {
-				saveEntity.run();
-			}
-			refresh();
-		}).open();
 	}
 
-	private String getPermissionAsString(final CUserProjectSettings settings) {
-
-		if ((settings.getPermission() == null) || settings.getPermission().isEmpty()) {
-			return "";
-		}
-		return settings.getPermission();
-	}
-
-	private String getProjectName(final CUserProjectSettings settings) {
-
-		if (settings.getProject() == null) {
-			return "Unknown Project";
-		}
-		// Get project by ID from service
-		return projectService.getById(settings.getProject().getId()).map(CProject::getName)
-			.orElse("Project #" + settings.getProject().getId());
-	}
-
-	private String getRoleAsString(final CUserProjectSettings settings) {
-
-		if ((settings.getRole() == null) || settings.getRole().isEmpty()) {
-			return "";
-		}
-		return settings.getRole();
-	}
-
-	private void onSettingsSaved(final CUserProjectSettings settings) {
-
-		if ((getProjectSettings != null) && (setProjectSettings != null)) {
-			final List<CUserProjectSettings> settingsList = getProjectSettings.get();
+	@Override
+	protected void onSettingsSaved(final CUserProjectSettings settings) {
+		if ((getSettings != null) && (setSettings != null)) {
+			final List<CUserProjectSettings> settingsList = getSettings.get();
 			// Check if this is an update or a new addition
 			boolean found = false;
 
@@ -133,7 +60,7 @@ public class CPanelUserProjectSettings extends CPanelUserBase {
 			if (!found) {
 				settingsList.add(settings);
 			}
-			setProjectSettings.accept(settingsList);
+			setSettings.accept(settingsList);
 
 			if (saveEntity != null) {
 				saveEntity.run();
@@ -142,8 +69,8 @@ public class CPanelUserProjectSettings extends CPanelUserBase {
 		}
 	}
 
-	private void openAddDialog() {
-
+	@Override
+	protected void openAddDialog() {
 		if (currentUser == null) {
 			new CWarningDialog(
 				"Please select a user first before adding project settings.").open();
@@ -161,7 +88,8 @@ public class CPanelUserProjectSettings extends CPanelUserBase {
 		dialog.open();
 	}
 
-	private void openEditDialog() {
+	@Override
+	protected void openEditDialog() {
 		final CUserProjectSettings selected = grid.asSingleSelect().getValue();
 
 		if (selected == null) {
@@ -180,65 +108,30 @@ public class CPanelUserProjectSettings extends CPanelUserBase {
 		dialog.open();
 	}
 
-	public void refresh() {
-		LOGGER.info("Refreshing CUserProjectSettingsGrid");
-
-		if (getProjectSettings != null) {
-			grid.setItems(getProjectSettings.get());
-		}
+	public void setCurrentUser(final CUser user) { 
+		this.currentUser = user; 
 	}
-
-	public void setCurrentUser(final CUser user) { this.currentUser = user; }
 
 	public void setProjectSettingsAccessors(
-		final Supplier<List<CUserProjectSettings>> getProjectSettings,
-		final Consumer<List<CUserProjectSettings>> setProjectSettings,
+		final java.util.function.Supplier<List<CUserProjectSettings>> getProjectSettings,
+		final java.util.function.Consumer<List<CUserProjectSettings>> setProjectSettings,
 		final Runnable saveEntity) {
-		LOGGER.info("Setting project settings accessors in CUserProjectSettingsGrid");
-		this.getProjectSettings = getProjectSettings;
-		this.setProjectSettings = setProjectSettings;
-		this.saveEntity = saveEntity;
-		refresh();
+		LOGGER.info("Setting project settings accessors");
+		setSettingsAccessors(getProjectSettings, setProjectSettings, saveEntity);
 	}
 
-	private void setupButtons() {
-		final CButton addButton = CButton.createPrimary("Add Project",
-			VaadinIcon.PLUS.create(), e -> openAddDialog());
-		final CButton editButton =
-			new CButton("Edit", VaadinIcon.EDIT.create(), e -> openEditDialog());
-		editButton.setEnabled(false);
-		final CButton deleteButton = CButton.createError("Delete",
-			VaadinIcon.TRASH.create(), e -> deleteSelected());
-		deleteButton.setEnabled(false);
-		// Enable/disable edit and delete buttons based on selection
-		grid.addSelectionListener(selection -> {
-			final boolean hasSelection = !selection.getAllSelectedItems().isEmpty();
-			editButton.setEnabled(hasSelection);
-			deleteButton.setEnabled(hasSelection);
-		});
-		final HorizontalLayout buttonLayout =
-			new HorizontalLayout(addButton, editButton, deleteButton);
-		buttonLayout.setSpacing(true);
-		getBaseLayout().add(buttonLayout);
-	}
-
-	private void setupGrid() {
+	@Override
+	protected void setupGrid() {
 		// Add columns for project name, roles, and permissions
 		grid.addColumn(CUserProjectSettings::getId).setHeader("ID").setAutoWidth(true);
-		grid.addColumn(CUserProjectSettings::getUser).setHeader("User")
+		grid.addComponentColumn(this::getUserWithAvatar).setHeader("User")
 			.setAutoWidth(true);
 		grid.addColumn(this::getProjectName).setHeader("Project Name").setAutoWidth(true)
 			.setSortable(true);
 		grid.addColumn(this::getRoleAsString).setHeader("Role").setAutoWidth(true);
 		grid.addColumn(this::getPermissionAsString).setHeader("Permission")
 			.setAutoWidth(true);
-		grid.setSelectionMode(Grid.SelectionMode.SINGLE);
+		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
 		getBaseLayout().add(grid);
-	}
-
-	@Override
-	protected void updatePanelEntityFields() {
-		// Contact Information fields - communication details setEntityFields();
-		setEntityFields(List.of(""));
 	}
 }

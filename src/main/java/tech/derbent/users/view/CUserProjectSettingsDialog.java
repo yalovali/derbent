@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.TextField;
 
 import tech.derbent.abstracts.views.CDBEditDialog;
@@ -60,8 +61,8 @@ public class CUserProjectSettingsDialog extends CDBEditDialog<CUserProjectSettin
     }
 
     @Override
-    protected Icon getFormIcon() { // TODO Auto-generated method stub
-        return null;
+    protected Icon getFormIcon() {
+        return VaadinIcon.USER_CHECK.create();
     }
 
     @Override
