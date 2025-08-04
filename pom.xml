@@ -163,6 +163,21 @@
 		<defaultGoal>spring-boot:run</defaultGoal>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.0.0-M5</version>
+				<configuration>
+					<includes>
+						<include>**/unit-tests/**/*Test.java</include>
+						<include>**/ui-tests/**/*Test.java</include>
+						<include>**/automated-tests/**/*Test.java</include>
+						<include>**/unit-tests/**/*Test*.java</include>
+						<include>**/ui-tests/**/*Test*.java</include>
+						<include>**/automated-tests/**/*Test*.java</include>
+					</includes>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>3.1.0</version>
