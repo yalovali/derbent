@@ -32,7 +32,7 @@ public class CActivityTypeServiceLazyLoadingTest extends CTestBase {
         final Optional<CActivityType> result = activityTypeService.getById(null);
         // Then
         assertFalse(result.isPresent());
-        verify(activityTypeRepository, never()).findById(any());
+        verify(activityTypeRepository, never()).findByIdWithRelationships(any());
     }
 
     @Test
@@ -42,26 +42,26 @@ public class CActivityTypeServiceLazyLoadingTest extends CTestBase {
         project.setName("Test Project");
         final CActivityType activityType = new CActivityType("Test Activity Type", project);
         // Note: ID is typically set by JPA, so we'll mock the return directly
-        when(activityTypeRepository.findById(activityTypeId)).thenReturn(Optional.of(activityType));
+        when(activityTypeRepository.findByIdWithRelationships(activityTypeId)).thenReturn(Optional.of(activityType));
         // When
         final Optional<CActivityType> result = activityTypeService.getById(activityTypeId);
         // Then
         assertTrue(result.isPresent());
         assertEquals("Test Activity Type", result.get().getName());
         assertEquals("Test Project", result.get().getProject().getName());
-        // Verify that the standard method was called
-        verify(activityTypeRepository).findById(activityTypeId);
+        // Verify that the eager loading method was called
+        verify(activityTypeRepository).findByIdWithRelationships(activityTypeId);
     }
 
     @Test
     void testGetWithNonExistentId() {
         // Given
         final Long nonExistentId = 999L;
-        when(activityTypeRepository.findById(nonExistentId)).thenReturn(Optional.empty());
+        when(activityTypeRepository.findByIdWithRelationships(nonExistentId)).thenReturn(Optional.empty());
         // When
         final Optional<CActivityType> result = activityTypeService.getById(nonExistentId);
         // Then
         assertFalse(result.isPresent());
-        verify(activityTypeRepository).findById(nonExistentId);
+        verify(activityTypeRepository).findByIdWithRelationships(nonExistentId);
     }
 }

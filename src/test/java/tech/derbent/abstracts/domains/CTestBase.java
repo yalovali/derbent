@@ -66,7 +66,6 @@ public abstract class CTestBase {
 	@Mock
 	protected CActivityTypeRepository activityTypeRepository;
 
-	@Autowired
 	protected CActivityTypeService activityTypeService;
 
 	@Mock
@@ -99,7 +98,6 @@ public abstract class CTestBase {
 	@Mock
 	protected CDecisionTypeRepository decisionTypeRepository;
 
-	@Autowired
 	protected CDecisionTypeService decisionTypeService;
 
 	protected CMeeting meeting;
@@ -170,6 +168,8 @@ public abstract class CTestBase {
 		activityStatusService =
 			new CActivityStatusService(activityStatusRepository, clock);
 		activityService = new CActivityService(activityRepository, clock);
+		activityTypeService = new CActivityTypeService(activityTypeRepository, clock);
+		decisionTypeService = new CDecisionTypeService(decisionTypeRepository, clock);
 		userService = new CUserService(userRepository, clock);
 		testUser = new CUser("Test User");
 		testUser.setLogin("testuser");
