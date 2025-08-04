@@ -19,6 +19,7 @@ import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.interfaces.CProjectChangeListener;
+import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.service.CActivityService;
@@ -32,12 +33,20 @@ import tech.derbent.session.service.CSessionService;
  */
 @Route("activities-kanban")
 @PageTitle("Activity Kanban Board")
-@Menu(order = 1.2, icon = "vaadin:dashboard", title = "Project.Kanban")
+@Menu(order = 1.2, icon = "class:tech.derbent.kanban.view.CActivityKanbanBoardView", title = "Project.Kanban")
 @PermitAll
-public class CActivityKanbanBoardView extends VerticalLayout implements CProjectChangeListener {
+public class CActivityKanbanBoardView extends VerticalLayout implements CProjectChangeListener, CInterfaceIconSet {
 
     private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = LoggerFactory.getLogger(CActivityKanbanBoardView.class);
+    
+    public static String getIconColorCode() {
+        return "#fd7e14"; // Orange color for Kanban boards
+    }
+
+    public static String getIconFilename() { 
+        return "vaadin:dashboard"; 
+    }
     private final CActivityService activityService;
     private final CSessionService sessionService;
     private H2 titleElement;

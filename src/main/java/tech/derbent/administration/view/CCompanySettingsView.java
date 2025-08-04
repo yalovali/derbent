@@ -12,6 +12,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.abstracts.views.CButton;
+import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.administration.domain.CCompanySettings;
 import tech.derbent.administration.service.CCompanySettingsService;
 import tech.derbent.base.ui.dialogs.CConfirmationDialog;
@@ -25,11 +26,19 @@ import tech.derbent.session.service.CSessionService;
  */
 @Route("administration/company-settings/:company_settings_id?/:action?(edit)")
 @PageTitle("Company Administration Settings")
-@Menu(order = 3.5, icon = "vaadin:cogs", title = "Settings.Company Settings")
+@Menu(order = 3.5, icon = "class:tech.derbent.administration.view.CCompanySettingsView", title = "Settings.Company Settings")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CCompanySettingsView extends CAbstractEntityDBPage<CCompanySettings> {
+public class CCompanySettingsView extends CAbstractEntityDBPage<CCompanySettings> implements CInterfaceIconSet {
 
     private static final long serialVersionUID = 1L;
+    
+    public static String getIconColorCode() {
+        return "#6c757d"; // Gray color for admin/settings
+    }
+
+    public static String getIconFilename() { 
+        return "vaadin:cogs"; 
+    }
 
     private final String ENTITY_ID_FIELD = "company_settings_id";
 
