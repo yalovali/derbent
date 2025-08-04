@@ -22,11 +22,11 @@ class CActivityResultsTest extends CTestBase {
         // Given
         final String activityName = "Test Activity";
         final String results = "Successfully completed with positive outcomes";
-        
+
         // When
         final CActivity activity = new CActivity(activityName, project);
         activity.setResults(results);
-        
+
         // Then
         assertNotNull(activity);
         assertEquals(activityName, activity.getName());
@@ -38,10 +38,10 @@ class CActivityResultsTest extends CTestBase {
     void testActivityResultsFieldEmpty() {
         // Given
         final String activityName = "Test Activity";
-        
+
         // When
         final CActivity activity = new CActivity(activityName, project);
-        
+
         // Then
         assertNotNull(activity);
         assertEquals(activityName, activity.getName());
@@ -54,14 +54,14 @@ class CActivityResultsTest extends CTestBase {
         final String activityName = "Test Activity";
         final String initialResults = "Initial results";
         final String updatedResults = "Updated results with more details";
-        
+
         // When
         final CActivity activity = new CActivity(activityName, project);
         activity.setResults(initialResults);
         assertEquals(initialResults, activity.getResults());
-        
+
         activity.setResults(updatedResults);
-        
+
         // Then
         assertEquals(updatedResults, activity.getResults());
     }

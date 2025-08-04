@@ -236,19 +236,20 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 
     private Component createUserMenu() {
         LOGGER.debug("Creating user menu for user: {}", currentUser != null ? currentUser.getUsername() : "null");
-        
+
         final var user = currentUser;
         final var avatar = new Avatar();
         avatar.addThemeVariants(AvatarVariant.LUMO_XSMALL);
         avatar.addClassNames(Margin.Right.SMALL);
         avatar.setColorIndex(5);
-        
+
         // Set user name for avatar
         if (user != null) {
             avatar.setName(user.getUsername());
-            avatar.setAbbreviation(user.getUsername().length() > 0 ? user.getUsername().substring(0, 1).toUpperCase() : "U");
+            avatar.setAbbreviation(
+                    user.getUsername().length() > 0 ? user.getUsername().substring(0, 1).toUpperCase() : "U");
         }
-        
+
         // Try to get current user's profile picture
         try {
             final var currentUserOptional = sessionService.getActiveUser();
@@ -261,7 +262,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
         } catch (final Exception e) {
             LOGGER.warn("Error loading user profile picture, using default: {}", e.getMessage());
         }
-        
+
         final var userMenu = new MenuBar();
         userMenu.addThemeVariants(MenuBarVariant.LUMO_TERTIARY_INLINE);
         userMenu.addClassNames(Margin.MEDIUM);
@@ -272,32 +273,32 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
         userMenuItem.getSubMenu().addItem("Logout", event -> authenticationContext.logout());
         return userMenu;
     }
-    
+
     /**
-     * Sets the avatar image based on the user's profile picture data.
-     * This method properly creates a StreamResource for the Avatar component.
+     * Sets the avatar image based on the user's profile picture data. This method properly creates a StreamResource for
+     * the Avatar component.
      * 
-     * @param avatar The avatar component to update
-     * @param user The user whose profile picture should be displayed
+     * @param avatar
+     *            The avatar component to update
+     * @param user
+     *            The user whose profile picture should be displayed
      */
     private void setAvatarImage(final Avatar avatar, final CUser user) {
         LOGGER.debug("Setting avatar image for user: {}", user != null ? user.getLogin() : "null");
-        
+
         if (user == null) {
             return; // Avatar will use default behavior
         }
-        
+
         final byte[] profilePictureData = user.getProfilePictureData();
-        
+
         if (profilePictureData != null && profilePictureData.length > 0) {
             try {
                 // Create a StreamResource from the profile picture data
-                final StreamResource imageResource = new StreamResource(
-                    "profile-" + user.getId() + ".jpg",
-                    () -> new ByteArrayInputStream(profilePictureData)
-                );
+                final StreamResource imageResource = new StreamResource("profile-" + user.getId() + ".jpg",
+                        () -> new ByteArrayInputStream(profilePictureData));
                 imageResource.setContentType("image/jpeg");
-                
+
                 // Set the image resource to the avatar
                 avatar.setImageResource(imageResource);
                 LOGGER.debug("Set avatar image from user profile picture data for user: {}", user.getLogin());
@@ -306,53 +307,56 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
                 LOGGER.warn("Error creating StreamResource from profile picture: {}", e.getMessage());
             }
         }
-        
+
         // Fall back to user initials if no profile picture is available
         setupAvatarInitials(avatar, user);
         LOGGER.debug("Using initials avatar for user: {}", user.getLogin());
     }
-    
+
     /**
      * Sets up avatar with user initials when no profile picture is available.
      * 
-     * @param avatar The avatar component to configure
-     * @param user The user whose initials to display
+     * @param avatar
+     *            The avatar component to configure
+     * @param user
+     *            The user whose initials to display
      */
     private void setupAvatarInitials(final Avatar avatar, final CUser user) {
         if (user == null) {
             return;
         }
-        
+
         String initials = "";
-        
+
         // Get initials from first name
         if (user.getName() != null && !user.getName().trim().isEmpty()) {
             String[] nameParts = user.getName().trim().split("\\s+");
             for (String part : nameParts) {
                 if (!part.isEmpty()) {
                     initials += part.substring(0, 1).toUpperCase();
-                    if (initials.length() >= 2) break; // Limit to 2 initials
+                    if (initials.length() >= 2)
+                        break; // Limit to 2 initials
                 }
             }
         }
-        
+
         // Add last name initial if we have less than 2 initials
         if (user.getLastname() != null && !user.getLastname().trim().isEmpty() && initials.length() < 2) {
             initials += user.getLastname().substring(0, 1).toUpperCase();
         }
-        
+
         // Fall back to username if no name is available
         if (initials.isEmpty() && user.getLogin() != null && !user.getLogin().trim().isEmpty()) {
             initials = user.getLogin().substring(0, 1).toUpperCase();
         }
-        
+
         // Final fallback
         if (initials.isEmpty()) {
             initials = "U";
         }
-        
+
         avatar.setAbbreviation(initials);
-        
+
         // Set tooltip with full name
         String displayName = "";
         if (user.getName() != null && !user.getName().trim().isEmpty()) {

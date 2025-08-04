@@ -23,20 +23,17 @@ import tech.derbent.abstracts.interfaces.CKanbanStatus;
 import tech.derbent.abstracts.interfaces.CKanbanType;
 
 /**
- * CBaseKanbanColumn - Abstract base class for Kanban columns with drag-and-drop functionality.
- * Layer: Base View (MVC)
+ * CBaseKanbanColumn - Abstract base class for Kanban columns with drag-and-drop functionality. Layer: Base View (MVC)
  * 
- * Provides common functionality for kanban columns including:
- * - Status-based organization
- * - Type-based grouping within columns
- * - Drag and drop support for reordering between columns
- * - Status update handling
+ * Provides common functionality for kanban columns including: - Status-based organization - Type-based grouping within
+ * columns - Drag and drop support for reordering between columns - Status update handling
  * 
- * @param <T> the type of entity displayed in this column
- * @param <S> the type of status this column represents
+ * @param <T>
+ *            the type of entity displayed in this column
+ * @param <S>
+ *            the type of status this column represents
  */
-public abstract class CBaseKanbanColumn<T extends CKanbanEntity, S extends CKanbanStatus> 
-        extends Div {
+public abstract class CBaseKanbanColumn<T extends CKanbanEntity, S extends CKanbanStatus> extends Div {
 
     private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = LoggerFactory.getLogger(CBaseKanbanColumn.class);
@@ -51,8 +48,10 @@ public abstract class CBaseKanbanColumn<T extends CKanbanEntity, S extends CKanb
     /**
      * Constructor for CBaseKanbanColumn.
      * 
-     * @param status the status this column represents
-     * @param entities the list of entities for this status
+     * @param status
+     *            the status this column represents
+     * @param entities
+     *            the list of entities for this status
      */
     protected CBaseKanbanColumn(final S status, final List<T> entities) {
         LOGGER.debug("Creating CBaseKanbanColumn for status: {} with {} entities",
@@ -68,19 +67,19 @@ public abstract class CBaseKanbanColumn<T extends CKanbanEntity, S extends CKanb
     }
 
     /**
-     * Creates a card component for the given entity.
-     * Subclasses must implement this to create specific card types.
+     * Creates a card component for the given entity. Subclasses must implement this to create specific card types.
      * 
-     * @param entity the entity to create a card for
+     * @param entity
+     *            the entity to create a card for
      * @return the created card component
      */
     protected abstract Component createEntityCard(T entity);
 
     /**
-     * Gets the type name for grouping purposes.
-     * Subclasses can override this if they need custom type handling.
+     * Gets the type name for grouping purposes. Subclasses can override this if they need custom type handling.
      * 
-     * @param entity the entity to get the type name for
+     * @param entity
+     *            the entity to get the type name for
      * @return the type name, or "No Type" if no type is set
      */
     protected String getEntityTypeName(final T entity) {
@@ -98,7 +97,8 @@ public abstract class CBaseKanbanColumn<T extends CKanbanEntity, S extends CKanb
     /**
      * Sets the handler for status updates.
      * 
-     * @param handler the handler to call when an entity status should be updated
+     * @param handler
+     *            the handler to call when an entity status should be updated
      */
     public void setStatusUpdateHandler(final BiConsumer<T, S> handler) {
         this.statusUpdateHandler = handler;
@@ -108,39 +108,40 @@ public abstract class CBaseKanbanColumn<T extends CKanbanEntity, S extends CKanb
      * Sets up the drop target for this column.
      */
     private void setupDropTarget() {
-        DropTarget.create(this)
-                .addDropListener(event -> {
-                    final var dragData = event.getDragData();
-                    if (dragData.isPresent()) {
-                        final Object data = dragData.get();
-                        if (data instanceof CKanbanEntity) {
-                            @SuppressWarnings("unchecked")
-                            final T entity = (T) data;
-                            LOGGER.debug("Entity dropped on column {}: {}", status.getName(), entity.getName());
-                            
-                            // Only update if the status is actually different
-                            if (!status.equals(entity.getStatus())) {
-                                if (statusUpdateHandler != null) {
-                                    statusUpdateHandler.accept(entity, status);
-                                }
-                            }
+        DropTarget.create(this).addDropListener(event -> {
+            final var dragData = event.getDragData();
+            if (dragData.isPresent()) {
+                final Object data = dragData.get();
+                if (data instanceof CKanbanEntity) {
+                    @SuppressWarnings("unchecked")
+                    final T entity = (T) data;
+                    LOGGER.debug("Entity dropped on column {}: {}", status.getName(), entity.getName());
+
+                    // Only update if the status is actually different
+                    if (!status.equals(entity.getStatus())) {
+                        if (statusUpdateHandler != null) {
+                            statusUpdateHandler.accept(entity, status);
                         }
                     }
-                });
+                }
+            }
+        });
     }
 
     /**
      * Creates a draggable card wrapper for the entity.
      * 
-     * @param entity the entity to wrap
-     * @param cardComponent the card component to wrap
+     * @param entity
+     *            the entity to wrap
+     * @param cardComponent
+     *            the card component to wrap
      * @return the draggable wrapper
      */
     protected Component createDraggableCard(final T entity, final Component cardComponent) {
         final Div wrapper = new Div();
         wrapper.add(cardComponent);
         wrapper.addClassName("kanban-card-wrapper");
-        
+
         // Make it draggable
         final DragSource<Div> dragSource = DragSource.configure(wrapper);
         dragSource.setEffectAllowed(EffectAllowed.MOVE);
@@ -153,15 +154,17 @@ public abstract class CBaseKanbanColumn<T extends CKanbanEntity, S extends CKanb
             LOGGER.debug("Finished dragging entity: {}", entity.getName());
             wrapper.removeClassName("kanban-card-dragging");
         });
-        
+
         return wrapper;
     }
 
     /**
      * Creates a type section with entities for the given type.
      * 
-     * @param typeName the entity type name for this section
-     * @param typeEntities the list of entities with this type
+     * @param typeName
+     *            the entity type name for this section
+     * @param typeEntities
+     *            the list of entities with this type
      */
     private void createTypeSection(final String typeName, final List<T> typeEntities) {
         LOGGER.debug("Creating type section for: {} with {} entities", typeName, typeEntities.size());
@@ -255,8 +258,7 @@ public abstract class CBaseKanbanColumn<T extends CKanbanEntity, S extends CKanb
      * Populates the column with entity cards grouped by type.
      */
     private void populateCards() {
-        LOGGER.debug("Populating {} entity cards for status: {} with type grouping", entities.size(),
-                status.getName());
+        LOGGER.debug("Populating {} entity cards for status: {} with type grouping", entities.size(), status.getName());
         cardsContainer.removeAll();
 
         if (entities.isEmpty()) {
@@ -278,8 +280,7 @@ public abstract class CBaseKanbanColumn<T extends CKanbanEntity, S extends CKanb
     }
 
     /**
-     * Refreshes the entire column display.
-     * Useful for real-time updates.
+     * Refreshes the entire column display. Useful for real-time updates.
      */
     public void refresh() {
         LOGGER.debug("Refreshing column for status: {}", status.getName());
@@ -289,11 +290,12 @@ public abstract class CBaseKanbanColumn<T extends CKanbanEntity, S extends CKanb
     /**
      * Updates the column with new entities.
      * 
-     * @param newEntities the updated list of entities
+     * @param newEntities
+     *            the updated list of entities
      */
     public void updateEntities(final List<T> newEntities) {
-        LOGGER.debug("Updating entities for status: {} from {} to {} entities", status.getName(),
-                this.entities.size(), newEntities != null ? newEntities.size() : 0);
+        LOGGER.debug("Updating entities for status: {} from {} to {} entities", status.getName(), this.entities.size(),
+                newEntities != null ? newEntities.size() : 0);
         this.entities = newEntities != null ? newEntities : List.of();
 
         // Update count

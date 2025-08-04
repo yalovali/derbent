@@ -18,11 +18,9 @@ import tech.derbent.meetings.service.CMeetingService;
 import tech.derbent.session.service.CSessionService;
 
 /**
- * CMeetingKanbanBoardView - Kanban board view for meetings using the generic base classes.
- * Layer: View (MVC)
+ * CMeetingKanbanBoardView - Kanban board view for meetings using the generic base classes. Layer: View (MVC)
  * 
- * This implementation demonstrates how the generic kanban system can be used
- * for different entity types like meetings.
+ * This implementation demonstrates how the generic kanban system can be used for different entity types like meetings.
  */
 @Route("meetings-kanban")
 @PageTitle("Meeting Kanban Board")
@@ -36,8 +34,10 @@ public class CMeetingKanbanBoardView extends CBaseKanbanBoardView<CMeeting, CMee
     /**
      * Constructor for CMeetingKanbanBoardView.
      * 
-     * @param meetingService the meeting service for data operations
-     * @param sessionService the session service for project context
+     * @param meetingService
+     *            the meeting service for data operations
+     * @param sessionService
+     *            the session service for project context
      */
     public CMeetingKanbanBoardView(final CMeetingService meetingService, final CSessionService sessionService) {
         super(meetingService, sessionService);
@@ -55,7 +55,7 @@ public class CMeetingKanbanBoardView extends CBaseKanbanBoardView<CMeeting, CMee
     }
 
     @Override
-    protected CBaseKanbanColumn<CMeeting, CMeetingStatus> createKanbanColumn(final CMeetingStatus status, 
+    protected CBaseKanbanColumn<CMeeting, CMeetingStatus> createKanbanColumn(final CMeetingStatus status,
             final List<CMeeting> entities) {
         return new CMeetingKanbanColumn(status, entities);
     }

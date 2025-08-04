@@ -15,25 +15,23 @@ import tech.derbent.session.service.CSessionService;
 /**
  * Test for CActivityStatusView to detect and prevent the binding issue that prevents the view from opening.
  * 
- * This test specifically addresses the issue mentioned in the problem statement:
- * "the activity status view cannot be opened"
+ * This test specifically addresses the issue mentioned in the problem statement: "the activity status view cannot be
+ * opened"
  */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@TestPropertySource(properties = { 
-    "spring.datasource.url=jdbc:h2:mem:testdb",
-    "spring.jpa.hibernate.ddl-auto=create-drop" 
-})
+@TestPropertySource(properties = { "spring.datasource.url=jdbc:h2:mem:testdb",
+        "spring.jpa.hibernate.ddl-auto=create-drop" })
 public class CActivityStatusViewUITest {
 
     @Autowired
     private CActivityStatusService activityStatusService;
 
-    @Autowired 
+    @Autowired
     private CSessionService sessionService;
 
     /**
-     * Test that CActivityStatusView can be instantiated without throwing binding errors.
-     * This test reproduces the exact issue: "All bindings created with forField must be completed before calling readBean"
+     * Test that CActivityStatusView can be instantiated without throwing binding errors. This test reproduces the exact
+     * issue: "All bindings created with forField must be completed before calling readBean"
      */
     @Test
     void testActivityStatusViewCanBeInstantiated() {
@@ -45,10 +43,10 @@ public class CActivityStatusViewUITest {
     }
 
     /**
-     * Test that the view can create its details layout without errors.
-     * This simulates what happens when the view is navigated to.
+     * Test that the view can create its details layout without errors. This simulates what happens when the view is
+     * navigated to.
      */
-    @Test 
+    @Test
     void testActivityStatusViewDetailsLayoutCreation() {
         assertDoesNotThrow(() -> {
             CActivityStatusView view = new CActivityStatusView(activityStatusService, sessionService);
@@ -58,20 +56,20 @@ public class CActivityStatusViewUITest {
     }
 
     /**
-     * Test that reproduces the exact error: populate form after grid selection.
-     * This simulates selecting an item in the grid which triggers populateForm.
+     * Test that reproduces the exact error: populate form after grid selection. This simulates selecting an item in the
+     * grid which triggers populateForm.
      */
     @Test
     void testActivityStatusViewPopulateForm() {
         assertDoesNotThrow(() -> {
             CActivityStatusView view = new CActivityStatusView(activityStatusService, sessionService);
             view.createDetailsLayout();
-            
+
             // Create a test entity
             tech.derbent.activities.domain.CActivityStatus testStatus = new tech.derbent.activities.domain.CActivityStatus();
             testStatus.setName("Test Status");
             testStatus.setDescription("Test Description");
-            
+
             // This should not throw "All bindings created with forField must be completed before calling readBean"
             view.testPopulateForm(testStatus);
         }, "Populate form should not throw binding errors");

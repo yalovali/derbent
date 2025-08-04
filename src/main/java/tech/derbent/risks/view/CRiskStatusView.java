@@ -15,9 +15,8 @@ import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 
 /**
- * CRiskStatusView - View for managing risk statuses. Layer: View (MVC) Provides CRUD operations for risk
- * statuses using the abstract master-detail pattern. Allows users to create, read, update, and delete risk status
- * definitions.
+ * CRiskStatusView - View for managing risk statuses. Layer: View (MVC) Provides CRUD operations for risk statuses using
+ * the abstract master-detail pattern. Allows users to create, read, update, and delete risk status definitions.
  */
 @Route("risk-statuses/:risk_status_id?/:action?(edit)")
 @PageTitle("Risk Statuses")
@@ -40,15 +39,14 @@ public class CRiskStatusView extends CProjectAwareMDPage<CRiskStatus> {
      */
     public CRiskStatusView(final CRiskStatusService entityService, final CSessionService sessionService) {
         super(CRiskStatus.class, entityService, sessionService);
-        LOGGER.debug("CRiskStatusView constructor called with service: {}",
-                entityService.getClass().getSimpleName());
+        LOGGER.debug("CRiskStatusView constructor called with service: {}", entityService.getClass().getSimpleName());
         addClassNames("risk-statuses-view");
         LOGGER.info("CRiskStatusView initialized with route: {}", CSpringAuxillaries.getRoutePath(this.getClass()));
     }
 
     /**
-     * Creates the details layout for editing risk status entities. Uses CEntityFormBuilder to automatically
-     * generate form fields based on MetaData annotations.
+     * Creates the details layout for editing risk status entities. Uses CEntityFormBuilder to automatically generate
+     * form fields based on MetaData annotations.
      */
     @Override
     protected void createDetailsLayout() {
@@ -67,8 +65,8 @@ public class CRiskStatusView extends CProjectAwareMDPage<CRiskStatus> {
     }
 
     /**
-     * Creates the grid for displaying risk status entities. Sets up columns for name and description with
-     * appropriate headers and sorting.
+     * Creates the grid for displaying risk status entities. Sets up columns for name and description with appropriate
+     * headers and sorting.
      */
     @Override
     protected void createGridForEntity() {

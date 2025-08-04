@@ -56,8 +56,13 @@ public class CDecisionTypeView extends CProjectAwareMDPage<CDecisionType> {
 
     @Override
     protected void createGridForEntity() {
+        // Add color-aware type column to show the type with color
+        grid.addStatusColumn(type -> type, "Type", "type");
         grid.addShortTextColumn(CDecisionType::getName, "Name", "name");
         grid.addLongTextColumn(CDecisionType::getDescription, "Description", "description");
+        grid.addShortTextColumn(CDecisionType::getColor, "Color", "color");
+        grid.addBooleanColumn(CDecisionType::isActive, "Active", "Active", "Inactive");
+        grid.addBooleanColumn(CDecisionType::requiresApproval, "Requires Approval", "Required", "Optional");
         grid.addShortTextColumn(CDecisionType::getProjectName, "Project", "project");
     }
 

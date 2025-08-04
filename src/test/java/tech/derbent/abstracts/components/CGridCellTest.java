@@ -26,7 +26,7 @@ class CGridCellTest {
         // Create test project
         testProject = new CProject();
         testProject.setName("Test Project");
-        
+
         // Create test activity status with color
         testStatus = new CActivityStatus();
         testStatus.setName("In Progress");
@@ -93,25 +93,25 @@ class CGridCellTest {
     @Test
     void testCGridCellIconConfiguration() {
         final CGridCell cell = new CGridCell();
-        
+
         // Test default icon display (disabled)
         assertFalse(cell.isShowIcon());
-        
+
         // Test enabling icon display
         cell.setShowIcon(true);
         assertTrue(cell.isShowIcon());
-        
+
         // Test disabling icon display
         cell.setShowIcon(false);
         assertFalse(cell.isShowIcon());
     }
-    
+
     @Test
     void testCGridCellWithEntityAndIconEnabled() {
         final CGridCell statusCell = new CGridCell();
         statusCell.setShowIcon(true);
         statusCell.setStatusValue(testStatus);
-        
+
         // With icon enabled, the cell should be properly configured
         assertTrue(statusCell.isShowIcon());
         assertNotNull(statusCell);
@@ -120,14 +120,14 @@ class CGridCellTest {
     @Test
     void testCGridCellAutoContrastConfiguration() {
         final CGridCell cell = new CGridCell();
-        
+
         // Test default auto contrast (enabled)
         assertTrue(cell.isAutoContrast());
-        
+
         // Test disabling auto contrast
         cell.setAutoContrast(false);
         assertFalse(cell.isAutoContrast());
-        
+
         // Test re-enabling auto contrast
         cell.setAutoContrast(true);
         assertTrue(cell.isAutoContrast());
@@ -136,15 +136,15 @@ class CGridCellTest {
     @Test
     void testCGridCellBooleanValue() {
         final CGridCell cell = new CGridCell();
-        
+
         // Test boolean value with custom colors
         cell.setBooleanValue(true, "Yes", "No", "#00ff00", "#ff0000");
         assertEquals("Yes", cell.getText());
-        
+
         // Test false value
         cell.setBooleanValue(false, "Yes", "No", "#00ff00", "#ff0000");
         assertEquals("No", cell.getText());
-        
+
         // Test empty false text
         cell.setBooleanValue(false, "Yes", "", "#00ff00", null);
         assertTrue(cell.getText().isEmpty() || cell.getText().isBlank());
@@ -153,11 +153,11 @@ class CGridCellTest {
     @Test
     void testCGridCellFinalActiveValue() {
         final CGridCell cell = new CGridCell();
-        
+
         // Test final status
         cell.setFinalActiveValue(true);
         assertEquals("Final", cell.getText());
-        
+
         // Test active status
         cell.setFinalActiveValue(false);
         assertEquals("Active", cell.getText());
@@ -166,11 +166,11 @@ class CGridCellTest {
     @Test
     void testCGridCellDefaultValue() {
         final CGridCell cell = new CGridCell();
-        
+
         // Test default value true
         cell.setDefaultValue(true);
         assertEquals("Default", cell.getText());
-        
+
         // Test default value false (should be empty)
         cell.setDefaultValue(false);
         assertTrue(cell.getText().isEmpty() || cell.getText().isBlank());
