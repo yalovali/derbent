@@ -106,12 +106,12 @@ public class CActivityService extends CEntityOfProjectService<CActivity>
 	public Optional<CActivity> getById(final Long id) {
 
 		if (id == null) {
-			throw new IllegalArgumentException("ID cannot be null");
+			return Optional.empty();
 		}
-		final CActivity entity = activityRepository.getReferenceById(id);
-		// Initialize lazy fields if entity is present (for any other potential lazy
-		// relationships) entity.ifPresent(this::initializeLazyFields);
-		return entity.getId() != null ? Optional.of(entity) : Optional.empty();
+		final Optional<CActivity> entity = activityRepository.findByIdWithEagerLoading(id);
+		// Initialize lazy fields if entity is present
+		entity.ifPresent(this::initializeLazyFields);
+		return entity;
 	}
 
 	// CKanbanService implementation methods

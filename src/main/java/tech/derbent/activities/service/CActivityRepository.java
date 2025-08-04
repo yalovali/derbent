@@ -21,11 +21,12 @@ public interface CActivityRepository extends CEntityOfProjectRepository<CActivit
 			+ "LEFT JOIN FETCH a.parentActivity " + "WHERE a.project = :project"
 	)
 	List<CActivity> findByProject(@Param ("project") CProject project, Pageable pageable);
+	
 	@Query (
 		"SELECT a FROM CActivity a " + "LEFT JOIN FETCH a.project "
 			+ "LEFT JOIN FETCH a.assignedTo " + "LEFT JOIN FETCH a.createdBy "
 			+ "LEFT JOIN FETCH a.activityType " + "LEFT JOIN FETCH a.status "
 			+ "LEFT JOIN FETCH a.parentActivity " + "WHERE a.id = :id"
 	)
-	Optional<CActivity> findByProject(@Param ("id") Long id);
+	Optional<CActivity> findByIdWithEagerLoading(@Param ("id") Long id);
 }
