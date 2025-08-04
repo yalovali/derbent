@@ -33,6 +33,8 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 
+import tech.derbent.abstracts.components.CBinderFactory;
+import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.domains.CEntityConstants;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.utils.CAuxillaries;
@@ -141,6 +143,65 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
     public static <EntityClass> Div buildFormAll(final Class<?> entityClass,
             final BeanValidationBinder<EntityClass> binder, final ComboBoxDataProvider dataProvider) {
         return buildForm(entityClass, binder, dataProvider, null);
+    }
+
+    /**
+     * Builds a form using an enhanced binder for better error reporting.
+     * 
+     * @param <EntityClass> the entity type
+     * @param entityClass the entity class
+     * @return a Div containing the form with enhanced binder
+     */
+    @SuppressWarnings("unchecked")
+    public static <EntityClass> Div buildEnhancedForm(final Class<?> entityClass) {
+        CEnhancedBinder<EntityClass> enhancedBinder = CBinderFactory.createEnhancedBinder((Class<EntityClass>) entityClass);
+        return buildForm(entityClass, enhancedBinder, null, null);
+    }
+
+    /**
+     * Builds a form using an enhanced binder with specified fields.
+     * 
+     * @param <EntityClass> the entity type
+     * @param entityClass the entity class
+     * @param entityFields list of field names to include
+     * @return a Div containing the form with enhanced binder
+     */
+    @SuppressWarnings("unchecked")
+    public static <EntityClass> Div buildEnhancedForm(final Class<?> entityClass, final List<String> entityFields) {
+        CEnhancedBinder<EntityClass> enhancedBinder = CBinderFactory.createEnhancedBinder((Class<EntityClass>) entityClass);
+        return buildForm(entityClass, enhancedBinder, null, entityFields);
+    }
+
+    /**
+     * Builds a form using an enhanced binder with data provider.
+     * 
+     * @param <EntityClass> the entity type
+     * @param entityClass the entity class
+     * @param dataProvider the data provider for ComboBox components
+     * @return a Div containing the form with enhanced binder
+     */
+    @SuppressWarnings("unchecked")
+    public static <EntityClass> Div buildEnhancedForm(final Class<?> entityClass, final ComboBoxDataProvider dataProvider) {
+        CEnhancedBinder<EntityClass> enhancedBinder = CBinderFactory.createEnhancedBinder((Class<EntityClass>) entityClass);
+        return buildForm(entityClass, enhancedBinder, dataProvider, null);
+    }
+
+    /**
+     * Creates an enhanced binder for the specified entity class.
+     * This method provides easy access to enhanced binders without changing existing code structure.
+     * 
+     * @param <EntityClass> the entity type
+     * @param entityClass the entity class
+     * @return an enhanced binder with detailed error logging
+     */
+    @SuppressWarnings("unchecked")
+    public static <EntityClass> CEnhancedBinder<EntityClass> createEnhancedBinder(final Class<?> entityClass) {
+        if (entityClass == null) {
+            LOGGER.error("Entity class parameter is null - cannot create enhanced binder");
+            throw new IllegalArgumentException("Entity class cannot be null");
+        }
+        LOGGER.debug("Creating enhanced binder for entity class: {}", entityClass.getSimpleName());
+        return CBinderFactory.createEnhancedBinder((Class<EntityClass>) entityClass);
     }
 
     private static NumberField createBigDecimalField(final Field field, final MetaData meta,
