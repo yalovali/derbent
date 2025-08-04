@@ -155,7 +155,7 @@ public class CDecisionsView extends CProjectAwareMDPage<CDecision> {
         final Optional<CProject> activeProject = sessionService.getActiveProject();
         Assert.isTrue(activeProject.isPresent(), "Active project must be present to load decisions");
         List<CDecision> items;
-        items = getDecisionService().findEntriesByProject(activeProject.get());
+        items = getDecisionService().findAllByProject(activeProject.get());
         // Update the grid with the loaded items
         grid.setItems(items);
         LOGGER.debug("Grid updated with {} items with eager-loaded relationships", items.size());

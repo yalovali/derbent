@@ -13,6 +13,8 @@ import org.springframework.security.core.userdetails.User;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 
 import tech.derbent.activities.domain.CActivity;
+import tech.derbent.activities.domain.CActivityStatus;
+import tech.derbent.activities.domain.CActivityType;
 import tech.derbent.activities.service.CActivityRepository;
 import tech.derbent.activities.service.CActivityService;
 import tech.derbent.activities.service.CActivityStatusRepository;
@@ -35,6 +37,7 @@ import tech.derbent.meetings.service.CMeetingService;
 import tech.derbent.meetings.service.CMeetingTypeService;
 import tech.derbent.orders.service.COrderService;
 import tech.derbent.projects.domain.CProject;
+import tech.derbent.projects.service.CProjectRepository;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.risks.service.CRiskService;
 import tech.derbent.risks.service.CRiskStatusRepository;
@@ -43,129 +46,157 @@ import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.service.CUserRepository;
 import tech.derbent.users.service.CUserService;
+import tech.derbent.users.service.CUserTypeRepository;
 import tech.derbent.users.service.CUserTypeService;
 
 public abstract class CTestBase {
 
-    @Mock
-    protected CActivityRepository activityRepository;
+	@Mock
+	protected CActivityRepository activityRepository;
 
-    @Autowired
-    protected CActivityService activityService;
+	@Mock
+	protected CActivityService activityService;
 
-    @Mock
-    protected CActivityStatusRepository activityStatusRepository;
+	@Mock
+	protected CActivityStatusRepository activityStatusRepository;
 
-    @Autowired
-    protected CActivityStatusService activityStatusService;
+	@Autowired
+	protected CActivityStatusService activityStatusService;
 
-    @Mock
-    protected CActivityTypeRepository activityTypeRepository;
+	@Mock
+	protected CActivityTypeRepository activityTypeRepository;
 
-    @Autowired
-    protected CActivityTypeService activityTypeService;
+	@Autowired
+	protected CActivityTypeService activityTypeService;
 
-    @Mock
-    protected Clock clock;
+	@Mock
+	protected AuthenticationContext authenticationContext;
 
-    @Autowired
-    protected CCommentPriorityService commentPriorityService;
+	@Mock
+	protected Clock clock;
 
-    @Mock
-    protected CCommentRepository commentRepository;
+	@Autowired
+	protected CCommentPriorityService commentPriorityService;
 
-    // Comment services
-    @Autowired
-    protected CCommentService commentService;
+	@Mock
+	protected CCommentRepository commentRepository;
 
-    // Company services
-    @Autowired
-    protected CCompanyService companyService;
+	// Comment services
+	@Autowired
+	protected CCommentService commentService;
 
-    // Decision services
-    @Autowired
-    protected CDecisionService decisionService;
+	// Company services
+	@Autowired
+	protected CCompanyService companyService;
 
-    @Autowired
-    protected CDecisionStatusService decisionStatusService;
+	// Decision services
+	@Autowired
+	protected CDecisionService decisionService;
 
-    @Mock
-    protected CDecisionTypeRepository decisionTypeRepository;
+	@Autowired
+	protected CDecisionStatusService decisionStatusService;
 
-    @Autowired
-    protected CDecisionTypeService decisionTypeService;
+	@Mock
+	protected CDecisionTypeRepository decisionTypeRepository;
 
-    protected CMeeting meeting;
+	@Autowired
+	protected CDecisionTypeService decisionTypeService;
 
-    @Autowired
-    protected CMeetingService meetingService;
+	protected CMeeting meeting;
 
-    protected CMeetingType meetingType;
+	@Autowired
+	protected CMeetingService meetingService;
 
-    @Autowired
-    protected CMeetingTypeService meetingTypeService;
+	protected CMeetingType meetingType;
 
-    // Order services
-    @Autowired
-    protected COrderService orderService;
+	@Autowired
+	protected CMeetingTypeService meetingTypeService;
 
-    protected CCommentPriority priority;
+	// Order services
+	@Autowired
+	protected COrderService orderService;
 
-    @Mock
-    protected CProject project;
+	protected CCommentPriority priority;
 
-    @Autowired
-    protected CProjectService projectService;
+	@Mock
+	protected CProject project;
 
-    // Risk services
-    @Autowired
-    protected CRiskService riskService;
+	@Autowired
+	protected CProjectRepository projectRepository;
 
-    @Mock
-    protected CRiskStatusRepository riskStatusRepository;
+	@Mock
+	protected CProjectService projectService;
 
-    @Autowired
-    protected CRiskStatusService riskStatusService;
+	// Risk services
+	@Autowired
+	protected CRiskService riskService;
 
-    protected CMeetingStatus status;
+	@Mock
+	protected CRiskStatusRepository riskStatusRepository;
 
-    protected CActivity testActivity;
+	@Mock
+	protected CRiskStatusService riskStatusService;
 
-    protected CUser testUser;
+	@Mock
+	protected CSessionService sessionService;
 
-    protected CSessionService sessionService;
+	protected CMeetingStatus status;
 
-    @Mock
-    protected CUserRepository userRepository;
+	protected CActivity testActivity;
 
-    @Autowired
-    protected CUserService userService;
+	private CActivityStatus testActivityStatus;
 
-    @Autowired
-    protected CUserTypeService userTypeService;
+	private CActivityType testActivityType;
 
-    @Mock
-    protected AuthenticationContext authenticationContext;
+	protected CUser testUser;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-        testUser = new CUser("Test User");
-        testUser.setLogin("testuser");
-        project = new CProject("Test Project");
-        testActivity = new CActivity("Test Activity", project);
-        priority = new CCommentPriority("High", project);
-        priority.setColor("#FF0000");
-        meetingType = new CMeetingType("Test Meeting Type", project);
-        status = new CMeetingStatus("SCHEDULED", project);
-        meeting = new CMeeting("Test Meeting", project, meetingType);
-        sessionService = new CSessionService(authenticationContext, userService, projectService);
-        final User authUser = new User("testuser", "password", java.util.Collections.emptyList());
-        final UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(testUser,
-                null, authUser.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        setupForTest();
-    }
+	@Mock
+	protected CUserRepository userRepository;
 
-    protected abstract void setupForTest();
+	@Mock
+	protected CUserService userService;
+
+	@Mock
+	private CUserTypeRepository userTypeRepository;
+
+	@Mock
+	protected CUserTypeService userTypeService;
+
+	@BeforeEach
+	void setUp() {
+		MockitoAnnotations.openMocks(this);
+		projectService = new CProjectService(projectRepository, clock, null);
+		project = new CProject("Test Project");
+		activityStatusService =
+			new CActivityStatusService(activityStatusRepository, clock);
+		activityService = new CActivityService(activityRepository, clock);
+		userService = new CUserService(userRepository, clock);
+		testUser = new CUser("Test User");
+		testUser.setLogin("testuser");
+		//
+		riskStatusService = new CRiskStatusService(riskStatusRepository, clock);
+		userTypeService = new CUserTypeService(userTypeRepository, clock);
+		testActivity = new CActivity("Test Activity", project);
+		priority = new CCommentPriority("High", project);
+		priority.setColor("#FF0000");
+		meetingType = new CMeetingType("Test Meeting Type", project);
+		status = new CMeetingStatus("SCHEDULED", project);
+		meeting = new CMeeting("Test Meeting", project, meetingType);
+		sessionService =
+			new CSessionService(authenticationContext, userService, projectService);
+		final User authUser =
+			new User("testuser", "password", java.util.Collections.emptyList());
+		final UsernamePasswordAuthenticationToken authentication =
+			new UsernamePasswordAuthenticationToken(testUser, null,
+				authUser.getAuthorities());
+		project.setName("Test Project");
+		testActivityType = new CActivityType("Development", project);
+		testActivity.setActivityType(testActivityType);
+		testActivityStatus = new CActivityStatus("IN_PROGRESS", project);
+		testActivity.setStatus(testActivityStatus);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+		setupForTest();
+	}
+
+	protected abstract void setupForTest();
 }

@@ -134,7 +134,7 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
             // Check if the entity service is for CEntityOfProject entities
             if (entityService instanceof CEntityOfProjectService) {
                 final CEntityOfProjectService<EntityClass> projectService = (CEntityOfProjectService<EntityClass>) entityService;
-                entities = projectService.findEntriesByProject(activeProject.get(), PageableUtils.createSafe(0, 10));
+                entities = projectService.findAllByProject(activeProject.get(), PageableUtils.createSafe(0, 10));
             } else {
                 // For non-project entities, show all entities (they don't have project
                 // filtering)
@@ -167,7 +167,7 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
         // Check if the entity service is for CEntityOfProject entities
         if (entityService instanceof CEntityOfProjectService) {
             final CEntityOfProjectService<EntityClass> projectService = (CEntityOfProjectService<EntityClass>) entityService;
-            result = projectService.findEntriesByProject(sessionService.getActiveProject().get(), pageable);
+            result = projectService.findAllByProject(sessionService.getActiveProject().get(), pageable);
         } else {
             // For non-project entities, just get the first entity from all entities
             LOGGER.debug("Entity service is not project-aware, selecting from all entities");
