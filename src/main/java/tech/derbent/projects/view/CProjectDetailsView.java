@@ -20,6 +20,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
 import tech.derbent.abstracts.views.CButton;
+import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.session.service.CSessionService;
@@ -31,9 +32,15 @@ import tech.derbent.session.service.CSessionService;
  */
 @Route("project-details/:project_id?/:action?(edit)")
 @PageTitle("Project Details")
-@Menu(order = 1.3, icon = "vaadin:briefcase", title = "Project.Project Details")
+@Menu(order = 1.3, icon = "class:tech.derbent.projects.view.CProjectDetailsView", title = "Project.Project Details")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CProjectDetailsView extends CAbstractNamedEntityPage<CProject> {
+public class CProjectDetailsView extends CAbstractNamedEntityPage<CProject> implements CInterfaceIconSet {
+
+    public static String getIconColorCode() {
+        return CProject.getIconColorCode(); // Use the static method from CProject
+    }
+
+    public static String getIconFilename() { return CProject.getIconFilename(); }
 
     // Layout modes enum
     public enum LayoutMode {

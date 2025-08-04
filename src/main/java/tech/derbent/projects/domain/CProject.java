@@ -19,7 +19,7 @@ public class CProject extends CEntityNamed<CProject> {
 		return "#fd7e14"; // Orange color for project entities
 	}
 
-	public static String getIconFilename() { return "vaadin:folder"; }
+	public static String getIconFilename() { return "vaadin:briefcase"; }
 
 	/**
 	 * Default constructor for JPA.

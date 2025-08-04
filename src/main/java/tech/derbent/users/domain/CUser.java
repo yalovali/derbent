@@ -31,7 +31,7 @@ public class CUser extends CEntityNamed<CUser> {
 		return "#6f42c1"; // Purple color for user entities
 	}
 
-	public static String getIconFilename() { return "vaadin:user"; }
+	public static String getIconFilename() { return "vaadin:users"; }
 
 	@Column (
 		name = "lastname", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME,

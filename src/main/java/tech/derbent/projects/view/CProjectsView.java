@@ -9,6 +9,7 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
 import tech.derbent.abstracts.views.CAccordionDBEntity;
+import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.session.service.CSessionService;
@@ -19,11 +20,17 @@ import tech.derbent.session.service.CSessionService;
  */
 @Route("projects/:project_id?/:action?(edit)")
 @PageTitle("Project Master Detail")
-@Menu(order = 1.1, icon = "vaadin:briefcase", title = "Settings.Projects")
+@Menu(order = 1.1, icon = "class:tech.derbent.projects.view.CProjectsView", title = "Settings.Projects")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CProjectsView extends CAbstractNamedEntityPage<CProject> {
+public class CProjectsView extends CAbstractNamedEntityPage<CProject> implements CInterfaceIconSet {
 
     private static final long serialVersionUID = 1L;
+
+    public static String getIconColorCode() {
+        return CProject.getIconColorCode(); // Use the static method from CProject
+    }
+
+    public static String getIconFilename() { return CProject.getIconFilename(); }
 
     private final String ENTITY_ID_FIELD = "project_id";
 
