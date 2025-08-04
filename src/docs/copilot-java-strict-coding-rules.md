@@ -128,6 +128,51 @@ src/main/java/tech/derbent/
 - Test all validation scenarios and edge cases
 - Mock external dependencies appropriately
 
+### 5.1 Test Organization Structure
+
+Tests are organized into three main directories under `src/test/java/`:
+
+1. **Unit Tests** (`src/test/java/unit-tests/`):
+   - Business logic tests
+   - Service layer tests  
+   - Domain entity tests
+   - Validation tests
+   - Integration tests
+   - Manual verification tests
+
+2. **UI Tests** (`src/test/java/ui-tests/`):
+   - Vaadin UI component tests
+   - View tests without browser automation
+   - Form validation UI tests
+   - Component interaction tests
+
+3. **Automated Tests** (`src/test/java/automated-tests/`):
+   - Playwright browser automation tests
+   - End-to-end testing scenarios
+   - Full application workflow tests
+   - Cross-browser compatibility tests
+
+### 5.2 Running Tests
+
+Use the following commands to run specific test categories:
+
+```bash
+# Run all tests
+mvn test
+
+# Run only unit tests
+mvn test -Dtest="**/unit-tests/**/*Test"
+
+# Run only UI tests  
+mvn test -Dtest="**/ui-tests/**/*Test"
+
+# Run only automated tests
+mvn test -Dtest="**/automated-tests/**/*Test"
+
+# Run Playwright tests using script
+./run-playwright-tests.sh all
+```
+
 ---
 
 ## 6. Java Build and Quality Checks
@@ -174,6 +219,7 @@ After accepting Copilot suggestions, manually review for:
 - Favor abstraction: if two or more features are similar, create an abstract base class with abstract fields and methods
 - Always start class names with a capital "C" (e.g., `CUser`, `CSettings`). Do not use standard Java class naming for domain classes
 - Check for lazy loading issues using best practices (e.g., `@Transactional`, `fetch = FetchType.LAZY`). Add comments explaining lazy loading risks or solutions
+- **Lazy Loading Best Practices**: Use eager loading queries in repositories (e.g., `LEFT JOIN FETCH`) for commonly accessed relationships to prevent `LazyInitializationException`
 - Always check for `null` values and possible `NullPointerException` in every function. If necessary, also check for empty strings
 - Always prefer using base classes to avoid code duplication
 - Every important function must start with a logger statement detailing function name and parameter values (do not log at function end)
@@ -613,51 +659,50 @@ class ManualVerificationTest {
 
 ## 5. Testing Standards
 
-### 5.1 Unit Tests
+### 5.3 Unit Tests  
 - Test all public methods
 - Include edge cases and error conditions
 - Use meaningful test names
 - Follow AAA pattern (Arrange, Act, Assert)
 - Write unit tests for all business logic and service methods
-- test all views, select all new items in grids, always test CRUD functions of views in all pages.
+- Test all views, select all new items in grids, always test CRUD functions of views in all pages
 - Use TestContainers for integration testing with PostgreSQL
 - Maintain test coverage above 80% for critical business logic
 - Test all validation scenarios and edge cases
 - Mock external dependencies appropriately
 - Include manual verification tests for complex UI interactions
-- always create tests for ui functions
-- test agains grid selection changes for every page every view
-- test contents of every combobox
+- Always create tests for UI functions
+- Test against grid selection changes for every page every view
+- Test contents of every combobox
 
-### 5.2 Integration Tests
+### 5.4 Integration Tests
 - Test entity persistence and retrieval
 - Verify relationship mappings
 - Test validation constraints
 - Include performance tests for critical paths
 
-
-### 5.3 UI Automated Tests
+### 5.5 UI Automated Tests
 - Don't call applicationLogin in every @test, just use it in the setup
 - Don't wait after every navigation etc, if there is a wait in the previous call it is enough
-- Try to navigate between views using class annotations.
+- Try to navigate between views using class annotations
 - Always fail all tests with fail assertion
 - Always generate for all views and functions a playwright tests
-- create auxillary functions for playwright tester for simpler commands
+- Create auxiliary functions for playwright tester for simpler commands
 - Always try to use selection by ID not by CSS or tag
-- try to insert ID to used components in test in java
-- keep tests in non headless chromium execution
+- Try to insert ID to used components in test in Java
+- Keep tests in non headless chromium execution
 - Test entity persistence and retrieval
 - Verify relationship mappings
 - Test validation constraints
 - Include performance tests for critical paths
-- write separete test classes for each view to keep code easy to understand
-- write short if blocks, quick returns to increase maintainance
-- dont have repeating blocks
-- check /derbent/src/docs/copilot-java-strict-coding-rules.md file for errors such as link errors
-- only take screen shot if there is a fail in tests, reduce the number of log messages
-- put all test classes in tests folder of that class group
-- create or use common functions like clickCancel, clickNew, clickGrid
-- if possible generate super class tests with classname, entity class parameters to run the tests, such as navigation tests, new item tests etc, which have all common pattern. 
+- Write separate test classes for each view to keep code easy to understand
+- Write short if blocks, quick returns to increase maintenance
+- Don't have repeating blocks
+- Check /derbent/src/docs/copilot-java-strict-coding-rules.md file for errors such as link errors
+- Only take screen shot if there is a fail in tests, reduce the number of log messages
+- Put all test classes in tests folder of that class group
+- Create or use common functions like clickCancel, clickNew, clickGrid
+- If possible generate super class tests with classname, entity class parameters to run the tests, such as navigation tests, new item tests etc, which have all common pattern 
 
 
 ## 6. Sample Implementation Guidelines

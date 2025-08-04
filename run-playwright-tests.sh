@@ -88,52 +88,52 @@ main() {
     case $command in
         "colors")
             echo "🎨 Running user color and entry views tests..."
-            run_playwright_tests "UserColorAndEntryViewsPlaywrightTest" "User Color and Entry Views Tests"
+            run_playwright_tests "tech.derbent.ui.automation.UserColorAndEntryViewsPlaywrightTest" "User Color and Entry Views Tests"
             ;;
             
         "all"|"playwright")
             echo "🎯 Running complete Playwright UI automation test suite..."
-            run_playwright_tests "PlaywrightUIAutomationTest" "Playwright UI Automation Tests"
+            run_playwright_tests "tech.derbent.ui.automation.PlaywrightUIAutomationTest" "Playwright UI Automation Tests"
             ;;
             
         "login")
             echo "🔐 Running login/logout tests..."
-            run_playwright_tests "PlaywrightUIAutomationTest#testLoginFunctionality,PlaywrightUIAutomationTest#testLogoutFunctionality,PlaywrightUIAutomationTest#testInvalidLoginHandling" "Login/Logout Tests"
+            run_playwright_tests "tech.derbent.ui.automation.PlaywrightUIAutomationTest#testLoginFunctionality,tech.derbent.ui.automation.PlaywrightUIAutomationTest#testLogoutFunctionality,tech.derbent.ui.automation.PlaywrightUIAutomationTest#testInvalidLoginHandling" "Login/Logout Tests"
             ;;
             
         "crud")
             echo "📝 Running CRUD operation tests..."
-            run_playwright_tests "PlaywrightUIAutomationTest#testCRUDOperationsInProjects,PlaywrightUIAutomationTest#testCRUDOperationsInMeetings" "CRUD Operation Tests"
+            run_playwright_tests "tech.derbent.ui.automation.PlaywrightUIAutomationTest#testCRUDOperationsInProjects,tech.derbent.ui.automation.PlaywrightUIAutomationTest#testCRUDOperationsInMeetings" "CRUD Operation Tests"
             ;;
             
         "grid")
             echo "📊 Running grid interaction tests..."
-            run_playwright_tests "PlaywrightUIAutomationTest#testGridInteractions" "Grid Interaction Tests"
+            run_playwright_tests "tech.derbent.ui.automation.PlaywrightUIAutomationTest#testGridInteractions" "Grid Interaction Tests"
             ;;
             
         "navigation")
             echo "🧭 Running navigation tests..."
-            run_playwright_tests "PlaywrightUIAutomationTest#testNavigationBetweenViews" "Navigation Tests"
+            run_playwright_tests "tech.derbent.ui.automation.PlaywrightUIAutomationTest#testNavigationBetweenViews" "Navigation Tests"
             ;;
             
         "responsive")
             echo "📱 Running responsive design tests..."
-            run_playwright_tests "PlaywrightUIAutomationTest#testResponsiveDesign" "Responsive Design Tests"
+            run_playwright_tests "tech.derbent.ui.automation.PlaywrightUIAutomationTest#testResponsiveDesign" "Responsive Design Tests"
             ;;
             
         "accessibility")
             echo "♿ Running accessibility tests..."
-            run_playwright_tests "PlaywrightUIAutomationTest#testAccessibilityBasics" "Accessibility Tests"
+            run_playwright_tests "tech.derbent.ui.automation.PlaywrightUIAutomationTest#testAccessibilityBasics" "Accessibility Tests"
             ;;
             
         "validation")
             echo "✅ Running form validation tests..."
-            run_playwright_tests "PlaywrightUIAutomationTest#testFormValidationAndErrorHandling" "Form Validation Tests"
+            run_playwright_tests "tech.derbent.ui.automation.PlaywrightUIAutomationTest#testFormValidationAndErrorHandling" "Form Validation Tests"
             ;;
             
         "workflow")
             echo "🔄 Running complete workflow tests..."
-            run_playwright_tests "PlaywrightUIAutomationTest#testCompleteApplicationFlow" "Complete Workflow Tests"
+            run_playwright_tests "tech.derbent.ui.automation.PlaywrightUIAutomationTest#testCompleteApplicationFlow" "Complete Workflow Tests"
             ;;
             
         "install")
