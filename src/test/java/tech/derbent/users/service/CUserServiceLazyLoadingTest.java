@@ -36,8 +36,8 @@ public class CUserServiceLazyLoadingTest extends CTestBase {
         user.setUserType(userType);
         final CCompany company = new CCompany("Test Company");
         user.setCompany(company);
-        // Mock the repository to return the user with all relationships
-        when(userRepository.findByIdWithAllRelationships(userId)).thenReturn(Optional.of(user));
+        // Mock the repository to return the user using standard findById
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         // When
         final Optional<CUser> result = userService.getById(userId);
         // Then
