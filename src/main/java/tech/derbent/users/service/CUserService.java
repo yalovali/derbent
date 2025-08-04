@@ -97,6 +97,38 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 	}
 
 	/**
+	 * Updates user password with proper encoding.
+	 * @param username         the username to update
+	 * @param newPlainPassword the new plain text password
+	 * @throws UsernameNotFoundException if user not found
+	 */
+	@Transactional
+	public void updatePassword(final String username, final String newPlainPassword) {
+		final CUser loginUser =
+			((CUserRepository) repository).findByUsername(username).orElseThrow(
+				() -> new UsernameNotFoundException("User not found: " + username));
+		final String encodedPassword = passwordEncoder.encode(newPlainPassword);
+		loginUser.setPassword(encodedPassword);
+		repository.saveAndFlush(loginUser);
+	}
+
+	/**
+	 * Gets a user with lazy-loaded project settings initialized.
+	 * @param id the user ID
+	 * @return the user with project settings loaded
+	 * @throws EntityNotFoundException if user not found
+	 */
+	@Transactional(readOnly = true)
+	public CUser getUserWithProjects(final Long id) {
+		LOGGER.debug("Getting user with projects for ID: {}", id);
+		// Use standard findById method - projects will be loaded when accessed within
+		// transaction
+		final CUser user = repository.findById(id).orElseThrow(
+			() -> new EntityNotFoundException("User not found with ID: " + id));
+		return user;
+	}
+
+	/**
 	 * Converts comma-separated role string to Spring Security authorities. Roles are
 	 * prefixed with "ROLE_" as per Spring Security convention.
 	 * @param rolesString comma-separated roles (e.g., "USER,ADMIN")
@@ -119,24 +151,9 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 		return authorities;
 	}
 
-	/**
-	 * Overrides the base get method to eagerly load CUserType and company relationships.
-	 * This prevents LazyInitializationException when the entity is used in UI contexts,
-	 * particularly when company information is used in comboboxes.
-	 * @param id the user ID
-	 * @return optional CUser with loaded userType and company
-	 */
 	@Override
-	@Transactional (readOnly = true)
-	public Optional<CUser> getById(final Long id) {
-		// Use standard findById method - lazy loading will be handled at transaction
-		// boundary
-		return repository.findById(id);
-	}
-
-	@Override
-	protected Class<CUser> getEntityClass() { // TODO Auto-generated method stub
-		return null;
+	protected Class<CUser> getEntityClass() { 
+		return CUser.class;
 	}
 
 	/**
@@ -147,18 +164,15 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 	public PasswordEncoder getPasswordEncoder() { return passwordEncoder; }
 
 	/**
-	 * Gets a user with lazy-loaded project settings initialized.
+	 * Overrides the base getById method to ensure lazy field initialization.
 	 * @param id the user ID
-	 * @return the user with project settings loaded
-	 * @throws EntityNotFoundException if user not found
+	 * @return optional CUser with lazy fields initialized
 	 */
-	@Transactional (readOnly = true)
-	public CUser getUserWithProjects(final Long id) {
-		LOGGER.debug("Getting user with projects for ID: {}", id);
-		// Use standard findById method - projects will be loaded when accessed within
-		// transaction
-		final CUser user = repository.findById(id).orElseThrow(
-			() -> new EntityNotFoundException("User not found with ID: " + id));
+	@Override
+	@Transactional(readOnly = true)
+	public Optional<CUser> getById(final Long id) {
+		final Optional<CUser> user = repository.findById(id);
+		user.ifPresent(this::initializeLazyFields);
 		return user;
 	}
 
@@ -168,7 +182,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 	 * @param user the user entity to initialize
 	 */
 	@Override
-	public void initializeLazyFields(final CUser user) {
+	protected void initializeLazyFields(final CUser user) {
 
 		if (user == null) {
 			return;
@@ -187,12 +201,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 
 	/**
 	 * Implementation of UserDetailsService.loadUserByUsername(). This is the core method
-	 * called by Spring Security during authentication. Authentication Flow Step: 1.
-	 * Spring Security calls this method with username from login form 2. Query database
-	 * to find CUser by username 3. If not found, throw UsernameNotFoundException 4. If
-	 * found, convert CUser to Spring Security UserDetails 5. Return UserDetails with
-	 * username, password, and authorities 6. Spring Security uses returned UserDetails to
-	 * verify password
+	 * called by Spring Security during authentication.
 	 * @param username the username from the login form
 	 * @return UserDetails object containing user authentication info
 	 * @throws UsernameNotFoundException if user not found in database
@@ -212,30 +221,13 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 		// Step 2: Convert user roles to Spring Security authorities
 		final Collection<GrantedAuthority> authorities =
 			getAuthorities(loginUser.getRoles());
-		// Step 3: Create and return Spring Security UserDetails The password will be
-		// compared by Spring Security using the configured PasswordEncoder
+		// Step 3: Create and return Spring Security UserDetails
 		return User.builder().username(loginUser.getUsername())
 			.password(loginUser.getPassword()) // Already encoded password from database
 			.authorities(authorities).accountExpired(false).accountLocked(false)
 			.credentialsExpired(false).disabled(!loginUser.isEnabled()) // Convert enabled
 			// flag to disabled flag
 			.build();
-	}
-
-	/**
-	 * Removes a project setting for a user.
-	 * @param userId    the user ID
-	 * @param projectId the project ID
-	 */
-	@Transactional
-	public void removeUserProjectSetting(final Long userId, final Long projectId) {
-		final CUser user = getUserWithProjects(userId);
-
-		if (user.getProjectSettings() != null) {
-			user.getProjectSettings()
-				.removeIf(setting -> setting.getProjectId().equals(projectId));
-			repository.saveAndFlush(user);
-		}
 	}
 
 	/**
@@ -278,102 +270,19 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 	}
 
 	/**
-	 * Auxiliary method to set company association for a user.
-	 * @param user    the user to configure
-	 * @param company the company to associate with the user
-	 * @return the configured user
+	 * Removes a project setting for a user.
+	 * @param userId    the user ID
+	 * @param projectId the project ID
 	 */
 	@Transactional
-	public CUser setCompanyAssociation(final CUser user,
-		final tech.derbent.companies.domain.CCompany company) {
-		LOGGER.info("setCompanyAssociation called for user: {} with company: {}",
-			user != null ? user.getName() : "null",
-			company != null ? company.getName() : "null");
+	public void removeUserProjectSetting(final Long userId, final Long projectId) {
+		final CUser user = getUserWithProjects(userId);
 
-		if (user == null) {
-			LOGGER.warn("User is null, cannot set company association");
-			return null;
+		if (user.getProjectSettings() != null) {
+			user.getProjectSettings()
+				.removeIf(setting -> setting.getProjectId().equals(projectId));
+			repository.saveAndFlush(user);
 		}
-
-		if (company != null) {
-			user.setCompany(company);
-		}
-		return save(user);
-	}
-	// Auxiliary methods for sample data initialization and user setup
-
-	/**
-	 * Auxiliary method to set user profile information. Following coding guidelines to
-	 * use service layer methods instead of direct field setting.
-	 * @param user               the user to configure
-	 * @param lastname           the user's last name
-	 * @param phone              the user's phone number
-	 * @param profilePictureData profile picture data
-	 * @return the configured user
-	 */
-	@Transactional
-	public CUser setUserProfile(final CUser user, final String lastname,
-		final String phone, final byte[] profilePictureData) {
-
-		if (user == null) {
-			LOGGER.warn("User is null, cannot set user profile");
-			return null;
-		}
-
-		if ((lastname != null) && !lastname.isEmpty()) {
-			user.setLastname(lastname);
-		}
-
-		if ((phone != null) && !phone.isEmpty()) {
-			user.setPhone(phone);
-		}
-
-		if (profilePictureData != null) {
-			user.setProfilePictureData(profilePictureData);
-		}
-		return save(user);
-	}
-
-	/**
-	 * Auxiliary method to set user role and permissions.
-	 * @param user     the user to configure
-	 * @param userRole the user's role enum
-	 * @param roles    comma-separated role string for Spring Security
-	 * @return the configured user
-	 */
-	@Transactional
-	public CUser setUserRole(final CUser user,
-		final tech.derbent.users.domain.CUserRole userRole, final String roles) {
-
-		if (user == null) {
-			LOGGER.warn("User is null, cannot set user role");
-			return null;
-		}
-
-		if (userRole != null) {
-			user.setUserRole(userRole);
-		}
-
-		if ((roles != null) && !roles.isEmpty()) {
-			user.setRoles(roles);
-		}
-		return save(user);
-	}
-
-	/**
-	 * Updates user password with proper encoding.
-	 * @param username         the username to update
-	 * @param newPlainPassword the new plain text password
-	 * @throws UsernameNotFoundException if user not found
-	 */
-	@Transactional
-	public void updatePassword(final String username, final String newPlainPassword) {
-		final CUser loginUser =
-			((CUserRepository) repository).findByUsername(username).orElseThrow(
-				() -> new UsernameNotFoundException("User not found: " + username));
-		final String encodedPassword = passwordEncoder.encode(newPlainPassword);
-		loginUser.setPassword(encodedPassword);
-		repository.saveAndFlush(loginUser);
 	}
 
 	@Override
@@ -388,5 +297,47 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 		if ((user.getName() == null) || user.getName().trim().isEmpty()) {
 			throw new IllegalArgumentException("User name cannot be null or empty");
 		}
+	}
+
+	/**
+	 * @deprecated Use entity setters directly instead of this auxiliary method.
+	 * This method is temporary for compatibility and will be removed.
+	 */
+	@Deprecated
+	@Transactional
+	public CUser setUserProfile(final CUser user, final String lastname,
+		final String phone, final byte[] profilePictureData) {
+		if (user == null) return null;
+		if (lastname != null && !lastname.isEmpty()) user.setLastname(lastname);
+		if (phone != null && !phone.isEmpty()) user.setPhone(phone);
+		if (profilePictureData != null) user.setProfilePictureData(profilePictureData);
+		return save(user);
+	}
+
+	/**
+	 * @deprecated Use entity setters directly instead of this auxiliary method.
+	 * This method is temporary for compatibility and will be removed.
+	 */
+	@Deprecated
+	@Transactional
+	public CUser setUserRole(final CUser user,
+		final tech.derbent.users.domain.CUserRole userRole, final String roles) {
+		if (user == null) return null;
+		if (userRole != null) user.setUserRole(userRole);
+		if (roles != null && !roles.isEmpty()) user.setRoles(roles);
+		return save(user);
+	}
+
+	/**
+	 * @deprecated Use entity setters directly instead of this auxiliary method.
+	 * This method is temporary for compatibility and will be removed.
+	 */
+	@Deprecated
+	@Transactional
+	public CUser setCompanyAssociation(final CUser user,
+		final tech.derbent.companies.domain.CCompany company) {
+		if (user == null) return null;
+		if (company != null) user.setCompany(company);
+		return save(user);
 	}
 }
