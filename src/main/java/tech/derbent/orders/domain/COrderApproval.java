@@ -30,12 +30,12 @@ public class COrderApproval extends CEntityNamed<COrderApproval> {
     @MetaData(displayName = "Order", required = true, readOnly = false, description = "The order this approval belongs to", hidden = false, order = 2, dataProviderBean = "COrderService")
     private COrder order;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "approver_id", nullable = true)
     @MetaData(displayName = "Approver", required = false, readOnly = false, description = "User responsible for this approval", hidden = false, order = 3, dataProviderBean = "CUserService")
     private CUser approver;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "approval_status_id", nullable = false)
     @MetaData(displayName = "Status", required = true, readOnly = false, description = "Current approval status", hidden = false, order = 4, dataProviderBean = "CApprovalStatusService")
     private CApprovalStatus approvalStatus;

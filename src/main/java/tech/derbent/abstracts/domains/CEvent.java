@@ -23,11 +23,16 @@ public abstract class CEvent<EntityClass> extends CEntityDB<EntityClass> {
     @MetaData(displayName = "Event Date", required = true, readOnly = true, description = "Date and time when the event occurred", hidden = false, order = 90)
     private LocalDateTime eventDate;
 
-    // Author of the event
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", nullable = false)
-    @MetaData(displayName = "Author", required = true, readOnly = true, description = "User who created this event", hidden = false, order = 91, dataProviderBean = "CUserService")
-    private CUser author;
+	// Author of the event
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "author_id", nullable = false)
+	@MetaData (
+		displayName = "Author", required = true, readOnly = true,
+		description = "User who created this event", hidden = false, order = 91,
+		dataProviderBean = "CUserService"
+	)
+	private CUser author;
+
 
     /**
      * Default constructor for JPA.

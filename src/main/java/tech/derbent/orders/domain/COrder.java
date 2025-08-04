@@ -37,7 +37,7 @@ import tech.derbent.users.domain.CUser;
 public class COrder extends CEntityOfProject<COrder> {
 
     // Order Type and Classification
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "order_type_id", nullable = false)
     @MetaData(displayName = "Order Type", required = true, readOnly = false, description = "Type category of the order (e.g., Purchase Order, Service Order)", hidden = false, order = 2, dataProviderBean = "COrderTypeService")
     private COrderType orderType;
@@ -59,24 +59,24 @@ public class COrder extends CEntityOfProject<COrder> {
     private String providerEmail;
 
     // Requestor and Responsibility
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "requestor_id", nullable = false)
     @MetaData(displayName = "Requestor", required = true, readOnly = false, description = "User who requested this order", hidden = false, order = 20, dataProviderBean = "CUserService")
     private CUser requestor;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "responsible_id", nullable = true)
     @MetaData(displayName = "Responsible", required = false, readOnly = false, description = "User responsible for managing this order", hidden = false, order = 21, dataProviderBean = "CUserService")
     private CUser responsible;
 
     // Status Management
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "order_status_id", nullable = false)
     @MetaData(displayName = "Status", required = true, readOnly = false, description = "Current status of the order", hidden = false, order = 30, dataProviderBean = "COrderStatusService")
     private COrderStatus status;
 
     // Financial Information
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "currency_id", nullable = false)
     @MetaData(displayName = "Currency", required = true, readOnly = false, description = "Currency for the order cost", hidden = false, order = 40, dataProviderBean = "CCurrencyService")
     private CCurrency currency;

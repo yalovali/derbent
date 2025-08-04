@@ -43,7 +43,7 @@ public class CComment extends CEvent<CComment> {
     private CActivity activity;
 
     // Priority of the comment
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "priority_id", nullable = true)
     @MetaData(displayName = "Priority", required = false, readOnly = false, description = "Priority level of this comment", hidden = false, order = 3, dataProviderBean = "CCommentPriorityService")
     private CCommentPriority priority;
