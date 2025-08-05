@@ -91,7 +91,7 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject> {
 	 */
 	@Override
 	protected void openAddDialog() {
-		if (!validateProjectAndService()) {
+		if (!validateProjectSelection() || !validateServiceAvailability("Project")) {
 			return;
 		}
 		
@@ -105,39 +105,26 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject> {
 	 */
 	@Override
 	protected void openEditDialog() {
-		final CUserProjectSettings selected = grid.asSingleSelect().getValue();
-
-		if (selected == null) {
-			new CWarningDialog("Please select a user to edit.").open();
-			return;
-		}
-
-		if (currentProject == null) {
-			new CWarningDialog("Current project information is not available. Please refresh the page.").open();
+		if (!validateGridSelection("edit") || !validateProjectSelection()) {
 			return;
 		}
 		
+		final CUserProjectSettings selected = grid.asSingleSelect().getValue();
 		final CProjectUserSettingsDialog dialog = new CProjectUserSettingsDialog(
 			projectService, userService, selected, currentProject, this::onSettingsSaved);
 		dialog.open();
 	}
 
 	/**
-	 * Validates that project and services are available for operations.
+	 * Validates that a project is currently selected.
 	 * 
-	 * @return true if project and services are available, false otherwise
+	 * @return true if currentProject is not null, false otherwise
 	 */
-	private boolean validateProjectAndService() {
+	private boolean validateProjectSelection() {
 		if (currentProject == null) {
-			new CWarningDialog("Please select a project first before adding users.").open();
+			new CWarningDialog("Please select a project first before managing users.").open();
 			return false;
 		}
-
-		if (projectService == null) {
-			new CWarningDialog("Project service is not available. Please try again later.").open();
-			return false;
-		}
-		
 		return true;
 	}
 
