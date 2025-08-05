@@ -40,4 +40,11 @@ public class CProject extends CEntityNamed<CProject> {
 	public CProject(final String name) {
 		super(CProject.class, name);
 	}
+
+	/**
+	 * Gets the list of user project settings for this project.
+	 */
+	public List<CUserProjectSettings> getUserSettings() {
+		return userSettings;
+	}
 }

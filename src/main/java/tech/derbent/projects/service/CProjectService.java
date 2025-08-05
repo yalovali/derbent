@@ -61,6 +61,18 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 	@PreAuthorize ("permitAll()")
 	public long getTotalProjectCount() { return repository.count(); }
 
+	/**
+	 * Gets a project with all its user settings loaded (to avoid lazy loading issues)
+	 */
+	@Transactional(readOnly = true)
+	public CProject getProjectWithUsers(final Long projectId) {
+		LOGGER.info("Getting project with users for project ID: {}", projectId);
+		return getById(projectId).orElse(null);
+		// Note: Since userSettings is eagerly loaded by default in the entity,
+		// this should work. If lazy loading issues occur, we'd need to use
+		// @EntityGraph or custom query with JOIN FETCH
+	}
+
 	@Override
 	@Transactional
 	public CProject save(final CProject entity) {

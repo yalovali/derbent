@@ -185,33 +185,37 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser> implements CInte
         LOGGER.info("Populating form with user data: {}", value != null ? value.getLogin() : "null");
         // Clear the description panel descriptionPanel.populateForm(value);
 
-        // Update the project settings grid when a user is selected
-        if (value != null) {
-            // Load user with project settings to avoid lazy initialization issues
-            final CUser userWithSettings = ((CUserService) entityService).getUserWithProjects(value.getId());
-            projectSettingsGrid.setCurrentUser(userWithSettings);
-            projectSettingsGrid.setProjectSettingsAccessors(() -> userWithSettings.getProjectSettings() != null
-                    ? userWithSettings.getProjectSettings()
-                    : java.util.Collections.emptyList(), (settings) -> {
-                        userWithSettings.setProjectSettings(settings);
-                        // Save the user when project settings are updated
-                        entityService.save(userWithSettings);
-                    }, () -> {
+        // Update the project settings grid when a user is selected (check if initialized)
+        if (projectSettingsGrid != null) {
+            if (value != null) {
+                // Load user with project settings to avoid lazy initialization issues
+                final CUser userWithSettings = ((CUserService) entityService).getUserWithProjects(value.getId());
+                projectSettingsGrid.setCurrentUser(userWithSettings);
+                projectSettingsGrid.setProjectSettingsAccessors(() -> userWithSettings.getProjectSettings() != null
+                        ? userWithSettings.getProjectSettings()
+                        : java.util.Collections.emptyList(), (settings) -> {
+                            userWithSettings.setProjectSettings(settings);
+                            // Save the user when project settings are updated
+                            entityService.save(userWithSettings);
+                        }, () -> {
 
-                        // Refresh the current entity after save
-                        try {
-                            final CUser refreshedUser = ((CUserService) entityService)
-                                    .getUserWithProjects(userWithSettings.getId());
-                            populateForm(refreshedUser);
-                        } catch (final Exception e) {
-                            LOGGER.error("Error refreshing user after project settings update", e);
-                        }
-                    });
+                            // Refresh the current entity after save
+                            try {
+                                final CUser refreshedUser = ((CUserService) entityService)
+                                        .getUserWithProjects(userWithSettings.getId());
+                                populateForm(refreshedUser);
+                            } catch (final Exception e) {
+                                LOGGER.error("Error refreshing user after project settings update", e);
+                            }
+                        });
+            } else {
+                projectSettingsGrid.setCurrentUser(null);
+                projectSettingsGrid.setProjectSettingsAccessors(() -> java.util.Collections.emptyList(), (settings) -> {
+                }, () -> {
+                });
+            }
         } else {
-            projectSettingsGrid.setCurrentUser(null);
-            projectSettingsGrid.setProjectSettingsAccessors(() -> java.util.Collections.emptyList(), (settings) -> {
-            }, () -> {
-            });
+            LOGGER.debug("Project settings grid not yet initialized, skipping populate");
         }
     }
 
