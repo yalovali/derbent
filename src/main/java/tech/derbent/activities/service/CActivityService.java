@@ -110,6 +110,19 @@ public class CActivityService extends CEntityOfProjectService<CActivity>
 		return Map.of(); // This would need proper implementation
 	}
 
+	/**
+	 * Find activity by ID with optimized eager loading.
+	 * Uses repository method with JOIN FETCH to prevent N+1 queries.
+	 * @param id the activity ID
+	 * @return the activity with eagerly loaded associations, or null if not found
+	 */
+	public CActivity findById(final Long id) {
+		if (id == null) {
+			return null;
+		}
+		return ((CActivityRepository) repository).findByIdWithEagerLoading(id).orElse(null);
+	}
+
 	@Override
 	protected Class<CActivity> getEntityClass() { return CActivity.class; }
 
@@ -141,132 +154,6 @@ public class CActivityService extends CEntityOfProjectService<CActivity>
 			LOGGER.warn("Error initializing lazy fields for CActivity with ID: {}",
 				entity.getId(), e);
 		}
-	}
-
-	/**
-	 * @deprecated Use entity setters directly instead of this auxiliary method. This
-	 *             method is temporary for compatibility and will be removed.
-	 */
-	@Deprecated
-	@Transactional
-	public CActivity setActivityType(final CActivity activity,
-		final CActivityType activityType, final String description) {
-
-		if (activity == null) {
-			return null;
-		}
-		activity.setActivityType(activityType);
-
-		if ((description != null) && !description.isEmpty()) {
-			activity.setDescription(description);
-		}
-		return save(activity);
-	}
-
-	/**
-	 * @deprecated Use entity setters directly instead of this auxiliary method. This
-	 *             method is temporary for compatibility and will be removed.
-	 */
-	@Deprecated
-	@Transactional
-	public CActivity setAssignedUsers(final CActivity activity, final CUser assignedTo,
-		final CUser createdBy) {
-
-		if (activity == null) {
-			return null;
-		}
-
-		if (assignedTo != null) {
-			activity.setAssignedTo(assignedTo);
-		}
-
-		if (createdBy != null) {
-			activity.setCreatedBy(createdBy);
-		}
-		return save(activity);
-	}
-
-	/**
-	 * @deprecated Use entity setters directly instead of this auxiliary method. This
-	 *             method is temporary for compatibility and will be removed.
-	 */
-	@Deprecated
-	@Transactional
-	public CActivity setDateInfo(final CActivity activity, final LocalDate startDate,
-		final LocalDate dueDate, final LocalDate completionDate) {
-
-		if (activity == null) {
-			return null;
-		}
-
-		if (startDate != null) {
-			activity.setStartDate(startDate);
-		}
-
-		if (dueDate != null) {
-			activity.setDueDate(dueDate);
-		}
-
-		if (completionDate != null) {
-			activity.setCompletionDate(completionDate);
-		}
-		return save(activity);
-	}
-
-	/**
-	 * @deprecated Use entity setters directly instead of this auxiliary method. This
-	 *             method is temporary for compatibility and will be removed.
-	 */
-	@Deprecated
-	@Transactional
-	public CActivity setStatusAndPriority(final CActivity activity,
-		final CActivityStatus status, final CActivityPriority priority,
-		final Integer progressPercentage) {
-
-		if (activity == null) {
-			return null;
-		}
-
-		if (status != null) {
-			activity.setStatus(status);
-		}
-
-		if (priority != null) {
-			activity.setPriority(priority);
-		}
-
-		if (progressPercentage != null) {
-			activity.setProgressPercentage(progressPercentage);
-		}
-		return save(activity);
-	}
-
-	/**
-	 * @deprecated Use entity setters directly instead of this auxiliary method. This
-	 *             method is temporary for compatibility and will be removed.
-	 */
-	@Deprecated
-	@Transactional
-	public CActivity setTimeTracking(final CActivity activity,
-		final BigDecimal estimatedHours, final BigDecimal actualHours,
-		final BigDecimal remainingHours) {
-
-		if (activity == null) {
-			return null;
-		}
-
-		if (estimatedHours != null) {
-			activity.setEstimatedHours(estimatedHours);
-		}
-
-		if (actualHours != null) {
-			activity.setActualHours(actualHours);
-		}
-
-		if (remainingHours != null) {
-			activity.setRemainingHours(remainingHours);
-		}
-		return save(activity);
 	}
 
 	@Override

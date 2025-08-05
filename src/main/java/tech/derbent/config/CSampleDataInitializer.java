@@ -239,17 +239,20 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivity frontendDev = new CActivity("Frontend Development", project);
 		final CActivityType developmentType =
 			findActivityTypeByNameAndProject("Development", project);
-		activityService.setActivityType(frontendDev, developmentType,
-			"Develop responsive user interface components using modern frameworks");
+		frontendDev.setActivityType(developmentType);
+		frontendDev.setDescription("Develop responsive user interface components using modern frameworks");
 		final CUser dev1 = findUserByLogin("msahin");
 		final CUser manager = findUserByLogin("mkaradeniz");
-		activityService.setAssignedUsers(frontendDev, dev1, manager);
-		activityService.setTimeTracking(frontendDev, new BigDecimal("32.00"),
-			new BigDecimal("28.00"), new BigDecimal("4.00"));
-		activityService.setDateInfo(frontendDev, LocalDate.now().minusDays(12),
-			LocalDate.now().plusDays(8), null);
+		frontendDev.setAssignedTo(dev1);
+		frontendDev.setCreatedBy(manager);
+		frontendDev.setEstimatedHours(new BigDecimal("32.00"));
+		frontendDev.setActualHours(new BigDecimal("28.00"));
+		frontendDev.setRemainingHours(new BigDecimal("4.00"));
+		frontendDev.setStartDate(LocalDate.now().minusDays(12));
+		frontendDev.setDueDate(LocalDate.now().plusDays(8));
 		final CActivityStatus inProgressStatus = findActivityStatusByName("In Progress");
-		activityService.setStatusAndPriority(frontendDev, inProgressStatus, null, 70);
+		frontendDev.setStatus(inProgressStatus);
+		frontendDev.setProgressPercentage(70);
 		commentService.createComment("Frontend development started with React components",
 			frontendDev, dev1);
 		commentService.createComment("Implemented responsive design patterns",
@@ -258,16 +261,19 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			frontendDev, manager);
 		// Database Migration Activity
 		final CActivity dbMigration = new CActivity("Database Migration", project);
-		activityService.setActivityType(dbMigration, developmentType,
-			"Migrate legacy data to new database schema");
+		dbMigration.setActivityType(developmentType);
+		dbMigration.setDescription("Migrate legacy data to new database schema");
 		final CUser admin = findUserByLogin("admin");
-		activityService.setAssignedUsers(dbMigration, admin, manager);
-		activityService.setTimeTracking(dbMigration, new BigDecimal("20.00"),
-			new BigDecimal("5.00"), new BigDecimal("15.00"));
-		activityService.setDateInfo(dbMigration, LocalDate.now().plusDays(5),
-			LocalDate.now().plusDays(15), null);
+		dbMigration.setAssignedTo(admin);
+		dbMigration.setCreatedBy(manager);
+		dbMigration.setEstimatedHours(new BigDecimal("20.00"));
+		dbMigration.setActualHours(new BigDecimal("5.00"));
+		dbMigration.setRemainingHours(new BigDecimal("15.00"));
+		dbMigration.setStartDate(LocalDate.now().plusDays(5));
+		dbMigration.setDueDate(LocalDate.now().plusDays(15));
 		final CActivityStatus notStartedStatus = findActivityStatusByName("Not Started");
-		activityService.setStatusAndPriority(dbMigration, notStartedStatus, null, 0);
+		dbMigration.setStatus(notStartedStatus);
+		dbMigration.setProgressPercentage(0);
 		commentService.createComment("Database migration plan prepared", dbMigration,
 			admin);
 		commentService.createComment("Waiting for backend API completion", dbMigration,
@@ -287,17 +293,21 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivity securityAudit = new CActivity("Security Audit", project);
 		final CActivityType researchType =
 			findActivityTypeByNameAndProject("Research", project);
-		activityService.setActivityType(securityAudit, researchType,
+		securityAudit.setActivityType(researchType);
+		securityAudit.setDescription(
 			"Comprehensive security assessment and vulnerability analysis");
 		final CUser admin = findUserByLogin("admin");
 		final CUser manager = findUserByLogin("mkaradeniz");
-		activityService.setAssignedUsers(securityAudit, admin, manager);
-		activityService.setTimeTracking(securityAudit, new BigDecimal("25.00"),
-			new BigDecimal("0.00"), new BigDecimal("25.00"));
-		activityService.setDateInfo(securityAudit, LocalDate.now().plusDays(10),
-			LocalDate.now().plusDays(18), null);
+		securityAudit.setAssignedTo(admin);
+		securityAudit.setCreatedBy(manager);
+		securityAudit.setEstimatedHours(new BigDecimal("25.00"));
+		securityAudit.setActualHours(new BigDecimal("0.00"));
+		securityAudit.setRemainingHours(new BigDecimal("25.00"));
+		securityAudit.setStartDate(LocalDate.now().plusDays(10));
+		securityAudit.setDueDate(LocalDate.now().plusDays(18));
 		final CActivityStatus notStartedStatus = findActivityStatusByName("Not Started");
-		activityService.setStatusAndPriority(securityAudit, notStartedStatus, null, 0);
+		securityAudit.setStatus(notStartedStatus);
+		securityAudit.setProgressPercentage(0);
 		commentService.createComment("Security audit requirements defined", securityAudit,
 			admin);
 		commentService.createComment("External security firm selected for audit",
@@ -306,16 +316,20 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivity serverMigration = new CActivity("Server Migration", project);
 		final CActivityType developmentType =
 			findActivityTypeByNameAndProject("Development", project);
-		activityService.setActivityType(serverMigration, developmentType,
+		serverMigration.setActivityType(developmentType);
+		serverMigration.setDescription(
 			"Migrate applications to new server infrastructure");
 		final CUser dev1 = findUserByLogin("bozkan");
-		activityService.setAssignedUsers(serverMigration, dev1, admin);
-		activityService.setTimeTracking(serverMigration, new BigDecimal("35.00"),
-			new BigDecimal("20.00"), new BigDecimal("15.00"));
-		activityService.setDateInfo(serverMigration, LocalDate.now().minusDays(8),
-			LocalDate.now().plusDays(12), null);
+		serverMigration.setAssignedTo(dev1);
+		serverMigration.setCreatedBy(admin);
+		serverMigration.setEstimatedHours(new BigDecimal("35.00"));
+		serverMigration.setActualHours(new BigDecimal("20.00"));
+		serverMigration.setRemainingHours(new BigDecimal("15.00"));
+		serverMigration.setStartDate(LocalDate.now().minusDays(8));
+		serverMigration.setDueDate(LocalDate.now().plusDays(12));
 		final CActivityStatus onHoldStatus = findActivityStatusByName("On Hold");
-		activityService.setStatusAndPriority(serverMigration, onHoldStatus, null, 55);
+		serverMigration.setStatus(onHoldStatus);
+		serverMigration.setProgressPercentage(55);
 		commentService.createComment("Server migration plan created", serverMigration,
 			dev1);
 		commentService.createComment("Testing environment successfully migrated",
@@ -337,17 +351,22 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivity codeReview = new CActivity("Code Review Process", project);
 		final CActivityType testingType =
 			findActivityTypeByNameAndProject("Testing", project);
-		activityService.setActivityType(codeReview, testingType,
+		codeReview.setActivityType(testingType);
+		codeReview.setDescription(
 			"Comprehensive code review and quality assurance");
 		final CUser analyst = findUserByLogin("ademir");
 		final CUser manager = findUserByLogin("mkaradeniz");
-		activityService.setAssignedUsers(codeReview, analyst, manager);
-		activityService.setTimeTracking(codeReview, new BigDecimal("12.00"),
-			new BigDecimal("12.00"), new BigDecimal("0.00"));
-		activityService.setDateInfo(codeReview, LocalDate.now().minusDays(3),
-			LocalDate.now().minusDays(1), LocalDate.now().minusDays(1));
+		codeReview.setAssignedTo(analyst);
+		codeReview.setCreatedBy(manager);
+		codeReview.setEstimatedHours(new BigDecimal("12.00"));
+		codeReview.setActualHours(new BigDecimal("12.00"));
+		codeReview.setRemainingHours(new BigDecimal("0.00"));
+		codeReview.setStartDate(LocalDate.now().minusDays(3));
+		codeReview.setDueDate(LocalDate.now().minusDays(1));
+		codeReview.setCompletionDate(LocalDate.now().minusDays(1));
 		final CActivityStatus completedStatus = findActivityStatusByName("Completed");
-		activityService.setStatusAndPriority(codeReview, completedStatus, null, 100);
+		codeReview.setStatus(completedStatus);
+		codeReview.setProgressPercentage(100);
 		commentService.createComment("Code review process initiated", codeReview,
 			manager);
 		commentService.createComment("Found minor issues, created fix recommendations",
@@ -356,16 +375,20 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			analyst);
 		// Performance Testing Activity
 		final CActivity perfTesting = new CActivity("Performance Testing", project);
-		activityService.setActivityType(perfTesting, testingType,
+		perfTesting.setActivityType(testingType);
+		perfTesting.setDescription(
 			"Load testing and performance optimization");
 		final CUser dev2 = findUserByLogin("bozkan");
-		activityService.setAssignedUsers(perfTesting, dev2, manager);
-		activityService.setTimeTracking(perfTesting, new BigDecimal("18.00"),
-			new BigDecimal("10.00"), new BigDecimal("8.00"));
-		activityService.setDateInfo(perfTesting, LocalDate.now().minusDays(5),
-			LocalDate.now().plusDays(2), null);
+		perfTesting.setAssignedTo(dev2);
+		perfTesting.setCreatedBy(manager);
+		perfTesting.setEstimatedHours(new BigDecimal("18.00"));
+		perfTesting.setActualHours(new BigDecimal("10.00"));
+		perfTesting.setRemainingHours(new BigDecimal("8.00"));
+		perfTesting.setStartDate(LocalDate.now().minusDays(5));
+		perfTesting.setDueDate(LocalDate.now().plusDays(2));
 		final CActivityStatus inProgressStatus = findActivityStatusByName("In Progress");
-		activityService.setStatusAndPriority(perfTesting, inProgressStatus, null, 60);
+		perfTesting.setStatus(inProgressStatus);
+		perfTesting.setProgressPercentage(60);
 		commentService.createComment("Performance testing framework setup", perfTesting,
 			dev2);
 		commentService.createComment("Baseline performance metrics collected",
@@ -411,21 +434,25 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			LOGGER.warn("Development activity type not found for project, using null");
 		}
 		// Set activity type and description using auxiliary method
-		activityService.setActivityType(backendDev, developmentType,
+		backendDev.setActivityType(developmentType);
+		backendDev.setDescription(
 			"Develop REST API endpoints for user management and authentication");
 		// Set assigned users using auxiliary method
 		final CUser manager = findUserByLogin("mkaradeniz");
 		final CUser admin = findUserByLogin("admin");
-		activityService.setAssignedUsers(backendDev, manager, admin);
-		// Set time tracking using auxiliary method
-		activityService.setTimeTracking(backendDev, new BigDecimal("40.00"),
-			new BigDecimal("35.50"), new BigDecimal("4.50"));
+		backendDev.setAssignedTo(manager);
+		backendDev.setCreatedBy(admin);
+		// Set time tracking using entity methods
+		backendDev.setEstimatedHours(new BigDecimal("40.00"));
+		backendDev.setActualHours(new BigDecimal("35.50"));
+		backendDev.setRemainingHours(new BigDecimal("4.50"));
 		// Set date information using auxiliary method
-		activityService.setDateInfo(backendDev, LocalDate.now().minusDays(10),
-			LocalDate.now().plusDays(5), null);
+		backendDev.setStartDate(LocalDate.now().minusDays(10));
+		backendDev.setDueDate(LocalDate.now().plusDays(5));
 		// Set status and priority using auxiliary method
 		final CActivityStatus inProgressStatus = findActivityStatusByName("In Progress");
-		activityService.setStatusAndPriority(backendDev, inProgressStatus, null, 75);
+		backendDev.setStatus(inProgressStatus);
+		backendDev.setProgressPercentage(75);
 		// Create comments
 		commentService.createComment("Initial backend API development started",
 			backendDev, admin);
@@ -781,30 +808,26 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CMeeting meeting = new CMeeting("Weekly Project Status Meeting", project);
 		meeting.setDescription(
 			"Weekly status update on project progress, blockers discussion, and next steps planning");
-		// Set meeting details using auxiliary method
-		meetingService.setMeetingDetails(meeting, null,
-			LocalDateTime.now().plusDays(1).withHour(14).withMinute(0),
-			LocalDateTime.now().plusDays(1).withHour(15).withMinute(0),
-			"Conference Room A");
-		// Set meeting content using auxiliary method
+		// Set meeting details using entity methods
+		meeting.setMeetingDate(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0));
+		meeting.setEndDate(LocalDateTime.now().plusDays(1).withHour(15).withMinute(0));
+		meeting.setLocation("Conference Room A");
+		// Set meeting content using entity methods
 		final CUser responsible = findUserByLogin("mkaradeniz");
-		meetingService.setMeetingContent(meeting,
-			"Weekly status update on project progress, blockers discussion, and next steps planning",
-			null, responsible);
+		meeting.setAgenda("Weekly status update on project progress, blockers discussion, and next steps planning");
+		meeting.setResponsible(responsible);
 		// Set participants using auxiliary method
 		final Set<CUser> participants = new HashSet<>();
 		participants.add(findUserByLogin("admin"));
 		participants.add(findUserByLogin("mkaradeniz"));
 		participants.add(findUserByLogin("bozkan"));
 		participants.add(findUserByLogin("msahin"));
-		meetingService.setParticipants(meeting, participants);
+		meeting.setParticipants(participants);
 		// Set meeting status using proper status entity
 		final CMeetingStatus scheduledStatus = findMeetingStatusByName("Scheduled");
 		meeting.setStatus(scheduledStatus);
-		// Set meeting status using auxiliary method
-		meetingService.setMeetingStatus(meeting, scheduledStatus,
-			"Meeting agenda prepared, participants notified",
-			"Project management system");
+		meeting.setMinutes("Meeting agenda prepared");
+		meeting.setLinkedElement("Project management system");
 		LOGGER
 			.info("Sample project meeting created successfully using auxiliary methods");
 	}
@@ -947,21 +970,25 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			LOGGER.warn("Design activity type not found for project, using null");
 		}
 		// Set activity type and description using auxiliary method
-		activityService.setActivityType(archDesign, designType,
+		archDesign.setActivityType(designType);
+		archDesign.setDescription(
 			"Design scalable system architecture for infrastructure modernization");
 		// Set assigned users using auxiliary method
 		final CUser teamMember2 = findUserByLogin("bozkan");
 		final CUser admin = findUserByLogin("admin");
-		activityService.setAssignedUsers(archDesign, teamMember2, admin);
-		// Set time tracking using auxiliary method
-		activityService.setTimeTracking(archDesign, new BigDecimal("60.00"),
-			new BigDecimal("45.00"), new BigDecimal("15.00"));
+		archDesign.setAssignedTo(teamMember2);
+		archDesign.setCreatedBy(admin);
+		// Set time tracking using entity methods
+		archDesign.setEstimatedHours(new BigDecimal("60.00"));
+		archDesign.setActualHours(new BigDecimal("45.00"));
+		archDesign.setRemainingHours(new BigDecimal("15.00"));
 		// Set date information using auxiliary method
-		activityService.setDateInfo(archDesign, LocalDate.now().minusDays(15),
-			LocalDate.now().plusDays(10), null);
+		archDesign.setStartDate(LocalDate.now().minusDays(15));
+		archDesign.setDueDate(LocalDate.now().plusDays(10));
 		// Set status and priority using auxiliary method
 		final CActivityStatus onHoldStatus = findActivityStatusByName("On Hold");
-		activityService.setStatusAndPriority(archDesign, onHoldStatus, null, 65);
+		archDesign.setStatus(onHoldStatus);
+		archDesign.setProgressPercentage(65);
 		// Create comments
 		commentService.createComment("Initial system architecture design phase started",
 			archDesign, admin);
@@ -1082,21 +1109,26 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			LOGGER.warn("Documentation activity type not found for project, using null");
 		}
 		// Set activity type and description using auxiliary method
-		activityService.setActivityType(techDoc, documentationType,
+		techDoc.setActivityType(documentationType);
+		techDoc.setDescription(
 			"Update and enhance technical documentation for customer experience features");
 		// Set assigned users using auxiliary method
 		final CUser analyst = findUserByLogin("ademir");
 		final CUser manager = findUserByLogin("mkaradeniz");
-		activityService.setAssignedUsers(techDoc, analyst, manager);
-		// Set time tracking using auxiliary method (completed activity)
-		activityService.setTimeTracking(techDoc, new BigDecimal("16.00"),
-			new BigDecimal("16.00"), new BigDecimal("0.00"));
-		// Set date information using auxiliary method (completed activity)
-		activityService.setDateInfo(techDoc, LocalDate.now().minusDays(5),
-			LocalDate.now().minusDays(1), LocalDate.now().minusDays(1));
+		techDoc.setAssignedTo(analyst);
+		techDoc.setCreatedBy(manager);
+		// Set time tracking using entity methods (completed activity)
+		techDoc.setEstimatedHours(new BigDecimal("16.00"));
+		techDoc.setActualHours(new BigDecimal("16.00"));
+		techDoc.setRemainingHours(new BigDecimal("0.00"));
+		// Set date information using entity methods (completed activity)
+		techDoc.setStartDate(LocalDate.now().minusDays(5));
+		techDoc.setDueDate(LocalDate.now().minusDays(1));
+		techDoc.setCompletionDate(LocalDate.now().minusDays(1));
 		// Set status and priority using auxiliary method (completed activity)
 		final CActivityStatus completedStatus = findActivityStatusByName("Completed");
-		activityService.setStatusAndPriority(techDoc, completedStatus, null, 100);
+		techDoc.setStatus(completedStatus);
+		techDoc.setProgressPercentage(100);
 		// Create comments
 		commentService.createComment(
 			"Initial technical documentation review and updates started", techDoc,
@@ -1134,21 +1166,25 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			LOGGER.warn("Testing activity type not found for project, using null");
 		}
 		// Set activity type and description using auxiliary method
-		activityService.setActivityType(uiTesting, testingType,
+		uiTesting.setActivityType(testingType);
+		uiTesting.setDescription(
 			"Comprehensive testing of user interface components and workflows");
 		// Set assigned users using auxiliary method
 		final CUser teamMember1 = findUserByLogin("msahin");
 		final CUser manager = findUserByLogin("mkaradeniz");
-		activityService.setAssignedUsers(uiTesting, teamMember1, manager);
-		// Set time tracking using auxiliary method
-		activityService.setTimeTracking(uiTesting, new BigDecimal("24.00"),
-			new BigDecimal("20.00"), new BigDecimal("4.00"));
+		uiTesting.setAssignedTo(teamMember1);
+		uiTesting.setCreatedBy(manager);
+		// Set time tracking using entity methods
+		uiTesting.setEstimatedHours(new BigDecimal("24.00"));
+		uiTesting.setActualHours(new BigDecimal("20.00"));
+		uiTesting.setRemainingHours(new BigDecimal("4.00"));
 		// Set date information using auxiliary method
-		activityService.setDateInfo(uiTesting, LocalDate.now().minusDays(7),
-			LocalDate.now().plusDays(3), null);
+		uiTesting.setStartDate(LocalDate.now().minusDays(7));
+		uiTesting.setDueDate(LocalDate.now().plusDays(3));
 		// Set status and priority using auxiliary method
 		final CActivityStatus inProgressStatus = findActivityStatusByName("In Progress");
-		activityService.setStatusAndPriority(uiTesting, inProgressStatus, null, 85);
+		uiTesting.setStatus(inProgressStatus);
+		uiTesting.setProgressPercentage(85);
 		// Create comments
 		commentService.createComment(
 			"UI testing activity initiated with comprehensive test plan", uiTesting,
