@@ -381,8 +381,9 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CUser dev2 = findUserByLogin("bozkan");
 		perfTesting.setAssignedTo(dev2);
 		perfTesting.setCreatedBy(manager);
-		activityService.setTimeTracking(perfTesting, new BigDecimal("18.00"),
-			new BigDecimal("10.00"), new BigDecimal("8.00"));
+		perfTesting.setEstimatedHours(new BigDecimal("18.00"));
+		perfTesting.setActualHours(new BigDecimal("10.00"));
+		perfTesting.setRemainingHours(new BigDecimal("8.00"));
 		perfTesting.setStartDate(LocalDate.now().minusDays(5));
 		perfTesting.setDueDate(LocalDate.now().plusDays(2));
 		final CActivityStatus inProgressStatus = findActivityStatusByName("In Progress");
@@ -441,9 +442,10 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CUser admin = findUserByLogin("admin");
 		backendDev.setAssignedTo(manager);
 		backendDev.setCreatedBy(admin);
-		// Set time tracking using auxiliary method
-		activityService.setTimeTracking(backendDev, new BigDecimal("40.00"),
-			new BigDecimal("35.50"), new BigDecimal("4.50"));
+		// Set time tracking using entity methods
+		backendDev.setEstimatedHours(new BigDecimal("40.00"));
+		backendDev.setActualHours(new BigDecimal("35.50"));
+		backendDev.setRemainingHours(new BigDecimal("4.50"));
 		// Set date information using auxiliary method
 		backendDev.setStartDate(LocalDate.now().minusDays(10));
 		backendDev.setDueDate(LocalDate.now().plusDays(5));
@@ -806,30 +808,26 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CMeeting meeting = new CMeeting("Weekly Project Status Meeting", project);
 		meeting.setDescription(
 			"Weekly status update on project progress, blockers discussion, and next steps planning");
-		// Set meeting details using auxiliary method
-		meetingService.setMeetingDetails(meeting, null,
-			LocalDateTime.now().plusDays(1).withHour(14).withMinute(0),
-			LocalDateTime.now().plusDays(1).withHour(15).withMinute(0),
-			"Conference Room A");
-		// Set meeting content using auxiliary method
+		// Set meeting details using entity methods
+		meeting.setMeetingDate(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0));
+		meeting.setEndDate(LocalDateTime.now().plusDays(1).withHour(15).withMinute(0));
+		meeting.setLocation("Conference Room A");
+		// Set meeting content using entity methods
 		final CUser responsible = findUserByLogin("mkaradeniz");
-		meetingService.setMeetingContent(meeting,
-			"Weekly status update on project progress, blockers discussion, and next steps planning",
-			null, responsible);
+		meeting.setAgenda("Weekly status update on project progress, blockers discussion, and next steps planning");
+		meeting.setResponsible(responsible);
 		// Set participants using auxiliary method
 		final Set<CUser> participants = new HashSet<>();
 		participants.add(findUserByLogin("admin"));
 		participants.add(findUserByLogin("mkaradeniz"));
 		participants.add(findUserByLogin("bozkan"));
 		participants.add(findUserByLogin("msahin"));
-		meetingService.setParticipants(meeting, participants);
+		meeting.setParticipants(participants);
 		// Set meeting status using proper status entity
 		final CMeetingStatus scheduledStatus = findMeetingStatusByName("Scheduled");
 		meeting.setStatus(scheduledStatus);
-		// Set meeting status using auxiliary method
-		meetingService.setMeetingStatus(meeting, scheduledStatus,
-			"Meeting agenda prepared, participants notified",
-			"Project management system");
+		meeting.setMinutes("Meeting agenda prepared");
+		meeting.setLinkedElement("Project management system");
 		LOGGER
 			.info("Sample project meeting created successfully using auxiliary methods");
 	}
@@ -980,9 +978,10 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CUser admin = findUserByLogin("admin");
 		archDesign.setAssignedTo(teamMember2);
 		archDesign.setCreatedBy(admin);
-		// Set time tracking using auxiliary method
-		activityService.setTimeTracking(archDesign, new BigDecimal("60.00"),
-			new BigDecimal("45.00"), new BigDecimal("15.00"));
+		// Set time tracking using entity methods
+		archDesign.setEstimatedHours(new BigDecimal("60.00"));
+		archDesign.setActualHours(new BigDecimal("45.00"));
+		archDesign.setRemainingHours(new BigDecimal("15.00"));
 		// Set date information using auxiliary method
 		archDesign.setStartDate(LocalDate.now().minusDays(15));
 		archDesign.setDueDate(LocalDate.now().plusDays(10));
@@ -1118,12 +1117,14 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CUser manager = findUserByLogin("mkaradeniz");
 		techDoc.setAssignedTo(analyst);
 		techDoc.setCreatedBy(manager);
-		// Set time tracking using auxiliary method (completed activity)
-		activityService.setTimeTracking(techDoc, new BigDecimal("16.00"),
-			new BigDecimal("16.00"), new BigDecimal("0.00"));
-		// Set date information using auxiliary method (completed activity)
-		activityService.setDateInfo(techDoc, LocalDate.now().minusDays(5),
-			LocalDate.now().minusDays(1), LocalDate.now().minusDays(1));
+		// Set time tracking using entity methods (completed activity)
+		techDoc.setEstimatedHours(new BigDecimal("16.00"));
+		techDoc.setActualHours(new BigDecimal("16.00"));
+		techDoc.setRemainingHours(new BigDecimal("0.00"));
+		// Set date information using entity methods (completed activity)
+		techDoc.setStartDate(LocalDate.now().minusDays(5));
+		techDoc.setDueDate(LocalDate.now().minusDays(1));
+		techDoc.setCompletionDate(LocalDate.now().minusDays(1));
 		// Set status and priority using auxiliary method (completed activity)
 		final CActivityStatus completedStatus = findActivityStatusByName("Completed");
 		techDoc.setStatus(completedStatus);
@@ -1173,9 +1174,10 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CUser manager = findUserByLogin("mkaradeniz");
 		uiTesting.setAssignedTo(teamMember1);
 		uiTesting.setCreatedBy(manager);
-		// Set time tracking using auxiliary method
-		activityService.setTimeTracking(uiTesting, new BigDecimal("24.00"),
-			new BigDecimal("20.00"), new BigDecimal("4.00"));
+		// Set time tracking using entity methods
+		uiTesting.setEstimatedHours(new BigDecimal("24.00"));
+		uiTesting.setActualHours(new BigDecimal("20.00"));
+		uiTesting.setRemainingHours(new BigDecimal("4.00"));
 		// Set date information using auxiliary method
 		uiTesting.setStartDate(LocalDate.now().minusDays(7));
 		uiTesting.setDueDate(LocalDate.now().plusDays(3));
