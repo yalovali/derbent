@@ -15,7 +15,7 @@ import tech.derbent.config.CSampleDataInitializer;
 @Service
 public class DatabaseResetService {
 
-    @Autowired
+    @Autowired(required = false)
     private CSampleDataInitializer sampleDataInitializer;
 
     protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
@@ -57,8 +57,12 @@ public class DatabaseResetService {
         }
 
         // Reinitialize sample data
-        LOGGER.info("Reinitializing sample data...");
-        sampleDataInitializer.loadSampleData();
+        if (sampleDataInitializer != null) {
+            LOGGER.info("Reinitializing sample data...");
+            sampleDataInitializer.loadSampleData();
+        } else {
+            LOGGER.info("Sample data initializer not available, skipping sample data reload");
+        }
         LOGGER.info("Database reset completed successfully");
     }
 }

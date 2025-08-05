@@ -30,7 +30,7 @@ run_playwright_tests() {
     install_playwright_browsers
     
     # Run the tests with Playwright-specific profile
-    if mvn test -Dtest="$test_class" -Dspring.profiles.active=test -Dplaywirght.headless=true; then
+    if mvn test -Dtest="$test_class" -Dspring.profiles.active=test -Dplaywright.headless=true; then
         echo "✅ $test_name completed successfully!"
         
         # Show screenshot count

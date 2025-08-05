@@ -16,11 +16,12 @@ import ui_tests.tech.derbent.ui.automation.CApplicationGeneric_UITest;
  * CActivityStatusViewPlaywrightTest - Tests for activity status view focusing on lazy
  * loading fixes and navigation behavior after save operations.
  */
-@SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT, classes = tech.derbent.Application.class)
 @TestPropertySource (properties = {
 	"spring.datasource.url=jdbc:h2:mem:testdb",
-	"spring.jpa.hibernate.ddl-auto=create-drop" }
-)
+	"spring.jpa.hibernate.ddl-auto=create-drop",
+	"spring.profiles.active=test"
+})
 public class CActivityStatusViewPlaywrightTest extends CApplicationGeneric_UITest {
 
 	private static final Logger LOGGER =

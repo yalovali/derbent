@@ -30,11 +30,12 @@ import ui_tests.tech.derbent.ui.automation.CBaseUITest;
  * Color-aware ComboBox components work properly 5. Entry forms show status and type
  * fields properly
  */
-@SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT, classes = tech.derbent.Application.class)
 @TestPropertySource (properties = {
 	"spring.datasource.url=jdbc:h2:mem:testdb",
-	"spring.jpa.hibernate.ddl-auto=create-drop" }
-)
+	"spring.jpa.hibernate.ddl-auto=create-drop",
+	"spring.profiles.active=test"
+})
 public class UserColorAndEntryViewsPlaywrightTest extends CBaseUITest {
 
 	private static final Logger LOGGER =

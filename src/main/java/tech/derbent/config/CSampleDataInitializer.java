@@ -54,6 +54,8 @@ import tech.derbent.users.domain.CUserRole;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.CUserTypeService;
 
+import org.springframework.context.annotation.Profile;
+
 /**
  * CSampleDataInitializer - Enhanced sample data initializer following coding guidelines.
  * Layer: Configuration (MVC) This component runs after the application starts and creates
@@ -67,6 +69,7 @@ import tech.derbent.users.service.CUserTypeService;
  * entities as available
  */
 @Component
+@Profile("!test")
 public class CSampleDataInitializer implements ApplicationRunner {
 
 	private static final Logger LOGGER =
