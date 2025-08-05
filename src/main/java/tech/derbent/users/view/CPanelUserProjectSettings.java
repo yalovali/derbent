@@ -116,7 +116,7 @@ public class CPanelUserProjectSettings extends CPanelUserProjectBase<CUser> {
 		final java.util.function.Supplier<List<CUserProjectSettings>> getProjectSettings,
 		final java.util.function.Consumer<List<CUserProjectSettings>> setProjectSettings,
 		final Runnable saveEntity) {
-		LOGGER.info("Setting project settings accessors");
+		LOGGER.debug("Setting project settings accessors");
 		setSettingsAccessors(getProjectSettings, setProjectSettings, saveEntity);
 	}
 

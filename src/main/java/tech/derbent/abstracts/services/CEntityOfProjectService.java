@@ -37,7 +37,7 @@ public abstract class CEntityOfProjectService<
 	 */
 	@Transactional (readOnly = true)
 	public long countByProject(final CProject project) {
-		LOGGER.info("countByProject called with project: {} for {}",
+		LOGGER.debug("countByProject called with project: {} for {}",
 			project != null ? project.getName() : "null", getClass().getSimpleName());
 
 		if (project == null) {
@@ -77,7 +77,7 @@ public abstract class CEntityOfProjectService<
 	 */
 	@Transactional (readOnly = true)
 	public List<EntityClass> findEntriesByProject(final CProject project) {
-		LOGGER.info("findEntriesByProject called for project: {}",
+		LOGGER.debug("findEntriesByProject called for project: {}",
 			project != null ? project.getName() : "null");
 
 		if (project == null) {
@@ -110,7 +110,7 @@ public abstract class CEntityOfProjectService<
 	@Transactional (readOnly = true)
 	public List<EntityClass> findEntriesByProject(final CProject project,
 		final Pageable pageable) {
-		LOGGER.info("findEntriesByProject called with project: {} and pageable for {}",
+		LOGGER.debug("findEntriesByProject called with project: {} and pageable for {}",
 			project != null ? project.getName() : "null", getClass().getSimpleName());
 
 		if (project == null) {
