@@ -60,6 +60,28 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 	}
 
 	/**
+	 * Find user by ID with optimized eager loading.
+	 * Uses repository method with JOIN FETCH to prevent N+1 queries.
+	 * @param id the user ID
+	 * @return the user with eagerly loaded associations, or null if not found
+	 */
+	public CUser findById(final Long id) {
+		if (id == null) {
+			return null;
+		}
+		return ((CUserRepository) repository).findByIdWithEagerLoading(id).orElse(null);
+	}
+
+	/**
+	 * Find all enabled users with eager loading for UI components.
+	 * Optimized for dropdowns, comboboxes, and selection components.
+	 * @return List of enabled users with eager loaded associations
+	 */
+	public List<CUser> findAllEnabledWithEagerLoading() {
+		return ((CUserRepository) repository).findAllEnabledWithEagerLoading();
+	}
+
+	/**
 	 * Creates a new login user with encoded password. This method handles password
 	 * encoding automatically.
 	 * @param username      the username for login

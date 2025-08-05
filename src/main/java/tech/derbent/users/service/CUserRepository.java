@@ -32,4 +32,28 @@ public interface CUserRepository extends CAbstractNamedRepository<CUser> {
 	 */
 	@Query ("SELECT u FROM CUser u WHERE u.login = :username")
 	Optional<CUser> findByUsername(@Param ("username") String username);
+	
+	/**
+	 * Find user by ID with eager loading of commonly accessed associations.
+	 * This prevents N+1 queries when accessing user details.
+	 * @param id the user ID
+	 * @return Optional containing the user with eagerly loaded associations
+	 */
+	@Query ("SELECT u FROM CUser u " +
+			"LEFT JOIN FETCH u.userType " +
+			"LEFT JOIN FETCH u.company " +
+			"WHERE u.id = :id")
+	Optional<CUser> findByIdWithEagerLoading(@Param ("id") Long id);
+	
+	/**
+	 * Find all enabled users with eager loading for dropdown/selection purposes.
+	 * Optimized for UI components that need user information.
+	 * @return List of enabled users with eager loaded associations
+	 */
+	@Query ("SELECT u FROM CUser u " +
+			"LEFT JOIN FETCH u.userType " +
+			"LEFT JOIN FETCH u.company " +
+			"WHERE u.enabled = true " +
+			"ORDER BY u.name")
+	List<CUser> findAllEnabledWithEagerLoading();
 }

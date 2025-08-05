@@ -73,9 +73,22 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting>
 	protected Class<CMeeting> getEntityClass() { return CMeeting.class; }
 
 	/**
-	 * Simplified lazy field initialization for CMeeting entity. With eager loading of
-	 * small entities (meetingType, status, responsible), this mainly handles complex
-	 * collections like participants and attendees.
+	 * Find meeting by ID with optimized eager loading.
+	 * Uses repository method with JOIN FETCH to prevent N+1 queries.
+	 * @param id the meeting ID
+	 * @return the meeting with eagerly loaded associations, or null if not found
+	 */
+	public CMeeting findById(final Long id) {
+		if (id == null) {
+			return null;
+		}
+		return ((CMeetingRepository) repository).findByIdWithEagerLoading(id).orElse(null);
+	}
+
+	/**
+	 * Optimized lazy field initialization for CMeeting entity.
+	 * With improved repository queries using JOIN FETCH, this mainly handles
+	 * complex collections like participants and attendees only when needed.
 	 * @param entity the CMeeting entity to initialize
 	 */
 	@Override
@@ -89,11 +102,10 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting>
 		try {
 			// Initialize the entity itself first
 			super.initializeLazyFields(entity);
-			// Initialize remaining lazy collections (participants, attendees are still
-			// lazy)
+			// Initialize only the lazy collections that aren't handled by eager queries
+			// Note: meetingType, status, responsible, relatedActivity are now eagerly loaded via JOIN FETCH
 			initializeLazyRelationship(entity.getParticipants());
 			initializeLazyRelationship(entity.getAttendees());
-			initializeLazyRelationship(entity.getRelatedActivity());
 		} catch (final Exception e) {
 			LOGGER.warn("Error initializing lazy fields for CMeeting with ID: {}",
 				entity.getId(), e);
@@ -115,84 +127,4 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting>
 		return save(entity);
 	}
 
-	/**
-	 * @deprecated Use entity setters directly instead of this auxiliary method.
-	 * This method is temporary for compatibility and will be removed.
-	 */
-	@Deprecated
-	@Transactional
-	public CMeeting setParticipants(final CMeeting meeting, final Set<CUser> participants) {
-		if (meeting == null) return null;
-		if (participants != null && !participants.isEmpty()) {
-			meeting.getParticipants().clear();
-			for (final CUser participant : participants) {
-				if (participant != null) meeting.addParticipant(participant);
-			}
-		}
-		return save(meeting);
-	}
-
-	/**
-	 * @deprecated Use entity setters directly instead of this auxiliary method.
-	 * This method is temporary for compatibility and will be removed.
-	 */
-	@Deprecated
-	@Transactional
-	public CMeeting setAttendees(final CMeeting meeting, final Set<CUser> attendees) {
-		if (meeting == null) return null;
-		if (attendees != null && !attendees.isEmpty()) {
-			meeting.getAttendees().clear();
-			for (final CUser attendee : attendees) {
-				if (attendee != null) meeting.addAttendee(attendee);
-			}
-		}
-		return save(meeting);
-	}
-
-	/**
-	 * @deprecated Use entity setters directly instead of this auxiliary method.
-	 * This method is temporary for compatibility and will be removed.
-	 */
-	@Deprecated
-	@Transactional
-	public CMeeting setMeetingDetails(final CMeeting meeting,
-		final CMeetingType meetingType, final LocalDateTime meetingDate,
-		final LocalDateTime endDate, final String location) {
-		if (meeting == null) return null;
-		if (meetingType != null) meeting.setMeetingType(meetingType);
-		if (meetingDate != null) meeting.setMeetingDate(meetingDate);
-		if (endDate != null) meeting.setEndDate(endDate);
-		if (location != null && !location.isEmpty()) meeting.setLocation(location);
-		return save(meeting);
-	}
-
-	/**
-	 * @deprecated Use entity setters directly instead of this auxiliary method.
-	 * This method is temporary for compatibility and will be removed.
-	 */
-	@Deprecated
-	@Transactional
-	public CMeeting setMeetingContent(final CMeeting meeting, final String agenda,
-		final CActivity relatedActivity, final CUser responsible) {
-		if (meeting == null) return null;
-		if (agenda != null && !agenda.isEmpty()) meeting.setAgenda(agenda);
-		if (relatedActivity != null) meeting.setRelatedActivity(relatedActivity);
-		if (responsible != null) meeting.setResponsible(responsible);
-		return save(meeting);
-	}
-
-	/**
-	 * @deprecated Use entity setters directly instead of this auxiliary method.
-	 * This method is temporary for compatibility and will be removed.
-	 */
-	@Deprecated
-	@Transactional
-	public CMeeting setMeetingStatus(final CMeeting meeting, final CMeetingStatus status,
-		final String minutes, final String linkedElement) {
-		if (meeting == null) return null;
-		if (status != null) meeting.setStatus(status);
-		if (minutes != null && !minutes.isEmpty()) meeting.setMinutes(minutes);
-		if (linkedElement != null && !linkedElement.isEmpty()) meeting.setLinkedElement(linkedElement);
-		return save(meeting);
-	}
 }

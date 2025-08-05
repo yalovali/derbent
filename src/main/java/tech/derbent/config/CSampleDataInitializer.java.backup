@@ -298,16 +298,13 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			"Comprehensive security assessment and vulnerability analysis");
 		final CUser admin = findUserByLogin("admin");
 		final CUser manager = findUserByLogin("mkaradeniz");
-		securityAudit.setAssignedTo(admin);
-		securityAudit.setCreatedBy(manager);
-		securityAudit.setEstimatedHours(new BigDecimal("25.00"));
-		securityAudit.setActualHours(new BigDecimal("0.00"));
-		securityAudit.setRemainingHours(new BigDecimal("25.00"));
-		securityAudit.setStartDate(LocalDate.now().plusDays(10));
-		securityAudit.setDueDate(LocalDate.now().plusDays(18));
+		activityService.setAssignedUsers(securityAudit, admin, manager);
+		activityService.setTimeTracking(securityAudit, new BigDecimal("25.00"),
+			new BigDecimal("0.00"), new BigDecimal("25.00"));
+		activityService.setDateInfo(securityAudit, LocalDate.now().plusDays(10),
+			LocalDate.now().plusDays(18), null);
 		final CActivityStatus notStartedStatus = findActivityStatusByName("Not Started");
-		securityAudit.setStatus(notStartedStatus);
-		securityAudit.setProgressPercentage(0);
+		activityService.setStatusAndPriority(securityAudit, notStartedStatus, null, 0);
 		commentService.createComment("Security audit requirements defined", securityAudit,
 			admin);
 		commentService.createComment("External security firm selected for audit",
@@ -320,16 +317,13 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		serverMigration.setDescription(
 			"Migrate applications to new server infrastructure");
 		final CUser dev1 = findUserByLogin("bozkan");
-		serverMigration.setAssignedTo(dev1);
-		serverMigration.setCreatedBy(admin);
-		serverMigration.setEstimatedHours(new BigDecimal("35.00"));
-		serverMigration.setActualHours(new BigDecimal("20.00"));
-		serverMigration.setRemainingHours(new BigDecimal("15.00"));
-		serverMigration.setStartDate(LocalDate.now().minusDays(8));
-		serverMigration.setDueDate(LocalDate.now().plusDays(12));
+		activityService.setAssignedUsers(serverMigration, dev1, admin);
+		activityService.setTimeTracking(serverMigration, new BigDecimal("35.00"),
+			new BigDecimal("20.00"), new BigDecimal("15.00"));
+		activityService.setDateInfo(serverMigration, LocalDate.now().minusDays(8),
+			LocalDate.now().plusDays(12), null);
 		final CActivityStatus onHoldStatus = findActivityStatusByName("On Hold");
-		serverMigration.setStatus(onHoldStatus);
-		serverMigration.setProgressPercentage(55);
+		activityService.setStatusAndPriority(serverMigration, onHoldStatus, null, 55);
 		commentService.createComment("Server migration plan created", serverMigration,
 			dev1);
 		commentService.createComment("Testing environment successfully migrated",
@@ -356,17 +350,13 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			"Comprehensive code review and quality assurance");
 		final CUser analyst = findUserByLogin("ademir");
 		final CUser manager = findUserByLogin("mkaradeniz");
-		codeReview.setAssignedTo(analyst);
-		codeReview.setCreatedBy(manager);
-		codeReview.setEstimatedHours(new BigDecimal("12.00"));
-		codeReview.setActualHours(new BigDecimal("12.00"));
-		codeReview.setRemainingHours(new BigDecimal("0.00"));
-		codeReview.setStartDate(LocalDate.now().minusDays(3));
-		codeReview.setDueDate(LocalDate.now().minusDays(1));
-		codeReview.setCompletionDate(LocalDate.now().minusDays(1));
+		activityService.setAssignedUsers(codeReview, analyst, manager);
+		activityService.setTimeTracking(codeReview, new BigDecimal("12.00"),
+			new BigDecimal("12.00"), new BigDecimal("0.00"));
+		activityService.setDateInfo(codeReview, LocalDate.now().minusDays(3),
+			LocalDate.now().minusDays(1), LocalDate.now().minusDays(1));
 		final CActivityStatus completedStatus = findActivityStatusByName("Completed");
-		codeReview.setStatus(completedStatus);
-		codeReview.setProgressPercentage(100);
+		activityService.setStatusAndPriority(codeReview, completedStatus, null, 100);
 		commentService.createComment("Code review process initiated", codeReview,
 			manager);
 		commentService.createComment("Found minor issues, created fix recommendations",
@@ -379,15 +369,13 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		perfTesting.setDescription(
 			"Load testing and performance optimization");
 		final CUser dev2 = findUserByLogin("bozkan");
-		perfTesting.setAssignedTo(dev2);
-		perfTesting.setCreatedBy(manager);
+		activityService.setAssignedUsers(perfTesting, dev2, manager);
 		activityService.setTimeTracking(perfTesting, new BigDecimal("18.00"),
 			new BigDecimal("10.00"), new BigDecimal("8.00"));
-		perfTesting.setStartDate(LocalDate.now().minusDays(5));
-		perfTesting.setDueDate(LocalDate.now().plusDays(2));
+		activityService.setDateInfo(perfTesting, LocalDate.now().minusDays(5),
+			LocalDate.now().plusDays(2), null);
 		final CActivityStatus inProgressStatus = findActivityStatusByName("In Progress");
-		perfTesting.setStatus(inProgressStatus);
-		perfTesting.setProgressPercentage(60);
+		activityService.setStatusAndPriority(perfTesting, inProgressStatus, null, 60);
 		commentService.createComment("Performance testing framework setup", perfTesting,
 			dev2);
 		commentService.createComment("Baseline performance metrics collected",
@@ -439,18 +427,16 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		// Set assigned users using auxiliary method
 		final CUser manager = findUserByLogin("mkaradeniz");
 		final CUser admin = findUserByLogin("admin");
-		backendDev.setAssignedTo(manager);
-		backendDev.setCreatedBy(admin);
+		activityService.setAssignedUsers(backendDev, manager, admin);
 		// Set time tracking using auxiliary method
 		activityService.setTimeTracking(backendDev, new BigDecimal("40.00"),
 			new BigDecimal("35.50"), new BigDecimal("4.50"));
 		// Set date information using auxiliary method
-		backendDev.setStartDate(LocalDate.now().minusDays(10));
-		backendDev.setDueDate(LocalDate.now().plusDays(5));
+		activityService.setDateInfo(backendDev, LocalDate.now().minusDays(10),
+			LocalDate.now().plusDays(5), null);
 		// Set status and priority using auxiliary method
 		final CActivityStatus inProgressStatus = findActivityStatusByName("In Progress");
-		backendDev.setStatus(inProgressStatus);
-		backendDev.setProgressPercentage(75);
+		activityService.setStatusAndPriority(backendDev, inProgressStatus, null, 75);
 		// Create comments
 		commentService.createComment("Initial backend API development started",
 			backendDev, admin);
@@ -978,18 +964,16 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		// Set assigned users using auxiliary method
 		final CUser teamMember2 = findUserByLogin("bozkan");
 		final CUser admin = findUserByLogin("admin");
-		archDesign.setAssignedTo(teamMember2);
-		archDesign.setCreatedBy(admin);
+		activityService.setAssignedUsers(archDesign, teamMember2, admin);
 		// Set time tracking using auxiliary method
 		activityService.setTimeTracking(archDesign, new BigDecimal("60.00"),
 			new BigDecimal("45.00"), new BigDecimal("15.00"));
 		// Set date information using auxiliary method
-		archDesign.setStartDate(LocalDate.now().minusDays(15));
-		archDesign.setDueDate(LocalDate.now().plusDays(10));
+		activityService.setDateInfo(archDesign, LocalDate.now().minusDays(15),
+			LocalDate.now().plusDays(10), null);
 		// Set status and priority using auxiliary method
 		final CActivityStatus onHoldStatus = findActivityStatusByName("On Hold");
-		archDesign.setStatus(onHoldStatus);
-		archDesign.setProgressPercentage(65);
+		activityService.setStatusAndPriority(archDesign, onHoldStatus, null, 65);
 		// Create comments
 		commentService.createComment("Initial system architecture design phase started",
 			archDesign, admin);
@@ -1116,8 +1100,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		// Set assigned users using auxiliary method
 		final CUser analyst = findUserByLogin("ademir");
 		final CUser manager = findUserByLogin("mkaradeniz");
-		techDoc.setAssignedTo(analyst);
-		techDoc.setCreatedBy(manager);
+		activityService.setAssignedUsers(techDoc, analyst, manager);
 		// Set time tracking using auxiliary method (completed activity)
 		activityService.setTimeTracking(techDoc, new BigDecimal("16.00"),
 			new BigDecimal("16.00"), new BigDecimal("0.00"));
@@ -1126,8 +1109,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			LocalDate.now().minusDays(1), LocalDate.now().minusDays(1));
 		// Set status and priority using auxiliary method (completed activity)
 		final CActivityStatus completedStatus = findActivityStatusByName("Completed");
-		techDoc.setStatus(completedStatus);
-		techDoc.setProgressPercentage(100);
+		activityService.setStatusAndPriority(techDoc, completedStatus, null, 100);
 		// Create comments
 		commentService.createComment(
 			"Initial technical documentation review and updates started", techDoc,
@@ -1171,18 +1153,16 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		// Set assigned users using auxiliary method
 		final CUser teamMember1 = findUserByLogin("msahin");
 		final CUser manager = findUserByLogin("mkaradeniz");
-		uiTesting.setAssignedTo(teamMember1);
-		uiTesting.setCreatedBy(manager);
+		activityService.setAssignedUsers(uiTesting, teamMember1, manager);
 		// Set time tracking using auxiliary method
 		activityService.setTimeTracking(uiTesting, new BigDecimal("24.00"),
 			new BigDecimal("20.00"), new BigDecimal("4.00"));
 		// Set date information using auxiliary method
-		uiTesting.setStartDate(LocalDate.now().minusDays(7));
-		uiTesting.setDueDate(LocalDate.now().plusDays(3));
+		activityService.setDateInfo(uiTesting, LocalDate.now().minusDays(7),
+			LocalDate.now().plusDays(3), null);
 		// Set status and priority using auxiliary method
 		final CActivityStatus inProgressStatus = findActivityStatusByName("In Progress");
-		uiTesting.setStatus(inProgressStatus);
-		uiTesting.setProgressPercentage(85);
+		activityService.setStatusAndPriority(uiTesting, inProgressStatus, null, 85);
 		// Create comments
 		commentService.createComment(
 			"UI testing activity initiated with comprehensive test plan", uiTesting,
