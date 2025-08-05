@@ -21,11 +21,12 @@ import ui_tests.tech.derbent.ui.automation.CBaseUITest;
  * test class provides the main test methods referenced by the run-playwright-tests.sh
  * script and implements comprehensive UI testing across all application views.
  */
-@SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT, classes = tech.derbent.Application.class)
 @TestPropertySource (properties = {
-	"spring.datasource.url=jdbc:h2:mem:testdb",
-	"spring.jpa.hibernate.ddl-auto=create-drop" }
-)
+	"spring.datasource.url=jdbc:h2:mem:testdb", 
+	"spring.jpa.hibernate.ddl-auto=create-drop",
+	"spring.profiles.active=test"
+})
 public class PlaywrightUIAutomationTest extends CBaseUITest {
 
 	private static final Logger LOGGER =
