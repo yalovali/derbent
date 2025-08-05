@@ -49,8 +49,23 @@ public class CProjectUserSettingsDialog extends CDBEditDialog<CUserProjectSettin
 
     /** Returns available users for selection. */
     private List<CUser> getAvailableUsers() {
-        // TODO: Get this from a UserService - for now return empty list
-        // This would normally be injected or retrieved from application context
+        // TODO: Implement proper user service injection
+        // For now, we'll need to get this from the application context or inject it properly
+        try {
+            // Get UserService from Spring application context
+            final org.springframework.context.ApplicationContext context = 
+                org.springframework.web.context.ContextLoader.getCurrentWebApplicationContext();
+            if (context != null) {
+                final tech.derbent.users.service.CUserService userService = 
+                    context.getBean(tech.derbent.users.service.CUserService.class);
+                // Use list method with a reasonable pageable instead of findAll
+                final org.springframework.data.domain.Pageable pageable = 
+                    org.springframework.data.domain.PageRequest.of(0, 1000);
+                return userService.list(pageable);
+            }
+        } catch (final Exception e) {
+            LOGGER.warn("Could not retrieve user service from application context", e);
+        }
         return java.util.Collections.emptyList();
     }
 
@@ -101,11 +116,13 @@ public class CProjectUserSettingsDialog extends CDBEditDialog<CUserProjectSettin
         rolesField = new TextField("Roles");
         rolesField.setPlaceholder("Enter roles separated by commas (e.g., DEVELOPER, MANAGER)");
         rolesField.setHelperText("Comma-separated list of roles for this project");
+        rolesField.setRequired(true);
 
         // Permissions field
         permissionsField = new TextField("Permissions");
         permissionsField.setPlaceholder("Enter permissions separated by commas (e.g., READ, WRITE, DELETE)");
         permissionsField.setHelperText("Comma-separated list of permissions for this project");
+        permissionsField.setRequired(true);
 
         formLayout.add(userComboBox, rolesField, permissionsField);
 
@@ -130,6 +147,18 @@ public class CProjectUserSettingsDialog extends CDBEditDialog<CUserProjectSettin
         if (userComboBox.getValue() == null) {
             throw new IllegalArgumentException("Please select a user");
         }
+        
+        // Validate role field
+        final String role = rolesField.getValue();
+        if (role == null || role.trim().isEmpty()) {
+            throw new IllegalArgumentException("Role is required and cannot be empty");
+        }
+        
+        // Validate permission field  
+        final String permission = permissionsField.getValue();
+        if (permission == null || permission.trim().isEmpty()) {
+            throw new IllegalArgumentException("Permission is required and cannot be empty");
+        }
 
         // Set project and user
         data.setProject(project);
@@ -138,8 +167,8 @@ public class CProjectUserSettingsDialog extends CDBEditDialog<CUserProjectSettin
             data.setUser(selectedUser);
         }
 
-        data.setRole(rolesField.getValue());
-        data.setPermission(permissionsField.getValue());
+        data.setRole(role.trim());
+        data.setPermission(permission.trim());
     }
 
     /**

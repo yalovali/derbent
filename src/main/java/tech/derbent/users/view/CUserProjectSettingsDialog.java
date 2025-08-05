@@ -106,10 +106,13 @@ public class CUserProjectSettingsDialog extends CDBEditDialog<CUserProjectSettin
         rolesField = new TextField("Roles");
         rolesField.setPlaceholder("Enter roles separated by commas (e.g., DEVELOPER, MANAGER)");
         rolesField.setHelperText("Comma-separated list of roles for this project");
+        rolesField.setRequired(true);
+        
         // Permissions field
         permissionsField = new TextField("Permissions");
         permissionsField.setPlaceholder("Enter permissions separated by commas (e.g., READ, WRITE, DELETE)");
         permissionsField.setHelperText("Comma-separated list of permissions for this project");
+        permissionsField.setRequired(true);
         formLayout.add(projectComboBox, rolesField, permissionsField);
 
         if (!isNew) {
@@ -135,6 +138,19 @@ public class CUserProjectSettingsDialog extends CDBEditDialog<CUserProjectSettin
         if (projectComboBox.getValue() == null) {
             throw new IllegalArgumentException("Please select a project");
         }
+        
+        // Validate role field
+        final String role = rolesField.getValue();
+        if (role == null || role.trim().isEmpty()) {
+            throw new IllegalArgumentException("Role is required and cannot be empty");
+        }
+        
+        // Validate permission field  
+        final String permission = permissionsField.getValue();
+        if (permission == null || permission.trim().isEmpty()) {
+            throw new IllegalArgumentException("Permission is required and cannot be empty");
+        }
+        
         // Set user and project
         data.setUser(user);
         final CProject selectedProject = projectComboBox.getValue();
@@ -142,7 +158,7 @@ public class CUserProjectSettingsDialog extends CDBEditDialog<CUserProjectSettin
         if (selectedProject != null) {
             data.setProject(selectedProject);
         }
-        data.setRole(rolesField.getValue());
-        data.setPermission(permissionsField.getValue());
+        data.setRole(role.trim());
+        data.setPermission(permission.trim());
     }
 }

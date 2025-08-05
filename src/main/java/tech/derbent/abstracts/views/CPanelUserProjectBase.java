@@ -187,7 +187,7 @@ public abstract class CPanelUserProjectBase<T extends CEntityDB<T>> extends CAcc
      * Refreshes the grid data
      */
     public void refresh() {
-        LOGGER.info("Refreshing grid data");
+        LOGGER.debug("Refreshing grid data");
         if (getSettings != null) {
             grid.setItems(getSettings.get());
         }
@@ -198,7 +198,7 @@ public abstract class CPanelUserProjectBase<T extends CEntityDB<T>> extends CAcc
      */
     public void setSettingsAccessors(final Supplier<List<CUserProjectSettings>> getSettings,
             final Consumer<List<CUserProjectSettings>> setSettings, final Runnable saveEntity) {
-        LOGGER.info("Setting settings accessors");
+        LOGGER.debug("Setting settings accessors");
         this.getSettings = getSettings;
         this.setSettings = setSettings;
         this.saveEntity = saveEntity;

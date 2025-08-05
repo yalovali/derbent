@@ -76,7 +76,7 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 	@Override
 	@Transactional
 	public CProject save(final CProject entity) {
-		LOGGER.info("save called with entity: {}", entity);
+		LOGGER.debug("save called with entity: {}", entity);
 		final boolean isNew = entity.getId() == null;
 		final CProject savedEntity = super.save(entity);
 		// Publish project list change event after saving

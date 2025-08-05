@@ -31,7 +31,7 @@ public class CEntityProjectsGrid<T extends CEntityDB<T>> extends VerticalLayout 
     private final ComboBox<CProject> projectComboBox;
 
     public CEntityProjectsGrid(final CProjectService projectService) {
-        LOGGER.info("CEntityProjectsGrid constructor called for {}", getClass().getSimpleName());
+        LOGGER.debug("CEntityProjectsGrid constructor called for {}", getClass().getSimpleName());
         grid.addShortTextColumn(CProject::getName, "Project Name", null);
         add(grid);
         // ComboBox to select a project
