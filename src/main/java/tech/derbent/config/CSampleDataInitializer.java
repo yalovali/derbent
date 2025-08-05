@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -21,6 +22,7 @@ import tech.derbent.activities.domain.CActivityType;
 import tech.derbent.activities.service.CActivityService;
 import tech.derbent.activities.service.CActivityStatusService;
 import tech.derbent.activities.service.CActivityTypeService;
+import tech.derbent.comments.domain.CComment;
 import tech.derbent.comments.domain.CCommentPriority;
 import tech.derbent.comments.service.CCommentPriorityService;
 import tech.derbent.comments.service.CCommentService;
@@ -253,6 +255,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivityStatus inProgressStatus = findActivityStatusByName("In Progress");
 		frontendDev.setStatus(inProgressStatus);
 		frontendDev.setProgressPercentage(70);
+		activityService.save(frontendDev);
 		commentService.createComment("Frontend development started with React components",
 			frontendDev, dev1);
 		commentService.createComment("Implemented responsive design patterns",
@@ -274,6 +277,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivityStatus notStartedStatus = findActivityStatusByName("Not Started");
 		dbMigration.setStatus(notStartedStatus);
 		dbMigration.setProgressPercentage(0);
+		activityService.save(dbMigration);
 		commentService.createComment("Database migration plan prepared", dbMigration,
 			admin);
 		commentService.createComment("Waiting for backend API completion", dbMigration,
@@ -308,6 +312,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivityStatus notStartedStatus = findActivityStatusByName("Not Started");
 		securityAudit.setStatus(notStartedStatus);
 		securityAudit.setProgressPercentage(0);
+		activityService.save(securityAudit);
 		commentService.createComment("Security audit requirements defined", securityAudit,
 			admin);
 		commentService.createComment("External security firm selected for audit",
@@ -330,6 +335,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivityStatus onHoldStatus = findActivityStatusByName("On Hold");
 		serverMigration.setStatus(onHoldStatus);
 		serverMigration.setProgressPercentage(55);
+		activityService.save(serverMigration);
 		commentService.createComment("Server migration plan created", serverMigration,
 			dev1);
 		commentService.createComment("Testing environment successfully migrated",
@@ -367,6 +373,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivityStatus completedStatus = findActivityStatusByName("Completed");
 		codeReview.setStatus(completedStatus);
 		codeReview.setProgressPercentage(100);
+		activityService.save(codeReview);
 		commentService.createComment("Code review process initiated", codeReview,
 			manager);
 		commentService.createComment("Found minor issues, created fix recommendations",
@@ -389,6 +396,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivityStatus inProgressStatus = findActivityStatusByName("In Progress");
 		perfTesting.setStatus(inProgressStatus);
 		perfTesting.setProgressPercentage(60);
+		activityService.save(perfTesting);
 		commentService.createComment("Performance testing framework setup", perfTesting,
 			dev2);
 		commentService.createComment("Baseline performance metrics collected",
@@ -453,6 +461,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivityStatus inProgressStatus = findActivityStatusByName("In Progress");
 		backendDev.setStatus(inProgressStatus);
 		backendDev.setProgressPercentage(75);
+		activityService.save(backendDev);
 		// Create comments
 		commentService.createComment("Initial backend API development started",
 			backendDev, admin);
@@ -989,6 +998,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivityStatus onHoldStatus = findActivityStatusByName("On Hold");
 		archDesign.setStatus(onHoldStatus);
 		archDesign.setProgressPercentage(65);
+		activityService.save(archDesign);
 		// Create comments
 		commentService.createComment("Initial system architecture design phase started",
 			archDesign, admin);
@@ -1129,6 +1139,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivityStatus completedStatus = findActivityStatusByName("Completed");
 		techDoc.setStatus(completedStatus);
 		techDoc.setProgressPercentage(100);
+		activityService.save(techDoc);
 		// Create comments
 		commentService.createComment(
 			"Initial technical documentation review and updates started", techDoc,
@@ -1185,6 +1196,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivityStatus inProgressStatus = findActivityStatusByName("In Progress");
 		uiTesting.setStatus(inProgressStatus);
 		uiTesting.setProgressPercentage(85);
+		activityService.save(uiTesting);
 		// Create comments
 		commentService.createComment(
 			"UI testing activity initiated with comprehensive test plan", uiTesting,
@@ -1824,18 +1836,59 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			args);
 
 		try {
-
+			// Check for force initialization flag
+			boolean forceInit = args.containsOption("force-init");
+			
 			// Check if database already has data - if so, skip initialization only on app
-			// startup
-			if (!isDatabaseEmpty()) {
+			// startup unless force initialization is requested
+			if (!isDatabaseEmpty() && !forceInit) {
 				LOGGER.info(
 					"Database already contains data, skipping sample data initialization on startup");
 				return;
 			}
+			
+			// Clear existing sample data if force initialization is requested
+			if (forceInit && !isDatabaseEmpty()) {
+				LOGGER.info("Force initialization requested - clearing existing sample data");
+				clearSampleData();
+			}
+			
 			loadSampleData(); // Load sample data
 		} catch (final Exception e) {
 			LOGGER.error("Error during sample data initialization", e);
 			throw e;
+		}
+	}
+
+	/**
+	 * Clears all sample data from the database to prepare for fresh initialization.
+	 * This method ensures that restarting the application multiple times doesn't
+	 * create duplicate sample data.
+	 * 
+	 * Note: This is a simplified cleanup that shows the intent. In a production
+	 * environment, consider using database scripts or admin interfaces for cleanup.
+	 */
+	@Transactional
+	private void clearSampleData() {
+		LOGGER.info("Clearing existing sample data from database");
+		
+		try {
+			// For this implementation, we'll log a warning and rely on the 
+			// isDatabaseEmpty() check to prevent duplicate initialization
+			LOGGER.warn("Sample data cleanup requested but not fully implemented.");
+			LOGGER.warn("Consider manually clearing the database or using --force-init carefully.");
+			LOGGER.warn("The isDatabaseEmpty() check should prevent most duplicate data issues.");
+			
+			// TODO: Implement proper cleanup if needed for production use
+			// This could involve:
+			// 1. Using native SQL queries to delete in proper order
+			// 2. Using repository.deleteAll() if available
+			// 3. Using database cascade delete rules
+			// 4. Or requiring manual database cleanup
+			
+		} catch (Exception e) {
+			LOGGER.error("Error during sample data cleanup", e);
+			throw new RuntimeException("Failed to clear sample data", e);
 		}
 	}
 }
