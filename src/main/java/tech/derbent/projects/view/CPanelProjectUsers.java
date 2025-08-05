@@ -1,6 +1,8 @@
 package tech.derbent.projects.view;
 
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.views.CPanelUserProjectBase;
@@ -125,8 +127,8 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject> {
 	}
 
 	public void setProjectUsersAccessors(
-		final java.util.function.Supplier<List<CUserProjectSettings>> getProjectUsers,
-		final java.util.function.Consumer<List<CUserProjectSettings>> setProjectUsers,
+		final Supplier<List<CUserProjectSettings>> getProjectUsers,
+		final Consumer<List<CUserProjectSettings>> setProjectUsers,
 		final Runnable saveEntity) {
 		LOGGER.debug("Setting project users accessors");
 		setSettingsAccessors(getProjectUsers, setProjectUsers, saveEntity);
