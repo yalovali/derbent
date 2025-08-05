@@ -78,13 +78,18 @@ public class Application implements AppShellConfigurator {
         return args -> {
             // Temporarily disable data initialization due to SQL syntax issues
             // LOGGER.info("Data initialization temporarily disabled");
-            final Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cuser", Integer.class);
+            try {
+                final Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cuser", Integer.class);
 
-            // disabled by count <0
-            if ((count != null) && (count == 0) && (count < 0)) {
-                final String sql = StreamUtils.copyToString(new ClassPathResource("data.sql").getInputStream(),
-                        StandardCharsets.UTF_8);
-                jdbcTemplate.execute(sql);
+                // disabled by count <0
+                if ((count != null) && (count == 0) && (count < 0)) {
+                    final String sql = StreamUtils.copyToString(new ClassPathResource("data.sql").getInputStream(),
+                            StandardCharsets.UTF_8);
+                    jdbcTemplate.execute(sql);
+                }
+            } catch (final Exception e) {
+                // Table might not exist yet if Hibernate hasn't created it
+                LOGGER.debug("Could not query cuser table - table may not exist yet: {}", e.getMessage());
             }
         };
     }
