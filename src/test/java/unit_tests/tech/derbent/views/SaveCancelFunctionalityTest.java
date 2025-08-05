@@ -80,8 +80,9 @@ public class SaveCancelFunctionalityTest {
     void testProjectsViewSaveCancelInheritance() {
         final CProjectService mockProjectService = mock(CProjectService.class);
         final CSessionService mockSessionService = mock(CSessionService.class);
+        final CUserService mockUserService = mock(CUserService.class);
 
-        final CProjectsView projectsView = new CProjectsView(mockProjectService, mockSessionService);
+        final CProjectsView projectsView = new CProjectsView(mockProjectService, mockSessionService, mockUserService);
         assertNotNull(projectsView, "Projects view should be instantiable");
         // The view inherits save/cancel functionality from CAbstractNamedEntityPage -> CAbstractEntityDBPage
     }

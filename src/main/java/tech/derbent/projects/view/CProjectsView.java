@@ -13,6 +13,7 @@ import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.session.service.CSessionService;
+import tech.derbent.users.service.CUserService;
 
 /**
  * CProjectsView - View for managing projects. Layer: View (MVC) Provides CRUD operations for projects using the
@@ -37,9 +38,13 @@ public class CProjectsView extends CAbstractNamedEntityPage<CProject> implements
     private final String ENTITY_ROUTE_TEMPLATE_EDIT = "projects/%s/edit";
 
     private CPanelProjectUsers projectUsersPanel;
+    
+    private final CUserService userService;
 
-    public CProjectsView(final CProjectService entityService, final CSessionService sessionService) {
+    public CProjectsView(final CProjectService entityService, final CSessionService sessionService,
+            final CUserService userService) {
         super(CProject.class, entityService, sessionService);
+        this.userService = userService;
         addClassNames("projects-view");
         // createDetailsLayout();
         LOGGER.info("CProjectsView initialized successfully");
@@ -53,7 +58,7 @@ public class CProjectsView extends CAbstractNamedEntityPage<CProject> implements
         
         // Add the project users panel for managing users in this project
         projectUsersPanel = new CPanelProjectUsers(getCurrentEntity(), getBinder(), 
-                (CProjectService) entityService, (CProjectService) entityService);
+                (CProjectService) entityService, (CProjectService) entityService, userService);
         addAccordionPanel(projectUsersPanel);
     }
 

@@ -35,7 +35,6 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 import com.vaadin.flow.theme.lumo.LumoUtility.IconSize;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
-import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.utils.CAuxillaries;
@@ -111,13 +110,6 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		final String pageTitle =
 			MenuConfiguration.getPageHeader(getContent()).orElse("Main Layout");
 		mainToolbar.setPageTitle(pageTitle); // Set the page title in the toolbar
-		// addToNavbar(true, new CViewToolbar(pageTitle)); // Add the toolbar with the
-		// page title
-		/*
-		 * Component content = getContent(); if (content instanceof HasDynamicTitle) {
-		 * String title = ((HasDynamicTitle) content).getPageTitle();
-		 * viewTitle.setText(title); } else { viewTitle.setText(""); }
-		 */
 	}
 
 	@SuppressWarnings ("unused")
@@ -360,7 +352,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		}
 		final byte[] profilePictureData = user.getProfilePictureData();
 
-		if (profilePictureData != null && profilePictureData.length > 0) {
+		if ((profilePictureData != null) && (profilePictureData.length > 0)) {
 
 			try {
 				// Create a StreamResource from the profile picture data
@@ -397,7 +389,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		String initials = "";
 
 		// Get initials from first name
-		if (user.getName() != null && !user.getName().trim().isEmpty()) {
+		if ((user.getName() != null) && !user.getName().trim().isEmpty()) {
 			final String[] nameParts = user.getName().trim().split("\\s+");
 
 			for (final String part : nameParts) {
@@ -413,13 +405,13 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		}
 
 		// Add last name initial if we have less than 2 initials
-		if (user.getLastname() != null && !user.getLastname().trim().isEmpty()
-			&& initials.length() < 2) {
+		if ((user.getLastname() != null) && !user.getLastname().trim().isEmpty()
+			&& (initials.length() < 2)) {
 			initials += user.getLastname().substring(0, 1).toUpperCase();
 		}
 
 		// Fall back to username if no name is available
-		if (initials.isEmpty() && user.getLogin() != null
+		if (initials.isEmpty() && (user.getLogin() != null)
 			&& !user.getLogin().trim().isEmpty()) {
 			initials = user.getLogin().substring(0, 1).toUpperCase();
 		}
@@ -432,10 +424,10 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		// Set tooltip with full name
 		String displayName = "";
 
-		if (user.getName() != null && !user.getName().trim().isEmpty()) {
+		if ((user.getName() != null) && !user.getName().trim().isEmpty()) {
 			displayName = user.getName();
 
-			if (user.getLastname() != null && !user.getLastname().trim().isEmpty()) {
+			if ((user.getLastname() != null) && !user.getLastname().trim().isEmpty()) {
 				displayName += " " + user.getLastname();
 			}
 		}

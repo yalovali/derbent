@@ -67,10 +67,8 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 	@Transactional(readOnly = true)
 	public CProject getProjectWithUsers(final Long projectId) {
 		LOGGER.info("Getting project with users for project ID: {}", projectId);
-		return getById(projectId).orElse(null);
-		// Note: Since userSettings is eagerly loaded by default in the entity,
-		// this should work. If lazy loading issues occur, we'd need to use
-		// @EntityGraph or custom query with JOIN FETCH
+		// Using the custom repository method that eagerly fetches user settings
+		return ((CProjectRepository) repository).findByIdWithUserSettings(projectId).orElse(null);
 	}
 
 	@Override

@@ -8,128 +8,135 @@ import tech.derbent.base.ui.dialogs.CWarningDialog;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUserProjectSettings;
-import tech.derbent.users.view.CUserProjectSettingsDialog;
+import tech.derbent.users.service.CUserService;
 
 /**
- * Panel for managing users within a project (reverse direction of CPanelUserProjectSettings).
- * This panel allows editing which users have access to a specific project and their roles/permissions.
+ * Panel for managing users within a project (reverse direction of
+ * CPanelUserProjectSettings). This panel allows editing which users have access to a
+ * specific project and their roles/permissions.
  */
 public class CPanelProjectUsers extends CPanelUserProjectBase<CProject> {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    private CProject currentProject;
+	private CProject currentProject;
+	private final CUserService userService; // Added CUserService
 
-    public CPanelProjectUsers(final CProject currentEntity,
-            final CEnhancedBinder<CProject> beanValidationBinder,
-            final CProjectService entityService, final CProjectService projectService) {
-        super("Project Users", currentEntity, beanValidationBinder, CProject.class, entityService, projectService);
-    }
+	public CPanelProjectUsers(final CProject currentEntity,
+		final CEnhancedBinder<CProject> beanValidationBinder,
+		final CProjectService entityService, final CProjectService projectService,
+		final CUserService userService) { // Added CUserService parameter
+		super("Project Users", currentEntity, beanValidationBinder, CProject.class,
+			entityService, projectService);
+		this.userService = userService; // Store the user service
+	}
 
-    @Override
-    protected String createDeleteConfirmationMessage(final CUserProjectSettings selected) {
-        final String userName = selected.getUser() != null ? 
-            selected.getUser().getName() + " " + (selected.getUser().getLastname() != null ? selected.getUser().getLastname() : "") :
-            "Unknown User";
-        return String.format(
-            "Are you sure you want to remove user '%s' from this project? This action cannot be undone.",
-            userName);
-    }
+	@Override
+	protected String
+		createDeleteConfirmationMessage(final CUserProjectSettings selected) {
+		final String userName = selected.getUser() != null ? selected.getUser().getName()
+			+ " " + (selected.getUser().getLastname() != null
+				? selected.getUser().getLastname() : "")
+			: "Unknown User";
+		return String.format(
+			"Are you sure you want to remove user '%s' from this project? This action cannot be undone.",
+			userName);
+	}
 
-    @Override
-    protected void onSettingsSaved(final CUserProjectSettings settings) {
-        if ((getSettings != null) && (setSettings != null)) {
-            final List<CUserProjectSettings> settingsList = getSettings.get();
-            // Check if this is an update or a new addition
-            boolean found = false;
+	@Override
+	protected void onSettingsSaved(final CUserProjectSettings settings) {
 
-            for (int i = 0; i < settingsList.size(); i++) {
-                final CUserProjectSettings existing = settingsList.get(i);
+		if ((getSettings != null) && (setSettings != null)) {
+			final List<CUserProjectSettings> settingsList = getSettings.get();
+			// Check if this is an update or a new addition
+			boolean found = false;
 
-                if ((existing.getId() != null)
-                    && existing.getId().equals(settings.getId())) {
-                    settingsList.set(i, settings);
-                    found = true;
-                    break;
-                }
-            }
+			for (int i = 0; i < settingsList.size(); i++) {
+				final CUserProjectSettings existing = settingsList.get(i);
 
-            if (!found) {
-                settingsList.add(settings);
-            }
-            setSettings.accept(settingsList);
+				if ((existing.getId() != null)
+					&& existing.getId().equals(settings.getId())) {
+					settingsList.set(i, settings);
+					found = true;
+					break;
+				}
+			}
 
-            if (saveEntity != null) {
-                saveEntity.run();
-            }
-            refresh();
-        }
-    }
+			if (!found) {
+				settingsList.add(settings);
+			}
+			setSettings.accept(settingsList);
 
-    @Override
-    protected void openAddDialog() {
-        if (currentProject == null) {
-            new CWarningDialog(
-                "Please select a project first before adding users.").open();
-            return;
-        }
+			if (saveEntity != null) {
+				saveEntity.run();
+			}
+			refresh();
+		}
+	}
 
-        if (projectService == null) {
-            new CWarningDialog(
-                "Project service is not available. Please try again later.").open();
-            return;
-        }
-        
-        // Create a dialog for adding users to project (reverse mode)
-        final CProjectUserSettingsDialog dialog =
-            new CProjectUserSettingsDialog(projectService, null, // null for new settings
-                currentProject, this::onSettingsSaved);
-        dialog.open();
-    }
+	@Override
+	protected void openAddDialog() {
 
-    @Override
-    protected void openEditDialog() {
-        final CUserProjectSettings selected = grid.asSingleSelect().getValue();
+		if (currentProject == null) {
+			new CWarningDialog("Please select a project first before adding users.")
+				.open();
+			return;
+		}
 
-        if (selected == null) {
-            new CWarningDialog("Please select a user to edit.").open();
-            return;
-        }
+		if (projectService == null) {
+			new CWarningDialog(
+				"Project service is not available. Please try again later.").open();
+			return;
+		}
+		// Create a dialog for adding users to project (reverse mode)
+		final CProjectUserSettingsDialog dialog =
+			new CProjectUserSettingsDialog(projectService, userService, null, // null for new settings
+				currentProject, this::onSettingsSaved);
+		dialog.open();
+	}
 
-        if (currentProject == null) {
-            new CWarningDialog(
-                "Current project information is not available. Please refresh the page.")
-                .open();
-            return;
-        }
-        
-        final CProjectUserSettingsDialog dialog = new CProjectUserSettingsDialog(
-            projectService, selected, currentProject, this::onSettingsSaved);
-        dialog.open();
-    }
+	@Override
+	protected void openEditDialog() {
+		final CUserProjectSettings selected = grid.asSingleSelect().getValue();
 
-    public void setCurrentProject(final CProject project) { 
-        this.currentProject = project; 
-    }
+		if (selected == null) {
+			new CWarningDialog("Please select a user to edit.").open();
+			return;
+		}
 
-    public void setProjectUsersAccessors(
-        final java.util.function.Supplier<List<CUserProjectSettings>> getProjectUsers,
-        final java.util.function.Consumer<List<CUserProjectSettings>> setProjectUsers,
-        final Runnable saveEntity) {
-        LOGGER.debug("Setting project users accessors");
-        setSettingsAccessors(getProjectUsers, setProjectUsers, saveEntity);
-    }
+		if (currentProject == null) {
+			new CWarningDialog(
+				"Current project information is not available. Please refresh the page.")
+				.open();
+			return;
+		}
+		final CProjectUserSettingsDialog dialog = new CProjectUserSettingsDialog(
+			projectService, userService, selected, currentProject, this::onSettingsSaved);
+		dialog.open();
+	}
 
-    @Override
-    protected void setupGrid() {
-        // Add columns for user name with avatar, roles, and permissions
-        grid.addColumn(CUserProjectSettings::getId).setHeader("ID").setAutoWidth(true);
-        grid.addComponentColumn(this::getUserWithAvatar).setHeader("User")
-            .setAutoWidth(true).setSortable(false);
-        grid.addColumn(this::getRoleAsString).setHeader("Role").setAutoWidth(true);
-        grid.addColumn(this::getPermissionAsString).setHeader("Permission")
-            .setAutoWidth(true);
-        grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
-        getBaseLayout().add(grid);
-    }
+	public void setCurrentProject(final CProject project) {
+		this.currentProject = project;
+	}
+
+	public void setProjectUsersAccessors(
+		final java.util.function.Supplier<List<CUserProjectSettings>> getProjectUsers,
+		final java.util.function.Consumer<List<CUserProjectSettings>> setProjectUsers,
+		final Runnable saveEntity) {
+		LOGGER.debug("Setting project users accessors");
+		setSettingsAccessors(getProjectUsers, setProjectUsers, saveEntity);
+	}
+
+	@Override
+	protected void setupGrid() {
+		// Add columns for user name with avatar, roles, and permissions
+		grid.addColumn(CUserProjectSettings::getId).setHeader("ID").setAutoWidth(true);
+		grid.addComponentColumn(this::getUserWithAvatar).setHeader("User")
+			.setAutoWidth(true).setSortable(false);
+		grid.addColumn(this::getRoleAsString).setHeader("Role").setAutoWidth(true);
+		grid.addColumn(this::getPermissionAsString).setHeader("Permission")
+			.setAutoWidth(true);
+		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
+		getBaseLayout().add(grid);
+	}
 }
