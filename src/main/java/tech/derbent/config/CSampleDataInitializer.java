@@ -253,6 +253,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivityStatus inProgressStatus = findActivityStatusByName("In Progress");
 		frontendDev.setStatus(inProgressStatus);
 		frontendDev.setProgressPercentage(70);
+		activityService.save(frontendDev);
 		commentService.createComment("Frontend development started with React components",
 			frontendDev, dev1);
 		commentService.createComment("Implemented responsive design patterns",
@@ -274,6 +275,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivityStatus notStartedStatus = findActivityStatusByName("Not Started");
 		dbMigration.setStatus(notStartedStatus);
 		dbMigration.setProgressPercentage(0);
+		activityService.save(dbMigration);
 		commentService.createComment("Database migration plan prepared", dbMigration,
 			admin);
 		commentService.createComment("Waiting for backend API completion", dbMigration,
@@ -308,6 +310,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivityStatus notStartedStatus = findActivityStatusByName("Not Started");
 		securityAudit.setStatus(notStartedStatus);
 		securityAudit.setProgressPercentage(0);
+		activityService.save(securityAudit);
 		commentService.createComment("Security audit requirements defined", securityAudit,
 			admin);
 		commentService.createComment("External security firm selected for audit",
@@ -330,6 +333,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivityStatus onHoldStatus = findActivityStatusByName("On Hold");
 		serverMigration.setStatus(onHoldStatus);
 		serverMigration.setProgressPercentage(55);
+		activityService.save(serverMigration);
 		commentService.createComment("Server migration plan created", serverMigration,
 			dev1);
 		commentService.createComment("Testing environment successfully migrated",
@@ -367,6 +371,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivityStatus completedStatus = findActivityStatusByName("Completed");
 		codeReview.setStatus(completedStatus);
 		codeReview.setProgressPercentage(100);
+		activityService.save(codeReview);
 		commentService.createComment("Code review process initiated", codeReview,
 			manager);
 		commentService.createComment("Found minor issues, created fix recommendations",
@@ -389,6 +394,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivityStatus inProgressStatus = findActivityStatusByName("In Progress");
 		perfTesting.setStatus(inProgressStatus);
 		perfTesting.setProgressPercentage(60);
+		activityService.save(perfTesting);
 		commentService.createComment("Performance testing framework setup", perfTesting,
 			dev2);
 		commentService.createComment("Baseline performance metrics collected",
@@ -453,6 +459,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivityStatus inProgressStatus = findActivityStatusByName("In Progress");
 		backendDev.setStatus(inProgressStatus);
 		backendDev.setProgressPercentage(75);
+		activityService.save(backendDev);
 		// Create comments
 		commentService.createComment("Initial backend API development started",
 			backendDev, admin);
@@ -989,6 +996,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivityStatus onHoldStatus = findActivityStatusByName("On Hold");
 		archDesign.setStatus(onHoldStatus);
 		archDesign.setProgressPercentage(65);
+		activityService.save(archDesign);
 		// Create comments
 		commentService.createComment("Initial system architecture design phase started",
 			archDesign, admin);
@@ -1129,6 +1137,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivityStatus completedStatus = findActivityStatusByName("Completed");
 		techDoc.setStatus(completedStatus);
 		techDoc.setProgressPercentage(100);
+		activityService.save(techDoc);
 		// Create comments
 		commentService.createComment(
 			"Initial technical documentation review and updates started", techDoc,
@@ -1185,6 +1194,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivityStatus inProgressStatus = findActivityStatusByName("In Progress");
 		uiTesting.setStatus(inProgressStatus);
 		uiTesting.setProgressPercentage(85);
+		activityService.save(uiTesting);
 		// Create comments
 		commentService.createComment(
 			"UI testing activity initiated with comprehensive test plan", uiTesting,
