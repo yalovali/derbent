@@ -9,11 +9,11 @@ import com.vaadin.flow.component.notification.Notification;
  * Abstract base class for data-aware dialogs. Uses generics to allow any data type. Handles dialog setup, form layout,
  * and save/cancel button logic. Child classes must implement form population and validation.
  */
-public abstract class CDBEditDialog<T> extends CDialog {
+public abstract class CDBEditDialog<EntityClass> extends CDialog {
 
     private static final long serialVersionUID = 1L;
-    protected final T data;
-    protected final Consumer<T> onSave;
+    protected final EntityClass data;
+    protected final Consumer<EntityClass> onSave;
     protected final boolean isNew;
     protected FormLayout formLayout;
 
@@ -25,7 +25,7 @@ public abstract class CDBEditDialog<T> extends CDialog {
      * @param isNew
      *            True if creating new, false if editing.
      */
-    public CDBEditDialog(final T data, final Consumer<T> onSave, final boolean isNew) {
+    public CDBEditDialog(final EntityClass data, final Consumer<EntityClass> onSave, final boolean isNew) {
         super();
         LOGGER.debug("CDialog constructor called for {}", getClass().getSimpleName());
         this.data = data;

@@ -55,8 +55,6 @@ public class CProjectsView extends CAbstractNamedEntityPage<CProject>
 		super(CProject.class, entityService, sessionService);
 		this.userService = userService;
 		addClassNames("projects-view");
-		createDetailsLayout(); // Uncommented this line to ensure details layout is
-								// created
 		LOGGER.info("CProjectsView initialized successfully");
 	}
 

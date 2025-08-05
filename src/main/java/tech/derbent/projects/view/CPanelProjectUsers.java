@@ -4,7 +4,10 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import com.vaadin.flow.component.button.Button;
+
 import tech.derbent.abstracts.components.CEnhancedBinder;
+import tech.derbent.abstracts.views.CDBUserSettingsDialog;
 import tech.derbent.abstracts.views.CPanelUserProjectBase;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
 import tech.derbent.projects.domain.CProject;
@@ -13,23 +16,19 @@ import tech.derbent.users.domain.CUserProjectSettings;
 import tech.derbent.users.service.CUserService;
 
 /**
- * Simplified panel for managing users within a project.
- * 
- * This is the reverse direction of CPanelUserProjectSettings - instead of showing
- * which projects a user has access to, this shows which users have access to a
- * specific project and allows management of their roles/permissions.
- * 
- * Key features:
- * - Add new users to the project
- * - Edit existing user roles/permissions
- * - Remove users from the project
- * - Automatic data synchronization with parent entity
+ * Simplified panel for managing users within a project. This is the reverse direction of
+ * CPanelUserProjectSettings - instead of showing which projects a user has access to,
+ * this shows which users have access to a specific project and allows management of their
+ * roles/permissions. Key features: - Add new users to the project - Edit existing user
+ * roles/permissions - Remove users from the project - Automatic data synchronization with
+ * parent entity
  */
 public class CPanelProjectUsers extends CPanelUserProjectBase<CProject> {
 
 	private static final long serialVersionUID = 1L;
 
 	private CProject currentProject;
+
 	private final CUserService userService;
 
 	public CPanelProjectUsers(final CProject currentEntity,
@@ -54,36 +53,39 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject> {
 			userName);
 	}
 
+	protected void onSave(final CProject item) {
+		LOGGER.debug("Saving user project settings: {}", item);
+	}
+
 	@Override
 	protected void onSettingsSaved(final CUserProjectSettings settings) {
 		LOGGER.debug("Saving user project settings: {}", settings);
+		// assert that we have accessors for getting and setting settings
+		assert getSettings != null;
+		assert setSettings != null;
+		final List<CUserProjectSettings> settingsList = getSettings.get();
+		// Check if this is an update or a new addition
+		boolean found = false;
 
-		if ((getSettings != null) && (setSettings != null)) {
-			final List<CUserProjectSettings> settingsList = getSettings.get();
-			// Check if this is an update or a new addition
-			boolean found = false;
+		for (int i = 0; i < settingsList.size(); i++) {
+			final CUserProjectSettings existing = settingsList.get(i);
 
-			for (int i = 0; i < settingsList.size(); i++) {
-				final CUserProjectSettings existing = settingsList.get(i);
-
-				if ((existing.getId() != null)
-					&& existing.getId().equals(settings.getId())) {
-					settingsList.set(i, settings);
-					found = true;
-					break;
-				}
+			if ((existing.getId() != null) && existing.getId().equals(settings.getId())) {
+				settingsList.set(i, settings);
+				found = true;
+				break;
 			}
-
-			if (!found) {
-				settingsList.add(settings);
-			}
-			setSettings.accept(settingsList);
-
-			if (saveEntity != null) {
-				saveEntity.run();
-			}
-			refresh();
 		}
+
+		if (!found) {
+			settingsList.add(settings);
+		}
+		setSettings.accept(settingsList);
+
+		if (saveEntity != null) {
+			saveEntity.run();
+		}
+		refresh();
 	}
 
 	/**
@@ -91,41 +93,42 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject> {
 	 */
 	@Override
 	protected void openAddDialog() {
+
 		if (!validateProjectSelection() || !validateServiceAvailability("Project")) {
 			return;
 		}
-		
 		final CProjectUserSettingsDialog dialog = new CProjectUserSettingsDialog(
 			projectService, userService, null, currentProject, this::onSettingsSaved);
 		dialog.open();
 	}
 
 	/**
-	 * Validates preconditions and opens dialog for editing selected user's project access.
+	 * Validates preconditions and opens dialog for editing selected user's project
+	 * access.
 	 */
 	@Override
 	protected void openEditDialog() {
+
 		if (!validateGridSelection("edit") || !validateProjectSelection()) {
 			return;
 		}
-		
 		final CUserProjectSettings selected = grid.asSingleSelect().getValue();
 		final CProjectUserSettingsDialog dialog = new CProjectUserSettingsDialog(
 			projectService, userService, selected, currentProject, this::onSettingsSaved);
 		dialog.open();
 	}
 
-	/**
-	 * Validates that a project is currently selected.
-	 * 
-	 * @return true if currentProject is not null, false otherwise
-	 */
-	private boolean validateProjectSelection() {
-		if (currentProject == null) {
-			new CWarningDialog("Please select a project first before managing users.").open();
-			return false;
+	private void openUserSettingsDialog() {
+
+		if (!validateProjectSelection() || !validateServiceAvailability("Project")) {
+			return;
 		}
-		return true;
+		final Consumer<CProject> consumer = project -> {
+			this.onSave(project);
+		};
+		final CDBUserSettingsDialog dialog = new CDBUserSettingsDialog(projectService,
+			userService, currentProject, consumer, true);
+		dialog.open();
 	}
 
 	public void setCurrentProject(final CProject project) {
@@ -151,5 +154,21 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject> {
 			.setAutoWidth(true);
 		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
 		getBaseLayout().add(grid);
+		final Button addButton = new Button("Add User", e -> openUserSettingsDialog());
+		getBaseLayout().add(addButton);
+	}
+
+	/**
+	 * Validates that a project is currently selected.
+	 * @return true if currentProject is not null, false otherwise
+	 */
+	private boolean validateProjectSelection() {
+
+		if (currentProject == null) {
+			new CWarningDialog("Please select a project first before managing users.")
+				.open();
+			return false;
+		}
+		return true;
 	}
 }

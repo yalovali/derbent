@@ -15,6 +15,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.base.ui.dialogs.CConfirmationDialog;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
 import tech.derbent.projects.domain.CProject;
@@ -26,8 +27,8 @@ import tech.derbent.users.domain.CUserProjectSettings;
  * Base class for managing user-project relationships in both directions. This class
  * provides common functionality for both user->project and project->user panels.
  */
-public abstract class CPanelUserProjectBase<T extends CEntityDB<T>>
-	extends CAccordionDBEntity<T> {
+public abstract class CPanelUserProjectBase<EntityClass extends CEntityDB<EntityClass>>
+	extends CAccordionDBEntity<EntityClass> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -45,9 +46,10 @@ public abstract class CPanelUserProjectBase<T extends CEntityDB<T>>
 
 	protected Runnable saveEntity;
 
-	public CPanelUserProjectBase(final String title, final T currentEntity,
-		final CEnhancedBinder<T> beanValidationBinder, final Class<T> entityClass,
-		final tech.derbent.abstracts.services.CAbstractService<T> entityService,
+	public CPanelUserProjectBase(final String title, final EntityClass currentEntity,
+		final CEnhancedBinder<EntityClass> beanValidationBinder,
+		final Class<EntityClass> entityClass,
+		final CAbstractService<EntityClass> entityService,
 		final CProjectService projectService) {
 		super(title, currentEntity, beanValidationBinder, entityClass, entityService);
 		this.projectService = projectService;
@@ -193,38 +195,6 @@ public abstract class CPanelUserProjectBase<T extends CEntityDB<T>>
 	 * Abstract method to handle settings save events
 	 */
 	protected abstract void onSettingsSaved(final CUserProjectSettings settings);
-
-	/**
-	 * Common validation helper for service availability.
-	 * Shows warning dialog and returns false if service is unavailable.
-	 * 
-	 * @param serviceName Name of the service for error message
-	 * @return true if projectService is available, false otherwise
-	 */
-	protected boolean validateServiceAvailability(final String serviceName) {
-		if (projectService == null) {
-			new CWarningDialog(serviceName + " service is not available. Please try again later.").open();
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	 * Common validation helper for entity selection in grid.
-	 * Shows warning dialog and returns false if no item is selected.
-	 * 
-	 * @param actionName Name of the action for error message (e.g., "edit", "delete")
-	 * @return true if an item is selected, false otherwise
-	 */
-	protected boolean validateGridSelection(final String actionName) {
-		final CUserProjectSettings selected = grid.asSingleSelect().getValue();
-		if (selected == null) {
-			final String message = String.format("Please select an item to %s.", actionName);
-			new CWarningDialog(message).open();
-			return false;
-		}
-		return true;
-	}
 	/**
 	 * Abstract method to open the add dialog
 	 */
@@ -291,5 +261,40 @@ public abstract class CPanelUserProjectBase<T extends CEntityDB<T>>
 	@Override
 	protected void updatePanelEntityFields() {
 		setEntityFields(List.of(""));
+	}
+
+	/**
+	 * Common validation helper for entity selection in grid. Shows warning dialog and
+	 * returns false if no item is selected.
+	 * @param actionName Name of the action for error message (e.g., "edit", "delete")
+	 * @return true if an item is selected, false otherwise
+	 */
+	protected boolean validateGridSelection(final String actionName) {
+		final CUserProjectSettings selected = grid.asSingleSelect().getValue();
+
+		if (selected == null) {
+			final String message =
+				String.format("Please select an item to %s.", actionName);
+			new CWarningDialog(message).open();
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Common validation helper for service availability. Shows warning dialog and returns
+	 * false if service is unavailable.
+	 * @param serviceName Name of the service for error message
+	 * @return true if projectService is available, false otherwise
+	 */
+	protected boolean validateServiceAvailability(final String serviceName) {
+
+		if (projectService == null) {
+			new CWarningDialog(
+				serviceName + " service is not available. Please try again later.")
+				.open();
+			return false;
+		}
+		return true;
 	}
 }
