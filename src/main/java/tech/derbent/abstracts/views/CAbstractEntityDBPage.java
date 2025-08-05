@@ -27,8 +27,10 @@ import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
 import jakarta.annotation.PostConstruct;
 import tech.derbent.abstracts.components.CEnhancedBinder;
+import tech.derbent.abstracts.components.CSearchToolbar;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.interfaces.CLayoutChangeListener;
+import tech.derbent.abstracts.interfaces.CSearchable;
 import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.abstracts.utils.PageableUtils;
 import tech.derbent.base.ui.dialogs.CConfirmationDialog;
@@ -46,6 +48,11 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	protected CGrid<EntityClass> grid;// = new CGrid<>(EntityClass.class, false);
 
 	private final CEnhancedBinder<EntityClass> binder;
+
+	// Search functionality
+	protected CSearchToolbar searchToolbar;
+	
+	private String currentSearchText = "";
 
 	// divide screen into two parts
 	protected SplitLayout splitLayout = new SplitLayout();
@@ -317,11 +324,20 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		grid = new CGrid<>(entityClass);
 		grid.getColumns().forEach(grid::removeColumn);
 		grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
-		// Use a custom data provider that properly handles pagination and sorting with
-		// safe validation
+		
+		// Create search toolbar if entity supports searching
+		if (CSearchable.class.isAssignableFrom(entityClass)) {
+			searchToolbar = new CSearchToolbar("Search " + entityClass.getSimpleName().replace("C", "").toLowerCase() + "...");
+			searchToolbar.addSearchListener(event -> {
+				currentSearchText = event.getSearchText();
+				refreshGrid();
+			});
+		}
+		
+		// Use a custom data provider that properly handles pagination, sorting and searching
 		grid.setItems(query -> {
-			LOGGER.debug("Grid query - offset: {}, limit: {}, sortOrders: {}",
-				query.getOffset(), query.getLimit(), query.getSortOrders());
+			LOGGER.debug("Grid query - offset: {}, limit: {}, sortOrders: {}, searchText: '{}'",
+				query.getOffset(), query.getLimit(), query.getSortOrders(), currentSearchText);
 
 			try {
 				// Convert Vaadin query to Spring Pageable using VaadinSpringDataHelpers
@@ -334,8 +350,15 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				LOGGER.debug("Safe Pageable - pageNumber: {}, pageSize: {}, sort: {}",
 					safePageable.getPageNumber(), safePageable.getPageSize(),
 					safePageable.getSort());
-				final java.util.List<EntityClass> result =
-					entityService.list(safePageable);
+				
+				// Use search-enabled list method if search text is provided and entity is searchable
+				final java.util.List<EntityClass> result;
+				if ((currentSearchText != null) && !currentSearchText.trim().isEmpty() 
+						&& CSearchable.class.isAssignableFrom(entityClass)) {
+					result = entityService.list(safePageable, currentSearchText);
+				} else {
+					result = entityService.list(safePageable);
+				}
 				LOGGER.debug("Data provider returned {} items", result.size());
 				return result.stream();
 			} catch (final Exception e) {
@@ -362,10 +385,22 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 					event.getValue().getId());
 			}
 		});
-		final Div wrapper = new Div();
-		wrapper.setClassName("grid-wrapper");
-		wrapper.add(grid);
-		splitLayout.addToPrimary(wrapper);
+		
+		// Create the grid container with search toolbar
+		final VerticalLayout gridContainer = new VerticalLayout();
+		gridContainer.setClassName("grid-container");
+		gridContainer.setPadding(false);
+		gridContainer.setSpacing(false);
+		
+		// Add search toolbar if available
+		if (searchToolbar != null) {
+			gridContainer.add(searchToolbar);
+		}
+		
+		gridContainer.add(grid);
+		gridContainer.setFlexGrow(1, grid);
+		
+		splitLayout.addToPrimary(gridContainer);
 		// Auto-select first item if available after grid is set up
 		// selectFirstItemIfAvailable();
 	}
@@ -458,6 +493,12 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	 * @return the grid component
 	 */
 	public CGrid<EntityClass> getGrid() { return grid; }
+
+	/**
+	 * Gets the search toolbar component, if available.
+	 * @return the search toolbar component, or null if entity doesn't support searching
+	 */
+	public CSearchToolbar getSearchToolbar() { return searchToolbar; }
 
 	private void initBaseDetailsLayout() {
 		baseDetailsLayout.setClassName("base-details-layout");

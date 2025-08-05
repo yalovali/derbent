@@ -17,13 +17,14 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.MetaData;
 import tech.derbent.abstracts.domains.CEntityConstants;
 import tech.derbent.abstracts.domains.CEntityNamed;
+import tech.derbent.abstracts.interfaces.CSearchable;
 import tech.derbent.companies.domain.CCompany;
 
 @Entity
 @Table (name = "cuser") // table name for the entity as the default is the class name in
 // lowercase
 @AttributeOverride (name = "id", column = @Column (name = "user_id"))
-public class CUser extends CEntityNamed<CUser> {
+public class CUser extends CEntityNamed<CUser> implements CSearchable {
 
 	public static final int MAX_LENGTH_NAME = 255;
 
@@ -327,5 +328,46 @@ public class CUser extends CEntityNamed<CUser> {
 			return login;
 		}
 		return "User #" + getId();
+	}
+
+	@Override
+	public boolean matches(final String searchText) {
+		if ((searchText == null) || searchText.trim().isEmpty()) {
+			return true; // Empty search matches all
+		}
+		
+		final String lowerSearchText = searchText.toLowerCase().trim();
+		
+		// Search in name field (first name)
+		if ((getName() != null) && getName().toLowerCase().contains(lowerSearchText)) {
+			return true;
+		}
+		
+		// Search in lastname field
+		if ((lastname != null) && lastname.toLowerCase().contains(lowerSearchText)) {
+			return true;
+		}
+		
+		// Search in login field
+		if ((login != null) && login.toLowerCase().contains(lowerSearchText)) {
+			return true;
+		}
+		
+		// Search in email field
+		if ((email != null) && email.toLowerCase().contains(lowerSearchText)) {
+			return true;
+		}
+		
+		// Search in description field
+		if ((getDescription() != null) && getDescription().toLowerCase().contains(lowerSearchText)) {
+			return true;
+		}
+		
+		// Search in ID as string
+		if ((getId() != null) && getId().toString().contains(lowerSearchText)) {
+			return true;
+		}
+		
+		return false;
 	}
 }

@@ -10,6 +10,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import tech.derbent.abstracts.domains.CEntityNamed;
+import tech.derbent.abstracts.interfaces.CSearchable;
 import tech.derbent.users.domain.CUserProjectSettings;
 
 /**
@@ -19,7 +20,7 @@ import tech.derbent.users.domain.CUserProjectSettings;
 @Entity
 @Table (name = "cproject")
 @AttributeOverride (name = "id", column = @Column (name = "project_id"))
-public class CProject extends CEntityNamed<CProject> {
+public class CProject extends CEntityNamed<CProject> implements CSearchable {
 
 	public static String getIconColorCode() {
 		return "#fd7e14"; // Orange color for project entities
@@ -46,5 +47,31 @@ public class CProject extends CEntityNamed<CProject> {
 	 */
 	public List<CUserProjectSettings> getUserSettings() {
 		return userSettings;
+	}
+
+	@Override
+	public boolean matches(final String searchText) {
+		if ((searchText == null) || searchText.trim().isEmpty()) {
+			return true; // Empty search matches all
+		}
+		
+		final String lowerSearchText = searchText.toLowerCase().trim();
+		
+		// Search in name field
+		if ((getName() != null) && getName().toLowerCase().contains(lowerSearchText)) {
+			return true;
+		}
+		
+		// Search in description field
+		if ((getDescription() != null) && getDescription().toLowerCase().contains(lowerSearchText)) {
+			return true;
+		}
+		
+		// Search in ID as string
+		if ((getId() != null) && getId().toString().contains(lowerSearchText)) {
+			return true;
+		}
+		
+		return false;
 	}
 }
