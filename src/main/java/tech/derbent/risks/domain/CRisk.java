@@ -14,8 +14,7 @@ import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.projects.domain.CProject;
 
 @Entity
-@Table (name = "crisk") // table name for the entity as the default is the class name in
-// lowercase
+@Table (name = "\"crisk\"") // Using quoted identifiers for PostgreSQL
 @AttributeOverride (name = "id", column = @Column (name = "risk_id"))
 public class CRisk extends CEntityOfProject<CRisk> {
 
@@ -26,7 +25,7 @@ public class CRisk extends CEntityOfProject<CRisk> {
 	public static String getIconFilename() { return "vaadin:warning"; }
 
 	@Enumerated (EnumType.STRING)
-	@Column (name = "risk_severity", nullable = false, length = 20)
+	@Column (name = "risk_severity", nullable = false, length = 20, columnDefinition = "VARCHAR(20)")
 	@MetaData (
 		displayName = "Risk Severity", required = true, readOnly = false,
 		defaultValue = "LOW", description = "Severity level of the risk", hidden = false,
