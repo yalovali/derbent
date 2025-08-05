@@ -193,6 +193,38 @@ public abstract class CPanelUserProjectBase<T extends CEntityDB<T>>
 	 * Abstract method to handle settings save events
 	 */
 	protected abstract void onSettingsSaved(final CUserProjectSettings settings);
+
+	/**
+	 * Common validation helper for service availability.
+	 * Shows warning dialog and returns false if service is unavailable.
+	 * 
+	 * @param serviceName Name of the service for error message
+	 * @return true if projectService is available, false otherwise
+	 */
+	protected boolean validateServiceAvailability(final String serviceName) {
+		if (projectService == null) {
+			new CWarningDialog(serviceName + " service is not available. Please try again later.").open();
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Common validation helper for entity selection in grid.
+	 * Shows warning dialog and returns false if no item is selected.
+	 * 
+	 * @param actionName Name of the action for error message (e.g., "edit", "delete")
+	 * @return true if an item is selected, false otherwise
+	 */
+	protected boolean validateGridSelection(final String actionName) {
+		final CUserProjectSettings selected = grid.asSingleSelect().getValue();
+		if (selected == null) {
+			final String message = String.format("Please select an item to %s.", actionName);
+			new CWarningDialog(message).open();
+			return false;
+		}
+		return true;
+	}
 	/**
 	 * Abstract method to open the add dialog
 	 */

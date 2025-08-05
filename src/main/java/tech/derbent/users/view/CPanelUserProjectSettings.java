@@ -12,14 +12,23 @@ import tech.derbent.users.domain.CUserProjectSettings;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.CUserTypeService;
 
+/**
+ * Simplified panel for managing a user's project assignments.
+ * 
+ * This panel displays all projects assigned to a specific user and allows:
+ * - Adding new project assignments
+ * - Editing existing project roles/permissions  
+ * - Removing project assignments
+ * 
+ * The panel automatically updates when the current user changes and maintains
+ * data consistency through proper accessor patterns.
+ */
 public class CPanelUserProjectSettings extends CPanelUserProjectBase<CUser> {
 
 	private static final long serialVersionUID = 1L;
 
 	private CUser currentUser;
-
 	private final CUserTypeService userTypeService;
-
 	private final CCompanyService companyService;
 
 	public CPanelUserProjectSettings(final CUser currentEntity,
@@ -72,44 +81,46 @@ public class CPanelUserProjectSettings extends CPanelUserProjectBase<CUser> {
 		}
 	}
 
+	/**
+	 * Validates preconditions and opens dialog for adding new project assignment.
+	 */
 	@Override
 	protected void openAddDialog() {
-
-		if (currentUser == null) {
-			new CWarningDialog(
-				"Please select a user first before adding project settings.").open();
+		if (!validateUserSelection() || !validateServiceAvailability("Project")) {
 			return;
 		}
-
-		if (projectService == null) {
-			new CWarningDialog(
-				"Project service is not available. Please try again later.").open();
-			return;
-		}
-		final CUserProjectSettingsDialog dialog =
-			new CUserProjectSettingsDialog(projectService, null, // null for new settings
-				currentUser, this::onSettingsSaved);
+		
+		final CUserProjectSettingsDialog dialog = new CUserProjectSettingsDialog(
+			projectService, null, currentUser, this::onSettingsSaved);
 		dialog.open();
 	}
 
+	/**
+	 * Validates preconditions and opens dialog for editing selected project assignment.
+	 */
 	@Override
 	protected void openEditDialog() {
+		if (!validateGridSelection("edit") || !validateUserSelection()) {
+			return;
+		}
+		
 		final CUserProjectSettings selected = grid.asSingleSelect().getValue();
-
-		if (selected == null) {
-			new CWarningDialog("Please select a project setting to edit.").open();
-			return;
-		}
-
-		if (currentUser == null) {
-			new CWarningDialog(
-				"Current user information is not available. Please refresh the page.")
-				.open();
-			return;
-		}
 		final CUserProjectSettingsDialog dialog = new CUserProjectSettingsDialog(
 			projectService, selected, currentUser, this::onSettingsSaved);
 		dialog.open();
+	}
+
+	/**
+	 * Validates that a user is currently selected.
+	 * 
+	 * @return true if currentUser is not null, false otherwise
+	 */
+	private boolean validateUserSelection() {
+		if (currentUser == null) {
+			new CWarningDialog("Please select a user first before managing project settings.").open();
+			return false;
+		}
+		return true;
 	}
 
 	public void setCurrentUser(final CUser user) { this.currentUser = user; }

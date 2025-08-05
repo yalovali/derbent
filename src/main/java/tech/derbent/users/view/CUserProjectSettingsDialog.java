@@ -15,34 +15,45 @@ import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserProjectSettings;
 
 /**
- * Dialog for assigning a user to a project. Inherits generic dialog logic from CDialog.
+ * Simplified dialog for managing user-project assignments.
+ * 
+ * This dialog handles both creating new project assignments and editing existing ones.
+ * The form automatically adapts based on whether it's in "new" or "edit" mode.
+ * 
+ * Key responsibilities:
+ * - Project selection (disabled in edit mode to prevent data inconsistency)
+ * - Role and permission management with validation
+ * - Form population and validation with clear error messages
  */
 public class CUserProjectSettingsDialog extends CDBEditDialog<CUserProjectSettings> {
 
     private static final long serialVersionUID = 1L;
 
     private final CProjectService projectService;
-
     private final CUser user;
 
-    // Form components
+    // Form components - organized for clarity
     private ComboBox<CProject> projectComboBox;
-
     private TextField rolesField;
-
     private TextField permissionsField;
 
+    /**
+     * Constructor for the dialog. Supports both new assignments and editing existing ones.
+     * 
+     * @param projectService Service for project operations
+     * @param settings Existing settings to edit, or null for new assignment
+     * @param user The user being assigned to projects
+     * @param onSave Callback executed when settings are successfully saved
+     */
     public CUserProjectSettingsDialog(final CProjectService projectService, final CUserProjectSettings settings,
             final CUser user, final Consumer<CUserProjectSettings> onSave) {
-        // Call parent constructor with provided settings or new instance if null Use new
-        // CUserProjectSettings() if settings is null to ensure non-null data This allows
-        // the dialog to handle both new assignments and edits without requiring a
-        // separate constructor for new assignments.
+        // Initialize with existing settings or create new instance for new assignments
         super(settings != null ? settings : new CUserProjectSettings(), onSave, settings == null);
         this.projectService = projectService;
         this.user = user;
-        setupDialog();// call setupDialog() to initialize the dialog
-        populateForm(); // Call after fields are initialized
+        
+        setupDialog();
+        populateForm();
     }
 
     /** Returns available projects for selection. */
@@ -85,80 +96,157 @@ public class CUserProjectSettingsDialog extends CDBEditDialog<CUserProjectSettin
         return "Project assignment updated successfully";
     }
 
-    /** Populates form fields from data. */
+    /**
+     * Simplified form population that creates and configures all form fields.
+     * Separated into logical sections for better maintainability.
+     */
     @Override
     protected void populateForm() {
         LOGGER.debug("Populating form for {}", getClass().getSimpleName());
+        
+        validateFormDependencies();
+        createFormFields();
+        populateExistingData();
+    }
 
-        if ((projectService == null) || (user == null)) {
+    /**
+     * Validates that required dependencies are available before form creation.
+     */
+    private void validateFormDependencies() {
+        if (projectService == null || user == null) {
             throw new IllegalStateException("ProjectService and User must be initialized before populating form");
         }
-        // Project selection
+    }
+
+    /**
+     * Creates and configures all form input fields with appropriate settings.
+     */
+    private void createFormFields() {
+        createProjectSelectionField();
+        createRoleField();
+        createPermissionField();
+        
+        formLayout.add(projectComboBox, rolesField, permissionsField);
+    }
+
+    /**
+     * Creates the project selection dropdown with appropriate restrictions.
+     */
+    private void createProjectSelectionField() {
         projectComboBox = new ComboBox<>("Project");
-        // Following coding guidelines: All selective ComboBoxes must be selection only
-        // (user must not be able to type arbitrary text)
-        projectComboBox.setAllowCustomValue(false);
+        projectComboBox.setAllowCustomValue(false); // Enforce selection-only per coding guidelines
         projectComboBox.setItemLabelGenerator(CProject::getName);
         projectComboBox.setItems(getAvailableProjects());
         projectComboBox.setRequired(true);
-        projectComboBox.setEnabled(isNew);
-        // Roles field
+        projectComboBox.setEnabled(isNew); // Disable in edit mode to prevent data inconsistency
+    }
+
+    /**
+     * Creates the role input field with validation and helpful hints.
+     */
+    private void createRoleField() {
         rolesField = new TextField("Roles");
         rolesField.setPlaceholder("Enter roles separated by commas (e.g., DEVELOPER, MANAGER)");
         rolesField.setHelperText("Comma-separated list of roles for this project");
         rolesField.setRequired(true);
-        
-        // Permissions field
+    }
+
+    /**
+     * Creates the permission input field with validation and helpful hints.
+     */
+    private void createPermissionField() {
         permissionsField = new TextField("Permissions");
         permissionsField.setPlaceholder("Enter permissions separated by commas (e.g., READ, WRITE, DELETE)");
         permissionsField.setHelperText("Comma-separated list of permissions for this project");
         permissionsField.setRequired(true);
-        formLayout.add(projectComboBox, rolesField, permissionsField);
+    }
 
+    /**
+     * Populates form fields with existing data when editing.
+     */
+    private void populateExistingData() {
         if (!isNew) {
-
-            if (data.getProject() != null) {
-                projectService.getById(data.getProject().getId()).ifPresent(projectComboBox::setValue);
-            }
-
-            if (data.getRole() != null) {
-                rolesField.setValue(data.getRole());
-            }
-
-            if (data.getPermission() != null) {
-                permissionsField.setValue(data.getPermission());
-            }
+            populateProjectField();
+            populateRoleField();
+            populatePermissionField();
         }
     }
 
-    /** Validates form fields. Throws exception if invalid. */
+    /**
+     * Sets the project field value for editing mode.
+     */
+    private void populateProjectField() {
+        if (data.getProject() != null) {
+            projectService.getById(data.getProject().getId()).ifPresent(projectComboBox::setValue);
+        }
+    }
+
+    /**
+     * Sets the role field value from existing data.
+     */
+    private void populateRoleField() {
+        if (data.getRole() != null) {
+            rolesField.setValue(data.getRole());
+        }
+    }
+
+    /**
+     * Sets the permission field value from existing data.
+     */
+    private void populatePermissionField() {
+        if (data.getPermission() != null) {
+            permissionsField.setValue(data.getPermission());
+        }
+    }
+
+    /**
+     * Simplified form validation with clear error messages.
+     * Validates all required fields and updates the data object.
+     */
     @Override
     protected void validateForm() {
+        validateProjectSelection();
+        validateRoleField();
+        validatePermissionField();
+        updateDataObject();
+    }
 
+    /**
+     * Validates that a project has been selected.
+     */
+    private void validateProjectSelection() {
         if (projectComboBox.getValue() == null) {
             throw new IllegalArgumentException("Please select a project");
         }
-        
-        // Validate role field
+    }
+
+    /**
+     * Validates the role field is not empty.
+     */
+    private void validateRoleField() {
         final String role = rolesField.getValue();
         if (role == null || role.trim().isEmpty()) {
             throw new IllegalArgumentException("Role is required and cannot be empty");
         }
-        
-        // Validate permission field  
+    }
+
+    /**
+     * Validates the permission field is not empty.
+     */
+    private void validatePermissionField() {
         final String permission = permissionsField.getValue();
         if (permission == null || permission.trim().isEmpty()) {
             throw new IllegalArgumentException("Permission is required and cannot be empty");
         }
-        
-        // Set user and project
-        data.setUser(user);
-        final CProject selectedProject = projectComboBox.getValue();
+    }
 
-        if (selectedProject != null) {
-            data.setProject(selectedProject);
-        }
-        data.setRole(role.trim());
-        data.setPermission(permission.trim());
+    /**
+     * Updates the data object with validated form values.
+     */
+    private void updateDataObject() {
+        data.setUser(user);
+        data.setProject(projectComboBox.getValue());
+        data.setRole(rolesField.getValue().trim());
+        data.setPermission(permissionsField.getValue().trim());
     }
 }
