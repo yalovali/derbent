@@ -62,6 +62,7 @@ show_usage() {
     echo "  login         Run login/logout tests only"
     echo "  crud          Run CRUD operation tests only"
     echo "  grid          Run grid interaction tests only"
+    echo "  search        Run search functionality tests only"
     echo "  navigation    Run navigation tests only"
     echo "  responsive    Run responsive design tests only"
     echo "  accessibility Run accessibility tests only"
@@ -108,7 +109,12 @@ main() {
             
         "grid")
             echo "📊 Running grid interaction tests..."
-            run_playwright_tests "tech.derbent.ui.automation.PlaywrightUIAutomationTest#testGridInteractions" "Grid Interaction Tests"
+            run_playwright_tests "tech.derbent.ui.automation.PlaywrightUIAutomationTest#testGridInteractions,tech.derbent.ui.automation.PlaywrightUIAutomationTest#testEntityRelationGrids" "Grid Interaction Tests"
+            ;;
+            
+        "search")
+            echo "🔍 Running search functionality tests..."
+            run_playwright_tests "tech.derbent.ui.automation.PlaywrightUIAutomationTest#testSearchFunctionality" "Search Functionality Tests"
             ;;
             
         "navigation")

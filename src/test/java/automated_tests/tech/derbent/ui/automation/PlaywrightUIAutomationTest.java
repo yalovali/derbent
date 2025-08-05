@@ -199,4 +199,30 @@ public class PlaywrightUIAutomationTest extends CBaseUITest {
 		}
 		LOGGER.info("✅ Responsive design test completed");
 	}
+
+	@Test
+	void testSearchFunctionality() {
+		LOGGER.info("🧪 Testing search functionality across views...");
+		
+		// Test search in Users view (CSearchable implementation)
+		testSearchFunctionality(CUsersView.class, "admin");
+		
+		// Test search in Projects view (CSearchable implementation)
+		testSearchFunctionality(CProjectsView.class, "Test");
+		
+		LOGGER.info("✅ Search functionality test completed");
+	}
+
+	@Test
+	void testEntityRelationGrids() {
+		LOGGER.info("🧪 Testing entity relation grids across views...");
+		
+		// Test entity relations in Users grid (User Type, Company, etc.)
+		testEntityRelationGrid(CUsersView.class);
+		
+		// Test entity relations in Projects grid
+		testEntityRelationGrid(CProjectsView.class);
+		
+		LOGGER.info("✅ Entity relation grids test completed");
+	}
 }
