@@ -13,25 +13,32 @@ import tech.derbent.users.domain.CUserProjectSettings;
 import tech.derbent.users.service.CUserService;
 
 /**
- * Panel for managing users within a project (reverse direction of
- * CPanelUserProjectSettings). This panel allows editing which users have access to a
- * specific project and their roles/permissions.
+ * Simplified panel for managing users within a project.
+ * 
+ * This is the reverse direction of CPanelUserProjectSettings - instead of showing
+ * which projects a user has access to, this shows which users have access to a
+ * specific project and allows management of their roles/permissions.
+ * 
+ * Key features:
+ * - Add new users to the project
+ * - Edit existing user roles/permissions
+ * - Remove users from the project
+ * - Automatic data synchronization with parent entity
  */
 public class CPanelProjectUsers extends CPanelUserProjectBase<CProject> {
 
 	private static final long serialVersionUID = 1L;
 
 	private CProject currentProject;
-
-	private final CUserService userService; // Added CUserService
+	private final CUserService userService;
 
 	public CPanelProjectUsers(final CProject currentEntity,
 		final CEnhancedBinder<CProject> beanValidationBinder,
 		final CProjectService entityService, final CProjectService projectService,
-		final CUserService userService) { // Added CUserService parameter
+		final CUserService userService) {
 		super("Project Users", currentEntity, beanValidationBinder, CProject.class,
 			entityService, projectService);
-		this.userService = userService; // Store the user service
+		this.userService = userService;
 		openPanel();
 	}
 
@@ -79,29 +86,23 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject> {
 		}
 	}
 
+	/**
+	 * Validates preconditions and opens dialog for adding new user to project.
+	 */
 	@Override
 	protected void openAddDialog() {
-
-		if (currentProject == null) {
-			new CWarningDialog("Please select a project first before adding users.")
-				.open();
+		if (!validateProjectAndService()) {
 			return;
 		}
-
-		if (projectService == null) {
-			new CWarningDialog(
-				"Project service is not available. Please try again later.").open();
-			return;
-		}
-		// Create a dialog for adding users to project (reverse mode)
-		final CProjectUserSettingsDialog dialog =
-			new CProjectUserSettingsDialog(projectService, userService, null, // null for
-																				// new
-																				// settings
-				currentProject, this::onSettingsSaved);
+		
+		final CProjectUserSettingsDialog dialog = new CProjectUserSettingsDialog(
+			projectService, userService, null, currentProject, this::onSettingsSaved);
 		dialog.open();
 	}
 
+	/**
+	 * Validates preconditions and opens dialog for editing selected user's project access.
+	 */
 	@Override
 	protected void openEditDialog() {
 		final CUserProjectSettings selected = grid.asSingleSelect().getValue();
@@ -112,14 +113,32 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject> {
 		}
 
 		if (currentProject == null) {
-			new CWarningDialog(
-				"Current project information is not available. Please refresh the page.")
-				.open();
+			new CWarningDialog("Current project information is not available. Please refresh the page.").open();
 			return;
 		}
+		
 		final CProjectUserSettingsDialog dialog = new CProjectUserSettingsDialog(
 			projectService, userService, selected, currentProject, this::onSettingsSaved);
 		dialog.open();
+	}
+
+	/**
+	 * Validates that project and services are available for operations.
+	 * 
+	 * @return true if project and services are available, false otherwise
+	 */
+	private boolean validateProjectAndService() {
+		if (currentProject == null) {
+			new CWarningDialog("Please select a project first before adding users.").open();
+			return false;
+		}
+
+		if (projectService == null) {
+			new CWarningDialog("Project service is not available. Please try again later.").open();
+			return false;
+		}
+		
+		return true;
 	}
 
 	public void setCurrentProject(final CProject project) {
