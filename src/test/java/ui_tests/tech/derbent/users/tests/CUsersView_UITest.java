@@ -154,7 +154,30 @@ public class CUsersView_UITest extends CBaseUITest {
 
 	@Test
 	void testUsersGridInteractions() {
+		LOGGER.info("🧪 Testing Users grid interactions...");
 		testAdvancedGridInView(CUsersView.class);
+		
+		// Additional grid interaction testing for users
+		assertTrue(navigateToViewByClass(CUsersView.class), "Should navigate to view");
+		
+		// Test grid selection changes
+		final int gridRowCount = getGridRowCount();
+		if (gridRowCount > 0) {
+			LOGGER.debug("Testing grid selection with {} rows", gridRowCount);
+			clickGrid(0); // Select first row
+			wait_500();
+			
+			// Test that selection triggers form population
+			final var textFields = page.locator("vaadin-text-field");
+			if (textFields.count() > 0) {
+				final String firstFieldValue = textFields.first().inputValue();
+				LOGGER.debug("First field populated with: {}", firstFieldValue);
+				assertTrue(firstFieldValue != null && !firstFieldValue.trim().isEmpty(),
+					"Grid selection should populate form fields");
+			}
+		}
+		
+		LOGGER.info("✅ Users grid interactions test completed");
 	}
 
 	@Test
@@ -208,5 +231,21 @@ public class CUsersView_UITest extends CBaseUITest {
 		}
 		clickCancel();
 		LOGGER.info("✅ Users profile picture handling test completed");
+	}
+
+	@Test
+	void testUsersSearchFunctionality() {
+		LOGGER.info("🧪 Testing Users search functionality...");
+		// Test search with common user fields
+		testSearchFunctionality(CUsersView.class, "admin");
+		LOGGER.info("✅ Users search functionality test completed");
+	}
+
+	@Test
+	void testUsersEntityRelationGrid() {
+		LOGGER.info("🧪 Testing Users entity relation grid display...");
+		// Test that user type, company, and other relations are displayed in grid
+		testEntityRelationGrid(CUsersView.class);
+		LOGGER.info("✅ Users entity relation grid test completed");
 	}
 }

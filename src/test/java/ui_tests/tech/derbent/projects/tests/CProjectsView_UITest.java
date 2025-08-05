@@ -129,11 +129,50 @@ public class CProjectsView_UITest extends CBaseUITest {
 
 	@Test
 	void testProjectsGridInteractions() {
+		LOGGER.info("🧪 Testing Projects grid interactions...");
 		testAdvancedGridInView(CProjectsView.class);
+		
+		// Additional grid interaction testing for projects
+		assertTrue(navigateToViewByClass(CProjectsView.class), "Should navigate to view");
+		
+		// Test grid selection changes
+		final int gridRowCount = getGridRowCount();
+		if (gridRowCount > 0) {
+			LOGGER.debug("Testing grid selection with {} rows", gridRowCount);
+			clickGrid(0); // Select first row
+			wait_500();
+			
+			// Test that selection triggers form population
+			final var textFields = page.locator("vaadin-text-field");
+			if (textFields.count() > 0) {
+				final String firstFieldValue = textFields.first().inputValue();
+				LOGGER.debug("First field populated with: {}", firstFieldValue);
+				assertTrue(firstFieldValue != null && !firstFieldValue.trim().isEmpty(),
+					"Grid selection should populate form fields");
+			}
+		}
+		
+		LOGGER.info("✅ Projects grid interactions test completed");
 	}
 
 	@Test
 	void testProjectsNavigation() {
 		testNavigationTo(CProjectsView.class, CMeetingsView.class);
+	}
+
+	@Test
+	void testProjectsSearchFunctionality() {
+		LOGGER.info("🧪 Testing Projects search functionality...");
+		// Test search with common project fields
+		testSearchFunctionality(CProjectsView.class, "Test");
+		LOGGER.info("✅ Projects search functionality test completed");
+	}
+
+	@Test
+	void testProjectsEntityRelationGrid() {
+		LOGGER.info("🧪 Testing Projects entity relation grid display...");
+		// Test that project relations are displayed in grid
+		testEntityRelationGrid(CProjectsView.class);
+		LOGGER.info("✅ Projects entity relation grid test completed");
 	}
 }
