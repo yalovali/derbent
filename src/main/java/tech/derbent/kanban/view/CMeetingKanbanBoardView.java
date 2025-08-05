@@ -10,6 +10,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.base.ui.CBaseKanbanBoardView;
 import tech.derbent.base.ui.CBaseKanbanColumn;
 import tech.derbent.meetings.domain.CMeeting;
@@ -24,12 +25,20 @@ import tech.derbent.session.service.CSessionService;
  */
 @Route("meetings-kanban")
 @PageTitle("Meeting Kanban Board")
-@Menu(order = 3.1, icon = "vaadin:calendar", title = "Meetings.Kanban")
+@Menu(order = 3.1, icon = "class:tech.derbent.kanban.view.CMeetingKanbanBoardView", title = "Meetings.Kanban")
 @PermitAll
-public class CMeetingKanbanBoardView extends CBaseKanbanBoardView<CMeeting, CMeetingStatus> {
+public class CMeetingKanbanBoardView extends CBaseKanbanBoardView<CMeeting, CMeetingStatus> implements CInterfaceIconSet {
 
     private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingKanbanBoardView.class);
+    
+    public static String getIconColorCode() {
+        return "#28a745"; // Green color for meetings
+    }
+
+    public static String getIconFilename() { 
+        return "vaadin:calendar"; 
+    }
 
     /**
      * Constructor for CMeetingKanbanBoardView.

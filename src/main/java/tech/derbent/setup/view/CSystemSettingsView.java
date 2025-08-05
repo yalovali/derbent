@@ -20,6 +20,7 @@ import tech.derbent.abstracts.components.CBinderFactory;
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.views.CAbstractPage;
 import tech.derbent.abstracts.views.CButton;
+import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.base.ui.dialogs.CConfirmationDialog;
 import tech.derbent.base.ui.dialogs.CInformationDialog;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
@@ -35,11 +36,19 @@ import tech.derbent.setup.service.CSystemSettingsService;
  */
 @Route ("setup/system-settings")
 @PageTitle ("System Setup & Configuration")
-@Menu (order = 100.1, icon = "vaadin:tools", title = "Setup.System Settings")
+@Menu (order = 100.1, icon = "class:tech.derbent.setup.view.CSystemSettingsView", title = "Setup.System Settings")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CSystemSettingsView extends CAbstractPage {
+public class CSystemSettingsView extends CAbstractPage implements CInterfaceIconSet {
 
 	private static final long serialVersionUID = 1L;
+	
+	public static String getIconColorCode() {
+		return "#6c757d"; // Gray color for setup/admin
+	}
+
+	public static String getIconFilename() { 
+		return "vaadin:tools"; 
+	}
 
 	private final CSystemSettingsService systemSettingsService;
 

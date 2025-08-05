@@ -51,8 +51,6 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 
 		private final String iconName;
 
-		private final String iconColor;
-
 		private final String path;
 
 		private final String targetLevelKey;
@@ -66,12 +64,9 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			if (iconName.startsWith("class:")) {
 				this.iconName =
 					CIconSetLoader.getIconFilename(iconName.replace("class:", ""));
-				this.iconColor =
-					CIconSetLoader.getIconColorCode(iconName.replace("class:", ""));
 			}
 			else {
 				this.iconName = iconName;
-				this.iconColor = getIconColor(iconName);
 			}
 			this.path = path;
 			this.targetLevelKey = targetLevelKey;
@@ -91,8 +86,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 
 			if ((iconName != null) && !iconName.trim().isEmpty()) {
 				icon = new Icon(iconName);
-				// Apply colorful styling
-				icon.getStyle().set("color", iconColor);
+				// Apply colorful styling - no color needed, icons will use their natural colors
 			}
 			else {
 				// Use a transparent placeholder icon to maintain consistent spacing
@@ -120,7 +114,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 				itemLayout.setFlexGrow(1, spacer);
 				final Icon navIcon = VaadinIcon.CHEVRON_RIGHT.create();
 				navIcon.addClassNames(IconSize.MEDIUM);
-				navIcon.getStyle().set("color", getIconColor("chevron-right"));
+				navIcon.getStyle().set("color", "var(--lumo-primary-color)");
 				navIcon.getStyle().set("min-width", "24px").set("min-height", "24px");
 				itemLayout.add(navIcon);
 			}
@@ -317,66 +311,6 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	}
 
 	/**
-	 * Maps icon names to their corresponding colors for a colorful navigation experience.
-	 * Colors are consistent with the toolbar's quick access icons.
-	 */
-	private String getIconColor(final String iconName) {
-
-		if ((iconName == null) || iconName.trim().isEmpty()) {
-			return "var(--lumo-primary-color)"; // Default color
-		}
-		// Remove vaadin: prefix if present
-		final String cleanIconName = iconName.replace("vaadin:", "").toLowerCase();
-
-		// Meetings - Green
-		if ("group".equals(cleanIconName) || "calendar".equals(cleanIconName)) {
-			return "#28a745";
-		}
-
-		// Activities - Blue
-		if ("calendar-clock".equals(cleanIconName) || "tasks".equals(cleanIconName)
-			|| "flag".equals(cleanIconName)) {
-			return "#007bff";
-		}
-
-		// Projects - Orange
-		if ("briefcase".equals(cleanIconName) || "folder".equals(cleanIconName)
-			|| "dashboard".equals(cleanIconName) || "grid-big".equals(cleanIconName)) {
-			return "#fd7e14";
-		}
-
-		// Users - Purple
-		if ("users".equals(cleanIconName)) {
-			return "#6f42c1";
-		}
-
-		// Settings & Administration - Gray
-		if ("cogs".equals(cleanIconName) || "building".equals(cleanIconName)
-			|| "tags".equals(cleanIconName)) {
-			return "#6c757d";
-		}
-
-		// Decisions - Red
-		if ("gavel".equals(cleanIconName)) {
-			return "#dc3545";
-		}
-
-		// Commerce - Teal
-		if ("cart".equals(cleanIconName)) {
-			return "#20c997";
-		}
-
-		// Navigation & General - Primary
-		if ("home".equals(cleanIconName) || "cubes".equals(cleanIconName)
-			|| "arrow-left".equals(cleanIconName) || "tree-table".equals(cleanIconName)
-			|| "chevron-right".equals(cleanIconName)) {
-			return "var(--lumo-primary-color)";
-		}
-		// Default fallback
-		return "var(--lumo-primary-color)";
-	}
-
-	/**
 	 * Handles back button click events.
 	 * @param event The click event
 	 */
@@ -504,10 +438,10 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		Icon levelIcon;
 
 		if (level.getParent() != null) {
-			// Add back button with consistent sizing and colorful styling
+			// Add back button with consistent sizing
 			levelIcon = VaadinIcon.ARROW_LEFT.create();
 			levelIcon.addClassNames(IconSize.MEDIUM);
-			levelIcon.getStyle().set("color", getIconColor("arrow-left"));
+			levelIcon.getStyle().set("color", "var(--lumo-primary-color)");
 			levelIcon.getStyle().set("min-width", "24px").set("min-height", "24px");
 			final CButton backButton =
 				new CButton(levelIcon, this::handleBackButtonClick);
@@ -518,10 +452,10 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			headerLayout.add(backButton);
 		}
 		else {
-			// Add app icon for root level to prevent label jumping with colorful styling
+			// Add app icon for root level to prevent label jumping
 			levelIcon = VaadinIcon.CUBES.create();
 			levelIcon.addClassNames(IconSize.MEDIUM, Margin.Right.MEDIUM);
-			levelIcon.getStyle().set("color", getIconColor("cubes"));
+			levelIcon.getStyle().set("color", "var(--lumo-primary-color)");
 			levelIcon.getStyle().set("min-width", "24px").set("min-height", "24px");
 			headerLayout.add(levelIcon);
 		}

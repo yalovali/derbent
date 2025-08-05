@@ -14,17 +14,26 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.abstracts.domains.CInterfaceIconSet;
 
 /**
  * Example view demonstrating responsive flex layout behavior.
  */
 @Route("examples/settings/advanced")
 @PageTitle("Advanced Settings Example")
-@Menu(order = 998, icon = "vaadin:cogs", title = "Examples.Settings.Advanced")
+@Menu(order = 998, icon = "class:tech.derbent.examples.view.CExampleSettingsView", title = "Examples.Settings.Advanced")
 @PermitAll
-public class CExampleSettingsView extends Div {
+public class CExampleSettingsView extends Div implements CInterfaceIconSet {
 
     private static final long serialVersionUID = 1L;
+    
+    public static String getIconColorCode() {
+        return "var(--lumo-primary-color)"; // Primary color for examples
+    }
+
+    public static String getIconFilename() { 
+        return "vaadin:cogs"; 
+    }
 
     public CExampleSettingsView() {
         final H2 title = new H2("Flex Layout Example");

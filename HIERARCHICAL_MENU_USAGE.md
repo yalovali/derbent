@@ -10,9 +10,18 @@ The Hierarchical Side Menu provides up to 4 levels of navigation with sliding an
 
 ```java
 @Route("my/deep/route/path")
-@Menu(order = 1, icon = "vaadin:folder", title = "Level1.Level2.Level3.Level4")
+@Menu(order = 1, icon = "class:tech.derbent.mypackage.view.MyView", title = "Level1.Level2.Level3.Level4")
 @PermitAll
-public class MyView extends VerticalLayout {
+public class MyView extends VerticalLayout implements CInterfaceIconSet {
+    
+    public static String getIconColorCode() {
+        return "#007bff"; // Your chosen color
+    }
+
+    public static String getIconFilename() { 
+        return "vaadin:folder"; 
+    }
+    
     // Your view implementation
 }
 ```
@@ -101,7 +110,9 @@ Check out these example views to see the hierarchical menu in action:
 ### Icon Selection
 - Use meaningful icons that represent the content
 - Maintain consistency within menu branches
-- Consider using Vaadin's built-in icon set for uniformity
+- Icons are now handled via the CInterfaceIconSet pattern with class-based references
+- Each view should implement CInterfaceIconSet and provide getIconColorCode() and getIconFilename() methods
+- Use the format: `icon = "class:tech.derbent.package.view.ClassName"` in @Menu annotations
 
 ## Technical Notes
 
