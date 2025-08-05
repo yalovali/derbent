@@ -86,7 +86,8 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 
 			if ((iconName != null) && !iconName.trim().isEmpty()) {
 				icon = new Icon(iconName);
-				// Apply colorful styling - no color needed, icons will use their natural colors
+				// Apply colorful styling - no color needed, icons will use their natural
+				// colors
 			}
 			else {
 				// Use a transparent placeholder icon to maintain consistent spacing

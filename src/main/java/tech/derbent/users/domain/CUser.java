@@ -21,8 +21,8 @@ import tech.derbent.abstracts.interfaces.CSearchable;
 import tech.derbent.companies.domain.CCompany;
 
 @Entity
-@Table (name = "cuser") // table name for the entity as the default is the class name in
-// lowercase
+@Table (name = "cuser") // Using quoted identifier to ensure exact case matching in
+						// PostgreSQL
 @AttributeOverride (name = "id", column = @Column (name = "user_id"))
 public class CUser extends CEntityNamed<CUser> implements CSearchable {
 
@@ -234,6 +234,47 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable {
 		return enabled; // Return the enabled status
 	}
 
+	@Override
+	public boolean matches(final String searchText) {
+
+		if ((searchText == null) || searchText.trim().isEmpty()) {
+			return true; // Empty search matches all
+		}
+		final String lowerSearchText = searchText.toLowerCase().trim();
+
+		// Search in name field (first name)
+		if ((getName() != null) && getName().toLowerCase().contains(lowerSearchText)) {
+			return true;
+		}
+
+		// Search in lastname field
+		if ((lastname != null) && lastname.toLowerCase().contains(lowerSearchText)) {
+			return true;
+		}
+
+		// Search in login field
+		if ((login != null) && login.toLowerCase().contains(lowerSearchText)) {
+			return true;
+		}
+
+		// Search in email field
+		if ((email != null) && email.toLowerCase().contains(lowerSearchText)) {
+			return true;
+		}
+
+		// Search in description field
+		if ((getDescription() != null)
+			&& getDescription().toLowerCase().contains(lowerSearchText)) {
+			return true;
+		}
+
+		// Search in ID as string
+		if ((getId() != null) && getId().toString().contains(lowerSearchText)) {
+			return true;
+		}
+		return false;
+	}
+
 	/**
 	 * Parses user role from legacy roles string.
 	 * @param roles comma-separated roles string
@@ -328,46 +369,5 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable {
 			return login;
 		}
 		return "User #" + getId();
-	}
-
-	@Override
-	public boolean matches(final String searchText) {
-		if ((searchText == null) || searchText.trim().isEmpty()) {
-			return true; // Empty search matches all
-		}
-		
-		final String lowerSearchText = searchText.toLowerCase().trim();
-		
-		// Search in name field (first name)
-		if ((getName() != null) && getName().toLowerCase().contains(lowerSearchText)) {
-			return true;
-		}
-		
-		// Search in lastname field
-		if ((lastname != null) && lastname.toLowerCase().contains(lowerSearchText)) {
-			return true;
-		}
-		
-		// Search in login field
-		if ((login != null) && login.toLowerCase().contains(lowerSearchText)) {
-			return true;
-		}
-		
-		// Search in email field
-		if ((email != null) && email.toLowerCase().contains(lowerSearchText)) {
-			return true;
-		}
-		
-		// Search in description field
-		if ((getDescription() != null) && getDescription().toLowerCase().contains(lowerSearchText)) {
-			return true;
-		}
-		
-		// Search in ID as string
-		if ((getId() != null) && getId().toString().contains(lowerSearchText)) {
-			return true;
-		}
-		
-		return false;
 	}
 }

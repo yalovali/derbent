@@ -569,7 +569,7 @@ public class CBaseUITest {
 			playwright = Playwright.create();
 			// Launch browser in headless mode for CI/CD compatibility
 			browser = playwright.chromium()
-				.launch(new BrowserType.LaunchOptions().setHeadless(true) // Set to true
+				.launch(new BrowserType.LaunchOptions().setHeadless(false) // Set to true
 																			// for CI/CD
 					.setSlowMo(50)); // Reduced slow motion for faster execution
 			// Create context with desktop viewport
@@ -774,6 +774,68 @@ public class CBaseUITest {
 	}
 
 	/**
+	 * Tests entity relation display in grid columns
+	 */
+	protected void testEntityRelationGrid(final Class<?> viewClass) {
+		LOGGER.info("🧪 Testing entity relation grid display in {} view",
+			viewClass.getSimpleName());
+
+		try {
+			// Navigate to the view
+			assertTrue(navigateToViewByClass(viewClass), "Should navigate to view");
+			// Wait for grid to load
+			wait_2000();
+			// Get all grid cells
+			final var gridCells = page.locator("vaadin-grid-cell-content");
+			final int cellCount = gridCells.count();
+
+			if (cellCount > 0) {
+				LOGGER.debug("Found {} grid cells, checking for entity relations",
+					cellCount);
+				// Check for reference columns (typically show related entity names)
+				boolean foundEntityRelations = false;
+
+				// Look for cells that contain text from related entities
+				for (int i = 0; i < Math.min(cellCount, 20); i++) { // Check first 20
+																	// cells
+					final String cellText = gridCells.nth(i).textContent();
+
+					// Check for common patterns in entity relations
+					if ((cellText != null) && !cellText.trim().isEmpty()
+						&& !cellText.matches("\\d+") && // Not just numbers (IDs)
+						!cellText.equals("true") && !cellText.equals("false") && // Not
+																					// booleans
+						(cellText.length() > 1)) {
+						foundEntityRelations = true;
+						LOGGER.debug("Found potential entity relation text: '{}'",
+							cellText.length() > 50 ? cellText.substring(0, 50) + "..."
+								: cellText);
+					}
+				}
+
+				if (foundEntityRelations) {
+					LOGGER.info("✅ Entity relations appear to be displayed in grid");
+				}
+				else {
+					LOGGER.warn(
+						"No clear entity relations found in grid - may need review");
+					takeScreenshot("entity-relations-check-"
+						+ viewClass.getSimpleName().toLowerCase(), true);
+				}
+			}
+			else {
+				LOGGER.warn("No grid cells found in {} view", viewClass.getSimpleName());
+				takeScreenshot("empty-grid-" + viewClass.getSimpleName().toLowerCase(),
+					true);
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Entity relation grid test failed for {}: {}",
+				viewClass.getSimpleName(), e.getMessage());
+			takeScreenshot("entity-relation-grid-test-error", true);
+		}
+	}
+
+	/**
 	 * Tests form validation by submitting empty form
 	 */
 	protected boolean testFormValidationById(final String saveButtonId) {
@@ -845,6 +907,61 @@ public class CBaseUITest {
 		LOGGER.info("Responsive design test completed for {}", viewName);
 	}
 
+	/**
+	 * Tests search functionality in a view by filling search field and verifying results
+	 */
+	protected void testSearchFunctionality(final Class<?> viewClass,
+		final String searchTerm) {
+		LOGGER.info("🧪 Testing search functionality in {} view with term: '{}'",
+			viewClass.getSimpleName(), searchTerm);
+
+		try {
+			// Navigate to the view
+			assertTrue(navigateToViewByClass(viewClass), "Should navigate to view");
+			// Check if search field exists (should be present for CSearchable entities)
+			final var searchFields = page.locator(
+				"vaadin-text-field[placeholder*='earch'], .search-toolbar vaadin-text-field");
+
+			if (searchFields.count() > 0) {
+				LOGGER.debug("Search field found, testing search functionality");
+				// Get initial grid row count
+				final int initialRowCount = getGridRowCount();
+				LOGGER.debug("Initial grid rows: {}", initialRowCount);
+				// Fill search field
+				searchFields.first().fill(searchTerm);
+				wait_1000(); // Wait for debounced search
+				// Get filtered row count
+				final int filteredRowCount = getGridRowCount();
+				LOGGER.debug("Filtered grid rows: {}", filteredRowCount);
+				// Verify search worked (filtered count should be <= initial count)
+				assertTrue(filteredRowCount <= initialRowCount,
+					"Search should filter results (filtered: " + filteredRowCount
+						+ ", initial: " + initialRowCount + ")");
+				// Clear search to verify all results return
+				searchFields.first().fill("");
+				wait_1000();
+				final int clearedRowCount = getGridRowCount();
+				LOGGER.debug("Cleared search grid rows: {}", clearedRowCount);
+				// After clearing, we should have same or more rows than filtered
+				assertTrue(clearedRowCount >= filteredRowCount,
+					"Clearing search should restore results");
+				LOGGER.info("✅ Search functionality test completed successfully");
+			}
+			else {
+				LOGGER.warn(
+					"No search field found in {} view - entity may not implement CSearchable",
+					viewClass.getSimpleName());
+				takeScreenshot(
+					"search-field-missing-" + viewClass.getSimpleName().toLowerCase(),
+					true);
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Search functionality test failed for {}: {}",
+				viewClass.getSimpleName(), e.getMessage());
+			takeScreenshot("search-functionality-test-error", true);
+		}
+	}
+
 	protected void wait_1000() {
 
 		if (isBrowserAvailable()) {
@@ -905,123 +1022,6 @@ public class CBaseUITest {
 			LOGGER.warn("Element with ID '{}' did not become visible within {}ms: {}", id,
 				timeoutMs, e.getMessage());
 			return false;
-		}
-	}
-
-	/**
-	 * Tests search functionality in a view by filling search field and verifying results
-	 */
-	protected void testSearchFunctionality(final Class<?> viewClass, final String searchTerm) {
-		LOGGER.info("🧪 Testing search functionality in {} view with term: '{}'", 
-			viewClass.getSimpleName(), searchTerm);
-
-		try {
-			// Navigate to the view
-			assertTrue(navigateToViewByClass(viewClass), "Should navigate to view");
-			
-			// Check if search field exists (should be present for CSearchable entities)
-			final var searchFields = page.locator("vaadin-text-field[placeholder*='earch'], .search-toolbar vaadin-text-field");
-			
-			if (searchFields.count() > 0) {
-				LOGGER.debug("Search field found, testing search functionality");
-				
-				// Get initial grid row count
-				final int initialRowCount = getGridRowCount();
-				LOGGER.debug("Initial grid rows: {}", initialRowCount);
-				
-				// Fill search field
-				searchFields.first().fill(searchTerm);
-				wait_1000(); // Wait for debounced search
-				
-				// Get filtered row count
-				final int filteredRowCount = getGridRowCount();
-				LOGGER.debug("Filtered grid rows: {}", filteredRowCount);
-				
-				// Verify search worked (filtered count should be <= initial count)
-				assertTrue(filteredRowCount <= initialRowCount, 
-					"Search should filter results (filtered: " + filteredRowCount + 
-					", initial: " + initialRowCount + ")");
-				
-				// Clear search to verify all results return
-				searchFields.first().fill("");
-				wait_1000();
-				
-				final int clearedRowCount = getGridRowCount();
-				LOGGER.debug("Cleared search grid rows: {}", clearedRowCount);
-				
-				// After clearing, we should have same or more rows than filtered
-				assertTrue(clearedRowCount >= filteredRowCount,
-					"Clearing search should restore results");
-				
-				LOGGER.info("✅ Search functionality test completed successfully");
-			} else {
-				LOGGER.warn("No search field found in {} view - entity may not implement CSearchable", 
-					viewClass.getSimpleName());
-				takeScreenshot("search-field-missing-" + viewClass.getSimpleName().toLowerCase(), true);
-			}
-			
-		} catch (final Exception e) {
-			LOGGER.error("Search functionality test failed for {}: {}", 
-				viewClass.getSimpleName(), e.getMessage());
-			takeScreenshot("search-functionality-test-error", true);
-		}
-	}
-
-	/**
-	 * Tests entity relation display in grid columns
-	 */
-	protected void testEntityRelationGrid(final Class<?> viewClass) {
-		LOGGER.info("🧪 Testing entity relation grid display in {} view", viewClass.getSimpleName());
-
-		try {
-			// Navigate to the view
-			assertTrue(navigateToViewByClass(viewClass), "Should navigate to view");
-			
-			// Wait for grid to load
-			wait_2000();
-			
-			// Get all grid cells
-			final var gridCells = page.locator("vaadin-grid-cell-content");
-			final int cellCount = gridCells.count();
-			
-			if (cellCount > 0) {
-				LOGGER.debug("Found {} grid cells, checking for entity relations", cellCount);
-				
-				// Check for reference columns (typically show related entity names)
-				boolean foundEntityRelations = false;
-				
-				// Look for cells that contain text from related entities
-				for (int i = 0; i < Math.min(cellCount, 20); i++) { // Check first 20 cells
-					final String cellText = gridCells.nth(i).textContent();
-					
-					// Check for common patterns in entity relations
-					if (cellText != null && !cellText.trim().isEmpty() && 
-						!cellText.matches("\\d+") && // Not just numbers (IDs)
-						!cellText.equals("true") && !cellText.equals("false") && // Not booleans
-						cellText.length() > 1) {
-						
-						foundEntityRelations = true;
-						LOGGER.debug("Found potential entity relation text: '{}'", 
-							cellText.length() > 50 ? cellText.substring(0, 50) + "..." : cellText);
-					}
-				}
-				
-				if (foundEntityRelations) {
-					LOGGER.info("✅ Entity relations appear to be displayed in grid");
-				} else {
-					LOGGER.warn("No clear entity relations found in grid - may need review");
-					takeScreenshot("entity-relations-check-" + viewClass.getSimpleName().toLowerCase(), true);
-				}
-				
-			} else {
-				LOGGER.warn("No grid cells found in {} view", viewClass.getSimpleName());
-				takeScreenshot("empty-grid-" + viewClass.getSimpleName().toLowerCase(), true);
-			}
-			
-		} catch (final Exception e) {
-			LOGGER.error("Entity relation grid test failed for {}: {}", 
-				viewClass.getSimpleName(), e.getMessage());
-			takeScreenshot("entity-relation-grid-test-error", true);
 		}
 	}
 }
