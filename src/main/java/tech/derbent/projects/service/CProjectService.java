@@ -53,6 +53,17 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 		return repository.findAll();
 	}
 
+	/**
+	 * Gets a project with all its user settings loaded (to avoid lazy loading issues)
+	 */
+	@Transactional (readOnly = true)
+	public CProject findByIdWithUserSettings(final Long projectId) {
+		LOGGER.info("Getting project with users for project ID: {}", projectId);
+		// Using the custom repository method that eagerly fetches user settings
+		return ((CProjectRepository) repository).findByIdWithUserSettings(projectId)
+			.orElse(null);
+	}
+
 	@Override
 	protected Class<CProject> getEntityClass() { // TODO Auto-generated method stub
 		return CProject.class;
@@ -60,16 +71,6 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 
 	@PreAuthorize ("permitAll()")
 	public long getTotalProjectCount() { return repository.count(); }
-
-	/**
-	 * Gets a project with all its user settings loaded (to avoid lazy loading issues)
-	 */
-	@Transactional(readOnly = true)
-	public CProject getProjectWithUsers(final Long projectId) {
-		LOGGER.info("Getting project with users for project ID: {}", projectId);
-		// Using the custom repository method that eagerly fetches user settings
-		return ((CProjectRepository) repository).findByIdWithUserSettings(projectId).orElse(null);
-	}
 
 	@Override
 	@Transactional

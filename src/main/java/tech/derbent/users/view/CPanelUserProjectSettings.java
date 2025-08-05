@@ -2,8 +2,6 @@ package tech.derbent.users.view;
 
 import java.util.List;
 
-import com.vaadin.flow.component.icon.VaadinIcon;
-
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.views.CPanelUserProjectBase;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
@@ -19,20 +17,24 @@ public class CPanelUserProjectSettings extends CPanelUserProjectBase<CUser> {
 	private static final long serialVersionUID = 1L;
 
 	private CUser currentUser;
+
 	private final CUserTypeService userTypeService;
+
 	private final CCompanyService companyService;
 
 	public CPanelUserProjectSettings(final CUser currentEntity,
 		final CEnhancedBinder<CUser> beanValidationBinder,
 		final CUserService entityService, final CUserTypeService userTypeService,
 		final CCompanyService companyService, final CProjectService projectService) {
-		super("Project Settings", currentEntity, beanValidationBinder, CUser.class, entityService, projectService);
+		super("Project Settings", currentEntity, beanValidationBinder, CUser.class,
+			entityService, projectService);
 		this.userTypeService = userTypeService;
 		this.companyService = companyService;
 	}
 
 	@Override
-	protected String createDeleteConfirmationMessage(final CUserProjectSettings selected) {
+	protected String
+		createDeleteConfirmationMessage(final CUserProjectSettings selected) {
 		final String projectName = getProjectName(selected);
 		return String.format(
 			"Are you sure you want to delete the project setting for '%s'? This action cannot be undone.",
@@ -41,6 +43,7 @@ public class CPanelUserProjectSettings extends CPanelUserProjectBase<CUser> {
 
 	@Override
 	protected void onSettingsSaved(final CUserProjectSettings settings) {
+
 		if ((getSettings != null) && (setSettings != null)) {
 			final List<CUserProjectSettings> settingsList = getSettings.get();
 			// Check if this is an update or a new addition
@@ -71,6 +74,7 @@ public class CPanelUserProjectSettings extends CPanelUserProjectBase<CUser> {
 
 	@Override
 	protected void openAddDialog() {
+
 		if (currentUser == null) {
 			new CWarningDialog(
 				"Please select a user first before adding project settings.").open();
@@ -108,9 +112,7 @@ public class CPanelUserProjectSettings extends CPanelUserProjectBase<CUser> {
 		dialog.open();
 	}
 
-	public void setCurrentUser(final CUser user) { 
-		this.currentUser = user; 
-	}
+	public void setCurrentUser(final CUser user) { this.currentUser = user; }
 
 	public void setProjectSettingsAccessors(
 		final java.util.function.Supplier<List<CUserProjectSettings>> getProjectSettings,

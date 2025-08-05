@@ -20,6 +20,7 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject> {
 	private static final long serialVersionUID = 1L;
 
 	private CProject currentProject;
+
 	private final CUserService userService; // Added CUserService
 
 	public CPanelProjectUsers(final CProject currentEntity,
@@ -29,6 +30,7 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject> {
 		super("Project Users", currentEntity, beanValidationBinder, CProject.class,
 			entityService, projectService);
 		this.userService = userService; // Store the user service
+		openPanel();
 	}
 
 	@Override
@@ -45,6 +47,7 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject> {
 
 	@Override
 	protected void onSettingsSaved(final CUserProjectSettings settings) {
+		LOGGER.debug("Saving user project settings: {}", settings);
 
 		if ((getSettings != null) && (setSettings != null)) {
 			final List<CUserProjectSettings> settingsList = getSettings.get();
@@ -90,7 +93,9 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject> {
 		}
 		// Create a dialog for adding users to project (reverse mode)
 		final CProjectUserSettingsDialog dialog =
-			new CProjectUserSettingsDialog(projectService, userService, null, // null for new settings
+			new CProjectUserSettingsDialog(projectService, userService, null, // null for
+																				// new
+																				// settings
 				currentProject, this::onSettingsSaved);
 		dialog.open();
 	}

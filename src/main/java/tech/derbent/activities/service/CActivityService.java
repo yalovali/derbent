@@ -1,8 +1,6 @@
 package tech.derbent.activities.service;
 
-import java.math.BigDecimal;
 import java.time.Clock;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -15,11 +13,9 @@ import tech.derbent.abstracts.interfaces.CKanbanService;
 import tech.derbent.abstracts.services.CEntityOfProjectRepository;
 import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.activities.domain.CActivity;
-import tech.derbent.activities.domain.CActivityPriority;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.domain.CActivityType;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.users.domain.CUser;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -50,6 +46,21 @@ public class CActivityService extends CEntityOfProjectService<CActivity>
 		final CActivityType noType = new CActivityType("No Type", project);
 		noType.setDescription("Activities without an assigned type");
 		return noType;
+	}
+
+	/**
+	 * Find activity by ID with optimized eager loading. Uses repository method with JOIN
+	 * FETCH to prevent N+1 queries.
+	 * @param id the activity ID
+	 * @return the activity with eagerly loaded associations, or null if not found
+	 */
+	public CActivity findById(final Long id) {
+
+		if (id == null) {
+			return null;
+		}
+		return ((CActivityRepository) repository).findByIdWithEagerLoading(id)
+			.orElse(null);
 	}
 
 	/**
@@ -108,19 +119,6 @@ public class CActivityService extends CEntityOfProjectService<CActivity>
 		// In a real implementation, you'd want to fetch the project by ID This is a
 		// simplification for the minimal change approach
 		return Map.of(); // This would need proper implementation
-	}
-
-	/**
-	 * Find activity by ID with optimized eager loading.
-	 * Uses repository method with JOIN FETCH to prevent N+1 queries.
-	 * @param id the activity ID
-	 * @return the activity with eagerly loaded associations, or null if not found
-	 */
-	public CActivity findById(final Long id) {
-		if (id == null) {
-			return null;
-		}
-		return ((CActivityRepository) repository).findByIdWithEagerLoading(id).orElse(null);
 	}
 
 	@Override

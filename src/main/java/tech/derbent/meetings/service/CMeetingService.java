@@ -1,21 +1,16 @@
 package tech.derbent.meetings.service;
 
 import java.time.Clock;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import tech.derbent.abstracts.interfaces.CKanbanService;
 import tech.derbent.abstracts.services.CEntityOfProjectService;
-import tech.derbent.activities.domain.CActivity;
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.domain.CMeetingStatus;
-import tech.derbent.meetings.domain.CMeetingType;
 import tech.derbent.users.domain.CUser;
 
 @Service
@@ -38,6 +33,21 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting>
 			return List.of();
 		}
 		return ((CMeetingRepository) repository).findByAttendeeId(user.getId());
+	}
+
+	/**
+	 * Find meeting by ID with optimized eager loading. Uses repository method with JOIN
+	 * FETCH to prevent N+1 queries.
+	 * @param id the meeting ID
+	 * @return the meeting with eagerly loaded associations, or null if not found
+	 */
+	public CMeeting findById(final Long id) {
+
+		if (id == null) {
+			return null;
+		}
+		return ((CMeetingRepository) repository).findByIdWithEagerLoading(id)
+			.orElse(null);
 	}
 
 	/**
@@ -73,22 +83,9 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting>
 	protected Class<CMeeting> getEntityClass() { return CMeeting.class; }
 
 	/**
-	 * Find meeting by ID with optimized eager loading.
-	 * Uses repository method with JOIN FETCH to prevent N+1 queries.
-	 * @param id the meeting ID
-	 * @return the meeting with eagerly loaded associations, or null if not found
-	 */
-	public CMeeting findById(final Long id) {
-		if (id == null) {
-			return null;
-		}
-		return ((CMeetingRepository) repository).findByIdWithEagerLoading(id).orElse(null);
-	}
-
-	/**
-	 * Optimized lazy field initialization for CMeeting entity.
-	 * With improved repository queries using JOIN FETCH, this mainly handles
-	 * complex collections like participants and attendees only when needed.
+	 * Optimized lazy field initialization for CMeeting entity. With improved repository
+	 * queries using JOIN FETCH, this mainly handles complex collections like participants
+	 * and attendees only when needed.
 	 * @param entity the CMeeting entity to initialize
 	 */
 	@Override
@@ -103,7 +100,8 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting>
 			// Initialize the entity itself first
 			super.initializeLazyFields(entity);
 			// Initialize only the lazy collections that aren't handled by eager queries
-			// Note: meetingType, status, responsible, relatedActivity are now eagerly loaded via JOIN FETCH
+			// Note: meetingType, status, responsible, relatedActivity are now eagerly
+			// loaded via JOIN FETCH
 			initializeLazyRelationship(entity.getParticipants());
 			initializeLazyRelationship(entity.getAttendees());
 		} catch (final Exception e) {
@@ -126,5 +124,4 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting>
 		entity.setStatus(newStatus);
 		return save(entity);
 	}
-
 }

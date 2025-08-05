@@ -92,7 +92,10 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable {
 	private String roles = "USER";
 
 	@Enumerated (EnumType.STRING)
-	@Column (name = "user_role", nullable = false, length = 50, columnDefinition = "VARCHAR(50)")
+	@Column (
+		name = "user_role", nullable = false, length = 50,
+		columnDefinition = "VARCHAR(50)"
+	)
 	@MetaData (
 		displayName = "User Role", required = true, readOnly = false,
 		defaultValue = "TEAM_MEMBER", description = "Primary user role in the system",
@@ -120,10 +123,17 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable {
 		defaultValue = "", description = "User's profile picture stored as binary data",
 		hidden = false, order = 11
 	)
-	@Column (name = "profile_picture_data", nullable = true, length = 10000, columnDefinition = "bytea")
+	@Column (
+		name = "profile_picture_data", nullable = true, length = 10000,
+		columnDefinition = "bytea"
+	)
 	private byte[] profilePictureData;
 
-	@OneToMany (mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	// load it eagerly because there a few projects that use this field
+	@OneToMany (
+		mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true,
+		fetch = FetchType.EAGER
+	)
 	private List<CUserProjectSettings> projectSettings;
 
 	@ManyToOne (fetch = FetchType.EAGER)

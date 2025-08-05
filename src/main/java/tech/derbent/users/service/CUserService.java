@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -60,28 +59,6 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 	}
 
 	/**
-	 * Find user by ID with optimized eager loading.
-	 * Uses repository method with JOIN FETCH to prevent N+1 queries.
-	 * @param id the user ID
-	 * @return the user with eagerly loaded associations, or null if not found
-	 */
-	public CUser findById(final Long id) {
-		if (id == null) {
-			return null;
-		}
-		return ((CUserRepository) repository).findByIdWithEagerLoading(id).orElse(null);
-	}
-
-	/**
-	 * Find all enabled users with eager loading for UI components.
-	 * Optimized for dropdowns, comboboxes, and selection components.
-	 * @return List of enabled users with eager loaded associations
-	 */
-	public List<CUser> findAllEnabledWithEagerLoading() {
-		return ((CUserRepository) repository).findAllEnabledWithEagerLoading();
-	}
-
-	/**
 	 * Creates a new login user with encoded password. This method handles password
 	 * encoding automatically.
 	 * @param username      the username for login
@@ -109,6 +86,29 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 		// Save to database
 		final CUser savedUser = repository.saveAndFlush(loginUser);
 		return savedUser;
+	}
+
+	/**
+	 * Find all enabled users with eager loading for UI components. Optimized for
+	 * dropdowns, comboboxes, and selection components.
+	 * @return List of enabled users with eager loaded associations
+	 */
+	public List<CUser> findAllEnabledWithEagerLoading() {
+		return ((CUserRepository) repository).findAllEnabledWithEagerLoading();
+	}
+
+	/**
+	 * Find user by ID with optimized eager loading. Uses repository method with JOIN
+	 * FETCH to prevent N+1 queries.
+	 * @param id the user ID
+	 * @return the user with eagerly loaded associations, or null if not found
+	 */
+	public CUser findById(final Long id) {
+
+		if (id == null) {
+			return null;
+		}
+		return ((CUserRepository) repository).findByIdWithEagerLoading(id).orElse(null);
 	}
 
 	/**
@@ -205,14 +205,6 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 		}
 	}
 
-	@Override
-	@Transactional (readOnly = true)
-	public List<CUser> list(final Pageable pageable) {
-		LOGGER.warn("list(Pageable) not implemented yet in this class:" + " {}",
-			getClass().getSimpleName());
-		throw new UnsupportedOperationException("list(Pageable) method not implemented");
-	}
-
 	/**
 	 * Implementation of UserDetailsService.loadUserByUsername(). This is the core method
 	 * called by Spring Security during authentication.
@@ -268,7 +260,8 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 	public CUserProjectSettings
 		saveUserProjectSetting(final CUserProjectSettings userProjectSetting) {
 		LOGGER.info("Saving user project setting for user ID: {} and project ID: {}",
-			userProjectSetting.getUser().getId(), userProjectSetting.getProject().getId());
+			userProjectSetting.getUser().getId(),
+			userProjectSetting.getProject().getId());
 		// Ensure the user exists and reload with project settings
 		final CUser user = getUserWithProjects(userProjectSetting.getUser().getId());
 
@@ -281,7 +274,8 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 
 		for (final CUserProjectSettings existing : user.getProjectSettings()) {
 
-			if (existing.getProject().getId().equals(userProjectSetting.getProject().getId())) {
+			if (existing.getProject().getId()
+				.equals(userProjectSetting.getProject().getId())) {
 				existing.setRole(userProjectSetting.getRole());
 				existing.setPermission(userProjectSetting.getPermission());
 				updated = true;

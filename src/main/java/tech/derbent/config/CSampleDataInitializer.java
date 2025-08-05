@@ -6,13 +6,13 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +22,6 @@ import tech.derbent.activities.domain.CActivityType;
 import tech.derbent.activities.service.CActivityService;
 import tech.derbent.activities.service.CActivityStatusService;
 import tech.derbent.activities.service.CActivityTypeService;
-import tech.derbent.comments.domain.CComment;
 import tech.derbent.comments.domain.CCommentPriority;
 import tech.derbent.comments.service.CCommentPriorityService;
 import tech.derbent.comments.service.CCommentService;
@@ -54,8 +53,6 @@ import tech.derbent.users.domain.CUserRole;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.CUserTypeService;
 
-import org.springframework.context.annotation.Profile;
-
 /**
  * CSampleDataInitializer - Enhanced sample data initializer following coding guidelines.
  * Layer: Configuration (MVC) This component runs after the application starts and creates
@@ -69,7 +66,7 @@ import org.springframework.context.annotation.Profile;
  * entities as available
  */
 @Component
-@Profile("!test")
+@Profile ("!test")
 public class CSampleDataInitializer implements ApplicationRunner {
 
 	private static final Logger LOGGER =
@@ -155,6 +152,35 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		this.activityStatusService = activityStatusService;
 		this.decisionService = decisionService;
 		this.currencyService = currencyService;
+	}
+
+	/**
+	 * Clears all sample data from the database to prepare for fresh initialization. This
+	 * method ensures that restarting the application multiple times doesn't create
+	 * duplicate sample data. Note: This is a simplified cleanup that shows the intent. In
+	 * a production environment, consider using database scripts or admin interfaces for
+	 * cleanup.
+	 */
+	@Transactional
+	private void clearSampleData() {
+		LOGGER.info("Clearing existing sample data from database");
+
+		try {
+			// For this implementation, we'll log a warning and rely on the
+			// isDatabaseEmpty() check to prevent duplicate initialization
+			LOGGER.warn("Sample data cleanup requested but not fully implemented.");
+			LOGGER.warn(
+				"Consider manually clearing the database or using --force-init carefully.");
+			LOGGER.warn(
+				"The isDatabaseEmpty() check should prevent most duplicate data issues.");
+			// TODO: Implement proper cleanup if needed for production use This could
+			// involve: 1. Using native SQL queries to delete in proper order 2. Using
+			// repository.deleteAll() if available 3. Using database cascade delete rules
+			// 4. Or requiring manual database cleanup
+		} catch (final Exception e) {
+			LOGGER.error("Error during sample data cleanup", e);
+			throw new RuntimeException("Failed to clear sample data", e);
+		}
 	}
 
 	private void createActivityStatus(final String name, final CProject project,
@@ -245,7 +271,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivityType developmentType =
 			findActivityTypeByNameAndProject("Development", project);
 		frontendDev.setActivityType(developmentType);
-		frontendDev.setDescription("Develop responsive user interface components using modern frameworks");
+		frontendDev.setDescription(
+			"Develop responsive user interface components using modern frameworks");
 		final CUser dev1 = findUserByLogin("msahin");
 		final CUser manager = findUserByLogin("mkaradeniz");
 		frontendDev.setAssignedTo(dev1);
@@ -325,8 +352,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivityType developmentType =
 			findActivityTypeByNameAndProject("Development", project);
 		serverMigration.setActivityType(developmentType);
-		serverMigration.setDescription(
-			"Migrate applications to new server infrastructure");
+		serverMigration
+			.setDescription("Migrate applications to new server infrastructure");
 		final CUser dev1 = findUserByLogin("bozkan");
 		serverMigration.setAssignedTo(dev1);
 		serverMigration.setCreatedBy(admin);
@@ -361,8 +388,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivityType testingType =
 			findActivityTypeByNameAndProject("Testing", project);
 		codeReview.setActivityType(testingType);
-		codeReview.setDescription(
-			"Comprehensive code review and quality assurance");
+		codeReview.setDescription("Comprehensive code review and quality assurance");
 		final CUser analyst = findUserByLogin("ademir");
 		final CUser manager = findUserByLogin("mkaradeniz");
 		codeReview.setAssignedTo(analyst);
@@ -386,8 +412,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		// Performance Testing Activity
 		final CActivity perfTesting = new CActivity("Performance Testing", project);
 		perfTesting.setActivityType(testingType);
-		perfTesting.setDescription(
-			"Load testing and performance optimization");
+		perfTesting.setDescription("Load testing and performance optimization");
 		final CUser dev2 = findUserByLogin("bozkan");
 		perfTesting.setAssignedTo(dev2);
 		perfTesting.setCreatedBy(manager);
@@ -821,12 +846,14 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		meeting.setDescription(
 			"Weekly status update on project progress, blockers discussion, and next steps planning");
 		// Set meeting details using entity methods
-		meeting.setMeetingDate(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0));
+		meeting
+			.setMeetingDate(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0));
 		meeting.setEndDate(LocalDateTime.now().plusDays(1).withHour(15).withMinute(0));
 		meeting.setLocation("Conference Room A");
 		// Set meeting content using entity methods
 		final CUser responsible = findUserByLogin("mkaradeniz");
-		meeting.setAgenda("Weekly status update on project progress, blockers discussion, and next steps planning");
+		meeting.setAgenda(
+			"Weekly status update on project progress, blockers discussion, and next steps planning");
 		meeting.setResponsible(responsible);
 		// Set participants using auxiliary method
 		final Set<CUser> participants = new HashSet<>();
@@ -1840,8 +1867,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 		try {
 			// Check for force initialization flag
-			boolean forceInit = args.containsOption("force-init");
-			
+			final boolean forceInit = args.containsOption("force-init");
+
 			// Check if database already has data - if so, skip initialization only on app
 			// startup unless force initialization is requested
 			if (!isDatabaseEmpty() && !forceInit) {
@@ -1849,49 +1876,17 @@ public class CSampleDataInitializer implements ApplicationRunner {
 					"Database already contains data, skipping sample data initialization on startup");
 				return;
 			}
-			
+
 			// Clear existing sample data if force initialization is requested
 			if (forceInit && !isDatabaseEmpty()) {
-				LOGGER.info("Force initialization requested - clearing existing sample data");
+				LOGGER.info(
+					"Force initialization requested - clearing existing sample data");
 				clearSampleData();
 			}
-			
 			loadSampleData(); // Load sample data
 		} catch (final Exception e) {
 			LOGGER.error("Error during sample data initialization", e);
 			throw e;
-		}
-	}
-
-	/**
-	 * Clears all sample data from the database to prepare for fresh initialization.
-	 * This method ensures that restarting the application multiple times doesn't
-	 * create duplicate sample data.
-	 * 
-	 * Note: This is a simplified cleanup that shows the intent. In a production
-	 * environment, consider using database scripts or admin interfaces for cleanup.
-	 */
-	@Transactional
-	private void clearSampleData() {
-		LOGGER.info("Clearing existing sample data from database");
-		
-		try {
-			// For this implementation, we'll log a warning and rely on the 
-			// isDatabaseEmpty() check to prevent duplicate initialization
-			LOGGER.warn("Sample data cleanup requested but not fully implemented.");
-			LOGGER.warn("Consider manually clearing the database or using --force-init carefully.");
-			LOGGER.warn("The isDatabaseEmpty() check should prevent most duplicate data issues.");
-			
-			// TODO: Implement proper cleanup if needed for production use
-			// This could involve:
-			// 1. Using native SQL queries to delete in proper order
-			// 2. Using repository.deleteAll() if available
-			// 3. Using database cascade delete rules
-			// 4. Or requiring manual database cleanup
-			
-		} catch (Exception e) {
-			LOGGER.error("Error during sample data cleanup", e);
-			throw new RuntimeException("Failed to clear sample data", e);
 		}
 	}
 }

@@ -6,11 +6,16 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.projects.domain.CProject;
 
 @Entity
-@Table (name = "cuserprojectsettings") // table name for the entity
+@Table (
+	name = "cuserprojectsettings", uniqueConstraints = @UniqueConstraint (columnNames = {
+		"user_id", "project_id" }
+	)
+) // table name for the entity
 @AttributeOverride (name = "id", column = @Column (name = "cuserprojectsettings_id"))
 public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 
@@ -47,4 +52,12 @@ public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 	public void setRole(final String role) { this.role = role; }
 
 	public void setUser(final CUser user) { this.user = user; }
+
+	@Override
+	public String toString() {
+		return String.format(
+			"UserProjectSettings[user=%s, project=%s, role=%s, permission=%s]",
+			user != null ? user.getLogin() : "null",
+			project != null ? project.getName() : "null", role, permission);
+	}
 }
