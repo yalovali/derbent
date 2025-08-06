@@ -47,10 +47,7 @@ public class CProjectUserSettingsDialog extends CDBRelationDialog<CUserProjectSe
         populateForm();
     }
 
-    @Override
-    protected CUserProjectSettings createNewRelationship() {
-        return new CUserProjectSettings();
-    }
+
 
     @Override
     protected List<CUser> getAvailableRelatedEntities() {
