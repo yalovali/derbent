@@ -95,7 +95,7 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject> {
 			return;
 		}
 		final CProjectUserSettingsDialog dialog = new CProjectUserSettingsDialog(
-			projectService, userService, null, currentProject, this::onSettingsSaved);
+			userService, null, currentProject, this::onSettingsSaved);
 		dialog.open();
 	}
 
@@ -111,7 +111,7 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject> {
 		}
 		final CUserProjectSettings selected = grid.asSingleSelect().getValue();
 		final CProjectUserSettingsDialog dialog = new CProjectUserSettingsDialog(
-			projectService, userService, selected, currentProject, this::onSettingsSaved);
+			userService, selected, currentProject, this::onSettingsSaved);
 		dialog.open();
 	}
 
