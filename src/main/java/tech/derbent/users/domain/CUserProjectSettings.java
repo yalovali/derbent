@@ -19,6 +19,29 @@ import tech.derbent.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "cuserprojectsettings_id"))
 public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 
+	public static void addUserToProject(final CProject project, final CUser user,
+		final CUserProjectSettings settings) {
+
+		if (project == null || user == null) {
+			throw new IllegalArgumentException("Master and detail cannot be null");
+		}
+
+		if (settings == null) {
+			throw new IllegalArgumentException("Relation class cannot be null");
+		}
+		removeUserFromProject(project, user);
+		settings.getProject().getUserSettings().add(settings);
+	}
+
+	// remove a user from project
+	public static void removeUserFromProject(final CProject project, final CUser user) {
+
+		if (project == null || user == null) {
+			throw new IllegalArgumentException("Project and User cannot be null");
+		}
+		project.getUserSettings().removeIf(settings -> settings.getUser().equals(user));
+	}
+
 	@ManyToOne
 	@JoinColumn (name = "user_id", nullable = false)
 	private CUser user;

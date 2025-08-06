@@ -20,8 +20,8 @@ import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUserProjectSettings;
-import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.CUserProjectSettingsService;
+import tech.derbent.users.service.CUserService;
 
 /**
  * CProjectsView - View for managing projects. Layer: View (MVC) Provides CRUD operations
@@ -52,6 +52,7 @@ public class CProjectsView extends CAbstractNamedEntityPage<CProject>
 	private CPanelProjectUsers projectUsersPanel;
 
 	private final CUserService userService;
+
 	private final CUserProjectSettingsService userProjectSettingsService;
 
 	@Autowired
@@ -73,8 +74,8 @@ public class CProjectsView extends CAbstractNamedEntityPage<CProject>
 		addAccordionPanel(panel);
 		// Add the project users panel for managing users in this project
 		projectUsersPanel = new CPanelProjectUsers(getCurrentEntity(), getBinder(),
-			(CProjectService) entityService, (CProjectService) entityService,
-			userService, userProjectSettingsService);
+			(CProjectService) entityService, (CProjectService) entityService, userService,
+			userProjectSettingsService);
 		addAccordionPanel(projectUsersPanel);
 	}
 
@@ -122,7 +123,9 @@ public class CProjectsView extends CAbstractNamedEntityPage<CProject>
 				() -> projectWithUsers.getUserSettings();
 			// what to do when user settings are updated
 			final Consumer<List<CUserProjectSettings>> consumer = users -> {
-				projectWithUsers.getUserSettings().clear();
+				// CUserProjectSettings::addUserToProject(projectWithUsers, users);
+				// projectWithUsers.removeUser(user);
+				// projectWithUsers.getUserSettings().clear();
 				projectWithUsers.getUserSettings().addAll(users);
 				// Save the project when user settings are updated
 				entityService.save(projectWithUsers);
