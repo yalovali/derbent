@@ -1,24 +1,43 @@
-/* Custom login view styling */
+/* Custom login view styling - minimal design */
 .custom-login-view {
-    background-image: url('./images/background1.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
 }
 
-.custom-login-view .custom-login-card {
-    background-color: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+.custom-login-view .lumo-card {
+    background-color: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .custom-login-view vaadin-text-field,
 .custom-login-view vaadin-password-field {
-    --lumo-border-radius: var(--lumo-border-radius-m);
+    --lumo-border-radius: var(--lumo-border-radius-s);
+    margin: 0;
 }
 
 .custom-login-view vaadin-button[theme~="primary"] {
-    --lumo-primary-color: #1976d2;
+    --lumo-primary-color: #667eea;
+    width: 100%;
     margin-top: var(--lumo-space-m);
+}
+
+.custom-login-view vaadin-button[theme~="tertiary"] {
+    --lumo-tertiary-text-color: #667eea;
+    margin-top: var(--lumo-space-s);
+}
+
+/* Horizontal form field styling */
+.custom-login-view vaadin-horizontal-layout {
+    gap: var(--lumo-space-m);
+    margin-bottom: var(--lumo-space-s);
+}
+
+.custom-login-view vaadin-horizontal-layout p {
+    margin: 0;
+    line-height: var(--lumo-line-height-m);
+    display: flex;
+    align-items: center;
+    text-align: right;
+    min-width: 120px;
 }
