@@ -21,6 +21,7 @@ import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserProjectSettings;
+import tech.derbent.users.service.CUserProjectSettingsService;
 
 /**
  * Base class for managing user-project relationships in both directions. This class
@@ -41,15 +42,19 @@ public abstract class CPanelUserProjectBase<EntityClass extends CEntityDB<Entity
 	// Handlers for getting and setting user-project settings
 	protected Supplier<List<CUserProjectSettings>> getSettings;
 
+	protected CUserProjectSettingsService userProjectSettingsService;
+
 	protected Runnable saveEntity;
 
 	public CPanelUserProjectBase(final String title, final EntityClass currentEntity,
 		final CEnhancedBinder<EntityClass> beanValidationBinder,
 		final Class<EntityClass> entityClass,
 		final CAbstractService<EntityClass> entityService,
-		final CProjectService projectService) {
+		final CProjectService projectService,
+		final CUserProjectSettingsService userProjectSettingsService) {
 		super(title, currentEntity, beanValidationBinder, entityClass, entityService);
 		this.projectService = projectService;
+		this.userProjectSettingsService = userProjectSettingsService;
 		setupGrid();
 		setupButtons();
 		closePanel();
@@ -99,13 +104,9 @@ public abstract class CPanelUserProjectBase<EntityClass extends CEntityDB<Entity
 		}
 		final String confirmMessage = createDeleteConfirmationMessage(selected);
 		new CConfirmationDialog(confirmMessage, () -> {
-			final List<CUserProjectSettings> settings = getSettings.get();
-			settings.remove(selected);
-
-			if (saveEntity != null) {
-				saveEntity.run();
-			}
+			userProjectSettingsService.delete(selected);
 			refresh();
+			saveEntity.run();
 		}).open();
 	}
 

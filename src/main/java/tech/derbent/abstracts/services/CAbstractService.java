@@ -52,52 +52,57 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		}
 	}
 
-	/**
-	 * Generic update method using reflection to copy non-null fields.
-	 * 
-	 * @param id the ID of the entity to update
-	 * @param updatedEntity entity containing the new values
-	 * @return the updated entity
-	 */
-	@Transactional
-	public EntityClass update(final Long id, final EntityClass updatedEntity) {
-		final EntityClass existingEntity = repository.findById(id)
-			.orElseThrow(() -> new RuntimeException("Entity not found with ID: " + id));
-		
-		// Use reflection to copy non-null fields
-		existingEntity.copyNonNullFields(updatedEntity, existingEntity);
-		
-		// Perform save with reflection-based audit updates
-		existingEntity.performSave();
-		
-		return repository.save(existingEntity);
+	public void delete(final EntityClass entity) {
+		LOGGER.debug("Deleting entity: {}", CSpringAuxillaries.safeToString(entity));
+
+		if (entity == null) {
+			LOGGER.warn("Cannot delete null entity");
+			return;
+		}
+
+		if (entity.getId() == null) {
+			LOGGER.warn("Entity ID is null, cannot delete: {}",
+				CSpringAuxillaries.safeToString(entity));
+			return;
+		}
+		repository.deleteById(entity.getId());
+	}
+
+	public void delete(final Long id) {
+		LOGGER.debug("Deleting entity with ID: {}", id);
+		repository.deleteById(id);
 	}
 
 	/**
-	 * Enhanced delete method that attempts soft delete using reflection before hard delete.
-	 * 
+	 * Enhanced delete method that attempts soft delete using reflection before hard
+	 * delete.
 	 * @param entity the entity to delete
 	 */
 	@Transactional
 	public void deleteWithReflection(final EntityClass entity) {
+
 		if (entity == null) {
 			LOGGER.warn("Cannot delete null entity");
 			return;
 		}
 
 		try {
+
 			// Try soft delete first using reflection
 			if (entity.performSoftDelete()) {
 				// Soft delete was successful, save the entity
 				repository.save(entity);
-				LOGGER.info("Performed soft delete for entity: {}", entity.getClass().getSimpleName());
-			} else {
+				LOGGER.info("Performed soft delete for entity: {}",
+					entity.getClass().getSimpleName());
+			}
+			else {
 				// No soft delete field found, perform hard delete
 				repository.delete(entity);
-				LOGGER.info("Performed hard delete for entity: {}", entity.getClass().getSimpleName());
+				LOGGER.info("Performed hard delete for entity: {}",
+					entity.getClass().getSimpleName());
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error during delete operation for entity: {}", 
+			LOGGER.error("Error during delete operation for entity: {}",
 				CSpringAuxillaries.safeToString(entity), e);
 			throw e;
 		}
@@ -105,23 +110,13 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 
 	/**
 	 * Enhanced delete by ID method that attempts soft delete using reflection.
-	 * 
 	 * @param id the ID of the entity to delete
 	 */
 	@Transactional
 	public void deleteWithReflection(final Long id) {
 		final EntityClass entity = repository.findById(id)
 			.orElseThrow(() -> new RuntimeException("Entity not found with ID: " + id));
-		
 		deleteWithReflection(entity);
-	}
-
-	public void delete(final EntityClass entity) {
-		repository.delete(entity);
-	}
-
-	public void delete(final Long id) {
-		repository.deleteById(id);
 	}
 
 	@Transactional (readOnly = true)
@@ -185,10 +180,9 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	}
 
 	/**
-	 * Lists entities with text-based filtering for searchable entities.
-	 * This method works with entities that implement CSearchable interface.
-	 * 
-	 * @param pageable pagination information
+	 * Lists entities with text-based filtering for searchable entities. This method works
+	 * with entities that implement CSearchable interface.
+	 * @param pageable   pagination information
 	 * @param searchText text to search for (null or empty means no filtering)
 	 * @return list of entities matching the search criteria
 	 */
@@ -196,23 +190,20 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	public List<EntityClass> list(final Pageable pageable, final String searchText) {
 		// Validate and fix pageable to prevent "max-results cannot be negative" error
 		final Pageable safePage = PageableUtils.validateAndFix(pageable);
-		
+
 		// If no search text or entity doesn't implement CSearchable, use regular listing
-		if ((searchText == null) || searchText.trim().isEmpty() 
-				|| !CSearchable.class.isAssignableFrom(getEntityClass())) {
+		if ((searchText == null) || searchText.trim().isEmpty()
+			|| !CSearchable.class.isAssignableFrom(getEntityClass())) {
 			return list(safePage);
 		}
-		
 		// Get all entities and filter using the entity's matches method
 		final List<EntityClass> allEntities = repository.findAll(safePage).toList();
 		// Initialize lazy fields for all entities
 		allEntities.forEach(this::initializeLazyFields);
-		
 		// Filter entities using their search implementation
 		final String trimmedSearchText = searchText.trim();
 		return allEntities.stream()
-			.filter(entity -> ((CSearchable) entity).matches(trimmedSearchText))
-			.toList();
+			.filter(entity -> ((CSearchable) entity).matches(trimmedSearchText)).toList();
 	}
 
 	public EntityClass newEntity() {
@@ -245,6 +236,23 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 				CSpringAuxillaries.safeToString(entity), e);
 			throw e;
 		}
+	}
+
+	/**
+	 * Generic update method using reflection to copy non-null fields.
+	 * @param id            the ID of the entity to update
+	 * @param updatedEntity entity containing the new values
+	 * @return the updated entity
+	 */
+	@Transactional
+	public EntityClass update(final Long id, final EntityClass updatedEntity) {
+		final EntityClass existingEntity = repository.findById(id)
+			.orElseThrow(() -> new RuntimeException("Entity not found with ID: " + id));
+		// Use reflection to copy non-null fields
+		existingEntity.copyNonNullFields(updatedEntity, existingEntity);
+		// Perform save with reflection-based audit updates
+		existingEntity.performSave();
+		return repository.save(existingEntity);
 	}
 
 	protected void validateEntity(final EntityClass entity) {

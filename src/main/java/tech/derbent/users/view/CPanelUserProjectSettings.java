@@ -26,10 +26,6 @@ public class CPanelUserProjectSettings extends CPanelUserProjectBase<CUser> {
 
 	private CUser currentUser;
 
-	private final CUserTypeService userTypeService;
-
-	private final CCompanyService companyService;
-
 	private final CUserProjectSettingsService userProjectSettingsService;
 
 	public CPanelUserProjectSettings(final CUser currentEntity,
@@ -38,9 +34,7 @@ public class CPanelUserProjectSettings extends CPanelUserProjectBase<CUser> {
 		final CCompanyService companyService, final CProjectService projectService,
 		final CUserProjectSettingsService userProjectSettingsService) {
 		super("Project Settings", currentEntity, beanValidationBinder, CUser.class,
-			entityService, projectService);
-		this.userTypeService = userTypeService;
-		this.companyService = companyService;
+			entityService, projectService, userProjectSettingsService);
 		this.userProjectSettingsService = userProjectSettingsService;
 		openPanel();
 	}

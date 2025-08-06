@@ -22,24 +22,21 @@ public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 	public static void addUserToProject(final CProject project, final CUser user,
 		final CUserProjectSettings settings) {
 
-		if (project == null || user == null) {
+		if ((project == null) || (user == null)) {
 			throw new IllegalArgumentException("Project and User cannot be null");
 		}
 
 		if (settings == null) {
 			throw new IllegalArgumentException("UserProjectSettings cannot be null");
 		}
-		
 		// Set the relationships in the settings object
 		settings.setProject(project);
 		settings.setUser(user);
-		
 		// Remove any existing relationship to avoid duplicates
 		removeUserFromProject(project, user);
-		
 		// Add to both sides of the bidirectional relationship
 		project.getUserSettings().add(settings);
-		
+
 		// Initialize user's project settings list if null
 		if (user.getProjectSettings() == null) {
 			user.setProjectSettings(new java.util.ArrayList<>());
@@ -50,16 +47,16 @@ public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 	// remove a user from project
 	public static void removeUserFromProject(final CProject project, final CUser user) {
 
-		if (project == null || user == null) {
+		if ((project == null) || (user == null)) {
 			throw new IllegalArgumentException("Project and User cannot be null");
 		}
-		
 		// Remove from project's user settings
 		project.getUserSettings().removeIf(settings -> settings.getUser().equals(user));
-		
+
 		// Remove from user's project settings
 		if (user.getProjectSettings() != null) {
-			user.getProjectSettings().removeIf(settings -> settings.getProject().equals(project));
+			user.getProjectSettings()
+				.removeIf(settings -> settings.getProject().equals(project));
 		}
 	}
 

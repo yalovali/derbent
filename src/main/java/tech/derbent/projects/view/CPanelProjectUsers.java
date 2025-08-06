@@ -36,7 +36,7 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject> {
 		final CUserService userService,
 		final CUserProjectSettingsService userProjectSettingsService) {
 		super("Project Users", currentEntity, beanValidationBinder, CProject.class,
-			entityService, projectService);
+			entityService, projectService, userProjectSettingsService);
 		this.userService = userService;
 		this.userProjectSettingsService = userProjectSettingsService;
 		openPanel();
