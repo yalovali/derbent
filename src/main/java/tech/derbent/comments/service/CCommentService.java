@@ -25,6 +25,7 @@ import tech.derbent.users.domain.CUser;
  */
 @Service
 @PreAuthorize ("isAuthenticated()")
+@Transactional(readOnly = true)
 public class CCommentService extends CAbstractService<CComment> {
 
 	public CCommentService(final CCommentRepository repository,

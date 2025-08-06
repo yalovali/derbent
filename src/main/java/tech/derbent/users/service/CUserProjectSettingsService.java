@@ -18,6 +18,7 @@ import tech.derbent.users.domain.CUserProjectSettings;
  * Handles CRUD operations for CUserProjectSettings entities.
  */
 @Service
+@Transactional(readOnly = true)
 public class CUserProjectSettingsService extends CAbstractEntityRelationService<CUserProjectSettings> {
 
     private final CUserProjectSettingsRepository repository;
