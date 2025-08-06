@@ -11,6 +11,7 @@ import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUserProjectSettings;
 import tech.derbent.users.service.CUserService;
+import tech.derbent.users.service.CUserProjectSettingsService;
 
 /**
  * Simplified panel for managing users within a project. This is the reverse direction of
@@ -27,14 +28,16 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject> {
 	private CProject currentProject;
 
 	private final CUserService userService;
+	private final CUserProjectSettingsService userProjectSettingsService;
 
 	public CPanelProjectUsers(final CProject currentEntity,
 		final CEnhancedBinder<CProject> beanValidationBinder,
 		final CProjectService entityService, final CProjectService projectService,
-		final CUserService userService) {
+		final CUserService userService, final CUserProjectSettingsService userProjectSettingsService) {
 		super("Project Users", currentEntity, beanValidationBinder, CProject.class,
 			entityService, projectService);
 		this.userService = userService;
+		this.userProjectSettingsService = userProjectSettingsService;
 		openPanel();
 	}
 
@@ -57,32 +60,55 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject> {
 	@Override
 	protected void onSettingsSaved(final CUserProjectSettings settings) {
 		LOGGER.debug("Saving user project settings: {}", settings);
-		// assert that we have accessors for getting and setting settings
-		assert getSettings != null;
-		assert setSettings != null;
-		final List<CUserProjectSettings> settingsList = getSettings.get();
-		// Check if this is an update or a new addition
-		boolean found = false;
-
-		for (int i = 0; i < settingsList.size(); i++) {
-			final CUserProjectSettings existing = settingsList.get(i);
-
-			if ((existing.getId() != null) && existing.getId().equals(settings.getId())) {
-				settingsList.set(i, settings);
-				found = true;
-				break;
+		
+		try {
+			// Use the service layer to properly persist the relationship
+			final CUserProjectSettings savedSettings;
+			
+			if (settings.getId() == null) {
+				// New relationship - create it
+				savedSettings = userProjectSettingsService.save(settings);
+				LOGGER.debug("Created new user project settings with ID: {}", savedSettings.getId());
+			} else {
+				// Existing relationship - update it
+				savedSettings = userProjectSettingsService.save(settings);
+				LOGGER.debug("Updated user project settings with ID: {}", savedSettings.getId());
 			}
+			
+			// Update the local collection if accessors are available
+			if (getSettings != null && setSettings != null) {
+				final List<CUserProjectSettings> settingsList = getSettings.get();
+				boolean found = false;
+				
+				// Find and update existing entry or add new one
+				for (int i = 0; i < settingsList.size(); i++) {
+					final CUserProjectSettings existing = settingsList.get(i);
+					
+					if ((existing.getId() != null) && existing.getId().equals(savedSettings.getId())) {
+						settingsList.set(i, savedSettings);
+						found = true;
+						break;
+					}
+				}
+				
+				if (!found) {
+					settingsList.add(savedSettings);
+				}
+				
+				setSettings.accept(settingsList);
+			}
+			
+			// Save the parent entity if needed
+			if (saveEntity != null) {
+				saveEntity.run();
+			}
+			
+			refresh();
+			
+		} catch (Exception e) {
+			LOGGER.error("Error saving user project settings", e);
+			throw new RuntimeException("Failed to save user project settings: " + e.getMessage(), e);
 		}
-
-		if (!found) {
-			settingsList.add(settings);
-		}
-		setSettings.accept(settingsList);
-
-		if (saveEntity != null) {
-			saveEntity.run();
-		}
-		refresh();
 	}
 
 	/**

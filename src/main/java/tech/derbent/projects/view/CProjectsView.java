@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
@@ -19,6 +21,7 @@ import tech.derbent.projects.service.CProjectService;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUserProjectSettings;
 import tech.derbent.users.service.CUserService;
+import tech.derbent.users.service.CUserProjectSettingsService;
 
 /**
  * CProjectsView - View for managing projects. Layer: View (MVC) Provides CRUD operations
@@ -49,11 +52,15 @@ public class CProjectsView extends CAbstractNamedEntityPage<CProject>
 	private CPanelProjectUsers projectUsersPanel;
 
 	private final CUserService userService;
+	private final CUserProjectSettingsService userProjectSettingsService;
 
+	@Autowired
 	public CProjectsView(final CProjectService entityService,
-		final CSessionService sessionService, final CUserService userService) {
+		final CSessionService sessionService, final CUserService userService,
+		final CUserProjectSettingsService userProjectSettingsService) {
 		super(CProject.class, entityService, sessionService);
 		this.userService = userService;
+		this.userProjectSettingsService = userProjectSettingsService;
 		addClassNames("projects-view");
 		LOGGER.info("CProjectsView initialized successfully");
 	}
@@ -67,7 +74,7 @@ public class CProjectsView extends CAbstractNamedEntityPage<CProject>
 		// Add the project users panel for managing users in this project
 		projectUsersPanel = new CPanelProjectUsers(getCurrentEntity(), getBinder(),
 			(CProjectService) entityService, (CProjectService) entityService,
-			userService);
+			userService, userProjectSettingsService);
 		addAccordionPanel(projectUsersPanel);
 	}
 
