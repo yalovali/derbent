@@ -569,8 +569,7 @@ public class CBaseUITest {
 			playwright = Playwright.create();
 			// Launch browser in headless mode for CI/CD compatibility
 			browser = playwright.chromium()
-				.launch(new BrowserType.LaunchOptions().setHeadless(true) // Always run in headless mode for testing
-					.setSlowMo(50)); // Reduced slow motion for faster execution
+				.launch(new BrowserType.LaunchOptions().setHeadless(false).setSlowMo(50));
 			// Create context with desktop viewport
 			context = browser
 				.newContext(new Browser.NewContextOptions().setViewportSize(1200, 800));
