@@ -26,6 +26,7 @@ import com.vaadin.flow.data.provider.DataProvider;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.session.service.CSessionService;
+import tech.derbent.users.service.CUserProjectSettingsService;
 
 /**
  * CAbstractUITest - Base class for UI testing with common utilities and mocking patterns.
@@ -42,6 +43,9 @@ public abstract class CAbstractUITest<EntityClass extends CEntityDB<EntityClass>
 
 	@Mock
 	protected CSessionService mockSessionService;
+
+	@Mock
+	protected CUserProjectSettingsService mockUserProjectSettingsService;
 
 	protected Class<EntityClass> entityClass;
 
