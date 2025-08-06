@@ -1,6 +1,8 @@
 package tech.derbent.users.view;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -22,6 +24,7 @@ import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
+import tech.derbent.users.domain.CUserProjectSettings;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.CUserTypeService;
 import tech.derbent.users.service.CUserProjectSettingsService;
@@ -301,11 +304,28 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser>
 	 */
 	private void setupProjectSettingsAccessors(final CUser userWithSettings) {
 		projectSettingsGrid.setProjectSettingsAccessors(
-			() -> userWithSettings.getProjectSettings() != null 
-				? userWithSettings.getProjectSettings() 
-				: Collections.emptyList(),
+			() -> {
+				// Ensure the collection is never null
+				List<CUserProjectSettings> settings = userWithSettings.getProjectSettings();
+				if (settings == null) {
+					settings = new ArrayList<>();
+					userWithSettings.setProjectSettings(settings);
+				}
+				return settings;
+			},
 			(settings) -> {
-				userWithSettings.setProjectSettings(settings);
+				// Instead of replacing the entire collection, update the existing one
+				// This preserves JPA's collection tracking and prevents orphan removal issues
+				List<CUserProjectSettings> currentSettings = userWithSettings.getProjectSettings();
+				if (currentSettings == null) {
+					// If null, initialize with new ArrayList and set it
+					currentSettings = new ArrayList<>(settings);
+					userWithSettings.setProjectSettings(currentSettings);
+				} else {
+					// Update existing collection in-place to preserve JPA tracking
+					currentSettings.clear();
+					currentSettings.addAll(settings);
+				}
 				entityService.save(userWithSettings);
 			},
 			() -> refreshUserAfterProjectUpdate(userWithSettings.getId())
