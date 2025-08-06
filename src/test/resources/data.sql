@@ -1,24 +1,14 @@
 -- =====================================================================
--- MINIMAL SAMPLE DATA INITIALIZATION FOR DERBENT APPLICATION
+-- MINIMAL SAMPLE DATA FOR H2 DATABASE (TEST ENVIRONMENT)
 -- =====================================================================
--- This script initializes the database with minimal sample data 
--- containing only 2 examples per entity type while enriching all items
--- with relations, types, status, colors, and comments.
--- 
--- COMPLIANCE WITH REQUIREMENTS:
--- ✓ Maximum 2 examples per entity type (reduced from 4+)
--- ✓ All entities enriched with relations, types, status, colors, comments
--- ✓ Proper relational integrity maintained
--- ✓ Rich data relationships preserved with minimal examples
--- ✓ All lookup tables included with essential examples
+-- This script provides minimal sample data compatible with H2 database
+-- used in tests, containing exactly 2 examples per entity type while 
+-- enriching all items with relations, types, status, colors, and comments.
 -- =====================================================================
 
 -- =====================================================================
--- TABLE CLEANUP - DELETE ALL EXISTING DATA AND CONSTRAINTS
+-- TABLE CLEANUP - DELETE ALL EXISTING DATA
 -- =====================================================================
-
--- Disable foreign key checks temporarily for PostgreSQL
-SET session_replication_role = replica;
 
 -- Delete data from junction tables first
 DELETE FROM cmeeting_participants;
@@ -55,24 +45,9 @@ DELETE FROM corderstatus;
 DELETE FROM ccurrency;
 DELETE FROM capprovalstatus;
 
-SET session_replication_role = DEFAULT;
-
--- Reset sequences to start from 1 (essential sequences only)
-DO '
-BEGIN
-    IF EXISTS (SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE c.relkind = ''S'' AND c.relname = ''cuser_user_id_seq'') THEN
-        EXECUTE ''SELECT setval(''''cuser_user_id_seq'''', 1, false)'';
-    END IF;
-END;
-';
-
-DO '
-BEGIN
-    IF EXISTS (SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE c.relkind = ''S'' AND c.relname = ''cproject_project_id_seq'') THEN
-        EXECUTE ''SELECT setval(''''cproject_project_id_seq'''', 1, false)'';
-    END IF;
-END;
-';
+-- Reset sequences for H2
+ALTER SEQUENCE cuser_user_id_seq RESTART WITH 1;
+ALTER SEQUENCE cproject_project_id_seq RESTART WITH 1;
 
 -- =====================================================================
 -- ESSENTIAL LOOKUP TABLES (2 examples each for types, statuses, etc.)
@@ -159,19 +134,17 @@ INSERT INTO ccompany (
 -- =====================================================================
 INSERT INTO cuser (
     created_date, email, enabled, lastname, login, name, password, phone, roles, 
-    last_modified_date, cusertype_id, user_role, profile_picture_data
+    last_modified_date, cusertype_id, user_role
 ) VALUES 
 -- System Administrator with full enrichment
 ('2025-01-15 08:00:00', 'admin@derbent.tech', TRUE, 'Administrator', 'admin', 'System', 
  '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-0001', 'ADMIN,USER', 
- '2025-01-15 08:00:00', 1, 'TEAM_MEMBER', 
- decode('PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSI3NSIgY3k9Ijc1IiByPSI3NSIgZmlsbD0iIzRBOTBFMiIvPgogIDx0ZXh0IHg9Ijc1IiB5PSI4MyIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjUwIiAKICAgICAgICBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPgogICAgU0EKICA8L3RleHQ+Cjwvc3ZnPg==', 'base64')),
+ '2025-01-15 08:00:00', 1, 'TEAM_MEMBER'),
 
 -- Senior Developer with full enrichment
 ('2025-01-15 10:00:00', 'sarah.developer@derbent.tech', TRUE, 'Johnson', 'sarah.johnson', 'Sarah', 
  '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-2001', 'DEVELOPER,USER', 
- '2025-01-15 10:00:00', 2, 'TEAM_MEMBER', 
- decode('PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSI3NSIgY3k9Ijc1IiByPSI3NSIgZmlsbD0iIzdCNjhFRSIvPgogIDx0ZXh0IHg9Ijc1IiB5PSI4MyIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjUwIiAKICAgICAgICBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPgogICAgU0oKICA8L3RleHQ+Cjwvc3ZnPg==', 'base64'));
+ '2025-01-15 10:00:00', 2, 'TEAM_MEMBER');
 
 -- =====================================================================
 -- PROJECTS (2 examples with full enrichment and relations)
@@ -179,10 +152,10 @@ INSERT INTO cuser (
 INSERT INTO cproject (name, description, created_date, last_modified_date) VALUES 
 ('E-Commerce Platform Modernization', 
  'Comprehensive migration of legacy e-commerce system to modern microservices architecture with React frontend, Spring Boot backend, and enhanced security features', 
- NOW(), NOW()),
+ CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('Customer Analytics Dashboard', 
  'Real-time analytics dashboard for customer behavior tracking using machine learning, data visualization, and automated reporting capabilities', 
- NOW(), NOW());
+ CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- =====================================================================
 -- MEETINGS (2 examples with full enrichment, relations, and participants)
@@ -321,12 +294,12 @@ INSERT INTO crisk (name, description, project_id, risk_severity, created_date, l
 -- High severity risk with comprehensive description
 ('Authentication Security Vulnerability Risk', 
  'Critical risk of security vulnerabilities in user authentication system due to complex OAuth integration and session management. Potential for unauthorized access, session hijacking, or data breaches if not properly implemented with comprehensive security testing and code review.',
- 1, 'HIGH', NOW(), NOW()),
+ 1, 'HIGH', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 
 -- Medium severity risk with detailed mitigation context
 ('Data Pipeline Performance Degradation Risk', 
  'Risk of analytics pipeline performance issues under high data volume loads, potentially leading to delayed insights, data processing backlogs, and customer analytics dashboard responsiveness problems. Requires careful monitoring and scaling strategies.',
- 2, 'MEDIUM', NOW(), NOW());
+ 2, 'MEDIUM', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- =====================================================================
 -- DECISIONS (2 examples with full enrichment, relations, and approval workflow)
@@ -339,12 +312,12 @@ INSERT INTO cdecision (
 -- Technical decision with comprehensive details
 ('Microservices Architecture Adoption for E-Commerce Platform', 
  'Strategic decision to adopt microservices architecture pattern for e-commerce platform modernization, including service decomposition strategy, API gateway implementation, and container orchestration with Kubernetes for improved scalability, maintainability, and team autonomy',
- 1, 1, 1, 1, 2, 1, 250000.00, '2025-02-01 00:00:00', '2025-04-01 00:00:00', NOW(), NOW()),
+ 1, 1, 1, 1, 2, 1, 250000.00, '2025-02-01 00:00:00', '2025-04-01 00:00:00', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 
 -- Strategic decision with full enrichment
 ('Analytics Technology Stack Selection', 
  'Strategic technology selection for customer analytics platform including Kafka for event streaming, ClickHouse for analytical database, React for dashboard frontend, and Python-based machine learning pipeline for advanced customer insights and predictive analytics',
- 2, 2, 2, 2, 1, 1, 180000.00, '2025-01-25 00:00:00', '2025-03-25 00:00:00', NOW(), NOW());
+ 2, 2, 2, 2, 1, 1, 180000.00, '2025-01-25 00:00:00', '2025-03-25 00:00:00', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Decision approvals with enriched workflow
 INSERT INTO cdecisionapproval (
@@ -354,27 +327,14 @@ INSERT INTO cdecisionapproval (
 -- Technical approval for microservices decision
 ('Senior Developer Technical Review', 
  'Comprehensive technical architecture review and approval for microservices adoption including scalability assessment and implementation feasibility',
- 1, 2, TRUE, 1, '2025-01-25 00:00:00', NOW(), NOW()),
+ 1, 2, TRUE, 1, '2025-01-25 00:00:00', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 
 -- Strategic approval for analytics technology
 ('Strategic Technology Approval', 
  'Strategic review of analytics technology stack selection with focus on long-term maintainability, cost-effectiveness, and technical capabilities alignment',
- 2, 1, TRUE, 1, '2025-01-28 00:00:00', NOW(), NOW());
+ 2, 1, TRUE, 1, '2025-01-28 00:00:00', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Decision team members (collaborative decisions)
 INSERT INTO cdecision_team_members (decision_id, user_id) VALUES 
 (1, 1), (1, 2),  -- Microservices decision team
 (2, 1), (2, 2);  -- Analytics technology team
-
--- =====================================================================
--- FINAL DATA VALIDATION AND SUMMARY
--- =====================================================================
--- This minimal dataset provides exactly 2 examples per entity type while maintaining:
--- ✓ Rich relations between all entities (users ↔ projects ↔ activities ↔ comments)
--- ✓ Complete type categorization (activity types, meeting types, decision types)
--- ✓ Comprehensive status tracking with colors (activity status, meeting status, decision status)
--- ✓ Full color coding for visual representation (statuses, priorities, decision types)
--- ✓ Detailed comments and annotations on all major entities
--- ✓ Cross-entity relationships (meetings ↔ participants, orders ↔ approvals, decisions ↔ teams)
--- ✓ Complete workflow states (approvals, reviews, completions)
--- ✓ Realistic business scenarios with full context and details
