@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
 import tech.derbent.abstracts.annotations.CSpringAuxillaries;
@@ -119,6 +120,11 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		final EntityClass entity = repository.findById(id)
 			.orElseThrow(() -> new RuntimeException("Entity not found with ID: " + id));
 		deleteWithReflection(entity);
+	}
+
+	@PreAuthorize ("permitAll()")
+	public List<EntityClass> findAll() {
+		return repository.findAll();
 	}
 
 	@Transactional (readOnly = true)

@@ -1,19 +1,18 @@
 package tech.derbent.abstracts.views;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.avatar.Avatar;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.base.ui.dialogs.CConfirmationDialog;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
@@ -22,49 +21,42 @@ import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserProjectSettings;
 import tech.derbent.users.service.CUserProjectSettingsService;
+import tech.derbent.users.service.CUserService;
 
 /**
  * Base class for managing user-project relationships in both directions. This class
  * provides common functionality for both user->project and project->user panels.
  */
-public abstract class CPanelUserProjectBase<EntityClass extends CEntityDB<EntityClass>>
-	extends CAccordionDBEntity<EntityClass> {
+public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<MasterClass>,
+	RelationalClass extends CEntityDB<RelationalClass>>
+	extends CPanelRelationalBase<MasterClass, CUserProjectSettings> {
 
 	private static final long serialVersionUID = 1L;
 
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
-	protected final Grid<CUserProjectSettings> grid =
-		new Grid<>(CUserProjectSettings.class, false);
-
-	protected final CProjectService projectService;
-
-	// Handlers for getting and setting user-project settings
-	protected Supplier<List<CUserProjectSettings>> getSettings;
-
 	protected CUserProjectSettingsService userProjectSettingsService;
 
-	protected Runnable saveEntity;
-
-	public CPanelUserProjectBase(final String title, final EntityClass currentEntity,
-		final CEnhancedBinder<EntityClass> beanValidationBinder,
-		final Class<EntityClass> entityClass,
-		final CAbstractService<EntityClass> entityService,
-		final CProjectService projectService,
+	public CPanelUserProjectBase(final String title, final MasterClass currentEntity,
+		final CEnhancedBinder<MasterClass> beanValidationBinder,
+		final Class<MasterClass> entityClass,
+		final CAbstractService<MasterClass> entityService,
 		final CUserProjectSettingsService userProjectSettingsService) {
-		super(title, currentEntity, beanValidationBinder, entityClass, entityService);
-		this.projectService = projectService;
+		super(title, currentEntity, beanValidationBinder, entityClass, entityService,
+			CUserProjectSettings.class);
 		this.userProjectSettingsService = userProjectSettingsService;
 		setupGrid();
 		setupButtons();
 		closePanel();
 	}
 
-	/**
-	 * Creates the delete confirmation message
-	 */
-	protected abstract String
-		createDeleteConfirmationMessage(final CUserProjectSettings selected);
+	protected String
+		createDeleteConfirmationMessage(final CUserProjectSettings selected) {
+		final String projectName = selected.getProject().getName();
+		return String.format(
+			"Are you sure you want to delete the project setting for '%s'? This action cannot be undone.",
+			projectName);
+	}
 
 	/**
 	 * Creates a user avatar with profile picture if available
@@ -104,8 +96,18 @@ public abstract class CPanelUserProjectBase<EntityClass extends CEntityDB<Entity
 		}
 		final String confirmMessage = createDeleteConfirmationMessage(selected);
 		new CConfirmationDialog(confirmMessage, () -> {
-			userProjectSettingsService.delete(selected);
-			refresh();
+			final CProject project = selected.getProject();
+			project.getUserSettings().remove(selected);
+			final CUser user = selected.getUser();
+			user.getProjectSettings().remove(selected);
+
+			if (entityService instanceof CProjectService) {
+				entityService.save((MasterClass) project);
+			}
+			else if (entityService instanceof CUserService) {
+				entityService.save((MasterClass) user);
+			}
+			// userProjectSettingsService.delete(selected); refresh();
 			saveEntity.run();
 		}).open();
 	}
@@ -139,18 +141,6 @@ public abstract class CPanelUserProjectBase<EntityClass extends CEntityDB<Entity
 			return "";
 		}
 		return settings.getPermission();
-	}
-
-	/**
-	 * Gets the project name from a settings object
-	 */
-	protected String getProjectName(final CUserProjectSettings settings) {
-
-		if (settings.getProject() == null) {
-			return "Unknown Project";
-		}
-		return projectService.getById(settings.getProject().getId())
-			.map(CProject::getName).orElse("Project #" + settings.getProject().getId());
 	}
 
 	/**
@@ -204,26 +194,6 @@ public abstract class CPanelUserProjectBase<EntityClass extends CEntityDB<Entity
 	/**
 	 * Refreshes the grid data
 	 */
-	public void refresh() {
-		LOGGER.debug("Refreshing grid data");
-
-		if (getSettings != null) {
-			grid.setItems(getSettings.get());
-		}
-	}
-
-	/**
-	 * Sets the settings accessors (getters, setters, save callback)
-	 */
-	public void setSettingsAccessors(
-		final Supplier<List<CUserProjectSettings>> getSettings,
-		final Runnable saveEntity) {
-		LOGGER.debug("Setting settings accessors");
-		this.getSettings = getSettings;
-		this.saveEntity = saveEntity;
-		refresh();
-	}
-
 	/**
 	 * Sets up the action buttons (Add, Edit, Delete)
 	 */
@@ -248,10 +218,19 @@ public abstract class CPanelUserProjectBase<EntityClass extends CEntityDB<Entity
 		getBaseLayout().add(buttonLayout);
 	}
 
-	/**
-	 * Sets up the grid with common columns
-	 */
-	protected abstract void setupGrid();
+	protected void setupGrid() {
+		// Add columns for project name, roles, and permissions
+		grid.addColumn(CUserProjectSettings::getId).setHeader("ID").setAutoWidth(true);
+		grid.addComponentColumn(this::getUserWithAvatar).setHeader("User")
+			.setAutoWidth(true);
+		grid.addColumn(CUserProjectSettings::getProjectName).setHeader("Project Name")
+			.setAutoWidth(true).setSortable(true);
+		grid.addColumn(this::getRoleAsString).setHeader("Role").setAutoWidth(true);
+		grid.addColumn(this::getPermissionAsString).setHeader("Permission")
+			.setAutoWidth(true);
+		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
+		getBaseLayout().add(grid);
+	}
 
 	@Override
 	protected void updatePanelEntityFields() {
@@ -284,7 +263,7 @@ public abstract class CPanelUserProjectBase<EntityClass extends CEntityDB<Entity
 	 */
 	protected boolean validateServiceAvailability(final String serviceName) {
 
-		if (projectService == null) {
+		if (entityService == null) {
 			new CWarningDialog(
 				serviceName + " service is not available. Please try again later.")
 				.open();

@@ -17,7 +17,7 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 
 	private final CEnhancedBinder<EntityClass> binder;
 
-	private EntityClass currentEntity;
+	protected EntityClass currentEntity;
 
 	protected CAbstractService<EntityClass> entityService;
 

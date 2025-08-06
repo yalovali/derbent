@@ -20,7 +20,8 @@ import tech.derbent.users.service.CUserService;
  * roles/permissions - Remove users from the project - Automatic data synchronization with
  * parent entity
  */
-public class CPanelProjectUsers extends CPanelUserProjectBase<CProject> {
+public class CPanelProjectUsers
+	extends CPanelUserProjectBase<CProject, CUserProjectSettings> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -32,11 +33,10 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject> {
 
 	public CPanelProjectUsers(final CProject currentEntity,
 		final CEnhancedBinder<CProject> beanValidationBinder,
-		final CProjectService entityService, final CProjectService projectService,
-		final CUserService userService,
+		final CProjectService entityService, final CUserService userService,
 		final CUserProjectSettingsService userProjectSettingsService) {
 		super("Project Users", currentEntity, beanValidationBinder, CProject.class,
-			entityService, projectService, userProjectSettingsService);
+			entityService, userProjectSettingsService);
 		this.userService = userService;
 		this.userProjectSettingsService = userProjectSettingsService;
 		openPanel();
@@ -124,8 +124,9 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject> {
 		if (!validateProjectSelection() || !validateServiceAvailability("Project")) {
 			return;
 		}
-		final CProjectUserSettingsDialog dialog = new CProjectUserSettingsDialog(
-			userService, null, currentProject, this::onSettingsSaved);
+		final CProjectUserSettingsDialog dialog =
+			new CProjectUserSettingsDialog((CProjectService) entityService, userService,
+				null, currentProject, this::onSettingsSaved);
 		dialog.open();
 	}
 
@@ -140,8 +141,9 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject> {
 			return;
 		}
 		final CUserProjectSettings selected = grid.asSingleSelect().getValue();
-		final CProjectUserSettingsDialog dialog = new CProjectUserSettingsDialog(
-			userService, selected, currentProject, this::onSettingsSaved);
+		final CProjectUserSettingsDialog dialog =
+			new CProjectUserSettingsDialog((CProjectService) entityService, userService,
+				selected, currentProject, this::onSettingsSaved);
 		dialog.open();
 	}
 

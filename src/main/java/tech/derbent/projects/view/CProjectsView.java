@@ -74,8 +74,7 @@ public class CProjectsView extends CAbstractNamedEntityPage<CProject>
 		addAccordionPanel(panel);
 		// Add the project users panel for managing users in this project
 		projectUsersPanel = new CPanelProjectUsers(getCurrentEntity(), getBinder(),
-			(CProjectService) entityService, (CProjectService) entityService, userService,
-			userProjectSettingsService);
+			(CProjectService) entityService, userService, userProjectSettingsService);
 		addAccordionPanel(projectUsersPanel);
 	}
 

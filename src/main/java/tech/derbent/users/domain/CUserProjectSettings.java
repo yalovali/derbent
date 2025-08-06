@@ -82,6 +82,10 @@ public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 
 	public CProject getProject() { return project; }
 
+	public String getProjectName() {
+		return project != null ? project.getName() : "Unknown Project";
+	}
+
 	public String getRole() { return role; }
 
 	public CUser getUser() { return user; }

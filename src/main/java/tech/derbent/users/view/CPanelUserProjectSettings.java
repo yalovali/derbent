@@ -20,11 +20,14 @@ import tech.derbent.users.service.CUserTypeService;
  * automatically updates when the current user changes and maintains data consistency
  * through proper accessor patterns.
  */
-public class CPanelUserProjectSettings extends CPanelUserProjectBase<CUser> {
+public class CPanelUserProjectSettings
+	extends CPanelUserProjectBase<CUser, CUserProjectSettings> {
 
 	private static final long serialVersionUID = 1L;
 
 	private CUser currentUser;
+
+	private final CProjectService projectService;
 
 	private final CUserProjectSettingsService userProjectSettingsService;
 
@@ -34,18 +37,10 @@ public class CPanelUserProjectSettings extends CPanelUserProjectBase<CUser> {
 		final CCompanyService companyService, final CProjectService projectService,
 		final CUserProjectSettingsService userProjectSettingsService) {
 		super("Project Settings", currentEntity, beanValidationBinder, CUser.class,
-			entityService, projectService, userProjectSettingsService);
+			entityService, userProjectSettingsService);
 		this.userProjectSettingsService = userProjectSettingsService;
+		this.projectService = projectService;
 		openPanel();
-	}
-
-	@Override
-	protected String
-		createDeleteConfirmationMessage(final CUserProjectSettings selected) {
-		final String projectName = getProjectName(selected);
-		return String.format(
-			"Are you sure you want to delete the project setting for '%s'? This action cannot be undone.",
-			projectName);
 	}
 
 	@Override
@@ -92,8 +87,9 @@ public class CPanelUserProjectSettings extends CPanelUserProjectBase<CUser> {
 		if (!validateUserSelection() || !validateServiceAvailability("Project")) {
 			return;
 		}
-		final CUserProjectSettingsDialog dialog = new CUserProjectSettingsDialog(
-			projectService, null, currentUser, this::onSettingsSaved);
+		final CUserProjectSettingsDialog dialog =
+			new CUserProjectSettingsDialog((CUserService) entityService, projectService,
+				null, currentUser, this::onSettingsSaved);
 		dialog.open();
 	}
 
@@ -107,8 +103,9 @@ public class CPanelUserProjectSettings extends CPanelUserProjectBase<CUser> {
 			return;
 		}
 		final CUserProjectSettings selected = grid.asSingleSelect().getValue();
-		final CUserProjectSettingsDialog dialog = new CUserProjectSettingsDialog(
-			projectService, selected, currentUser, this::onSettingsSaved);
+		final CUserProjectSettingsDialog dialog =
+			new CUserProjectSettingsDialog((CUserService) entityService, projectService,
+				selected, currentUser, this::onSettingsSaved);
 		dialog.open();
 	}
 
@@ -119,21 +116,6 @@ public class CPanelUserProjectSettings extends CPanelUserProjectBase<CUser> {
 		final Runnable saveEntity) {
 		LOGGER.debug("Setting project settings accessors");
 		setSettingsAccessors(getProjectSettings, saveEntity);
-	}
-
-	@Override
-	protected void setupGrid() {
-		// Add columns for project name, roles, and permissions
-		grid.addColumn(CUserProjectSettings::getId).setHeader("ID").setAutoWidth(true);
-		grid.addComponentColumn(this::getUserWithAvatar).setHeader("User")
-			.setAutoWidth(true);
-		grid.addColumn(this::getProjectName).setHeader("Project Name").setAutoWidth(true)
-			.setSortable(true);
-		grid.addColumn(this::getRoleAsString).setHeader("Role").setAutoWidth(true);
-		grid.addColumn(this::getPermissionAsString).setHeader("Permission")
-			.setAutoWidth(true);
-		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
-		getBaseLayout().add(grid);
 	}
 
 	/**
