@@ -52,6 +52,70 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		}
 	}
 
+	/**
+	 * Generic update method using reflection to copy non-null fields.
+	 * 
+	 * @param id the ID of the entity to update
+	 * @param updatedEntity entity containing the new values
+	 * @return the updated entity
+	 */
+	@Transactional
+	public EntityClass update(final Long id, final EntityClass updatedEntity) {
+		final EntityClass existingEntity = repository.findById(id)
+			.orElseThrow(() -> new RuntimeException("Entity not found with ID: " + id));
+		
+		// Use reflection to copy non-null fields
+		existingEntity.copyNonNullFields(updatedEntity, existingEntity);
+		
+		// Perform save with reflection-based audit updates
+		existingEntity.performSave();
+		
+		return repository.save(existingEntity);
+	}
+
+	/**
+	 * Enhanced delete method that attempts soft delete using reflection before hard delete.
+	 * 
+	 * @param entity the entity to delete
+	 */
+	@Transactional
+	public void deleteWithReflection(final EntityClass entity) {
+		if (entity == null) {
+			LOGGER.warn("Cannot delete null entity");
+			return;
+		}
+
+		try {
+			// Try soft delete first using reflection
+			if (entity.performSoftDelete()) {
+				// Soft delete was successful, save the entity
+				repository.save(entity);
+				LOGGER.info("Performed soft delete for entity: {}", entity.getClass().getSimpleName());
+			} else {
+				// No soft delete field found, perform hard delete
+				repository.delete(entity);
+				LOGGER.info("Performed hard delete for entity: {}", entity.getClass().getSimpleName());
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error during delete operation for entity: {}", 
+				CSpringAuxillaries.safeToString(entity), e);
+			throw e;
+		}
+	}
+
+	/**
+	 * Enhanced delete by ID method that attempts soft delete using reflection.
+	 * 
+	 * @param id the ID of the entity to delete
+	 */
+	@Transactional
+	public void deleteWithReflection(final Long id) {
+		final EntityClass entity = repository.findById(id)
+			.orElseThrow(() -> new RuntimeException("Entity not found with ID: " + id));
+		
+		deleteWithReflection(entity);
+	}
+
 	public void delete(final EntityClass entity) {
 		repository.delete(entity);
 	}
