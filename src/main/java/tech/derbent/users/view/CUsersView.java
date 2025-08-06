@@ -24,6 +24,7 @@ import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.CUserTypeService;
+import tech.derbent.users.service.CUserProjectSettingsService;
 
 @Route ("users/:user_id?/:action?(edit)")
 @PageTitle ("User Master Detail")
@@ -56,18 +57,21 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser>
 	CPanelUserDescription descriptionPanel;
 
 	private final CProjectService projectService;
+	private final CUserProjectSettingsService userProjectSettingsService;
 
 	// private final TextField name; • Annotate the CUsersView constructor with @Autowired
 	// to let Spring inject dependencies.
 	@Autowired
 	public CUsersView(final CUserService entityService,
 		final CProjectService projectService, final CUserTypeService userTypeService,
-		final CCompanyService companyService, final CSessionService sessionService) {
+		final CCompanyService companyService, final CSessionService sessionService,
+		final CUserProjectSettingsService userProjectSettingsService) {
 		super(CUser.class, entityService, sessionService);
 		addClassNames("users-view");
 		this.userTypeService = userTypeService;
 		this.companyService = companyService;
 		this.projectService = projectService;
+		this.userProjectSettingsService = userProjectSettingsService;
 		// projectSettingsGrid = new CPanelUserProjectSettings(projectService);
 		LOGGER.info("CUsersView initialized with user type and company services");
 	}
@@ -88,7 +92,7 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser>
 		// entityService); addAccordionPanel(panel);
 		projectSettingsGrid = new CPanelUserProjectSettings(getCurrentEntity(),
 			getBinder(), (CUserService) entityService, userTypeService, companyService,
-			projectService);
+			projectService, userProjectSettingsService);
 		addAccordionPanel(projectSettingsGrid);
 		panel = new CPanelUserSystemAccess(getCurrentEntity(), getBinder(),
 			(CUserService) entityService, userTypeService, companyService);
