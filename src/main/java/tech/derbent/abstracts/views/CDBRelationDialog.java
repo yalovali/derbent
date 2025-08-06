@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.textfield.TextField;
 
 /**
@@ -23,7 +24,7 @@ import com.vaadin.flow.component.textfield.TextField;
  * @param <MainEntityClass> The main entity type that owns the relationship
  * @param <RelatedEntityClass> The related entity type being selected
  */
-public abstract class CDBRelationDialog<RelationshipClass, MainEntityClass, RelatedEntityClass>
+public abstract class CDBRelationDialog<RelationshipClass extends tech.derbent.abstracts.domains.CEntityDB<RelationshipClass>, MainEntityClass, RelatedEntityClass>
         extends CDBEditDialog<RelationshipClass> {
 
     private static final long serialVersionUID = 1L;
@@ -50,11 +51,7 @@ public abstract class CDBRelationDialog<RelationshipClass, MainEntityClass, Rela
         // Child classes must call setupDialog() and populateForm() in their constructor
     }
 
-    /**
-     * Creates a new instance of the relationship class.
-     * Child classes must implement this to provide proper instantiation.
-     */
-    protected abstract RelationshipClass createNewRelationship();
+
 
     /**
      * Returns the list of available related entities for selection.
@@ -261,6 +258,103 @@ public abstract class CDBRelationDialog<RelationshipClass, MainEntityClass, Rela
         final String permission = permissionsField.getValue();
         if (permission == null || permission.trim().isEmpty()) {
             throw new IllegalArgumentException("Permission is required and cannot be empty");
+        }
+    }
+
+    /**
+     * Adds a unified save functionality that handles both adding new relationships
+     * and updating existing ones. This method encapsulates the proper collection
+     * management logic to ensure items are added to lists instead of replacing them.
+     * 
+     * @param relationship The relationship to save
+     * @param getSettings Supplier to get the current list of settings
+     * @param setSettings Consumer to update the list of settings
+     * @param saveEntity Runnable to persist the parent entity
+     * @param settingsService Service to persist the relationship entity
+     */
+    protected void saveRelationship(
+            final RelationshipClass relationship,
+            final java.util.function.Supplier<List<RelationshipClass>> getSettings,
+            final java.util.function.Consumer<List<RelationshipClass>> setSettings,
+            final Runnable saveEntity,
+            final tech.derbent.abstracts.services.CAbstractService<RelationshipClass> settingsService) {
+        
+        LOGGER.debug("Saving relationship: {}", relationship);
+        
+        try {
+            // Use the service layer to properly persist the relationship
+            final RelationshipClass savedRelationship;
+            
+            if (relationship.getId() == null) {
+                // New relationship - create it
+                savedRelationship = settingsService.save(relationship);
+                LOGGER.debug("Created new relationship with ID: {}", savedRelationship.getId());
+            } else {
+                // Existing relationship - update it
+                savedRelationship = settingsService.save(relationship);
+                LOGGER.debug("Updated relationship with ID: {}", savedRelationship.getId());
+            }
+            
+            // Update the local collection if accessors are available
+            if (getSettings != null && setSettings != null) {
+                final List<RelationshipClass> settingsList = getSettings.get();
+                
+                if (settingsList == null) {
+                    // Initialize new list if none exists
+                    final List<RelationshipClass> newList = new java.util.ArrayList<>();
+                    newList.add(savedRelationship);
+                    setSettings.accept(newList);
+                } else {
+                    // Find and update existing entry or add new one
+                    boolean found = false;
+                    for (int i = 0; i < settingsList.size(); i++) {
+                        final RelationshipClass existing = settingsList.get(i);
+                        
+                        if ((existing.getId() != null) && existing.getId().equals(savedRelationship.getId())) {
+                            settingsList.set(i, savedRelationship);
+                            found = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!found) {
+                        // Add new item to existing list (not replace the list)
+                        settingsList.add(savedRelationship);
+                    }
+                    
+                    // Update the collection without replacing the list reference
+                    setSettings.accept(settingsList);
+                }
+            }
+            
+            // Save the parent entity if needed
+            if (saveEntity != null) {
+                saveEntity.run();
+            }
+            
+        } catch (final Exception e) {
+            LOGGER.error("Error saving relationship", e);
+            throw new RuntimeException("Failed to save relationship: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Override the save method to use unified relationship save functionality
+     * when available, while maintaining the callback pattern.
+     */
+    @Override
+    protected void save() {
+        try {
+            LOGGER.debug("Saving relationship data: {}", data);
+            validateForm();
+            
+            if (onSave != null) {
+                onSave.accept(data);
+            }
+            close();
+            Notification.show(isNew ? getSuccessCreateMessage() : getSuccessUpdateMessage());
+        } catch (final Exception e) {
+            Notification.show("Error: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
         }
     }
 
