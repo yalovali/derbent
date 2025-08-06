@@ -52,11 +52,11 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
     private final Class<T> entityType;
 
     // Styling configuration
-    private boolean roundedCorners = true;
+    private Boolean roundedCorners = Boolean.TRUE;
 
     private String padding = "4px 8px";
 
-    private boolean autoContrast = true;
+    private Boolean autoContrast = Boolean.TRUE;
 
     private String minWidth = "100%";
 

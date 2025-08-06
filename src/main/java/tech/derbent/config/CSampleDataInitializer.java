@@ -437,16 +437,19 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	private void createAdminUser() {
 		final CUser admin = userService.createLoginUser("admin", STANDARD_PASSWORD,
 			"Ahmet", "admin@of.gov.tr", "ADMIN,USER");
-		// Set user profile using auxiliary method with actual profile picture
+		// Set user profile directly on entity
 		final String profilePictureFile = PROFILE_PICTURE_MAPPING.get("admin");
 		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
-		userService.setUserProfile(admin, "Yılmaz", "+90-462-751-1001",
-			profilePictureBytes);
-		// Set user role using auxiliary method
-		userService.setUserRole(admin, CUserRole.ADMIN, "ADMIN,USER");
-		// Set company association using auxiliary method
+		admin.setLastname("Yılmaz");
+		admin.setPhone("+90-462-751-1001");
+		admin.setProfilePictureData(profilePictureBytes);
+		// Set user role directly on entity
+		admin.setUserRole(CUserRole.ADMIN);
+		admin.setRoles("ADMIN,USER");
+		// Set company association directly on entity
 		final CCompany company = findCompanyByName("Of Teknoloji Çözümleri");
-		userService.setCompanyAssociation(admin, company);
+		admin.setCompany(company);
+		userService.save(admin);
 	}
 
 	/**
@@ -673,16 +676,19 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		LOGGER.info("createProjectManagerUser called - creating project manager");
 		final CUser manager = userService.createLoginUser("mkaradeniz", STANDARD_PASSWORD,
 			"Mehmet Emin", "mehmet.karadeniz@ofteknoloji.com.tr", "MANAGER,USER");
-		// Set user profile using auxiliary method with actual profile picture
+		// Set user profile directly on entity
 		final String profilePictureFile = PROFILE_PICTURE_MAPPING.get("mkaradeniz");
 		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
-		userService.setUserProfile(manager, "Karadeniz", "+90-462-751-1002",
-			profilePictureBytes);
-		// Set user role using auxiliary method
-		userService.setUserRole(manager, CUserRole.PROJECT_MANAGER, "MANAGER,USER");
-		// Set company association using auxiliary method
+		manager.setLastname("Karadeniz");
+		manager.setPhone("+90-462-751-1002");
+		manager.setProfilePictureData(profilePictureBytes);
+		// Set user role directly on entity
+		manager.setUserRole(CUserRole.PROJECT_MANAGER);
+		manager.setRoles("MANAGER,USER");
+		// Set company association directly on entity
 		final CCompany company = findCompanyByName("Of Teknoloji Çözümleri");
-		userService.setCompanyAssociation(manager, company);
+		manager.setCompany(company);
+		userService.save(manager);
 	}
 
 	private void createProjectWithDescription(final String name,
@@ -1050,16 +1056,19 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	private void createTeamMemberAlice() {
 		final CUser analyst = userService.createLoginUser("ademir", STANDARD_PASSWORD,
 			"Ayşe", "ayse.demir@ofsaglik.com.tr", "USER");
-		// Set user profile using auxiliary method with actual profile picture
+		// Set user profile directly on entity
 		final String profilePictureFile = PROFILE_PICTURE_MAPPING.get("ademir");
 		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
-		userService.setUserProfile(analyst, "Demir", "+90-462-751-1005",
-			profilePictureBytes);
-		// Set user role using auxiliary method
-		userService.setUserRole(analyst, CUserRole.TEAM_MEMBER, "USER");
-		// Set company association using auxiliary method
+		analyst.setLastname("Demir");
+		analyst.setPhone("+90-462-751-1005");
+		analyst.setProfilePictureData(profilePictureBytes);
+		// Set user role directly on entity
+		analyst.setUserRole(CUserRole.TEAM_MEMBER);
+		analyst.setRoles("USER");
+		// Set company association directly on entity
 		final CCompany company = findCompanyByName("Of Sağlık Teknolojileri");
-		userService.setCompanyAssociation(analyst, company);
+		analyst.setCompany(company);
+		userService.save(analyst);
 		LOGGER.info("Team member Ayşe Demir created successfully");
 	}
 
@@ -1071,16 +1080,19 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			"createTeamMemberBob called - creating Burak Özkan from Çamburnu village");
 		final CUser developer = userService.createLoginUser("bozkan", STANDARD_PASSWORD,
 			"Burak", "burak.ozkan@ofdanismanlik.com.tr", "USER");
-		// Set user profile using auxiliary method with actual profile picture
+		// Set user profile directly on entity
 		final String profilePictureFile = PROFILE_PICTURE_MAPPING.get("bozkan");
 		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
-		userService.setUserProfile(developer, "Özkan", "+90-462-751-1004",
-			profilePictureBytes);
-		// Set user role using auxiliary method
-		userService.setUserRole(developer, CUserRole.TEAM_MEMBER, "USER");
-		// Set company association using auxiliary method
+		developer.setLastname("Özkan");
+		developer.setPhone("+90-462-751-1004");
+		developer.setProfilePictureData(profilePictureBytes);
+		// Set user role directly on entity
+		developer.setUserRole(CUserRole.TEAM_MEMBER);
+		developer.setRoles("USER");
+		// Set company association directly on entity
 		final CCompany company = findCompanyByName("Of Stratejik Danışmanlık");
-		userService.setCompanyAssociation(developer, company);
+		developer.setCompany(company);
+		userService.save(developer);
 		LOGGER.info("Team member Burak Özkan created successfully");
 	}
 
@@ -1090,16 +1102,19 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	private void createTeamMemberMary() {
 		final CUser teamMember = userService.createLoginUser("msahin", STANDARD_PASSWORD,
 			"Merve", "merve.sahin@ofendüstri.com.tr", "USER");
-		// Set user profile using auxiliary method with actual profile picture
+		// Set user profile directly on entity
 		final String profilePictureFile = PROFILE_PICTURE_MAPPING.get("msahin");
 		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
-		userService.setUserProfile(teamMember, "Şahin", "+90-462-751-1003",
-			profilePictureBytes);
-		// Set user role using auxiliary method
-		userService.setUserRole(teamMember, CUserRole.TEAM_MEMBER, "USER");
-		// Set company association using auxiliary method
+		teamMember.setLastname("Şahin");
+		teamMember.setPhone("+90-462-751-1003");
+		teamMember.setProfilePictureData(profilePictureBytes);
+		// Set user role directly on entity
+		teamMember.setUserRole(CUserRole.TEAM_MEMBER);
+		teamMember.setRoles("USER");
+		// Set company association directly on entity
 		final CCompany company = findCompanyByName("Of Endüstri Dinamikleri");
-		userService.setCompanyAssociation(teamMember, company);
+		teamMember.setCompany(company);
+		userService.save(teamMember);
 		LOGGER.info("Team member Merve Şahin created successfully");
 	}
 

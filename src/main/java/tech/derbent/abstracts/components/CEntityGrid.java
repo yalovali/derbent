@@ -43,19 +43,19 @@ public class CEntityGrid<EntityClass extends CEntityDB<EntityClass>> extends CGr
     private static final Logger LOGGER = LoggerFactory.getLogger(CEntityGrid.class);
 
     // Default styling configuration
-    private boolean roundedCorners = true;
+    private Boolean roundedCorners = Boolean.TRUE;
 
     private String padding = "4px 8px";
 
-    private boolean autoContrast = true;
+    private Boolean autoContrast = Boolean.TRUE;
 
     private String minWidth = "80px";
 
-    private boolean centerAlign = true;
+    private Boolean centerAlign = Boolean.TRUE;
 
     private String fontWeight = "500";
 
-    private boolean showIcon = true; // New: Enable/disable icon display in status cells
+    private Boolean showIcon = Boolean.TRUE; // New: Enable/disable icon display in status cells
 
     /**
      * Constructor for CColorAwareGrid with entity class.
@@ -186,12 +186,12 @@ public class CEntityGrid<EntityClass extends CEntityDB<EntityClass>> extends CGr
         return showIcon;
     }
 
-    public void setAutoContrast(final boolean autoContrast) {
-        this.autoContrast = autoContrast;
+    public void setAutoContrast(final Boolean autoContrast) {
+        this.autoContrast = autoContrast != null ? autoContrast : Boolean.TRUE;
     }
 
-    public void setCenterAlign(final boolean centerAlign) {
-        this.centerAlign = centerAlign;
+    public void setCenterAlign(final Boolean centerAlign) {
+        this.centerAlign = centerAlign != null ? centerAlign : Boolean.TRUE;
     }
 
     public void setFontWeight(final String fontWeight) {
@@ -207,11 +207,11 @@ public class CEntityGrid<EntityClass extends CEntityDB<EntityClass>> extends CGr
         this.padding = padding;
     }
 
-    public void setRoundedCorners(final boolean roundedCorners) {
-        this.roundedCorners = roundedCorners;
+    public void setRoundedCorners(final Boolean roundedCorners) {
+        this.roundedCorners = roundedCorners != null ? roundedCorners : Boolean.TRUE;
     }
 
-    public void setShowIcon(final boolean showIcon) {
-        this.showIcon = showIcon;
+    public void setShowIcon(final Boolean showIcon) {
+        this.showIcon = showIcon != null ? showIcon : Boolean.TRUE;
     }
 }

@@ -292,74 +292,11 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 		return userProjectSetting;
 	}
 
-	/**
-	 * @deprecated Use entity setters directly instead of this auxiliary method. This
-	 *             method is temporary for compatibility and will be removed.
-	 */
-	@Deprecated
-	@Transactional
-	public CUser setCompanyAssociation(final CUser user,
-		final tech.derbent.companies.domain.CCompany company) {
 
-		if (user == null) {
-			return null;
-		}
 
-		if (company != null) {
-			user.setCompany(company);
-		}
-		return save(user);
-	}
 
-	/**
-	 * @deprecated Use entity setters directly instead of this auxiliary method. This
-	 *             method is temporary for compatibility and will be removed.
-	 */
-	@Deprecated
-	@Transactional
-	public CUser setUserProfile(final CUser user, final String lastname,
-		final String phone, final byte[] profilePictureData) {
 
-		if (user == null) {
-			return null;
-		}
 
-		if ((lastname != null) && !lastname.isEmpty()) {
-			user.setLastname(lastname);
-		}
-
-		if ((phone != null) && !phone.isEmpty()) {
-			user.setPhone(phone);
-		}
-
-		if (profilePictureData != null) {
-			user.setProfilePictureData(profilePictureData);
-		}
-		return save(user);
-	}
-
-	/**
-	 * @deprecated Use entity setters directly instead of this auxiliary method. This
-	 *             method is temporary for compatibility and will be removed.
-	 */
-	@Deprecated
-	@Transactional
-	public CUser setUserRole(final CUser user,
-		final tech.derbent.users.domain.CUserRole userRole, final String roles) {
-
-		if (user == null) {
-			return null;
-		}
-
-		if (userRole != null) {
-			user.setUserRole(userRole);
-		}
-
-		if ((roles != null) && !roles.isEmpty()) {
-			user.setRoles(roles);
-		}
-		return save(user);
-	}
 
 	/**
 	 * Updates user password with proper encoding.

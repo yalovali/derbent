@@ -71,7 +71,7 @@ public class CMeetingStatusView extends CProjectAwareMDPage<CMeetingStatus> impl
         // Enhanced Type column that shows Final/Active status using CGridCell
         grid.addComponentColumn(entity -> {
             final CGridCell statusCell = new CGridCell();
-            statusCell.setFinalActiveValue(entity.isFinal());
+            statusCell.setFinalActiveValue(entity.getFinalStatus());
             return statusCell;
         }).setHeader("Type").setWidth("100px").setFlexGrow(0);
 
