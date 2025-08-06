@@ -4,10 +4,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import com.vaadin.flow.component.button.Button;
-
 import tech.derbent.abstracts.components.CEnhancedBinder;
-import tech.derbent.abstracts.views.CDBUserSettingsDialog;
 import tech.derbent.abstracts.views.CPanelUserProjectBase;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
 import tech.derbent.projects.domain.CProject;
@@ -118,19 +115,6 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject> {
 		dialog.open();
 	}
 
-	private void openUserSettingsDialog() {
-
-		if (!validateProjectSelection() || !validateServiceAvailability("Project")) {
-			return;
-		}
-		final Consumer<CProject> consumer = project -> {
-			this.onSave(project);
-		};
-		final CDBUserSettingsDialog dialog = new CDBUserSettingsDialog(projectService,
-			userService, currentProject, consumer, true);
-		dialog.open();
-	}
-
 	public void setCurrentProject(final CProject project) {
 		this.currentProject = project;
 	}
@@ -154,8 +138,6 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject> {
 			.setAutoWidth(true);
 		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
 		getBaseLayout().add(grid);
-		final Button addButton = new Button("Add User", e -> openUserSettingsDialog());
-		getBaseLayout().add(addButton);
 	}
 
 	/**
