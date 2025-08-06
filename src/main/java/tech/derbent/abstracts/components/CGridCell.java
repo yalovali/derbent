@@ -48,8 +48,8 @@ public class CGridCell extends Div {
     private static final Logger LOGGER = LoggerFactory.getLogger(CGridCell.class);
 
     // Simplified styling configuration - only essential properties
-    private boolean showIcon = false;
-    private boolean autoContrast = true;
+    private Boolean showIcon = Boolean.FALSE;
+    private Boolean autoContrast = Boolean.TRUE;
 
     /**
      * Default constructor for CGridCell.
@@ -126,8 +126,8 @@ public class CGridCell extends Div {
      * @param autoContrast
      *            true to enable auto-contrast
      */
-    public void setAutoContrast(final boolean autoContrast) {
-        this.autoContrast = autoContrast;
+    public void setAutoContrast(final Boolean autoContrast) {
+        this.autoContrast = autoContrast != null ? autoContrast : Boolean.TRUE;
     }
 
     /**
@@ -177,8 +177,8 @@ public class CGridCell extends Div {
      * @param showIcon
      *            true to show icons alongside text
      */
-    public void setShowIcon(final boolean showIcon) {
-        this.showIcon = showIcon;
+    public void setShowIcon(final Boolean showIcon) {
+        this.showIcon = showIcon != null ? showIcon : Boolean.FALSE;
     }
 
     /**
@@ -230,13 +230,13 @@ public class CGridCell extends Div {
         getStyle().set("background-color", color);
 
         // Apply contrasting text color if auto-contrast is enabled
-        if (autoContrast) {
+        if (Boolean.TRUE.equals(autoContrast)) {
             final String textColor = CColorUtils.getContrastTextColor(color);
             getStyle().set("color", textColor);
         }
 
         // Create content with icon if enabled
-        if (showIcon && CColorUtils.shouldDisplayIcon(entity)) {
+        if (Boolean.TRUE.equals(showIcon) && CColorUtils.shouldDisplayIcon(entity)) {
             final Icon icon = CColorUtils.createIconForEntity(entity);
 
             if (icon != null) {
@@ -287,13 +287,13 @@ public class CGridCell extends Div {
             // Apply colors based on the boolean value
             if (value && trueColor != null) {
                 getStyle().set("background-color", trueColor);
-                if (autoContrast) {
+                if (Boolean.TRUE.equals(autoContrast)) {
                     final String textColor = CColorUtils.getContrastTextColor(trueColor);
                     getStyle().set("color", textColor);
                 }
             } else if (!value && falseColor != null) {
                 getStyle().set("background-color", falseColor);
-                if (autoContrast) {
+                if (Boolean.TRUE.equals(autoContrast)) {
                     final String textColor = CColorUtils.getContrastTextColor(falseColor);
                     getStyle().set("color", textColor);
                 }

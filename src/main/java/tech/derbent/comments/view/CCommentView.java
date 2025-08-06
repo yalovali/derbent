@@ -48,7 +48,7 @@ public class CCommentView extends Div {
 
     private final CButton cancelButton;
 
-    private boolean isEditing = false;
+    private Boolean isEditing = Boolean.FALSE;
 
     private String originalText;
 
@@ -138,7 +138,7 @@ public class CCommentView extends Div {
      * Cancels editing and reverts to original text.
      */
     private void cancelEditing() {
-        isEditing = false;
+        isEditing = Boolean.FALSE;
 
         // Revert any changes made to the comment text
         if (originalText != null) {
@@ -162,7 +162,7 @@ public class CCommentView extends Div {
      * @return true if in edit mode, false otherwise
      */
     public boolean isEditing() {
-        return isEditing;
+        return Boolean.TRUE.equals(isEditing);
     }
 
     /**
@@ -186,7 +186,7 @@ public class CCommentView extends Div {
 
         try {
             commentService.updateCommentText(comment, newText.trim());
-            isEditing = false;
+            isEditing = Boolean.FALSE;
             updateContent();
         } catch (final Exception e) {
             LOGGER.error("Error saving comment changes", e);
@@ -238,7 +238,7 @@ public class CCommentView extends Div {
             LOGGER.warn("Cannot edit comment - no comment service available");
             return;
         }
-        isEditing = true;
+        isEditing = Boolean.TRUE;
         originalText = comment.getCommentText();
         updateContent();
     }
@@ -248,7 +248,7 @@ public class CCommentView extends Div {
      */
     private void updateCommentText() {
 
-        if (isEditing) {
+        if (Boolean.TRUE.equals(isEditing)) {
             commentTextParagraph.setVisible(false);
             editTextArea.setValue(comment.getCommentText());
             editTextArea.setVisible(true);
@@ -261,7 +261,7 @@ public class CCommentView extends Div {
             editTextArea.setVisible(false);
         }
         // Update edit buttons visibility
-        editButtonsLayout.setVisible(isEditing);
+        editButtonsLayout.setVisible(Boolean.TRUE.equals(isEditing));
     }
 
     /**
@@ -296,7 +296,7 @@ public class CCommentView extends Div {
         rightSide.setAlignItems(HorizontalLayout.Alignment.CENTER);
 
         // Add edit button if service is available
-        if ((commentService != null) && !isEditing) {
+        if ((commentService != null) && !Boolean.TRUE.equals(isEditing)) {
             rightSide.add(editButton);
         }
 

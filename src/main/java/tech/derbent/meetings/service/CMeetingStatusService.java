@@ -57,7 +57,7 @@ public class CMeetingStatusService extends CEntityOfProjectService<CMeetingStatu
 	@Transactional (readOnly = true)
 	public List<CMeetingStatus> findAllActiveStatusesByProject(final CProject project) {
 		// Use the inherited findAllByProject and filter for active statuses
-		return findEntriesByProject(project).stream().filter(status -> !status.isFinal())
+		return findEntriesByProject(project).stream().filter(status -> !status.getFinalStatus())
 			.toList();
 	}
 

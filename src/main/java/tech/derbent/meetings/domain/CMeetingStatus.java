@@ -75,13 +75,7 @@ public class CMeetingStatus extends CStatus<CMeetingStatus> implements CKanbanSt
         this.finalStatus = finalStatus;
     }
 
-    /**
-     * @deprecated Use getFinalStatus() instead for consistency
-     */
-    @Deprecated
-    public Boolean isFinal() {
-        return getFinalStatus();
-    }
+
 
     @Override
     public String toString() {
