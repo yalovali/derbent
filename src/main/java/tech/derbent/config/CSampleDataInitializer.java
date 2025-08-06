@@ -832,7 +832,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		}
 		meeting.setParticipants(participants);
 		meetingService.save(meeting);
-		LOGGER.info("Sample planning meeting created successfully");
 	}
 
 	/**
@@ -873,8 +872,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		meeting.setStatus(scheduledStatus);
 		meeting.setMinutes("Meeting agenda prepared");
 		meeting.setLinkedElement("Project management system");
-		LOGGER
-			.info("Sample project meeting created successfully using auxiliary methods");
 	}
 
 	/**
@@ -1069,15 +1066,12 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CCompany company = findCompanyByName("Of Sağlık Teknolojileri");
 		analyst.setCompany(company);
 		userService.save(analyst);
-		LOGGER.info("Team member Ayşe Demir created successfully");
 	}
 
 	/**
 	 * Creates team member Bob Wilson.
 	 */
 	private void createTeamMemberBob() {
-		LOGGER.info(
-			"createTeamMemberBob called - creating Burak Özkan from Çamburnu village");
 		final CUser developer = userService.createLoginUser("bozkan", STANDARD_PASSWORD,
 			"Burak", "burak.ozkan@ofdanismanlik.com.tr", "USER");
 		// Set user profile directly on entity
@@ -1093,7 +1087,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CCompany company = findCompanyByName("Of Stratejik Danışmanlık");
 		developer.setCompany(company);
 		userService.save(developer);
-		LOGGER.info("Team member Burak Özkan created successfully");
 	}
 
 	/**

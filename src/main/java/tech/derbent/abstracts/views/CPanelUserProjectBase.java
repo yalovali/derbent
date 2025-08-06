@@ -1,7 +1,6 @@
 package tech.derbent.abstracts.views;
 
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.slf4j.Logger;
@@ -41,8 +40,6 @@ public abstract class CPanelUserProjectBase<EntityClass extends CEntityDB<Entity
 
 	// Handlers for getting and setting user-project settings
 	protected Supplier<List<CUserProjectSettings>> getSettings;
-
-	protected Consumer<List<CUserProjectSettings>> setSettings;
 
 	protected Runnable saveEntity;
 
@@ -95,7 +92,7 @@ public abstract class CPanelUserProjectBase<EntityClass extends CEntityDB<Entity
 			return;
 		}
 
-		if ((getSettings == null) || (setSettings == null)) {
+		if ((getSettings == null)) {
 			new CWarningDialog(
 				"Settings handlers are not available. Please refresh the page.").open();
 			return;
@@ -104,7 +101,6 @@ public abstract class CPanelUserProjectBase<EntityClass extends CEntityDB<Entity
 		new CConfirmationDialog(confirmMessage, () -> {
 			final List<CUserProjectSettings> settings = getSettings.get();
 			settings.remove(selected);
-			setSettings.accept(settings);
 
 			if (saveEntity != null) {
 				saveEntity.run();
@@ -220,11 +216,9 @@ public abstract class CPanelUserProjectBase<EntityClass extends CEntityDB<Entity
 	 */
 	public void setSettingsAccessors(
 		final Supplier<List<CUserProjectSettings>> getSettings,
-		final Consumer<List<CUserProjectSettings>> setSettings,
 		final Runnable saveEntity) {
 		LOGGER.debug("Setting settings accessors");
 		this.getSettings = getSettings;
-		this.setSettings = setSettings;
 		this.saveEntity = saveEntity;
 		refresh();
 	}

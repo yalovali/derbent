@@ -74,29 +74,8 @@ public class CPanelUserProjectSettings extends CPanelUserProjectBase<CUser> {
 				LOGGER.debug("Updated user project settings with ID: {}",
 					savedSettings.getId());
 			}
-
 			// Update the local collection if accessors are available
-			if (getSettings != null && setSettings != null) {
-				final List<CUserProjectSettings> settingsList = getSettings.get();
-				boolean found = false;
-
-				// Find and update existing entry or add new one
-				for (int i = 0; i < settingsList.size(); i++) {
-					final CUserProjectSettings existing = settingsList.get(i);
-
-					if ((existing.getId() != null)
-						&& existing.getId().equals(savedSettings.getId())) {
-						settingsList.set(i, savedSettings);
-						found = true;
-						break;
-					}
-				}
-
-				if (!found) {
-					settingsList.add(savedSettings);
-				}
-				setSettings.accept(settingsList);
-			}
+			userProjectSettingsService.save(settings);
 
 			// Save the parent entity if needed
 			if (saveEntity != null) {
@@ -143,10 +122,9 @@ public class CPanelUserProjectSettings extends CPanelUserProjectBase<CUser> {
 
 	public void setProjectSettingsAccessors(
 		final java.util.function.Supplier<List<CUserProjectSettings>> getProjectSettings,
-		final java.util.function.Consumer<List<CUserProjectSettings>> setProjectSettings,
 		final Runnable saveEntity) {
 		LOGGER.debug("Setting project settings accessors");
-		setSettingsAccessors(getProjectSettings, setProjectSettings, saveEntity);
+		setSettingsAccessors(getProjectSettings, saveEntity);
 	}
 
 	@Override

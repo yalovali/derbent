@@ -121,22 +121,13 @@ public class CProjectsView extends CAbstractNamedEntityPage<CProject>
 			// supply the project settings from eager loaded project
 			final Supplier<List<CUserProjectSettings>> supplier =
 				() -> projectWithUsers.getUserSettings();
-			// what to do when user settings are updated
-			final Consumer<List<CUserProjectSettings>> consumer = users -> {
-				// CUserProjectSettings::addUserToProject(projectWithUsers, users);
-				// projectWithUsers.removeUser(user);
-				// projectWithUsers.getUserSettings().clear();
-				projectWithUsers.getUserSettings().addAll(users);
-				// Save the project when user settings are updated
-				entityService.save(projectWithUsers);
-			};
 			final Runnable runnable = () -> {
 				final CProject refreshedProject = ((CProjectService) entityService)
 					.findByIdWithUserSettings(projectWithUsers.getId());
 				populateForm(refreshedProject);
 			};
 			//
-			projectUsersPanel.setProjectUsersAccessors(supplier, consumer, runnable);
+			projectUsersPanel.setProjectUsersAccessors(supplier, runnable);
 		}
 		else {
 			projectUsersPanel.setCurrentProject(null);
@@ -148,7 +139,7 @@ public class CProjectsView extends CAbstractNamedEntityPage<CProject>
 			final Runnable runnable = () -> {
 				// Do nothing
 			};
-			projectUsersPanel.setProjectUsersAccessors(supplier, consumer, runnable);
+			projectUsersPanel.setProjectUsersAccessors(supplier, runnable);
 		}
 	}
 

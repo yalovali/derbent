@@ -1,7 +1,6 @@
 package tech.derbent.projects.view;
 
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import tech.derbent.abstracts.components.CEnhancedBinder;
@@ -10,8 +9,8 @@ import tech.derbent.base.ui.dialogs.CWarningDialog;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUserProjectSettings;
-import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.CUserProjectSettingsService;
+import tech.derbent.users.service.CUserService;
 
 /**
  * Simplified panel for managing users within a project. This is the reverse direction of
@@ -28,12 +27,14 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject> {
 	private CProject currentProject;
 
 	private final CUserService userService;
+
 	private final CUserProjectSettingsService userProjectSettingsService;
 
 	public CPanelProjectUsers(final CProject currentEntity,
 		final CEnhancedBinder<CProject> beanValidationBinder,
 		final CProjectService entityService, final CProjectService projectService,
-		final CUserService userService, final CUserProjectSettingsService userProjectSettingsService) {
+		final CUserService userService,
+		final CUserProjectSettingsService userProjectSettingsService) {
 		super("Project Users", currentEntity, beanValidationBinder, CProject.class,
 			entityService, projectService);
 		this.userService = userService;
@@ -60,54 +61,57 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject> {
 	@Override
 	protected void onSettingsSaved(final CUserProjectSettings settings) {
 		LOGGER.debug("Saving user project settings: {}", settings);
-		
+
 		try {
 			// Use the service layer to properly persist the relationship
 			final CUserProjectSettings savedSettings;
-			
+
 			if (settings.getId() == null) {
 				// New relationship - create it
 				savedSettings = userProjectSettingsService.save(settings);
-				LOGGER.debug("Created new user project settings with ID: {}", savedSettings.getId());
-			} else {
+				LOGGER.debug("Created new user project settings with ID: {}",
+					savedSettings.getId());
+			}
+			else {
 				// Existing relationship - update it
 				savedSettings = userProjectSettingsService.save(settings);
-				LOGGER.debug("Updated user project settings with ID: {}", savedSettings.getId());
+				LOGGER.debug("Updated user project settings with ID: {}",
+					savedSettings.getId());
 			}
-			
+
 			// Update the local collection if accessors are available
-			if (getSettings != null && setSettings != null) {
+			if (getSettings != null) {
 				final List<CUserProjectSettings> settingsList = getSettings.get();
 				boolean found = false;
-				
+
 				// Find and update existing entry or add new one
 				for (int i = 0; i < settingsList.size(); i++) {
 					final CUserProjectSettings existing = settingsList.get(i);
-					
-					if ((existing.getId() != null) && existing.getId().equals(savedSettings.getId())) {
+
+					if ((existing.getId() != null)
+						&& existing.getId().equals(savedSettings.getId())) {
 						settingsList.set(i, savedSettings);
 						found = true;
 						break;
 					}
 				}
-				
+
 				if (!found) {
 					settingsList.add(savedSettings);
 				}
-				
-				setSettings.accept(settingsList);
+				// setSettings.accept(settingsList);
+				userProjectSettingsService.save(settings);
 			}
-			
+
 			// Save the parent entity if needed
 			if (saveEntity != null) {
 				saveEntity.run();
 			}
-			
 			refresh();
-			
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error saving user project settings", e);
-			throw new RuntimeException("Failed to save user project settings: " + e.getMessage(), e);
+			throw new RuntimeException(
+				"Failed to save user project settings: " + e.getMessage(), e);
 		}
 	}
 
@@ -147,10 +151,9 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject> {
 
 	public void setProjectUsersAccessors(
 		final Supplier<List<CUserProjectSettings>> getProjectUsers,
-		final Consumer<List<CUserProjectSettings>> setProjectUsers,
 		final Runnable saveEntity) {
 		LOGGER.debug("Setting project users accessors");
-		setSettingsAccessors(getProjectUsers, setProjectUsers, saveEntity);
+		setSettingsAccessors(getProjectUsers, saveEntity);
 	}
 
 	@Override

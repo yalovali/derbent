@@ -6,9 +6,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
@@ -25,9 +23,9 @@ import tech.derbent.projects.service.CProjectService;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserProjectSettings;
+import tech.derbent.users.service.CUserProjectSettingsService;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.CUserTypeService;
-import tech.derbent.users.service.CUserProjectSettingsService;
 
 @Route ("users/:user_id?/:action?(edit)")
 @PageTitle ("User Master Detail")
@@ -60,6 +58,7 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser>
 	CPanelUserDescription descriptionPanel;
 
 	private final CProjectService projectService;
+
 	private final CUserProjectSettingsService userProjectSettingsService;
 
 	// private final TextField name; • Annotate the CUsersView constructor with @Autowired
@@ -77,6 +76,31 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser>
 		this.userProjectSettingsService = userProjectSettingsService;
 		// projectSettingsGrid = new CPanelUserProjectSettings(projectService);
 		LOGGER.info("CUsersView initialized with user type and company services");
+	}
+
+	/**
+	 * Binds form data to the current entity.
+	 */
+	private void bindFormData() throws ValidationException {
+		getBinder().writeBean(getCurrentEntity());
+	}
+
+	/**
+	 * Clears project settings panel when no user is selected.
+	 */
+	private void clearProjectSettings() {
+		projectSettingsGrid.setCurrentUser(null);
+		projectSettingsGrid.setProjectSettingsAccessors(Collections::emptyList, () -> {});
+	}
+
+	/**
+	 * Configures project settings panel for the specified user.
+	 * @param user The user to configure project settings for
+	 */
+	private void configureProjectSettingsForUser(final CUser user) {
+		final CUser userWithSettings = loadUserWithProjects(user.getId());
+		projectSettingsGrid.setCurrentUser(userWithSettings);
+		setupProjectSettingsAccessors(userWithSettings);
 	}
 
 	@Override
@@ -143,19 +167,15 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser>
 	}
 
 	/**
-	 * Simplified save button creation with focused error handling.
-	 * 
-	 * Handles the complete save workflow:
-	 * 1. Form validation and data binding
-	 * 2. Password update processing
-	 * 3. Entity persistence
-	 * 4. UI updates and navigation
+	 * Simplified save button creation with focused error handling. Handles the complete
+	 * save workflow: 1. Form validation and data binding 2. Password update processing 3.
+	 * Entity persistence 4. UI updates and navigation
 	 */
 	@Override
 	protected CButton createSaveButton(final String buttonText) {
 		LOGGER.info("Creating custom save button for CUsersView");
-		
 		return CButton.createPrimary(buttonText, e -> {
+
 			try {
 				performSaveOperation();
 			} catch (final ValidationException validationException) {
@@ -164,6 +184,56 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser>
 				handleUnexpectedError(exception);
 			}
 		});
+	}
+
+	/**
+	 * Ensures a current entity exists, creating one if necessary.
+	 */
+	private void ensureEntityExists() {
+
+		if (getCurrentEntity() == null) {
+			setCurrentEntity(entityService.createEntity());
+		}
+	}
+
+	@Override
+	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
+
+	@Override
+	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
+
+	/**
+	 * Handles password update through the description panel.
+	 */
+	private void handlePasswordUpdate() {
+		descriptionPanel.saveEventHandler();
+	}
+
+	/**
+	 * Handles unexpected errors with proper logging.
+	 */
+	private void handleUnexpectedError(final Exception exception) {
+		LOGGER.error("Unexpected error during save operation", exception);
+		new CWarningDialog("An unexpected error occurred while saving. Please try again.")
+			.open();
+	}
+
+	/**
+	 * Handles validation errors with user-friendly messaging.
+	 */
+	private void handleValidationError() {
+		new CWarningDialog(
+			"Failed to save the data. Please check that all required fields are filled and values are valid.")
+			.open();
+	}
+
+	/**
+	 * Loads user data with project settings to avoid lazy initialization issues.
+	 * @param userId The ID of the user to load
+	 * @return User entity with project settings loaded
+	 */
+	private CUser loadUserWithProjects(final Long userId) {
+		return ((CUserService) entityService).getUserWithProjects(userId);
 	}
 
 	/**
@@ -177,26 +247,30 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser>
 	}
 
 	/**
-	 * Ensures a current entity exists, creating one if necessary.
+	 * Simplified form population with clear separation of concerns. Updates both the main
+	 * form and project settings panel when user selection changes. Handles lazy loading
+	 * and data synchronization properly.
 	 */
-	private void ensureEntityExists() {
-		if (getCurrentEntity() == null) {
-			setCurrentEntity(entityService.createEntity());
+	@Override
+	protected void populateForm(final CUser value) {
+		super.populateForm(value);
+		LOGGER.info("Populating form with user data: {}",
+			value != null ? value.getLogin() : "null");
+		updateProjectSettingsPanel(value);
+	}
+
+	/**
+	 * Refreshes user data after project settings update.
+	 * @param userId The ID of the user to refresh
+	 */
+	private void refreshUserAfterProjectUpdate(final Long userId) {
+
+		try {
+			final CUser refreshedUser = loadUserWithProjects(userId);
+			populateForm(refreshedUser);
+		} catch (final Exception e) {
+			LOGGER.error("Error refreshing user after project settings update", e);
 		}
-	}
-
-	/**
-	 * Binds form data to the current entity.
-	 */
-	private void bindFormData() throws ValidationException {
-		getBinder().writeBean(getCurrentEntity());
-	}
-
-	/**
-	 * Handles password update through the description panel.
-	 */
-	private void handlePasswordUpdate() {
-		descriptionPanel.saveEventHandler();
 	}
 
 	/**
@@ -205,9 +279,49 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser>
 	private void saveEntityAndUpdateUI() {
 		final CUser savedEntity = entityService.save(getCurrentEntity());
 		LOGGER.info("User saved successfully with ID: {}", savedEntity.getId());
-		
 		setCurrentEntity(savedEntity);
 		updateUIAfterSave();
+	}
+
+	/**
+	 * Sets up accessor methods for project settings panel data management.
+	 * @param userWithSettings User entity with project settings loaded
+	 */
+	private void setupProjectSettingsAccessors(final CUser userWithSettings) {
+		projectSettingsGrid.setProjectSettingsAccessors(() -> {
+			// Ensure the collection is never null
+			List<CUserProjectSettings> settings = userWithSettings.getProjectSettings();
+
+			if (settings == null) {
+				settings = new ArrayList<>();
+				userWithSettings.setProjectSettings(settings);
+			}
+			return settings;
+		}, () -> refreshUserAfterProjectUpdate(userWithSettings.getId()));
+	}
+
+	@Override
+	protected void setupToolbar() {
+		// TODO Auto-generated method stub
+	}
+
+	/**
+	 * Updates the project settings panel based on current user selection.
+	 * @param user The selected user, or null to clear the panel
+	 */
+	private void updateProjectSettingsPanel(final CUser user) {
+
+		if (projectSettingsGrid == null) {
+			LOGGER.debug("Project settings grid not yet initialized, skipping populate");
+			return;
+		}
+
+		if (user != null) {
+			configureProjectSettingsForUser(user);
+		}
+		else {
+			clearProjectSettings();
+		}
 	}
 
 	/**
@@ -218,148 +332,5 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser>
 		refreshGrid();
 		safeShowNotification("User data saved successfully");
 		safeNavigateToClass();
-	}
-
-	/**
-	 * Handles validation errors with user-friendly messaging.
-	 */
-	private void handleValidationError() {
-		new CWarningDialog(
-			"Failed to save the data. Please check that all required fields are filled and values are valid.")
-			.open();
-	}
-
-	/**
-	 * Handles unexpected errors with proper logging.
-	 */
-	private void handleUnexpectedError(final Exception exception) {
-		LOGGER.error("Unexpected error during save operation", exception);
-		new CWarningDialog("An unexpected error occurred while saving. Please try again.").open();
-	}
-
-	@Override
-	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
-
-	@Override
-	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	/**
-	 * Simplified form population with clear separation of concerns.
-	 * 
-	 * Updates both the main form and project settings panel when user selection changes.
-	 * Handles lazy loading and data synchronization properly.
-	 */
-	@Override
-	protected void populateForm(final CUser value) {
-		super.populateForm(value);
-		LOGGER.info("Populating form with user data: {}", value != null ? value.getLogin() : "null");
-		
-		updateProjectSettingsPanel(value);
-	}
-
-	/**
-	 * Updates the project settings panel based on current user selection.
-	 * 
-	 * @param user The selected user, or null to clear the panel
-	 */
-	private void updateProjectSettingsPanel(final CUser user) {
-		if (projectSettingsGrid == null) {
-			LOGGER.debug("Project settings grid not yet initialized, skipping populate");
-			return;
-		}
-
-		if (user != null) {
-			configureProjectSettingsForUser(user);
-		} else {
-			clearProjectSettings();
-		}
-	}
-
-	/**
-	 * Configures project settings panel for the specified user.
-	 * 
-	 * @param user The user to configure project settings for
-	 */
-	private void configureProjectSettingsForUser(final CUser user) {
-		final CUser userWithSettings = loadUserWithProjects(user.getId());
-		projectSettingsGrid.setCurrentUser(userWithSettings);
-		
-		setupProjectSettingsAccessors(userWithSettings);
-	}
-
-	/**
-	 * Loads user data with project settings to avoid lazy initialization issues.
-	 * 
-	 * @param userId The ID of the user to load
-	 * @return User entity with project settings loaded
-	 */
-	private CUser loadUserWithProjects(final Long userId) {
-		return ((CUserService) entityService).getUserWithProjects(userId);
-	}
-
-	/**
-	 * Sets up accessor methods for project settings panel data management.
-	 * 
-	 * @param userWithSettings User entity with project settings loaded
-	 */
-	private void setupProjectSettingsAccessors(final CUser userWithSettings) {
-		projectSettingsGrid.setProjectSettingsAccessors(
-			() -> {
-				// Ensure the collection is never null
-				List<CUserProjectSettings> settings = userWithSettings.getProjectSettings();
-				if (settings == null) {
-					settings = new ArrayList<>();
-					userWithSettings.setProjectSettings(settings);
-				}
-				return settings;
-			},
-			(settings) -> {
-				// Instead of replacing the entire collection, update the existing one
-				// This preserves JPA's collection tracking and prevents orphan removal issues
-				List<CUserProjectSettings> currentSettings = userWithSettings.getProjectSettings();
-				if (currentSettings == null) {
-					// If null, initialize with new ArrayList and set it
-					currentSettings = new ArrayList<>(settings);
-					userWithSettings.setProjectSettings(currentSettings);
-				} else {
-					// Update existing collection in-place to preserve JPA tracking
-					currentSettings.clear();
-					currentSettings.addAll(settings);
-				}
-				entityService.save(userWithSettings);
-			},
-			() -> refreshUserAfterProjectUpdate(userWithSettings.getId())
-		);
-	}
-
-	/**
-	 * Refreshes user data after project settings update.
-	 * 
-	 * @param userId The ID of the user to refresh
-	 */
-	private void refreshUserAfterProjectUpdate(final Long userId) {
-		try {
-			final CUser refreshedUser = loadUserWithProjects(userId);
-			populateForm(refreshedUser);
-		} catch (final Exception e) {
-			LOGGER.error("Error refreshing user after project settings update", e);
-		}
-	}
-
-	/**
-	 * Clears project settings panel when no user is selected.
-	 */
-	private void clearProjectSettings() {
-		projectSettingsGrid.setCurrentUser(null);
-		projectSettingsGrid.setProjectSettingsAccessors(
-			Collections::emptyList, 
-			(settings) -> {}, 
-			() -> {}
-		);
-	}
-
-	@Override
-	protected void setupToolbar() {
-		// TODO Auto-generated method stub
 	}
 }
