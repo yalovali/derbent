@@ -10,7 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.vaadin.flow.spring.security.VaadinWebSecurity;
 
-import tech.derbent.login.view.CLoginView;
+import tech.derbent.login.view.CCustomLoginView;
 import tech.derbent.users.service.CUserService;
 
 /**
@@ -49,7 +49,7 @@ class CSecurityConfig extends VaadinWebSecurity {
         super.configure(http);
         // Set our custom login view When users need to authenticate, they'll be
         // redirected to CLoginView
-        setLoginView(http, CLoginView.class);
+        setLoginView(http, CCustomLoginView.class);
         // Configure the UserDetailsService for authentication
         http.userDetailsService(loginUserService);
     }

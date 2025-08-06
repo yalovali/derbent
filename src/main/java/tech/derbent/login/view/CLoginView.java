@@ -28,7 +28,7 @@ import tech.derbent.base.data.DatabaseResetService;
  * displays error message to user - User can retry with correct credentials
  */
 // Disables auto layout to prevent the login view from being embedded in a router layout.
-@Route(value = "login", autoLayout = false)
+@Route(value = "overlay-login", autoLayout = false)
 @PageTitle("Login")
 @AnonymousAllowed // Allows anonymous access so users can access the login page without
 public class CLoginView extends Main implements BeforeEnterObserver {
