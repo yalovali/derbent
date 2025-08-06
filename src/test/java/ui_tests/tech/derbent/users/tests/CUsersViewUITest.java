@@ -6,8 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -187,7 +185,8 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
 		LOGGER.info("Testing users grid data loading");
 		// Test that grid can load data without exceptions
 		testGridDataLoading(usersView.getGrid());
-		// Note: Service calls are verified in other tests that actually trigger data loading
+		// Note: Service calls are verified in other tests that actually trigger data
+		// loading
 	}
 
 	@Test
