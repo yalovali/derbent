@@ -52,6 +52,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		}
 	}
 
+	@Transactional
 	public void delete(final EntityClass entity) {
 		LOGGER.debug("Deleting entity: {}", CSpringAuxillaries.safeToString(entity));
 
@@ -68,6 +69,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		repository.deleteById(entity.getId());
 	}
 
+	@Transactional
 	public void delete(final Long id) {
 		LOGGER.debug("Deleting entity with ID: {}", id);
 		repository.deleteById(id);
