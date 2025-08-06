@@ -167,7 +167,8 @@ public class PlaywrightUIAutomationTest extends CBaseUITest {
 		if (performLogout()) {
 			// Verify we're back at login page
 			wait_loginscreen();
-			assertTrue(page.locator("vaadin-login-overlay").isVisible(),
+			// Updated for CCustomLoginView - check for the custom login form
+			assertTrue(page.locator(".custom-login-view").isVisible(),
 				"Should be back at login page");
 			LOGGER.info("✅ Logout functionality test completed successfully");
 		}

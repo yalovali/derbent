@@ -449,14 +449,16 @@ public class CBaseUITest {
 
 	/**
 	 * Performs login with specified credentials
+	 * Updated for CCustomLoginView (new login screen)
 	 */
 	protected void performLogin(final String username, final String password) {
 
 		try {
 			LOGGER.debug("Performing login with username: {}", username);
-			page.fill("vaadin-text-field[name='username'] > input", username);
-			page.fill("vaadin-password-field[name='password'] > input", password);
-			page.click("vaadin-button");
+			// Updated selectors for CCustomLoginView
+			page.fill("#custom-username-input", username);
+			page.fill("#custom-password-input", password);
+			page.click("#custom-submit-button");
 			wait_afterlogin();
 		} catch (final Exception e) {
 			LOGGER.error("Login failed: {}", e.getMessage());
@@ -996,11 +998,16 @@ public class CBaseUITest {
 		}
 	}
 
+	/**
+	 * Waits for login screen to be ready
+	 * Updated for CCustomLoginView (new login screen)
+	 */
 	protected void wait_loginscreen() {
 
 		if (isBrowserAvailable()) {
 			wait_500();
-			page.waitForSelector("#input-vaadin-text-field-12",
+			// Updated selector for CCustomLoginView - wait for username input field
+			page.waitForSelector("#custom-username-input",
 				new Page.WaitForSelectorOptions().setTimeout(10000));
 		}
 	}

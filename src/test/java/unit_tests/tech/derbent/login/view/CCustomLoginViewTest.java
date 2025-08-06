@@ -34,8 +34,8 @@ public class CCustomLoginViewTest extends CBaseUITest {
 			LOGGER.warn("⚠️ Browser not available, skipping UI test");
 			return;
 		}
-		// Navigate to custom login
-		page.navigate(baseUrl + "/custom-login");
+		// Navigate to custom login (route is "login" for CCustomLoginView)
+		page.navigate(baseUrl + "/login");
 		// Wait for the page to load
 		page.waitForSelector(".custom-login-view",
 			new Page.WaitForSelectorOptions().setTimeout(10000));
@@ -58,8 +58,8 @@ public class CCustomLoginViewTest extends CBaseUITest {
 			LOGGER.warn("⚠️ Browser not available, skipping UI test");
 			return;
 		}
-		// Navigate to custom login
-		page.navigate(baseUrl + "/custom-login");
+		// Navigate to custom login (route is "login" for CCustomLoginView)
+		page.navigate(baseUrl + "/login");
 		// Wait for the page to load
 		page.waitForSelector(".custom-login-view",
 			new Page.WaitForSelectorOptions().setTimeout(10000));
@@ -73,7 +73,7 @@ public class CCustomLoginViewTest extends CBaseUITest {
 		page.waitForTimeout(3000);
 		// Verify we're no longer on login page (successful login)
 		final String currentUrl = page.url();
-		assertTrue(!currentUrl.contains("custom-login") && !currentUrl.contains("login"));
+		assertTrue(!currentUrl.contains("login"));
 		LOGGER.info("✅ Custom login form with credentials test completed");
 	}
 
@@ -85,22 +85,22 @@ public class CCustomLoginViewTest extends CBaseUITest {
 			LOGGER.warn("⚠️ Browser not available, skipping UI test");
 			return;
 		}
-		// Navigate directly to custom login
-		page.navigate(baseUrl + "/custom-login");
+		// Navigate directly to custom login (route is "login" for CCustomLoginView)
+		page.navigate(baseUrl + "/login");
 		// Wait for the page to load
 		page.waitForSelector(".custom-login-view",
 			new Page.WaitForSelectorOptions().setTimeout(10000));
 		// Verify page title
 		final String title = page.title();
 		assertNotNull(title);
-		assertTrue(title.contains("Custom Login"));
+		assertTrue(title.contains("Login"));
 		LOGGER.info("✅ Custom login view title: {}", title);
 		// Verify custom login form elements are present
 		assertTrue(page.locator("#custom-username-input").isVisible());
 		assertTrue(page.locator("#custom-password-input").isVisible());
 		assertTrue(page.locator("#custom-submit-button").isVisible());
-		// Verify back link to original login is present
-		assertTrue(page.locator("a[href='login']").isVisible());
+		// Verify back link to original login is present (button text from CCustomLoginView)
+		assertTrue(page.locator("text=Bact to Original Login").isVisible());
 		LOGGER.info("✅ Custom login view loads test completed");
 	}
 
@@ -112,18 +112,17 @@ public class CCustomLoginViewTest extends CBaseUITest {
 			LOGGER.warn("⚠️ Browser not available, skipping UI test");
 			return;
 		}
-		// Navigate to custom login
-		page.navigate(baseUrl + "/custom-login");
+		// Navigate to custom login (route is "login" for CCustomLoginView)
+		page.navigate(baseUrl + "/login");
 		// Wait for the page to load
 		page.waitForSelector(".custom-login-view",
 			new Page.WaitForSelectorOptions().setTimeout(10000));
-		// Click back to original login link
-		page.locator("text=Back to original login").click();
-		// Verify we're now on original login page
+		// Click back to original login link (button text from CCustomLoginView)
+		page.locator("text=Bact to Original Login").click();
+		// Verify we're now on original login page (route is "overlay-login" for CLoginView)
 		page.waitForSelector("vaadin-login-overlay",
 			new Page.WaitForSelectorOptions().setTimeout(10000));
-		assertTrue(page.url().contains("login"));
-		assertTrue(!page.url().contains("custom-login"));
+		assertTrue(page.url().contains("overlay-login"));
 		LOGGER.info("✅ Navigation from custom to original login test completed");
 	}
 
@@ -135,17 +134,18 @@ public class CCustomLoginViewTest extends CBaseUITest {
 			LOGGER.warn("⚠️ Browser not available, skipping UI test");
 			return;
 		}
-		// Navigate to original login
-		page.navigate(baseUrl + "/login");
+		// Navigate to original login (route is "overlay-login" for CLoginView)
+		page.navigate(baseUrl + "/overlay-login");
 		// Wait for login overlay
 		page.waitForSelector("vaadin-login-overlay",
 			new Page.WaitForSelectorOptions().setTimeout(10000));
-		// Look for the custom login link
+		// Look for the custom login link (from CLoginView footer)
 		page.locator("text=Try Custom Login").click();
-		// Verify we're now on custom login page
+		// Verify we're now on custom login page (route is "login" for CCustomLoginView)
 		page.waitForSelector(".custom-login-view",
 			new Page.WaitForSelectorOptions().setTimeout(10000));
-		assertTrue(page.url().contains("custom-login"));
+		assertTrue(page.url().contains("login"));
+		assertTrue(!page.url().contains("overlay-login"));
 		LOGGER.info("✅ Navigation from original to custom login test completed");
 	}
 }
