@@ -168,6 +168,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 			getUI().ifPresent(ui -> ui.navigate(CLoginView.class));
 		});
 		// Error message display
+		errorMessage.setId("custom-error-message");
 		errorMessage.addClassNames(LumoUtility.TextColor.ERROR,
 			LumoUtility.TextAlignment.RIGHT, LumoUtility.FontSize.SMALL);
 		errorMessage.setVisible(true);

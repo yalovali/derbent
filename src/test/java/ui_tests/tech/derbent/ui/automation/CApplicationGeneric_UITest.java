@@ -6,17 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.test.context.TestPropertySource;
 
 import com.microsoft.playwright.Page;
 
-@SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT)
-@TestPropertySource (properties = {
-	"spring.datasource.url=jdbc:h2:mem:testdb",
-	"spring.jpa.hibernate.ddl-auto=create-drop" }
-)
 public class CApplicationGeneric_UITest extends CBaseUITest {
 
 	static final Logger LOGGER =
@@ -47,19 +39,14 @@ public class CApplicationGeneric_UITest extends CBaseUITest {
 	@Test
 	void testLogoutFunctionality() {
 		LOGGER.info("🧪 Testing logout functionality...");
-
 		// Look for logout option
-		if (performLogout()) {
-			// Verify we're back at login page
-			wait_loginscreen();
-			takeScreenshot("after-logout");
-			// Updated for CCustomLoginView
-			assertTrue(page.locator(".custom-login-view").isVisible());
-			LOGGER.info("✅ Logout functionality test completed successfully");
-		}
-		else {
-			LOGGER.warn("⚠️ Logout functionality not tested - logout button not found");
-		}
+		performLogout();
+		// Verify we're back at login page
+		wait_loginscreen();
+		takeScreenshot("after-logout");
+		// Updated for CCustomLoginView
+		assertTrue(page.locator(".custom-login-view").isVisible());
+		LOGGER.info("✅ Logout functionality test completed successfully");
 	}
 
 	@Test

@@ -9,7 +9,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
@@ -25,6 +28,8 @@ import tech.derbent.meetings.view.CMeetingsView;
 import tech.derbent.projects.view.CProjectsView;
 import tech.derbent.users.view.CUsersView;
 
+@SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT)
+@ActiveProfiles ("uitest") // Use the test profile that disables initializers
 public class CBaseUITest {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CBaseUITest.class);
@@ -410,40 +415,41 @@ public class CBaseUITest {
 		page.navigate(baseUrl);
 		wait_loginscreen();
 		performLogin("admin", "test123");
-		wait_afterlogin();
 	}
 
-	protected boolean navigateToViewByClass(final Class<?> viewClass) {
+	protected void navigateToViewByClass(final Class<?> viewClass) {
 
 		if (!isBrowserAvailable()) {
-			LOGGER.warn("⚠️ Browser not available, cannot navigate to view: {}",
-				viewClass.getSimpleName());
-			return false;
+			throw new RuntimeException("Browser not available for navigation to view: "
+				+ viewClass.getSimpleName());
 		}
+		final Route routeAnnotation = viewClass.getAnnotation(Route.class);
 
-		try {
-			final Route routeAnnotation = viewClass.getAnnotation(Route.class);
+		if (routeAnnotation == null) {
+			throw new RuntimeException(
+				"Class " + viewClass.getName() + " has no @Route annotation");
+		}
+		final String route = routeAnnotation.value().split("/")[0];
 
-			if (routeAnnotation == null) {
-				LOGGER.error("Class {} has no @Route annotation!", viewClass.getName());
-				return false;
-			}
-			final String route = routeAnnotation.value().split("/")[0];
+		if (route.isEmpty()) {
+			throw new RuntimeException(
+				"Route value is empty for class: " + viewClass.getName());
+		}
+		String url = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
+		url += route.startsWith("/") ? route.substring(1) : route;
+		LOGGER.info("Navigating to view by class: {}", url);
+		page.navigate(url);
+		page.waitForTimeout(2000); // waits for 2 seconds
+		// Check if the view is loaded by looking for a specific element
+		final String viewSelector = "#pageid-" + route.replace("/", "-");
+		final Locator viewLocator = page.locator(viewSelector);
 
-			if (route.isEmpty()) {
-				LOGGER.error("Route value is empty for class: {}", viewClass.getName());
-				return false;
-			}
-			String url = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
-			url += route.startsWith("/") ? route.substring(1) : route;
-			LOGGER.info("Navigating to view by class: {}", url);
-			page.navigate(url);
-			page.waitForTimeout(2000); // waits for 2 seconds
-			return true;
-		} catch (final Exception e) {
-			LOGGER.warn("Failed to navigate to view {}: {}", viewClass.getSimpleName(),
-				e.getMessage());
-			return false;
+		// #page-box-border\ flex\ flex-col\ gap-s\ md-page\ projects-view
+		if (viewLocator.count() == 0) {
+			LOGGER.error("View {} not found after navigation", viewClass.getSimpleName());
+			takeScreenshot("view-not-found-" + viewClass.getSimpleName(), true);
+			throw new RuntimeException(
+				"View not found after navigation: " + viewClass.getSimpleName());
 		}
 	}
 
@@ -452,73 +458,61 @@ public class CBaseUITest {
 	 * screen)
 	 */
 	protected void performLogin(final String username, final String password) {
+		LOGGER.debug("Performing login with username: {}", username);
+		page.locator("#custom-username-input").locator("input").fill(username);
+		page.locator("#custom-password-input").locator("input").fill(password);
+		page.click("#custom-submit-button");
+		wait_1000();
+		// Safely check if error message exists without throwing exception
+		final var errorMessageLocator = page.locator("#custom-error-message");
 
-		try {
-			LOGGER.debug("Performing login with username: {}", username);
-			// Updated selectors for CCustomLoginView
-			page.fill("input-vaadin-text-field-9", username);
-			page.fill("#custom-password-input", password);
-			page.click("#custom-submit-button");
-			wait_afterlogin();
-		} catch (final Exception e) {
-			LOGGER.error("Login failed: {}", e.getMessage());
-			takeScreenshot("login-failed", true);
-			throw new RuntimeException("Login failed", e);
+		if (errorMessageLocator.count() > 0) {
+			final String text = errorMessageLocator.textContent();
+
+			if (text != null && !text.isEmpty()) {
+				LOGGER.error("Login error message: {}", text);
+				throw new RuntimeException("Login failed: " + text);
+			}
 		}
+		wait_afterlogin();
 	}
 
 	/**
 	 * Attempts to perform logout
 	 */
-	protected boolean performLogout() {
+	protected void performLogout() {
+		// Look for logout button or menu
+		final var logoutButtons = page.locator(
+			"vaadin-button:has-text('Logout'), a:has-text('Logout'), vaadin-menu-bar-button:has-text('Logout')");
 
-		try {
-			// Look for logout button or menu
-			final var logoutButtons = page.locator(
-				"vaadin-button:has-text('Logout'), a:has-text('Logout'), vaadin-menu-bar-button:has-text('Logout')");
+		if (logoutButtons.count() > 0) {
+			logoutButtons.first().click();
+			page.waitForTimeout(1000);
+			return;
+		}
+		// Alternative: look for user menu that might contain logout
+		final var userMenus =
+			page.locator("vaadin-menu-bar, [role='button']:has-text('User')");
 
-			if (logoutButtons.count() > 0) {
-				logoutButtons.first().click();
-				page.waitForTimeout(1000);
-				return true;
+		if (userMenus.count() > 0) {
+			userMenus.first().click();
+			page.waitForTimeout(500);
+			final var logoutInMenu =
+				page.locator("vaadin-menu-bar-item:has-text('Logout')");
+
+			if (logoutInMenu.count() > 0) {
+				logoutInMenu.click();
+				return;
 			}
-			// Alternative: look for user menu that might contain logout
-			final var userMenus =
-				page.locator("vaadin-menu-bar, [role='button']:has-text('User')");
-
-			if (userMenus.count() > 0) {
-				userMenus.first().click();
-				page.waitForTimeout(500);
-				final var logoutInMenu =
-					page.locator("vaadin-menu-bar-item:has-text('Logout')");
-
-				if (logoutInMenu.count() > 0) {
-					logoutInMenu.click();
-					return true;
-				}
-			}
-			return false;
-		} catch (final Exception e) {
-			LOGGER.warn("Logout attempt failed: {}", e.getMessage());
-			return false;
 		}
 	}
 	// ========== Additional Playwright Testing Utilities ==========
 
 	protected void performWorkflowInView(final Class<?> viewName) {
-
-		try {
-			LOGGER.info("Performing workflow in {} view...", viewName);
-
-			// Navigate to view by finding navigation elements
-			if (navigateToViewByClass(viewName)) {
-				LOGGER.info("✅ Workflow step completed for {} view", viewName);
-			}
-		} catch (final Exception e) {
-			LOGGER.warn("⚠️ Workflow failed in {} view: {}", viewName.getSimpleName(),
-				e.getMessage());
-			takeScreenshot("workflow-error-" + viewName.getSimpleName());
-		}
+		LOGGER.info("Performing workflow in {} view...", viewName);
+		// Navigate to view by finding navigation elements
+		navigateToViewByClass(viewName);
+		LOGGER.info("✅ Workflow step completed for {} view", viewName);
 	}
 
 	/**
@@ -704,7 +698,7 @@ public class CBaseUITest {
 
 		try {
 			LOGGER.info("Testing advanced grid interactions in {} view...", viewClass);
-			assertTrue(navigateToViewByClass(viewClass), "Should navigate to view");
+			navigateToViewByClass(viewClass);
 			gridClickCell(0);
 			gridClickSort();
 			LOGGER.info("✅ Advanced grid test completed for {} view", viewClass);
@@ -808,8 +802,7 @@ public class CBaseUITest {
 
 		try {
 			// Navigate to the view
-			assertTrue(navigateToViewByClass(viewClass), "Should navigate to view");
-			// Wait for grid to load
+			navigateToViewByClass(viewClass); // Wait for grid to load
 			wait_2000();
 			// Get all grid cells
 			final var gridCells = page.locator("vaadin-grid-cell-content");
@@ -902,14 +895,9 @@ public class CBaseUITest {
 	protected void testNavigationTo(final Class<?> class1, final Class<?> class2) {
 		LOGGER.info("🧪 Testing {} navigation...", class1.getSimpleName());
 		// Test navigation to Users
-		assertTrue(navigateToViewByClass(class1),
-			"Should navigate to view:" + class1.getSimpleName());
-
+		navigateToViewByClass(class1);
 		// Test navigation to related views
-		if (navigateToViewByClass(class2)) {
-			assertTrue(navigateToViewByClass(class1),
-				"Should navigate to view:" + class1.getSimpleName());
-		}
+		navigateToViewByClass(class2);
 		LOGGER.info("✅ {} navigation test completed", class1.getSimpleName());
 	}
 
@@ -943,7 +931,7 @@ public class CBaseUITest {
 
 		try {
 			// Navigate to the view
-			assertTrue(navigateToViewByClass(viewClass), "Should navigate to view");
+			navigateToViewByClass(viewClass);
 			// Check if search field exists (should be present for CSearchable entities)
 			final var searchFields = page.locator(
 				"vaadin-text-field[placeholder*='earch'], .search-toolbar vaadin-text-field");
@@ -1019,9 +1007,13 @@ public class CBaseUITest {
 
 		if (isBrowserAvailable()) {
 			wait_500();
-			page.waitForSelector("vaadin-app-layout",
+			page.waitForSelector("#main-layout",
 				new Page.WaitForSelectorOptions().setTimeout(10000));
+			LOGGER.debug("Application layout found after login");
+			return;
 		}
+		throw new RuntimeException(
+			"Login failed - application layout not found after login");
 	}
 
 	/**

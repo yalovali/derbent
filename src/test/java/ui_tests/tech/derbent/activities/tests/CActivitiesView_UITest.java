@@ -5,9 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.test.context.TestPropertySource;
 
 import tech.derbent.activities.view.CActivitiesView;
 import tech.derbent.projects.view.CProjectsView;
@@ -17,16 +14,8 @@ import ui_tests.tech.derbent.ui.automation.CBaseUITest;
  * CActivitiesViewPlaywrightTest - Comprehensive Playwright tests for the Activities view.
  * Tests all aspects of the Activities view including CRUD operations, grid interactions,
  * form validation, ComboBox selections, and UI behaviors following the strict coding
- * guidelines for Playwright testing. Improved version with: - Reduced logging (DEBUG
- * instead of INFO for routine operations) - Screenshots only on failures - Common utility
- * functions (clickNew, clickCancel, clickGrid) - Class annotation-based approach instead
- * of magic strings
+ * guidelines for Playwright testing.
  */
-@SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT)
-@TestPropertySource (properties = {
-	"spring.datasource.url=jdbc:h2:mem:testdb",
-	"spring.jpa.hibernate.ddl-auto=create-drop", "server.port=8080" }
-)
 public class CActivitiesView_UITest extends CBaseUITest {
 
 	private static final Logger LOGGER =
@@ -35,8 +24,7 @@ public class CActivitiesView_UITest extends CBaseUITest {
 	@Test
 	void testActivitiesAccessibility() {
 		LOGGER.debug("Testing Activities accessibility");
-		assertTrue(navigateToViewByClass(CActivitiesView.class),
-			"Should navigate to Activities view");
+		navigateToViewByClass(CActivitiesView.class);
 		testAccessibilityBasics("Activities");
 		LOGGER.debug("Activities accessibility test completed");
 	}
@@ -81,8 +69,7 @@ public class CActivitiesView_UITest extends CBaseUITest {
 	@Test
 	void testActivitiesCompleteWorkflow() {
 		LOGGER.debug("Testing Activities complete workflow");
-		assertTrue(navigateToViewByClass(CActivitiesView.class),
-			"Should navigate to Activities view");
+		navigateToViewByClass(CActivitiesView.class);
 		final int initialRowCount = getGridRowCount();
 		LOGGER.debug("Initial grid has {} rows", initialRowCount);
 		// Use common function to create new activity
@@ -110,8 +97,7 @@ public class CActivitiesView_UITest extends CBaseUITest {
 	@Test
 	void testActivitiesCRUDOperations() {
 		LOGGER.debug("Testing Activities CRUD operations");
-		assertTrue(navigateToViewByClass(CActivitiesView.class),
-			"Should navigate to Activities view");
+		navigateToViewByClass(CActivitiesView.class);
 		// Use the auxiliary CRUD testing method
 		testCRUDOperationsInView("Activities", "new-button", "save-button",
 			"delete-button");
@@ -121,8 +107,7 @@ public class CActivitiesView_UITest extends CBaseUITest {
 	@Test
 	void testActivitiesFormValidation() {
 		LOGGER.debug("Testing Activities form validation");
-		assertTrue(navigateToViewByClass(CActivitiesView.class),
-			"Should navigate to Activities view");
+		navigateToViewByClass(CActivitiesView.class);
 		// Use common function to open new form
 		clickNew();
 		// Test form validation using auxiliary method
@@ -135,8 +120,7 @@ public class CActivitiesView_UITest extends CBaseUITest {
 	@Test
 	void testActivitiesGridInteractions() {
 		LOGGER.debug("Testing Activities grid interactions");
-		assertTrue(navigateToViewByClass(CActivitiesView.class),
-			"Should navigate to Activities view");
+		navigateToViewByClass(CActivitiesView.class);
 		final int gridRowCount = getGridRowCount();
 		LOGGER.debug("Grid has {} rows", gridRowCount);
 

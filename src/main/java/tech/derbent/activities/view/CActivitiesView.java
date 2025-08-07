@@ -15,14 +15,14 @@ import tech.derbent.comments.view.CPanelActivityComments;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 
-@Route ("activities/:activity_id?/:action?(edit)")
+@Route ("cactivitiesview/:activity_id?/:action?(edit)")
 @PageTitle ("Activity Master Detail")
 @Menu (
 	order = 1.1, icon = "class:tech.derbent.activities.view.CActivitiesView",
 	title = "Project.Activities"
 )
 @PermitAll // When security is enabled, allow all authenticated users
-public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
+public final class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -34,7 +34,7 @@ public class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 
 	private final String ENTITY_ID_FIELD = "activity_id";
 
-	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "activities/%s/edit";
+	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "cactivitiesview/%s/edit";
 
 	private final CCommentService commentService;
 

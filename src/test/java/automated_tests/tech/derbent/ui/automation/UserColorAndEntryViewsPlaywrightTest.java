@@ -30,12 +30,15 @@ import ui_tests.tech.derbent.ui.automation.CBaseUITest;
  * Color-aware ComboBox components work properly 5. Entry forms show status and type
  * fields properly
  */
-@SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT, classes = tech.derbent.Application.class)
+@SpringBootTest (
+	webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class
+)
 @TestPropertySource (properties = {
+	"spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa",
+	"spring.datasource.password=", "spring.datasource.driver-class-name=org.h2.Driver",
 	"spring.datasource.url=jdbc:h2:mem:testdb",
-	"spring.jpa.hibernate.ddl-auto=create-drop",
-	"spring.profiles.active=test"
-})
+	"spring.jpa.hibernate.ddl-auto=create-drop", "server.port=8080" }
+)
 public class UserColorAndEntryViewsPlaywrightTest extends CBaseUITest {
 
 	private static final Logger LOGGER =
@@ -85,8 +88,7 @@ public class UserColorAndEntryViewsPlaywrightTest extends CBaseUITest {
 		// Test in multiple views that use ComboBoxes
 		for (final Class<?> view : entryViews) {
 			LOGGER.info("Testing ComboBox functionality in: {}", view.getSimpleName());
-			assertTrue(navigateToViewByClass(view),
-				"Should navigate to " + view.getSimpleName());
+			navigateToViewByClass(view);
 			waitForGridLoad();
 			// Open new entry form
 			clickNew();
@@ -152,10 +154,9 @@ public class UserColorAndEntryViewsPlaywrightTest extends CBaseUITest {
 		}
 
 		// Test accessibility in status views which have the most color usage
-		for (final Class<?> statusView : statusViews) {
-			LOGGER.info("Testing accessibility in: {}", statusView.getSimpleName());
-			assertTrue(navigateToViewByClass(statusView),
-				"Should navigate to " + statusView.getSimpleName());
+		for (final Class<?> view : statusViews) {
+			LOGGER.info("Testing accessibility in: {}", view.getSimpleName());
+			navigateToViewByClass(view);
 			waitForGridLoad();
 			// Check for proper ARIA labels and roles
 			final boolean hasAriaLabels = page.locator("[aria-label]").count() > 0;
@@ -163,26 +164,26 @@ public class UserColorAndEntryViewsPlaywrightTest extends CBaseUITest {
 
 			if (hasAriaLabels) {
 				LOGGER.info("✅ {} has ARIA labels for accessibility",
-					statusView.getSimpleName());
+					view.getSimpleName());
 			}
 
 			if (hasRoles) {
 				LOGGER.info("✅ {} has role attributes for accessibility",
-					statusView.getSimpleName());
+					view.getSimpleName());
 			}
 			// Check for keyboard navigation support
 			final boolean hasTabableElements =
 				page.locator("[tabindex], button, input, select, textarea, [href]")
 					.count() > 0;
 			assertTrue(hasTabableElements,
-				statusView.getSimpleName() + " should have keyboard navigable elements");
+				view.getSimpleName() + " should have keyboard navigable elements");
 			// Verify grid accessibility
 			final boolean hasGridRole =
 				page.locator("vaadin-grid[role='grid']").count() > 0;
 
 			if (hasGridRole) {
 				LOGGER.info("✅ {} has proper grid accessibility attributes",
-					statusView.getSimpleName());
+					view.getSimpleName());
 			}
 		}
 		LOGGER.info("✅ Color contrast and accessibility test completed");
@@ -198,17 +199,9 @@ public class UserColorAndEntryViewsPlaywrightTest extends CBaseUITest {
 		}
 		// Complete workflow: Users -> Projects -> Activities with color validation 1.
 		// Start with Users view
-		assertTrue(navigateToViewByClass(CUsersView.class), "Should navigate to Users");
-		waitForGridLoad();
-		LOGGER.info("✅ Step 1: Accessed Users view");
-		// 2. Navigate to Projects view
-		assertTrue(navigateToViewByClass(CProjectsView.class),
-			"Should navigate to Projects");
-		waitForGridLoad();
-		LOGGER.info("✅ Step 2: Accessed Projects view");
-		// 3. Navigate to Activities view
-		assertTrue(navigateToViewByClass(CActivitiesView.class),
-			"Should navigate to Activities");
+		navigateToViewByClass(CUsersView.class);
+		navigateToViewByClass(CProjectsView.class);
+		navigateToViewByClass(CActivitiesView.class);
 		waitForGridLoad();
 		LOGGER.info("✅ Step 3: Accessed Activities view");
 		// 4. Test creating new activity with user assignment
@@ -254,8 +247,7 @@ public class UserColorAndEntryViewsPlaywrightTest extends CBaseUITest {
 		// Test each main entry view
 		for (final Class<?> entryView : entryViews) {
 			LOGGER.info("Testing entry view: {}", entryView.getSimpleName());
-			assertTrue(navigateToViewByClass(entryView),
-				"Should navigate to " + entryView.getSimpleName());
+			navigateToViewByClass(entryView);
 			waitForGridLoad();
 			// Test creating a new entry to check status/type fields
 			clickNew();
@@ -321,8 +313,7 @@ public class UserColorAndEntryViewsPlaywrightTest extends CBaseUITest {
 		// Test each status view
 		for (final Class<?> statusView : statusViews) {
 			LOGGER.info("Testing status view: {}", statusView.getSimpleName());
-			assertTrue(navigateToViewByClass(statusView),
-				"Should navigate to " + statusView.getSimpleName());
+			navigateToViewByClass(statusView);
 			waitForGridLoad();
 			// Check for status column with color rendering
 			final boolean hasStatusColumn =
@@ -391,8 +382,7 @@ public class UserColorAndEntryViewsPlaywrightTest extends CBaseUITest {
 		// Test each type view
 		for (final Class<?> typeView : typeViews) {
 			LOGGER.info("Testing type view: {}", typeView.getSimpleName());
-			assertTrue(navigateToViewByClass(typeView),
-				"Should navigate to " + typeView.getSimpleName());
+			navigateToViewByClass(typeView);
 			waitForGridLoad();
 			// Check for type column with color rendering
 			final boolean hasTypeColumn = page.locator("vaadin-grid-column").count() > 0;
@@ -454,8 +444,7 @@ public class UserColorAndEntryViewsPlaywrightTest extends CBaseUITest {
 			return;
 		}
 		// Navigate to Users view to test user color functionality
-		assertTrue(navigateToViewByClass(CUsersView.class),
-			"Should navigate to Users view");
+		navigateToViewByClass(CUsersView.class);
 		// Check if user grid displays properly with color-aware components
 		waitForGridLoad();
 		// Verify color-aware user display (profile pictures, status indicators)

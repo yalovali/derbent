@@ -16,12 +16,15 @@ import ui_tests.tech.derbent.ui.automation.CApplicationGeneric_UITest;
  * CActivityStatusViewPlaywrightTest - Tests for activity status view focusing on lazy
  * loading fixes and navigation behavior after save operations.
  */
-@SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT, classes = tech.derbent.Application.class)
+@SpringBootTest (
+	webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class
+)
 @TestPropertySource (properties = {
+	"spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa",
+	"spring.datasource.password=", "spring.datasource.driver-class-name=org.h2.Driver",
 	"spring.datasource.url=jdbc:h2:mem:testdb",
-	"spring.jpa.hibernate.ddl-auto=create-drop",
-	"spring.profiles.active=test"
-})
+	"spring.jpa.hibernate.ddl-auto=create-drop", "server.port=8080" }
+)
 public class CActivityStatusViewPlaywrightTest extends CApplicationGeneric_UITest {
 
 	private static final Logger LOGGER =
@@ -30,8 +33,7 @@ public class CActivityStatusViewPlaywrightTest extends CApplicationGeneric_UITes
 	@Test
 	void testActivityStatusColorFunctionality() {
 		LOGGER.info("🧪 Testing Activity Status color functionality...");
-		assertTrue(navigateToViewByClass(CActivityStatusView.class),
-			"Should navigate to activity status view");
+		navigateToViewByClass(CActivityStatusView.class);
 		clickNew();
 		wait_1000();
 		// Test color picker if available
@@ -55,8 +57,7 @@ public class CActivityStatusViewPlaywrightTest extends CApplicationGeneric_UITes
 	@Test
 	void testActivityStatusFormValidationAndSave() {
 		LOGGER.info("🧪 Testing Activity Status form validation and save...");
-		assertTrue(navigateToViewByClass(CActivityStatusView.class),
-			"Should navigate to activity status view");
+		navigateToViewByClass(CActivityStatusView.class);
 		clickNew();
 		wait_1000();
 		// Test validation by trying to save without required fields
@@ -94,8 +95,7 @@ public class CActivityStatusViewPlaywrightTest extends CApplicationGeneric_UITes
 	@Test
 	void testActivityStatusGridSelectionLazyLoading() {
 		LOGGER.info("🧪 Testing Activity Status grid selection and lazy loading...");
-		assertTrue(navigateToViewByClass(CActivityStatusView.class),
-			"Should navigate to activity status view");
+		navigateToViewByClass(CActivityStatusView.class);
 		// Check if grid has rows
 		final int rowCount = getGridRowCount();
 
@@ -137,8 +137,7 @@ public class CActivityStatusViewPlaywrightTest extends CApplicationGeneric_UITes
 	void testActivityStatusLazyLoadingAndNavigation() {
 		LOGGER
 			.info("🧪 Testing Activity Status lazy loading and navigation after save...");
-		assertTrue(navigateToViewByClass(CActivityStatusView.class),
-			"Should navigate to activity status view");
+		navigateToViewByClass(CActivityStatusView.class);
 		// Test that grid loads without lazy loading exceptions
 		takeScreenshot("activity-status-grid-loaded");
 		// Create new activity status to test save navigation

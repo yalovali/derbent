@@ -172,9 +172,6 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			processedComponents = processMetaForField(binder, dataProvider, formLayout,
 				processedComponents, field);
 		}
-		LOGGER.info(
-			"Form generation completed. Successfully processed {} out of {} components",
-			processedComponents, sortedFields.size());
 		panel.add(formLayout);
 		return panel;
 	}
@@ -215,7 +212,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 					meta.defaultValue(), field.getName(), e.getMessage());
 			}
 		}
-		
+
 		try {
 			final String propertyName = getPropertyName(field);
 			binder.forField(numberField)
@@ -666,9 +663,10 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		final Class<?> fieldType = field.getType();
 
 		try {
-			// Get property name first to ensure it's valid before starting forField binding
+			// Get property name first to ensure it's valid before starting forField
+			// binding
 			final String propertyName = getPropertyName(field);
-			
+
 			if ((fieldType == Integer.class) || (fieldType == int.class)) {
 				binder.forField(numberField)
 					.withConverter(value -> value != null ? value.intValue() : null,

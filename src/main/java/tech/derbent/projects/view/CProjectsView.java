@@ -2,7 +2,6 @@ package tech.derbent.projects.view;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +26,7 @@ import tech.derbent.users.service.CUserService;
  * CProjectsView - View for managing projects. Layer: View (MVC) Provides CRUD operations
  * for projects using the abstract master-detail pattern.
  */
-@Route ("projects/:project_id?/:action?(edit)")
+@Route ("cprojectsview/:project_id?/:action?(edit)")
 @PageTitle ("Project Master Detail")
 @Menu (
 	order = 1.1, icon = "class:tech.derbent.projects.view.CProjectsView",
@@ -47,7 +46,7 @@ public class CProjectsView extends CAbstractNamedEntityPage<CProject>
 
 	private final String ENTITY_ID_FIELD = "project_id";
 
-	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "projects/%s/edit";
+	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "cprojectsview/%s/edit";
 
 	private CPanelProjectUsers projectUsersPanel;
 
@@ -62,7 +61,6 @@ public class CProjectsView extends CAbstractNamedEntityPage<CProject>
 		super(CProject.class, entityService, sessionService);
 		this.userService = userService;
 		this.userProjectSettingsService = userProjectSettingsService;
-		addClassNames("projects-view");
 		LOGGER.info("CProjectsView initialized successfully");
 	}
 
@@ -132,9 +130,6 @@ public class CProjectsView extends CAbstractNamedEntityPage<CProject>
 			projectUsersPanel.setCurrentProject(null);
 			final Supplier<List<CUserProjectSettings>> supplier =
 				() -> Collections.emptyList();
-			final Consumer<List<CUserProjectSettings>> consumer = users -> {
-				// Do nothing
-			};
 			final Runnable runnable = () -> {
 				// Do nothing
 			};

@@ -1,7 +1,5 @@
 package automated_tests.tech.derbent.meetings.tests;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,12 +17,15 @@ import ui_tests.tech.derbent.ui.automation.CApplicationGeneric_UITest;
  * form validation, ComboBox selections, and UI behaviors following the strict coding
  * guidelines for Playwright testing.
  */
-@SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT, classes = tech.derbent.Application.class)
+@SpringBootTest (
+	webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class
+)
 @TestPropertySource (properties = {
+	"spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa",
+	"spring.datasource.password=", "spring.datasource.driver-class-name=org.h2.Driver",
 	"spring.datasource.url=jdbc:h2:mem:testdb",
-	"spring.jpa.hibernate.ddl-auto=create-drop",
-	"spring.profiles.active=test"
-})
+	"spring.jpa.hibernate.ddl-auto=create-drop", "server.port=8080" }
+)
 public class CMeetingsViewPlaywrightTest extends CApplicationGeneric_UITest {
 
 	private static final Logger LOGGER =
@@ -33,7 +34,7 @@ public class CMeetingsViewPlaywrightTest extends CApplicationGeneric_UITest {
 	@Test
 	void testMeetingsComboBoxes() {
 		LOGGER.info("🧪 Testing Meetings ComboBox components...");
-		assertTrue(navigateToViewByClass(CMeetingsView.class), "Should navigate to view");
+		navigateToViewByClass(CMeetingsView.class);
 		// Open new meeting form
 		final var newButtons =
 			page.locator("vaadin-button:has-text('New'), vaadin-button:has-text('Add')");
@@ -90,8 +91,7 @@ public class CMeetingsViewPlaywrightTest extends CApplicationGeneric_UITest {
 	@Test
 	void testMeetingsCompleteWorkflow() {
 		LOGGER.info("🧪 Testing Meetings complete workflow...");
-		assertTrue(navigateToViewByClass(CMeetingsView.class),
-			"Should navigate to Activities view");
+		navigateToViewByClass(CMeetingsView.class);
 		// Test complete workflow: navigate -> view grid -> create new -> fill form ->
 		// save -> view result
 		final int initialRowCount = getGridRowCount();
@@ -148,7 +148,7 @@ public class CMeetingsViewPlaywrightTest extends CApplicationGeneric_UITest {
 	@Test
 	void testMeetingsCRUDOperations() {
 		LOGGER.info("🧪 Testing Meetings CRUD operations...");
-		assertTrue(navigateToViewByClass(CMeetingsView.class), "Should navigate to view");
+		navigateToViewByClass(CMeetingsView.class);
 		// Use the auxiliary CRUD testing method
 		testCRUDOperationsInView("Meetings", "new-button", "save-button",
 			"delete-button");
@@ -158,7 +158,7 @@ public class CMeetingsViewPlaywrightTest extends CApplicationGeneric_UITest {
 	@Test
 	void testMeetingsDateTimeHandling() {
 		LOGGER.info("🧪 Testing Meetings date/time handling...");
-		assertTrue(navigateToViewByClass(CMeetingsView.class), "Should navigate to view");
+		navigateToViewByClass(CMeetingsView.class);
 		clickNew(); // Open new meeting form
 		// Test date pickers
 		final var datePickers = page.locator("vaadin-date-picker");
@@ -194,7 +194,7 @@ public class CMeetingsViewPlaywrightTest extends CApplicationGeneric_UITest {
 	@Test
 	void testMeetingsFormValidation() {
 		LOGGER.info("🧪 Testing Meetings form validation...");
-		assertTrue(navigateToViewByClass(CMeetingsView.class), "Should navigate to view");
+		navigateToViewByClass(CMeetingsView.class);
 		clickNew();
 		testFormValidationById("save-button");
 		takeScreenshot("meetings-form-validation");

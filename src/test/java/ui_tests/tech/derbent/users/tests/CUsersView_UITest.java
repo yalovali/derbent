@@ -7,9 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.test.context.TestPropertySource;
 
 import tech.derbent.projects.view.CProjectsView;
 import tech.derbent.users.view.CUsersView;
@@ -21,11 +18,6 @@ import ui_tests.tech.derbent.ui.automation.CBaseUITest;
  * validation, ComboBox selections, and UI behaviors following the strict coding
  * guidelines for Playwright testing.
  */
-@SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT)
-@TestPropertySource (properties = {
-	"spring.datasource.url=jdbc:h2:mem:testdb",
-	"spring.jpa.hibernate.ddl-auto=create-drop", "server.port=8080" }
-)
 public class CUsersView_UITest extends CBaseUITest {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUsersView_UITest.class);
@@ -33,7 +25,7 @@ public class CUsersView_UITest extends CBaseUITest {
 	@Test
 	void testUsersComboBoxes() {
 		LOGGER.info("🧪 Testing Users ComboBox components...");
-		assertTrue(navigateToViewByClass(CUsersView.class), "Should navigate to view");
+		navigateToViewByClass(CUsersView.class);
 		clickNew();
 		// Test User Role ComboBox
 		final var comboBoxes = page.locator("vaadin-combo-box");
@@ -88,7 +80,7 @@ public class CUsersView_UITest extends CBaseUITest {
 	@Test
 	void testUsersCompleteWorkflow() {
 		LOGGER.info("🧪 Testing Users complete workflow...");
-		assertTrue(navigateToViewByClass(CUsersView.class), "Should navigate to view");
+		navigateToViewByClass(CUsersView.class);
 		LOGGER.debug("Initial grid has {} rows", getGridRowCount());
 		// Create new user
 		clickNew();
@@ -124,16 +116,24 @@ public class CUsersView_UITest extends CBaseUITest {
 	@Test
 	void testUsersCRUDOperations() {
 		LOGGER.info("🧪 Testing Users CRUD operations...");
-		assertTrue(navigateToViewByClass(CUsersView.class), "Should navigate to view");
+		navigateToViewByClass(CUsersView.class);
 		// Use the auxiliary CRUD testing method
 		testCRUDOperationsInView("Users", "new-button", "save-button", "delete-button");
 		LOGGER.info("✅ Users CRUD operations test completed");
 	}
 
 	@Test
+	void testUsersEntityRelationGrid() {
+		LOGGER.info("🧪 Testing Users entity relation grid display...");
+		// Test that user type, company, and other relations are displayed in grid
+		testEntityRelationGrid(CUsersView.class);
+		LOGGER.info("✅ Users entity relation grid test completed");
+	}
+
+	@Test
 	void testUsersFormValidation() {
 		LOGGER.info("🧪 Testing Users form validation...");
-		assertTrue(navigateToViewByClass(CUsersView.class), "Should navigate to view");
+		navigateToViewByClass(CUsersView.class);
 		// Try to create new user
 		clickNew();
 		final boolean validationWorking = testFormValidationById("save-button");
@@ -156,19 +156,18 @@ public class CUsersView_UITest extends CBaseUITest {
 	void testUsersGridInteractions() {
 		LOGGER.info("🧪 Testing Users grid interactions...");
 		testAdvancedGridInView(CUsersView.class);
-		
 		// Additional grid interaction testing for users
-		assertTrue(navigateToViewByClass(CUsersView.class), "Should navigate to view");
-		
+		navigateToViewByClass(CUsersView.class);
 		// Test grid selection changes
 		final int gridRowCount = getGridRowCount();
+
 		if (gridRowCount > 0) {
 			LOGGER.debug("Testing grid selection with {} rows", gridRowCount);
 			clickGrid(0); // Select first row
 			wait_500();
-			
 			// Test that selection triggers form population
 			final var textFields = page.locator("vaadin-text-field");
+
 			if (textFields.count() > 0) {
 				final String firstFieldValue = textFields.first().inputValue();
 				LOGGER.debug("First field populated with: {}", firstFieldValue);
@@ -176,7 +175,6 @@ public class CUsersView_UITest extends CBaseUITest {
 					"Grid selection should populate form fields");
 			}
 		}
-		
 		LOGGER.info("✅ Users grid interactions test completed");
 	}
 
@@ -188,7 +186,7 @@ public class CUsersView_UITest extends CBaseUITest {
 	@Test
 	void testUsersProfilePictureDisplay() {
 		LOGGER.info("🧪 Testing Users profile picture display in grid...");
-		assertTrue(navigateToViewByClass(CUsersView.class), "Should navigate to view");
+		navigateToViewByClass(CUsersView.class);
 		// Wait for grid to load
 		wait_2000();
 		// Check if profile pictures are displayed in the grid
@@ -213,7 +211,7 @@ public class CUsersView_UITest extends CBaseUITest {
 	@Test
 	void testUsersProfilePictureHandling() {
 		LOGGER.info("🧪 Testing Users profile picture handling...");
-		assertTrue(navigateToViewByClass(CUsersView.class), "Should navigate to view");
+		navigateToViewByClass(CUsersView.class);
 		// Check if profile pictures are displayed in the grid
 		final var profileImages = page.locator("vaadin-grid img");
 
@@ -239,13 +237,5 @@ public class CUsersView_UITest extends CBaseUITest {
 		// Test search with common user fields
 		testSearchFunctionality(CUsersView.class, "admin");
 		LOGGER.info("✅ Users search functionality test completed");
-	}
-
-	@Test
-	void testUsersEntityRelationGrid() {
-		LOGGER.info("🧪 Testing Users entity relation grid display...");
-		// Test that user type, company, and other relations are displayed in grid
-		testEntityRelationGrid(CUsersView.class);
-		LOGGER.info("✅ Users entity relation grid test completed");
 	}
 }

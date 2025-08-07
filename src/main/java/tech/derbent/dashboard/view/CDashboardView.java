@@ -22,8 +22,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.views.CAbstractPage;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
+import tech.derbent.abstracts.views.CAbstractPage;
 import tech.derbent.activities.service.CActivityService;
 import tech.derbent.base.ui.dialogs.CExceptionDialog;
 import tech.derbent.projects.domain.CProject;
@@ -37,9 +37,11 @@ import tech.derbent.users.service.CUserService;
  * Displays total projects, users per project, and activities per project. Provides a
  * comprehensive overview of the system's current state.
  */
-@Route ("dashboard")
+@Route ("cdashboardview")
 @PageTitle ("Home")
-@Menu (order = 0, icon = "class:tech.derbent.dashboard.view.CDashboardView", title = "Home")
+@Menu (
+	order = 0, icon = "class:tech.derbent.dashboard.view.CDashboardView", title = "Home"
+)
 @PermitAll
 public final class CDashboardView extends CAbstractPage implements CInterfaceIconSet {
 

@@ -11,9 +11,9 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
-import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.decisions.domain.CDecision;
 import tech.derbent.decisions.service.CDecisionService;
 import tech.derbent.projects.domain.CProject;
@@ -25,11 +25,15 @@ import tech.derbent.session.service.CSessionService;
  * CActivitiesView. Includes grid listing, detail editing, and comprehensive panel
  * organization.
  */
-@Route ("decisions/:decision_id?/:action?(edit)")
+@Route ("cdecisionsview/:decision_id?/:action?(edit)")
 @PageTitle ("Decision Master Detail")
-@Menu (order = 1.5, icon = "class:tech.derbent.decisions.view.CDecisionsView", title = "Project.Decisions")
+@Menu (
+	order = 1.5, icon = "class:tech.derbent.decisions.view.CDecisionsView",
+	title = "Project.Decisions"
+)
 @PermitAll // When security is enabled, allow all authenticated users
-public class CDecisionsView extends CProjectAwareMDPage<CDecision> implements CInterfaceIconSet {
+public class CDecisionsView extends CProjectAwareMDPage<CDecision>
+	implements CInterfaceIconSet {
 
 	private static final long serialVersionUID = 1L;
 
@@ -41,7 +45,7 @@ public class CDecisionsView extends CProjectAwareMDPage<CDecision> implements CI
 
 	private final String ENTITY_ID_FIELD = "decision_id";
 
-	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "decisions/%s/edit";
+	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "cdecisionsview/%s/edit";
 
 	/**
 	 * Constructor for decisions view.
@@ -51,7 +55,6 @@ public class CDecisionsView extends CProjectAwareMDPage<CDecision> implements CI
 	public CDecisionsView(final CDecisionService entityService,
 		final CSessionService sessionService) {
 		super(CDecision.class, entityService, sessionService);
-		addClassNames("decisions-view");
 	}
 
 	/**

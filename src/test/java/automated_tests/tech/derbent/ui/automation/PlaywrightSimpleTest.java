@@ -24,11 +24,13 @@ import ui_tests.tech.derbent.ui.automation.CBaseUITest;
  * setup to avoid browser download issues
  */
 @SpringBootTest (
-	webEnvironment = WebEnvironment.RANDOM_PORT, classes = tech.derbent.Application.class
+	webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class
 )
 @TestPropertySource (properties = {
+	"spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa",
+	"spring.datasource.password=", "spring.datasource.driver-class-name=org.h2.Driver",
 	"spring.datasource.url=jdbc:h2:mem:testdb",
-	"spring.jpa.hibernate.ddl-auto=create-drop", "spring.profiles.active=test" }
+	"spring.jpa.hibernate.ddl-auto=create-drop", "server.port=8080" }
 )
 public class PlaywrightSimpleTest extends CBaseUITest {
 

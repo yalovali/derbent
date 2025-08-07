@@ -27,7 +27,7 @@ import tech.derbent.users.service.CUserProjectSettingsService;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.CUserTypeService;
 
-@Route ("users/:user_id?/:action?(edit)")
+@Route ("cusersview/:user_id?/:action?(edit)")
 @PageTitle ("User Master Detail")
 @Menu (
 	order = 3.2, icon = "class:tech.derbent.users.view.CUsersView",
@@ -47,7 +47,7 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser>
 
 	private final String ENTITY_ID_FIELD = "user_id";
 
-	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "users/%s/edit";
+	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "cusersview/%s/edit";
 
 	private CPanelUserProjectSettings projectSettingsGrid;
 

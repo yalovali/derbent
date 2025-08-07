@@ -51,7 +51,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	// Search functionality
 	protected CSearchToolbar searchToolbar;
-	
+
 	private String currentSearchText = "";
 
 	// divide screen into two parts
@@ -81,6 +81,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		this.entityClass = entityClass;
 		this.entityService = entityService;
 		this.sessionService = sessionService;
+		// dont setid here, as it may not be initialized yet
 		binder = new CEnhancedBinder<>(entityClass);
 		addClassNames("md-page");
 		setSizeFull();
@@ -229,7 +230,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	}
 
 	protected CButton createDeleteButton(final String buttonText) {
-		LOGGER.info("Creating delete button for {}", getClass().getSimpleName());
 		final CButton delete = CButton.createTertiary(buttonText);
 		delete.addClickListener(e -> {
 
@@ -324,20 +324,23 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		grid = new CGrid<>(entityClass);
 		grid.getColumns().forEach(grid::removeColumn);
 		grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
-		
+
 		// Create search toolbar if entity supports searching
 		if (CSearchable.class.isAssignableFrom(entityClass)) {
-			searchToolbar = new CSearchToolbar("Search " + entityClass.getSimpleName().replace("C", "").toLowerCase() + "...");
+			searchToolbar = new CSearchToolbar("Search "
+				+ entityClass.getSimpleName().replace("C", "").toLowerCase() + "...");
 			searchToolbar.addSearchListener(event -> {
 				currentSearchText = event.getSearchText();
 				refreshGrid();
 			});
 		}
-		
-		// Use a custom data provider that properly handles pagination, sorting and searching
+		// Use a custom data provider that properly handles pagination, sorting and
+		// searching
 		grid.setItems(query -> {
-			LOGGER.debug("Grid query - offset: {}, limit: {}, sortOrders: {}, searchText: '{}'",
-				query.getOffset(), query.getLimit(), query.getSortOrders(), currentSearchText);
+			LOGGER.debug(
+				"Grid query - offset: {}, limit: {}, sortOrders: {}, searchText: '{}'",
+				query.getOffset(), query.getLimit(), query.getSortOrders(),
+				currentSearchText);
 
 			try {
 				// Convert Vaadin query to Spring Pageable using VaadinSpringDataHelpers
@@ -350,13 +353,15 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				LOGGER.debug("Safe Pageable - pageNumber: {}, pageSize: {}, sort: {}",
 					safePageable.getPageNumber(), safePageable.getPageSize(),
 					safePageable.getSort());
-				
-				// Use search-enabled list method if search text is provided and entity is searchable
+				// Use search-enabled list method if search text is provided and entity is
+				// searchable
 				final java.util.List<EntityClass> result;
-				if ((currentSearchText != null) && !currentSearchText.trim().isEmpty() 
-						&& CSearchable.class.isAssignableFrom(entityClass)) {
+
+				if ((currentSearchText != null) && !currentSearchText.trim().isEmpty()
+					&& CSearchable.class.isAssignableFrom(entityClass)) {
 					result = entityService.list(safePageable, currentSearchText);
-				} else {
+				}
+				else {
 					result = entityService.list(safePageable);
 				}
 				LOGGER.debug("Data provider returned {} items", result.size());
@@ -385,28 +390,24 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 					event.getValue().getId());
 			}
 		});
-		
 		// Create the grid container with search toolbar
 		final VerticalLayout gridContainer = new VerticalLayout();
 		gridContainer.setClassName("grid-container");
 		gridContainer.setPadding(false);
 		gridContainer.setSpacing(false);
-		
+
 		// Add search toolbar if available
 		if (searchToolbar != null) {
 			gridContainer.add(searchToolbar);
 		}
-		
 		gridContainer.add(grid);
 		gridContainer.setFlexGrow(1, grid);
-		
 		splitLayout.addToPrimary(gridContainer);
 		// Auto-select first item if available after grid is set up
 		// selectFirstItemIfAvailable();
 	}
 
 	protected CButton createNewButton(final String buttonText) {
-		LOGGER.info("Creating new button for {}", getClass().getSimpleName());
 		final CButton newButton = CButton.createTertiary(buttonText, e -> {
 			LOGGER.debug("New button clicked, emptying bound fields");
 
@@ -430,7 +431,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	}
 
 	protected CButton createSaveButton(final String buttonText) {
-		LOGGER.info("Creating save button for {}", getClass().getSimpleName());
 		final CButton save = CButton.createPrimary(buttonText, e -> {
 
 			try {
@@ -510,6 +510,14 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		baseDetailsLayout.setJustifyContentMode(FlexLayout.JustifyContentMode.START);
 	}
 
+	@PostConstruct
+	protected void initPageId() {
+		// set page ID in this syntax to check with playwright tests
+		final String pageid = this.getClass().getSimpleName().toLowerCase();
+		super.setId("pageid-" + pageid);
+		super.addClassNames("class-" + pageid);
+	}
+
 	private void initSplitLayout(final VerticalLayout detailsBase) {
 		splitLayout.setSizeFull();
 		splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
@@ -520,7 +528,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	// this method is called when the page is attached to the UI
 	@Override
 	protected void onAttach(final AttachEvent attachEvent) {
-		LOGGER.debug("onAttach called for {}", getClass().getSimpleName());
 		super.onAttach(attachEvent);
 
 		// Register for layout change notifications if service is available
@@ -682,6 +689,12 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	public void setCurrentEntity(final EntityClass currentEntity) {
 		LOGGER.debug("Setting current entity: {}", currentEntity);
 		this.currentEntity = currentEntity;
+	}
+
+	@Override
+	public void setId(final String id) {
+		throw new UnsupportedOperationException(
+			"Use initPageId instead to set page ID for testing purposes");
 	}
 
 	/**

@@ -20,7 +20,7 @@ import tech.derbent.session.service.CSessionService;
  * Manages different priority levels that comments can have to categorize their
  * importance.
  */
-@Route ("comment-priorities/:ccommentpriority_id?/:action?(edit)")
+@Route ("ccommentpriorityview/:ccommentpriority_id?/:action?(edit)")
 @PageTitle ("Comment Priorities")
 @Menu (
 	order = 12.1, icon = "class:tech.derbent.comments.view.CCommentPriorityView",
@@ -40,7 +40,7 @@ public class CCommentPriorityView extends CProjectAwareMDPage<CCommentPriority> 
 
 	private final String ENTITY_ID_FIELD = "ccommentpriority_id";
 
-	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "comment-priorities/%s/edit";
+	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "ccommentpriorityview/%s/edit";
 
 	/**
 	 * Constructor for CCommentPriorityView.

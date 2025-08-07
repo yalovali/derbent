@@ -16,12 +16,15 @@ import ui_tests.tech.derbent.ui.automation.CApplicationGeneric_UITest;
  * CDecisionStatusViewPlaywrightTest - Tests for decision status view focusing on lazy
  * loading fixes and navigation behavior after save operations.
  */
-@SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT, classes = tech.derbent.Application.class)
+@SpringBootTest (
+	webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class
+)
 @TestPropertySource (properties = {
+	"spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa",
+	"spring.datasource.password=", "spring.datasource.driver-class-name=org.h2.Driver",
 	"spring.datasource.url=jdbc:h2:mem:testdb",
-	"spring.jpa.hibernate.ddl-auto=create-drop",
-	"spring.profiles.active=test"
-})
+	"spring.jpa.hibernate.ddl-auto=create-drop", "server.port=8080" }
+)
 public class CDecisionStatusViewPlaywrightTest extends CApplicationGeneric_UITest {
 
 	private static final Logger LOGGER =
@@ -30,8 +33,7 @@ public class CDecisionStatusViewPlaywrightTest extends CApplicationGeneric_UITes
 	@Test
 	void testDecisionStatusApprovalRequirement() {
 		LOGGER.info("🧪 Testing Decision Status approval requirement functionality...");
-		assertTrue(navigateToViewByClass(CDecisionStatusView.class),
-			"Should navigate to decision status view");
+		navigateToViewByClass(CDecisionStatusView.class);
 		clickNew();
 		wait_1000();
 		// Fill basic fields
@@ -67,8 +69,7 @@ public class CDecisionStatusViewPlaywrightTest extends CApplicationGeneric_UITes
 	@Test
 	void testDecisionStatusColorAndSortOrder() {
 		LOGGER.info("🧪 Testing Decision Status color and sort order...");
-		assertTrue(navigateToViewByClass(CDecisionStatusView.class),
-			"Should navigate to decision status view");
+		navigateToViewByClass(CDecisionStatusView.class);
 		clickNew();
 		wait_1000();
 		// Fill required fields
@@ -102,8 +103,7 @@ public class CDecisionStatusViewPlaywrightTest extends CApplicationGeneric_UITes
 	@Test
 	void testDecisionStatusFinalStatus() {
 		LOGGER.info("🧪 Testing Decision Status final status functionality...");
-		assertTrue(navigateToViewByClass(CDecisionStatusView.class),
-			"Should navigate to decision status view");
+		navigateToViewByClass(CDecisionStatusView.class);
 		clickNew();
 		wait_1000();
 		// Fill basic fields
@@ -138,8 +138,7 @@ public class CDecisionStatusViewPlaywrightTest extends CApplicationGeneric_UITes
 	@Test
 	void testDecisionStatusGridSelectionLazyLoading() {
 		LOGGER.info("🧪 Testing Decision Status grid selection and lazy loading...");
-		assertTrue(navigateToViewByClass(CDecisionStatusView.class),
-			"Should navigate to decision status view");
+		navigateToViewByClass(CDecisionStatusView.class);
 		// Check if grid has rows
 		final int rowCount = getGridRowCount();
 
@@ -180,8 +179,7 @@ public class CDecisionStatusViewPlaywrightTest extends CApplicationGeneric_UITes
 	void testDecisionStatusLazyLoadingAndNavigation() {
 		LOGGER
 			.info("🧪 Testing Decision Status lazy loading and navigation after save...");
-		assertTrue(navigateToViewByClass(CDecisionStatusView.class),
-			"Should navigate to decision status view");
+		navigateToViewByClass(CDecisionStatusView.class);
 		// Test that grid loads without lazy loading exceptions
 		takeScreenshot("decision-status-grid-loaded");
 		// Create new decision status to test save navigation

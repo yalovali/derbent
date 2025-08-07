@@ -90,6 +90,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		this.userService = userService;
 		this.currentUser =
 			authenticationContext.getAuthenticatedUser(User.class).orElse(null);
+		setId("main-layout");
 		setPrimarySection(Section.DRAWER);
 		// this is the main layout, so we add the side navigation menu and the user menu
 		// to the drawer and the toolbar to the navbar
@@ -238,8 +239,6 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	}
 
 	private Component createUserMenu() {
-		LOGGER.debug("Creating user menu for user: {}",
-			currentUser != null ? currentUser.getUsername() : "null");
 		final var user = currentUser;
 		final var avatar = new Avatar();
 		avatar.addThemeVariants(AvatarVariant.LUMO_SMALL); // Changed from XSMALL to SMALL
@@ -344,8 +343,6 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	 * @param user   The user whose profile picture should be displayed
 	 */
 	private void setAvatarImage(final Avatar avatar, final CUser user) {
-		LOGGER.debug("Setting avatar image for user: {}",
-			user != null ? user.getLogin() : "null");
 
 		if (user == null) {
 			return; // Avatar will use default behavior
@@ -373,7 +370,6 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		}
 		// Fall back to user initials if no profile picture is available
 		setupAvatarInitials(avatar, user);
-		LOGGER.debug("Using initials avatar for user: {}", user.getLogin());
 	}
 
 	/**

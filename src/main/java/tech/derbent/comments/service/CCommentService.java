@@ -25,7 +25,7 @@ import tech.derbent.users.domain.CUser;
  */
 @Service
 @PreAuthorize ("isAuthenticated()")
-@Transactional(readOnly = true)
+@Transactional (readOnly = true)
 public class CCommentService extends CAbstractService<CComment> {
 
 	public CCommentService(final CCommentRepository repository,
@@ -35,7 +35,6 @@ public class CCommentService extends CAbstractService<CComment> {
 
 	@PreAuthorize ("permitAll()")
 	public long countByActivity(final CActivity activity) {
-		LOGGER.info("countByActivity called with activity: {}", activity);
 
 		if (activity == null) {
 			LOGGER.warn("countByActivity called with null activity");

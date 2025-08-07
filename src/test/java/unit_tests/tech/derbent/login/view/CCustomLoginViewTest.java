@@ -17,10 +17,14 @@ import ui_tests.tech.derbent.ui.automation.CBaseUITest;
 /**
  * UI tests for the custom login view functionality.
  */
-@SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest (
+	webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class
+)
 @TestPropertySource (properties = {
+	"spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa",
+	"spring.datasource.password=", "spring.datasource.driver-class-name=org.h2.Driver",
 	"spring.datasource.url=jdbc:h2:mem:testdb",
-	"spring.jpa.hibernate.ddl-auto=create-drop" }
+	"spring.jpa.hibernate.ddl-auto=create-drop", "server.port=8080" }
 )
 public class CCustomLoginViewTest extends CBaseUITest {
 
@@ -99,7 +103,8 @@ public class CCustomLoginViewTest extends CBaseUITest {
 		assertTrue(page.locator("#custom-username-input").isVisible());
 		assertTrue(page.locator("#custom-password-input").isVisible());
 		assertTrue(page.locator("#custom-submit-button").isVisible());
-		// Verify back link to original login is present (button text from CCustomLoginView)
+		// Verify back link to original login is present (button text from
+		// CCustomLoginView)
 		assertTrue(page.locator("text=Bact to Original Login").isVisible());
 		LOGGER.info("✅ Custom login view loads test completed");
 	}
@@ -119,7 +124,8 @@ public class CCustomLoginViewTest extends CBaseUITest {
 			new Page.WaitForSelectorOptions().setTimeout(10000));
 		// Click back to original login link (button text from CCustomLoginView)
 		page.locator("text=Bact to Original Login").click();
-		// Verify we're now on original login page (route is "overlay-login" for CLoginView)
+		// Verify we're now on original login page (route is "overlay-login" for
+		// CLoginView)
 		page.waitForSelector("vaadin-login-overlay",
 			new Page.WaitForSelectorOptions().setTimeout(10000));
 		assertTrue(page.url().contains("overlay-login"));

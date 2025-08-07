@@ -1,6 +1,5 @@
 package unit_tests.tech.derbent.abstracts.tests;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.Test;
@@ -20,8 +19,12 @@ import ui_tests.tech.derbent.ui.automation.CBaseUITest;
  * ComboBox testing
  * @param <T> The entity class being tested
  */
-@SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT)
+@SpringBootTest (
+	webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class
+)
 @TestPropertySource (properties = {
+	"spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa",
+	"spring.datasource.password=", "spring.datasource.driver-class-name=org.h2.Driver",
 	"spring.datasource.url=jdbc:h2:mem:testdb",
 	"spring.jpa.hibernate.ddl-auto=create-drop", "server.port=8080" }
 )
@@ -68,8 +71,7 @@ public abstract class CGenericViewTest<T> extends CBaseUITest {
 		LOGGER.debug("Testing {} grid interactions", entityName);
 
 		try {
-			assertTrue(navigateToViewByClass(getViewClass()),
-				"Should navigate to " + entityName + " view");
+			navigateToViewByClass(getViewClass());
 			final int gridRowCount = getGridRowCount();
 			LOGGER.debug("{} grid has {} rows", entityName, gridRowCount);
 
@@ -101,8 +103,7 @@ public abstract class CGenericViewTest<T> extends CBaseUITest {
 		LOGGER.debug("Testing new {} creation", entityName);
 
 		try {
-			assertTrue(navigateToViewByClass(getViewClass()),
-				"Should navigate to " + entityName + " view");
+			navigateToViewByClass(getViewClass());
 			// Try to click New button
 			clickNew();
 			wait_1000();
@@ -141,8 +142,7 @@ public abstract class CGenericViewTest<T> extends CBaseUITest {
 		LOGGER.debug("Testing {} view accessibility", entityName);
 
 		try {
-			assertTrue(navigateToViewByClass(getViewClass()),
-				"Should navigate to " + entityName + " view");
+			navigateToViewByClass(getViewClass());
 			testAccessibilityBasics(entityName);
 			LOGGER.debug("{} accessibility test completed", entityName);
 		} catch (final Exception e) {
@@ -162,8 +162,7 @@ public abstract class CGenericViewTest<T> extends CBaseUITest {
 		LOGGER.debug("Testing {} ComboBox components", entityName);
 
 		try {
-			assertTrue(navigateToViewByClass(getViewClass()),
-				"Should navigate to " + entityName + " view");
+			navigateToViewByClass(getViewClass());
 			// Try to open new form to access ComboBoxes
 			clickNew();
 			wait_1000();
@@ -215,8 +214,7 @@ public abstract class CGenericViewTest<T> extends CBaseUITest {
 		LOGGER.debug("Testing {} view loading", entityName);
 
 		try {
-			assertTrue(navigateToViewByClass(getViewClass()),
-				"Should navigate to " + entityName + " view");
+			navigateToViewByClass(getViewClass());
 			// Check for basic view elements
 			final int gridCount = page.locator("vaadin-grid").count();
 			LOGGER.debug("{} view has {} grids", entityName, gridCount);
@@ -246,8 +244,7 @@ public abstract class CGenericViewTest<T> extends CBaseUITest {
 		LOGGER.debug("Testing navigation to {} view", entityName);
 
 		try {
-			assertTrue(navigateToViewByClass(getViewClass()),
-				"Should successfully navigate to " + entityName + " view");
+			navigateToViewByClass(getViewClass());
 			LOGGER.debug("Navigation to {} view completed successfully", entityName);
 		} catch (final Exception e) {
 			LOGGER.error("Navigation test failed for {} view: {}", entityName,

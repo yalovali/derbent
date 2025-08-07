@@ -16,9 +16,9 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
-import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.service.CMeetingService;
 import tech.derbent.meetings.service.CMeetingStatusService;
@@ -26,11 +26,15 @@ import tech.derbent.meetings.service.CMeetingTypeService;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.service.CUserService;
 
-@Route ("meetings/:meeting_id?/:action?(edit)")
+@Route ("cmeetingsview/:meeting_id?/:action?(edit)")
 @PageTitle ("Meeting Master Detail")
-@Menu (order = 1.4, icon = "class:tech.derbent.meetings.view.CMeetingsView", title = "Project.Meetings")
+@Menu (
+	order = 1.4, icon = "class:tech.derbent.meetings.view.CMeetingsView",
+	title = "Project.Meetings"
+)
 @PermitAll // When security is enabled, allow all authenticated users
-public class CMeetingsView extends CProjectAwareMDPage<CMeeting> implements CInterfaceIconSet {
+public class CMeetingsView extends CProjectAwareMDPage<CMeeting>
+	implements CInterfaceIconSet {
 
 	private static final long serialVersionUID = 1L;
 
@@ -42,7 +46,7 @@ public class CMeetingsView extends CProjectAwareMDPage<CMeeting> implements CInt
 
 	private final String ENTITY_ID_FIELD = "meeting_id";
 
-	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "meetings/%s/edit";
+	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "cmeetingsview/%s/edit";
 
 	private final CMeetingTypeService meetingTypeService;
 

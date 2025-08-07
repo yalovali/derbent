@@ -5,9 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.test.context.TestPropertySource;
 
 import tech.derbent.meetings.view.CMeetingsView;
 import tech.derbent.projects.view.CProjectsView;
@@ -19,11 +16,6 @@ import ui_tests.tech.derbent.ui.automation.CBaseUITest;
  * form validation, ComboBox selections, and UI behaviors following the strict coding
  * guidelines for Playwright testing.
  */
-@SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT)
-@TestPropertySource (properties = {
-	"spring.datasource.url=jdbc:h2:mem:testdb",
-	"spring.jpa.hibernate.ddl-auto=create-drop", "server.port=8080" }
-)
 public class CProjectsView_UITest extends CBaseUITest {
 
 	private static final Logger LOGGER =
@@ -32,7 +24,7 @@ public class CProjectsView_UITest extends CBaseUITest {
 	@Test
 	void testProjectsComboBoxes() {
 		LOGGER.info("🧪 Testing Projects ComboBox components...");
-		assertTrue(navigateToViewByClass(CProjectsView.class), "Should navigate to view");
+		navigateToViewByClass(CProjectsView.class);
 		clickNew(); // Test all ComboBoxes in the form
 		final var comboBoxes = page.locator("vaadin-combo-box");
 		final int comboBoxCount = comboBoxes.count();
@@ -61,7 +53,7 @@ public class CProjectsView_UITest extends CBaseUITest {
 	@Test
 	void testProjectsCompleteWorkflow() {
 		LOGGER.info("🧪 Testing Projects complete workflow...");
-		assertTrue(navigateToViewByClass(CProjectsView.class), "Should navigate to view");
+		navigateToViewByClass(CProjectsView.class);
 		clickNew(); // Open new project form
 		takeScreenshot("projects-workflow-new-form");
 		// Fill project name
@@ -97,7 +89,7 @@ public class CProjectsView_UITest extends CBaseUITest {
 	@Test
 	void testProjectsCRUDOperations() {
 		LOGGER.info("🧪 Testing Projects CRUD operations...");
-		assertTrue(navigateToViewByClass(CProjectsView.class), "Should navigate to view");
+		navigateToViewByClass(CProjectsView.class);
 		// Use the auxiliary CRUD testing method
 		testCRUDOperationsInView("Projects", "new-button", "save-button",
 			"delete-button");
@@ -105,9 +97,17 @@ public class CProjectsView_UITest extends CBaseUITest {
 	}
 
 	@Test
+	void testProjectsEntityRelationGrid() {
+		LOGGER.info("🧪 Testing Projects entity relation grid display...");
+		// Test that project relations are displayed in grid
+		testEntityRelationGrid(CProjectsView.class);
+		LOGGER.info("✅ Projects entity relation grid test completed");
+	}
+
+	@Test
 	void testProjectsFormValidation() {
 		LOGGER.info("🧪 Testing Projects form validation...");
-		assertTrue(navigateToViewByClass(CProjectsView.class), "Should navigate to view");
+		navigateToViewByClass(CProjectsView.class);
 		clickNew(); // Open new project form
 		final boolean validationWorking = testFormValidationById("save-button");
 		LOGGER.debug("Form validation working: {}", validationWorking);
@@ -131,19 +131,18 @@ public class CProjectsView_UITest extends CBaseUITest {
 	void testProjectsGridInteractions() {
 		LOGGER.info("🧪 Testing Projects grid interactions...");
 		testAdvancedGridInView(CProjectsView.class);
-		
 		// Additional grid interaction testing for projects
-		assertTrue(navigateToViewByClass(CProjectsView.class), "Should navigate to view");
-		
+		navigateToViewByClass(CProjectsView.class);
 		// Test grid selection changes
 		final int gridRowCount = getGridRowCount();
+
 		if (gridRowCount > 0) {
 			LOGGER.debug("Testing grid selection with {} rows", gridRowCount);
 			clickGrid(0); // Select first row
 			wait_500();
-			
 			// Test that selection triggers form population
 			final var textFields = page.locator("vaadin-text-field");
+
 			if (textFields.count() > 0) {
 				final String firstFieldValue = textFields.first().inputValue();
 				LOGGER.debug("First field populated with: {}", firstFieldValue);
@@ -151,7 +150,6 @@ public class CProjectsView_UITest extends CBaseUITest {
 					"Grid selection should populate form fields");
 			}
 		}
-		
 		LOGGER.info("✅ Projects grid interactions test completed");
 	}
 
@@ -166,13 +164,5 @@ public class CProjectsView_UITest extends CBaseUITest {
 		// Test search with common project fields
 		testSearchFunctionality(CProjectsView.class, "Test");
 		LOGGER.info("✅ Projects search functionality test completed");
-	}
-
-	@Test
-	void testProjectsEntityRelationGrid() {
-		LOGGER.info("🧪 Testing Projects entity relation grid display...");
-		// Test that project relations are displayed in grid
-		testEntityRelationGrid(CProjectsView.class);
-		LOGGER.info("✅ Projects entity relation grid test completed");
 	}
 }

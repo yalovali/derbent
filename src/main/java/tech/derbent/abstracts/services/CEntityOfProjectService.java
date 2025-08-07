@@ -110,8 +110,6 @@ public abstract class CEntityOfProjectService<
 	@Transactional (readOnly = true)
 	public List<EntityClass> findEntriesByProject(final CProject project,
 		final Pageable pageable) {
-		LOGGER.debug("findEntriesByProject called with project: {} and pageable for {}",
-			project != null ? project.getName() : "null", getClass().getSimpleName());
 
 		if (project == null) {
 			LOGGER.warn("findEntriesByProject called with null project for {}",

@@ -185,7 +185,6 @@ public abstract class CProjectAwareMDPage<
 				"Entity service is not project-aware, selecting from all entities");
 			result = entityService.list(pageable);
 		}
-		LOGGER.debug("Fetched {} entities for project", result.size());
 
 		if (!result.isEmpty()) {
 			final EntityClass firstEntity = result.get(0);
