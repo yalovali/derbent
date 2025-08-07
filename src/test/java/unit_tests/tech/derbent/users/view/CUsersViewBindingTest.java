@@ -29,7 +29,8 @@ import tech.derbent.users.view.CUsersView;
 	"spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa",
 	"spring.datasource.password=", "spring.datasource.driver-class-name=org.h2.Driver",
 	"spring.datasource.url=jdbc:h2:mem:testdb",
-	"spring.jpa.hibernate.ddl-auto=create-drop", "server.port=8080" }
+	"spring.jpa.hibernate.ddl-auto=create-drop", "server.port=8080", 
+	"spring.sql.init.mode=never" }
 )
 public class CUsersViewBindingTest {
 
