@@ -37,16 +37,16 @@ public class PlaywrightUIAutomationTest extends CBaseUITest {
 
 	@Test
 	void testAccessibilityBasics() {
-		LOGGER.info("🧪 Testing accessibility basics...");
+		LOGGER.info("🧪 Testing accessibility basics for all views...");
 
-		// Test accessibility for each view
-		for (final Class<?> view : viewClasses) {
+		// Test accessibility for ALL views now, not just the basic ones
+		for (final Class<?> view : allViewClasses) {
 			navigateToViewByClass(view);
 			// Take screenshot of each view for documentation/verification
 			takeScreenshot("accessibility-" + view.getSimpleName().toLowerCase(), false);
 			testAccessibilityBasics(view.getSimpleName());
 		}
-		LOGGER.info("✅ Accessibility basics test completed");
+		LOGGER.info("✅ Accessibility basics test completed for {} views", allViewClasses.length);
 	}
 
 	@Test
@@ -199,5 +199,71 @@ public class PlaywrightUIAutomationTest extends CBaseUITest {
 		// Test search in Projects view (CSearchable implementation)
 		testSearchFunctionality(CProjectsView.class, "Test");
 		LOGGER.info("✅ Search functionality test completed");
+	}
+
+	@Test
+	void testAllStatusAndTypeViews() {
+		LOGGER.info("🧪 Testing all status and type views...");
+
+		for (final Class<?> view : statusAndTypeViewClasses) {
+			LOGGER.info("Testing status/type view: {}", view.getSimpleName());
+			navigateToViewByClass(view);
+			takeScreenshot("status-type-" + view.getSimpleName().toLowerCase(), false);
+		}
+		LOGGER.info("✅ All status and type views test completed for {} views", statusAndTypeViewClasses.length);
+	}
+
+	@Test
+	void testAllMainBusinessViews() {
+		LOGGER.info("🧪 Testing all main business views...");
+
+		for (final Class<?> view : mainViewClasses) {
+			LOGGER.info("Testing main view: {}", view.getSimpleName());
+			navigateToViewByClass(view);
+			takeScreenshot("main-business-" + view.getSimpleName().toLowerCase(), false);
+		}
+		LOGGER.info("✅ All main business views test completed for {} views", mainViewClasses.length);
+	}
+
+	@Test
+	void testAllAdministrativeViews() {
+		LOGGER.info("🧪 Testing all administrative views...");
+
+		for (final Class<?> view : adminViewClasses) {
+			LOGGER.info("Testing admin view: {}", view.getSimpleName());
+			navigateToViewByClass(view);
+			takeScreenshot("admin-" + view.getSimpleName().toLowerCase(), false);
+		}
+		LOGGER.info("✅ All administrative views test completed for {} views", adminViewClasses.length);
+	}
+
+	@Test
+	void testAllKanbanViews() {
+		LOGGER.info("🧪 Testing all Kanban board views...");
+
+		for (final Class<?> view : kanbanViewClasses) {
+			LOGGER.info("Testing kanban view: {}", view.getSimpleName());
+			navigateToViewByClass(view);
+			takeScreenshot("kanban-" + view.getSimpleName().toLowerCase(), false);
+		}
+		LOGGER.info("✅ All Kanban views test completed for {} views", kanbanViewClasses.length);
+	}
+
+	@Test
+	void testComprehensiveAllViewsNavigation() {
+		LOGGER.info("🧪 Testing navigation to ALL views ({} total)...", allViewClasses.length);
+
+		int successCount = 0;
+		for (final Class<?> view : allViewClasses) {
+			try {
+				LOGGER.debug("Navigating to view: {}", view.getSimpleName());
+				navigateToViewByClass(view);
+				takeScreenshot("all-views-nav-" + view.getSimpleName().toLowerCase(), false);
+				successCount++;
+			} catch (final Exception e) {
+				LOGGER.warn("⚠️ Failed to navigate to view {}: {}", view.getSimpleName(), e.getMessage());
+			}
+		}
+		LOGGER.info("✅ Comprehensive navigation test completed: {}/{} views accessed", successCount, allViewClasses.length);
 	}
 }

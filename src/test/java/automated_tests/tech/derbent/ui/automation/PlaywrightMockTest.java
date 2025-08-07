@@ -19,9 +19,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.TestPropertySource;
 
+import ui_tests.tech.derbent.ui.automation.CBaseUITest;
+
 /**
- * Mock Playwright test that demonstrates screenshot functionality This creates sample
- * screenshots to show the feature is working
+ * Mock Playwright test that demonstrates screenshot functionality for ALL views.
+ * This creates sample screenshots to show the comprehensive view testing feature is working.
  */
 @SpringBootTest (
 	webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class
@@ -32,7 +34,7 @@ import org.springframework.test.context.TestPropertySource;
 	"spring.datasource.url=jdbc:h2:mem:testdb",
 	"spring.jpa.hibernate.ddl-auto=create-drop", "server.port=8080" }
 )
-public class PlaywrightMockTest {
+public class PlaywrightMockTest extends CBaseUITest {
 
 	private static final Logger LOGGER =
 		LoggerFactory.getLogger(PlaywrightMockTest.class);
@@ -242,20 +244,19 @@ public class PlaywrightMockTest {
 
 	@Test
 	void testAccessibilityScreenshots() {
-		LOGGER.info("🧪 Testing accessibility screenshot functionality...");
+		LOGGER.info("🧪 Testing accessibility screenshot functionality for ALL views...");
 
 		try {
 			// Create screenshots directory
 			Files.createDirectories(Paths.get("target/screenshots"));
-			// Create accessibility test screenshots
-			final String[] accessibilityViews = {
-				"accessibility-projects", "accessibility-users",
-				"accessibility-activities" };
-
-			for (final String view : accessibilityViews) {
-				createAccessibilityScreenshot(view);
+			
+			// Create accessibility test screenshots for ALL views
+			for (final Class<?> viewClass : allViewClasses) {
+				final String viewName = "accessibility-" + viewClass.getSimpleName().toLowerCase();
+				createAccessibilityScreenshot(viewName);
 			}
-			LOGGER.info("♿ Accessibility screenshots created successfully");
+			
+			LOGGER.info("♿ Accessibility screenshots created successfully for {} views", allViewClasses.length);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to create accessibility screenshots: {}",
 				e.getMessage());
@@ -265,22 +266,22 @@ public class PlaywrightMockTest {
 	@Test
 	void testPlaywrightScreenshotFunctionality() {
 		LOGGER.info(
-			"🧪 Testing Playwright screenshot functionality (mock implementation)...");
+			"🧪 Testing Playwright screenshot functionality for ALL views (mock implementation)...");
 
 		try {
 			// Create screenshots directory
 			Files.createDirectories(Paths.get("target/screenshots"));
-			// Create mock screenshots for different views
-			final String[] views = {
-				"login", "projects", "users", "activities", "meetings", "decisions" };
-
-			for (final String view : views) {
-				createMockScreenshot(view);
+			
+			// Create mock screenshots for ALL views
+			for (final Class<?> viewClass : allViewClasses) {
+				final String viewName = "mock-" + viewClass.getSimpleName().toLowerCase();
+				createMockScreenshot(viewName);
 			}
+			
 			// Create a workflow screenshot
 			createWorkflowScreenshot();
 			LOGGER.info(
-				"✅ Playwright screenshot functionality test completed successfully");
+				"✅ Playwright screenshot functionality test completed successfully for {} views", allViewClasses.length);
 			// Show screenshot count
 			final File screenshotsDir = new File("target/screenshots");
 			final File[] screenshots =
@@ -301,22 +302,38 @@ public class PlaywrightMockTest {
 
 	@Test
 	void testWorkflowScreenshots() {
-		LOGGER.info("🧪 Testing workflow screenshot functionality...");
+		LOGGER.info("🧪 Testing workflow screenshot functionality for ALL view categories...");
 
 		try {
 			// Create screenshots directory
 			Files.createDirectories(Paths.get("target/screenshots"));
-			// Create workflow screenshots
-			final String[] workflowSteps = {
-				"workflow-start", "workflow-users-view", "workflow-projects-view",
-				"workflow-activities-view", "workflow-meetings-view",
-				"workflow-decisions-view", "workflow-new-project-form",
+			
+			// Create workflow screenshots for different view categories
+			LOGGER.info("Creating workflow screenshots for main business views...");
+			for (final Class<?> viewClass : mainViewClasses) {
+				createWorkflowStepScreenshot("workflow-main-" + viewClass.getSimpleName().toLowerCase());
+			}
+			
+			LOGGER.info("Creating workflow screenshots for status and type views...");
+			for (final Class<?> viewClass : statusAndTypeViewClasses) {
+				createWorkflowStepScreenshot("workflow-config-" + viewClass.getSimpleName().toLowerCase());
+			}
+			
+			LOGGER.info("Creating workflow screenshots for admin views...");
+			for (final Class<?> viewClass : adminViewClasses) {
+				createWorkflowStepScreenshot("workflow-admin-" + viewClass.getSimpleName().toLowerCase());
+			}
+			
+			// Create additional workflow screenshots
+			final String[] additionalSteps = {
+				"workflow-start", "workflow-new-project-form",
 				"workflow-project-form-filled", "workflow-after-save" };
 
-			for (final String step : workflowSteps) {
+			for (final String step : additionalSteps) {
 				createWorkflowStepScreenshot(step);
 			}
-			LOGGER.info("🔄 Workflow screenshots created successfully");
+			
+			LOGGER.info("🔄 Comprehensive workflow screenshots created successfully for all view categories");
 		} catch (final Exception e) {
 			LOGGER.error("Failed to create workflow screenshots: {}", e.getMessage());
 		}
