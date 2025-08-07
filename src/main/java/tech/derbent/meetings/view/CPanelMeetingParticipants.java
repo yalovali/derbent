@@ -36,6 +36,7 @@ public class CPanelMeetingParticipants extends CPanelMeetingBase {
 		super("Participants & Attendees", currentEntity, beanValidationBinder,
 			entityService, meetingTypeService);
 		this.userService = userService;
+		initPanel();
 	}
 
 	private void createAttendeesField() {
@@ -55,6 +56,7 @@ public class CPanelMeetingParticipants extends CPanelMeetingBase {
 				e);
 			attendeesField.setItems();
 		}
+
 		// Manual binding for attendees field with proper type handling
 		try {
 			getBinder().forField(attendeesField)
@@ -66,11 +68,15 @@ public class CPanelMeetingParticipants extends CPanelMeetingBase {
 				.bind(CMeeting::getAttendees, CMeeting::setAttendees);
 			LOGGER.debug("Successfully bound attendees field");
 		} catch (final Exception e) {
-			LOGGER.error("Failed to bind attendees field: {} - using simple binding fallback", e.getMessage());
+			LOGGER.error(
+				"Failed to bind attendees field: {} - using simple binding fallback",
+				e.getMessage());
+
 			try {
 				getBinder().bind(attendeesField, "attendees");
 			} catch (final Exception fallbackException) {
-				LOGGER.error("Simple binding fallback also failed for attendees field: {}", 
+				LOGGER.error(
+					"Simple binding fallback also failed for attendees field: {}",
 					fallbackException.getMessage());
 			}
 		}
@@ -94,6 +100,7 @@ public class CPanelMeetingParticipants extends CPanelMeetingBase {
 				e);
 			participantsField.setItems();
 		}
+
 		// Manual binding for participants field with proper type handling
 		try {
 			getBinder().forField(participantsField)
@@ -105,11 +112,15 @@ public class CPanelMeetingParticipants extends CPanelMeetingBase {
 				.bind(CMeeting::getParticipants, CMeeting::setParticipants);
 			LOGGER.debug("Successfully bound participants field");
 		} catch (final Exception e) {
-			LOGGER.error("Failed to bind participants field: {} - using simple binding fallback", e.getMessage());
+			LOGGER.error(
+				"Failed to bind participants field: {} - using simple binding fallback",
+				e.getMessage());
+
 			try {
 				getBinder().bind(participantsField, "participants");
 			} catch (final Exception fallbackException) {
-				LOGGER.error("Simple binding fallback also failed for participants field: {}", 
+				LOGGER.error(
+					"Simple binding fallback also failed for participants field: {}",
 					fallbackException.getMessage());
 			}
 		}

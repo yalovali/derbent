@@ -62,7 +62,7 @@ public class CDecisionStatus extends CStatus<CDecisionStatus> {
         return Boolean.TRUE.equals(isFinal);
     }
 
-    public Boolean isFinal() {
+    public Boolean getIsFinal() {
         return isFinal;
     }
 
@@ -75,7 +75,7 @@ public class CDecisionStatus extends CStatus<CDecisionStatus> {
         return Boolean.TRUE.equals(requiresApproval) && !Boolean.TRUE.equals(isFinal);
     }
 
-    public Boolean isRequiresApproval() {
+    public Boolean getRequiresApproval() {
         return requiresApproval;
     }
 

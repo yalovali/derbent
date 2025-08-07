@@ -26,6 +26,7 @@ public class CPanelDecisionCostManagement extends CPanelDecisionBase {
 		final CDecisionService entityService) {
 		super("Cost & Financial Impact", currentEntity, beanValidationBinder,
 			entityService);
+		initPanel();
 	}
 
 	@Override

@@ -71,7 +71,7 @@ public class CDecisionStatusView extends CAbstractNamedEntityPage<CDecisionStatu
 		// Enhanced Type column that shows Final/Active status using CGridCell
 		grid.addComponentColumn(entity -> {
 			final CGridCell statusCell = new CGridCell();
-			statusCell.setFinalActiveValue(entity.isFinal());
+			statusCell.setFinalActiveValue(entity.getIsFinal());
 			return statusCell;
 		}).setHeader("Type").setWidth("100px").setFlexGrow(0);
 		grid.addShortTextColumn(entity -> String.valueOf(entity.getSortOrder()), "Order",

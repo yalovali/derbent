@@ -18,6 +18,7 @@ public class CPanelCompanyContactDetails extends CPanelCompanyBase {
 		final CEnhancedBinder<CCompany> beanValidationBinder,
 		final CCompanyService entityService) {
 		super("Contact Details", currentEntity, beanValidationBinder, entityService);
+		initPanel();
 	}
 
 	@Override

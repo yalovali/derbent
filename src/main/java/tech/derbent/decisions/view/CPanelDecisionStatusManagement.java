@@ -25,6 +25,7 @@ public class CPanelDecisionStatusManagement extends CPanelDecisionBase {
 		final CEnhancedBinder<CDecision> beanValidationBinder,
 		final CDecisionService entityService) {
 		super("Status & Workflow", currentEntity, beanValidationBinder, entityService);
+		initPanel();
 	}
 
 	@Override

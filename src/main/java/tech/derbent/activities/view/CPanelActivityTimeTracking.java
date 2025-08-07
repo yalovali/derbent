@@ -19,6 +19,7 @@ public class CPanelActivityTimeTracking extends CPanelActivityBase {
 		final CEnhancedBinder<CActivity> beanValidationBinder,
 		final CActivityService entityService) {
 		super("Time Tracking", currentEntity, beanValidationBinder, entityService);
+		initPanel();
 	}
 
 	@Override

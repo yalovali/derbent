@@ -18,7 +18,7 @@ public class CPanelActivityStatusPriority extends CPanelActivityBase {
 		final CEnhancedBinder<CActivity> beanValidationBinder,
 		final CActivityService entityService) {
 		super("Status & Priority", currentEntity, beanValidationBinder, entityService);
-		openPanel();
+		initPanel();
 	}
 
 	@Override

@@ -76,7 +76,7 @@ public class CRiskStatus extends CStatus<CRiskStatus> {
 
 	public Boolean isFinal() { return isFinal; }
 
-	public void setFinal(final Boolean isFinal) { this.isFinal = isFinal; }
+	public void setIsFinal(final Boolean isFinal) { this.isFinal = isFinal; }
 
 	@Override
 	public String toString() {

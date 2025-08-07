@@ -238,6 +238,10 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable {
 
 	public CUserType getUserType() { return userType; }
 
+	public Boolean getEnabled() {
+		return enabled; // Return the enabled status
+	}
+
 	public Boolean isEnabled() {
 		return enabled; // Return the enabled status
 	}

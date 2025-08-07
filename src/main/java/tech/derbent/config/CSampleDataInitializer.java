@@ -1793,7 +1793,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * @return true if database is empty, false otherwise
 	 */
 	private boolean isDatabaseEmpty() {
-		/// LOGGER.info("isDatabaseEmpty called - checking user count");
 		final long userCount = userService.count();
 		LOGGER.info("User count in database: {}", userCount);
 		return userCount == 0;

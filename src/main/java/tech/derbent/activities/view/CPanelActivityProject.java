@@ -14,6 +14,7 @@ public class CPanelActivityProject extends CPanelActivityBase {
 		final CEnhancedBinder<CActivity> beanValidationBinder,
 		final CActivityService entityService) {
 		super("Proje", currentEntity, beanValidationBinder, entityService);
+		initPanel();
 	}
 
 	@Override

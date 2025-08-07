@@ -25,7 +25,5 @@ public abstract class CPanelCompanyBase extends CAccordionDBEntity<CCompany> {
 		final CEnhancedBinder<CCompany> beanValidationBinder,
 		final CCompanyService entityService) {
 		super(title, currentEntity, beanValidationBinder, CCompany.class, entityService);
-		createPanelContent();
-		closePanel();
 	}
 }

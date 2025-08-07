@@ -568,8 +568,8 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	protected void populateForm(final EntityClass value) {
 		LOGGER.debug("Populating form with entity: {}", value);
 		currentEntity = value;
-		binder.readBean(currentEntity);
 		populateAccordionPanels(value);
+		getBinder().readBean(value);
 	}
 
 	protected void refreshGrid() {

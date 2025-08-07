@@ -1,6 +1,7 @@
 package tech.derbent.users.view;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.views.CPanelUserProjectBase;
@@ -40,7 +41,7 @@ public class CPanelUserProjectSettings
 			entityService, userProjectSettingsService);
 		this.userProjectSettingsService = userProjectSettingsService;
 		this.projectService = projectService;
-		openPanel();
+		initPanel();
 	}
 
 	@Override
@@ -107,6 +108,12 @@ public class CPanelUserProjectSettings
 			new CUserProjectSettingsDialog((CUserService) entityService, projectService,
 				selected, currentUser, this::onSettingsSaved);
 		dialog.open();
+	}
+
+	public void setAccessors(final Supplier<List<CUserProjectSettings>> getProjectUsers,
+		final Runnable saveEntity) {
+		LOGGER.debug("Setting project users accessors");
+		setSettingsAccessors(getProjectUsers, saveEntity);
 	}
 
 	public void setCurrentUser(final CUser user) { this.currentUser = user; }

@@ -19,6 +19,7 @@ public class CPanelActivityBudgetManagement extends CPanelActivityBase {
 		final CEnhancedBinder<CActivity> beanValidationBinder,
 		final CActivityService entityService) {
 		super("Budget Management", currentEntity, beanValidationBinder, entityService);
+		initPanel();
 	}
 
 	@Override

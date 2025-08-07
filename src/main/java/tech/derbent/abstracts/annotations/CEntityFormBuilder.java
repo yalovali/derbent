@@ -31,6 +31,9 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.converter.StringToDoubleConverter;
+import com.vaadin.flow.data.converter.StringToIntegerConverter;
+import com.vaadin.flow.data.converter.StringToLongConverter;
 
 import tech.derbent.abstracts.components.CBinderFactory;
 import tech.derbent.abstracts.components.CEnhancedBinder;
@@ -199,7 +202,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		}
 		final NumberField numberField = new NumberField();
 		CAuxillaries.setId(numberField);
-		numberField.setStep(1);
+		numberField.setStep(0.01); // Set decimal step for BigDecimal fields
 
 		if ((meta.defaultValue() != null) && !meta.defaultValue().trim().isEmpty()) {
 
@@ -218,8 +221,9 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			// Use converter to handle BigDecimal conversion
 			binder.forField(numberField)
 				.withConverter(
-					value -> value != null ? new BigDecimal(value.toString()) : null,
-					value -> value != null ? value.doubleValue() : null)
+					value -> value != null ? BigDecimal.valueOf(value) : null,
+					value -> value != null ? value.doubleValue() : null,
+					"Invalid decimal value")
 				.bind(propertyName);
 			LOGGER.debug(
 				"Successfully bound NumberField with BigDecimal converter for field '{}'",
@@ -228,12 +232,13 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			LOGGER.error(
 				"Failed to bind BigDecimal field for field '{}': {} - using fallback binding",
 				field.getName(), e.getMessage());
+
 			// Fallback to simple binding without converter
 			try {
-				safeBindComponentWithField(binder, numberField, field, "NumberField(BigDecimal-fallback)");
+				safeBindComponentWithField(binder, numberField, field,
+					"NumberField(BigDecimal-fallback)");
 			} catch (final Exception fallbackException) {
-				LOGGER.error(
-					"Fallback binding also failed for BigDecimal field '{}': {}",
+				LOGGER.error("Fallback binding also failed for BigDecimal field '{}': {}",
 					field.getName(), fallbackException.getMessage());
 			}
 		}
@@ -678,8 +683,10 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 
 			if ((fieldType == Integer.class) || (fieldType == int.class)) {
 				binder.forField(numberField)
-					.withConverter(value -> value != null ? value.intValue() : null,
-						value -> value != null ? value.doubleValue() : null)
+					.withConverter(
+						value -> value != null ? value.intValue() : null,
+						value -> value != null ? value.doubleValue() : null,
+						"Invalid integer value")
 					.bind(propertyName);
 				LOGGER.debug(
 					"Successfully bound NumberField with Integer converter for field '{}'",
@@ -687,8 +694,10 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			}
 			else if ((fieldType == Long.class) || (fieldType == long.class)) {
 				binder.forField(numberField)
-					.withConverter(value -> value != null ? value.longValue() : null,
-						value -> value != null ? value.doubleValue() : null)
+					.withConverter(
+						value -> value != null ? value.longValue() : null,
+						value -> value != null ? value.doubleValue() : null,
+						"Invalid long value")
 					.bind(propertyName);
 				LOGGER.debug(
 					"Successfully bound NumberField with Long converter for field '{}'",
@@ -702,12 +711,13 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			LOGGER.error(
 				"Failed to bind integer field for field '{}': {} - using fallback binding",
 				field.getName(), e.getMessage());
+
 			// Fallback to simple binding without converter
 			try {
-				safeBindComponentWithField(binder, numberField, field, "NumberField(Integer-fallback)");
+				safeBindComponentWithField(binder, numberField, field,
+					"NumberField(Integer-fallback)");
 			} catch (final Exception fallbackException) {
-				LOGGER.error(
-					"Fallback binding also failed for integer field '{}': {}",
+				LOGGER.error("Fallback binding also failed for integer field '{}': {}",
 					field.getName(), fallbackException.getMessage());
 			}
 		}
@@ -980,11 +990,10 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 				fieldName != null ? fieldName : "null");
 			return;
 		}
+		LOGGER.debug("Attempting to bind {} for field '{}'", componentType, fieldName);
 
 		try {
 			binder.bind(component, fieldName);
-			LOGGER.debug("Successfully bound {} for field '{}'", componentType,
-				fieldName);
 		} catch (final Exception e) {
 			LOGGER.error(
 				"Failed to bind {} for field '{}': {} - this may cause incomplete bindings",

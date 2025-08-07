@@ -14,8 +14,7 @@ public class CPanelActivityDescription extends CPanelActivityBase {
 		final CEnhancedBinder<CActivity> beanValidationBinder,
 		final CActivityService entityService) {
 		super("Basic Information", currentEntity, beanValidationBinder, entityService);
-		// only open this panel
-		openPanel();
+		initPanel();
 	}
 
 	@Override

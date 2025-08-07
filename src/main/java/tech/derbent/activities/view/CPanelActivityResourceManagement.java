@@ -14,6 +14,7 @@ public class CPanelActivityResourceManagement extends CPanelActivityBase {
 		final CEnhancedBinder<CActivity> beanValidationBinder,
 		final CActivityService entityService) {
 		super("Resource Management", currentEntity, beanValidationBinder, entityService);
+		initPanel();
 	}
 
 	@Override

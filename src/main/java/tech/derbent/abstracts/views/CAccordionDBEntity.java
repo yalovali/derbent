@@ -25,6 +25,8 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 
 	private final ComboBoxDataProvider detailsDataProvider;
 
+	private boolean isPanelInitialized = false;
+
 	/**
 	 * Constructor for CAccordionDescription with custom title.
 	 * @param title                custom title for the accordion panel
@@ -55,7 +57,6 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 
 	// Override if you need to customize the panel content creation
 	protected void createPanelContent() {
-		updatePanelEntityFields(); // Set the entity fields first
 		getBaseLayout().add(
 			CEntityFormBuilder.buildForm(entityClass, getBinder(), getEntityFields()));
 	}
@@ -68,7 +69,17 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 
 	public List<String> getEntityFields() { return EntityFields; }
 
+	protected void initPanel() {
+		LOGGER.debug("Initializing panel for entity: {}",
+			currentEntity != null ? currentEntity.getId() : "null");
+		updatePanelEntityFields();
+		createPanelContent();
+		openPanel();
+		isPanelInitialized = true;
+	}
+
 	public void populateForm(final EntityClass entity) {
+		assert isPanelInitialized : "Panel must be initialized before populating form";
 		currentEntity = entity;
 
 		if (entity == null) {
@@ -77,6 +88,8 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 		else {
 			// LOGGER.debug("Populating form with entity: {}", entity); Populate the form
 			// fields with the entity data
+			LOGGER.debug("Populating form with entity: {}",
+				entity.getId() != null ? entity.getId() : "null");
 			binder.readBean(entity);
 		}
 	}
@@ -86,7 +99,5 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 
 	protected void setEntityFields(final List<String> fields) { EntityFields = fields; }
 
-	protected void updatePanelEntityFields() {
-		// TODO Auto-generated method stub
-	}
+	protected abstract void updatePanelEntityFields();
 }

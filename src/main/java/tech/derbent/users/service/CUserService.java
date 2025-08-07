@@ -54,16 +54,6 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 		return ((CUserRepository) repository).countUsersByProjectId(projectId);
 	}
 
-	/**
-	 * Creates a new login user with encoded password. This method handles password
-	 * encoding automatically.
-	 * @param username      the username for login
-	 * @param plainPassword the plain text password (will be encoded)
-	 * @param name          the user's first name
-	 * @param email         the user's email
-	 * @param roles         comma-separated roles (e.g., "USER,ADMIN")
-	 * @return the created and saved CUser
-	 */
 	@Transactional // Write operation requires writable transaction
 	public CUser createLoginUser(final String username, final String plainPassword,
 		final String name, final String email, final String roles) {

@@ -1,5 +1,9 @@
 package tech.derbent.users.view;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Supplier;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.html.Div;
@@ -17,6 +21,7 @@ import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
+import tech.derbent.users.domain.CUserProjectSettings;
 import tech.derbent.users.service.CUserProjectSettingsService;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.CUserTypeService;
@@ -73,23 +78,25 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser>
 
 	@Override
 	protected void createDetailsLayout() {
-		final CAccordionDBEntity<CUser> panel;
+		CAccordionDBEntity<CUser> panel;
 		descriptionPanel = new CPanelUserDescription(getCurrentEntity(), getBinder(),
 			(CUserService) entityService, userTypeService, companyService);
+		// descriptionPanel = new CPanelUserDescription(getCurrentEntity(),
+		// getBinder(),(CUserService) entityService, userTypeService, companyService);
 		addAccordionPanel(descriptionPanel);
-		/*
-		 * panel = new CPanelUserContactInfo(getCurrentEntity(), getBinder(),
-		 * (CUserService) entityService, userTypeService, companyService);
-		 * addAccordionPanel(panel); panel = new
-		 * CPanelUserCompanyAssociation(getCurrentEntity(), getBinder(), (CUserService)
-		 * entityService, userTypeService, companyService); addAccordionPanel(panel);
-		 * projectSettingsGrid = new CPanelUserProjectSettings(getCurrentEntity(),
-		 * getBinder(), (CUserService) entityService, userTypeService, companyService,
-		 * projectService, userProjectSettingsService);
-		 * addAccordionPanel(projectSettingsGrid); panel = new
-		 * CPanelUserSystemAccess(getCurrentEntity(), getBinder(), (CUserService)
-		 * entityService, userTypeService, companyService); addAccordionPanel(panel);
-		 */
+		panel = new CPanelUserContactInfo(getCurrentEntity(), getBinder(),
+			(CUserService) entityService, userTypeService, companyService);
+		addAccordionPanel(panel);
+		panel = new CPanelUserCompanyAssociation(getCurrentEntity(), getBinder(),
+			(CUserService) entityService, userTypeService, companyService);
+		addAccordionPanel(panel);
+		projectSettingsGrid = new CPanelUserProjectSettings(getCurrentEntity(),
+			getBinder(), (CUserService) entityService, userTypeService, companyService,
+			projectService, userProjectSettingsService);
+		addAccordionPanel(projectSettingsGrid);
+		panel = new CPanelUserSystemAccess(getCurrentEntity(), getBinder(),
+			(CUserService) entityService, userTypeService, companyService);
+		addAccordionPanel(panel);
 	}
 
 	@Override
@@ -170,8 +177,35 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser>
 	 */
 	@Override
 	protected void populateForm(final CUser value) {
-		// entityService.initializeLazyFields(value);
+
+		if (value == null) {
+			LOGGER.warn("User with ID {} not found, cannot populate form");
+		}
 		super.populateForm(value);
+
+		if (value != null) {
+			final CUser user = entityService.getById(value.getId()).orElse(null);
+			// Load project with user settings to avoid lazy initialization issues
+			projectSettingsGrid.setCurrentUser(user);
+			// supply the project settings from eager loaded project
+			final Supplier<List<CUserProjectSettings>> supplier =
+				() -> user.getProjectSettings();
+			final Runnable runnable = () -> {
+				final CUser refreshedProject = entityService.getById(user.getId()).get();
+				populateForm(refreshedProject);
+			};
+			//
+			projectSettingsGrid.setAccessors(supplier, runnable);
+		}
+		else {
+			projectSettingsGrid.setCurrentUser(value);
+			final Supplier<List<CUserProjectSettings>> supplier =
+				() -> Collections.emptyList();
+			final Runnable runnable = () -> {
+				// Do nothing
+			};
+			projectSettingsGrid.setAccessors(supplier, runnable);
+		}
 	}
 
 	@Override

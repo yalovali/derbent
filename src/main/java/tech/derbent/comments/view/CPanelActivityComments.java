@@ -65,6 +65,7 @@ public class CPanelActivityComments extends CPanelActivityBase {
 			currentEntity);
 		this.commentService = commentService;
 		this.sessionService = sessionService;
+		initPanel();
 	}
 
 	/**

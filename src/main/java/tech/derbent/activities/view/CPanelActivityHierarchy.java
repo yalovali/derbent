@@ -18,6 +18,7 @@ public class CPanelActivityHierarchy extends CPanelActivityBase {
 		final CEnhancedBinder<CActivity> beanValidationBinder,
 		final CActivityService entityService) {
 		super("Hierarchy", currentEntity, beanValidationBinder, entityService);
+		initPanel();
 	}
 
 	@Override

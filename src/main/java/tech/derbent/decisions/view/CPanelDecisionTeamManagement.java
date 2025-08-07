@@ -26,6 +26,7 @@ public class CPanelDecisionTeamManagement extends CPanelDecisionBase {
 		final CDecisionService entityService) {
 		super("Team & Accountability", currentEntity, beanValidationBinder,
 			entityService);
+		initPanel();
 	}
 
 	@Override

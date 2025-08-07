@@ -100,8 +100,6 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	private void handleLogin() {
 		final String username = usernameField.getValue();
 		final String password = passwordField.getValue();
-		// Clear previous error
-		errorMessage.setVisible(false);
 		errorMessage.setText("");
 
 		// Basic validation

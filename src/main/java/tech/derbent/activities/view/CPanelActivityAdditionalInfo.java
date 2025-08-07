@@ -19,6 +19,7 @@ public class CPanelActivityAdditionalInfo extends CPanelActivityBase {
 		final CEnhancedBinder<CActivity> beanValidationBinder,
 		final CActivityService entityService, final CSessionService sessionService) {
 		super("Additional Info", currentEntity, beanValidationBinder, entityService);
+		initPanel();
 	}
 
 	@Override

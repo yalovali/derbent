@@ -27,7 +27,7 @@ public class CPanelDecisionDescription extends CPanelDecisionBase {
 		final CDecisionService entityService) {
 		super("Basic Information", currentEntity, beanValidationBinder, entityService);
 		// Only open this panel by default
-		openPanel();
+		initPanel();
 	}
 
 	@Override

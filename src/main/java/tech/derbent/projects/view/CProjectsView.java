@@ -123,7 +123,7 @@ public class CProjectsView extends CAbstractNamedEntityPage<CProject>
 				populateForm(refreshedProject);
 			};
 			//
-			projectUsersPanel.setProjectUsersAccessors(supplier, runnable);
+			projectUsersPanel.setAccessors(supplier, runnable);
 		}
 		else {
 			projectUsersPanel.setCurrentProject(null);
@@ -132,7 +132,7 @@ public class CProjectsView extends CAbstractNamedEntityPage<CProject>
 			final Runnable runnable = () -> {
 				// Do nothing
 			};
-			projectUsersPanel.setProjectUsersAccessors(supplier, runnable);
+			projectUsersPanel.setAccessors(supplier, runnable);
 		}
 	}
 

@@ -19,6 +19,7 @@ public class CPanelMeetingAgenda extends CPanelMeetingBase {
 		final CMeetingService entityService) {
 		super("Agenda & Location", currentEntity, beanValidationBinder, entityService,
 			null);
+		initPanel();
 	}
 
 	@Override

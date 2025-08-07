@@ -1,6 +1,5 @@
 package tech.derbent.decisions.view;
 
-import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.decisions.domain.CDecision;
@@ -26,13 +25,5 @@ public abstract class CPanelDecisionBase extends CAccordionDBEntity<CDecision> {
 		final CEnhancedBinder<CDecision> beanValidationBinder,
 		final CDecisionService entityService) {
 		super(title, currentEntity, beanValidationBinder, CDecision.class, entityService);
-		createPanelContent();
-		closePanel();
-	}
-
-	@Override
-	protected void createPanelContent() {
-		getBaseLayout().add(CEntityFormBuilder.buildForm(CDecision.class, getBinder(),
-			getEntityFields()));
 	}
 }

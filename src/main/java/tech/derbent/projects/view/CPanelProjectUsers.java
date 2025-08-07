@@ -39,7 +39,7 @@ public class CPanelProjectUsers
 			entityService, userProjectSettingsService);
 		this.userService = userService;
 		this.userProjectSettingsService = userProjectSettingsService;
-		openPanel();
+		initPanel();
 	}
 
 	@Override
@@ -147,15 +147,14 @@ public class CPanelProjectUsers
 		dialog.open();
 	}
 
-	public void setCurrentProject(final CProject project) {
-		this.currentProject = project;
-	}
-
-	public void setProjectUsersAccessors(
-		final Supplier<List<CUserProjectSettings>> getProjectUsers,
+	public void setAccessors(final Supplier<List<CUserProjectSettings>> getProjectUsers,
 		final Runnable saveEntity) {
 		LOGGER.debug("Setting project users accessors");
 		setSettingsAccessors(getProjectUsers, saveEntity);
+	}
+
+	public void setCurrentProject(final CProject project) {
+		this.currentProject = project;
 	}
 
 	@Override

@@ -199,7 +199,7 @@ public class CEnhancedBinder<BEAN> extends BeanValidationBinder<BEAN> {
 			super.readBean(bean);
 		} catch (final Exception e) {
 			LOGGER.error("Error during readBean for bean type: {}",
-				beanType.getSimpleName(), e);
+				beanType.getSimpleName());
 			throw e;
 		}
 	}

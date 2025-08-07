@@ -21,8 +21,7 @@ public class CPanelMeetingBasicInfo extends CPanelMeetingBase {
 		final CMeetingTypeService meetingTypeService) {
 		super("Basic Information", currentEntity, beanValidationBinder, entityService,
 			meetingTypeService);
-		// only open this panel
-		openPanel();
+		initPanel();
 	}
 
 	@Override
