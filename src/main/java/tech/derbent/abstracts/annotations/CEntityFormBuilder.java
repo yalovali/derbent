@@ -215,12 +215,20 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 					meta.defaultValue(), field.getName(), e.getMessage());
 			}
 		}
-		final String propertyName = getPropertyName(field);
-		binder.forField(numberField)
-			.withConverter(
-				value -> value != null ? new BigDecimal(value.toString()) : null,
-				value -> value != null ? value.doubleValue() : null)
-			.bind(propertyName);
+		
+		try {
+			final String propertyName = getPropertyName(field);
+			binder.forField(numberField)
+				.withConverter(
+					value -> value != null ? new BigDecimal(value.toString()) : null,
+					value -> value != null ? value.doubleValue() : null)
+				.bind(propertyName);
+		} catch (final Exception e) {
+			LOGGER.error(
+				"Failed to bind BigDecimal field for field '{}': {} - trying simple binding",
+				field.getName(), e.getMessage());
+			safeBindComponentWithField(binder, numberField, field, "NumberField");
+		}
 		return numberField;
 	}
 
@@ -658,9 +666,10 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		final Class<?> fieldType = field.getType();
 
 		try {
-
+			// Get property name first to ensure it's valid before starting forField binding
+			final String propertyName = getPropertyName(field);
+			
 			if ((fieldType == Integer.class) || (fieldType == int.class)) {
-				final String propertyName = getPropertyName(field);
 				binder.forField(numberField)
 					.withConverter(value -> value != null ? value.intValue() : null,
 						value -> value != null ? value.doubleValue() : null)
@@ -670,7 +679,6 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 					field.getName());
 			}
 			else if ((fieldType == Long.class) || (fieldType == long.class)) {
-				final String propertyName = getPropertyName(field);
 				binder.forField(numberField)
 					.withConverter(value -> value != null ? value.longValue() : null,
 						value -> value != null ? value.doubleValue() : null)
