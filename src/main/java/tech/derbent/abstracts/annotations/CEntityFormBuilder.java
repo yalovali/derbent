@@ -220,11 +220,19 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 					value -> value != null ? new BigDecimal(value.toString()) : null,
 					value -> value != null ? value.doubleValue() : null)
 				.bind(propertyName);
+			LOGGER.debug("Successfully bound NumberField with BigDecimal converter for field '{}'", 
+				field.getName());
 		} catch (final Exception e) {
 			LOGGER.error(
-				"Failed to bind BigDecimal field for field '{}': {} - trying simple binding",
+				"Failed to bind BigDecimal field for field '{}': {} - using simple binding fallback",
 				field.getName(), e.getMessage());
-			safeBindComponentWithField(binder, numberField, field, "NumberField");
+			// Fallback to simple binding
+			try {
+				binder.bind(numberField, field.getName());
+			} catch (final Exception fallbackException) {
+				LOGGER.error("Simple binding fallback also failed for field '{}': {}", 
+					field.getName(), fallbackException.getMessage());
+			}
 		}
 		return numberField;
 	}
@@ -687,13 +695,19 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			}
 			else {
 				// Fallback for other number types (Double, etc.)
-				safeBindComponentWithField(binder, numberField, field, "NumberField");
+				binder.bind(numberField, propertyName);
 			}
 		} catch (final Exception e) {
 			LOGGER.error(
-				"Failed to bind integer field for field '{}': {} - trying simple binding",
+				"Failed to bind integer field for field '{}': {} - using simple binding fallback",
 				field.getName(), e.getMessage());
-			safeBindComponentWithField(binder, numberField, field, "NumberField");
+			// Fallback to simple binding
+			try {
+				binder.bind(numberField, field.getName());
+			} catch (final Exception fallbackException) {
+				LOGGER.error("Simple binding fallback also failed for field '{}': {}", 
+					field.getName(), fallbackException.getMessage());
+			}
 		}
 		return numberField;
 	}
@@ -949,8 +963,8 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 	}
 
 	/**
-	 * Safely binds a component to a field, ensuring no incomplete bindings are left. This
-	 * method prevents the "All bindings created with forField must be completed" error.
+	 * Safely binds a component to a field, ensuring no incomplete bindings are left.
+	 * This method prevents the "All bindings created with forField must be completed" error.
 	 */
 	private static void safeBindComponent(final CEnhancedBinder<?> binder,
 		final HasValueAndElement<?, ?> component, final String fieldName,

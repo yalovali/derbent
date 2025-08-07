@@ -117,13 +117,34 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 		lastnameField.setRequired(true);
 		lastnameField.setMaxLength(CUser.MAX_LENGTH_NAME);
 		// Bind fields to data
-		binder.forField(nameField)
-			.withValidator(
-				new StringLengthValidator("Name is required", 1, CUser.MAX_LENGTH_NAME))
-			.bind(CUser::getName, CUser::setName);
-		binder.forField(lastnameField).withValidator(
-			new StringLengthValidator("Last name is required", 1, CUser.MAX_LENGTH_NAME))
-			.bind(CUser::getLastname, CUser::setLastname);
+		try {
+			binder.forField(nameField)
+				.withValidator(
+					new StringLengthValidator("Name is required", 1, CUser.MAX_LENGTH_NAME))
+				.bind(CUser::getName, CUser::setName);
+		} catch (final Exception e) {
+			LOGGER.error("Failed to bind name field: {} - using simple binding fallback", e.getMessage());
+			try {
+				binder.bind(nameField, "name");
+			} catch (final Exception fallbackException) {
+				LOGGER.error("Simple binding fallback also failed for name field: {}", 
+					fallbackException.getMessage());
+			}
+		}
+		
+		try {
+			binder.forField(lastnameField).withValidator(
+				new StringLengthValidator("Last name is required", 1, CUser.MAX_LENGTH_NAME))
+				.bind(CUser::getLastname, CUser::setLastname);
+		} catch (final Exception e) {
+			LOGGER.error("Failed to bind lastname field: {} - using simple binding fallback", e.getMessage());
+			try {
+				binder.bind(lastnameField, "lastname");
+			} catch (final Exception fallbackException) {
+				LOGGER.error("Simple binding fallback also failed for lastname field: {}", 
+					fallbackException.getMessage());
+			}
+		}
 		final FormLayout profileSection = new FormLayout();
 		profileSection.add(nameField, lastnameField);
 		profileSection.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 2));
