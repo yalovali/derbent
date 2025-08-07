@@ -1196,8 +1196,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Creates UI testing activity.
 	 */
 	private void createUITestingActivity() {
-		LOGGER.info(
-			"createUITestingActivity called - creating user interface testing activity");
 		final CProject project = findProjectByName("Product Development Phase 2");
 
 		if (project == null) {
@@ -1245,7 +1243,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		commentService.createComment(
 			"Working on accessibility testing and user experience validation", uiTesting,
 			teamMember1);
-		LOGGER.info("UI testing activity created successfully");
 	}
 
 	/**

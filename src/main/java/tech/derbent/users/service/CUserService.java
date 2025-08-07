@@ -3,8 +3,6 @@ package tech.derbent.users.service;
 import java.time.Clock;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -21,11 +19,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.persistence.EntityNotFoundException;
 import tech.derbent.abstracts.annotations.CSpringAuxillaries;
 import tech.derbent.abstracts.services.CAbstractNamedEntityService;
 import tech.derbent.users.domain.CUser;
-import tech.derbent.users.domain.CUserProjectSettings;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -88,27 +84,11 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 		return savedUser;
 	}
 
-	/**
-	 * Find all enabled users with eager loading for UI components. Optimized for
-	 * dropdowns, comboboxes, and selection components.
-	 * @return List of enabled users with eager loaded associations
-	 */
-	public List<CUser> findAllEnabledWithEagerLoading() {
-		return ((CUserRepository) repository).findAllEnabledWithEagerLoading();
-	}
-
-	/**
-	 * Find user by ID with optimized eager loading. Uses repository method with JOIN
-	 * FETCH to prevent N+1 queries.
-	 * @param id the user ID
-	 * @return the user with eagerly loaded associations, or null if not found
-	 */
-	public CUser findById(final Long id) {
-
-		if (id == null) {
-			return null;
-		}
-		return ((CUserRepository) repository).findByIdWithEagerLoading(id).orElse(null);
+	@Transactional (readOnly = true)
+	public CUser findByIdWithUserSettings(final Long id) {
+		LOGGER.info("Getting project with users for project ID: {}", id);
+		// Using the custom repository method that eagerly fetches user settings
+		return ((CUserRepository) repository).findByIdWithUserSettings(id).orElse(null);
 	}
 
 	/**
@@ -143,19 +123,6 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 		return authorities;
 	}
 
-	/**
-	 * Overrides the base getById method to ensure lazy field initialization.
-	 * @param id the user ID
-	 * @return optional CUser with lazy fields initialized
-	 */
-	@Override
-	@Transactional (readOnly = true)
-	public Optional<CUser> getById(final Long id) {
-		final Optional<CUser> user = repository.findById(id);
-		user.ifPresent(this::initializeLazyFields);
-		return user;
-	}
-
 	@Override
 	protected Class<CUser> getEntityClass() { return CUser.class; }
 
@@ -165,23 +132,6 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 	 * @return the PasswordEncoder instance
 	 */
 	public PasswordEncoder getPasswordEncoder() { return passwordEncoder; }
-
-	/**
-	 * Gets a user with lazy-loaded project settings initialized.
-	 * @param id the user ID
-	 * @return the user with project settings loaded
-	 * @throws EntityNotFoundException if user not found
-	 */
-	@Transactional (readOnly = true)
-	public CUser getUserWithProjects(final Long id) {
-		LOGGER.debug("Getting user with projects for ID: {}", id);
-		// Get user and initialize all lazy fields including project settings
-		final CUser user = repository.findById(id).orElseThrow(
-			() -> new EntityNotFoundException("User not found with ID: " + id));
-		// Initialize lazy fields to prevent LazyInitializationException
-		initializeLazyFields(user);
-		return user;
-	}
 
 	/**
 	 * Initializes lazy fields for a user entity to prevent LazyInitializationException.
@@ -234,63 +184,6 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 			.credentialsExpired(false).disabled(!loginUser.isEnabled()) // Convert enabled
 			// flag to disabled flag
 			.build();
-	}
-
-	/**
-	 * Removes a project setting for a user.
-	 * @param userId    the user ID
-	 * @param projectId the project ID
-	 */
-	@Transactional
-	public void removeUserProjectSetting(final Long userId, final Long projectId) {
-		final CUser user = getUserWithProjects(userId);
-
-		if (user.getProjectSettings() != null) {
-			user.getProjectSettings()
-				.removeIf(setting -> setting.getProject().getId().equals(projectId));
-			repository.saveAndFlush(user);
-		}
-	}
-
-	/**
-	 * Adds or updates a project setting for a user.
-	 * @param userProjectSetting the project setting to save
-	 * @return the saved project setting
-	 */
-	@Transactional
-	public CUserProjectSettings
-		saveUserProjectSetting(final CUserProjectSettings userProjectSetting) {
-		LOGGER.info("Saving user project setting for user ID: {} and project ID: {}",
-			userProjectSetting.getUser().getId(),
-			userProjectSetting.getProject().getId());
-		// Ensure the user exists and reload with project settings
-		final CUser user = getUserWithProjects(userProjectSetting.getUser().getId());
-
-		// Initialize project settings list if null
-		if (user.getProjectSettings() == null) {
-			user.setProjectSettings(new java.util.ArrayList<>());
-		}
-		// Check if this setting already exists (update case)
-		boolean updated = false;
-
-		for (final CUserProjectSettings existing : user.getProjectSettings()) {
-
-			if (existing.getProject().getId()
-				.equals(userProjectSetting.getProject().getId())) {
-				existing.setRole(userProjectSetting.getRole());
-				existing.setPermission(userProjectSetting.getPermission());
-				updated = true;
-				break;
-			}
-		}
-
-		if (!updated) {
-			userProjectSetting.setUser(user);
-			user.getProjectSettings().add(userProjectSetting);
-		}
-		repository.saveAndFlush(user);
-		// Return the saved project setting
-		return userProjectSetting;
 	}
 
 	/**

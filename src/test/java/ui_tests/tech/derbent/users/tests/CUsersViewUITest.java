@@ -139,22 +139,6 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
 	}
 
 	@Test
-	void testFormPopulation() {
-		LOGGER.info("Testing form population with user data");
-
-		if (!testEntities.isEmpty()) {
-			final CUser testUser = testEntities.get(0);
-			// Mock getUserWithProjects to return the test user
-			when(mockUserService.getUserWithProjects(testUser.getId()))
-				.thenReturn(testUser);
-			// Test form population doesn't throw exceptions
-			assertDoesNotThrow(() -> {
-				usersView.testPopulateForm(testUser);
-			}, "Form population should not throw exceptions");
-		}
-	}
-
-	@Test
 	void testGridColumnAccess() {
 		LOGGER.info("Testing users grid column access for lazy loading issues");
 		// This tests all columns to ensure no lazy loading exceptions occur
@@ -265,22 +249,6 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
 				user.getUserType() != null ? user.getUserType().getName() : "";
 			assertNotNull(userTypeDisplay, "User type display should not be null");
 		});
-	}
-
-	@Test
-	void testUserWithProjectsLoading() {
-		LOGGER.info("Testing user with projects loading");
-
-		if (!testEntities.isEmpty()) {
-			final CUser testUser = testEntities.get(0);
-			// Mock the getUserWithProjects method
-			when(mockUserService.getUserWithProjects(testUser.getId()))
-				.thenReturn(testUser);
-			// Test that loading user with projects doesn't cause exceptions
-			assertDoesNotThrow(() -> {
-				usersView.testPopulateForm(testUser);
-			}, "Loading user with projects should not throw exceptions");
-		}
 	}
 
 	@Test

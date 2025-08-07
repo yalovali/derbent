@@ -226,12 +226,7 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable {
 	public byte[] getProfilePictureData() { return profilePictureData; }
 
 	// Getter and setter with safe initialization to prevent lazy loading issues
-	public List<CUserProjectSettings> getProjectSettings() { 
-		if (projectSettings == null) {
-			projectSettings = new ArrayList<>();
-		}
-		return projectSettings; 
-	}
+	public List<CUserProjectSettings> getProjectSettings() { return projectSettings; }
 
 	public String getRoles() { return roles; }
 
@@ -343,7 +338,8 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable {
 	}
 
 	public void setProjectSettings(final List<CUserProjectSettings> projectSettings) {
-		this.projectSettings = projectSettings != null ? projectSettings : new ArrayList<>();
+		this.projectSettings =
+			projectSettings != null ? projectSettings : new ArrayList<>();
 	}
 
 	public void setRoles(final String roles) {

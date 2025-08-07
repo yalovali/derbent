@@ -30,8 +30,6 @@ public class CEnhancedBinderIntegrationExample {
 
 		private final CAbstractService<CMeetingStatus> service;
 
-		private final Div formLayout;
-
 		public ConfigurableMeetingStatusView(
 			final CAbstractService<CMeetingStatus> service,
 			final CSessionService sessionService, final boolean useEnhancedBinder) {
@@ -45,7 +43,7 @@ public class CEnhancedBinderIntegrationExample {
 				// Use standard binder
 				this.binder = CBinderFactory.createStandardBinder(CMeetingStatus.class);
 			}
-			this.formLayout = CEntityFormBuilder.buildForm(CMeetingStatus.class, binder);
+			CEntityFormBuilder.buildForm(CMeetingStatus.class, binder);
 		}
 
 		public void save() {

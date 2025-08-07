@@ -1,9 +1,5 @@
 package tech.derbent.users.view;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.html.Div;
@@ -17,12 +13,10 @@ import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
 import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.abstracts.views.CButton;
-import tech.derbent.base.ui.dialogs.CWarningDialog;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
-import tech.derbent.users.domain.CUserProjectSettings;
 import tech.derbent.users.service.CUserProjectSettingsService;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.CUserTypeService;
@@ -75,60 +69,27 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser>
 		this.projectService = projectService;
 		this.userProjectSettingsService = userProjectSettingsService;
 		// projectSettingsGrid = new CPanelUserProjectSettings(projectService);
-		LOGGER.info("CUsersView initialized with user type and company services");
-	}
-
-	/**
-	 * Binds form data to the current entity.
-	 */
-	private void bindFormData() throws ValidationException {
-		getBinder().writeBean(getCurrentEntity());
-	}
-
-	/**
-	 * Clears project settings panel when no user is selected.
-	 */
-	private void clearProjectSettings() {
-		projectSettingsGrid.setCurrentUser(null);
-		projectSettingsGrid.setProjectSettingsAccessors(Collections::emptyList, () -> {});
-	}
-
-	/**
-	 * Configures project settings panel for the specified user.
-	 * @param user The user to configure project settings for
-	 */
-	private void configureProjectSettingsForUser(final CUser user) {
-		final CUser userWithSettings = loadUserWithProjects(user.getId());
-		projectSettingsGrid.setCurrentUser(userWithSettings);
-		setupProjectSettingsAccessors(userWithSettings);
 	}
 
 	@Override
 	protected void createDetailsLayout() {
-		CAccordionDBEntity<CUser> panel;
+		final CAccordionDBEntity<CUser> panel;
 		descriptionPanel = new CPanelUserDescription(getCurrentEntity(), getBinder(),
 			(CUserService) entityService, userTypeService, companyService);
 		addAccordionPanel(descriptionPanel);
-		panel = new CPanelUserContactInfo(getCurrentEntity(), getBinder(),
-			(CUserService) entityService, userTypeService, companyService);
-		addAccordionPanel(panel);
-		panel = new CPanelUserCompanyAssociation(getCurrentEntity(), getBinder(),
-			(CUserService) entityService, userTypeService, companyService);
-		addAccordionPanel(panel);
-		// panel = new CPanelUserBasicInfo(getCurrentEntity(), getBinder(), (CUserService)
-		// entityService); addAccordionPanel(panel);
-		projectSettingsGrid = new CPanelUserProjectSettings(getCurrentEntity(),
-			getBinder(), (CUserService) entityService, userTypeService, companyService,
-			projectService, userProjectSettingsService);
-		addAccordionPanel(projectSettingsGrid);
-		panel = new CPanelUserSystemAccess(getCurrentEntity(), getBinder(),
-			(CUserService) entityService, userTypeService, companyService);
-		addAccordionPanel(panel);
-		/**************/
-		// descriptionPanel = new CPanelUserDescription(getCurrentEntity(),
-		// getBinder(),(CUserService) entityService, userTypeService, companyService);
-		// getBaseDetailsLayout().add(descriptionPanel);
-		// getBaseDetailsLayout().add(projectSettingsGrid);
+		/*
+		 * panel = new CPanelUserContactInfo(getCurrentEntity(), getBinder(),
+		 * (CUserService) entityService, userTypeService, companyService);
+		 * addAccordionPanel(panel); panel = new
+		 * CPanelUserCompanyAssociation(getCurrentEntity(), getBinder(), (CUserService)
+		 * entityService, userTypeService, companyService); addAccordionPanel(panel);
+		 * projectSettingsGrid = new CPanelUserProjectSettings(getCurrentEntity(),
+		 * getBinder(), (CUserService) entityService, userTypeService, companyService,
+		 * projectService, userProjectSettingsService);
+		 * addAccordionPanel(projectSettingsGrid); panel = new
+		 * CPanelUserSystemAccess(getCurrentEntity(), getBinder(), (CUserService)
+		 * entityService, userTypeService, companyService); addAccordionPanel(panel);
+		 */
 	}
 
 	@Override
@@ -161,9 +122,6 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser>
 			item -> item.getCompany() != null ? item.getCompany().getName() : "",
 			"Company");
 		grid.addShortTextColumn(CUser::getRoles, "Roles", "roles");
-		// Data provider is already set up in the base class
-		// CAbstractMDPage.createGridLayout() No need to call grid.setItems() again as
-		// it's already configured to handle sorting properly
 	}
 
 	/**
@@ -178,22 +136,11 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser>
 
 			try {
 				performSaveOperation();
-			} catch (final ValidationException validationException) {
-				handleValidationError();
-			} catch (final Exception exception) {
-				handleUnexpectedError(exception);
+			} catch (final ValidationException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
 		});
-	}
-
-	/**
-	 * Ensures a current entity exists, creating one if necessary.
-	 */
-	private void ensureEntityExists() {
-
-		if (getCurrentEntity() == null) {
-			setCurrentEntity(entityService.createEntity());
-		}
 	}
 
 	@Override
@@ -210,40 +157,10 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser>
 	}
 
 	/**
-	 * Handles unexpected errors with proper logging.
-	 */
-	private void handleUnexpectedError(final Exception exception) {
-		LOGGER.error("Unexpected error during save operation", exception);
-		new CWarningDialog("An unexpected error occurred while saving. Please try again.")
-			.open();
-	}
-
-	/**
-	 * Handles validation errors with user-friendly messaging.
-	 */
-	private void handleValidationError() {
-		new CWarningDialog(
-			"Failed to save the data. Please check that all required fields are filled and values are valid.")
-			.open();
-	}
-
-	/**
-	 * Loads user data with project settings to avoid lazy initialization issues.
-	 * @param userId The ID of the user to load
-	 * @return User entity with project settings loaded
-	 */
-	private CUser loadUserWithProjects(final Long userId) {
-		return ((CUserService) entityService).getUserWithProjects(userId);
-	}
-
-	/**
 	 * Performs the complete save operation workflow.
 	 */
 	private void performSaveOperation() throws ValidationException {
-		ensureEntityExists();
-		bindFormData();
 		handlePasswordUpdate();
-		saveEntityAndUpdateUI();
 	}
 
 	/**
@@ -253,86 +170,13 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser>
 	 */
 	@Override
 	protected void populateForm(final CUser value) {
-		// update all layz loaded fields
-		entityService.initializeLazyFields(value);
-		super.populateForm(value);
 		LOGGER.info("Populating form with user data: {}",
 			value != null ? value.getLogin() : "null");
-		updateProjectSettingsPanel(value);
-	}
-
-	/**
-	 * Refreshes user data after project settings update.
-	 * @param userId The ID of the user to refresh
-	 */
-	private void refreshUserAfterProjectUpdate(final Long userId) {
-
-		try {
-			final CUser refreshedUser = loadUserWithProjects(userId);
-			populateForm(refreshedUser);
-		} catch (final Exception e) {
-			LOGGER.error("Error refreshing user after project settings update", e);
-		}
-	}
-
-	/**
-	 * Saves the entity and updates the UI accordingly.
-	 */
-	private void saveEntityAndUpdateUI() {
-		final CUser savedEntity = entityService.save(getCurrentEntity());
-		LOGGER.info("User saved successfully with ID: {}", savedEntity.getId());
-		setCurrentEntity(savedEntity);
-		updateUIAfterSave();
-	}
-
-	/**
-	 * Sets up accessor methods for project settings panel data management.
-	 * @param userWithSettings User entity with project settings loaded
-	 */
-	private void setupProjectSettingsAccessors(final CUser userWithSettings) {
-		projectSettingsGrid.setProjectSettingsAccessors(() -> {
-			// Ensure the collection is never null
-			List<CUserProjectSettings> settings = userWithSettings.getProjectSettings();
-
-			if (settings == null) {
-				settings = new ArrayList<>();
-				userWithSettings.setProjectSettings(settings);
-			}
-			return settings;
-		}, () -> refreshUserAfterProjectUpdate(userWithSettings.getId()));
+		super.populateForm(value);
 	}
 
 	@Override
 	protected void setupToolbar() {
 		// TODO Auto-generated method stub
-	}
-
-	/**
-	 * Updates the project settings panel based on current user selection.
-	 * @param user The selected user, or null to clear the panel
-	 */
-	private void updateProjectSettingsPanel(final CUser user) {
-
-		if (projectSettingsGrid == null) {
-			LOGGER.debug("Project settings grid not yet initialized, skipping populate");
-			return;
-		}
-
-		if (user != null) {
-			configureProjectSettingsForUser(user);
-		}
-		else {
-			clearProjectSettings();
-		}
-	}
-
-	/**
-	 * Updates UI components after successful save.
-	 */
-	private void updateUIAfterSave() {
-		clearForm();
-		refreshGrid();
-		safeShowNotification("User data saved successfully");
-		safeNavigateToClass();
 	}
 }

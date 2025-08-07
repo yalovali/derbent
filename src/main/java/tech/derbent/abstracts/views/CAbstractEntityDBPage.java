@@ -174,7 +174,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 			}
 		}
 		else {
-			selectFirstItemIfAvailable();
+			// selectFirstItemIfAvailable();
 		}
 	}
 
