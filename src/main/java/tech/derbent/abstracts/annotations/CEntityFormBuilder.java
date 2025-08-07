@@ -224,15 +224,10 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 				field.getName());
 		} catch (final Exception e) {
 			LOGGER.error(
-				"Failed to bind BigDecimal field for field '{}': {} - using simple binding fallback",
+				"Failed to bind BigDecimal field for field '{}': {} - this will cause incomplete bindings",
 				field.getName(), e.getMessage());
-			// Fallback to simple binding
-			try {
-				binder.bind(numberField, field.getName());
-			} catch (final Exception fallbackException) {
-				LOGGER.error("Simple binding fallback also failed for field '{}': {}", 
-					field.getName(), fallbackException.getMessage());
-			}
+			// Instead of fallback binding, we need to clean up and let the standard binding handle it
+			// The incomplete forField binding will be cleaned up by validateBindingsComplete()
 		}
 		return numberField;
 	}
@@ -699,15 +694,10 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			}
 		} catch (final Exception e) {
 			LOGGER.error(
-				"Failed to bind integer field for field '{}': {} - using simple binding fallback",
+				"Failed to bind integer field for field '{}': {} - this will cause incomplete bindings",
 				field.getName(), e.getMessage());
-			// Fallback to simple binding
-			try {
-				binder.bind(numberField, field.getName());
-			} catch (final Exception fallbackException) {
-				LOGGER.error("Simple binding fallback also failed for field '{}': {}", 
-					field.getName(), fallbackException.getMessage());
-			}
+			// Instead of fallback binding, we need to clean up and let the standard binding handle it
+			// The incomplete forField binding will be cleaned up by validateBindingsComplete()
 		}
 		return numberField;
 	}

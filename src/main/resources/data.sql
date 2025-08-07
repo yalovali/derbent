@@ -18,7 +18,7 @@
 -- =====================================================================
 
 -- Disable foreign key checks temporarily for PostgreSQL
-SET session_replication_role = replica;
+-- SET session_replication_role = replica;
 
 -- Delete data from junction tables first
 DELETE FROM cmeeting_participants;
@@ -55,7 +55,8 @@ DELETE FROM corderstatus;
 DELETE FROM ccurrency;
 DELETE FROM capprovalstatus;
 
-SET session_replication_role = DEFAULT;
+-- Re-enable foreign key checks for PostgreSQL
+-- SET session_replication_role = DEFAULT;
 
 -- Reset sequences to start from 1 (essential sequences only)
 DO '
