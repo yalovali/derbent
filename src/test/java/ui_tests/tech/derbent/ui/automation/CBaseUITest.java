@@ -23,9 +23,32 @@ import com.microsoft.playwright.Playwright;
 import com.vaadin.flow.router.Route;
 
 import tech.derbent.activities.view.CActivitiesView;
+import tech.derbent.activities.view.CActivityStatusView;
+import tech.derbent.activities.view.CActivityTypeView;
+import tech.derbent.administration.view.CCompanySettingsView;
+import tech.derbent.base.ui.view.CDashboardView;
+import tech.derbent.comments.view.CCommentPriorityView;
+import tech.derbent.companies.view.CCompanyView;
+import tech.derbent.decisions.view.CDecisionStatusView;
+import tech.derbent.decisions.view.CDecisionTypeView;
 import tech.derbent.decisions.view.CDecisionsView;
+import tech.derbent.examples.view.CExampleHierarchicalMenuView;
+import tech.derbent.examples.view.CExampleSettingsView;
+import tech.derbent.examples.view.CSearchDemoView;
+import tech.derbent.examples.view.CSearchShowcaseView;
+import tech.derbent.kanban.view.CActivityKanbanBoardView;
+import tech.derbent.kanban.view.CGenericActivityKanbanBoardView;
+import tech.derbent.kanban.view.CMeetingKanbanBoardView;
+import tech.derbent.meetings.view.CMeetingStatusView;
+import tech.derbent.meetings.view.CMeetingTypeView;
 import tech.derbent.meetings.view.CMeetingsView;
+import tech.derbent.orders.view.COrdersView;
+import tech.derbent.projects.view.CProjectDetailsView;
 import tech.derbent.projects.view.CProjectsView;
+import tech.derbent.risks.view.CRiskStatusView;
+import tech.derbent.risks.view.CRiskView;
+import tech.derbent.setup.view.CSystemSettingsView;
+import tech.derbent.users.view.CUserTypeView;
 import tech.derbent.users.view.CUsersView;
 
 @SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT)
@@ -47,9 +70,65 @@ public class CBaseUITest {
 
 	protected String baseUrl;
 
-	protected Class<?>[] viewClasses = {
+	// Core business views - main entity management
+	protected Class<?>[] mainViewClasses = {
 		CProjectsView.class, CActivitiesView.class, CMeetingsView.class,
-		CDecisionsView.class, CUsersView.class };
+		CDecisionsView.class, CUsersView.class, COrdersView.class,
+		CRiskView.class, CCompanyView.class };
+
+	// Status and Type configuration views
+	protected Class<?>[] statusAndTypeViewClasses = {
+		CActivityStatusView.class, CActivityTypeView.class,
+		CDecisionStatusView.class, CDecisionTypeView.class,
+		CMeetingStatusView.class, CMeetingTypeView.class,
+		CUserTypeView.class, CRiskStatusView.class,
+		CCommentPriorityView.class };
+
+	// Administrative and system configuration views
+	protected Class<?>[] adminViewClasses = {
+		CCompanySettingsView.class, CSystemSettingsView.class,
+		CDashboardView.class };
+
+	// Kanban board views
+	protected Class<?>[] kanbanViewClasses = {
+		CActivityKanbanBoardView.class, CMeetingKanbanBoardView.class,
+		CGenericActivityKanbanBoardView.class };
+
+	// Example and demo views
+	protected Class<?>[] exampleViewClasses = {
+		CExampleHierarchicalMenuView.class, CExampleSettingsView.class,
+		CSearchDemoView.class, CSearchShowcaseView.class };
+
+	// Detail views
+	protected Class<?>[] detailViewClasses = {
+		CProjectDetailsView.class };
+
+	// All views combined for comprehensive testing
+	protected Class<?>[] allViewClasses = {
+		// Main business views
+		CProjectsView.class, CActivitiesView.class, CMeetingsView.class,
+		CDecisionsView.class, CUsersView.class, COrdersView.class,
+		CRiskView.class, CCompanyView.class,
+		// Status and Type views
+		CActivityStatusView.class, CActivityTypeView.class,
+		CDecisionStatusView.class, CDecisionTypeView.class,
+		CMeetingStatusView.class, CMeetingTypeView.class,
+		CUserTypeView.class, CRiskStatusView.class,
+		CCommentPriorityView.class,
+		// Administrative views
+		CCompanySettingsView.class, CSystemSettingsView.class,
+		CDashboardView.class,
+		// Kanban views
+		CActivityKanbanBoardView.class, CMeetingKanbanBoardView.class,
+		CGenericActivityKanbanBoardView.class,
+		// Example views
+		CExampleHierarchicalMenuView.class, CExampleSettingsView.class,
+		CSearchDemoView.class, CSearchShowcaseView.class,
+		// Detail views
+		CProjectDetailsView.class };
+
+	// Legacy property for backward compatibility
+	protected Class<?>[] viewClasses = mainViewClasses;
 
 	/**
 	 * Clicks on an element by its ID with timeout and error handling

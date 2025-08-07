@@ -111,6 +111,11 @@ show_usage() {
     echo "Options:"
     echo "  all           Run all Playwright UI automation tests"
     echo "  playwright    Run Playwright browser automation tests"
+    echo "  comprehensive Run comprehensive tests for ALL views (new)"
+    echo "  status-types  Run status and type views tests only (new)"
+    echo "  main-views    Run main business views tests only (new)"
+    echo "  admin-views   Run administrative views tests only (new)"
+    echo "  kanban-views  Run kanban board views tests only (new)"
     echo "  mock          Run mock tests that demonstrate screenshot functionality"
     echo "  docker        Run tests using Docker (recommended)"
     echo "  login         Run login/logout tests only"
@@ -128,14 +133,17 @@ show_usage() {
     echo "  help          Show this help message"
     echo ""
     echo "Examples:"
-    echo "  $0 mock       # Run mock tests to demonstrate screenshot functionality"
-    echo "  $0 docker     # Run real Playwright tests using Docker (recommended)"
-    echo "  $0 all        # Run all Playwright automation tests"
-    echo "  $0 playwright # Run complete Playwright test suite"
-    echo "  $0 login      # Run only login/logout tests"
-    echo "  $0 colors     # Run only user color and entry views tests"
-    echo "  $0 install    # Install Playwright browsers"
-    echo "  $0 clean      # Clean up test artifacts"
+    echo "  $0 mock           # Run mock tests to demonstrate screenshot functionality"
+    echo "  $0 comprehensive  # Run tests for ALL views (new comprehensive testing)"
+    echo "  $0 status-types   # Run tests for all status and type views"
+    echo "  $0 main-views     # Run tests for all main business views"
+    echo "  $0 docker         # Run real Playwright tests using Docker (recommended)"
+    echo "  $0 all            # Run all Playwright automation tests"
+    echo "  $0 playwright     # Run complete Playwright test suite"
+    echo "  $0 login          # Run only login/logout tests"
+    echo "  $0 colors         # Run only user color and entry views tests"
+    echo "  $0 install        # Install Playwright browsers"
+    echo "  $0 clean          # Clean up test artifacts"
     echo ""
     echo "Note: Use 'mock' option to see screenshot functionality without browser issues."
     echo "      Use 'docker' option for full Playwright testing with real browsers."
@@ -154,6 +162,31 @@ main() {
         "docker")
             echo "🐳 Running Playwright tests with Docker..."
             run_with_docker
+            ;;
+            
+        "comprehensive")
+            echo "🌟 Running comprehensive tests for ALL views..."
+            run_playwright_tests "automated_tests.tech.derbent.ui.automation.ComprehensiveViewsPlaywrightTest" "Comprehensive All Views Tests"
+            ;;
+            
+        "status-types")
+            echo "⚙️ Running status and type views tests..."
+            run_playwright_tests "tech.derbent.ui.automation.PlaywrightUIAutomationTest#testAllStatusAndTypeViews" "Status and Type Views Tests"
+            ;;
+            
+        "main-views")
+            echo "🏢 Running main business views tests..."
+            run_playwright_tests "tech.derbent.ui.automation.PlaywrightUIAutomationTest#testAllMainBusinessViews" "Main Business Views Tests"
+            ;;
+            
+        "admin-views")
+            echo "🔧 Running administrative views tests..."
+            run_playwright_tests "tech.derbent.ui.automation.PlaywrightUIAutomationTest#testAllAdministrativeViews" "Administrative Views Tests"
+            ;;
+            
+        "kanban-views")
+            echo "📋 Running kanban board views tests..."
+            run_playwright_tests "tech.derbent.ui.automation.PlaywrightUIAutomationTest#testAllKanbanViews" "Kanban Board Views Tests"
             ;;
             
         "colors")
@@ -188,7 +221,7 @@ main() {
             
         "navigation")
             echo "🧭 Running navigation tests..."
-            run_playwright_tests "tech.derbent.ui.automation.PlaywrightUIAutomationTest#testNavigationBetweenViews" "Navigation Tests"
+            run_playwright_tests "tech.derbent.ui.automation.PlaywrightUIAutomationTest#testNavigationBetweenViews,tech.derbent.ui.automation.PlaywrightUIAutomationTest#testComprehensiveAllViewsNavigation" "Navigation Tests"
             ;;
             
         "responsive")
