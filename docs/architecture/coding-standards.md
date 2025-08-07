@@ -525,7 +525,7 @@ class ManualVerificationTest {
 
 **Critical**: Follow the established lazy loading architecture. See `COMPREHENSIVE_LAZY_LOADING_FIX.md` for complete implementation details.
 
-### 9.6.1. Current Lazy Loading Architecture
+### 9.6.3. Current Lazy Loading Architecture (✅ UPDATED)
 The application uses a comprehensive lazy loading solution implemented in base classes:
 
 **Base Architecture**:
@@ -533,6 +533,24 @@ The application uses a comprehensive lazy loading solution implemented in base c
 - **CEntityOfProjectService**: Enhanced lazy field initialization for project-aware entities  
 - **Repository Layer**: Uses `LEFT JOIN FETCH` queries for eager loading
 - **Service Layer**: Overrides `getById()` methods for entity-specific eager loading
+
+**Fixed User Service Method**:
+```java
+@Transactional (readOnly = true)
+public CUser getUserWithProjects(final Long id) {
+    LOGGER.debug("Getting user with projects for ID: {}", id);
+    // Get user and initialize all lazy fields including project settings
+    final CUser user = repository.findById(id).orElseThrow(
+        () -> new EntityNotFoundException("User not found with ID: " + id));
+    
+    // Initialize lazy fields to prevent LazyInitializationException
+    initializeLazyFields(user);
+    
+    return user;
+}
+```
+
+This fix ensures that when the CUsersView loads user data with projects, all lazy relationships (UserType, Company, ProjectSettings) are properly initialized, preventing LazyInitializationException issues.
 
 ### 9.6.2. Implementation Pattern for New Entities
 All new entities with lazy relationships must follow this established pattern:

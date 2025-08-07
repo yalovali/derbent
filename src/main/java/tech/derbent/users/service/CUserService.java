@@ -175,10 +175,13 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 	@Transactional (readOnly = true)
 	public CUser getUserWithProjects(final Long id) {
 		LOGGER.debug("Getting user with projects for ID: {}", id);
-		// Use standard findById method - projects will be loaded when accessed within
-		// transaction
+		// Get user and initialize all lazy fields including project settings
 		final CUser user = repository.findById(id).orElseThrow(
 			() -> new EntityNotFoundException("User not found with ID: " + id));
+		
+		// Initialize lazy fields to prevent LazyInitializationException
+		initializeLazyFields(user);
+		
 		return user;
 	}
 

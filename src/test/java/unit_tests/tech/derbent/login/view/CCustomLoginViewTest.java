@@ -105,7 +105,7 @@ public class CCustomLoginViewTest extends CBaseUITest {
 		assertTrue(page.locator("#custom-submit-button").isVisible());
 		// Verify back link to original login is present (button text from
 		// CCustomLoginView)
-		assertTrue(page.locator("text=Bact to Original Login").isVisible());
+		assertTrue(page.locator("text=Back to Original Login").isVisible());
 		LOGGER.info("✅ Custom login view loads test completed");
 	}
 
@@ -123,7 +123,7 @@ public class CCustomLoginViewTest extends CBaseUITest {
 		page.waitForSelector(".custom-login-view",
 			new Page.WaitForSelectorOptions().setTimeout(10000));
 		// Click back to original login link (button text from CCustomLoginView)
-		page.locator("text=Bact to Original Login").click();
+		page.locator("text=Back to Original Login").click();
 		// Verify we're now on original login page (route is "overlay-login" for
 		// CLoginView)
 		page.waitForSelector("vaadin-login-overlay",
