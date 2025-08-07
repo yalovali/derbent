@@ -109,6 +109,21 @@ Browser.NewContextOptions contextOptions = new Browser.NewContextOptions()
 
 ## Core Testing Patterns
 
+> **⚠️ Important Update**: The login screen has been updated from `LoginOverlay` to `CCustomLoginView`. All login-related tests have been updated to use the new selectors and approach.
+
+### Login Screen Architecture
+
+The application now uses a custom login view (`CCustomLoginView`) instead of Vaadin's `LoginOverlay`:
+
+- **Route**: `/login` (mapped to `CCustomLoginView`)
+- **Alternative Route**: `/overlay-login` (mapped to `CLoginView` for testing)
+- **Security Configuration**: Uses `CCustomLoginView` as default login view
+- **Element IDs**: 
+  - Username: `#custom-username-input`
+  - Password: `#custom-password-input`
+  - Submit Button: `#custom-submit-button`
+  - Container: `.custom-login-view`
+
 ### Login Testing Pattern
 
 ```java
@@ -117,13 +132,13 @@ void testLoginFunctionality() {
     // Navigate to application
     page.navigate(baseUrl);
     
-    // Wait for login overlay
-    page.waitForSelector("vaadin-login-overlay");
+    // Wait for custom login view (updated for new login screen)
+    page.waitForSelector(".custom-login-view");
     
-    // Perform login
-    page.locator("vaadin-login-overlay vaadin-text-field").fill("admin");
-    page.locator("vaadin-login-overlay vaadin-password-field").fill("test123");
-    page.locator("vaadin-login-overlay vaadin-button[theme~='primary']").click();
+    // Perform login using specific element IDs
+    page.locator("#custom-username-input").fill("admin");
+    page.locator("#custom-password-input").fill("test123");
+    page.locator("#custom-submit-button").click();
     
     // Verify successful login
     page.waitForSelector("vaadin-app-layout");
@@ -292,15 +307,17 @@ void testAccessibilityBasics() {
 ```java
 private void loginToApplication() {
     page.navigate(baseUrl);
-    page.waitForSelector("vaadin-login-overlay");
+    // Wait for custom login view (updated for new login screen)
+    page.waitForSelector(".custom-login-view");
     performLogin("admin", "test123");
     page.waitForSelector("vaadin-app-layout");
 }
 
 private void performLogin(String username, String password) {
-    page.locator("vaadin-login-overlay vaadin-text-field").fill(username);
-    page.locator("vaadin-login-overlay vaadin-password-field").fill(password);
-    page.locator("vaadin-login-overlay vaadin-button[theme~='primary']").click();
+    // Updated selectors for CCustomLoginView
+    page.locator("#custom-username-input").fill(username);
+    page.locator("#custom-password-input").fill(password);
+    page.locator("#custom-submit-button").click();
     page.waitForTimeout(1000);
 }
 ```

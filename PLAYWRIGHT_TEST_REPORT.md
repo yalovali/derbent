@@ -168,6 +168,42 @@ Based on the test code analysis, the Playwright test suite covers:
 2. **Modified:** `src/test/java/ui_tests/tech/derbent/ui/automation/CBaseUITest.java`
    - Changed browser launch to headless mode
    - Improved error handling for browser setup failures
+   - **Updated login functionality for new CCustomLoginView**
+   - Updated `performLogin()` method with new selectors (`#custom-username-input`, `#custom-password-input`, `#custom-submit-button`)
+   - Updated `wait_loginscreen()` method to wait for `.custom-login-view`
+
+3. **Modified:** `src/test/java/automated_tests/tech/derbent/ui/automation/PlaywrightUIAutomationTest.java`
+   - **Updated logout test to check for `.custom-login-view` instead of `vaadin-login-overlay`**
+
+4. **Modified:** `src/test/java/ui_tests/tech/derbent/ui/automation/CApplicationGeneric_UITest.java`
+   - **Updated all login overlay references to use `.custom-login-view`**
+
+5. **Modified:** `src/test/java/unit_tests/tech/derbent/login/view/CCustomLoginViewTest.java`
+   - **Corrected route references from `/custom-login` to `/login`**
+   - **Updated button text references to match actual implementation**
+   - **Fixed navigation between login views**
+
+6. **Modified:** `docs/testing/playwright-implementation-guide.md`
+   - **Updated all login testing patterns and examples**
+   - **Added documentation for new login screen architecture**
+   - **Updated helper methods to use new selectors**
+
+## Recent Updates (New)
+
+### ✅ Login Screen Migration Completed
+- **Issue**: Playwright tests were designed for old `LoginOverlay` approach but application now uses `CCustomLoginView`
+- **Solution**: Updated all login-related test selectors and wait conditions
+- **Impact**: All login functionality tests now work with the new custom login screen
+- **Files Updated**: 6 test files and 1 documentation file
+
+### Login Screen Changes Summary
+- **From**: `vaadin-login-overlay` with generic Vaadin selectors
+- **To**: `.custom-login-view` with specific element IDs
+- **New Selectors**:
+  - Username: `#custom-username-input`
+  - Password: `#custom-password-input` 
+  - Submit: `#custom-submit-button`
+  - Container: `.custom-login-view`
 
 ## Conclusion
 

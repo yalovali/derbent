@@ -32,15 +32,15 @@ public class CApplicationGeneric_UITest extends CBaseUITest {
 		}
 		// Navigate to application
 		page.navigate(baseUrl);
-		// Wait for login overlay to be visible (application should require login)
-		page.waitForSelector("vaadin-login-overlay",
+		// Wait for custom login view to be visible (application should require login)
+		page.waitForSelector(".custom-login-view",
 			new Page.WaitForSelectorOptions().setTimeout(10000));
 		// Verify page title contains expected text
 		final String title = page.title();
 		assertNotNull(title);
 		LOGGER.info("✅ Application loaded successfully. Title: {}", title);
-		// Check that login overlay is present
-		assertTrue(page.locator("vaadin-login-overlay").isVisible());
+		// Check that custom login view is present
+		assertTrue(page.locator(".custom-login-view").isVisible());
 		LOGGER.info("✅ Application loads successfully test completed");
 	}
 
@@ -53,7 +53,8 @@ public class CApplicationGeneric_UITest extends CBaseUITest {
 			// Verify we're back at login page
 			wait_loginscreen();
 			takeScreenshot("after-logout");
-			assertTrue(page.locator("vaadin-login-overlay").isVisible());
+			// Updated for CCustomLoginView
+			assertTrue(page.locator(".custom-login-view").isVisible());
 			LOGGER.info("✅ Logout functionality test completed successfully");
 		}
 		else {
