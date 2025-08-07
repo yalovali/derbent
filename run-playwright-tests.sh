@@ -52,6 +52,58 @@ run_playwright_tests() {
     fi
 }
 
+# Function to run mock tests that demonstrate screenshot functionality
+run_mock_tests() {
+    echo "🎭 Running mock Playwright tests with screenshot generation..."
+    echo "============================================================="
+    
+    # Create screenshots directory
+    mkdir -p target/screenshots
+    
+    # Run mock tests that generate screenshots
+    if mvn test -Dtest="PlaywrightMockTest" -Dspring.profiles.active=test --batch-mode; then
+        echo "✅ Mock tests completed successfully!"
+        
+        # Show screenshot count
+        screenshot_count=$(find target/screenshots -name "*.png" 2>/dev/null | wc -l)
+        if [[ $screenshot_count -gt 0 ]]; then
+            echo "📸 Generated $screenshot_count mock screenshots in target/screenshots/"
+            echo "Screenshots created:"
+            ls -1 target/screenshots/*.png 2>/dev/null | head -10 || true
+            if [[ $screenshot_count -gt 10 ]]; then
+                echo "... and $((screenshot_count - 10)) more screenshots"
+            fi
+        fi
+        
+    else
+        echo "❌ Mock tests failed!"
+        return 1
+    fi
+}
+
+# Function to run with Docker (if available)
+run_with_docker() {
+    echo "🐳 Running Playwright tests with Docker..."
+    echo "=========================================="
+    
+    if command -v docker &> /dev/null; then
+        echo "Building Playwright Docker image..."
+        docker build -f Dockerfile.playwright -t derbent-playwright .
+        
+        echo "Running tests in Docker container..."
+        docker run --rm -v $(pwd)/target:/app/target derbent-playwright
+        
+        # Show results
+        screenshot_count=$(find target/screenshots -name "*.png" 2>/dev/null | wc -l)
+        if [[ $screenshot_count -gt 0 ]]; then
+            echo "📸 Generated $screenshot_count Docker screenshots in target/screenshots/"
+        fi
+    else
+        echo "❌ Docker not available. Please install Docker to use this option."
+        return 1
+    fi
+}
+
 # Function to show usage
 show_usage() {
     echo "Usage: $0 [option]"
@@ -59,6 +111,8 @@ show_usage() {
     echo "Options:"
     echo "  all           Run all Playwright UI automation tests"
     echo "  playwright    Run Playwright browser automation tests"
+    echo "  mock          Run mock tests that demonstrate screenshot functionality"
+    echo "  docker        Run tests using Docker (recommended)"
     echo "  login         Run login/logout tests only"
     echo "  crud          Run CRUD operation tests only"
     echo "  grid          Run grid interaction tests only"
@@ -74,12 +128,17 @@ show_usage() {
     echo "  help          Show this help message"
     echo ""
     echo "Examples:"
+    echo "  $0 mock       # Run mock tests to demonstrate screenshot functionality"
+    echo "  $0 docker     # Run real Playwright tests using Docker (recommended)"
     echo "  $0 all        # Run all Playwright automation tests"
     echo "  $0 playwright # Run complete Playwright test suite"
     echo "  $0 login      # Run only login/logout tests"
     echo "  $0 colors     # Run only user color and entry views tests"
     echo "  $0 install    # Install Playwright browsers"
     echo "  $0 clean      # Clean up test artifacts"
+    echo ""
+    echo "Note: Use 'mock' option to see screenshot functionality without browser issues."
+    echo "      Use 'docker' option for full Playwright testing with real browsers."
 }
 
 # Main execution
@@ -87,6 +146,16 @@ main() {
     local command=${1:-help}
     
     case $command in
+        "mock")
+            echo "🎭 Running mock Playwright tests with screenshots..."
+            run_mock_tests
+            ;;
+            
+        "docker")
+            echo "🐳 Running Playwright tests with Docker..."
+            run_with_docker
+            ;;
+            
         "colors")
             echo "🎨 Running user color and entry views tests..."
             run_playwright_tests "tech.derbent.ui.automation.UserColorAndEntryViewsPlaywrightTest" "User Color and Entry Views Tests"

@@ -567,16 +567,42 @@ public class CBaseUITest {
 		baseUrl = "http://localhost:" + port;
 
 		try {
+			// Set environment to skip browser download
+			System.setProperty("PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD", "1");
+			
 			// Initialize Playwright
 			playwright = Playwright.create();
-			// Launch browser in headless mode for CI/CD compatibility
-			browser = playwright.chromium()
-				.launch(new BrowserType.LaunchOptions().setHeadless(false).setSlowMo(50));
+			
+			// Use system browser configuration
+			BrowserType.LaunchOptions launchOptions = new BrowserType.LaunchOptions()
+				.setHeadless(true)  // Use headless mode for CI/CD environments
+				.setSlowMo(50);
+				
+			// Set system browser path
+			String chromiumPath = "/usr/bin/chromium-browser";
+			
+			// Check if system browser exists
+			java.nio.file.Path browserPath = java.nio.file.Paths.get(chromiumPath);
+			if (java.nio.file.Files.exists(browserPath)) {
+				launchOptions.setExecutablePath(browserPath);
+				LOGGER.info("Using system browser at: {}", chromiumPath);
+			} else {
+				LOGGER.warn("System browser not found at: {}", chromiumPath);
+				throw new RuntimeException("No suitable browser found");
+			}
+			
+			// Launch browser
+			browser = playwright.chromium().launch(launchOptions);
+			
 			// Create context with desktop viewport
 			context = browser
 				.newContext(new Browser.NewContextOptions().setViewportSize(1200, 800));
 			// Create page
 			page = context.newPage();
+			
+			// Create screenshots directory
+			java.nio.file.Files.createDirectories(java.nio.file.Paths.get("target/screenshots"));
+			
 			loginToApplication();
 			LOGGER.info("Playwright test setup completed. Application URL: {}", baseUrl);
 		} catch (final Exception e) {
@@ -601,25 +627,27 @@ public class CBaseUITest {
 	 */
 	protected void takeScreenshot(final String name, final boolean isFailure) {
 
-		// Only take screenshots on failures as per coding guidelines
-		if (!isFailure) {
-			return;
-		}
-
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available, cannot take screenshot: {}", name);
 			return;
 		}
 
 		try {
+			// Create screenshots directory if it doesn't exist
+			java.nio.file.Files.createDirectories(java.nio.file.Paths.get("target/screenshots"));
+			
 			final String screenshotPath =
 				"target/screenshots/" + name + "-" + System.currentTimeMillis() + ".png";
 			page.screenshot(
 				new Page.ScreenshotOptions().setPath(Paths.get(screenshotPath)));
-			LOGGER.warn("📸 Failure screenshot saved: {}", screenshotPath);
+			
+			if (isFailure) {
+				LOGGER.warn("📸 Failure screenshot saved: {}", screenshotPath);
+			} else {
+				LOGGER.info("📸 Screenshot saved: {}", screenshotPath);
+			}
 		} catch (final Exception e) {
-			LOGGER.error("Failed to take failure screenshot '{}': {}", name,
-				e.getMessage());
+			LOGGER.error("Failed to take screenshot '{}': {}", name, e.getMessage());
 		}
 	}
 

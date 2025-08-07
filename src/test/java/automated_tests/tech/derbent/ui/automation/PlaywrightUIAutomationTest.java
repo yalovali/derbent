@@ -40,6 +40,10 @@ public class PlaywrightUIAutomationTest extends CBaseUITest {
 		for (final Class<?> view : viewClasses) {
 			assertTrue(navigateToViewByClass(view),
 				"Should navigate to " + view.getSimpleName());
+			
+			// Take screenshot of each view for documentation/verification
+			takeScreenshot("accessibility-" + view.getSimpleName().toLowerCase(), false);
+			
 			testAccessibilityBasics(view.getSimpleName());
 		}
 		LOGGER.info("✅ Accessibility basics test completed");
@@ -51,30 +55,46 @@ public class PlaywrightUIAutomationTest extends CBaseUITest {
 		// Test a complete workflow across the application
 		// 1. Navigate to Users and verify
 		assertTrue(navigateToViewByClass(CUsersView.class), "Should navigate to Users");
+		takeScreenshot("workflow-users-view", false);
+		
 		// 2. Navigate to Projects and verify
 		assertTrue(navigateToViewByClass(CProjectsView.class),
 			"Should navigate to Projects");
+		takeScreenshot("workflow-projects-view", false);
+		
 		// 3. Navigate to Activities and verify
 		assertTrue(navigateToViewByClass(CActivitiesView.class),
 			"Should navigate to Activities");
+		takeScreenshot("workflow-activities-view", false);
+		
 		// 4. Navigate to Meetings and verify
 		assertTrue(navigateToViewByClass(CMeetingsView.class),
 			"Should navigate to Meetings");
+		takeScreenshot("workflow-meetings-view", false);
+		
 		// 5. Navigate to Decisions and verify
 		assertTrue(navigateToViewByClass(CDecisionsView.class),
 			"Should navigate to Decisions");
+		takeScreenshot("workflow-decisions-view", false);
+		
 		// 6. Test creating a new project workflow
 		assertTrue(navigateToViewByClass(CProjectsView.class),
 			"Should navigate back to Projects");
 		final int initialRowCount = getGridRowCount();
+		takeScreenshot("workflow-before-new-project", false);
+		
 		clickNew();
+		takeScreenshot("workflow-new-project-form", false);
 
 		// Fill project name if form is available
 		if (fillFirstTextField("Test Project " + System.currentTimeMillis())) {
 			LOGGER.debug("Filled project name in workflow test");
+			takeScreenshot("workflow-project-form-filled", false);
 		}
 		clickSave();
 		wait_2000();
+		takeScreenshot("workflow-after-save", false);
+		
 		final int finalRowCount = getGridRowCount();
 		LOGGER.debug("Initial rows: {}, Final rows: {}", initialRowCount, finalRowCount);
 		LOGGER.info("✅ Complete application flow test completed");
