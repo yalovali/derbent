@@ -215,7 +215,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 
 		try {
 			final String propertyName = getPropertyName(field);
-			// write it with a for loop Use a converter to handle BigDecimal conversion
+			// Use converter to handle BigDecimal conversion
 			binder.forField(numberField)
 				.withConverter(
 					value -> value != null ? new BigDecimal(value.toString()) : null,
@@ -226,11 +226,16 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 				field.getName());
 		} catch (final Exception e) {
 			LOGGER.error(
-				"Failed to bind BigDecimal field for field '{}': {} - this will cause incomplete bindings",
+				"Failed to bind BigDecimal field for field '{}': {} - using fallback binding",
 				field.getName(), e.getMessage());
-			// Instead of fallback binding, we need to clean up and let the standard
-			// binding handle it The incomplete forField binding will be cleaned up by
-			// validateBindingsComplete()
+			// Fallback to simple binding without converter
+			try {
+				safeBindComponentWithField(binder, numberField, field, "NumberField(BigDecimal-fallback)");
+			} catch (final Exception fallbackException) {
+				LOGGER.error(
+					"Fallback binding also failed for BigDecimal field '{}': {}",
+					field.getName(), fallbackException.getMessage());
+			}
 		}
 		return numberField;
 	}
@@ -669,8 +674,6 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		final Class<?> fieldType = field.getType();
 
 		try {
-			// Get property name first to ensure it's valid before starting forField
-			// binding
 			final String propertyName = getPropertyName(field);
 
 			if ((fieldType == Integer.class) || (fieldType == int.class)) {
@@ -697,11 +700,16 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			}
 		} catch (final Exception e) {
 			LOGGER.error(
-				"Failed to bind integer field for field '{}': {} - this will cause incomplete bindings",
+				"Failed to bind integer field for field '{}': {} - using fallback binding",
 				field.getName(), e.getMessage());
-			// Instead of fallback binding, we need to clean up and let the standard
-			// binding handle it The incomplete forField binding will be cleaned up by
-			// validateBindingsComplete()
+			// Fallback to simple binding without converter
+			try {
+				safeBindComponentWithField(binder, numberField, field, "NumberField(Integer-fallback)");
+			} catch (final Exception fallbackException) {
+				LOGGER.error(
+					"Fallback binding also failed for integer field '{}': {}",
+					field.getName(), fallbackException.getMessage());
+			}
 		}
 		return numberField;
 	}
