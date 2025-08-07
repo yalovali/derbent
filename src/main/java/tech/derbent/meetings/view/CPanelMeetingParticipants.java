@@ -56,13 +56,24 @@ public class CPanelMeetingParticipants extends CPanelMeetingBase {
 			attendeesField.setItems();
 		}
 		// Manual binding for attendees field with proper type handling
-		getBinder().forField(attendeesField)
-			.withConverter(
-				(final Set<CUser> selectedUsers) -> selectedUsers != null
-					? new HashSet<>(selectedUsers) : new HashSet<CUser>(),
-				(final Set<CUser> attendeesSet) -> attendeesSet != null ? attendeesSet
-					: Set.<CUser>of())
-			.bind(CMeeting::getAttendees, CMeeting::setAttendees);
+		try {
+			getBinder().forField(attendeesField)
+				.withConverter(
+					(final Set<CUser> selectedUsers) -> selectedUsers != null
+						? new HashSet<>(selectedUsers) : new HashSet<CUser>(),
+					(final Set<CUser> attendeesSet) -> attendeesSet != null ? attendeesSet
+						: Set.<CUser>of())
+				.bind(CMeeting::getAttendees, CMeeting::setAttendees);
+			LOGGER.debug("Successfully bound attendees field");
+		} catch (final Exception e) {
+			LOGGER.error("Failed to bind attendees field: {} - using simple binding fallback", e.getMessage());
+			try {
+				getBinder().bind(attendeesField, "attendees");
+			} catch (final Exception fallbackException) {
+				LOGGER.error("Simple binding fallback also failed for attendees field: {}", 
+					fallbackException.getMessage());
+			}
+		}
 	}
 
 	private void createParticipantsField() {
@@ -84,13 +95,24 @@ public class CPanelMeetingParticipants extends CPanelMeetingBase {
 			participantsField.setItems();
 		}
 		// Manual binding for participants field with proper type handling
-		getBinder().forField(participantsField)
-			.withConverter(
-				(final Set<CUser> selectedUsers) -> selectedUsers != null
-					? new HashSet<>(selectedUsers) : new HashSet<CUser>(),
-				(final Set<CUser> participantsSet) -> participantsSet != null
-					? participantsSet : Set.<CUser>of())
-			.bind(CMeeting::getParticipants, CMeeting::setParticipants);
+		try {
+			getBinder().forField(participantsField)
+				.withConverter(
+					(final Set<CUser> selectedUsers) -> selectedUsers != null
+						? new HashSet<>(selectedUsers) : new HashSet<CUser>(),
+					(final Set<CUser> participantsSet) -> participantsSet != null
+						? participantsSet : Set.<CUser>of())
+				.bind(CMeeting::getParticipants, CMeeting::setParticipants);
+			LOGGER.debug("Successfully bound participants field");
+		} catch (final Exception e) {
+			LOGGER.error("Failed to bind participants field: {} - using simple binding fallback", e.getMessage());
+			try {
+				getBinder().bind(participantsField, "participants");
+			} catch (final Exception fallbackException) {
+				LOGGER.error("Simple binding fallback also failed for participants field: {}", 
+					fallbackException.getMessage());
+			}
+		}
 	}
 
 	@Override
