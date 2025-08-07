@@ -448,15 +448,15 @@ public class CBaseUITest {
 	}
 
 	/**
-	 * Performs login with specified credentials
-	 * Updated for CCustomLoginView (new login screen)
+	 * Performs login with specified credentials Updated for CCustomLoginView (new login
+	 * screen)
 	 */
 	protected void performLogin(final String username, final String password) {
 
 		try {
 			LOGGER.debug("Performing login with username: {}", username);
 			// Updated selectors for CCustomLoginView
-			page.fill("#custom-username-input", username);
+			page.fill("input-vaadin-text-field-9", username);
 			page.fill("#custom-password-input", password);
 			page.click("#custom-submit-button");
 			wait_afterlogin();
@@ -564,45 +564,42 @@ public class CBaseUITest {
 
 	@BeforeEach
 	void setUp() {
+		LOGGER.info("Setting up Playwright test environment...");
 		baseUrl = "http://localhost:" + port;
 
 		try {
 			// Set environment to skip browser download
 			System.setProperty("PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD", "1");
-			
 			// Initialize Playwright
 			playwright = Playwright.create();
-			
 			// Use system browser configuration
-			BrowserType.LaunchOptions launchOptions = new BrowserType.LaunchOptions()
-				.setHeadless(true)  // Use headless mode for CI/CD environments
-				.setSlowMo(50);
-				
-			// Set system browser path
-			String chromiumPath = "/usr/bin/chromium-browser";
-			
+			final BrowserType.LaunchOptions launchOptions =
+				new BrowserType.LaunchOptions().setHeadless(false).setSlowMo(50);
+
 			// Check if system browser exists
-			java.nio.file.Path browserPath = java.nio.file.Paths.get(chromiumPath);
-			if (java.nio.file.Files.exists(browserPath)) {
-				launchOptions.setExecutablePath(browserPath);
-				LOGGER.info("Using system browser at: {}", chromiumPath);
-			} else {
-				LOGGER.warn("System browser not found at: {}", chromiumPath);
+			if (Paths.get("/usr/bin/google-chrome").toFile().exists()) {
+				launchOptions.setExecutablePath(Paths.get("/usr/bin/google-chrome"));
+				LOGGER.info(
+					"Using system Google Chrome browser at: /usr/bin/google-chrome");
+			}
+			else if (Paths.get("/usr/bin/chromium").toFile().exists()) {
+				launchOptions.setExecutablePath(Paths.get("/usr/bin/chromium"));
+				LOGGER.info("Using system Chromium browser at: /usr/bin/chromium");
+			}
+			else {
+				LOGGER.warn("System browser not found");
 				throw new RuntimeException("No suitable browser found");
 			}
-			
 			// Launch browser
 			browser = playwright.chromium().launch(launchOptions);
-			
 			// Create context with desktop viewport
 			context = browser
 				.newContext(new Browser.NewContextOptions().setViewportSize(1200, 800));
 			// Create page
 			page = context.newPage();
-			
 			// Create screenshots directory
-			java.nio.file.Files.createDirectories(java.nio.file.Paths.get("target/screenshots"));
-			
+			java.nio.file.Files
+				.createDirectories(java.nio.file.Paths.get("target/screenshots"));
 			loginToApplication();
 			LOGGER.info("Playwright test setup completed. Application URL: {}", baseUrl);
 		} catch (final Exception e) {
@@ -634,16 +631,17 @@ public class CBaseUITest {
 
 		try {
 			// Create screenshots directory if it doesn't exist
-			java.nio.file.Files.createDirectories(java.nio.file.Paths.get("target/screenshots"));
-			
+			java.nio.file.Files
+				.createDirectories(java.nio.file.Paths.get("target/screenshots"));
 			final String screenshotPath =
 				"target/screenshots/" + name + "-" + System.currentTimeMillis() + ".png";
 			page.screenshot(
 				new Page.ScreenshotOptions().setPath(Paths.get(screenshotPath)));
-			
+
 			if (isFailure) {
 				LOGGER.warn("📸 Failure screenshot saved: {}", screenshotPath);
-			} else {
+			}
+			else {
 				LOGGER.info("📸 Screenshot saved: {}", screenshotPath);
 			}
 		} catch (final Exception e) {
@@ -1027,8 +1025,7 @@ public class CBaseUITest {
 	}
 
 	/**
-	 * Waits for login screen to be ready
-	 * Updated for CCustomLoginView (new login screen)
+	 * Waits for login screen to be ready Updated for CCustomLoginView (new login screen)
 	 */
 	protected void wait_loginscreen() {
 
