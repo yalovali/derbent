@@ -215,19 +215,22 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 
 		try {
 			final String propertyName = getPropertyName(field);
+			// write it with a for loop Use a converter to handle BigDecimal conversion
 			binder.forField(numberField)
 				.withConverter(
 					value -> value != null ? new BigDecimal(value.toString()) : null,
 					value -> value != null ? value.doubleValue() : null)
 				.bind(propertyName);
-			LOGGER.debug("Successfully bound NumberField with BigDecimal converter for field '{}'", 
+			LOGGER.debug(
+				"Successfully bound NumberField with BigDecimal converter for field '{}'",
 				field.getName());
 		} catch (final Exception e) {
 			LOGGER.error(
 				"Failed to bind BigDecimal field for field '{}': {} - this will cause incomplete bindings",
 				field.getName(), e.getMessage());
-			// Instead of fallback binding, we need to clean up and let the standard binding handle it
-			// The incomplete forField binding will be cleaned up by validateBindingsComplete()
+			// Instead of fallback binding, we need to clean up and let the standard
+			// binding handle it The incomplete forField binding will be cleaned up by
+			// validateBindingsComplete()
 		}
 		return numberField;
 	}
@@ -696,8 +699,9 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			LOGGER.error(
 				"Failed to bind integer field for field '{}': {} - this will cause incomplete bindings",
 				field.getName(), e.getMessage());
-			// Instead of fallback binding, we need to clean up and let the standard binding handle it
-			// The incomplete forField binding will be cleaned up by validateBindingsComplete()
+			// Instead of fallback binding, we need to clean up and let the standard
+			// binding handle it The incomplete forField binding will be cleaned up by
+			// validateBindingsComplete()
 		}
 		return numberField;
 	}
@@ -953,8 +957,8 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 	}
 
 	/**
-	 * Safely binds a component to a field, ensuring no incomplete bindings are left.
-	 * This method prevents the "All bindings created with forField must be completed" error.
+	 * Safely binds a component to a field, ensuring no incomplete bindings are left. This
+	 * method prevents the "All bindings created with forField must be completed" error.
 	 */
 	private static void safeBindComponent(final CEnhancedBinder<?> binder,
 		final HasValueAndElement<?, ?> component, final String fieldName,
@@ -979,6 +983,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 				componentType, fieldName, e.getMessage(), e);
 			// Don't throw - just log the error to prevent form generation failure But
 			// warn that this might cause incomplete bindings
+			binder.removeBinding(fieldName); // Eğer CEnhancedBinder bunu destekliyorsa
 		}
 	}
 
