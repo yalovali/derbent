@@ -1,5 +1,6 @@
 package tech.derbent.users.domain;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.AttributeOverride;
@@ -202,9 +203,6 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable {
 
 	@Override
 	public boolean equals(final Object o) {
-		// Use the superclass (CEntityNamed -> CEntityDB) equals method which properly
-		// handles ID-based equality and proxy classes. This is the standard approach for
-		// JPA entities.
 		return super.equals(o);
 	}
 
@@ -227,8 +225,13 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable {
 
 	public byte[] getProfilePictureData() { return profilePictureData; }
 
-	// Getter and setter
-	public List<CUserProjectSettings> getProjectSettings() { return projectSettings; }
+	// Getter and setter with safe initialization to prevent lazy loading issues
+	public List<CUserProjectSettings> getProjectSettings() { 
+		if (projectSettings == null) {
+			projectSettings = new ArrayList<>();
+		}
+		return projectSettings; 
+	}
 
 	public String getRoles() { return roles; }
 
@@ -340,7 +343,7 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable {
 	}
 
 	public void setProjectSettings(final List<CUserProjectSettings> projectSettings) {
-		this.projectSettings = projectSettings;
+		this.projectSettings = projectSettings != null ? projectSettings : new ArrayList<>();
 	}
 
 	public void setRoles(final String roles) {

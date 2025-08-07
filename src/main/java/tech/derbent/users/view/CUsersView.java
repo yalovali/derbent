@@ -253,6 +253,8 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser>
 	 */
 	@Override
 	protected void populateForm(final CUser value) {
+		// update all layz loaded fields
+		entityService.initializeLazyFields(value);
 		super.populateForm(value);
 		LOGGER.info("Populating form with user data: {}",
 			value != null ? value.getLogin() : "null");

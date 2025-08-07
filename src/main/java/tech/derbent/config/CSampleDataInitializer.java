@@ -1499,8 +1499,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * Initialize decision status entities with comprehensive sample data.
 	 */
 	private void initializeDecisionStatuses() {
-		LOGGER.info(
-			"initializeDecisionStatuses called - creating decision status classifications");
 
 		try {
 			// Get all projects
@@ -1816,7 +1814,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			final Path filePath = java.nio.file.Paths.get("profile-pictures", filename);
 
 			if (Files.exists(filePath)) {
-				LOGGER.debug("Loading profile picture from file path: {}", filePath);
+				// LOGGER.debug("Loading profile picture from file path: {}", filePath);
 				return Files.readAllBytes(filePath);
 			}
 			// Fallback: Load from classpath resources
@@ -1824,7 +1822,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 				.getResourceAsStream("profile-pictures/" + filename);
 
 			if (resource != null) {
-				LOGGER.debug("Loading profile picture from classpath: {}", filename);
+				// LOGGER.debug("Loading profile picture from classpath: {}", filename);
 				return resource.readAllBytes();
 			}
 			LOGGER.warn("Profile picture file not found: {}", filename);

@@ -168,18 +168,15 @@ public abstract class CEntityOfProjectService<
 	 * @param entity the entity to initialize
 	 */
 	@Override
-	protected void initializeLazyFields(final EntityClass entity) {
+	public void initializeLazyFields(final EntityClass entity) {
 
 		if (entity == null) {
 			return;
 		}
 
 		try {
-			// Call parent initialization for basic entity relationships
 			super.initializeLazyFields(entity);
 
-			// Most relationships are now eager-loaded, minimal initialization needed Only
-			// initialize complex collections if present
 			if (entity.getProject() != null) {
 				initializeLazyRelationship(entity.getProject());
 			}

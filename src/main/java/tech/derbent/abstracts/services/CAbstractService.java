@@ -137,11 +137,14 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 
 	protected abstract Class<EntityClass> getEntityClass();
 
-	protected void initializeLazyFields(final EntityClass entity) {
+	public void initializeLazyFields(final EntityClass entity) {
 
 		if (entity == null) {
 			return;
 		}
+		// LOGGER.debug("Initializing lazy fields for entity: {}
+		// {}",entity.getClass().getSimpleName(),
+		// CSpringAuxillaries.safeToString(entity));
 
 		try {
 			CSpringAuxillaries.initializeLazily(entity);

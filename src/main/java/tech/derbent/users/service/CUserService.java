@@ -178,10 +178,8 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 		// Get user and initialize all lazy fields including project settings
 		final CUser user = repository.findById(id).orElseThrow(
 			() -> new EntityNotFoundException("User not found with ID: " + id));
-		
 		// Initialize lazy fields to prevent LazyInitializationException
 		initializeLazyFields(user);
-		
 		return user;
 	}
 
@@ -191,20 +189,20 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 	 * @param user the user entity to initialize
 	 */
 	@Override
-	public void initializeLazyFields(final CUser user) {
+	public void initializeLazyFields(final CUser entity) {
 
-		if (user == null) {
+		if (entity == null) {
 			return;
 		}
 
 		try {
-			super.initializeLazyFields(user);
-			initializeLazyRelationship(user.getUserType());
-			initializeLazyRelationship(user.getCompany());
-			initializeLazyRelationship(user.getProjectSettings());
+			super.initializeLazyFields(entity);
+			initializeLazyRelationship(entity.getUserType());
+			initializeLazyRelationship(entity.getCompany());
+			initializeLazyRelationship(entity.getProjectSettings());
 		} catch (final Exception e) {
 			LOGGER.warn("Error initializing lazy fields for user with ID: {}",
-				CSpringAuxillaries.safeGetId(user), e);
+				CSpringAuxillaries.safeGetId(entity), e);
 		}
 	}
 
@@ -294,12 +292,6 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 		// Return the saved project setting
 		return userProjectSetting;
 	}
-
-
-
-
-
-
 
 	/**
 	 * Updates user password with proper encoding.

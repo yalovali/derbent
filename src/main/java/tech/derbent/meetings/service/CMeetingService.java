@@ -89,19 +89,14 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting>
 	 * @param entity the CMeeting entity to initialize
 	 */
 	@Override
-	protected void initializeLazyFields(final CMeeting entity) {
+	public void initializeLazyFields(final CMeeting entity) {
 
 		if (entity == null) {
 			return;
 		}
-		LOGGER.debug("Initializing lazy fields for CMeeting with ID: {}", entity.getId());
 
 		try {
-			// Initialize the entity itself first
 			super.initializeLazyFields(entity);
-			// Initialize only the lazy collections that aren't handled by eager queries
-			// Note: meetingType, status, responsible, relatedActivity are now eagerly
-			// loaded via JOIN FETCH
 			initializeLazyRelationship(entity.getParticipants());
 			initializeLazyRelationship(entity.getAttendees());
 		} catch (final Exception e) {

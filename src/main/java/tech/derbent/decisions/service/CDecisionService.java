@@ -116,23 +116,18 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> {
 	 * @param entity the decision entity to initialize
 	 */
 	@Override
-	protected void initializeLazyFields(final CDecision entity) {
+	public void initializeLazyFields(final CDecision entity) {
 
 		if (entity == null) {
 			return;
 		}
-		LOGGER.debug("Initializing lazy fields for Decision with ID: {} entity: {}",
-			entity.getId(), entity.getName());
 
 		try {
-			// First call the parent implementation to handle common fields
 			super.initializeLazyFields(entity);
-			// Initialize Decision-specific relationships
 			initializeLazyRelationship(entity.getDecisionType());
 			initializeLazyRelationship(entity.getDecisionStatus());
 			initializeLazyRelationship(entity.getAccountableUser());
 
-			// Handle collections
 			if ((entity.getTeamMembers() != null) && !entity.getTeamMembers().isEmpty()) {
 				entity.getTeamMembers().forEach(this::initializeLazyRelationship);
 			}

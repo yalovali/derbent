@@ -22,6 +22,7 @@ import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.data.binder.ValidationException;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
@@ -128,8 +129,8 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		if (entityID.isPresent()) {
 			final Optional<EntityClass> entityByRoute =
 				entityService.getById(entityID.get());
-			LOGGER.debug("Entity ID in URL: {}, looking up entity: {}", entityID.get(),
-				entityByRoute);
+			// LOGGER.debug("Entity ID in URL: {}, looking up entity: {}", entityID.get(),
+			// entityByRoute);
 
 			if (entityByRoute.isPresent()) {
 				// final Optional<EntityClass> entity = entityService.get(entityID.get());
@@ -678,10 +679,9 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 			LOGGER.warn("Grid is null, cannot select first item");
 			return;
 		}
-		grid.getDataProvider().fetch(new com.vaadin.flow.data.provider.Query<>())
-			.findFirst().ifPresentOrElse(entity -> {
+		grid.getDataProvider().fetch(new Query<>()).findFirst()
+			.ifPresentOrElse(entity -> {
 				grid.select(entity);
-				LOGGER.debug("Auto-selected first item in grid: {}", entity.getId());
 			}, () -> LOGGER.debug("No items available in grid for {}",
 				getClass().getSimpleName()));
 	}

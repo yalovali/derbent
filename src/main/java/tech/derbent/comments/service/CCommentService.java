@@ -201,16 +201,14 @@ public class CCommentService extends CAbstractService<CComment> {
 	 * @param entity the comment entity to initialize
 	 */
 	@Override
-	protected void initializeLazyFields(final CComment entity) {
+	public void initializeLazyFields(final CComment entity) {
 
 		if (entity == null) {
 			return;
 		}
 
 		try {
-			// First call the parent implementation to handle common fields
 			super.initializeLazyFields(entity);
-			// Initialize Comment-specific relationships
 			initializeLazyRelationship(entity.getAuthor());
 			initializeLazyRelationship(entity.getActivity());
 			initializeLazyRelationship(entity.getPriority());

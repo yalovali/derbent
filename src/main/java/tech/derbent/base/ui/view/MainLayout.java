@@ -106,7 +106,6 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 
 	@Override
 	public void afterNavigation(final AfterNavigationEvent event) {
-		LOGGER.debug("After navigation in MainLayout");
 		// Update the view title in the toolbar after navigation
 		final String pageTitle =
 			MenuConfiguration.getPageHeader(getContent()).orElse("Main Layout");

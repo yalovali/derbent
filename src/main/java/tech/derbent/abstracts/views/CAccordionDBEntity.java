@@ -69,7 +69,6 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 	public List<String> getEntityFields() { return EntityFields; }
 
 	public void populateForm(final EntityClass entity) {
-		LOGGER.debug("Populating form with entity: {}", entity);
 		currentEntity = entity;
 
 		if (entity == null) {

@@ -70,18 +70,14 @@ public class COrderService extends CEntityOfProjectService<COrder> {
 	 * @param entity the order entity to initialize
 	 */
 	@Override
-	protected void initializeLazyFields(final COrder entity) {
+	public void initializeLazyFields(final COrder entity) {
 
 		if (entity == null) {
 			return;
 		}
-		LOGGER.debug("Initializing lazy fields for Order with ID: {} entity: {}",
-			entity.getId(), entity.getName());
 
 		try {
-			// First call the parent implementation to handle common fields
 			super.initializeLazyFields(entity);
-			// Initialize Order-specific relationships
 			initializeLazyRelationship(entity.getOrderType());
 			initializeLazyRelationship(entity.getStatus());
 
