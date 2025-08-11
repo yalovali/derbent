@@ -1,0 +1,116 @@
+name: AI Code Review (Derbent)
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+    branches: [ "**" ]
+  workflow_dispatch: # <-- Manual trigger
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    if: github.event.pull_request.draft == false || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get PR diff
+        id: diff
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "Manual run: comparing last commit with previous commit."
+            git fetch origin main
+            git diff --unified=0 HEAD~1 HEAD > pr.diff
+          else
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+            git diff --unified=0 --diff-filter=ACMR $BASE_SHA $HEAD_SHA > pr.diff
+          fi
+          head -c 60000 pr.diff > pr_trunc.diff
+
+      - name: Build prompt
+        run: |
+          cat > prompt.txt << 'EOF'
+You are a **senior Java enterprise and Vaadin UI software engineer** reviewing a Pull Request for the **Derbent** project.
+
+**Follow these special Derbent-specific review rules:**
+1. Make sure the code is **consistent with the existing Derbent project structure**.
+2. Do **not break other components**.
+3. Follow the rules described in `/derbent/src/docs/copilot-java-strict-coding-rules.md`.
+4. If necessary, **create base classes** instead of duplicating logic.
+
+**Focus areas:**
+1) **Java Backend**
+   - Spring Boot, Hibernate/JPA best practices
+   - Transaction & session management (LazyInitializationException, N+1 queries)
+   - Null safety, exception handling
+   - Clean architecture & separation of concerns
+   - Code readability & maintainability
+2) **Vaadin Frontend**
+   - UI component hierarchy correctness
+   - Event handling best practices
+   - Avoiding memory leaks in listeners
+   - Grid/ComboBox real-time updates
+3) **Security**
+   - Data validation & sanitization
+   - AuthZ/AuthN checks
+   - Sensitive info exposure
+4) **Tests**
+   - Missing or weak test coverage
+5) **Suggested Fixes**
+   - Provide concrete, short code examples for improvements
+   - Mention specific files and line numbers when possible
+
+**Output format in Markdown:**
+- Summary
+- Major Issues
+- Minor Issues
+- Suggested Tests
+- Per-file Notes
+- Suggested Commit Messages (conventional commits style)
+
+Here is the PR diff:
+
+```diff
+EOF
+          cat pr_trunc.diff >> prompt.txt
+          echo -e "\n```" >> prompt.txt
+
+      - name: Call OpenAI API (gpt-4o)
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          BODY=$(jq -Rs --slurpfile sys <(echo 'You are a precise, senior Java/Vaadin reviewer for the Derbent project. Keep response under ~900 words.') \
+            '{model:"gpt-4o", messages:[ {role:"system", content:$sys[0]}, {role:"user", content:.} ], temperature:0.2, max_tokens:1500}' < prompt.txt)
+
+          curl -sS https://api.openai.com/v1/chat/completions \
+            -H "Authorization: Bearer $OPENAI_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$BODY" \
+            | tee openai.json >/dev/null
+
+          jq -r '.choices[0].message.content' openai.json > review.md
+
+      - name: Post PR comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('review.md', 'utf8').trim() || "AI review could not be generated.";
+            if (context.eventName === 'workflow_dispatch') {
+              console.log("Manual run output:\n", body);
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body
+              });
+            }
