@@ -428,16 +428,16 @@ public final class CViewToolbar extends Composite<Header> implements CProjectLis
         quickAccessDiv.addClassNames(Display.FLEX, AlignItems.CENTER, Gap.SMALL);
         
         // Meetings icon - green (consistent with navigation)
-        final var meetingsButton = createColorfulIconButton(VaadinIcon.GROUP, "Meetings", "#28a745", "meetings");
+        final var meetingsButton = createColorfulIconButton(VaadinIcon.GROUP, "Meetings", "#28a745", "cmeetingsview");
         
         // Activities icon - blue
-        final var activitiesButton = createColorfulIconButton(VaadinIcon.TASKS, "Activities", "#007bff", "activities");
+        final var activitiesButton = createColorfulIconButton(VaadinIcon.TASKS, "Activities", "#007bff", "cactivitiesview");
         
         // Projects icon - orange (consistent with navigation)
-        final var projectsButton = createColorfulIconButton(VaadinIcon.BRIEFCASE, "Projects", "#fd7e14", "projects");
+        final var projectsButton = createColorfulIconButton(VaadinIcon.BRIEFCASE, "Projects", "#fd7e14", "cprojectsview");
         
         // Users icon - purple
-        final var usersButton = createColorfulIconButton(VaadinIcon.USERS, "Users", "#6f42c1", "users");
+        final var usersButton = createColorfulIconButton(VaadinIcon.USERS, "Users", "#6f42c1", "cusersview");
         
         quickAccessDiv.add(meetingsButton, activitiesButton, projectsButton, usersButton);
         return quickAccessDiv;
