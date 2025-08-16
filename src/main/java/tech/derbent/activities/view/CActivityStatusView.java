@@ -53,7 +53,7 @@ public class CActivityStatusView extends CProjectAwareMDPage<CActivityStatus>
 	}
 
 	@Override
-	protected void createDetailsLayout() {
+	public void createDetailsLayout() {
 		final Div detailsLayout =
 			CEntityFormBuilder.buildForm(CActivityStatus.class, getBinder());
 		getBaseDetailsLayout().add(detailsLayout);
