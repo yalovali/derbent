@@ -78,6 +78,9 @@ public class CPanelScreenLines extends CPanelScreenBase {
         final H3 title = new H3("Screen Field Definitions");
         layout.add(title);
 
+        // Lines grid (create first before toolbar so it's available)
+        createLinesGrid();
+
         // Toolbar
         final HorizontalLayout toolbar = createLinesToolbar();
         layout.add(toolbar);
@@ -88,7 +91,6 @@ public class CPanelScreenLines extends CPanelScreenBase {
         mainLayout.setSpacing(true);
 
         // Lines grid (left side)
-        createLinesGrid();
         final Div gridWrapper = new Div(linesGrid);
         gridWrapper.setWidth("60%");
         gridWrapper.setHeightFull();
