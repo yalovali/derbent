@@ -12,7 +12,6 @@ import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.service.CActivityStatusService;
-import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 
 /**
@@ -104,12 +103,6 @@ public class CActivityStatusView extends CProjectAwareMDPage<CActivityStatus>
 
 	@Override
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	@Override
-	protected void setProjectForEntity(final CActivityStatus entity,
-		final CProject project) {
-		entity.setProject(project);
-	}
 
 	@Override
 	protected void setupToolbar() {

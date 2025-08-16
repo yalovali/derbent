@@ -196,7 +196,7 @@ public abstract class CEntityOfProjectService<
 	@Override
 	@Transactional
 	public EntityClass newEntity(final String name) {
-		throw new IllegalArgumentException("cannot call newEntity without project");
+		throw new IllegalArgumentException("cannot call newEntity without project name");
 	}
 
 	@Transactional

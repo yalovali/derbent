@@ -9,7 +9,6 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
-import tech.derbent.projects.domain.CProject;
 import tech.derbent.risks.domain.CRisk;
 import tech.derbent.risks.service.CRiskService;
 import tech.derbent.session.service.CSessionService;
@@ -86,11 +85,6 @@ public class CRiskView extends CProjectAwareMDPage<CRisk> implements CInterfaceI
 
 	@Override
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	@Override
-	protected void setProjectForEntity(final CRisk entity, final CProject project) {
-		entity.setProject(project);
-	}
 
 	@Override
 	protected void setupToolbar() {

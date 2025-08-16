@@ -223,12 +223,6 @@ public class CMeetingsView extends CProjectAwareMDPage<CMeeting>
 	}
 
 	@Override
-	protected void setProjectForEntity(final CMeeting entity,
-		final tech.derbent.projects.domain.CProject project) {
-		entity.setProject(project);
-	}
-
-	@Override
 	protected void setupToolbar() {
 		// Create search field
 		searchField = new TextField();

@@ -195,5 +195,17 @@ public abstract class CProjectAwareMDPage<
 	/**
 	 * Sets the project for the entity.
 	 */
-	protected abstract void setProjectForEntity(EntityClass entity, CProject project);
+	public void setProjectForEntity(final EntityClass entity, final CProject project) {
+		assert entity != null : "Entity must not be null";
+		assert project != null : "Project must not be null";
+
+		if (entity instanceof CEntityOfProject) {
+			entity.setProject(project);
+		}
+		else {
+			throw new IllegalArgumentException(
+				"Entity must implement CEntityOfProject interface");
+		}
+		LOGGER.debug("Set project {} for entity {}", project.getName(), entity.getId());
+	}
 }

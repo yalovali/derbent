@@ -48,14 +48,6 @@ public class CRiskStatus extends CStatus<CRiskStatus> {
 		super(CRiskStatus.class, name, project);
 	}
 
-	public CRiskStatus(final String name, final CProject project,
-		final String description, final String color, final Boolean isFinal) {
-		super(CRiskStatus.class, name, project);
-		setDescription(description);
-		setColor(color);
-		this.isFinal = isFinal;
-	}
-
 	@Override
 	public boolean equals(final Object o) {
 

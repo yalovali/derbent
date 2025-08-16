@@ -11,46 +11,44 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
 
 /**
- * Example view to demonstrate 4-level hierarchical menu structure. This view shows how the hierarchical menu parses
- * deep menu annotations.
+ * Example view to demonstrate 4-level hierarchical menu structure. This view shows how
+ * the hierarchical menu parses deep menu annotations.
  */
-@Route("examples/hierarchy/deep/sample")
-@PageTitle("Hierarchical Menu Example")
-@Menu(order = 999, icon = "class:tech.derbent.examples.view.CExampleHierarchicalMenuView", title = "Examples.Hierarchy.DeepMenu.Sample")
+@Route ("examples/hierarchy/deep/sample")
+@PageTitle ("Hierarchical Menu Example")
+@Menu (
+	order = 999, icon = "class:tech.derbent.examples.view.CExampleHierarchicalMenuView",
+	title = "Examples.Hierarchy.DeepMenu.Sample"
+)
 @PermitAll
 public class CExampleHierarchicalMenuView extends Div implements CInterfaceIconSet {
 
-    private static final long serialVersionUID = 1L;
-    
-    public static String getIconColorCode() {
-        return "var(--lumo-primary-color)"; // Primary color for examples
-    }
+	private static final long serialVersionUID = 1L;
 
-    public static String getIconFilename() { 
-        return "vaadin:tree-table"; 
-    }
+	public static String getIconColorCode() {
+		return "var(--lumo-primary-color)"; // Primary color for examples
+	}
 
-    public CExampleHierarchicalMenuView() {
-        // Create content to demonstrate the hierarchical menu
-        final H2 title = new H2("Hierarchical Menu Example");
+	public static String getIconFilename() { return "vaadin:tree-table"; }
 
-        final Paragraph description = new Paragraph("This page demonstrates the 4-level hierarchical menu structure. "
-                + "The menu path for this page is: Examples → Hierarchy → DeepMenu → Sample");
-
-        final Paragraph implementation = new Paragraph(
-                "The hierarchical menu supports navigation up to 4 levels deep with "
-                        + "sliding animations, back button functionality, and automatic parsing "
-                        + "of @Menu annotations in the format: parentItem2.childItem1.childofchileitem1.finalItem");
-
-        final Paragraph features = new Paragraph("Key features include: " + "• 4-level menu hierarchy support "
-                + "• Sliding animations between levels " + "• Back button navigation " + "• Visual depth indicators "
-                + "• Responsive design " + "• Integration with existing menu system");
-
-        add(title, description, implementation, features);
-
-        // Add some styling
-        addClassName("example-view");
-        getStyle().set("padding", "2rem");
-        getStyle().set("max-width", "800px");
-    }
+	public CExampleHierarchicalMenuView() {
+		// Create content to demonstrate the hierarchical menu
+		final H2 title = new H2("Hierarchical Menu Example");
+		final Paragraph description = new Paragraph(
+			"This page demonstrates the 4-level hierarchical menu structure. "
+				+ "The menu path for this page is: Examples → Hierarchy → DeepMenu → Sample");
+		final Paragraph implementation = new Paragraph(
+			"The hierarchical menu supports navigation up to 4 levels deep with "
+				+ "sliding animations, back button functionality, and automatic parsing "
+				+ "of @Menu annotations in the format: parentItem2.childItem1.childofchileitem1.finalItem");
+		final Paragraph features = new Paragraph("Key features include: "
+			+ "• 4-level menu hierarchy support " + "• Sliding animations between levels "
+			+ "• Back button navigation " + "• Visual depth indicators "
+			+ "• Responsive design " + "• Integration with existing menu system");
+		add(title, description, implementation, features);
+		// Add some styling
+		addClassName("example-view");
+		getStyle().set("padding", "2rem");
+		getStyle().set("max-width", "800px");
+	}
 }

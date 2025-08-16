@@ -23,6 +23,8 @@ import tech.derbent.meetings.domain.CMeetingStatus;
  */
 public class CEnhancedBinderDemo extends VerticalLayout {
 
+	private static final long serialVersionUID = 1L;
+
 	private static final Logger LOGGER =
 		LoggerFactory.getLogger(CEnhancedBinderDemo.class);
 

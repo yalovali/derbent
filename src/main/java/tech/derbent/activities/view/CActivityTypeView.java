@@ -11,7 +11,6 @@ import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.activities.domain.CActivityType;
 import tech.derbent.activities.service.CActivityTypeService;
-import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 
 /**
@@ -72,12 +71,6 @@ public class CActivityTypeView extends CProjectAwareMDPage<CActivityType>
 
 	@Override
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	@Override
-	protected void setProjectForEntity(final CActivityType entity,
-		final CProject project) {
-		entity.setProject(project);
-	}
 
 	@Override
 	protected void setupToolbar() {

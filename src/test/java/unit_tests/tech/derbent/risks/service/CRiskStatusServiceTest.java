@@ -36,23 +36,6 @@ class CRiskStatusServiceTest extends CTestBase {
 	}
 
 	@Test
-	void testCreateEntityWithNameAndDescription() {
-		// Given
-		final String name = "MITIGATED";
-		final String description = "Risk has been mitigated";
-		final String color = "#00cc66";
-		// When
-		final CRiskStatus status =
-			new CRiskStatus(name, project, description, color, false);
-		// Then
-		assertNotNull(status);
-		assertEquals(name, status.getName());
-		assertEquals(description, status.getDescription());
-		assertEquals(project, status.getProject());
-		assertEquals(false, status.isFinal());
-	}
-
-	@Test
 	void testCreateEntityWithNullName() {
 		assertThrows(IllegalArgumentException.class, () -> {
 			new CRiskStatus(null, project);

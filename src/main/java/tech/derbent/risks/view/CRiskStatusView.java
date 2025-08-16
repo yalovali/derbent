@@ -10,7 +10,6 @@ import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.annotations.CSpringAuxillaries;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
-import tech.derbent.projects.domain.CProject;
 import tech.derbent.risks.domain.CRiskStatus;
 import tech.derbent.risks.service.CRiskStatusService;
 import tech.derbent.session.service.CSessionService;
@@ -95,11 +94,6 @@ public class CRiskStatusView extends CProjectAwareMDPage<CRiskStatus>
 
 	@Override
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	@Override
-	protected void setProjectForEntity(final CRiskStatus entity, final CProject project) {
-		entity.setProject(project);
-	}
 
 	@Override
 	protected void setupToolbar() {

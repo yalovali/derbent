@@ -9,7 +9,6 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
-import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUserType;
 import tech.derbent.users.service.CUserTypeService;
@@ -72,11 +71,6 @@ public class CUserTypeView extends CProjectAwareMDPage<CUserType>
 
 	@Override
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	@Override
-	protected void setProjectForEntity(final CUserType entity, final CProject project) {
-		entity.setProject(project);
-	}
 
 	@Override
 	protected void setupToolbar() {

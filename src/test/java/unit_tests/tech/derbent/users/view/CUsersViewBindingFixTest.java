@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 
-import tech.derbent.abstracts.annotations.MetaData;
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.users.domain.CUser;
 

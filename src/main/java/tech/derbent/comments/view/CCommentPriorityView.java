@@ -11,7 +11,6 @@ import tech.derbent.abstracts.components.CGridCell;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.comments.domain.CCommentPriority;
 import tech.derbent.comments.service.CCommentPriorityService;
-import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 
 /**
@@ -86,12 +85,6 @@ public class CCommentPriorityView extends CProjectAwareMDPage<CCommentPriority> 
 
 	@Override
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	@Override
-	protected void setProjectForEntity(final CCommentPriority entity,
-		final CProject project) {
-		entity.setProject(project);
-	}
 
 	@Override
 	protected void setupToolbar() {

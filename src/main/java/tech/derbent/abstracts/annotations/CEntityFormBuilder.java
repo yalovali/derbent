@@ -31,9 +31,6 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.converter.StringToDoubleConverter;
-import com.vaadin.flow.data.converter.StringToIntegerConverter;
-import com.vaadin.flow.data.converter.StringToLongConverter;
 
 import tech.derbent.abstracts.components.CBinderFactory;
 import tech.derbent.abstracts.components.CEnhancedBinder;
@@ -220,8 +217,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			final String propertyName = getPropertyName(field);
 			// Use converter to handle BigDecimal conversion
 			binder.forField(numberField)
-				.withConverter(
-					value -> value != null ? BigDecimal.valueOf(value) : null,
+				.withConverter(value -> value != null ? BigDecimal.valueOf(value) : null,
 					value -> value != null ? value.doubleValue() : null,
 					"Invalid decimal value")
 				.bind(propertyName);
@@ -683,8 +679,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 
 			if ((fieldType == Integer.class) || (fieldType == int.class)) {
 				binder.forField(numberField)
-					.withConverter(
-						value -> value != null ? value.intValue() : null,
+					.withConverter(value -> value != null ? value.intValue() : null,
 						value -> value != null ? value.doubleValue() : null,
 						"Invalid integer value")
 					.bind(propertyName);
@@ -694,8 +689,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			}
 			else if ((fieldType == Long.class) || (fieldType == long.class)) {
 				binder.forField(numberField)
-					.withConverter(
-						value -> value != null ? value.longValue() : null,
+					.withConverter(value -> value != null ? value.longValue() : null,
 						value -> value != null ? value.doubleValue() : null,
 						"Invalid long value")
 					.bind(propertyName);

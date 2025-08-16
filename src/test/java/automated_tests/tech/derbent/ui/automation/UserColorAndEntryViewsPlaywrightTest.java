@@ -79,11 +79,7 @@ public class UserColorAndEntryViewsPlaywrightTest extends CBaseUITest {
 	@Test
 	void testColorAwareComboBoxFunctionality() {
 		LOGGER.info("🧪 Testing color-aware ComboBox functionality...");
-
-		if (!isBrowserAvailable()) {
-			LOGGER.warn("⚠️ Browser not available, skipping ComboBox test");
-			return;
-		}
+		assertBrowserAvailable();
 
 		// Test in multiple views that use ComboBoxes
 		for (final Class<?> view : entryViews) {
@@ -147,11 +143,7 @@ public class UserColorAndEntryViewsPlaywrightTest extends CBaseUITest {
 	@Test
 	void testColorContrastAndAccessibility() {
 		LOGGER.info("🧪 Testing color contrast and accessibility...");
-
-		if (!isBrowserAvailable()) {
-			LOGGER.warn("⚠️ Browser not available, skipping accessibility test");
-			return;
-		}
+		assertBrowserAvailable();
 
 		// Test accessibility in status views which have the most color usage
 		for (final Class<?> view : statusViews) {
@@ -192,11 +184,7 @@ public class UserColorAndEntryViewsPlaywrightTest extends CBaseUITest {
 	@Test
 	void testCompleteUserColorWorkflow() {
 		LOGGER.info("🧪 Testing complete user color workflow...");
-
-		if (!isBrowserAvailable()) {
-			LOGGER.warn("⚠️ Browser not available, skipping workflow test");
-			return;
-		}
+		assertBrowserAvailable();
 		// Complete workflow: Users -> Projects -> Activities with color validation 1.
 		// Start with Users view
 		navigateToViewByClass(CUsersView.class);
@@ -238,11 +226,7 @@ public class UserColorAndEntryViewsPlaywrightTest extends CBaseUITest {
 	@Test
 	void testEntryViewsShowStatusAndTypeFields() {
 		LOGGER.info("🧪 Testing entry views show status and type fields...");
-
-		if (!isBrowserAvailable()) {
-			LOGGER.warn("⚠️ Browser not available, skipping entry views test");
-			return;
-		}
+		assertBrowserAvailable();
 
 		// Test each main entry view
 		for (final Class<?> entryView : entryViews) {
@@ -304,11 +288,7 @@ public class UserColorAndEntryViewsPlaywrightTest extends CBaseUITest {
 	@Test
 	void testStatusViewsDisplayColorsCorrectly() {
 		LOGGER.info("🧪 Testing status views display colors correctly...");
-
-		if (!isBrowserAvailable()) {
-			LOGGER.warn("⚠️ Browser not available, skipping status views test");
-			return;
-		}
+		assertBrowserAvailable();
 
 		// Test each status view
 		for (final Class<?> statusView : statusViews) {
@@ -373,11 +353,7 @@ public class UserColorAndEntryViewsPlaywrightTest extends CBaseUITest {
 	@Test
 	void testTypeViewsDisplayColorsCorrectly() {
 		LOGGER.info("🧪 Testing type views display colors correctly...");
-
-		if (!isBrowserAvailable()) {
-			LOGGER.warn("⚠️ Browser not available, skipping type views test");
-			return;
-		}
+		assertBrowserAvailable();
 
 		// Test each type view
 		for (final Class<?> typeView : typeViews) {
@@ -438,11 +414,7 @@ public class UserColorAndEntryViewsPlaywrightTest extends CBaseUITest {
 	@Test
 	void testUserColorDisplayInColorAwareComponents() {
 		LOGGER.info("🧪 Testing user color display in color-aware components...");
-
-		if (!isBrowserAvailable()) {
-			LOGGER.warn("⚠️ Browser not available, skipping user color test");
-			return;
-		}
+		assertBrowserAvailable();
 		// Navigate to Users view to test user color functionality
 		navigateToViewByClass(CUsersView.class);
 		// Check if user grid displays properly with color-aware components

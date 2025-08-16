@@ -69,8 +69,6 @@ public abstract class CTypeEntity<EntityType> extends CEntityOfProject<EntityTyp
 
 	@Override
 	public boolean equals(final Object obj) {
-		// Use the superclass equals method which properly handles ID-based equality and
-		// proxy classes. This is the standard approach for JPA entities.
 		return super.equals(obj);
 	}
 

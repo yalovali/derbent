@@ -14,7 +14,6 @@ import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.decisions.domain.CDecisionType;
 import tech.derbent.decisions.service.CDecisionTypeService;
-import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 
 @Route ("cdecisiontypeview/:decisiontype_id?/:action?(edit)")
@@ -85,12 +84,6 @@ public class CDecisionTypeView extends CProjectAwareMDPage<CDecisionType>
 
 	@Override
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	@Override
-	protected void setProjectForEntity(final CDecisionType entity,
-		final CProject project) {
-		entity.setProject(project);
-	}
 
 	@Override
 	protected void setupToolbar() {

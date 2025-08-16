@@ -13,7 +13,6 @@ import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.meetings.domain.CMeetingStatus;
 import tech.derbent.meetings.service.CMeetingStatusService;
-import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 
 /**
@@ -88,12 +87,6 @@ public class CMeetingStatusView extends CProjectAwareMDPage<CMeetingStatus>
 
 	@Override
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	@Override
-	protected void setProjectForEntity(final CMeetingStatus entity,
-		final CProject project) {
-		entity.setProject(project);
-	}
 
 	@Override
 	protected void setupToolbar() {

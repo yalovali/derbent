@@ -35,16 +35,12 @@ public class CActivityStatusViewPlaywrightTest extends CApplicationGeneric_UITes
 		LOGGER.info("🧪 Testing Activity Status color functionality...");
 		navigateToViewByClass(CActivityStatusView.class);
 		clickNew();
-		wait_1000();
 		// Test color picker if available
 		final var colorPickers = page.locator("vaadin-color-picker, input[type='color']");
-
-		if (colorPickers.count() > 0) {
-			LOGGER.debug("Testing color picker");
-			colorPickers.first().fill("#2196F3");
-			wait_500();
-			takeScreenshot("activity-status-color-picker");
-		}
+		assertTrue(colorPickers.count() > 0,
+			"Color picker should be available in the activity status form");
+		colorPickers.first().fill("#2196F3");
+		wait_500();
 		// Fill other required fields
 		fillFirstTextField("Colored Status " + System.currentTimeMillis());
 		clickSave();

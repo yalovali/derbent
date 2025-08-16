@@ -1,7 +1,9 @@
 package ui_tests.tech.derbent.ui.automation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.nio.file.Paths;
 
@@ -17,6 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.BrowserType;
+import com.microsoft.playwright.ElementHandle;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
@@ -73,21 +76,18 @@ public class CBaseUITest {
 	// Core business views - main entity management
 	protected Class<?>[] mainViewClasses = {
 		CProjectsView.class, CActivitiesView.class, CMeetingsView.class,
-		CDecisionsView.class, CUsersView.class, COrdersView.class,
-		CRiskView.class, CCompanyView.class };
+		CDecisionsView.class, CUsersView.class, COrdersView.class, CRiskView.class,
+		CCompanyView.class };
 
 	// Status and Type configuration views
 	protected Class<?>[] statusAndTypeViewClasses = {
-		CActivityStatusView.class, CActivityTypeView.class,
-		CDecisionStatusView.class, CDecisionTypeView.class,
-		CMeetingStatusView.class, CMeetingTypeView.class,
-		CUserTypeView.class, CRiskStatusView.class,
-		CCommentPriorityView.class };
+		CActivityStatusView.class, CActivityTypeView.class, CDecisionStatusView.class,
+		CDecisionTypeView.class, CMeetingStatusView.class, CMeetingTypeView.class,
+		CUserTypeView.class, CRiskStatusView.class, CCommentPriorityView.class };
 
 	// Administrative and system configuration views
 	protected Class<?>[] adminViewClasses = {
-		CCompanySettingsView.class, CSystemSettingsView.class,
-		CDashboardView.class };
+		CCompanySettingsView.class, CSystemSettingsView.class, CDashboardView.class };
 
 	// Kanban board views
 	protected Class<?>[] kanbanViewClasses = {
@@ -105,71 +105,92 @@ public class CBaseUITest {
 
 	// All views combined for comprehensive testing
 	protected Class<?>[] allViewClasses = {
-		// Main business views
 		CProjectsView.class, CActivitiesView.class, CMeetingsView.class,
-		CDecisionsView.class, CUsersView.class, COrdersView.class,
-		CRiskView.class, CCompanyView.class,
-		// Status and Type views
-		CActivityStatusView.class, CActivityTypeView.class,
-		CDecisionStatusView.class, CDecisionTypeView.class,
-		CMeetingStatusView.class, CMeetingTypeView.class,
-		CUserTypeView.class, CRiskStatusView.class,
-		CCommentPriorityView.class,
-		// Administrative views
-		CCompanySettingsView.class, CSystemSettingsView.class,
-		CDashboardView.class,
-		// Kanban views
-		CActivityKanbanBoardView.class, CMeetingKanbanBoardView.class,
-		CGenericActivityKanbanBoardView.class,
-		// Example views
+		CDecisionsView.class, CUsersView.class, COrdersView.class, CRiskView.class,
+		CCompanyView.class, CActivityStatusView.class, CActivityTypeView.class,
+		CDecisionStatusView.class, CDecisionTypeView.class, CMeetingStatusView.class,
+		CMeetingTypeView.class, CUserTypeView.class, CRiskStatusView.class,
+		CCommentPriorityView.class, CCompanySettingsView.class, CSystemSettingsView.class,
+		CDashboardView.class, CActivityKanbanBoardView.class,
+		CMeetingKanbanBoardView.class, CGenericActivityKanbanBoardView.class,
 		CExampleHierarchicalMenuView.class, CExampleSettingsView.class,
-		CSearchDemoView.class, CSearchShowcaseView.class,
-		// Detail views
-		CProjectDetailsView.class };
+		CSearchDemoView.class, CSearchShowcaseView.class, CProjectDetailsView.class };
 
 	// Legacy property for backward compatibility
 	protected Class<?>[] viewClasses = mainViewClasses;
 
 	/**
+	 * Improved browser availability check with proper assertion
+	 */
+	protected void assertBrowserAvailable() {
+		assertTrue(isBrowserAvailable(),
+			"Browser is not available for testing - ensure Playwright setup completed successfully");
+	}
+
+	/**
+	 * Improved element existence check with assertion
+	 */
+	protected void assertElementExistsById(final String id) {
+		assertTrue(elementExistsById(id),
+			"Element with ID '" + id + "' should exist but was not found");
+	}
+
+	/**
+	 * Improved element non-existence check with assertion
+	 */
+	protected void assertElementNotExistsById(final String id) {
+		assertFalse(elementExistsById(id),
+			"Element with ID '" + id + "' should not exist but was found");
+	}
+
+	/**
+	 * Improved grid row count assertion
+	 */
+	protected void assertGridHasRows(final int expectedMinRows) {
+		final int actualRows = getGridRowCount();
+		assertTrue(actualRows >= expectedMinRows, "Grid should have at least "
+			+ expectedMinRows + " rows but has " + actualRows);
+	}
+
+	/**
+	 * Improved text content assertion
+	 */
+	protected void assertTextById(final String id, final String expectedText) {
+		final String actualText = getTextById(id);
+		assertNotNull(actualText,
+			"Element with ID '" + id + "' should have text content");
+		assertEquals(expectedText, actualText,
+			"Text content mismatch for element with ID '" + id + "'");
+	}
+
+	/**
 	 * Clicks on an element by its ID with timeout and error handling
 	 */
-	protected boolean clickById(final String id) {
-		return clickById(id, 5000);
+	protected void clickById(final String id) {
+		clickById(id, 5000);
 	}
 
 	/**
-	 * Clicks on an element by its ID with custom timeout
+	 * Clicks on an element by its ID with timeout and error handling
 	 */
-	protected boolean clickById(final String id, final int timeoutMs) {
-
-		if (!isBrowserAvailable()) {
-			LOGGER.warn("⚠️ Browser not available, cannot click element with ID: {}", id);
-			return false;
-		}
-
-		try {
-			final String selector = "#" + id;
-
-			if (page.locator(selector).count() > 0) {
-				page.click(selector, new Page.ClickOptions().setTimeout(timeoutMs));
-				LOGGER.debug("Successfully clicked element with ID: {}", id);
-				return true;
-			}
-			else {
-				LOGGER.warn("Element with ID '{}' not found", id);
-				return false;
-			}
-		} catch (final Exception e) {
-			LOGGER.warn("Failed to click element with ID '{}': {}", id, e.getMessage());
-			return false;
-		}
+	protected void clickById(final String id, final int timeoutMs) {
+		assertBrowserAvailable();
+		final String selector = "#" + id;
+		final var locator = page.locator(selector);
+		assertNotNull(id, "Element ID cannot be null");
+		assertTrue(locator.count() > 0,
+			"Element with ID '" + id + "' should exist before clicking");
+		// Perform click with timeout
+		page.click(selector, new Page.ClickOptions().setTimeout(timeoutMs));
+		LOGGER.debug("Successfully clicked element with ID: {}", id);
 	}
 
 	/**
-	 * Common function to click Cancel button with error handling
+	 * Common function to click Cancel button with improved structure
 	 */
 	protected void clickCancel() {
 
+		// Early return for browser availability
 		if (!isBrowserAvailable()) {
 			LOGGER.warn("⚠️ Browser not available, cannot click Cancel button");
 			return;
@@ -240,24 +261,12 @@ public class CBaseUITest {
 	 * Common function to click New/Add button with error handling
 	 */
 	protected void clickNew() {
-
-		try {
-			final var newButtons = page
-				.locator("vaadin-button:has-text('New'), vaadin-button:has-text('Add')");
-
-			if (newButtons.count() > 0) {
-				newButtons.first().click();
-				wait_1000();
-				LOGGER.debug("Successfully clicked New button");
-			}
-			else {
-				LOGGER.warn("New/Add button not found");
-				takeScreenshot("new-button-not-found", true);
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Failed to click New button: {}", e.getMessage());
-			takeScreenshot("new-button-error", true);
-		}
+		final var newButtons =
+			page.locator("vaadin-button:has-text('New'), vaadin-button:has-text('Add')");
+		assertTrue(newButtons.count() > 0, "New/Add button should exist before clicking");
+		newButtons.first().click();
+		wait_1000();
+		LOGGER.debug("Successfully clicked New button");
 	}
 
 	protected void clickNewButton() {
@@ -272,24 +281,12 @@ public class CBaseUITest {
 	}
 
 	protected void clickSaveButton() {
-
-		try {
-			final var saveButtons = page.locator(
-				"vaadin-button:has-text('Save'), vaadin-button:has-text('Create')");
-
-			if (saveButtons.count() > 0) {
-				saveButtons.first().click();
-				wait_2000();
-				LOGGER.debug("Successfully clicked Save button");
-			}
-			else {
-				LOGGER.warn("Save button not found");
-				takeScreenshot("save-button-not-found", true);
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Failed to click Save button: {}", e.getMessage());
-			takeScreenshot("save-button-error", true);
-		}
+		final var saveButtons = page
+			.locator("vaadin-button:has-text('Save'), vaadin-button:has-text('Create')");
+		assertTrue(saveButtons.count() > 0, "Save button should exist before clicking");
+		saveButtons.first().click();
+		wait_2000();
+		LOGGER.debug("Successfully clicked Save button");
 	}
 
 	/**
@@ -303,27 +300,21 @@ public class CBaseUITest {
 	}
 
 	/**
-	 * Fills a form field by its ID
+	 * Fills a form field by its ID with improved structure and assertions
 	 */
-	protected boolean fillById(final String id, final String value) {
-
-		try {
-			final String selector = "#" + id;
-
-			if (page.locator(selector).count() > 0) {
-				page.fill(selector, value);
-				LOGGER.debug("Successfully filled field with ID '{}' with value: {}", id,
-					value);
-				return true;
-			}
-			else {
-				LOGGER.warn("Field with ID '{}' not found", id);
-				return false;
-			}
-		} catch (final Exception e) {
-			LOGGER.warn("Failed to fill field with ID '{}': {}", id, e.getMessage());
-			return false;
-		}
+	protected void fillById(final String id, final String value) {
+		// Input validation
+		assertNotNull(id, "Element ID cannot be null");
+		assertNotNull(value, "Value to fill cannot be null");
+		assertBrowserAvailable();
+		final String selector = "#" + id;
+		final var locator = page.locator(selector);
+		// Check element existence
+		assertTrue(locator.count() > 0,
+			"Element with ID '" + id + "' should exist before filling");
+		// Fill the field
+		page.fill(selector, value);
+		LOGGER.debug("Successfully filled field with ID '{}' with value: {}", id, value);
 	}
 
 	protected void fillFirstDateField(final String value) {
@@ -346,29 +337,27 @@ public class CBaseUITest {
 	}
 
 	/**
-	 * Gets the count of grid rows
+	 * Gets the count of grid rows with improved error handling and assertions
 	 */
 	protected int getGridFirstCell() {
 		final var grids = page.locator("vaadin-grid");
-
-		if (grids.count() == 0) {
-			fail("No grids found in view");
-			return 0;
-		}
+		// Use proper assertions instead of fail()
+		assertTrue(grids.count() > 0,
+			"No grids found in view - expected at least one grid");
 		final var grid = grids.first();
 		final var gridCells = grid.locator("vaadin-grid-cell-content");
 		final int gridCellCount = gridCells.count();
-
-		if (gridCellCount < 1) {
-			fail("no grid cells");
-		}
+		// Use proper assertions with descriptive messages
+		assertTrue(gridCellCount >= 1,
+			"No grid cells found - expected at least one cell");
 		boolean emptyCells = false;
 		int firstDataCell = -1;
 
 		for (int i = 0; i < gridCellCount; i++) {
 			final Locator gridCell = gridCells.nth(i);
+			final String cellText = gridCell.textContent();
 
-			if (gridCell.textContent().isEmpty()) {
+			if ((cellText == null) || cellText.isEmpty()) {
 				emptyCells = true;
 			}
 			else if (emptyCells) {
@@ -376,39 +365,38 @@ public class CBaseUITest {
 				break;
 			}
 		}
+		// Validate that we found a data cell
+		assertTrue(firstDataCell >= 0, "No data cells found after empty cells");
 		return firstDataCell;
 	}
 
 	/**
-	 * Gets the count of grid rows
+	 * Gets the count of grid rows with improved error handling and assertions
 	 */
 	protected int getGridRowCount() {
 		final var grids = page.locator("vaadin-grid");
-
-		if (grids.count() == 0) {
-			fail("No grids found in view");
-			return 0;
-		}
+		// Use proper assertions instead of fail()
+		assertTrue(grids.count() > 0,
+			"No grids found in view - expected at least one grid");
 		final var grid = grids.first();
 		final var gridCells = grid.locator("vaadin-grid-cell-content");
 		final int gridCellCount = gridCells.count();
-
-		if (gridCellCount < 1) {
-			fail("no grid cells");
-		}
+		// Use proper assertions with descriptive messages
+		assertTrue(gridCellCount >= 1,
+			"No grid cells found - expected at least one cell");
 		int columns = 0;
 		boolean emptyCells = false;
 		int emptyCellCount = 0;
 
 		for (int i = 0; i < gridCellCount; i++) {
 			final Locator gridCell = gridCells.nth(i);
+			final String cellText = gridCell.textContent();
 
-			if (gridCell.textContent().isEmpty()) {
+			if ((cellText == null) || cellText.isEmpty()) {
 				emptyCellCount++;
 				emptyCells = true;
 			}
 			else {
-				// logger.info("Grid cell text: {}", gridCell.textContent());
 
 				if (emptyCells) {
 					break;
@@ -416,8 +404,12 @@ public class CBaseUITest {
 				columns++;
 			}
 		}
+		// Validate column count before calculation
+		assertTrue(columns > 0, "No columns detected in grid");
 		final int rowCount = (gridCellCount - emptyCellCount - columns) / columns;
 		LOGGER.debug("Grid has {} rows and {} columns", rowCount, columns);
+		// Ensure row count is reasonable
+		assertTrue(rowCount >= 0, "Invalid row count calculated: " + rowCount);
 		return rowCount;
 	}
 
@@ -425,24 +417,13 @@ public class CBaseUITest {
 	 * Gets the text content of an element by ID
 	 */
 	protected String getTextById(final String id) {
-
-		try {
-			final String selector = "#" + id;
-
-			if (page.locator(selector).count() > 0) {
-				final String text = page.locator(selector).textContent();
-				LOGGER.debug("Got text '{}' from element with ID: {}", text, id);
-				return text;
-			}
-			else {
-				LOGGER.warn("Element with ID '{}' not found", id);
-				return null;
-			}
-		} catch (final Exception e) {
-			LOGGER.warn("Failed to get text from element with ID '{}': {}", id,
-				e.getMessage());
-			return null;
-		}
+		final String selector = "#" + id;
+		final Locator item = page.locator(selector);
+		assertTrue(item.count() > 0,
+			"Element with ID '" + id + "' should exist before getting text");
+		final String text = item.textContent();
+		LOGGER.debug("Got text '{}' from element with ID: {}", text, id);
+		return text;
 	}
 
 	protected void gridClickCell(final int cellIndex) {
@@ -471,14 +452,13 @@ public class CBaseUITest {
 			LOGGER.debug("Testing grid sorting");
 			sorters.first().click();
 			wait_1000();
-			takeScreenshot("meetings-grid-sorted");
 		}
 	}
 
 	/**
 	 * Checks if browser is available for testing
 	 */
-	protected boolean isBrowserAvailable() {
+	private boolean isBrowserAvailable() {
 		return (page != null) && (playwright != null);
 	}
 
@@ -486,34 +466,20 @@ public class CBaseUITest {
 	 * Helper method to login to the application with default credentials
 	 */
 	protected void loginToApplication() {
-
-		if (!isBrowserAvailable()) {
-			LOGGER.warn("⚠️ Browser not available, cannot login to application");
-			return;
-		}
+		assertBrowserAvailable();
 		page.navigate(baseUrl);
 		wait_loginscreen();
 		performLogin("admin", "test123");
 	}
 
 	protected void navigateToViewByClass(final Class<?> viewClass) {
-
-		if (!isBrowserAvailable()) {
-			throw new RuntimeException("Browser not available for navigation to view: "
-				+ viewClass.getSimpleName());
-		}
+		assertBrowserAvailable();
 		final Route routeAnnotation = viewClass.getAnnotation(Route.class);
-
-		if (routeAnnotation == null) {
-			throw new RuntimeException(
-				"Class " + viewClass.getName() + " has no @Route annotation");
-		}
+		assertTrue(routeAnnotation != null,
+			"Class " + viewClass.getName() + " must have a @Route annotation");
 		final String route = routeAnnotation.value().split("/")[0];
-
-		if (route.isEmpty()) {
-			throw new RuntimeException(
-				"Route value is empty for class: " + viewClass.getName());
-		}
+		assertTrue(!route.isEmpty(),
+			"Route value must not be empty for class: " + viewClass.getName());
 		String url = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
 		url += route.startsWith("/") ? route.substring(1) : route;
 		LOGGER.info("Navigating to view by class: {}", url);
@@ -522,14 +488,8 @@ public class CBaseUITest {
 		// Check if the view is loaded by looking for a specific element
 		final String viewSelector = "#pageid-" + route.replace("/", "-");
 		final Locator viewLocator = page.locator(viewSelector);
-
-		// #page-box-border\ flex\ flex-col\ gap-s\ md-page\ projects-view
-		if (viewLocator.count() == 0) {
-			LOGGER.error("View {} not found after navigation", viewClass.getSimpleName());
-			takeScreenshot("view-not-found-" + viewClass.getSimpleName(), true);
-			throw new RuntimeException(
-				"View not found after navigation: " + viewClass.getSimpleName());
-		}
+		assertTrue(viewLocator.count() > 0, "View element with selector '" + viewSelector
+			+ "' should exist after navigation");
 	}
 
 	/**
@@ -537,53 +497,51 @@ public class CBaseUITest {
 	 * screen)
 	 */
 	protected void performLogin(final String username, final String password) {
+		// Input validation
+		assertNotNull(username, "Username cannot be null");
+		assertNotNull(password, "Password cannot be null");
+		assertFalse(username.trim().isEmpty(), "Username cannot be empty");
+		assertFalse(password.trim().isEmpty(), "Password cannot be empty");
 		LOGGER.debug("Performing login with username: {}", username);
+		// Fill login form - Playwright fill() returns void, so we can't check return
+		// value
 		page.locator("#custom-username-input").locator("input").fill(username);
 		page.locator("#custom-password-input").locator("input").fill(password);
+		// Submit login
 		page.click("#custom-submit-button");
 		wait_1000();
-		// Safely check if error message exists without throwing exception
+		// Check for error messages
 		final var errorMessageLocator = page.locator("#custom-error-message");
 
 		if (errorMessageLocator.count() > 0) {
-			final String text = errorMessageLocator.textContent();
+			final String errorText = errorMessageLocator.textContent();
 
-			if (text != null && !text.isEmpty()) {
-				LOGGER.error("Login error message: {}", text);
-				throw new RuntimeException("Login failed: " + text);
+			if ((errorText != null) && !errorText.trim().isEmpty()) {
+				LOGGER.error("Login error message: {}", errorText);
+				throw new RuntimeException("Login failed: " + errorText);
 			}
 		}
+		// Wait for successful login
 		wait_afterlogin();
 	}
 
 	/**
-	 * Attempts to perform logout
+	 * Attempts to perform logout using the specific menu item IDs from MainLayout with
+	 * proper assertions for test validation
 	 */
 	protected void performLogout() {
-		// Look for logout button or menu
-		final var logoutButtons = page.locator(
-			"vaadin-button:has-text('Logout'), a:has-text('Logout'), vaadin-menu-bar-button:has-text('Logout')");
-
-		if (logoutButtons.count() > 0) {
-			logoutButtons.first().click();
-			page.waitForTimeout(1000);
-			return;
-		}
-		// Alternative: look for user menu that might contain logout
-		final var userMenus =
-			page.locator("vaadin-menu-bar, [role='button']:has-text('User')");
-
-		if (userMenus.count() > 0) {
-			userMenus.first().click();
-			page.waitForTimeout(500);
-			final var logoutInMenu =
-				page.locator("vaadin-menu-bar-item:has-text('Logout')");
-
-			if (logoutInMenu.count() > 0) {
-				logoutInMenu.click();
-				return;
-			}
-		}
+		// Assert browser is available before attempting logout
+		assertBrowserAvailable();
+		// First click on the user menu item to open the dropdown
+		clickById("user-menu-item");
+		assertTrue(waitForElementById("logout-menu-item", 2000),
+			"Logout menu item should be available after opening user menu");
+		// Then click on the logout menu item
+		clickById("logout-menu-item");
+		wait_1000();
+		assertTrue(waitForElementById("custom-username-input", 5000),
+			"Should be redirected to login page after logout");
+		LOGGER.info("✅ Logout completed successfully - redirected to login page");
 	}
 	// ========== Additional Playwright Testing Utilities ==========
 
@@ -937,38 +895,22 @@ public class CBaseUITest {
 	 * Tests form validation by submitting empty form
 	 */
 	protected boolean testFormValidationById(final String saveButtonId) {
+		clickById(saveButtonId);
+		wait_1000();
+		// Look for validation messages
+		final var errorMessages =
+			page.locator("vaadin-text-field[invalid], .error-message, [role='alert']");
+		final boolean hasValidation = errorMessages.count() > 0;
 
-		try {
-
-			// Try to save without filling required fields
-			if (clickById(saveButtonId)) {
-				wait_1000();
-				// Look for validation messages
-				final var errorMessages = page.locator(
-					"vaadin-text-field[invalid], .error-message, [role='alert']");
-				final boolean hasValidation = errorMessages.count() > 0;
-
-				if (hasValidation) {
-					LOGGER.debug("Form validation working - found {} validation messages",
-						errorMessages.count());
-				}
-				else {
-					LOGGER.warn(
-						"No validation messages found - potential validation issue");
-					takeScreenshot("form-validation-missing", true);
-				}
-				return hasValidation;
-			}
-			else {
-				LOGGER.error("Could not click save button for validation test");
-				takeScreenshot("validation-test-save-button-missing", true);
-				return false;
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Form validation test failed: {}", e.getMessage());
-			takeScreenshot("form-validation-test-error", true);
-			return false;
+		if (hasValidation) {
+			LOGGER.debug("Form validation working - found {} validation messages",
+				errorMessages.count());
 		}
+		else {
+			LOGGER.warn("No validation messages found - potential validation issue");
+			takeScreenshot("form-validation-missing", true);
+		}
+		return hasValidation;
 	}
 
 	protected void testNavigationTo(final Class<?> class1, final Class<?> class2) {
@@ -1099,13 +1041,12 @@ public class CBaseUITest {
 	 * Waits for login screen to be ready Updated for CCustomLoginView (new login screen)
 	 */
 	protected void wait_loginscreen() {
-
-		if (isBrowserAvailable()) {
-			wait_500();
-			// Updated selector for CCustomLoginView - wait for username input field
-			page.waitForSelector("#custom-username-input",
-				new Page.WaitForSelectorOptions().setTimeout(10000));
-		}
+		assertBrowserAvailable();
+		// Updated selector for CCustomLoginView - wait for username input field
+		final ElementHandle handler = page.waitForSelector("#custom-username-input",
+			new Page.WaitForSelectorOptions().setTimeout(10000));
+		assertNotNull(handler,
+			"Login screen did not load - username input field not found");
 	}
 
 	/**

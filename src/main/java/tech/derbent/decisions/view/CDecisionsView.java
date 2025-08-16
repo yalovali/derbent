@@ -171,14 +171,6 @@ public class CDecisionsView extends CProjectAwareMDPage<CDecision>
 	}
 
 	@Override
-	protected void setProjectForEntity(final CDecision entity, final CProject project) {
-
-		if (entity != null) {
-			entity.setProject(project);
-		}
-	}
-
-	@Override
 	protected void setupToolbar() {
 		// Setup toolbar if needed - following the pattern from CActivitiesView
 	}

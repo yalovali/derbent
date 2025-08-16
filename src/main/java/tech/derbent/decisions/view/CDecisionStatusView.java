@@ -9,9 +9,10 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.components.CGridCell;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
-import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
+import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.decisions.domain.CDecisionStatus;
 import tech.derbent.decisions.service.CDecisionStatusService;
+import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 
 /**
@@ -26,7 +27,7 @@ import tech.derbent.session.service.CSessionService;
 	title = "Types.Decision Statuses"
 )
 @PermitAll
-public class CDecisionStatusView extends CAbstractNamedEntityPage<CDecisionStatus>
+public class CDecisionStatusView extends CProjectAwareMDPage<CDecisionStatus>
 	implements CInterfaceIconSet {
 
 	private static final long serialVersionUID = 1L;
@@ -83,6 +84,14 @@ public class CDecisionStatusView extends CAbstractNamedEntityPage<CDecisionStatu
 
 	@Override
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
+
+	@Override
+	public void setProjectForEntity(final CDecisionStatus entity,
+		final CProject project) {
+		assert entity != null : "Entity must not be null";
+		assert project != null : "Project must not be null";
+		entity.setProject(project);
+	}
 
 	@Override
 	protected void setupToolbar() {

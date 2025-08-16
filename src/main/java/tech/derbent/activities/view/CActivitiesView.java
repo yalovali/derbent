@@ -12,7 +12,6 @@ import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
 import tech.derbent.comments.service.CCommentService;
 import tech.derbent.comments.view.CPanelActivityComments;
-import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 
 @Route ("cactivitiesview/:activity_id?/:action?(edit)")
@@ -131,11 +130,6 @@ public final class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 	@Override
 	protected String getEntityRouteTemplateEdit() { // TODO Auto-generated method stub
 		return ENTITY_ROUTE_TEMPLATE_EDIT;
-	}
-
-	@Override
-	protected void setProjectForEntity(final CActivity entity, final CProject project) {
-		entity.setProject(project);
 	}
 
 	@Override

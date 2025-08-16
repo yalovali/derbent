@@ -76,24 +76,17 @@ public class CDecisionStatusViewPlaywrightTest extends CApplicationGeneric_UITes
 		fillFirstTextField("Ordered Status " + System.currentTimeMillis());
 		// Test color picker if available
 		final var colorPickers = page.locator("vaadin-color-picker, input[type='color']");
-
-		if (colorPickers.count() > 0) {
-			LOGGER.debug("Testing color picker");
-			colorPickers.first().fill("#9C27B0");
-			wait_500();
-			takeScreenshot("decision-status-color-picker");
-		}
+		assertTrue(colorPickers.count() > 0,
+			"Color picker should be available in the decision status form");
+		colorPickers.first().fill("#9C27B0");
+		wait_500();
 		// Test sort order if available
 		final var numberFields =
 			page.locator("vaadin-number-field, vaadin-integer-field");
-
-		if (numberFields.count() > 0) {
-			LOGGER.debug("Testing sort order field");
-			numberFields.first().fill("50");
-			wait_500();
-			takeScreenshot("decision-status-sort-order");
-		}
-		takeScreenshot("decision-status-color-sort-form");
+		assertTrue(numberFields.count() > 0,
+			"Sort order field should be available in the decision status form");
+		numberFields.first().fill("50");
+		wait_500();
 		clickSave();
 		wait_2000();
 		takeScreenshot("decision-status-color-sort-saved");

@@ -11,6 +11,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.avatar.AvatarVariant;
+import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -272,11 +273,13 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		userMenu.addClassNames(Margin.MEDIUM);
 		final var userMenuItem = userMenu.addItem(avatar);
 		userMenuItem.add(user.getUsername());
+		userMenuItem.setId("user-menu-item");
 		userMenuItem.getSubMenu().addItem("Edit Profile",
 			event -> openUserProfileDialog());
 		// TODO Add additional items to the user menu if needed
-		userMenuItem.getSubMenu().addItem("Logout",
+		final MenuItem menuItem = userMenuItem.getSubMenu().addItem("Logout",
 			event -> authenticationContext.logout());
+		menuItem.setId("logout-menu-item");
 		return userMenu;
 	}
 
