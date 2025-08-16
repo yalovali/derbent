@@ -50,6 +50,7 @@ import tech.derbent.projects.view.CProjectDetailsView;
 import tech.derbent.projects.view.CProjectsView;
 import tech.derbent.risks.view.CRiskStatusView;
 import tech.derbent.risks.view.CRiskView;
+import tech.derbent.screens.view.CScreenView;
 import tech.derbent.setup.view.CSystemSettingsView;
 import tech.derbent.users.view.CUserTypeView;
 import tech.derbent.users.view.CUsersView;
@@ -77,7 +78,7 @@ public class CBaseUITest {
 	protected Class<?>[] mainViewClasses = {
 		CProjectsView.class, CActivitiesView.class, CMeetingsView.class,
 		CDecisionsView.class, CUsersView.class, COrdersView.class, CRiskView.class,
-		CCompanyView.class };
+		CCompanyView.class, CScreenView.class };
 
 	// Status and Type configuration views
 	protected Class<?>[] statusAndTypeViewClasses = {
@@ -107,7 +108,7 @@ public class CBaseUITest {
 	protected Class<?>[] allViewClasses = {
 		CProjectsView.class, CActivitiesView.class, CMeetingsView.class,
 		CDecisionsView.class, CUsersView.class, COrdersView.class, CRiskView.class,
-		CCompanyView.class, CActivityStatusView.class, CActivityTypeView.class,
+		CCompanyView.class, CScreenView.class, CActivityStatusView.class, CActivityTypeView.class,
 		CDecisionStatusView.class, CDecisionTypeView.class, CMeetingStatusView.class,
 		CMeetingTypeView.class, CUserTypeView.class, CRiskStatusView.class,
 		CCommentPriorityView.class, CCompanySettingsView.class, CSystemSettingsView.class,
