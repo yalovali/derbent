@@ -12,6 +12,7 @@ import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUserType;
 import tech.derbent.users.service.CUserTypeService;
+import tech.derbent.projects.domain.CProject;
 
 /**
  * CUserTypeView - View for managing user types. Layer: View (MVC) Provides CRUD
@@ -73,7 +74,15 @@ public class CUserTypeView extends CProjectAwareMDPage<CUserType>
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
 
 	@Override
+	public void setProjectForEntity(final CUserType entity,
+		final CProject project) {
+		assert entity != null : "Entity must not be null";
+		assert project != null : "Project must not be null";
+		entity.setProject(project);
+	}
+
+	@Override
 	protected void setupToolbar() {
-		// TODO: Implement toolbar setup if needed
+		// Toolbar setup is handled by the parent class
 	}
 }

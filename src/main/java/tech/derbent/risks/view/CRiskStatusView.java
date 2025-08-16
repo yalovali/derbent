@@ -7,11 +7,12 @@ import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
-import tech.derbent.abstracts.annotations.CSpringAuxillaries;
+import tech.derbent.abstracts.components.CGridCell;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.risks.domain.CRiskStatus;
 import tech.derbent.risks.service.CRiskStatusService;
+import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 
 /**
@@ -49,44 +50,32 @@ public class CRiskStatusView extends CProjectAwareMDPage<CRiskStatus>
 	public CRiskStatusView(final CRiskStatusService entityService,
 		final CSessionService sessionService) {
 		super(CRiskStatus.class, entityService, sessionService);
-		LOGGER.debug("CRiskStatusView constructor called with service: {}",
-			entityService.getClass().getSimpleName());
-		addClassNames("risk-statuses-view");
-		LOGGER.info("CRiskStatusView initialized with route: {}",
-			CSpringAuxillaries.getRoutePath(this.getClass()));
 	}
 
-	/**
-	 * Creates the details layout for editing risk status entities. Uses
-	 * CEntityFormBuilder to automatically generate form fields based on MetaData
-	 * annotations.
-	 */
 	@Override
 	protected void createDetailsLayout() {
-		LOGGER.debug("Creating details layout for CRiskStatusView");
-
-		try {
-			final Div detailsLayout =
-				CEntityFormBuilder.buildForm(CRiskStatus.class, getBinder());
-			// Note: Buttons are now automatically added to the details tab by the parent
-			// class
-			getBaseDetailsLayout().add(detailsLayout);
-			LOGGER.debug("Details layout created successfully for CRiskStatusView");
-		} catch (final Exception e) {
-			LOGGER.error("Error creating details layout for CRiskStatusView", e);
-			throw new RuntimeException(
-				"Failed to create details layout for risk status view", e);
-		}
+		final Div detailsLayout =
+			CEntityFormBuilder.buildForm(CRiskStatus.class, getBinder());
+		getBaseDetailsLayout().add(detailsLayout);
 	}
 
-	/**
-	 * Creates the grid for displaying risk status entities. Sets up columns for name and
-	 * description with appropriate headers and sorting.
-	 */
 	@Override
 	protected void createGridForEntity() {
-		grid.addShortTextColumn(CRiskStatus::getName, "Status Name", "name");
-		grid.addLongTextColumn(CRiskStatus::getDescription, "Description", "description");
+		// Use enhanced color-aware status column that shows both color and icon
+		grid.addStatusColumn(status -> status, "Status", "status");
+		grid.addShortTextColumn(CRiskStatus::getName, "Name", "name");
+		grid.addLongTextColumn(CRiskStatus::getDescription, "Description",
+			"description");
+		// Color column for reference (hex value)
+		grid.addShortTextColumn(entity -> entity.getColor(), "Color", "color");
+		// Enhanced Type column that shows Final/Active status using CGridCell
+		grid.addComponentColumn(entity -> {
+			final CGridCell statusCell = new CGridCell();
+			statusCell.setFinalActiveValue(entity.getIsFinal());
+			return statusCell;
+		}).setHeader("Type").setWidth("100px").setFlexGrow(0);
+		grid.addShortTextColumn(entity -> String.valueOf(entity.getSortOrder()), "Order",
+			"sortOrder");
 	}
 
 	@Override
@@ -96,9 +85,15 @@ public class CRiskStatusView extends CProjectAwareMDPage<CRiskStatus>
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
 
 	@Override
+	public void setProjectForEntity(final CRiskStatus entity,
+		final CProject project) {
+		assert entity != null : "Entity must not be null";
+		assert project != null : "Project must not be null";
+		entity.setProject(project);
+	}
+
+	@Override
 	protected void setupToolbar() {
-		LOGGER.debug("Setting up toolbar for CRiskStatusView");
-		// TODO: Implement toolbar setup if needed Currently using default toolbar from
-		// parent class
+		// Toolbar setup is handled by the parent class
 	}
 }

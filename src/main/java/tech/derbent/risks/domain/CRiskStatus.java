@@ -66,6 +66,8 @@ public class CRiskStatus extends CStatus<CRiskStatus> {
 		return Objects.hash(super.hashCode(), isFinal);
 	}
 
+	public Boolean getIsFinal() { return isFinal; }
+
 	public Boolean isFinal() { return isFinal; }
 
 	public void setIsFinal(final Boolean isFinal) { this.isFinal = isFinal; }

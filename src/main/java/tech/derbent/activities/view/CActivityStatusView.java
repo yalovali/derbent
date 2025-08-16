@@ -7,11 +7,11 @@ import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
-import tech.derbent.abstracts.annotations.CSpringAuxillaries;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.service.CActivityStatusService;
+import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 
 /**
@@ -50,34 +50,13 @@ public class CActivityStatusView extends CProjectAwareMDPage<CActivityStatus>
 	public CActivityStatusView(final CActivityStatusService entityService,
 		final CSessionService sessionService) {
 		super(CActivityStatus.class, entityService, sessionService);
-		LOGGER.debug("CActivityStatusView constructor called with service: {}",
-			entityService.getClass().getSimpleName());
-		addClassNames("activity-statuses-view");
-		LOGGER.info("CActivityStatusView initialized with route: {}",
-			CSpringAuxillaries.getRoutePath(this.getClass()));
 	}
 
-	/**
-	 * Creates the details layout for editing activity status entities. Uses
-	 * CEntityFormBuilder to automatically generate form fields based on MetaData
-	 * annotations.
-	 */
 	@Override
-	public void createDetailsLayout() {
-		LOGGER.debug("Creating details layout for CActivityStatusView");
-
-		try {
-			final Div detailsLayout =
-				CEntityFormBuilder.buildForm(CActivityStatus.class, getBinder());
-			// Note: Buttons are now automatically added to the details tab by the parent
-			// class
-			getBaseDetailsLayout().add(detailsLayout);
-			LOGGER.debug("Details layout created successfully for CActivityStatusView");
-		} catch (final Exception e) {
-			LOGGER.error("Error creating details layout for CActivityStatusView", e);
-			throw new RuntimeException(
-				"Failed to create details layout for activity status view", e);
-		}
+	protected void createDetailsLayout() {
+		final Div detailsLayout =
+			CEntityFormBuilder.buildForm(CActivityStatus.class, getBinder());
+		getBaseDetailsLayout().add(detailsLayout);
 	}
 
 	/**
@@ -105,10 +84,16 @@ public class CActivityStatusView extends CProjectAwareMDPage<CActivityStatus>
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
 
 	@Override
+	public void setProjectForEntity(final CActivityStatus entity,
+		final CProject project) {
+		assert entity != null : "Entity must not be null";
+		assert project != null : "Project must not be null";
+		entity.setProject(project);
+	}
+
+	@Override
 	protected void setupToolbar() {
-		LOGGER.debug("Setting up toolbar for CActivityStatusView");
-		// TODO: Implement toolbar setup if needed Currently using default toolbar from
-		// parent class
+		// Toolbar setup is handled by the parent class
 	}
 
 	/**
