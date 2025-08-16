@@ -439,7 +439,10 @@ public final class CViewToolbar extends Composite<Header> implements CProjectLis
         // Users icon - purple
         final var usersButton = createColorfulIconButton(VaadinIcon.USERS, "Users", "#6f42c1", "cusersview");
         
-        quickAccessDiv.add(meetingsButton, activitiesButton, projectsButton, usersButton);
+        // Screens icon - purple (consistent with domain color)
+        final var screensButton = createColorfulIconButton(VaadinIcon.VIEWPORT, "Screens", "#6f42c1", "cscreensview");
+        
+        quickAccessDiv.add(meetingsButton, activitiesButton, projectsButton, usersButton, screensButton);
         return quickAccessDiv;
     }
 

@@ -48,6 +48,10 @@ import tech.derbent.projects.service.CProjectService;
 import tech.derbent.risks.domain.CRisk;
 import tech.derbent.risks.domain.ERiskSeverity;
 import tech.derbent.risks.service.CRiskService;
+import tech.derbent.screens.domain.CScreen;
+import tech.derbent.screens.domain.CScreenLines;
+import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CScreenLinesService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserRole;
 import tech.derbent.users.service.CUserService;
@@ -115,6 +119,10 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	private final CDecisionService decisionService;
 
 	private final CCurrencyService currencyService;
+	
+	private final CScreenService screenService;
+	
+	private final CScreenLinesService screenLinesService;
 
 	public CSampleDataInitializer(final CProjectService projectService,
 		final CUserService userService, final CActivityService activityService,
@@ -132,7 +140,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final COrderStatusService orderStatusService,
 		final CApprovalStatusService approvalStatusService,
 		final CDecisionService decisionService, final COrderService orderService,
-		final CCurrencyService currencyService) {
+		final CCurrencyService currencyService, final CScreenService screenService,
+		final CScreenLinesService screenLinesService) {
 		LOGGER
 			.info("CSampleDataInitializer constructor called with service dependencies");
 		this.projectService = projectService;
@@ -152,6 +161,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		this.activityStatusService = activityStatusService;
 		this.decisionService = decisionService;
 		this.currencyService = currencyService;
+		this.screenService = screenService;
+		this.screenLinesService = screenLinesService;
 	}
 
 	/**
@@ -799,6 +810,79 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			LOGGER.error("Error creating sample decisions", e);
 			throw new RuntimeException("Failed to create sample decisions", e);
 		}
+	}
+
+	/**
+	 * Creates sample screens with two fields per project as per requirements.
+	 */
+	private void createSampleScreens() {
+		try {
+			final CProject project1 = findProjectByName("Digital Transformation Initiative");
+			final CProject project2 = findProjectByName("Product Development Phase 2");
+			final CProject project3 = findProjectByName("Infrastructure Modernization");
+			final CProject project4 = findProjectByName("Customer Experience Enhancement");
+
+			if (project1 != null) {
+				createScreenWithFields(project1, "User Management Screen", "CUser", 
+					"User Name", "name", "User Email", "email");
+			}
+
+			if (project2 != null) {
+				createScreenWithFields(project2, "Activity Tracking Screen", "CActivity", 
+					"Activity Title", "name", "Activity Status", "status");
+			}
+
+			if (project3 != null) {
+				createScreenWithFields(project3, "Project Overview Screen", "CProject", 
+					"Project Name", "name", "Project Description", "description");
+			}
+
+			if (project4 != null) {
+				createScreenWithFields(project4, "Meeting Management Screen", "CMeeting", 
+					"Meeting Title", "name", "Meeting Date", "meetingDate");
+			}
+
+		} catch (final Exception e) {
+			LOGGER.error("Error creating sample screens", e);
+			throw new RuntimeException("Failed to create sample screens", e);
+		}
+	}
+
+	/**
+	 * Helper method to create a screen with two sample fields.
+	 */
+	private void createScreenWithFields(CProject project, String screenName, String entityType,
+			String field1Caption, String field1Name, String field2Caption, String field2Name) {
+		
+		// Create the screen
+		final CScreen screen = new CScreen(screenName, project);
+		screen.setEntityType(entityType);
+		screen.setScreenTitle(screenName);
+		screen.setDescription("Sample screen for " + entityType + " entity management");
+		screen.setIsActive(true);
+		
+		final CScreen savedScreen = screenService.save(screen);
+		LOGGER.info("Created sample screen: {} for project: {}", screenName, project.getName());
+
+		// Create first field
+		final CScreenLines field1 = screenLinesService.newEntity(savedScreen, field1Caption, field1Name);
+		field1.setFieldDescription("Description for " + field1Caption.toLowerCase());
+		field1.setFieldType("TEXT");
+		field1.setIsRequired(true);
+		field1.setIsActive(true);
+		field1.setLineOrder(1);
+		screenLinesService.save(field1);
+
+		// Create second field
+		final CScreenLines field2 = screenLinesService.newEntity(savedScreen, field2Caption, field2Name);
+		field2.setFieldDescription("Description for " + field2Caption.toLowerCase());
+		field2.setFieldType(field2Name.contains("Date") ? "DATE" : "TEXT");
+		field2.setIsRequired(false);
+		field2.setIsActive(true);
+		field2.setLineOrder(2);
+		screenLinesService.save(field2);
+
+		LOGGER.info("Created sample fields for screen: {}", screenName);
 	}
 
 	/**
@@ -1853,6 +1937,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			initializeRisks();
 			createSampleCurrencies();
 			createSampleDecisions();
+			createSampleScreens(); // Add sample screens with fields
 			// createSampleOrders(); // Temporarily disabled due to missing dependencies
 			LOGGER.info("Sample data initialization completed successfully");
 		} catch (final Exception e) {
