@@ -21,12 +21,14 @@ import tech.derbent.screens.domain.CScreen;
 import tech.derbent.screens.domain.CScreenLines;
 import tech.derbent.screens.service.CScreenService;
 import tech.derbent.screens.service.CScreenLinesService;
+import tech.derbent.screens.service.CEntityFieldService;
 
 public class CPanelScreenLines extends CPanelScreenBase {
 
     private static final long serialVersionUID = 1L;
 
     private final CScreenLinesService screenLinesService;
+    private final CEntityFieldService entityFieldService;
     private Grid<CScreenLines> linesGrid;
     private CScreenLines selectedLine;
     private Binder<CScreenLines> linesBinder;
@@ -34,7 +36,8 @@ public class CPanelScreenLines extends CPanelScreenBase {
     // Form fields for screen line editing
     private TextField lineOrderField;
     private TextField fieldCaptionField;
-    private TextField entityFieldNameField;
+    private ComboBox<String> entityTypeCombo;
+    private ComboBox<CEntityFieldService.EntityFieldInfo> entityFieldCombo;
     private TextField fieldDescriptionField;
     private ComboBox<String> fieldTypeCombo;
     private Checkbox isRequiredField;
@@ -42,16 +45,18 @@ public class CPanelScreenLines extends CPanelScreenBase {
     private Checkbox isHiddenField;
     private TextField defaultValueField;
     private TextField relatedEntityTypeField;
-    private TextField dataProviderBeanField;
+    private ComboBox<String> dataProviderBeanCombo;
     private TextField maxLengthField;
     private Checkbox isActiveField;
 
     public CPanelScreenLines(final CScreen currentEntity,
                             final CEnhancedBinder<CScreen> beanValidationBinder,
                             final CScreenService entityService,
-                            final CScreenLinesService screenLinesService) {
+                            final CScreenLinesService screenLinesService,
+                            final CEntityFieldService entityFieldService) {
         super("Screen Lines", currentEntity, beanValidationBinder, entityService);
         this.screenLinesService = screenLinesService;
+        this.entityFieldService = entityFieldService;
         this.linesBinder = new Binder<>(CScreenLines.class);
         initPanel();
         createScreenLinesLayout();
@@ -169,8 +174,17 @@ public class CPanelScreenLines extends CPanelScreenBase {
         fieldCaptionField = new TextField("Field Caption");
         fieldCaptionField.setRequired(true);
         
-        entityFieldNameField = new TextField("Entity Field Name");
-        entityFieldNameField.setRequired(true);
+        // Entity type selection
+        entityTypeCombo = new ComboBox<>("Entity Type");
+        entityTypeCombo.setItems(entityFieldService.getAvailableEntityTypes());
+        entityTypeCombo.setRequired(true);
+        entityTypeCombo.addValueChangeListener(e -> updateEntityFieldCombo(e.getValue()));
+        
+        // Entity field selection (populated based on entity type)
+        entityFieldCombo = new ComboBox<>("Entity Field");
+        entityFieldCombo.setRequired(true);
+        entityFieldCombo.setItemLabelGenerator(field -> field.toString());
+        entityFieldCombo.addValueChangeListener(e -> populateFieldFromSelection(e.getValue()));
         
         fieldDescriptionField = new TextField("Field Description");
         
@@ -185,7 +199,10 @@ public class CPanelScreenLines extends CPanelScreenBase {
         
         defaultValueField = new TextField("Default Value");
         relatedEntityTypeField = new TextField("Related Entity Type");
-        dataProviderBeanField = new TextField("Data Provider Bean");
+        
+        dataProviderBeanCombo = new ComboBox<>("Data Provider Bean");
+        dataProviderBeanCombo.setItems(entityFieldService.getDataProviderBeans());
+        
         maxLengthField = new TextField("Max Length");
         
         isActiveField = new Checkbox("Active");
@@ -193,7 +210,6 @@ public class CPanelScreenLines extends CPanelScreenBase {
 
         // Bind fields
         linesBinder.forField(fieldCaptionField).bind(CScreenLines::getFieldCaption, CScreenLines::setFieldCaption);
-        linesBinder.forField(entityFieldNameField).bind(CScreenLines::getEntityFieldName, CScreenLines::setEntityFieldName);
         linesBinder.forField(fieldDescriptionField).bind(CScreenLines::getFieldDescription, CScreenLines::setFieldDescription);
         linesBinder.forField(fieldTypeCombo).bind(CScreenLines::getFieldType, CScreenLines::setFieldType);
         linesBinder.forField(isRequiredField).bind(CScreenLines::getIsRequired, CScreenLines::setIsRequired);
@@ -201,12 +217,29 @@ public class CPanelScreenLines extends CPanelScreenBase {
         linesBinder.forField(isHiddenField).bind(CScreenLines::getIsHidden, CScreenLines::setIsHidden);
         linesBinder.forField(defaultValueField).bind(CScreenLines::getDefaultValue, CScreenLines::setDefaultValue);
         linesBinder.forField(relatedEntityTypeField).bind(CScreenLines::getRelatedEntityType, CScreenLines::setRelatedEntityType);
-        linesBinder.forField(dataProviderBeanField).bind(CScreenLines::getDataProviderBean, CScreenLines::setDataProviderBean);
+        linesBinder.forField(dataProviderBeanCombo).bind(CScreenLines::getDataProviderBean, CScreenLines::setDataProviderBean);
         linesBinder.forField(maxLengthField).asRequired().withConverter(
             value -> value.isEmpty() ? null : Integer.valueOf(value),
             value -> value == null ? "" : value.toString()
         ).bind(CScreenLines::getMaxLength, CScreenLines::setMaxLength);
         linesBinder.forField(isActiveField).bind(CScreenLines::getIsActive, CScreenLines::setIsActive);
+
+        // Custom binding for entity field name (derived from combo selection)
+        linesBinder.forField(entityFieldCombo)
+            .withConverter(
+                fieldInfo -> fieldInfo != null ? fieldInfo.getFieldName() : null,
+                fieldName -> {
+                    if (fieldName != null && entityTypeCombo.getValue() != null) {
+                        return entityFieldService.getEntityFields(entityTypeCombo.getValue())
+                            .stream()
+                            .filter(f -> f.getFieldName().equals(fieldName))
+                            .findFirst()
+                            .orElse(null);
+                    }
+                    return null;
+                }
+            )
+            .bind(CScreenLines::getEntityFieldName, CScreenLines::setEntityFieldName);
 
         // Save button
         final Button saveButton = new Button("Save Line", VaadinIcon.CHECK.create());
@@ -214,9 +247,9 @@ public class CPanelScreenLines extends CPanelScreenBase {
         saveButton.addClickListener(e -> saveCurrentLine());
 
         formLayout.add(
-            lineOrderField, fieldCaptionField, entityFieldNameField, fieldDescriptionField,
+            lineOrderField, fieldCaptionField, entityTypeCombo, entityFieldCombo, fieldDescriptionField,
             fieldTypeCombo, isRequiredField, isReadonlyField, isHiddenField,
-            defaultValueField, relatedEntityTypeField, dataProviderBeanField, maxLengthField,
+            defaultValueField, relatedEntityTypeField, dataProviderBeanCombo, maxLengthField,
             isActiveField, saveButton
         );
 
@@ -290,12 +323,31 @@ public class CPanelScreenLines extends CPanelScreenBase {
         if (line != null) {
             linesBinder.readBean(line);
             lineOrderField.setValue(String.valueOf(line.getLineOrder()));
+            
+            // Try to determine entity type from the existing line
+            if (line.getEntityFieldName() != null && getCurrentEntity() != null && getCurrentEntity().getEntityType() != null) {
+                entityTypeCombo.setValue(getCurrentEntity().getEntityType());
+                updateEntityFieldCombo(getCurrentEntity().getEntityType());
+                
+                // Find and select the field in the combo
+                entityFieldCombo.getDataProvider().refreshAll();
+                final String fieldName = line.getEntityFieldName();
+                entityFieldCombo.setValue(
+                    entityFieldService.getEntityFields(getCurrentEntity().getEntityType())
+                        .stream()
+                        .filter(f -> f.getFieldName().equals(fieldName))
+                        .findFirst()
+                        .orElse(null)
+                );
+            }
         }
     }
 
     private void clearLineForm() {
         linesBinder.readBean(null);
         lineOrderField.clear();
+        entityTypeCombo.clear();
+        entityFieldCombo.clear();
     }
 
     private void refreshLinesGrid() {
@@ -304,6 +356,41 @@ public class CPanelScreenLines extends CPanelScreenBase {
             linesGrid.setItems(lines);
         } else {
             linesGrid.setItems();
+        }
+    }
+
+    /**
+     * Update the entity field combo when entity type changes.
+     */
+    private void updateEntityFieldCombo(String entityType) {
+        if (entityType != null) {
+            final List<CEntityFieldService.EntityFieldInfo> fields = entityFieldService.getEntityFields(entityType);
+            entityFieldCombo.setItems(fields);
+            entityFieldCombo.clear();
+        } else {
+            entityFieldCombo.clear();
+            entityFieldCombo.setItems();
+        }
+    }
+
+    /**
+     * Populate form fields from the selected entity field.
+     */
+    private void populateFieldFromSelection(CEntityFieldService.EntityFieldInfo fieldInfo) {
+        if (fieldInfo != null) {
+            fieldCaptionField.setValue(fieldInfo.getDisplayName());
+            fieldDescriptionField.setValue(fieldInfo.getDescription());
+            fieldTypeCombo.setValue(fieldInfo.getFieldType());
+            isRequiredField.setValue(fieldInfo.isRequired());
+            isReadonlyField.setValue(fieldInfo.isReadOnly());
+            isHiddenField.setValue(fieldInfo.isHidden());
+            defaultValueField.setValue(fieldInfo.getDefaultValue());
+            maxLengthField.setValue(String.valueOf(fieldInfo.getMaxLength()));
+            
+            if (!fieldInfo.getDataProviderBean().isEmpty()) {
+                dataProviderBeanCombo.setValue(fieldInfo.getDataProviderBean());
+                relatedEntityTypeField.setValue(fieldInfo.getJavaType());
+            }
         }
     }
 }

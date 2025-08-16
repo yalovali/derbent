@@ -11,6 +11,7 @@ import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CScreen;
 import tech.derbent.screens.service.CScreenService;
 import tech.derbent.screens.service.CScreenLinesService;
+import tech.derbent.screens.service.CEntityFieldService;
 import tech.derbent.session.service.CSessionService;
 
 @Route("cscreensview/:screen_id?/:action?(edit)")
@@ -37,12 +38,15 @@ public final class CScreenView extends CProjectAwareMDPage<CScreen> {
     private final String ENTITY_ROUTE_TEMPLATE_EDIT = "cscreensview/%s/edit";
 
     private final CScreenLinesService screenLinesService;
+    private final CEntityFieldService entityFieldService;
 
     public CScreenView(final CScreenService entityService,
                        final CSessionService sessionService, 
-                       final CScreenLinesService screenLinesService) {
+                       final CScreenLinesService screenLinesService,
+                       final CEntityFieldService entityFieldService) {
         super(CScreen.class, entityService, sessionService);
         this.screenLinesService = screenLinesService;
+        this.entityFieldService = entityFieldService;
         addClassNames("screens-view");
     }
 
@@ -60,7 +64,7 @@ public final class CScreenView extends CProjectAwareMDPage<CScreen> {
         
         // Screen lines panel - this will show the field definitions
         addAccordionPanel(new CPanelScreenLines(getCurrentEntity(), getBinder(),
-                (CScreenService) entityService, screenLinesService));
+                (CScreenService) entityService, screenLinesService, entityFieldService));
         
         // Related entities panel
         addAccordionPanel(new CPanelScreenRelatedEntities(getCurrentEntity(), getBinder(),
