@@ -27,7 +27,6 @@ import tech.derbent.users.domain.CUserProjectSettings;
 import tech.derbent.users.service.CUserProjectSettingsService;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.CUserTypeService;
-import tech.derbent.users.view.CPanelUserProjectSettings;
 import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 
 /**
@@ -37,36 +36,20 @@ import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 @ExtendWith (MockitoExtension.class)
 class CUserProjectSettingsCollectionTest extends CTestBase {
 
-	private CUserService userService;
-
-	private CProjectService projectService;
-
-	private CUserTypeService userTypeService;
-
-	private CCompanyService companyService;
-
-	private CSessionService sessionService;
-
-	private CUserProjectSettingsService userProjectSettingsService;
-
-	private CPanelUserProjectSettings projectSettingsPanel;
-
 	@Override
 	@BeforeEach
 	protected void setupForTest() {
-		// Mock Vaadin environment
-		final VaadinRequest request = mock(VaadinRequest.class);
-		final VaadinService service = mock(VaadinService.class);
+		mock(VaadinRequest.class);
+		mock(VaadinService.class);
 		final VaadinSession session = mock(VaadinSession.class);
 		VaadinSession.setCurrent(session);
 		UI.setCurrent(new UI());
-		// Mock services
-		userService = mock(CUserService.class);
-		projectService = mock(CProjectService.class);
-		userTypeService = mock(CUserTypeService.class);
-		companyService = mock(CCompanyService.class);
-		sessionService = mock(CSessionService.class);
-		userProjectSettingsService = mock(CUserProjectSettingsService.class);
+		mock(CUserService.class);
+		mock(CProjectService.class);
+		mock(CUserTypeService.class);
+		mock(CCompanyService.class);
+		mock(CSessionService.class);
+		mock(CUserProjectSettingsService.class);
 	}
 
 	@Test

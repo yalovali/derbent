@@ -211,11 +211,29 @@ public class CEnhancedBinder<BEAN> extends BeanValidationBinder<BEAN> {
 	private void validateBindingsComplete() {
 
 		try {
-			// Use reflection to check if there are any incomplete bindings
-			final Field incompleteMemberField =
-				Binder.class.getDeclaredField("incompleteMemberFields");
-			incompleteMemberField.setAccessible(true);
-			final Set<?> incompleteBindings = (Set<?>) incompleteMemberField.get(this);
+			// In Vaadin 24.x, the field is called "incompleteBindings" not "incompleteMemberFields"
+			Field incompleteBindingsField = null;
+			
+			// Try different possible field names across Vaadin versions
+			String[] possibleFieldNames = {"incompleteBindings", "incompleteMemberFields", "incompleteFields"};
+			
+			for (String fieldName : possibleFieldNames) {
+				try {
+					incompleteBindingsField = Binder.class.getDeclaredField(fieldName);
+					LOGGER.debug("Found incomplete bindings field: {}", fieldName);
+					break;
+				} catch (NoSuchFieldException e) {
+					LOGGER.debug("Field '{}' not found, trying next", fieldName);
+				}
+			}
+			
+			if (incompleteBindingsField == null) {
+				LOGGER.debug("No incomplete bindings field found in Binder class - this may be a newer Vaadin version");
+				return;
+			}
+			
+			incompleteBindingsField.setAccessible(true);
+			final Set<?> incompleteBindings = (Set<?>) incompleteBindingsField.get(this);
 
 			if ((incompleteBindings != null) && !incompleteBindings.isEmpty()) {
 				LOGGER.warn(
@@ -224,7 +242,6 @@ public class CEnhancedBinder<BEAN> extends BeanValidationBinder<BEAN> {
 
 				// Log details about the incomplete bindings if possible
 				try {
-
 					for (final Object binding : incompleteBindings) {
 						LOGGER.debug("Incomplete binding: {}", binding.toString());
 					}
@@ -232,12 +249,15 @@ public class CEnhancedBinder<BEAN> extends BeanValidationBinder<BEAN> {
 					LOGGER.debug("Could not log incomplete binding details: {}",
 						debugException.getMessage());
 				}
+				
+				int originalSize = incompleteBindings.size();
 				incompleteBindings.clear();
 				LOGGER.info("Cleared {} incomplete bindings for {}",
-					incompleteBindings.size(), beanType.getSimpleName());
+					originalSize, beanType.getSimpleName());
 			}
 		} catch (final Exception e) {
-			LOGGER.debug("Could not check for incomplete bindings: {}", e.getMessage());
+			LOGGER.debug("Could not check for incomplete bindings: {} - {}", 
+				e.getClass().getSimpleName(), e.getMessage());
 			// Continue with readBean operation even if validation fails
 		}
 	}

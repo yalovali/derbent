@@ -19,7 +19,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import tech.derbent.abstracts.annotations.CSpringAuxillaries;
 import tech.derbent.abstracts.services.CAbstractNamedEntityService;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.users.domain.CUser;
@@ -132,7 +131,6 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 	@Override
 	public void initializeLazyFields(final CUser entity) {
 		Check.notNull(entity, "User entity cannot be null");
-
 		super.initializeLazyFields(entity);
 		initializeLazyRelationship(entity.getUserType());
 		initializeLazyRelationship(entity.getCompany());

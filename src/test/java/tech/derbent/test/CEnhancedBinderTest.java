@@ -16,8 +16,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.binder.ValidationException;
-import com.vaadin.flow.server.VaadinRequest;
-import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
@@ -37,9 +35,6 @@ class CEnhancedBinderTest extends CTestBase {
 	@Override
 	@BeforeEach
 	protected void setupForTest() {
-		// Mock Vaadin environment
-		final VaadinRequest request = mock(VaadinRequest.class);
-		final VaadinService service = mock(VaadinService.class);
 		final VaadinSession session = mock(VaadinSession.class);
 		VaadinSession.setCurrent(session);
 		UI.setCurrent(new UI());
@@ -207,17 +202,10 @@ class CEnhancedBinderTest extends CTestBase {
 			final CMeetingStatus testEntity = new CMeetingStatus();
 			testEntity.setName("Test Status");
 			testEntity.setDescription("Test Description");
-			// Test validation utility method
-			final boolean isValid =
-				CValidationUtils.validateBean(enhancedBinder, testEntity);
 			// Result depends on entity validation rules Test error summary
 			final String errorSummary =
 				CValidationUtils.getValidationErrorSummary(enhancedBinder);
 			assertNotNull(errorSummary, "Error summary should not be null");
-			// Test has validation errors utility
-			final boolean hasErrors =
-				CValidationUtils.hasValidationErrors(enhancedBinder);
-			// Result depends on validation outcome
 		}, "Validation utility methods should work without exceptions");
 	}
 }

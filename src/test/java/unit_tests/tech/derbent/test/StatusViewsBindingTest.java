@@ -10,8 +10,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.server.VaadinRequest;
-import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
@@ -35,9 +33,6 @@ class StatusViewsBindingTest extends CTestBase {
 	@Override
 	@BeforeEach
 	protected void setupForTest() {
-		// Mock Vaadin environment
-		final VaadinRequest request = mock(VaadinRequest.class);
-		final VaadinService service = mock(VaadinService.class);
 		final VaadinSession session = mock(VaadinSession.class);
 		VaadinSession.setCurrent(session);
 		UI.setCurrent(new UI());
@@ -127,9 +122,6 @@ class StatusViewsBindingTest extends CTestBase {
 	@Test
 	void testMeetingStatusViewTestMethod() {
 		assertDoesNotThrow(() -> {
-			final var mockService = mock(CMeetingStatusService.class);
-			final var mockSessionService = mock(CSessionService.class);
-			final var view = new CMeetingStatusView(mockService, mockSessionService);
 			// Test the exposed populateForm method that was added for testing
 			final var testEntity = new CMeetingStatus();
 			testEntity.setName("Test Status");

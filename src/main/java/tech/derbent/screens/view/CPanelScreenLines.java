@@ -45,19 +45,6 @@ public class CPanelScreenLines extends CPanelScreenBase {
 		createScreenLinesLayout();
 	}
 
-	private void addNewLine() {
-
-		if ((getCurrentEntity() == null) || (getCurrentEntity().getId() == null)) {
-			Notification.show("Please save the screen first before adding lines", 3000,
-				Notification.Position.MIDDLE);
-			return;
-		}
-		final CScreenLines newLine =
-			screenLinesService.newEntity(getCurrentEntity(), "New Field", "newField");
-		selectedLine = newLine;
-		// Removed inline form population - now using dialog
-	}
-
 	private void createLinesGrid() {
 		grid = new CGrid<CScreenLines>(CScreenLines.class);
 		grid.setHeightFull();

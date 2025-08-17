@@ -1,8 +1,5 @@
 package tech.derbent.activities.domain;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -22,8 +19,6 @@ import tech.derbent.projects.domain.CProject;
 @Table (name = "cactivitypriority")
 @AttributeOverride (name = "id", column = @Column (name = "cactivitypriority_id"))
 public class CActivityPriority extends CTypeEntity<CActivityPriority> {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityPriority.class);
 
 	/**
 	 * Priority level for the activity (1=Highest, 5=Lowest).

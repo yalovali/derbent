@@ -300,11 +300,6 @@ public class UserColorAndEntryViewsPlaywrightTest extends CBaseUITest {
 				page.locator("vaadin-grid-column").count() > 0;
 			assertTrue(hasStatusColumn,
 				statusView.getSimpleName() + " should have grid columns");
-			// Check for color-aware status display elements
-			final boolean hasColorElements =
-				(page.locator("[style*='background-color']").count() > 0)
-					|| (page.locator("[class*='status']").count() > 0)
-					|| (page.locator("[class*='color']").count() > 0);
 			// Verify grid has data
 			waitForGridLoad();
 			final int rowCount = getGridRowCount();

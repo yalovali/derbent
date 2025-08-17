@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -110,8 +111,7 @@ class CActivityKanbanDragDropTest {
 	@Test
 	void testKanbanColumnWithDropHandler() {
 		// Create a mock drop handler
-		final java.util.function.Consumer<CActivity> mockHandler =
-			mock(java.util.function.Consumer.class);
+		final Consumer<CActivity> mockHandler = mock(Consumer.class);
 		// Create a column with drop handler
 		final List<CActivity> activities = List.of(testActivity);
 		final CActivityKanbanColumn column =

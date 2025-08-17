@@ -30,14 +30,12 @@ class CDecisionStatusServiceLazyLoadingTest {
 
 	private CDecisionStatusService decisionStatusService;
 
-	private CProject project;
-
 	@BeforeEach
 	void setUp() {
 		MockitoAnnotations.openMocks(this);
 		decisionStatusService =
 			new CDecisionStatusService(decisionStatusRepository, clock);
-		project = new CProject("Test Project");
+		new CProject("Test Project");
 	}
 
 	@Test

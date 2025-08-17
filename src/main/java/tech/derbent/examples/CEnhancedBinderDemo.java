@@ -188,20 +188,6 @@ public class CEnhancedBinderDemo extends VerticalLayout {
 		}
 	}
 
-	/**
-	 * Example showing how existing code can be minimally modified to use enhanced
-	 * features.
-	 */
-	public void demonstrateMinimalCodeChanges() {
-		logToOutput("=== Minimal Code Changes Example ===");
-		final var binder = CBinderFactory.createEnhancedBinder(CMeetingStatus.class);
-		logToOutput("Binder created with factory method");
-		logToOutput("Is enhanced: " + CBinderFactory.isEnhancedBinder(binder));
-		// Rest of the code remains exactly the same!
-		final Div form = CEntityFormBuilder.buildForm(CMeetingStatus.class, binder);
-		logToOutput("Form built - no other code changes needed");
-	}
-
 	private void logToOutput(final String message) {
 		LOGGER.info(message);
 		final String currentText = logOutput.getText();

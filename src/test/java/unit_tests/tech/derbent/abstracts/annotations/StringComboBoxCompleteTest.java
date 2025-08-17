@@ -1,6 +1,7 @@
 package unit_tests.tech.derbent.abstracts.annotations;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
@@ -12,7 +13,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
@@ -25,78 +25,76 @@ import tech.derbent.abstracts.domains.CEntityDB;
  * Complete test demonstrating String ComboBox with working data provider
  */
 @SpringBootTest
-@ContextConfiguration(classes = {StringComboBoxCompleteTest.TestConfiguration.class})
+@ContextConfiguration (classes = {
+	StringComboBoxCompleteTest.TestConfiguration.class }
+)
 class StringComboBoxCompleteTest {
 
-    @Configuration
-    static class TestConfiguration {
-        
-        @Bean("testStringService")
-        public TestStringService testStringService() {
-            return new TestStringService();
-        }
-    }
-    
-    /**
-     * Service that provides String data
-     */
-    public static class TestStringService {
-        public List<String> list() {
-            return Arrays.asList("Red", "Green", "Blue");
-        }
-        
-        public List<String> getTypes() {
-            return Arrays.asList("Type A", "Type B", "Type C");
-        }
-    }
+	@Configuration
+	static class TestConfiguration {
 
-    /**
-     * Test entity with String ComboBox fields
-     */
-    public static class TestStringEntity extends CEntityDB<TestStringEntity> {
-        
-        @MetaData(
-            displayName = "Color",
-            required = true,
-            order = 1,
-            dataProviderBean = "testStringService",
-            defaultValue = "Red"
-        )
-        private String color;
-        
-        @MetaData(
-            displayName = "Type",
-            required = false,
-            order = 2,
-            dataProviderBean = "testStringService",
-            dataProviderMethod = "getTypes",
-            autoSelectFirst = true
-        )
-        private String type;
+		@Bean ("testStringService")
+		public TestStringService testStringService() {
+			return new TestStringService();
+		}
+	}
 
-        public String getColor() { return color; }
-        public void setColor(String color) { this.color = color; }
-        
-        public String getType() { return type; }
-        public void setType(String type) { this.type = type; }
-    }
+	/**
+	 * Test entity with String ComboBox fields
+	 */
+	public static class TestStringEntity extends CEntityDB<TestStringEntity> {
 
-    @Test
-    @DisplayName("String ComboBox should work with actual data provider")
-    void testStringComboBoxWithDataProvider() {
-        // Given
-        final CEnhancedBinder<TestStringEntity> binder = 
-            CBinderFactory.createEnhancedBinder(TestStringEntity.class);
+		@MetaData (
+			displayName = "Color", required = true, order = 1,
+			dataProviderBean = "testStringService", defaultValue = "Red"
+		)
+		private String color;
 
-        // When
-        final Div form = CEntityFormBuilder.buildForm(TestStringEntity.class, binder, null);
+		@MetaData (
+			displayName = "Type", required = false, order = 2,
+			dataProviderBean = "testStringService", dataProviderMethod = "getTypes",
+			autoSelectFirst = true
+		)
+		private String type;
 
-        // Then
-        assertNotNull(form, "Form should be created successfully");
-        assertTrue(form.getChildren().count() > 0, "Form should contain components");
-        
-        // The test demonstrates that String ComboBox creation works without exceptions
-        // and integrates with Spring data providers
-        System.out.println("String ComboBox with data provider created successfully!");
-    }
+		@Override
+		public String getColor() { return color; }
+
+		public String getType() { return type; }
+
+		public void setColor(final String color) { this.color = color; }
+
+		public void setType(final String type) { this.type = type; }
+	}
+
+	/**
+	 * Service that provides String data
+	 */
+	public static class TestStringService {
+
+		public List<String> getTypes() {
+			return Arrays.asList("Type A", "Type B", "Type C");
+		}
+
+		public List<String> list() {
+			return Arrays.asList("Red", "Green", "Blue");
+		}
+	}
+
+	@Test
+	@DisplayName ("String ComboBox should work with actual data provider")
+	void testStringComboBoxWithDataProvider() {
+		// Given
+		final CEnhancedBinder<TestStringEntity> binder =
+			CBinderFactory.createEnhancedBinder(TestStringEntity.class);
+		// When
+		final Div form =
+			CEntityFormBuilder.buildForm(TestStringEntity.class, binder, null);
+		// Then
+		assertNotNull(form, "Form should be created successfully");
+		assertTrue(form.getChildren().count() > 0, "Form should contain components");
+		// The test demonstrates that String ComboBox creation works without exceptions
+		// and integrates with Spring data providers
+		System.out.println("String ComboBox with data provider created successfully!");
+	}
 }

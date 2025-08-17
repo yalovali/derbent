@@ -10,8 +10,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.server.VaadinRequest;
-import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
@@ -30,9 +28,6 @@ class BindingCompletionTest extends CTestBase {
 	@Override
 	@BeforeEach
 	protected void setupForTest() {
-		// Mock Vaadin environment
-		final VaadinRequest request = mock(VaadinRequest.class);
-		final VaadinService service = mock(VaadinService.class);
 		final VaadinSession session = mock(VaadinSession.class);
 		VaadinSession.setCurrent(session);
 		UI.setCurrent(new UI());

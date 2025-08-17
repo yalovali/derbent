@@ -12,7 +12,6 @@ import com.vaadin.flow.data.binder.ValidationException;
 
 import tech.derbent.abstracts.components.CBinderFactory;
 import tech.derbent.abstracts.components.CEnhancedBinder;
-import tech.derbent.abstracts.utils.Check;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
 
 /**
@@ -90,7 +89,6 @@ public class CValidationUtils {
 	 */
 	public static boolean hasValidationErrors(final CEnhancedBinder<?> binder) {
 		Check.notNull(binder, "Binder cannot be null");
-		
 		final CEnhancedBinder<?> enhancedBinder = CBinderFactory.asEnhancedBinder(binder);
 
 		if (enhancedBinder != null) {

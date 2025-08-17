@@ -52,23 +52,20 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 		populateForm();
 	}
 
-	private void createFormFields() {
-		// Create the form layout manually to have better control over field order and behavior
-		final VerticalLayout customFormLayout = new VerticalLayout();
-		customFormLayout.setPadding(false);
-		customFormLayout.setSpacing(true);
-
-		// Use CEntityFormBuilder for basic fields but add custom dropdowns
-		final Div basicFormContent = CEntityFormBuilder.buildForm(CScreenLines.class, binder);
-		customFormLayout.add(basicFormContent);
-
-		// Add custom entity line type dropdown
-		createEntityLineTypeComboBox(customFormLayout);
-
-		// Add custom entity field name dropdown
-		createEntityFieldNameComboBox(customFormLayout);
-
-		formLayout.add(customFormLayout);
+	private void createEntityFieldNameComboBox(final VerticalLayout layout) {
+		entityFieldNameComboBox = new ComboBox<>("Entity Field Name");
+		entityFieldNameComboBox
+			.setHelperText("Select the field from the chosen entity type");
+		entityFieldNameComboBox.setRequired(true);
+		entityFieldNameComboBox.setAllowCustomValue(false);
+		// Set up value change listener
+		entityFieldNameComboBox.addValueChangeListener(event -> {
+			updateFieldTypeBasedOnSelection();
+		});
+		// Bind to entity
+		binder.forField(entityFieldNameComboBox).bind(CScreenLines::getEntityFieldName,
+			CScreenLines::setEntityFieldName);
+		layout.add(entityFieldNameComboBox);
 	}
 
 	private void createEntityLineTypeComboBox(final VerticalLayout layout) {
@@ -79,43 +76,38 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 		entityLineTypeComboBox.setAllowCustomValue(false);
 
 		// Get available entity line types based on screen's entity type
-		if (screen != null && screen.getEntityType() != null) {
-			final List<String> entityLineTypes = viewsService
-				.getAvailableEntityLineTypes(screen.getEntityType());
+		if ((screen != null) && (screen.getEntityType() != null)) {
+			final List<String> entityLineTypes =
+				viewsService.getAvailableEntityLineTypes(screen.getEntityType());
 			entityLineTypeComboBox.setItems(entityLineTypes);
 		}
-
 		// Set up value change listener
 		entityLineTypeComboBox.addValueChangeListener(event -> {
 			final String selectedLineType = event.getValue();
 			updateEntityFieldNameOptions(selectedLineType);
 			updateFieldTypeBasedOnSelection();
 		});
-
 		// Bind to entity
 		binder.forField(entityLineTypeComboBox).bind(CScreenLines::getEntityLineType,
 			CScreenLines::setEntityLineType);
-
 		layout.add(entityLineTypeComboBox);
 	}
 
-	private void createEntityFieldNameComboBox(final VerticalLayout layout) {
-		entityFieldNameComboBox = new ComboBox<>("Entity Field Name");
-		entityFieldNameComboBox.setHelperText(
-			"Select the field from the chosen entity type");
-		entityFieldNameComboBox.setRequired(true);
-		entityFieldNameComboBox.setAllowCustomValue(false);
-
-		// Set up value change listener
-		entityFieldNameComboBox.addValueChangeListener(event -> {
-			updateFieldTypeBasedOnSelection();
-		});
-
-		// Bind to entity
-		binder.forField(entityFieldNameComboBox).bind(CScreenLines::getEntityFieldName,
-			CScreenLines::setEntityFieldName);
-
-		layout.add(entityFieldNameComboBox);
+	private void createFormFields() {
+		// Create the form layout manually to have better control over field order and
+		// behavior
+		final VerticalLayout customFormLayout = new VerticalLayout();
+		customFormLayout.setPadding(false);
+		customFormLayout.setSpacing(true);
+		// Use CEntityFormBuilder for basic fields but add custom dropdowns
+		final Div basicFormContent =
+			CEntityFormBuilder.buildForm(CScreenLines.class, binder);
+		customFormLayout.add(basicFormContent);
+		// Add custom entity line type dropdown
+		createEntityLineTypeComboBox(customFormLayout);
+		// Add custom entity field name dropdown
+		createEntityFieldNameComboBox(customFormLayout);
+		formLayout.add(customFormLayout);
 	}
 
 	@Override
@@ -141,17 +133,18 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 
 	@Override
 	protected void populateForm() {
+
 		if (data != null) {
 			binder.readBean(data);
+
 			// Trigger entity line type change to populate field names
 			if (data.getEntityLineType() != null) {
 				updateEntityFieldNameOptions(data.getEntityLineType());
 			}
-		} else {
-			// Set default entity line type to the screen's entity type for new records
-			if (screen != null && screen.getEntityType() != null) {
-				entityLineTypeComboBox.setValue(screen.getEntityType());
-			}
+		}
+		else // Set default entity line type to the screen's entity type for new records
+		if ((screen != null) && (screen.getEntityType() != null)) {
+			entityLineTypeComboBox.setValue(screen.getEntityType());
 		}
 	}
 
@@ -164,23 +157,22 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 	}
 
 	private void updateEntityFieldNameOptions(final String entityLineType) {
-		if (entityLineType == null || entityLineType.isEmpty()) {
+
+		if ((entityLineType == null) || entityLineType.isEmpty()) {
 			entityFieldNameComboBox.setItems();
 			return;
 		}
-
 		// Get the actual entity class name for the selected line type
-		final String entityClassName = viewsService.getEntityClassNameForLineType(entityLineType);
-
+		final String entityClassName =
+			viewsService.getEntityClassNameForLineType(entityLineType);
 		// Get available fields for this entity type
-		final List<CEntityFieldService.EntityFieldInfo> fieldInfos = entityFieldService
-			.getEntityFields(entityClassName);
-
+		final List<CEntityFieldService.EntityFieldInfo> fieldInfos =
+			entityFieldService.getEntityFields(entityClassName);
 		// Extract field names and set them in the combobox
-		final List<String> fieldNames = fieldInfos.stream()
-			.filter(info -> !info.isHidden()) // Only show non-hidden fields
-			.map(CEntityFieldService.EntityFieldInfo::getFieldName).toList();
-
+		final List<String> fieldNames =
+			fieldInfos.stream().filter(info -> !info.isHidden()) // Only show non-hidden
+																	// fields
+				.map(CEntityFieldService.EntityFieldInfo::getFieldName).toList();
 		entityFieldNameComboBox.setItems(fieldNames);
 	}
 
@@ -188,19 +180,18 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 		final String entityLineType = entityLineTypeComboBox.getValue();
 		final String fieldName = entityFieldNameComboBox.getValue();
 
-		if (entityLineType == null || fieldName == null) {
+		if ((entityLineType == null) || (fieldName == null)) {
 			return;
 		}
-
 		// Get the actual entity class name for the selected line type
-		final String entityClassName = viewsService.getEntityClassNameForLineType(entityLineType);
-
+		final String entityClassName =
+			viewsService.getEntityClassNameForLineType(entityLineType);
 		// Get field information to determine the field type
-		final List<CEntityFieldService.EntityFieldInfo> fieldInfos = entityFieldService
-			.getEntityFields(entityClassName);
+		final List<CEntityFieldService.EntityFieldInfo> fieldInfos =
+			entityFieldService.getEntityFields(entityClassName);
+		fieldInfos.stream().filter(info -> info.getFieldName().equals(fieldName))
+			.findFirst().ifPresent(fieldInfo -> {
 
-		fieldInfos.stream().filter(info -> info.getFieldName().equals(fieldName)).findFirst()
-			.ifPresent(fieldInfo -> {
 				// Update the field type in the entity (it will be readonly in the UI)
 				if (data != null) {
 					data.setFieldType(fieldInfo.getFieldType());
@@ -212,6 +203,7 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 
 	@Override
 	protected void validateForm() {
+
 		if (!binder.isValid()) {
 			throw new IllegalStateException(
 				"Please fill in all required fields correctly");

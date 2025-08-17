@@ -27,13 +27,11 @@ class CActivityServiceLazyLoadingTest {
 
 	private CActivityService activityService;
 
-	private CProject project;
-
 	@BeforeEach
 	void setUp() {
 		MockitoAnnotations.openMocks(this);
 		activityService = new CActivityService(activityRepository, clock);
-		project = new CProject("Test Project");
+		new CProject("Test Project");
 	}
 
 	@Test

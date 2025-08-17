@@ -1,8 +1,5 @@
 package tech.derbent.screens.domain;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -26,8 +23,6 @@ import tech.derbent.abstracts.domains.CEntityDB;
 @Table (name = "cscreen_lines")
 @AttributeOverride (name = "id", column = @Column (name = "screen_line_id"))
 public class CScreenLines extends CEntityDB<CScreenLines> {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(CScreenLines.class);
 
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "screen_id", nullable = false)

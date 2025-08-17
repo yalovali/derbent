@@ -123,7 +123,7 @@ public class PlaywrightUIAutomationTest extends CBaseUITest {
 		clickSave();
 		wait_2000();
 		takeScreenshot("workflow-after-save", false);
-		final int finalRowCount = getGridRowCount();
+		getGridRowCount();
 		LOGGER.info("✅ Complete application flow test completed");
 	}
 

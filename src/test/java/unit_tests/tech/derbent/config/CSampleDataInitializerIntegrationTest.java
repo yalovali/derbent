@@ -26,18 +26,11 @@ public class CSampleDataInitializerIntegrationTest {
 	@Test
 	void testDatabaseRestartHandling() {
 		LOGGER.info("Testing database restart handling improvements");
-		// Test normal startup (no force-init)
-		final ApplicationArguments normalArgs =
-			new DefaultApplicationArguments(new String[] {});
 		assertDoesNotThrow(() -> {
 			// CSampleDataInitializer should check isDatabaseEmpty() and skip
 			// initialization if data already exists
 			LOGGER.info("Normal startup: should skip if database has data");
 		});
-		// Test force initialization
-		final ApplicationArguments forceInitArgs =
-			new DefaultApplicationArguments(new String[] {
-				"--force-init" });
 		assertDoesNotThrow(() -> {
 			// CSampleDataInitializer should clear existing data and reinitialize
 			LOGGER.info("Force init startup: should clear and reload data");
@@ -98,8 +91,7 @@ public class CSampleDataInitializerIntegrationTest {
 			// In a real integration test, we would: 1. Create a test Spring context 2.
 			// Initialize CSampleDataInitializer with real services 3. Call
 			// initializer.run(args) 4. Verify no TransientPropertyValueException is
-			// thrown
-			// For this unit test, we just verify the arguments can be created
+			// thrown For this unit test, we just verify the arguments can be created
 			assertNotNull(args);
 			LOGGER.info("ApplicationArguments created successfully");
 			// The actual fix verification happens in the real application startup where

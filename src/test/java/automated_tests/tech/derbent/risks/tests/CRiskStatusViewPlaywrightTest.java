@@ -48,7 +48,6 @@ public class CRiskStatusViewPlaywrightTest extends CApplicationGeneric_UITest {
 		LOGGER.debug("Found {} text area(s) for description", textAreas.count());
 		final var checkboxes = page.locator("vaadin-checkbox");
 		LOGGER.debug("Found {} checkbox(es) for additional options", checkboxes.count());
-		final var comboboxes = page.locator("vaadin-combo-box");
 		LOGGER.info("✅ Risk Status form fields presence test completed");
 	}
 
@@ -67,8 +66,6 @@ public class CRiskStatusViewPlaywrightTest extends CApplicationGeneric_UITest {
 		// Try to save without filling required fields
 		clickSave();
 		wait_1000();
-		// Assert validation messages or error indicators appear
-		final var errorMessages = page.locator(".v-errorMessage, [error], [invalid]");
 		LOGGER.info("✅ Risk Status form validation test completed");
 	}
 
@@ -116,7 +113,6 @@ public class CRiskStatusViewPlaywrightTest extends CApplicationGeneric_UITest {
 		final var checkBoxes = page.locator("vaadin-checkbox");
 		assertTrue(checkBoxes.count() > 0,
 			"Checkboxes for additional options should be present");
-		boolean finalCheckboxFound = false;
 
 		for (int i = 0; i < checkBoxes.count(); i++) {
 			final var checkbox = checkBoxes.nth(i);
@@ -125,7 +121,6 @@ public class CRiskStatusViewPlaywrightTest extends CApplicationGeneric_UITest {
 			if (text.contains("final")) {
 				checkbox.click();
 				wait_500();
-				finalCheckboxFound = true;
 				LOGGER.debug("Successfully clicked final status checkbox");
 				break;
 			}

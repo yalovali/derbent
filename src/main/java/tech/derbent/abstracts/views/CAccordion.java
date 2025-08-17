@@ -43,7 +43,6 @@ public class CAccordion extends Accordion {
 	 * @param components the components to add
 	 */
 	public void addToContent(final Component... components) {
-		LOGGER.debug("Adding {} components to accordion content", components.length);
 		baseLayout.add(components);
 	}
 
@@ -51,7 +50,6 @@ public class CAccordion extends Accordion {
 	 * Convenience method to remove all components from the base layout.
 	 */
 	public void clearContent() {
-		LOGGER.debug("Clearing all content from accordion");
 		baseLayout.removeAll();
 	}
 
@@ -72,12 +70,10 @@ public class CAccordion extends Accordion {
 	 * Convenience method to open this accordion panel (index 0).
 	 */
 	public void openPanel() {
-		LOGGER.debug("Opening accordion panel: {}", accordionTitle);
 		open(0);
 	}
 
 	public void removeAllFromContent() {
-		LOGGER.debug("Removing all components from accordion content");
 		baseLayout.removeAll();
 	}
 
