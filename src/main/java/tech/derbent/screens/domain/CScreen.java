@@ -17,7 +17,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
-import tech.derbent.abstracts.annotations.ColorAwareComboBox;
 import tech.derbent.abstracts.annotations.MetaData;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.activities.domain.CActivity;
@@ -50,7 +49,6 @@ public class CScreen extends CEntityOfProject<CScreen> {
 		description = "Type of entity this screen is designed for", hidden = false,
 		order = 2, maxLength = 100, dataProviderBean = "CViewsService"
 	)
-	@ColorAwareComboBox (roundedCorners = true, autoContrast = true)
 	private String entityType;
 
 	@Column (name = "screen_title", nullable = true, length = 255)

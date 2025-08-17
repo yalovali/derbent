@@ -20,7 +20,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
-import tech.derbent.abstracts.annotations.ColorAwareComboBox;
 import tech.derbent.abstracts.annotations.MetaData;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.projects.domain.CProject;
@@ -74,7 +73,6 @@ public class CDecision extends CEntityOfProject<CDecision> {
 		description = "Current status of the decision", hidden = false, order = 4,
 		dataProviderBean = "CDecisionStatusService"
 	)
-	@ColorAwareComboBox (roundedCorners = true, autoContrast = true)
 	private CDecisionStatus decisionStatus;
 
 	// Accountable Personnel

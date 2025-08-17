@@ -9,7 +9,6 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 
-import tech.derbent.abstracts.annotations.ColorAwareComboBox;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.utils.CColorUtils;
 
@@ -161,24 +160,6 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 
     public boolean isRoundedCorners() {
         return roundedCorners;
-    }
-
-    /**
-     * Sets the styling configuration from an annotation.
-     * 
-     * @param annotation
-     *            the ColorAwareComboBox annotation
-     */
-    public void setAnnotationConfig(final ColorAwareComboBox annotation) {
-
-        if (annotation != null) {
-            this.roundedCorners = annotation.roundedCorners();
-            this.padding = annotation.padding();
-            this.autoContrast = annotation.autoContrast();
-            this.minWidth = annotation.minWidth();
-            // Reconfigure renderer for all entities
-            configureColorRenderer();
-        }
     }
 
     public void setAutoContrast(final boolean autoContrast) {

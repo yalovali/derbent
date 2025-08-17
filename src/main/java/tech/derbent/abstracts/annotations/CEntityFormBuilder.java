@@ -81,7 +81,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 	public static <EntityClass> Div buildEnhancedForm(final Class<?> entityClass) {
 		final CEnhancedBinder<EntityClass> enhancedBinder =
 			CBinderFactory.createEnhancedBinder((Class<EntityClass>) entityClass);
-		return buildForm(entityClass, enhancedBinder, null, null);
+		return buildForm(entityClass, enhancedBinder, null);
 	}
 
 	/**
@@ -92,11 +92,15 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 	 * @return a Div containing the form with enhanced binder
 	 */
 	@SuppressWarnings ("unchecked")
+	/**
+	 * @deprecated Use buildEnhancedForm(Class, List) instead. ComboBoxDataProvider is no longer needed.
+	 */
+	@Deprecated
 	public static <EntityClass> Div buildEnhancedForm(final Class<?> entityClass,
 		final ComboBoxDataProvider dataProvider) {
 		final CEnhancedBinder<EntityClass> enhancedBinder =
 			CBinderFactory.createEnhancedBinder((Class<EntityClass>) entityClass);
-		return buildForm(entityClass, enhancedBinder, dataProvider, null);
+		return buildForm(entityClass, enhancedBinder, null);
 	}
 
 	/**
@@ -111,17 +115,16 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		final List<String> entityFields) {
 		final CEnhancedBinder<EntityClass> enhancedBinder =
 			CBinderFactory.createEnhancedBinder((Class<EntityClass>) entityClass);
-		return buildForm(entityClass, enhancedBinder, null, entityFields);
+		return buildForm(entityClass, enhancedBinder, entityFields);
 	}
 
 	public static <EntityClass> Div buildForm(final Class<?> entityClass,
 		final CEnhancedBinder<EntityClass> binder) {
-		return buildForm(entityClass, binder, null, null);
+		return buildForm(entityClass, binder, null);
 	}
 
 	public static <EntityClass> Div buildForm(final Class<?> entityClass,
-		final CEnhancedBinder<EntityClass> binder,
-		final ComboBoxDataProvider dataProvider, final List<String> entityFields) {
+		final CEnhancedBinder<EntityClass> binder, final List<String> entityFields) {
 
 		// Enhanced null pointer checking with detailed logging
 		if (entityClass == null) {
@@ -171,22 +174,21 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			if (skip) {
 				continue;
 			}
-			processedComponents = processMetaForField(binder, dataProvider, formLayout,
+			processedComponents = processMetaForField(binder, formLayout,
 				processedComponents, field);
 		}
 		panel.add(formLayout);
 		return panel;
 	}
 
-	public static <EntityClass> Div buildForm(final Class<?> entityClass,
-		final CEnhancedBinder<EntityClass> binder, final List<String> entityFields) {
-		return buildForm(entityClass, binder, null, entityFields);
-	}
-
+	/**
+	 * @deprecated Use buildForm(Class, CEnhancedBinder) instead. ComboBoxDataProvider is no longer needed.
+	 */
+	@Deprecated
 	public static <EntityClass> Div buildFormAll(final Class<?> entityClass,
 		final CEnhancedBinder<EntityClass> binder,
 		final ComboBoxDataProvider dataProvider) {
-		return buildForm(entityClass, binder, dataProvider, null);
+		return buildForm(entityClass, binder, null);
 	}
 
 	private static NumberField createBigDecimalField(final Field field,
@@ -282,8 +284,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 
 	@SuppressWarnings ("unchecked")
 	private static <T extends CEntityDB<T>> ComboBox<T> createComboBox(final Field field,
-		final MetaData meta, final CEnhancedBinder<?> binder,
-		final ComboBoxDataProvider dataProvider) {
+		final MetaData meta, final CEnhancedBinder<?> binder) {
 
 		// Enhanced null pointer checking with detailed logging
 		if (field == null) {
@@ -301,26 +302,9 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			return null;
 		}
 		final Class<T> fieldType = (Class<T>) field.getType();
-		// Check if this field has @ColorAwareComboBox annotation
-		final ColorAwareComboBox colorAnnotation =
-			field.getAnnotation(ColorAwareComboBox.class);
-		final ComboBox<T> comboBox;
-
-		// Use specialized color-aware ComboBox if annotation is present or if it's a
-		// status entity
-		if ((colorAnnotation != null) || CColorUtils.isStatusEntity(fieldType)) {
-			LOGGER.debug("Creating CColorAwareComboBox for field: {}", field.getName());
-			final CColorAwareComboBox<T> colorAwareComboBox =
-				new CColorAwareComboBox<>(fieldType);
-
-			if (colorAnnotation != null) {
-				colorAwareComboBox.setAnnotationConfig(colorAnnotation);
-			}
-			comboBox = colorAwareComboBox;
-		}
-		else {
-			comboBox = new ComboBox<>();
-		}
+		// All ComboBoxes are now color-aware by default
+		LOGGER.debug("Creating CColorAwareComboBox for field: {}", field.getName());
+		final ComboBox<T> comboBox = new CColorAwareComboBox<>(fieldType);
 		// Set ID for better test automation
 		CAuxillaries.setId(comboBox);
 		// Apply MetaData combobox configuration Custom value allowance based on MetaData
@@ -346,37 +330,18 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		// of toString()
 		comboBox
 			.setItemLabelGenerator(item -> CColorUtils.getDisplayTextFromEntity(item));
-		// Data provider resolution with priority order: 1. Legacy ComboBoxDataProvider
-		// (if provided) - for backward compatibility 2. Annotation-based resolution using
-		// CDataProviderResolver 3. Empty list as fallback
+		// Data provider resolution using CDataProviderResolver
 		List<T> items = null;
 
-		// Priority 1: Use legacy data provider if provided
-		if (dataProvider != null) {
-
-			try {
-				items = dataProvider.getItems(fieldType);
-
-				if (items != null) {}
-				else {
-					LOGGER.warn(
-						"Legacy data provider returned null for field '{}' of type '{}'",
-						field.getName(), fieldType.getSimpleName());
-				}
-			} catch (final Exception e) {
-				LOGGER.error(
-					"Error using legacy data provider for field '{}' of type '{}': {}",
-					field.getName(), fieldType.getSimpleName(), e.getMessage(), e);
-			}
-		}
-
-		// Priority 2: Use annotation-based resolution if legacy provider didn't work
-		if ((items == null) && (dataProviderResolver != null)) {
-
+		// Use annotation-based resolution 
+		if (dataProviderResolver != null) {
 			try {
 				items = dataProviderResolver.resolveData(fieldType, meta);
 
-				if (items != null) {}
+				if (items != null) {
+					LOGGER.debug("Successfully resolved {} items for field '{}' via annotations",
+						items.size(), field.getName());
+				}
 				else {
 					LOGGER.warn(
 						"Annotation-based resolver returned null for field '{}' of type '{}'",
@@ -388,8 +353,11 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 					field.getName(), fieldType.getSimpleName(), e);
 			}
 		}
+		else {
+			LOGGER.warn("DataProviderResolver is not available for field '{}'", field.getName());
+		}
 
-		// Priority 3: Fallback to empty list
+		// Fallback to empty list
 		if (items == null) {
 			LOGGER.warn(
 				"No data provider could supply items for field '{}' of type '{}' - using empty list",
@@ -458,8 +426,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 	}
 
 	private static Component createComponentForField(final Field field,
-		final MetaData meta, final CEnhancedBinder<?> binder,
-		final ComboBoxDataProvider dataProvider) {
+		final MetaData meta, final CEnhancedBinder<?> binder) {
 		Component component = null;
 
 		// Enhanced null pointer checking
@@ -487,10 +454,10 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		// if metadata contains dataProviderBean, it is combobox
 		if ((meta.dataProviderBean() != null)
 			&& !meta.dataProviderBean().trim().isEmpty()) {
-			component = createComboBox(field, meta, binder, dataProvider);
+			component = createComboBox(field, meta, binder);
 		}
 		else if (CEntityDB.class.isAssignableFrom(fieldType)) {
-			component = createComboBox(field, meta, binder, dataProvider);
+			component = createComboBox(field, meta, binder);
 		}
 		else if ((fieldType == Boolean.class) || (fieldType == boolean.class)) {
 			component = createCheckbox(field, meta, binder);
@@ -910,8 +877,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 	}
 
 	private static <EntityClass> int processMetaForField(
-		final CEnhancedBinder<EntityClass> binder,
-		final ComboBoxDataProvider dataProvider, final VerticalLayout formLayout,
+		final CEnhancedBinder<EntityClass> binder, final VerticalLayout formLayout,
 		int processedComponents, final Field field) {
 
 		if (field == null) {
@@ -930,7 +896,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			// LOGGER.debug("Creating component for field '{}' with displayName
 			// '{}'",field.getName(), meta.displayName());
 			final Component component =
-				createComponentForField(field, meta, binder, dataProvider);
+				createComponentForField(field, meta, binder);
 
 			if (component != null) {
 				final HorizontalLayout horizontalLayout =

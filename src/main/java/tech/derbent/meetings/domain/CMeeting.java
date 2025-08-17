@@ -70,7 +70,6 @@ public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntit
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "meeting_status_id", nullable = true)
     @MetaData(displayName = "Status", required = false, readOnly = false, description = "Current status of the meeting", hidden = false, order = 9, dataProviderBean = "CMeetingStatusService")
-    @tech.derbent.abstracts.annotations.ColorAwareComboBox(roundedCorners = true, autoContrast = true)
     private CMeetingStatus status;
 
     @ManyToOne(fetch = FetchType.EAGER)
