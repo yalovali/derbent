@@ -1,14 +1,11 @@
 package unit_tests.tech.derbent.abstracts.views;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
 
+import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.views.CButton;
 import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 
@@ -25,44 +22,44 @@ class CButtonTest extends CTestBase {
 	@Test
 	void testBasicConstructor() {
 		final CButton button = new CButton("Test Button");
-		assertNotNull(button);
-		assertEquals("Test Button", button.getText());
+		Check.notNull(button);
+		Check.equals("Test Button", button.getText());
 	}
 
 	@Test
 	void testCreateError() {
 		final CButton button = CButton.createError("Error Button");
-		assertNotNull(button);
-		assertEquals("Error Button", button.getText());
-		assertTrue(
+		Check.notNull(button);
+		Check.equals("Error Button", button.getText());
+		Check.condition(
 			button.getThemeNames().contains(ButtonVariant.LUMO_ERROR.getVariantName()));
 	}
 
 	@Test
 	void testCreatePrimary() {
 		final CButton button = CButton.createPrimary("Primary Button");
-		assertNotNull(button);
-		assertEquals("Primary Button", button.getText());
-		assertTrue(
+		Check.notNull(button);
+		Check.equals("Primary Button", button.getText());
+		Check.condition(
 			button.getThemeNames().contains(ButtonVariant.LUMO_PRIMARY.getVariantName()));
 	}
 
 	@Test
 	void testCreateTertiary() {
 		final CButton button = CButton.createTertiary("Tertiary Button");
-		assertNotNull(button);
-		assertEquals("Tertiary Button", button.getText());
-		assertTrue(button.getThemeNames()
+		Check.notNull(button);
+		Check.equals("Tertiary Button", button.getText());
+		Check.condition(button.getThemeNames()
 			.contains(ButtonVariant.LUMO_TERTIARY.getVariantName()));
 	}
 
 	@Test
 	void testCreateWithIcon() {
 		final CButton button = CButton.createPrimary("Save", VaadinIcon.PLUS.create());
-		assertNotNull(button);
-		assertEquals("Save", button.getText());
-		assertNotNull(button.getIcon());
-		assertTrue(
+		Check.notNull(button);
+		Check.equals("Save", button.getText());
+		Check.notNull(button.getIcon());
+		Check.condition(
 			button.getThemeNames().contains(ButtonVariant.LUMO_PRIMARY.getVariantName()));
 	}
 }

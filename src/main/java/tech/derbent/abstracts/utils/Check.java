@@ -596,11 +596,11 @@ public class Check {
 	 * @param message custom error message (optional)
 	 * @throws IllegalArgumentException if object is null
 	 */
-	public static void notNull(final Object object, final String entityName) {
+	public static void notNull(final Object object, final String message) {
 
 		if (object == null) {
-			throw new IllegalArgumentException(entityName != null
-				? entityName + " cannot be null" : DEFAULT_NULL_MESSAGE);
+			throw new IllegalArgumentException(message != null
+				? message : DEFAULT_NULL_MESSAGE);
 		}
 	}
 

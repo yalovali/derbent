@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.abstracts.annotations.CSpringAuxillaries;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.interfaces.CSearchable;
+import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.utils.PageableUtils;
 
 /**
@@ -267,10 +268,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	}
 
 	protected void validateEntity(final EntityClass entity) {
-
-		if (entity == null) {
-			throw new IllegalArgumentException("Entity cannot be null");
-		}
+		Check.notNull(entity, "Entity cannot be null");
 		// Add more validation logic in subclasses if needed
 	}
 }

@@ -1,11 +1,5 @@
 package unit_tests.tech.derbent.abstracts.ui;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -15,6 +9,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.DataProvider;
 
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.utils.Check;
 
 /**
  * CGridTestUtils - Utility class for testing grid components and data providers. Layer: Testing (MVC) Provides
@@ -37,9 +32,9 @@ public class CGridTestUtils {
      */
     public static <T extends CEntityDB<T>> void testGridColumnsForLazyLoading(final Grid<T> grid, final T testEntity) {
         LOGGER.info("Testing grid columns for lazy loading issues");
-        assertNotNull(testEntity, "Test entity must not be null");
+        Check.notNull(testEntity, "Test entity must not be null");
         // Basic test that grid has columns
-        assertTrue(grid.getColumns().size() > 0, "Grid should have columns");
+        Check.condition(grid.getColumns().size() > 0, "Grid should have columns");
         LOGGER.info("Grid has {} columns", grid.getColumns().size());
         LOGGER.info("All grid columns tested successfully");
     }
@@ -57,7 +52,7 @@ public class CGridTestUtils {
     public static <T extends CEntityDB<T>> void testGridDataProvider(final Grid<T> grid, final List<T> testData) {
         LOGGER.info("Testing grid data provider for {}", grid.getClass().getSimpleName());
         final DataProvider<T, ?> dataProvider = grid.getDataProvider();
-        assertNotNull(dataProvider, "Grid should have a data provider");
+        Check.notNull(dataProvider, "Grid should have a data provider");
         LOGGER.info("Grid data provider test completed successfully");
     }
 
@@ -72,7 +67,7 @@ public class CGridTestUtils {
     public static <T extends CEntityDB<T>> void testGridDataProviderVariousQueries(final Grid<T> grid) {
         LOGGER.info("Testing grid data provider with various query parameters");
         final DataProvider<T, ?> dataProvider = grid.getDataProvider();
-        assertNotNull(dataProvider, "Grid should have a data provider");
+        Check.notNull(dataProvider, "Grid should have a data provider");
         LOGGER.info("Grid data provider query variation test completed successfully");
     }
 
@@ -88,11 +83,13 @@ public class CGridTestUtils {
      */
     public static <T extends CEntityDB<T>> void testGridErrorHandling(final Grid<T> grid, final T problematicEntity) {
         LOGGER.info("Testing grid error handling with problematic data");
-        assertNotNull(problematicEntity, "Problematic entity must not be null");
+        Check.notNull(problematicEntity, "Problematic entity must not be null");
         // Test that the grid can handle problematic data
-        assertDoesNotThrow(() -> {
-            assertTrue(grid.getColumns().size() > 0, "Grid should have columns");
-        }, "Grid should handle problematic data gracefully");
+        try {
+            Check.condition(grid.getColumns().size() > 0, "Grid should have columns");
+        } catch (Exception e) {
+            throw new IllegalStateException("Grid should handle problematic data gracefully", e);
+        }
         LOGGER.info("Grid error handling test completed successfully");
     }
 
@@ -109,16 +106,18 @@ public class CGridTestUtils {
     public static <T extends CEntityDB<T>> void testGridPerformance(final Grid<T> grid, final List<T> largeDataset) {
         LOGGER.info("Testing grid performance with {} items", largeDataset.size());
         final long startTime = System.currentTimeMillis();
-        assertDoesNotThrow(() -> {
+        try {
             // Test data provider with large dataset
             final DataProvider<T, ?> dataProvider = grid.getDataProvider();
-            assertNotNull(dataProvider, "Grid should have a data provider");
-        }, "Grid should handle large datasets without exceptions");
+            Check.notNull(dataProvider, "Grid should have a data provider");
+        } catch (Exception e) {
+            throw new IllegalStateException("Grid should handle large datasets without exceptions", e);
+        }
         final long endTime = System.currentTimeMillis();
         final long duration = endTime - startTime;
         LOGGER.info("Grid performance test completed in {}ms", duration);
         // Performance assertion - should complete within reasonable time
-        assertTrue(duration < 5000, "Grid performance test should complete within 5 seconds");
+        Check.condition(duration < 5000, "Grid performance test should complete within 5 seconds");
     }
 
     /**
@@ -140,15 +139,17 @@ public class CGridTestUtils {
         }
         final T testEntity = testEntities.get(0);
         // Test single selection
-        assertDoesNotThrow(() -> {
+        try {
             grid.select(testEntity);
             final T selected = grid.asSingleSelect().getValue();
-            assertEquals(testEntity, selected, "Selected entity should match");
+            Check.equals(testEntity, selected, "Selected entity should match");
             // Test deselection
             grid.deselectAll();
             final T afterDeselect = grid.asSingleSelect().getValue();
-            assertNull(afterDeselect, "No entity should be selected after deselection");
-        }, "Grid selection should work without exceptions");
+            Check.condition(afterDeselect == null, "No entity should be selected after deselection");
+        } catch (Exception e) {
+            throw new IllegalStateException("Grid selection should work without exceptions", e);
+        }
         LOGGER.info("Grid selection test completed successfully");
     }
 
@@ -168,7 +169,7 @@ public class CGridTestUtils {
 
         for (final String expectedKey : expectedColumnKeys) {
             final boolean hasColumn = grid.getColumns().stream().anyMatch(col -> expectedKey.equals(col.getKey()));
-            assertTrue(hasColumn, String.format("Grid should have column with key: %s", expectedKey));
+            Check.condition(hasColumn, String.format("Grid should have column with key: %s", expectedKey));
         }
         LOGGER.info("Grid column validation completed successfully");
     }
