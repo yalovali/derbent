@@ -345,33 +345,23 @@ public final class CDataProviderResolver {
 		LOGGER.debug(
 			"Resolving data from bean '{}' using method '{}' for entity type: {}",
 			beanName, methodName, entityType.getSimpleName());
+		Check.notBlank(beanName, "Bean name cannot be empty");
+		// Get bean from Spring context with caching
+		final Object serviceBean = getBeanFromCache(beanName, () -> {
 
-		try {
-			// Get bean from Spring context with caching
-			final Object serviceBean = getBeanFromCache(beanName, () -> {
-
-				if (applicationContext.containsBean(beanName)) {
-					return applicationContext.getBean(beanName);
-				}
-				else {
-					LOGGER.warn("Bean '{}' not found in application context", beanName);
-					return null;
-				}
-			});
-
-			if (serviceBean == null) {
-				LOGGER.error("Failed to retrieve bean '{}' from Spring context",
-					beanName);
-				return Collections.emptyList();
+			if (applicationContext.containsBean(beanName)) {
+				return applicationContext.getBean(beanName);
 			}
-			LOGGER.debug("Successfully retrieved bean '{}' of type: {}", beanName,
-				serviceBean.getClass().getSimpleName());
-			return callDataMethod(serviceBean, methodName, entityType);
-		} catch (final Exception e) {
-			LOGGER.error("Error resolving data from bean '{}': {}", beanName,
-				e.getMessage(), e);
-			return Collections.emptyList();
-		}
+			else {
+				LOGGER.warn("Bean '{}' not found in application context", beanName);
+				return null;
+			}
+		});
+		Check.notNull(serviceBean,
+			"Service bean cannot be null for bean name: " + beanName);
+		LOGGER.debug("Successfully retrieved bean '{}' of type: {}", beanName,
+			serviceBean.getClass().getSimpleName());
+		return callDataMethod(serviceBean, methodName, entityType);
 	}
 
 	/**

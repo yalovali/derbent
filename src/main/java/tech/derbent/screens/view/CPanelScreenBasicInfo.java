@@ -8,18 +8,20 @@ import tech.derbent.screens.service.CScreenService;
 
 public class CPanelScreenBasicInfo extends CPanelScreenBase {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    public CPanelScreenBasicInfo(final CScreen currentEntity,
-                                final CEnhancedBinder<CScreen> beanValidationBinder,
-                                final CScreenService entityService) {
-        super("Basic Information", currentEntity, beanValidationBinder, entityService);
-        initPanel();
-    }
+	public CPanelScreenBasicInfo(final CScreen currentEntity,
+		final CEnhancedBinder<CScreen> beanValidationBinder,
+		final CScreenService entityService) {
+		super("Basic Information", currentEntity, beanValidationBinder, entityService);
+		initPanel();
+	}
 
-    @Override
-    protected void updatePanelEntityFields() {
-        // Basic Information panel - fundamental screen fields
-        setEntityFields(List.of("name", "description", "entityType", "screenTitle", "headerText", "isActive"));
-    }
+	@Override
+	protected void updatePanelEntityFields() {
+		// Basic Information panel - fundamental screen fields
+		setEntityFields(List.of("entityType"));
+		// setEntityFields(List.of("name", "description", "entityType", "screenTitle",
+		// "headerText", "isActive"));
+	}
 }

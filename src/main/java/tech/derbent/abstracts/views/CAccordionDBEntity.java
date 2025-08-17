@@ -23,8 +23,6 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 
 	private List<String> EntityFields;
 
-	private final ComboBoxDataProvider detailsDataProvider;
-
 	private boolean isPanelInitialized = false;
 
 	/**
@@ -44,7 +42,6 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 		this.binder = beanValidationBinder;
 		this.entityService = entityService;
 		this.currentEntity = currentEntity;
-		this.detailsDataProvider = createComboBoxDataProvider();
 	}
 
 	public void clearForm() {
@@ -64,8 +61,6 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 	public CEnhancedBinder<EntityClass> getBinder() { return binder; }
 
 	public EntityClass getCurrentEntity() { return currentEntity; }
-
-	public ComboBoxDataProvider getDetailsDataProvider() { return detailsDataProvider; }
 
 	public List<String> getEntityFields() { return EntityFields; }
 
