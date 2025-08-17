@@ -41,7 +41,7 @@ public class CPanelUserDescription extends CPanelUserBase {
 		passwordField.setPlaceholder("Enter new password (leave empty to keep current)");
 		passwordField.setWidthFull();
 		passwordField.setHelperText("Password will be encrypted when saved");
-		getBaseLayout().add(passwordField);
+		addToContent(passwordField);
 	}
 
 	@Override

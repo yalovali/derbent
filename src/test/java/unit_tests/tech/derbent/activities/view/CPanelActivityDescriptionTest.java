@@ -47,7 +47,6 @@ class CPanelActivityDescriptionTest extends CTestBase {
 		panel = new CPanelActivityDescription(testActivity, binder, activityService);
 		// Then
 		assertNotNull(panel, "Panel should be created successfully");
-		assertNotNull(panel.getBaseLayout(), "Base layout should be initialized");
 	}
 
 	@Test

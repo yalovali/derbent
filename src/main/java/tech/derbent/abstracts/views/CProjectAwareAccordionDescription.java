@@ -5,8 +5,8 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
-import tech.derbent.abstracts.components.CEnhancedBinder;
 
+import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.interfaces.CProjectChangeListener;
 import tech.derbent.abstracts.services.CAbstractService;
@@ -116,7 +116,7 @@ public abstract class CProjectAwareAccordionDescription<
 
 		try {
 			// Clear existing content
-			getBaseLayout().removeAll();
+			removeAllFromContent();
 
 			// Recreate content if entity is available
 			if (getCurrentEntity() != null) {

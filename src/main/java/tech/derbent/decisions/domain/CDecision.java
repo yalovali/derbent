@@ -20,28 +20,36 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
+import tech.derbent.abstracts.annotations.ColorAwareComboBox;
 import tech.derbent.abstracts.annotations.MetaData;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
 
 /**
- * CDecision - Domain entity representing project decisions with comprehensive management features. Layer: Domain (MVC)
- * Supports: - Decision type categorization - Cost estimation and tracking - Team collaboration and assignments -
- * Multi-stage approval workflow - Accountable personnel management - Descriptive documentation Follows the established
- * patterns from CActivity for consistency.
+ * CDecision - Domain entity representing project decisions with comprehensive management
+ * features. Layer: Domain (MVC) Supports: - Decision type categorization - Cost
+ * estimation and tracking - Team collaboration and assignments - Multi-stage approval
+ * workflow - Accountable personnel management - Descriptive documentation Follows the
+ * established patterns from CActivity for consistency.
  */
 @Entity
-@Table(name = "cdecision")
-@AttributeOverride(name = "id", column = @Column(name = "decision_id"))
+@Table (name = "cdecision")
+@AttributeOverride (name = "id", column = @Column (name = "decision_id"))
 public class CDecision extends CEntityOfProject<CDecision> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDecision.class);
 
+	public static String getIconColorCode() {
+		return "#dc3545"; // Red color for decision entities
+	}
+
+	public static String getIconFilename() { return "vaadin:gavel"; }
+
 	// Decision Type Classification
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "decisiontype_id", nullable = true)
-	@MetaData(
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "decisiontype_id", nullable = true)
+	@MetaData (
 		displayName = "Decision Type", required = false, readOnly = false,
 		description = "Category or type of the decision", hidden = false, order = 2,
 		dataProviderBean = "CDecisionTypeService"
@@ -59,16 +67,14 @@ public class CDecision extends CEntityOfProject<CDecision> {
 	private BigDecimal estimatedCost;
 
 	// Status Management
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "decision_status_id", nullable = true)
-	@MetaData(
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "decision_status_id", nullable = true)
+	@MetaData (
 		displayName = "Decision Status", required = false, readOnly = false,
 		description = "Current status of the decision", hidden = false, order = 4,
 		dataProviderBean = "CDecisionStatusService"
 	)
-	@tech.derbent.abstracts.annotations.ColorAwareComboBox(
-		roundedCorners = true, autoContrast = true
-	)
+	@ColorAwareComboBox (roundedCorners = true, autoContrast = true)
 	private CDecisionStatus decisionStatus;
 
 	// Accountable Personnel
@@ -340,11 +346,4 @@ public class CDecision extends CEntityOfProject<CDecision> {
 	public String toString() {
 		return getName() != null ? getName() : super.toString();
 	}
-
-	public static String getIconColorCode() {
-		return "#dc3545"; // Red color for decision entities
-	}
-
-	public static String getIconFilename() { return "vaadin:gavel"; }
-
 }

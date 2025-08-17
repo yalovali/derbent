@@ -50,7 +50,6 @@ class CPanelActivityResourceManagementTest extends CTestBase {
 			new CPanelActivityResourceManagement(testActivity, binder, activityService);
 		// Then
 		assertNotNull(panel, "Panel should be created successfully");
-		assertNotNull(panel.getBaseLayout(), "Base layout should be initialized");
 		assertEquals("Resource Management", panel.getAccordionTitle(),
 			"Panel should have correct title");
 	}

@@ -57,7 +57,7 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 
 	// Override if you need to customize the panel content creation
 	protected void createPanelContent() {
-		getBaseLayout().add(
+		addToContent(
 			CEntityFormBuilder.buildForm(entityClass, getBinder(), getEntityFields()));
 	}
 

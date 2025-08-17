@@ -167,7 +167,7 @@ public class CPanelProjectUsers
 		grid.addColumn(this::getPermissionAsString).setHeader("Permission")
 			.setAutoWidth(true);
 		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
-		getBaseLayout().add(grid);
+		addToContent(grid);
 	}
 
 	/**

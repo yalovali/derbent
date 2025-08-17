@@ -33,10 +33,12 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 
 import tech.derbent.abstracts.components.CBinderFactory;
+import tech.derbent.abstracts.components.CColorAwareComboBox;
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.domains.CEntityConstants;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.utils.CAuxillaries;
+import tech.derbent.abstracts.utils.CColorUtils;
 
 @org.springframework.stereotype.Component
 public final class CEntityFormBuilder implements ApplicationContextAware {
@@ -300,20 +302,16 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		}
 		final Class<T> fieldType = (Class<T>) field.getType();
 		// Check if this field has @ColorAwareComboBox annotation
-		final tech.derbent.abstracts.annotations.ColorAwareComboBox colorAnnotation =
-			field.getAnnotation(
-				tech.derbent.abstracts.annotations.ColorAwareComboBox.class);
+		final ColorAwareComboBox colorAnnotation =
+			field.getAnnotation(ColorAwareComboBox.class);
 		final ComboBox<T> comboBox;
 
 		// Use specialized color-aware ComboBox if annotation is present or if it's a
 		// status entity
-		if ((colorAnnotation != null)
-			|| tech.derbent.abstracts.utils.CColorUtils.isStatusEntity(fieldType)) {
+		if ((colorAnnotation != null) || CColorUtils.isStatusEntity(fieldType)) {
 			LOGGER.debug("Creating CColorAwareComboBox for field: {}", field.getName());
-			final tech.derbent.abstracts.components.CColorAwareComboBox<
-				T> colorAwareComboBox =
-					new tech.derbent.abstracts.components.CColorAwareComboBox<>(
-						fieldType);
+			final CColorAwareComboBox<T> colorAwareComboBox =
+				new CColorAwareComboBox<>(fieldType);
 
 			if (colorAnnotation != null) {
 				colorAwareComboBox.setAnnotationConfig(colorAnnotation);
@@ -325,14 +323,29 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		}
 		// Set ID for better test automation
 		CAuxillaries.setId(comboBox);
-		// Following coding guidelines: All selective ComboBoxes must be selection only
-		// (user must not be able to type arbitrary text)
-		comboBox.setAllowCustomValue(false);
+		// Apply MetaData combobox configuration Custom value allowance based on MetaData
+		// configuration
+		comboBox.setAllowCustomValue(meta.allowCustomValue());
+
+		// Set placeholder text if specified
+		if (!meta.placeholder().trim().isEmpty()) {
+			comboBox.setPlaceholder(meta.placeholder());
+		}
+
+		// Set read-only state for combobox if specified
+		if (meta.comboboxReadOnly() || meta.readOnly()) {
+			comboBox.setReadOnly(true);
+		}
+
+		// Set width if specified
+		if (!meta.width().trim().isEmpty()) {
+			comboBox.setWidth(meta.width());
+		}
 		// Enhanced item label generator with null safety and proper display formatting
 		// Fix for combobox display issue: use getName() for CEntityNamed entities instead
 		// of toString()
-		comboBox.setItemLabelGenerator(item -> tech.derbent.abstracts.utils.CColorUtils
-			.getDisplayTextFromEntity(item));
+		comboBox
+			.setItemLabelGenerator(item -> CColorUtils.getDisplayTextFromEntity(item));
 		// Data provider resolution with priority order: 1. Legacy ComboBoxDataProvider
 		// (if provided) - for backward compatibility 2. Annotation-based resolution using
 		// CDataProviderResolver 3. Empty list as fallback
@@ -384,19 +397,54 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			items = List.of();
 		}
 
+		// Handle clearOnEmptyData configuration
+		if (meta.clearOnEmptyData() && items.isEmpty()) {
+			comboBox.setValue(null);
+			LOGGER.debug("Cleared ComboBox value for field '{}' due to empty data",
+				field.getName());
+		}
+
 		// Set items on ComboBox with validation
 		try {
 			comboBox.setItems(items);
+			// Enhanced default value handling with autoSelectFirst support
+			final boolean hasDefaultValue =
+				(meta.defaultValue() != null) && !meta.defaultValue().trim().isEmpty();
 
-			// Set default value to first item if available and no default value specified
-			// in metadata This ensures ComboBoxes are not empty when forms are
-			// created/cleared
-			if (!items.isEmpty() && ((meta.defaultValue() == null)
-				|| meta.defaultValue().trim().isEmpty())) {
-				comboBox.setValue(items.get(0));
-				LOGGER.debug(
-					"Set ComboBox default value to first item for field '{}': {}",
-					field.getName(), items.get(0));
+			if (!items.isEmpty()) {
+
+				if (hasDefaultValue) {
+
+					// Try to find and set the default value
+					try {
+						// For entity types, try to find by name or toString match
+						final T defaultItem = items.stream().filter(item -> {
+							final String itemDisplay =
+								CColorUtils.getDisplayTextFromEntity(item);
+							return meta.defaultValue().equals(itemDisplay);
+						}).findFirst().orElse(null);
+
+						if (defaultItem != null) {
+							comboBox.setValue(defaultItem);
+							LOGGER.debug("Set ComboBox default value for field '{}': {}",
+								field.getName(), defaultItem);
+						}
+						else {
+							LOGGER.warn(
+								"Default value '{}' not found in items for field '{}'",
+								meta.defaultValue(), field.getName());
+						}
+					} catch (final Exception e) {
+						LOGGER.warn("Error setting default value for field '{}': {}",
+							field.getName(), e.getMessage());
+					}
+				}
+				else if (meta.autoSelectFirst()) {
+					// Auto-select first item if configured
+					comboBox.setValue(items.get(0));
+					LOGGER.debug("Auto-selected first item for field '{}': {}",
+						field.getName(), items.get(0));
+				}
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error setting items on ComboBox for field '{}': {}",
@@ -436,8 +484,15 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 			return null;
 		}
 
-		// Handle different field types with detailed logging
-		if ((fieldType == Boolean.class) || (fieldType == boolean.class)) {
+		// if metadata contains dataProviderBean, it is combobox
+		if ((meta.dataProviderBean() != null)
+			&& !meta.dataProviderBean().trim().isEmpty()) {
+			component = createComboBox(field, meta, binder, dataProvider);
+		}
+		else if (CEntityDB.class.isAssignableFrom(fieldType)) {
+			component = createComboBox(field, meta, binder, dataProvider);
+		}
+		else if ((fieldType == Boolean.class) || (fieldType == boolean.class)) {
 			component = createCheckbox(field, meta, binder);
 		}
 		else if ((fieldType == String.class)
@@ -469,9 +524,6 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		}
 		else if (fieldType.isEnum()) {
 			component = createEnumComponent(field, meta, binder);
-		}
-		else if (CEntityDB.class.isAssignableFrom(fieldType)) {
-			component = createComboBox(field, meta, binder, dataProvider);
 		}
 		else {
 			LOGGER.warn(

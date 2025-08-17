@@ -132,6 +132,6 @@ public class CPanelMeetingParticipants extends CPanelMeetingBase {
 		setEntityFields(List.of("participants", "attendees"));
 		createParticipantsField();
 		createAttendeesField();
-		getBaseLayout().add(participantsField, attendeesField);
+		addToContent(participantsField, attendeesField);
 	}
 }

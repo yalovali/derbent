@@ -247,4 +247,73 @@ public @interface MetaData {
      * @return the width specification, never null
      */
     String width() default "";
+
+    /**
+     * Whether the combobox should allow users to enter custom values not in the list.
+     * <p>
+     * By default, comboboxes are selection-only to maintain data integrity. Set this to true
+     * to allow users to type custom values that aren't in the provided data list.
+     * </p>
+     * 
+     * @return true to allow custom values, false by default (selection only)
+     */
+    boolean allowCustomValue() default false;
+
+    /**
+     * Placeholder text to show in the combobox when no value is selected.
+     * <p>
+     * This provides a hint to users about what to select or enter in the field.
+     * </p>
+     * 
+     * @return the placeholder text, empty string by default
+     */
+    String placeholder() default "";
+
+    /**
+     * Whether to auto-select the first item in the combobox when no default value is specified.
+     * <p>
+     * When true, the first item from the data provider will be automatically selected.
+     * This is useful for required fields to ensure a value is always present.
+     * </p>
+     * 
+     * @return true to auto-select first item, false by default
+     */
+    boolean autoSelectFirst() default false;
+
+    /**
+     * Whether to clear the combobox selection when the data provider returns empty results.
+     * <p>
+     * When true, the combobox value will be cleared if the data provider returns no items.
+     * This is useful for dependent comboboxes where the selection should be cleared when
+     * the parent selection changes and no valid options remain.
+     * </p>
+     * 
+     * @return true to clear on empty data, false by default
+     */
+    boolean clearOnEmptyData() default false;
+
+    /**
+     * Custom filter method name for the combobox data provider.
+     * <p>
+     * When specified, this method will be called on the data provider bean with a filter string
+     * parameter to provide filtered results as the user types. The method should accept a String
+     * parameter and return a filtered List of entities.
+     * </p>
+     * 
+     * @return the filter method name, empty string for no custom filtering
+     * @see #dataProviderBean()
+     * @see #dataProviderClass()
+     */
+    String filterMethod() default "";
+
+    /**
+     * Whether the combobox should be read-only but still show its value.
+     * <p>
+     * This is different from the general readOnly attribute as it specifically controls
+     * combobox behavior. A read-only combobox displays the selected value but cannot be changed.
+     * </p>
+     * 
+     * @return true for read-only combobox, false by default
+     */
+    boolean comboboxReadOnly() default false;
 }

@@ -137,8 +137,7 @@ public class CPanelActivityComments extends CPanelActivityBase {
 		this.commentsTitle = new H3("H3 Comments");
 		setupComponents();
 		// New comment section
-		getBaseLayout().add(createNewCommentSection());
-		getBaseLayout().add(commentsTitle);
+		addToContent(createNewCommentSection(), commentsTitle);
 		setupCommentsContainer();
 		updateCommentsTitle();
 		loadComments();
@@ -224,7 +223,7 @@ public class CPanelActivityComments extends CPanelActivityBase {
 		commentsContainer.setSpacing(true);
 		commentsContainer.setWidthFull();
 		commentsContainer.addClassName("comments-container");
-		getBaseLayout().add(commentsContainer);
+		addToContent(commentsContainer);
 	}
 
 	/**

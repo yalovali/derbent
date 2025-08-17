@@ -215,7 +215,7 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 		final HorizontalLayout buttonLayout =
 			new HorizontalLayout(addButton, editButton, deleteButton);
 		buttonLayout.setSpacing(true);
-		getBaseLayout().add(buttonLayout);
+		addToContent(buttonLayout);
 	}
 
 	protected void setupGrid() {
@@ -229,7 +229,7 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 		grid.addColumn(this::getPermissionAsString).setHeader("Permission")
 			.setAutoWidth(true);
 		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
-		getBaseLayout().add(grid);
+		addToContent(grid);
 	}
 
 	@Override

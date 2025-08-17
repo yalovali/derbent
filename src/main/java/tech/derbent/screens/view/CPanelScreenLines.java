@@ -5,14 +5,13 @@ import java.util.List;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import tech.derbent.abstracts.components.CEnhancedBinder;
+import tech.derbent.abstracts.views.CGrid;
 import tech.derbent.screens.domain.CScreen;
 import tech.derbent.screens.domain.CScreenLines;
 import tech.derbent.screens.service.CEntityFieldService;
@@ -27,7 +26,7 @@ public class CPanelScreenLines extends CPanelScreenBase {
 
 	private final CEntityFieldService entityFieldService;
 
-	private Grid<CScreenLines> linesGrid;
+	private Grid<CScreenLines> grid;
 
 	private CScreenLines selectedLine;
 
@@ -55,38 +54,22 @@ public class CPanelScreenLines extends CPanelScreenBase {
 		// Removed inline form population - now using dialog
 	}
 
-	private VerticalLayout createInstructionsPanel() {
-		final VerticalLayout panel = new VerticalLayout();
-		panel.setPadding(true);
-		panel.setSpacing(true);
-		final H3 title = new H3("Instructions");
-		panel.add(title);
-		final Div instructions = new Div();
-		instructions.getStyle().set("color", "var(--lumo-secondary-text-color)");
-		instructions.getElement().setProperty("innerHTML",
-			"• Click 'Add Screen Field Description' to create new fields<br/>"
-				+ "• Click any field in the grid to edit it<br/>"
-				+ "• Use Delete button to remove selected field<br/>"
-				+ "• Use Move Up/Down to reorder fields");
-		panel.add(instructions);
-		return panel;
-	}
-
 	private void createLinesGrid() {
-		linesGrid = new Grid<>(CScreenLines.class, false);
-		linesGrid.setHeightFull();
-		linesGrid.addColumn(CScreenLines::getLineOrder).setHeader("Order")
+		grid = new CGrid<CScreenLines>(CScreenLines.class);
+		grid.setHeightFull();
+		grid.addColumn(CScreenLines::getLineOrder).setHeader("Order")
 			.setWidth("80px");
-		linesGrid.addColumn(CScreenLines::getFieldCaption).setHeader("Caption")
+		grid.addColumn(CScreenLines::getFieldCaption).setHeader("Caption")
 			.setAutoWidth(true);
-		linesGrid.addColumn(CScreenLines::getEntityFieldName).setHeader("Field Name")
+		grid.addColumn(CScreenLines::getEntityFieldName).setHeader("Field Name")
 			.setAutoWidth(true);
-		linesGrid.addColumn(CScreenLines::getFieldType).setHeader("Type")
+		grid.addColumn(CScreenLines::getFieldType).setHeader("Type")
 			.setWidth("100px");
-		linesGrid.addColumn(line -> line.getIsRequired() ? "Yes" : "No")
+		grid.addColumn(line -> line.getIsRequired() ? "Yes" : "No")
 			.setHeader("Required").setWidth("80px");
-		linesGrid.addColumn(line -> line.getIsActive() ? "Active" : "Inactive")
+		grid.addColumn(line -> line.getIsActive() ? "Active" : "Inactive")
 			.setHeader("Status").setWidth("80px");
+		grid.setMinHeight("300px");
 	}
 
 	private HorizontalLayout createLinesToolbar() {
@@ -108,7 +91,7 @@ public class CPanelScreenLines extends CPanelScreenBase {
 		moveDownButton.addClickListener(e -> moveLineDown());
 		moveDownButton.setEnabled(false);
 		// Enable/disable buttons based on selection
-		linesGrid.asSingleSelect().addValueChangeListener(e -> {
+		grid.asSingleSelect().addValueChangeListener(e -> {
 			final boolean hasSelection = e.getValue() != null;
 			deleteButton.setEnabled(hasSelection);
 			moveUpButton.setEnabled(hasSelection);
@@ -128,32 +111,10 @@ public class CPanelScreenLines extends CPanelScreenBase {
 	}
 
 	private void createScreenLinesLayout() {
-		final VerticalLayout layout = new VerticalLayout();
-		layout.setPadding(false);
-		layout.setSpacing(true);
-		// Title
 		final H3 title = new H3("Screen Field Definitions");
-		layout.add(title);
-		// Lines grid (create first before toolbar so it's available)
 		createLinesGrid();
-		// Toolbar
 		final HorizontalLayout toolbar = createLinesToolbar();
-		layout.add(toolbar);
-		// Grid and instructions in horizontal layout
-		final HorizontalLayout mainLayout = new HorizontalLayout();
-		mainLayout.setSizeFull();
-		mainLayout.setSpacing(true);
-		// Lines grid (takes full width now)
-		final Div gridWrapper = new Div(linesGrid);
-		gridWrapper.setWidthFull();
-		gridWrapper.setHeightFull();
-		// Instructions panel (right side)
-		final VerticalLayout instructionsLayout = createInstructionsPanel();
-		instructionsLayout.setWidth("30%");
-		mainLayout.add(gridWrapper, instructionsLayout);
-		layout.add(mainLayout);
-		// Set content for the accordion panel
-		addToContent(layout);
+		addToContent(title, toolbar, grid);
 		refreshLinesGrid();
 	}
 
@@ -165,7 +126,7 @@ public class CPanelScreenLines extends CPanelScreenBase {
 				screenLinesService.delete(selectedLine);
 				refreshLinesGrid();
 				// Clear selection
-				linesGrid.asSingleSelect().clear();
+				grid.asSingleSelect().clear();
 				Notification.show("Line deleted successfully", 3000,
 					Notification.Position.BOTTOM_START);
 			} catch (final Exception e) {
@@ -242,10 +203,10 @@ public class CPanelScreenLines extends CPanelScreenBase {
 		if (getCurrentEntity() != null) {
 			final List<CScreenLines> lines =
 				screenLinesService.findByScreenOrderByLineOrder(getCurrentEntity());
-			linesGrid.setItems(lines);
+			grid.setItems(lines);
 		}
 		else {
-			linesGrid.setItems();
+			grid.setItems();
 		}
 	}
 
@@ -258,7 +219,7 @@ public class CPanelScreenLines extends CPanelScreenBase {
 			screenLinesService.save(screenLine);
 			refreshLinesGrid();
 			// Clear selection to avoid confusion
-			linesGrid.asSingleSelect().clear();
+			grid.asSingleSelect().clear();
 		} catch (final Exception e) {
 			Notification.show("Error saving field: " + e.getMessage(), 5000,
 				Notification.Position.MIDDLE);
