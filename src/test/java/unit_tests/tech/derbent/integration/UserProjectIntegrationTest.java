@@ -12,8 +12,8 @@ import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserProjectSettings;
 
 /**
- * Integration test to verify the user-project relationship functionality works correctly
- * after the refactoring and base class implementation.
+ * Integration test to verify the user-project relationship functionality works correctly after the refactoring and base
+ * class implementation.
  */
 public class UserProjectIntegrationTest {
 

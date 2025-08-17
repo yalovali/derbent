@@ -14,52 +14,48 @@ import unit_tests.tech.derbent.abstracts.domains.CTestBase;
  */
 class CButtonTest extends CTestBase {
 
-	@Override
-	protected void setupForTest() {
-		// TODO Auto-generated method stub
-	}
+    @Override
+    protected void setupForTest() {
+        // TODO Auto-generated method stub
+    }
 
-	@Test
-	void testBasicConstructor() {
-		final CButton button = new CButton("Test Button");
-		Check.notNull(button);
-		Check.equals("Test Button", button.getText());
-	}
+    @Test
+    void testBasicConstructor() {
+        final CButton button = new CButton("Test Button");
+        Check.notNull(button);
+        Check.equals("Test Button", button.getText());
+    }
 
-	@Test
-	void testCreateError() {
-		final CButton button = CButton.createError("Error Button");
-		Check.notNull(button);
-		Check.equals("Error Button", button.getText());
-		Check.condition(
-			button.getThemeNames().contains(ButtonVariant.LUMO_ERROR.getVariantName()));
-	}
+    @Test
+    void testCreateError() {
+        final CButton button = CButton.createError("Error Button");
+        Check.notNull(button);
+        Check.equals("Error Button", button.getText());
+        Check.condition(button.getThemeNames().contains(ButtonVariant.LUMO_ERROR.getVariantName()));
+    }
 
-	@Test
-	void testCreatePrimary() {
-		final CButton button = CButton.createPrimary("Primary Button");
-		Check.notNull(button);
-		Check.equals("Primary Button", button.getText());
-		Check.condition(
-			button.getThemeNames().contains(ButtonVariant.LUMO_PRIMARY.getVariantName()));
-	}
+    @Test
+    void testCreatePrimary() {
+        final CButton button = CButton.createPrimary("Primary Button");
+        Check.notNull(button);
+        Check.equals("Primary Button", button.getText());
+        Check.condition(button.getThemeNames().contains(ButtonVariant.LUMO_PRIMARY.getVariantName()));
+    }
 
-	@Test
-	void testCreateTertiary() {
-		final CButton button = CButton.createTertiary("Tertiary Button");
-		Check.notNull(button);
-		Check.equals("Tertiary Button", button.getText());
-		Check.condition(button.getThemeNames()
-			.contains(ButtonVariant.LUMO_TERTIARY.getVariantName()));
-	}
+    @Test
+    void testCreateTertiary() {
+        final CButton button = CButton.createTertiary("Tertiary Button");
+        Check.notNull(button);
+        Check.equals("Tertiary Button", button.getText());
+        Check.condition(button.getThemeNames().contains(ButtonVariant.LUMO_TERTIARY.getVariantName()));
+    }
 
-	@Test
-	void testCreateWithIcon() {
-		final CButton button = CButton.createPrimary("Save", VaadinIcon.PLUS.create());
-		Check.notNull(button);
-		Check.equals("Save", button.getText());
-		Check.notNull(button.getIcon());
-		Check.condition(
-			button.getThemeNames().contains(ButtonVariant.LUMO_PRIMARY.getVariantName()));
-	}
+    @Test
+    void testCreateWithIcon() {
+        final CButton button = CButton.createPrimary("Save", VaadinIcon.PLUS.create());
+        Check.notNull(button);
+        Check.equals("Save", button.getText());
+        Check.notNull(button.getIcon());
+        Check.condition(button.getThemeNames().contains(ButtonVariant.LUMO_PRIMARY.getVariantName()));
+    }
 }

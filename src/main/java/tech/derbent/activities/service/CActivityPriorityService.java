@@ -14,18 +14,17 @@ import tech.derbent.projects.domain.CProject;
 @Transactional
 public class CActivityPriorityService extends CEntityOfProjectService<CActivityPriority> {
 
-	public CActivityPriorityService(final CActivityPriorityRepository repository,
-		final Clock clock) {
-		super(repository, clock);
-	}
+    public CActivityPriorityService(final CActivityPriorityRepository repository, final Clock clock) {
+        super(repository, clock);
+    }
 
-	@Transactional (readOnly = true)
-	public Optional<CActivityPriority> findDefaultPriority(final CProject project) {
-		return ((CActivityPriorityRepository) repository).findByIsDefaultTrue(project);
-	}
+    @Transactional(readOnly = true)
+    public Optional<CActivityPriority> findDefaultPriority(final CProject project) {
+        return ((CActivityPriorityRepository) repository).findByIsDefaultTrue(project);
+    }
 
-	@Override
-	protected Class<CActivityPriority> getEntityClass() {
-		return CActivityPriority.class;
-	}
+    @Override
+    protected Class<CActivityPriority> getEntityClass() {
+        return CActivityPriority.class;
+    }
 }

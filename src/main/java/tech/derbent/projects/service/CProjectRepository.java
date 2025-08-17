@@ -12,7 +12,8 @@ public interface CProjectRepository extends CAbstractNamedRepository<CProject> {
     /**
      * Finds a project by ID and eagerly loads its user settings to prevent LazyInitializationException.
      *
-     * @param projectId the ID of the project to fetch
+     * @param projectId
+     *            the ID of the project to fetch
      * @return the project with eagerly loaded user settings, or empty if not found
      */
     @Query("SELECT p FROM CProject p LEFT JOIN FETCH p.userSettings WHERE p.id = :projectId")

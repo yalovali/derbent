@@ -426,22 +426,24 @@ public final class CViewToolbar extends Composite<Header> implements CProjectLis
     private Div createQuickAccessToolbar() {
         final var quickAccessDiv = new Div();
         quickAccessDiv.addClassNames(Display.FLEX, AlignItems.CENTER, Gap.SMALL);
-        
+
         // Meetings icon - green (consistent with navigation)
         final var meetingsButton = createColorfulIconButton(VaadinIcon.GROUP, "Meetings", "#28a745", "cmeetingsview");
-        
+
         // Activities icon - blue
-        final var activitiesButton = createColorfulIconButton(VaadinIcon.TASKS, "Activities", "#007bff", "cactivitiesview");
-        
+        final var activitiesButton = createColorfulIconButton(VaadinIcon.TASKS, "Activities", "#007bff",
+                "cactivitiesview");
+
         // Projects icon - orange (consistent with navigation)
-        final var projectsButton = createColorfulIconButton(VaadinIcon.BRIEFCASE, "Projects", "#fd7e14", "cprojectsview");
-        
+        final var projectsButton = createColorfulIconButton(VaadinIcon.BRIEFCASE, "Projects", "#fd7e14",
+                "cprojectsview");
+
         // Users icon - purple
         final var usersButton = createColorfulIconButton(VaadinIcon.USERS, "Users", "#6f42c1", "cusersview");
-        
+
         // Screens icon - purple (consistent with domain color)
         final var screensButton = createColorfulIconButton(VaadinIcon.VIEWPORT, "Screens", "#6f42c1", "cscreensview");
-        
+
         quickAccessDiv.add(meetingsButton, activitiesButton, projectsButton, usersButton, screensButton);
         return quickAccessDiv;
     }
@@ -453,26 +455,24 @@ public final class CViewToolbar extends Composite<Header> implements CProjectLis
         final Icon icon = iconType.create();
         icon.addClassNames(IconSize.MEDIUM); // Use same size as menu icons
         icon.getStyle().set("color", color);
-        
+
         final CButton button = new CButton(icon);
         button.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ICON);
         button.getElement().setAttribute("title", tooltip);
         button.addClassNames(Margin.NONE);
-        
+
         // Add hover effect
         final String originalColor = color;
         final String hoverColor = color + "99"; // Add transparency for hover
-        button.getElement().addEventListener("mouseenter",
-                e -> icon.getStyle().set("color", hoverColor));
-        button.getElement().addEventListener("mouseleave",
-                e -> icon.getStyle().set("color", originalColor));
-        
+        button.getElement().addEventListener("mouseenter", e -> icon.getStyle().set("color", hoverColor));
+        button.getElement().addEventListener("mouseleave", e -> icon.getStyle().set("color", originalColor));
+
         // Navigate to route
         button.addClickListener(event -> {
             LOGGER.info("{} button clicked, navigating to {}", tooltip, route);
             com.vaadin.flow.component.UI.getCurrent().navigate(route);
         });
-        
+
         return button;
     }
 }

@@ -31,92 +31,86 @@ import tech.derbent.session.service.CSessionService;
  */
 class CActivityKanbanDragDropTest {
 
-	@Mock
-	private CActivityService activityService;
+    @Mock
+    private CActivityService activityService;
 
-	@Mock
-	private CSessionService sessionService;
+    @Mock
+    private CSessionService sessionService;
 
-	private CProject testProject;
+    private CProject testProject;
 
-	private CActivityStatus todoStatus;
+    private CActivityStatus todoStatus;
 
-	private CActivityStatus inProgressStatus;
+    private CActivityStatus inProgressStatus;
 
-	private CActivity testActivity;
+    private CActivity testActivity;
 
-	@BeforeEach
-	void setUp() {
-		MockitoAnnotations.openMocks(this);
-		// Create test project
-		testProject = new CProject();
-		testProject.setName("Test Project");
-		// Create test statuses
-		todoStatus = new CActivityStatus("TODO", testProject);
-		inProgressStatus = new CActivityStatus("IN_PROGRESS", testProject);
-		// Create test activity
-		testActivity = new CActivity("Test Activity", testProject);
-		testActivity.setStatus(todoStatus);
-	}
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        // Create test project
+        testProject = new CProject();
+        testProject.setName("Test Project");
+        // Create test statuses
+        todoStatus = new CActivityStatus("TODO", testProject);
+        inProgressStatus = new CActivityStatus("IN_PROGRESS", testProject);
+        // Create test activity
+        testActivity = new CActivity("Test Activity", testProject);
+        testActivity.setStatus(todoStatus);
+    }
 
-	@Test
-	void testActivityCardCreationWithDragAndDrop() {
-		// Test that activity cards are created with drag functionality
-		final CActivityCard card = new CActivityCard(testActivity);
-		assertNotNull(card);
-		assertEquals(testActivity, card.getActivity());
-		// Verify that the card has the drag wrapper CSS class
-		assertEquals(true, card.getClassNames().contains("kanban-card-wrapper"));
-	}
+    @Test
+    void testActivityCardCreationWithDragAndDrop() {
+        // Test that activity cards are created with drag functionality
+        final CActivityCard card = new CActivityCard(testActivity);
+        assertNotNull(card);
+        assertEquals(testActivity, card.getActivity());
+        // Verify that the card has the drag wrapper CSS class
+        assertEquals(true, card.getClassNames().contains("kanban-card-wrapper"));
+    }
 
-	@Test
-	void testActivityStatusUpdate() {
-		// Test the updateEntityStatus method
-		when(activityService.updateEntityStatus(any(CActivity.class),
-			any(CActivityStatus.class))).thenReturn(testActivity);
-		// Call the method
-		final CActivity updatedActivity =
-			activityService.updateEntityStatus(testActivity, inProgressStatus);
-		// Verify the method was called
-		verify(activityService).updateEntityStatus(testActivity, inProgressStatus);
-		assertNotNull(updatedActivity);
-	}
+    @Test
+    void testActivityStatusUpdate() {
+        // Test the updateEntityStatus method
+        when(activityService.updateEntityStatus(any(CActivity.class), any(CActivityStatus.class)))
+                .thenReturn(testActivity);
+        // Call the method
+        final CActivity updatedActivity = activityService.updateEntityStatus(testActivity, inProgressStatus);
+        // Verify the method was called
+        verify(activityService).updateEntityStatus(testActivity, inProgressStatus);
+        assertNotNull(updatedActivity);
+    }
 
-	@Test
-	void testKanbanBoardViewCreation() {
-		// Mock the session service to return a project
-		when(sessionService.getActiveProject()).thenReturn(Optional.of(testProject));
-		// Mock the activity service to return grouped activities
-		final Map<CActivityStatus, List<CActivity>> groupedActivities =
-			Map.of(todoStatus, List.of(testActivity));
-		when(activityService.getActivitiesGroupedByStatus(testProject))
-			.thenReturn(groupedActivities);
-		// Create the kanban board view
-		final CActivityKanbanBoardView boardView =
-			new CActivityKanbanBoardView(activityService, sessionService);
-		assertNotNull(boardView);
-	}
+    @Test
+    void testKanbanBoardViewCreation() {
+        // Mock the session service to return a project
+        when(sessionService.getActiveProject()).thenReturn(Optional.of(testProject));
+        // Mock the activity service to return grouped activities
+        final Map<CActivityStatus, List<CActivity>> groupedActivities = Map.of(todoStatus, List.of(testActivity));
+        when(activityService.getActivitiesGroupedByStatus(testProject)).thenReturn(groupedActivities);
+        // Create the kanban board view
+        final CActivityKanbanBoardView boardView = new CActivityKanbanBoardView(activityService, sessionService);
+        assertNotNull(boardView);
+    }
 
-	@Test
-	void testKanbanColumnCreationWithDropTarget() {
-		// Create a column with activities
-		final List<CActivity> activities = List.of(testActivity);
-		final CActivityKanbanColumn column =
-			new CActivityKanbanColumn(todoStatus, activities);
-		assertNotNull(column);
-		assertEquals(todoStatus, column.getActivityStatus());
-		assertEquals(activities, column.getActivities());
-	}
+    @Test
+    void testKanbanColumnCreationWithDropTarget() {
+        // Create a column with activities
+        final List<CActivity> activities = List.of(testActivity);
+        final CActivityKanbanColumn column = new CActivityKanbanColumn(todoStatus, activities);
+        assertNotNull(column);
+        assertEquals(todoStatus, column.getActivityStatus());
+        assertEquals(activities, column.getActivities());
+    }
 
-	@Test
-	void testKanbanColumnWithDropHandler() {
-		// Create a mock drop handler
-		final Consumer<CActivity> mockHandler = mock(Consumer.class);
-		// Create a column with drop handler
-		final List<CActivity> activities = List.of(testActivity);
-		final CActivityKanbanColumn column =
-			new CActivityKanbanColumn(todoStatus, activities, mockHandler);
-		assertNotNull(column);
-		assertEquals(todoStatus, column.getActivityStatus());
-	}
+    @Test
+    void testKanbanColumnWithDropHandler() {
+        // Create a mock drop handler
+        final Consumer<CActivity> mockHandler = mock(Consumer.class);
+        // Create a column with drop handler
+        final List<CActivity> activities = List.of(testActivity);
+        final CActivityKanbanColumn column = new CActivityKanbanColumn(todoStatus, activities, mockHandler);
+        assertNotNull(column);
+        assertEquals(todoStatus, column.getActivityStatus());
+    }
 }

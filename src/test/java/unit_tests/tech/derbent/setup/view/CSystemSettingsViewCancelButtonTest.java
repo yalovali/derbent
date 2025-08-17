@@ -22,82 +22,78 @@ import tech.derbent.setup.view.CSystemSettingsView;
 import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 
 /**
- * Test class to verify that CSystemSettingsView has a cancel button that properly handles
- * rejecting changes as required by the coding guidelines.
+ * Test class to verify that CSystemSettingsView has a cancel button that properly handles rejecting changes as required
+ * by the coding guidelines.
  */
-@ExtendWith (MockitoExtension.class)
+@ExtendWith(MockitoExtension.class)
 class CSystemSettingsViewCancelButtonTest extends CTestBase {
 
-	@Mock
-	private CSystemSettingsService systemSettingsService;
+    @Mock
+    private CSystemSettingsService systemSettingsService;
 
-	private CSystemSettings testSettings;
+    private CSystemSettings testSettings;
 
-	private CSystemSettingsView view;
+    private CSystemSettingsView view;
 
-	@Override
-	protected void setupForTest() {
-		// Mock Vaadin environment
-		@SuppressWarnings ("unused")
-		final VaadinRequest request = mock(VaadinRequest.class);
-		@SuppressWarnings ("unused")
-		final VaadinService service = mock(VaadinService.class);
-		final VaadinSession session = mock(VaadinSession.class);
-		VaadinSession.setCurrent(session);
-		UI.setCurrent(new UI());
-		// Create test settings
-		testSettings = new CSystemSettings();
-		testSettings.setApplicationName("Test App");
-		testSettings.setApplicationVersion("1.0.0");
-		testSettings.setSessionTimeoutMinutes(30);
-		testSettings.setMaxLoginAttempts(3);
-		testSettings.setRequireStrongPasswords(true);
-		testSettings.setMaintenanceModeEnabled(false);
-		// Mock service behavior with lenient stubbing to avoid unnecessary stubbing
-		// errors
-		lenient().when(systemSettingsService.getOrCreateSystemSettings())
-			.thenReturn(testSettings);
-		lenient()
-			.when(systemSettingsService.updateSystemSettings(any(CSystemSettings.class)))
-			.thenReturn(testSettings);
-		// Create view instance
-		view = new CSystemSettingsView(systemSettingsService);
-	}
+    @Override
+    protected void setupForTest() {
+        // Mock Vaadin environment
+        @SuppressWarnings("unused")
+        final VaadinRequest request = mock(VaadinRequest.class);
+        @SuppressWarnings("unused")
+        final VaadinService service = mock(VaadinService.class);
+        final VaadinSession session = mock(VaadinSession.class);
+        VaadinSession.setCurrent(session);
+        UI.setCurrent(new UI());
+        // Create test settings
+        testSettings = new CSystemSettings();
+        testSettings.setApplicationName("Test App");
+        testSettings.setApplicationVersion("1.0.0");
+        testSettings.setSessionTimeoutMinutes(30);
+        testSettings.setMaxLoginAttempts(3);
+        testSettings.setRequireStrongPasswords(true);
+        testSettings.setMaintenanceModeEnabled(false);
+        // Mock service behavior with lenient stubbing to avoid unnecessary stubbing
+        // errors
+        lenient().when(systemSettingsService.getOrCreateSystemSettings()).thenReturn(testSettings);
+        lenient().when(systemSettingsService.updateSystemSettings(any(CSystemSettings.class))).thenReturn(testSettings);
+        // Create view instance
+        view = new CSystemSettingsView(systemSettingsService);
+    }
 
-	@Test
-	void testButtonLayoutContainsCancelButton() {
-		// Verify that the view contains necessary components The createButtonLayout
-		// method should include a cancel button as we modified it
-		assertDoesNotThrow(() -> {
-			// The view construction includes button layout creation If our changes are
-			// correct, this should not throw any exceptions
-			assertNotNull(view.getClass(), "View class should be accessible");
-		}, "Button layout creation should succeed with cancel button included");
-	}
+    @Test
+    void testButtonLayoutContainsCancelButton() {
+        // Verify that the view contains necessary components The createButtonLayout
+        // method should include a cancel button as we modified it
+        assertDoesNotThrow(() -> {
+            // The view construction includes button layout creation If our changes are
+            // correct, this should not throw any exceptions
+            assertNotNull(view.getClass(), "View class should be accessible");
+        }, "Button layout creation should succeed with cancel button included");
+    }
 
-	@Test
-	void testCancelButtonFunctionality() {
-		// This test verifies that the cancel button can be invoked without throwing
-		// exceptions The cancel functionality reloads settings from the service to reject
-		// unsaved changes
-		assertDoesNotThrow(() -> {
-			// Test the binding functionality that should trigger the
-			// IllegalStateException if forField is not properly completed with bind()
-			var binder = view.getBinder();
-			assertNotNull(binder, "Binder should be available");
+    @Test
+    void testCancelButtonFunctionality() {
+        // This test verifies that the cancel button can be invoked without throwing
+        // exceptions The cancel functionality reloads settings from the service to reject
+        // unsaved changes
+        assertDoesNotThrow(() -> {
+            // Test the binding functionality that should trigger the
+            // IllegalStateException if forField is not properly completed with bind()
+            var binder = view.getBinder();
+            assertNotNull(binder, "Binder should be available");
 
-			// This will trigger the IllegalStateException if there are incomplete
-			// forField bindings
-			if (view.getCurrentSettings() != null) {
-				binder.readBean(view.getCurrentSettings());
-			}
-		}, "Cancel button functionality should not throw exceptions");
-	}
+            // This will trigger the IllegalStateException if there are incomplete
+            // forField bindings
+            if (view.getCurrentSettings() != null) {
+                binder.readBean(view.getCurrentSettings());
+            }
+        }, "Cancel button functionality should not throw exceptions");
+    }
 
-	@Test
-	void testViewInitialization() {
-		assertNotNull(view, "CSystemSettingsView should be initialized");
-		assertNotNull(systemSettingsService,
-			"System settings service should be injected");
-	}
+    @Test
+    void testViewInitialization() {
+        assertNotNull(view, "CSystemSettingsView should be initialized");
+        assertNotNull(systemSettingsService, "System settings service should be injected");
+    }
 }

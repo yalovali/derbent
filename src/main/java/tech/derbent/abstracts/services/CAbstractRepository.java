@@ -8,5 +8,5 @@ import tech.derbent.abstracts.domains.CEntityDB;
 
 @NoRepositoryBean // 🔥 Bu şart!
 public interface CAbstractRepository<EntityClass extends CEntityDB<EntityClass>>
-	extends JpaRepository<EntityClass, Long>, JpaSpecificationExecutor<EntityClass> {
+        extends JpaRepository<EntityClass, Long>, JpaSpecificationExecutor<EntityClass> {
 }

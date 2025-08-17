@@ -39,9 +39,8 @@ class CRiskStatusViewTest {
         assertDoesNotThrow(() -> {
             // This test just verifies the method exists and can be called
             // More detailed testing would require actual entities
-            view.getClass().getMethod("setProjectForEntity", 
-                tech.derbent.risks.domain.CRiskStatus.class, 
-                tech.derbent.projects.domain.CProject.class);
+            view.getClass().getMethod("setProjectForEntity", tech.derbent.risks.domain.CRiskStatus.class,
+                    tech.derbent.projects.domain.CProject.class);
         }, "setProjectForEntity method should exist");
     }
 }

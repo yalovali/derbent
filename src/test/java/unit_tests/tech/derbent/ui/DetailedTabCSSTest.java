@@ -13,7 +13,6 @@ import org.springframework.test.context.TestPropertySource;
 
 import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 
-
 /**
  * Test to validate that the detailed tab has the red background color CSS styling.
  */

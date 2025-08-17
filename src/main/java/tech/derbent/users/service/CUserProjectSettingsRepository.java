@@ -11,8 +11,7 @@ import tech.derbent.abstracts.services.CAbstractRepository;
 import tech.derbent.users.domain.CUserProjectSettings;
 
 /**
- * Repository interface for CUserProjectSettings entity.
- * Provides data access methods for user-project relationships.
+ * Repository interface for CUserProjectSettings entity. Provides data access methods for user-project relationships.
  */
 @Repository
 public interface CUserProjectSettingsRepository extends CAbstractRepository<CUserProjectSettings> {
@@ -33,7 +32,8 @@ public interface CUserProjectSettingsRepository extends CAbstractRepository<CUse
      * Find a specific user project setting by user and project
      */
     @Query("SELECT ups FROM CUserProjectSettings ups LEFT JOIN FETCH ups.project LEFT JOIN FETCH ups.user WHERE ups.user.id = :userId AND ups.project.id = :projectId")
-    Optional<CUserProjectSettings> findByUserIdAndProjectId(@Param("userId") Long userId, @Param("projectId") Long projectId);
+    Optional<CUserProjectSettings> findByUserIdAndProjectId(@Param("userId") Long userId,
+            @Param("projectId") Long projectId);
 
     /**
      * Check if a relationship exists between user and project

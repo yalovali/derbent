@@ -323,5 +323,7 @@ public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntit
         return "#28a745"; // Green color for meeting entities
     }
 
-    public static String getIconFilename() { return "vaadin:group"; }
+    public static String getIconFilename() {
+        return "vaadin:group";
+    }
 }

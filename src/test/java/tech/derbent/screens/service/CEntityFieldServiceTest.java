@@ -41,12 +41,12 @@ class CEntityFieldServiceTest {
         // Then
         assertNotNull(fields);
         assertFalse(fields.isEmpty());
-        
+
         // Check that we have some expected fields
         final boolean hasName = fields.stream().anyMatch(f -> "name".equals(f.getFieldName()));
         final boolean hasDescription = fields.stream().anyMatch(f -> "description".equals(f.getFieldName()));
         final boolean hasActivityType = fields.stream().anyMatch(f -> "activityType".equals(f.getFieldName()));
-        
+
         assertTrue(hasName, "Should have 'name' field");
         assertTrue(hasDescription, "Should have 'description' field");
         assertTrue(hasActivityType, "Should have 'activityType' field");
@@ -82,12 +82,10 @@ class CEntityFieldServiceTest {
 
         // Then
         assertFalse(fields.isEmpty());
-        
-        final EntityFieldInfo nameField = fields.stream()
-            .filter(f -> "name".equals(f.getFieldName()))
-            .findFirst()
-            .orElse(null);
-        
+
+        final EntityFieldInfo nameField = fields.stream().filter(f -> "name".equals(f.getFieldName())).findFirst()
+                .orElse(null);
+
         assertNotNull(nameField);
         assertEquals("name", nameField.getFieldName());
         assertEquals("Name", nameField.getDisplayName());

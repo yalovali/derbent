@@ -25,23 +25,26 @@ public class CScreenService extends CEntityOfProjectService<CScreen> {
     }
 
     /**
-     * Find screen by ID with optimized eager loading.
-     * Uses repository method with JOIN FETCH to prevent N+1 queries.
-     * @param id the screen ID
+     * Find screen by ID with optimized eager loading. Uses repository method with JOIN FETCH to prevent N+1 queries.
+     * 
+     * @param id
+     *            the screen ID
      * @return the screen with eagerly loaded associations, or null if not found
      */
     public CScreen findById(final Long id) {
         if (id == null) {
             return null;
         }
-        return ((CScreenRepository) repository).findByIdWithEagerLoading(id)
-            .orElse(null);
+        return ((CScreenRepository) repository).findByIdWithEagerLoading(id).orElse(null);
     }
 
     /**
      * Find screens by project and entity type.
-     * @param project the project
-     * @param entityType the entity type
+     * 
+     * @param project
+     *            the project
+     * @param entityType
+     *            the entity type
      * @return list of screens for the given project and entity type
      */
     @Transactional(readOnly = true)
@@ -51,7 +54,9 @@ public class CScreenService extends CEntityOfProjectService<CScreen> {
 
     /**
      * Find active screens by project.
-     * @param project the project
+     * 
+     * @param project
+     *            the project
      * @return list of active screens for the given project
      */
     @Transactional(readOnly = true)
@@ -61,8 +66,11 @@ public class CScreenService extends CEntityOfProjectService<CScreen> {
 
     /**
      * Create a new screen with default values.
-     * @param name the screen name
-     * @param project the project
+     * 
+     * @param name
+     *            the screen name
+     * @param project
+     *            the project
      * @return the new screen
      */
     public CScreen newEntity(final String name, final CProject project) {
@@ -72,9 +80,11 @@ public class CScreenService extends CEntityOfProjectService<CScreen> {
     }
 
     /**
-     * Create a new screen with default values using a dummy project.
-     * This method is called by the framework when no specific project is available.
-     * @param name the screen name
+     * Create a new screen with default values using a dummy project. This method is called by the framework when no
+     * specific project is available.
+     * 
+     * @param name
+     *            the screen name
      * @return the new screen
      */
     @Override
