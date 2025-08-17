@@ -76,6 +76,7 @@ public class CScreenLinesService extends CAbstractService<CScreenLines> {
         final CScreenLines screenLine = new CScreenLines(screen, fieldCaption, entityFieldName);
         screenLine.setLineOrder(getNextLineOrder(screen));
         screenLine.setFieldType("TEXT"); // Default field type
+        screenLine.setMaxLength(255); // Default max length for text fields
         screenLine.setIsActive(true);
         return screenLine;
     }
