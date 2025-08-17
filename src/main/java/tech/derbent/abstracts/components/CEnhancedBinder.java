@@ -232,25 +232,53 @@ public class CEnhancedBinder<BEAN> extends BeanValidationBinder<BEAN> {
             }
 
             incompleteBindingsField.setAccessible(true);
-            final Set<?> incompleteBindings = (Set<?>) incompleteBindingsField.get(this);
+            final Object incompleteBindingsObj = incompleteBindingsField.get(this);
 
-            if ((incompleteBindings != null) && !incompleteBindings.isEmpty()) {
-                LOGGER.warn(
-                        "Found {} incomplete bindings for {} - clearing them to prevent readBean error. This indicates a form binding issue that should be investigated.",
-                        incompleteBindings.size(), beanType.getSimpleName());
+            if (incompleteBindingsObj != null) {
+                // Handle both Set and IdentityHashMap types that may be used in different Vaadin versions
+                Collection<?> incompleteBindings = null;
 
-                // Log details about the incomplete bindings if possible
-                try {
-                    for (final Object binding : incompleteBindings) {
-                        LOGGER.debug("Incomplete binding: {}", binding.toString());
-                    }
-                } catch (final Exception debugException) {
-                    LOGGER.debug("Could not log incomplete binding details: {}", debugException.getMessage());
+                if (incompleteBindingsObj instanceof Set) {
+                    incompleteBindings = (Set<?>) incompleteBindingsObj;
+                } else if (incompleteBindingsObj instanceof IdentityHashMap) {
+                    // In some Vaadin versions, incompleteBindings is an IdentityHashMap
+                    incompleteBindings = ((IdentityHashMap<?, ?>) incompleteBindingsObj).keySet();
+                } else if (incompleteBindingsObj instanceof Collection) {
+                    // Fallback to generic Collection
+                    incompleteBindings = (Collection<?>) incompleteBindingsObj;
+                } else {
+                    LOGGER.debug("Incomplete bindings field is of unexpected type: {}",
+                            incompleteBindingsObj.getClass().getSimpleName());
                 }
 
-                int originalSize = incompleteBindings.size();
-                incompleteBindings.clear();
-                LOGGER.info("Cleared {} incomplete bindings for {}", originalSize, beanType.getSimpleName());
+                if ((incompleteBindings != null) && !incompleteBindings.isEmpty()) {
+                    LOGGER.warn(
+                            "Found {} incomplete bindings for {} - clearing them to prevent readBean error. This indicates a form binding issue that should be investigated.",
+                            incompleteBindings.size(), beanType.getSimpleName());
+
+                    // Log details about the incomplete bindings if possible
+                    try {
+                        for (final Object binding : incompleteBindings) {
+                            LOGGER.debug("Incomplete binding: {}", binding.toString());
+                        }
+                    } catch (final Exception debugException) {
+                        LOGGER.debug("Could not log incomplete binding details: {}", debugException.getMessage());
+                    }
+
+                    int originalSize = incompleteBindings.size();
+
+                    // Clear the original object appropriately based on its type
+                    if (incompleteBindingsObj instanceof Set) {
+                        ((Set<?>) incompleteBindingsObj).clear();
+                    } else if (incompleteBindingsObj instanceof IdentityHashMap) {
+                        ((IdentityHashMap<?, ?>) incompleteBindingsObj).clear();
+                    } else if (incompleteBindingsObj instanceof Collection) {
+                        ((Collection<?>) incompleteBindingsObj).clear();
+                    }
+
+                    LOGGER.info("Cleared {} incomplete bindings for {}", originalSize, beanType.getSimpleName());
+                }
+
             }
         } catch (final Exception e) {
             LOGGER.debug("Could not check for incomplete bindings: {} - {}", e.getClass().getSimpleName(),
