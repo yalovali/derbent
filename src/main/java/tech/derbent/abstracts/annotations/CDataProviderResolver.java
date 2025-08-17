@@ -5,11 +5,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -189,13 +191,24 @@ public final class CDataProviderResolver {
 	}
 
 	/**
+	 * Debug method to list all available service beans in the application context. Useful
+	 * for troubleshooting data provider resolution issues.
+	 * @return list of all bean names that end with "Service"
+	 */
+	public List<String> getAvailableServiceBeans() {
+		return java.util.Arrays.stream(applicationContext.getBeanDefinitionNames())
+			.filter(name -> name.toLowerCase().contains("service")).sorted()
+			.collect(java.util.stream.Collectors.toList());
+	}
+
+	/**
 	 * Retrieves a bean from cache or computes it using the supplier.
 	 * @param cacheKey     the cache key
 	 * @param beanSupplier supplier to compute the bean if not cached
 	 * @return the bean or null if not found
 	 */
 	private Object getBeanFromCache(final String cacheKey,
-		final java.util.function.Supplier<Object> beanSupplier) {
+		final Supplier<Object> beanSupplier) {
 		return beanCache.computeIfAbsent(cacheKey, k -> {
 			final Object bean = beanSupplier.get();
 
@@ -255,36 +268,23 @@ public final class CDataProviderResolver {
 			"Resolving data provider for entity type: {} with MetaData configuration",
 			entityType.getSimpleName());
 
-		try {
-
-			// Strategy 1: Use specified bean name
-			if ((metaData.dataProviderBean() != null)
-				&& !metaData.dataProviderBean().trim().isEmpty()) {
-				LOGGER.debug("Using specified bean name: '{}' for entity type: {}",
-					metaData.dataProviderBean(), entityType.getSimpleName());
-				return resolveDataFromBean(entityType, metaData.dataProviderBean(),
-					metaData.dataProviderMethod());
-			}
-
-			// Strategy 2: Use specified bean class
-			if ((metaData.dataProviderClass() != null)
-				&& (metaData.dataProviderClass() != Object.class)) {
-				LOGGER.debug("Using specified bean class: '{}' for entity type: {}",
-					metaData.dataProviderClass().getSimpleName(),
-					entityType.getSimpleName());
-				return resolveDataFromClass(entityType, metaData.dataProviderClass(),
-					metaData.dataProviderMethod());
-			}
-			// Strategy 3: Automatic resolution by naming convention
-			LOGGER.debug("Attempting automatic resolution for entity type: {}",
-				entityType.getSimpleName());
-			return resolveDataAutomatically(entityType, metaData.dataProviderMethod());
-		} catch (final Exception e) {
-			LOGGER.error(
-				"Failed to resolve data for entity type: {} - returning empty list. Error: {}",
-				entityType.getSimpleName(), e.getMessage(), e);
-			return Collections.emptyList();
+		// Strategy 1: Use specified bean name
+		if ((metaData.dataProviderBean() != null)
+			&& !metaData.dataProviderBean().trim().isEmpty()) {
+			return resolveDataFromBean(entityType, metaData.dataProviderBean(),
+				metaData.dataProviderMethod());
 		}
+
+		// Strategy 2: Use specified bean class
+		if ((metaData.dataProviderClass() != null)
+			&& (metaData.dataProviderClass() != Object.class)) {
+			return resolveDataFromClass(entityType, metaData.dataProviderClass(),
+				metaData.dataProviderMethod());
+		}
+		// Strategy 3: Automatic resolution by naming convention
+		LOGGER.debug("Attempting automatic resolution for entity type: {}",
+			entityType.getSimpleName());
+		return resolveDataAutomatically(entityType, metaData.dataProviderMethod());
 	}
 
 	/**
@@ -315,15 +315,8 @@ public final class CDataProviderResolver {
 
 		for (final String beanName : possibleBeanNames) {
 
-			try {
-
-				if (applicationContext.containsBean(beanName)) {
-					return resolveDataFromBean(entityType, beanName, methodName);
-				}
-			} catch (final Exception e) {
-				LOGGER.debug(
-					"Failed to use bean '{}' for entity type: {} - trying next option",
-					beanName, entityName);
+			if (applicationContext.containsBean(beanName)) {
+				return resolveDataFromBean(entityType, beanName, methodName);
 			}
 		}
 		LOGGER.warn(
@@ -348,19 +341,13 @@ public final class CDataProviderResolver {
 		Check.notBlank(beanName, "Bean name cannot be empty");
 		// Get bean from Spring context with caching
 		final Object serviceBean = getBeanFromCache(beanName, () -> {
-
-			if (applicationContext.containsBean(beanName)) {
-				return applicationContext.getBean(beanName);
-			}
-			else {
-				LOGGER.warn("Bean '{}' not found in application context", beanName);
-				return null;
-			}
+			Check.condition(applicationContext.containsBean(beanName),
+				"Bean '" + beanName + "' not found in application context of beans:"
+					+ getAvailableServiceBeans());
+			return applicationContext.getBean(beanName);
 		});
 		Check.notNull(serviceBean,
 			"Service bean cannot be null for bean name: " + beanName);
-		LOGGER.debug("Successfully retrieved bean '{}' of type: {}", beanName,
-			serviceBean.getClass().getSimpleName());
 		return callDataMethod(serviceBean, methodName, entityType);
 	}
 
@@ -382,14 +369,7 @@ public final class CDataProviderResolver {
 			// Get bean by type from Spring context with caching
 			final String cacheKey = serviceClass.getName();
 			final Object serviceBean = getBeanFromCache(cacheKey, () -> {
-
-				try {
-					return applicationContext.getBean(serviceClass);
-				} catch (final Exception e) {
-					LOGGER.warn("Bean of type '{}' not found in application context: {}",
-						serviceClass.getSimpleName(), e.getMessage());
-					return null;
-				}
+				return applicationContext.getBean(serviceClass);
 			});
 
 			if (serviceBean == null) {
@@ -473,9 +453,8 @@ public final class CDataProviderResolver {
 				final Pageable pageable = PageableUtils.createSafe(0, DEFAULT_PAGE_SIZE);
 				final Object result = method.invoke(serviceBean, pageable);
 
-				if (result instanceof org.springframework.data.domain.Page) {
-					return ((org.springframework.data.domain.Page<T>) result)
-						.getContent();
+				if (result instanceof Page) {
+					return ((Page<T>) result).getContent();
 				}
 				else if (result instanceof List) {
 					return (List<T>) result;

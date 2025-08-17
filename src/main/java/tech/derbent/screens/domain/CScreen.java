@@ -3,9 +3,6 @@ package tech.derbent.screens.domain;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -34,8 +31,6 @@ import tech.derbent.risks.domain.CRisk;
 @AttributeOverride (name = "id", column = @Column (name = "screen_id"))
 public class CScreen extends CEntityOfProject<CScreen> {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CScreen.class);
-
 	public static String getIconColorCode() {
 		return "#6f42c1"; // Purple color for screen entities
 	}
@@ -47,7 +42,8 @@ public class CScreen extends CEntityOfProject<CScreen> {
 	@MetaData (
 		displayName = "Entity Type", required = true, readOnly = false,
 		description = "Type of entity this screen is designed for", hidden = false,
-		order = 2, maxLength = 100, dataProviderBean = "CViewsService"
+		order = 2, maxLength = 100, dataProviderBean = "CViewsService",
+		dataProviderMethod = "getAvailableBaseTypes"
 	)
 	private String entityType;
 

@@ -1,10 +1,5 @@
 package ui_tests.tech.derbent.abstracts.ui;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -25,6 +20,7 @@ import com.vaadin.flow.data.provider.DataProvider;
 
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.services.CAbstractService;
+import tech.derbent.abstracts.utils.Check;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.service.CUserProjectSettingsService;
 
@@ -144,7 +140,7 @@ public abstract class CAbstractUITest<EntityClass extends CEntityDB<EntityClass>
 			return;
 		}
 		// Basic test that grid has columns
-		assertTrue(grid.getColumns().size() > 0, "Grid should have columns");
+		Check.condition(grid.getColumns().size() > 0, "Grid should have columns");
 		LOGGER.info("Grid has {} columns", grid.getColumns().size());
 		LOGGER.info("Grid column access test passed for {}", entityClass.getSimpleName());
 	}
@@ -156,16 +152,16 @@ public abstract class CAbstractUITest<EntityClass extends CEntityDB<EntityClass>
 	 */
 	protected void testGridDataLoading(final Grid<EntityClass> grid) {
 		LOGGER.info("Testing grid data loading for {}", entityClass.getSimpleName());
-		assertNotNull(grid, "Grid should not be null");
+		Check.notNull(grid, "Grid should not be null");
 
 		try {
 			// Test that the grid can be accessed without exceptions
 			final DataProvider<EntityClass, ?> dataProvider = grid.getDataProvider();
-			assertNotNull(dataProvider, "Grid should have a data provider");
+			Check.notNull(dataProvider, "Grid should have a data provider");
 			LOGGER.info("Grid data loading test passed for {}",
 				entityClass.getSimpleName());
 		} catch (final Exception e) {
-			fail("Grid data loading failed with exception: " + e.getMessage(), e);
+			throw new IllegalStateException("Grid data loading failed with exception: " + e.getMessage(), e);
 		}
 	}
 
@@ -186,14 +182,14 @@ public abstract class CAbstractUITest<EntityClass extends CEntityDB<EntityClass>
 			// Test selection
 			grid.select(testEntity);
 			final EntityClass selected = grid.asSingleSelect().getValue();
-			assertEquals(testEntity, selected, "Selected entity should match");
+			Check.equals(testEntity, selected, "Selected entity should match");
 			// Test deselection
 			grid.deselectAll();
-			assertNull(grid.asSingleSelect().getValue(),
+			Check.condition(grid.asSingleSelect().getValue() == null,
 				"No entity should be selected after deselect");
 			LOGGER.info("Grid selection test passed for {}", entityClass.getSimpleName());
 		} catch (final Exception e) {
-			fail("Grid selection testing failed: " + e.getMessage(), e);
+			throw new IllegalStateException("Grid selection testing failed: " + e.getMessage(), e);
 		}
 	}
 

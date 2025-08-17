@@ -9,6 +9,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.utils.Check;
 
 @MappedSuperclass
 public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
@@ -64,12 +65,7 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	public CEntityNamed(final Class<EntityClass> clazz, final String name) {
 		super(clazz);
 
-		if ((name == null) || name.trim().isEmpty()) {
-			LOGGER.error("Constructor called with null or empty name for {}",
-				getClass().getSimpleName());
-			throw new IllegalArgumentException(
-				"Name cannot be null or empty for " + getClass().getSimpleName());
-		}
+		Check.notBlank(name, "Name cannot be null or empty for " + getClass().getSimpleName());
 		this.name = name.trim();
 	}
 

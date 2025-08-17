@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import tech.derbent.abstracts.services.CAbstractService;
+import tech.derbent.abstracts.utils.Check;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.comments.domain.CComment;
 import tech.derbent.comments.domain.CCommentPriority;
@@ -35,29 +36,17 @@ public class CCommentService extends CAbstractService<CComment> {
 
 	@PreAuthorize ("permitAll()")
 	public long countByActivity(final CActivity activity) {
-
-		if (activity == null) {
-			LOGGER.warn("countByActivity called with null activity");
-			return 0;
-		}
+		Check.notNull(activity, "Activity cannot be null");
 		return ((CCommentRepository) repository).countByActivity(activity);
 	}
 
 	@Transactional
 	public CComment createComment(final String commentText, final CActivity activity,
 		final CUser author) {
-
-		if ((commentText == null) || commentText.trim().isEmpty()) {
-			throw new IllegalArgumentException("Comment text cannot be null or empty");
-		}
-
-		if (activity == null) {
-			throw new IllegalArgumentException("Activity cannot be null");
-		}
-
-		if (author == null) {
-			throw new IllegalArgumentException("Author cannot be null");
-		}
+		Check.notBlank(commentText, "Comment text cannot be null or empty");
+		Check.notNull(activity, "Activity cannot be null");
+		Check.notNull(author, "Author cannot be null");
+		
 		final CComment comment = new CComment(commentText, activity, author);
 		return save(comment);
 	}
@@ -73,18 +62,10 @@ public class CCommentService extends CAbstractService<CComment> {
 	@Transactional
 	public CComment createComment(final String commentText, final CActivity activity,
 		final CUser author, final CCommentPriority priority) {
-
-		if ((commentText == null) || commentText.trim().isEmpty()) {
-			throw new IllegalArgumentException("Comment text cannot be null or empty");
-		}
-
-		if (activity == null) {
-			throw new IllegalArgumentException("Activity cannot be null");
-		}
-
-		if (author == null) {
-			throw new IllegalArgumentException("Author cannot be null");
-		}
+		Check.notBlank(commentText, "Comment text cannot be null or empty");
+		Check.notNull(activity, "Activity cannot be null");
+		Check.notNull(author, "Author cannot be null");
+		
 		final CComment comment = new CComment(commentText, activity, author, priority);
 		return save(comment);
 	}
@@ -96,13 +77,7 @@ public class CCommentService extends CAbstractService<CComment> {
 	 */
 	@PreAuthorize ("permitAll()")
 	public List<CComment> findByActivityOrderByEventDateAsc(final CActivity activity) {
-		LOGGER.info("findByActivityOrderByEventDateAsc called with activity: {}",
-			activity);
-
-		if (activity == null) {
-			LOGGER.warn("findByActivityOrderByEventDateAsc called with null activity");
-			return List.of();
-		}
+		Check.notNull(activity, "Activity cannot be null");
 		return ((CCommentRepository) repository)
 			.findByActivityOrderByEventDateAsc(activity);
 	}
@@ -116,14 +91,7 @@ public class CCommentService extends CAbstractService<CComment> {
 	@PreAuthorize ("permitAll()")
 	public Page<CComment> findByActivityOrderByEventDateAsc(final CActivity activity,
 		final Pageable pageable) {
-		LOGGER.info(
-			"findByActivityOrderByEventDateAsc called with activity: {}, pageable: {}",
-			activity, pageable);
-
-		if (activity == null) {
-			LOGGER.warn("findByActivityOrderByEventDateAsc called with null activity");
-			return Page.empty();
-		}
+		Check.notNull(activity, "Activity cannot be null");
 		return ((CCommentRepository) repository)
 			.findByActivityOrderByEventDateAsc(activity, pageable);
 	}
@@ -202,20 +170,12 @@ public class CCommentService extends CAbstractService<CComment> {
 	 */
 	@Override
 	public void initializeLazyFields(final CComment entity) {
+		Check.notNull(entity, "Comment entity cannot be null");
 
-		if (entity == null) {
-			return;
-		}
-
-		try {
-			super.initializeLazyFields(entity);
-			initializeLazyRelationship(entity.getAuthor());
-			initializeLazyRelationship(entity.getActivity());
-			initializeLazyRelationship(entity.getPriority());
-		} catch (final Exception e) {
-			LOGGER.warn("Error initializing lazy fields for Comment with ID: {}",
-				entity.getId(), e);
-		}
+		super.initializeLazyFields(entity);
+		initializeLazyRelationship(entity.getAuthor());
+		initializeLazyRelationship(entity.getActivity());
+		initializeLazyRelationship(entity.getPriority());
 	}
 
 	/**
@@ -225,11 +185,7 @@ public class CCommentService extends CAbstractService<CComment> {
 	 */
 	@Transactional
 	public CComment toggleImportant(final CComment comment) {
-		LOGGER.info("toggleImportant called with comment: {}", comment);
-
-		if (comment == null) {
-			throw new IllegalArgumentException("Comment cannot be null");
-		}
+		Check.notNull(comment, "Comment cannot be null");
 		comment.setImportant(!comment.isImportant());
 		return save(comment);
 	}
@@ -242,16 +198,9 @@ public class CCommentService extends CAbstractService<CComment> {
 	 */
 	@Transactional
 	public CComment updateCommentText(final CComment comment, final String newText) {
-		LOGGER.info("updateCommentText called with comment: {}, newText: {}", comment,
-			newText);
-
-		if (comment == null) {
-			throw new IllegalArgumentException("Comment cannot be null");
-		}
-
-		if ((newText == null) || newText.trim().isEmpty()) {
-			throw new IllegalArgumentException("Comment text cannot be null or empty");
-		}
+		Check.notNull(comment, "Comment cannot be null");
+		Check.notBlank(newText, "Comment text cannot be null or empty");
+		
 		comment.setCommentText(newText);
 		return save(comment);
 	}

@@ -1,10 +1,5 @@
 package ui_tests.tech.derbent.ui.automation;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.nio.file.Paths;
 
 import org.junit.jupiter.api.AfterEach;
@@ -25,6 +20,7 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.vaadin.flow.router.Route;
 
+import tech.derbent.abstracts.utils.Check;
 import tech.derbent.activities.view.CActivitiesView;
 import tech.derbent.activities.view.CActivityStatusView;
 import tech.derbent.activities.view.CActivityTypeView;
@@ -124,7 +120,7 @@ public class CBaseUITest {
 	 * Improved browser availability check with proper assertion
 	 */
 	protected void assertBrowserAvailable() {
-		assertTrue(isBrowserAvailable(),
+		Check.condition(isBrowserAvailable(),
 			"Browser is not available for testing - ensure Playwright setup completed successfully");
 	}
 
@@ -132,7 +128,7 @@ public class CBaseUITest {
 	 * Improved element existence check with assertion
 	 */
 	protected void assertElementExistsById(final String id) {
-		assertTrue(elementExistsById(id),
+		Check.condition(elementExistsById(id),
 			"Element with ID '" + id + "' should exist but was not found");
 	}
 
@@ -140,7 +136,7 @@ public class CBaseUITest {
 	 * Improved element non-existence check with assertion
 	 */
 	protected void assertElementNotExistsById(final String id) {
-		assertFalse(elementExistsById(id),
+		Check.condition(!elementExistsById(id),
 			"Element with ID '" + id + "' should not exist but was found");
 	}
 
@@ -149,7 +145,7 @@ public class CBaseUITest {
 	 */
 	protected void assertGridHasRows(final int expectedMinRows) {
 		final int actualRows = getGridRowCount();
-		assertTrue(actualRows >= expectedMinRows, "Grid should have at least "
+		Check.condition(actualRows >= expectedMinRows, "Grid should have at least "
 			+ expectedMinRows + " rows but has " + actualRows);
 	}
 
@@ -158,9 +154,9 @@ public class CBaseUITest {
 	 */
 	protected void assertTextById(final String id, final String expectedText) {
 		final String actualText = getTextById(id);
-		assertNotNull(actualText,
+		Check.notNull(actualText,
 			"Element with ID '" + id + "' should have text content");
-		assertEquals(expectedText, actualText,
+		Check.equals(expectedText, actualText,
 			"Text content mismatch for element with ID '" + id + "'");
 	}
 
@@ -178,9 +174,8 @@ public class CBaseUITest {
 		assertBrowserAvailable();
 		final String selector = "#" + id;
 		final var locator = page.locator(selector);
-		assertNotNull(id, "Element ID cannot be null");
-		assertTrue(locator.count() > 0,
-			"Element with ID '" + id + "' should exist before clicking");
+		Check.notNull(id, "Element ID cannot be null");
+		Check.condition(locator.count() > 0, "Element with ID '" + id + "' should exist before clicking");
 		// Perform click with timeout
 		page.click(selector, new Page.ClickOptions().setTimeout(timeoutMs));
 		LOGGER.debug("Successfully clicked element with ID: {}", id);
@@ -264,7 +259,7 @@ public class CBaseUITest {
 	protected void clickNew() {
 		final var newButtons =
 			page.locator("vaadin-button:has-text('New'), vaadin-button:has-text('Add')");
-		assertTrue(newButtons.count() > 0, "New/Add button should exist before clicking");
+		Check.condition(newButtons.count() > 0, "New/Add button should exist before clicking");
 		newButtons.first().click();
 		wait_1000();
 		LOGGER.debug("Successfully clicked New button");
@@ -284,7 +279,7 @@ public class CBaseUITest {
 	protected void clickSaveButton() {
 		final var saveButtons = page
 			.locator("vaadin-button:has-text('Save'), vaadin-button:has-text('Create')");
-		assertTrue(saveButtons.count() > 0, "Save button should exist before clicking");
+		Check.condition(saveButtons.count() > 0, "Save button should exist before clicking");
 		saveButtons.first().click();
 		wait_2000();
 		LOGGER.debug("Successfully clicked Save button");
@@ -305,14 +300,13 @@ public class CBaseUITest {
 	 */
 	protected void fillById(final String id, final String value) {
 		// Input validation
-		assertNotNull(id, "Element ID cannot be null");
-		assertNotNull(value, "Value to fill cannot be null");
+		Check.notNull(id, "Element ID cannot be null");
+		Check.notNull(value, "Value to fill cannot be null");
 		assertBrowserAvailable();
 		final String selector = "#" + id;
 		final var locator = page.locator(selector);
 		// Check element existence
-		assertTrue(locator.count() > 0,
-			"Element with ID '" + id + "' should exist before filling");
+		Check.condition(locator.count() > 0, "Element with ID '" + id + "' should exist before filling");
 		// Fill the field
 		page.fill(selector, value);
 		LOGGER.debug("Successfully filled field with ID '{}' with value: {}", id, value);
@@ -343,14 +337,12 @@ public class CBaseUITest {
 	protected int getGridFirstCell() {
 		final var grids = page.locator("vaadin-grid");
 		// Use proper assertions instead of fail()
-		assertTrue(grids.count() > 0,
-			"No grids found in view - expected at least one grid");
+		Check.condition(grids.count() > 0, "No grids found in view - expected at least one grid");
 		final var grid = grids.first();
 		final var gridCells = grid.locator("vaadin-grid-cell-content");
 		final int gridCellCount = gridCells.count();
 		// Use proper assertions with descriptive messages
-		assertTrue(gridCellCount >= 1,
-			"No grid cells found - expected at least one cell");
+		Check.condition(gridCellCount >= 1, "No grid cells found - expected at least one cell");
 		boolean emptyCells = false;
 		int firstDataCell = -1;
 
@@ -367,7 +359,7 @@ public class CBaseUITest {
 			}
 		}
 		// Validate that we found a data cell
-		assertTrue(firstDataCell >= 0, "No data cells found after empty cells");
+		Check.condition(firstDataCell >= 0, "No data cells found after empty cells");
 		return firstDataCell;
 	}
 
@@ -377,14 +369,12 @@ public class CBaseUITest {
 	protected int getGridRowCount() {
 		final var grids = page.locator("vaadin-grid");
 		// Use proper assertions instead of fail()
-		assertTrue(grids.count() > 0,
-			"No grids found in view - expected at least one grid");
+		Check.condition(grids.count() > 0, "No grids found in view - expected at least one grid");
 		final var grid = grids.first();
 		final var gridCells = grid.locator("vaadin-grid-cell-content");
 		final int gridCellCount = gridCells.count();
 		// Use proper assertions with descriptive messages
-		assertTrue(gridCellCount >= 1,
-			"No grid cells found - expected at least one cell");
+		Check.condition(gridCellCount >= 1, "No grid cells found - expected at least one cell");
 		int columns = 0;
 		boolean emptyCells = false;
 		int emptyCellCount = 0;
@@ -406,11 +396,11 @@ public class CBaseUITest {
 			}
 		}
 		// Validate column count before calculation
-		assertTrue(columns > 0, "No columns detected in grid");
+		Check.condition(columns > 0, "No columns detected in grid");
 		final int rowCount = (gridCellCount - emptyCellCount - columns) / columns;
 		LOGGER.debug("Grid has {} rows and {} columns", rowCount, columns);
 		// Ensure row count is reasonable
-		assertTrue(rowCount >= 0, "Invalid row count calculated: " + rowCount);
+		Check.condition(rowCount >= 0, "Invalid row count calculated: " + rowCount);
 		return rowCount;
 	}
 
@@ -420,7 +410,7 @@ public class CBaseUITest {
 	protected String getTextById(final String id) {
 		final String selector = "#" + id;
 		final Locator item = page.locator(selector);
-		assertTrue(item.count() > 0,
+		Check.condition(item.count() > 0,
 			"Element with ID '" + id + "' should exist before getting text");
 		final String text = item.textContent();
 		LOGGER.debug("Got text '{}' from element with ID: {}", text, id);
@@ -434,8 +424,7 @@ public class CBaseUITest {
 		try {
 			final String selector = "vaadin-grid-cell-content";
 			final var gridCells = page.locator(selector);
-			assertTrue(cellIndex < (gridCells.count() - gridFirstCellIndex),
-				"invalid grid cell index: " + cellIndex);
+			Check.condition(cellIndex < (gridCells.count() - gridFirstCellIndex), "invalid grid cell index: " + cellIndex);
 			gridCells.nth(gridFirstCellIndex + cellIndex).click();
 			wait_500();
 		} catch (final Exception e) {
@@ -476,11 +465,9 @@ public class CBaseUITest {
 	protected void navigateToViewByClass(final Class<?> viewClass) {
 		assertBrowserAvailable();
 		final Route routeAnnotation = viewClass.getAnnotation(Route.class);
-		assertTrue(routeAnnotation != null,
-			"Class " + viewClass.getName() + " must have a @Route annotation");
+		Check.condition(routeAnnotation != null, "Class " + viewClass.getName() + " must have a @Route annotation");
 		final String route = routeAnnotation.value().split("/")[0];
-		assertTrue(!route.isEmpty(),
-			"Route value must not be empty for class: " + viewClass.getName());
+		Check.condition(!route.isEmpty(), "Route value must not be empty for class: " + viewClass.getName());
 		String url = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
 		url += route.startsWith("/") ? route.substring(1) : route;
 		LOGGER.info("Navigating to view by class: {}", url);
@@ -489,7 +476,7 @@ public class CBaseUITest {
 		// Check if the view is loaded by looking for a specific element
 		final String viewSelector = "#pageid-" + route.replace("/", "-");
 		final Locator viewLocator = page.locator(viewSelector);
-		assertTrue(viewLocator.count() > 0, "View element with selector '" + viewSelector
+		Check.condition(viewLocator.count() > 0, "View element with selector '" + viewSelector
 			+ "' should exist after navigation");
 	}
 
@@ -499,10 +486,10 @@ public class CBaseUITest {
 	 */
 	protected void performLogin(final String username, final String password) {
 		// Input validation
-		assertNotNull(username, "Username cannot be null");
-		assertNotNull(password, "Password cannot be null");
-		assertFalse(username.trim().isEmpty(), "Username cannot be empty");
-		assertFalse(password.trim().isEmpty(), "Password cannot be empty");
+		Check.notNull(username, "Username cannot be null");
+		Check.notNull(password, "Password cannot be null");
+		Check.condition(!(username.trim().isEmpty()), "Username cannot be empty");
+		Check.condition(!(password.trim().isEmpty()), "Password cannot be empty");
 		LOGGER.debug("Performing login with username: {}", username);
 		// Fill login form - Playwright fill() returns void, so we can't check return
 		// value
@@ -535,13 +522,11 @@ public class CBaseUITest {
 		assertBrowserAvailable();
 		// First click on the user menu item to open the dropdown
 		clickById("user-menu-item");
-		assertTrue(waitForElementById("logout-menu-item", 2000),
-			"Logout menu item should be available after opening user menu");
+		Check.condition(waitForElementById("logout-menu-item", 2000), "Logout menu item should be available after opening user menu");
 		// Then click on the logout menu item
 		clickById("logout-menu-item");
 		wait_1000();
-		assertTrue(waitForElementById("custom-username-input", 5000),
-			"Should be redirected to login page after logout");
+		Check.condition(waitForElementById("custom-username-input", 5000), "Should be redirected to login page after logout");
 		LOGGER.info("✅ Logout completed successfully - redirected to login page");
 	}
 	// ========== Additional Playwright Testing Utilities ==========
@@ -970,8 +955,7 @@ public class CBaseUITest {
 				final int filteredRowCount = getGridRowCount();
 				LOGGER.debug("Filtered grid rows: {}", filteredRowCount);
 				// Verify search worked (filtered count should be <= initial count)
-				assertTrue(filteredRowCount <= initialRowCount,
-					"Search should filter results (filtered: " + filteredRowCount
+				Check.condition(filteredRowCount <= initialRowCount, "Search should filter results (filtered: " + filteredRowCount
 						+ ", initial: " + initialRowCount + ")");
 				// Clear search to verify all results return
 				searchFields.first().fill("");
@@ -979,8 +963,7 @@ public class CBaseUITest {
 				final int clearedRowCount = getGridRowCount();
 				LOGGER.debug("Cleared search grid rows: {}", clearedRowCount);
 				// After clearing, we should have same or more rows than filtered
-				assertTrue(clearedRowCount >= filteredRowCount,
-					"Clearing search should restore results");
+				Check.condition(clearedRowCount >= filteredRowCount, "Clearing search should restore results");
 				LOGGER.info("✅ Search functionality test completed successfully");
 			}
 			else {
@@ -1046,8 +1029,7 @@ public class CBaseUITest {
 		// Updated selector for CCustomLoginView - wait for username input field
 		final ElementHandle handler = page.waitForSelector("#custom-username-input",
 			new Page.WaitForSelectorOptions().setTimeout(10000));
-		assertNotNull(handler,
-			"Login screen did not load - username input field not found");
+		Check.notNull(handler, "Login screen did not load - username input field not found");
 	}
 
 	/**

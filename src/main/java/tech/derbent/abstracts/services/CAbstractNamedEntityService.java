@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.transaction.annotation.Transactional;
 
 import tech.derbent.abstracts.domains.CEntityNamed;
+import tech.derbent.abstracts.utils.Check;
 
 /**
  * CAbstractNamedEntityService - Abstract service class for entities that extend
@@ -22,10 +23,7 @@ public abstract class CAbstractNamedEntityService<
 	 * @throws IllegalArgumentException if the name is null or empty
 	 */
 	protected static void validateEntityName(final String name) {
-
-		if ((name == null) || name.trim().isEmpty()) {
-			throw new IllegalArgumentException("Entity name cannot be null or empty");
-		}
+		Check.notBlank(name, "Entity name cannot be null or empty");
 	}
 
 	/**
@@ -40,15 +38,9 @@ public abstract class CAbstractNamedEntityService<
 
 	@Transactional
 	public EntityClass createEntity(final String name) {
-
-		try {
-			final EntityClass entity = newEntity(name);
-			repository.saveAndFlush(entity);
-			return entity;
-		} catch (final Exception e) {
-			throw new RuntimeException(
-				"Failed to create instance of " + getEntityClass().getName(), e);
-		}
+		final EntityClass entity = newEntity(name);
+		repository.saveAndFlush(entity);
+		return entity;
 	}
 
 	/**
@@ -58,22 +50,10 @@ public abstract class CAbstractNamedEntityService<
 	 */
 	@Transactional (readOnly = true)
 	public boolean existsByName(final String name) {
-
-		if ((name == null) || name.trim().isEmpty()) {
-			LOGGER.warn("existsByName called with null or empty name for {}",
-				getClass().getSimpleName());
-			return false;
-		}
-
-		try {
-			final boolean exists = ((CAbstractNamedRepository<EntityClass>) repository)
-				.existsByNameIgnoreCase(name.trim());
-			return exists;
-		} catch (final Exception e) {
-			LOGGER.error("Error checking name existence '{}' in {}: {}", name,
-				getClass().getSimpleName(), e.getMessage(), e);
-			throw new RuntimeException("Failed to check name existence", e);
-		}
+		Check.notBlank(name, "Name cannot be null or empty");
+		
+		return ((CAbstractNamedRepository<EntityClass>) repository)
+			.existsByNameIgnoreCase(name.trim());
 	}
 
 	/**
@@ -83,23 +63,10 @@ public abstract class CAbstractNamedEntityService<
 	 */
 	@Transactional (readOnly = true)
 	public Optional<EntityClass> findByName(final String name) {
+		Check.notBlank(name, "Name cannot be null or empty");
 
-		if ((name == null) || name.trim().isEmpty()) {
-			LOGGER.warn("findByName called with null or empty name for {}",
-				getClass().getSimpleName());
-			return Optional.empty();
-		}
-
-		try {
-			final Optional<EntityClass> entity =
-				((CAbstractNamedRepository<EntityClass>) repository)
-					.findByNameIgnoreCase(name.trim());
-			return entity;
-		} catch (final Exception e) {
-			LOGGER.error("Error finding entity by name '{}' in {}: {}", name,
-				getClass().getSimpleName(), e.getMessage(), e);
-			throw new RuntimeException("Failed to find entity by name", e);
-		}
+		return ((CAbstractNamedRepository<EntityClass>) repository)
+			.findByNameIgnoreCase(name.trim());
 	}
 
 	/**
@@ -110,32 +77,21 @@ public abstract class CAbstractNamedEntityService<
 	 */
 	@Transactional (readOnly = true)
 	public boolean isNameUnique(final String name, final Long currentId) {
+		Check.notBlank(name, "Name cannot be null or empty");
 
-		if ((name == null) || name.trim().isEmpty()) {
-			LOGGER.warn("Name uniqueness check called with null or empty name for {}",
-				getClass().getSimpleName());
-			return false;
+		final Optional<EntityClass> existingEntity =
+			((CAbstractNamedRepository<EntityClass>) repository)
+				.findByNameIgnoreCase(name.trim());
+
+		if (existingEntity.isEmpty()) {
+			return true;
 		}
 
-		try {
-			final Optional<EntityClass> existingEntity =
-				((CAbstractNamedRepository<EntityClass>) repository)
-					.findByNameIgnoreCase(name.trim());
-
-			if (existingEntity.isEmpty()) {
-				return true;
-			}
-
-			// If we're updating an existing entity, check if it's the same entity
-			if ((currentId != null) && existingEntity.get().getId().equals(currentId)) {
-				return true;
-			}
-			return false;
-		} catch (final Exception e) {
-			LOGGER.error("Error checking name uniqueness for '{}' in {}: {}", name,
-				getClass().getSimpleName(), e.getMessage(), e);
-			throw new RuntimeException("Failed to check name uniqueness", e);
+		// If we're updating an existing entity, check if it's the same entity
+		if ((currentId != null) && existingEntity.get().getId().equals(currentId)) {
+			return true;
 		}
+		return false;
 	}
 
 	@Override
@@ -162,8 +118,7 @@ public abstract class CAbstractNamedEntityService<
 			if (!getEntityClass().isInstance(instance)) {
 				throw new IllegalStateException("Created object is not instance of T");
 			}
-			final EntityClass entity = ((EntityClass) instance);
-			return entity;
+			return ((EntityClass) instance);
 		} catch (final Exception e) {
 			throw new RuntimeException(
 				"Failed to create instance of " + getEntityClass().getName(), e);
