@@ -71,6 +71,8 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 	protected static final String LabelMinWidth_210PX = "210px";
 
 	private static CDataProviderResolver dataProviderResolver;
+	
+	private static ApplicationContext applicationContext;
 
 	/**
 	 * Builds a form using an enhanced binder for better error reporting.
@@ -333,6 +335,156 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		return comboBox;
 	}
 
+	/**
+	 * Creates a ComboBox for String fields with data provider configuration.
+	 * This method handles String fields that should be rendered as ComboBox instead of TextField
+	 * when metadata specifies a data provider.
+	 * @param field the field to create the ComboBox for
+	 * @param meta the metadata containing data provider configuration
+	 * @param binder the binder for form binding
+	 * @return configured ComboBox<String> component
+	 */
+	private static ComboBox<String> createStringComboBox(final Field field,
+		final MetaData meta, final CEnhancedBinder<?> binder) {
+		Check.notNull(field, "Field for String ComboBox creation");
+		Check.notNull(meta, "MetaData for String ComboBox creation");
+		Check.notNull(binder, "Binder for String ComboBox creation");
+		
+		LOGGER.debug("Creating String ComboBox for field: {}", field.getName());
+		final ComboBox<String> comboBox = new ComboBox<>();
+		
+		// Configure basic properties from metadata
+		comboBox.setLabel(meta.displayName());
+		comboBox.setPlaceholder(meta.placeholder());
+		comboBox.setAllowCustomValue(meta.allowCustomValue());
+		comboBox.setReadOnly(meta.comboboxReadOnly() || meta.readOnly());
+		
+		// Set width if specified
+		if (!meta.width().trim().isEmpty()) {
+			comboBox.setWidth(meta.width());
+		}
+		
+		// Resolve String data using data provider
+		List<String> items = resolveStringData(meta, field.getName());
+		comboBox.setItems(items);
+		LOGGER.debug("Resolved {} string items for field '{}'", items.size(), field.getName());
+		
+		// Handle clearOnEmptyData configuration
+		if (meta.clearOnEmptyData() && items.isEmpty()) {
+			comboBox.setValue(null);
+			LOGGER.debug("Cleared String ComboBox value for field '{}' due to empty data",
+				field.getName());
+		}
+		
+		// Handle default value
+		final boolean hasDefaultValue =
+			(meta.defaultValue() != null) && !meta.defaultValue().trim().isEmpty();
+		if (hasDefaultValue) {
+			// For String ComboBox, try to match default value exactly
+			if (items.contains(meta.defaultValue())) {
+				comboBox.setValue(meta.defaultValue());
+				LOGGER.debug("Set String ComboBox default value for field '{}': '{}'",
+					field.getName(), meta.defaultValue());
+			} else {
+				LOGGER.warn("Default value '{}' not found in items for String field '{}'",
+					meta.defaultValue(), field.getName());
+			}
+		} else if (meta.autoSelectFirst() && !items.isEmpty()) {
+			// Auto-select first item if configured
+			comboBox.setValue(items.get(0));
+			LOGGER.debug("Auto-selected first string item for field '{}': '{}'",
+				field.getName(), items.get(0));
+		}
+		
+		// Bind to field
+		safeBindComponentWithField(binder, comboBox, field, "String ComboBox");
+		return comboBox;
+	}
+	
+	/**
+	 * Resolves String data from data provider configuration.
+	 * This method attempts to call service methods that return List<String>.
+	 * @param meta the metadata containing data provider configuration
+	 * @param fieldName the field name for logging purposes
+	 * @return list of strings for the ComboBox, never null but may be empty
+	 */
+	private static List<String> resolveStringData(final MetaData meta, final String fieldName) {
+		// For basic implementation, return empty list if no applicationContext is available
+		if (applicationContext == null) {
+			LOGGER.warn("No Spring ApplicationContext available for String data resolution for field '{}'", fieldName);
+			return List.of();
+		}
+		
+		// Try to resolve data provider bean
+		String beanName = meta.dataProviderBean();
+		if ((beanName == null) || beanName.trim().isEmpty()) {
+			LOGGER.debug("No dataProviderBean specified for String field '{}'", fieldName);
+			return List.of();
+		}
+		
+		try {
+			// Get the service bean from Spring context
+			if (!applicationContext.containsBean(beanName)) {
+				LOGGER.warn("Data provider bean '{}' not found in Spring context for field '{}'", 
+					beanName, fieldName);
+				return List.of();
+			}
+			
+			Object serviceBean = applicationContext.getBean(beanName);
+			LOGGER.debug("Retrieved data provider bean '{}' for String field '{}'", beanName, fieldName);
+			
+			// Determine method name to call
+			String methodName = meta.dataProviderMethod();
+			if ((methodName == null) || methodName.trim().isEmpty()) {
+				methodName = "list";
+			}
+			
+			// Try to call the method
+			return callStringDataMethod(serviceBean, methodName, fieldName);
+			
+		} catch (Exception e) {
+			LOGGER.error("Error resolving String data for field '{}' from bean '{}': {}", 
+				fieldName, beanName, e.getMessage());
+			return List.of();
+		}
+	}
+	
+	/**
+	 * Calls a method on a service bean to retrieve String data.
+	 * @param serviceBean the service bean instance
+	 * @param methodName the method name to call
+	 * @param fieldName the field name for logging
+	 * @return list of strings from the method call
+	 */
+	@SuppressWarnings("unchecked")
+	private static List<String> callStringDataMethod(Object serviceBean, String methodName, String fieldName) {
+		try {
+			// Try to find and call the method
+			java.lang.reflect.Method method = serviceBean.getClass().getMethod(methodName);
+			Object result = method.invoke(serviceBean);
+			
+			if (result instanceof List) {
+				List<?> rawList = (List<?>) result;
+				// Convert to List<String> if possible
+				List<String> stringList = rawList.stream()
+					.filter(item -> item instanceof String)
+					.map(item -> (String) item)
+					.toList();
+				
+				LOGGER.debug("Successfully called method '{}' on bean for field '{}', returned {} string items",
+					methodName, fieldName, stringList.size());
+				return stringList;
+			} else {
+				LOGGER.warn("Method '{}' did not return a List for String field '{}'", methodName, fieldName);
+				return List.of();
+			}
+			
+		} catch (Exception e) {
+			LOGGER.debug("Failed to call method '{}' for String field '{}': {}", methodName, fieldName, e.getMessage());
+			return List.of();
+		}
+	}
+
 	private static Component createComponentForField(final Field field,
 		final MetaData meta, final CEnhancedBinder<?> binder) {
 		Component component = null;
@@ -342,12 +494,16 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		final Class<?> fieldType = field.getType();
 		Check.notNull(fieldType, "Field type for field " + field.getName());
 
-		// if metadata contains dataProviderBean, it is combobox
-		if ((meta.dataProviderBean() != null)
-			&& !meta.dataProviderBean().trim().isEmpty()) {
-			component = createComboBox(field, meta, binder);
+		// Check if field should be rendered as ComboBox based on metadata
+		final boolean hasDataProvider = (meta.dataProviderBean() != null)
+			&& !meta.dataProviderBean().trim().isEmpty();
+		
+		if (hasDataProvider && (fieldType == String.class)) {
+			// String field with data provider should be rendered as String ComboBox
+			component = createStringComboBox(field, meta, binder);
 		}
-		else if (CEntityDB.class.isAssignableFrom(fieldType)) {
+		else if (hasDataProvider || CEntityDB.class.isAssignableFrom(fieldType)) {
+			// Entity field or non-String field with data provider should be rendered as entity ComboBox
 			component = createComboBox(field, meta, binder);
 		}
 		else if ((fieldType == Boolean.class) || (fieldType == boolean.class)) {
@@ -873,6 +1029,8 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 	 */
 	@Override
 	public void setApplicationContext(final ApplicationContext context) {
+		// Store the application context for String data provider resolution
+		CEntityFormBuilder.applicationContext = context;
 
 		try {
 			CEntityFormBuilder.dataProviderResolver =
