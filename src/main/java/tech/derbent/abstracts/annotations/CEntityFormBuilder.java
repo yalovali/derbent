@@ -333,6 +333,56 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		return comboBox;
 	}
 
+	/**
+	 * Creates a ComboBox for String fields with data provider configuration.
+	 * This method handles String fields that should be rendered as ComboBox instead of TextField
+	 * when metadata specifies a data provider.
+	 * @param field the field to create the ComboBox for
+	 * @param meta the metadata containing data provider configuration
+	 * @param binder the binder for form binding
+	 * @return configured ComboBox<String> component
+	 */
+	private static ComboBox<String> createStringComboBox(final Field field,
+		final MetaData meta, final CEnhancedBinder<?> binder) {
+		Check.notNull(field, "Field for String ComboBox creation");
+		Check.notNull(meta, "MetaData for String ComboBox creation");
+		Check.notNull(binder, "Binder for String ComboBox creation");
+		
+		LOGGER.debug("Creating String ComboBox for field: {}", field.getName());
+		final ComboBox<String> comboBox = new ComboBox<>();
+		
+		// Configure basic properties from metadata
+		comboBox.setLabel(meta.displayName());
+		comboBox.setPlaceholder(meta.placeholder());
+		comboBox.setAllowCustomValue(meta.allowCustomValue());
+		comboBox.setReadOnly(meta.comboboxReadOnly() || meta.readOnly());
+		
+		// Set width if specified
+		if (!meta.width().trim().isEmpty()) {
+			comboBox.setWidth(meta.width());
+		}
+		
+		// TODO: Resolve String data using data provider
+		// For now, we'll provide an empty list to avoid null pointer exceptions
+		// This will be enhanced when CDataProviderResolver supports String types
+		LOGGER.warn("String ComboBox data provider resolution not yet implemented for field '{}'", 
+			field.getName());
+		comboBox.setItems(); // Empty list for now
+		
+		// Handle default value
+		final boolean hasDefaultValue =
+			(meta.defaultValue() != null) && !meta.defaultValue().trim().isEmpty();
+		if (hasDefaultValue) {
+			comboBox.setValue(meta.defaultValue());
+			LOGGER.debug("Set String ComboBox default value for field '{}': '{}'",
+				field.getName(), meta.defaultValue());
+		}
+		
+		// Bind to field
+		safeBindComponentWithField(binder, comboBox, field, "String ComboBox");
+		return comboBox;
+	}
+
 	private static Component createComponentForField(final Field field,
 		final MetaData meta, final CEnhancedBinder<?> binder) {
 		Component component = null;
@@ -342,12 +392,16 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		final Class<?> fieldType = field.getType();
 		Check.notNull(fieldType, "Field type for field " + field.getName());
 
-		// if metadata contains dataProviderBean, it is combobox
-		if ((meta.dataProviderBean() != null)
-			&& !meta.dataProviderBean().trim().isEmpty()) {
-			component = createComboBox(field, meta, binder);
+		// Check if field should be rendered as ComboBox based on metadata
+		final boolean hasDataProvider = (meta.dataProviderBean() != null)
+			&& !meta.dataProviderBean().trim().isEmpty();
+		
+		if (hasDataProvider && (fieldType == String.class)) {
+			// String field with data provider should be rendered as String ComboBox
+			component = createStringComboBox(field, meta, binder);
 		}
-		else if (CEntityDB.class.isAssignableFrom(fieldType)) {
+		else if (hasDataProvider || CEntityDB.class.isAssignableFrom(fieldType)) {
+			// Entity field or non-String field with data provider should be rendered as entity ComboBox
 			component = createComboBox(field, meta, binder);
 		}
 		else if ((fieldType == Boolean.class) || (fieldType == boolean.class)) {
