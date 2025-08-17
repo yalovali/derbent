@@ -99,9 +99,6 @@ public class CActivity extends CEntityOfProject<CActivity> implements CKanbanEnt
 		description = "Current status of the activity", hidden = false, order = 30,
 		dataProviderBean = "CActivityStatusService"
 	)
-	@tech.derbent.abstracts.annotations.ColorAwareComboBox (
-		roundedCorners = true, autoContrast = true
-	)
 	private CActivityStatus status;
 
 	@ManyToOne (fetch = FetchType.EAGER)

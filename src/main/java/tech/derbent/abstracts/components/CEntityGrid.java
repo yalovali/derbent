@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.function.ValueProvider;
 
-import tech.derbent.abstracts.annotations.ColorAwareGrid;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.views.CGrid;
 
@@ -83,7 +82,24 @@ public class CEntityGrid<EntityClass extends CEntityDB<EntityClass>> extends CGr
      */
     public <S extends CEntityDB<S>> Column<EntityClass> addColorAwareStatusColumn(
             final ValueProvider<EntityClass, S> statusProvider, final String header, final String key) {
-        return addColorAwareStatusColumn(statusProvider, header, key, null);
+        LOGGER.info("Adding color-aware status column: {} with enhanced color rendering", header);
+
+        final Column<EntityClass> column = addComponentColumn(entity -> {
+            final S status = statusProvider.apply(entity);
+            final CGridCell statusCell = new CGridCell();
+
+            // Apply default grid settings to the cell
+            statusCell.setAutoContrast(this.autoContrast);
+            // Configure icon display (always from grid setting)
+            statusCell.setShowIcon(this.showIcon);
+            statusCell.setStatusValue(status);
+            return statusCell;
+        }).setHeader(header).setWidth(WIDTH_REFERENCE).setFlexGrow(0).setSortable(true);
+
+        if (key != null) {
+            column.setKey(key);
+        }
+        return column;
     }
 
     /**
@@ -102,39 +118,16 @@ public class CEntityGrid<EntityClass extends CEntityDB<EntityClass>> extends CGr
      *            Optional annotation for styling configuration
      * @return The created column
      */
+    /**
+     * @deprecated Use addColorAwareStatusColumn(ValueProvider, String, String) instead. 
+     * ColorAwareGrid annotation is no longer used - all status columns are color-aware by default.
+     */
+    @Deprecated
     public <S extends CEntityDB<S>> Column<EntityClass> addColorAwareStatusColumn(
             final ValueProvider<EntityClass, S> statusProvider, final String header, final String key,
-            final ColorAwareGrid annotation) {
-        LOGGER.info("Adding color-aware status column: {} with enhanced color rendering", header);
-
-        // Configure styling from annotation if provided
-        if (annotation != null) {
-            this.roundedCorners = annotation.roundedCorners();
-            this.padding = annotation.padding();
-            this.autoContrast = annotation.autoContrast();
-            this.minWidth = annotation.minWidth();
-            this.centerAlign = annotation.centerAlign();
-            this.fontWeight = annotation.fontWeight();
-        }
-        final Column<EntityClass> column = addComponentColumn(entity -> {
-            final S status = statusProvider.apply(entity);
-            final CGridCell statusCell = new CGridCell();
-
-            // Configure styling from annotation if provided
-            if (annotation != null) {
-                // Apply annotation-based configuration to the cell
-                statusCell.setAutoContrast(this.autoContrast);
-            }
-            // Configure icon display (always from grid setting)
-            statusCell.setShowIcon(this.showIcon);
-            statusCell.setStatusValue(status);
-            return statusCell;
-        }).setHeader(header).setWidth(WIDTH_REFERENCE).setFlexGrow(0).setSortable(true);
-
-        if (key != null) {
-            column.setKey(key);
-        }
-        return column;
+            final Object annotation) {
+        // Ignore annotation parameter and delegate to the new method
+        return addColorAwareStatusColumn(statusProvider, header, key);
     }
 
     /**
