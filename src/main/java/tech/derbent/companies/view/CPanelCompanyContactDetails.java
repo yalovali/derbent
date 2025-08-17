@@ -7,23 +7,22 @@ import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
 
 /**
- * CPanelCompanyContactDetails - Panel for grouping contact information fields of CCompany
- * entity. Layer: View (MVC) Groups fields: address, phone, email, website
+ * CPanelCompanyContactDetails - Panel for grouping contact information fields of CCompany entity. Layer: View (MVC)
+ * Groups fields: address, phone, email, website
  */
 public class CPanelCompanyContactDetails extends CPanelCompanyBase {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public CPanelCompanyContactDetails(final CCompany currentEntity,
-		final CEnhancedBinder<CCompany> beanValidationBinder,
-		final CCompanyService entityService) {
-		super("Contact Details", currentEntity, beanValidationBinder, entityService);
-		initPanel();
-	}
+    public CPanelCompanyContactDetails(final CCompany currentEntity,
+            final CEnhancedBinder<CCompany> beanValidationBinder, final CCompanyService entityService) {
+        super("Contact Details", currentEntity, beanValidationBinder, entityService);
+        initPanel();
+    }
 
-	@Override
-	protected void updatePanelEntityFields() {
-		// Contact Details fields - communication and location information
-		setEntityFields(List.of("address", "phone", "email", "website"));
-	}
+    @Override
+    protected void updatePanelEntityFields() {
+        // Contact Details fields - communication and location information
+        setEntityFields(List.of("address", "phone", "email", "website"));
+    }
 }

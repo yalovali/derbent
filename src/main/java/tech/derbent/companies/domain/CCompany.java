@@ -138,5 +138,7 @@ public class CCompany extends CEntityNamed<CCompany> {
         return "#6c757d"; // Gray color for company entities
     }
 
-    public static String getIconFilename() { return "vaadin:building"; }
+    public static String getIconFilename() {
+        return "vaadin:building";
+    }
 }

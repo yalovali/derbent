@@ -10,9 +10,8 @@ public class CPanelScreenRelatedEntities extends CPanelScreenBase {
 
     private static final long serialVersionUID = 1L;
 
-    public CPanelScreenRelatedEntities(final CScreen currentEntity,
-                                      final CEnhancedBinder<CScreen> beanValidationBinder,
-                                      final CScreenService entityService) {
+    public CPanelScreenRelatedEntities(final CScreen currentEntity, final CEnhancedBinder<CScreen> beanValidationBinder,
+            final CScreenService entityService) {
         super("Related Entities", currentEntity, beanValidationBinder, entityService);
         initPanel();
     }

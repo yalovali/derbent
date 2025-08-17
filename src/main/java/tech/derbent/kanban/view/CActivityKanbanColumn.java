@@ -66,7 +66,7 @@ public class CActivityKanbanColumn extends Div {
      * @param onActivityDropped
      *            callback function to handle dropped activities
      */
-    public CActivityKanbanColumn(final CActivityStatus activityStatus, final List<CActivity> activities, 
+    public CActivityKanbanColumn(final CActivityStatus activityStatus, final List<CActivity> activities,
             final Consumer<CActivity> onActivityDropped) {
         LOGGER.debug("Creating CActivityKanbanColumn for status: {} with {} activities",
                 activityStatus != null ? activityStatus.getName() : "null", activities != null ? activities.size() : 0);
@@ -153,10 +153,10 @@ public class CActivityKanbanColumn extends Div {
         LOGGER.debug("Initializing column layout for status: {}", activityStatus.getName());
         // Set CSS class for styling
         addClassName("kanban-column");
-        
+
         // Configure drag and drop
         setupDropTarget();
-        
+
         // Create header container
         final Div headerContainer = new Div();
         headerContainer.addClassName("kanban-column-header");
@@ -185,28 +185,28 @@ public class CActivityKanbanColumn extends Div {
      */
     private void setupDropTarget() {
         LOGGER.debug("Setting up drop target for column: {}", activityStatus.getName());
-        
+
         final DropTarget<CActivityKanbanColumn> dropTarget = DropTarget.create(this);
         dropTarget.setDropEffect(DropEffect.MOVE);
-        
+
         // Add drop listener to handle the actual drop
         dropTarget.addDropListener(event -> {
             LOGGER.debug("Drop event in column: {}", activityStatus.getName());
-            
+
             // Get the dragged activity from the drag source
-            if (event.getDragSourceComponent().isPresent() && 
-                event.getDragSourceComponent().get() instanceof CActivityCard) {
-                
+            if (event.getDragSourceComponent().isPresent()
+                    && event.getDragSourceComponent().get() instanceof CActivityCard) {
+
                 final CActivityCard draggedCard = (CActivityCard) event.getDragSourceComponent().get();
                 final CActivity droppedActivity = draggedCard.getActivity();
-                
-                LOGGER.info("Activity dropped: {} into status: {}", 
-                    droppedActivity.getName(), activityStatus.getName());
-                
+
+                LOGGER.info("Activity dropped: {} into status: {}", droppedActivity.getName(),
+                        activityStatus.getName());
+
                 // Only process if the activity is being dropped into a different status
                 if (!activityStatus.equals(droppedActivity.getStatus())) {
                     droppedActivity.setStatus(activityStatus);
-                    
+
                     // Call the callback if provided
                     if (onActivityDropped != null) {
                         onActivityDropped.accept(droppedActivity);

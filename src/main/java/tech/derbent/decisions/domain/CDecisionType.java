@@ -118,5 +118,7 @@ public class CDecisionType extends CTypeEntity<CDecisionType> {
         return "#dc3545"; // Red color for decision type entities
     }
 
-    public static String getIconFilename() { return "vaadin:tags"; }
+    public static String getIconFilename() {
+        return "vaadin:tags";
+    }
 }

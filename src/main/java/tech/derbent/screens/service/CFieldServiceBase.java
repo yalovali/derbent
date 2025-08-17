@@ -17,48 +17,49 @@ import tech.derbent.users.domain.CUser;
 
 public class CFieldServiceBase {
 
-	public static Class<?> getEntityClass(final String entityType) {
+    public static Class<?> getEntityClass(final String entityType) {
 
-		try {
+        try {
 
-			switch (entityType) {
-			case "CActivity":
-				return CActivity.class;
-			case "CMeeting":
-				return CMeeting.class;
-			case "CRisk":
-				return CRisk.class;
-			case "CProject":
-				return CProject.class;
-			case "CUser":
-				return CUser.class;
-			case "CActivityType":
-				return CActivityType.class;
-			case "CActivityStatus":
-				return CActivityStatus.class;
-			case "CActivityPriority":
-				return CActivityPriority.class;
-			case "CMeetingType":
-				return CMeetingType.class;
-			case "CMeetingStatus":
-				return CMeetingStatus.class;
-			case "CRiskStatus":
-				return CRiskStatus.class;
-			case "CRiskSeverity":
-				return CRiskSeverity.class;
-			default:
-				return null;
-			}
-		} catch (final Exception e) {
-			return null;
-		}
-	}
+            switch (entityType) {
+            case "CActivity":
+                return CActivity.class;
+            case "CMeeting":
+                return CMeeting.class;
+            case "CRisk":
+                return CRisk.class;
+            case "CProject":
+                return CProject.class;
+            case "CUser":
+                return CUser.class;
+            case "CActivityType":
+                return CActivityType.class;
+            case "CActivityStatus":
+                return CActivityStatus.class;
+            case "CActivityPriority":
+                return CActivityPriority.class;
+            case "CMeetingType":
+                return CMeetingType.class;
+            case "CMeetingStatus":
+                return CMeetingStatus.class;
+            case "CRiskStatus":
+                return CRiskStatus.class;
+            case "CRiskSeverity":
+                return CRiskSeverity.class;
+            default:
+                return null;
+            }
+        } catch (final Exception e) {
+            return null;
+        }
+    }
 
-	/**
-	 * Get available entity types for screen configuration.
-	 * @return list of entity types
-	 */
-	public List<String> getAvailableEntityTypes() {
-		return List.of("CActivity", "CMeeting", "CRisk", "CProject", "CUser");
-	}
+    /**
+     * Get available entity types for screen configuration.
+     * 
+     * @return list of entity types
+     */
+    public List<String> getAvailableEntityTypes() {
+        return List.of("CActivity", "CMeeting", "CRisk", "CProject", "CUser");
+    }
 }

@@ -8,8 +8,8 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.CommandLineRunner;
 
 /**
- * Test configuration to override beans that should not run during UI tests.
- * This prevents sample data initialization and other startup processes.
+ * Test configuration to override beans that should not run during UI tests. This prevents sample data initialization
+ * and other startup processes.
  */
 @TestConfiguration
 @Profile("uitest")
@@ -25,12 +25,12 @@ public class CUITestConfiguration {
             // Do nothing - prevents any ApplicationRunner from executing
         };
     }
-    
+
     /**
      * Override any CommandLineRunner beans to prevent initialization
      */
     @Bean
-    @Primary  
+    @Primary
     public CommandLineRunner noOpCommandLineRunner() {
         return args -> {
             // Do nothing - prevents any CommandLineRunner from executing

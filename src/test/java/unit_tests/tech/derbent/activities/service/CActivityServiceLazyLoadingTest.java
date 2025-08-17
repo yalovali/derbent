@@ -14,33 +14,33 @@ import tech.derbent.activities.service.CActivityService;
 import tech.derbent.projects.domain.CProject;
 
 /**
- * Test class for CActivityService lazy loading functionality. Specifically tests the fix
- * for LazyInitializationException with CActivityType.
+ * Test class for CActivityService lazy loading functionality. Specifically tests the fix for
+ * LazyInitializationException with CActivityType.
  */
 class CActivityServiceLazyLoadingTest {
 
-	@Mock
-	private CActivityRepository activityRepository;
+    @Mock
+    private CActivityRepository activityRepository;
 
-	@Mock
-	private Clock clock;
+    @Mock
+    private Clock clock;
 
-	private CActivityService activityService;
+    private CActivityService activityService;
 
-	@BeforeEach
-	void setUp() {
-		MockitoAnnotations.openMocks(this);
-		activityService = new CActivityService(activityRepository, clock);
-		new CProject("Test Project");
-	}
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        activityService = new CActivityService(activityRepository, clock);
+        new CProject("Test Project");
+    }
 
-	@Test
-	void testInitializeLazyFieldsHandlesNullEntity() {
-		// When & Then - Should not throw any exception
-		assertDoesNotThrow(() -> {
-			// The method is inherited from the base class and uses generic type Just
-			// verify the service handles null entity gracefully
-			activityService.getById(null);
-		});
-	}
+    @Test
+    void testInitializeLazyFieldsHandlesNullEntity() {
+        // When & Then - Should not throw any exception
+        assertDoesNotThrow(() -> {
+            // The method is inherited from the base class and uses generic type Just
+            // verify the service handles null entity gracefully
+            activityService.getById(null);
+        });
+    }
 }

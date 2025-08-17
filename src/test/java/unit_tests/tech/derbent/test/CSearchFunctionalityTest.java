@@ -8,8 +8,7 @@ import org.junit.jupiter.api.Test;
 import tech.derbent.projects.domain.CProject;
 
 /**
- * CSearchFunctionalityTest - Unit tests for search functionality.
- * Layer: Test
+ * CSearchFunctionalityTest - Unit tests for search functionality. Layer: Test
  * 
  * Tests the search interface implementation and basic search behavior.
  */
@@ -33,11 +32,11 @@ class CSearchFunctionalityTest {
     void testSearchByName() {
         // Test exact name match
         assertTrue(project.matches("Test Project"));
-        
+
         // Test partial name match
         assertTrue(project.matches("Test"));
         assertTrue(project.matches("Project"));
-        
+
         // Test case insensitive match
         assertTrue(project.matches("test"));
         assertTrue(project.matches("PROJECT"));
@@ -48,12 +47,12 @@ class CSearchFunctionalityTest {
     void testSearchByDescription() {
         // Test exact description match
         assertTrue(project.matches("This is a test project for search functionality"));
-        
+
         // Test partial description match
         assertTrue(project.matches("test project"));
         assertTrue(project.matches("search functionality"));
         assertTrue(project.matches("functionality"));
-        
+
         // Test case insensitive match
         assertTrue(project.matches("SEARCH"));
         assertTrue(project.matches("Test Project"));
@@ -63,7 +62,7 @@ class CSearchFunctionalityTest {
     void testSearchWithNullOrEmpty() {
         // Null search should match all
         assertTrue(project.matches(null));
-        
+
         // Empty search should match all
         assertTrue(project.matches(""));
         assertTrue(project.matches("   "));
@@ -82,11 +81,11 @@ class CSearchFunctionalityTest {
         // Create project with null description
         CProject projectWithNullDesc = new CProject("Test Project");
         // Description is null by default
-        
+
         // Should still match by name
         assertTrue(projectWithNullDesc.matches("Test"));
         assertTrue(projectWithNullDesc.matches("Project"));
-        
+
         // Should not match description search
         assertFalse(projectWithNullDesc.matches("description"));
     }
@@ -102,11 +101,11 @@ class CSearchFunctionalityTest {
         } catch (Exception e) {
             fail("Could not set ID for testing: " + e.getMessage());
         }
-        
+
         // Should match by ID
         assertTrue(project.matches("123"));
         assertTrue(project.matches("12"));
-        
+
         // Should not match non-existent ID
         assertFalse(project.matches("456"));
     }

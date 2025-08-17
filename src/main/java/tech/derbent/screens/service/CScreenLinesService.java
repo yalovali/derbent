@@ -29,7 +29,9 @@ public class CScreenLinesService extends CAbstractService<CScreenLines> {
 
     /**
      * Find screen lines by screen ordered by line order.
-     * @param screen the screen
+     * 
+     * @param screen
+     *            the screen
      * @return list of screen lines ordered by line order
      */
     @Transactional(readOnly = true)
@@ -39,7 +41,9 @@ public class CScreenLinesService extends CAbstractService<CScreenLines> {
 
     /**
      * Find active screen lines by screen ordered by line order.
-     * @param screen the screen
+     * 
+     * @param screen
+     *            the screen
      * @return list of active screen lines ordered by line order
      */
     @Transactional(readOnly = true)
@@ -49,7 +53,9 @@ public class CScreenLinesService extends CAbstractService<CScreenLines> {
 
     /**
      * Get the next available line order for a screen.
-     * @param screen the screen
+     * 
+     * @param screen
+     *            the screen
      * @return the next line order number
      */
     public Integer getNextLineOrder(final CScreen screen) {
@@ -58,7 +64,9 @@ public class CScreenLinesService extends CAbstractService<CScreenLines> {
 
     /**
      * Count the number of lines for a screen.
-     * @param screen the screen
+     * 
+     * @param screen
+     *            the screen
      * @return the count of lines
      */
     public Long countByScreen(final CScreen screen) {
@@ -67,9 +75,13 @@ public class CScreenLinesService extends CAbstractService<CScreenLines> {
 
     /**
      * Create a new screen line with default values.
-     * @param screen the parent screen
-     * @param fieldCaption the field caption
-     * @param entityFieldName the entity field name
+     * 
+     * @param screen
+     *            the parent screen
+     * @param fieldCaption
+     *            the field caption
+     * @param entityFieldName
+     *            the entity field name
      * @return the new screen line
      */
     public CScreenLines newEntity(final CScreen screen, final String fieldCaption, final String entityFieldName) {
@@ -83,7 +95,9 @@ public class CScreenLinesService extends CAbstractService<CScreenLines> {
 
     /**
      * Move a screen line up in the order.
-     * @param screenLine the screen line to move up
+     * 
+     * @param screenLine
+     *            the screen line to move up
      */
     @Transactional
     public void moveLineUp(final CScreenLines screenLine) {
@@ -96,10 +110,10 @@ public class CScreenLinesService extends CAbstractService<CScreenLines> {
                     final CScreenLines previousLine = lines.get(i - 1);
                     final Integer currentOrder = screenLine.getLineOrder();
                     final Integer previousOrder = previousLine.getLineOrder();
-                    
+
                     screenLine.setLineOrder(previousOrder);
                     previousLine.setLineOrder(currentOrder);
-                    
+
                     save(screenLine);
                     save(previousLine);
                     break;
@@ -110,7 +124,9 @@ public class CScreenLinesService extends CAbstractService<CScreenLines> {
 
     /**
      * Move a screen line down in the order.
-     * @param screenLine the screen line to move down
+     * 
+     * @param screenLine
+     *            the screen line to move down
      */
     @Transactional
     public void moveLineDown(final CScreenLines screenLine) {
@@ -121,10 +137,10 @@ public class CScreenLinesService extends CAbstractService<CScreenLines> {
                 final CScreenLines nextLine = lines.get(i + 1);
                 final Integer currentOrder = screenLine.getLineOrder();
                 final Integer nextOrder = nextLine.getLineOrder();
-                
+
                 screenLine.setLineOrder(nextOrder);
                 nextLine.setLineOrder(currentOrder);
-                
+
                 save(screenLine);
                 save(nextLine);
                 break;
@@ -134,7 +150,9 @@ public class CScreenLinesService extends CAbstractService<CScreenLines> {
 
     /**
      * Reorder all lines for a screen to ensure sequential numbering.
-     * @param screen the screen to reorder lines for
+     * 
+     * @param screen
+     *            the screen to reorder lines for
      */
     @Transactional
     public void reorderLines(final CScreen screen) {

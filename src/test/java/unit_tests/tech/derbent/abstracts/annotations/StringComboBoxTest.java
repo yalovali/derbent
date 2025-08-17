@@ -22,25 +22,25 @@ class StringComboBoxTest {
      * Test entity with String field that should be rendered as ComboBox
      */
     public static class TestEntity extends CEntityDB<TestEntity> {
-        
-        @MetaData(
-            displayName = "String Category",
-            required = true,
-            order = 1,
-            dataProviderBean = "someService"  // This will cause the issue
+
+        @MetaData(displayName = "String Category", required = true, order = 1, dataProviderBean = "someService" // This will cause the issue
         )
         private String category;
 
-        public String getCategory() { return category; }
-        public void setCategory(String category) { this.category = category; }
+        public String getCategory() {
+            return category;
+        }
+
+        public void setCategory(String category) {
+            this.category = category;
+        }
     }
 
     @Test
     @DisplayName("Should create String ComboBox for String field with dataProviderBean")
     void testStringFieldWithDataProvider() {
         // Given
-        final CEnhancedBinder<TestEntity> binder = 
-            CBinderFactory.createEnhancedBinder(TestEntity.class);
+        final CEnhancedBinder<TestEntity> binder = CBinderFactory.createEnhancedBinder(TestEntity.class);
 
         // When
         Div form = null;
@@ -48,7 +48,7 @@ class StringComboBoxTest {
         try {
             form = CEntityFormBuilder.buildForm(TestEntity.class, binder, null);
             System.out.println("Form created successfully!");
-            
+
             // Print out what components were created
             form.getChildren().forEach(child -> {
                 System.out.println("Child component: " + child.getClass().getSimpleName());
@@ -63,7 +63,7 @@ class StringComboBoxTest {
                     });
                 });
             });
-            
+
         } catch (Exception e) {
             caughtException = e;
             System.out.println("Exception caught: " + e.getClass().getSimpleName() + " - " + e.getMessage());

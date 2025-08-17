@@ -75,8 +75,6 @@ public class CMeetingStatus extends CStatus<CMeetingStatus> implements CKanbanSt
         this.finalStatus = finalStatus;
     }
 
-
-
     @Override
     public String toString() {
         return getName() != null ? getName() : super.toString();
@@ -86,5 +84,7 @@ public class CMeetingStatus extends CStatus<CMeetingStatus> implements CKanbanSt
         return "#28a745"; // Green color for meeting status entities
     }
 
-    public static String getIconFilename() { return "vaadin:flag"; }
+    public static String getIconFilename() {
+        return "vaadin:flag";
+    }
 }

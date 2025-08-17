@@ -18,190 +18,208 @@ import tech.derbent.comments.domain.CCommentPriority;
 import tech.derbent.users.domain.CUser;
 
 /**
- * CCommentService - Service class for CComment entities. Layer: Service (MVC) Provides
- * business logic operations for comment management including: - CRUD operations -
- * Activity-based comment queries - Project-based comment queries - Author-based comment
- * queries - Comment creation with validation - Data provider functionality for UI
- * components
+ * CCommentService - Service class for CComment entities. Layer: Service (MVC) Provides business logic operations for
+ * comment management including: - CRUD operations - Activity-based comment queries - Project-based comment queries -
+ * Author-based comment queries - Comment creation with validation - Data provider functionality for UI components
  */
 @Service
-@PreAuthorize ("isAuthenticated()")
-@Transactional (readOnly = true)
+@PreAuthorize("isAuthenticated()")
+@Transactional(readOnly = true)
 public class CCommentService extends CAbstractService<CComment> {
 
-	public CCommentService(final CCommentRepository repository,
-		final CCommentPriorityService commentPriorityService, final Clock clock) {
-		super(repository, clock);
-	}
+    public CCommentService(final CCommentRepository repository, final CCommentPriorityService commentPriorityService,
+            final Clock clock) {
+        super(repository, clock);
+    }
 
-	@PreAuthorize ("permitAll()")
-	public long countByActivity(final CActivity activity) {
-		Check.notNull(activity, "Activity cannot be null");
-		return ((CCommentRepository) repository).countByActivity(activity);
-	}
+    @PreAuthorize("permitAll()")
+    public long countByActivity(final CActivity activity) {
+        Check.notNull(activity, "Activity cannot be null");
+        return ((CCommentRepository) repository).countByActivity(activity);
+    }
 
-	@Transactional
-	public CComment createComment(final String commentText, final CActivity activity,
-		final CUser author) {
-		Check.notBlank(commentText, "Comment text cannot be null or empty");
-		Check.notNull(activity, "Activity cannot be null");
-		Check.notNull(author, "Author cannot be null");
-		
-		final CComment comment = new CComment(commentText, activity, author);
-		return save(comment);
-	}
+    @Transactional
+    public CComment createComment(final String commentText, final CActivity activity, final CUser author) {
+        Check.notBlank(commentText, "Comment text cannot be null or empty");
+        Check.notNull(activity, "Activity cannot be null");
+        Check.notNull(author, "Author cannot be null");
 
-	/**
-	 * Creates a new comment with priority.
-	 * @param commentText the comment content text
-	 * @param activity    the activity this comment belongs to
-	 * @param author      the user who created this comment
-	 * @param priority    the priority level of this comment
-	 * @return the created comment
-	 */
-	@Transactional
-	public CComment createComment(final String commentText, final CActivity activity,
-		final CUser author, final CCommentPriority priority) {
-		Check.notBlank(commentText, "Comment text cannot be null or empty");
-		Check.notNull(activity, "Activity cannot be null");
-		Check.notNull(author, "Author cannot be null");
-		
-		final CComment comment = new CComment(commentText, activity, author, priority);
-		return save(comment);
-	}
+        final CComment comment = new CComment(commentText, activity, author);
+        return save(comment);
+    }
 
-	/**
-	 * Finds all comments for a specific activity, ordered by event date (chronological).
-	 * @param activity the activity
-	 * @return list of comments for the activity ordered by event date
-	 */
-	@PreAuthorize ("permitAll()")
-	public List<CComment> findByActivityOrderByEventDateAsc(final CActivity activity) {
-		Check.notNull(activity, "Activity cannot be null");
-		return ((CCommentRepository) repository)
-			.findByActivityOrderByEventDateAsc(activity);
-	}
+    /**
+     * Creates a new comment with priority.
+     * 
+     * @param commentText
+     *            the comment content text
+     * @param activity
+     *            the activity this comment belongs to
+     * @param author
+     *            the user who created this comment
+     * @param priority
+     *            the priority level of this comment
+     * @return the created comment
+     */
+    @Transactional
+    public CComment createComment(final String commentText, final CActivity activity, final CUser author,
+            final CCommentPriority priority) {
+        Check.notBlank(commentText, "Comment text cannot be null or empty");
+        Check.notNull(activity, "Activity cannot be null");
+        Check.notNull(author, "Author cannot be null");
 
-	/**
-	 * Finds all comments for a specific activity with pagination.
-	 * @param activity the activity
-	 * @param pageable pagination information
-	 * @return page of comments for the activity ordered by event date
-	 */
-	@PreAuthorize ("permitAll()")
-	public Page<CComment> findByActivityOrderByEventDateAsc(final CActivity activity,
-		final Pageable pageable) {
-		Check.notNull(activity, "Activity cannot be null");
-		return ((CCommentRepository) repository)
-			.findByActivityOrderByEventDateAsc(activity, pageable);
-	}
+        final CComment comment = new CComment(commentText, activity, author, priority);
+        return save(comment);
+    }
 
-	/**
-	 * Finds all comments for an activity with eagerly loaded relationships.
-	 * @param activity the activity
-	 * @return list of comments with loaded relationships ordered by event date
-	 */
-	@PreAuthorize ("permitAll()")
-	public List<CComment> findByActivityWithRelationships(final CActivity activity) {
-		LOGGER.info("findByActivityWithRelationships called with activity: {}", activity);
+    /**
+     * Finds all comments for a specific activity, ordered by event date (chronological).
+     * 
+     * @param activity
+     *            the activity
+     * @return list of comments for the activity ordered by event date
+     */
+    @PreAuthorize("permitAll()")
+    public List<CComment> findByActivityOrderByEventDateAsc(final CActivity activity) {
+        Check.notNull(activity, "Activity cannot be null");
+        return ((CCommentRepository) repository).findByActivityOrderByEventDateAsc(activity);
+    }
 
-		if (activity == null) {
-			LOGGER.warn("findByActivityOrderByEventDateAsc called with null activity");
-			return List.of();
-		}
-		return ((CCommentRepository) repository)
-			.findByActivityOrderByEventDateAsc(activity);
-	}
+    /**
+     * Finds all comments for a specific activity with pagination.
+     * 
+     * @param activity
+     *            the activity
+     * @param pageable
+     *            pagination information
+     * @return page of comments for the activity ordered by event date
+     */
+    @PreAuthorize("permitAll()")
+    public Page<CComment> findByActivityOrderByEventDateAsc(final CActivity activity, final Pageable pageable) {
+        Check.notNull(activity, "Activity cannot be null");
+        return ((CCommentRepository) repository).findByActivityOrderByEventDateAsc(activity, pageable);
+    }
 
-	/**
-	 * Finds all comments by a specific author, ordered by event date (newest first).
-	 * @param author the comment author
-	 * @return list of comments by the author ordered by event date
-	 */
-	@PreAuthorize ("permitAll()")
-	public List<CComment> findByAuthorOrderByEventDateDesc(final CUser author) {
-		LOGGER.info("findByAuthorOrderByEventDateDesc called with author: {}", author);
+    /**
+     * Finds all comments for an activity with eagerly loaded relationships.
+     * 
+     * @param activity
+     *            the activity
+     * @return list of comments with loaded relationships ordered by event date
+     */
+    @PreAuthorize("permitAll()")
+    public List<CComment> findByActivityWithRelationships(final CActivity activity) {
+        LOGGER.info("findByActivityWithRelationships called with activity: {}", activity);
 
-		if (author == null) {
-			LOGGER.warn("findByAuthorOrderByEventDateDesc called with null author");
-			return List.of();
-		}
-		return ((CCommentRepository) repository).findByAuthorOrderByEventDateDesc(author);
-	}
+        if (activity == null) {
+            LOGGER.warn("findByActivityOrderByEventDateAsc called with null activity");
+            return List.of();
+        }
+        return ((CCommentRepository) repository).findByActivityOrderByEventDateAsc(activity);
+    }
 
-	/**
-	 * Finds important comments for an activity.
-	 * @param activity the activity
-	 * @return list of important comments for the activity ordered by event date
-	 */
-	@PreAuthorize ("permitAll()")
-	public List<CComment> findImportantByActivity(final CActivity activity) {
-		LOGGER.info("findImportantByActivity called with activity: {}", activity);
+    /**
+     * Finds all comments by a specific author, ordered by event date (newest first).
+     * 
+     * @param author
+     *            the comment author
+     * @return list of comments by the author ordered by event date
+     */
+    @PreAuthorize("permitAll()")
+    public List<CComment> findByAuthorOrderByEventDateDesc(final CUser author) {
+        LOGGER.info("findByAuthorOrderByEventDateDesc called with author: {}", author);
 
-		if (activity == null) {
-			LOGGER.warn("findImportantByActivity called with null activity");
-			return List.of();
-		}
-		return ((CCommentRepository) repository).findImportantByActivity(activity);
-	}
+        if (author == null) {
+            LOGGER.warn("findByAuthorOrderByEventDateDesc called with null author");
+            return List.of();
+        }
+        return ((CCommentRepository) repository).findByAuthorOrderByEventDateDesc(author);
+    }
 
-	/**
-	 * Overrides the base get method to eagerly load relationships. This prevents
-	 * LazyInitializationException when the entity is used in UI components.
-	 */
-	@Override
-	public Optional<CComment> getById(final Long id) {
-		LOGGER.info("get called with id: {}", id);
+    /**
+     * Finds important comments for an activity.
+     * 
+     * @param activity
+     *            the activity
+     * @return list of important comments for the activity ordered by event date
+     */
+    @PreAuthorize("permitAll()")
+    public List<CComment> findImportantByActivity(final CActivity activity) {
+        LOGGER.info("findImportantByActivity called with activity: {}", activity);
 
-		if (id == null) {
-			LOGGER.warn("get called with null id");
-			return Optional.empty();
-		}
-		return repository.findById(id);
-	}
+        if (activity == null) {
+            LOGGER.warn("findImportantByActivity called with null activity");
+            return List.of();
+        }
+        return ((CCommentRepository) repository).findImportantByActivity(activity);
+    }
 
-	@Override
-	protected Class<CComment> getEntityClass() { return CComment.class; }
+    /**
+     * Overrides the base get method to eagerly load relationships. This prevents LazyInitializationException when the
+     * entity is used in UI components.
+     */
+    @Override
+    public Optional<CComment> getById(final Long id) {
+        LOGGER.info("get called with id: {}", id);
 
-	/**
-	 * Enhanced initialization of lazy-loaded fields specific to Comment entities. Based
-	 * on CActivityService implementation style.
-	 * @param entity the comment entity to initialize
-	 */
-	@Override
-	public void initializeLazyFields(final CComment entity) {
-		Check.notNull(entity, "Comment entity cannot be null");
+        if (id == null) {
+            LOGGER.warn("get called with null id");
+            return Optional.empty();
+        }
+        return repository.findById(id);
+    }
 
-		super.initializeLazyFields(entity);
-		initializeLazyRelationship(entity.getAuthor());
-		initializeLazyRelationship(entity.getActivity());
-		initializeLazyRelationship(entity.getPriority());
-	}
+    @Override
+    protected Class<CComment> getEntityClass() {
+        return CComment.class;
+    }
 
-	/**
-	 * Toggles the important flag of a comment.
-	 * @param comment the comment to toggle
-	 * @return the updated comment
-	 */
-	@Transactional
-	public CComment toggleImportant(final CComment comment) {
-		Check.notNull(comment, "Comment cannot be null");
-		comment.setImportant(!comment.isImportant());
-		return save(comment);
-	}
+    /**
+     * Enhanced initialization of lazy-loaded fields specific to Comment entities. Based on CActivityService
+     * implementation style.
+     * 
+     * @param entity
+     *            the comment entity to initialize
+     */
+    @Override
+    public void initializeLazyFields(final CComment entity) {
+        Check.notNull(entity, "Comment entity cannot be null");
 
-	/**
-	 * Updates comment text.
-	 * @param comment the comment to update
-	 * @param newText the new comment text
-	 * @return the updated comment
-	 */
-	@Transactional
-	public CComment updateCommentText(final CComment comment, final String newText) {
-		Check.notNull(comment, "Comment cannot be null");
-		Check.notBlank(newText, "Comment text cannot be null or empty");
-		
-		comment.setCommentText(newText);
-		return save(comment);
-	}
+        super.initializeLazyFields(entity);
+        initializeLazyRelationship(entity.getAuthor());
+        initializeLazyRelationship(entity.getActivity());
+        initializeLazyRelationship(entity.getPriority());
+    }
+
+    /**
+     * Toggles the important flag of a comment.
+     * 
+     * @param comment
+     *            the comment to toggle
+     * @return the updated comment
+     */
+    @Transactional
+    public CComment toggleImportant(final CComment comment) {
+        Check.notNull(comment, "Comment cannot be null");
+        comment.setImportant(!comment.isImportant());
+        return save(comment);
+    }
+
+    /**
+     * Updates comment text.
+     * 
+     * @param comment
+     *            the comment to update
+     * @param newText
+     *            the new comment text
+     * @return the updated comment
+     */
+    @Transactional
+    public CComment updateCommentText(final CComment comment, final String newText) {
+        Check.notNull(comment, "Comment cannot be null");
+        Check.notBlank(newText, "Comment text cannot be null or empty");
+
+        comment.setCommentText(newText);
+        return save(comment);
+    }
 }

@@ -79,10 +79,10 @@ public class CActivityCard extends Div {
         // Set CSS class for styling
         addClassName("activity-card");
         addClassName("kanban-card-wrapper");
-        
+
         // Configure drag and drop
         setupDragAndDrop();
-        
+
         // Create title element
         titleElement = new H4(activity.getName() != null ? activity.getName() : "Unnamed Activity");
         titleElement.addClassName("activity-card-title");
@@ -108,18 +108,18 @@ public class CActivityCard extends Div {
      */
     private void setupDragAndDrop() {
         LOGGER.debug("Setting up drag and drop for activity: {}", activity.getName());
-        
+
         // Configure as drag source
         final DragSource<CActivityCard> dragSource = DragSource.create(this);
         dragSource.setEffectAllowed(EffectAllowed.MOVE);
         dragSource.setDragData(activity);
-        
+
         // Add drag start listener for visual feedback
         dragSource.addDragStartListener(event -> {
             LOGGER.debug("Drag started for activity: {}", activity.getName());
             addClassName("kanban-card-dragging");
         });
-        
+
         // Add drag end listener to remove visual feedback
         dragSource.addDragEndListener(event -> {
             LOGGER.debug("Drag ended for activity: {}", activity.getName());
