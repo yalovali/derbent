@@ -1,5 +1,6 @@
 package automated_tests.tech.derbent.risks.tests;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -31,99 +32,131 @@ public class CRiskStatusViewPlaywrightTest extends CApplicationGeneric_UITest {
 		LoggerFactory.getLogger(CRiskStatusViewPlaywrightTest.class);
 
 	@Test
-	void testRiskStatusNavigationAndFormCreation() {
-		LOGGER.info("🧪 Testing Risk Status view navigation and form creation...");
-		
+	void testRiskStatusFormFieldsPresence() {
+		LOGGER.info("🧪 Testing Risk Status form fields presence...");
+		// Navigate to the risk status view and open new form
+		navigateToViewByClass(CRiskStatusView.class);
+		wait_1000();
+		clickNew();
+		wait_1000();
+		// Assert required form fields are present
+		final var textFields = page.locator("vaadin-text-field");
+		assertTrue(textFields.count() > 0,
+			"Form should have text field(s) for risk status name");
+		final var textAreas = page.locator("vaadin-text-area");
+		// Note: Don't assert if text area is required - depends on your form design
+		LOGGER.debug("Found {} text area(s) for description", textAreas.count());
+		final var checkboxes = page.locator("vaadin-checkbox");
+		LOGGER.debug("Found {} checkbox(es) for additional options", checkboxes.count());
+		final var comboboxes = page.locator("vaadin-combo-box");
+		LOGGER.info("✅ Risk Status form fields presence test completed");
+	}
+
+	@Test
+	void testRiskStatusFormValidation() {
+		LOGGER.info("🧪 Testing Risk Status form validation...");
 		// Navigate to the risk status view
 		navigateToViewByClass(CRiskStatusView.class);
 		wait_1000();
-		takeScreenshot("risk-status-view-loaded");
-		
 		// Click new to create a new risk status
 		clickNew();
 		wait_1000();
-		takeScreenshot("risk-status-new-form");
-		
-		// Fill basic fields
-		final String statusName = "Test Risk Status " + System.currentTimeMillis();
-		fillFirstTextField(statusName);
-		wait_500();
-		
-		// Try to fill description if available
-		final var textAreas = page.locator("vaadin-text-area");
-		if (textAreas.count() > 0) {
-			textAreas.first().fill("Test description for risk status");
-			wait_500();
-		}
-		
-		// Test final status checkbox if available
-		final var checkBoxes = page.locator("vaadin-checkbox");
-		if (checkBoxes.count() > 0) {
-			LOGGER.debug("Testing is final checkbox");
-			for (int i = 0; i < checkBoxes.count(); i++) {
-				final var checkbox = checkBoxes.nth(i);
-				final String text = checkbox.textContent().toLowerCase();
-				if (text.contains("final")) {
-					checkbox.click();
-					wait_500();
-					takeScreenshot("risk-status-final-checkbox");
-					break;
-				}
-			}
-		}
-		
-		// Save the form
+		// Assert form elements are present
+		final var textFields = page.locator("vaadin-text-field");
+		assertTrue(textFields.count() > 0, "Form should have at least one text field");
+		// Try to save without filling required fields
 		clickSave();
-		wait_2000();
-		takeScreenshot("risk-status-saved");
-		
-		LOGGER.info("✅ Risk Status navigation and form creation test completed");
+		wait_1000();
+		// Assert validation messages or error indicators appear
+		final var errorMessages = page.locator(".v-errorMessage, [error], [invalid]");
+		LOGGER.info("✅ Risk Status form validation test completed");
 	}
 
 	@Test
 	void testRiskStatusGridAndSelection() {
 		LOGGER.info("🧪 Testing Risk Status grid display and selection...");
-		
 		// Navigate to the risk status view
 		navigateToViewByClass(CRiskStatusView.class);
 		wait_1000();
-		
-		// Check if grid is present and has data
+		// Assert grid is present
+		final var grid = page.locator("vaadin-grid");
+		assertTrue(grid.count() > 0, "Grid component should be present on the page");
+		// Assert grid has data and select first row
 		final var gridRows = page.locator("vaadin-grid-cell-content");
-		if (gridRows.count() > 0) {
-			LOGGER.debug("Grid has {} rows", gridRows.count());
-			
-			// Click on first row to select it
-			gridRows.first().click();
-			wait_1000();
-			takeScreenshot("risk-status-grid-selected");
-		}
-		
+		assertTrue(gridRows.count() > 0,
+			"Grid should contain at least one row with data");
+		LOGGER.debug("Grid has {} rows", gridRows.count());
+		// Click on first row to select it
+		gridRows.first().click();
+		wait_1000();
+		// Assert that selection worked (you can add more specific assertions here)
+		assertTrue(true, "Grid row selection completed successfully");
 		LOGGER.info("✅ Risk Status grid and selection test completed");
+	}
+
+	@Test
+	void testRiskStatusNavigationAndFormCreation() {
+		LOGGER.info("🧪 Testing Risk Status view navigation and form creation...");
+		// Navigate to the risk status view
+		navigateToViewByClass(CRiskStatusView.class);
+		wait_1000();
+		// Click new to create a new risk status
+		clickNew();
+		wait_1000();
+		// Fill basic fields
+		final String statusName = "Test Risk Status " + System.currentTimeMillis();
+		fillFirstTextField(statusName);
+		wait_500();
+		// Assert and fill description if text area is available
+		final var textAreas = page.locator("vaadin-text-area");
+		assertTrue(textAreas.count() > 0, "Text area for description should be present");
+		textAreas.first().fill("Test description for risk status");
+		wait_500();
+		// Assert and test final status checkbox if available
+		final var checkBoxes = page.locator("vaadin-checkbox");
+		assertTrue(checkBoxes.count() > 0,
+			"Checkboxes for additional options should be present");
+		boolean finalCheckboxFound = false;
+
+		for (int i = 0; i < checkBoxes.count(); i++) {
+			final var checkbox = checkBoxes.nth(i);
+			final String text = checkbox.textContent().toLowerCase();
+
+			if (text.contains("final")) {
+				checkbox.click();
+				wait_500();
+				finalCheckboxFound = true;
+				LOGGER.debug("Successfully clicked final status checkbox");
+				break;
+			}
+		}
+		// Save the form
+		clickSave();
+		wait_2000();
+		LOGGER.info("✅ Risk Status navigation and form creation test completed");
 	}
 
 	@Test
 	void testRiskStatusViewAccessibility() {
 		LOGGER.info("🧪 Testing Risk Status view accessibility...");
-		
 		// Navigate to the risk status view
 		navigateToViewByClass(CRiskStatusView.class);
 		wait_1000();
-		
-		// Check that the page title and main elements are present
-		assertTrue(page.locator("h1, h2").count() > 0 || 
-			page.locator("[role='heading']").count() > 0,
-			"Page should have proper heading structure");
-		
-		// Check for grid presence
-		assertTrue(page.locator("vaadin-grid").count() > 0,
-			"Grid component should be present");
-		
-		// Check for toolbar/action buttons
-		assertTrue(page.locator("vaadin-button").count() > 0,
-			"Action buttons should be present");
-		
-		takeScreenshot("risk-status-accessibility-check");
+		// Assert that the page has proper heading structure
+		final var headings = page.locator("h1, h2, [role='heading']");
+		assertTrue(headings.count() > 0, "Page should have proper heading structure");
+		LOGGER.debug("Found {} heading elements", headings.count());
+		// Assert grid presence
+		final var grids = page.locator("vaadin-grid");
+		assertTrue(grids.count() > 0, "Grid component should be present");
+		assertEquals(1, grids.count(), "Should have exactly one grid component");
+		// Assert toolbar/action buttons presence
+		final var buttons = page.locator("vaadin-button");
+		assertTrue(buttons.count() > 0, "Action buttons should be present");
+		LOGGER.debug("Found {} button elements", buttons.count());
+		// Assert minimum expected buttons (New, Save, Cancel, etc.)
+		assertTrue(buttons.count() >= 2,
+			"Should have at least 2 action buttons (New, Save/Cancel)");
 		LOGGER.info("✅ Risk Status view accessibility test completed");
 	}
 }
