@@ -728,7 +728,7 @@ public class CBaseUITest {
 		} catch (final Exception e) {
 			LOGGER.warn("Advanced grid test failed in {} view: {}", viewClass,
 				e.getMessage());
-			takeScreenshot("grid-test-error-" + viewClass.getSimpleName());
+			takeScreenshot("grid-test-error-" + viewClass.getSimpleName(), true);
 		}
 	}
 
@@ -909,23 +909,34 @@ public class CBaseUITest {
 	}
 
 	/**
-	 * Tests responsive design by changing viewport size
+	 * Tests responsive design by changing viewport size - screenshots only on errors
 	 */
 	protected void testResponsiveDesign(final String viewName) {
-		LOGGER.info("Testing responsive design for {}", viewName);
-		// Test mobile viewport
-		page.setViewportSize(375, 667);
-		wait_1000();
-		takeScreenshot("responsive-mobile-" + viewName.toLowerCase());
-		// Test tablet viewport
-		page.setViewportSize(768, 1024);
-		wait_1000();
-		takeScreenshot("responsive-tablet-" + viewName.toLowerCase());
-		// Test desktop viewport
-		page.setViewportSize(1200, 800);
-		wait_1000();
-		takeScreenshot("responsive-desktop-" + viewName.toLowerCase());
-		LOGGER.info("Responsive design test completed for {}", viewName);
+		LOGGER.info("🧪 Testing responsive design for {}", viewName);
+		
+		try {
+			// Test mobile viewport
+			page.setViewportSize(375, 667);
+			wait_1000();
+			// Only log success, no screenshot needed
+			LOGGER.debug("✅ Mobile viewport (375x667) test completed for {}", viewName);
+			
+			// Test tablet viewport
+			page.setViewportSize(768, 1024);
+			wait_1000();
+			LOGGER.debug("✅ Tablet viewport (768x1024) test completed for {}", viewName);
+			
+			// Test desktop viewport
+			page.setViewportSize(1200, 800);
+			wait_1000();
+			LOGGER.debug("✅ Desktop viewport (1200x800) test completed for {}", viewName);
+			
+			LOGGER.info("✅ Responsive design test completed successfully for {}", viewName);
+		} catch (final Exception e) {
+			LOGGER.error("❌ Responsive design test failed for {}: {}", viewName, e.getMessage());
+			takeScreenshot("responsive-design-failed-" + viewName.toLowerCase(), true);
+			throw new AssertionError("Responsive design test failed for " + viewName + ": " + e.getMessage(), e);
+		}
 	}
 
 	/**

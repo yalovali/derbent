@@ -305,7 +305,7 @@ public class CActivityStatusViewPlaywrightTest extends CApplicationGeneric_UITes
 				
 				// Close dropdown by clicking elsewhere
 				page.locator("body").click();
-				wait_200();
+				wait_500();
 			}
 			
 			clickCancel();
