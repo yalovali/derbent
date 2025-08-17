@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.abstracts.interfaces.CKanbanService;
 import tech.derbent.abstracts.services.CEntityOfProjectRepository;
 import tech.derbent.abstracts.services.CEntityOfProjectService;
+import tech.derbent.abstracts.utils.Check;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.domain.CActivityType;
@@ -55,10 +56,7 @@ public class CActivityService extends CEntityOfProjectService<CActivity>
 	 * @return the activity with eagerly loaded associations, or null if not found
 	 */
 	public CActivity findById(final Long id) {
-
-		if (id == null) {
-			return null;
-		}
+		Check.notNull(id, "Activity ID cannot be null");
 		return ((CActivityRepository) repository).findByIdWithEagerLoading(id)
 			.orElse(null);
 	}
@@ -132,39 +130,27 @@ public class CActivityService extends CEntityOfProjectService<CActivity>
 	 */
 	@Override
 	public void initializeLazyFields(final CActivity entity) {
-
-		if (entity == null) {
-			return;
-		}
+		Check.notNull(entity, "Activity entity cannot be null");
+		
 		LOGGER.debug("Initializing lazy fields for CActivity with ID: {} entity: {}",
 			entity.getId(), entity.getName());
 
-		try {
-			super.initializeLazyFields(entity);
-			initializeLazyRelationship(entity.getActivityType());
-			initializeLazyRelationship(entity.getAssignedTo());
-			initializeLazyRelationship(entity.getCreatedBy());
-			initializeLazyRelationship(entity.getStatus());
-			initializeLazyRelationship(entity.getPriority());
-			initializeLazyRelationship(entity.getParentActivity());
-			initializeLazyRelationship(entity.getProject());
-		} catch (final Exception e) {
-			LOGGER.warn("Error initializing lazy fields for CActivity with ID: {}",
-				entity.getId(), e);
-		}
+		super.initializeLazyFields(entity);
+		initializeLazyRelationship(entity.getActivityType());
+		initializeLazyRelationship(entity.getAssignedTo());
+		initializeLazyRelationship(entity.getCreatedBy());
+		initializeLazyRelationship(entity.getStatus());
+		initializeLazyRelationship(entity.getPriority());
+		initializeLazyRelationship(entity.getParentActivity());
+		initializeLazyRelationship(entity.getProject());
 	}
 
 	@Override
 	public CActivity updateEntityStatus(final CActivity entity,
 		final CActivityStatus newStatus) {
-
-		if (entity == null) {
-			throw new IllegalArgumentException("Entity cannot be null");
-		}
-
-		if (newStatus == null) {
-			throw new IllegalArgumentException("New status cannot be null");
-		}
+		Check.notNull(entity, "Entity cannot be null");
+		Check.notNull(newStatus, "New status cannot be null");
+		
 		entity.setStatus(newStatus);
 		return save(entity);
 	}
