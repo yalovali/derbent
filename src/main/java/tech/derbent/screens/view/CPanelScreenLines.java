@@ -17,6 +17,7 @@ import tech.derbent.screens.domain.CScreenLines;
 import tech.derbent.screens.service.CEntityFieldService;
 import tech.derbent.screens.service.CScreenLinesService;
 import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CViewsService;
 
 public class CPanelScreenLines extends CPanelScreenBase {
 
@@ -26,6 +27,8 @@ public class CPanelScreenLines extends CPanelScreenBase {
 
 	private final CEntityFieldService entityFieldService;
 
+	private final CViewsService viewsService;
+
 	private Grid<CScreenLines> grid;
 
 	private CScreenLines selectedLine;
@@ -33,10 +36,11 @@ public class CPanelScreenLines extends CPanelScreenBase {
 	public CPanelScreenLines(final CScreen currentEntity,
 		final CEnhancedBinder<CScreen> beanValidationBinder,
 		final CScreenService entityService, final CScreenLinesService screenLinesService,
-		final CEntityFieldService entityFieldService) {
+		final CEntityFieldService entityFieldService, final CViewsService viewsService) {
 		super("Screen Lines", currentEntity, beanValidationBinder, entityService);
 		this.screenLinesService = screenLinesService;
 		this.entityFieldService = entityFieldService;
+		this.viewsService = viewsService;
 		initPanel();
 		createScreenLinesLayout();
 	}
@@ -179,7 +183,7 @@ public class CPanelScreenLines extends CPanelScreenBase {
 		final CScreenLines newLine =
 			screenLinesService.newEntity(getCurrentEntity(), "New Field", "newField");
 		final CScreenLinesEditDialog dialog = new CScreenLinesEditDialog(newLine,
-			this::saveScreenLine, true, entityFieldService, currentEntity);
+			this::saveScreenLine, true, entityFieldService, currentEntity, viewsService);
 		dialog.open();
 	}
 
@@ -192,7 +196,7 @@ public class CPanelScreenLines extends CPanelScreenBase {
 			return;
 		}
 		final CScreenLinesEditDialog dialog = new CScreenLinesEditDialog(screenLine,
-			this::saveScreenLine, false, entityFieldService, currentEntity);
+			this::saveScreenLine, false, entityFieldService, currentEntity, viewsService);
 		dialog.open();
 	}
 

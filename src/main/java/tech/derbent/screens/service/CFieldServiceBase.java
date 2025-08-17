@@ -3,9 +3,16 @@ package tech.derbent.screens.service;
 import java.util.List;
 
 import tech.derbent.activities.domain.CActivity;
+import tech.derbent.activities.domain.CActivityPriority;
+import tech.derbent.activities.domain.CActivityStatus;
+import tech.derbent.activities.domain.CActivityType;
 import tech.derbent.meetings.domain.CMeeting;
+import tech.derbent.meetings.domain.CMeetingStatus;
+import tech.derbent.meetings.domain.CMeetingType;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.risks.domain.CRisk;
+import tech.derbent.risks.domain.CRiskSeverity;
+import tech.derbent.risks.domain.CRiskStatus;
 import tech.derbent.users.domain.CUser;
 
 public class CFieldServiceBase {
@@ -25,6 +32,20 @@ public class CFieldServiceBase {
 				return CProject.class;
 			case "CUser":
 				return CUser.class;
+			case "CActivityType":
+				return CActivityType.class;
+			case "CActivityStatus":
+				return CActivityStatus.class;
+			case "CActivityPriority":
+				return CActivityPriority.class;
+			case "CMeetingType":
+				return CMeetingType.class;
+			case "CMeetingStatus":
+				return CMeetingStatus.class;
+			case "CRiskStatus":
+				return CRiskStatus.class;
+			case "CRiskSeverity":
+				return CRiskSeverity.class;
 			default:
 				return null;
 			}

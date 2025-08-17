@@ -64,6 +64,15 @@ public class CScreenLines extends CEntityDB<CScreenLines> {
 	)
 	private String entityFieldName;
 
+	@Column (name = "entity_line_type", nullable = true, length = 100)
+	@Size (max = 100, message = "Entity line type cannot exceed 100 characters")
+	@MetaData (
+		displayName = "Entity Line Type", required = false, readOnly = false,
+		description = "Type of entity this line refers to (direct entity or related entity)",
+		hidden = false, order = 4, maxLength = 100
+	)
+	private String entityLineType;
+
 	@Column (name = "field_description", nullable = true, length = 500)
 	@Size (max = 500, message = "Field description cannot exceed 500 characters")
 	@MetaData (
@@ -77,8 +86,8 @@ public class CScreenLines extends CEntityDB<CScreenLines> {
 	@Size (max = 50, message = "Field type cannot exceed 50 characters")
 	@NotNull (message = "Field type is required")
 	@MetaData (
-		displayName = "Field Type", required = true, readOnly = false,
-		description = "Type of field (TEXT, NUMBER, DATE, BOOLEAN, REFERENCE)",
+		displayName = "Field Type", required = true, readOnly = true,
+		description = "Type of field (TEXT, NUMBER, DATE, BOOLEAN, REFERENCE) - computed automatically",
 		hidden = false, order = 5, maxLength = 50
 	)
 	private String fieldType;
@@ -173,6 +182,8 @@ public class CScreenLines extends CEntityDB<CScreenLines> {
 
 	public String getEntityFieldName() { return entityFieldName; }
 
+	public String getEntityLineType() { return entityLineType; }
+
 	public String getFieldCaption() { return fieldCaption; }
 
 	public String getFieldDescription() { return fieldDescription; }
@@ -205,6 +216,10 @@ public class CScreenLines extends CEntityDB<CScreenLines> {
 
 	public void setEntityFieldName(final String entityFieldName) {
 		this.entityFieldName = entityFieldName;
+	}
+
+	public void setEntityLineType(final String entityLineType) {
+		this.entityLineType = entityLineType;
 	}
 
 	public void setFieldCaption(final String fieldCaption) {
