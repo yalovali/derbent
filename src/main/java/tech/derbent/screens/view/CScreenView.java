@@ -56,10 +56,10 @@ public final class CScreenView extends CProjectAwareMDPage<CScreen> {
 	protected void createDetailsLayout() {
 		addAccordionPanel(new CPanelScreenBasicInfo(getCurrentEntity(), getBinder(),
 			(CScreenService) entityService));
-		// addAccordionPanel(new CPanelScreenLines(getCurrentEntity(), getBinder(),
-		// (CScreenService) entityService, screenLinesService, entityFieldService));
-		// addAccordionPanel(new CPanelScreenRelatedEntities(getCurrentEntity(),
-		// getBinder(), (CScreenService) entityService));
+		addAccordionPanel(new CPanelScreenLines(getCurrentEntity(), getBinder(),
+			(CScreenService) entityService, screenLinesService, entityFieldService));
+		addAccordionPanel(new CPanelScreenRelatedEntities(getCurrentEntity(), getBinder(),
+			(CScreenService) entityService));
 	}
 
 	@Override

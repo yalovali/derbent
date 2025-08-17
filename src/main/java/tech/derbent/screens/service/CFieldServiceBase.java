@@ -10,15 +10,7 @@ import tech.derbent.users.domain.CUser;
 
 public class CFieldServiceBase {
 
-	/**
-	 * Get available entity types for screen configuration.
-	 * @return list of entity types
-	 */
-	public List<String> getAvailableEntityTypes() {
-		return List.of("CActivity", "CMeeting", "CRisk", "CProject", "CUser");
-	}
-
-	protected Class<?> getEntityClass(final String entityType) {
+	public static Class<?> getEntityClass(final String entityType) {
 
 		try {
 
@@ -39,5 +31,13 @@ public class CFieldServiceBase {
 		} catch (final Exception e) {
 			return null;
 		}
+	}
+
+	/**
+	 * Get available entity types for screen configuration.
+	 * @return list of entity types
+	 */
+	public List<String> getAvailableEntityTypes() {
+		return List.of("CActivity", "CMeeting", "CRisk", "CProject", "CUser");
 	}
 }

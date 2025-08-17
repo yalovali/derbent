@@ -19,9 +19,8 @@ public class CPanelScreenBasicInfo extends CPanelScreenBase {
 
 	@Override
 	protected void updatePanelEntityFields() {
-		// Basic Information panel - fundamental screen fields
-		setEntityFields(List.of("entityType"));
-		// setEntityFields(List.of("name", "description", "entityType", "screenTitle",
-		// "headerText", "isActive"));
+		// setEntityFields(List.of("entityType"));
+		setEntityFields(List.of("name", "description", "entityType", "screenTitle",
+			"headerText", "isActive"));
 	}
 }

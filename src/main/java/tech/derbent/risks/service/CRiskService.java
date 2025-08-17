@@ -9,6 +9,7 @@ import com.vaadin.flow.router.Menu;
 
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.services.CEntityOfProjectService;
+import tech.derbent.abstracts.utils.Check;
 import tech.derbent.risks.domain.CRisk;
 
 @Service
@@ -31,10 +32,7 @@ public class CRiskService extends CEntityOfProjectService<CRisk> {
 	 */
 	@Override
 	public void initializeLazyFields(final CRisk entity) {
-
-		if (entity == null) {
-			return;
-		}
+		Check.notNull(entity, "Entity cannot be null");
 
 		try {
 			super.initializeLazyFields(entity);
