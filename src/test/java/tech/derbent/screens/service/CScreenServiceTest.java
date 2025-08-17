@@ -67,13 +67,10 @@ class CScreenServiceTest {
         // Given
         final CProject project = new CProject("Test Project");
         final String entityType = "CActivity";
-        final List<CScreen> expectedScreens = Arrays.asList(
-            new CScreen("Screen 1", project),
-            new CScreen("Screen 2", project)
-        );
+        final List<CScreen> expectedScreens = Arrays.asList(new CScreen("Screen 1", project),
+                new CScreen("Screen 2", project));
 
-        when(screenRepository.findByProjectAndEntityType(project, entityType))
-            .thenReturn(expectedScreens);
+        when(screenRepository.findByProjectAndEntityType(project, entityType)).thenReturn(expectedScreens);
 
         // When
         final List<CScreen> actualScreens = screenService.findByProjectAndEntityType(project, entityType);
@@ -87,13 +84,10 @@ class CScreenServiceTest {
     void testFindActiveByProject() {
         // Given
         final CProject project = new CProject("Test Project");
-        final List<CScreen> expectedScreens = Arrays.asList(
-            new CScreen("Active Screen 1", project),
-            new CScreen("Active Screen 2", project)
-        );
+        final List<CScreen> expectedScreens = Arrays.asList(new CScreen("Active Screen 1", project),
+                new CScreen("Active Screen 2", project));
 
-        when(screenRepository.findActiveByProject(project))
-            .thenReturn(expectedScreens);
+        when(screenRepository.findActiveByProject(project)).thenReturn(expectedScreens);
 
         // When
         final List<CScreen> actualScreens = screenService.findActiveByProject(project);

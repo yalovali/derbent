@@ -15,66 +15,66 @@ import tech.derbent.abstracts.interfaces.CSearchable;
 import tech.derbent.users.domain.CUserProjectSettings;
 
 /**
- * CProject - Domain entity representing projects. Layer: Domain (MVC) Inherits from
- * CEntityDB to provide database functionality.
+ * CProject - Domain entity representing projects. Layer: Domain (MVC) Inherits from CEntityDB to provide database
+ * functionality.
  */
 @Entity
-@Table (name = "cproject")
-@AttributeOverride (name = "id", column = @Column (name = "project_id"))
+@Table(name = "cproject")
+@AttributeOverride(name = "id", column = @Column(name = "project_id"))
 public class CProject extends CEntityNamed<CProject> implements CSearchable {
 
-	public static String getIconColorCode() {
-		return "#fd7e14"; // Orange color for project entities
-	}
+    public static String getIconColorCode() {
+        return "#fd7e14"; // Orange color for project entities
+    }
 
-	public static String getIconFilename() { return "vaadin:briefcase"; }
+    public static String getIconFilename() {
+        return "vaadin:briefcase";
+    }
 
-	// lets keep it layzily loaded to avoid loading all user settings at once
-	@OneToMany (
-		mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true,
-		fetch = FetchType.LAZY
-	)
-	private final List<CUserProjectSettings> userSettings = new ArrayList<>();
+    // lets keep it layzily loaded to avoid loading all user settings at once
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private final List<CUserProjectSettings> userSettings = new ArrayList<>();
 
-	/**
-	 * Default constructor for JPA.
-	 */
-	public CProject() {
-		super();
-	}
+    /**
+     * Default constructor for JPA.
+     */
+    public CProject() {
+        super();
+    }
 
-	public CProject(final String name) {
-		super(CProject.class, name);
-	}
+    public CProject(final String name) {
+        super(CProject.class, name);
+    }
 
-	/**
-	 * Gets the list of user project settings for this project.
-	 */
-	public List<CUserProjectSettings> getUserSettings() { return userSettings; }
+    /**
+     * Gets the list of user project settings for this project.
+     */
+    public List<CUserProjectSettings> getUserSettings() {
+        return userSettings;
+    }
 
-	@Override
-	public boolean matches(final String searchText) {
+    @Override
+    public boolean matches(final String searchText) {
 
-		if ((searchText == null) || searchText.trim().isEmpty()) {
-			return true; // Empty search matches all
-		}
-		final String lowerSearchText = searchText.toLowerCase().trim();
+        if ((searchText == null) || searchText.trim().isEmpty()) {
+            return true; // Empty search matches all
+        }
+        final String lowerSearchText = searchText.toLowerCase().trim();
 
-		// Search in name field
-		if ((getName() != null) && getName().toLowerCase().contains(lowerSearchText)) {
-			return true;
-		}
+        // Search in name field
+        if ((getName() != null) && getName().toLowerCase().contains(lowerSearchText)) {
+            return true;
+        }
 
-		// Search in description field
-		if ((getDescription() != null)
-			&& getDescription().toLowerCase().contains(lowerSearchText)) {
-			return true;
-		}
+        // Search in description field
+        if ((getDescription() != null) && getDescription().toLowerCase().contains(lowerSearchText)) {
+            return true;
+        }
 
-		// Search in ID as string
-		if ((getId() != null) && getId().toString().contains(lowerSearchText)) {
-			return true;
-		}
-		return false;
-	}
+        // Search in ID as string
+        if ((getId() != null) && getId().toString().contains(lowerSearchText)) {
+            return true;
+        }
+        return false;
+    }
 }

@@ -16,10 +16,8 @@ import tech.derbent.users.domain.CUserProjectSettings;
 import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 
 /**
- * Integration test to verify that the user-project relationship supports:
- * 1. One user can have multiple projects
- * 2. One project can have multiple users
- * 3. Adding new relationships doesn't replace existing ones
+ * Integration test to verify that the user-project relationship supports: 1. One user can have multiple projects 2. One
+ * project can have multiple users 3. Adding new relationships doesn't replace existing ones
  */
 class UserProjectMultipleRelationshipTest extends CTestBase {
 
@@ -38,7 +36,7 @@ class UserProjectMultipleRelationshipTest extends CTestBase {
         // Create test projects
         project1 = new CProject();
         project1.setName("Project Alpha");
-        
+
         project2 = new CProject();
         project2.setName("Project Beta");
     }
@@ -46,7 +44,7 @@ class UserProjectMultipleRelationshipTest extends CTestBase {
     @Test
     void testOneUserMultipleProjects() {
         // Test that one user can have multiple projects
-        
+
         // Create first user-project relationship
         CUserProjectSettings settings1 = new CUserProjectSettings();
         settings1.setUser(user1);
@@ -81,22 +79,20 @@ class UserProjectMultipleRelationshipTest extends CTestBase {
 
         // Verify that user now has multiple projects
         assertEquals(2, user1.getProjectSettings().size(), "User should have two projects");
-        
+
         // Verify both projects are present
         boolean hasProjectAlpha = user1.getProjectSettings().stream()
-            .anyMatch(s -> "Project Alpha".equals(s.getProject().getName()));
+                .anyMatch(s -> "Project Alpha".equals(s.getProject().getName()));
         boolean hasProjectBeta = user1.getProjectSettings().stream()
-            .anyMatch(s -> "Project Beta".equals(s.getProject().getName()));
-            
+                .anyMatch(s -> "Project Beta".equals(s.getProject().getName()));
+
         assertTrue(hasProjectAlpha, "User should be assigned to Project Alpha");
         assertTrue(hasProjectBeta, "User should be assigned to Project Beta");
 
         // Verify roles are correctly assigned
-        boolean hasDeveloperRole = user1.getProjectSettings().stream()
-            .anyMatch(s -> "DEVELOPER".equals(s.getRole()));
-        boolean hasTeamLeadRole = user1.getProjectSettings().stream()
-            .anyMatch(s -> "TEAM_LEAD".equals(s.getRole()));
-            
+        boolean hasDeveloperRole = user1.getProjectSettings().stream().anyMatch(s -> "DEVELOPER".equals(s.getRole()));
+        boolean hasTeamLeadRole = user1.getProjectSettings().stream().anyMatch(s -> "TEAM_LEAD".equals(s.getRole()));
+
         assertTrue(hasDeveloperRole, "User should have DEVELOPER role");
         assertTrue(hasTeamLeadRole, "User should have TEAM_LEAD role");
     }
@@ -104,7 +100,7 @@ class UserProjectMultipleRelationshipTest extends CTestBase {
     @Test
     void testOneProjectMultipleUsers() {
         // Test that one project can have multiple users
-        
+
         // Create project settings for first user
         CUserProjectSettings settings1 = new CUserProjectSettings();
         settings1.setUser(user1);
@@ -126,21 +122,21 @@ class UserProjectMultipleRelationshipTest extends CTestBase {
         // Verify both users are assigned to the same project
         assertNotNull(user1.getProjectSettings(), "User1 should have project settings");
         assertNotNull(user2.getProjectSettings(), "User2 should have project settings");
-        
+
         assertEquals(1, user1.getProjectSettings().size(), "User1 should have one project");
         assertEquals(1, user2.getProjectSettings().size(), "User2 should have one project");
 
         // Verify both users are assigned to the same project
         String user1ProjectName = user1.getProjectSettings().get(0).getProject().getName();
         String user2ProjectName = user2.getProjectSettings().get(0).getProject().getName();
-        
+
         assertEquals("Project Alpha", user1ProjectName, "User1 should be assigned to Project Alpha");
         assertEquals("Project Alpha", user2ProjectName, "User2 should be assigned to Project Alpha");
 
         // Verify different roles
         String user1Role = user1.getProjectSettings().get(0).getRole();
         String user2Role = user2.getProjectSettings().get(0).getRole();
-        
+
         assertEquals("DEVELOPER", user1Role, "User1 should have DEVELOPER role");
         assertEquals("QA_ENGINEER", user2Role, "User2 should have QA_ENGINEER role");
     }
@@ -148,7 +144,7 @@ class UserProjectMultipleRelationshipTest extends CTestBase {
     @Test
     void testBidirectionalRelationshipConsistency() {
         // Test that bidirectional relationships remain consistent
-        
+
         CUserProjectSettings settings = new CUserProjectSettings();
         settings.setUser(user1);
         settings.setProject(project1);
@@ -161,11 +157,12 @@ class UserProjectMultipleRelationshipTest extends CTestBase {
         // Verify the relationship is correctly established
         assertNotNull(user1.getProjectSettings(), "User should have project settings");
         assertEquals(1, user1.getProjectSettings().size(), "User should have one project");
-        
+
         CUserProjectSettings retrievedSettings = user1.getProjectSettings().get(0);
         assertEquals(user1, retrievedSettings.getUser(), "Settings should reference the correct user");
         assertEquals(project1, retrievedSettings.getProject(), "Settings should reference the correct project");
         assertEquals("ARCHITECT", retrievedSettings.getRole(), "Settings should have correct role");
-        assertEquals("READ,WRITE,DELETE,ADMIN", retrievedSettings.getPermission(), "Settings should have correct permissions");
+        assertEquals("READ,WRITE,DELETE,ADMIN", retrievedSettings.getPermission(),
+                "Settings should have correct permissions");
     }
 }

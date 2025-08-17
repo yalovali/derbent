@@ -119,8 +119,8 @@ public class CEntityGrid<EntityClass extends CEntityDB<EntityClass>> extends CGr
      * @return The created column
      */
     /**
-     * @deprecated Use addColorAwareStatusColumn(ValueProvider, String, String) instead. 
-     * ColorAwareGrid annotation is no longer used - all status columns are color-aware by default.
+     * @deprecated Use addColorAwareStatusColumn(ValueProvider, String, String) instead. ColorAwareGrid annotation is no
+     *             longer used - all status columns are color-aware by default.
      */
     @Deprecated
     public <S extends CEntityDB<S>> Column<EntityClass> addColorAwareStatusColumn(

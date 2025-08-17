@@ -38,7 +38,7 @@ class CScreenLinesServiceTest {
         final CScreen screen = new CScreen("Test Screen", project);
         final String fieldCaption = "Test Field";
         final String entityFieldName = "testField";
-        
+
         // Mock the getNextLineOrder method
         when(screenLinesRepository.getNextLineOrder(screen)).thenReturn(1);
 
@@ -63,7 +63,7 @@ class CScreenLinesServiceTest {
         final CScreen screen = new CScreen("Test Screen", project);
         final String fieldCaption = "Test Field";
         final String entityFieldName = "testField";
-        
+
         when(screenLinesRepository.getNextLineOrder(screen)).thenReturn(1);
 
         // When

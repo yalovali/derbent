@@ -7,23 +7,22 @@ import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
 
 /**
- * CPanelActivityHierarchy - Panel for grouping hierarchy related fields of CActivity
- * entity. Layer: View (MVC) Groups fields: parentActivity
+ * CPanelActivityHierarchy - Panel for grouping hierarchy related fields of CActivity entity. Layer: View (MVC) Groups
+ * fields: parentActivity
  */
 public class CPanelActivityHierarchy extends CPanelActivityBase {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public CPanelActivityHierarchy(final CActivity currentEntity,
-		final CEnhancedBinder<CActivity> beanValidationBinder,
-		final CActivityService entityService) {
-		super("Hierarchy", currentEntity, beanValidationBinder, entityService);
-		initPanel();
-	}
+    public CPanelActivityHierarchy(final CActivity currentEntity, final CEnhancedBinder<CActivity> beanValidationBinder,
+            final CActivityService entityService) {
+        super("Hierarchy", currentEntity, beanValidationBinder, entityService);
+        initPanel();
+    }
 
-	@Override
-	protected void updatePanelEntityFields() {
-		// Hierarchy fields - parent-child relationships
-		setEntityFields(List.of("parentActivity"));
-	}
+    @Override
+    protected void updatePanelEntityFields() {
+        // Hierarchy fields - parent-child relationships
+        setEntityFields(List.of("parentActivity"));
+    }
 }

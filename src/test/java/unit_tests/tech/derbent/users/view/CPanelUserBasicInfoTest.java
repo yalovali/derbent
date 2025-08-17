@@ -12,14 +12,14 @@ import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 /**
  * Test class for CPanelUserBasicInfo to ensure proper field grouping.
  */
-@ExtendWith (MockitoExtension.class)
+@ExtendWith(MockitoExtension.class)
 class CPanelUserBasicInfoTest extends CTestBase {
 
-	@SuppressWarnings ("unused")
-	private CEnhancedBinder<CUser> binder;
+    @SuppressWarnings("unused")
+    private CEnhancedBinder<CUser> binder;
 
-	@Override
-	protected void setupForTest() {
-		binder = CBinderFactory.createBinder(CUser.class);
-	}
+    @Override
+    protected void setupForTest() {
+        binder = CBinderFactory.createBinder(CUser.class);
+    }
 }

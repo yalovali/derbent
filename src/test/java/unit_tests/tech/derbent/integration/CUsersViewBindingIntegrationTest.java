@@ -17,94 +17,78 @@ import tech.derbent.users.service.CUserTypeService;
 import tech.derbent.users.view.CUsersView;
 
 /**
- * Integration test to verify that the CUsersView binding issue is fixed.
- * This test specifically addresses the problem: "All bindings created with forField must be completed before calling readBean"
- * that occurred when navigating to 'cusersview'.
+ * Integration test to verify that the CUsersView binding issue is fixed. This test specifically addresses the problem:
+ * "All bindings created with forField must be completed before calling readBean" that occurred when navigating to
+ * 'cusersview'.
  */
 @SpringBootTest(classes = tech.derbent.Application.class)
-@TestPropertySource(properties = {
-    "spring.datasource.url=jdbc:h2:mem:testdb",
-    "spring.datasource.driver-class-name=org.h2.Driver",
-    "spring.jpa.hibernate.ddl-auto=create-drop",
-    "spring.sql.init.mode=never",
-    "spring.jpa.defer-datasource-initialization=false"
-})
+@TestPropertySource(properties = { "spring.datasource.url=jdbc:h2:mem:testdb",
+        "spring.datasource.driver-class-name=org.h2.Driver", "spring.jpa.hibernate.ddl-auto=create-drop",
+        "spring.sql.init.mode=never", "spring.jpa.defer-datasource-initialization=false" })
 public class CUsersViewBindingIntegrationTest {
 
     @Autowired
     private CUserService userService;
-    
+
     @Autowired
     private CProjectService projectService;
-    
+
     @Autowired
     private CUserTypeService userTypeService;
-    
+
     @Autowired
     private CCompanyService companyService;
-    
+
     @Autowired
     private CSessionService sessionService;
-    
+
     @Autowired
     private CUserProjectSettingsService userProjectSettingsService;
 
     /**
-     * Test that CUsersView can be instantiated without binding completion errors.
-     * This reproduces the exact scenario from the bug report.
+     * Test that CUsersView can be instantiated without binding completion errors. This reproduces the exact scenario
+     * from the bug report.
      */
     @Test
     void testCUsersViewInstantiationDoesNotThrowBindingError() {
         assertDoesNotThrow(() -> {
             // Create CUsersView - this should trigger form creation and binding
-            CUsersView usersView = new CUsersView(
-                userService, 
-                projectService, 
-                userTypeService, 
-                companyService, 
-                sessionService, 
-                userProjectSettingsService
-            );
-            
+            CUsersView usersView = new CUsersView(userService, projectService, userTypeService, companyService,
+                    sessionService, userProjectSettingsService);
+
             assertNotNull(usersView, "CUsersView should be created successfully");
             assertNotNull(usersView.getBinder(), "Binder should be initialized");
-            
+
             // Try to populate form with null (this was causing the binding issue)
             usersView.testPopulateForm(null);
-            
+
             System.out.println("✅ CUsersView instantiated and populated without binding errors");
-            
+
         }, "CUsersView instantiation should not throw 'All bindings created with forField must be completed' error");
     }
-    
+
     /**
      * Test that form population with user data works without binding errors.
      */
-    @Test 
+    @Test
     void testCUsersViewFormPopulationWithUserData() {
         assertDoesNotThrow(() -> {
             // Create CUsersView
-            CUsersView usersView = new CUsersView(
-                userService, 
-                projectService, 
-                userTypeService, 
-                companyService, 
-                sessionService, 
-                userProjectSettingsService
-            );
-            
+            CUsersView usersView = new CUsersView(userService, projectService, userTypeService, companyService,
+                    sessionService, userProjectSettingsService);
+
             // Create a test user
             var testUser = userService.createEntity();
             testUser.setName("Test User");
             testUser.setLastname("Test Lastname");
             testUser.setLogin("testuser");
             testUser.setEmail("test@example.com");
-            
+
             // This should trigger readBean without throwing binding completion errors
             usersView.testPopulateForm(testUser);
-            
+
             System.out.println("✅ CUsersView form populated with user data without binding errors");
-            
+
         }, "CUsersView form population should not throw binding completion errors");
     }
 }

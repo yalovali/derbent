@@ -18,8 +18,8 @@ import tech.derbent.risks.service.CRiskService;
 import tech.derbent.users.service.CUserService;
 
 /**
- * Test to validate that the reduced sample data (2 examples per entity)
- * maintains all required enrichments: relations, types, status, colors, comments.
+ * Test to validate that the reduced sample data (2 examples per entity) maintains all required enrichments: relations,
+ * types, status, colors, comments.
  */
 @SpringBootTest
 @ActiveProfiles("test")
@@ -28,25 +28,25 @@ public class MinimalSampleDataValidationTest {
 
     @Autowired
     private CUserService userService;
-    
+
     @Autowired
     private CProjectService projectService;
-    
+
     @Autowired
     private CActivityService activityService;
-    
+
     @Autowired
     private CMeetingService meetingService;
-    
+
     @Autowired
     private COrderService orderService;
-    
+
     @Autowired
     private CCommentService commentService;
-    
+
     @Autowired
     private CRiskService riskService;
-    
+
     @Autowired
     private CDecisionService decisionService;
 
@@ -62,14 +62,14 @@ public class MinimalSampleDataValidationTest {
         assertEquals(2, riskService.count(), "Should have exactly 2 risks");
         assertEquals(2, decisionService.count(), "Should have exactly 2 decisions");
     }
-    
+
     @Test
     public void testDataIntegrityAndStructure() {
         // Basic validation that the structure is correct and reduced
         assertTrue(userService.count() > 0, "Users should exist");
         assertTrue(projectService.count() > 0, "Projects should exist");
         assertTrue(activityService.count() > 0, "Activities should exist");
-        
+
         // Verify we have significantly fewer records than the original
         assertTrue(userService.count() <= 2, "Users reduced to 2 or fewer");
         assertTrue(projectService.count() <= 2, "Projects reduced to 2 or fewer");

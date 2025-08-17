@@ -32,5 +32,7 @@ public class CActivityType extends CTypeEntity<CActivityType> implements CKanban
         return "#007bff"; // Blue color for activity type entities
     }
 
-    public static String getIconFilename() { return "vaadin:tags"; }
+    public static String getIconFilename() {
+        return "vaadin:tags";
+    }
 }

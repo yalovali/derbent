@@ -72,11 +72,11 @@ public class CLoginView extends Main implements BeforeEnterObserver {
         });
         // CAuxillaries.setId(resetDbButton);
         resetDbButton.addClassName(LumoUtility.Margin.Top.SMALL);
-        
+
         // Add link to custom login for testing
         final RouterLink customLoginLink = new RouterLink("Try Custom Login", CCustomLoginView.class);
         customLoginLink.addClassName(LumoUtility.FontSize.SMALL);
-        
+
         loginOverlay.getFooter().add(resetDbButton);
         loginOverlay.getFooter().add(passwordHint);
         loginOverlay.getFooter().add(customLoginLink);

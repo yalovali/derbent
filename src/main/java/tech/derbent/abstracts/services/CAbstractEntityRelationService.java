@@ -9,16 +9,16 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.abstracts.domains.CEntityDB;
 
 /**
- * Abstract service class for managing entity-to-entity relationships.
- * Provides common operations for relationship entities.
+ * Abstract service class for managing entity-to-entity relationships. Provides common operations for relationship
+ * entities.
  * 
- * @param <RelationEntity> The relationship entity type
+ * @param <RelationEntity>
+ *            The relationship entity type
  */
-public abstract class CAbstractEntityRelationService<RelationEntity extends CEntityDB<RelationEntity>> 
+public abstract class CAbstractEntityRelationService<RelationEntity extends CEntityDB<RelationEntity>>
         extends CAbstractService<RelationEntity> {
 
-    public CAbstractEntityRelationService(final CAbstractRepository<RelationEntity> repository,
-            final Clock clock) {
+    public CAbstractEntityRelationService(final CAbstractRepository<RelationEntity> repository, final Clock clock) {
         super(repository, clock);
     }
 
@@ -46,11 +46,11 @@ public abstract class CAbstractEntityRelationService<RelationEntity extends CEnt
     @Transactional
     public RelationEntity createRelationship(final Long parentEntityId, final Long childEntityId) {
         LOGGER.debug("Creating relationship between parent {} and child {}", parentEntityId, childEntityId);
-        
+
         if (relationshipExists(parentEntityId, childEntityId)) {
             throw new IllegalArgumentException("Relationship already exists between entities");
         }
-        
+
         final RelationEntity relationship = createRelationshipInstance(parentEntityId, childEntityId);
         validateRelationship(relationship);
         return save(relationship);
@@ -62,7 +62,7 @@ public abstract class CAbstractEntityRelationService<RelationEntity extends CEnt
     @Transactional
     public void deleteRelationship(final Long parentEntityId, final Long childEntityId) {
         LOGGER.debug("Deleting relationship between parent {} and child {}", parentEntityId, childEntityId);
-        
+
         final Optional<RelationEntity> relationship = findRelationship(parentEntityId, childEntityId);
         if (relationship.isPresent()) {
             delete(relationship.get());
@@ -96,7 +96,7 @@ public abstract class CAbstractEntityRelationService<RelationEntity extends CEnt
     @Transactional
     public RelationEntity updateRelationship(final RelationEntity relationship) {
         LOGGER.debug("Updating relationship: {}", relationship);
-        
+
         validateRelationship(relationship);
         return save(relationship);
     }

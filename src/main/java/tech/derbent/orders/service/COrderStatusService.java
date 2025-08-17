@@ -11,9 +11,9 @@ import tech.derbent.orders.domain.COrderStatus;
 
 /**
  * COrderStatusService - Service layer for COrderStatus entity. Layer: Service (MVC) Handles business logic for order
- * status operations including creation, validation, and management of order status entities.
- * Since COrderStatus extends CStatus which extends CTypeEntity which extends CEntityOfProject,
- * this service must extend CEntityOfProjectService to enforce project-based queries.
+ * status operations including creation, validation, and management of order status entities. Since COrderStatus extends
+ * CStatus which extends CTypeEntity which extends CEntityOfProject, this service must extend CEntityOfProjectService to
+ * enforce project-based queries.
  */
 @Service
 @PreAuthorize("isAuthenticated()")

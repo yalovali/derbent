@@ -39,5 +39,7 @@ public class CUserType extends CEntityOfProject<CUserType> {
         return "#6f42c1"; // Purple color for user type entities
     }
 
-    public static String getIconFilename() { return "vaadin:group"; }
+    public static String getIconFilename() {
+        return "vaadin:group";
+    }
 }
