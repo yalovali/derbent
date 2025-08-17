@@ -39,6 +39,7 @@ import tech.derbent.abstracts.domains.CEntityConstants;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.utils.CAuxillaries;
 import tech.derbent.abstracts.utils.CColorUtils;
+import tech.derbent.abstracts.utils.Check;
 
 @org.springframework.stereotype.Component
 public final class CEntityFormBuilder implements ApplicationContextAware {
@@ -127,17 +128,8 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		final CEnhancedBinder<EntityClass> binder, final List<String> entityFields) {
 
 		// Enhanced null pointer checking with detailed logging
-		if (entityClass == null) {
-			LOGGER.error("Entity class parameter is null - cannot build form");
-			throw new IllegalArgumentException("Entity class cannot be null");
-		}
-
-		if (binder == null) {
-			LOGGER.error(
-				"Binder parameter is null for entity class: {} - cannot build form",
-				entityClass.getSimpleName());
-			throw new IllegalArgumentException("Binder cannot be null");
-		}
+		Check.notNull(entityClass, "Entity class cannot be null");
+		Check.notNull(binder, "Binder cannot be null");
 		final Div panel = new Div();
 		panel.setClassName("editor-layout");
 		// final FormLayout formLayout = new FormLayout();
@@ -551,11 +543,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 	public static <EntityClass> CEnhancedBinder<EntityClass>
 		createEnhancedBinder(final Class<?> entityClass) {
 
-		if (entityClass == null) {
-			LOGGER
-				.error("Entity class parameter is null - cannot create enhanced binder");
-			throw new IllegalArgumentException("Entity class cannot be null");
-		}
+		Check.notNull(entityClass, "Entity class cannot be null");
 		LOGGER.debug("Creating enhanced binder for entity class: {}",
 			entityClass.getSimpleName());
 		return CBinderFactory.createEnhancedBinder((Class<EntityClass>) entityClass);
