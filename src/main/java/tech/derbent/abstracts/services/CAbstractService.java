@@ -56,23 +56,16 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 
 	@Transactional
 	public void delete(final EntityClass entity) {
+		Check.notNull(entity, "Entity cannot be null");
+		Check.notNull(entity.getId(), "Entity ID cannot be null");
+		
 		LOGGER.debug("Deleting entity: {}", CSpringAuxillaries.safeToString(entity));
-
-		if (entity == null) {
-			LOGGER.warn("Cannot delete null entity");
-			return;
-		}
-
-		if (entity.getId() == null) {
-			LOGGER.warn("Entity ID is null, cannot delete: {}",
-				CSpringAuxillaries.safeToString(entity));
-			return;
-		}
 		repository.deleteById(entity.getId());
 	}
 
 	@Transactional
 	public void delete(final Long id) {
+		Check.notNull(id, "Entity ID cannot be null");
 		LOGGER.debug("Deleting entity with ID: {}", id);
 		repository.deleteById(id);
 	}
@@ -84,31 +77,20 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	 */
 	@Transactional
 	public void deleteWithReflection(final EntityClass entity) {
+		Check.notNull(entity, "Entity cannot be null");
 
-		if (entity == null) {
-			LOGGER.warn("Cannot delete null entity");
-			return;
+		// Try soft delete first using reflection
+		if (entity.performSoftDelete()) {
+			// Soft delete was successful, save the entity
+			repository.save(entity);
+			LOGGER.info("Performed soft delete for entity: {}",
+				entity.getClass().getSimpleName());
 		}
-
-		try {
-
-			// Try soft delete first using reflection
-			if (entity.performSoftDelete()) {
-				// Soft delete was successful, save the entity
-				repository.save(entity);
-				LOGGER.info("Performed soft delete for entity: {}",
-					entity.getClass().getSimpleName());
-			}
-			else {
-				// No soft delete field found, perform hard delete
-				repository.delete(entity);
-				LOGGER.info("Performed hard delete for entity: {}",
-					entity.getClass().getSimpleName());
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error during delete operation for entity: {}",
-				CSpringAuxillaries.safeToString(entity), e);
-			throw e;
+		else {
+			// No soft delete field found, perform hard delete
+			repository.delete(entity);
+			LOGGER.info("Performed hard delete for entity: {}",
+				entity.getClass().getSimpleName());
 		}
 	}
 
@@ -139,29 +121,17 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	protected abstract Class<EntityClass> getEntityClass();
 
 	public void initializeLazyFields(final EntityClass entity) {
-
-		if (entity == null) {
-			return;
-		}
+		Check.notNull(entity, "Entity cannot be null");
 		// LOGGER.debug("Initializing lazy fields for entity: {}
 		// {}",entity.getClass().getSimpleName(),
 		// CSpringAuxillaries.safeToString(entity));
-
-		try {
-			CSpringAuxillaries.initializeLazily(entity);
-		} catch (final Exception e) {
-			LOGGER.warn("Error initializing lazy fields for entity: {}",
-				CSpringAuxillaries.safeToString(entity), e);
-		}
+		CSpringAuxillaries.initializeLazily(entity);
 	}
 
 	protected void initializeLazyRelationship(final Object relationshipEntity) {
-
-		if (relationshipEntity == null) {
-			return;
-		}
+		Check.notNull(relationshipEntity, "Relationship entity cannot be null");
+		
 		final boolean success = CSpringAuxillaries.initializeLazily(relationshipEntity);
-
 		if (!success) {
 			LOGGER.warn("Failed to initialize lazy relationship: {}",
 				CSpringAuxillaries.safeToString(relationshipEntity));
@@ -239,15 +209,8 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 
 	@Transactional
 	public EntityClass save(final EntityClass entity) {
-
-		try {
-			final EntityClass savedEntity = repository.save(entity);
-			return savedEntity;
-		} catch (final Exception e) {
-			LOGGER.error("Error saving entity: {}",
-				CSpringAuxillaries.safeToString(entity), e);
-			throw e;
-		}
+		Check.notNull(entity, "Entity cannot be null");
+		return repository.save(entity);
 	}
 
 	/**

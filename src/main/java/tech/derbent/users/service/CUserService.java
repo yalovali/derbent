@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import tech.derbent.abstracts.annotations.CSpringAuxillaries;
 import tech.derbent.abstracts.services.CAbstractNamedEntityService;
+import tech.derbent.abstracts.utils.Check;
 import tech.derbent.users.domain.CUser;
 
 @Service
@@ -130,20 +131,12 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 	 */
 	@Override
 	public void initializeLazyFields(final CUser entity) {
+		Check.notNull(entity, "User entity cannot be null");
 
-		if (entity == null) {
-			return;
-		}
-
-		try {
-			super.initializeLazyFields(entity);
-			initializeLazyRelationship(entity.getUserType());
-			initializeLazyRelationship(entity.getCompany());
-			initializeLazyRelationship(entity.getProjectSettings());
-		} catch (final Exception e) {
-			LOGGER.warn("Error initializing lazy fields for user with ID: {}",
-				CSpringAuxillaries.safeGetId(entity), e);
-		}
+		super.initializeLazyFields(entity);
+		initializeLazyRelationship(entity.getUserType());
+		initializeLazyRelationship(entity.getCompany());
+		initializeLazyRelationship(entity.getProjectSettings());
 	}
 
 	/**
@@ -195,14 +188,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser>
 	@Override
 	protected void validateEntity(final CUser user) {
 		super.validateEntity(user);
-
-		// Additional validation for user entities
-		if ((user.getLogin() == null) || user.getLogin().trim().isEmpty()) {
-			throw new IllegalArgumentException("User login cannot be null or empty");
-		}
-
-		if ((user.getName() == null) || user.getName().trim().isEmpty()) {
-			throw new IllegalArgumentException("User name cannot be null or empty");
-		}
+		Check.notBlank(user.getLogin(), "User login cannot be null or empty");
+		Check.notBlank(user.getName(), "User name cannot be null or empty");
 	}
 }
