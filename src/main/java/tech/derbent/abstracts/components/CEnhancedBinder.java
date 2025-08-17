@@ -278,6 +278,7 @@ public class CEnhancedBinder<BEAN> extends BeanValidationBinder<BEAN> {
 
                     LOGGER.info("Cleared {} incomplete bindings for {}", originalSize, beanType.getSimpleName());
                 }
+
             }
         } catch (final Exception e) {
             LOGGER.debug("Could not check for incomplete bindings: {} - {}", e.getClass().getSimpleName(),
@@ -313,4 +314,5 @@ public class CEnhancedBinder<BEAN> extends BeanValidationBinder<BEAN> {
             throw e;
         }
     }
+
 }
