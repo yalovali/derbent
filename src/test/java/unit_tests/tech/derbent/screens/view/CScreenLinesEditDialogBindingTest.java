@@ -15,9 +15,9 @@ import tech.derbent.screens.service.CViewsService;
 import tech.derbent.screens.view.CScreenLinesEditDialog;
 
 /**
- * Unit test to verify that CScreenLinesEditDialog does not throw binding exceptions
- * when created and populated. This specifically tests the fix for the incomplete
- * bindings error that occurred when clicking "Add Screen Field Description".
+ * Unit test to verify that CScreenLinesEditDialog does not throw binding exceptions when created and populated. This
+ * specifically tests the fix for the incomplete bindings error that occurred when clicking "Add Screen Field
+ * Description".
  */
 @ExtendWith(MockitoExtension.class)
 class CScreenLinesEditDialogBindingTest {
@@ -43,15 +43,11 @@ class CScreenLinesEditDialogBindingTest {
 
         // This should not throw any binding exceptions
         assertDoesNotThrow(() -> {
-            CScreenLinesEditDialog dialog = new CScreenLinesEditDialog(
-                screenLine, 
-                (savedLine) -> {}, // onSave callback
-                true, // isNew
-                entityFieldService,
-                screen,
-                viewsService
-            );
-            
+            CScreenLinesEditDialog dialog = new CScreenLinesEditDialog(screenLine, (savedLine) -> {
+            }, // onSave callback
+                    true, // isNew
+                    entityFieldService, screen, viewsService);
+
             assertNotNull(dialog, "Dialog should be created successfully");
         }, "CScreenLinesEditDialog creation should not throw binding exceptions");
     }
@@ -72,15 +68,11 @@ class CScreenLinesEditDialogBindingTest {
 
         // This should not throw any binding exceptions when editing existing entity
         assertDoesNotThrow(() -> {
-            CScreenLinesEditDialog dialog = new CScreenLinesEditDialog(
-                screenLine, 
-                (savedLine) -> {}, // onSave callback
-                false, // isNew = false (editing existing)
-                entityFieldService,
-                screen,
-                viewsService
-            );
-            
+            CScreenLinesEditDialog dialog = new CScreenLinesEditDialog(screenLine, (savedLine) -> {
+            }, // onSave callback
+                    false, // isNew = false (editing existing)
+                    entityFieldService, screen, viewsService);
+
             assertNotNull(dialog, "Dialog should be created successfully for existing entity");
         }, "CScreenLinesEditDialog creation for existing entity should not throw binding exceptions");
     }
