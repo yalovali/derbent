@@ -94,12 +94,18 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
         final VerticalLayout customFormLayout = new VerticalLayout();
         customFormLayout.setPadding(false);
         customFormLayout.setSpacing(true);
-        // Use CEntityFormBuilder for basic fields but add custom dropdowns
-        final Div basicFormContent = CEntityFormBuilder.buildForm(CScreenLines.class, binder);
+
+        // Use CEntityFormBuilder for basic fields, but exclude the fields we handle manually
+        // to prevent duplicate bindings that cause incomplete binding errors
+        final java.util.List<String> fieldsToInclude = java.util.List.of("lineOrder", "fieldCaption",
+                "fieldDescription", "fieldType", "isRequired", "isReadonly", "isHidden", "defaultValue",
+                "relatedEntityType", "dataProviderBean", "maxLength", "isActive");
+        final Div basicFormContent = CEntityFormBuilder.buildForm(CScreenLines.class, binder, fieldsToInclude);
         customFormLayout.add(basicFormContent);
-        // Add custom entity line type dropdown
+
+        // Add custom entity line type dropdown (this handles entityLineType field)
         createEntityLineTypeComboBox(customFormLayout);
-        // Add custom entity field name dropdown
+        // Add custom entity field name dropdown (this handles entityFieldName field)
         createEntityFieldNameComboBox(customFormLayout);
         formLayout.add(customFormLayout);
     }
