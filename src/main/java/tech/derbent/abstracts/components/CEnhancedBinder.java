@@ -197,8 +197,24 @@ public class CEnhancedBinder<BEAN> extends BeanValidationBinder<BEAN> {
             // Check for incomplete bindings before attempting to read the bean
             validateBindingsComplete();
             super.readBean(bean);
+            LOGGER.debug("Successfully completed readBean operation for bean type: {}", beanType.getSimpleName());
         } catch (final Exception e) {
-            LOGGER.error("Error during readBean for bean type: {}", beanType.getSimpleName());
+            LOGGER.error("Error during readBean for bean type: {} - {}: {}", beanType.getSimpleName(),
+                    e.getClass().getSimpleName(), e.getMessage());
+
+            // Log additional context if available
+            if (bean != null) {
+                LOGGER.debug("Bean state: {}", bean.toString());
+            }
+
+            // Check if we have any current bindings that might be causing issues
+            try {
+                int bindingCount = getBindings().size();
+                LOGGER.debug("Current binding count: {}", bindingCount);
+            } catch (Exception bindingException) {
+                LOGGER.debug("Could not retrieve binding count: {}", bindingException.getMessage());
+            }
+
             throw e;
         }
     }
@@ -267,16 +283,28 @@ public class CEnhancedBinder<BEAN> extends BeanValidationBinder<BEAN> {
 
                     int originalSize = incompleteBindings.size();
 
-                    // Clear the original object appropriately based on its type
-                    if (incompleteBindingsObj instanceof Set) {
-                        ((Set<?>) incompleteBindingsObj).clear();
-                    } else if (incompleteBindingsObj instanceof IdentityHashMap) {
-                        ((IdentityHashMap<?, ?>) incompleteBindingsObj).clear();
-                    } else if (incompleteBindingsObj instanceof Collection) {
-                        ((Collection<?>) incompleteBindingsObj).clear();
-                    }
+                    // Use safer clearing operations with better error handling
+                    try {
+                        if (incompleteBindingsObj instanceof Set) {
+                            @SuppressWarnings("rawtypes")
+                            Set rawSet = (Set) incompleteBindingsObj;
+                            rawSet.clear();
+                        } else if (incompleteBindingsObj instanceof IdentityHashMap) {
+                            @SuppressWarnings("rawtypes")
+                            IdentityHashMap rawMap = (IdentityHashMap) incompleteBindingsObj;
+                            rawMap.clear();
+                        } else if (incompleteBindingsObj instanceof Collection) {
+                            @SuppressWarnings("rawtypes")
+                            Collection rawCollection = (Collection) incompleteBindingsObj;
+                            rawCollection.clear();
+                        }
 
-                    LOGGER.info("Cleared {} incomplete bindings for {}", originalSize, beanType.getSimpleName());
+                        LOGGER.info("Cleared {} incomplete bindings for {}", originalSize, beanType.getSimpleName());
+                    } catch (final Exception clearException) {
+                        LOGGER.warn("Failed to clear incomplete bindings for {}: {} - {}", beanType.getSimpleName(),
+                                clearException.getClass().getSimpleName(), clearException.getMessage());
+                        // Don't re-throw - continue with readBean operation
+                    }
                 }
 
             }
