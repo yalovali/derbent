@@ -181,6 +181,25 @@ Run tests with:
 ./mvnw test -Dtest=CEnhancedBinderTest
 ```
 
+## Known Issues and Solutions
+
+### Incomplete Binding Error Fix
+
+**Issue**: `BindingException: An exception has been thrown inside binding logic for the field element [label='Entity Field Name']`
+
+**Root Cause**: The `validateBindingsComplete()` method used unsafe generic wildcard casting operations that could cause `ClassCastException` at runtime.
+
+**Solution**: 
+- Replaced unsafe casting with `@SuppressWarnings("rawtypes")` raw type casting
+- Added comprehensive exception handling around clearing operations
+- Enhanced error logging for better debugging
+- Graceful degradation when binding validation fails
+
+**Test Coverage**: 
+```bash
+./mvnw test -Dtest=CScreenLinesEditDialogBindingTest
+```
+
 ## Demo
 
 A complete demo is available in `CEnhancedBinderDemo.java` showing:
