@@ -129,16 +129,15 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
             // {}",entity.getClass().getSimpleName(),
             // CSpringAuxillaries.safeToString(entity));
             CSpringAuxillaries.initializeLazily(entity);
-            
+
             // Automatic detection and handling of CEntityOfProject relationships
             if (entity instanceof tech.derbent.abstracts.domains.CEntityOfProject) {
-                final tech.derbent.abstracts.domains.CEntityOfProject projectEntity = 
-                    (tech.derbent.abstracts.domains.CEntityOfProject) entity;
+                final tech.derbent.abstracts.domains.CEntityOfProject projectEntity = (tech.derbent.abstracts.domains.CEntityOfProject) entity;
                 initializeLazyRelationship(projectEntity.getProject(), "project");
             }
         } catch (final Exception e) {
-            LOGGER.warn("Error initializing lazy fields for {} with ID: {}", 
-                    entity.getClass().getSimpleName(), entity.getId(), e);
+            LOGGER.warn("Error initializing lazy fields for {} with ID: {}", entity.getClass().getSimpleName(),
+                    entity.getId(), e);
         }
     }
 
@@ -155,8 +154,8 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
         try {
             final boolean success = CSpringAuxillaries.initializeLazily(relationshipEntity);
             if (!success) {
-                LOGGER.warn("Failed to initialize lazy relationship '{}': {}",
-                        relationshipName, CSpringAuxillaries.safeToString(relationshipEntity));
+                LOGGER.warn("Failed to initialize lazy relationship '{}': {}", relationshipName,
+                        CSpringAuxillaries.safeToString(relationshipEntity));
             }
         } catch (final Exception e) {
             LOGGER.warn("Error initializing lazy relationship '{}': {}", relationshipName,

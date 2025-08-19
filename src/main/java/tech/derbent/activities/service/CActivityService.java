@@ -136,7 +136,8 @@ public class CActivityService extends CEntityOfProjectService<CActivity>
         }
 
         try {
-            LOGGER.debug("Initializing lazy fields for CActivity with ID: {} entity: {}", entity.getId(), entity.getName());
+            LOGGER.debug("Initializing lazy fields for CActivity with ID: {} entity: {}", entity.getId(),
+                    entity.getName());
 
             super.initializeLazyFields(entity); // Handles CEntityOfProject relationships automatically
             initializeLazyRelationship(entity.getActivityType(), "activityType");

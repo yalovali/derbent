@@ -29,8 +29,8 @@ public class CRiskService extends CEntityOfProjectService<CRisk> {
     }
 
     /**
-     * Gets a risk by ID with all relationships eagerly loaded. This prevents LazyInitializationException
-     * when accessing risk details.
+     * Gets a risk by ID with all relationships eagerly loaded. This prevents LazyInitializationException when accessing
+     * risk details.
      * 
      * @param id
      *            the risk ID

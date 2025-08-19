@@ -89,8 +89,8 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting>
     }
 
     /**
-     * Gets a meeting by ID with all relationships eagerly loaded. This prevents LazyInitializationException
-     * when accessing meeting details.
+     * Gets a meeting by ID with all relationships eagerly loaded. This prevents LazyInitializationException when
+     * accessing meeting details.
      * 
      * @param id
      *            the meeting ID

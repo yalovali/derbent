@@ -121,8 +121,8 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
     }
 
     /**
-     * Gets a user by ID with eagerly loaded UserType and Company relationships. This prevents LazyInitializationException
-     * when accessing user type and company information.
+     * Gets a user by ID with eagerly loaded UserType and Company relationships. This prevents
+     * LazyInitializationException when accessing user type and company information.
      * 
      * @param id
      *            the user ID

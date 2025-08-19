@@ -18,8 +18,7 @@ public interface CUserRepository extends CAbstractNamedRepository<CUser> {
             + "LEFT JOIN FETCH u.userType " + "LEFT JOIN FETCH u.company " + "WHERE u.id = :userId")
     Optional<CUser> findByIdWithUserSettings(@Param("userId") Long id);
 
-    @Query("SELECT u FROM CUser u " + "LEFT JOIN FETCH u.userType " + "LEFT JOIN FETCH u.company "
-            + "WHERE u.id = :id")
+    @Query("SELECT u FROM CUser u " + "LEFT JOIN FETCH u.userType " + "LEFT JOIN FETCH u.company " + "WHERE u.id = :id")
     Optional<CUser> findByIdWithUserType(@Param("id") Long id);
 
     @Query("SELECT u FROM CUser u " + "LEFT JOIN FETCH u.userType " + "LEFT JOIN FETCH u.company "
