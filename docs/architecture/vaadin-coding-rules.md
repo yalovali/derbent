@@ -136,82 +136,177 @@ List<CMeeting> findByProjectWithParticipants(@Param("project") CProject project)
 
 #### 1. Extend Appropriate Base Repository
 ```java
-// ✅ CORRECT: Extend specific base repository
-public interface CMeetingRepository extends CEntityOfProjectRepository<CMeeting> {
-    // Meeting-specific methods
+// ✅ CORRECT: Extend specific base repository for project entities
+public interface CActivityRepository extends CEntityOfProjectRepository<CActivity> {
+    // Activity-specific methods with optimized eager loading
 }
 
-// ✅ CORRECT: Extend named entity repository
+// ✅ CORRECT: Extend named entity repository for standalone entities
 public interface CUserRepository extends CAbstractNamedRepository<CUser> {
     // User-specific methods
 }
+
+// ✅ CORRECT: Extend base repository for simple entities
+public interface CActivityTypeRepository extends CAbstractRepository<CActivityType> {
+    // Type-specific methods
+}
 ```
 
-#### 2. Method Naming Conventions
+#### 2. Method Naming Conventions and Required Patterns
 ```java
-// ✅ CORRECT: Descriptive method names
-Optional<CMeeting> findByIdWithEagerLoading(@Param("id") Long id);
-List<CUser> findAllEnabledWithEagerLoading();
-List<CMeeting> findByProjectForListView(@Param("project") CProject project);
+// ✅ REQUIRED: Optimized eager loading for detail views
+@Query("SELECT e FROM EntityName e " +
+       "LEFT JOIN FETCH e.type " +
+       "LEFT JOIN FETCH e.status " +
+       "LEFT JOIN FETCH e.project " +
+       "WHERE e.id = :id")
+Optional<EntityName> findByIdWithEagerLoading(@Param("id") Long id);
 
-// ❌ INCORRECT: Generic names
-Optional<CMeeting> findWithDetails(@Param("id") Long id);
-List<CUser> findSpecial();
+// ✅ REQUIRED: Project-aware list queries
+@Override
+@Query("SELECT e FROM EntityName e " +
+       "LEFT JOIN FETCH e.type " +
+       "LEFT JOIN FETCH e.status " +
+       "WHERE e.project = :project")
+List<EntityName> findByProject(@Param("project") CProject project, Pageable pageable);
+
+// ❌ INCORRECT: Generic names without eager loading strategy
+Optional<EntityName> findWithDetails(@Param("id") Long id);
+List<EntityName> findSpecial();
+```
+
+#### 3. Performance-Optimized Query Patterns
+```java
+// ✅ CORRECT: Separate queries for different use cases
+@Query("SELECT e FROM EntityName e " +
+       "LEFT JOIN FETCH e.basicField1 " +
+       "LEFT JOIN FETCH e.basicField2 " +
+       "WHERE e.project = :project")
+List<EntityName> findByProjectForListView(@Param("project") CProject project);
+
+@Query("SELECT e FROM EntityName e " +
+       "LEFT JOIN FETCH e.basicField1 " +
+       "LEFT JOIN FETCH e.basicField2 " +
+       "LEFT JOIN FETCH e.complexRelationship " +
+       "LEFT JOIN FETCH e.heavyRelationship " +
+       "WHERE e.id = :id")
+Optional<EntityName> findByIdWithEagerLoading(@Param("id") Long id);
 ```
 
 ## Service Layer Rules
 
 ### Service Design Rules
 
-#### 1. Override findById for Optimization
+#### 1. Service Constructor and Security Patterns
 ```java
-// ✅ CORRECT: Optimized findById
-@Override
-public CMeeting findById(final Long id) {
-    if (id == null) {
-        return null;
+// ✅ CORRECT: Modern service pattern with security
+@Service
+@PreAuthorize("isAuthenticated()")
+public class CActivityService extends CEntityOfProjectService<CActivity> 
+        implements CKanbanService<CActivity, CActivityStatus> {
+    
+    public CActivityService(final CActivityRepository repository, final Clock clock) {
+        super(repository, clock);
     }
-    return ((CMeetingRepository) repository).findByIdWithEagerLoading(id).orElse(null);
+    
+    // Service methods with proper authorization
+}
+```
+
+#### 2. Optimized findById Implementation
+```java
+// ✅ CORRECT: Optimized findById with validation
+public CActivity findById(final Long id) {
+    Check.notNull(id, "Activity ID cannot be null");
+    return ((CActivityRepository) repository).findByIdWithEagerLoading(id).orElse(null);
 }
 
-// ❌ INCORRECT: Using default implementation
+// ❌ INCORRECT: Using default implementation without optimization
 // Don't override if no optimization is needed
 ```
 
-#### 2. Avoid Redundant Service Methods
+#### 3. Specialized Service Interface Implementation
 ```java
-// ❌ INCORRECT: Redundant helper methods
-@Deprecated
-public CMeeting setParticipants(CMeeting meeting, Set<CUser> participants) {
-    meeting.setParticipants(participants);
-    return save(meeting);
+// ✅ CORRECT: Implement domain-specific interfaces
+public class CActivityService extends CEntityOfProjectService<CActivity>
+        implements CKanbanService<CActivity, CActivityStatus> {
+    
+    @Override
+    @Transactional(readOnly = true)
+    public Map<CActivityStatus, List<CActivity>> getEntitiesGroupedByStatus(final CProject project) {
+        final List<CActivity> activities = findByProject(project);
+        return activities.stream().collect(Collectors.groupingBy(
+            activity -> activity.getStatus() != null ? activity.getStatus() : createNoStatusInstance(project),
+            Collectors.toList()));
+    }
 }
-
-// ✅ CORRECT: Use entity methods directly
-// meeting.setParticipants(participants);
-// meetingService.save(meeting);
 ```
 
-#### 3. Lazy Field Initialization Best Practices
+#### 2. Avoid Redundant Service Methods - Enhanced Guidelines
 ```java
-// ✅ CORRECT: Minimal lazy initialization
+// ❌ INCORRECT: Redundant auxiliary methods (DEPRECATED)
+@Deprecated
+public CActivity setActivityType(CActivity activity, CActivityType type, String description) {
+    activity.setActivityType(type);
+    activity.setDescription(description);
+    return save(activity);
+}
+
+@Deprecated  
+public CActivity setAssignedUsers(CActivity activity, CUser assignedTo, CUser createdBy) {
+    activity.setAssignedTo(assignedTo);
+    activity.setCreatedBy(createdBy);
+    return save(activity);
+}
+
+// ✅ CORRECT: Use entity setters directly with enhanced binder
+activity.setActivityType(type);
+activity.setDescription(description);
+activity.setAssignedTo(assignedTo);
+activity.setCreatedBy(createdBy);
+activityService.save(activity); // Single save operation
+
+// ✅ CORRECT: Business logic methods that add real value
+@Transactional
+public CActivity startActivity(final CActivity activity) {
+    validateActivityCanBeStarted(activity);
+    activity.setStatus(findStatusByName("IN_PROGRESS"));
+    activity.setStartDate(LocalDate.now());
+    updateRelatedActivities(activity);
+    return save(activity);
+}
+```
+
+#### 3. Enhanced Lazy Field Initialization Best Practices
+```java
+// ✅ CORRECT: Comprehensive lazy initialization with automatic detection
 @Override
-protected void initializeLazyFields(final CMeeting entity) {
+protected void initializeLazyFields(final CActivity entity) {
     if (entity == null) {
         return;
     }
-    super.initializeLazyFields(entity);
+    super.initializeLazyFields(entity); // Handles CEntityOfProject automatically
     
-    // Only initialize what JOIN FETCH can't handle
-    initializeLazyRelationship(entity.getParticipants());
-    initializeLazyRelationship(entity.getAttendees());
+    // Only initialize relationships not handled by JOIN FETCH queries
+    // These are typically complex collections or rarely accessed fields
+    initializeLazyRelationship(entity.getSubActivities());
+    initializeLazyRelationship(entity.getComments());
+    initializeLazyRelationship(entity.getAttachments());
 }
 
 // ❌ INCORRECT: Initializing eagerly loaded fields
 @Override
-protected void initializeLazyFields(final CMeeting entity) {
-    initializeLazyRelationship(entity.getStatus()); // Already EAGER
-    initializeLazyRelationship(entity.getMeetingType()); // Already EAGER
+protected void initializeLazyFields(final CActivity entity) {
+    initializeLazyRelationship(entity.getStatus()); // Already EAGER in @ManyToOne
+    initializeLazyRelationship(entity.getActivityType()); // Already loaded via JOIN FETCH
+    initializeLazyRelationship(entity.getProject()); // Handled by super class
+}
+
+// ✅ CORRECT: Entity-specific validation with helper methods  
+private CActivityStatus createNoStatusInstance(final CProject project) {
+    final CActivityStatus noStatus = new CActivityStatus("No Status", project);
+    noStatus.setDescription("Activities without an assigned status");
+    return noStatus;
 }
 ```
 
@@ -250,31 +345,63 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting> {
 
 ### Query Performance Rules
 
-#### 1. Monitor N+1 Query Problems
+#### 1. Monitor N+1 Query Problems with Enhanced Detection
 ```java
 // ✅ CORRECT: Log and monitor queries in development
 # application-dev.properties
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.type.descriptor.sql.BasicBinder=TRACE
 logging.level.org.hibernate.SQL=DEBUG
+logging.level.org.hibernate.type.descriptor.sql.BasicBinder=TRACE
+
+// ✅ CORRECT: Service-level query monitoring
+@Override
+public List<CActivity> findByProject(final CProject project) {
+    final long startTime = System.currentTimeMillis();
+    final List<CActivity> results = super.findByProject(project);
+    LOGGER.debug("findByProject took {}ms, returned {} activities", 
+                System.currentTimeMillis() - startTime, results.size());
+    return results;
+}
 ```
 
-#### 2. Use Pagination for Large Result Sets
+#### 2. Enhanced Pagination Patterns
 ```java
-// ✅ CORRECT: Paginated queries
-@Query("SELECT m FROM CMeeting m WHERE m.project = :project")
-Page<CMeeting> findByProject(@Param("project") CProject project, Pageable pageable);
+// ✅ CORRECT: Repository-level pagination with eager loading
+@Query("SELECT e FROM CActivity e " +
+       "LEFT JOIN FETCH e.activityType " +
+       "LEFT JOIN FETCH e.status " +
+       "WHERE e.project = :project")
+Page<CActivity> findByProjectWithEagerLoading(@Param("project") CProject project, Pageable pageable);
+
+// ✅ CORRECT: Service-level pagination with project context
+@Transactional(readOnly = true)
+public List<CActivity> findByProjectPaginated(final CProject project, final int page, final int size) {
+    final Pageable pageable = PageableUtils.createPageable(page, size);
+    return ((CActivityRepository) repository).findByProjectWithEagerLoading(project, pageable).getContent();
+}
 ```
 
-#### 3. Avoid Loading Unnecessary Data
+#### 3. Optimized Data Loading Strategies
 ```java
-// ✅ CORRECT: Project-specific queries
-@Query("SELECT m.id, m.name, m.status FROM CMeeting m WHERE m.project = :project")
+// ✅ CORRECT: Different queries for different use cases
+@Query("SELECT a.id, a.name, a.status.name FROM CActivity a WHERE a.project = :project")
 List<Object[]> findBasicInfoByProject(@Param("project") CProject project);
 
-// ❌ INCORRECT: Loading full entities when only basic info needed
-@Query("SELECT m FROM CMeeting m WHERE m.project = :project")
-List<CMeeting> findByProject(@Param("project") CProject project);
+@Query("SELECT a FROM CActivity a " +
+       "LEFT JOIN FETCH a.activityType " +
+       "LEFT JOIN FETCH a.status " +
+       "LEFT JOIN FETCH a.assignedTo " +
+       "WHERE a.project = :project")  
+List<CActivity> findByProjectForDetailView(@Param("project") CProject project);
+
+// ❌ INCORRECT: Loading full entities for list views
+@Query("SELECT a FROM CActivity a " +
+       "LEFT JOIN FETCH a.subActivities " +
+       "LEFT JOIN FETCH a.comments " +
+       "WHERE a.project = :project")
+List<CActivity> findByProjectForListView(@Param("project") CProject project); // Too much data
 ```
 
 ## Code Documentation Rules
@@ -338,30 +465,75 @@ public CMeeting setParticipants(CMeeting meeting, Set<CUser> participants) {
 
 ### Unit Test Requirements
 
-#### 1. Test Repository Queries
+#### 1. Test Repository Queries with Current Patterns
 ```java
 @Test
 void testFindByIdWithEagerLoading() {
-    // Given
-    CMeeting meeting = createTestMeeting();
-    meetingRepository.save(meeting);
+    // Given - Create test entity with relationships
+    final CProject project = createTestProject();
+    final CActivityType activityType = createTestActivityType(project);
+    final CActivity activity = createTestActivity(project, activityType);
+    activityRepository.save(activity);
     
-    // When
-    Optional<CMeeting> result = meetingRepository.findByIdWithEagerLoading(meeting.getId());
+    // When - Use optimized repository method
+    final Optional<CActivity> result = activityRepository.findByIdWithEagerLoading(activity.getId());
     
-    // Then
+    // Then - Verify eager loading worked
     assertThat(result).isPresent();
+    assertThat(result.get().getActivityType()).isNotNull(); // Verify eager loading
+    assertThat(result.get().getProject()).isNotNull(); // Verify eager loading
     assertThat(result.get().getStatus()).isNotNull(); // Verify eager loading
+}
+
+@Test
+void testFindByProjectWithPagination() {
+    // Given - Create multiple test activities
+    final CProject project = createTestProject();
+    createMultipleTestActivities(project, 15);
+    
+    // When - Use paginated query
+    final Pageable pageable = PageableUtils.createPageable(0, 10);
+    final List<CActivity> results = activityRepository.findByProject(project, pageable);
+    
+    // Then - Verify pagination works
+    assertThat(results).hasSize(10);
+    assertThat(results.get(0).getProject()).isEqualTo(project);
 }
 ```
 
-#### 2. Test Service Layer Optimizations
+#### 2. Test Service Layer Optimizations with Enhanced Patterns
 ```java
 @Test
-void testFindByIdUsesOptimizedQuery() {
-    // Test that service uses the optimized repository method
-    CMeeting meeting = meetingService.findById(1L);
-    // Verify no additional queries are needed for associations
+void testServiceUsesOptimizedRepositoryMethod() {
+    // Given - Mock repository with optimized method
+    final CActivity activity = createTestActivity();
+    when(activityRepository.findByIdWithEagerLoading(1L))
+        .thenReturn(Optional.of(activity));
+    
+    // When - Use service method
+    final CActivity result = activityService.findById(1L);
+    
+    // Then - Verify optimized method was called
+    assertThat(result).isEqualTo(activity);
+    verify(activityRepository).findByIdWithEagerLoading(1L);
+    verify(activityRepository, never()).findById(1L); // Standard method not called
+}
+
+@Test
+void testKanbanServiceImplementation() {
+    // Given - Create activities with different statuses
+    final CProject project = createTestProject();
+    final List<CActivity> activities = createActivitiesWithVariousStatuses(project);
+    
+    // When - Use kanban service method
+    final Map<CActivityStatus, List<CActivity>> groupedActivities = 
+        activityService.getEntitiesGroupedByStatus(project);
+    
+    // Then - Verify grouping works correctly
+    assertThat(groupedActivities).isNotEmpty();
+    assertThat(groupedActivities.keySet())
+        .extracting(CActivityStatus::getName)
+        .contains("TODO", "IN_PROGRESS", "COMPLETED");
 }
 ```
 
@@ -431,10 +603,25 @@ public List<CMeeting> findByProject(Long projectId) {
 
 ## Conclusion
 
-Following these coding rules ensures:
-- Consistent code quality across the project
-- Optimal performance for data access operations
-- Maintainable and scalable codebase
-- Clear documentation and examples for team members
+Following these enhanced coding rules ensures:
+- **Consistent code quality** across all project modules and components
+- **Optimal performance** for data access operations with comprehensive lazy loading
+- **Maintainable and scalable** codebase with proper service layer patterns
+- **Clear documentation** and examples for team members and new developers
+- **Robust testing infrastructure** with automated UI and integration testing
+- **Modern annotation-driven** form generation with enhanced binder support
+- **Efficient repository patterns** with optimized eager loading strategies
+- **Comprehensive panel architecture** for complex entity management
+- **Project-aware functionality** with proper session management
 
-These rules should be reviewed and updated regularly as the project evolves and new patterns emerge.
+### Key Improvements in Current Version:
+- Enhanced lazy loading with automatic `CEntityOfProject` detection
+- Comprehensive panel-based UI architecture across all modules
+- Advanced annotation system with string ComboBox and data provider support
+- Optimized repository patterns with specialized eager loading queries
+- Modern service patterns with security annotations and interface implementations
+- Robust testing framework with generic test superclasses
+- Performance monitoring and query optimization guidelines
+- Component-specific CSS organization for better maintainability
+
+These rules should be reviewed and updated regularly as the project evolves, new patterns emerge, and additional modules are implemented. The comprehensive nature of these guidelines ensures consistency across the expanding codebase while maintaining high performance and code quality standards.
