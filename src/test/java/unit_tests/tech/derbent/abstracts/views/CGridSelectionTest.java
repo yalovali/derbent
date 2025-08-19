@@ -16,8 +16,8 @@ import tech.derbent.users.domain.CUser;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test class for CGrid selection improvements following coding guidelines.
- * Tests the requirement that grids should always have a selected row when data is available.
+ * Test class for CGrid selection improvements following coding guidelines. Tests the requirement that grids should
+ * always have a selected row when data is available.
  */
 @SpringBootTest(classes = tech.derbent.Application.class)
 @TestPropertySource(properties = { "spring.datasource.url=jdbc:h2:mem:testdb",
@@ -31,13 +31,10 @@ public class CGridSelectionTest {
     @BeforeEach
     void setUp() {
         grid = new CGrid<>(CUser.class);
-        
+
         // Create test users
-        testUsers = Arrays.asList(
-            createTestUser(1L, "Test User 1"),
-            createTestUser(2L, "Test User 2"),
-            createTestUser(3L, "Test User 3")
-        );
+        testUsers = Arrays.asList(createTestUser(1L, "Test User 1"), createTestUser(2L, "Test User 2"),
+                createTestUser(3L, "Test User 3"));
     }
 
     private CUser createTestUser(Long id, String name) {
@@ -53,10 +50,10 @@ public class CGridSelectionTest {
     void testEnsureSelectionWhenDataAvailable_WithNoData() {
         // Given: Grid with no data
         grid.setItems();
-        
+
         // When: ensureSelectionWhenDataAvailable is called
         grid.ensureSelectionWhenDataAvailable();
-        
+
         // Then: No selection should be made (no exception should be thrown)
         assertNull(grid.asSingleSelect().getValue());
     }
@@ -66,10 +63,10 @@ public class CGridSelectionTest {
         // Given: Grid with data but no selection
         grid.setItems(testUsers);
         assertNull(grid.asSingleSelect().getValue());
-        
+
         // When: ensureSelectionWhenDataAvailable is called
         grid.ensureSelectionWhenDataAvailable();
-        
+
         // Then: First item should be selected
         assertNotNull(grid.asSingleSelect().getValue());
         assertEquals(testUsers.get(0).getName(), grid.asSingleSelect().getValue().getName());
@@ -80,10 +77,10 @@ public class CGridSelectionTest {
         // Given: Grid with data and existing selection
         grid.setItems(testUsers);
         grid.select(testUsers.get(1)); // Select second item
-        
+
         // When: ensureSelectionWhenDataAvailable is called
         grid.ensureSelectionWhenDataAvailable();
-        
+
         // Then: Existing selection should be preserved
         assertEquals(testUsers.get(1).getName(), grid.asSingleSelect().getValue().getName());
     }
@@ -92,16 +89,16 @@ public class CGridSelectionTest {
     void testSelectMethodWithLogging() {
         // Given: Grid with data
         grid.setItems(testUsers);
-        
+
         // When: select method is called
         grid.select(testUsers.get(0));
-        
+
         // Then: Selection should work correctly
         assertEquals(testUsers.get(0).getName(), grid.asSingleSelect().getValue().getName());
-        
+
         // When: deselecting
         grid.select(null);
-        
+
         // Then: No selection should exist
         assertNull(grid.asSingleSelect().getValue());
     }
@@ -111,10 +108,10 @@ public class CGridSelectionTest {
         // Given: Empty grid
         grid.setItems();
         assertNull(grid.asSingleSelect().getValue());
-        
+
         // When: Data is added to the grid
         grid.setItems(testUsers);
-        
+
         // Then: The grid should automatically select first item
         // Note: This test verifies the data provider listener functionality
         // In a real UI environment, this would be triggered automatically
@@ -129,18 +126,18 @@ public class CGridSelectionTest {
         // 1. Generic design - works with any CEntityDB subclass
         // 2. Always selected row when data available
         // 3. Consistent behavior across implementations
-        
+
         // Given: Grid with various data scenarios
         CGrid<CUser> userGrid = new CGrid<>(CUser.class);
-        
+
         // Test 1: Generic design - works with CUser entities
         userGrid.setItems(testUsers);
         userGrid.ensureSelectionWhenDataAvailable();
         assertNotNull(userGrid.asSingleSelect().getValue());
-        
+
         // Test 2: Always selected row principle
         assertTrue(userGrid.asSingleSelect().getValue() != null);
-        
+
         // Test 3: Consistent behavior - multiple calls should be safe
         userGrid.ensureSelectionWhenDataAvailable();
         userGrid.ensureSelectionWhenDataAvailable();
