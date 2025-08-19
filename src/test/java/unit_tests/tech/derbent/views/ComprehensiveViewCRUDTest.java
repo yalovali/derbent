@@ -32,7 +32,7 @@ import unit_tests.tech.derbent.abstracts.domains.CTestBase;
  * Comprehensive test class for all views in the application. Tests CRUD operations, grid functionality, field
  * population, and data integrity for all entity views as requested in the review comment.
  */
-@SpringBootTest
+@SpringBootTest(classes = tech.derbent.Application.class)
 @Transactional
 public class ComprehensiveViewCRUDTest extends CTestBase {
     // Meeting services

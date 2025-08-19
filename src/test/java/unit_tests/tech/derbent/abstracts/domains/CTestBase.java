@@ -54,7 +54,7 @@ public abstract class CTestBase {
     @Mock
     protected CActivityRepository activityRepository;
 
-    @Mock
+    @Autowired
     protected CActivityService activityService;
 
     @Mock
@@ -66,6 +66,7 @@ public abstract class CTestBase {
     @Mock
     protected CActivityTypeRepository activityTypeRepository;
 
+    @Autowired
     protected CActivityTypeService activityTypeService;
 
     @Mock
@@ -98,6 +99,7 @@ public abstract class CTestBase {
     @Mock
     protected CDecisionTypeRepository decisionTypeRepository;
 
+    @Autowired
     protected CDecisionTypeService decisionTypeService;
 
     protected CMeeting meeting;
@@ -122,7 +124,7 @@ public abstract class CTestBase {
     @Autowired
     protected CProjectRepository projectRepository;
 
-    @Mock
+    @Autowired
     protected CProjectService projectService;
 
     // Risk services
@@ -132,7 +134,7 @@ public abstract class CTestBase {
     @Mock
     protected CRiskStatusRepository riskStatusRepository;
 
-    @Mock
+    @Autowired
     protected CRiskStatusService riskStatusService;
 
     @Mock
@@ -151,45 +153,40 @@ public abstract class CTestBase {
     @Mock
     protected CUserRepository userRepository;
 
-    @Mock
+    @Autowired
     protected CUserService userService;
 
     @Mock
     private CUserTypeRepository userTypeRepository;
 
-    @Mock
+    @Autowired
     protected CUserTypeService userTypeService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        projectService = new CProjectService(projectRepository, clock, null);
+        
+        // Create test entities for use in tests
         project = new CProject("Test Project");
-        activityStatusService = new CActivityStatusService(activityStatusRepository, clock);
-        activityService = new CActivityService(activityRepository, clock);
-        activityTypeService = new CActivityTypeService(activityTypeRepository, clock);
-        decisionTypeService = new CDecisionTypeService(decisionTypeRepository, clock);
-        userService = new CUserService(userRepository, clock);
         testUser = new CUser("Test User");
         testUser.setLogin("testuser");
-        //
-        riskStatusService = new CRiskStatusService(riskStatusRepository, clock);
-        userTypeService = new CUserTypeService(userTypeRepository, clock);
         testActivity = new CActivity("Test Activity", project);
         priority = new CCommentPriority("High", project);
         priority.setColor("#FF0000");
         meetingType = new CMeetingType("Test Meeting Type", project);
         status = new CMeetingStatus("SCHEDULED", project);
         meeting = new CMeeting("Test Meeting", project, meetingType);
-        sessionService = new CSessionService(authenticationContext, userService, projectService);
+        
+        // Set up authentication context for session service
         final User authUser = new User("testuser", "password", java.util.Collections.emptyList());
         final UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(testUser,
                 null, authUser.getAuthorities());
-        project.setName("Test Project");
+        
         testActivityType = new CActivityType("Development", project);
         testActivity.setActivityType(testActivityType);
         testActivityStatus = new CActivityStatus("IN_PROGRESS", project);
         testActivity.setStatus(testActivityStatus);
+        
         SecurityContextHolder.getContext().setAuthentication(authentication);
         setupForTest();
     }
