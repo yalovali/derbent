@@ -24,6 +24,9 @@ CActivityStatus                   // Workflow management (TODO, IN_PROGRESS, REV
 CActivityPriority                 // Priority system (CRITICAL, HIGH, MEDIUM, LOW, LOWEST)
 CMeeting extends CEntityOfProject // Meeting management system
 CRisk extends CEntityOfProject    // Risk management system
+CDecision extends CEntityOfProject // Decision tracking and management
+CScreen extends CEntityNamed      // Dynamic screen configuration system
+CComment extends CEntityOfProject // Comment and collaboration system
 ```
 
 Check [project_design_description.md](./project_design_description.md) file for complete project scope and architectural details.
@@ -48,24 +51,34 @@ Check [project_design_description.md](./project_design_description.md) file for 
 ```
 src/main/java/tech/derbent/
 ├── abstracts/           # Base classes and annotations
-│   ├── annotations/     # MetaData and other annotations
+│   ├── annotations/     # MetaData and form generation annotations
 │   ├── domains/         # Base domain entities (CEntityNamed, CEntityOfProject)
-│   ├── services/        # Base service classes
-│   └── views/           # Base UI components (CButton, CDialog, CGrid)
-│   └── tests/           # Tests UI, unit etc.
+│   ├── services/        # Base service classes with lazy loading support
+│   ├── views/           # Base UI components (CButton, CDialog, CGrid, CPanelBase)
+│   ├── components/      # Enhanced binder and advanced UI components
+│   └── utils/           # Utility classes and helper functions
 ├── activities/          # Activity management module
 │   ├── domain/         # CActivity, CActivityStatus, CActivityPriority
-│   ├── service/        # Activity business logic
-│   └── view/           # Activity UI components
-│   └── tests/           # Tests UI, unit etc.
+│   ├── service/        # Activity business logic and repositories
+│   └── view/           # Activity UI components and panels
 ├── users/              # User management module
 │   ├── domain/         # CUser, CUserRole, CUserType
-│   ├── service/        # User business logic
-│   └── tests/           # Tests UI, unit etc.
-│   └── view/           # User UI components
+│   ├── service/        # User business logic and repositories
+│   └── view/           # User UI components and panels
 ├── projects/           # Project management module
 ├── meetings/           # Meeting management module
 ├── companies/          # Company management module
+├── risks/              # Risk management module
+├── decisions/          # Decision tracking module
+├── comments/           # Comment and collaboration module
+├── screens/            # Dynamic screen configuration module
+├── kanban/             # Kanban board functionality
+├── session/            # Session and project context management
+├── config/             # Application configuration and sample data
+├── setup/              # System configuration and settings
+├── administration/     # Administrative functions
+├── dashboard/          # Dashboard and analytics
+├── login/              # Authentication and login
 └── base/               # Core infrastructure
     └── ui/dialogs/     # Standard dialogs (CWarningDialog, CInformationDialog)
 ```
@@ -132,21 +145,22 @@ src/main/java/tech/derbent/
 
 Tests are organized into three main directories under `src/test/java/`:
 
-1. **Unit Tests** (`src/test/java/unit-tests/`):
-   - Business logic tests
+1. **Unit Tests** (`src/test/java/unit_tests/`):
+   - Business logic tests organized by package structure
    - Service layer tests  
    - Domain entity tests
    - Validation tests
    - Integration tests
    - Manual verification tests
+   - Component-specific tests (annotations, views, domains)
 
-2. **UI Tests** (`src/test/java/ui-tests/`):
+2. **UI Tests** (`src/test/java/ui_tests/`):
    - Vaadin UI component tests
    - View tests without browser automation
    - Form validation UI tests
    - Component interaction tests
 
-3. **Automated Tests** (`src/test/java/automated-tests/`):
+3. **Automated Tests** (`src/test/java/automated_tests/`):
    - Playwright browser automation tests
    - End-to-end testing scenarios
    - Full application workflow tests
@@ -287,9 +301,58 @@ public class CActivityView extends CProjectAwareMDPage<CActivity> {
 - Never add loggers at the end of functions. Always log at the start with full detail about the function and parameters
 - All code must follow Java naming conventions for variables and methods, except for class names which must start with "C"
 
-## 9.1. MetaData Annotation System
+## 9.1. MetaData Annotation System and Enhanced Binder
 
-This project uses a sophisticated **@MetaData** annotation system for automatic form generation and field configuration. This is a key architectural pattern that must be followed:
+This project uses a sophisticated **@MetaData** annotation system combined with **CEnhancedBinder** for automatic form generation and advanced field configuration. This is a key architectural pattern that must be followed:
+
+### CEnhancedBinder Pattern
+The enhanced binder provides advanced validation, binding, and form generation capabilities:
+
+```java
+// Enhanced binder usage in panels
+public class CPanelActivityDescription extends CPanelActivityBase {
+    
+    public CPanelActivityDescription(CActivity currentEntity,
+        CEnhancedBinder<CActivity> binder, CActivityService service) {
+        super("Basic Information", currentEntity, binder, service);
+        openPanel(); // Only open this panel by default
+    }
+    
+    @Override
+    protected void updatePanelEntityFields() {
+        // Enhanced binder automatically generates fields based on MetaData
+        setEntityFields(List.of("name", "description", "activityType", "project"));
+    }
+}
+```
+
+### Advanced MetaData Features
+The annotation system now supports comprehensive field configuration:
+
+```java
+// Enhanced MetaData with ComboBox customization
+@MetaData(
+    displayName = "Activity Type", 
+    required = false, 
+    readOnly = false,
+    description = "Type category of the activity", 
+    hidden = false, 
+    order = 2,
+    dataProviderBean = "CActivityTypeService",
+    allowCustomValue = false,  // Selection-only ComboBox
+    comboBoxItemLabelProperty = "name"  // Display property
+)
+private CActivityType activityType;
+
+// String-based ComboBox with predefined options
+@MetaData(
+    displayName = "Status Category",
+    stringComboBoxOptions = {"TODO", "IN_PROGRESS", "REVIEW", "COMPLETED", "BLOCKED"},
+    allowCustomValue = false,
+    description = "Current status category"
+)
+private String statusCategory;
+```
 
 **MetaData Annotation Pattern:**
 ```java
@@ -344,12 +407,14 @@ private String name;
 
 **File Organization:**
 - Main styles: `src/main/frontend/themes/default/styles.css`
+- Component-specific styles: `src/main/frontend/themes/default/kanban.css`, `project-details.css`
 - Login styles: `src/main/frontend/themes/default/dev-login.css`
 - Background styles: `src/main/frontend/themes/default/login-background.css`
 
 **CSS Best Practices:**
 - Always use very simple CSS. Don't use JavaScript in Java or CSS
 - Use CSS built-in simple functions and Vaadin Lumo design tokens
+- Organize CSS by component functionality for better maintainability
 - Update CSS class names based on component class names, update CSS file accordingly
 - Use Vaadin Shadow DOM parts for component styling:
   ```css
@@ -357,6 +422,12 @@ private String name;
       background-image: url('./images/background1.png');
   }
   ```
+
+**Component-Specific CSS Organization:**
+- Create dedicated CSS files for complex components (kanban boards, project details)
+- Import component CSS files in main `styles.css`
+- Follow responsive design principles with mobile-friendly breakpoints
+- Use consistent naming conventions matching Java class names
 
 **Real CSS Examples from the Project:**
 ```css
@@ -387,12 +458,47 @@ vaadin-accordion-heading {
 }
 ```
 
-**Entity Panel Pattern Implementation:**
-- Follow the pattern of `CPanelActivityDescription` and its superclasses
-- Use this pattern to group each entity's fields according to related business topics
-- Don't leave any field out - create comprehensive panels for all entity aspects
-- Create necessary classes and base classes with consistent naming conventions
+**Entity Panel Architecture Implementation:**
+- Follow the pattern of comprehensive panel-based UI organization
+- Use `CPanelEntityBase` superclasses for consistent behavior across modules
+- Create separate panels for different business aspects of each entity
 - Only open the first panel by default (call `openPanel()` in constructor)
+
+**Current Panel Organization Patterns:**
+
+**Activity Management Panels:**
+- `CPanelActivityDescription` - Basic information and type
+- `CPanelActivityStatusPriority` - Status and priority management
+- `CPanelActivityTimeTracking` - Time and progress tracking
+- `CPanelActivityBudgetManagement` - Cost and budget information
+- `CPanelActivityResourceManagement` - User assignments and resources
+- `CPanelActivityHierarchy` - Parent-child relationships
+- `CPanelActivityProject` - Project association details
+
+**User Management Panels:**
+- `CPanelUserDescription` - Basic user information
+- `CPanelUserContactInfo` - Contact details and communication
+- `CPanelUserCompanyAssociation` - Company relationships
+- `CPanelUserSystemAccess` - Security and access controls
+- `CPanelUserProjectSettings` - Project-specific configurations
+
+**Meeting Management Panels:**
+- `CPanelMeetingBasicInfo` - Meeting details and type
+- `CPanelMeetingSchedule` - Date, time, and duration
+- `CPanelMeetingParticipants` - Attendees and participants
+- `CPanelMeetingAgenda` - Agenda items and topics
+- `CPanelMeetingMinutes` - Meeting notes and outcomes
+
+**Decision Management Panels:**
+- `CPanelDecisionDescription` - Decision details and rationale
+- `CPanelDecisionStatusManagement` - Decision lifecycle tracking
+- `CPanelDecisionTeamManagement` - Stakeholders and decision makers
+- `CPanelDecisionCostManagement` - Financial impact and budgeting
+
+**Dynamic Screen Management Panels:**
+- `CPanelScreenBasicInfo` - Screen configuration basics
+- `CPanelScreenLines` - Screen field definitions
+- `CPanelScreenRelatedEntities` - Entity relationships
 
 **Example Panel Implementation:**
 ```java
@@ -410,14 +516,6 @@ public class CPanelActivityDescription extends CPanelActivityBase {
     }
 }
 ```
-
-**Panel Organization Guidelines:**
-- Create separate panels for different business aspects:
-  - `CPanelActivityDescription` - Basic information
-  - `CPanelActivityStatusPriority` - Status and priority management
-  - `CPanelActivityTimeTracking` - Time and progress tracking
-  - `CPanelActivityBudgetManagement` - Cost and budget information
-  - `CPanelActivityResourceManagement` - User assignments and resources
 
 ## 9.5. Architecture Patterns and Best Practices
 
@@ -523,16 +621,45 @@ class ManualVerificationTest {
 
 ## 9.6. Lazy Loading Architecture Guidelines (Current Implementation)
 
-**Critical**: Follow the established lazy loading architecture. See `COMPREHENSIVE_LAZY_LOADING_FIX.md` for complete implementation details.
+**Critical**: Follow the established comprehensive lazy loading architecture. See `docs/patterns/comprehensive-lazy-loading-fix.md` for complete implementation details.
 
-### 9.6.3. Current Lazy Loading Architecture (✅ UPDATED)
-The application uses a comprehensive lazy loading solution implemented in base classes:
+### 9.6.1. Current Lazy Loading Architecture (✅ COMPREHENSIVE SOLUTION)
+The application uses a fully implemented lazy loading solution across all base classes:
 
 **Base Architecture**:
 - **CAbstractService**: Provides `initializeLazyFields()` with automatic `CEntityOfProject` detection
 - **CEntityOfProjectService**: Enhanced lazy field initialization for project-aware entities  
-- **Repository Layer**: Uses `LEFT JOIN FETCH` queries for eager loading
-- **Service Layer**: Overrides `getById()` methods for entity-specific eager loading
+- **CAbstractNamedEntityService**: Handles named entity lazy relationships
+- **Repository Layer**: Uses optimized `LEFT JOIN FETCH` queries for eager loading
+- **Service Layer**: Entity-specific `findById()` and `getById()` method overrides
+
+**Generic Lazy Loading Pattern**:
+```java
+// Base service automatically handles common patterns
+@Override
+protected void initializeLazyFields(final EntityClass entity) {
+    if (entity == null) return;
+    
+    // Automatic detection for CEntityOfProject
+    if (entity instanceof CEntityOfProject) {
+        initializeLazyRelationship(((CEntityOfProject) entity).getProject());
+    }
+    
+    // Entity-specific relationships handled by child classes
+    super.initializeLazyFields(entity);
+}
+```
+
+**Repository Eager Loading Strategy**:
+```java
+// Optimized queries for all main entities
+@Query("SELECT e FROM EntityName e " +
+       "LEFT JOIN FETCH e.commonField1 " +
+       "LEFT JOIN FETCH e.commonField2 " +
+       "LEFT JOIN FETCH e.project " +
+       "WHERE e.id = :id")
+Optional<EntityName> findByIdWithEagerLoading(@Param("id") Long id);
+```
 
 **Fixed User Service Method**:
 ```java
@@ -555,39 +682,58 @@ This fix ensures that when the CUsersView loads user data with projects, all laz
 ### 9.6.2. Implementation Pattern for New Entities
 All new entities with lazy relationships must follow this established pattern:
 
-**1. Repository Layer** - Add eager loading queries when needed:
+**1. Repository Layer** - Extend appropriate base repository:
 ```java
 @Repository
 public interface CNewEntityRepository extends CEntityOfProjectRepository<CNewEntity> {
-    // Only add custom queries if base class methods are insufficient
-    @Query("SELECT e FROM CNewEntity e LEFT JOIN FETCH e.entityType WHERE e.project = :project")
-    List<CNewEntity> findByProject(@Param("project") CProject project);
+    
+    // ✅ REQUIRED: Optimized eager loading query for detail views
+    @Query("SELECT e FROM CNewEntity e " +
+           "LEFT JOIN FETCH e.entityType " +
+           "LEFT JOIN FETCH e.status " +
+           "LEFT JOIN FETCH e.project " +
+           "LEFT JOIN FETCH e.assignedTo " +
+           "WHERE e.id = :id")
+    Optional<CNewEntity> findByIdWithEagerLoading(@Param("id") Long id);
+    
+    // ✅ REQUIRED: Project-aware list query with essential relationships
+    @Override
+    @Query("SELECT e FROM CNewEntity e " +
+           "LEFT JOIN FETCH e.entityType " +
+           "LEFT JOIN FETCH e.status " +
+           "WHERE e.project = :project")
+    List<CNewEntity> findByProject(@Param("project") CProject project, Pageable pageable);
 }
 ```
 
 **2. Service Layer** - Minimal overrides, leverage base class functionality:
 ```java
 @Service
+@PreAuthorize("isAuthenticated()")
 public class CNewEntityService extends CEntityOfProjectService<CNewEntity> {
     
-    // Only override getById() if custom eager loading is needed
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<CNewEntity> getById(final Long id) {
-        final Optional<CNewEntity> entity = repository.findById(id);
-        entity.ifPresent(this::initializeLazyFields);
-        return entity;
+    public CNewEntityService(final CNewEntityRepository repository, final Clock clock) {
+        super(repository, clock);
+    }
+    
+    // ✅ REQUIRED: Override findById for optimized eager loading
+    public CNewEntity findById(final Long id) {
+        Check.notNull(id, "Entity ID cannot be null");
+        return ((CNewEntityRepository) repository).findByIdWithEagerLoading(id).orElse(null);
     }
     
     // Only override initializeLazyFields() if entity has specific lazy relationships
     @Override
     protected void initializeLazyFields(final CNewEntity entity) {
         super.initializeLazyFields(entity); // Handles CEntityOfProject automatically
-        initializeLazyRelationship(entity.getSpecificField());
+        // Add entity-specific lazy field initialization if needed
+        initializeLazyRelationship(entity.getSpecificComplexField());
     }
     
     @Override
-    protected Class<CNewEntity> getEntityClass() { return CNewEntity.class; }
+    protected Class<CNewEntity> getEntityClass() { 
+        return CNewEntity.class; 
+    }
 }
 ```
 
@@ -1091,17 +1237,136 @@ public class CEntityService extends CEntityOfProjectService<CEntity> {
 - [Hierarchical Side Menu Implementation](./HIERARCHICAL_SIDE_MENU_IMPLEMENTATION.md) - Navigation patterns
 
 
+## 9.13. Modern Architectural Patterns and Components
+
+### 9.13.1. Enhanced Binder Architecture
+The `CEnhancedBinder` provides advanced form binding capabilities that extend Vaadin's standard binder:
+
+```java
+// Enhanced binder with automatic field generation
+public class CPanelActivityDescription extends CPanelActivityBase {
+    
+    @Override
+    protected void updatePanelEntityFields() {
+        // Enhanced binder automatically processes MetaData annotations
+        setEntityFields(List.of("name", "description", "activityType", "status"));
+        
+        // Automatic validation, data provider binding, and field customization
+        // based on @MetaData annotations
+    }
+    
+    @Override
+    protected ComboBoxDataProvider createComboBoxDataProvider() {
+        return new CEntityFormBuilder.ComboBoxDataProvider() {
+            @Override
+            public List<?> getItems(String dataProviderBean) {
+                // Automatic resolution of data provider services
+                return dataProviderResolver.resolveDataProvider(dataProviderBean);
+            }
+        };
+    }
+}
+```
+
+### 9.13.2. Dynamic Screen Configuration System
+The new `CScreen` and `CScreenLines` entities provide dynamic UI configuration:
+
+```java
+// Dynamic screen entity for flexible UI generation
+@Entity
+@Table(name = "cscreen")
+public class CScreen extends CEntityNamed<CScreen> {
+    
+    @OneToMany(mappedBy = "screen", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @MetaData(displayName = "Screen Fields", description = "Dynamic field definitions")
+    private Set<CScreenLines> screenLines = new HashSet<>();
+    
+    // Screen configuration and field management
+}
+
+// Service pattern for dynamic screen management
+@Service
+public class CScreenService extends CAbstractNamedEntityService<CScreen> {
+    
+    public List<Component> generateDynamicForm(final CScreen screen) {
+        return screen.getScreenLines().stream()
+            .sorted(Comparator.comparing(CScreenLines::getFieldOrder))
+            .map(this::createFieldFromScreenLine)
+            .collect(Collectors.toList());
+    }
+}
+```
+
+### 9.13.3. Project-Aware Session Management
+Enhanced session management provides consistent project context across all views:
+
+```java
+// Project-aware session service
+@Service
+@Component 
+@Scope("session")
+public class CSessionService implements CProjectChangeListener {
+    
+    private CProject currentProject;
+    private final EventBus eventBus;
+    
+    public void setCurrentProject(final CProject project) {
+        final CProject oldProject = this.currentProject;
+        this.currentProject = project;
+        
+        // Notify all project-aware components
+        eventBus.fireEvent(new ProjectChangeEvent(oldProject, project));
+    }
+    
+    // Thread-safe project context management
+    public CProject getCurrentProject() {
+        return Optional.ofNullable(currentProject)
+            .orElseThrow(() -> new SessionException("No project selected"));
+    }
+}
+```
+
+### 9.13.4. Kanban Interface Implementation
+Standardized interface for kanban-style views across different entity types:
+
+```java
+// Generic kanban service interface
+public interface CKanbanService<EntityType, StatusType> {
+    
+    Map<StatusType, List<EntityType>> getEntitiesGroupedByStatus(CProject project);
+    
+    EntityType moveEntityToStatus(EntityType entity, StatusType newStatus);
+    
+    List<StatusType> getAvailableStatuses(CProject project);
+}
+
+// Implementation for activities
+@Service
+public class CActivityService extends CEntityOfProjectService<CActivity>
+        implements CKanbanService<CActivity, CActivityStatus> {
+    
+    @Override
+    public Map<CActivityStatus, List<CActivity>> getEntitiesGroupedByStatus(final CProject project) {
+        final List<CActivity> activities = findByProject(project);
+        return activities.stream().collect(Collectors.groupingBy(
+            activity -> activity.getStatus() != null ? activity.getStatus() : createNoStatusInstance(project)
+        ));
+    }
+}
+```
+
 ## 9.12. Service Layer Best Practices - Avoiding Unnecessary Functions
 
 ### 9.12.1. Core Principle: Minimal Service Functions
 Services should contain only essential business logic, not simple wrapper methods around entity setters.
 
 **✅ REQUIRED Service Functions:**
-- CRUD operations (`save`, `getById`, `findEntriesByProject`)
+- CRUD operations (`save`, `findById`, `findByProject`)
 - Complex business logic with validation
 - Multi-entity transactions  
 - Security-sensitive operations
 - Domain-specific queries and calculations
+- Interface implementations (CKanbanService, etc.)
 
 **❌ PROHIBITED Service Functions:**
 - Simple wrapper methods around entity setters
@@ -1180,11 +1445,18 @@ public CProject completeProject(final CProject project) {
 
 // Domain-specific calculations
 public BigDecimal calculateProjectProgress(final CProject project) {
-    final List<CActivity> activities = findEntriesByProject(project);
+    final List<CActivity> activities = findByProject(project);
     return activities.stream()
         .map(CActivity::getProgressPercentage)
         .collect(averagingInt(Integer::intValue))
         .toBigDecimal();
+}
+
+// Interface implementation requirements
+@Override
+public Map<CActivityStatus, List<CActivity>> getEntitiesGroupedByStatus(final CProject project) {
+    // Required by CKanbanService interface
+    return groupActivitiesByStatus(project);
 }
 ```
 
@@ -1310,18 +1582,25 @@ public BigDecimal calculateProjectProgress(final CProject project) {
 
 ### 5.3 Test Structure and Guidelines
 
-**Test Organization Structure:**
-Tests must be organized in module-specific directories following this structure:
+**Current Test Organization Structure:**
+Tests are organized in module-specific directories following this structure:
 ```
-src/test/java/tech/derbent/
-├── abstracts/tests/           # Generic test superclasses and utilities
-│   ├── CGenericViewTest.java  # Generic view test patterns
-│   └── CTestUtils.java        # Common utility functions
-├── activities/tests/          # Activity-related tests
-├── users/tests/               # User-related tests  
-├── meetings/tests/            # Meeting-related tests
-├── projects/tests/            # Project-related tests
-└── ui/automation/             # Base UI test infrastructure
+src/test/java/
+├── unit_tests/tech/derbent/        # Comprehensive unit testing
+│   ├── abstracts/tests/            # Generic test superclasses and utilities
+│   │   ├── CGenericViewTest.java   # Generic view test patterns
+│   │   └── CTestUtils.java         # Common utility functions
+│   ├── abstracts/annotations/      # Annotation system tests
+│   ├── abstracts/views/            # Base UI component tests
+│   ├── activities/                 # Activity-related tests
+│   ├── users/                      # User-related tests  
+│   ├── meetings/                   # Meeting-related tests
+│   ├── projects/                   # Project-related tests
+│   ├── screens/                    # Dynamic screen tests
+│   ├── decisions/                  # Decision management tests
+│   └── kanban/                     # Kanban functionality tests
+├── ui_tests/tech/derbent/          # Vaadin component testing
+└── automated_tests/tech/derbent/   # Playwright automation
 ```
 
 **Test Super Classes and Inheritance:**
@@ -1341,6 +1620,8 @@ public abstract class CGenericViewTest<T> extends CBaseUITest {
     public void testGridInteractions() { /* Common grid testing */ }
     @Test
     public void testViewComboBoxes() { /* Common combobox testing */ }
+    @Test
+    public void testPanelFunctionality() { /* Panel-based UI testing */ }
 }
 
 // Concrete implementation - minimal code required
@@ -1350,6 +1631,12 @@ public class CActivitiesViewGenericTest extends CGenericViewTest<CActivity> {
     
     @Override
     protected Class<CActivity> getEntityClass() { return CActivity.class; }
+    
+    // Add activity-specific tests if needed
+    @Test
+    public void testActivityKanbanFunctionality() {
+        // Test kanban-specific features
+    }
 }
 ```
 
@@ -1362,6 +1649,44 @@ clickNew();           // Standard new/add button interaction
 clickSave();          // Standard save/create button interaction
 clickGrid(int index); // Standard grid row selection
 takeScreenshot(String name, boolean isFailure); // Conditional screenshots
+
+// Enhanced binder testing utilities
+testFieldBinding(String fieldName, Object testValue);
+testComboBoxDataProvider(String fieldName, String dataProviderBean);
+testValidationRules(String fieldName, Object invalidValue);
+testPanelGeneration(Class<?> entityClass, List<String> expectedFields);
+```
+
+**Enhanced Binder and Annotation Testing:**
+```java
+@Test
+void testMetaDataAnnotationProcessing() {
+    // Given - Entity with MetaData annotations
+    final CActivity activity = new CActivity();
+    
+    // When - Generate form using enhanced binder
+    final CEnhancedBinder<CActivity> binder = new CEnhancedBinder<>(CActivity.class);
+    final Map<String, Component> fields = CEntityFormBuilder.generateFields(binder, activity);
+    
+    // Then - Verify field generation based on annotations
+    assertThat(fields).containsKey("name");
+    assertThat(fields).containsKey("activityType");
+    assertThat(fields.get("activityType")).isInstanceOf(ComboBox.class);
+    
+    // Verify data provider binding
+    final ComboBox<CActivityType> typeCombo = (ComboBox<CActivityType>) fields.get("activityType");
+    assertThat(typeCombo.getDataProvider()).isNotNull();
+}
+
+@Test 
+void testStringComboBoxGeneration() {
+    // Test string-based ComboBox with predefined options
+    final Map<String, Component> fields = generateFieldsForEntity(TestEntity.class);
+    final ComboBox<String> statusCombo = (ComboBox<String>) fields.get("statusCategory");
+    
+    assertThat(statusCombo.getListDataView().getItems().collect(Collectors.toList()))
+        .containsExactly("TODO", "IN_PROGRESS", "REVIEW", "COMPLETED", "BLOCKED");
+}
 ```
 
 ### 5.4 UI Automated Tests
@@ -1974,21 +2299,34 @@ For comprehensive development guidance, refer to these additional documents:
 
 ### Core Architecture & Design
 - [Project Design Description](./project_design_description.md) - Complete project requirements and architecture
-- [Enhanced Activity Management Requirements](./enhanced-activity-management-requirements.md) - Activity system specifications
+- [Enhanced Activity Management Requirements](./activity-management-requirements.md) - Activity system specifications
+- [Vaadin Coding Rules](./vaadin-coding-rules.md) - Data access patterns and performance optimization
+
+### Implementation Patterns & Guides  
+- [Comprehensive Lazy Loading Fix](../patterns/comprehensive-lazy-loading-fix.md) - JPA performance optimization patterns
+- [Boolean Binding Fix Pattern](../patterns/boolean-binding-fix-pattern.md) - Enhanced binder improvements
+- [Hibernate Transient Entity Prevention](../patterns/hibernate-transient-entity-prevention.md) - Entity management patterns
 
 ### UI/UX Implementation Guides  
 - [CSS Guidelines](./CSS_GUIDELINES.md) - Complete styling standards and Vaadin theming
+- [CSS Reorganization Implementation](../implementation/css-reorganization.md) - Component-specific CSS organization
 - [CPanelActivityDescription Implementation](./CPANEL_ACTIVITY_DESCRIPTION_IMPLEMENTATION.md) - Entity panel patterns
 - [User Profile Dialog Implementation](./user-profile-dialog-implementation.md) - Dialog patterns
 - [Hierarchical Side Menu Implementation](./HIERARCHICAL_SIDE_MENU_IMPLEMENTATION.md) - Navigation implementation
 
 ### Technical Implementation Patterns
 - [Annotation-Based ComboBox Data Providers](./ANNOTATION_BASED_COMBOBOX_DATA_PROVIDERS.md) - Form building with annotations
-- [Comprehensive Lazy Loading Fix](./COMPREHENSIVE_LAZY_LOADING_FIX.md) - JPA performance optimization
 - [User Company Association Requirements](./user-company-association-requirements.md) - Multi-tenant patterns
+- [Enhanced Binder Guide](../guides/enhanced-binder-guide.md) - Advanced form binding patterns
 
 ### Development Best Practices
 - [CActivity Enhancement Summary](./cactivity-enhancement-summary.md) - Activity domain implementation patterns
+- [Testing Comprehensive Guide](../testing/comprehensive-testing-guide.md) - Testing strategies and patterns
+
+### Module-Specific Documentation
+- [Screen Management Implementation](../implementation/screen-management.md) - Dynamic screen configuration
+- [Decision Management Patterns](../implementation/decision-management.md) - Decision tracking implementation
+- [Kanban Interface Implementation](../implementation/kanban-interface.md) - Generic kanban patterns
 
 ---
 
