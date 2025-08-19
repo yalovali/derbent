@@ -15,74 +15,78 @@ import tech.derbent.abstracts.utils.CAuxillaries;
 
 public abstract class CDialog extends Dialog {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
-	protected VerticalLayout mainLayout;
+    protected VerticalLayout mainLayout;
 
-	protected final HorizontalLayout buttonLayout = new HorizontalLayout();
+    protected final HorizontalLayout buttonLayout = new HorizontalLayout();
 
-	/**
-	 * Constructor for CDialog. Initializes the dialog with a default layout.
-	 */
-	public CDialog() {
-		super();
-		initializeDialog();
-	}
+    /**
+     * Constructor for CDialog. Initializes the dialog with a default layout.
+     */
+    public CDialog() {
+        super();
+        initializeDialog();
+    }
 
-	/** Child must implement: form title. */
-	protected abstract Icon getFormIcon();
-	/** Child must implement: form title. */
-	protected abstract String getFormTitle();
-	/** Child must implement: dialog header title. */
-	@Override
-	public abstract String getHeaderTitle();
+    /** Child must implement: form title. */
+    protected abstract Icon getFormIcon();
 
-	/**
-	 * Common initialization for all CDialog instances.
-	 */
-	protected void initializeDialog() {
-		CAuxillaries.setId(this);
-		LOGGER.debug("CDialog initialized with ID: {}", getId().orElse("none"));
-	}
+    /** Child must implement: form title. */
+    protected abstract String getFormTitle();
 
-	protected abstract void setupButtons();
-	protected abstract void setupContent();
+    /** Child must implement: dialog header title. */
+    @Override
+    public abstract String getHeaderTitle();
 
-	/**
-	 * Sets up dialog properties (title, modal, size, etc.)
-	 * @throws InvocationTargetException
-	 * @throws IllegalAccessException
-	 * @throws SecurityException
-	 * @throws NoSuchMethodException
-	 */
-	protected void setupDialog() {
-		setHeaderTitle(getHeaderTitle());
-		setModal(true);
-		setCloseOnEsc(true);
-		setCloseOnOutsideClick(false);
-		setWidth("500px");
-		mainLayout = new VerticalLayout();
-		mainLayout.setPadding(false);
-		mainLayout.setSpacing(true);
-		final HorizontalLayout headerLayout = new HorizontalLayout();
-		headerLayout.setAlignItems(HorizontalLayout.Alignment.CENTER);
-		headerLayout.setSpacing(true);
-		final Icon icon = getFormIcon();
+    /**
+     * Common initialization for all CDialog instances.
+     */
+    protected void initializeDialog() {
+        CAuxillaries.setId(this);
+        LOGGER.debug("CDialog initialized with ID: {}", getId().orElse("none"));
+    }
 
-		if (icon != null) {
-			icon.setSize("24px");
-			headerLayout.add(icon);
-		}
-		headerLayout.add(new H3(getFormTitle()));
-		mainLayout.add(headerLayout);
-		add(mainLayout);
-		//
-		buttonLayout.setJustifyContentMode(HorizontalLayout.JustifyContentMode.CENTER);
-		buttonLayout.getStyle().set("margin-top", "16px");
-		getFooter().add(buttonLayout);
-		setupContent();
-		setupButtons();
-	}
+    protected abstract void setupButtons();
+
+    protected abstract void setupContent();
+
+    /**
+     * Sets up dialog properties (title, modal, size, etc.)
+     * 
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     * @throws SecurityException
+     * @throws NoSuchMethodException
+     */
+    protected void setupDialog() {
+        setHeaderTitle(getHeaderTitle());
+        setModal(true);
+        setCloseOnEsc(true);
+        setCloseOnOutsideClick(false);
+        setWidth("500px");
+        mainLayout = new VerticalLayout();
+        mainLayout.setPadding(false);
+        mainLayout.setSpacing(true);
+        final HorizontalLayout headerLayout = new HorizontalLayout();
+        headerLayout.setAlignItems(HorizontalLayout.Alignment.CENTER);
+        headerLayout.setSpacing(true);
+        final Icon icon = getFormIcon();
+
+        if (icon != null) {
+            icon.setSize("24px");
+            headerLayout.add(icon);
+        }
+        headerLayout.add(new H3(getFormTitle()));
+        mainLayout.add(headerLayout);
+        add(mainLayout);
+        //
+        buttonLayout.setJustifyContentMode(HorizontalLayout.JustifyContentMode.CENTER);
+        buttonLayout.getStyle().set("margin-top", "16px");
+        getFooter().add(buttonLayout);
+        setupContent();
+        setupButtons();
+    }
 }

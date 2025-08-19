@@ -16,81 +16,81 @@ import tech.derbent.comments.service.CCommentPriorityService;
 import tech.derbent.session.service.CSessionService;
 
 /**
- * CCommentPriorityView - View for managing comment priorities. Layer: View (MVC) Provides
- * CRUD operations for comment priorities using the abstract master-detail pattern.
- * Manages different priority levels that comments can have to categorize their
- * importance.
+ * CCommentPriorityView - View for managing comment priorities. Layer: View (MVC) Provides CRUD operations for comment
+ * priorities using the abstract master-detail pattern. Manages different priority levels that comments can have to
+ * categorize their importance.
  */
-@Route ("ccommentpriorityview/:ccommentpriority_id?/:action?(edit)")
-@PageTitle ("Comment Priorities")
-@Menu (
-	order = 12.1, icon = "class:tech.derbent.comments.view.CCommentPriorityView",
-	title = "Types.Comment Priorities"
-)
+@Route("ccommentpriorityview/:ccommentpriority_id?/:action?(edit)")
+@PageTitle("Comment Priorities")
+@Menu(order = 12.1, icon = "class:tech.derbent.comments.view.CCommentPriorityView", title = "Types.Comment Priorities")
 @PermitAll
 public class CCommentPriorityView extends CProjectAwareMDPage<CCommentPriority> {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public static String getIconColorCode() {
-		return CCommentPriority.getIconColorCode(); // Use the static method from
-													// CActivity
-	}
+    public static String getIconColorCode() {
+        return CCommentPriority.getIconColorCode(); // Use the static method from
+                                                    // CActivity
+    }
 
-	public static String getIconFilename() { return CCommentPriority.getIconFileName(); }
+    public static String getIconFilename() {
+        return CCommentPriority.getIconFileName();
+    }
 
-	private final String ENTITY_ID_FIELD = "ccommentpriority_id";
+    private final String ENTITY_ID_FIELD = "ccommentpriority_id";
 
-	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "ccommentpriorityview/%s/edit";
+    private final String ENTITY_ROUTE_TEMPLATE_EDIT = "ccommentpriorityview/%s/edit";
 
-	/**
-	 * Constructor for CCommentPriorityView.
-	 * @param entityService  the service for comment priority operations
-	 * @param sessionService
-	 */
-	public CCommentPriorityView(final CCommentPriorityService entityService,
-		final CSessionService sessionService) {
-		super(CCommentPriority.class, entityService, sessionService);
-		addClassNames("comment-priorities-view");
-	}
+    /**
+     * Constructor for CCommentPriorityView.
+     * 
+     * @param entityService
+     *            the service for comment priority operations
+     * @param sessionService
+     */
+    public CCommentPriorityView(final CCommentPriorityService entityService, final CSessionService sessionService) {
+        super(CCommentPriority.class, entityService, sessionService);
+        addClassNames("comment-priorities-view");
+    }
 
-	@Override
-	protected void createDetailsLayout() throws NoSuchMethodException, SecurityException,
-		IllegalAccessException, InvocationTargetException {
-		final CVerticalLayout formLayout =
-			CEntityFormBuilder.buildForm(CCommentPriority.class, getBinder());
-		getBaseDetailsLayout().add(formLayout);
-	}
+    @Override
+    protected void createDetailsLayout()
+            throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+        final CVerticalLayout formLayout = CEntityFormBuilder.buildForm(CCommentPriority.class, getBinder());
+        getBaseDetailsLayout().add(formLayout);
+    }
 
-	@Override
-	protected void createGridForEntity() {
-		// Use enhanced color-aware status column that shows both color and icon
-		grid.addEntityColumn(entity -> String.valueOf(entity.getPriorityLevel()),
-			"Priority", "priorityLevel");
-		// grid.addStatusColumn(priority -> priority, "Priority", "priority");
-		grid.addEntityColumn(CCommentPriority::getName, "Name", "name");
-		grid.addEntityColumn(CCommentPriority::getDescription, "Description",
-			"description");
-		// grid.addShortTextColumn(entity ->
-		// String.valueOf(entity.getPriorityLevel()),"Level", "priorityLevel"); Color
-		// column for reference (hex value)
-		grid.addEntityColumn(entity -> entity.getColor(), "Color", "color");
-		// Default priority indicator using CGridCell
-		grid.addComponentColumn(entity -> {
-			final CGridCell defaultCell = new CGridCell();
-			defaultCell.setDefaultValue(entity.isDefault());
-			return defaultCell;
-		}).setHeader("Default").setWidth("80px").setFlexGrow(0);
-	}
+    @Override
+    protected void createGridForEntity() {
+        // Use enhanced color-aware status column that shows both color and icon
+        grid.addEntityColumn(entity -> String.valueOf(entity.getPriorityLevel()), "Priority", "priorityLevel");
+        // grid.addStatusColumn(priority -> priority, "Priority", "priority");
+        grid.addEntityColumn(CCommentPriority::getName, "Name", "name");
+        grid.addEntityColumn(CCommentPriority::getDescription, "Description", "description");
+        // grid.addShortTextColumn(entity ->
+        // String.valueOf(entity.getPriorityLevel()),"Level", "priorityLevel"); Color
+        // column for reference (hex value)
+        grid.addEntityColumn(entity -> entity.getColor(), "Color", "color");
+        // Default priority indicator using CGridCell
+        grid.addComponentColumn(entity -> {
+            final CGridCell defaultCell = new CGridCell();
+            defaultCell.setDefaultValue(entity.isDefault());
+            return defaultCell;
+        }).setHeader("Default").setWidth("80px").setFlexGrow(0);
+    }
 
-	@Override
-	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
+    @Override
+    protected String getEntityRouteIdField() {
+        return ENTITY_ID_FIELD;
+    }
 
-	@Override
-	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
+    @Override
+    protected String getEntityRouteTemplateEdit() {
+        return ENTITY_ROUTE_TEMPLATE_EDIT;
+    }
 
-	@Override
-	protected void setupToolbar() {
-		// Toolbar setup is handled by the parent class
-	}
+    @Override
+    protected void setupToolbar() {
+        // Toolbar setup is handled by the parent class
+    }
 }

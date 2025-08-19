@@ -25,85 +25,80 @@ import tech.derbent.abstracts.views.CVerticalLayout;
  * Complete test demonstrating String ComboBox with working data provider
  */
 @SpringBootTest
-@ContextConfiguration (classes = {
-	StringComboBoxCompleteTest.TestConfiguration.class }
-)
+@ContextConfiguration(classes = { StringComboBoxCompleteTest.TestConfiguration.class })
 class StringComboBoxCompleteTest {
 
-	@Configuration
-	static class TestConfiguration {
+    @Configuration
+    static class TestConfiguration {
 
-		@Bean ("testStringService")
-		public TestStringService testStringService() {
-			return new TestStringService();
-		}
-	}
+        @Bean("testStringService")
+        public TestStringService testStringService() {
+            return new TestStringService();
+        }
+    }
 
-	/**
-	 * Test entity with String ComboBox fields
-	 */
-	public static class TestStringEntity extends CEntityDB<TestStringEntity> {
+    /**
+     * Test entity with String ComboBox fields
+     */
+    public static class TestStringEntity extends CEntityDB<TestStringEntity> {
 
-		@MetaData (
-			displayName = "Color", required = true, order = 1,
-			dataProviderBean = "testStringService", defaultValue = "Red"
-		)
-		private String color;
+        @MetaData(displayName = "Color", required = true, order = 1, dataProviderBean = "testStringService", defaultValue = "Red")
+        private String color;
 
-		@MetaData (
-			displayName = "Type", required = false, order = 2,
-			dataProviderBean = "testStringService", dataProviderMethod = "getTypes",
-			autoSelectFirst = true
-		)
-		private String type;
+        @MetaData(displayName = "Type", required = false, order = 2, dataProviderBean = "testStringService", dataProviderMethod = "getTypes", autoSelectFirst = true)
+        private String type;
 
-		@Override
-		public String getColor() { return color; }
+        @Override
+        public String getColor() {
+            return color;
+        }
 
-		public String getType() { return type; }
+        public String getType() {
+            return type;
+        }
 
-		public void setColor(final String color) { this.color = color; }
+        public void setColor(final String color) {
+            this.color = color;
+        }
 
-		public void setType(final String type) { this.type = type; }
-	}
+        public void setType(final String type) {
+            this.type = type;
+        }
+    }
 
-	/**
-	 * Service that provides String data
-	 */
-	public static class TestStringService {
+    /**
+     * Service that provides String data
+     */
+    public static class TestStringService {
 
-		public List<String> getTypes() {
-			return Arrays.asList("Type A", "Type B", "Type C");
-		}
+        public List<String> getTypes() {
+            return Arrays.asList("Type A", "Type B", "Type C");
+        }
 
-		public List<String> list() {
-			return Arrays.asList("Red", "Green", "Blue");
-		}
-	}
+        public List<String> list() {
+            return Arrays.asList("Red", "Green", "Blue");
+        }
+    }
 
-	@Test
-	@DisplayName ("String ComboBox should work with actual data provider")
-	void testStringComboBoxWithDataProvider() {
-		// Given
-		final CEnhancedBinder<TestStringEntity> binder =
-			CBinderFactory.createEnhancedBinder(TestStringEntity.class);
-		// When
-		CVerticalLayout formLayout = null;
+    @Test
+    @DisplayName("String ComboBox should work with actual data provider")
+    void testStringComboBoxWithDataProvider() {
+        // Given
+        final CEnhancedBinder<TestStringEntity> binder = CBinderFactory.createEnhancedBinder(TestStringEntity.class);
+        // When
+        CVerticalLayout formLayout = null;
 
-		try {
-			formLayout =
-				CEntityFormBuilder.buildForm(TestStringEntity.class, binder, null);
-		} catch (NoSuchMethodException | SecurityException | IllegalAccessException
-			| InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		// Then
-		assertNotNull(formLayout, "Form should be created successfully");
-		assertTrue(formLayout.getChildren().count() > 0,
-			"Form should contain components");
-		// The test demonstrates that String ComboBox creation works without exceptions
-		// and integrates with Spring data providers
-		System.out.println("String ComboBox with data provider created successfully!");
-	}
+        try {
+            formLayout = CEntityFormBuilder.buildForm(TestStringEntity.class, binder, null);
+        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | InvocationTargetException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        // Then
+        assertNotNull(formLayout, "Form should be created successfully");
+        assertTrue(formLayout.getChildren().count() > 0, "Form should contain components");
+        // The test demonstrates that String ComboBox creation works without exceptions
+        // and integrates with Spring data providers
+        System.out.println("String ComboBox with data provider created successfully!");
+    }
 }

@@ -23,128 +23,121 @@ import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.views.CVerticalLayout;
 
 /**
- * Test class to verify that CEntityFormBuilder can create ComboBox components for String
- * fields when metadata specifies a data provider.
+ * Test class to verify that CEntityFormBuilder can create ComboBox components for String fields when metadata specifies
+ * a data provider.
  */
 @SpringBootTest
-@ContextConfiguration (classes = {
-	CEntityFormBuilderStringComboBoxTest.TestConfiguration.class }
-)
+@ContextConfiguration(classes = { CEntityFormBuilderStringComboBoxTest.TestConfiguration.class })
 class CEntityFormBuilderStringComboBoxTest {
 
-	/**
-	 * Mock service to provide string data for testing
-	 */
-	public static class StringDataService {
+    /**
+     * Mock service to provide string data for testing
+     */
+    public static class StringDataService {
 
-		public List<String> getCategories() {
-			return Arrays.asList("Category A", "Category B", "Category C");
-		}
+        public List<String> getCategories() {
+            return Arrays.asList("Category A", "Category B", "Category C");
+        }
 
-		public List<String> list() {
-			return Arrays.asList("Option 1", "Option 2", "Option 3");
-		}
-	}
+        public List<String> list() {
+            return Arrays.asList("Option 1", "Option 2", "Option 3");
+        }
+    }
 
-	/**
-	 * Test configuration providing a mock service for String ComboBox data
-	 */
-	@Configuration
-	static class TestConfiguration {
+    /**
+     * Test configuration providing a mock service for String ComboBox data
+     */
+    @Configuration
+    static class TestConfiguration {
 
-		/**
-		 * Mock service that provides string data for ComboBox
-		 */
-		@Bean ("stringDataService")
-		public StringDataService stringDataService() {
-			return new StringDataService();
-		}
-	}
+        /**
+         * Mock service that provides string data for ComboBox
+         */
+        @Bean("stringDataService")
+        public StringDataService stringDataService() {
+            return new StringDataService();
+        }
+    }
 
-	/**
-	 * Test entity with String field that should be rendered as ComboBox
-	 */
-	public static class TestEntityWithStringComboBox
-		extends CEntityDB<TestEntityWithStringComboBox> {
+    /**
+     * Test entity with String field that should be rendered as ComboBox
+     */
+    public static class TestEntityWithStringComboBox extends CEntityDB<TestEntityWithStringComboBox> {
 
-		@MetaData (
-			displayName = "String Category", required = true, order = 1,
-			dataProviderBean = "stringDataService"
-		)
-		private String category;
+        @MetaData(displayName = "String Category", required = true, order = 1, dataProviderBean = "stringDataService")
+        private String category;
 
-		@MetaData (
-			displayName = "String Type", required = false, order = 2,
-			dataProviderBean = "stringDataService", dataProviderMethod = "getCategories"
-		)
-		private String type;
+        @MetaData(displayName = "String Type", required = false, order = 2, dataProviderBean = "stringDataService", dataProviderMethod = "getCategories")
+        private String type;
 
-		@MetaData (
-			displayName = "Regular String Field", required = false, order = 3,
-			maxLength = 50
-		)
-		private String description;
+        @MetaData(displayName = "Regular String Field", required = false, order = 3, maxLength = 50)
+        private String description;
 
-		// Getters and setters
-		public String getCategory() { return category; }
+        // Getters and setters
+        public String getCategory() {
+            return category;
+        }
 
-		public String getDescription() { return description; }
+        public String getDescription() {
+            return description;
+        }
 
-		public String getType() { return type; }
+        public String getType() {
+            return type;
+        }
 
-		public void setCategory(final String category) { this.category = category; }
+        public void setCategory(final String category) {
+            this.category = category;
+        }
 
-		public void setDescription(final String description) {
-			this.description = description;
-		}
+        public void setDescription(final String description) {
+            this.description = description;
+        }
 
-		public void setType(final String type) { this.type = type; }
-	}
+        public void setType(final String type) {
+            this.type = type;
+        }
+    }
 
-	@BeforeEach
-	void setUp() {
-		// Setup for each test
-	}
+    @BeforeEach
+    void setUp() {
+        // Setup for each test
+    }
 
-	@Test
-	@DisplayName ("Should create ComboBox for String field with dataProviderBean")
-	void testCreateStringComboBoxWithDataProvider() throws NoSuchMethodException,
-		SecurityException, IllegalAccessException, InvocationTargetException {
-		// Given
-		final CEnhancedBinder<TestEntityWithStringComboBox> binder =
-			CBinderFactory.createEnhancedBinder(TestEntityWithStringComboBox.class);
-		// When - This should not throw an exception and should create a ComboBox
-		final CVerticalLayout formLayout = CEntityFormBuilder
-			.buildForm(TestEntityWithStringComboBox.class, binder, null);
-		// Then
-		assertNotNull(formLayout, "Form should be created successfully");
-		// Check that the form contains components
-		assertTrue(formLayout.getChildren().count() > 0,
-			"Form should contain components");
-		// The key test: verify that the form generation succeeded without throwing an
-		// exception This demonstrates that String fields with dataProviderBean metadata
-		// can now be processed
-		assertTrue(true,
-			"Form creation succeeded - String ComboBox functionality is working");
-	}
+    @Test
+    @DisplayName("Should create ComboBox for String field with dataProviderBean")
+    void testCreateStringComboBoxWithDataProvider()
+            throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+        // Given
+        final CEnhancedBinder<TestEntityWithStringComboBox> binder = CBinderFactory
+                .createEnhancedBinder(TestEntityWithStringComboBox.class);
+        // When - This should not throw an exception and should create a ComboBox
+        final CVerticalLayout formLayout = CEntityFormBuilder.buildForm(TestEntityWithStringComboBox.class, binder,
+                null);
+        // Then
+        assertNotNull(formLayout, "Form should be created successfully");
+        // Check that the form contains components
+        assertTrue(formLayout.getChildren().count() > 0, "Form should contain components");
+        // The key test: verify that the form generation succeeded without throwing an
+        // exception This demonstrates that String fields with dataProviderBean metadata
+        // can now be processed
+        assertTrue(true, "Form creation succeeded - String ComboBox functionality is working");
+    }
 
-	@Test
-	@DisplayName (
-		"String field without dataProvider should create TextField, not ComboBox"
-	)
-	void testStringFieldWithoutDataProviderCreatesTextField()
-		throws NoSuchMethodException, SecurityException, IllegalAccessException,
-		InvocationTargetException {
-		// Given
-		final CEnhancedBinder<TestEntityWithStringComboBox> binder =
-			CBinderFactory.createEnhancedBinder(TestEntityWithStringComboBox.class);
-		// When
-		final CVerticalLayout formLayout = CEntityFormBuilder
-			.buildForm(TestEntityWithStringComboBox.class, binder, null);
-		// Then
-		assertNotNull(formLayout, "Form should be created successfully");
-		// The description field should not be a ComboBox (it should be a TextField) This
-		// test ensures we don't break existing String field behavior
-		assertTrue(true, "Form creation should succeed for mixed String field types");
-	}
+    @Test
+    @DisplayName("String field without dataProvider should create TextField, not ComboBox")
+    void testStringFieldWithoutDataProviderCreatesTextField()
+            throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+        // Given
+        final CEnhancedBinder<TestEntityWithStringComboBox> binder = CBinderFactory
+                .createEnhancedBinder(TestEntityWithStringComboBox.class);
+        // When
+        final CVerticalLayout formLayout = CEntityFormBuilder.buildForm(TestEntityWithStringComboBox.class, binder,
+                null);
+        // Then
+        assertNotNull(formLayout, "Form should be created successfully");
+        // The description field should not be a ComboBox (it should be a TextField) This
+        // test ensures we don't break existing String field behavior
+        assertTrue(true, "Form creation should succeed for mixed String field types");
+    }
 }

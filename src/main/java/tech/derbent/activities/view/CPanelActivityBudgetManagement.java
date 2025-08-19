@@ -8,25 +8,23 @@ import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
 
 /**
- * CPanelActivityBudgetManagement - Panel for grouping budget management related fields of
- * CActivity entity. Layer: View (MVC) Groups fields: estimatedCost, actualCost,
- * hourlyRate
+ * CPanelActivityBudgetManagement - Panel for grouping budget management related fields of CActivity entity. Layer: View
+ * (MVC) Groups fields: estimatedCost, actualCost, hourlyRate
  */
 public class CPanelActivityBudgetManagement extends CPanelActivityBase {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public CPanelActivityBudgetManagement(final CActivity currentEntity,
-		final CEnhancedBinder<CActivity> beanValidationBinder,
-		final CActivityService entityService) throws NoSuchMethodException,
-		SecurityException, IllegalAccessException, InvocationTargetException {
-		super("Budget Management", currentEntity, beanValidationBinder, entityService);
-		initPanel();
-	}
+    public CPanelActivityBudgetManagement(final CActivity currentEntity,
+            final CEnhancedBinder<CActivity> beanValidationBinder, final CActivityService entityService)
+            throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+        super("Budget Management", currentEntity, beanValidationBinder, entityService);
+        initPanel();
+    }
 
-	@Override
-	protected void updatePanelEntityFields() {
-		// Budget Management fields - cost estimation and tracking
-		setEntityFields(List.of("estimatedCost", "actualCost", "hourlyRate"));
-	}
+    @Override
+    protected void updatePanelEntityFields() {
+        // Budget Management fields - cost estimation and tracking
+        setEntityFields(List.of("estimatedCost", "actualCost", "hourlyRate"));
+    }
 }
