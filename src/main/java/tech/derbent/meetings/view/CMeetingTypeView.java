@@ -2,7 +2,6 @@ package tech.derbent.meetings.view;
 
 import java.lang.reflect.InvocationTargetException;
 
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -12,6 +11,7 @@ import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.annotations.CSpringAuxillaries;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
+import tech.derbent.abstracts.views.CVerticalLayout;
 import tech.derbent.meetings.domain.CMeetingType;
 import tech.derbent.meetings.service.CMeetingTypeService;
 import tech.derbent.session.service.CSessionService;
@@ -61,11 +61,11 @@ public class CMeetingTypeView extends CProjectAwareMDPage<CMeetingType>
 	protected void createDetailsLayout() throws NoSuchMethodException, SecurityException,
 		IllegalAccessException, InvocationTargetException {
 		LOGGER.info("Creating details layout for CMeetingTypeView");
-		final Div detailsLayout =
+		final CVerticalLayout formLayout =
 			CEntityFormBuilder.buildForm(CMeetingType.class, getBinder());
 		// Note: Buttons are now automatically added to the details tab by the parent
 		// class
-		getBaseDetailsLayout().add(detailsLayout);
+		getBaseDetailsLayout().add(formLayout);
 	}
 
 	@Override

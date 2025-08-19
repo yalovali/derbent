@@ -47,17 +47,17 @@ class CScreenLinesServiceTest {
 		final CProject project = new CProject("Test Project");
 		final CScreen screen = new CScreen("Test Screen", project);
 		final String fieldCaption = "Test Field";
-		final String entityFieldName = "testField";
+		final String entityProperty = "testField";
 		// Mock the getNextLineOrder method
 		when(screenLinesRepository.getNextLineOrder(screen)).thenReturn(1);
 		// When
 		final CScreenLines screenLine =
-			screenLinesService.newEntity(screen, fieldCaption, entityFieldName);
+			screenLinesService.newEntity(screen, fieldCaption, entityProperty);
 		// Then
 		assertNotNull(screenLine);
 		assertEquals(screen, screenLine.getScreen());
 		assertEquals(fieldCaption, screenLine.getFieldCaption());
-		assertEquals(entityFieldName, screenLine.getEntityFieldName());
+		assertEquals(entityProperty, screenLine.getEntityProperty());
 		assertEquals(Integer.valueOf(255), screenLine.getMaxLength()); // This should be
 																		// set to default
 																		// value

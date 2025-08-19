@@ -120,6 +120,10 @@ public class CPanelProjectUsers
 
 	/**
 	 * Validates preconditions and opens dialog for adding new user to project.
+	 * @throws InvocationTargetException
+	 * @throws IllegalAccessException
+	 * @throws SecurityException
+	 * @throws NoSuchMethodException
 	 */
 	@Override
 	protected void openAddDialog() {

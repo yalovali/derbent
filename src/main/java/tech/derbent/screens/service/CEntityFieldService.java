@@ -1,13 +1,18 @@
 package tech.derbent.screens.service;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
 import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.utils.Check;
 
 /**
  * Service to provide entity field information for screen line configuration. This service
@@ -21,29 +26,29 @@ public class CEntityFieldService extends CFieldServiceBase {
 	 */
 	public static class EntityFieldInfo {
 
-		private String fieldName;
+		private String fieldName = "fieldName";
 
-		private String displayName;
+		private String displayName = "displayName";
 
-		private String description;
+		private String description = "description";
 
-		private String fieldType;
+		private String fieldType = "fieldType";
 
 		private String javaType;
 
-		private boolean required;
+		private boolean required = false;
 
-		private boolean readOnly;
+		private boolean readOnly = false;
 
-		private boolean hidden;
+		private boolean hidden = false;
 
-		private int order;
+		private int order = 999;
 
-		private int maxLength;
+		private int maxLength = 255;
 
-		private String defaultValue;
+		private String defaultValue = "";
 
-		private String dataProviderBean;
+		private String dataProviderBean = "";
 
 		public String getDataProviderBean() { return dataProviderBean; }
 
@@ -108,6 +113,8 @@ public class CEntityFieldService extends CFieldServiceBase {
 		}
 	}
 
+	public static final String THIS_CLASS = "This Class";
+
 	private EntityFieldInfo createFieldInfo(final Field field) {
 
 		try {
@@ -166,23 +173,6 @@ public class CEntityFieldService extends CFieldServiceBase {
 		return fields;
 	}
 
-	// return available field types for a given entity type
-	public List<Field> getAvailableFieldClassesOfType(final Class<?> entityType) {
-		final List<Field> fieldTypes = new ArrayList<Field>();
-		final List<Field> fields = getAllFields(entityType);
-
-		for (final Field field : fields) {
-
-			if (java.lang.reflect.Modifier.isStatic(field.getModifiers())
-				|| field.getName().equals("serialVersionUID")
-				|| field.getName().equals("LOGGER")) {
-				continue;
-			}
-			fieldTypes.add(field);
-		}
-		return fieldTypes;
-	}
-
 	/**
 	 * Get data provider beans for reference fields.
 	 * @return list of available data provider bean names
@@ -196,6 +186,13 @@ public class CEntityFieldService extends CFieldServiceBase {
 			"CScreenService", "CScreenLinesService");
 	}
 
+	public EntityFieldInfo getEntityFieldInfo(final String entityType,
+		final String fieldName) {
+		final List<EntityFieldInfo> fields = getEntityFields(entityType);
+		return fields.stream().filter(field -> field.getFieldName().equals(fieldName))
+			.findFirst().orElse(null);
+	}
+
 	/**
 	 * Get field information for a specific entity type.
 	 * @param entityType the entity type name
@@ -203,18 +200,14 @@ public class CEntityFieldService extends CFieldServiceBase {
 	 */
 	public List<EntityFieldInfo> getEntityFields(final String entityType) {
 		final Class<?> entityClass = getEntityClass(entityType);
-
-		if (entityClass == null) {
-			return List.of();
-		}
+		Check.notNull(entityClass,
+			"Entity class must not be null for type: " + entityType);
 		final List<EntityFieldInfo> fields = new ArrayList<>();
-		// Get all fields including inherited ones
 		final List<Field> allFields = getAllFields(entityClass);
 
 		for (final Field field : allFields) {
 
-			// Skip static fields and certain system fields
-			if (java.lang.reflect.Modifier.isStatic(field.getModifiers())
+			if (Modifier.isStatic(field.getModifiers())
 				|| field.getName().equals("serialVersionUID")
 				|| field.getName().equals("LOGGER")) {
 				continue;
@@ -228,14 +221,62 @@ public class CEntityFieldService extends CFieldServiceBase {
 		return fields;
 	}
 
-	public List<Field> getFields(final String entityType) {
+	public List<EntityFieldInfo> getEntityRelationFields(final String entityType,
+		final List<EntityFieldInfo> listOfAdditionalFields) {
 		final Class<?> entityClass = getEntityClass(entityType);
+		Check.notNull(entityClass,
+			"Entity class must not be null for type: " + entityType);
+		final List<EntityFieldInfo> fields = new ArrayList<>();
 
-		if (entityClass == null) {
-			return List.of();
+		if (listOfAdditionalFields != null) {
+			fields.addAll(listOfAdditionalFields);
 		}
-		// Get all fields including inherited ones
-		return getAllFields(entityClass);
+		final List<Field> allFields = getAllFields(entityClass);
+
+		for (final Field field : allFields) {
+
+			if (Modifier.isStatic(field.getModifiers())
+				|| field.getName().equals("serialVersionUID")
+				|| field.getName().equals("LOGGER")
+				|| !isFieldComplexType(field.getType())) {
+				continue;
+			}
+			final EntityFieldInfo fieldInfo = createFieldInfo(field);
+
+			if (fieldInfo != null) {
+				fields.add(fieldInfo);
+			}
+		}
+		return fields;
+	}
+
+	public List<EntityFieldInfo> getEntitySimpleFields(final String entityType,
+		final List<EntityFieldInfo> listOfAdditionalFields) {
+		final Class<?> entityClass = getEntityClass(entityType);
+		Check.notNull(entityClass,
+			"Entity class must not be null for type: " + entityType);
+		final List<EntityFieldInfo> fields = new ArrayList<>();
+
+		if (listOfAdditionalFields != null) {
+			fields.addAll(listOfAdditionalFields);
+		}
+		final List<Field> allFields = getAllFields(entityClass);
+
+		for (final Field field : allFields) {
+
+			if (Modifier.isStatic(field.getModifiers())
+				|| field.getName().equals("serialVersionUID")
+				|| field.getName().equals("LOGGER")
+				|| isFieldComplexType(field.getType())) {
+				continue;
+			}
+			final EntityFieldInfo fieldInfo = createFieldInfo(field);
+
+			if (fieldInfo != null) {
+				fields.add(fieldInfo);
+			}
+		}
+		return fields;
 	}
 
 	private String getSimpleTypeName(final Class<?> type) {
@@ -267,5 +308,20 @@ public class CEntityFieldService extends CFieldServiceBase {
 			}
 			return "TEXT";
 		}
+	}
+
+	private boolean isFieldComplexType(final Class<?> type) {
+
+		// Check if the field type is a complex type (not primitive or standard types)
+		if (type.isPrimitive() || type.isEnum() || type == String.class
+			|| Number.class.isAssignableFrom(type) || type == Boolean.class
+			|| type == Date.class || type == LocalDate.class
+			|| type == LocalDateTime.class) {
+			return false;
+		}
+		return true;
+		// Check if it's a domain entity (likely a reference) return
+		// type.getSimpleName().startsWith("C")&&
+		// Character.isUpperCase(type.getSimpleName().charAt(1));
 	}
 }

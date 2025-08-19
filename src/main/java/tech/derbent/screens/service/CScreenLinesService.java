@@ -127,9 +127,9 @@ public class CScreenLinesService extends CAbstractService<CScreenLines> {
 	 * @return the new screen line
 	 */
 	public CScreenLines newEntity(final CScreen screen, final String fieldCaption,
-		final String entityFieldName) {
+		final String entityProperty) {
 		final CScreenLines screenLine =
-			new CScreenLines(screen, fieldCaption, entityFieldName);
+			new CScreenLines(screen, fieldCaption, entityProperty);
 		screenLine.setLineOrder(getNextLineOrder(screen));
 		screenLine.setMaxLength(255); // Default max length for text fields
 		screenLine.setIsActive(true);

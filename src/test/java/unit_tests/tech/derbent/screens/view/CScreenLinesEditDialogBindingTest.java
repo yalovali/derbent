@@ -42,8 +42,8 @@ class CScreenLinesEditDialogBindingTest {
 		screen.setEntityType("tech.derbent.users.domain.CUser");
 		// Create screen line with the specific field that was causing the error
 		final CScreenLines screenLine =
-			new CScreenLines(screen, "Entity Field Name", "entityFieldName");
-		screenLine.setEntityFieldName("firstName"); // This is the field mentioned in the
+			new CScreenLines(screen, "Entity Field Name", "entityProperty");
+		screenLine.setEntityProperty("firstName"); // This is the field mentioned in the
 		// error
 		screenLine.setLineOrder(5);
 		screenLine.setIsRequired(true);
@@ -57,7 +57,7 @@ class CScreenLinesEditDialogBindingTest {
 					LOGGER.info("Save callback called for complex field: {}", savedLine);
 				}, // onSave callback
 					false, // isNew = false (this triggers readBean with existing data)
-					entityFieldService, screen, viewsService);
+					entityFieldService, screen);
 			assertNotNull(dialog,
 				"Dialog should be created successfully with complex Entity Field Name");
 			LOGGER.info(
@@ -74,16 +74,11 @@ class CScreenLinesEditDialogBindingTest {
 		screen.setEntityType("CActivity");
 		// Test with null data (new entry scenario)
 		assertDoesNotThrow(() -> {
-			final CScreenLinesEditDialog dialog = new CScreenLinesEditDialog(null, // data
-																					// =
-																					// null
-																					// for
-																					// new
-																					// entries
-				(savedLine) -> {
+			final CScreenLinesEditDialog dialog =
+				new CScreenLinesEditDialog(null, (savedLine) -> {
 					LOGGER.info("Save callback called for new entry: {}", savedLine);
 				}, true, // isNew = true
-				entityFieldService, screen, viewsService);
+					entityFieldService, screen);
 			assertNotNull(dialog, "Dialog should be created successfully with null data");
 			LOGGER.info("✅ Dialog created successfully with null data (new entry)");
 		}, "CScreenLinesEditDialog should handle null data without binding exceptions");

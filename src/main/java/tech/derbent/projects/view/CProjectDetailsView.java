@@ -23,6 +23,7 @@ import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
 import tech.derbent.abstracts.views.CButton;
+import tech.derbent.abstracts.views.CVerticalLayout;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.session.service.CSessionService;
@@ -133,8 +134,9 @@ public class CProjectDetailsView extends CAbstractNamedEntityPage<CProject>
 		cardsContainer.setClassName("project-cards-container");
 		gridLayout.add(cardsContainer);
 		// Add form at bottom
-		final Div formContent = CEntityFormBuilder.buildForm(CProject.class, getBinder());
-		gridLayout.add(formContent);
+		final CVerticalLayout formLayout =
+			CEntityFormBuilder.buildForm(CProject.class, getBinder());
+		gridLayout.add(formLayout);
 		getBaseDetailsLayout().add(gridLayout);
 	}
 
@@ -210,8 +212,9 @@ public class CProjectDetailsView extends CAbstractNamedEntityPage<CProject>
 		contentHeader.add(new Icon(VaadinIcon.FILE_TEXT), new Span("Project Details"));
 		mainContent.add(contentHeader);
 		// Add form
-		final Div formContent = CEntityFormBuilder.buildForm(CProject.class, getBinder());
-		mainContent.add(formContent);
+		final CVerticalLayout formLayout =
+			CEntityFormBuilder.buildForm(CProject.class, getBinder());
+		mainContent.add(formLayout);
 		compactLayout.add(sidebar, mainContent);
 		getBaseDetailsLayout().add(compactLayout);
 	}
@@ -300,8 +303,9 @@ public class CProjectDetailsView extends CAbstractNamedEntityPage<CProject>
 		chartsSection.add(chartPlaceholder);
 		dashboardLayout.add(chartsSection);
 		// Add form
-		final Div formContent = CEntityFormBuilder.buildForm(CProject.class, getBinder());
-		dashboardLayout.add(formContent);
+		final CVerticalLayout formLayout =
+			CEntityFormBuilder.buildForm(CProject.class, getBinder());
+		dashboardLayout.add(formLayout);
 		getBaseDetailsLayout().add(dashboardLayout);
 	}
 
@@ -371,8 +375,9 @@ public class CProjectDetailsView extends CAbstractNamedEntityPage<CProject>
 		formHeader.add(new Icon(VaadinIcon.FOLDER), new Span("Project Details"));
 		formWrapper.add(formHeader);
 		// Build the form using the existing form builder
-		final Div formContent = CEntityFormBuilder.buildForm(CProject.class, getBinder());
-		formWrapper.add(formContent);
+		final CVerticalLayout formLayout =
+			CEntityFormBuilder.buildForm(CProject.class, getBinder());
+		formWrapper.add(formLayout);
 		// Add additional project information section
 		final Div projectInfoCard = createProjectInfoCard();
 		formWrapper.add(projectInfoCard);
@@ -471,8 +476,9 @@ public class CProjectDetailsView extends CAbstractNamedEntityPage<CProject>
 		columnsLayout.add(activeColumn, planningColumn, completedColumn);
 		kanbanLayout.add(columnsLayout);
 		// Add form at bottom
-		final Div formContent = CEntityFormBuilder.buildForm(CProject.class, getBinder());
-		kanbanLayout.add(formContent);
+		final CVerticalLayout formLayout =
+			CEntityFormBuilder.buildForm(CProject.class, getBinder());
+		kanbanLayout.add(formLayout);
 		getBaseDetailsLayout().add(kanbanLayout);
 	}
 
@@ -718,8 +724,9 @@ public class CProjectDetailsView extends CAbstractNamedEntityPage<CProject>
 				"2025-02-01", VaadinIcon.FLAG));
 		timelineLayout.add(timelineContainer);
 		// Add form
-		final Div formContent = CEntityFormBuilder.buildForm(CProject.class, getBinder());
-		timelineLayout.add(formContent);
+		final CVerticalLayout formLayout =
+			CEntityFormBuilder.buildForm(CProject.class, getBinder());
+		timelineLayout.add(formLayout);
 		getBaseDetailsLayout().add(timelineLayout);
 	}
 

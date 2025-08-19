@@ -14,6 +14,7 @@ import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.components.CBinderFactory;
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.utils.CValidationUtils;
+import tech.derbent.abstracts.views.CVerticalLayout;
 import tech.derbent.meetings.domain.CMeetingStatus;
 
 /**
@@ -67,16 +68,16 @@ public class CEnhancedBinderDemo extends VerticalLayout {
 				logToOutput("Enhanced binder created for: "
 					+ CMeetingStatus.class.getSimpleName());
 				// Build form using enhanced binder
-				final Div formLayout =
+				final CVerticalLayout formLayout =
 					CEntityFormBuilder.buildForm(CMeetingStatus.class, enhancedBinder);
 				logToOutput("Form built with enhanced binder");
 				logToOutput(
 					"Form components created: " + formLayout.getChildren().count());
 				// Alternative: Build form directly with enhanced features
-				final Div enhancedForm =
+				final CVerticalLayout formLayout2 =
 					CEntityFormBuilder.buildEnhancedForm(CMeetingStatus.class);
 				logToOutput("Direct enhanced form created with components: "
-					+ enhancedForm.getChildren().count());
+					+ formLayout2.getChildren().count());
 			} catch (final Exception ex) {
 				logToOutput("Error building enhanced form: " + ex.getMessage());
 			}

@@ -3,7 +3,6 @@ package tech.derbent.decisions.view;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -13,6 +12,7 @@ import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.annotations.CSpringAuxillaries;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
+import tech.derbent.abstracts.views.CVerticalLayout;
 import tech.derbent.decisions.domain.CDecisionType;
 import tech.derbent.decisions.service.CDecisionTypeService;
 import tech.derbent.session.service.CSessionService;
@@ -58,9 +58,9 @@ public class CDecisionTypeView extends CProjectAwareMDPage<CDecisionType>
 		IllegalAccessException, InvocationTargetException {
 		// Now we can include all fields with @MetaData annotation including the boolean
 		// fields
-		final Div detailsLayout = CEntityFormBuilder.buildForm(CDecisionType.class,
-			getBinder(), List.of("name", "description", "color"));
-		getBaseDetailsLayout().add(detailsLayout);
+		final CVerticalLayout formLayout = CEntityFormBuilder.buildForm(
+			CDecisionType.class, getBinder(), List.of("name", "description", "color"));
+		getBaseDetailsLayout().add(formLayout);
 		/*
 		 * final Div detailsLayout = CEntityFormBuilder.buildForm(CActivityType.class,
 		 * getBinder()); getBaseDetailsLayout().add(detailsLayout);

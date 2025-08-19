@@ -15,13 +15,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
-import com.vaadin.flow.component.html.Div;
-
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.annotations.MetaData;
 import tech.derbent.abstracts.components.CBinderFactory;
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.views.CVerticalLayout;
 
 /**
  * Test class to verify that CEntityFormBuilder can create ComboBox components for String
@@ -115,12 +114,13 @@ class CEntityFormBuilderStringComboBoxTest {
 		final CEnhancedBinder<TestEntityWithStringComboBox> binder =
 			CBinderFactory.createEnhancedBinder(TestEntityWithStringComboBox.class);
 		// When - This should not throw an exception and should create a ComboBox
-		final Div form = CEntityFormBuilder.buildForm(TestEntityWithStringComboBox.class,
-			binder, null);
+		final CVerticalLayout formLayout = CEntityFormBuilder
+			.buildForm(TestEntityWithStringComboBox.class, binder, null);
 		// Then
-		assertNotNull(form, "Form should be created successfully");
+		assertNotNull(formLayout, "Form should be created successfully");
 		// Check that the form contains components
-		assertTrue(form.getChildren().count() > 0, "Form should contain components");
+		assertTrue(formLayout.getChildren().count() > 0,
+			"Form should contain components");
 		// The key test: verify that the form generation succeeded without throwing an
 		// exception This demonstrates that String fields with dataProviderBean metadata
 		// can now be processed
@@ -139,10 +139,10 @@ class CEntityFormBuilderStringComboBoxTest {
 		final CEnhancedBinder<TestEntityWithStringComboBox> binder =
 			CBinderFactory.createEnhancedBinder(TestEntityWithStringComboBox.class);
 		// When
-		final Div form = CEntityFormBuilder.buildForm(TestEntityWithStringComboBox.class,
-			binder, null);
+		final CVerticalLayout formLayout = CEntityFormBuilder
+			.buildForm(TestEntityWithStringComboBox.class, binder, null);
 		// Then
-		assertNotNull(form, "Form should be created successfully");
+		assertNotNull(formLayout, "Form should be created successfully");
 		// The description field should not be a ComboBox (it should be a TextField) This
 		// test ensures we don't break existing String field behavior
 		assertTrue(true, "Form creation should succeed for mixed String field types");

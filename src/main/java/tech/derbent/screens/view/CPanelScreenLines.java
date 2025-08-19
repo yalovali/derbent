@@ -28,8 +28,6 @@ public class CPanelScreenLines extends CPanelScreenBase {
 
 	private final CEntityFieldService entityFieldService;
 
-	private final CViewsService viewsService;
-
 	private Grid<CScreenLines> grid;
 
 	private CScreenLines selectedLine;
@@ -43,7 +41,6 @@ public class CPanelScreenLines extends CPanelScreenBase {
 		super("Screen Lines", currentEntity, beanValidationBinder, entityService);
 		this.screenLinesService = screenLinesService;
 		this.entityFieldService = entityFieldService;
-		this.viewsService = viewsService;
 		initPanel();
 		createScreenLinesLayout();
 	}
@@ -54,7 +51,7 @@ public class CPanelScreenLines extends CPanelScreenBase {
 		grid.addColumn(CScreenLines::getLineOrder).setHeader("Order").setWidth("80px");
 		grid.addColumn(CScreenLines::getFieldCaption).setHeader("Caption")
 			.setAutoWidth(true);
-		grid.addColumn(CScreenLines::getEntityFieldName).setHeader("Field Name")
+		grid.addColumn(CScreenLines::getEntityProperty).setHeader("Field Name")
 			.setAutoWidth(true);
 		grid.addColumn(line -> line.getIsRequired() ? "Yes" : "No").setHeader("Required")
 			.setWidth("80px");
@@ -192,7 +189,7 @@ public class CPanelScreenLines extends CPanelScreenBase {
 		final CScreenLines newLine =
 			screenLinesService.newEntity(getCurrentEntity(), "New Field", "newField");
 		final CScreenLinesEditDialog dialog = new CScreenLinesEditDialog(newLine,
-			this::saveScreenLine, true, entityFieldService, currentEntity, viewsService);
+			this::saveScreenLine, true, entityFieldService, currentEntity);
 		dialog.open();
 	}
 
@@ -211,7 +208,7 @@ public class CPanelScreenLines extends CPanelScreenBase {
 			return;
 		}
 		final CScreenLinesEditDialog dialog = new CScreenLinesEditDialog(screenLine,
-			this::saveScreenLine, false, entityFieldService, currentEntity, viewsService);
+			this::saveScreenLine, false, entityFieldService, currentEntity);
 		dialog.open();
 	}
 

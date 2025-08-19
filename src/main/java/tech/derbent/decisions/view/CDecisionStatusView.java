@@ -2,7 +2,6 @@ package tech.derbent.decisions.view;
 
 import java.lang.reflect.InvocationTargetException;
 
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -12,6 +11,7 @@ import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.components.CGridCell;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
+import tech.derbent.abstracts.views.CVerticalLayout;
 import tech.derbent.decisions.domain.CDecisionStatus;
 import tech.derbent.decisions.service.CDecisionStatusService;
 import tech.derbent.projects.domain.CProject;
@@ -58,9 +58,9 @@ public class CDecisionStatusView extends CProjectAwareMDPage<CDecisionStatus>
 	@Override
 	protected void createDetailsLayout() throws NoSuchMethodException, SecurityException,
 		IllegalAccessException, InvocationTargetException {
-		final Div detailsLayout =
+		final CVerticalLayout formLayout =
 			CEntityFormBuilder.buildForm(CDecisionStatus.class, getBinder());
-		getBaseDetailsLayout().add(detailsLayout);
+		getBaseDetailsLayout().add(formLayout);
 	}
 
 	@Override

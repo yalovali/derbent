@@ -2,7 +2,6 @@ package tech.derbent.comments.view;
 
 import java.lang.reflect.InvocationTargetException;
 
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -11,6 +10,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.components.CGridCell;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
+import tech.derbent.abstracts.views.CVerticalLayout;
 import tech.derbent.comments.domain.CCommentPriority;
 import tech.derbent.comments.service.CCommentPriorityService;
 import tech.derbent.session.service.CSessionService;
@@ -57,9 +57,9 @@ public class CCommentPriorityView extends CProjectAwareMDPage<CCommentPriority> 
 	@Override
 	protected void createDetailsLayout() throws NoSuchMethodException, SecurityException,
 		IllegalAccessException, InvocationTargetException {
-		final Div detailsLayout =
+		final CVerticalLayout formLayout =
 			CEntityFormBuilder.buildForm(CCommentPriority.class, getBinder());
-		getBaseDetailsLayout().add(detailsLayout);
+		getBaseDetailsLayout().add(formLayout);
 	}
 
 	@Override

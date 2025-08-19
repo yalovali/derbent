@@ -3,6 +3,7 @@ package tech.derbent.abstracts.annotations;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -10,7 +11,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -42,9 +45,10 @@ import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.utils.CAuxillaries;
 import tech.derbent.abstracts.utils.CColorUtils;
 import tech.derbent.abstracts.utils.Check;
+import tech.derbent.abstracts.views.CVerticalLayout;
 
 @org.springframework.stereotype.Component
-public final class CEntityFormBuilder implements ApplicationContextAware {
+public final class CEntityFormBuilder<EntityClass> implements ApplicationContextAware {
 
 	/**
 	 * Interface for providing data to ComboBox components. Implementations should provide
@@ -87,30 +91,9 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 	 * @throws NoSuchMethodException
 	 */
 	@SuppressWarnings ("unchecked")
-	public static <EntityClass> Div buildEnhancedForm(final Class<?> entityClass)
-		throws NoSuchMethodException, SecurityException, IllegalAccessException,
-		InvocationTargetException {
-		final CEnhancedBinder<EntityClass> enhancedBinder =
-			CBinderFactory.createEnhancedBinder((Class<EntityClass>) entityClass);
-		return buildForm(entityClass, enhancedBinder, null);
-	}
-
-	/**
-	 * Builds a form using an enhanced binder with data provider.
-	 * @param <EntityClass> the entity type
-	 * @param entityClass   the entity class
-	 * @param dataProvider  the data provider for ComboBox components
-	 * @return a Div containing the form with enhanced binder
-	 * @throws InvocationTargetException
-	 * @throws IllegalAccessException
-	 * @throws SecurityException
-	 * @throws NoSuchMethodException
-	 */
-	@SuppressWarnings ("unchecked")
-	@Deprecated
-	public static <EntityClass> Div buildEnhancedForm(final Class<?> entityClass,
-		final ComboBoxDataProvider dataProvider) throws NoSuchMethodException,
-		SecurityException, IllegalAccessException, InvocationTargetException {
+	public static <EntityClass> CVerticalLayout buildEnhancedForm(
+		final Class<?> entityClass) throws NoSuchMethodException, SecurityException,
+		IllegalAccessException, InvocationTargetException {
 		final CEnhancedBinder<EntityClass> enhancedBinder =
 			CBinderFactory.createEnhancedBinder((Class<EntityClass>) entityClass);
 		return buildForm(entityClass, enhancedBinder, null);
@@ -128,83 +111,62 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 	 * @throws NoSuchMethodException
 	 */
 	@SuppressWarnings ("unchecked")
-	public static <EntityClass> Div buildEnhancedForm(final Class<?> entityClass,
-		final List<String> entityFields) throws NoSuchMethodException, SecurityException,
-		IllegalAccessException, InvocationTargetException {
+	public static <EntityClass> CVerticalLayout
+		buildEnhancedForm(final Class<?> entityClass, final List<String> entityFields)
+			throws NoSuchMethodException, SecurityException, IllegalAccessException,
+			InvocationTargetException {
 		final CEnhancedBinder<EntityClass> enhancedBinder =
 			CBinderFactory.createEnhancedBinder((Class<EntityClass>) entityClass);
 		return buildForm(entityClass, enhancedBinder, entityFields);
 	}
 
-	public static <EntityClass> Div buildForm(final Class<?> entityClass,
+	public static <EntityClass> CVerticalLayout buildForm(final Class<?> entityClass,
 		final CEnhancedBinder<EntityClass> binder) throws NoSuchMethodException,
 		SecurityException, IllegalAccessException, InvocationTargetException {
-		return buildForm(entityClass, binder, null);
+		return buildForm(entityClass, binder, null, null,
+			new CVerticalLayout(false, false, false));
 	}
 
-	public static <EntityClass> Div buildForm(final Class<?> entityClass,
+	public static <EntityClass> CVerticalLayout buildForm(final Class<?> entityClass,
 		final CEnhancedBinder<EntityClass> binder, final List<String> entityFields)
+		throws NoSuchMethodException, SecurityException, IllegalAccessException,
+		InvocationTargetException {
+		return buildForm(entityClass, binder, entityFields, null,
+			new CVerticalLayout(false, false, false));
+	}
+
+	public static <EntityClass> CVerticalLayout buildForm(final Class<?> entityClass,
+		final CEnhancedBinder<EntityClass> binder, List<String> entityFields,
+		final Map<String, Component> map, final CVerticalLayout formLayout)
 		throws NoSuchMethodException, SecurityException, IllegalAccessException,
 		InvocationTargetException {
 		Check.notNull(entityClass, "Entity class");
 		Check.notNull(binder, "Binder of " + entityClass.getSimpleName());
-		final Div panel = new Div();
-		panel.setClassName("editor-layout");
 		// final FormLayout formLayout = new FormLayout();
-		final VerticalLayout formLayout = new VerticalLayout();
-		// no spacing, no margin, no padding
-		formLayout.setPadding(false);
-		formLayout.setMargin(false);
-		formLayout.setSpacing(false);
-		// formLayout.setLabelsAside(true); formLayout.addFormItem(firstName, "First
-		// name"); Collect all fields from the class hierarchy with enhanced logging
 		final List<Field> allFields = new ArrayList<>();
 		getListOfAllFields(entityClass, allFields);
-		// LOGGER.debug("Total fields collected from hierarchy: {}", allFields.size());
-		// Filter and sort fields with enhanced null checking and logging
 		final List<Field> sortedFields = getSortedFilteredFieldsList(allFields);
 		LOGGER.info("Processing {} visible fields for form generation",
 			sortedFields.size());
 		// Create components with enhanced error handling and logging
-		int processedComponents = 0;
 
-		for (final Field field : sortedFields) {
-			// skip if entityFields is not null and does not contain the field name or
-			// entityFields is empty
-			boolean skip = false;
-
-			if (entityFields == null) {
-				// skip = false; //already false by default
-			}
-
-			if ((entityFields != null) && !entityFields.contains(field.getName())) {
-				skip = true;
-			}
-
-			if (skip) {
-				continue;
-			}
-			processedComponents =
-				processMetaForField(binder, formLayout, processedComponents, field);
+		if (entityFields == null) {
+			entityFields =
+				sortedFields.stream().map(Field::getName).collect(Collectors.toList());
 		}
-		panel.add(formLayout);
-		return panel;
-	}
 
-	/**
-	 * @throws InvocationTargetException
-	 * @throws IllegalAccessException
-	 * @throws SecurityException
-	 * @throws NoSuchMethodException
-	 * @deprecated Use buildForm(Class, CEnhancedBinder) instead. ComboBoxDataProvider is
-	 *             no longer needed.
-	 */
-	@Deprecated
-	public static <EntityClass> Div buildFormAll(final Class<?> entityClass,
-		final CEnhancedBinder<EntityClass> binder,
-		final ComboBoxDataProvider dataProvider) throws NoSuchMethodException,
-		SecurityException, IllegalAccessException, InvocationTargetException {
-		return buildForm(entityClass, binder, null);
+		for (final String fieldName : entityFields) {
+			final Field field = sortedFields.stream()
+				.filter(f -> f.getName().equals(fieldName)).findFirst().orElse(null);
+			Check.notNull(field, "Field '" + fieldName + "' not found in entity class "
+				+ entityClass.getSimpleName());
+			final Component component = processMetaForField(binder, formLayout, field);
+
+			if (component != null && map != null) {
+				map.put(fieldName, component);
+			}
+		}
+		return formLayout;
 	}
 
 	/**
@@ -222,23 +184,29 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 	private static List<String> callStringDataMethod(final Object serviceBean,
 		final String methodName, final String fieldName) throws NoSuchMethodException,
 		SecurityException, IllegalAccessException, InvocationTargetException {
+
 		// Try to find and call the method
-		final Method method = serviceBean.getClass().getMethod(methodName);
-		Check.notNull(method,
-			"Method '" + methodName + "' on service bean for field '" + fieldName + "'");
-		final Object result = method.invoke(serviceBean);
-		Check.notNull(result, "Result of method '" + methodName
-			+ "' on service bean for field '" + fieldName + "'");
-		Check.condition(result instanceof List, "Method '" + methodName
-			+ "' on service bean for field '" + fieldName + "' did not return a List");
-		final List<?> rawList = (List<?>) result;
-		// Convert to List<String> if possible
-		final List<String> stringList = rawList.stream()
-			.filter(item -> item instanceof String).map(item -> (String) item).toList();
-		LOGGER.debug(
-			"Successfully called method '{}' on bean for field '{}', returned {} string items",
-			methodName, fieldName, stringList.size());
-		return stringList;
+		try {
+			final Method method = serviceBean.getClass().getMethod(methodName);
+			Check.notNull(method, "Method '" + methodName
+				+ "' on service bean for field '" + fieldName + "'");
+			final Object result = method.invoke(serviceBean);
+			Check.notNull(result, "Result of method '" + methodName
+				+ "' on service bean for field '" + fieldName + "'");
+			Check.condition(result instanceof List,
+				"Method '" + methodName + "' on service bean for field '" + fieldName
+					+ "' did not return a List");
+			final List<?> rawList = (List<?>) result;
+			// Convert to List<String> if possible
+			final List<String> stringList =
+				rawList.stream().filter(item -> item instanceof String)
+					.map(item -> (String) item).toList();
+			return stringList;
+		} catch (final Exception e) {
+			LOGGER.error("Failed to call method '{}' on service bean for field '{}': {}",
+				methodName, fieldName, e.getMessage());
+			throw e;
+		}
 	}
 
 	// call stringdatamethod with one parameter
@@ -246,23 +214,30 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		final String methodName, final String fieldName, final Object parameter)
 		throws NoSuchMethodException, SecurityException, IllegalAccessException,
 		InvocationTargetException {
-		// Try to find and call the method with one parameter
-		final Method method = serviceBean.getClass().getMethod(methodName, Object.class);
-		Check.notNull(method,
-			"Method '" + methodName + "' on service bean for field '" + fieldName + "'");
-		final Object result = method.invoke(serviceBean, parameter);
-		Check.notNull(result, "Result of method '" + methodName
-			+ "' on service bean for field '" + fieldName + "'");
-		Check.condition(result instanceof List, "Method '" + methodName
-			+ "' on service bean for field '" + fieldName + "' did not return a List");
-		final List<?> rawList = (List<?>) result;
-		// Convert to List<String> if possible
-		final List<String> stringList = rawList.stream()
-			.filter(item -> item instanceof String).map(item -> (String) item).toList();
-		LOGGER.debug(
-			"Successfully called method '{}' on bean for field '{}', returned {} string items",
-			methodName, fieldName, stringList.size());
-		return stringList;
+
+		try {
+			// Try to find and call the method with one parameter
+			final Method method =
+				serviceBean.getClass().getMethod(methodName, Object.class);
+			Check.notNull(method, "Method '" + methodName
+				+ "' on service bean for field '" + fieldName + "'");
+			final Object result = method.invoke(serviceBean, parameter);
+			Check.notNull(result, "Result of method '" + methodName
+				+ "' on service bean for field '" + fieldName + "'");
+			Check.condition(result instanceof List,
+				"Method '" + methodName + "' on service bean for field '" + fieldName
+					+ "' did not return a List");
+			final List<?> rawList = (List<?>) result;
+			// Convert to List<String> if possible
+			final List<String> stringList =
+				rawList.stream().filter(item -> item instanceof String)
+					.map(item -> (String) item).toList();
+			return stringList;
+		} catch (final Exception e) {
+			LOGGER.error("Failed to call method '{}' on service bean for field '{}': {}",
+				methodName, fieldName, e.getMessage());
+			throw e;
+		}
 	}
 
 	private static NumberField createBigDecimalField(final Field field,
@@ -613,61 +588,36 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 
 		// Set default value if specified
 		if ((meta.defaultValue() != null) && !meta.defaultValue().trim().isEmpty()) {
-
-			try {
-				final double defaultVal = Double.parseDouble(meta.defaultValue());
-				numberField.setValue(defaultVal);
-				LOGGER.debug("Set default value '{}' for integer field '{}'", defaultVal,
-					field.getName());
-			} catch (final NumberFormatException e) {
-				LOGGER.error(
-					"Failed to parse default value '{}' as number for field '{}': {}",
-					meta.defaultValue(), field.getName(), e.getMessage());
-			}
+			final double defaultVal = Double.parseDouble(meta.defaultValue());
+			numberField.setValue(defaultVal);
 		}
 		// Handle different integer types with proper conversion
 		final Class<?> fieldType = field.getType();
+		final String propertyName = getPropertyName(field);
 
-		try {
-			final String propertyName = getPropertyName(field);
-
-			if ((fieldType == Integer.class) || (fieldType == int.class)) {
-				binder.forField(numberField)
-					.withConverter(value -> value != null ? value.intValue() : null,
-						value -> value != null ? value.doubleValue() : null,
-						"Invalid integer value")
-					.bind(propertyName);
-				LOGGER.debug(
-					"Successfully bound NumberField with Integer converter for field '{}'",
-					field.getName());
-			}
-			else if ((fieldType == Long.class) || (fieldType == long.class)) {
-				binder.forField(numberField)
-					.withConverter(value -> value != null ? value.longValue() : null,
-						value -> value != null ? value.doubleValue() : null,
-						"Invalid long value")
-					.bind(propertyName);
-				LOGGER.debug(
-					"Successfully bound NumberField with Long converter for field '{}'",
-					field.getName());
-			}
-			else {
-				// Fallback for other number types (Double, etc.)
-				binder.bind(numberField, propertyName);
-			}
-		} catch (final Exception e) {
-			LOGGER.error(
-				"Failed to bind integer field for field '{}': {} - using fallback binding",
-				field.getName(), e.getMessage());
-
-			// Fallback to simple binding without converter
-			try {
-				safeBindComponentWithField(binder, numberField, field,
-					"NumberField(Integer-fallback)");
-			} catch (final Exception fallbackException) {
-				LOGGER.error("Fallback binding also failed for integer field '{}': {}",
-					field.getName(), fallbackException.getMessage());
-			}
+		if ((fieldType == Integer.class) || (fieldType == int.class)) {
+			binder.forField(numberField)
+				.withConverter(value -> value != null ? value.intValue() : null,
+					value -> value != null ? value.doubleValue() : null,
+					"Invalid integer value")
+				.bind(propertyName);
+			LOGGER.debug(
+				"Successfully bound NumberField with Integer converter for field '{}'",
+				field.getName());
+		}
+		else if ((fieldType == Long.class) || (fieldType == long.class)) {
+			binder.forField(numberField)
+				.withConverter(value -> value != null ? value.longValue() : null,
+					value -> value != null ? value.doubleValue() : null,
+					"Invalid long value")
+				.bind(propertyName);
+			LOGGER.debug(
+				"Successfully bound NumberField with Long converter for field '{}'",
+				field.getName());
+		}
+		else {
+			// Fallback for other number types (Double, etc.)
+			binder.bind(numberField, propertyName);
 		}
 		return numberField;
 	}
@@ -839,12 +789,8 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 
 	private static List<Field> getSortedFilteredFieldsList(final List<Field> allFields) {
 		return allFields.stream().filter(field -> {
-
-			if (field == null) {
-				LOGGER.warn("Null field encountered during filtering");
-				return false;
-			}
-			return !java.lang.reflect.Modifier.isStatic(field.getModifiers());
+			Check.notNull(field, "Field in sorted filtered fields list");
+			return !Modifier.isStatic(field.getModifiers());
 		}).filter(field -> {
 			final MetaData metaData = field.getAnnotation(MetaData.class);
 
@@ -865,15 +811,13 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		})).collect(Collectors.toList());
 	}
 
-	private static <EntityClass> int processMetaForField(
+	private static <EntityClass> Component processMetaForField(
 		final CEnhancedBinder<EntityClass> binder, final VerticalLayout formLayout,
-		int processedComponents, final Field field) throws NoSuchMethodException,
-		SecurityException, IllegalAccessException, InvocationTargetException {
+		final Field field) throws NoSuchMethodException, SecurityException,
+		IllegalAccessException, InvocationTargetException {
 		Check.notNull(field, "field");
 		final MetaData meta = field.getAnnotation(MetaData.class);
 		Check.notNull(meta, "MetaData for field " + field.getName());
-		// LOGGER.debug("Creating component for field '{}' with displayName
-		// '{}'",field.getName(), meta.displayName());
 		final Component component = createComponentForField(field, meta, binder);
 		Check.notNull(component, "Component for field " + field.getName()
 			+ " with displayName " + meta.displayName());
@@ -881,8 +825,7 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		Check.notNull(horizontalLayout, "HorizontalLayout for field " + field.getName()
 			+ " with displayName " + meta.displayName());
 		formLayout.add(horizontalLayout);
-		processedComponents++;
-		return processedComponents;
+		return component;
 	}
 
 	/**
@@ -967,6 +910,10 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		Check.condition(!beanName.trim().isEmpty(),
 			"Data provider bean name for String field '" + fieldName
 				+ "' must not be empty");
+
+		if (beanName.equals("none")) {
+			return List.of(); // No data provider configured, return empty list
+		}
 		Check.condition(applicationContext.containsBean(beanName),
 			"Data provider bean '" + beanName + "' for String field '" + fieldName
 				+ "' must be present in Spring context");
@@ -982,7 +929,8 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 				+ "' must not be empty");
 
 		// Try to call the method
-		if (meta.dataProviderParamMethod() != null) {
+		if (meta.dataProviderParamMethod() != null
+			&& meta.dataProviderParamMethod().trim().length() > 0) {
 
 			try {
 				// call dataprovider param method, returning Object as result
@@ -993,6 +941,9 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 				final Object param = method.invoke(serviceBean);
 				return callStringDataMethod(serviceBean, methodName, fieldName, param);
 			} catch (final NoSuchMethodException e) {
+				LOGGER.error(
+					"Data provider method '{}' not found on service bean for field '{}': {}",
+					meta.dataProviderParamMethod(), fieldName, e.getMessage());
 				throw e;
 			}
 		}
@@ -1079,9 +1030,41 @@ public final class CEntityFormBuilder implements ApplicationContextAware {
 		((HasValueAndElement<?, ?>) field).setRequiredIndicatorVisible(meta.required());
 	}
 
-	private CEntityFormBuilder() {
-		// Spring component - constructor managed by Spring
+	final CVerticalLayout formLayout;
+
+	final Map<String, Component> map;
+
+	public CEntityFormBuilder() {
+		this.map = new HashMap<>();
+		this.formLayout = new CVerticalLayout(false, false, false);
 	}
+
+	public CEntityFormBuilder(final Class<?> entityClass,
+		final CEnhancedBinder<EntityClass> binder, final List<String> entityFields)
+		throws NoSuchMethodException, SecurityException, IllegalAccessException,
+		InvocationTargetException {
+		this.map = new HashMap<>();
+		this.formLayout = new CVerticalLayout(false, false, false);
+		CEntityFormBuilder.buildForm(entityClass, binder, entityFields, map, formLayout);
+	}
+
+	public CVerticalLayout build(final Class<?> entityClass,
+		final CEnhancedBinder<EntityClass> binder, final List<String> entityFields)
+		throws NoSuchMethodException, SecurityException, IllegalAccessException,
+		InvocationTargetException {
+		return CEntityFormBuilder.buildForm(entityClass, binder, entityFields, map,
+			formLayout);
+	}
+
+	public Component getComponent(final String fieldName) {
+		Check.notNull(fieldName, "Field name for component retrieval");
+		final Component component = map.get(fieldName);
+		Check.notNull(component,
+			"Component for field " + fieldName + " not found in form builder map");
+		return component;
+	}
+
+	public CVerticalLayout getFormLayout() { return formLayout; }
 
 	/**
 	 * Sets the application context and initializes the data provider resolver. This

@@ -14,13 +14,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
-import com.vaadin.flow.component.html.Div;
-
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.annotations.MetaData;
 import tech.derbent.abstracts.components.CBinderFactory;
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.views.CVerticalLayout;
 
 /**
  * Complete test demonstrating String ComboBox with working data provider
@@ -89,18 +88,20 @@ class StringComboBoxCompleteTest {
 		final CEnhancedBinder<TestStringEntity> binder =
 			CBinderFactory.createEnhancedBinder(TestStringEntity.class);
 		// When
-		Div form = null;
+		CVerticalLayout formLayout = null;
 
 		try {
-			form = CEntityFormBuilder.buildForm(TestStringEntity.class, binder, null);
+			formLayout =
+				CEntityFormBuilder.buildForm(TestStringEntity.class, binder, null);
 		} catch (NoSuchMethodException | SecurityException | IllegalAccessException
 			| InvocationTargetException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		// Then
-		assertNotNull(form, "Form should be created successfully");
-		assertTrue(form.getChildren().count() > 0, "Form should contain components");
+		assertNotNull(formLayout, "Form should be created successfully");
+		assertTrue(formLayout.getChildren().count() > 0,
+			"Form should contain components");
 		// The test demonstrates that String ComboBox creation works without exceptions
 		// and integrates with Spring data providers
 		System.out.println("String ComboBox with data provider created successfully!");

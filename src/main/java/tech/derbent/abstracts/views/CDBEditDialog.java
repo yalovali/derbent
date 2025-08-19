@@ -6,77 +6,86 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.notification.Notification;
 
 /**
- * Abstract base class for data-aware dialogs. Uses generics to allow any data type. Handles dialog setup, form layout,
- * and save/cancel button logic. Child classes must implement form population and validation.
+ * Abstract base class for data-aware dialogs. Uses generics to allow any data type.
+ * Handles dialog setup, form layout, and save/cancel button logic. Child classes must
+ * implement form population and validation.
  */
 public abstract class CDBEditDialog<EntityClass> extends CDialog {
 
-    private static final long serialVersionUID = 1L;
-    protected final EntityClass data;
-    protected final Consumer<EntityClass> onSave;
-    protected final boolean isNew;
-    protected FormLayout formLayout;
+	private static final long serialVersionUID = 1L;
 
-    /**
-     * @param data
-     *            The data object to edit or create.
-     * @param onSave
-     *            Callback to execute on save.
-     * @param isNew
-     *            True if creating new, false if editing.
-     */
-    public CDBEditDialog(final EntityClass data, final Consumer<EntityClass> onSave, final boolean isNew) {
-        super();
-        LOGGER.debug("CDialog constructor called for {}", getClass().getSimpleName());
-        this.data = data;
-        this.onSave = onSave;
-        this.isNew = isNew;
-        // dont populate form here, as fields may not be initialized yet populateForm();
-    }
+	protected final EntityClass entity;
 
-    /** Child can override: success message for create. */
-    protected String getSuccessCreateMessage() {
-        return "Created successfully";
-    }
+	protected final Consumer<EntityClass> onSave;
 
-    /** Child can override: success message for update. */
-    protected String getSuccessUpdateMessage() {
-        return "Updated successfully";
-    }
+	protected final boolean isNew;
 
-    /** Child must implement: populate form fields from data. */
-    protected abstract void populateForm();
+	private FormLayout dialogLayout;
 
-    /** Called when Save is pressed. Handles validation and callback. */
-    protected void save() {
-        try {
-            LOGGER.debug("Saving data: {}", data);
-            validateForm();
-            if (onSave != null) {
-                onSave.accept(data);
-            }
-            close();
-            Notification.show(isNew ? getSuccessCreateMessage() : getSuccessUpdateMessage());
-        } catch (final Exception e) {
-            Notification.show("Error: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
-        }
-    }
+	/**
+	 * @param entity The data object to edit or create.
+	 * @param onSave Callback to execute on save.
+	 * @param isNew  True if creating new, false if editing.
+	 */
+	public CDBEditDialog(final EntityClass entity, final Consumer<EntityClass> onSave,
+		final boolean isNew) {
+		super();
+		LOGGER.debug("CDialog constructor called for {}", getClass().getSimpleName());
+		this.entity = entity;
+		this.onSave = onSave;
+		this.isNew = isNew;
+		// dont populate form here, as fields may not be initialized yet populateForm();
+	}
 
-    /** Sets up Save and Cancel buttons. */
-    @Override
-    protected void setupButtons() {
-        final CButton saveButton = CButton.createPrimary("Save", e -> save());
-        final CButton cancelButton = CButton.createTertiary("Cancel", e -> close());
-        buttonLayout.add(saveButton, cancelButton);
-    }
+	public FormLayout getDialogLayout() { return dialogLayout; }
 
-    /** Sets up the main layout and form layout. */
-    @Override
-    protected void setupContent() {
-        formLayout = new FormLayout();
-        mainLayout.add(formLayout);
-    }
+	/** Child can override: success message for create. */
+	protected String getSuccessCreateMessage() {
+		return "Created successfully";
+	}
 
-    /** Child must implement: validate form fields. */
-    protected abstract void validateForm();
+	/** Child can override: success message for update. */
+	protected String getSuccessUpdateMessage() {
+		return "Updated successfully";
+	}
+
+	/** Child must implement: populate form fields from data. */
+	protected abstract void populateForm();
+
+	/** Called when Save is pressed. Handles validation and callback. */
+	protected void save() {
+
+		try {
+			LOGGER.debug("Saving data: {}", entity);
+			validateForm();
+
+			if (onSave != null) {
+				onSave.accept(entity);
+			}
+			close();
+			Notification
+				.show(isNew ? getSuccessCreateMessage() : getSuccessUpdateMessage());
+		} catch (final Exception e) {
+			Notification.show("Error: " + e.getMessage(), 5000,
+				Notification.Position.MIDDLE);
+		}
+	}
+
+	/** Sets up Save and Cancel buttons. */
+	@Override
+	protected void setupButtons() {
+		final CButton saveButton = CButton.createPrimary("Save", e -> save());
+		final CButton cancelButton = CButton.createTertiary("Cancel", e -> close());
+		buttonLayout.add(saveButton, cancelButton);
+	}
+
+	/** Sets up the main layout and form layout. */
+	@Override
+	protected void setupContent() {
+		dialogLayout = new FormLayout();
+		mainLayout.add(dialogLayout);
+	}
+
+	/** Child must implement: validate form fields. */
+	protected abstract void validateForm();
 }

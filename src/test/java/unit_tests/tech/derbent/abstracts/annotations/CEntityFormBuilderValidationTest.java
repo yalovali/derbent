@@ -10,11 +10,10 @@ import java.lang.reflect.InvocationTargetException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import com.vaadin.flow.component.html.Div;
-
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.annotations.MetaData;
 import tech.derbent.abstracts.components.CBinderFactory;
+import tech.derbent.abstracts.views.CVerticalLayout;
 import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 
 /**
@@ -91,10 +90,9 @@ class CEntityFormBuilderValidationTest extends CTestBase {
 		}
 		final var binder =
 			CBinderFactory.createEnhancedBinder(EntityWithoutMetaData.class);
-		final Div result =
+		final CVerticalLayout formLayout =
 			CEntityFormBuilder.buildForm(EntityWithoutMetaData.class, binder);
-		assertNotNull(result, "Form should be created even without MetaData fields");
-		assertEquals("editor-layout", result.getClassName());
+		assertNotNull(formLayout, "Form should be created even without MetaData fields");
 		// Should have minimal content since no fields have MetaData
 	}
 
@@ -103,9 +101,9 @@ class CEntityFormBuilderValidationTest extends CTestBase {
 	void testBuildFormWithValidParameters() throws NoSuchMethodException,
 		SecurityException, IllegalAccessException, InvocationTargetException {
 		final var binder = CBinderFactory.createEnhancedBinder(TestEntity.class);
-		final Div result = CEntityFormBuilder.buildForm(TestEntity.class, binder);
-		assertNotNull(result, "Form should be created successfully");
-		assertEquals("editor-layout", result.getClassName());
-		assertTrue(result.getChildren().count() > 0, "Form should contain components");
+		final CVerticalLayout formLayout =
+			CEntityFormBuilder.buildForm(TestEntity.class, binder);
+		assertTrue(formLayout.getChildren().count() > 0,
+			"Form should contain components");
 	}
 }

@@ -40,7 +40,9 @@ public class CRiskService extends CEntityOfProjectService<CRisk> {
 
         try {
             super.initializeLazyFields(entity);
-            initializeLazyRelationship(entity.getStatus());
+            if (entity.getStatus() != null) {
+                initializeLazyRelationship(entity.getStatus());
+            }
         } catch (final Exception e) {
             LOGGER.warn("Error initializing lazy fields for Risk with ID: {}", entity.getId(), e);
         }

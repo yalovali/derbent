@@ -27,6 +27,10 @@ public class CScreenLines extends CEntityDB<CScreenLines> {
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "screen_id", nullable = false)
 	@NotNull (message = "Screen reference is required")
+	@MetaData (
+		displayName = "Screen Reference", required = true, readOnly = false,
+		description = "Screen Reference", hidden = false, order = 1, defaultValue = "1"
+	)
 	private CScreen screen;
 
 	@Column (name = "line_order", nullable = false)
@@ -44,9 +48,7 @@ public class CScreenLines extends CEntityDB<CScreenLines> {
 	@MetaData (
 		displayName = "Field Class", required = true, readOnly = false,
 		description = "Class of field this screen is designed for", hidden = false,
-		order = 2, maxLength = 100, dataProviderBean = "CEntityFieldService",
-		dataProviderMethod = "getAvailableFieldClassesOfType"
-		// ,dataProviderParamMethod = "getScreenType"
+		order = 2, maxLength = 100, dataProviderBean = "none"
 	)
 	private String fieldClass;
 
@@ -60,15 +62,15 @@ public class CScreenLines extends CEntityDB<CScreenLines> {
 	)
 	private String fieldCaption;
 
-	@Column (name = "entity_field_name", nullable = false, length = 100)
-	@Size (max = 100, message = "Entity field name cannot exceed 100 characters")
-	@NotNull (message = "Entity field name is required")
+	@Column (name = "entity_property", nullable = false, length = 100)
+	@Size (max = 100, message = "Field property name cannot exceed 100 characters")
+	@NotNull (message = "Field propery name is required")
 	@MetaData (
-		displayName = "Entity Field Name", required = true, readOnly = false,
-		description = "Name of the field in the entity", hidden = false, order = 3,
-		maxLength = 100
+		displayName = "Field Property", required = true, readOnly = false,
+		description = "Name of the property in the entity", hidden = false, order = 3,
+		maxLength = 100, dataProviderBean = "none"
 	)
-	private String entityFieldName;
+	private String entityProperty;
 
 	@Column (name = "field_description", nullable = true, length = 500)
 	@Size (max = 500, message = "Field description cannot exceed 500 characters")
@@ -155,11 +157,11 @@ public class CScreenLines extends CEntityDB<CScreenLines> {
 	}
 
 	public CScreenLines(final CScreen screen, final String fieldCaption,
-		final String entityFieldName) {
+		final String entityProperty) {
 		super(CScreenLines.class);
 		this.screen = screen;
 		this.fieldCaption = fieldCaption;
-		this.entityFieldName = entityFieldName;
+		this.entityProperty = entityProperty;
 	}
 	// Getters and Setters
 
@@ -167,7 +169,7 @@ public class CScreenLines extends CEntityDB<CScreenLines> {
 
 	public String getDefaultValue() { return defaultValue; }
 
-	public String getEntityFieldName() { return entityFieldName; }
+	public String getEntityProperty() { return entityProperty; }
 
 	public String getFieldCaption() { return fieldCaption; }
 
@@ -199,8 +201,8 @@ public class CScreenLines extends CEntityDB<CScreenLines> {
 		this.defaultValue = defaultValue;
 	}
 
-	public void setEntityFieldName(final String entityFieldName) {
-		this.entityFieldName = entityFieldName;
+	public void setEntityProperty(final String entityProperty) {
+		this.entityProperty = entityProperty;
 	}
 
 	public void setFieldCaption(final String fieldCaption) {
@@ -234,7 +236,7 @@ public class CScreenLines extends CEntityDB<CScreenLines> {
 	@Override
 	public String toString() {
 		return String.format(
-			"CScreenLines{id=%d, lineOrder=%d, fieldCaption='%s', entityFieldName='%s'}",
-			getId(), lineOrder, fieldCaption, entityFieldName);
+			"CScreenLines{id=%d, lineOrder=%d, fieldCaption='%s', entityProperty='%s'}",
+			getId(), lineOrder, fieldCaption, entityProperty);
 	}
 }

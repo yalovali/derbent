@@ -1,5 +1,7 @@
 package tech.derbent.abstracts.views;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,67 +15,74 @@ import tech.derbent.abstracts.utils.CAuxillaries;
 
 public abstract class CDialog extends Dialog {
 
-    private static final long serialVersionUID = 1L;
-    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
-    protected VerticalLayout mainLayout;
-    protected final HorizontalLayout buttonLayout = new HorizontalLayout();
+	private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor for CDialog. Initializes the dialog with a default layout.
-     */
-    public CDialog() {
-        super();
-        initializeDialog();
-    }
+	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
-    /**
-     * Common initialization for all CDialog instances.
-     */
-    protected void initializeDialog() {
-        CAuxillaries.setId(this);
-        LOGGER.debug("CDialog initialized with ID: {}", getId().orElse("none"));
-    }
+	protected VerticalLayout mainLayout;
 
-    /** Child must implement: form title. */
-    protected abstract Icon getFormIcon();
+	protected final HorizontalLayout buttonLayout = new HorizontalLayout();
 
-    /** Child must implement: form title. */
-    protected abstract String getFormTitle();
+	/**
+	 * Constructor for CDialog. Initializes the dialog with a default layout.
+	 */
+	public CDialog() {
+		super();
+		initializeDialog();
+	}
 
-    /** Child must implement: dialog header title. */
-    @Override
-    public abstract String getHeaderTitle();
+	/** Child must implement: form title. */
+	protected abstract Icon getFormIcon();
+	/** Child must implement: form title. */
+	protected abstract String getFormTitle();
+	/** Child must implement: dialog header title. */
+	@Override
+	public abstract String getHeaderTitle();
 
-    protected abstract void setupButtons();
+	/**
+	 * Common initialization for all CDialog instances.
+	 */
+	protected void initializeDialog() {
+		CAuxillaries.setId(this);
+		LOGGER.debug("CDialog initialized with ID: {}", getId().orElse("none"));
+	}
 
-    protected abstract void setupContent();
+	protected abstract void setupButtons();
+	protected abstract void setupContent();
 
-    /** Sets up dialog properties (title, modal, size, etc.) */
-    protected void setupDialog() {
-        setHeaderTitle(getHeaderTitle());
-        setModal(true);
-        setCloseOnEsc(true);
-        setCloseOnOutsideClick(false);
-        setWidth("500px");
-        mainLayout = new VerticalLayout();
-        mainLayout.setPadding(false);
-        mainLayout.setSpacing(true);
-        final HorizontalLayout headerLayout = new HorizontalLayout();
-        headerLayout.setAlignItems(HorizontalLayout.Alignment.CENTER);
-        headerLayout.setSpacing(true);
-        final Icon icon = getFormIcon();
-        if (icon != null) {
-            icon.setSize("24px");
-            headerLayout.add(icon);
-        }
-        headerLayout.add(new H3(getFormTitle()));
-        mainLayout.add(headerLayout);
-        add(mainLayout);
-        //
-        buttonLayout.setJustifyContentMode(HorizontalLayout.JustifyContentMode.CENTER);
-        buttonLayout.getStyle().set("margin-top", "16px");
-        getFooter().add(buttonLayout);
-        setupContent();
-        setupButtons();
-    }
+	/**
+	 * Sets up dialog properties (title, modal, size, etc.)
+	 * @throws InvocationTargetException
+	 * @throws IllegalAccessException
+	 * @throws SecurityException
+	 * @throws NoSuchMethodException
+	 */
+	protected void setupDialog() {
+		setHeaderTitle(getHeaderTitle());
+		setModal(true);
+		setCloseOnEsc(true);
+		setCloseOnOutsideClick(false);
+		setWidth("500px");
+		mainLayout = new VerticalLayout();
+		mainLayout.setPadding(false);
+		mainLayout.setSpacing(true);
+		final HorizontalLayout headerLayout = new HorizontalLayout();
+		headerLayout.setAlignItems(HorizontalLayout.Alignment.CENTER);
+		headerLayout.setSpacing(true);
+		final Icon icon = getFormIcon();
+
+		if (icon != null) {
+			icon.setSize("24px");
+			headerLayout.add(icon);
+		}
+		headerLayout.add(new H3(getFormTitle()));
+		mainLayout.add(headerLayout);
+		add(mainLayout);
+		//
+		buttonLayout.setJustifyContentMode(HorizontalLayout.JustifyContentMode.CENTER);
+		buttonLayout.getStyle().set("margin-top", "16px");
+		getFooter().add(buttonLayout);
+		setupContent();
+		setupButtons();
+	}
 }

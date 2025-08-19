@@ -2,7 +2,6 @@ package tech.derbent.activities.view;
 
 import java.lang.reflect.InvocationTargetException;
 
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -11,6 +10,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
+import tech.derbent.abstracts.views.CVerticalLayout;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.service.CActivityStatusService;
 import tech.derbent.projects.domain.CProject;
@@ -57,7 +57,7 @@ public class CActivityStatusView extends CProjectAwareMDPage<CActivityStatus>
 	@Override
 	public void createDetailsLayout() throws NoSuchMethodException, SecurityException,
 		IllegalAccessException, InvocationTargetException {
-		final Div detailsLayout =
+		final CVerticalLayout detailsLayout =
 			CEntityFormBuilder.buildForm(CActivityStatus.class, getBinder());
 		getBaseDetailsLayout().add(detailsLayout);
 	}

@@ -10,6 +10,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
+import tech.derbent.abstracts.views.CVerticalLayout;
 import tech.derbent.orders.domain.COrder;
 import tech.derbent.orders.service.COrderService;
 import tech.derbent.session.service.CSessionService;
@@ -74,9 +75,9 @@ public class COrdersView extends CProjectAwareMDPage<COrder>
 	@Override
 	protected void createDetailsLayout() throws NoSuchMethodException, SecurityException,
 		IllegalAccessException, InvocationTargetException {
-		final com.vaadin.flow.component.html.Div detailsLayout =
+		final CVerticalLayout formLayout =
 			CEntityFormBuilder.buildForm(COrder.class, getBinder());
-		getBaseDetailsLayout().add(detailsLayout);
+		getBaseDetailsLayout().add(formLayout);
 	}
 
 	@Override
