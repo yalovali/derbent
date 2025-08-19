@@ -55,6 +55,14 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
         wrapper.setClassName("grid-wrapper");
         wrapper.add(grid);
         splitLayout.addToPrimary(wrapper);
+
+        // Ensure consistent selection behavior for project-aware grids
+        // This follows coding guidelines for generic design
+        grid.getDataProvider().addDataProviderListener(e -> {
+            getUI().ifPresent(ui -> ui.access(() -> {
+                grid.ensureSelectionWhenDataAvailable();
+            }));
+        });
     }
 
     @Override
