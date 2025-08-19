@@ -58,6 +58,27 @@ public class CDecisionTypeService extends CEntityOfProjectService<CDecisionType>
         return ((CDecisionTypeRepository) repository).findByProjectAndRequiresApprovalTrue(project);
     }
 
+    /**
+     * Gets a decision type by ID with all relationships eagerly loaded. This prevents LazyInitializationException
+     * when accessing project and other relationships.
+     * 
+     * @param id
+     *            the decision type ID
+     * @return optional decision type with loaded relationships
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.Optional<CDecisionType> getById(final Long id) {
+        if (id == null) {
+            return java.util.Optional.empty();
+        }
+
+        LOGGER.debug("Getting CDecisionType with ID {} (overridden to eagerly load relationships)", id);
+        final java.util.Optional<CDecisionType> entity = ((CDecisionTypeRepository) repository).findByIdWithRelationships(id);
+        entity.ifPresent(this::initializeLazyFields);
+        return entity;
+    }
+
     @Override
     protected Class<CDecisionType> getEntityClass() {
         return CDecisionType.class;

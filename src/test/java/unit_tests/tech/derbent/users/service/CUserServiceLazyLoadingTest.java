@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserType;
+import tech.derbent.users.service.CUserRepository;
 import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 
 /**
@@ -36,8 +37,8 @@ public class CUserServiceLazyLoadingTest extends CTestBase {
         user.setUserType(userType);
         final CCompany company = new CCompany("Test Company");
         user.setCompany(company);
-        // Mock the repository to return the user using standard findById
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        // Mock the repository to return the user using the new eager loading method
+        when(((CUserRepository) userRepository).findByIdWithUserType(userId)).thenReturn(Optional.of(user));
         // When
         final Optional<CUser> result = userService.getById(userId);
         // Then

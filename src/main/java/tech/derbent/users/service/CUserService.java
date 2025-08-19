@@ -121,6 +121,27 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
     }
 
     /**
+     * Gets a user by ID with eagerly loaded UserType and Company relationships. This prevents LazyInitializationException
+     * when accessing user type and company information.
+     * 
+     * @param id
+     *            the user ID
+     * @return optional user with loaded relationships
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.Optional<CUser> getById(final Long id) {
+        if (id == null) {
+            return java.util.Optional.empty();
+        }
+
+        LOGGER.debug("Getting CUser with ID {} (overridden to eagerly load userType)", id);
+        final java.util.Optional<CUser> entity = ((CUserRepository) repository).findByIdWithUserType(id);
+        entity.ifPresent(this::initializeLazyFields);
+        return entity;
+    }
+
+    /**
      * Gets the password encoder used by this service. Useful for external password operations.
      * 
      * @return the PasswordEncoder instance
@@ -133,16 +154,24 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
      * Initializes lazy fields for a user entity to prevent LazyInitializationException. Specifically initializes user
      * type, company, and project settings.
      * 
-     * @param user
+     * @param entity
      *            the user entity to initialize
      */
     @Override
     public void initializeLazyFields(final CUser entity) {
-        Check.notNull(entity, "User entity cannot be null");
-        super.initializeLazyFields(entity);
-        initializeLazyRelationship(entity.getUserType());
-        initializeLazyRelationship(entity.getCompany());
-        initializeLazyRelationship(entity.getProjectSettings());
+        if (entity == null) {
+            LOGGER.debug("User entity is null, skipping lazy field initialization");
+            return;
+        }
+
+        try {
+            super.initializeLazyFields(entity); // Handles CEntityOfProject relationships automatically
+            initializeLazyRelationship(entity.getUserType(), "userType");
+            initializeLazyRelationship(entity.getCompany(), "company");
+            initializeLazyRelationship(entity.getProjectSettings(), "projectSettings");
+        } catch (final Exception e) {
+            LOGGER.warn("Error initializing lazy fields for CUser with ID: {}", entity.getId(), e);
+        }
     }
 
     /**
