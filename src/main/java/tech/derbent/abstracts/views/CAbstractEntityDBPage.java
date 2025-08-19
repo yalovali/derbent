@@ -383,8 +383,13 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
         gridContainer.add(grid);
         gridContainer.setFlexGrow(1, grid);
         splitLayout.addToPrimary(gridContainer);
-        // Auto-select first item if available after grid is set up
-        // selectFirstItemIfAvailable();
+        // Ensure grid has selection when data is available - follows coding guidelines
+        // for consistent grid behavior across all views
+        grid.getDataProvider().addDataProviderListener(e -> {
+            getUI().ifPresent(ui -> ui.access(() -> {
+                grid.ensureSelectionWhenDataAvailable();
+            }));
+        });
     }
 
     protected CButton createNewButton(final String buttonText) {

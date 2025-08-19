@@ -72,8 +72,8 @@ public class COrderService extends CEntityOfProjectService<COrder> {
     }
 
     /**
-     * Gets an order by ID with all relationships eagerly loaded. This prevents LazyInitializationException
-     * when accessing order details.
+     * Gets an order by ID with all relationships eagerly loaded. This prevents LazyInitializationException when
+     * accessing order details.
      * 
      * @param id
      *            the order ID

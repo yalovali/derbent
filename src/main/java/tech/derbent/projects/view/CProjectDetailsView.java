@@ -2,7 +2,6 @@ package tech.derbent.projects.view;
 
 import java.lang.reflect.InvocationTargetException;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -385,16 +384,8 @@ public class CProjectDetailsView extends CAbstractNamedEntityPage<CProject> impl
                 .setSortable(false);
         // Add row styling
         grid.setClassNameGenerator(project -> "project-row");
-        // Enhanced selection listener
-        grid.asSingleSelect().addValueChangeListener(event -> {
-
-            if (event.getValue() != null) {
-                UI.getCurrent().navigate(String.format(ENTITY_ROUTE_TEMPLATE_EDIT, event.getValue().getId()));
-            } else {
-                clearForm();
-                UI.getCurrent().navigate(CProjectDetailsView.class);
-            }
-        });
+        // Selection handling is now managed by the base class - no custom logic needed
+        // This follows the coding guidelines for child class simplicity
     }
 
     @Override
@@ -741,16 +732,13 @@ public class CProjectDetailsView extends CAbstractNamedEntityPage<CProject> impl
     /**
      * Common grid selection listener setup
      */
+    /**
+     * Selection handling is now managed by the base class for consistency. This follows the coding guidelines for child
+     * class simplicity and generic design.
+     */
     private void setupGridSelectionListener() {
-        grid.asSingleSelect().addValueChangeListener(event -> {
-
-            if (event.getValue() != null) {
-                UI.getCurrent().navigate(String.format(ENTITY_ROUTE_TEMPLATE_EDIT, event.getValue().getId()));
-            } else {
-                clearForm();
-                UI.getCurrent().navigate(CProjectDetailsView.class);
-            }
-        });
+        // Grid selection is now handled automatically by the base class
+        // No custom logic needed - this follows coding guidelines for generic design
     }
 
     /**

@@ -116,8 +116,8 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> {
     }
 
     /**
-     * Gets a decision by ID with all relationships eagerly loaded. This prevents LazyInitializationException
-     * when accessing decision details.
+     * Gets a decision by ID with all relationships eagerly loaded. This prevents LazyInitializationException when
+     * accessing decision details.
      * 
      * @param id
      *            the decision ID
@@ -131,7 +131,8 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> {
         }
 
         LOGGER.debug("Getting CDecision with ID {} (overridden to eagerly load relationships)", id);
-        final java.util.Optional<CDecision> entity = ((CDecisionRepository) repository).findByIdWithAllRelationships(id);
+        final java.util.Optional<CDecision> entity = ((CDecisionRepository) repository)
+                .findByIdWithAllRelationships(id);
         entity.ifPresent(this::initializeLazyFields);
         return entity;
     }

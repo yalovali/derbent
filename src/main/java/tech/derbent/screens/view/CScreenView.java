@@ -2,7 +2,6 @@ package tech.derbent.screens.view;
 
 import java.lang.reflect.InvocationTargetException;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -108,17 +107,8 @@ public final class CScreenView extends CProjectAwareMDPage<CScreen> {
             }
             return desc.length() > 50 ? desc.substring(0, 50) + "..." : desc;
         }, "Description", null);
-        // when a row is selected or deselected, populate form
-        grid.asSingleSelect().addValueChangeListener(event -> {
-            LOGGER.debug("Grid selection changed: {}", event.getValue());
-
-            if (event.getValue() != null) {
-                UI.getCurrent().navigate(String.format(ENTITY_ROUTE_TEMPLATE_EDIT, event.getValue().getId()));
-            } else {
-                clearForm();
-                UI.getCurrent().navigate(CScreenView.class);
-            }
-        });
+        // Selection handling is now managed by the base class - no custom logic needed
+        // This follows the coding guidelines for child class simplicity
     }
 
     @Override

@@ -304,6 +304,11 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
         addThemeVariants(GridVariant.LUMO_COMPACT);
         setHeightFull();
         CAuxillaries.setId(this);
+
+        // Ensure grid always has a selected row when data is available
+        getDataProvider().addDataProviderListener(event -> {
+            ensureSelectionWhenDataAvailable();
+        });
     }
 
     /**
@@ -315,11 +320,6 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
         return showIconInStatusColumns;
     }
 
-    @Override
-    public void select(final EntityClass entity) {
-        super.select(entity);
-    }
-
     /**
      * Enable or disable icon display in status columns. Note: This setting only affects future status columns created
      * after this call.
@@ -329,5 +329,39 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
      */
     public void setShowIconInStatusColumns(final boolean showIconInStatusColumns) {
         this.showIconInStatusColumns = showIconInStatusColumns;
+    }
+
+    /**
+     * Ensures that the grid has a selected row when data is available. This method is called automatically when data
+     * changes and follows the coding guideline that grids should always have a selected row.
+     */
+    public void ensureSelectionWhenDataAvailable() {
+        LOGGER.debug("Ensuring grid selection when data is available");
+
+        try {
+            // Only auto-select if no current selection and data is available
+            if (asSingleSelect().getValue() == null) {
+                getDataProvider().fetch(new com.vaadin.flow.data.provider.Query<>()).findFirst().ifPresent(entity -> {
+                    LOGGER.debug("Auto-selecting first entity: {}", entity.getId());
+                    select(entity);
+                });
+            }
+        } catch (final Exception e) {
+            LOGGER.debug("Could not auto-select first row: {}", e.getMessage());
+            // Don't throw exception - this is a convenience feature
+        }
+    }
+
+    /**
+     * Override select to add logging for debugging grid selection behavior.
+     */
+    @Override
+    public void select(final EntityClass entity) {
+        if (entity != null) {
+            LOGGER.debug("Selecting entity with ID: {}", entity.getId());
+        } else {
+            LOGGER.debug("Deselecting current entity");
+        }
+        super.select(entity);
     }
 }
