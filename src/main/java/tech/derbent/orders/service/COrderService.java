@@ -72,8 +72,28 @@ public class COrderService extends CEntityOfProjectService<COrder> {
     }
 
     /**
-     * Enhanced initialization of lazy-loaded fields specific to Order entities. Based on CActivityService
-     * implementation style.
+     * Gets an order by ID with all relationships eagerly loaded. This prevents LazyInitializationException
+     * when accessing order details.
+     * 
+     * @param id
+     *            the order ID
+     * @return optional order with loaded relationships
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.Optional<COrder> getById(final Long id) {
+        if (id == null) {
+            return java.util.Optional.empty();
+        }
+
+        LOGGER.debug("Getting COrder with ID {} (overridden to eagerly load relationships)", id);
+        final java.util.Optional<COrder> entity = ((COrderRepository) repository).findByIdWithEagerLoading(id);
+        entity.ifPresent(this::initializeLazyFields);
+        return entity;
+    }
+
+    /**
+     * Enhanced initialization of lazy-loaded fields specific to Order entities. Uses improved null-safe patterns.
      * 
      * @param entity
      *            the order entity to initialize
@@ -82,16 +102,17 @@ public class COrderService extends CEntityOfProjectService<COrder> {
     public void initializeLazyFields(final COrder entity) {
 
         if (entity == null) {
+            LOGGER.debug("Order entity is null, skipping lazy field initialization");
             return;
         }
 
         try {
-            super.initializeLazyFields(entity);
-            initializeLazyRelationship(entity.getOrderType());
-            initializeLazyRelationship(entity.getStatus());
+            super.initializeLazyFields(entity); // Handles CEntityOfProject relationships automatically
+            initializeLazyRelationship(entity.getOrderType(), "orderType");
+            initializeLazyRelationship(entity.getStatus(), "status");
 
             if ((entity.getApprovals() != null) && !entity.getApprovals().isEmpty()) {
-                entity.getApprovals().forEach(this::initializeLazyRelationship);
+                entity.getApprovals().forEach(approval -> initializeLazyRelationship(approval, "approval"));
             }
         } catch (final Exception e) {
             LOGGER.warn("Error initializing lazy fields for Order with ID: {}", entity.getId(), e);

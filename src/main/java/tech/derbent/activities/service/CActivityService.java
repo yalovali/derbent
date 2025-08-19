@@ -130,18 +130,25 @@ public class CActivityService extends CEntityOfProjectService<CActivity>
      */
     @Override
     public void initializeLazyFields(final CActivity entity) {
-        Check.notNull(entity, "Activity entity cannot be null");
+        if (entity == null) {
+            LOGGER.debug("Activity entity is null, skipping lazy field initialization");
+            return;
+        }
 
-        LOGGER.debug("Initializing lazy fields for CActivity with ID: {} entity: {}", entity.getId(), entity.getName());
+        try {
+            LOGGER.debug("Initializing lazy fields for CActivity with ID: {} entity: {}", entity.getId(), entity.getName());
 
-        super.initializeLazyFields(entity);
-        initializeLazyRelationship(entity.getActivityType());
-        initializeLazyRelationship(entity.getAssignedTo());
-        initializeLazyRelationship(entity.getCreatedBy());
-        initializeLazyRelationship(entity.getStatus());
-        initializeLazyRelationship(entity.getPriority());
-        initializeLazyRelationship(entity.getParentActivity());
-        initializeLazyRelationship(entity.getProject());
+            super.initializeLazyFields(entity); // Handles CEntityOfProject relationships automatically
+            initializeLazyRelationship(entity.getActivityType(), "activityType");
+            initializeLazyRelationship(entity.getAssignedTo(), "assignedTo");
+            initializeLazyRelationship(entity.getCreatedBy(), "createdBy");
+            initializeLazyRelationship(entity.getStatus(), "status");
+            initializeLazyRelationship(entity.getPriority(), "priority");
+            initializeLazyRelationship(entity.getParentActivity(), "parentActivity");
+            // Project is already handled by super.initializeLazyFields() for CEntityOfProject
+        } catch (final Exception e) {
+            LOGGER.warn("Error initializing lazy fields for CActivity with ID: {}", entity.getId(), e);
+        }
     }
 
     @Override

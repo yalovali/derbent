@@ -116,8 +116,28 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> {
     }
 
     /**
-     * Enhanced initialization of lazy-loaded fields specific to Decision entities. Based on CActivityService
-     * implementation style.
+     * Gets a decision by ID with all relationships eagerly loaded. This prevents LazyInitializationException
+     * when accessing decision details.
+     * 
+     * @param id
+     *            the decision ID
+     * @return optional decision with loaded relationships
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.Optional<CDecision> getById(final Long id) {
+        if (id == null) {
+            return java.util.Optional.empty();
+        }
+
+        LOGGER.debug("Getting CDecision with ID {} (overridden to eagerly load relationships)", id);
+        final java.util.Optional<CDecision> entity = ((CDecisionRepository) repository).findByIdWithAllRelationships(id);
+        entity.ifPresent(this::initializeLazyFields);
+        return entity;
+    }
+
+    /**
+     * Enhanced initialization of lazy-loaded fields specific to Decision entities. Uses improved null-safe patterns.
      * 
      * @param entity
      *            the decision entity to initialize
@@ -126,21 +146,22 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> {
     public void initializeLazyFields(final CDecision entity) {
 
         if (entity == null) {
+            LOGGER.debug("Decision entity is null, skipping lazy field initialization");
             return;
         }
 
         try {
-            super.initializeLazyFields(entity);
-            initializeLazyRelationship(entity.getDecisionType());
-            initializeLazyRelationship(entity.getDecisionStatus());
-            initializeLazyRelationship(entity.getAccountableUser());
+            super.initializeLazyFields(entity); // Handles CEntityOfProject relationships automatically
+            initializeLazyRelationship(entity.getDecisionType(), "decisionType");
+            initializeLazyRelationship(entity.getDecisionStatus(), "decisionStatus");
+            initializeLazyRelationship(entity.getAccountableUser(), "accountableUser");
 
             if ((entity.getTeamMembers() != null) && !entity.getTeamMembers().isEmpty()) {
-                entity.getTeamMembers().forEach(this::initializeLazyRelationship);
+                entity.getTeamMembers().forEach(member -> initializeLazyRelationship(member, "teamMember"));
             }
 
             if ((entity.getApprovals() != null) && !entity.getApprovals().isEmpty()) {
-                entity.getApprovals().forEach(this::initializeLazyRelationship);
+                entity.getApprovals().forEach(approval -> initializeLazyRelationship(approval, "approval"));
             }
         } catch (final Exception e) {
             LOGGER.warn("Error initializing lazy fields for Decision with ID: {}", entity.getId(), e);

@@ -119,20 +119,48 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
     protected abstract Class<EntityClass> getEntityClass();
 
     public void initializeLazyFields(final EntityClass entity) {
-        Check.notNull(entity, "Entity cannot be null");
-        // LOGGER.debug("Initializing lazy fields for entity: {}
-        // {}",entity.getClass().getSimpleName(),
-        // CSpringAuxillaries.safeToString(entity));
-        CSpringAuxillaries.initializeLazily(entity);
+        if (entity == null) {
+            LOGGER.debug("Entity is null, skipping lazy field initialization");
+            return;
+        }
+
+        try {
+            // LOGGER.debug("Initializing lazy fields for entity: {}
+            // {}",entity.getClass().getSimpleName(),
+            // CSpringAuxillaries.safeToString(entity));
+            CSpringAuxillaries.initializeLazily(entity);
+            
+            // Automatic detection and handling of CEntityOfProject relationships
+            if (entity instanceof tech.derbent.abstracts.domains.CEntityOfProject) {
+                final tech.derbent.abstracts.domains.CEntityOfProject projectEntity = 
+                    (tech.derbent.abstracts.domains.CEntityOfProject) entity;
+                initializeLazyRelationship(projectEntity.getProject(), "project");
+            }
+        } catch (final Exception e) {
+            LOGGER.warn("Error initializing lazy fields for {} with ID: {}", 
+                    entity.getClass().getSimpleName(), entity.getId(), e);
+        }
     }
 
     protected void initializeLazyRelationship(final Object relationshipEntity) {
-        Check.notNull(relationshipEntity, "Relationship entity cannot be null");
+        initializeLazyRelationship(relationshipEntity, "unknown");
+    }
 
-        final boolean success = CSpringAuxillaries.initializeLazily(relationshipEntity);
-        if (!success) {
-            LOGGER.warn("Failed to initialize lazy relationship: {}",
-                    CSpringAuxillaries.safeToString(relationshipEntity));
+    protected void initializeLazyRelationship(final Object relationshipEntity, final String relationshipName) {
+        if (relationshipEntity == null) {
+            LOGGER.debug("Relationship '{}' is null, skipping initialization", relationshipName);
+            return;
+        }
+
+        try {
+            final boolean success = CSpringAuxillaries.initializeLazily(relationshipEntity);
+            if (!success) {
+                LOGGER.warn("Failed to initialize lazy relationship '{}': {}",
+                        relationshipName, CSpringAuxillaries.safeToString(relationshipEntity));
+            }
+        } catch (final Exception e) {
+            LOGGER.warn("Error initializing lazy relationship '{}': {}", relationshipName,
+                    CSpringAuxillaries.safeToString(relationshipEntity), e);
         }
     }
 

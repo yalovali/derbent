@@ -4,6 +4,7 @@ import java.time.Clock;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.vaadin.flow.router.Menu;
 
@@ -28,21 +29,42 @@ public class CRiskService extends CEntityOfProjectService<CRisk> {
     }
 
     /**
-     * Enhanced initialization of lazy-loaded fields specific to Risk entities. Based on CActivityService implementation
-     * style.
+     * Gets a risk by ID with all relationships eagerly loaded. This prevents LazyInitializationException
+     * when accessing risk details.
+     * 
+     * @param id
+     *            the risk ID
+     * @return optional risk with loaded relationships
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.Optional<CRisk> getById(final Long id) {
+        if (id == null) {
+            return java.util.Optional.empty();
+        }
+
+        LOGGER.debug("Getting CRisk with ID {} (overridden to eagerly load relationships)", id);
+        final java.util.Optional<CRisk> entity = ((CRiskRepository) repository).findByIdWithEagerLoading(id);
+        entity.ifPresent(this::initializeLazyFields);
+        return entity;
+    }
+
+    /**
+     * Enhanced initialization of lazy-loaded fields specific to Risk entities. Uses improved null-safe patterns.
      * 
      * @param entity
      *            the risk entity to initialize
      */
     @Override
     public void initializeLazyFields(final CRisk entity) {
-        Check.notNull(entity, "Entity cannot be null");
+        if (entity == null) {
+            LOGGER.debug("Risk entity is null, skipping lazy field initialization");
+            return;
+        }
 
         try {
-            super.initializeLazyFields(entity);
-            if (entity.getStatus() != null) {
-                initializeLazyRelationship(entity.getStatus());
-            }
+            super.initializeLazyFields(entity); // Handles CEntityOfProject relationships automatically
+            initializeLazyRelationship(entity.getStatus(), "status");
         } catch (final Exception e) {
             LOGGER.warn("Error initializing lazy fields for Risk with ID: {}", entity.getId(), e);
         }

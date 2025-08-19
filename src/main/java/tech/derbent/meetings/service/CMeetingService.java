@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import tech.derbent.abstracts.interfaces.CKanbanService;
 import tech.derbent.abstracts.services.CEntityOfProjectService;
@@ -88,6 +89,27 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting>
     }
 
     /**
+     * Gets a meeting by ID with all relationships eagerly loaded. This prevents LazyInitializationException
+     * when accessing meeting details.
+     * 
+     * @param id
+     *            the meeting ID
+     * @return optional meeting with loaded relationships
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.Optional<CMeeting> getById(final Long id) {
+        if (id == null) {
+            return java.util.Optional.empty();
+        }
+
+        LOGGER.debug("Getting CMeeting with ID {} (overridden to eagerly load relationships)", id);
+        final java.util.Optional<CMeeting> entity = ((CMeetingRepository) repository).findByIdWithEagerLoading(id);
+        entity.ifPresent(this::initializeLazyFields);
+        return entity;
+    }
+
+    /**
      * Optimized lazy field initialization for CMeeting entity. With improved repository queries using JOIN FETCH, this
      * mainly handles complex collections like participants and attendees only when needed.
      * 
@@ -98,13 +120,18 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting>
     public void initializeLazyFields(final CMeeting entity) {
 
         if (entity == null) {
+            LOGGER.debug("Meeting entity is null, skipping lazy field initialization");
             return;
         }
 
         try {
-            super.initializeLazyFields(entity);
-            initializeLazyRelationship(entity.getParticipants());
-            initializeLazyRelationship(entity.getAttendees());
+            super.initializeLazyFields(entity); // Handles CEntityOfProject relationships automatically
+            initializeLazyRelationship(entity.getMeetingType(), "meetingType");
+            initializeLazyRelationship(entity.getStatus(), "status");
+            initializeLazyRelationship(entity.getResponsible(), "responsible");
+            initializeLazyRelationship(entity.getRelatedActivity(), "relatedActivity");
+            initializeLazyRelationship(entity.getParticipants(), "participants");
+            initializeLazyRelationship(entity.getAttendees(), "attendees");
         } catch (final Exception e) {
             LOGGER.warn("Error initializing lazy fields for CMeeting with ID: {}", entity.getId(), e);
         }

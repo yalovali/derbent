@@ -172,11 +172,11 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
         }
 
         try {
-            super.initializeLazyFields(entity);
+            super.initializeLazyFields(entity); // This will handle the project relationship automatically
 
-            if (entity.getProject() != null) {
-                initializeLazyRelationship(entity.getProject());
-            }
+            // Initialize specific CEntityOfProject relationships that may not be covered by the base
+            initializeLazyRelationship(entity.getAssignedTo(), "assignedTo");
+            initializeLazyRelationship(entity.getCreatedBy(), "createdBy");
         } catch (final Exception e) {
             LOGGER.warn("Error initializing lazy fields for {} with ID: {}", getEntityClass().getSimpleName(),
                     entity.getId(), e);
