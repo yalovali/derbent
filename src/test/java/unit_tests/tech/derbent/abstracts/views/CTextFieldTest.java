@@ -100,17 +100,11 @@ class CTextFieldTest extends CTestBase {
 
     @Test
     void testFluentAPIMethods() {
-        final CTextField field = new CTextField()
-            .withRequired(true)
-            .withWidthFull()
-            .withPlaceholder("Test placeholder")
-            .withHelperText("Helper text")
-            .withErrorMessage("Error message")
-            .withValueChangeMode(ValueChangeMode.LAZY)
-            .withClearButton(true)
-            .withMaxLength(100)
-            .withPattern("[a-zA-Z]*");
-        
+        final CTextField field = new CTextField().withRequired(true).withWidthFull().withPlaceholder("Test placeholder")
+                .withHelperText("Helper text").withErrorMessage("Error message")
+                .withValueChangeMode(ValueChangeMode.LAZY).withClearButton(true).withMaxLength(100)
+                .withPattern("[a-zA-Z]*");
+
         Check.notNull(field);
         Check.condition(field.isRequired());
         Check.condition(field.isRequiredIndicatorVisible());
@@ -150,11 +144,9 @@ class CTextFieldTest extends CTestBase {
 
     @Test
     void testValidationSettings() {
-        final CTextField field = new CTextField()
-            .withPattern("\\d+")
-            .withErrorMessage("Only numbers allowed")
-            .withMaxLength(10);
-        
+        final CTextField field = new CTextField().withPattern("\\d+").withErrorMessage("Only numbers allowed")
+                .withMaxLength(10);
+
         Check.equals("\\d+", field.getPattern());
         Check.equals("Only numbers allowed", field.getErrorMessage());
         Check.equals(10, field.getMaxLength());

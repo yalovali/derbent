@@ -30,7 +30,7 @@ class CDivTest extends CTestBase {
         final CButton button1 = new CButton("Button 1");
         final CButton button2 = new CButton("Button 2");
         final CDiv div = new CDiv(button1, button2);
-        
+
         Check.notNull(div);
         Check.equals(2, (int) (int) div.getChildren().count());
     }
@@ -46,7 +46,7 @@ class CDivTest extends CTestBase {
     void testConstructorWithClassNameAndComponents() {
         final CButton button = new CButton("Test");
         final CDiv div = new CDiv("test-class", button);
-        
+
         Check.notNull(div);
         Check.condition(div.getClassNames().contains("test-class"));
         Check.equals(1, (int) (int) div.getChildren().count());
@@ -90,16 +90,10 @@ class CDivTest extends CTestBase {
 
     @Test
     void testFluentAPIMethods() {
-        final CDiv div = new CDiv()
-            .withWidthFull()
-            .withHeightFull()
-            .withClassName("test-class")
-            .withStyle("color", "red")
-            .withPadding("10px")
-            .withMargin("5px")
-            .withBorderRadius("4px")
-            .withBackgroundColor("#f0f0f0");
-        
+        final CDiv div = new CDiv().withWidthFull().withHeightFull().withClassName("test-class")
+                .withStyle("color", "red").withPadding("10px").withMargin("5px").withBorderRadius("4px")
+                .withBackgroundColor("#f0f0f0");
+
         Check.notNull(div);
         Check.equals("100%", div.getWidth());
         Check.equals("100%", div.getHeight());
@@ -131,7 +125,7 @@ class CDivTest extends CTestBase {
         final CDiv div = new CDiv();
         div.withStyle("background-color", "blue");
         div.withStyle("color", "white");
-        
+
         Check.equals("blue", div.getStyle().get("background-color"));
         Check.equals("white", div.getStyle().get("color"));
     }

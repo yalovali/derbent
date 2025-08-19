@@ -6,11 +6,9 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.abstracts.utils.CAuxillaries;
 
 /**
- * CHorizontalLayout - Enhanced base class for horizontal layouts in the application.
- * Layer: View (MVC)
- * Provides common initialization patterns, utility methods for spacing, padding, 
- * and sizing operations. Extends Vaadin HorizontalLayout with application-specific
- * enhancements.
+ * CHorizontalLayout - Enhanced base class for horizontal layouts in the application. Layer: View (MVC) Provides common
+ * initialization patterns, utility methods for spacing, padding, and sizing operations. Extends Vaadin HorizontalLayout
+ * with application-specific enhancements.
  */
 public class CHorizontalLayout extends HorizontalLayout {
 
@@ -68,6 +66,7 @@ public class CHorizontalLayout extends HorizontalLayout {
 
     /**
      * Creates a horizontal layout with spacing enabled.
+     * 
      * @return new CHorizontalLayout with spacing
      */
     public static CHorizontalLayout withSpacing() {
@@ -76,6 +75,7 @@ public class CHorizontalLayout extends HorizontalLayout {
 
     /**
      * Creates a horizontal layout with padding enabled.
+     * 
      * @return new CHorizontalLayout with padding
      */
     public static CHorizontalLayout withPadding() {
@@ -84,6 +84,7 @@ public class CHorizontalLayout extends HorizontalLayout {
 
     /**
      * Creates a horizontal layout with both spacing and padding enabled.
+     * 
      * @return new CHorizontalLayout with spacing and padding
      */
     public static CHorizontalLayout withSpacingAndPadding() {
@@ -92,6 +93,7 @@ public class CHorizontalLayout extends HorizontalLayout {
 
     /**
      * Creates a horizontal layout with all spacing, padding, and margin enabled.
+     * 
      * @return new CHorizontalLayout with full spacing configuration
      */
     public static CHorizontalLayout withFullSpacing() {
@@ -100,7 +102,9 @@ public class CHorizontalLayout extends HorizontalLayout {
 
     /**
      * Creates a horizontal layout for button groups with spacing and center alignment.
-     * @param buttons the buttons to add
+     * 
+     * @param buttons
+     *            the buttons to add
      * @return new CHorizontalLayout configured for buttons
      */
     public static CHorizontalLayout forButtons(final Component... buttons) {
@@ -113,7 +117,9 @@ public class CHorizontalLayout extends HorizontalLayout {
 
     /**
      * Creates a horizontal layout for toolbar components with spacing.
-     * @param components the toolbar components to add
+     * 
+     * @param components
+     *            the toolbar components to add
      * @return new CHorizontalLayout configured for toolbars
      */
     public static CHorizontalLayout forToolbar(final Component... components) {
@@ -127,7 +133,9 @@ public class CHorizontalLayout extends HorizontalLayout {
 
     /**
      * Fluent API for setting spacing.
-     * @param spacing whether to enable spacing
+     * 
+     * @param spacing
+     *            whether to enable spacing
      * @return this layout for method chaining
      */
     public CHorizontalLayout withSpacing(final boolean spacing) {
@@ -137,7 +145,9 @@ public class CHorizontalLayout extends HorizontalLayout {
 
     /**
      * Fluent API for setting padding.
-     * @param padding whether to enable padding
+     * 
+     * @param padding
+     *            whether to enable padding
      * @return this layout for method chaining
      */
     public CHorizontalLayout withPadding(final boolean padding) {
@@ -147,7 +157,9 @@ public class CHorizontalLayout extends HorizontalLayout {
 
     /**
      * Fluent API for setting margin.
-     * @param margin whether to enable margin
+     * 
+     * @param margin
+     *            whether to enable margin
      * @return this layout for method chaining
      */
     public CHorizontalLayout withMargin(final boolean margin) {
@@ -157,6 +169,7 @@ public class CHorizontalLayout extends HorizontalLayout {
 
     /**
      * Fluent API for setting width to full.
+     * 
      * @return this layout for method chaining
      */
     public CHorizontalLayout withWidthFull() {
@@ -166,6 +179,7 @@ public class CHorizontalLayout extends HorizontalLayout {
 
     /**
      * Fluent API for setting height to full.
+     * 
      * @return this layout for method chaining
      */
     public CHorizontalLayout withHeightFull() {
@@ -175,6 +189,7 @@ public class CHorizontalLayout extends HorizontalLayout {
 
     /**
      * Fluent API for setting size to full.
+     * 
      * @return this layout for method chaining
      */
     public CHorizontalLayout withSizeFull() {
@@ -184,7 +199,9 @@ public class CHorizontalLayout extends HorizontalLayout {
 
     /**
      * Fluent API for setting default vertical component alignment.
-     * @param alignment the alignment to set
+     * 
+     * @param alignment
+     *            the alignment to set
      * @return this layout for method chaining
      */
     public CHorizontalLayout withDefaultAlignment(final Alignment alignment) {
@@ -194,7 +211,9 @@ public class CHorizontalLayout extends HorizontalLayout {
 
     /**
      * Fluent API for setting justify content mode.
-     * @param mode the justify content mode to set
+     * 
+     * @param mode
+     *            the justify content mode to set
      * @return this layout for method chaining
      */
     public CHorizontalLayout withJustifyContentMode(final JustifyContentMode mode) {

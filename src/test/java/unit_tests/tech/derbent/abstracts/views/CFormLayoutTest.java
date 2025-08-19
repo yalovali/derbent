@@ -32,7 +32,7 @@ class CFormLayoutTest extends CTestBase {
         final CTextField field1 = new CTextField("Field 1");
         final CTextField field2 = new CTextField("Field 2");
         final CFormLayout form = new CFormLayout(field1, field2);
-        
+
         Check.notNull(form);
         Check.equals(2, (int) form.getChildren().count());
     }
@@ -85,14 +85,10 @@ class CFormLayoutTest extends CTestBase {
 
     @Test
     void testFluentAPIMethods() {
-        final CFormLayout form = new CFormLayout()
-            .withMaxWidth("500px")
-            .withWidthFull()
-            .withClassName("test-form")
-            .withStyle("border", "1px solid #ccc")
-            .withPadding("var(--lumo-space-m)")
-            .withGap("var(--lumo-space-s)");
-        
+        final CFormLayout form = new CFormLayout().withMaxWidth("500px").withWidthFull().withClassName("test-form")
+                .withStyle("border", "1px solid #ccc").withPadding("var(--lumo-space-m)")
+                .withGap("var(--lumo-space-s)");
+
         Check.notNull(form);
         Check.equals("500px", form.getMaxWidth());
         Check.equals("100%", form.getWidth());
@@ -107,10 +103,10 @@ class CFormLayoutTest extends CTestBase {
         final CFormLayout form = new CFormLayout();
         final CTextField field = new CTextField("Test Field");
         final CButton button = new CButton("Test Button");
-        
+
         form.withFullWidthComponent(field);
         form.withComponent(button, 2);
-        
+
         Check.equals(2, (int) form.getChildren().count());
         Check.equals(3, form.getColspan(field)); // Full width component gets colspan 3
         Check.equals(2, form.getColspan(button));
@@ -141,30 +137,27 @@ class CFormLayoutTest extends CTestBase {
     void testResponsiveStepsConfiguration() {
         final CFormLayout singleCol = CFormLayout.singleColumn();
         Check.equals(1, singleCol.getResponsiveSteps().size());
-        
+
         final CFormLayout twoCol = CFormLayout.twoColumn();
         Check.equals(2, twoCol.getResponsiveSteps().size());
-        
+
         final CFormLayout responsive = CFormLayout.responsive();
         Check.equals(3, responsive.getResponsiveSteps().size());
     }
 
     @Test
     void testStyleConfiguration() {
-        final CFormLayout form = new CFormLayout()
-            .withStyle("background-color", "white")
-            .withStyle("border-radius", "8px");
-        
+        final CFormLayout form = new CFormLayout().withStyle("background-color", "white").withStyle("border-radius",
+                "8px");
+
         Check.equals("white", form.getStyle().get("background-color"));
         Check.equals("8px", form.getStyle().get("border-radius"));
     }
 
     @Test
     void testFormLayoutSizing() {
-        final CFormLayout form = new CFormLayout()
-            .withWidthFull()
-            .withMaxWidth("600px");
-        
+        final CFormLayout form = new CFormLayout().withWidthFull().withMaxWidth("600px");
+
         Check.equals("100%", form.getWidth());
         Check.equals("600px", form.getMaxWidth());
     }

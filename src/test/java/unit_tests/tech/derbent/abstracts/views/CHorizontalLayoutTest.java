@@ -50,7 +50,7 @@ class CHorizontalLayoutTest extends CTestBase {
         final CButton button1 = new CButton("Button 1");
         final CButton button2 = new CButton("Button 2");
         final CHorizontalLayout layout = new CHorizontalLayout(button1, button2);
-        
+
         Check.notNull(layout);
         Check.equals(2, (int) layout.getChildren().count());
     }
@@ -84,7 +84,7 @@ class CHorizontalLayoutTest extends CTestBase {
         final CButton button1 = new CButton("Button 1");
         final CButton button2 = new CButton("Button 2");
         final CHorizontalLayout layout = CHorizontalLayout.forButtons(button1, button2);
-        
+
         Check.notNull(layout);
         Check.condition(layout.isSpacing());
         Check.equals(2, (int) layout.getChildren().count());
@@ -96,7 +96,7 @@ class CHorizontalLayoutTest extends CTestBase {
         final CButton button1 = new CButton("Action 1");
         final CButton button2 = new CButton("Action 2");
         final CHorizontalLayout layout = CHorizontalLayout.forToolbar(button1, button2);
-        
+
         Check.notNull(layout);
         Check.condition(layout.isSpacing());
         Check.equals(2, (int) layout.getChildren().count());
@@ -106,15 +106,10 @@ class CHorizontalLayoutTest extends CTestBase {
 
     @Test
     void testFluentAPIMethods() {
-        final CHorizontalLayout layout = new CHorizontalLayout()
-            .withSpacing(true)
-            .withPadding(true)
-            .withMargin(true)
-            .withWidthFull()
-            .withHeightFull()
-            .withDefaultAlignment(HorizontalLayout.Alignment.CENTER)
-            .withJustifyContentMode(HorizontalLayout.JustifyContentMode.CENTER);
-        
+        final CHorizontalLayout layout = new CHorizontalLayout().withSpacing(true).withPadding(true).withMargin(true)
+                .withWidthFull().withHeightFull().withDefaultAlignment(HorizontalLayout.Alignment.CENTER)
+                .withJustifyContentMode(HorizontalLayout.JustifyContentMode.CENTER);
+
         Check.notNull(layout);
         Check.condition(layout.isSpacing());
         Check.condition(layout.isPadding());

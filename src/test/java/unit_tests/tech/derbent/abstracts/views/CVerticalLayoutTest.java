@@ -50,7 +50,7 @@ class CVerticalLayoutTest extends CTestBase {
         final CButton button1 = new CButton("Button 1");
         final CButton button2 = new CButton("Button 2");
         final CVerticalLayout layout = new CVerticalLayout(button1, button2);
-        
+
         Check.notNull(layout);
         Check.equals(2, (int) layout.getChildren().count());
     }
@@ -84,7 +84,7 @@ class CVerticalLayoutTest extends CTestBase {
         final CButton button1 = new CButton("Button 1");
         final CButton button2 = new CButton("Button 2");
         final CVerticalLayout layout = CVerticalLayout.forButtons(button1, button2);
-        
+
         Check.notNull(layout);
         Check.condition(layout.isSpacing());
         Check.equals(2, (int) layout.getChildren().count());
@@ -93,14 +93,9 @@ class CVerticalLayoutTest extends CTestBase {
 
     @Test
     void testFluentAPIMethods() {
-        final CVerticalLayout layout = new CVerticalLayout()
-            .withSpacing(true)
-            .withPadding(true)
-            .withMargin(true)
-            .withWidthFull()
-            .withHeightFull()
-            .withDefaultAlignment(VerticalLayout.Alignment.CENTER);
-        
+        final CVerticalLayout layout = new CVerticalLayout().withSpacing(true).withPadding(true).withMargin(true)
+                .withWidthFull().withHeightFull().withDefaultAlignment(VerticalLayout.Alignment.CENTER);
+
         Check.notNull(layout);
         Check.condition(layout.isSpacing());
         Check.condition(layout.isPadding());
