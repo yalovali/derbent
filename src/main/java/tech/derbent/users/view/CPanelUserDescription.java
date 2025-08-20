@@ -82,6 +82,6 @@ public class CPanelUserDescription extends CPanelUserBase {
     @Override
     protected void updatePanelEntityFields() {
         // setEntityFields(List.of("name"));
-        setEntityFields(List.of("name", "lastname", "login", "password"));
+        setEntityFields(List.of("name", "lastname", "login")); // Removed password - handled manually
     }
 }
