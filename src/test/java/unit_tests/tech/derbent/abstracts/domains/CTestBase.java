@@ -165,7 +165,7 @@ public abstract class CTestBase {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        
+
         // Create test entities for use in tests
         project = new CProject("Test Project");
         testUser = new CUser("Test User");
@@ -176,17 +176,17 @@ public abstract class CTestBase {
         meetingType = new CMeetingType("Test Meeting Type", project);
         status = new CMeetingStatus("SCHEDULED", project);
         meeting = new CMeeting("Test Meeting", project, meetingType);
-        
+
         // Set up authentication context for session service
         final User authUser = new User("testuser", "password", java.util.Collections.emptyList());
         final UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(testUser,
                 null, authUser.getAuthorities());
-        
+
         testActivityType = new CActivityType("Development", project);
         testActivity.setActivityType(testActivityType);
         testActivityStatus = new CActivityStatus("IN_PROGRESS", project);
         testActivity.setStatus(testActivityStatus);
-        
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
         setupForTest();
     }

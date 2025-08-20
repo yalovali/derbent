@@ -47,13 +47,12 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
     }
 
     /**
-     * Test all activity-related views and CRUD operations
-     * Following AAA pattern: Arrange, Act, Assert
+     * Test all activity-related views and CRUD operations Following AAA pattern: Arrange, Act, Assert
      */
     @Test
     public void testActivityViewsCRUD() {
         // ARRANGE - Test data already loaded via sample data initializer
-        
+
         // ACT & ASSERT - Test READ operations
         final List<CActivity> activities = activityService.list(Pageable.unpaged());
         assertTrue(activities.size() >= 1, "Should have at least 1 activity from sample data");
@@ -65,12 +64,12 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
             assertNotNull(activity.getDescription(), "Activity description should not be null");
             assertNotNull(activity.getProject(), "Activity project should not be null");
             assertNotNull(activity.getActivityType(), "Activity type should not be null");
-            
+
             // Test READ by ID operation
             final CActivity selectedActivity = activityService.getById(activity.getId()).orElse(null);
             assertNotNull(selectedActivity, "Should be able to retrieve activity by ID");
             assertEquals(activity.getName(), selectedActivity.getName(), "Retrieved activity should match");
-            
+
             // Test UPDATE operation
             final String originalName = activity.getName();
             final String updatedName = "Updated " + originalName + " " + System.currentTimeMillis();
@@ -78,38 +77,38 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
             final CActivity updatedActivity = activityService.save(activity);
             assertNotNull(updatedActivity, "Updated activity should not be null");
             assertEquals(updatedName, updatedActivity.getName(), "Activity name should be updated");
-            
+
             // Restore original name for consistency
             activity.setName(originalName);
             activityService.save(activity);
         }
-        
+
         // Test CREATE operation
         final CProject firstProject = projectService.list(Pageable.unpaged()).get(0);
         final String activityName = "Test CRUD Activity " + System.currentTimeMillis();
         final CActivity newActivity = activityService.newEntity(activityName, firstProject);
         newActivity.setDescription("Activity created by CRUD test");
-        
+
         // Set required fields that have sample data
         final List<CActivityType> activityTypes = activityTypeService.list(Pageable.unpaged());
         if (!activityTypes.isEmpty()) {
             newActivity.setActivityType(activityTypes.get(0));
         }
-        
+
         final CActivity savedActivity = activityService.save(newActivity);
         assertNotNull(savedActivity, "Saved activity should not be null");
         assertNotNull(savedActivity.getId(), "Saved activity should have an ID");
         assertEquals(newActivity.getName(), savedActivity.getName(), "Saved activity name should match");
-        
+
         // Test DELETE operation
         final Long savedActivityId = savedActivity.getId();
         activityService.delete(savedActivityId);
         final Optional<CActivity> deletedActivity = activityService.getById(savedActivityId);
         assertFalse(deletedActivity.isPresent(), "Deleted activity should not be found");
-        
+
         // Test CActivityTypeView - activity type management CRUD
         testActivityTypeCRUD();
-        
+
         // Test CActivityStatusView - activity status management CRUD  
         testActivityStatusCRUD();
     }
@@ -126,24 +125,24 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
             assertNotNull(type.getName(), "Activity type name should not be null");
             assertNotNull(type.getDescription(), "Activity type description should not be null");
         }
-        
+
         // Test CREATE operation
         final CProject firstProject = projectService.list(Pageable.unpaged()).get(0);
         final String typeName = "Test Activity Type " + System.currentTimeMillis();
         final CActivityType newType = activityTypeService.newEntity(typeName, firstProject);
         newType.setDescription("Activity type created by CRUD test");
-        
+
         final CActivityType savedType = activityTypeService.save(newType);
         assertNotNull(savedType, "Saved activity type should not be null");
         assertNotNull(savedType.getId(), "Saved activity type should have an ID");
         assertEquals(newType.getName(), savedType.getName(), "Saved activity type name should match");
-        
+
         // Test UPDATE operation
         final String updatedName = "Updated " + savedType.getName();
         savedType.setName(updatedName);
         final CActivityType updatedType = activityTypeService.save(savedType);
         assertEquals(updatedName, updatedType.getName(), "Activity type name should be updated");
-        
+
         // Test DELETE operation
         final Long savedTypeId = savedType.getId();
         activityTypeService.delete(savedTypeId);
@@ -157,31 +156,31 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
     private void testActivityStatusCRUD() {
         // ACT & ASSERT - Test READ operations
         final List<CActivityStatus> activityStatuses = activityStatusService.list(Pageable.unpaged());
-        
+
         if (!activityStatuses.isEmpty()) {
             for (final CActivityStatus status : activityStatuses) {
                 assertNotNull(status.getName(), "Activity status name should not be null");
                 assertNotNull(status.getDescription(), "Activity status description should not be null");
             }
         }
-        
+
         // Test CREATE operation
         final CProject firstProject = projectService.list(Pageable.unpaged()).get(0);
         final String statusName = "TEST_STATUS_" + System.currentTimeMillis();
         final CActivityStatus newStatus = activityStatusService.newEntity(statusName, firstProject);
         newStatus.setDescription("Activity status created by CRUD test");
-        
+
         final CActivityStatus savedStatus = activityStatusService.save(newStatus);
         assertNotNull(savedStatus, "Saved activity status should not be null");
         assertNotNull(savedStatus.getId(), "Saved activity status should have an ID");
         assertEquals(newStatus.getName(), savedStatus.getName(), "Saved activity status name should match");
-        
+
         // Test UPDATE operation
         final String updatedName = "UPDATED_" + savedStatus.getName();
         savedStatus.setName(updatedName);
         final CActivityStatus updatedStatus = activityStatusService.save(savedStatus);
         assertEquals(updatedName, updatedStatus.getName(), "Activity status name should be updated");
-        
+
         // Test DELETE operation
         final Long savedStatusId = savedStatus.getId();
         activityStatusService.delete(savedStatusId);
@@ -228,26 +227,25 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
     }
 
     /**
-     * Test all comment-related views and CRUD operations
-     * Following AAA pattern: Arrange, Act, Assert
+     * Test all comment-related views and CRUD operations Following AAA pattern: Arrange, Act, Assert
      */
     @Test
     public void testCommentViewsCRUD() {
         // ARRANGE - Test data already loaded via sample data initializer
-        
+
         // ACT & ASSERT - Test READ operations for comments
         final List<tech.derbent.comments.domain.CComment> comments = commentService.list(Pageable.unpaged());
         // Note: Comments might be empty in sample data, so we just verify the service works
-        
+
         // ACT & ASSERT - Test READ operations for comment priorities
         final List<CCommentPriority> commentPriorities = commentPriorityService.list(Pageable.unpaged());
         // Comment priorities should have some sample data, test them if available
-        
+
         if (!commentPriorities.isEmpty()) {
             for (final CCommentPriority priority : commentPriorities) {
                 assertNotNull(priority.getName(), "Comment priority name should not be null");
                 assertNotNull(priority.getProject(), "Comment priority project should not be null");
-                
+
                 // Test READ by ID operation
                 final CCommentPriority selectedPriority = commentPriorityService.getById(priority.getId()).orElse(null);
                 assertNotNull(selectedPriority, "Should be able to retrieve comment priority by ID");
@@ -257,13 +255,12 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
     }
 
     /**
-     * Test all company-related views and CRUD operations
-     * Following AAA pattern: Arrange, Act, Assert
+     * Test all company-related views and CRUD operations Following AAA pattern: Arrange, Act, Assert
      */
     @Test
     public void testCompanyViewsCRUD() {
         // ARRANGE - Test data already loaded via sample data initializer
-        
+
         // ACT & ASSERT - Test READ operations
         final List<CCompany> companies = companyService.list(Pageable.unpaged());
         assertTrue(companies.size() >= 1, "Should have at least 1 company from sample data");
@@ -276,12 +273,12 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
             assertNotNull(company.getAddress(), "Company address should not be null");
             assertNotNull(company.getPhone(), "Company phone number should not be null");
             assertNotNull(company.getEmail(), "Company email should not be null");
-            
+
             // Test READ by ID operation
             final CCompany selectedCompany = companyService.getById(company.getId()).orElse(null);
             assertNotNull(selectedCompany, "Should be able to retrieve company by ID");
             assertEquals(company.getName(), selectedCompany.getName(), "Retrieved company should match");
-            
+
             // Test UPDATE operation
             final String originalPhone = company.getPhone();
             final String updatedPhone = "+1-555-" + System.currentTimeMillis();
@@ -289,12 +286,12 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
             final CCompany updatedCompany = companyService.save(company);
             assertNotNull(updatedCompany, "Updated company should not be null");
             assertEquals(updatedPhone, updatedCompany.getPhone(), "Company phone should be updated");
-            
+
             // Restore original phone for consistency
             company.setPhone(originalPhone);
             companyService.save(company);
         }
-        
+
         // Test CREATE operation
         final CCompany newCompany = companyService.newEntity();
         final String uniqueId = String.valueOf(System.currentTimeMillis());
@@ -303,13 +300,13 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
         newCompany.setAddress("123 Test Street, Test City");
         newCompany.setPhone("+1-555-" + uniqueId);
         newCompany.setEmail("test" + uniqueId + "@example.com");
-        
+
         final CCompany savedCompany = companyService.save(newCompany);
         assertNotNull(savedCompany, "Saved company should not be null");
         assertNotNull(savedCompany.getId(), "Saved company should have an ID");
         assertEquals(newCompany.getName(), savedCompany.getName(), "Saved company name should match");
         assertEquals(newCompany.getEmail(), savedCompany.getEmail(), "Saved company email should match");
-        
+
         // Test DELETE operation
         final Long savedCompanyId = savedCompany.getId();
         companyService.delete(savedCompanyId);
@@ -408,7 +405,8 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
             assertNotNull(type.getName(), "Meeting type name should not be null");
             // Note: Description might be null in sample data
             if (type.getDescription() != null) {
-                assertFalse(type.getDescription().trim().isEmpty(), "Meeting type description should not be empty if present");
+                assertFalse(type.getDescription().trim().isEmpty(),
+                        "Meeting type description should not be empty if present");
             }
             // Test CRUD operations
             final CMeetingType retrieved = meetingTypeService.getById(type.getId()).orElse(null);
@@ -418,26 +416,25 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
     }
 
     /**
-     * Test all order-related views and CRUD operations
-     * Following AAA pattern: Arrange, Act, Assert
+     * Test all order-related views and CRUD operations Following AAA pattern: Arrange, Act, Assert
      */
     @Test
     public void testOrderViewsCRUD() {
         // ARRANGE - Test data already loaded via sample data initializer
-        
+
         // ACT & ASSERT - Test READ operations
         final List<tech.derbent.orders.domain.COrder> orders = orderService.list(Pageable.unpaged());
         // Note: Orders might be empty in sample data, so we just verify the service works
-        
+
         // Verify service functionality by testing basic operations
         assertNotNull(orders, "Order list should not be null");
         assertTrue(orders.size() >= 0, "Order list should be non-negative");
-        
+
         // If there are orders, test their structure
         for (final tech.derbent.orders.domain.COrder order : orders) {
             assertNotNull(order.getName(), "Order name should not be null");
             assertNotNull(order.getProject(), "Order project should not be null");
-            
+
             // Test READ by ID operation
             final tech.derbent.orders.domain.COrder selectedOrder = orderService.getById(order.getId()).orElse(null);
             assertNotNull(selectedOrder, "Should be able to retrieve order by ID");
@@ -446,13 +443,12 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
     }
 
     /**
-     * Test all project-related views and CRUD operations
-     * Following AAA pattern: Arrange, Act, Assert
+     * Test all project-related views and CRUD operations Following AAA pattern: Arrange, Act, Assert
      */
     @Test
     public void testProjectViewsCRUD() {
         // ARRANGE - Test data already loaded via sample data initializer
-        
+
         // ACT & ASSERT - Test READ operations
         final List<CProject> projects = projectService.list(Pageable.unpaged());
         assertTrue(projects.size() >= 1, "Should have at least 1 project from sample data");
@@ -462,12 +458,12 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
             // Test READ operation - verify all required fields are populated
             assertNotNull(project.getName(), "Project name should not be null");
             assertNotNull(project.getDescription(), "Project description should not be null");
-            
+
             // Test READ by ID operation
             final CProject selectedProject = projectService.getById(project.getId()).orElse(null);
             assertNotNull(selectedProject, "Should be able to retrieve project by ID");
             assertEquals(project.getName(), selectedProject.getName(), "Retrieved project should match");
-            
+
             // Test UPDATE operation
             final String originalName = project.getName();
             final String updatedName = "Updated " + originalName + " " + System.currentTimeMillis();
@@ -475,23 +471,24 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
             final CProject updatedProject = projectService.save(project);
             assertNotNull(updatedProject, "Updated project should not be null");
             assertEquals(updatedName, updatedProject.getName(), "Project name should be updated");
-            
+
             // Restore original name for consistency
             project.setName(originalName);
             projectService.save(project);
         }
-        
+
         // Test CREATE operation
         final CProject newProject = projectService.newEntity();
         newProject.setName("Test CRUD Project " + System.currentTimeMillis());
         newProject.setDescription("Project created by CRUD test");
-        
+
         final CProject savedProject = projectService.save(newProject);
         assertNotNull(savedProject, "Saved project should not be null");
         assertNotNull(savedProject.getId(), "Saved project should have an ID");
         assertEquals(newProject.getName(), savedProject.getName(), "Saved project name should match");
-        assertEquals(newProject.getDescription(), savedProject.getDescription(), "Saved project description should match");
-        
+        assertEquals(newProject.getDescription(), savedProject.getDescription(),
+                "Saved project description should match");
+
         // Test DELETE operation
         final Long savedProjectId = savedProject.getId();
         projectService.delete(savedProjectId);
@@ -500,13 +497,12 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
     }
 
     /**
-     * Test all risk-related views and CRUD operations
-     * Following AAA pattern: Arrange, Act, Assert
+     * Test all risk-related views and CRUD operations Following AAA pattern: Arrange, Act, Assert
      */
     @Test
     public void testRiskViewsCRUD() {
         // ARRANGE - Test data already loaded via sample data initializer
-        
+
         // ACT & ASSERT - Test READ operations
         final List<CRisk> risks = riskService.list(Pageable.unpaged());
         assertTrue(risks.size() >= 1, "Should have at least 1 risk from sample data");
@@ -518,12 +514,12 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
             assertNotNull(risk.getDescription(), "Risk description should not be null");
             assertNotNull(risk.getRiskSeverity(), "Risk severity should not be null");
             assertNotNull(risk.getProject(), "Risk project should not be null");
-            
+
             // Test READ by ID operation
             final CRisk selectedRisk = riskService.getById(risk.getId()).orElse(null);
             assertNotNull(selectedRisk, "Should be able to retrieve risk by ID");
             assertEquals(risk.getName(), selectedRisk.getName(), "Retrieved risk should match");
-            
+
             // Test UPDATE operation
             final String originalDescription = risk.getDescription();
             final String updatedDescription = "Updated " + originalDescription + " " + System.currentTimeMillis();
@@ -531,7 +527,7 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
             final CRisk updatedRisk = riskService.save(risk);
             assertNotNull(updatedRisk, "Updated risk should not be null");
             assertEquals(updatedDescription, updatedRisk.getDescription(), "Risk description should be updated");
-            
+
             // Restore original description for consistency
             risk.setDescription(originalDescription);
             riskService.save(risk);
@@ -539,13 +535,12 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
     }
 
     /**
-     * Test all user-related views and CRUD operations
-     * Following AAA pattern: Arrange, Act, Assert
+     * Test all user-related views and CRUD operations Following AAA pattern: Arrange, Act, Assert
      */
     @Test
     public void testUserViewsCRUD() {
         // ARRANGE - Test data already loaded via sample data initializer
-        
+
         // ACT & ASSERT - Test READ operations
         final List<CUser> users = userService.list(Pageable.unpaged());
         assertTrue(users.size() >= 1, "Should have at least 1 user from sample data");
@@ -557,12 +552,12 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
             assertNotNull(user.getEmail(), "User email should not be null");
             assertNotNull(user.getUserRole(), "User role should not be null");
             assertNotNull(user.getCompany(), "User company should not be null");
-            
+
             // Test READ by ID operation
             final CUser selectedUser = userService.getById(user.getId()).orElse(null);
             assertNotNull(selectedUser, "Should be able to retrieve user by ID");
             assertEquals(user.getName(), selectedUser.getName(), "Retrieved user should match");
-            
+
             // Test UPDATE operation (modify phone number to avoid email uniqueness conflicts)
             final String originalPhone = user.getPhone();
             final String updatedPhone = "+1-555-" + System.currentTimeMillis();
@@ -570,36 +565,36 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
             final CUser updatedUser = userService.save(user);
             assertNotNull(updatedUser, "Updated user should not be null");
             assertEquals(updatedPhone, updatedUser.getPhone(), "User phone should be updated");
-            
+
             // Restore original phone for consistency
             user.setPhone(originalPhone);
             userService.save(user);
         }
-        
+
         // Test CREATE operation
         final CUser newUser = userService.newEntity();
         final String uniqueId = String.valueOf(System.currentTimeMillis());
         final CCompany firstCompany = companyService.list(Pageable.unpaged()).get(0);
-        
+
         newUser.setName("Test CRUD User " + uniqueId);
         newUser.setEmail("testuser" + uniqueId + "@example.com");
         newUser.setLogin("testuser" + uniqueId);
         newUser.setUserRole(CUserRole.TEAM_MEMBER);
         newUser.setCompany(firstCompany);
         newUser.setPhone("+1-555-" + uniqueId);
-        
+
         final CUser savedUser = userService.save(newUser);
         assertNotNull(savedUser, "Saved user should not be null");
         assertNotNull(savedUser.getId(), "Saved user should have an ID");
         assertEquals(newUser.getName(), savedUser.getName(), "Saved user name should match");
         assertEquals(newUser.getEmail(), savedUser.getEmail(), "Saved user email should match");
-        
+
         // Test DELETE operation
         final Long savedUserId = savedUser.getId();
         userService.delete(savedUserId);
         final Optional<CUser> deletedUser = userService.getById(savedUserId);
         assertFalse(deletedUser.isPresent(), "Deleted user should not be found");
-        
+
         // Test CUserTypeView - user type management CRUD
         testUserTypeCRUD();
     }
@@ -610,33 +605,34 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
     private void testUserTypeCRUD() {
         // ACT & ASSERT - Test READ operations
         final List<CUserType> userTypes = userTypeService.list(Pageable.unpaged());
-        
+
         for (final CUserType type : userTypes) {
             assertNotNull(type.getName(), "User type name should not be null");
             // Note: description might be null based on current data model
             if (type.getDescription() != null) {
-                assertFalse(type.getDescription().trim().isEmpty(), "User type description should not be empty if present");
+                assertFalse(type.getDescription().trim().isEmpty(),
+                        "User type description should not be empty if present");
             }
             assertNotNull(type.getProject(), "User type project should not be null");
         }
-        
+
         // Test CREATE operation
         final CProject firstProject = projectService.list(Pageable.unpaged()).get(0);
         final String typeName = "Test User Type " + System.currentTimeMillis();
         final CUserType newType = userTypeService.newEntity(typeName, firstProject);
         newType.setDescription("User type created by CRUD test");
-        
+
         final CUserType savedType = userTypeService.save(newType);
         assertNotNull(savedType, "Saved user type should not be null");
         assertNotNull(savedType.getId(), "Saved user type should have an ID");
         assertEquals(newType.getName(), savedType.getName(), "Saved user type name should match");
-        
+
         // Test UPDATE operation
         final String updatedName = "Updated " + savedType.getName();
         savedType.setName(updatedName);
         final CUserType updatedType = userTypeService.save(savedType);
         assertEquals(updatedName, updatedType.getName(), "User type name should be updated");
-        
+
         // Test DELETE operation
         final Long savedTypeId = savedType.getId();
         userTypeService.delete(savedTypeId);
@@ -645,60 +641,59 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
     }
 
     /**
-     * Test edge cases and validation scenarios for CRUD operations
-     * Following AAA pattern: Arrange, Act, Assert
+     * Test edge cases and validation scenarios for CRUD operations Following AAA pattern: Arrange, Act, Assert
      */
     @Test
     public void testCRUDEdgeCasesAndValidation() {
         // ARRANGE - Prepare test data
         final CProject firstProject = projectService.list(Pageable.unpaged()).get(0);
-        
+
         // ACT & ASSERT - Test null handling in service methods
-        
+
         // Test retrieving non-existent entity by ID
         final Optional<CProject> nonExistentProject = projectService.getById(99999L);
         assertFalse(nonExistentProject.isPresent(), "Non-existent project should not be found");
-        
+
         final Optional<CActivity> nonExistentActivity = activityService.getById(99999L);
         assertFalse(nonExistentActivity.isPresent(), "Non-existent activity should not be found");
-        
+
         final Optional<CUser> nonExistentUser = userService.getById(99999L);
         assertFalse(nonExistentUser.isPresent(), "Non-existent user should not be found");
-        
+
         final Optional<CCompany> nonExistentCompany = companyService.getById(99999L);
         assertFalse(nonExistentCompany.isPresent(), "Non-existent company should not be found");
-        
+
         // Test pagination edge cases
         final Pageable smallPage = Pageable.ofSize(1);
         final List<CProject> smallPageResult = projectService.list(smallPage);
         assertTrue(smallPageResult.size() <= 1, "Small page size should return at most 1 result");
-        
+
         final Pageable largePage = Pageable.ofSize(1000);
         final List<CProject> largePageResult = projectService.list(largePage);
         assertNotNull(largePageResult, "Large page size should not cause errors");
-        
+
         // Test entity creation with minimal required fields
         final CProject minimalProject = projectService.newEntity();
         minimalProject.setName("Minimal Test Project " + System.currentTimeMillis());
         minimalProject.setDescription("Minimal description");
-        
+
         final CProject savedMinimalProject = projectService.save(minimalProject);
         assertNotNull(savedMinimalProject, "Minimal project should be saved successfully");
         assertNotNull(savedMinimalProject.getId(), "Saved minimal project should have an ID");
-        
+
         // Clean up test data
         projectService.delete(savedMinimalProject.getId());
-        
+
         // Test activity creation with required relationships
         final String activityName = "Edge Case Activity " + System.currentTimeMillis();
         final CActivity edgeActivity = activityService.newEntity(activityName, firstProject);
         edgeActivity.setDescription("Edge case description");
-        
+
         final CActivity savedEdgeActivity = activityService.save(edgeActivity);
         assertNotNull(savedEdgeActivity, "Edge activity should be saved successfully");
         assertNotNull(savedEdgeActivity.getProject(), "Edge activity should have project relationship");
         assertEquals(firstProject.getId(), savedEdgeActivity.getProject().getId(), "Activity project should match");
-        
+
         // Clean up
         activityService.delete(savedEdgeActivity.getId());
     }
