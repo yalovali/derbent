@@ -13,77 +13,76 @@ import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.events.ProjectListChangeEvent;
 
 @Service
-@PreAuthorize("isAuthenticated()")
+@PreAuthorize ("isAuthenticated()")
 public class CProjectService extends CAbstractNamedEntityService<CProject> {
 
-    private final ApplicationEventPublisher eventPublisher;
+	private final ApplicationEventPublisher eventPublisher;
 
-    public CProjectService(final CProjectRepository repository, final Clock clock,
-            final ApplicationEventPublisher eventPublisher) {
-        super(repository, clock);
-        this.eventPublisher = eventPublisher;
-    }
+	public CProjectService(final CProjectRepository repository, final Clock clock,
+		final ApplicationEventPublisher eventPublisher) {
+		super(repository, clock);
+		this.eventPublisher = eventPublisher;
+	}
 
-    @Override
-    @Transactional
-    public CProject createEntity(final String name) {
-        LOGGER.info("Creating project with name: {}", name);
-        // Use parent validation and creation logic
-        super.createEntity(name);
-        // Find the created entity to publish event
-        final var entity = findByName(name)
-                .orElseThrow(() -> new RuntimeException("Created project not found: " + name));
-        // Publish project list change event
-        eventPublisher
-                .publishEvent(new ProjectListChangeEvent(this, entity, ProjectListChangeEvent.ChangeType.CREATED));
-        return entity;
-    }
+	@Override
+	@Transactional
+	public CProject createEntity(final String name) {
+		LOGGER.info("Creating project with name: {}", name);
+		// Use parent validation and creation logic
+		super.createEntity(name);
+		// Find the created entity to publish event
+		final var entity = findByName(name).orElseThrow(
+			() -> new RuntimeException("Created project not found: " + name));
+		// Publish project list change event
+		eventPublisher.publishEvent(new ProjectListChangeEvent(this, entity,
+			ProjectListChangeEvent.ChangeType.CREATED));
+		return entity;
+	}
 
-    @Override
-    @Transactional
-    public void delete(final CProject entity) {
-        super.delete(entity);
-        // Publish project list change event after deletion
-        eventPublisher
-                .publishEvent(new ProjectListChangeEvent(this, entity, ProjectListChangeEvent.ChangeType.DELETED));
-    }
+	@Override
+	@Transactional
+	public void delete(final CProject entity) {
+		super.delete(entity);
+		// Publish project list change event after deletion
+		eventPublisher.publishEvent(new ProjectListChangeEvent(this, entity,
+			ProjectListChangeEvent.ChangeType.DELETED));
+	}
 
-    @PreAuthorize("permitAll()")
-    public List<CProject> findAll() {
-        return repository.findAll();
-    }
+	@Override
+	@PreAuthorize ("permitAll()")
+	public List<CProject> findAll() {
+		return repository.findAll();
+	}
 
-    /**
-     * Gets a project with all its user settings loaded (to avoid lazy loading issues)
-     */
-    @Transactional(readOnly = true)
-    public CProject findByIdWithUserSettings(final Long projectId) {
-        LOGGER.info("Getting project with users for project ID: {}", projectId);
-        // Using the custom repository method that eagerly fetches user settings
-        return ((CProjectRepository) repository).findByIdWithUserSettings(projectId).orElse(null);
-    }
+	/**
+	 * Gets a project with all its user settings loaded (to avoid lazy loading issues)
+	 */
+	@Transactional (readOnly = true)
+	public CProject findByIdWithUserSettings(final Long projectId) {
+		return ((CProjectRepository) repository).findByIdWithUserSettings(projectId)
+			.orElse(null);
+	}
 
-    @Override
-    protected Class<CProject> getEntityClass() { // TODO Auto-generated method stub
-        return CProject.class;
-    }
+	@Override
+	protected Class<CProject> getEntityClass() { // TODO Auto-generated method stub
+		return CProject.class;
+	}
 
-    @PreAuthorize("permitAll()")
-    public long getTotalProjectCount() {
-        return repository.count();
-    }
+	@PreAuthorize ("permitAll()")
+	public long getTotalProjectCount() { return repository.count(); }
 
-    @Override
-    @Transactional
-    public CProject save(final CProject entity) {
-        LOGGER.debug("save called with entity: {}", entity);
-        final boolean isNew = entity.getId() == null;
-        final CProject savedEntity = super.save(entity);
-        // Publish project list change event after saving
-        final ProjectListChangeEvent.ChangeType changeType = isNew
-                ? ProjectListChangeEvent.ChangeType.CREATED
-                : ProjectListChangeEvent.ChangeType.UPDATED;
-        eventPublisher.publishEvent(new ProjectListChangeEvent(this, savedEntity, changeType));
-        return savedEntity;
-    }
+	@Override
+	@Transactional
+	public CProject save(final CProject entity) {
+		LOGGER.debug("save called with entity: {}", entity);
+		final boolean isNew = entity.getId() == null;
+		final CProject savedEntity = super.save(entity);
+		// Publish project list change event after saving
+		final ProjectListChangeEvent.ChangeType changeType =
+			isNew ? ProjectListChangeEvent.ChangeType.CREATED
+				: ProjectListChangeEvent.ChangeType.UPDATED;
+		eventPublisher
+			.publishEvent(new ProjectListChangeEvent(this, savedEntity, changeType));
+		return savedEntity;
+	}
 }
