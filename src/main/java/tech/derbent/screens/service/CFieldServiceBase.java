@@ -18,51 +18,50 @@ import tech.derbent.users.domain.CUser;
 
 public class CFieldServiceBase {
 
-    public static Class<?> getEntityClass(final String entityType) {
+	/**
+	 * Get available entity types for screen configuration.
+	 * @return list of entity types
+	 */
+	public static List<String> getAvailableEntityTypes() {
+		return List.of("CActivity", "CMeeting", "CRisk", "CProject", "CUser");
+	}
 
-        try {
+	public static Class<?> getEntityClass(final String entityType) {
 
-            switch (entityType) {
-            case "CActivity":
-                return CActivity.class;
-            case "CMeeting":
-                return CMeeting.class;
-            case "CRisk":
-                return CRisk.class;
-            case "CCompany":
-                return CCompany.class;
-            case "CProject":
-                return CProject.class;
-            case "CUser":
-                return CUser.class;
-            case "CActivityType":
-                return CActivityType.class;
-            case "CActivityStatus":
-                return CActivityStatus.class;
-            case "CActivityPriority":
-                return CActivityPriority.class;
-            case "CMeetingType":
-                return CMeetingType.class;
-            case "CMeetingStatus":
-                return CMeetingStatus.class;
-            case "CRiskStatus":
-                return CRiskStatus.class;
-            case "CRiskSeverity":
-                return CRiskSeverity.class;
-            default:
-                throw new IllegalArgumentException("Unknown entity type: " + entityType);
-            }
-        } catch (final Exception e) {
-            return null;
-        }
-    }
+		try {
 
-    /**
-     * Get available entity types for screen configuration.
-     * 
-     * @return list of entity types
-     */
-    public List<String> getAvailableEntityTypes() {
-        return List.of("CActivity", "CMeeting", "CRisk", "CProject", "CUser");
-    }
+			switch (entityType) {
+			case "CActivity":
+				return CActivity.class;
+			case "CMeeting":
+				return CMeeting.class;
+			case "CRisk":
+				return CRisk.class;
+			case "CCompany":
+				return CCompany.class;
+			case "CProject":
+				return CProject.class;
+			case "CUser":
+				return CUser.class;
+			case "CActivityType":
+				return CActivityType.class;
+			case "CActivityStatus":
+				return CActivityStatus.class;
+			case "CActivityPriority":
+				return CActivityPriority.class;
+			case "CMeetingType":
+				return CMeetingType.class;
+			case "CMeetingStatus":
+				return CMeetingStatus.class;
+			case "CRiskStatus":
+				return CRiskStatus.class;
+			case "CRiskSeverity":
+				return CRiskSeverity.class;
+			default:
+				throw new IllegalArgumentException("Unknown entity type: " + entityType);
+			}
+		} catch (final Exception e) {
+			return null;
+		}
+	}
 }

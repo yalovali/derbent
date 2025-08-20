@@ -51,19 +51,31 @@ public class CEntityFieldService extends CFieldServiceBase {
 		private String defaultValue = "";
 
 		private String dataProviderBean = "";
-		
+
 		// Additional MetaData properties
 		private boolean autoSelectFirst = false;
+
 		private String placeholder = "";
+
 		private boolean allowCustomValue = false;
+
 		private boolean useRadioButtons = false;
+
 		private boolean comboboxReadOnly = false;
+
 		private boolean clearOnEmptyData = false;
+
 		private String width = "";
+
 		private String dataProviderMethod = "";
+
 		private String dataProviderParamMethod = "";
 
 		public String getDataProviderBean() { return dataProviderBean; }
+
+		public String getDataProviderMethod() { return dataProviderMethod; }
+
+		public String getDataProviderParamMethod() { return dataProviderParamMethod; }
 
 		public String getDefaultValue() { return defaultValue; }
 
@@ -83,24 +95,18 @@ public class CEntityFieldService extends CFieldServiceBase {
 		public int getMaxLength() { return maxLength; }
 
 		public int getOrder() { return order; }
-		
-		public boolean isAutoSelectFirst() { return autoSelectFirst; }
-		
+
 		public String getPlaceholder() { return placeholder; }
-		
-		public boolean isAllowCustomValue() { return allowCustomValue; }
-		
-		public boolean isUseRadioButtons() { return useRadioButtons; }
-		
-		public boolean isComboboxReadOnly() { return comboboxReadOnly; }
-		
-		public boolean isClearOnEmptyData() { return clearOnEmptyData; }
-		
+
 		public String getWidth() { return width; }
-		
-		public String getDataProviderMethod() { return dataProviderMethod; }
-		
-		public String getDataProviderParamMethod() { return dataProviderParamMethod; }
+
+		public boolean isAllowCustomValue() { return allowCustomValue; }
+
+		public boolean isAutoSelectFirst() { return autoSelectFirst; }
+
+		public boolean isClearOnEmptyData() { return clearOnEmptyData; }
+
+		public boolean isComboboxReadOnly() { return comboboxReadOnly; }
 
 		public boolean isHidden() { return hidden; }
 
@@ -108,8 +114,34 @@ public class CEntityFieldService extends CFieldServiceBase {
 
 		public boolean isRequired() { return required; }
 
+		public boolean isUseRadioButtons() { return useRadioButtons; }
+
+		public void setAllowCustomValue(final boolean allowCustomValue) {
+			this.allowCustomValue = allowCustomValue;
+		}
+
+		public void setAutoSelectFirst(final boolean autoSelectFirst) {
+			this.autoSelectFirst = autoSelectFirst;
+		}
+
+		public void setClearOnEmptyData(final boolean clearOnEmptyData) {
+			this.clearOnEmptyData = clearOnEmptyData;
+		}
+
+		public void setComboboxReadOnly(final boolean comboboxReadOnly) {
+			this.comboboxReadOnly = comboboxReadOnly;
+		}
+
 		public void setDataProviderBean(final String dataProviderBean) {
 			this.dataProviderBean = dataProviderBean;
+		}
+
+		public void setDataProviderMethod(final String dataProviderMethod) {
+			this.dataProviderMethod = dataProviderMethod;
+		}
+
+		public void setDataProviderParamMethod(final String dataProviderParamMethod) {
+			this.dataProviderParamMethod = dataProviderParamMethod;
 		}
 
 		public void setDefaultValue(final String defaultValue) {
@@ -140,27 +172,19 @@ public class CEntityFieldService extends CFieldServiceBase {
 
 		public void setOrder(final int order) { this.order = order; }
 
+		public void setPlaceholder(final String placeholder) {
+			this.placeholder = placeholder;
+		}
+
 		public void setReadOnly(final boolean readOnly) { this.readOnly = readOnly; }
 
 		public void setRequired(final boolean required) { this.required = required; }
-		
-		public void setAutoSelectFirst(final boolean autoSelectFirst) { this.autoSelectFirst = autoSelectFirst; }
-		
-		public void setPlaceholder(final String placeholder) { this.placeholder = placeholder; }
-		
-		public void setAllowCustomValue(final boolean allowCustomValue) { this.allowCustomValue = allowCustomValue; }
-		
-		public void setUseRadioButtons(final boolean useRadioButtons) { this.useRadioButtons = useRadioButtons; }
-		
-		public void setComboboxReadOnly(final boolean comboboxReadOnly) { this.comboboxReadOnly = comboboxReadOnly; }
-		
-		public void setClearOnEmptyData(final boolean clearOnEmptyData) { this.clearOnEmptyData = clearOnEmptyData; }
-		
+
+		public void setUseRadioButtons(final boolean useRadioButtons) {
+			this.useRadioButtons = useRadioButtons;
+		}
+
 		public void setWidth(final String width) { this.width = width; }
-		
-		public void setDataProviderMethod(final String dataProviderMethod) { this.dataProviderMethod = dataProviderMethod; }
-		
-		public void setDataProviderParamMethod(final String dataProviderParamMethod) { this.dataProviderParamMethod = dataProviderParamMethod; }
 
 		@Override
 		public String toString() {
@@ -178,9 +202,9 @@ public class CEntityFieldService extends CFieldServiceBase {
 			final EntityFieldInfo info =
 				createFieldInfo(field.getAnnotation(MetaData.class));
 			info.setFieldName(field.getName());
-			info.setFieldType(getSimpleTypeName(field.getType()));
+			info.setFieldType(getSimpleTypeName(field.getType())); // String
 			info.setJavaType(field.getType().getSimpleName());
-			info.fieldType = field.getType();
+			info.setFieldTypeClass(field.getType()); // Class<?> ata
 			return info;
 		} catch (final Exception e) {
 			return null;
@@ -218,13 +242,6 @@ public class CEntityFieldService extends CFieldServiceBase {
 		}
 	}
 
-	private static String formatFieldName(final String fieldName) {
-		// Convert camelCase to Title Case
-		return fieldName.replaceAll("([A-Z])", " $1")
-			.replaceAll("^.", String.valueOf(Character.toUpperCase(fieldName.charAt(0))))
-			.trim();
-	}
-
 	private static List<Field> getAllFields(final Class<?> clazz) {
 		final List<Field> fields = new ArrayList<>();
 		// Get fields from current class and all superclasses
@@ -235,6 +252,19 @@ public class CEntityFieldService extends CFieldServiceBase {
 			currentClass = currentClass.getSuperclass();
 		}
 		return fields;
+	}
+
+	/**
+	 * Get data provider beans for reference fields.
+	 * @return list of available data provider bean names
+	 */
+	public static List<String> getDataProviderBeans() {
+		return List.of("CActivityService", "CActivityTypeService",
+			"CActivityStatusService", "CActivityPriorityService", "CMeetingService",
+			"CMeetingTypeService", "CMeetingStatusService", "CRiskService",
+			"CRiskTypeService", "CRiskStatusService", "CRiskPriorityService",
+			"CProjectService", "CUserService", "CUserTypeService", "CCompanyService",
+			"CScreenService", "CScreenLinesService");
 	}
 
 	public static EntityFieldInfo getEntityFieldInfo(final String entityType,
@@ -261,6 +291,64 @@ public class CEntityFieldService extends CFieldServiceBase {
 			if (Modifier.isStatic(field.getModifiers())
 				|| field.getName().equals("serialVersionUID")
 				|| field.getName().equals("LOGGER")) {
+				continue;
+			}
+			final EntityFieldInfo fieldInfo = createFieldInfo(field);
+
+			if (fieldInfo != null) {
+				fields.add(fieldInfo);
+			}
+		}
+		return fields;
+	}
+
+	public static List<EntityFieldInfo> getEntityRelationFields(final String entityType,
+		final List<EntityFieldInfo> listOfAdditionalFields) {
+		final Class<?> entityClass = getEntityClass(entityType);
+		Check.notNull(entityClass,
+			"Entity class must not be null for type: " + entityType);
+		final List<EntityFieldInfo> fields = new ArrayList<>();
+
+		if (listOfAdditionalFields != null) {
+			fields.addAll(listOfAdditionalFields);
+		}
+		final List<Field> allFields = getAllFields(entityClass);
+
+		for (final Field field : allFields) {
+
+			if (Modifier.isStatic(field.getModifiers())
+				|| field.getName().equals("serialVersionUID")
+				|| field.getName().equals("LOGGER")
+				|| !isFieldComplexType(field.getType())) {
+				continue;
+			}
+			final EntityFieldInfo fieldInfo = createFieldInfo(field);
+
+			if (fieldInfo != null) {
+				fields.add(fieldInfo);
+			}
+		}
+		return fields;
+	}
+
+	public static List<EntityFieldInfo> getEntitySimpleFields(final String entityType,
+		final List<EntityFieldInfo> listOfAdditionalFields) {
+		final Class<?> entityClass = getEntityClass(entityType);
+		Check.notNull(entityClass,
+			"Entity class must not be null for type: " + entityType);
+		final List<EntityFieldInfo> fields = new ArrayList<>();
+
+		if (listOfAdditionalFields != null) {
+			fields.addAll(listOfAdditionalFields);
+		}
+		final List<Field> allFields = getAllFields(entityClass);
+
+		for (final Field field : allFields) {
+
+			if (Modifier.isStatic(field.getModifiers())
+				|| field.getName().equals("serialVersionUID")
+				|| field.getName().equals("LOGGER")
+				|| isFieldComplexType(field.getType())) {
 				continue;
 			}
 			final EntityFieldInfo fieldInfo = createFieldInfo(field);
@@ -303,78 +391,7 @@ public class CEntityFieldService extends CFieldServiceBase {
 		}
 	}
 
-	/**
-	 * Get data provider beans for reference fields.
-	 * @return list of available data provider bean names
-	 */
-	public List<String> getDataProviderBeans() {
-		return List.of("CActivityService", "CActivityTypeService",
-			"CActivityStatusService", "CActivityPriorityService", "CMeetingService",
-			"CMeetingTypeService", "CMeetingStatusService", "CRiskService",
-			"CRiskTypeService", "CRiskStatusService", "CRiskPriorityService",
-			"CProjectService", "CUserService", "CUserTypeService", "CCompanyService",
-			"CScreenService", "CScreenLinesService");
-	}
-
-	public List<EntityFieldInfo> getEntityRelationFields(final String entityType,
-		final List<EntityFieldInfo> listOfAdditionalFields) {
-		final Class<?> entityClass = getEntityClass(entityType);
-		Check.notNull(entityClass,
-			"Entity class must not be null for type: " + entityType);
-		final List<EntityFieldInfo> fields = new ArrayList<>();
-
-		if (listOfAdditionalFields != null) {
-			fields.addAll(listOfAdditionalFields);
-		}
-		final List<Field> allFields = getAllFields(entityClass);
-
-		for (final Field field : allFields) {
-
-			if (Modifier.isStatic(field.getModifiers())
-				|| field.getName().equals("serialVersionUID")
-				|| field.getName().equals("LOGGER")
-				|| !isFieldComplexType(field.getType())) {
-				continue;
-			}
-			final EntityFieldInfo fieldInfo = createFieldInfo(field);
-
-			if (fieldInfo != null) {
-				fields.add(fieldInfo);
-			}
-		}
-		return fields;
-	}
-
-	public List<EntityFieldInfo> getEntitySimpleFields(final String entityType,
-		final List<EntityFieldInfo> listOfAdditionalFields) {
-		final Class<?> entityClass = getEntityClass(entityType);
-		Check.notNull(entityClass,
-			"Entity class must not be null for type: " + entityType);
-		final List<EntityFieldInfo> fields = new ArrayList<>();
-
-		if (listOfAdditionalFields != null) {
-			fields.addAll(listOfAdditionalFields);
-		}
-		final List<Field> allFields = getAllFields(entityClass);
-
-		for (final Field field : allFields) {
-
-			if (Modifier.isStatic(field.getModifiers())
-				|| field.getName().equals("serialVersionUID")
-				|| field.getName().equals("LOGGER")
-				|| isFieldComplexType(field.getType())) {
-				continue;
-			}
-			final EntityFieldInfo fieldInfo = createFieldInfo(field);
-
-			if (fieldInfo != null) {
-				fields.add(fieldInfo);
-			}
-		}
-		return fields;
-	}
-
-	private boolean isFieldComplexType(final Class<?> type) {
+	private static boolean isFieldComplexType(final Class<?> type) {
 
 		// Check if the field type is a complex type (not primitive or standard types)
 		if (type.isPrimitive() || type.isEnum() || type == String.class
