@@ -9,47 +9,12 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 
-import tech.derbent.abstracts.annotations.MetaData;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.utils.CAuxillaries;
 import tech.derbent.abstracts.utils.CColorUtils;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
-/**
- * CColorAwareComboBox - Specialized ComboBox superclass for entities with color and
- * icon-aware rendering.
- * <p>
- * This class extends the standard Vaadin ComboBox to provide automatic color and icon
- * rendering for entities. It detects status entities and renders them with colored
- * backgrounds based on their color properties. Additionally, it displays appropriate
- * icons for entity types such as users, companies, projects, etc.
- * </p>
- * <p>
- * The class follows the project's coding guidelines by providing a reusable superclass
- * for all enhanced ComboBox components, ensuring consistent styling and behavior across
- * the application.
- * </p>
- * <p>
- * <strong>Usage Example:</strong>
- * </p>
- *
- * <pre>{@code
- * // For status entities with colors
- * CColorAwareComboBox<CDecisionStatus> statusComboBox =
- * 	statusComboBox.setItems(statusList);
- * // For entities with icons (like users)
- * CColorAwareComboBox<CUser> userComboBox =
- * 	new CColorAwareComboBox<>(CUser.class, "Select User");
- * userComboBox.setItems(userList);
- * }</pre>
- *
- * @param <T> the entity type that extends CEntityDB
- * @author Derbent Framework
- * @since 1.0
- * @see tech.derbent.abstracts.annotations.ColorAwareComboBox
- * @see tech.derbent.abstracts.utils.CColorUtils
- */
 public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 
 	private static final long serialVersionUID = 1L;
@@ -77,14 +42,6 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 		this.entityType = entityType;
 		initializeComboBox();
 		CAuxillaries.setId(this);
-	}
-
-	public CColorAwareComboBox(final Class<T> entityType, final MetaData meta) {
-		super();
-		this.entityType = entityType;
-		initializeComboBox();
-		CAuxillaries.setId(this);
-		updateFromMeta(meta);
 	}
 
 	/**
@@ -210,29 +167,6 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 		// Set width if specified
 		if (!fieldInfo.getWidth().trim().isEmpty()) {
 			setWidth(fieldInfo.getWidth());
-		}
-	}
-
-	private void updateFromMeta(final MetaData meta) {
-
-		if (meta == null) {
-			return;
-		}
-		setAllowCustomValue(meta.allowCustomValue());
-
-		// Set placeholder text if specified
-		if (!meta.placeholder().trim().isEmpty()) {
-			setPlaceholder(meta.placeholder());
-		}
-
-		// Set read-only state for combobox if specified
-		if (meta.comboboxReadOnly() || meta.readOnly()) {
-			setReadOnly(true);
-		}
-
-		// Set width if specified
-		if (!meta.width().trim().isEmpty()) {
-			setWidth(meta.width());
 		}
 	}
 }

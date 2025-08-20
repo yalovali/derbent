@@ -132,7 +132,7 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 			final Component component =
 				processField(binder, formLayout, mapHorizontalLayouts, field);
 
-			if (component != null && mapComponents != null) {
+			if ((component != null) && (mapComponents != null)) {
 				mapComponents.put(fieldName, component);
 			}
 		}
@@ -350,74 +350,6 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 		return comboBox;
 	}
 
-	@SuppressWarnings ("unchecked")
-	public static <T extends CEntityDB<T>> ComboBox<T> createComboBox(final Field field,
-		final MetaData meta, final CEnhancedBinder<?> binder) {
-		Check.notNull(field, "Field for ComboBox creation");
-		Check.notNull(meta, "MetaData for ComboBox creation");
-		Check.notNull(binder, "Binder for ComboBox creation");
-		final Class<T> fieldType = (Class<T>) field.getType();
-		// All ComboBoxes are now color-aware by default
-		LOGGER.debug("Creating CColorAwareComboBox for field: {}", field.getName());
-		final ComboBox<T> comboBox = new CColorAwareComboBox<>(fieldType, meta);
-		// Enhanced item label generator with null safety and proper display formatting
-		// Fix for combobox display issue: use getName() for CEntityNamed entities instead
-		// of toString()
-		comboBox
-			.setItemLabelGenerator(item -> CColorUtils.getDisplayTextFromEntity(item));
-		// Data provider resolution using CDataProviderResolver
-		List<T> items = null;
-		Check.notNull(dataProviderResolver,
-			"DataProviderResolver for field " + field.getName());
-		items = dataProviderResolver.resolveData(fieldType, meta);
-		LOGGER.debug("Resolved {} items for field '{}' of type {}", items.size(),
-			field.getName(), fieldType.getSimpleName());
-		Check.notNull(items, "Items for field " + field.getName() + " of type "
-			+ fieldType.getSimpleName());
-
-		// Handle clearOnEmptyData configuration
-		if (meta.clearOnEmptyData() && items.isEmpty()) {
-			comboBox.setValue(null);
-			LOGGER.debug("Cleared ComboBox value for field '{}' due to empty data",
-				field.getName());
-		}
-		comboBox.setItems(items);
-		// Enhanced default value handling with autoSelectFirst support
-		final boolean hasDefaultValue =
-			(meta.defaultValue() != null) && !meta.defaultValue().trim().isEmpty();
-
-		if (!items.isEmpty()) {
-
-			if (hasDefaultValue) {
-				// For entity types, try to find by name or toString match
-				final T defaultItem = items.stream().filter(item -> {
-					final String itemDisplay = CColorUtils.getDisplayTextFromEntity(item);
-					return meta.defaultValue().equals(itemDisplay);
-				}).findFirst().orElse(null);
-
-				if (defaultItem != null) {
-					comboBox.setValue(defaultItem);
-					LOGGER.debug("Set ComboBox default value for field '{}': {}",
-						field.getName(), defaultItem);
-				}
-				else {
-					LOGGER.warn("Default value '{}' not found in items for field '{}'",
-						meta.defaultValue(), field.getName());
-				}
-			}
-			else if (meta.autoSelectFirst()) {
-				// Auto-select first item if configured
-				comboBox.setValue(items.get(0));
-				LOGGER.debug("Auto-selected first item for field '{}': {}",
-					field.getName(), items.get(0));
-			}
-		}
-		// Use simple binding for ComboBox to avoid incomplete forField bindings The
-		// complex converter logic was causing incomplete bindings
-		safeBindComponentWithField(binder, comboBox, field.getName(), "ComboBox");
-		return comboBox;
-	}
-
 	private static Component createComponentForField(final EntityFieldInfo fieldInfo,
 		final CEnhancedBinder<?> binder) throws NoSuchMethodException, SecurityException,
 		IllegalAccessException, InvocationTargetException {
@@ -435,8 +367,14 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 			component = createStringComboBox(fieldInfo, binder);
 		}
 		else if (hasDataProvider || CEntityDB.class.isAssignableFrom(fieldType)) {
+
 			// Entity field or non-String field with data provider should be rendered as
 			// entity ComboBox
+			if (fieldInfo.getJavaType() == "Set") {
+				LOGGER.error("Set type is not supported for ComboBox: "
+					+ fieldInfo.getFieldName() + " of type " + fieldType.getSimpleName());
+				return null;
+			}
 			component = createComboBox(fieldInfo, binder);
 		}
 		else if ((fieldType == Boolean.class) || (fieldType == boolean.class)) {
@@ -897,8 +835,8 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 				+ "' must not be empty");
 
 		// Try to call the method
-		if (fieldInfo.getDataProviderParamMethod() != null
-			&& fieldInfo.getDataProviderParamMethod().trim().length() > 0) {
+		if ((fieldInfo.getDataProviderParamMethod() != null)
+			&& (fieldInfo.getDataProviderParamMethod().trim().length() > 0)) {
 
 			try {
 				// call dataprovider param method, returning Object as result

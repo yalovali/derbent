@@ -4,8 +4,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.domain.Pageable;
-
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -160,41 +158,6 @@ public abstract class CProjectAwareMDPage<
 			// If no active project, show empty grid
 			LOGGER.debug("No active project found, clearing grid items");
 			grid.setItems(Collections.emptyList());
-		}
-	}
-
-	@Override
-	protected void selectFirstItemIfAvailable() {
-
-		if (grid == null) {
-			LOGGER.warn("Grid is null, cannot select first item");
-			return;
-		}
-
-		if (!sessionService.getActiveProject().isPresent()) {
-			LOGGER.warn("No active project available for first item selection");
-			return;
-		}
-		final Pageable pageable = PageableUtils.createSafe(0, 1); // first page, 1 item
-		List<EntityClass> result;
-
-		// Check if the entity service is for CEntityOfProject entities
-		if (entityService instanceof CEntityOfProjectService) {
-			final CEntityOfProjectService<EntityClass> projectService =
-				(CEntityOfProjectService<EntityClass>) entityService;
-			result = projectService
-				.findEntriesByProject(sessionService.getActiveProject().get(), pageable);
-		}
-		else {
-			// For non-project entities, just get the first entity from all entities
-			LOGGER.debug(
-				"Entity service is not project-aware, selecting from all entities");
-			result = entityService.list(pageable);
-		}
-
-		if (!result.isEmpty()) {
-			final EntityClass firstEntity = result.get(0);
-			grid.select(firstEntity);
 		}
 	}
 

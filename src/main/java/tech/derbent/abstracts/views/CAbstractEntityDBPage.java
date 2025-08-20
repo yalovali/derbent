@@ -127,57 +127,37 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	@Override
 	public void beforeEnter(final BeforeEnterEvent event) {
 		LOGGER.debug("beforeEnter called for {}", getClass().getSimpleName());
+
+		if (grid == null) {
+			LOGGER.warn("Grid is null, cannot populate form");
+			return;
+		}
+		Optional<EntityClass> lastEntity = null;
 		final Optional<Long> entityID =
 			event.getRouteParameters().get(getEntityRouteIdField()).map(Long::parseLong);
 
 		if (entityID.isPresent()) {
-			final Optional<EntityClass> entityByRoute =
-				entityService.getById(entityID.get());
-			// LOGGER.debug("Entity ID in URL: {}, looking up entity: {}", entityID.get(),
-			// entityByRoute);
+			lastEntity = entityService.getById(entityID.get());
 
-			if (entityByRoute.isPresent()) {
-				// final Optional<EntityClass> entity = entityService.get(entityID.get());
-
-				if (grid != null) {
-					// this already triggers change event and populates the form
-					grid.select(entityByRoute.get());
-				}
-				else {
-					// it it necassary
-					sessionService.setActiveId(entityClass.getClass().getSimpleName(),
-						entityByRoute.get().getId());
-					populateForm(entityByRoute.get());
-				}
-			}
-			else {
-				Notification.show(
-					String.format("The requested samplePerson was not found, ID = %s",
-						entityID.get()),
-					3000, Notification.Position.BOTTOM_START);
-				// when a row is selected but the data is no longer available, refresh
-				// grid
-				refreshGrid();
+			if (lastEntity.isEmpty()) {
+				LOGGER.warn("Entity with ID {} not found in database", entityID.get());
 			}
 		}
-		else if (sessionService.getActiveId(entityClass.getSimpleName()) != null) {
-			// If no specific entity ID in URL, try to select the last selected entity
-			LOGGER.debug(
-				"No entity ID in URL, trying to select last selected entity ID: {}",
-				sessionService.getActiveId(entityClass.getSimpleName()));
-			final Optional<EntityClass> lastEntity = entityService
+		else {
+			lastEntity = entityService
 				.getById(sessionService.getActiveId(entityClass.getSimpleName()));
-
-			if (lastEntity.isPresent()) {
-				populateForm(lastEntity.get());
-
-				if (grid != null) {
-					grid.select(lastEntity.get()); // Ensure grid selection matches the
-													// form
-				}
-			}
 		}
-		else {}
+
+		if (lastEntity.isEmpty()) {
+			grid.getDataProvider().fetch(new Query<>()).findFirst()
+				.ifPresentOrElse(entity -> {
+					grid.select(entity);
+				}, () -> LOGGER.debug("No items available in grid for {}",
+					getClass().getSimpleName()));
+		}
+		else {
+			grid.select(lastEntity.get());
+		}
 	}
 
 	protected void clearForm() {
@@ -601,7 +581,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 		try {
 			// Find the entity in the current grid data that matches the ID
-			grid.getDataProvider().fetch(new com.vaadin.flow.data.provider.Query<>())
+			grid.getDataProvider().fetch(new Query<>())
 				.filter(entity -> entityId.equals(entity.getId())).findFirst()
 				.ifPresentOrElse(entity -> {
 					grid.select(entity);
@@ -668,25 +648,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		} catch (final Exception e) {
 			LOGGER.warn("Error showing notification '{}': {}", message, e.getMessage());
 		}
-	}
-
-	/**
-	 * Selects the first item in the grid if available. This is called when no specific
-	 * entity ID is provided in the URL.
-	 */
-	protected void selectFirstItemIfAvailable() {
-		LOGGER.debug("selectFirstItemIfAvailable called for {}",
-			getClass().getSimpleName());
-
-		if (grid == null) {
-			LOGGER.warn("Grid is null, cannot select first item");
-			return;
-		}
-		grid.getDataProvider().fetch(new Query<>()).findFirst()
-			.ifPresentOrElse(entity -> {
-				grid.select(entity);
-			}, () -> LOGGER.debug("No items available in grid for {}",
-				getClass().getSimpleName()));
 	}
 
 	public void setCurrentEntity(final EntityClass currentEntity) {
