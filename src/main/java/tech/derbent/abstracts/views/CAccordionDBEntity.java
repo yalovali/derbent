@@ -22,7 +22,7 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 
 	protected CAbstractService<EntityClass> entityService;
 
-	private List<String> EntityFields;
+	private List<String> EntityFields = null;
 
 	private boolean isPanelInitialized = false;
 
