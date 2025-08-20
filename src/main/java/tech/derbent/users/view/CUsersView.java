@@ -20,6 +20,8 @@ import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.abstracts.views.CButton;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.service.CProjectService;
+import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.view.CScreenBuilder;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserProjectSettings;
@@ -59,18 +61,25 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser> implements CInte
 
     private final CUserProjectSettingsService userProjectSettingsService;
 
+    private final CScreenService screenService;
+
+    private final CScreenBuilder screenBuilder;
+
     // private final TextField name; • Annotate the CUsersView constructor with @Autowired
     // to let Spring inject dependencies.
     @Autowired
     public CUsersView(final CUserService entityService, final CProjectService projectService,
             final CUserTypeService userTypeService, final CCompanyService companyService,
-            final CSessionService sessionService, final CUserProjectSettingsService userProjectSettingsService) {
+            final CSessionService sessionService, final CUserProjectSettingsService userProjectSettingsService,
+            final CScreenService screenService, final CScreenBuilder screenBuilder) {
         super(CUser.class, entityService, sessionService);
         addClassNames("users-view");
         this.userTypeService = userTypeService;
         this.companyService = companyService;
         this.projectService = projectService;
         this.userProjectSettingsService = userProjectSettingsService;
+        this.screenService = screenService;
+        this.screenBuilder = screenBuilder;
         // projectSettingsGrid = new CPanelUserProjectSettings(projectService);
     }
 
@@ -95,6 +104,11 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser> implements CInte
         addAccordionPanel(projectSettingsGrid);
         panel = new CPanelUserSystemAccess(getCurrentEntity(), getBinder(), (CUserService) entityService,
                 userTypeService, companyService);
+        addAccordionPanel(panel);
+
+        // Add the new screen demo panel below existing panels
+        panel = new CPanelUserScreenDemo(getCurrentEntity(), getBinder(), (CUserService) entityService, screenService,
+                screenBuilder);
         addAccordionPanel(panel);
     }
 
