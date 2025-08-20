@@ -6,10 +6,8 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import tech.derbent.abstracts.utils.CAuxillaries;
 
 /**
- * CTextField - Enhanced base class for text fields in the application.
- * Layer: View (MVC)
- * Provides common initialization patterns, utility methods for validation,
- * sizing, and styling. Extends Vaadin TextField with application-specific
+ * CTextField - Enhanced base class for text fields in the application. Layer: View (MVC) Provides common initialization
+ * patterns, utility methods for validation, sizing, and styling. Extends Vaadin TextField with application-specific
  * enhancements.
  */
 public class CTextField extends TextField {
@@ -51,7 +49,9 @@ public class CTextField extends TextField {
 
     /**
      * Creates a required text field with label.
-     * @param label the field label
+     * 
+     * @param label
+     *            the field label
      * @return new CTextField marked as required
      */
     public static CTextField createRequired(final String label) {
@@ -63,7 +63,9 @@ public class CTextField extends TextField {
 
     /**
      * Creates a text field with full width.
-     * @param label the field label
+     * 
+     * @param label
+     *            the field label
      * @return new CTextField with full width
      */
     public static CTextField createFullWidth(final String label) {
@@ -74,7 +76,9 @@ public class CTextField extends TextField {
 
     /**
      * Creates a text field for email input.
-     * @param label the field label
+     * 
+     * @param label
+     *            the field label
      * @return new CTextField configured for email
      */
     public static CTextField createEmail(final String label) {
@@ -88,7 +92,9 @@ public class CTextField extends TextField {
 
     /**
      * Creates a text field for numeric input.
-     * @param label the field label
+     * 
+     * @param label
+     *            the field label
      * @return new CTextField configured for numeric input
      */
     public static CTextField createNumeric(final String label) {
@@ -101,7 +107,9 @@ public class CTextField extends TextField {
 
     /**
      * Creates a text field for search input with immediate value change.
-     * @param label the field label
+     * 
+     * @param label
+     *            the field label
      * @return new CTextField configured for search
      */
     public static CTextField createSearch(final String label) {
@@ -114,7 +122,9 @@ public class CTextField extends TextField {
 
     /**
      * Fluent API for setting field as required.
-     * @param required whether the field is required
+     * 
+     * @param required
+     *            whether the field is required
      * @return this field for method chaining
      */
     public CTextField withRequired(final boolean required) {
@@ -125,6 +135,7 @@ public class CTextField extends TextField {
 
     /**
      * Fluent API for setting width to full.
+     * 
      * @return this field for method chaining
      */
     public CTextField withWidthFull() {
@@ -134,7 +145,9 @@ public class CTextField extends TextField {
 
     /**
      * Fluent API for setting placeholder text.
-     * @param placeholder the placeholder text
+     * 
+     * @param placeholder
+     *            the placeholder text
      * @return this field for method chaining
      */
     public CTextField withPlaceholder(final String placeholder) {
@@ -144,7 +157,9 @@ public class CTextField extends TextField {
 
     /**
      * Fluent API for setting helper text.
-     * @param helperText the helper text
+     * 
+     * @param helperText
+     *            the helper text
      * @return this field for method chaining
      */
     public CTextField withHelperText(final String helperText) {
@@ -154,7 +169,9 @@ public class CTextField extends TextField {
 
     /**
      * Fluent API for setting error message.
-     * @param errorMessage the error message
+     * 
+     * @param errorMessage
+     *            the error message
      * @return this field for method chaining
      */
     public CTextField withErrorMessage(final String errorMessage) {
@@ -164,7 +181,9 @@ public class CTextField extends TextField {
 
     /**
      * Fluent API for setting value change mode.
-     * @param mode the value change mode
+     * 
+     * @param mode
+     *            the value change mode
      * @return this field for method chaining
      */
     public CTextField withValueChangeMode(final ValueChangeMode mode) {
@@ -174,7 +193,9 @@ public class CTextField extends TextField {
 
     /**
      * Fluent API for setting clear button visibility.
-     * @param visible whether clear button should be visible
+     * 
+     * @param visible
+     *            whether clear button should be visible
      * @return this field for method chaining
      */
     public CTextField withClearButton(final boolean visible) {
@@ -184,7 +205,9 @@ public class CTextField extends TextField {
 
     /**
      * Fluent API for setting maximum length.
-     * @param maxLength the maximum length
+     * 
+     * @param maxLength
+     *            the maximum length
      * @return this field for method chaining
      */
     public CTextField withMaxLength(final int maxLength) {
@@ -194,7 +217,9 @@ public class CTextField extends TextField {
 
     /**
      * Fluent API for setting validation pattern.
-     * @param pattern the validation pattern
+     * 
+     * @param pattern
+     *            the validation pattern
      * @return this field for method chaining
      */
     public CTextField withPattern(final String pattern) {
@@ -211,6 +236,7 @@ public class CTextField extends TextField {
 
     /**
      * Creates an email icon for email fields.
+     * 
      * @return email icon component
      */
     private static com.vaadin.flow.component.icon.Icon createEmailIcon() {
