@@ -4,16 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 import tech.derbent.screens.domain.CScreen;
 import tech.derbent.screens.domain.CScreenLines;
 import tech.derbent.screens.service.CEntityFieldService;
-import tech.derbent.screens.service.CViewsService;
 import tech.derbent.screens.view.CScreenLinesEditDialog;
 
 /**
@@ -21,16 +19,13 @@ import tech.derbent.screens.view.CScreenLinesEditDialog;
  * specifically tests the fix for the incomplete bindings error that occurred when clicking "Add Screen Field
  * Description".
  */
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest(classes = tech.derbent.Application.class)
+@TestPropertySource(properties = { "spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa",
+        "spring.datasource.password=", "spring.datasource.driver-class-name=org.h2.Driver",
+        "spring.jpa.hibernate.ddl-auto=create-drop", "server.port=0" })
 class CScreenLinesEditDialogBindingTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CScreenLinesEditDialogBindingTest.class);
-
-    @Mock
-    private CEntityFieldService entityFieldService;
-
-    @Mock
-    private CViewsService viewsService;
 
     @Test
     void testDialogCreationWithComplexEntityFieldName() {
@@ -38,11 +33,10 @@ class CScreenLinesEditDialogBindingTest {
         // Create a test screen
         final CScreen screen = new CScreen();
         screen.setName("Complex Test Screen");
-        screen.setEntityType("tech.derbent.users.domain.CUser");
+        screen.setEntityType("tech.derbent.activities.domain.CActivity");
         // Create screen line with the specific field that was causing the error
         final CScreenLines screenLine = new CScreenLines(screen, "Entity Field Name", "entityProperty");
-        screenLine.setEntityProperty("firstName"); // This is the field mentioned in the
-        // error
+        screenLine.setEntityProperty("name"); // This is a valid field for CActivity
         screenLine.setLineOrder(5);
         screenLine.setIsRequired(true);
         screenLine.setIsReadonly(false);
@@ -50,6 +44,7 @@ class CScreenLinesEditDialogBindingTest {
         screenLine.setIsActive(true);
         // This test specifically targets the "Entity Field Name" field binding error
         assertDoesNotThrow(() -> {
+            final CEntityFieldService entityFieldService = new CEntityFieldService();
             final CScreenLinesEditDialog dialog = new CScreenLinesEditDialog(screenLine, (savedLine) -> {
                 LOGGER.info("Save callback called for complex field: {}", savedLine);
             }, // onSave callback
@@ -66,9 +61,10 @@ class CScreenLinesEditDialogBindingTest {
         // Create a test screen
         final CScreen screen = new CScreen();
         screen.setName("Test Screen for New Entry");
-        screen.setEntityType("CActivity");
+        screen.setEntityType("tech.derbent.activities.domain.CActivity");
         // Test with null data (new entry scenario)
         assertDoesNotThrow(() -> {
+            final CEntityFieldService entityFieldService = new CEntityFieldService();
             final CScreenLinesEditDialog dialog = new CScreenLinesEditDialog(null, (savedLine) -> {
                 LOGGER.info("Save callback called for new entry: {}", savedLine);
             }, true, // isNew = true
