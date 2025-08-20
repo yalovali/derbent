@@ -58,9 +58,9 @@ public class CUsersViewNavigationTest {
 	@Test
 	void testFormClearAndRepopulate() {
 		assertDoesNotThrow(() -> {
-			final CUsersView view = new CUsersView(userService, projectService,
-				userTypeService, companyService, sessionService,
-				userProjectSettingsService, null, null);
+			final CUsersView view =
+				new CUsersView(userService, projectService, userTypeService,
+					companyService, sessionService, userProjectSettingsService);
 			// Create test users
 			tech.derbent.users.domain.CUser user1 = userService.createEntity();
 			user1.setName("User One");
@@ -91,9 +91,9 @@ public class CUsersViewNavigationTest {
 	@Test
 	void testNavigateToUsersListView() {
 		assertDoesNotThrow(() -> {
-			final CUsersView view = new CUsersView(userService, projectService,
-				userTypeService, companyService, sessionService,
-				userProjectSettingsService, null, null);
+			final CUsersView view =
+				new CUsersView(userService, projectService, userTypeService,
+					companyService, sessionService, userProjectSettingsService);
 			// Test that the view can handle null population (simulating navigation to
 			// list view)
 			view.testPopulateForm(null);

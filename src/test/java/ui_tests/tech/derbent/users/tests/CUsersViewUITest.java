@@ -101,9 +101,9 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
 
 	@BeforeEach
 	void setupUserTests() {
-		usersView = new CUsersView(mockUserService, mockProjectService,
-			mockUserTypeService, mockCompanyService, mockSessionService,
-			mockUserProjectSettingsService, null, null);
+		usersView =
+			new CUsersView(mockUserService, mockProjectService, mockUserTypeService,
+				mockCompanyService, mockSessionService, mockUserProjectSettingsService);
 	}
 
 	@Test

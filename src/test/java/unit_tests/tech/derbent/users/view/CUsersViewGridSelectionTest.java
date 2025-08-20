@@ -57,9 +57,9 @@ public class CUsersViewGridSelectionTest {
 	void testGridSelectionDoesNotCauseReadBeanError() {
 		assertDoesNotThrow(() -> {
 			// Create the view (this initializes the grid and forms)
-			final CUsersView view = new CUsersView(userService, projectService,
-				userTypeService, companyService, sessionService,
-				userProjectSettingsService, null, null);
+			final CUsersView view =
+				new CUsersView(userService, projectService, userTypeService,
+					companyService, sessionService, userProjectSettingsService);
 			assertNotNull(view, "CUsersView should be created successfully");
 			// Create and save some test users to simulate grid data
 			CUser user1 = userService.createEntity();
@@ -106,9 +106,9 @@ public class CUsersViewGridSelectionTest {
 	@Test
 	void testRapidGridSelectionChanges() {
 		assertDoesNotThrow(() -> {
-			final CUsersView view = new CUsersView(userService, projectService,
-				userTypeService, companyService, sessionService,
-				userProjectSettingsService, null, null);
+			final CUsersView view =
+				new CUsersView(userService, projectService, userTypeService,
+					companyService, sessionService, userProjectSettingsService);
 			// Create multiple users
 			final CUser[] users = new CUser[5];
 

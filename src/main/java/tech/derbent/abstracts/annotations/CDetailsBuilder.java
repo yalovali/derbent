@@ -1,4 +1,5 @@
 package tech.derbent.abstracts.annotations;
 
-public class CEntityForm {
+
+public class CDetailsBuilder {
 }

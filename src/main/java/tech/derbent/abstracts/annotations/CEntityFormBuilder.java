@@ -44,6 +44,8 @@ import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.views.CDiv;
 import tech.derbent.abstracts.views.CHorizontalLayout;
 import tech.derbent.abstracts.views.CVerticalLayout;
+import tech.derbent.screens.service.CEntityFieldService;
+import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
 @org.springframework.stereotype.Component
 public final class CEntityFormBuilder<EntityClass> implements ApplicationContextAware {
@@ -196,6 +198,55 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 		}
 	}
 
+	private static NumberField createBigDecimalField(final EntityFieldInfo fieldInfo,
+		final CEnhancedBinder<?> binder) {
+		Check.notNull(binder, "Binder for BigDecimal field creation");
+		Check.notNull(fieldInfo, "FieldInfo for BigDecimal field creation");
+		final NumberField numberField = new NumberField();
+		CAuxillaries.setId(numberField);
+		numberField.setStep(0.01); // Set decimal step for BigDecimal fields
+
+		if ((fieldInfo.getDefaultValue() != null)
+			&& !fieldInfo.getDefaultValue().trim().isEmpty()) {
+
+			try {
+				final double defaultVal = Double.parseDouble(fieldInfo.getDefaultValue());
+				numberField.setValue(defaultVal);
+			} catch (final NumberFormatException e) {
+				LOGGER.error(
+					"Failed to parse default value '{}' as number for field '{}': {}",
+					fieldInfo.getDefaultValue(), fieldInfo.getDisplayName(),
+					e.getMessage());
+			}
+		}
+
+		try {
+			// Use converter to handle BigDecimal conversion
+			binder.forField(numberField)
+				.withConverter(value -> value != null ? BigDecimal.valueOf(value) : null,
+					value -> value != null ? value.doubleValue() : null,
+					"Invalid decimal value")
+				.bind(fieldInfo.getFieldName());
+			LOGGER.debug(
+				"Successfully bound NumberField with BigDecimal converter for field '{}'",
+				fieldInfo.getFieldName());
+		} catch (final Exception e) {
+			LOGGER.error(
+				"Failed to bind BigDecimal field for field '{}': {} - using fallback binding",
+				fieldInfo.getFieldName(), e.getMessage());
+
+			// Fallback to simple binding without converter
+			try {
+				safeBindComponentWithField(binder, numberField, fieldInfo.getFieldName(),
+					"NumberField(BigDecimal-fallback)");
+			} catch (final Exception fallbackException) {
+				LOGGER.error("Fallback binding also failed for BigDecimal field '{}': {}",
+					fieldInfo.getFieldName(), fallbackException.getMessage());
+			}
+		}
+		return numberField;
+	}
+
 	private static NumberField createBigDecimalField(final Field field,
 		final MetaData meta, final CEnhancedBinder<?> binder) {
 		Check.notNull(field, "Field for BigDecimal field creation");
@@ -235,7 +286,7 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 
 			// Fallback to simple binding without converter
 			try {
-				safeBindComponentWithField(binder, numberField, field,
+				safeBindComponentWithField(binder, numberField, field.getName(),
 					"NumberField(BigDecimal-fallback)");
 			} catch (final Exception fallbackException) {
 				LOGGER.error("Fallback binding also failed for BigDecimal field '{}': {}",
@@ -273,7 +324,7 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 		}
 
 		try {
-			safeBindComponentWithField(binder, checkbox, field, "Checkbox");
+			safeBindComponentWithField(binder, checkbox, field.getName(), "Checkbox");
 		} catch (final Exception e) {
 			LOGGER.error("Failed to bind checkbox for field '{}': {}", field.getName(),
 				e.getMessage());
@@ -346,8 +397,77 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 		}
 		// Use simple binding for ComboBox to avoid incomplete forField bindings The
 		// complex converter logic was causing incomplete bindings
-		safeBindComponentWithField(binder, comboBox, field, "ComboBox");
+		safeBindComponentWithField(binder, comboBox, field.getName(), "ComboBox");
 		return comboBox;
+	}
+
+	private static Component createComponentForField(final EntityFieldInfo fieldInfo,
+		final CEnhancedBinder<?> binder) throws NoSuchMethodException, SecurityException,
+		IllegalAccessException, InvocationTargetException {
+		Component component = null;
+		Check.notNull(fieldInfo, "Field");
+		Check.notNull(binder, "Binder for field " + fieldInfo.getDisplayName());
+		final Class<?> fieldType = fieldInfo.getFieldTypeClass();
+		Check.notNull(fieldType, "Field type for field " + fieldInfo.getDisplayName());
+		// Check if field should be rendered as ComboBox based on metadata
+		final boolean hasDataProvider = (fieldInfo.getDataProviderBean() != null)
+			&& !fieldInfo.getDataProviderBean().trim().isEmpty();
+
+		if (hasDataProvider && (fieldType == String.class)) {
+			// String field with data provider should be rendered as String ComboBox
+			component = createStringComboBox(fieldInfo, binder);
+		}
+		else if (hasDataProvider || CEntityDB.class.isAssignableFrom(fieldType)) {
+			// Entity field or non-String field with data provider should be rendered as
+			// entity ComboBox
+			component = createComboBox(fieldInfo, binder);
+		}
+		else if ((fieldType == Boolean.class) || (fieldType == boolean.class)) {
+			component = createCheckbox(fieldInfo, binder);
+		}
+		else if ((fieldType == String.class)
+			&& (fieldInfo.getMaxLength() >= CEntityConstants.MAX_LENGTH_DESCRIPTION)) {
+			component = createTextArea(fieldInfo, binder);
+		}
+		else if ((fieldType == String.class)
+			&& (fieldInfo.getMaxLength() < CEntityConstants.MAX_LENGTH_DESCRIPTION)) {
+			component = createTextField(fieldInfo, binder);
+		}
+		else if ((fieldType == Integer.class) || (fieldType == int.class)
+			|| (fieldType == Long.class) || (fieldType == long.class)) {
+			// Integer types
+			component = createIntegerField(fieldInfo, binder);
+		}
+		else if (fieldType == BigDecimal.class) {
+			component = createBigDecimalField(fieldInfo, binder);
+		}
+		else if ((fieldType == Double.class) || (fieldType == double.class)
+			|| (fieldType == Float.class) || (fieldType == float.class)) {
+			// Floating-point types
+			component = createFloatingPointField(fieldInfo, binder);
+		}
+		else if (fieldType == LocalDate.class) {
+			component = createDatePicker(fieldInfo, binder);
+		}
+		else if ((fieldType == LocalDateTime.class) || (fieldType == Instant.class)) {
+			component = createDateTimePicker(fieldInfo, binder);
+		}
+		else if (fieldType.isEnum()) {
+			component = createEnumComponent(fieldInfo, binder);
+		}
+		else {
+			Check.condition(false, "Unsupported field type: " + fieldType.getSimpleName()
+				+ " for field: " + fieldInfo.getDisplayName());
+		}
+		Check.notNull(component, "Component for field " + fieldInfo.getFieldName()
+			+ " of type " + fieldType.getSimpleName());
+		setRequiredIndicatorVisible(fieldInfo, component);
+		// dont use helper text for Checkbox components setHelperText(meta, component);
+		setComponentWidth(component, fieldInfo.getWidth());
+		// setclass name for styling in format of form-field{ComponentType}
+		component.setClassName("form-field-" + component.getClass().getSimpleName());
+		// Create field
+		return component;
 	}
 
 	private static Component createComponentForField(final Field field,
@@ -425,7 +545,7 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 		final CEnhancedBinder<?> binder) {
 		final DatePicker datePicker = new DatePicker();
 		CAuxillaries.setId(datePicker);
-		safeBindComponentWithField(binder, datePicker, field, "DatePicker");
+		safeBindComponentWithField(binder, datePicker, field.getName(), "DatePicker");
 		return datePicker;
 	}
 
@@ -433,7 +553,8 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 		final MetaData meta, final CEnhancedBinder<?> binder) {
 		final DateTimePicker dateTimePicker = new DateTimePicker();
 		CAuxillaries.setId(dateTimePicker);
-		safeBindComponentWithField(binder, dateTimePicker, field, "DateTimePicker");
+		safeBindComponentWithField(binder, dateTimePicker, field.getName(),
+			"DateTimePicker");
 		return dateTimePicker;
 	}
 
@@ -463,7 +584,8 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 			final RadioButtonGroup<Enum> radioGroup = new RadioButtonGroup<>();
 			radioGroup.setItems(enumConstants);
 			radioGroup.setItemLabelGenerator(Enum::name);
-			safeBindComponentWithField(binder, radioGroup, field, "RadioButtonGroup");
+			safeBindComponentWithField(binder, radioGroup, field.getName(),
+				"RadioButtonGroup");
 			return radioGroup;
 		}
 		else {
@@ -475,32 +597,30 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 			comboBox.setAllowCustomValue(false);
 			comboBox.setItems(enumConstants);
 			comboBox.setItemLabelGenerator(Enum::name);
-			safeBindComponentWithField(binder, comboBox, field, "ComboBox(Enum)");
+			safeBindComponentWithField(binder, comboBox, field.getName(),
+				"ComboBox(Enum)");
 			return comboBox;
 		}
 	}
 
-	private static CHorizontalLayout createFieldLayout(final MetaData meta,
+	private static CHorizontalLayout createFieldLayout(final EntityFieldInfo fieldInfo,
 		final Component component) {
-		Check.notNull(meta, "MetaData for field layout");
-		Check.notNull(component,
-			("Component for field layout" + meta.displayName()) != null
-				? meta.displayName() : "unknown");
+		Check.notNull(fieldInfo, "MetaData for field layout");
+		Check.notNull(component, "Component for field layout" + fieldInfo.getFieldName());
 		final CHorizontalLayout horizontalLayout = CHorizontalLayout.forForm();
-		// Safe handling of display name
-		final String displayName =
-			((meta.displayName() != null) && !meta.displayName().trim().isEmpty())
-				? meta.displayName() : "Field";
-		final CDiv labelDiv = new CDiv(displayName);
+		final CDiv labelDiv = new CDiv(fieldInfo.getDisplayName());
 		labelDiv.setClassName("form-field-label");
 
-		if (meta.required()) {
+		if (fieldInfo.isRequired()) {
 			labelDiv.getStyle().set("font-weight", "bold");
-			// LOGGER.debug("Applied bold styling for required field: {}", displayName);
 		}
 		horizontalLayout.add(labelDiv, component);
-		// LOGGER.debug("Successfully created field layout for: {}", displayName);
 		return horizontalLayout;
+	}
+
+	private static CHorizontalLayout createFieldLayout(final MetaData meta,
+		final Component component) {
+		return createFieldLayout(CEntityFieldService.createFieldInfo(meta), component);
 	}
 
 	private static NumberField createFloatingPointField(final Field field,
@@ -570,19 +690,58 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 		return numberField;
 	}
 
-	/**
-	 * Creates a ComboBox for String fields with data provider configuration. This method
-	 * handles String fields that should be rendered as ComboBox instead of TextField when
-	 * metadata specifies a data provider.
-	 * @param field  the field to create the ComboBox for
-	 * @param meta   the metadata containing data provider configuration
-	 * @param binder the binder for form binding
-	 * @return configured ComboBox<String> component
-	 * @throws InvocationTargetException
-	 * @throws IllegalAccessException
-	 * @throws SecurityException
-	 * @throws NoSuchMethodException
-	 */
+	private static ComboBox<String> createStringComboBox(final EntityFieldInfo fieldInfo,
+		final CEnhancedBinder<?> binder) throws NoSuchMethodException, SecurityException,
+		IllegalAccessException, InvocationTargetException {
+		Check.notNull(fieldInfo, "Field for String ComboBox creation");
+		Check.notNull(binder, "Binder for String ComboBox creation");
+		final ComboBox<String> comboBox = new ComboBox<>();
+		// Configure basic properties from metadata
+		comboBox.setLabel(meta.displayName());
+		comboBox.setPlaceholder(meta.placeholder());
+		comboBox.setAllowCustomValue(meta.allowCustomValue());
+		comboBox.setReadOnly(meta.comboboxReadOnly() || meta.readOnly());
+
+		// Set width if specified
+		if (!meta.width().trim().isEmpty()) {
+			comboBox.setWidth(meta.width());
+		}
+		// Resolve String data using data provider
+		final List<String> items = resolveStringData(meta, field.getName());
+		comboBox.setItems(items);
+
+		// Handle clearOnEmptyData configuration
+		if (meta.clearOnEmptyData() && items.isEmpty()) {
+			comboBox.setValue(null);
+		}
+		// Handle default value
+		final boolean hasDefaultValue =
+			(meta.defaultValue() != null) && !meta.defaultValue().trim().isEmpty();
+
+		if (hasDefaultValue) {
+
+			// For String ComboBox, try to match default value exactly
+			if (items.contains(meta.defaultValue())) {
+				comboBox.setValue(meta.defaultValue());
+				LOGGER.debug("Set String ComboBox default value for field '{}': '{}'",
+					field.getName(), meta.defaultValue());
+			}
+			else {
+				LOGGER.warn("Default value '{}' not found in items for String field '{}'",
+					meta.defaultValue(), field.getName());
+			}
+		}
+		else if (meta.autoSelectFirst() && !items.isEmpty()) {
+			// Auto-select first item if configured
+			comboBox.setValue(items.get(0));
+			LOGGER.debug("Auto-selected first string item for field '{}': '{}'",
+				field.getName(), items.get(0));
+		}
+		// Bind to field
+		safeBindComponentWithField(binder, comboBox, field.getName(), "String ComboBox");
+		return comboBox;
+	}
+
 	private static ComboBox<String> createStringComboBox(final Field field,
 		final MetaData meta, final CEnhancedBinder<?> binder)
 		throws NoSuchMethodException, SecurityException, IllegalAccessException,
@@ -633,7 +792,7 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 				field.getName(), items.get(0));
 		}
 		// Bind to field
-		safeBindComponentWithField(binder, comboBox, field, "String ComboBox");
+		safeBindComponentWithField(binder, comboBox, field.getName(), "String ComboBox");
 		return comboBox;
 	}
 
@@ -661,7 +820,7 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 		}
 
 		try {
-			safeBindComponentWithField(binder, item, field, "TextArea");
+			safeBindComponentWithField(binder, item, field.getName(), "TextArea");
 		} catch (final Exception e) {
 			LOGGER.error("Failed to bind text area for field '{}': {}", field.getName(),
 				e.getMessage());
@@ -696,7 +855,7 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 		}
 
 		try {
-			safeBindComponentWithField(binder, item, field, "TextField");
+			safeBindComponentWithField(binder, item, field.getName(), "TextField");
 		} catch (final Exception e) {
 			LOGGER.error("Failed to bind text field for field '{}': {}", field.getName(),
 				e.getMessage());
@@ -723,18 +882,6 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 		}
 	}
 
-	/**
-	 * Cached instance of the data provider resolver for performance.
-	 */
-	/**
-	 * Determines the correct property name for binding. Simply returns the field name for
-	 * most cases.
-	 */
-	private static String getPropertyName(final Field field) {
-		Check.notNull(field, "Field for property name retrieval");
-		return field.getName();
-	}
-
 	private static List<Field> getSortedFilteredFieldsList(final List<Field> allFields) {
 		return allFields.stream().filter(field -> {
 			Check.notNull(field, "Field in sorted filtered fields list");
@@ -757,6 +904,29 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 			final MetaData metaData = field.getAnnotation(MetaData.class);
 			return metaData != null ? metaData.order() : Integer.MAX_VALUE;
 		})).collect(Collectors.toList());
+	}
+
+	private static <EntityClass> Component processField(
+		final CEnhancedBinder<EntityClass> binder, final VerticalLayout formLayout,
+		final Map<String, CHorizontalLayout> mapHorizontalLayouts, final Field field)
+		throws NoSuchMethodException, SecurityException, IllegalAccessException,
+		InvocationTargetException {
+		Check.notNull(field, "field");
+		final EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(field);
+		Check.notNull(fieldInfo, "MetaData for field " + field.getName());
+		final Component component = createComponentForField(fieldInfo, binder);
+		Check.notNull(component, "Component for field " + field.getName()
+			+ " with displayName " + fieldInfo.getFieldName());
+		final CHorizontalLayout horizontalLayout =
+			createFieldLayout(fieldInfo, component);
+		Check.notNull(horizontalLayout, "HorizontalLayout for field " + field.getName()
+			+ " with displayName " + fieldInfo.getDisplayName());
+		formLayout.add(horizontalLayout);
+
+		if (mapHorizontalLayouts != null) {
+			mapHorizontalLayouts.put(field.getName(), horizontalLayout);
+		}
+		return component;
 	}
 
 	private static <EntityClass> Component processMetaForField(
@@ -931,25 +1101,22 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 	 * incomplete bindings are left.
 	 */
 	private static void safeBindComponentWithField(final CEnhancedBinder<?> binder,
-		final HasValueAndElement<?, ?> component, final Field field,
+		final HasValueAndElement<?, ?> component, final String propertyName,
 		final String componentType) {
 
-		if ((binder == null) || (component == null) || (field == null)) {
+		if ((binder == null) || (component == null) || (propertyName == null)) {
 			LOGGER.error(
 				"Null parameters in safeBindComponentWithField - binder: {}, component: {}, field: {}",
 				binder != null ? "present" : "null",
-				component != null ? "present" : "null",
-				field != null ? field.getName() : "null");
+				component != null ? "present" : "null", propertyName);
 			return;
 		}
-		final String propertyName = getPropertyName(field);
 		safeBindComponent(binder, component, propertyName, componentType);
 	}
 
-	private static void setComponentWidth(final Component component,
-		final MetaData meta) {
+	private static void setComponentWidth(final Component component, final String width) {
 
-		if ((component == null) || (meta == null)) {
+		if ((component == null) || (width == null)) {
 			return;
 		}
 
@@ -957,12 +1124,12 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 			final com.vaadin.flow.component.HasSize hasSize =
 				(com.vaadin.flow.component.HasSize) component;
 
-			if ((meta.width() != null) && !meta.width().trim().isEmpty()) {
+			if ((width != null) && !width.trim().isEmpty()) {
 
 				try {
-					hasSize.setWidth(meta.width());
+					hasSize.setWidth(width);
 				} catch (final Exception e) {
-					LOGGER.warn("Failed to set component width '{}': {}", meta.width(),
+					LOGGER.warn("Failed to set component width '{}': {}", width,
 						e.getMessage());
 					// Fall back to full width
 					hasSize.setWidthFull();

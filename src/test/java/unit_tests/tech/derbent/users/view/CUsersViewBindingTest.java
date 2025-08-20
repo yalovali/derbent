@@ -62,9 +62,9 @@ public class CUsersViewBindingTest {
 		// This should not throw java.lang.IllegalStateException: All bindings created
 		// with forField must be completed before calling readBean
 		assertDoesNotThrow(() -> {
-			final CUsersView view = new CUsersView(userService, projectService,
-				userTypeService, companyService, sessionService,
-				userProjectSettingsService, null, null);
+			final CUsersView view =
+				new CUsersView(userService, projectService, userTypeService,
+					companyService, sessionService, userProjectSettingsService);
 			assertNotNull(view, "CUsersView should be instantiated successfully");
 		}, "CUsersView should be instantiated without binding errors");
 	}
@@ -76,9 +76,9 @@ public class CUsersViewBindingTest {
 	@Test
 	void testCUsersViewNavigateToUser() {
 		assertDoesNotThrow(() -> {
-			final CUsersView view = new CUsersView(userService, projectService,
-				userTypeService, companyService, sessionService,
-				userProjectSettingsService, null, null);
+			final CUsersView view =
+				new CUsersView(userService, projectService, userTypeService,
+					companyService, sessionService, userProjectSettingsService);
 			// Create a test user
 			tech.derbent.users.domain.CUser testUser = userService.createEntity();
 			testUser.setName("Test User");
