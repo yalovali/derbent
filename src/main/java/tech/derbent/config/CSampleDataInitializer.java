@@ -57,6 +57,7 @@ import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserRole;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.CUserTypeService;
+import tech.derbent.users.service.CUserViewService;
 
 /**
  * CSampleDataInitializer - Enhanced sample data initializer following coding guidelines.
@@ -1025,8 +1026,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	 * @throws Exception
 	 */
 	private void createScreenWithFields(final CProject project, final String screenName,
-		final String entityType, final String relationFieldName, final String entityProperty1,
-		final String entityProperty2) throws Exception {
+		final String entityType, final String relationFieldName,
+		final String entityProperty1, final String entityProperty2) throws Exception {
 		// Create the screen
 		final CScreen screen = new CScreen(screenName, project);
 		screen.setEntityType(entityType);
@@ -1049,7 +1050,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		CEntityFieldService.createFieldInfo(screen.getEntityType(), line);
 		screenLinesService.save(line);
 		// Create first field
-		line = screenLinesService.newEntity(savedScreen, relationFieldName, entityProperty1);
+		line =
+			screenLinesService.newEntity(savedScreen, relationFieldName, entityProperty1);
 		line.setFieldDescription("Description for " + entityProperty1.toLowerCase());
 		line.setIsRequired(true);
 		line.setIsActive(true);
@@ -1058,7 +1060,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		CEntityFieldService.createFieldInfo(screen.getEntityType(), line);
 		screenLinesService.save(line);
 		// Create second field
-		line = screenLinesService.newEntity(savedScreen, relationFieldName, entityProperty2);
+		line =
+			screenLinesService.newEntity(savedScreen, relationFieldName, entityProperty2);
 		line.setFieldDescription("Description for " + entityProperty2.toLowerCase());
 		line.setIsRequired(false);
 		line.setIsActive(true);
@@ -1066,6 +1069,9 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		line.setFieldCaption(relationFieldName + " " + entityProperty2);
 		CEntityFieldService.createFieldInfo(screen.getEntityType(), line);
 		screenLinesService.save(line);
+		//
+		final CScreen screen1 = CUserViewService.createBasicView(project);
+		screenService.save(screen1);
 		LOGGER.info("Created sample fields for screen: {}", screenName);
 	}
 

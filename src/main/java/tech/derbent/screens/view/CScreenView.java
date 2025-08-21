@@ -69,8 +69,6 @@ public final class CScreenView extends CProjectAwareMDPage<CScreen> {
 		addAccordionPanel(new CPanelScreenLines(getCurrentEntity(), getBinder(),
 			(CScreenService) entityService, screenLinesService, entityFieldService,
 			viewsService));
-		addAccordionPanel(new CPanelScreenRelatedEntities(getCurrentEntity(), getBinder(),
-			(CScreenService) entityService));
 		addAccordionPanel(new CPanelScreenPreview(getCurrentEntity(), getBinder(),
 			(CScreenService) entityService));
 	}
@@ -81,20 +79,6 @@ public final class CScreenView extends CProjectAwareMDPage<CScreen> {
 		grid.addShortTextColumn(CScreen::getName, "Screen Name", "name");
 		grid.addShortTextColumn(CScreen::getEntityType, "Entity Type", "entityType");
 		grid.addShortTextColumn(CScreen::getScreenTitle, "Screen Title", "screenTitle");
-		// Show related entity information
-		grid.addColumn(screen -> {
-
-			if (screen.getRelatedActivity() != null) {
-				return "Activity: " + screen.getRelatedActivity().getName();
-			}
-			else if (screen.getRelatedMeeting() != null) {
-				return "Meeting: " + screen.getRelatedMeeting().getName();
-			}
-			else if (screen.getRelatedRisk() != null) {
-				return "Risk: " + screen.getRelatedRisk().getName();
-			}
-			return "No Related Entity";
-		}, "Related Entity", null);
 		// Show active status
 		grid.addColumn(screen -> screen.getIsActive() ? "Active" : "Inactive", "Status",
 			null);

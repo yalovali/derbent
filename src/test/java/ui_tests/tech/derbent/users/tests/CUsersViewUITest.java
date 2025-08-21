@@ -18,6 +18,8 @@ import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
+import tech.derbent.screens.service.CScreenService;
+import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserType;
 import tech.derbent.users.service.CUserProjectSettingsService;
@@ -47,6 +49,12 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
 
 	@Mock
 	private CUserProjectSettingsService mockUserProjectService;
+
+	@Mock
+	private CSessionService mockSessionService;
+
+	@Mock
+	private CScreenService screenService;
 
 	private CUsersView usersView;
 
@@ -101,9 +109,9 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
 
 	@BeforeEach
 	void setupUserTests() {
-		usersView =
-			new CUsersView(mockUserService, mockProjectService, mockUserTypeService,
-				mockCompanyService, mockSessionService, mockUserProjectSettingsService);
+		usersView = new CUsersView(screenService, mockUserService, mockProjectService,
+			mockUserTypeService, mockCompanyService, mockSessionService,
+			mockUserProjectSettingsService);
 	}
 
 	@Test

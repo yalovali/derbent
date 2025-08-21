@@ -11,7 +11,7 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
-import com.vaadin.flow.component.HasOrderedComponents;
+import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
@@ -245,7 +245,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	@PostConstruct
 	protected abstract void createDetailsLayout() throws NoSuchMethodException,
-		SecurityException, IllegalAccessException, InvocationTargetException;
+		SecurityException, IllegalAccessException, InvocationTargetException, Exception;
 
 	/**
 	 * Creates the button layout for the details tab. Contains new, save, cancel, and
@@ -461,7 +461,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		return save;
 	}
 
-	public HasOrderedComponents getBaseDetailsLayout() { return baseDetailsLayout; }
+	public HasComponents getBaseDetailsLayout() { return baseDetailsLayout; }
 
 	public CEnhancedBinder<EntityClass> getBinder() { return binder; }
 

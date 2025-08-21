@@ -9,20 +9,24 @@ public class CPanelDetails extends CAccordion {
 
 	private static final long serialVersionUID = 1L;
 
-	public CPanelDetails(final String title, final CEntityFormBuilder<?> detailsBuilder) {
+	private final String name;
+
+	public CPanelDetails(final String name, final String title) {
 		super(title);
-		getBaseLayout().add(detailsBuilder.getFormLayout());
+		this.name = name;
 	}
 
 	// Override this method to customize the panel content creation
 	protected void createPanelContent() {}
 
+	public String getName() { return name; }
+
 	public void processLine(final int counter, final CScreen screen,
-		final CScreenLines line, final CEntityFormBuilder<?> detailsBuilder)
+		final CScreenLines line, final CEntityFormBuilder<?> formBuilder)
 		throws Exception {
 
 		try {
-			detailsBuilder.addFieldLine(screen.getEntityType(), line);
+			formBuilder.addFieldLine(screen.getEntityType(), line, getBaseLayout());
 		} catch (final Exception e) {
 			e.printStackTrace();
 			throw new Exception("Error processing line: " + line.getFieldCaption(), e);

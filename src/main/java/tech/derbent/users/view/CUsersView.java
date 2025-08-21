@@ -1,6 +1,5 @@
 package tech.derbent.users.view;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
@@ -15,17 +14,21 @@ import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
+import tech.derbent.abstracts.services.CDetailsBuilder;
 import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
 import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.abstracts.views.CButton;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.service.CProjectService;
+import tech.derbent.screens.domain.CScreen;
+import tech.derbent.screens.service.CScreenService;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserProjectSettings;
 import tech.derbent.users.service.CUserProjectSettingsService;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.CUserTypeService;
+import tech.derbent.users.service.CUserViewService;
 
 @Route ("cusersview/:user_id?/:action?(edit)")
 @PageTitle ("User Master Detail")
@@ -39,6 +42,8 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser>
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String ENTITY_ROUTE_TEMPLATE_EDIT = "cusersview/%s/edit";
+
 	public static String getIconColorCode() {
 		return CUser.getIconColorCode(); // Use the static method from CUser
 	}
@@ -46,8 +51,6 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser>
 	public static String getIconFilename() { return CUser.getIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "user_id";
-
-	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "cusersview/%s/edit";
 
 	private CPanelUserProjectSettings projectSettingsGrid;
 
@@ -59,46 +62,45 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser>
 
 	private final CProjectService projectService;
 
+	private final CScreenService screenService;
+
 	private final CUserProjectSettingsService userProjectSettingsService;
 
 	// private final TextField name; • Annotate the CUsersView constructor with @Autowired
 	// to let Spring inject dependencies.
 	@Autowired
-	public CUsersView(final CUserService entityService,
-		final CProjectService projectService, final CUserTypeService userTypeService,
-		final CCompanyService companyService, final CSessionService sessionService,
+	public CUsersView(final CScreenService screenService,
+		final CUserService entityService, final CProjectService projectService,
+		final CUserTypeService userTypeService, final CCompanyService companyService,
+		final CSessionService sessionService,
 		final CUserProjectSettingsService userProjectSettingsService) {
 		super(CUser.class, entityService, sessionService);
 		addClassNames("users-view");
 		this.userTypeService = userTypeService;
 		this.companyService = companyService;
 		this.projectService = projectService;
+		this.screenService = screenService;
 		this.userProjectSettingsService = userProjectSettingsService;
 		// projectSettingsGrid = new CPanelUserProjectSettings(projectService);
 	}
 
 	@Override
-	protected void createDetailsLayout() throws NoSuchMethodException, SecurityException,
-		IllegalAccessException, InvocationTargetException {
-		CAccordionDBEntity<CUser> panel;
+	protected void createDetailsLayout() throws Exception {
+		final CAccordionDBEntity<CUser> panel;
 		descriptionPanel = new CPanelUserDescription(getCurrentEntity(), getBinder(),
 			(CUserService) entityService, userTypeService, companyService);
 		// descriptionPanel = new CPanelUserDescription(getCurrentEntity(),
 		// getBinder(),(CUserService) entityService, userTypeService, companyService);
 		addAccordionPanel(descriptionPanel);
-		panel = new CPanelUserContactInfo(getCurrentEntity(), getBinder(),
-			(CUserService) entityService, userTypeService, companyService);
-		addAccordionPanel(panel);
-		panel = new CPanelUserCompanyAssociation(getCurrentEntity(), getBinder(),
-			(CUserService) entityService, userTypeService, companyService);
-		addAccordionPanel(panel);
 		projectSettingsGrid = new CPanelUserProjectSettings(getCurrentEntity(),
 			getBinder(), (CUserService) entityService, userTypeService, companyService,
 			projectService, userProjectSettingsService);
 		addAccordionPanel(projectSettingsGrid);
-		panel = new CPanelUserSystemAccess(getCurrentEntity(), getBinder(),
-			(CUserService) entityService, userTypeService, companyService);
-		addAccordionPanel(panel);
+		final CDetailsBuilder detailsBuilder = new CDetailsBuilder();
+		final CScreen screen = screenService.findByNameAndProject(
+			sessionService.getActiveProject().orElse(null),
+			CUserViewService.USER_VIEW_NAME);
+		detailsBuilder.buildDetails(screen, getBinder(), getBaseDetailsLayout());
 		// Add the new screen demo panel below existing panels addAccordionPanel(panel);
 	}
 

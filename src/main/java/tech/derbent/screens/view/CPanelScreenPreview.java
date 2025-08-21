@@ -56,6 +56,7 @@ public class CPanelScreenPreview extends CPanelScreenBase {
 			}
 
 			if (divPreview != null) {
+				final CDetailsBuilder builder = new CDetailsBuilder();
 				divPreview.removeAll();
 				// get service for the class
 				final Class<?> screenClass =
@@ -63,7 +64,7 @@ public class CPanelScreenPreview extends CPanelScreenBase {
 				@SuppressWarnings ("unchecked")
 				final CEnhancedBinder<CEntityDB<?>> binder =
 					new CEnhancedBinder<CEntityDB<?>>((Class<CEntityDB<?>>) screenClass);
-				divPreview.add(CDetailsBuilder.buildDetails(screen, binder));
+				builder.buildDetails(screen, binder, divPreview);
 				// Get related service class for the given class type
 				/** ADD SAMPLE DATA ************************************/
 				final String serviceClassName =

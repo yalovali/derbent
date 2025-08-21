@@ -255,6 +255,7 @@ public class CScreenLines extends CEntityDB<CScreenLines> {
 
 	public void setSectionName(final String sectionName) {
 		this.sectionName = sectionName;
+		this.fieldCaption = sectionName;
 	}
 
 	@Override

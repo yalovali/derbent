@@ -96,7 +96,7 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 					"relatedEntityType", "dataProviderBean", "maxLength", "isActive")));
 			// BUILD SECTION TAB
 			tabSectionSpan.add(formSection.build(CScreenLines.class, binder,
-				List.of("sectionName", "isActive")));
+				List.of("sectionName", "fieldCaption", "isActive")));
 			// SETUP ENTITY TAB COMBOXBOXES
 			cmbFieldClass =
 				((ComboBox<String>) formClassType.getComponent("relationFieldName"));
@@ -104,7 +104,7 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 				final String selectedType = event.getValue();
 				entity.setRelationFieldName(selectedType);
 
-				if (selectedType == null || selectedType.isEmpty()) {
+				if ((selectedType == null) || selectedType.isEmpty()) {
 					return; // No
 				}
 
@@ -125,7 +125,7 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 			cmbFieldProperties.addValueChangeListener(event -> {
 				final String selectedProperty = event.getValue();
 
-				if (selectedProperty != null && !selectedProperty.isEmpty()) {
+				if ((selectedProperty != null) && !selectedProperty.isEmpty()) {
 					// Update the entity property based on the selected value
 					entity.setEntityProperty(selectedProperty);
 					updatePropertyDefaultValues(selectedProperty);
@@ -171,7 +171,7 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 		if (entity != null) {
 
 			// Now populate entityProperty ComboBox if relationFieldName is already set
-			if (entity.getRelationFieldName() != null
+			if ((entity.getRelationFieldName() != null)
 				&& !entity.getRelationFieldName().isEmpty()) {
 				updateEntityPropertyBasedOnClass();
 			}
@@ -210,7 +210,7 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 		final String relationFieldName = entity.getRelationFieldName();
 		LOGGER.debug("Selected field class: {}", relationFieldName);
 
-		if (relationFieldName == null || relationFieldName.isEmpty()) {
+		if ((relationFieldName == null) || relationFieldName.isEmpty()) {
 			return;
 		}
 		List<EntityFieldInfo> fieldProperties = null;
@@ -247,12 +247,12 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 		// default values
 		divJavaType.setText(" ");
 
-		if (selectedProperty == null || selectedProperty.isEmpty()) {
+		if ((selectedProperty == null) || selectedProperty.isEmpty()) {
 			return;
 		}
 		final String relationFieldName = entity.getRelationFieldName();
 
-		if (relationFieldName == null || relationFieldName.isEmpty()) {
+		if ((relationFieldName == null) || relationFieldName.isEmpty()) {
 			return;
 		}
 		EntityFieldInfo info;

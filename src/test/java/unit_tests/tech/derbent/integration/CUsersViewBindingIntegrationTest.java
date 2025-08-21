@@ -10,6 +10,7 @@ import org.springframework.test.context.TestPropertySource;
 
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.service.CProjectService;
+import tech.derbent.screens.service.CScreenService;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.service.CUserProjectSettingsService;
 import tech.derbent.users.service.CUserService;
@@ -46,6 +47,9 @@ public class CUsersViewBindingIntegrationTest {
 	private CSessionService sessionService;
 
 	@Autowired
+	private CScreenService screenService;
+
+	@Autowired
 	private CUserProjectSettingsService userProjectSettingsService;
 
 	/**
@@ -55,9 +59,9 @@ public class CUsersViewBindingIntegrationTest {
 	void testCUsersViewFormPopulationWithUserData() {
 		assertDoesNotThrow(() -> {
 			// Create CUsersView
-			final CUsersView usersView =
-				new CUsersView(userService, projectService, userTypeService,
-					companyService, sessionService, userProjectSettingsService);
+			final CUsersView usersView = new CUsersView(screenService, userService,
+				projectService, userTypeService, companyService, sessionService,
+				userProjectSettingsService);
 			// Create a test user
 			final var testUser = userService.createEntity();
 			testUser.setName("Test User");
@@ -79,9 +83,9 @@ public class CUsersViewBindingIntegrationTest {
 	void testCUsersViewInstantiationDoesNotThrowBindingError() {
 		assertDoesNotThrow(() -> {
 			// Create CUsersView - this should trigger form creation and binding
-			final CUsersView usersView =
-				new CUsersView(userService, projectService, userTypeService,
-					companyService, sessionService, userProjectSettingsService);
+			final CUsersView usersView = new CUsersView(screenService, userService,
+				projectService, userTypeService, companyService, sessionService,
+				userProjectSettingsService);
 			assertNotNull(usersView, "CUsersView should be created successfully");
 			assertNotNull(usersView.getBinder(), "Binder should be initialized");
 			// Try to populate form with null (this was causing the binding issue)

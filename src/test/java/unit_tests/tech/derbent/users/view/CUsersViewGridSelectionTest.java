@@ -11,6 +11,7 @@ import org.springframework.test.context.TestPropertySource;
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.service.CProjectService;
+import tech.derbent.screens.service.CScreenService;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.service.CUserProjectSettingsService;
@@ -47,6 +48,9 @@ public class CUsersViewGridSelectionTest {
 	private CSessionService sessionService;
 
 	@Autowired
+	private CScreenService screenService;
+
+	@Autowired
 	private CUserProjectSettingsService userProjectSettingsService;
 
 	/**
@@ -57,9 +61,9 @@ public class CUsersViewGridSelectionTest {
 	void testGridSelectionDoesNotCauseReadBeanError() {
 		assertDoesNotThrow(() -> {
 			// Create the view (this initializes the grid and forms)
-			final CUsersView view =
-				new CUsersView(userService, projectService, userTypeService,
-					companyService, sessionService, userProjectSettingsService);
+			final CUsersView view = new CUsersView(screenService, userService,
+				projectService, userTypeService, companyService, sessionService,
+				userProjectSettingsService);
 			assertNotNull(view, "CUsersView should be created successfully");
 			// Create and save some test users to simulate grid data
 			CUser user1 = userService.createEntity();
@@ -106,9 +110,9 @@ public class CUsersViewGridSelectionTest {
 	@Test
 	void testRapidGridSelectionChanges() {
 		assertDoesNotThrow(() -> {
-			final CUsersView view =
-				new CUsersView(userService, projectService, userTypeService,
-					companyService, sessionService, userProjectSettingsService);
+			final CUsersView view = new CUsersView(screenService, userService,
+				projectService, userTypeService, companyService, sessionService,
+				userProjectSettingsService);
 			// Create multiple users
 			final CUser[] users = new CUser[5];
 

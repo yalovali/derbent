@@ -8,18 +8,13 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.MetaData;
 import tech.derbent.abstracts.domains.CEntityOfProject;
-import tech.derbent.activities.domain.CActivity;
-import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.risks.domain.CRisk;
 
 /**
  * CScreen - Domain entity representing screen views for entities. Layer: Domain (MVC)
@@ -65,34 +60,6 @@ public class CScreen extends CEntityOfProject<CScreen> {
 	)
 	private String headerText;
 
-	// Relations to project entities - only one can be set at a time
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "related_activity_id", nullable = true)
-	@MetaData (
-		displayName = "Related Activity", required = false, readOnly = false,
-		description = "Activity this screen is related to", hidden = false, order = 10,
-		dataProviderBean = "CActivityService"
-	)
-	private CActivity relatedActivity;
-
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "related_meeting_id", nullable = true)
-	@MetaData (
-		displayName = "Related Meeting", required = false, readOnly = false,
-		description = "Meeting this screen is related to", hidden = false, order = 11,
-		dataProviderBean = "CMeetingService"
-	)
-	private CMeeting relatedMeeting;
-
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "related_risk_id", nullable = true)
-	@MetaData (
-		displayName = "Related Risk", required = false, readOnly = false,
-		description = "Risk this screen is related to", hidden = false, order = 12,
-		dataProviderBean = "CRiskService"
-	)
-	private CRisk relatedRisk;
-
 	@OneToMany (
 		mappedBy = "screen", cascade = CascadeType.ALL, fetch = FetchType.LAZY,
 		orphanRemoval = true
@@ -134,12 +101,6 @@ public class CScreen extends CEntityOfProject<CScreen> {
 
 	public Boolean getIsActive() { return isActive; }
 
-	public CActivity getRelatedActivity() { return relatedActivity; }
-
-	public CMeeting getRelatedMeeting() { return relatedMeeting; }
-
-	public CRisk getRelatedRisk() { return relatedRisk; }
-
 	public List<CScreenLines> getScreenLines() { return screenLines; }
 
 	public String getScreenTitle() { return screenTitle; }
@@ -157,18 +118,6 @@ public class CScreen extends CEntityOfProject<CScreen> {
 	public void setHeaderText(final String headerText) { this.headerText = headerText; }
 
 	public void setIsActive(final Boolean isActive) { this.isActive = isActive; }
-
-	public void setRelatedActivity(final CActivity relatedActivity) {
-		this.relatedActivity = relatedActivity;
-	}
-
-	public void setRelatedMeeting(final CMeeting relatedMeeting) {
-		this.relatedMeeting = relatedMeeting;
-	}
-
-	public void setRelatedRisk(final CRisk relatedRisk) {
-		this.relatedRisk = relatedRisk;
-	}
 
 	public void setScreenLines(final List<CScreenLines> screenLines) {
 		this.screenLines = screenLines;

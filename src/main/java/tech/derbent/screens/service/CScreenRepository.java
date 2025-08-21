@@ -20,25 +20,24 @@ public interface CScreenRepository extends CEntityOfProjectRepository<CScreen> {
 	@Query (
 		"SELECT s FROM CScreen s " + "LEFT JOIN FETCH s.project "
 			+ "LEFT JOIN FETCH s.assignedTo " + "LEFT JOIN FETCH s.createdBy "
-			+ "LEFT JOIN FETCH s.relatedActivity " + "LEFT JOIN FETCH s.relatedMeeting "
-			+ "LEFT JOIN FETCH s.relatedRisk " + "LEFT JOIN FETCH s.screenLines "
-			+ "WHERE s.id = :id"
+			+ "LEFT JOIN FETCH s.screenLines WHERE s.id = :id"
 	)
 	Optional<CScreen> findByIdWithEagerLoading(@Param ("id") Long id);
 	@Query ("SELECT s FROM CScreen s LEFT JOIN FETCH s.screenLines WHERE s.id = :id")
 	Optional<CScreen> findByIdWithScreenLines(@Param ("id") Long id);
+	@Query (
+		"SELECT s FROM CScreen s " + "LEFT JOIN FETCH s.project "
+			+ "LEFT JOIN FETCH s.assignedTo " + "LEFT JOIN FETCH s.createdBy "
+			+ "LEFT JOIN FETCH s.screenLines "
+			+ "WHERE s.project = :project AND s.name = :name"
+	)
+	Optional<CScreen> findByNameAndProject(@Param ("project") CProject project,
+		@Param ("name") String name);
 	@Override
 	@Query (
 		"SELECT s FROM CScreen s " + "LEFT JOIN FETCH s.project "
 			+ "LEFT JOIN FETCH s.assignedTo " + "LEFT JOIN FETCH s.createdBy "
-			+ "LEFT JOIN FETCH s.relatedActivity " + "LEFT JOIN FETCH s.relatedMeeting "
-			+ "LEFT JOIN FETCH s.relatedRisk " + "WHERE s.project = :project"
+			+ "WHERE s.project = :project"
 	)
-	List<CScreen> findByProject(@Param ("project") CProject project, Pageable pageable);
-	@Query (
-		"SELECT s FROM CScreen s "
-			+ "WHERE s.project = :project AND s.entityType = :entityType"
-	)
-	List<CScreen> findByProjectAndEntityType(@Param ("project") CProject project,
-		@Param ("entityType") String entityType);
+	List<CScreen> findByProject(@Param ("project") CProject project, Pageable pageable);;
 }

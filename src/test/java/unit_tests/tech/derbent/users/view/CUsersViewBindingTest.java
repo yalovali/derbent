@@ -11,6 +11,7 @@ import org.springframework.test.context.TestPropertySource;
 
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.service.CProjectService;
+import tech.derbent.screens.service.CScreenService;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.service.CUserProjectSettingsService;
 import tech.derbent.users.service.CUserService;
@@ -50,6 +51,9 @@ public class CUsersViewBindingTest {
 	private CSessionService sessionService;
 
 	@Autowired
+	private CScreenService screenService;
+
+	@Autowired
 	private CUserProjectSettingsService userProjectSettingsService;
 
 	/**
@@ -62,9 +66,9 @@ public class CUsersViewBindingTest {
 		// This should not throw java.lang.IllegalStateException: All bindings created
 		// with forField must be completed before calling readBean
 		assertDoesNotThrow(() -> {
-			final CUsersView view =
-				new CUsersView(userService, projectService, userTypeService,
-					companyService, sessionService, userProjectSettingsService);
+			final CUsersView view = new CUsersView(screenService, userService,
+				projectService, userTypeService, companyService, sessionService,
+				userProjectSettingsService);
 			assertNotNull(view, "CUsersView should be instantiated successfully");
 		}, "CUsersView should be instantiated without binding errors");
 	}
@@ -76,9 +80,9 @@ public class CUsersViewBindingTest {
 	@Test
 	void testCUsersViewNavigateToUser() {
 		assertDoesNotThrow(() -> {
-			final CUsersView view =
-				new CUsersView(userService, projectService, userTypeService,
-					companyService, sessionService, userProjectSettingsService);
+			final CUsersView view = new CUsersView(screenService, userService,
+				projectService, userTypeService, companyService, sessionService,
+				userProjectSettingsService);
 			// Create a test user
 			tech.derbent.users.domain.CUser testUser = userService.createEntity();
 			testUser.setName("Test User");

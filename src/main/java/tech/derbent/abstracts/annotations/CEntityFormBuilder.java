@@ -282,7 +282,6 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 		return checkbox;
 	}
 
-	@SuppressWarnings ("unchecked")
 	public static <T extends CEntityDB<T>> ComboBox<T>
 		createComboBox(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
 		Check.notNull(fieldInfo, "FieldInfo for ComboBox creation");
@@ -463,7 +462,9 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 		return CBinderFactory.createEnhancedBinder((Class<EntityClass>) entityClass);
 	}
 
-	@SuppressWarnings ("unchecked")
+	@SuppressWarnings ({
+		"unchecked", "rawtypes" }
+	)
 	private static Component createEnumComponent(final EntityFieldInfo fieldInfo,
 		final CEnhancedBinder<?> binder) {
 		final Class<? extends Enum> enumType =
@@ -944,7 +945,7 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 
 	final Map<String, CHorizontalLayout> horizontalLayoutMap;
 
-	private CEnhancedBinder binder;
+	private CEnhancedBinder<?> binder;
 
 	public CEntityFormBuilder() {
 		this.componentMap = new HashMap<>();
@@ -975,12 +976,12 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 			horizontalLayoutMap, formLayout);
 	}
 
-	public void addFieldLine(final String screenClassType, final CScreenLines line)
-		throws Exception {
+	public void addFieldLine(final String screenClassType, final CScreenLines line,
+		final VerticalLayout layout) throws Exception {
 		final EntityFieldInfo fieldInfo =
 			CEntityFieldService.createFieldInfo(screenClassType, line);
-		CEntityFormBuilder.processField(binder, formLayout, horizontalLayoutMap,
-			fieldInfo, componentMap);
+		CEntityFormBuilder.processField(binder, layout, horizontalLayoutMap, fieldInfo,
+			componentMap);
 	}
 
 	public CVerticalLayout build(final Class<?> entityClass,

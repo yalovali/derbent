@@ -1,6 +1,8 @@
 package tech.derbent.abstracts.services;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +10,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.formlayout.FormLayout;
 
 import jakarta.persistence.Persistence;
@@ -28,10 +31,44 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDetailsBuilder.class);
 
-	public static FormLayout buildDetails(CScreen screen, final CEnhancedBinder<?> binder)
-		throws Exception {
+	public static ApplicationContext getApplicationContext() {
+		return applicationContext;
+	}
+
+	private static Component processLine(final int counter, final CScreen screen,
+		final CScreenLines line) {
+		LOGGER.debug("Processing line: {}", counter);
+		Check.notNull(line, "Line cannot be null");
+
+		if (line.getRelationFieldName().equals(CEntityFieldService.SECTION)) {
+			final CPanelDetails sectionPanel =
+				new CPanelDetails(line.getSectionName(), line.getFieldCaption());
+			return sectionPanel;
+		}
+		// return null;
+		return null;
+	}
+
+	private HasComponents formLayout;
+
+	private final Map<String, CPanelDetails> mapSectionPanels;
+
+	public CDetailsBuilder() {
+		this.mapSectionPanels = new HashMap<>();
+	}
+
+	public HasComponents buildDetails(CScreen screen, final CEnhancedBinder<?> binder,
+		final HasComponents layout) throws Exception {
 		Check.notNull(screen, "Screen cannot be null");
+		Check.notNull(binder, "Binder cannot be null");
 		Check.notNull(applicationContext, "Details name cannot be null");
+
+		if (layout != null) {
+			formLayout = layout;
+		}
+		else {
+			formLayout = new FormLayout();
+		}
 		final CScreenService screenService =
 			applicationContext.getBean(CScreenService.class);
 		Check.notNull(screenService, "Screen service cannot be null");
@@ -42,7 +79,7 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 			screen = screenService.findByIdWithScreenLines(screen.getId());
 		}
 
-		if (screen.getScreenLines() == null || screen.getScreenLines().isEmpty()) {
+		if ((screen.getScreenLines() == null) || screen.getScreenLines().isEmpty()) {
 			LOGGER.warn("No lines found for screen: {}", screen.getName());
 			return new FormLayout(); // Return an empty layout if no lines are present
 		}
@@ -52,7 +89,6 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		final CEntityFormBuilder<?> detailsBuilder =
 			new CEntityFormBuilder<>(screenClass, binder);
 		//
-		final FormLayout formLayout = new FormLayout();
 		CPanelDetails currentSection = null;
 		final int counter = 0;
 		// screen.getScreenLines().size(); // Ensure lines are loaded
@@ -69,36 +105,21 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 				currentSection.processLine(counter, screen, line, detailsBuilder);
 				continue;
 			}
-			final Component component =
-				processLine(counter, screen, line, detailsBuilder);
+			final Component component = processLine(counter, screen, line);
 
 			if (component instanceof CPanelDetails) {
 				formLayout.add(component);
 				currentSection = (CPanelDetails) component;
+				mapSectionPanels.put(currentSection.getName(), currentSection);
 			}
 		}
 		return formLayout;
 	}
 
-	public static ApplicationContext getApplicationContext() {
-		return applicationContext;
+	public CPanelDetails getSectionPanel(final String sectionName) {
+		Check.notNull(sectionName, "Section name cannot be null");
+		return mapSectionPanels.get(sectionName);
 	}
-
-	private static Component processLine(final int counter, final CScreen screen,
-		final CScreenLines line, final CEntityFormBuilder<?> detailsBuilder) {
-		LOGGER.debug("Processing line: {}", counter);
-		Check.notNull(line, "Line cannot be null");
-
-		if (line.getRelationFieldName().equals(CEntityFieldService.SECTION)) {
-			final CPanelDetails sectionPanel =
-				new CPanelDetails(line.getSectionName(), detailsBuilder);
-			return sectionPanel;
-		}
-		// return null;
-		return null;
-	}
-
-	private CDetailsBuilder() {}
 
 	/**
 	 * Sets the application context and initializes the data provider resolver. This

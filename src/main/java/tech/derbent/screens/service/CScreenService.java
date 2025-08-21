@@ -42,10 +42,13 @@ public class CScreenService extends CEntityOfProjectService<CScreen> {
 	}
 
 	@Transactional (readOnly = true)
-	public List<CScreen> findByProjectAndEntityType(final CProject project,
-		final String entityType) {
-		return ((CScreenRepository) repository).findByProjectAndEntityType(project,
-			entityType);
+	public CScreen findByNameAndProject(final CProject project, final String name) {
+
+		if ((project == null) || (name == null) || name.isBlank()) {
+			return null;
+		}
+		return ((CScreenRepository) repository).findByNameAndProject(project, name)
+			.orElse(null);
 	}
 
 	@Override
