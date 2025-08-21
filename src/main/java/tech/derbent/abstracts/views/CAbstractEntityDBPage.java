@@ -13,14 +13,10 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
-import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
-import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -62,7 +58,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	// divide screen into two parts
 	protected SplitLayout splitLayout = new SplitLayout();
 
-	private final FlexLayout baseDetailsLayout = new FlexLayout();
+	private final CFlexLayout baseDetailsLayout;
 	// private final VerticalLayout baseDetailsLayout = new VerticalLayout();
 
 	private final Div detailsTabLayout = new Div();
@@ -86,32 +82,23 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		this.entityClass = entityClass;
 		this.entityService = entityService;
 		this.sessionService = sessionService;
+		this.baseDetailsLayout = CFlexLayout.forEntityPage();
 		// dont setid here, as it may not be initialized yet
 		binder = new CEnhancedBinder<>(entityClass);
-		addClassNames("md-page");
-		setSizeFull();
 		createGridLayout();
-		// layout for the secondary part of the split layout
-		final VerticalLayout detailsBase = new VerticalLayout();
-		// create the tab layout for the details view top
+		// layout for the secondary part of the split layout create the tab layout for the
+		// details view top
 		detailsTabLayout.setClassName("details-tab-layout");
-		detailsBase.add(detailsTabLayout);
 		// now the content are!!!
 		final Scroller scroller = new Scroller();
-		detailsBase.add(scroller);
-		initBaseDetailsLayout();
 		// FLEX LAYOUT///////////////////
-		baseDetailsLayout.setClassName("baseDetailsLayout");//////////////////////////////////
-		baseDetailsLayout.setWidthFull();
-		baseDetailsLayout.setFlexWrap(FlexLayout.FlexWrap.WRAP);
-		baseDetailsLayout.setJustifyContentMode(JustifyContentMode.AROUND);
-		baseDetailsLayout.setAlignItems(Alignment.STRETCH);
-		baseDetailsLayout.setFlexDirection(FlexLayout.FlexDirection.ROW);
 		scroller.setContent(baseDetailsLayout);
 		scroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
 		// baseDetailsLayout.add(baseDescriptionAccordion);
 		createGridForEntity();
 		// binder = new CEnhancedBinder<>(entityClass
+		final CVerticalLayout detailsBase = new CVerticalLayout(false, false, false);
+		detailsBase.add(detailsTabLayout, scroller);
 		initSplitLayout(detailsBase);
 		// Initial layout setup - will be updated when layout service is available
 		updateLayoutOrientation();
@@ -186,7 +173,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	}
 
 	protected CButton createCancelButton(final String buttonText) {
-		final CButton cancel = CButton.createTertiary(buttonText, e -> {
+		final CButton cancel = CButton.createTertiary(buttonText, null, e -> {
 
 			try {
 				// Get the last selected entity ID
@@ -213,7 +200,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	}
 
 	protected CButton createDeleteButton(final String buttonText) {
-		final CButton delete = CButton.createTertiary(buttonText);
+		final CButton delete = CButton.createTertiary(buttonText, null, null);
 		delete.addClickListener(e -> {
 
 			if (currentEntity == null) {
@@ -306,8 +293,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	protected void createGridLayout() {
 		grid = new CGrid<>(entityClass);
-		grid.getColumns().forEach(grid::removeColumn);
-		grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
 		// Create search toolbar if entity supports searching
 		if (CSearchable.class.isAssignableFrom(entityClass)) {
@@ -392,7 +377,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	}
 
 	protected CButton createNewButton(final String buttonText) {
-		final CButton newButton = CButton.createTertiary(buttonText, e -> {
+		final CButton newButton = CButton.createTertiary(buttonText, null, e -> {
 			LOGGER.debug("New button clicked, emptying bound fields");
 
 			try {
@@ -415,16 +400,22 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	}
 
 	protected CButton createSaveButton(final String buttonText) {
-		final CButton save = CButton.createPrimary(buttonText, e -> {
+		final CButton save = CButton.createPrimary(buttonText, null, e -> {
 
 			try {
 				// Ensure we have an entity to save
+				LOGGER.debug("Save button clicked, current entity: {}",
+					currentEntity != null ? currentEntity.getId() : "null");
 
 				if (currentEntity == null) {
 					LOGGER.warn(
 						"No current entity for save operation, creating new entity");
 					currentEntity = createNewEntity();
 					populateForm(currentEntity);
+				}
+
+				if (!onBeforeSaveEvent()) {
+					return;
 				}
 				// Write form data to entity
 				getBinder().writeBean(currentEntity);
@@ -484,16 +475,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	 */
 	public CSearchToolbar getSearchToolbar() { return searchToolbar; }
 
-	private void initBaseDetailsLayout() {
-		baseDetailsLayout.setClassName("base-details-layout");
-		baseDetailsLayout.setSizeFull();
-		baseDetailsLayout.setAlignItems(FlexLayout.Alignment.STRETCH);
-		/* FOR FLEX LAYOUT */
-		// baseDetailsLayout.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
-		// baseDetailsLayout.setFlexWrap(FlexLayout.FlexWrap.WRAP);
-		baseDetailsLayout.setJustifyContentMode(FlexLayout.JustifyContentMode.START);
-	}
-
 	@PostConstruct
 	protected void initPageId() {
 		// set page ID in this syntax to check with playwright tests
@@ -520,6 +501,10 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 			// Update layout based on current mode
 			updateLayoutOrientation();
 		}
+	}
+
+	protected boolean onBeforeSaveEvent() {
+		return true;
 	}
 
 	@Override

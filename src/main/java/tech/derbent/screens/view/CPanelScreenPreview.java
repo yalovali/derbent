@@ -32,7 +32,7 @@ public class CPanelScreenPreview extends CPanelScreenBase {
 		IllegalAccessException, InvocationTargetException {
 		super.createPanelContent();
 		// Add any specific content for the preview panel here if needed
-		final CButton previewButton = new CButton("Preview");
+		final CButton previewButton = new CButton("Preview", null, null);
 		getBaseLayout().add(previewButton);
 		previewButton.addClickListener(event -> {
 			populateForm(currentEntity);

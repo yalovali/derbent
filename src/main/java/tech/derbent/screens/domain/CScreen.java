@@ -91,6 +91,11 @@ public class CScreen extends CEntityOfProject<CScreen> {
 	 * Helper method to add a screen line
 	 */
 	public void addScreenLine(final CScreenLines screenLine) {
+
+		if (screenLine.getLineOrder() == 0) {
+			// default line order is the next available number
+			screenLine.setLineOrder(screenLines.size() + 1);
+		}
 		screenLines.add(screenLine);
 		screenLine.setScreen(this);
 	}

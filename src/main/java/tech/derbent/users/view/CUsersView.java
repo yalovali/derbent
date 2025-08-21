@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.data.binder.ValidationException;
+import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -15,9 +15,9 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.services.CDetailsBuilder;
+import tech.derbent.abstracts.utils.CPanelDetails;
+import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
-import tech.derbent.abstracts.views.CAccordionDBEntity;
-import tech.derbent.abstracts.views.CButton;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.screens.domain.CScreen;
@@ -50,6 +50,8 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser>
 
 	public static String getIconFilename() { return CUser.getIconFilename(); }
 
+	private PasswordField passwordField;
+
 	private final String ENTITY_ID_FIELD = "user_id";
 
 	private CPanelUserProjectSettings projectSettingsGrid;
@@ -57,8 +59,6 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser>
 	private final CUserTypeService userTypeService;
 
 	private final CCompanyService companyService;
-
-	CPanelUserDescription descriptionPanel;
 
 	private final CProjectService projectService;
 
@@ -86,22 +86,28 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser>
 
 	@Override
 	protected void createDetailsLayout() throws Exception {
-		final CAccordionDBEntity<CUser> panel;
-		descriptionPanel = new CPanelUserDescription(getCurrentEntity(), getBinder(),
-			(CUserService) entityService, userTypeService, companyService);
-		// descriptionPanel = new CPanelUserDescription(getCurrentEntity(),
-		// getBinder(),(CUserService) entityService, userTypeService, companyService);
-		addAccordionPanel(descriptionPanel);
-		projectSettingsGrid = new CPanelUserProjectSettings(getCurrentEntity(),
-			getBinder(), (CUserService) entityService, userTypeService, companyService,
-			projectService, userProjectSettingsService);
-		addAccordionPanel(projectSettingsGrid);
+		/**********************/
 		final CDetailsBuilder detailsBuilder = new CDetailsBuilder();
 		final CScreen screen = screenService.findByNameAndProject(
 			sessionService.getActiveProject().orElse(null),
 			CUserViewService.USER_VIEW_NAME);
 		detailsBuilder.buildDetails(screen, getBinder(), getBaseDetailsLayout());
+		/**********************/
+		projectSettingsGrid = new CPanelUserProjectSettings(getCurrentEntity(),
+			getBinder(), (CUserService) entityService, userTypeService, companyService,
+			projectService, userProjectSettingsService);
+		addAccordionPanel(projectSettingsGrid);
+		/**********************/
 		// Add the new screen demo panel below existing panels addAccordionPanel(panel);
+		final CPanelDetails panel =
+			detailsBuilder.getSectionPanel(CUserViewService.BASE_PANEL_NAME);
+		Check.notNull(panel, "Panel for CUserViewService.BASE_PANEL_NAME cannot be null");
+		// Add password field for editing
+		passwordField = new PasswordField("Password");
+		passwordField.setPlaceholder("Enter new password (leave empty to keep current)");
+		passwordField.setWidthFull();
+		passwordField.setHelperText("Password will be encrypted when saved");
+		panel.addToContent(passwordField);
 	}
 
 	@Override
@@ -136,25 +142,6 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser>
 		grid.addShortTextColumn(CUser::getRoles, "Roles", "roles");
 	}
 
-	/**
-	 * Simplified save button creation with focused error handling. Handles the complete
-	 * save workflow: 1. Form validation and data binding 2. Password update processing 3.
-	 * Entity persistence 4. UI updates and navigation
-	 */
-	@Override
-	protected CButton createSaveButton(final String buttonText) {
-		LOGGER.info("Creating custom save button for CUsersView");
-		return CButton.createPrimary(buttonText, e -> {
-
-			try {
-				performSaveOperation();
-			} catch (final ValidationException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		});
-	}
-
 	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
 
@@ -165,14 +152,30 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser>
 	 * Handles password update through the description panel.
 	 */
 	private void handlePasswordUpdate() {
-		descriptionPanel.saveEventHandler();
+
+		// Handle password update if a new password was entered
+		if ((passwordField != null) && !passwordField.isEmpty()) {
+			final String newPassword = passwordField.getValue();
+
+			if ((getCurrentEntity().getLogin() != null)
+				&& !getCurrentEntity().getLogin().isEmpty()) {
+				((CUserService) entityService)
+					.updatePassword(getCurrentEntity().getLogin(), newPassword);
+				LOGGER.info("Password updated for user: {}",
+					getCurrentEntity().getLogin());
+			}
+		}
 	}
 
-	/**
-	 * Performs the complete save operation workflow.
-	 */
-	private void performSaveOperation() throws ValidationException {
+	@Override
+	protected boolean onBeforeSaveEvent() {
+		LOGGER.info("onBeforeSaveEvent called for CUsersView");
+
+		if (super.onBeforeSaveEvent() == false) {
+			return false; // If the base class validation fails, do not proceed
+		}
 		handlePasswordUpdate();
+		return true; // Default implementation allows save
 	}
 
 	/**

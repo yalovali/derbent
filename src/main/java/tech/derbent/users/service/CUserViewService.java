@@ -10,6 +10,8 @@ public class CUserViewService {
 
 	public static final String USER_VIEW_NAME = "User View";
 
+	public static final String BASE_PANEL_NAME = "User Information";
+
 	public static CScreen createBasicView(final CProject project) {
 
 		try {
@@ -25,7 +27,7 @@ public class CUserViewService {
 			CScreenLines screenLine = new CScreenLines();
 			screenLine.setRelationFieldName(CEntityFieldService.SECTION);
 			screenLine.setEntityProperty(CEntityFieldService.SECTION);
-			screenLine.setSectionName("Main Section");
+			screenLine.setSectionName(CUserViewService.BASE_PANEL_NAME);
 			screen.addScreenLine(screenLine);
 			//
 			screenLine = new CScreenLines();

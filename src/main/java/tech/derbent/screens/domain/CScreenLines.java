@@ -39,9 +39,9 @@ public class CScreenLines extends CEntityDB<CScreenLines> {
 	@MetaData (
 		displayName = "Line Order", required = true, readOnly = false,
 		description = "Order of this line in the screen (1-999)", hidden = false,
-		order = 1, defaultValue = "1"
+		order = 1, defaultValue = "0"
 	)
-	private Integer lineOrder = 1;
+	private Integer lineOrder = 0;
 
 	@Column (name = "relationFieldName", nullable = false, length = 100)
 	@Size (max = 100, message = "Relation Field Name cannot exceed 100 characters")

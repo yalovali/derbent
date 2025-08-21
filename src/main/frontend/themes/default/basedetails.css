@@ -4,9 +4,12 @@
   --form-field-margin-right: 12px;
 }
 
-.baseDetailsLayout {
+.base-details-layout {
 	row-gap: 10px;
 	column-gap: 0px;
+	spacing: 10px;
+	gap: 0px;
+	margin: 0px;
 }
 
 .form-field-NumberField{

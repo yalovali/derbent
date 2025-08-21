@@ -240,7 +240,7 @@ public class CPanelScreenLines extends CPanelScreenBase {
 
 		if (getCurrentEntity() != null) {
 			final List<CScreenLines> lines =
-				screenLinesService.findByScreenOrderByLineOrder(getCurrentEntity());
+				screenLinesService.findByScreen(getCurrentEntity());
 			grid.setItems(lines);
 		}
 		else {

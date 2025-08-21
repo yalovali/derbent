@@ -304,24 +304,25 @@ public class CEntityFieldService extends CFieldServiceBase {
 			"CScreenService", "CScreenLinesService");
 	}
 
-	public static Field getEntityField(final String entityType, final String fieldName)
+	public static Field getEntityField(Class<?> type, final String fieldName)
 		throws NoSuchFieldException {
-		Class<?> currentClass = getEntityClass(entityType);
-		Check.notNull(currentClass,
-			"Entity class must not be null for type: " + entityType);
 
-		while ((currentClass != null) && (currentClass != Object.class)) {
+		while ((type != null) && (type != Object.class)) {
 
 			try {
-				final Field field = currentClass.getDeclaredField(fieldName);
-				return field;
+				return type.getDeclaredField(fieldName);
 			} catch (final NoSuchFieldException e) {
-				// Field not found in this class, continue to superclass
+				type = type.getSuperclass(); // bir üst sınıfa bak
 			}
-			currentClass = currentClass.getSuperclass();
 		}
-		throw new NoSuchFieldException(
-			"Field '" + fieldName + "' not found in entity type: " + entityType);
+		throw new NoSuchFieldException("Field '" + fieldName
+			+ "' not found in entity type: " + type.getSimpleName());
+	}
+
+	public static Field getEntityField(final String entityType, final String fieldName)
+		throws NoSuchFieldException {
+		final Class<?> currentClass = getEntityClass(entityType);
+		return getEntityField(currentClass, fieldName);
 	}
 
 	public static EntityFieldInfo getEntityFieldInfo(final String entityType,
@@ -451,10 +452,10 @@ public class CEntityFieldService extends CFieldServiceBase {
 	private static boolean isFieldComplexType(final Class<?> type) {
 
 		// Check if the field type is a complex type (not primitive or standard types)
-		if (type.isPrimitive() || type.isEnum() || type == String.class
-			|| Number.class.isAssignableFrom(type) || type == Boolean.class
-			|| type == Date.class || type == LocalDate.class
-			|| type == LocalDateTime.class) {
+		if (type.isPrimitive() || type.isEnum() || (type == String.class)
+			|| Number.class.isAssignableFrom(type) || (type == Boolean.class)
+			|| (type == Date.class) || (type == LocalDate.class)
+			|| (type == LocalDateTime.class)) {
 			return false;
 		}
 		return true;

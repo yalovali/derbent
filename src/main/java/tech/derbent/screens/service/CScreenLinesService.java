@@ -38,8 +38,8 @@ public class CScreenLinesService extends CAbstractService<CScreenLines> {
 	 * @return list of active screen lines ordered by line order
 	 */
 	@Transactional (readOnly = true)
-	public List<CScreenLines> findActiveByScreenOrderByLineOrder(final CScreen screen) {
-		return screenLinesRepository.findActiveByScreenOrderByLineOrder(screen);
+	public List<CScreenLines> findActiveByScreen(final CScreen screen) {
+		return screenLinesRepository.findActiveByScreen(screen);
 	}
 
 	/**
@@ -48,8 +48,8 @@ public class CScreenLinesService extends CAbstractService<CScreenLines> {
 	 * @return list of screen lines ordered by line order
 	 */
 	@Transactional (readOnly = true)
-	public List<CScreenLines> findByScreenOrderByLineOrder(final CScreen screen) {
-		return screenLinesRepository.findByScreenOrderByLineOrder(screen);
+	public List<CScreenLines> findByScreen(final CScreen screen) {
+		return screenLinesRepository.findByScreen(screen);
 	}
 
 	@Override
@@ -70,8 +70,7 @@ public class CScreenLinesService extends CAbstractService<CScreenLines> {
 	 */
 	@Transactional
 	public void moveLineDown(final CScreenLines screenLine) {
-		final List<CScreenLines> lines =
-			findByScreenOrderByLineOrder(screenLine.getScreen());
+		final List<CScreenLines> lines = findByScreen(screenLine.getScreen());
 
 		for (int i = 0; i < lines.size(); i++) {
 
@@ -99,8 +98,7 @@ public class CScreenLinesService extends CAbstractService<CScreenLines> {
 
 		if (screenLine.getLineOrder() > 1) {
 			// Find the line with the previous order
-			final List<CScreenLines> lines =
-				findByScreenOrderByLineOrder(screenLine.getScreen());
+			final List<CScreenLines> lines = findByScreen(screenLine.getScreen());
 
 			for (int i = 0; i < lines.size(); i++) {
 
@@ -142,7 +140,7 @@ public class CScreenLinesService extends CAbstractService<CScreenLines> {
 	 */
 	@Transactional
 	public void reorderLines(final CScreen screen) {
-		final List<CScreenLines> lines = findByScreenOrderByLineOrder(screen);
+		final List<CScreenLines> lines = findByScreen(screen);
 
 		for (int i = 0; i < lines.size(); i++) {
 			final CScreenLines line = lines.get(i);
