@@ -47,6 +47,7 @@ import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.views.CDiv;
 import tech.derbent.abstracts.views.CHorizontalLayout;
 import tech.derbent.abstracts.views.CVerticalLayout;
+import tech.derbent.screens.domain.CScreenLines;
 import tech.derbent.screens.service.CEntityFieldService;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
@@ -132,12 +133,9 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 			}
 			Check.notNull(field, "Field '" + fieldName + "' not found in entity class "
 				+ entityClass.getSimpleName());
-			final Component component =
-				processField(binder, formLayout, mapHorizontalLayouts, field);
-
-			if ((component != null) && (mapComponents != null)) {
-				mapComponents.put(fieldName, component);
-			}
+			final EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(field);
+			processField(binder, formLayout, mapHorizontalLayouts, fieldInfo,
+				mapComponents);
 		}
 		return formLayout;
 	}
@@ -738,27 +736,25 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 		})).collect(Collectors.toList());
 	}
 
-	private static <EntityClass> Component processField(
+	private static <EntityClass> void processField(
 		final CEnhancedBinder<EntityClass> binder, final VerticalLayout formLayout,
-		final Map<String, CHorizontalLayout> mapHorizontalLayouts, final Field field)
+		final Map<String, CHorizontalLayout> mapHorizontalLayouts,
+		final EntityFieldInfo fieldInfo, final Map<String, Component> mapComponents)
 		throws NoSuchMethodException, SecurityException, IllegalAccessException,
 		InvocationTargetException {
-		Check.notNull(field, "field");
-		final EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(field);
-		Check.notNull(fieldInfo, "MetaData for field " + field.getName());
+		Check.notNull(fieldInfo, "field");
 		final Component component = createComponentForField(fieldInfo, binder);
-		Check.notNull(component, "Component for field " + field.getName()
-			+ " with displayName " + fieldInfo.getFieldName());
 		final CHorizontalLayout horizontalLayout =
 			createFieldLayout(fieldInfo, component);
-		Check.notNull(horizontalLayout, "HorizontalLayout for field " + field.getName()
-			+ " with displayName " + fieldInfo.getDisplayName());
 		formLayout.add(horizontalLayout);
 
 		if (mapHorizontalLayouts != null) {
-			mapHorizontalLayouts.put(field.getName(), horizontalLayout);
+			mapHorizontalLayouts.put(fieldInfo.getFieldName(), horizontalLayout);
 		}
-		return component;
+
+		if ((component != null) && (mapComponents != null)) {
+			mapComponents.put(fieldInfo.getFieldName(), component);
+		}
 	}
 
 	/**
@@ -806,12 +802,6 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 		});
 	}
 
-	/**
-	 * Resets all ComboBox components in a container to their first available item. This
-	 * method is useful for implementing "New" button behavior where ComboBoxes should
-	 * default to their first option instead of being empty.
-	 * @param container the container component to search for ComboBoxes
-	 */
 	public static void resetComboBoxesToFirstItem(
 		final com.vaadin.flow.component.HasComponents container) {
 		Check.notNull(container, "Container for resetting ComboBoxes to first item");
@@ -948,16 +938,29 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 			.setRequiredIndicatorVisible(fieldInfo.isRequired());
 	}
 
-	final CVerticalLayout formLayout;
-
 	final Map<String, Component> componentMap;
 
+	final CVerticalLayout formLayout;
+
 	final Map<String, CHorizontalLayout> horizontalLayoutMap;
+
+	private CEnhancedBinder binder;
 
 	public CEntityFormBuilder() {
 		this.componentMap = new HashMap<>();
 		this.horizontalLayoutMap = new HashMap<>();
 		this.formLayout = new CVerticalLayout(false, false, false);
+	}
+
+	public CEntityFormBuilder(final Class<?> entityClass) throws NoSuchMethodException,
+		SecurityException, IllegalAccessException, InvocationTargetException {
+		this(entityClass, createEnhancedBinder(entityClass), List.of());
+	}
+
+	public CEntityFormBuilder(final Class<?> entityClass,
+		final CEnhancedBinder<EntityClass> binder) throws NoSuchMethodException,
+		SecurityException, IllegalAccessException, InvocationTargetException {
+		this(entityClass, binder, List.of());
 	}
 
 	public CEntityFormBuilder(final Class<?> entityClass,
@@ -967,8 +970,17 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 		this.componentMap = new HashMap<>();
 		this.horizontalLayoutMap = new HashMap<>();
 		this.formLayout = new CVerticalLayout(false, false, false);
+		this.binder = binder;
 		CEntityFormBuilder.buildForm(entityClass, binder, entityFields, componentMap,
 			horizontalLayoutMap, formLayout);
+	}
+
+	public void addFieldLine(final String screenClassType, final CScreenLines line)
+		throws Exception {
+		final EntityFieldInfo fieldInfo =
+			CEntityFieldService.createFieldInfo(screenClassType, line);
+		CEntityFormBuilder.processField(binder, formLayout, horizontalLayoutMap,
+			fieldInfo, componentMap);
 	}
 
 	public CVerticalLayout build(final Class<?> entityClass,

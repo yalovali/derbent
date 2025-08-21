@@ -85,8 +85,8 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 		try {
 			// create the combobox to select the field class
 			getDialogLayout().add(divScreenType);
-			getDialogLayout().add(
-				formClassType.build(CScreenLines.class, binder, List.of("fieldClass")));
+			getDialogLayout().add(formClassType.build(CScreenLines.class, binder,
+				List.of("relationFieldName")));
 			// add tab here
 			getDialogLayout().add(tabsOfDialog);
 			// BUILD ENTITY TAB
@@ -98,10 +98,11 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 			tabSectionSpan.add(formSection.build(CScreenLines.class, binder,
 				List.of("sectionName", "isActive")));
 			// SETUP ENTITY TAB COMBOXBOXES
-			cmbFieldClass = ((ComboBox<String>) formClassType.getComponent("fieldClass"));
+			cmbFieldClass =
+				((ComboBox<String>) formClassType.getComponent("relationFieldName"));
 			cmbFieldClass.addValueChangeListener(event -> {
 				final String selectedType = event.getValue();
-				entity.setFieldClass(selectedType);
+				entity.setRelationFieldName(selectedType);
 
 				if (selectedType == null || selectedType.isEmpty()) {
 					return; // No
@@ -169,8 +170,9 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 
 		if (entity != null) {
 
-			// Now populate entityProperty ComboBox if fieldClass is already set
-			if (entity.getFieldClass() != null && !entity.getFieldClass().isEmpty()) {
+			// Now populate entityProperty ComboBox if relationFieldName is already set
+			if (entity.getRelationFieldName() != null
+				&& !entity.getRelationFieldName().isEmpty()) {
 				updateEntityPropertyBasedOnClass();
 			}
 			binder.readBean(entity);
@@ -205,31 +207,31 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 
 	@SuppressWarnings ("unchecked")
 	private void updateEntityPropertyBasedOnClass() {
-		final String fieldClass = entity.getFieldClass();
-		LOGGER.debug("Selected field class: {}", fieldClass);
+		final String relationFieldName = entity.getRelationFieldName();
+		LOGGER.debug("Selected field class: {}", relationFieldName);
 
-		if (fieldClass == null || fieldClass.isEmpty()) {
+		if (relationFieldName == null || relationFieldName.isEmpty()) {
 			return;
 		}
 		List<EntityFieldInfo> fieldProperties = null;
 
 		// this class is a special case, we need to get all fields of the screen's entity
 		// type
-		if (fieldClass.equals(CEntityFieldService.SECTION)) {
+		if (relationFieldName.equals(CEntityFieldService.SECTION)) {
 			cmbFieldProperties.setItems(List.of(CEntityFieldService.SECTION));
 			entity.setEntityProperty(CEntityFieldService.SECTION);
 			return;
 		}
-		else if (fieldClass.equals(CEntityFieldService.THIS_CLASS)) {
+		else if (relationFieldName.equals(CEntityFieldService.THIS_CLASS)) {
 			fieldProperties =
 				CEntityFieldService.getEntitySimpleFields(screen.getEntityType(), null);
 		}
 		else {
 			// Get field properties for the selected class of relation
 			final EntityFieldInfo info = CEntityFieldService
-				.getEntityFieldInfo(screen.getEntityType().toString(), fieldClass);
+				.getEntityFieldInfo(screen.getEntityType().toString(), relationFieldName);
 			Check.notNull(info,
-				"Field info must not be null for field class: " + fieldClass);
+				"Field info must not be null for field class: " + relationFieldName);
 			fieldProperties =
 				CEntityFieldService.getEntitySimpleFields(info.getJavaType(), null);
 		}
@@ -248,23 +250,23 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 		if (selectedProperty == null || selectedProperty.isEmpty()) {
 			return;
 		}
-		final String fieldClass = entity.getFieldClass();
+		final String relationFieldName = entity.getRelationFieldName();
 
-		if (fieldClass == null || fieldClass.isEmpty()) {
+		if (relationFieldName == null || relationFieldName.isEmpty()) {
 			return;
 		}
 		EntityFieldInfo info;
 
-		if (fieldClass.equals(CEntityFieldService.SECTION)) {
+		if (relationFieldName.equals(CEntityFieldService.SECTION)) {
 			return;
 		}
-		else if (fieldClass.equals(CEntityFieldService.THIS_CLASS)) {
+		else if (relationFieldName.equals(CEntityFieldService.THIS_CLASS)) {
 			info = CEntityFieldService
 				.getEntityFieldInfo(screen.getEntityType().toString(), selectedProperty);
 		}
 		else {
 			info = CEntityFieldService
-				.getEntityFieldInfo(screen.getEntityType().toString(), fieldClass);
+				.getEntityFieldInfo(screen.getEntityType().toString(), relationFieldName);
 			info = CEntityFieldService.getEntityFieldInfo(info.getJavaType(),
 				selectedProperty);
 		}

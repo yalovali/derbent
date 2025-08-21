@@ -1,0 +1,113 @@
+package tech.derbent.abstracts.services;
+
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.formlayout.FormLayout;
+
+import jakarta.persistence.Persistence;
+import jakarta.persistence.PersistenceUtil;
+import tech.derbent.abstracts.annotations.CEntityFormBuilder;
+import tech.derbent.abstracts.components.CEnhancedBinder;
+import tech.derbent.abstracts.utils.CPanelDetails;
+import tech.derbent.abstracts.utils.Check;
+import tech.derbent.screens.domain.CScreen;
+import tech.derbent.screens.domain.CScreenLines;
+import tech.derbent.screens.service.CEntityFieldService;
+import tech.derbent.screens.service.CScreenService;
+
+@org.springframework.stereotype.Component
+public final class CDetailsBuilder implements ApplicationContextAware {
+
+	private static ApplicationContext applicationContext;
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDetailsBuilder.class);
+
+	public static FormLayout buildDetails(CScreen screen, final CEnhancedBinder<?> binder)
+		throws Exception {
+		Check.notNull(screen, "Screen cannot be null");
+		Check.notNull(applicationContext, "Details name cannot be null");
+		final CScreenService screenService =
+			applicationContext.getBean(CScreenService.class);
+		Check.notNull(screenService, "Screen service cannot be null");
+		// for lazy loading of screen lines
+		final PersistenceUtil persistenceUtil = Persistence.getPersistenceUtil();
+
+		if (!persistenceUtil.isLoaded(screen, "screenLines")) {
+			screen = screenService.findByIdWithScreenLines(screen.getId());
+		}
+
+		if (screen.getScreenLines() == null || screen.getScreenLines().isEmpty()) {
+			LOGGER.warn("No lines found for screen: {}", screen.getName());
+			return new FormLayout(); // Return an empty layout if no lines are present
+		}
+		final Class<?> screenClass =
+			CEntityFieldService.getEntityClass(screen.getEntityType());
+		Check.notNull(screenClass, "Screen class cannot be null");
+		final CEntityFormBuilder<?> detailsBuilder =
+			new CEntityFormBuilder<>(screenClass, binder);
+		//
+		final FormLayout formLayout = new FormLayout();
+		CPanelDetails currentSection = null;
+		final int counter = 0;
+		// screen.getScreenLines().size(); // Ensure lines are loaded
+		final List<CScreenLines> lines = screen.getScreenLines();
+
+		for (final CScreenLines line : lines) {
+
+			if (line.getRelationFieldName().equals(CEntityFieldService.SECTION)) {
+				// no more current section. switch to base
+				currentSection = null;
+			}
+
+			if (currentSection != null) {
+				currentSection.processLine(counter, screen, line, detailsBuilder);
+				continue;
+			}
+			final Component component =
+				processLine(counter, screen, line, detailsBuilder);
+
+			if (component instanceof CPanelDetails) {
+				formLayout.add(component);
+				currentSection = (CPanelDetails) component;
+			}
+		}
+		return formLayout;
+	}
+
+	public static ApplicationContext getApplicationContext() {
+		return applicationContext;
+	}
+
+	private static Component processLine(final int counter, final CScreen screen,
+		final CScreenLines line, final CEntityFormBuilder<?> detailsBuilder) {
+		LOGGER.debug("Processing line: {}", counter);
+		Check.notNull(line, "Line cannot be null");
+
+		if (line.getRelationFieldName().equals(CEntityFieldService.SECTION)) {
+			final CPanelDetails sectionPanel =
+				new CPanelDetails(line.getSectionName(), detailsBuilder);
+			return sectionPanel;
+		}
+		// return null;
+		return null;
+	}
+
+	private CDetailsBuilder() {}
+
+	/**
+	 * Sets the application context and initializes the data provider resolver. This
+	 * method is called automatically by Spring.
+	 * @param context the Spring application context
+	 */
+	@Override
+	public void setApplicationContext(final ApplicationContext context) {
+		// Store the application context for String data provider resolution
+		CDetailsBuilder.applicationContext = context;
+	}
+}

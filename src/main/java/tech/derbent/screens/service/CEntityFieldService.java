@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import tech.derbent.abstracts.annotations.MetaData;
 import tech.derbent.abstracts.utils.Check;
+import tech.derbent.screens.domain.CScreenLines;
 
 /**
  * Service to provide entity field information for screen line configuration. This service
@@ -242,6 +243,42 @@ public class CEntityFieldService extends CFieldServiceBase {
 		}
 	}
 
+	public static EntityFieldInfo createFieldInfo(final String screenClassName,
+		final CScreenLines line) throws Exception {
+
+		try {
+			Check.notNull(line, "Line cannot be null");
+			String relationFieldName = line.getRelationFieldName();
+			Field field = null;
+
+			if (relationFieldName.equals(CEntityFieldService.THIS_CLASS)) {
+				relationFieldName = screenClassName;
+				field = getEntityField(relationFieldName, line.getEntityProperty());
+			}
+			else if (relationFieldName == CEntityFieldService.SECTION) {
+				final EntityFieldInfo sectionInfo = new EntityFieldInfo();
+				sectionInfo.setFieldName(CEntityFieldService.SECTION);
+				sectionInfo.setFieldType(CEntityFieldService.SECTION);
+				sectionInfo.setJavaType(CEntityFieldService.SECTION);
+				sectionInfo.setDisplayName(line.getSectionName());
+				sectionInfo.setDescription(line.getSectionName());
+				sectionInfo.setFieldTypeClass(CEntityFieldService.class);
+				return sectionInfo;
+			}
+			else {
+				field = getEntityField(screenClassName, relationFieldName);
+				field =
+					getEntityField(field.getClass().getName(), line.getEntityProperty());
+			}
+			// get field of class
+			final EntityFieldInfo info = createFieldInfo(field);
+			return info;
+		} catch (final Exception e) {
+			line.printLine();
+			throw e;
+		}
+	}
+
 	private static List<Field> getAllFields(final Class<?> clazz) {
 		final List<Field> fields = new ArrayList<>();
 		// Get fields from current class and all superclasses
@@ -265,6 +302,26 @@ public class CEntityFieldService extends CFieldServiceBase {
 			"CRiskTypeService", "CRiskStatusService", "CRiskPriorityService",
 			"CProjectService", "CUserService", "CUserTypeService", "CCompanyService",
 			"CScreenService", "CScreenLinesService");
+	}
+
+	public static Field getEntityField(final String entityType, final String fieldName)
+		throws NoSuchFieldException {
+		Class<?> currentClass = getEntityClass(entityType);
+		Check.notNull(currentClass,
+			"Entity class must not be null for type: " + entityType);
+
+		while ((currentClass != null) && (currentClass != Object.class)) {
+
+			try {
+				final Field field = currentClass.getDeclaredField(fieldName);
+				return field;
+			} catch (final NoSuchFieldException e) {
+				// Field not found in this class, continue to superclass
+			}
+			currentClass = currentClass.getSuperclass();
+		}
+		throw new NoSuchFieldException(
+			"Field '" + fieldName + "' not found in entity type: " + entityType);
 	}
 
 	public static EntityFieldInfo getEntityFieldInfo(final String entityType,
@@ -404,5 +461,32 @@ public class CEntityFieldService extends CFieldServiceBase {
 		// Check if it's a domain entity (likely a reference) return
 		// type.getSimpleName().startsWith("C")&&
 		// Character.isUpperCase(type.getSimpleName().charAt(1));
+	}
+
+	public static void printFieldInfo(final EntityFieldInfo fieldInfo) {
+
+		if (fieldInfo == null) {
+			System.out.println("Field info is null");
+			return;
+		}
+		System.out.println("Field Name: " + fieldInfo.getFieldName());
+		System.out.println("Display Name: " + fieldInfo.getDisplayName());
+		System.out.println("Description: " + fieldInfo.getDescription());
+		System.out.println("Field Type: " + fieldInfo.getFieldType());
+		System.out.println("Java Type: " + fieldInfo.getJavaType());
+		System.out.println("Required: " + fieldInfo.isRequired());
+		System.out.println("Read Only: " + fieldInfo.isReadOnly());
+		System.out.println("Hidden: " + fieldInfo.isHidden());
+		System.out.println("Order: " + fieldInfo.getOrder());
+		System.out.println("Max Length: " + fieldInfo.getMaxLength());
+		System.out.println("Default Value: " + fieldInfo.getDefaultValue());
+		System.out.println("Data Provider Bean: " + fieldInfo.getDataProviderBean());
+		System.out.println("Auto Select First: " + fieldInfo.isAutoSelectFirst());
+		System.out.println("Placeholder: " + fieldInfo.getPlaceholder());
+		System.out.println("Allow Custom Value: " + fieldInfo.isAllowCustomValue());
+		System.out.println("Use Radio Buttons: " + fieldInfo.isUseRadioButtons());
+		System.out.println("Combobox Read Only: " + fieldInfo.isComboboxReadOnly());
+		System.out.println("Clear On Empty Data: " + fieldInfo.isClearOnEmptyData());
+		System.out.println("Width: " + fieldInfo.getWidth());
 	}
 }
