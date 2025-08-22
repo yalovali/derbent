@@ -9,30 +9,28 @@ import tech.derbent.abstracts.interfaces.CKanbanType;
 import tech.derbent.projects.domain.CProject;
 
 /**
- * CActivityType - Domain entity representing activity types. Layer: Domain (MVC) Inherits from CTypeEntity to provide
- * project-aware type functionality for activities.
+ * CActivityType - Domain entity representing activity types. Layer: Domain (MVC) Inherits
+ * from CTypeEntity to provide project-aware type functionality for activities.
  */
 @Entity
-@Table(name = "cactivitytype")
-@AttributeOverride(name = "id", column = @Column(name = "cactivitytype_id"))
+@Table (name = "cactivitytype")
+@AttributeOverride (name = "id", column = @Column (name = "cactivitytype_id"))
 public class CActivityType extends CTypeEntity<CActivityType> implements CKanbanType {
 
-    /**
-     * Default constructor for JPA.
-     */
-    public CActivityType() {
-        super();
-    }
+	public static String getIconColorCode() {
+		return "#007bff"; // Blue color for activity type entities
+	}
 
-    public CActivityType(final String name, final CProject project) {
-        super(CActivityType.class, name, project);
-    }
+	public static String getIconFilename() { return "vaadin:tags"; }
 
-    public static String getIconColorCode() {
-        return "#007bff"; // Blue color for activity type entities
-    }
+	/**
+	 * Default constructor for JPA.
+	 */
+	public CActivityType() {
+		super();
+	}
 
-    public static String getIconFilename() {
-        return "vaadin:tags";
-    }
+	public CActivityType(final String name, final CProject project) {
+		super(CActivityType.class, name, project);
+	}
 }

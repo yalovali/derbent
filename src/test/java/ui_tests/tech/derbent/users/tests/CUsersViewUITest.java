@@ -7,13 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-
 import java.util.Arrays;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.domain.CProject;
@@ -28,40 +25,27 @@ import tech.derbent.users.service.CUserTypeService;
 import tech.derbent.users.view.CUsersView;
 import ui_tests.tech.derbent.abstracts.ui.CAbstractUITest;
 
-/**
- * CUsersViewUITest - Comprehensive UI tests for the Users view. Layer: Testing (MVC)
- * Tests grid functionality, lazy loading prevention, data loading, and user interactions
- * for the Users view including profile picture handling and relationship access.
- */
+/** CUsersViewUITest - Comprehensive UI tests for the Users view. Layer: Testing (MVC) Tests grid functionality, lazy loading prevention, data
+ * loading, and user interactions for the Users view including profile picture handling and relationship access. */
 class CUsersViewUITest extends CAbstractUITest<CUser> {
 
 	@Mock
 	private CUserService mockUserService;
-
 	@Mock
 	private CUserTypeService mockUserTypeService;
-
 	@Mock
 	private CCompanyService mockCompanyService;
-
 	@Mock
 	private CProjectService mockProjectService;
-
 	@Mock
 	private CUserProjectSettingsService mockUserProjectService;
-
 	@Mock
 	private CSessionService mockSessionService;
-
 	@Mock
 	private CScreenService screenService;
-
 	private CUsersView usersView;
-
 	private CUserType testUserType;
-
 	private CCompany testCompany;
-
 	private CProject project;
 
 	public CUsersViewUITest() {
@@ -81,7 +65,8 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
 		user.setCompany(testCompany);
 		// Create a simple profile picture (small byte array)
 		final byte[] profilePicture = {
-			1, 2, 3, 4, 5 }; // Simple test data
+				1, 2, 3, 4, 5
+		}; // Simple test data
 		user.setProfilePictureData(profilePicture);
 		return user;
 	}
@@ -109,17 +94,15 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
 
 	@BeforeEach
 	void setupUserTests() {
-		usersView = new CUsersView(screenService, mockUserService, mockProjectService,
-			mockUserTypeService, mockCompanyService, mockSessionService,
-			mockUserProjectSettingsService);
+		usersView = new CUsersView(mockUserService, mockProjectService, mockUserTypeService, mockCompanyService, mockSessionService,
+				mockUserProjectSettingsService, screenService);
 	}
 
 	@Test
 	void testCompanyColumnAccess() {
 		LOGGER.info("Testing company column access");
 		testEntities.forEach(user -> {
-			final String companyDisplay =
-				user.getCompany() != null ? user.getCompany().getName() : "";
+			final String companyDisplay = user.getCompany() != null ? user.getCompany().getName() : "";
 			assertNotNull(companyDisplay, "Company display should not be null");
 		});
 	}
@@ -161,14 +144,11 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
 	void testGridCreation() {
 		LOGGER.info("Testing users grid creation");
 		assertNotNull(usersView.getGrid(), "Grid should be created");
-		assertTrue(usersView.getGrid().getColumns().size() > 0,
-			"Grid should have columns");
+		assertTrue(usersView.getGrid().getColumns().size() > 0, "Grid should have columns");
 		// Verify expected columns exist
-		final boolean hasNameColumn = usersView.getGrid().getColumns().stream()
-			.anyMatch(col -> "name".equals(col.getKey()));
+		final boolean hasNameColumn = usersView.getGrid().getColumns().stream().anyMatch(col -> "name".equals(col.getKey()));
 		assertTrue(hasNameColumn, "Grid should have name column");
-		final boolean hasEmailColumn = usersView.getGrid().getColumns().stream()
-			.anyMatch(col -> "email".equals(col.getKey()));
+		final boolean hasEmailColumn = usersView.getGrid().getColumns().stream().anyMatch(col -> "email".equals(col.getKey()));
 		assertTrue(hasEmailColumn, "Grid should have email column");
 	}
 
@@ -211,12 +191,10 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
 		// gracefully
 		assertDoesNotThrow(() -> {
 			// Test user type column
-			final String userTypeDisplay = userWithNulls.getUserType() != null
-				? userWithNulls.getUserType().getName() : "";
+			final String userTypeDisplay = userWithNulls.getUserType() != null ? userWithNulls.getUserType().getName() : "";
 			assertEquals("", userTypeDisplay);
 			// Test company column
-			final String companyDisplay = userWithNulls.getCompany() != null
-				? userWithNulls.getCompany().getName() : "";
+			final String companyDisplay = userWithNulls.getCompany() != null ? userWithNulls.getCompany().getName() : "";
 			assertEquals("", companyDisplay);
 		}, "Grid columns should handle null relationships gracefully");
 	}
@@ -228,11 +206,9 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
 			final byte[] profileData = user.getProfilePictureData();
 			// Should handle both null and non-null profile pictures
 			assertDoesNotThrow(() -> {
-
 				if ((profileData != null) && (profileData.length > 0)) {
 					// Should be able to access profile picture data
-					assertTrue(profileData.length > 0,
-						"Profile picture should have data");
+					assertTrue(profileData.length > 0, "Profile picture should have data");
 				}
 			}, "Profile picture access should not throw exceptions");
 		});
@@ -253,8 +229,7 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
 	void testUserTypeColumnAccess() {
 		LOGGER.info("Testing user type column access");
 		testEntities.forEach(user -> {
-			final String userTypeDisplay =
-				user.getUserType() != null ? user.getUserType().getName() : "";
+			final String userTypeDisplay = user.getUserType() != null ? user.getUserType().getName() : "";
 			assertNotNull(userTypeDisplay, "User type display should not be null");
 		});
 	}
@@ -265,15 +240,13 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
 		assertNotNull(usersView, "Users view should be created");
 		assertNotNull(usersView.getGrid(), "Grid should be initialized");
 		// Verify view is properly configured
-		assertTrue(usersView.getClassNames().contains("users-view"),
-			"View should have proper CSS class");
+		assertTrue(usersView.getClassNames().contains("users-view"), "View should have proper CSS class");
 	}
 
 	@Override
 	protected void verifyEntityRelationships(final CUser entity) {
 		assertNotNull(entity.getUserType(), "User type should be initialized");
 		assertNotNull(entity.getCompany(), "Company should be initialized");
-
 		// Verify lazy relationships can be accessed without exceptions
 		try {
 			final String userTypeName = entity.getUserType().getName();

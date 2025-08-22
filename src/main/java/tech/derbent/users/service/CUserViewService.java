@@ -1,113 +1,53 @@
 package tech.derbent.users.service;
 
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CScreen;
-import tech.derbent.screens.domain.CScreenLines;
-import tech.derbent.screens.service.CEntityFieldService;
+import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.screens.service.CScreenLinesService;
 import tech.derbent.users.domain.CUser;
 
 public class CUserViewService {
 
-	public static final String USER_VIEW_NAME = "User View";
-
+	public static final String BASE_VIEW_NAME = "User View";
 	public static final String BASE_PANEL_NAME = "User Information";
+	static EntityFieldInfo info;
+	static Map<String, EntityFieldInfo> fields;
+	private static Logger LOGGER = LoggerFactory.getLogger(CUserViewService.class);
 
 	public static CScreen createBasicView(final CProject project) {
-
 		try {
-			final CScreen screen = new CScreen();
-			screen.setProject(project);
-			screen.setEntityType(CUser.class.getSimpleName());
-			screen.setHeaderText("User View");
-			screen.setIsActive(Boolean.TRUE);
-			screen.setScreenTitle("User View");
-			screen.setName(USER_VIEW_NAME);
-			screen.setDescription("View details for user");
+			final CScreen scr = new CScreen();
+			final Class<?> clazz = CUser.class;
+			final String entityType = clazz.getSimpleName().replaceFirst("^C", "");
+			scr.setProject(project);
+			scr.setEntityType(clazz.getSimpleName());
+			scr.setHeaderText(entityType + " View");
+			scr.setIsActive(Boolean.TRUE);
+			scr.setScreenTitle(entityType + " View");
+			scr.setName(BASE_VIEW_NAME);
+			scr.setDescription(entityType + " View Details");
 			// create screen lines
-			CScreenLines screenLine = new CScreenLines();
-			screenLine.setRelationFieldName(CEntityFieldService.SECTION);
-			screenLine.setEntityProperty(CEntityFieldService.SECTION);
-			screenLine.setSectionName(CUserViewService.BASE_PANEL_NAME);
-			screen.addScreenLine(screenLine);
-			//
-			screenLine = new CScreenLines();
-			screenLine.setRelationFieldName(CEntityFieldService.THIS_CLASS);
-			screenLine.setEntityProperty("name");
-			screenLine.setFieldCaption("User Details");
-			screenLine.setFieldDescription("User's name and details");
-			screen.addScreenLine(screenLine);
-			//
-			screenLine = new CScreenLines();
-			screenLine.setRelationFieldName(CEntityFieldService.THIS_CLASS);
-			screenLine.setEntityProperty("lastname");
-			screenLine.setFieldCaption("Last Name");
-			screenLine.setFieldDescription("User's last name");
-			screen.addScreenLine(screenLine);
-			//
-			screenLine = new CScreenLines();
-			screenLine.setRelationFieldName(CEntityFieldService.THIS_CLASS);
-			screenLine.setEntityProperty("login");
-			screenLine.setFieldCaption("Login");
-			screenLine.setFieldDescription("Login name for the system");
-			screen.addScreenLine(screenLine);
-			//
-			screenLine = new CScreenLines();
-			screenLine.setRelationFieldName(CEntityFieldService.THIS_CLASS);
-			screenLine.setEntityProperty("phone");
-			screenLine.setFieldCaption("Phone");
-			screenLine.setFieldDescription("Phone number");
-			screen.addScreenLine(screenLine);
-			//
-			screenLine = new CScreenLines();
-			screenLine.setRelationFieldName(CEntityFieldService.THIS_CLASS);
-			screenLine.setEntityProperty("email");
-			screenLine.setFieldCaption("Email");
-			screenLine.setFieldDescription("User's email address");
-			screen.addScreenLine(screenLine);
-			// create screen lines
-			screenLine = new CScreenLines();
-			screenLine.setRelationFieldName(CEntityFieldService.SECTION);
-			screenLine.setEntityProperty(CEntityFieldService.SECTION);
-			screenLine.setSectionName("System Access");
-			screen.addScreenLine(screenLine);
-			//
-			screenLine = new CScreenLines();
-			screenLine.setRelationFieldName(CEntityFieldService.THIS_CLASS);
-			screenLine.setEntityProperty("roles");
-			screenLine.setFieldCaption("User Roles");
-			screenLine.setFieldDescription("User's roles in the system");
-			screen.addScreenLine(screenLine);
-			//
-			screenLine = new CScreenLines();
-			screenLine.setRelationFieldName(CEntityFieldService.THIS_CLASS);
-			screenLine.setEntityProperty("userRole");
-			screenLine.setFieldCaption("User Role");
-			screenLine.setFieldDescription("");
-			screen.addScreenLine(screenLine);
-			//
-			screenLine = new CScreenLines();
-			screenLine.setRelationFieldName(CEntityFieldService.THIS_CLASS);
-			screenLine.setEntityProperty("enabled");
-			screenLine.setFieldCaption("Enabled");
-			screenLine.setFieldDescription("Is the user enabled?");
-			screen.addScreenLine(screenLine);
-			//
-			screenLine = new CScreenLines();
-			screenLine.setRelationFieldName(CEntityFieldService.THIS_CLASS);
-			screenLine.setEntityProperty("company");
-			screenLine.setFieldCaption("Company");
-			screenLine.setFieldDescription("Company the user belongs to");
-			screen.addScreenLine(screenLine);
-			//
-			screenLine = new CScreenLines();
-			screenLine.setRelationFieldName(CEntityFieldService.THIS_CLASS);
-			screenLine.setEntityProperty("userType");
-			screenLine.setFieldCaption("User Type");
-			screenLine.setFieldDescription("The category of user");
-			screen.addScreenLine(screenLine);
-			return screen;
+			scr.addScreenLine(CScreenLinesService.createSection(CUserViewService.BASE_PANEL_NAME));
+			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "name"));
+			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "lastname"));
+			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "login"));
+			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "password"));
+			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "phone"));
+			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "email"));
+			/******************/
+			scr.addScreenLine(CScreenLinesService.createSection("System Access"));
+			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "roles"));
+			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "userRole"));
+			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "enabled"));
+			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "company"));
+			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "userType"));
+			scr.debug_printScreenInformation();
+			return scr;
 		} catch (final Exception e) {
-			// TODO Auto-generated catch block
+			LOGGER.error("Error creating basic user view: {}", e.getMessage(), e);
 			e.printStackTrace();
 			return null;
 		}

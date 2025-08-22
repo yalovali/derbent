@@ -27,7 +27,7 @@ import tech.derbent.meetings.domain.CMeetingType;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.risks.domain.CRisk;
 import tech.derbent.users.domain.CUser;
-import tech.derbent.users.domain.CUserRole;
+import tech.derbent.users.domain.EUserRole;
 import tech.derbent.users.domain.CUserType;
 import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 
@@ -622,7 +622,7 @@ public class ComprehensiveViewCRUDTest extends CTestBase {
         newUser.setName("Test CRUD User " + uniqueId);
         newUser.setEmail("testuser" + uniqueId + "@example.com");
         newUser.setLogin("testuser" + uniqueId);
-        newUser.setUserRole(CUserRole.TEAM_MEMBER);
+        newUser.setUserRole(EUserRole.TEAM_MEMBER);
         newUser.setCompany(firstCompany);
         newUser.setPhone("+1-555-" + uniqueId);
         final CUser savedUser = userService.save(newUser);

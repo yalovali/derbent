@@ -39,7 +39,7 @@ class CScreenLinesEditDialogBindingTest {
 		// Create screen line with the specific field that was causing the error
 		final CScreenLines screenLine =
 			new CScreenLines(screen, "Entity Field Name", "entityProperty");
-		screenLine.setEntityProperty("name"); // This is a valid field for CActivity
+		screenLine.setProperty("name"); // This is a valid field for CActivity
 		screenLine.setLineOrder(5);
 		screenLine.setIsRequired(true);
 		screenLine.setIsReadonly(false);

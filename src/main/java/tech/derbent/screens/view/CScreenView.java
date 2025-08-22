@@ -1,11 +1,9 @@
 package tech.derbent.screens.view;
 
 import java.lang.reflect.InvocationTargetException;
-
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.screens.domain.CScreen;
@@ -17,10 +15,7 @@ import tech.derbent.session.service.CSessionService;
 
 @Route ("cscreensview/:screen_id?/:action?(edit)")
 @PageTitle ("Screen Master Detail")
-@Menu (
-	order = 1.5, icon = "class:tech.derbent.screens.view.CScreenView",
-	title = "Project.Screens"
-)
+@Menu (order = 1.5, icon = "class:tech.derbent.screens.view.CScreenView", title = "Project.Screens")
 @PermitAll // When security is enabled, allow all authenticated users
 public final class CScreenView extends CProjectAwareMDPage<CScreen> {
 
@@ -33,44 +28,31 @@ public final class CScreenView extends CProjectAwareMDPage<CScreen> {
 	public static String getIconFilename() { return CScreen.getIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "screen_id";
-
 	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "cscreensview/%s/edit";
-
 	private final CScreenLinesService screenLinesService;
-
 	private final CEntityFieldService entityFieldService;
-
 	private final CViewsService viewsService;
 
-	public CScreenView(final CScreenService entityService,
-		final CSessionService sessionService,
-		final CScreenLinesService screenLinesService,
-		final CEntityFieldService entityFieldService, final CViewsService viewsService) {
-		super(CScreen.class, entityService, sessionService);
+	public CScreenView(final CScreenService entityService, final CSessionService sessionService, final CScreenLinesService screenLinesService,
+			final CEntityFieldService entityFieldService, final CViewsService viewsService, final CScreenService screenService) {
+		super(CScreen.class, entityService, sessionService, screenService);
 		this.screenLinesService = screenLinesService;
 		this.entityFieldService = entityFieldService;
 		this.viewsService = viewsService;
 		addClassNames("screens-view");
 	}
 
-	/**
-	 * Creates the entity details section using accordion panels. Follows the same pattern
-	 * as CActivitiesView for consistency.
+	/** Creates the entity details section using accordion panels. Follows the same pattern as CActivitiesView for consistency.
 	 * @throws InvocationTargetException
 	 * @throws IllegalAccessException
 	 * @throws SecurityException
-	 * @throws NoSuchMethodException
-	 */
+	 * @throws NoSuchMethodException */
 	@Override
-	protected void createDetailsLayout() throws NoSuchMethodException, SecurityException,
-		IllegalAccessException, InvocationTargetException {
-		addAccordionPanel(new CPanelScreenBasicInfo(getCurrentEntity(), getBinder(),
-			(CScreenService) entityService));
-		addAccordionPanel(new CPanelScreenLines(getCurrentEntity(), getBinder(),
-			(CScreenService) entityService, screenLinesService, entityFieldService,
-			viewsService));
-		addAccordionPanel(new CPanelScreenPreview(getCurrentEntity(), getBinder(),
-			(CScreenService) entityService));
+	protected void createDetailsLayout() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+		addAccordionPanel(new CPanelScreenBasicInfo(getCurrentEntity(), getBinder(), (CScreenService) entityService));
+		addAccordionPanel(new CPanelScreenLines(getCurrentEntity(), getBinder(), (CScreenService) entityService, screenLinesService,
+				entityFieldService, viewsService));
+		addAccordionPanel(new CPanelScreenPreview(getCurrentEntity(), getBinder(), (CScreenService) entityService));
 	}
 
 	@Override
@@ -80,11 +62,9 @@ public final class CScreenView extends CProjectAwareMDPage<CScreen> {
 		grid.addShortTextColumn(CScreen::getEntityType, "Entity Type", "entityType");
 		grid.addShortTextColumn(CScreen::getScreenTitle, "Screen Title", "screenTitle");
 		// Show active status
-		grid.addColumn(screen -> screen.getIsActive() ? "Active" : "Inactive", "Status",
-			null);
+		grid.addColumn(screen -> screen.getIsActive() ? "Active" : "Inactive", "Status", null);
 		// Show number of screen lines
 		grid.addColumn(screen -> {
-
 			try {
 				return String.valueOf(screenLinesService.countByScreen(screen));
 			} catch (final Exception e) {
@@ -93,7 +73,6 @@ public final class CScreenView extends CProjectAwareMDPage<CScreen> {
 		}, "Lines Count", null);
 		grid.addColumn(screen -> {
 			final String desc = screen.getDescription();
-
 			if (desc == null) {
 				return "Not set";
 			}

@@ -15,130 +15,134 @@ import tech.derbent.abstracts.domains.CEntityConstants;
 import tech.derbent.abstracts.domains.CEntityNamed;
 
 /**
- * CCompany - Domain entity representing companies within the organization. Layer: Domain (MVC) Inherits from CEntityDB
- * to provide database functionality.
+ * CCompany - Domain entity representing companies within the organization. Layer: Domain
+ * (MVC) Inherits from CEntityDB to provide database functionality.
  */
 @Entity
-@Table(name = "ccompany") // table name for the entity as the default is the class name
+@Table (name = "ccompany") // table name for the entity as the default is the class name
 // in lowercase
-@AttributeOverride(name = "id", column = @Column(name = "company_id"))
+@AttributeOverride (name = "id", column = @Column (name = "company_id"))
 public class CCompany extends CEntityNamed<CCompany> {
-    // name and description fields are now inherited from CEntityNamed
+	// name and description fields are now inherited from CEntityNamed
 
-    @Column(name = "address", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
-    @Size(max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
-    @MetaData(displayName = "Address", required = false, readOnly = false, defaultValue = "", description = "Company address", hidden = false, order = 3, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION)
-    private String address;
+	public static String getIconColorCode() {
+		return "#6c757d"; // Gray color for company entities
+	}
 
-    @Column(name = "phone", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
-    @Size(max = CEntityConstants.MAX_LENGTH_NAME)
-    @MetaData(displayName = "Phone", required = false, readOnly = false, defaultValue = "", description = "Company phone number", hidden = false, order = 4, maxLength = CEntityConstants.MAX_LENGTH_NAME)
-    private String phone;
+	public static String getIconFilename() { return "vaadin:building"; }
 
-    @Column(name = "email", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
-    @Size(max = CEntityConstants.MAX_LENGTH_NAME)
-    @MetaData(displayName = "Email", required = false, readOnly = false, defaultValue = "", description = "Company email address", hidden = false, order = 5, maxLength = CEntityConstants.MAX_LENGTH_NAME)
-    private String email;
+	@Column (
+		name = "address", nullable = true,
+		length = CEntityConstants.MAX_LENGTH_DESCRIPTION
+	)
+	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
+	@MetaData (
+		displayName = "Address", required = false, readOnly = false, defaultValue = "",
+		description = "Company address", hidden = false, order = 3,
+		maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
+	)
+	private String address;
 
-    @Column(name = "website", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
-    @Size(max = CEntityConstants.MAX_LENGTH_NAME)
-    @MetaData(displayName = "Website", required = false, readOnly = false, defaultValue = "", description = "Company website URL", hidden = false, order = 6, maxLength = CEntityConstants.MAX_LENGTH_NAME)
-    private String website;
+	@Column (name = "phone", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@MetaData (
+		displayName = "Phone", required = false, readOnly = false, defaultValue = "",
+		description = "Company phone number", hidden = false, order = 4,
+		maxLength = CEntityConstants.MAX_LENGTH_NAME
+	)
+	private String phone;
 
-    @Column(name = "tax_number", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
-    @Size(max = CEntityConstants.MAX_LENGTH_NAME)
-    @MetaData(displayName = "Tax Number", required = false, readOnly = false, defaultValue = "", description = "Company tax identification number", hidden = false, order = 7, maxLength = CEntityConstants.MAX_LENGTH_NAME)
-    private String taxNumber;
+	@Column (name = "email", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@MetaData (
+		displayName = "Email", required = false, readOnly = false, defaultValue = "",
+		description = "Company email address", hidden = false, order = 5,
+		maxLength = CEntityConstants.MAX_LENGTH_NAME
+	)
+	private String email;
 
-    @Column(name = "enabled", nullable = false)
-    @MetaData(displayName = "Active", required = true, readOnly = false, defaultValue = "true", description = "Is company active?", hidden = false, order = 8)
-    private Boolean enabled = Boolean.TRUE;
+	@Column (name = "website", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@MetaData (
+		displayName = "Website", required = false, readOnly = false, defaultValue = "",
+		description = "Company website URL", hidden = false, order = 6,
+		maxLength = CEntityConstants.MAX_LENGTH_NAME
+	)
+	private String website;
 
-    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @MetaData(displayName = "Users", required = false, readOnly = true, description = "Users belonging to this company", hidden = false, order = 9)
-    private List<tech.derbent.users.domain.CUser> users;
+	@Column (
+		name = "tax_number", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME
+	)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@MetaData (
+		displayName = "Tax Number", required = false, readOnly = false, defaultValue = "",
+		description = "Company tax identification number", hidden = false, order = 7,
+		maxLength = CEntityConstants.MAX_LENGTH_NAME
+	)
+	private String taxNumber;
 
-    /**
-     * Default constructor for JPA.
-     */
-    public CCompany() {
-        super();
-        // Initialize with default values for JPA
-        this.enabled = true;
-    }
+	@Column (name = "enabled", nullable = false)
+	@MetaData (
+		displayName = "Active", required = true, readOnly = false, defaultValue = "true",
+		description = "Is company active?", hidden = false, order = 8
+	)
+	private Boolean enabled = Boolean.TRUE;
 
-    public CCompany(final String name) {
-        super(CCompany.class, name); // Use the CEntityNamed constructor
-    }
+	@OneToMany (mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@MetaData (
+		displayName = "Users", required = false, readOnly = true,
+		description = "Users belonging to this company", hidden = false, order = 9
+	)
+	private List<tech.derbent.users.domain.CUser> users;
 
-    public String getAddress() {
-        return address;
-    }
+	/**
+	 * Default constructor for JPA.
+	 */
+	public CCompany() {
+		super();
+		// Initialize with default values for JPA
+		this.enabled = true;
+	}
 
-    public String getEmail() {
-        return email;
-    }
+	public CCompany(final String name) {
+		super(CCompany.class, name); // Use the CEntityNamed constructor
+	}
 
-    public String getPhone() {
-        return phone;
-    }
+	public String getAddress() { return address; }
 
-    public String getTaxNumber() {
-        return taxNumber;
-    }
+	public String getEmail() { return email; }
 
-    public List<tech.derbent.users.domain.CUser> getUsers() {
-        return users;
-    }
+	public String getPhone() { return phone; }
 
-    public String getWebsite() {
-        return website;
-    }
+	public String getTaxNumber() { return taxNumber; }
 
-    public Boolean isEnabled() {
-        return enabled;
-    }
+	public List<tech.derbent.users.domain.CUser> getUsers() { return users; }
 
-    public void setAddress(final String address) {
-        this.address = address;
-    }
+	public String getWebsite() { return website; }
 
-    public void setEmail(final String email) {
-        this.email = email;
-    }
+	public Boolean isEnabled() { return enabled; }
 
-    public void setEnabled(final Boolean enabled) {
-        this.enabled = enabled;
-    }
+	public void setAddress(final String address) { this.address = address; }
 
-    public void setPhone(final String phone) {
-        this.phone = phone;
-    }
+	public void setEmail(final String email) { this.email = email; }
 
-    public void setTaxNumber(final String taxNumber) {
-        this.taxNumber = taxNumber;
-    }
+	public void setEnabled(final Boolean enabled) { this.enabled = enabled; }
 
-    public void setUsers(final List<tech.derbent.users.domain.CUser> users) {
-        this.users = users;
-    }
+	public void setPhone(final String phone) { this.phone = phone; }
 
-    public void setWebsite(final String website) {
-        this.website = website;
-    }
+	public void setTaxNumber(final String taxNumber) { this.taxNumber = taxNumber; }
 
-    @Override
-    public String toString() {
-        return "CCompany{" + "name='" + getName() + '\'' + ", description='" + getDescription() + '\'' + ", address='"
-                + address + '\'' + ", phone='" + phone + '\'' + ", email='" + email + '\'' + ", website='" + website
-                + '\'' + ", taxNumber='" + taxNumber + '\'' + ", enabled=" + enabled + '}';
-    }
+	public void setUsers(final List<tech.derbent.users.domain.CUser> users) {
+		this.users = users;
+	}
 
-    public static String getIconColorCode() {
-        return "#6c757d"; // Gray color for company entities
-    }
+	public void setWebsite(final String website) { this.website = website; }
 
-    public static String getIconFilename() {
-        return "vaadin:building";
-    }
+	@Override
+	public String toString() {
+		return "CCompany{" + "name='" + getName() + '\'' + ", description='"
+			+ getDescription() + '\'' + ", address='" + address + '\'' + ", phone='"
+			+ phone + '\'' + ", email='" + email + '\'' + ", website='" + website + '\''
+			+ ", taxNumber='" + taxNumber + '\'' + ", enabled=" + enabled + '}';
+	}
 }

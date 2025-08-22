@@ -127,7 +127,7 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 
 				if ((selectedProperty != null) && !selectedProperty.isEmpty()) {
 					// Update the entity property based on the selected value
-					entity.setEntityProperty(selectedProperty);
+					entity.setProperty(selectedProperty);
 					updatePropertyDefaultValues(selectedProperty);
 				}
 			});
@@ -219,7 +219,7 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 		// type
 		if (relationFieldName.equals(CEntityFieldService.SECTION)) {
 			cmbFieldProperties.setItems(List.of(CEntityFieldService.SECTION));
-			entity.setEntityProperty(CEntityFieldService.SECTION);
+			entity.setProperty(CEntityFieldService.SECTION);
 			return;
 		}
 		else if (relationFieldName.equals(CEntityFieldService.THIS_CLASS)) {
@@ -275,7 +275,7 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 		entity.setDefaultValue(info.getDefaultValue());
 		entity.setMaxLength(info.getMaxLength());
 		entity.setDataProviderBean(info.getDataProviderBean());
-		entity.setFieldDescription(info.getDescription());
+		entity.setDescription(info.getDescription());
 		divJavaType.setText("Java type: " + info.getJavaType());
 	}
 

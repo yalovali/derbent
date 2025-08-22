@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.users.domain.CUser;
-import tech.derbent.users.domain.CUserRole;
+import tech.derbent.users.domain.EUserRole;
 import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 
 /**
@@ -26,7 +26,7 @@ class CUserTest extends CTestBase {
     void testAllUserRoleEnumValues() {
 
         // Test all enum values have proper display names and authorities
-        for (final CUserRole role : CUserRole.values()) {
+        for (final EUserRole role : EUserRole.values()) {
             assertNotNull(role.getDisplayName());
             assertNotNull(role.getDescription());
             assertNotNull(role.getAuthority());
@@ -66,7 +66,7 @@ class CUserTest extends CTestBase {
         final String password = "password123";
         final String name = "Test User";
         final String email = "test@example.com";
-        final CUserRole role = CUserRole.PROJECT_MANAGER;
+        final EUserRole role = EUserRole.PROJECT_MANAGER;
         // When
         final CUser user = new CUser(username, password, name, email, role);
         // Then
@@ -92,7 +92,7 @@ class CUserTest extends CTestBase {
         assertEquals(username, user.getLogin());
         assertEquals(name, user.getName());
         assertEquals(email, user.getEmail());
-        assertEquals(CUserRole.ADMIN, user.getUserRole()); // Should parse enum from
+        assertEquals(EUserRole.ADMIN, user.getUserRole()); // Should parse enum from
                                                            // string
         assertEquals(roles, user.getRoles());
     }
@@ -102,9 +102,9 @@ class CUserTest extends CTestBase {
         // Given
         final CUser user = new CUser("test");
         // When
-        final CUserRole defaultRole = user.getUserRole();
+        final EUserRole defaultRole = user.getUserRole();
         // Then
-        assertEquals(CUserRole.TEAM_MEMBER, defaultRole);
+        assertEquals(EUserRole.TEAM_MEMBER, defaultRole);
         assertNotNull(defaultRole.getDisplayName());
         assertNotNull(defaultRole.getDescription());
         assertEquals("ROLE_TEAM_MEMBER", defaultRole.getAuthority());
@@ -113,20 +113,20 @@ class CUserTest extends CTestBase {
     @Test
     void testUserRoleFromString() {
         // Test various string inputs
-        assertEquals(CUserRole.ADMIN, CUserRole.fromString("ADMIN"));
-        assertEquals(CUserRole.PROJECT_MANAGER, CUserRole.fromString("PROJECT_MANAGER"));
-        assertEquals(CUserRole.TEAM_MEMBER, CUserRole.fromString("TEAM_MEMBER"));
-        assertEquals(CUserRole.GUEST, CUserRole.fromString("GUEST"));
+        assertEquals(EUserRole.ADMIN, EUserRole.fromString("ADMIN"));
+        assertEquals(EUserRole.PROJECT_MANAGER, EUserRole.fromString("PROJECT_MANAGER"));
+        assertEquals(EUserRole.TEAM_MEMBER, EUserRole.fromString("TEAM_MEMBER"));
+        assertEquals(EUserRole.GUEST, EUserRole.fromString("GUEST"));
         // Test legacy mappings
-        assertEquals(CUserRole.TEAM_MEMBER, CUserRole.fromString("USER"));
-        assertEquals(CUserRole.PROJECT_MANAGER, CUserRole.fromString("MANAGER"));
+        assertEquals(EUserRole.TEAM_MEMBER, EUserRole.fromString("USER"));
+        assertEquals(EUserRole.PROJECT_MANAGER, EUserRole.fromString("MANAGER"));
         // Test case insensitivity
-        assertEquals(CUserRole.ADMIN, CUserRole.fromString("admin"));
-        assertEquals(CUserRole.PROJECT_MANAGER, CUserRole.fromString("project manager"));
+        assertEquals(EUserRole.ADMIN, EUserRole.fromString("admin"));
+        assertEquals(EUserRole.PROJECT_MANAGER, EUserRole.fromString("project manager"));
         // Test default fallback
-        assertEquals(CUserRole.TEAM_MEMBER, CUserRole.fromString("INVALID_ROLE"));
-        assertEquals(CUserRole.TEAM_MEMBER, CUserRole.fromString(null));
-        assertEquals(CUserRole.TEAM_MEMBER, CUserRole.fromString(""));
+        assertEquals(EUserRole.TEAM_MEMBER, EUserRole.fromString("INVALID_ROLE"));
+        assertEquals(EUserRole.TEAM_MEMBER, EUserRole.fromString(null));
+        assertEquals(EUserRole.TEAM_MEMBER, EUserRole.fromString(""));
     }
 
     @Test
@@ -134,9 +134,9 @@ class CUserTest extends CTestBase {
         // Given
         final CUser user = new CUser("testuser");
         // When
-        user.setUserRole(CUserRole.ADMIN);
+        user.setUserRole(EUserRole.ADMIN);
         // Then
-        assertEquals(CUserRole.ADMIN, user.getUserRole());
+        assertEquals(EUserRole.ADMIN, user.getUserRole());
         assertEquals("ADMIN", user.getRoles()); // Should sync with legacy roles string
     }
 
@@ -147,7 +147,7 @@ class CUserTest extends CTestBase {
         // When
         user.setUserRole(null);
         // Then
-        assertEquals(CUserRole.TEAM_MEMBER, user.getUserRole()); // Should default to
+        assertEquals(EUserRole.TEAM_MEMBER, user.getUserRole()); // Should default to
                                                                  // TEAM_MEMBER
         assertEquals("TEAM_MEMBER", user.getRoles());
     }

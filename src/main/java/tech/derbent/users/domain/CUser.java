@@ -2,7 +2,6 @@ package tech.derbent.users.domain;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -18,6 +17,7 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.MetaData;
 import tech.derbent.abstracts.domains.CEntityConstants;
 import tech.derbent.abstracts.domains.CEntityNamed;
+import tech.derbent.abstracts.interfaces.CFieldInfoGenerator;
 import tech.derbent.abstracts.interfaces.CSearchable;
 import tech.derbent.companies.domain.CCompany;
 
@@ -25,7 +25,7 @@ import tech.derbent.companies.domain.CCompany;
 @Table (name = "cuser") // Using quoted identifier to ensure exact case matching in
 // PostgreSQL
 @AttributeOverride (name = "id", column = @Column (name = "user_id"))
-public class CUser extends CEntityNamed<CUser> implements CSearchable {
+public class CUser extends CEntityNamed<CUser> implements CSearchable, CFieldInfoGenerator {
 
 	public static final int MAX_LENGTH_NAME = 255;
 
@@ -35,132 +35,85 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable {
 
 	public static String getIconFilename() { return "vaadin:users"; }
 
-	@Column (
-		name = "lastname", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME,
-		unique = false
-	)
+	@Column (name = "lastname", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
 	@MetaData (
-		displayName = "Last Name", required = true, readOnly = false, defaultValue = "",
-		description = "User's last name", hidden = false, order = 2,
-		maxLength = CEntityConstants.MAX_LENGTH_NAME
+			displayName = "Last Name", required = true, readOnly = false, defaultValue = "", description = "User's last name", hidden = false,
+			order = 2, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	private String lastname;
-
 	@MetaData (
-		displayName = "Login", required = true, readOnly = false, defaultValue = "",
-		description = "Login name for the system", hidden = false, order = 3,
-		maxLength = CEntityConstants.MAX_LENGTH_NAME
+			displayName = "Login", required = true, readOnly = false, defaultValue = "", description = "Login name for the system", hidden = false,
+			order = 3, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
-	@Column (
-		name = "login", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME,
-		unique = true
-	)
+	@Column (name = "login", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = true)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	private String login;
-
 	@MetaData (
-		displayName = "Email", required = true, readOnly = false, defaultValue = "",
-		description = "User's email address", hidden = false, order = 4,
-		maxLength = CEntityConstants.MAX_LENGTH_NAME
+			displayName = "Email", required = true, readOnly = false, defaultValue = "", description = "User's email address", hidden = false,
+			order = 4, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
-	@Column (
-		name = "email", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME,
-		unique = false
-	)
+	@Column (name = "email", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	private String email;
-
 	@MetaData (
-		displayName = "Phone", required = false, readOnly = false, defaultValue = "",
-		description = "Phone number", hidden = false, order = 5,
-		maxLength = CEntityConstants.MAX_LENGTH_NAME
+			displayName = "Phone", required = false, readOnly = false, defaultValue = "", description = "Phone number", hidden = false, order = 5,
+			maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
-	@Column (
-		name = "phone", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME,
-		unique = false
-	)
+	@Column (name = "phone", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	private String phone;
-
 	@Column (name = "roles", nullable = false, length = 255)
 	@Size (max = 255)
 	@MetaData (
-		displayName = "Roles", required = true, readOnly = false, defaultValue = "USER",
-		description = "User roles (comma-separated)", hidden = false, order = 6,
-		maxLength = 255
+			displayName = "Roles", required = true, readOnly = false, defaultValue = "USER", description = "User roles (comma-separated)",
+			hidden = false, order = 6, maxLength = 255
 	)
 	private String roles = "USER";
-
 	@Enumerated (EnumType.STRING)
-	@Column (
-		name = "user_role", nullable = false, length = 50,
-		columnDefinition = "VARCHAR(50)"
-	)
+	@Column (name = "user_role", nullable = false, length = 50, columnDefinition = "VARCHAR(50)")
 	@MetaData (
-		displayName = "User Role", required = true, readOnly = false,
-		defaultValue = "TEAM_MEMBER", description = "Primary user role in the system",
-		hidden = false, order = 7, maxLength = 50
+			displayName = "User Role", required = true, readOnly = false, defaultValue = "TEAM_MEMBER",
+			description = "Primary user role in the system", hidden = false, order = 7, maxLength = 50
 	)
-	private CUserRole userRole = CUserRole.TEAM_MEMBER;
-
+	private EUserRole userRole = EUserRole.TEAM_MEMBER;
 	@Column (name = "password", nullable = true, length = 255)
 	@Size (max = 255)
 	@MetaData (
-		displayName = "Password", required = false, readOnly = false,
-		description = "User password (stored as hash)", hidden = false, order = 99
+			displayName = "Password", required = false, readOnly = false, passwordField = true, description = "User password (stored as hash)",
+			hidden = false, order = 99, passwordRevealButton = false
 	)
 	private String password; // Encoded password
-
 	@MetaData (
-		displayName = "Enabled", required = true, readOnly = false, defaultValue = "true",
-		description = "Is user account enabled?", hidden = false, order = 8
+			displayName = "Enabled", required = true, readOnly = false, defaultValue = "true", description = "Is user account enabled?",
+			hidden = false, order = 8
 	)
 	@Column (name = "enabled", nullable = false)
 	private Boolean enabled = Boolean.TRUE; // User account status, default is enabled
-
 	@MetaData (
-		displayName = "Profile Picture", required = false, readOnly = false,
-		defaultValue = "", description = "User's profile picture stored as binary data",
-		hidden = false, order = 11
+			displayName = "Profile Picture", required = false, readOnly = false, defaultValue = "",
+			description = "User's profile picture stored as binary data", hidden = false, order = 11
 	)
-	@Column (
-		name = "profile_picture_data", nullable = true, length = 10000,
-		columnDefinition = "bytea"
-	)
+	@Column (name = "profile_picture_data", nullable = true, length = 10000, columnDefinition = "bytea")
 	private byte[] profilePictureData;
-
 	// load it eagerly because there a few projects that use this field
-	@OneToMany (
-		mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true,
-		fetch = FetchType.EAGER
-	)
+	@OneToMany (mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	private List<CUserProjectSettings> projectSettings;
-
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "cusertype_id", nullable = true)
-	@MetaData (
-		displayName = "User Type", required = false, readOnly = false,
-		description = "Type category of the user", hidden = false, order = 9
-	)
+	@MetaData (displayName = "User Type", required = false, readOnly = false, description = "Type category of the user", hidden = false, order = 9)
 	private CUserType userType;
-
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "company_id", nullable = true)
-	@MetaData (
-		displayName = "Company", required = false, readOnly = false,
-		description = "Company the user belongs to", hidden = false, order = 10
-	)
+	@MetaData (displayName = "Company", required = false, readOnly = false, description = "Company the user belongs to", hidden = false, order = 10)
 	private CCompany company;
 
-	/**
-	 * Default constructor for JPA.
-	 */
+	/** Default constructor for JPA. */
 	public CUser() {
 		super();
 		// Initialize with default values for JPA
 		this.roles = "USER";
-		this.userRole = CUserRole.TEAM_MEMBER;
+		this.userRole = EUserRole.TEAM_MEMBER;
 		this.enabled = true;
 	}
 
@@ -168,29 +121,24 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable {
 		super(CUser.class, name);
 	}
 
-	public CUser(final String username, final String password, final String name,
-		final String email) {
+	public CUser(final String username, final String password, final String name, final String email) {
 		super(CUser.class, name);
 		this.login = username;
 		this.email = email;
 		this.setPassword(password);
 	}
 
-	/**
-	 * Constructor with user role enum.
-	 */
-	public CUser(final String username, final String password, final String name,
-		final String email, final CUserRole userRole) {
+	/** Constructor with user role enum. */
+	public CUser(final String username, final String password, final String name, final String email, final EUserRole userRole) {
 		super(CUser.class, name);
 		this.login = username;
 		this.email = email;
 		this.setPassword(password);
-		this.userRole = userRole != null ? userRole : CUserRole.TEAM_MEMBER;
+		this.userRole = userRole != null ? userRole : EUserRole.TEAM_MEMBER;
 		this.setRoles(this.userRole.name()); // Keep roles string in sync
 	}
 
-	public CUser(final String username, final String password, final String name,
-		final String email, final String roles) {
+	public CUser(final String username, final String password, final String name, final String email, final String roles) {
 		super(CUser.class, name);
 		this.login = username;
 		super.setName(name);
@@ -204,6 +152,11 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable {
 	@Override
 	public boolean equals(final Object o) {
 		return super.equals(o);
+	}
+
+	@Override
+	public Class<?> getClassName() { // TODO Auto-generated method stub
+		return CUser.class;
 	}
 
 	public CCompany getCompany() { return company; }
@@ -238,7 +191,7 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable {
 		return getLogin(); // Convenience method to get username for authentication
 	}
 
-	public CUserRole getUserRole() { return userRole; }
+	public EUserRole getUserRole() { return userRole; }
 
 	public CUserType getUserType() { return userType; }
 
@@ -248,38 +201,30 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable {
 
 	@Override
 	public boolean matches(final String searchText) {
-
 		if ((searchText == null) || searchText.trim().isEmpty()) {
 			return true; // Empty search matches all
 		}
 		final String lowerSearchText = searchText.toLowerCase().trim();
-
 		// Search in name field (first name)
 		if ((getName() != null) && getName().toLowerCase().contains(lowerSearchText)) {
 			return true;
 		}
-
 		// Search in lastname field
 		if ((lastname != null) && lastname.toLowerCase().contains(lowerSearchText)) {
 			return true;
 		}
-
 		// Search in login field
 		if ((login != null) && login.toLowerCase().contains(lowerSearchText)) {
 			return true;
 		}
-
 		// Search in email field
 		if ((email != null) && email.toLowerCase().contains(lowerSearchText)) {
 			return true;
 		}
-
 		// Search in description field
-		if ((getDescription() != null)
-			&& getDescription().toLowerCase().contains(lowerSearchText)) {
+		if ((getDescription() != null) && getDescription().toLowerCase().contains(lowerSearchText)) {
 			return true;
 		}
-
 		// Search in ID as string
 		if ((getId() != null) && getId().toString().contains(lowerSearchText)) {
 			return true;
@@ -287,30 +232,24 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable {
 		return false;
 	}
 
-	/**
-	 * Parses user role from legacy roles string.
+	/** Parses user role from legacy roles string.
 	 * @param roles comma-separated roles string
-	 * @return corresponding CUserRole enum value
-	 */
-	private CUserRole parseUserRoleFromRoles(final String roles) {
-
+	 * @return corresponding CUserRole enum value */
+	private EUserRole parseUserRoleFromRoles(final String roles) {
 		if ((roles == null) || roles.trim().isEmpty()) {
-			return CUserRole.TEAM_MEMBER;
+			return EUserRole.TEAM_MEMBER;
 		}
 		final String upperRoles = roles.toUpperCase();
-
 		if (upperRoles.contains("ADMIN")) {
-			return CUserRole.ADMIN;
+			return EUserRole.ADMIN;
 		}
-
 		if (upperRoles.contains("PROJECT_MANAGER") || upperRoles.contains("MANAGER")) {
-			return CUserRole.PROJECT_MANAGER;
+			return EUserRole.PROJECT_MANAGER;
 		}
-
 		if (upperRoles.contains("GUEST")) {
-			return CUserRole.GUEST;
+			return EUserRole.GUEST;
 		}
-		return CUserRole.TEAM_MEMBER;
+		return EUserRole.TEAM_MEMBER;
 	}
 
 	public void setCompany(final CCompany company) { this.company = company; }
@@ -337,47 +276,35 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable {
 
 	public void setPhone(final String phone) { this.phone = phone; }
 
-	public void setProfilePictureData(final byte[] profilePictureData) {
-		this.profilePictureData = profilePictureData;
-	}
+	public void setProfilePictureData(final byte[] profilePictureData) { this.profilePictureData = profilePictureData; }
 
 	public void setProjectSettings(final List<CUserProjectSettings> projectSettings) {
-		this.projectSettings =
-			projectSettings != null ? projectSettings : new ArrayList<>();
+		this.projectSettings = projectSettings != null ? projectSettings : new ArrayList<>();
 	}
 
-	public void setRoles(final String roles) {
-		this.roles = roles != null ? roles : "USER";
-	}
+	public void setRoles(final String roles) { this.roles = roles != null ? roles : "USER"; }
 
-	public void setUserRole(final CUserRole userRole) {
-		this.userRole = userRole != null ? userRole : CUserRole.TEAM_MEMBER;
+	public void setUserRole(final EUserRole userRole) {
+		this.userRole = userRole != null ? userRole : EUserRole.TEAM_MEMBER;
 		// Keep roles string in sync for backward compatibility
 		this.setRoles(this.userRole.name());
 	}
 
 	public void setUserType(final CUserType userType) { this.userType = userType; }
 
-	/**
-	 * Returns a comprehensive string representation of the user including all key fields.
-	 * Note: This method is used for debugging and logging purposes. For ComboBox display
-	 * in the UI, the CEntityFormBuilder now uses getName() method automatically to show
-	 * only the user's name instead of all fields. This resolves the combobox display
-	 * issue where users were listed with complete text with all fields.
-	 * @return detailed string representation of the user
-	 */
+	/** Returns a comprehensive string representation of the user including all key fields. Note: This method is used for debugging and logging
+	 * purposes. For ComboBox display in the UI, the CEntityFormBuilder now uses getName() method automatically to show only the user's name instead
+	 * of all fields. This resolves the combobox display issue where users were listed with complete text with all fields.
+	 * @return detailed string representation of the user */
 	@Override
 	public String toString() {
-
 		// Return user-friendly representation for UI display
 		if ((getName() != null) && !getName().trim().isEmpty()) {
-
 			if ((lastname != null) && !lastname.trim().isEmpty()) {
 				return getName() + " " + lastname;
 			}
 			return getName();
 		}
-
 		if ((login != null) && !login.trim().isEmpty()) {
 			return login;
 		}
