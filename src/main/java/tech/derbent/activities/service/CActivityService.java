@@ -19,7 +19,6 @@ import tech.derbent.projects.domain.CProject;
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CActivityService extends CEntityOfProjectService<CActivity> implements CKanbanService<CActivity, CActivityStatus> {
-
 	public CActivityService(final CActivityRepository repository, final Clock clock) {
 		super(repository, clock);
 	}
@@ -41,17 +40,11 @@ public class CActivityService extends CEntityOfProjectService<CActivity> impleme
 		return noType;
 	}
 
-	/** Find activity by ID with optimized eager loading. Uses repository method with JOIN FETCH to prevent N+1 queries.
-	 * @param id the activity ID
-	 * @return the activity with eagerly loaded associations, or null if not found */
 	public CActivity findById(final Long id) {
 		Check.notNull(id, "Activity ID cannot be null");
-		return ((CActivityRepository) repository).findByIdWithEagerLoading(id).orElse(null);
+		return ((CActivityRepository) repository).findById(id).orElse(null);
 	}
 
-	/** Gets all activities for a project grouped by activity status. Activities without a status are grouped under a "No Status" key.
-	 * @param project the project to get activities for
-	 * @return map of activity status to list of activities */
 	@Transactional (readOnly = true)
 	public Map<CActivityStatus, List<CActivity>> getActivitiesGroupedByStatus(final CProject project) {
 		// Get all activities for the project with type and status loaded
@@ -61,9 +54,6 @@ public class CActivityService extends CEntityOfProjectService<CActivity> impleme
 				.groupingBy(activity -> activity.getStatus() != null ? activity.getStatus() : createNoStatusInstance(project), Collectors.toList()));
 	}
 
-	/** Gets all activities for a project grouped by activity type. Activities without a type are grouped under a "No Type" key.
-	 * @param project the project to get activities for
-	 * @return map of activity type to list of activities */
 	@Transactional (readOnly = true)
 	public Map<CActivityType, List<CActivity>> getActivitiesGroupedByType(final CProject project) {
 		LOGGER.debug("Getting activities grouped by type for project: {}", project.getName());

@@ -119,9 +119,9 @@ public class CPanelActivityComments extends CPanelActivityBase {
 		commentsContainer.removeAll();
 		Check.notNull(commentService, "Comment service cannot be null");
 		Check.notNull(sessionService, "Session service cannot be null");
-		Check.notNull(getCurrentEntity(), "Current activity cannot be null");
+		// Check.notNull(getCurrentEntity(), "Current activity cannot be null");
 		try {
-			final List<CComment> comments = commentService.findByActivityWithRelationships(getCurrentEntity());
+			final List<CComment> comments = commentService.findByActivity(getCurrentEntity());
 			LOGGER.debug("Found {} comments for activity", comments.size());
 			if (comments.isEmpty()) {
 				final Div noCommentsDiv = new Div();

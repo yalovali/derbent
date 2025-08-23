@@ -20,7 +20,6 @@ import tech.derbent.abstracts.domains.CEntityDB;
 @Table (name = "cscreen_lines")
 @AttributeOverride (name = "id", column = @Column (name = "screen_line_id"))
 public class CScreenLines extends CEntityDB<CScreenLines> {
-
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "screen_id", nullable = false)
 	@NotNull (message = "Screen reference is required")
@@ -51,7 +50,7 @@ public class CScreenLines extends CEntityDB<CScreenLines> {
 			displayName = "Field Caption", required = true, readOnly = false, description = "Caption/label to display for this field", hidden = false,
 			order = 2, maxLength = 255
 	)
-	private String displayName;
+	private String fieldCaption;
 	@Column (name = "entity_property", nullable = false, length = 100)
 	@Size (max = 100, message = "Field property name cannot exceed 100 characters")
 	@NotNull (message = "Field propery name is required")
@@ -144,9 +143,9 @@ public class CScreenLines extends CEntityDB<CScreenLines> {
 
 	public String getDefaultValue() { return defaultValue; }
 
-	public String getDisplayName() { return displayName; }
-
 	public String getEntityProperty() { return entityProperty; }
+
+	public String getFieldCaption() { return fieldCaption; }
 
 	public String getFieldDescription() { return fieldDescription; }
 
@@ -171,7 +170,7 @@ public class CScreenLines extends CEntityDB<CScreenLines> {
 	public String getSectionName() { return sectionName; }
 
 	public void printLine() {
-		System.out.println("CScreenLines{" + "id=" + getId() + ", lineOrder=" + lineOrder + ", fieldCaption='" + displayName + '\''
+		System.out.println("CScreenLines{" + "id=" + getId() + ", lineOrder=" + lineOrder + ", fieldCaption='" + fieldCaption + '\''
 				+ ", entityProperty='" + entityProperty + '\'' + ", relationFieldName='" + relationFieldName + '\'' + ", sectionName='" + sectionName
 				+ '\'' + ", isActive=" + isActive + '}');
 	}
@@ -182,7 +181,7 @@ public class CScreenLines extends CEntityDB<CScreenLines> {
 
 	public void setDescription(final String fieldDescription) { this.fieldDescription = fieldDescription; }
 
-	public void setDisplayName(final String displayName) { this.displayName = displayName; }
+	public void setFieldCaption(final String fieldCaption) { this.fieldCaption = fieldCaption; }
 
 	public void setIsActive(final Boolean isActive) { this.isActive = isActive; }
 
@@ -206,12 +205,12 @@ public class CScreenLines extends CEntityDB<CScreenLines> {
 
 	public void setSectionName(final String sectionName) {
 		this.sectionName = sectionName;
-		this.displayName = sectionName;
+		this.fieldCaption = sectionName;
 	}
 
 	@Override
 	public String toString() {
-		return String.format("CScreenLines{id=%d, lineOrder=%d, fieldCaption='%s', entityProperty='%s'}", getId(), lineOrder, displayName,
+		return String.format("CScreenLines{id=%d, lineOrder=%d, fieldCaption='%s', entityProperty='%s'}", getId(), lineOrder, fieldCaption,
 				entityProperty);
 	}
 }

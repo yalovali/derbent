@@ -20,7 +20,6 @@ import tech.derbent.abstracts.utils.PageableUtils;
 /** CAbstractService - Abstract base service class for entity operations. Layer: Service (MVC) Provides common CRUD operations and lazy loading
  * support for all entity types. */
 public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass>> {
-
 	protected final Clock clock;
 	protected final CAbstractRepository<EntityClass> repository;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
@@ -138,11 +137,11 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	}
 
 	@Transactional (readOnly = true)
-	public List<EntityClass> list(final Pageable pageable) {
+	public Page<EntityClass> list(final Pageable pageable) {
 		// Validate and fix pageable to prevent "max-results cannot be negative" error
 		final Pageable safePage = PageableUtils.validateAndFix(pageable);
 		// LOGGER.debug("Listing entities with pageable: {}", safePage);
-		final List<EntityClass> entities = repository.findAll(safePage).toList();
+		final Page<EntityClass> entities = repository.findAll(safePage);
 		// Initialize lazy fields for all entities
 		entities.forEach(this::initializeLazyFields);
 		return entities;
@@ -169,7 +168,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		final Pageable safePage = PageableUtils.validateAndFix(pageable);
 		// If no search text or entity doesn't implement CSearchable, use regular listing
 		if ((searchText == null) || searchText.trim().isEmpty() || !CSearchable.class.isAssignableFrom(getEntityClass())) {
-			return list(safePage);
+			return list(safePage).getContent();
 		}
 		// Get all entities and filter using the entity's matches method
 		final List<EntityClass> allEntities = repository.findAll(safePage).toList();

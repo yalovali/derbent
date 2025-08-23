@@ -21,7 +21,6 @@ import tech.derbent.session.service.CSessionService;
  * notifications when the active project changes. */
 public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<EntityClass>> extends CAbstractNamedEntityPage<EntityClass>
 		implements CProjectChangeListener {
-
 	private static final long serialVersionUID = 1L;
 	protected final CSessionService sessionService;
 
@@ -124,12 +123,12 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
 			// Check if the entity service is for CEntityOfProject entities
 			if (entityService instanceof CEntityOfProjectService) {
 				final CEntityOfProjectService<EntityClass> projectService = (CEntityOfProjectService<EntityClass>) entityService;
-				entities = projectService.findEntriesByProject(activeProject.get(), PageableUtils.createSafe(0, 10));
+				entities = projectService.findEntriesByProject(activeProject.get(), PageableUtils.createSafe(0, 10)).getContent();
 			} else {
 				// For non-project entities, show all entities (they don't have project
 				// filtering)
 				LOGGER.debug("Entity service is not project-aware, showing all entities");
-				entities = entityService.list(PageableUtils.createSafe(0, 10));
+				entities = entityService.list(PageableUtils.createSafe(0, 10)).getContent();
 			}
 			grid.setItems(entities);
 		} else {

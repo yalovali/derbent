@@ -1,7 +1,6 @@
-// name: HelloWorld
-// description: Simple Hello World script in Java
-// toolbar: Script Shell
-// keyboard: CTRL+ALT+H
+// name: Hello Toolbar
+// description: Test button
+// toolbar: org.eclipse.ui.main.toolbar?after=additions
 
 print("Hello World from EASE Java Script!");
 

@@ -1,14 +1,12 @@
 package tech.derbent.users.service;
 
 import java.time.Clock;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.abstracts.services.CEntityOfProjectService;
-import tech.derbent.abstracts.utils.Check;
 import tech.derbent.users.domain.CUserType;
 
 /** CUserTypeService - Service layer for CUserType entity. Layer: Service (MVC) Handles business logic for project-aware user type operations. */
@@ -25,18 +23,6 @@ public class CUserTypeService extends CEntityOfProjectService<CUserType> {
 	 * @param clock      the Clock instance for time-related operations */
 	public CUserTypeService(final CUserTypeRepository repository, final Clock clock) {
 		super(repository, clock);
-	}
-
-	/** Gets a user type by ID with eagerly loaded relationships. Overrides parent get() method to prevent LazyInitializationException.
-	 * @param id the user type ID
-	 * @return Optional containing the user type with loaded relationships */
-	@Override
-	@Transactional (readOnly = true)
-	public Optional<CUserType> getById(final Long id) {
-		Check.notNull(id, "ID must not be null");
-		final Optional<CUserType> entity = ((CUserTypeRepository) repository).findByIdWithRelationships(id);
-		entity.ifPresent(this::initializeLazyFields);
-		return entity;
 	}
 
 	@Override

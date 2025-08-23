@@ -16,7 +16,6 @@ import tech.derbent.screens.domain.CScreenLines;
 
 @ExtendWith (MockitoExtension.class)
 class CScreenLinesServiceTest {
-
 	@Mock
 	private CScreenLinesRepository screenLinesRepository;
 	@Mock
@@ -50,7 +49,7 @@ class CScreenLinesServiceTest {
 		// Then
 		assertNotNull(screenLine);
 		assertEquals(screen, screenLine.getScreen());
-		assertEquals(fieldCaption, screenLine.getDisplayName());
+		assertEquals(fieldCaption, screenLine.getFieldCaption());
 		assertEquals(entityProperty, screenLine.getEntityProperty());
 		assertEquals(Integer.valueOf(255), screenLine.getMaxLength()); // This should be
 																		// set to default

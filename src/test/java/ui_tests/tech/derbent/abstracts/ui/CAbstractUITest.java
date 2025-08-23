@@ -25,7 +25,6 @@ import tech.derbent.users.service.CUserProjectSettingsService;
  * components including: - Mock service setup - Grid data loading testing - Lazy loading issue detection - Navigation testing utilities - Form
  * validation testing helpers */
 public abstract class CAbstractUITest<EntityClass extends CEntityDB<EntityClass>> {
-
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	@Mock
 	protected CAbstractService<EntityClass> mockEntityService;
@@ -69,7 +68,7 @@ public abstract class CAbstractUITest<EntityClass extends CEntityDB<EntityClass>
 	/** Sets up mock service behavior for standard operations. */
 	protected void setupServiceMocks() {
 		// Mock paginated list method
-		when(mockEntityService.list(any(Pageable.class))).thenReturn(testEntities);
+		when(mockEntityService.list(any(Pageable.class)).getContent()).thenReturn(testEntities);
 		// Mock individual entity retrieval
 		if ((testEntities != null) && !testEntities.isEmpty()) {
 			final EntityClass firstEntity = testEntities.get(0);

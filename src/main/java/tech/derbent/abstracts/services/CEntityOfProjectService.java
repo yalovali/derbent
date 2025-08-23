@@ -3,6 +3,7 @@ package tech.derbent.abstracts.services;
 import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.abstracts.domains.CEntityOfProject;
@@ -13,7 +14,6 @@ import tech.derbent.projects.domain.CProject;
  * operations for project-aware entities including validation, creation, and project-based queries with consistent error handling, logging, and proper
  * lazy loading support. */
 public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProject<EntityClass>> extends CAbstractNamedEntityService<EntityClass> {
-
 	/** Constructor for CEntityOfProjectService.
 	 * @param repository the repository for data access operations
 	 * @param clock      the Clock instance for time-related operations */
@@ -71,10 +71,10 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	 * @param pageable pagination information
 	 * @return list of entities with loaded relationships */
 	@Transactional (readOnly = true)
-	public List<EntityClass> findEntriesByProject(final CProject project, final Pageable pageable) {
+	public Page<EntityClass> findEntriesByProject(final CProject project, final Pageable pageable) {
 		Check.notNull(project, "Project cannot be null");
 		try {
-			final List<EntityClass> entities = ((CEntityOfProjectRepository<EntityClass>) repository).findByProject(project, pageable);
+			final Page<EntityClass> entities = ((CEntityOfProjectRepository<EntityClass>) repository).findByProject(project, pageable);
 			// Initialize any additional lazy fields that weren't loaded by the query
 			entities.forEach(this::initializeLazyFields);
 			return entities;
@@ -82,26 +82,6 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 			LOGGER.error("Error finding entities by project '{}' with pagination in {}: {}", project.getName(), getClass().getSimpleName(),
 					e.getMessage(), e);
 			throw new RuntimeException("Failed to find entities by project with pagination", e);
-		}
-	}
-
-	/** Gets an entity by ID with all relationships eagerly loaded. This is the standard method for single entity retrieval that loads all necessary
-	 * relationships to prevent LazyInitializationException.
-	 * @param id the entity ID
-	 * @return optional entity with loaded relationships */
-	@Override
-	@Transactional (readOnly = true)
-	public Optional<EntityClass> getById(final Long id) {
-		Check.notNull(id, "ID must not be null");
-		try {
-			final Optional<EntityClass> entity = repository.findById(id);
-			// With eager loading of small entities, minimal lazy field initialization
-			// needed
-			entity.ifPresent(this::initializeLazyFields);
-			return entity;
-		} catch (final Exception e) {
-			LOGGER.error("Error getting entity by id '{}' in {}: {}", id, getClass().getSimpleName(), e.getMessage(), e);
-			throw new RuntimeException("Failed to get entity by id", e);
 		}
 	}
 

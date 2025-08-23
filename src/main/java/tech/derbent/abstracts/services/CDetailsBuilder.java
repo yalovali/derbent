@@ -23,7 +23,6 @@ import tech.derbent.screens.service.CScreenService;
 
 @org.springframework.stereotype.Component
 public final class CDetailsBuilder implements ApplicationContextAware {
-
 	private static ApplicationContext applicationContext;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDetailsBuilder.class);
 
@@ -32,7 +31,7 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 	private static Component processLine(final int counter, final CScreen screen, final CScreenLines line) {
 		Check.notNull(line, "Line cannot be null");
 		if (line.getRelationFieldName().equals(CEntityFieldService.SECTION)) {
-			final CPanelDetails sectionPanel = new CPanelDetails(line.getSectionName(), line.getDisplayName());
+			final CPanelDetails sectionPanel = new CPanelDetails(line.getSectionName(), line.getFieldCaption());
 			return sectionPanel;
 		}
 		return null;

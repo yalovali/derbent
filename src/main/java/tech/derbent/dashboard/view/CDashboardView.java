@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Pageable;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H3;
@@ -38,7 +39,6 @@ import tech.derbent.users.service.CUserService;
 @Menu (order = 0, icon = "class:tech.derbent.dashboard.view.CDashboardView", title = "Home")
 @PermitAll
 public final class CDashboardView extends CAbstractPage implements CInterfaceIconSet {
-
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() {
@@ -120,7 +120,7 @@ public final class CDashboardView extends CAbstractPage implements CInterfaceIco
 							}
 							// Get all users and count those that have project settings for
 							// this project
-							final List<CUser> allUsers = userService.list(null);
+							final List<CUser> allUsers = userService.list(Pageable.unpaged()).getContent();
 							if (allUsers == null) {
 								LOGGER.warn("User service returned null list");
 								return 0L;

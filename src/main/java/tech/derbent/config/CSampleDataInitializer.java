@@ -71,7 +71,6 @@ import tech.derbent.users.service.CUserViewService;
 @Component
 @Profile ("!test")
 public class CSampleDataInitializer implements ApplicationRunner {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSampleDataInitializer.class);
 	// Standard password for all users as per coding guidelines
 	private static final String STANDARD_PASSWORD = "test123";
@@ -835,7 +834,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		line.setIsRequired(true);
 		line.setIsActive(true);
 		line.setLineOrder(1);
-		line.setDisplayName(relationFieldName + " " + entityProperty1);
+		line.setFieldCaption(relationFieldName + " " + entityProperty1);
 		// check
 		CEntityFieldService.createFieldInfo(screen.getEntityType(), line);
 		screenLinesService.save(line);
@@ -845,7 +844,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		line.setIsRequired(true);
 		line.setIsActive(true);
 		line.setLineOrder(1);
-		line.setDisplayName(relationFieldName + " " + entityProperty1);
+		line.setFieldCaption(relationFieldName + " " + entityProperty1);
 		CEntityFieldService.createFieldInfo(screen.getEntityType(), line);
 		screenLinesService.save(line);
 		// Create second field
@@ -854,7 +853,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		line.setIsRequired(false);
 		line.setIsActive(true);
 		line.setLineOrder(2);
-		line.setDisplayName(relationFieldName + " " + entityProperty2);
+		line.setFieldCaption(relationFieldName + " " + entityProperty2);
 		CEntityFieldService.createFieldInfo(screen.getEntityType(), line);
 		screenLinesService.save(line);
 		//

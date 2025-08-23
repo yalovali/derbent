@@ -18,7 +18,6 @@ import tech.derbent.screens.service.CScreenService;
 import tech.derbent.screens.service.CViewsService;
 
 public class CPanelScreenLines extends CPanelScreenBase {
-
 	private static final long serialVersionUID = 1L;
 	private final CScreenLinesService screenLinesService;
 	private CGrid<CScreenLines> grid;
@@ -37,7 +36,7 @@ public class CPanelScreenLines extends CPanelScreenBase {
 		grid = new CGrid<CScreenLines>(CScreenLines.class);
 		grid.setHeightFull();
 		grid.addColumn(CScreenLines::getLineOrder).setHeader("Order").setWidth("80px");
-		grid.addColumn(CScreenLines::getDisplayName).setHeader("Caption").setAutoWidth(true);
+		grid.addColumn(CScreenLines::getFieldCaption).setHeader("Caption").setAutoWidth(true);
 		grid.addColumn(CScreenLines::getEntityProperty).setHeader("Field Name").setAutoWidth(true);
 		grid.addColumn(line -> line.getIsRequired() ? "Yes" : "No").setHeader("Required").setWidth("80px");
 		grid.addColumn(line -> line.getIsActive() ? "Active" : "Inactive").setHeader("Status").setWidth("80px");

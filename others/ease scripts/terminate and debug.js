@@ -1,6 +1,5 @@
 // name: Restart Debug
 // description: Terminate, wait ~1s, then Debug Last — runs on UI thread
-// toolbar: Script Shell
 // toolbar: org.eclipse.ui.main.toolbar
 // image: platform:/plugin/org.eclipse.debug.ui/icons/full/elcl16/relaunch_debug.png
 // keyboard: CTRL+ALT+P

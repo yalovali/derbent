@@ -15,7 +15,6 @@ import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CScreenLinesService extends CAbstractService<CScreenLines> {
-
 	public static CScreenLines createLineFromDefaults(final Class<?> entityClass, final String fieldName) throws NoSuchFieldException {
 		final Field field = CEntityFieldService.getEntityField(entityClass, fieldName);
 		Check.notNull(field, "Field not found: " + fieldName + " in class " + entityClass.getSimpleName());
@@ -24,7 +23,7 @@ public class CScreenLinesService extends CAbstractService<CScreenLines> {
 		final CScreenLines line = new CScreenLines();
 		line.setProperty(fieldInfo.getFieldName());
 		line.setDescription(fieldInfo.getDescription());
-		line.setDisplayName(fieldInfo.getDisplayName());
+		line.setFieldCaption(fieldInfo.getDisplayName());
 		line.setRelationFieldName(CEntityFieldService.THIS_CLASS);
 		return line;
 	}

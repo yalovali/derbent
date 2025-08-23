@@ -27,7 +27,6 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 1.4, icon = "class:tech.derbent.meetings.view.CMeetingsView", title = "Project.Meetings")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CMeetingsView extends CProjectAwareMDPage<CMeeting> implements CInterfaceIconSet {
-
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() {
@@ -171,7 +170,7 @@ public class CMeetingsView extends CProjectAwareMDPage<CMeeting> implements CInt
 						(tech.derbent.abstracts.services.CEntityOfProjectService<CMeeting>) entityService;
 				final Optional<tech.derbent.projects.domain.CProject> activeProject = sessionService.getActiveProject();
 				if (activeProject.isPresent()) {
-					final List<CMeeting> allMeetings = projectService.findEntriesByProject(activeProject.get(), Pageable.unpaged());
+					final List<CMeeting> allMeetings = projectService.findEntriesByProject(activeProject.get(), Pageable.unpaged()).getContent();
 					final List<CMeeting> filteredMeetings =
 							allMeetings.stream().filter(meeting -> matchesSearchText(meeting, searchText.toLowerCase().trim()))
 									.collect(java.util.stream.Collectors.toList());

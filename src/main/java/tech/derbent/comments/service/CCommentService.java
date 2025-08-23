@@ -2,7 +2,6 @@ package tech.derbent.comments.service;
 
 import java.time.Clock;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,7 +28,9 @@ public class CCommentService extends CAbstractService<CComment> {
 
 	@PreAuthorize ("permitAll()")
 	public long countByActivity(final CActivity activity) {
-		Check.notNull(activity, "Activity cannot be null");
+		if (activity == null) {
+			return 0L;
+		}
 		return ((CCommentRepository) repository).countByActivity(activity);
 	}
 
@@ -61,9 +62,11 @@ public class CCommentService extends CAbstractService<CComment> {
 	 * @param activity the activity
 	 * @return list of comments for the activity ordered by event date */
 	@PreAuthorize ("permitAll()")
-	public List<CComment> findByActivityOrderByEventDateAsc(final CActivity activity) {
-		Check.notNull(activity, "Activity cannot be null");
-		return ((CCommentRepository) repository).findByActivityOrderByEventDateAsc(activity);
+	public List<CComment> findByActivity(final CActivity activity) {
+		if (activity == null) {
+			return List.of();
+		}
+		return ((CCommentRepository) repository).findByActivity(activity);
 	}
 
 	/** Finds all comments for a specific activity with pagination.
@@ -71,27 +74,9 @@ public class CCommentService extends CAbstractService<CComment> {
 	 * @param pageable pagination information
 	 * @return page of comments for the activity ordered by event date */
 	@PreAuthorize ("permitAll()")
-	public Page<CComment> findByActivityOrderByEventDateAsc(final CActivity activity, final Pageable pageable) {
+	public Page<CComment> findByActivity(final CActivity activity, final Pageable pageable) {
 		Check.notNull(activity, "Activity cannot be null");
-		return ((CCommentRepository) repository).findByActivityOrderByEventDateAsc(activity, pageable);
-	}
-
-	/** Finds all comments for an activity with eagerly loaded relationships.
-	 * @param activity the activity
-	 * @return list of comments with loaded relationships ordered by event date */
-	@PreAuthorize ("permitAll()")
-	public List<CComment> findByActivityWithRelationships(final CActivity activity) {
-		Check.notNull(activity, "Activity cannot be null");
-		return ((CCommentRepository) repository).findByActivityOrderByEventDateAsc(activity);
-	}
-
-	/** Finds all comments by a specific author, ordered by event date (newest first).
-	 * @param author the comment author
-	 * @return list of comments by the author ordered by event date */
-	@PreAuthorize ("permitAll()")
-	public List<CComment> findByAuthorOrderByEventDateDesc(final CUser author) {
-		Check.notNull(author, "Author cannot be null");
-		return ((CCommentRepository) repository).findByAuthorOrderByEventDateDesc(author);
+		return ((CCommentRepository) repository).findByActivity(activity, pageable);
 	}
 
 	/** Finds important comments for an activity.
@@ -101,14 +86,6 @@ public class CCommentService extends CAbstractService<CComment> {
 	public List<CComment> findImportantByActivity(final CActivity activity) {
 		Check.notNull(activity, "Activity cannot be null");
 		return ((CCommentRepository) repository).findImportantByActivity(activity);
-	}
-
-	/** Overrides the base get method to eagerly load relationships. This prevents LazyInitializationException when the entity is used in UI
-	 * components. */
-	@Override
-	public Optional<CComment> getById(final Long id) {
-		Check.notNull(id, "ID must not be null");
-		return repository.findById(id);
 	}
 
 	@Override

@@ -25,7 +25,6 @@ import tech.derbent.users.domain.CUser;
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class CUserService extends CAbstractNamedEntityService<CUser> implements UserDetailsService {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserService.class);
 	private final PasswordEncoder passwordEncoder;
 
@@ -43,7 +42,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	 * @return count of users assigned to the project */
 	@PreAuthorize ("permitAll()")
 	public long countUsersByProjectId(final Long projectId) {
-		return ((CUserRepository) repository).countUsersByProjectId(projectId);
+		return ((CUserRepository) repository).countByProjectId(projectId);
 	}
 
 	@Transactional // Write operation requires writable transaction
@@ -62,13 +61,6 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 		// Save to database
 		final CUser savedUser = repository.saveAndFlush(loginUser);
 		return savedUser;
-	}
-
-	@Transactional (readOnly = true)
-	public CUser findByIdWithUserSettings(final Long id) {
-		LOGGER.info("Getting project with users for project ID: {}", id);
-		// Using the custom repository method that eagerly fetches user settings
-		return ((CUserRepository) repository).findByIdWithUserSettings(id).orElse(null);
 	}
 
 	/** Finds a user by login username.
@@ -93,19 +85,6 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 				.map(SimpleGrantedAuthority::new).collect(Collectors.toList());
 		LOGGER.debug("Converted roles '{}' to authorities: {}", rolesString, authorities);
 		return authorities;
-	}
-
-	/** Gets a user by ID with eagerly loaded UserType and Company relationships. This prevents LazyInitializationException when accessing user type
-	 * and company information.
-	 * @param id the user ID
-	 * @return optional user with loaded relationships */
-	@Override
-	@Transactional (readOnly = true)
-	public java.util.Optional<CUser> getById(final Long id) {
-		Check.notNull(id, "ID must not be null");
-		final java.util.Optional<CUser> entity = ((CUserRepository) repository).findByIdWithUserType(id);
-		entity.ifPresent(this::initializeLazyFields);
-		return entity;
 	}
 
 	@Override

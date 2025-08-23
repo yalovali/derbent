@@ -3,7 +3,6 @@ package tech.derbent.decisions.service;
 import java.time.Clock;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.decisions.domain.CDecision;
@@ -16,18 +15,6 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> {
 
 	public CDecisionService(final CDecisionRepository repository, final Clock clock) {
 		super(repository, clock);
-	}
-
-	/** Gets a decision by ID with all relationships eagerly loaded. This prevents LazyInitializationException when accessing decision details.
-	 * @param id the decision ID
-	 * @return optional decision with loaded relationships */
-	@Override
-	@Transactional (readOnly = true)
-	public java.util.Optional<CDecision> getById(final Long id) {
-		Check.notNull(id, "ID must not be null");
-		final java.util.Optional<CDecision> entity = ((CDecisionRepository) repository).findByIdWithAllRelationships(id);
-		entity.ifPresent(this::initializeLazyFields);
-		return entity;
 	}
 
 	@Override

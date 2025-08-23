@@ -37,7 +37,6 @@ import tech.derbent.session.service.CSessionService;
 import tech.derbent.session.service.LayoutService;
 
 public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<EntityClass>> extends CAbstractPage implements CLayoutChangeListener {
-
 	private static final long serialVersionUID = 1L;
 	protected final Class<EntityClass> entityClass;
 	protected CGrid<EntityClass> grid;// = new CGrid<>(EntityClass.class, false);
@@ -261,7 +260,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				if ((currentSearchText != null) && !currentSearchText.trim().isEmpty() && CSearchable.class.isAssignableFrom(entityClass)) {
 					result = entityService.list(safePageable, currentSearchText);
 				} else {
-					result = entityService.list(safePageable);
+					result = entityService.list(safePageable).getContent();
 				}
 				LOGGER.debug("Data provider returned {} items", result.size());
 				return result.stream();
@@ -377,6 +376,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	public Div getDetailsTabLayout() { return detailsTabLayout; }
 
 	protected abstract String getEntityRouteIdField();
+
 	protected abstract String getEntityRouteTemplateEdit();
 
 	/** Gets the grid component for testing purposes.

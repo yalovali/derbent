@@ -42,18 +42,6 @@ public class COrderService extends CEntityOfProjectService<COrder> {
 		return ((COrderService) repository).findByResponsible(responsible);
 	}
 
-	/** Gets an order by ID with all relationships eagerly loaded. This prevents LazyInitializationException when accessing order details.
-	 * @param id the order ID
-	 * @return optional order with loaded relationships */
-	@Override
-	@Transactional (readOnly = true)
-	public java.util.Optional<COrder> getById(final Long id) {
-		Check.notNull(id, "ID must not be null");
-		final java.util.Optional<COrder> entity = ((COrderRepository) repository).findByIdWithEagerLoading(id);
-		entity.ifPresent(this::initializeLazyFields);
-		return entity;
-	}
-
 	@Override
 	protected Class<COrder> getEntityClass() { return COrder.class; }
 

@@ -10,7 +10,6 @@ import tech.derbent.screens.domain.CScreen;
 import tech.derbent.screens.domain.CScreenLines;
 
 public class CPanelDetails extends CAccordion {
-
 	private static final long serialVersionUID = 1L;
 	private final String name;
 	final Map<String, Component> componentMap;
@@ -38,7 +37,7 @@ public class CPanelDetails extends CAccordion {
 			formBuilder.addFieldLine(screen.getEntityType(), line, getBaseLayout(), componentMap, horizontalLayoutMap);
 		} catch (final Exception e) {
 			e.printStackTrace();
-			throw new Exception("Error processing line: " + line.getDisplayName(), e);
+			throw new Exception("Error processing line: " + line.getFieldCaption(), e);
 		}
 	}
 }

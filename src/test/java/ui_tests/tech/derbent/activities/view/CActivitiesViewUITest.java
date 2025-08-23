@@ -29,7 +29,6 @@ import ui_tests.tech.derbent.abstracts.ui.CAbstractUITest;
 /** CActivitiesViewUITest - Comprehensive UI tests for the Activities view. Layer: Testing (MVC) Tests grid functionality, lazy loading prevention,
  * data loading, and user interactions for the Activities view to ensure robust UI behavior. */
 class CActivitiesViewUITest extends CAbstractUITest<CActivity> {
-
 	@Mock
 	private CActivityService mockActivityService;
 	@Mock
@@ -172,7 +171,7 @@ class CActivitiesViewUITest extends CAbstractUITest<CActivity> {
 	void testGridWithEmptyData() {
 		LOGGER.info("Testing grid behavior with empty data");
 		// Mock empty result
-		when(mockActivityService.list(any())).thenReturn(Arrays.asList());
+		when(mockActivityService.list(any()).getContent()).thenReturn(Arrays.asList());
 		// Should not throw exceptions
 		assertDoesNotThrow(() -> {
 			testGridDataLoading(activitiesView.getGrid());
@@ -203,11 +202,7 @@ class CActivitiesViewUITest extends CAbstractUITest<CActivity> {
 	@Test
 	void testParentActivityColumnAccess() {
 		LOGGER.info("Testing parent activity column access specifically");
-		final CActivity activityWithParent = testEntities.get(0); // Has parent activity
-																	// set Test the parent
-																	// activity column
-																	// value provider
-																	// directly
+		final CActivity activityWithParent = testEntities.get(0);
 		final String parentActivityDisplay =
 				activityWithParent.getParentActivity() != null ? activityWithParent.getParentActivity().getName() : "No Parent Activity";
 		assertNotNull(parentActivityDisplay, "Parent activity display should not be null");

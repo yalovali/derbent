@@ -139,7 +139,6 @@ public abstract class CBaseKanbanColumn<T extends CKanbanEntity, S extends CKanb
 
 	/** Initializes the column components and layout. */
 	private void initializeColumn() {
-		LOGGER.debug("Initializing column layout for status: {}", status.getName());
 		// Set CSS class for styling
 		addClassName("kanban-column");
 		// Create header container
