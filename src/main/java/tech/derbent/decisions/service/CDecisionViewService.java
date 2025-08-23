@@ -34,15 +34,15 @@ public class CDecisionViewService {
 			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "createdBy"));
 			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "createdDate"));
 			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "decisionType"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "estimatedCost"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "decisionStatus"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "accountableUser"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "teamMembers"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "implementationDate"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "reviewDate"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "project"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "assignedTo"));
+			/* scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "decisionType"));
+			 * scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "estimatedCost"));
+			 * scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "decisionStatus"));
+			 * scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "accountableUser"));
+			 * scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "teamMembers"));
+			 * scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "implementationDate"));
+			 * scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "reviewDate"));
+			 * scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "project"));
+			 * scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "assignedTo")); */
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {
