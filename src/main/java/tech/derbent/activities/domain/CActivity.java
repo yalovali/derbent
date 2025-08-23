@@ -2,10 +2,8 @@ package tech.derbent.activities.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -18,7 +16,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
-import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.interfaces.CKanbanEntity;
 import tech.derbent.abstracts.interfaces.CKanbanStatus;
@@ -26,14 +24,10 @@ import tech.derbent.abstracts.interfaces.CKanbanType;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
 
-/**
- * CActivity - Enhanced domain entity representing project activities with comprehensive
- * management features. Layer: Domain (MVC) Supports: - Resource management (user
- * assignments, time tracking) - Task tracking (status, priority, progress) - Project
- * management (milestones, dependencies, deliverables) - Budget planning (cost estimation,
- * actual vs planned tracking) Inspired by Jira and ProjeQtOr functionality for
- * professional project management.
- */
+/** CActivity - Enhanced domain entity representing project activities with comprehensive management features. Layer: Domain (MVC) Supports: -
+ * Resource management (user assignments, time tracking) - Task tracking (status, priority, progress) - Project management (milestones, dependencies,
+ * deliverables) - Budget planning (cost estimation, actual vs planned tracking) Inspired by Jira and ProjeQtOr functionality for professional project
+ * management. */
 @Entity
 @Table (name = "cactivity") // table name for the entity as the default is the class name
 // in lowercase
@@ -51,228 +45,168 @@ public class CActivity extends CEntityOfProject<CActivity> implements CKanbanEnt
 	// Basic Activity Information
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "cactivitytype_id", nullable = true)
-	@MetaData (
-		displayName = "Activity Type", required = false, readOnly = false,
-		description = "Type category of the activity", hidden = false, order = 2,
-		dataProviderBean = "CActivityTypeService"
+	@AMetaData (
+			displayName = "Activity Type", required = false, readOnly = false, description = "Type category of the activity", hidden = false,
+			order = 2, dataProviderBean = "CActivityTypeService"
 	)
 	private CActivityType activityType;
-
 	// Time Tracking
 	@Column (name = "estimated_hours", nullable = true, precision = 10, scale = 2)
 	@DecimalMin (value = "0.0", message = "Estimated hours must be positive")
 	@DecimalMax (value = "9999.99", message = "Estimated hours cannot exceed 9999.99")
-	@MetaData (
-		displayName = "Estimated Hours", required = false, readOnly = false,
-		defaultValue = "0.00",
-		description = "Estimated time in hours to complete this activity", hidden = false,
-		order = 20
+	@AMetaData (
+			displayName = "Estimated Hours", required = false, readOnly = false, defaultValue = "0.00",
+			description = "Estimated time in hours to complete this activity", hidden = false, order = 20
 	)
 	private BigDecimal estimatedHours;
-
 	@Column (name = "actual_hours", nullable = true, precision = 10, scale = 2)
 	@DecimalMin (value = "0.0", message = "Actual hours must be positive")
 	@DecimalMax (value = "9999.99", message = "Actual hours cannot exceed 9999.99")
-	@MetaData (
-		displayName = "Actual Hours", required = false, readOnly = false,
-		defaultValue = "0.00",
-		description = "Actual time spent on this activity in hours", hidden = false,
-		order = 21
+	@AMetaData (
+			displayName = "Actual Hours", required = false, readOnly = false, defaultValue = "0.00",
+			description = "Actual time spent on this activity in hours", hidden = false, order = 21
 	)
 	private BigDecimal actualHours = BigDecimal.ZERO;
-
 	@Column (name = "remaining_hours", nullable = true, precision = 10, scale = 2)
 	@DecimalMin (value = "0.0", message = "Remaining hours must be positive")
 	@DecimalMax (value = "9999.99", message = "Remaining hours cannot exceed 9999.99")
-	@MetaData (
-		displayName = "Remaining Hours", required = false, readOnly = false,
-		defaultValue = "0.00", description = "Estimated remaining time in hours",
-		hidden = false, order = 22
+	@AMetaData (
+			displayName = "Remaining Hours", required = false, readOnly = false, defaultValue = "0.00",
+			description = "Estimated remaining time in hours", hidden = false, order = 22
 	)
 	private BigDecimal remainingHours;
-
 	// Status and Priority Management
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "cactivitystatus_id", nullable = true)
-	@MetaData (
-		displayName = "Status", required = false, readOnly = false,
-		description = "Current status of the activity", hidden = false, order = 30,
-		dataProviderBean = "CActivityStatusService"
+	@AMetaData (
+			displayName = "Status", required = false, readOnly = false, description = "Current status of the activity", hidden = false, order = 30,
+			dataProviderBean = "CActivityStatusService"
 	)
 	private CActivityStatus status;
-
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "cactivitypriority_id", nullable = true)
-	@MetaData (
-		displayName = "Priority", required = false, readOnly = false,
-		description = "Priority level of the activity", hidden = false, order = 31,
-		dataProviderBean = "CActivityPriorityService"
+	@AMetaData (
+			displayName = "Priority", required = false, readOnly = false, description = "Priority level of the activity", hidden = false, order = 31,
+			dataProviderBean = "CActivityPriorityService"
 	)
 	private CActivityPriority priority;
-
 	@Column (name = "progress_percentage", nullable = true)
 	@Min (value = 0, message = "Progress percentage must be between 0 and 100")
 	@Max (value = 100, message = "Progress percentage must be between 0 and 100")
-	@MetaData (
-		displayName = "Progress %", required = false, readOnly = false,
-		defaultValue = "0", description = "Completion percentage (0-100)", hidden = false,
-		order = 32
+	@AMetaData (
+			displayName = "Progress %", required = false, readOnly = false, defaultValue = "0", description = "Completion percentage (0-100)",
+			hidden = false, order = 32
 	)
 	private Integer progressPercentage = 0;
-
 	// Date Management
 	@Column (name = "start_date", nullable = true)
-	@MetaData (
-		displayName = "Start Date", required = false, readOnly = false,
-		description = "Planned or actual start date of the activity", hidden = false,
-		order = 40
+	@AMetaData (
+			displayName = "Start Date", required = false, readOnly = false, description = "Planned or actual start date of the activity",
+			hidden = false, order = 40
 	)
 	private LocalDate startDate;
-
 	@Column (name = "due_date", nullable = true)
-	@MetaData (
-		displayName = "Due Date", required = false, readOnly = false,
-		description = "Expected completion date", hidden = false, order = 41
-	)
+	@AMetaData (displayName = "Due Date", required = false, readOnly = false, description = "Expected completion date", hidden = false, order = 41)
 	private LocalDate dueDate;
-
 	@Column (name = "completion_date", nullable = true)
-	@MetaData (
-		displayName = "Completion Date", required = false, readOnly = true,
-		description = "Actual completion date", hidden = false, order = 42
+	@AMetaData (
+			displayName = "Completion Date", required = false, readOnly = true, description = "Actual completion date", hidden = false, order = 42
 	)
 	private LocalDate completionDate;
-
 	// Budget Management
 	@Column (name = "estimated_cost", nullable = true, precision = 12, scale = 2)
 	@DecimalMin (value = "0.0", message = "Estimated cost must be positive")
 	@DecimalMax (value = "999999.99", message = "Estimated cost cannot exceed 999999.99")
-	@MetaData (
-		displayName = "Estimated Cost", required = false, readOnly = false,
-		defaultValue = "0.00", description = "Estimated cost to complete this activity",
-		hidden = false, order = 50
+	@AMetaData (
+			displayName = "Estimated Cost", required = false, readOnly = false, defaultValue = "0.00",
+			description = "Estimated cost to complete this activity", hidden = false, order = 50
 	)
 	private BigDecimal estimatedCost;
-
 	@Column (name = "actual_cost", nullable = true, precision = 12, scale = 2)
 	@DecimalMin (value = "0.0", message = "Actual cost must be positive")
 	@DecimalMax (value = "999999.99", message = "Actual cost cannot exceed 999999.99")
-	@MetaData (
-		displayName = "Actual Cost", required = false, readOnly = false,
-		defaultValue = "0.00", description = "Actual cost spent on this activity",
-		hidden = false, order = 51
+	@AMetaData (
+			displayName = "Actual Cost", required = false, readOnly = false, defaultValue = "0.00",
+			description = "Actual cost spent on this activity", hidden = false, order = 51
 	)
 	private BigDecimal actualCost = BigDecimal.ZERO;
-
 	@Column (name = "hourly_rate", nullable = true, precision = 10, scale = 2)
 	@DecimalMin (value = "0.0", message = "Hourly rate must be positive")
 	@DecimalMax (value = "9999.99", message = "Hourly rate cannot exceed 9999.99")
-	@MetaData (
-		displayName = "Hourly Rate", required = false, readOnly = false,
-		defaultValue = "0.00", description = "Hourly rate for cost calculation",
-		hidden = false, order = 52
+	@AMetaData (
+			displayName = "Hourly Rate", required = false, readOnly = false, defaultValue = "0.00", description = "Hourly rate for cost calculation",
+			hidden = false, order = 52
 	)
 	private BigDecimal hourlyRate;
-
 	// Hierarchical Structure Support
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "parent_activity_id", nullable = true)
-	@MetaData (
-		displayName = "Parent Activity", required = false, readOnly = false,
-		description = "Parent activity for hierarchical task breakdown", hidden = false,
-		order = 60, dataProviderBean = "CActivityService"
+	@AMetaData (
+			displayName = "Parent Activity", required = false, readOnly = false, description = "Parent activity for hierarchical task breakdown",
+			hidden = false, order = 60, dataProviderBean = "CActivityService"
 	)
 	private CActivity parentActivity;
-
 	// Additional Information
 	@Column (name = "acceptance_criteria", nullable = true, length = 2000)
 	@Size (max = 2000)
-	@MetaData (
-		displayName = "Acceptance Criteria", required = false, readOnly = false,
-		defaultValue = "",
-		description = "Criteria that must be met for the activity to be considered complete",
-		hidden = false, order = 70, maxLength = 2000
+	@AMetaData (
+			displayName = "Acceptance Criteria", required = false, readOnly = false, defaultValue = "",
+			description = "Criteria that must be met for the activity to be considered complete", hidden = false, order = 70, maxLength = 2000
 	)
 	private String acceptanceCriteria;
-
 	@Column (name = "notes", nullable = true, length = 2000)
 	@Size (max = 2000)
-	@MetaData (
-		displayName = "Notes", required = false, readOnly = false, defaultValue = "",
-		description = "Additional notes and comments", hidden = false, order = 71,
-		maxLength = 2000
+	@AMetaData (
+			displayName = "Notes", required = false, readOnly = false, defaultValue = "", description = "Additional notes and comments",
+			hidden = false, order = 71, maxLength = 2000
 	)
 	private String notes;
-
 	@Column (name = "results", nullable = true, length = 2000)
 	@Size (max = 2000)
-	@MetaData (
-		displayName = "Results", required = false, readOnly = false, defaultValue = "",
-		description = "Results and outcomes of the activity", hidden = false, order = 72,
-		maxLength = 2000
+	@AMetaData (
+			displayName = "Results", required = false, readOnly = false, defaultValue = "", description = "Results and outcomes of the activity",
+			hidden = false, order = 72, maxLength = 2000
 	)
 	private String results;
 
-	/**
-	 * Default constructor for JPA.
-	 */
+	/** Default constructor for JPA. */
 	public CActivity() {
 		super();
 		// Initialize with default values for JPA
 		initializeDefaults();
 	}
 
-	/**
-	 * Constructor with name and project.
+	/** Constructor with name and project.
 	 * @param name    the name of the activity - must not be null
-	 * @param project the project this activity belongs to - must not be null
-	 */
+	 * @param project the project this activity belongs to - must not be null */
 	public CActivity(final String name, final CProject project) {
 		super(CActivity.class, name, project);
-
-		if (name == null) {
-			LOGGER.warn("CActivity constructor - Name parameter is null");
-		}
-
-		if (project == null) {
-			LOGGER.warn("CActivity constructor - Project parameter is null");
-		}
 		initializeDefaults();
 	}
 
-	/**
-	 * Constructor with name, project, and assigned user.
+	/** Constructor with name, project, and assigned user.
 	 * @param name       the name of the activity - must not be null
 	 * @param project    the project this activity belongs to - must not be null
-	 * @param assignedTo the user assigned to this activity - can be null
-	 */
+	 * @param assignedTo the user assigned to this activity - can be null */
 	public CActivity(final String name, final CProject project, final CUser assignedTo) {
 		super(CActivity.class, name, project);
 		initializeDefaults();
 		setAssignedTo(assignedTo);
 	}
 
-	/**
-	 * Calculate the cost variance (actual cost - estimated cost).
-	 * @return the cost variance, positive if over budget, negative if under budget
-	 */
+	/** Calculate the cost variance (actual cost - estimated cost).
+	 * @return the cost variance, positive if over budget, negative if under budget */
 	public BigDecimal calculateCostVariance() {
-
 		if ((actualCost == null) || (estimatedCost == null)) {
-			LOGGER.debug(
-				"calculateCostVariance() - Missing cost data, actual={}, estimated={}",
-				actualCost, estimatedCost);
+			LOGGER.debug("calculateCostVariance() - Missing cost data, actual={}, estimated={}", actualCost, estimatedCost);
 			return BigDecimal.ZERO;
 		}
 		return actualCost.subtract(estimatedCost);
 	}
 
-	/**
-	 * Calculate the time variance (actual hours - estimated hours).
-	 * @return the time variance, positive if over estimated, negative if under estimated
-	 */
+	/** Calculate the time variance (actual hours - estimated hours).
+	 * @return the time variance, positive if over estimated, negative if under estimated */
 	public BigDecimal calculateTimeVariance() {
-
 		if ((actualHours == null) || (estimatedHours == null)) {
 			return BigDecimal.ZERO;
 		}
@@ -285,14 +219,10 @@ public class CActivity extends CEntityOfProject<CActivity> implements CKanbanEnt
 
 	public CActivityType getActivityType() { return activityType; }
 
-	public BigDecimal getActualCost() {
-		return actualCost != null ? actualCost : BigDecimal.ZERO;
-	}
+	public BigDecimal getActualCost() { return actualCost != null ? actualCost : BigDecimal.ZERO; }
 	// Getters and Setters with proper logging and null checking
 
-	public BigDecimal getActualHours() {
-		return actualHours != null ? actualHours : BigDecimal.ZERO;
-	}
+	public BigDecimal getActualHours() { return actualHours != null ? actualHours : BigDecimal.ZERO; }
 
 	public LocalDate getCompletionDate() { return completionDate; }
 
@@ -310,9 +240,7 @@ public class CActivity extends CEntityOfProject<CActivity> implements CKanbanEnt
 
 	public CActivityPriority getPriority() { return priority; }
 
-	public Integer getProgressPercentage() {
-		return progressPercentage != null ? progressPercentage : 0;
-	}
+	public Integer getProgressPercentage() { return progressPercentage != null ? progressPercentage : 0; }
 
 	public BigDecimal getRemainingHours() { return remainingHours; }
 
@@ -326,82 +254,62 @@ public class CActivity extends CEntityOfProject<CActivity> implements CKanbanEnt
 	@Override
 	public CKanbanType getType() { return activityType; }
 
-	/**
-	 * Initialize default values for the activity.
-	 */
+	/** Initialize default values for the activity. */
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-
 		if (this.actualHours == null) {
 			this.actualHours = BigDecimal.ZERO;
 		}
-
 		if (this.actualCost == null) {
 			this.actualCost = BigDecimal.ZERO;
 		}
-
 		if (this.progressPercentage == null) {
 			this.progressPercentage = 0;
 		}
-
 		if (this.estimatedHours == null) {
 			this.estimatedHours = BigDecimal.ZERO;
 		}
-
 		if (this.estimatedCost == null) {
 			this.estimatedCost = BigDecimal.ZERO;
 		}
-
 		if (this.remainingHours == null) {
 			this.remainingHours = BigDecimal.ZERO;
 		}
-
 		if (this.hourlyRate == null) {
 			this.hourlyRate = BigDecimal.ZERO;
 		}
-
 		if (this.startDate == null) {
 			this.startDate = LocalDate.now();
 		}
-
 		if (this.dueDate == null) {
 			this.dueDate = LocalDate.now().plusDays(7); // Default to 1 week from today
 		}
-
 		if (this.completionDate == null) {
 			this.completionDate = null; // No completion date by default
 		}
 	}
 
-	/**
-	 * Check if the activity is completed.
-	 * @return true if the activity has a completion date or progress is 100%
-	 */
+	/** Check if the activity is completed.
+	 * @return true if the activity has a completion date or progress is 100% */
 	public boolean isCompleted() {
 		final boolean hasCompletionDate = completionDate != null;
-		final boolean isFullProgress =
-			(progressPercentage != null) && (progressPercentage >= 100);
+		final boolean isFullProgress = (progressPercentage != null) && (progressPercentage >= 100);
 		final boolean isFinalStatus = (status != null) && status.getFinalStatus();
 		final boolean completed = hasCompletionDate || isFullProgress || isFinalStatus;
-		LOGGER.debug(
-			"isCompleted() - Activity id={} completed={} (completionDate={}, progress={}, finalStatus={})",
-			getId(), completed, hasCompletionDate, progressPercentage, isFinalStatus);
+		LOGGER.debug("isCompleted() - Activity id={} completed={} (completionDate={}, progress={}, finalStatus={})", getId(), completed,
+				hasCompletionDate, progressPercentage, isFinalStatus);
 		return completed;
 	}
 
-	/**
-	 * Check if the activity is overdue.
-	 * @return true if the due date has passed and the activity is not completed
-	 */
+	/** Check if the activity is overdue.
+	 * @return true if the due date has passed and the activity is not completed */
 	public boolean isOverdue() {
-
 		if ((dueDate == null) || isCompleted()) {
 			return false;
 		}
 		final boolean overdue = LocalDate.now().isAfter(dueDate);
-		LOGGER.debug("isOverdue() - Activity id={} overdue={} (dueDate={}, today={})",
-			getId(), overdue, dueDate, LocalDate.now());
+		LOGGER.debug("isOverdue() - Activity id={} overdue={} (dueDate={}, today={})", getId(), overdue, dueDate, LocalDate.now());
 		return overdue;
 	}
 
@@ -416,22 +324,16 @@ public class CActivity extends CEntityOfProject<CActivity> implements CKanbanEnt
 	}
 
 	public void setActualCost(final BigDecimal actualCost) {
-
 		if ((actualCost != null) && (actualCost.compareTo(BigDecimal.ZERO) < 0)) {
-			LOGGER.warn(
-				"setActualCost - Attempting to set negative actual cost: {} for activity id={}",
-				actualCost, getId());
+			LOGGER.warn("setActualCost - Attempting to set negative actual cost: {} for activity id={}", actualCost, getId());
 		}
 		this.actualCost = actualCost != null ? actualCost : BigDecimal.ZERO;
 		updateLastModified();
 	}
 
 	public void setActualHours(final BigDecimal actualHours) {
-
 		if ((actualHours != null) && (actualHours.compareTo(BigDecimal.ZERO) < 0)) {
-			LOGGER.warn(
-				"setActualHours - Attempting to set negative actual hours: {} for activity id={}",
-				actualHours, getId());
+			LOGGER.warn("setActualHours - Attempting to set negative actual hours: {} for activity id={}", actualHours, getId());
 		}
 		this.actualHours = actualHours != null ? actualHours : BigDecimal.ZERO;
 		updateLastModified();
@@ -439,9 +341,7 @@ public class CActivity extends CEntityOfProject<CActivity> implements CKanbanEnt
 
 	public void setCompletionDate(final LocalDate completionDate) {
 		this.completionDate = completionDate;
-
-		if ((completionDate != null) && (progressPercentage != null)
-			&& (progressPercentage < 100)) {
+		if ((completionDate != null) && (progressPercentage != null) && (progressPercentage < 100)) {
 			this.progressPercentage = 100;
 		}
 		updateLastModified();
@@ -453,33 +353,24 @@ public class CActivity extends CEntityOfProject<CActivity> implements CKanbanEnt
 	}
 
 	public void setEstimatedCost(final BigDecimal estimatedCost) {
-
 		if ((estimatedCost != null) && (estimatedCost.compareTo(BigDecimal.ZERO) < 0)) {
-			LOGGER.warn(
-				"setEstimatedCost - Attempting to set negative estimated cost: {} for activity id={}",
-				estimatedCost, getId());
+			LOGGER.warn("setEstimatedCost - Attempting to set negative estimated cost: {} for activity id={}", estimatedCost, getId());
 		}
 		this.estimatedCost = estimatedCost;
 		updateLastModified();
 	}
 
 	public void setEstimatedHours(final BigDecimal estimatedHours) {
-
 		if ((estimatedHours != null) && (estimatedHours.compareTo(BigDecimal.ZERO) < 0)) {
-			LOGGER.warn(
-				"setEstimatedHours - Attempting to set negative estimated hours: {} for activity id={}",
-				estimatedHours, getId());
+			LOGGER.warn("setEstimatedHours - Attempting to set negative estimated hours: {} for activity id={}", estimatedHours, getId());
 		}
 		this.estimatedHours = estimatedHours;
 		updateLastModified();
 	}
 
 	public void setHourlyRate(final BigDecimal hourlyRate) {
-
 		if ((hourlyRate != null) && (hourlyRate.compareTo(BigDecimal.ZERO) < 0)) {
-			LOGGER.warn(
-				"setHourlyRate - Attempting to set negative hourly rate: {} for activity id={}",
-				hourlyRate, getId());
+			LOGGER.warn("setHourlyRate - Attempting to set negative hourly rate: {} for activity id={}", hourlyRate, getId());
 		}
 		this.hourlyRate = hourlyRate;
 		updateLastModified();
@@ -491,11 +382,8 @@ public class CActivity extends CEntityOfProject<CActivity> implements CKanbanEnt
 	}
 
 	public void setParentActivity(final CActivity parentActivity) {
-
 		if ((parentActivity != null) && parentActivity.equals(this)) {
-			LOGGER.warn(
-				"setParentActivity - Attempting to set self as parent for activity id={}",
-				getId());
+			LOGGER.warn("setParentActivity - Attempting to set self as parent for activity id={}", getId());
 			return;
 		}
 		this.parentActivity = parentActivity;
@@ -508,30 +396,21 @@ public class CActivity extends CEntityOfProject<CActivity> implements CKanbanEnt
 	}
 
 	public void setProgressPercentage(final Integer progressPercentage) {
-
-		if ((progressPercentage != null)
-			&& ((progressPercentage < 0) || (progressPercentage > 100))) {
-			LOGGER.warn(
-				"setProgressPercentage - Invalid progress percentage: {} for activity id={}",
-				progressPercentage, getId());
+		if ((progressPercentage != null) && ((progressPercentage < 0) || (progressPercentage > 100))) {
+			LOGGER.warn("setProgressPercentage - Invalid progress percentage: {} for activity id={}", progressPercentage, getId());
 			return;
 		}
 		this.progressPercentage = progressPercentage != null ? progressPercentage : 0;
-
 		// Auto-set completion date if progress reaches 100%
-		if ((progressPercentage != null) && (progressPercentage >= 100)
-			&& (completionDate == null)) {
+		if ((progressPercentage != null) && (progressPercentage >= 100) && (completionDate == null)) {
 			this.completionDate = LocalDate.now();
 		}
 		updateLastModified();
 	}
 
 	public void setRemainingHours(final BigDecimal remainingHours) {
-
 		if ((remainingHours != null) && (remainingHours.compareTo(BigDecimal.ZERO) < 0)) {
-			LOGGER.warn(
-				"setRemainingHours - Attempting to set negative remaining hours: {} for activity id={}",
-				remainingHours, getId());
+			LOGGER.warn("setRemainingHours - Attempting to set negative remaining hours: {} for activity id={}", remainingHours, getId());
 		}
 		this.remainingHours = remainingHours;
 		updateLastModified();
@@ -549,11 +428,9 @@ public class CActivity extends CEntityOfProject<CActivity> implements CKanbanEnt
 
 	public void setStatus(final CActivityStatus status) {
 		this.status = status;
-
 		// Auto-set completion date if status is final
 		if ((status != null) && status.getFinalStatus() && (completionDate == null)) {
 			this.completionDate = LocalDate.now();
-
 			if ((progressPercentage != null) && (progressPercentage < 100)) {
 				this.progressPercentage = 100;
 			}
@@ -564,7 +441,6 @@ public class CActivity extends CEntityOfProject<CActivity> implements CKanbanEnt
 	// CKanbanEntity implementation methods
 	@Override
 	public void setStatus(final CKanbanStatus status) {
-
 		if (status instanceof CActivityStatus) {
 			setStatus((CActivityStatus) status);
 		}

@@ -5,7 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
-import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityNamed;
 
 /**
@@ -21,12 +21,12 @@ public class CCurrency extends CEntityNamed<CCurrency> {
 
     @Column(name = "currency_code", nullable = false, length = 3, unique = false)
     @Size(max = 3, min = 3, message = "Currency code must be exactly 3 characters")
-    @MetaData(displayName = "Currency Code", required = true, readOnly = false, description = "ISO 4217 currency code (e.g., USD, EUR, GBP)", hidden = false, order = 2, maxLength = 3)
+    @AMetaData(displayName = "Currency Code", required = true, readOnly = false, description = "ISO 4217 currency code (e.g., USD, EUR, GBP)", hidden = false, order = 2, maxLength = 3)
     private String currencyCode;
 
     @Column(name = "currency_symbol", nullable = true, length = 5)
     @Size(max = 5)
-    @MetaData(displayName = "Symbol", required = false, readOnly = false, description = "Currency symbol (e.g., $, €, £)", hidden = false, order = 3, maxLength = 5)
+    @AMetaData(displayName = "Symbol", required = false, readOnly = false, description = "Currency symbol (e.g., $, €, £)", hidden = false, order = 3, maxLength = 5)
     private String currencySymbol;
 
     /**

@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
-import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.components.CBinderFactory;
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.domains.CEntityDB;
@@ -64,13 +64,13 @@ class CEntityFormBuilderStringComboBoxTest {
      */
     public static class TestEntityWithStringComboBox extends CEntityDB<TestEntityWithStringComboBox> {
 
-        @MetaData(displayName = "String Category", required = true, order = 1, dataProviderBean = "stringDataService")
+        @AMetaData(displayName = "String Category", required = true, order = 1, dataProviderBean = "stringDataService")
         private String category;
 
-        @MetaData(displayName = "String Type", required = false, order = 2, dataProviderBean = "stringDataService", dataProviderMethod = "getCategories")
+        @AMetaData(displayName = "String Type", required = false, order = 2, dataProviderBean = "stringDataService", dataProviderMethod = "getCategories")
         private String type;
 
-        @MetaData(displayName = "Regular String Field", required = false, order = 3, maxLength = 50)
+        @AMetaData(displayName = "Regular String Field", required = false, order = 3, maxLength = 50)
         private String description;
 
         // Getters and setters

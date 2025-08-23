@@ -73,7 +73,7 @@ public abstract class CGenericViewTest<T> extends CBaseUITest {
             final var formFields = page.locator("vaadin-text-field, vaadin-text-area, vaadin-combo-box");
 
             if (formFields.count() > 0) {
-                Check.condition(formFields.count() > 0, "Create form should have input fields for " + entityName);
+                Check.isTrue(formFields.count() > 0, "Create form should have input fields for " + entityName);
                 // Test form validation
                 clickSave();
                 wait_500();
@@ -85,7 +85,7 @@ public abstract class CGenericViewTest<T> extends CBaseUITest {
                 wait_500();
                 // Verify we're back to grid view
                 final int afterCancelCount = getGridRowCount();
-                Check.condition(afterCancelCount == initialRowCount,
+                Check.isTrue(afterCancelCount == initialRowCount,
                         "Row count should be unchanged after canceling create operation");
             } else {
                 LOGGER.debug("No form fields found - create operation may not be available for {} view", entityName);
@@ -119,7 +119,7 @@ public abstract class CGenericViewTest<T> extends CBaseUITest {
             LOGGER.debug("{} grid contains {} rows", entityName, gridRowCount);
             // Verify grid is present
             final var grids = page.locator("vaadin-grid");
-            Check.condition(grids.count() > 0, entityName + " view should contain at least one grid component");
+            Check.isTrue(grids.count() > 0, entityName + " view should contain at least one grid component");
 
             if (gridRowCount > 0) {
                 // Test grid selection
@@ -129,7 +129,7 @@ public abstract class CGenericViewTest<T> extends CBaseUITest {
                 LOGGER.debug("Successfully clicked first row in {} grid without errors", entityName);
                 // Test grid header interactions
                 final var gridHeaders = page.locator("vaadin-grid-column-header");
-                Check.condition(gridHeaders.count() > 0, entityName + " grid should have column headers");
+                Check.isTrue(gridHeaders.count() > 0, entityName + " grid should have column headers");
 
                 // Test sorting by clicking first header
                 if (gridHeaders.count() > 0) {
@@ -164,12 +164,12 @@ public abstract class CGenericViewTest<T> extends CBaseUITest {
             LOGGER.debug("Initial {} grid has {} rows", entityName, initialRowCount);
             // Try to click New button
             clickNew();
-            Check.condition(true, "Should be able to attempt clicking New button");
+            Check.isTrue(true, "Should be able to attempt clicking New button");
             wait_1000();
             // Check if a form appeared
             final var formElements = page.locator("vaadin-form-layout, vaadin-text-field, vaadin-text-area");
             final int formElementCount = formElements.count();
-            Check.condition(formElementCount > 0,
+            Check.isTrue(formElementCount > 0,
                     "Form elements should appear after clicking New in " + entityName + " view");
             LOGGER.debug("Form appeared with {} elements for new {} creation", formElementCount, entityName);
             // Test form validation by attempting to save without filling required fields
@@ -183,7 +183,7 @@ public abstract class CGenericViewTest<T> extends CBaseUITest {
             wait_500();
             // Verify we're back to grid view
             final int finalRowCount = getGridRowCount();
-            Check.condition(finalRowCount == initialRowCount,
+            Check.isTrue(finalRowCount == initialRowCount,
                     "Row count should be unchanged after canceling new " + entityName + " creation");
             LOGGER.debug("✅ New {} creation test completed successfully", entityName);
         } catch (final Exception e) {
@@ -207,7 +207,7 @@ public abstract class CGenericViewTest<T> extends CBaseUITest {
             // Test keyboard navigation basics
             final var focusableElements = page
                     .locator("button, input, select, textarea, [tabindex]:not([tabindex='-1'])");
-            Check.condition(focusableElements.count() > 0,
+            Check.isTrue(focusableElements.count() > 0,
                     entityName + " view should have focusable elements for accessibility");
             // Test ARIA labels and roles
             final var ariaElements = page.locator("[aria-label], [role]");
@@ -220,7 +220,7 @@ public abstract class CGenericViewTest<T> extends CBaseUITest {
                 // Check that button has text or aria-label
                 final String buttonText = button.textContent();
                 final String ariaLabel = button.getAttribute("aria-label");
-                Check.condition(
+                Check.isTrue(
                         ((buttonText != null) && !buttonText.trim().isEmpty())
                                 || ((ariaLabel != null) && !ariaLabel.trim().isEmpty()),
                         "Buttons in " + entityName + " view should have accessible text or aria-label");
@@ -274,7 +274,7 @@ public abstract class CGenericViewTest<T> extends CBaseUITest {
                     final int optionCount = options.count();
                     LOGGER.debug("ComboBox '{}' has {} options available", comboBoxLabel, optionCount);
                     // Verify ComboBox functionality
-                    Check.condition(optionCount >= 0,
+                    Check.isTrue(optionCount >= 0,
                             "ComboBox '" + comboBoxLabel + "' should have accessible options without errors");
 
                     if (optionCount > 0) {
@@ -319,18 +319,18 @@ public abstract class CGenericViewTest<T> extends CBaseUITest {
             LOGGER.debug("{} view loading summary: {} grids, {} buttons, {} forms", entityName, gridCount, buttonCount,
                     formCount);
             // Enhanced element checks
-            Check.condition((gridCount > 0) || (buttonCount > 0) || (formCount > 0),
+            Check.isTrue((gridCount > 0) || (buttonCount > 0) || (formCount > 0),
                     entityName + " view should contain at least one interactive element (grid, button, or form)");
             // Test that the page title or heading contains relevant information
             final var headings = page.locator("h1, h2, h3, [role='heading']");
             LOGGER.debug("{} view has {} heading elements", entityName, headings.count());
             // Verify no JavaScript errors occurred during loading
             final String currentUrl = page.url();
-            Check.condition(currentUrl.contains(getViewRoute()) || currentUrl.contains(entityName.toLowerCase()),
+            Check.isTrue(currentUrl.contains(getViewRoute()) || currentUrl.contains(entityName.toLowerCase()),
                     "URL should reflect the " + entityName + " view route");
             // Test responsive layout basics
             final var mainLayout = page.locator("vaadin-app-layout, vaadin-vertical-layout, vaadin-horizontal-layout");
-            Check.condition(mainLayout.count() > 0, entityName + " view should have proper layout components");
+            Check.isTrue(mainLayout.count() > 0, entityName + " view should have proper layout components");
             LOGGER.debug("✅ {} view loading test completed successfully", entityName);
         } catch (final Exception e) {
             LOGGER.error("❌ View loading test failed for {}: {}", entityName, e.getMessage());
@@ -354,12 +354,12 @@ public abstract class CGenericViewTest<T> extends CBaseUITest {
             // Verify successful navigation
             final String currentUrl = page.url();
             final String expectedRoute = getViewRoute();
-            Check.condition(currentUrl.contains(expectedRoute) || currentUrl.contains(entityName.toLowerCase()),
+            Check.isTrue(currentUrl.contains(expectedRoute) || currentUrl.contains(entityName.toLowerCase()),
                     "Navigation should lead to correct URL containing '" + expectedRoute + "' or '"
                             + entityName.toLowerCase() + "'");
             // Verify page is responsive and loaded
             final var pageContent = page.locator("body");
-            Check.condition(pageContent.isVisible(),
+            Check.isTrue(pageContent.isVisible(),
                     "Page content should be visible after navigation to " + entityName + " view");
             // Test that we can navigate back and forth
             page.goBack();
@@ -368,7 +368,7 @@ public abstract class CGenericViewTest<T> extends CBaseUITest {
             wait_500();
             // Verify we're back to the correct view
             final String finalUrl = page.url();
-            Check.condition(finalUrl.contains(expectedRoute) || finalUrl.contains(entityName.toLowerCase()),
+            Check.isTrue(finalUrl.contains(expectedRoute) || finalUrl.contains(entityName.toLowerCase()),
                     "Should return to " + entityName + " view after browser navigation");
             LOGGER.debug("✅ Navigation to {} view completed successfully", entityName);
         } catch (final Exception e) {

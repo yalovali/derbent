@@ -31,7 +31,7 @@ This document describes the implementation of administration and setup settings 
 
 **View**: `CCompanySettingsView`
 - Master-detail interface following existing patterns
-- Form generation using MetaData annotations
+- Form generation using AMetaData annotations
 - Grid display with key settings information
 - Reset to defaults functionality
 
@@ -62,7 +62,7 @@ This document describes the implementation of administration and setup settings 
 
 **View**: `CSystemSettingsView`
 - Single-page configuration interface
-- Form generation using MetaData annotations
+- Form generation using AMetaData annotations
 - Configuration testing functionality
 - Reset to defaults with confirmation
 
@@ -91,7 +91,7 @@ This document describes the implementation of administration and setup settings 
 ### UI Integration
 - **Vaadin Integration**: Follows existing Vaadin patterns
 - **Form Generation**: Automatic form generation using CEntityFormBuilder
-- **MetaData Annotations**: Rich metadata for form field generation
+- **AMetaData Annotations**: Rich metadata for form field generation
 - **Menu Integration**: Proper @Menu annotations for navigation
 - **Security**: @PermitAll for authenticated users (following existing pattern)
 
@@ -146,7 +146,7 @@ This implementation fully complies with the coding guidelines specified in `copi
 - ✅ Comprehensive logging at method entry
 - ✅ Null checking and validation
 - ✅ Using base classes and patterns
-- ✅ MetaData annotations for form generation
+- ✅ AMetaData annotations for form generation
 - ✅ Proper exception handling
 - ✅ PostgreSQL-specific database design
 - ✅ Sample data for testing

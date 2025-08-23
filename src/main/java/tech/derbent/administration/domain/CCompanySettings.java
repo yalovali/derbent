@@ -14,7 +14,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
-import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityConstants;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.companies.domain.CCompany;
@@ -31,106 +31,106 @@ public class CCompanySettings extends CEntityDB<CCompanySettings> {
 
     @ManyToOne
     @JoinColumn(name = "company_id", nullable = false)
-    @MetaData(displayName = "Company", required = true, readOnly = false, description = "Company these settings belong to", hidden = false, order = 1)
+    @AMetaData(displayName = "Company", required = true, readOnly = false, description = "Company these settings belong to", hidden = false, order = 1)
     private CCompany company;
 
     // Workflow and Project Management Settings
     @Column(name = "default_project_status", nullable = false, length = CEntityConstants.MAX_LENGTH_NAME)
     @Size(max = CEntityConstants.MAX_LENGTH_NAME)
-    @MetaData(displayName = "Default Project Status", required = true, readOnly = false, defaultValue = "PLANNED", description = "Default status for new projects", hidden = false, order = 2, maxLength = CEntityConstants.MAX_LENGTH_NAME)
+    @AMetaData(displayName = "Default Project Status", required = true, readOnly = false, defaultValue = "PLANNED", description = "Default status for new projects", hidden = false, order = 2, maxLength = CEntityConstants.MAX_LENGTH_NAME)
     private String defaultProjectStatus = "PLANNED";
 
     @Column(name = "default_activity_status", nullable = false, length = CEntityConstants.MAX_LENGTH_NAME)
     @Size(max = CEntityConstants.MAX_LENGTH_NAME)
-    @MetaData(displayName = "Default Activity Status", required = true, readOnly = false, defaultValue = "TODO", description = "Default status for new activities", hidden = false, order = 3, maxLength = CEntityConstants.MAX_LENGTH_NAME)
+    @AMetaData(displayName = "Default Activity Status", required = true, readOnly = false, defaultValue = "TODO", description = "Default status for new activities", hidden = false, order = 3, maxLength = CEntityConstants.MAX_LENGTH_NAME)
     private String defaultActivityStatus = "TODO";
 
     @Column(name = "default_activity_priority", nullable = false, length = CEntityConstants.MAX_LENGTH_NAME)
     @Size(max = CEntityConstants.MAX_LENGTH_NAME)
-    @MetaData(displayName = "Default Activity Priority", required = true, readOnly = false, defaultValue = "MEDIUM", description = "Default priority for new activities", hidden = false, order = 4, maxLength = CEntityConstants.MAX_LENGTH_NAME)
+    @AMetaData(displayName = "Default Activity Priority", required = true, readOnly = false, defaultValue = "MEDIUM", description = "Default priority for new activities", hidden = false, order = 4, maxLength = CEntityConstants.MAX_LENGTH_NAME)
     private String defaultActivityPriority = "MEDIUM";
 
     // Time and Schedule Settings
     @Column(name = "company_timezone", nullable = false, length = CEntityConstants.MAX_LENGTH_NAME)
     @Size(max = CEntityConstants.MAX_LENGTH_NAME)
-    @MetaData(displayName = "Company Timezone", required = true, readOnly = false, defaultValue = "UTC", description = "Primary timezone for the company", hidden = false, order = 5, maxLength = CEntityConstants.MAX_LENGTH_NAME)
+    @AMetaData(displayName = "Company Timezone", required = true, readOnly = false, defaultValue = "UTC", description = "Primary timezone for the company", hidden = false, order = 5, maxLength = CEntityConstants.MAX_LENGTH_NAME)
     private String companyTimezone = ZoneId.systemDefault().getId();
 
     @Column(name = "working_hours_per_day", nullable = false, precision = 4, scale = 2)
     @DecimalMin(value = "1.0", message = "Working hours must be at least 1.0")
     @DecimalMax(value = "24.0", message = "Working hours cannot exceed 24.0")
-    @MetaData(displayName = "Working Hours Per Day", required = true, readOnly = false, defaultValue = "8.0", description = "Standard working hours per day", hidden = false, order = 6)
+    @AMetaData(displayName = "Working Hours Per Day", required = true, readOnly = false, defaultValue = "8.0", description = "Standard working hours per day", hidden = false, order = 6)
     private BigDecimal workingHoursPerDay = new BigDecimal("8.0");
 
     @Column(name = "working_days_per_week", nullable = false)
     @Min(value = 1, message = "Working days must be at least 1")
     @Max(value = 7, message = "Working days cannot exceed 7")
-    @MetaData(displayName = "Working Days Per Week", required = true, readOnly = false, defaultValue = "5", description = "Standard working days per week", hidden = false, order = 7)
+    @AMetaData(displayName = "Working Days Per Week", required = true, readOnly = false, defaultValue = "5", description = "Standard working days per week", hidden = false, order = 7)
     private Integer workingDaysPerWeek = 5;
 
     @Column(name = "start_work_hour", nullable = false)
     @Min(value = 0, message = "Start work hour must be between 0 and 23")
     @Max(value = 23, message = "Start work hour must be between 0 and 23")
-    @MetaData(displayName = "Start Work Hour", required = true, readOnly = false, defaultValue = "9", description = "Standard work start hour (24-hour format)", hidden = false, order = 8)
+    @AMetaData(displayName = "Start Work Hour", required = true, readOnly = false, defaultValue = "9", description = "Standard work start hour (24-hour format)", hidden = false, order = 8)
     private Integer startWorkHour = 9;
 
     @Column(name = "end_work_hour", nullable = false)
     @Min(value = 0, message = "End work hour must be between 0 and 23")
     @Max(value = 23, message = "End work hour must be between 0 and 23")
-    @MetaData(displayName = "End Work Hour", required = true, readOnly = false, defaultValue = "17", description = "Standard work end hour (24-hour format)", hidden = false, order = 9)
+    @AMetaData(displayName = "End Work Hour", required = true, readOnly = false, defaultValue = "17", description = "Standard work end hour (24-hour format)", hidden = false, order = 9)
     private Integer endWorkHour = 17;
 
     // Notification Settings
     @Column(name = "email_notifications_enabled", nullable = false)
-    @MetaData(displayName = "Email Notifications", required = true, readOnly = false, defaultValue = "true", description = "Enable email notifications", hidden = false, order = 10)
+    @AMetaData(displayName = "Email Notifications", required = true, readOnly = false, defaultValue = "true", description = "Enable email notifications", hidden = false, order = 10)
     private Boolean emailNotificationsEnabled = Boolean.TRUE;
 
     @Column(name = "due_date_reminder_days", nullable = false)
     @Min(value = 0, message = "Reminder days must be non-negative")
     @Max(value = 30, message = "Reminder days cannot exceed 30")
-    @MetaData(displayName = "Due Date Reminder (Days)", required = true, readOnly = false, defaultValue = "3", description = "Days before due date to send reminders", hidden = false, order = 11)
+    @AMetaData(displayName = "Due Date Reminder (Days)", required = true, readOnly = false, defaultValue = "3", description = "Days before due date to send reminders", hidden = false, order = 11)
     private Integer dueDateReminderDays = 3;
 
     @Column(name = "overdue_notification_enabled", nullable = false)
-    @MetaData(displayName = "Overdue Notifications", required = true, readOnly = false, defaultValue = "true", description = "Enable overdue task notifications", hidden = false, order = 12)
+    @AMetaData(displayName = "Overdue Notifications", required = true, readOnly = false, defaultValue = "true", description = "Enable overdue task notifications", hidden = false, order = 12)
     private Boolean overdueNotificationEnabled = Boolean.TRUE;
 
     // Project Management Preferences
     @Column(name = "auto_assign_project_manager", nullable = false)
-    @MetaData(displayName = "Auto-assign Project Manager", required = true, readOnly = false, defaultValue = "false", description = "Automatically assign project manager to new projects", hidden = false, order = 13)
+    @AMetaData(displayName = "Auto-assign Project Manager", required = true, readOnly = false, defaultValue = "false", description = "Automatically assign project manager to new projects", hidden = false, order = 13)
     private Boolean autoAssignProjectManager = Boolean.FALSE;
 
     @Column(name = "require_time_tracking", nullable = false)
-    @MetaData(displayName = "Require Time Tracking", required = true, readOnly = false, defaultValue = "true", description = "Require time tracking for all activities", hidden = false, order = 14)
+    @AMetaData(displayName = "Require Time Tracking", required = true, readOnly = false, defaultValue = "true", description = "Require time tracking for all activities", hidden = false, order = 14)
     private Boolean requireTimeTracking = Boolean.TRUE;
 
     @Column(name = "default_hourly_rate", nullable = true, precision = 10, scale = 2)
     @DecimalMin(value = "0.0", message = "Hourly rate must be non-negative")
-    @MetaData(displayName = "Default Hourly Rate", required = false, readOnly = false, defaultValue = "50.0", description = "Default hourly rate for cost calculations", hidden = false, order = 15)
+    @AMetaData(displayName = "Default Hourly Rate", required = false, readOnly = false, defaultValue = "50.0", description = "Default hourly rate for cost calculations", hidden = false, order = 15)
     private BigDecimal defaultHourlyRate = new BigDecimal("50.0");
 
     // UI and Display Settings
     @Column(name = "company_theme_color", nullable = true, length = 7)
     @Size(max = 7)
-    @MetaData(displayName = "Theme Color", required = false, readOnly = false, defaultValue = "#1976d2", description = "Company primary theme color (hex)", hidden = false, order = 16, maxLength = 7)
+    @AMetaData(displayName = "Theme Color", required = false, readOnly = false, defaultValue = "#1976d2", description = "Company primary theme color (hex)", hidden = false, order = 16, maxLength = 7)
     private String companyThemeColor = "#1976d2";
 
     @Column(name = "show_budget_info", nullable = false)
-    @MetaData(displayName = "Show Budget Information", required = true, readOnly = false, defaultValue = "true", description = "Display budget information in project views", hidden = false, order = 17)
+    @AMetaData(displayName = "Show Budget Information", required = true, readOnly = false, defaultValue = "true", description = "Display budget information in project views", hidden = false, order = 17)
     private Boolean showBudgetInfo = Boolean.TRUE;
 
     @Column(name = "enable_gantt_charts", nullable = false)
-    @MetaData(displayName = "Enable Gantt Charts", required = true, readOnly = false, defaultValue = "true", description = "Enable Gantt chart functionality", hidden = false, order = 18)
+    @AMetaData(displayName = "Enable Gantt Charts", required = true, readOnly = false, defaultValue = "true", description = "Enable Gantt chart functionality", hidden = false, order = 18)
     private Boolean enableGanttCharts = Boolean.TRUE;
 
     // Security and Permissions
     @Column(name = "default_user_role", nullable = false, length = CEntityConstants.MAX_LENGTH_NAME)
     @Size(max = CEntityConstants.MAX_LENGTH_NAME)
-    @MetaData(displayName = "Default User Role", required = true, readOnly = false, defaultValue = "MEMBER", description = "Default role for new users", hidden = false, order = 19, maxLength = CEntityConstants.MAX_LENGTH_NAME)
+    @AMetaData(displayName = "Default User Role", required = true, readOnly = false, defaultValue = "MEMBER", description = "Default role for new users", hidden = false, order = 19, maxLength = CEntityConstants.MAX_LENGTH_NAME)
     private String defaultUserRole = "MEMBER";
 
     @Column(name = "require_approval_for_time_entries", nullable = false)
-    @MetaData(displayName = "Require Time Entry Approval", required = true, readOnly = false, defaultValue = "false", description = "Require manager approval for time entries", hidden = false, order = 20)
+    @AMetaData(displayName = "Require Time Entry Approval", required = true, readOnly = false, defaultValue = "false", description = "Require manager approval for time entries", hidden = false, order = 20)
     private Boolean requireApprovalForTimeEntries = Boolean.FALSE;
 
     /**

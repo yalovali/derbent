@@ -120,7 +120,7 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 			Check.notNull(method, "Method '" + methodName + "' on service bean for field '" + fieldName + "'");
 			final Object result = method.invoke(serviceBean);
 			Check.notNull(result, "Result of method '" + methodName + "' on service bean for field '" + fieldName + "'");
-			Check.condition(result instanceof List,
+			Check.isTrue(result instanceof List,
 					"Method '" + methodName + "' on service bean for field '" + fieldName + "' did not return a List");
 			final List<?> rawList = (List<?>) result;
 			// Convert to List<String> if possible
@@ -141,7 +141,7 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 			Check.notNull(method, "Method '" + methodName + "' on service bean for field '" + fieldName + "'");
 			final Object result = method.invoke(serviceBean, parameter);
 			Check.notNull(result, "Result of method '" + methodName + "' on service bean for field '" + fieldName + "'");
-			Check.condition(result instanceof List,
+			Check.isTrue(result instanceof List,
 					"Method '" + methodName + "' on service bean for field '" + fieldName + "' did not return a List");
 			final List<?> rawList = (List<?>) result;
 			// Convert to List<String> if possible
@@ -314,7 +314,7 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 		} else if (fieldType.isEnum()) {
 			component = createEnumComponent(fieldInfo, binder);
 		} else {
-			Check.condition(false, "Unsupported field type: " + fieldType.getSimpleName() + " for field: " + fieldInfo.getDisplayName());
+			Check.isTrue(false, "Unsupported field type: " + fieldType.getSimpleName() + " for field: " + fieldInfo.getDisplayName());
 		}
 		Check.notNull(component, "Component for field " + fieldInfo.getFieldName() + " of type " + fieldType.getSimpleName());
 		setRequiredIndicatorVisible(fieldInfo, component);
@@ -373,7 +373,7 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 	}
 
 	private static CHorizontalLayout createFieldLayout(final EntityFieldInfo fieldInfo, final Component component) {
-		Check.notNull(fieldInfo, "MetaData for field layout");
+		Check.notNull(fieldInfo, "AMetaData for field layout");
 		Check.notNull(component, "Component for field layout" + fieldInfo.getFieldName());
 		final CHorizontalLayout horizontalLayout = CHorizontalLayout.forForm();
 		final CDiv labelDiv = new CDiv(fieldInfo.getDisplayName());
@@ -552,19 +552,19 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 			Check.notNull(field, "Field in sorted filtered fields list");
 			return !Modifier.isStatic(field.getModifiers());
 		}).filter(field -> {
-			final MetaData metaData = field.getAnnotation(MetaData.class);
+			final AMetaData metaData = field.getAnnotation(AMetaData.class);
 			if (metaData == null) {
 				return false;
 			}
 			return true;
 		}).filter(field -> {
-			final MetaData metaData = field.getAnnotation(MetaData.class);
+			final AMetaData metaData = field.getAnnotation(AMetaData.class);
 			if (metaData.hidden()) {
 				return false;
 			}
 			return true;
 		}).sorted(Comparator.comparingInt(field -> {
-			final MetaData metaData = field.getAnnotation(MetaData.class);
+			final AMetaData metaData = field.getAnnotation(AMetaData.class);
 			return metaData != null ? metaData.order() : Integer.MAX_VALUE;
 		})).collect(Collectors.toList());
 	}
@@ -627,18 +627,18 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 		// Try to resolve data provider bean
 		final String beanName = fieldInfo.getDataProviderBean();
 		Check.notNull(beanName, "Data provider bean name for String field '" + fieldInfo.getFieldName() + "'");
-		Check.condition(!beanName.trim().isEmpty(), "Data provider bean name for String field '" + fieldInfo.getFieldName() + "' must not be empty");
+		Check.isTrue(!beanName.trim().isEmpty(), "Data provider bean name for String field '" + fieldInfo.getFieldName() + "' must not be empty");
 		if (beanName.equals("none")) {
 			return List.of(); // No data provider configured, return empty list
 		}
-		Check.condition(applicationContext.containsBean(beanName),
+		Check.isTrue(applicationContext.containsBean(beanName),
 				"Data provider bean '" + beanName + "' for String field '" + fieldInfo.getFieldName() + "' must be present in Spring context");
 		final Object serviceBean = applicationContext.getBean(beanName);
 		LOGGER.debug("Retrieved data provider bean '{}' for String field '{}'", beanName, fieldInfo.getFieldName());
 		// Determine method name to call
 		final String methodName = fieldInfo.getDataProviderMethod();
 		Check.notNull(methodName, "Data provider method name for String field '" + fieldInfo.getFieldName() + "'");
-		Check.condition(!methodName.trim().isEmpty(),
+		Check.isTrue(!methodName.trim().isEmpty(),
 				"Data provider method name for String field '" + fieldInfo.getFieldName() + "' must not be empty");
 		// Try to call the method
 		if ((fieldInfo.getDataProviderParamMethod() != null) && (fieldInfo.getDataProviderParamMethod().trim().length() > 0)) {

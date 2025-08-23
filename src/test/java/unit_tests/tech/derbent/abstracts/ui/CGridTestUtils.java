@@ -34,7 +34,7 @@ public class CGridTestUtils {
         LOGGER.info("Testing grid columns for lazy loading issues");
         Check.notNull(testEntity, "Test entity must not be null");
         // Basic test that grid has columns
-        Check.condition(grid.getColumns().size() > 0, "Grid should have columns");
+        Check.isTrue(grid.getColumns().size() > 0, "Grid should have columns");
         LOGGER.info("Grid has {} columns", grid.getColumns().size());
         LOGGER.info("All grid columns tested successfully");
     }
@@ -86,7 +86,7 @@ public class CGridTestUtils {
         Check.notNull(problematicEntity, "Problematic entity must not be null");
         // Test that the grid can handle problematic data
         try {
-            Check.condition(grid.getColumns().size() > 0, "Grid should have columns");
+            Check.isTrue(grid.getColumns().size() > 0, "Grid should have columns");
         } catch (Exception e) {
             throw new IllegalStateException("Grid should handle problematic data gracefully", e);
         }
@@ -117,7 +117,7 @@ public class CGridTestUtils {
         final long duration = endTime - startTime;
         LOGGER.info("Grid performance test completed in {}ms", duration);
         // Performance assertion - should complete within reasonable time
-        Check.condition(duration < 5000, "Grid performance test should complete within 5 seconds");
+        Check.isTrue(duration < 5000, "Grid performance test should complete within 5 seconds");
     }
 
     /**
@@ -146,7 +146,7 @@ public class CGridTestUtils {
             // Test deselection
             grid.deselectAll();
             final T afterDeselect = grid.asSingleSelect().getValue();
-            Check.condition(afterDeselect == null, "No entity should be selected after deselection");
+            Check.isTrue(afterDeselect == null, "No entity should be selected after deselection");
         } catch (Exception e) {
             throw new IllegalStateException("Grid selection should work without exceptions", e);
         }
@@ -169,7 +169,7 @@ public class CGridTestUtils {
 
         for (final String expectedKey : expectedColumnKeys) {
             final boolean hasColumn = grid.getColumns().stream().anyMatch(col -> expectedKey.equals(col.getKey()));
-            Check.condition(hasColumn, String.format("Grid should have column with key: %s", expectedKey));
+            Check.isTrue(hasColumn, String.format("Grid should have column with key: %s", expectedKey));
         }
         LOGGER.info("Grid column validation completed successfully");
     }

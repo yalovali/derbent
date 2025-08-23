@@ -6,7 +6,7 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.base.domain.CStatus;
 import tech.derbent.projects.domain.CProject;
 
@@ -29,7 +29,7 @@ public class CRiskStatus extends CStatus<CRiskStatus> {
     }
 
     @Column(name = "is_final", nullable = false)
-    @MetaData(displayName = "Is Final Status", required = true, readOnly = false, defaultValue = "false", description = "Indicates if this is a final status (resolved/closed)", hidden = false, order = 4)
+    @AMetaData(displayName = "Is Final Status", required = true, readOnly = false, defaultValue = "false", description = "Indicates if this is a final status (resolved/closed)", hidden = false, order = 4)
     private Boolean isFinal = Boolean.FALSE;
 
     /**

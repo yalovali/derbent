@@ -166,25 +166,25 @@ public class CKanbanView extends CProjectAwareMDPage<CActivity> {
 @Table(name = "ctime_log")
 public class CTimeLog extends CEntityBase {
     
-    @MetaData(displayName = "Activity", required = true, order = 1,
+    @AMetaData(displayName = "Activity", required = true, order = 1,
               dataProviderBean = "CActivityService")
     @ManyToOne(fetch = FetchType.LAZY)
     private CActivity activity;
     
-    @MetaData(displayName = "Start Time", required = true, order = 2)
+    @AMetaData(displayName = "Start Time", required = true, order = 2)
     private LocalDateTime startTime;
     
-    @MetaData(displayName = "End Time", required = false, order = 3)
+    @AMetaData(displayName = "End Time", required = false, order = 3)
     private LocalDateTime endTime;
     
-    @MetaData(displayName = "Duration (Hours)", required = false, order = 4)
+    @AMetaData(displayName = "Duration (Hours)", required = false, order = 4)
     private BigDecimal durationHours;
     
-    @MetaData(displayName = "Description", required = false, order = 5,
+    @AMetaData(displayName = "Description", required = false, order = 5,
               maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION)
     private String description;
     
-    @MetaData(displayName = "Category", required = true, order = 6,
+    @AMetaData(displayName = "Category", required = true, order = 6,
               dataProviderBean = "CTimeCategoryService")
     @ManyToOne(fetch = FetchType.LAZY)
     private CTimeCategory category;
@@ -761,7 +761,7 @@ This comprehensive to-do list is accompanied by detailed implementation guides f
 - [x] MVC architecture separation maintained
 - [x] Comprehensive logging at method entry
 - [x] Null checking and validation throughout
-- [x] MetaData annotations for form generation
+- [x] AMetaData annotations for form generation
 - [x] PostgreSQL-optimized database design
 - [x] Proper lazy loading architecture
 - [x] Exception handling with user-friendly messages

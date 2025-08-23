@@ -92,7 +92,7 @@ This document describes the comprehensive enhancements made to the Meeting Manag
 
 ### Coding Standards Compliance
 - All classes follow "C" prefix naming convention
-- Comprehensive `@MetaData` annotations for form generation
+- Comprehensive `@AMetaData` annotations for form generation
 - Proper lazy loading with initialization methods
 - Null-safe parameter handling
 - Comprehensive logging with method entry logging
@@ -117,7 +117,7 @@ This document describes the comprehensive enhancements made to the Meeting Manag
 - Panels integrate with existing form builder system
 - Uses existing `CButton`, `CDialog`, and other base UI components
 - Consistent styling with existing application theme
-- MetaData-driven form generation for all new fields
+- AMetaData-driven form generation for all new fields
 
 ## Benefits
 

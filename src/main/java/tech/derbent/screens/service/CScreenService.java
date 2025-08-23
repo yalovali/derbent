@@ -2,12 +2,11 @@ package tech.derbent.screens.service;
 
 import java.time.Clock;
 import java.util.List;
-
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import tech.derbent.abstracts.services.CEntityOfProjectService;
+import tech.derbent.abstracts.utils.Check;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CScreen;
 
@@ -25,30 +24,24 @@ public class CScreenService extends CEntityOfProjectService<CScreen> {
 	}
 
 	public CScreen findById(final Long id) {
-
-		if (id == null) {
-			return null;
-		}
+		Check.notNull(id, "ID must not be null");
 		return ((CScreenRepository) repository).findByIdWithEagerLoading(id).orElse(null);
 	}
 
 	@Transactional (readOnly = true)
 	public CScreen findByIdWithScreenLines(final Long id) {
-
-		if (id == null) {
-			return null;
-		}
+		Check.notNull(id, "ID must not be null");
 		return ((CScreenRepository) repository).findByIdWithScreenLines(id).orElse(null);
 	}
 
 	@Transactional (readOnly = true)
 	public CScreen findByNameAndProject(final CProject project, final String name) {
-
+		Check.notNull(project, "Project must not be null");
+		Check.notBlank(name, "Name must not be blank");
 		if ((project == null) || (name == null) || name.isBlank()) {
 			return null;
 		}
-		return ((CScreenRepository) repository).findByNameAndProject(project, name)
-			.orElse(null);
+		return ((CScreenRepository) repository).findByNameAndProject(project, name).orElse(null);
 	}
 
 	@Override

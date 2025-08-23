@@ -14,6 +14,8 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.abstracts.services.CTimer;
+import tech.derbent.abstracts.utils.Check;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.domain.CActivityType;
@@ -160,12 +162,11 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	/** Creates additional activities for Customer Experience Enhancement project. */
 	private void createAdditionalCustomerExperienceActivities() {
 		final CProject project = findProjectByName("Customer Experience Enhancement");
-		if (project == null) {
-			return;
-		}
+		Check.notNull(project, "Project 'Customer Experience Enhancement' not found");
 		// User Research Activity
 		final CActivity userResearch = new CActivity("User Research & Analysis", project);
 		final CActivityType researchType = findActivityTypeByNameAndProject("Research", project);
+		Check.notNull(researchType, "Research activity type not found for project");
 		userResearch.setActivityType(researchType);
 		userResearch.setDescription("Conduct user interviews and analyze customer feedback");
 		final CUser analyst = findUserByLogin("ademir");
@@ -770,6 +771,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 	/** Creates sample screens with two fields per project as per requirements. */
 	private void createSampleScreens() {
+		CTimer.stamp();
 		try {
 			final CProject project1 = findProjectByName("Digital Transformation Initiative");
 			if (project1 != null) {
@@ -779,6 +781,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			LOGGER.error("Error creating sample screens", e);
 			throw new RuntimeException("Failed to create sample screens", e);
 		}
+		CTimer.print();
 	}
 
 	/** Creates sample standup meeting. */
@@ -814,11 +817,10 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		meetingService.save(meeting);
 	}
 
-	/** Helper method to create a screen with two sample fields.
-	 * @throws Exception */
 	private void createScreenWithFields(final CProject project, final String screenName, final String entityType, final String relationFieldName,
 			final String entityProperty1, final String entityProperty2) throws Exception {
 		// Create the screen
+		CTimer.stamp();
 		final CScreen screen = new CScreen(screenName, project);
 		screen.setEntityType(entityType);
 		screen.setScreenTitle(screenName);
@@ -862,6 +864,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		screenService.save(CDecisionViewService.createBasicView(project));
 		// Log completion
 		LOGGER.info("Created sample fields for screen: {}", screenName);
+		CTimer.print();
 	}
 
 	/** Creates system architecture design activity. */

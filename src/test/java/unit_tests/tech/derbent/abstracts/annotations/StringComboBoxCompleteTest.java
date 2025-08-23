@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
-import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.components.CBinderFactory;
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.domains.CEntityDB;
@@ -42,10 +42,10 @@ class StringComboBoxCompleteTest {
      */
     public static class TestStringEntity extends CEntityDB<TestStringEntity> {
 
-        @MetaData(displayName = "Color", required = true, order = 1, dataProviderBean = "testStringService", defaultValue = "Red")
+        @AMetaData(displayName = "Color", required = true, order = 1, dataProviderBean = "testStringService", defaultValue = "Red")
         private String color;
 
-        @MetaData(displayName = "Type", required = false, order = 2, dataProviderBean = "testStringService", dataProviderMethod = "getTypes", autoSelectFirst = true)
+        @AMetaData(displayName = "Type", required = false, order = 2, dataProviderBean = "testStringService", dataProviderMethod = "getTypes", autoSelectFirst = true)
         private String type;
 
         @Override

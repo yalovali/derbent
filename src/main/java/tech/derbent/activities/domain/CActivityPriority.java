@@ -4,7 +4,7 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CTypeEntity;
 import tech.derbent.projects.domain.CProject;
 
@@ -24,7 +24,7 @@ public class CActivityPriority extends CTypeEntity<CActivityPriority> {
 	 * Priority level for the activity (1=Highest, 5=Lowest).
 	 */
 	@Column (name = "priority_level", nullable = false)
-	@MetaData (
+	@AMetaData (
 		displayName = "Priority Level", required = false, readOnly = false,
 		defaultValue = "3", description = "Priority level (1=Highest, 5=Lowest)",
 		hidden = false, order = 2
@@ -35,7 +35,7 @@ public class CActivityPriority extends CTypeEntity<CActivityPriority> {
 	 * Indicates if this is the default priority.
 	 */
 	@Column (name = "is_default", nullable = false)
-	@MetaData (
+	@AMetaData (
 		displayName = "Is Default", required = false, readOnly = false,
 		defaultValue = "false", description = "Indicates if this is the default priority",
 		hidden = false, order = 7

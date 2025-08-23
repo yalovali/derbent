@@ -18,7 +18,7 @@ import org.mockito.Mock;
 import org.springframework.context.ApplicationContext;
 
 import tech.derbent.abstracts.annotations.CDataProviderResolver;
-import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityDB;
 import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 
@@ -61,11 +61,11 @@ class CDataProviderResolverTest extends CTestBase {
     private CDataProviderResolver resolver;
 
     /**
-     * Helper method to create MetaData mock with specified values
+     * Helper method to create AMetaData mock with specified values
      */
-    private MetaData createMetaData(final String beanName, final String beanValue, final Class<?> providerClass,
+    private AMetaData createAMetaData(final String beanName, final String beanValue, final Class<?> providerClass,
             final String methodName) {
-        final MetaData metaData = mock(MetaData.class);
+        final AMetaData metaData = mock(AMetaData.class);
         when(metaData.dataProviderBean()).thenReturn(beanName);
         doReturn(providerClass).when(metaData).dataProviderClass();
         when(metaData.dataProviderMethod()).thenReturn(methodName);
@@ -81,7 +81,7 @@ class CDataProviderResolverTest extends CTestBase {
     @DisplayName("should try automatic resolution when no explicit provider specified")
     void testAutomaticResolutionAttempt() {
         // Given
-        final MetaData metaData = createMetaData("", "", Object.class, "list");
+        final AMetaData metaData = createAMetaData("", "", Object.class, "list");
         when(applicationContext.containsBean("TestEntityService")).thenReturn(false);
         when(applicationContext.containsBean("testEntityService")).thenReturn(false);
         when(applicationContext.containsBean("testentityService")).thenReturn(false);
@@ -100,7 +100,7 @@ class CDataProviderResolverTest extends CTestBase {
     @DisplayName("should prioritize explicit bean name over class")
     void testBeanNamePriorityOverClass() {
         // Given - both bean name and class specified
-        final MetaData metaData = createMetaData("explicitService", "", String.class, "list");
+        final AMetaData metaData = createAMetaData("explicitService", "", String.class, "list");
         when(applicationContext.containsBean("explicitService")).thenReturn(false);
         // When
         final List<TestEntity> result = resolver.resolveData(TestEntity.class, metaData);
@@ -116,7 +116,7 @@ class CDataProviderResolverTest extends CTestBase {
     @DisplayName("should return empty list when bean is not found by class")
     void testBeanNotFoundByClass() {
         // Given
-        final MetaData metaData = createMetaData("", "", String.class, "list");
+        final AMetaData metaData = createAMetaData("", "", String.class, "list");
         when(applicationContext.getBean(String.class)).thenThrow(new RuntimeException("Bean not found"));
         // When
         final List<TestEntity> result = resolver.resolveData(TestEntity.class, metaData);
@@ -130,7 +130,7 @@ class CDataProviderResolverTest extends CTestBase {
     @DisplayName("should return empty list when bean is not found by name")
     void testBeanNotFoundByName() {
         // Given
-        final MetaData metaData = createMetaData("nonExistentService", "", Object.class, "list");
+        final AMetaData metaData = createAMetaData("nonExistentService", "", Object.class, "list");
         when(applicationContext.containsBean("nonExistentService")).thenReturn(false);
         // When
         final List<TestEntity> result = resolver.resolveData(TestEntity.class, metaData);
@@ -145,7 +145,7 @@ class CDataProviderResolverTest extends CTestBase {
     @DisplayName("should prioritize explicit class when no bean name specified")
     void testClassResolutionWhenNoBeanName() {
         // Given - only class specified
-        final MetaData metaData = createMetaData("", "", String.class, "list");
+        final AMetaData metaData = createAMetaData("", "", String.class, "list");
         when(applicationContext.getBean(String.class)).thenThrow(new RuntimeException("Bean not found"));
         // When
         final List<TestEntity> result = resolver.resolveData(TestEntity.class, metaData);
@@ -182,7 +182,7 @@ class CDataProviderResolverTest extends CTestBase {
     @DisplayName("should handle null entity type gracefully")
     void testNullEntityType() {
         // Given
-        final MetaData metaData = createMetaData("testService", "", Object.class, "list");
+        final AMetaData metaData = createAMetaData("testService", "", Object.class, "list");
         // When & Then
         final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> resolver.resolveData(null, metaData));
@@ -191,18 +191,18 @@ class CDataProviderResolverTest extends CTestBase {
 
     @Test
     @DisplayName("should handle null metadata gracefully")
-    void testNullMetaData() {
+    void testNullAMetaData() {
         // When & Then
         final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> resolver.resolveData(TestEntity.class, null));
-        assertEquals("MetaData cannot be null", exception.getMessage());
+        assertEquals("AMetaData cannot be null", exception.getMessage());
     }
 
     @Test
     @DisplayName("should handle service method invocation errors gracefully")
     void testServiceMethodInvocationError() {
         // Given
-        final MetaData metaData = createMetaData("testService", "", Object.class, "list");
+        final AMetaData metaData = createAMetaData("testService", "", Object.class, "list");
         final Object mockService = new Object(); // Service without the expected method
         when(applicationContext.containsBean("testService")).thenReturn(true);
         when(applicationContext.getBean("testService")).thenReturn(mockService);

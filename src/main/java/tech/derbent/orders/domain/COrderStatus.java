@@ -11,7 +11,7 @@ import tech.derbent.projects.domain.CProject;
  * COrderStatus - Domain entity representing status states of orders in the system. Layer: Domain (MVC) Defines the
  * various status states an order can have during its lifecycle, such as Draft, Submitted, Approved, In Progress,
  * Completed, Cancelled, etc. This entity follows the standard CEntityNamed pattern providing automatic name and
- * description fields with MetaData annotation support.
+ * description fields with AMetaData annotation support.
  */
 @Entity
 @Table(name = "corderstatus")

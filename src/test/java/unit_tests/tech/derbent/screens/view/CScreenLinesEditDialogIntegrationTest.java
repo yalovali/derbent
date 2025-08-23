@@ -60,7 +60,7 @@ class CScreenLinesEditDialogIntegrationTest {
 				assertNotNull(fields,
 					"Fields should not be null for class: " + className);
 				// Note: Some entities might have empty field lists if they don't have
-				// MetaData annotations
+				// AMetaData annotations
 			}
 		}
 	}

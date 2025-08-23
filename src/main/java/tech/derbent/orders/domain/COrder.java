@@ -17,7 +17,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
-import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
@@ -26,7 +26,7 @@ import tech.derbent.users.domain.CUser;
  * COrder - Domain entity representing orders in the company system. Layer: Domain (MVC) Comprehensive order management
  * entity that tracks all aspects of company orders including type, project association, provider details, financial
  * information, responsible parties, and approval workflow. This entity extends CEntityOfProject to inherit project
- * association and standard audit fields, with comprehensive order-specific fields using MetaData annotations for
+ * association and standard audit fields, with comprehensive order-specific fields using AMetaData annotations for
  * automatic form generation. Key Features: - Project association (via CEntityOfProject) - Provider company and contact
  * management - Financial tracking with currency and cost information - Multi-level approval workflow - Status tracking
  * and responsibility assignment - Full audit trail and descriptive text
@@ -39,87 +39,87 @@ public class COrder extends CEntityOfProject<COrder> {
     // Order Type and Classification
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "order_type_id", nullable = false)
-    @MetaData(displayName = "Order Type", required = true, readOnly = false, description = "Type category of the order (e.g., Purchase Order, Service Order)", hidden = false, order = 2, dataProviderBean = "COrderTypeService")
+    @AMetaData(displayName = "Order Type", required = true, readOnly = false, description = "Type category of the order (e.g., Purchase Order, Service Order)", hidden = false, order = 2, dataProviderBean = "COrderTypeService")
     private COrderType orderType;
 
     // Provider Information
     @Column(name = "provider_company_name", nullable = false, length = 200)
     @Size(max = 200)
-    @MetaData(displayName = "Provider Company", required = true, readOnly = false, description = "Name of the company providing goods or services", hidden = false, order = 10, maxLength = 200)
+    @AMetaData(displayName = "Provider Company", required = true, readOnly = false, description = "Name of the company providing goods or services", hidden = false, order = 10, maxLength = 200)
     private String providerCompanyName;
 
     @Column(name = "provider_contact_name", nullable = true, length = 100)
     @Size(max = 100)
-    @MetaData(displayName = "Provider Contact", required = false, readOnly = false, description = "Contact person at the provider company", hidden = false, order = 11, maxLength = 100)
+    @AMetaData(displayName = "Provider Contact", required = false, readOnly = false, description = "Contact person at the provider company", hidden = false, order = 11, maxLength = 100)
     private String providerContactName;
 
     @Column(name = "provider_email", nullable = true, length = 150)
     @Size(max = 150)
-    @MetaData(displayName = "Provider Email", required = false, readOnly = false, description = "Email address of the provider contact", hidden = false, order = 12, maxLength = 150)
+    @AMetaData(displayName = "Provider Email", required = false, readOnly = false, description = "Email address of the provider contact", hidden = false, order = 12, maxLength = 150)
     private String providerEmail;
 
     // Requestor and Responsibility
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "requestor_id", nullable = false)
-    @MetaData(displayName = "Requestor", required = true, readOnly = false, description = "User who requested this order", hidden = false, order = 20, dataProviderBean = "CUserService")
+    @AMetaData(displayName = "Requestor", required = true, readOnly = false, description = "User who requested this order", hidden = false, order = 20, dataProviderBean = "CUserService")
     private CUser requestor;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "responsible_id", nullable = true)
-    @MetaData(displayName = "Responsible", required = false, readOnly = false, description = "User responsible for managing this order", hidden = false, order = 21, dataProviderBean = "CUserService")
+    @AMetaData(displayName = "Responsible", required = false, readOnly = false, description = "User responsible for managing this order", hidden = false, order = 21, dataProviderBean = "CUserService")
     private CUser responsible;
 
     // Status Management
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "order_status_id", nullable = false)
-    @MetaData(displayName = "Status", required = true, readOnly = false, description = "Current status of the order", hidden = false, order = 30, dataProviderBean = "COrderStatusService")
+    @AMetaData(displayName = "Status", required = true, readOnly = false, description = "Current status of the order", hidden = false, order = 30, dataProviderBean = "COrderStatusService")
     private COrderStatus status;
 
     // Financial Information
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "currency_id", nullable = false)
-    @MetaData(displayName = "Currency", required = true, readOnly = false, description = "Currency for the order cost", hidden = false, order = 40, dataProviderBean = "CCurrencyService")
+    @AMetaData(displayName = "Currency", required = true, readOnly = false, description = "Currency for the order cost", hidden = false, order = 40, dataProviderBean = "CCurrencyService")
     private CCurrency currency;
 
     @Column(name = "estimated_cost", nullable = true, precision = 15, scale = 2)
     @DecimalMin(value = "0.00", message = "Estimated cost must be positive")
     @DecimalMax(value = "99999999999.99", message = "Estimated cost cannot exceed 99,999,999,999.99")
-    @MetaData(displayName = "Estimated Cost", required = false, readOnly = false, defaultValue = "0.00", description = "Estimated cost of the order", hidden = false, order = 41)
+    @AMetaData(displayName = "Estimated Cost", required = false, readOnly = false, defaultValue = "0.00", description = "Estimated cost of the order", hidden = false, order = 41)
     private BigDecimal estimatedCost = BigDecimal.ZERO;
 
     @Column(name = "actual_cost", nullable = true, precision = 15, scale = 2)
     @DecimalMin(value = "0.00", message = "Actual cost must be positive")
     @DecimalMax(value = "99999999999.99", message = "Actual cost cannot exceed 99,999,999,999.99")
-    @MetaData(displayName = "Actual Cost", required = false, readOnly = false, defaultValue = "0.00", description = "Actual cost of the order", hidden = false, order = 42)
+    @AMetaData(displayName = "Actual Cost", required = false, readOnly = false, defaultValue = "0.00", description = "Actual cost of the order", hidden = false, order = 42)
     private BigDecimal actualCost = BigDecimal.ZERO;
 
     // Date Management
     @Column(name = "order_date", nullable = false)
-    @MetaData(displayName = "Order Date", required = true, readOnly = false, description = "Date when the order was created", hidden = false, order = 50)
+    @AMetaData(displayName = "Order Date", required = true, readOnly = false, description = "Date when the order was created", hidden = false, order = 50)
     private LocalDate orderDate;
 
     @Column(name = "required_date", nullable = true)
-    @MetaData(displayName = "Required Date", required = false, readOnly = false, description = "Date when the order is required to be completed", hidden = false, order = 51)
+    @AMetaData(displayName = "Required Date", required = false, readOnly = false, description = "Date when the order is required to be completed", hidden = false, order = 51)
     private LocalDate requiredDate;
 
     @Column(name = "delivery_date", nullable = true)
-    @MetaData(displayName = "Delivery Date", required = false, readOnly = false, description = "Actual or planned delivery date", hidden = false, order = 52)
+    @AMetaData(displayName = "Delivery Date", required = false, readOnly = false, description = "Actual or planned delivery date", hidden = false, order = 52)
     private LocalDate deliveryDate;
 
     // Additional Details
     @Column(name = "order_number", nullable = true, length = 50)
     @Size(max = 50)
-    @MetaData(displayName = "Order Number", required = false, readOnly = false, description = "External order reference number", hidden = false, order = 60, maxLength = 50)
+    @AMetaData(displayName = "Order Number", required = false, readOnly = false, description = "External order reference number", hidden = false, order = 60, maxLength = 50)
     private String orderNumber;
 
     @Column(name = "delivery_address", nullable = true, length = 500)
     @Size(max = 500)
-    @MetaData(displayName = "Delivery Address", required = false, readOnly = false, description = "Address where the order should be delivered", hidden = false, order = 61, maxLength = 500)
+    @AMetaData(displayName = "Delivery Address", required = false, readOnly = false, description = "Address where the order should be delivered", hidden = false, order = 61, maxLength = 500)
     private String deliveryAddress;
 
     // Approval Management (One-to-Many relationship)
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @MetaData(displayName = "Approvals", required = false, readOnly = true, description = "Approval records for this order", hidden = false, order = 70)
+    @AMetaData(displayName = "Approvals", required = false, readOnly = true, description = "Approval records for this order", hidden = false, order = 70)
     private List<COrderApproval> approvals = new ArrayList<>();
 
     /**

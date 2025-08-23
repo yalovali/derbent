@@ -26,7 +26,7 @@ class CEntityFieldServiceTest {
 	void testFieldInfoProperties() {
 		final List<CEntityFieldService.EntityFieldInfo> fields =
 			CEntityFieldService.getEntityFields("CActivity");
-		// Find a field with MetaData annotation to test
+		// Find a field with AMetaData annotation to test
 		final CEntityFieldService.EntityFieldInfo nameField =
 			fields.stream().filter(field -> "name".equals(field.getFieldName()))
 				.findFirst().orElse(null);

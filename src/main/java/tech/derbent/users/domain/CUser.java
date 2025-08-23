@@ -14,7 +14,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
-import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityConstants;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.interfaces.CFieldInfoGenerator;
@@ -36,27 +36,27 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable, CFieldInf
 	public static String getIconFilename() { return "vaadin:users"; }
 
 	@Column (name = "lastname", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
-	@MetaData (
+	@AMetaData (
 			displayName = "Last Name", required = true, readOnly = false, defaultValue = "", description = "User's last name", hidden = false,
 			order = 2, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	private String lastname;
-	@MetaData (
+	@AMetaData (
 			displayName = "Login", required = true, readOnly = false, defaultValue = "", description = "Login name for the system", hidden = false,
 			order = 3, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	@Column (name = "login", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = true)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	private String login;
-	@MetaData (
+	@AMetaData (
 			displayName = "Email", required = true, readOnly = false, defaultValue = "", description = "User's email address", hidden = false,
 			order = 4, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	@Column (name = "email", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	private String email;
-	@MetaData (
+	@AMetaData (
 			displayName = "Phone", required = false, readOnly = false, defaultValue = "", description = "Phone number", hidden = false, order = 5,
 			maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
@@ -65,32 +65,32 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable, CFieldInf
 	private String phone;
 	@Column (name = "roles", nullable = false, length = 255)
 	@Size (max = 255)
-	@MetaData (
+	@AMetaData (
 			displayName = "Roles", required = true, readOnly = false, defaultValue = "USER", description = "User roles (comma-separated)",
 			hidden = false, order = 6, maxLength = 255
 	)
 	private String roles = "USER";
 	@Enumerated (EnumType.STRING)
 	@Column (name = "user_role", nullable = false, length = 50, columnDefinition = "VARCHAR(50)")
-	@MetaData (
+	@AMetaData (
 			displayName = "User Role", required = true, readOnly = false, defaultValue = "TEAM_MEMBER",
 			description = "Primary user role in the system", hidden = false, order = 7, maxLength = 50
 	)
 	private EUserRole userRole = EUserRole.TEAM_MEMBER;
 	@Column (name = "password", nullable = true, length = 255)
 	@Size (max = 255)
-	@MetaData (
+	@AMetaData (
 			displayName = "Password", required = false, readOnly = false, passwordField = true, description = "User password (stored as hash)",
 			hidden = false, order = 99, passwordRevealButton = false
 	)
 	private String password; // Encoded password
-	@MetaData (
+	@AMetaData (
 			displayName = "Enabled", required = true, readOnly = false, defaultValue = "true", description = "Is user account enabled?",
 			hidden = false, order = 8
 	)
 	@Column (name = "enabled", nullable = false)
 	private Boolean enabled = Boolean.TRUE; // User account status, default is enabled
-	@MetaData (
+	@AMetaData (
 			displayName = "Profile Picture", required = false, readOnly = false, defaultValue = "",
 			description = "User's profile picture stored as binary data", hidden = false, order = 11
 	)
@@ -101,11 +101,11 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable, CFieldInf
 	private List<CUserProjectSettings> projectSettings;
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "cusertype_id", nullable = true)
-	@MetaData (displayName = "User Type", required = false, readOnly = false, description = "Type category of the user", hidden = false, order = 9)
+	@AMetaData (displayName = "User Type", required = false, readOnly = false, description = "Type category of the user", hidden = false, order = 9)
 	private CUserType userType;
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "company_id", nullable = true)
-	@MetaData (displayName = "Company", required = false, readOnly = false, description = "Company the user belongs to", hidden = false, order = 10)
+	@AMetaData (displayName = "Company", required = false, readOnly = false, description = "Company the user belongs to", hidden = false, order = 10)
 	private CCompany company;
 
 	/** Default constructor for JPA. */

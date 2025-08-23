@@ -10,7 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
-import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.users.domain.CUser;
 
@@ -27,30 +27,30 @@ public class COrderApproval extends CEntityNamed<COrderApproval> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
-    @MetaData(displayName = "Order", required = true, readOnly = false, description = "The order this approval belongs to", hidden = false, order = 2, dataProviderBean = "COrderService")
+    @AMetaData(displayName = "Order", required = true, readOnly = false, description = "The order this approval belongs to", hidden = false, order = 2, dataProviderBean = "COrderService")
     private COrder order;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "approver_id", nullable = true)
-    @MetaData(displayName = "Approver", required = false, readOnly = false, description = "User responsible for this approval", hidden = false, order = 3, dataProviderBean = "CUserService")
+    @AMetaData(displayName = "Approver", required = false, readOnly = false, description = "User responsible for this approval", hidden = false, order = 3, dataProviderBean = "CUserService")
     private CUser approver;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "approval_status_id", nullable = false)
-    @MetaData(displayName = "Status", required = true, readOnly = false, description = "Current approval status", hidden = false, order = 4, dataProviderBean = "CApprovalStatusService")
+    @AMetaData(displayName = "Status", required = true, readOnly = false, description = "Current approval status", hidden = false, order = 4, dataProviderBean = "CApprovalStatusService")
     private CApprovalStatus approvalStatus;
 
     @Column(name = "approval_date", nullable = true)
-    @MetaData(displayName = "Approval Date", required = false, readOnly = false, description = "Date and time when approval was given or rejected", hidden = false, order = 5)
+    @AMetaData(displayName = "Approval Date", required = false, readOnly = false, description = "Date and time when approval was given or rejected", hidden = false, order = 5)
     private LocalDateTime approvalDate;
 
     @Column(name = "comments", nullable = true, length = 1000)
     @Size(max = 1000)
-    @MetaData(displayName = "Comments", required = false, readOnly = false, description = "Approval comments or rejection reasons", hidden = false, order = 6, maxLength = 1000)
+    @AMetaData(displayName = "Comments", required = false, readOnly = false, description = "Approval comments or rejection reasons", hidden = false, order = 6, maxLength = 1000)
     private String comments;
 
     @Column(name = "approval_level", nullable = false)
-    @MetaData(displayName = "Approval Level", required = true, readOnly = false, defaultValue = "1", description = "Sequential approval level (1 = first approval, 2 = second, etc.)", hidden = false, order = 7, min = 1, max = 10)
+    @AMetaData(displayName = "Approval Level", required = true, readOnly = false, defaultValue = "1", description = "Sequential approval level (1 = first approval, 2 = second, etc.)", hidden = false, order = 7, min = 1, max = 10)
     private Integer approvalLevel = 1;
 
     /**

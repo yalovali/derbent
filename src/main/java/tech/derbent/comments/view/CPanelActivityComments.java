@@ -3,10 +3,8 @@ package tech.derbent.comments.view;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Optional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
@@ -15,8 +13,8 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
-
 import tech.derbent.abstracts.components.CEnhancedBinder;
+import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.views.CButton;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
@@ -26,32 +24,20 @@ import tech.derbent.comments.service.CCommentService;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
 
-/**
- * CPanelActivityComments - Accordion panel for managing comments on activities. Layer:
- * View (MVC) Provides UI for: - Viewing existing comments in chronological order - Adding
- * new comments - Comment count display - Integration with activity details view
- */
+/** CPanelActivityComments - Accordion panel for managing comments on activities. Layer: View (MVC) Provides UI for: - Viewing existing comments in
+ * chronological order - Adding new comments - Comment count display - Integration with activity details view */
 public class CPanelActivityComments extends CPanelActivityBase {
 
-	private static final Logger LOGGER =
-		LoggerFactory.getLogger(CPanelActivityComments.class);
-
+	private static final Logger LOGGER = LoggerFactory.getLogger(CPanelActivityComments.class);
 	private static final long serialVersionUID = 1L;
-
 	private final CCommentService commentService;
-
 	private final CSessionService sessionService;
-
 	private VerticalLayout commentsContainer;
-
 	private TextArea newCommentArea;
-
 	private CButton addCommentButton;
-
 	private H3 commentsTitle;
 
-	/**
-	 * Constructor for CPanelActivityComments.
+	/** Constructor for CPanelActivityComments.
 	 * @param currentEntity   the current activity entity
 	 * @param binder          the validation binder
 	 * @param activityService the activity service
@@ -60,49 +46,26 @@ public class CPanelActivityComments extends CPanelActivityBase {
 	 * @throws InvocationTargetException
 	 * @throws IllegalAccessException
 	 * @throws SecurityException
-	 * @throws NoSuchMethodException
-	 */
-	public CPanelActivityComments(final CActivity currentEntity,
-		final CEnhancedBinder<CActivity> binder, final CActivityService activityService,
-		final CCommentService commentService, final CSessionService sessionService)
-		throws NoSuchMethodException, SecurityException, IllegalAccessException,
-		InvocationTargetException {
+	 * @throws NoSuchMethodException */
+	public CPanelActivityComments(final CActivity currentEntity, final CEnhancedBinder<CActivity> binder, final CActivityService activityService,
+			final CCommentService commentService, final CSessionService sessionService)
+			throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
 		super("Comments", currentEntity, binder, activityService);
-		LOGGER.info("CPanelActivityComments constructor called with activity: {}",
-			currentEntity);
 		this.commentService = commentService;
 		this.sessionService = sessionService;
 		initPanel();
 	}
 
-	/**
-	 * Handles adding a new comment.
-	 */
+	/** Handles adding a new comment. */
 	private void addComment() {
-		LOGGER.info("Adding new comment for activity: {}", getCurrentEntity());
 		final String commentText = newCommentArea.getValue();
-
-		if ((commentText == null) || commentText.trim().isEmpty()) {
-			LOGGER.warn("Cannot add empty comment");
-			return;
-		}
-
-		if (getCurrentEntity() == null) {
-			LOGGER.warn("Cannot add comment - current entity is null");
-			return;
-		}
-
+		Check.notBlank(commentText, "Comment text cannot be blank");
+		Check.notNull(getCurrentEntity(), "Current activity cannot be null");
 		try {
 			final Optional<CUser> currentUserOpt = sessionService.getActiveUser();
-
-			if (currentUserOpt.isEmpty()) {
-				LOGGER.warn("Cannot add comment - no current user");
-				return;
-			}
+			Check.isTrue(currentUserOpt.isPresent(), "No active user in session");
 			final CUser currentUser = currentUserOpt.get();
-			final CComment newComment = commentService.createComment(commentText.trim(),
-				getCurrentEntity(), currentUser);
-			LOGGER.info("Created new comment: {}", newComment);
+			commentService.createComment(commentText.trim(), getCurrentEntity(), currentUser);
 			// Clear the text area
 			newCommentArea.clear();
 			// Reload comments to show the new one
@@ -113,10 +76,8 @@ public class CPanelActivityComments extends CPanelActivityBase {
 		}
 	}
 
-	/**
-	 * Creates the new comment section.
-	 * @return the new comment section layout
-	 */
+	/** Creates the new comment section.
+	 * @return the new comment section layout */
 	private VerticalLayout createNewCommentSection() {
 		final VerticalLayout section = new VerticalLayout();
 		section.setPadding(false);
@@ -139,8 +100,7 @@ public class CPanelActivityComments extends CPanelActivityBase {
 		// Initialize UI components
 		this.commentsContainer = new VerticalLayout();
 		this.newCommentArea = new TextArea();
-		this.addCommentButton =
-			CButton.createPrimary("Add Comment", null, event -> addComment());
+		this.addCommentButton = CButton.createPrimary("Add Comment", null, event -> addComment());
 		this.commentsTitle = new H3("H3 Comments");
 		setupComponents();
 		// New comment section
@@ -150,28 +110,19 @@ public class CPanelActivityComments extends CPanelActivityBase {
 		loadComments();
 	}
 
-	/**
-	 * Gets the comment service.
-	 * @return the comment service
-	 */
+	/** Gets the comment service.
+	 * @return the comment service */
 	public CCommentService getCommentService() { return commentService; }
 
-	/**
-	 * Loads and displays comments for the current activity.
-	 */
+	/** Loads and displays comments for the current activity. */
 	private void loadComments() {
 		commentsContainer.removeAll();
-
-		if (getCurrentEntity() == null) {
-			LOGGER.warn("Cannot load comments - current entity is null");
-			return;
-		}
-
+		Check.notNull(commentService, "Comment service cannot be null");
+		Check.notNull(sessionService, "Session service cannot be null");
+		Check.notNull(getCurrentEntity(), "Current activity cannot be null");
 		try {
-			final List<CComment> comments =
-				commentService.findByActivityWithRelationships(getCurrentEntity());
+			final List<CComment> comments = commentService.findByActivityWithRelationships(getCurrentEntity());
 			LOGGER.debug("Found {} comments for activity", comments.size());
-
 			if (comments.isEmpty()) {
 				final Div noCommentsDiv = new Div();
 				noCommentsDiv.setText("No comments yet. Be the first to add a comment!");
@@ -181,20 +132,16 @@ public class CPanelActivityComments extends CPanelActivityBase {
 				noCommentsDiv.getStyle().set("font-style", "italic");
 				noCommentsDiv.getStyle().set("padding", "2rem");
 				commentsContainer.add(noCommentsDiv);
-			}
-			else {
-
+			} else {
 				// Add comments in chronological order
 				for (final CComment comment : comments) {
-					final CCommentView commentView =
-						new CCommentView(comment, commentService);
+					final CCommentView commentView = new CCommentView(comment, commentService);
 					commentsContainer.add(commentView);
 				}
 			}
 			updateCommentsTitle();
 		} catch (final Exception e) {
-			LOGGER.error("Error loading comments for activity: {}", getCurrentEntity(),
-				e);
+			LOGGER.error("Error loading comments for activity: {}", getCurrentEntity(), e);
 			final Div errorDiv = new Div();
 			errorDiv.setText("Error loading comments. Please try again.");
 			errorDiv.addClassName("error-message");
@@ -206,21 +153,17 @@ public class CPanelActivityComments extends CPanelActivityBase {
 	@Override
 	public void populateForm(final CActivity entity) {
 		super.populateForm(entity);
-
 		// Refresh comments when activity changes
 		if (entity != null) {
 			loadComments();
-		}
-		else {
+		} else {
 			// Clear comments if no activity selected
 			commentsContainer.removeAll();
 			updateCommentsTitle();
 		}
 	}
 
-	/**
-	 * Refreshes the comments panel (useful after external changes).
-	 */
+	/** Refreshes the comments panel (useful after external changes). */
 	public void refreshComments() {
 		loadComments();
 	}
@@ -233,9 +176,7 @@ public class CPanelActivityComments extends CPanelActivityBase {
 		addToContent(commentsContainer);
 	}
 
-	/**
-	 * Sets up the UI components.
-	 */
+	/** Sets up the UI components. */
 	private void setupComponents() {
 		// New comment text area
 		newCommentArea.setLabel("New Comment");
@@ -257,26 +198,20 @@ public class CPanelActivityComments extends CPanelActivityBase {
 		// Additional listener for immediate response during typing
 		newCommentArea.getElement().addEventListener("input", e -> {
 			final String currentValue = newCommentArea.getValue();
-			addCommentButton
-				.setEnabled((currentValue != null) && !currentValue.trim().isEmpty());
+			addCommentButton.setEnabled((currentValue != null) && !currentValue.trim().isEmpty());
 		});
 	}
 
-	/**
-	 * Updates the comments title with count.
-	 */
+	/** Updates the comments title with count. */
 	private void updateCommentsTitle() {
-
 		if (commentsTitle == null) {
 			LOGGER.warn("Comments title is null, cannot update");
 			return;
 		}
-
 		if (getCurrentEntity() == null) {
 			commentsTitle.setText("Comments");
 			return;
 		}
-
 		try {
 			final long commentCount = commentService.countByActivity(getCurrentEntity());
 			commentsTitle.setText(String.format("Comments (%d)", commentCount));

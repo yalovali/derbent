@@ -11,7 +11,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
-import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.components.CBinderFactory;
 import tech.derbent.abstracts.views.CVerticalLayout;
 import unit_tests.tech.derbent.abstracts.domains.CTestBase;
@@ -23,14 +23,14 @@ import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 class CEntityFormBuilderValidationTest extends CTestBase {
 
     /**
-     * Test entity with various MetaData annotations and proper getters/setters
+     * Test entity with various AMetaData annotations and proper getters/setters
      */
     public static class TestEntity {
 
-        @MetaData(displayName = "Test String", required = true, description = "A test string field", order = 1, maxLength = 50, defaultValue = "test")
+        @AMetaData(displayName = "Test String", required = true, description = "A test string field", order = 1, maxLength = 50, defaultValue = "test")
         private String testString;
 
-        @MetaData(displayName = "Test Boolean", required = false, description = "A test boolean field", order = 2, defaultValue = "false")
+        @AMetaData(displayName = "Test Boolean", required = false, description = "A test boolean field", order = 2, defaultValue = "false")
         private Boolean testBoolean;
 
         public Boolean getTestBoolean() {
@@ -74,19 +74,19 @@ class CEntityFormBuilderValidationTest extends CTestBase {
     }
 
     @Test
-    @DisplayName("buildForm should handle entity class without MetaData annotations")
-    void testBuildFormWithoutMetaData()
+    @DisplayName("buildForm should handle entity class without AMetaData annotations")
+    void testBuildFormWithoutAMetaData()
             throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
-        // Test entity without MetaData annotations
-        class EntityWithoutMetaData {
+        // Test entity without AMetaData annotations
+        class EntityWithoutAMetaData {
 
             @SuppressWarnings("unused")
             private String plainField;
         }
-        final var binder = CBinderFactory.createEnhancedBinder(EntityWithoutMetaData.class);
-        final CVerticalLayout formLayout = CEntityFormBuilder.buildForm(EntityWithoutMetaData.class, binder);
-        assertNotNull(formLayout, "Form should be created even without MetaData fields");
-        // Should have minimal content since no fields have MetaData
+        final var binder = CBinderFactory.createEnhancedBinder(EntityWithoutAMetaData.class);
+        final CVerticalLayout formLayout = CEntityFormBuilder.buildForm(EntityWithoutAMetaData.class, binder);
+        assertNotNull(formLayout, "Form should be created even without AMetaData fields");
+        // Should have minimal content since no fields have AMetaData
     }
 
     @Test

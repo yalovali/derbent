@@ -7,7 +7,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
-import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.users.domain.CUser;
 
 /**
@@ -20,13 +20,13 @@ public abstract class CEvent<EntityClass> extends CEntityDB<EntityClass> {
 
     // Event timestamp - when the event occurred
     @Column(name = "event_date", nullable = false)
-    @MetaData(displayName = "Event Date", required = true, readOnly = true, description = "Date and time when the event occurred", hidden = false, order = 90)
+    @AMetaData(displayName = "Event Date", required = true, readOnly = true, description = "Date and time when the event occurred", hidden = false, order = 90)
     private LocalDateTime eventDate;
 
     // Author of the event
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "author_id", nullable = false)
-    @MetaData(displayName = "Author", required = true, readOnly = true, description = "User who created this event", hidden = false, order = 91, dataProviderBean = "CUserService")
+    @AMetaData(displayName = "Author", required = true, readOnly = true, description = "User who created this event", hidden = false, order = 91, dataProviderBean = "CUserService")
     private CUser author;
 
     /**

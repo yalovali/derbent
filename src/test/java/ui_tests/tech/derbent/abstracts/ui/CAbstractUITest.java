@@ -109,7 +109,7 @@ public abstract class CAbstractUITest<EntityClass extends CEntityDB<EntityClass>
 			return;
 		}
 		// Basic test that grid has columns
-		Check.condition(grid.getColumns().size() > 0, "Grid should have columns");
+		Check.isTrue(grid.getColumns().size() > 0, "Grid should have columns");
 		LOGGER.info("Grid has {} columns", grid.getColumns().size());
 		LOGGER.info("Grid column access test passed for {}", entityClass.getSimpleName());
 	}
@@ -145,7 +145,7 @@ public abstract class CAbstractUITest<EntityClass extends CEntityDB<EntityClass>
 			Check.equals(testEntity, selected, "Selected entity should match");
 			// Test deselection
 			grid.deselectAll();
-			Check.condition(grid.asSingleSelect().getValue() == null, "No entity should be selected after deselect");
+			Check.isTrue(grid.asSingleSelect().getValue() == null, "No entity should be selected after deselect");
 			LOGGER.info("Grid selection test passed for {}", entityClass.getSimpleName());
 		} catch (final Exception e) {
 			throw new IllegalStateException("Grid selection testing failed: " + e.getMessage(), e);

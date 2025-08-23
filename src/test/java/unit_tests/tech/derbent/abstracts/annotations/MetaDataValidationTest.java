@@ -10,30 +10,30 @@ import java.lang.reflect.Field;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.annotations.AMetaData;
 import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 
 /**
- * Test class to verify MetaData annotation improvements including: - Better null pointer checking - Enhanced
+ * Test class to verify AMetaData annotation improvements including: - Better null pointer checking - Enhanced
  * documentation - Parameter validation
  */
-class MetaDataValidationTest extends CTestBase {
+class AMetaDataValidationTest extends CTestBase {
 
     /**
-     * Test entity class with MetaData annotations for testing
+     * Test entity class with AMetaData annotations for testing
      */
     private static class TestEntity {
 
-        @MetaData(displayName = "Test Name", required = true, description = "A test field for validation", order = 1, maxLength = 100, defaultValue = "test")
+        @AMetaData(displayName = "Test Name", required = true, description = "A test field for validation", order = 1, maxLength = 100, defaultValue = "test")
         private String name;
 
-        @MetaData(displayName = "Test Number", required = false, description = "A numeric test field", order = 2, min = 0.0, max = 100.0, defaultValue = "50")
+        @AMetaData(displayName = "Test Number", required = false, description = "A numeric test field", order = 2, min = 0.0, max = 100.0, defaultValue = "50")
         private Double number;
 
-        @MetaData(displayName = "Test Boolean", required = true, description = "A boolean test field", order = 3, defaultValue = "true")
+        @AMetaData(displayName = "Test Boolean", required = true, description = "A boolean test field", order = 3, defaultValue = "true")
         private Boolean flag;
 
-        @MetaData(displayName = "", // Test empty display name
+        @AMetaData(displayName = "", // Test empty display name
                 required = false, description = "", // Test empty description
                 order = 4, defaultValue = "" // Test empty default value
         )
@@ -46,21 +46,21 @@ class MetaDataValidationTest extends CTestBase {
     }
 
     @Test
-    @DisplayName("MetaData should handle boolean fields correctly")
+    @DisplayName("AMetaData should handle boolean fields correctly")
     void testBooleanField() throws NoSuchFieldException {
         final Field flagField = TestEntity.class.getDeclaredField("flag");
-        final MetaData metaData = flagField.getAnnotation(MetaData.class);
-        assertNotNull(metaData, "MetaData annotation should be present");
+        final AMetaData metaData = flagField.getAnnotation(AMetaData.class);
+        assertNotNull(metaData, "AMetaData annotation should be present");
         assertTrue(metaData.required());
         assertEquals("true", metaData.defaultValue());
     }
 
     @Test
-    @DisplayName("MetaData defaults should be properly set")
+    @DisplayName("AMetaData defaults should be properly set")
     void testDefaults() throws NoSuchFieldException {
         // Test defaults by creating a minimal annotation
         final Field emptyField = TestEntity.class.getDeclaredField("emptyValues");
-        final MetaData metaData = emptyField.getAnnotation(MetaData.class);
+        final AMetaData metaData = emptyField.getAnnotation(AMetaData.class);
         // These should be the defaults according to our annotation definition
         assertEquals("", metaData.defaultValue());
         assertEquals("", metaData.description());
@@ -77,11 +77,11 @@ class MetaDataValidationTest extends CTestBase {
     }
 
     @Test
-    @DisplayName("MetaData should handle empty values gracefully")
+    @DisplayName("AMetaData should handle empty values gracefully")
     void testEmptyValues() throws NoSuchFieldException {
         final Field emptyField = TestEntity.class.getDeclaredField("emptyValues");
-        final MetaData metaData = emptyField.getAnnotation(MetaData.class);
-        assertNotNull(metaData, "MetaData annotation should be present");
+        final AMetaData metaData = emptyField.getAnnotation(AMetaData.class);
+        assertNotNull(metaData, "AMetaData annotation should be present");
         assertEquals("", metaData.displayName()); // Should be empty, not null
         assertEquals("", metaData.description()); // Should be empty, not null
         assertEquals("", metaData.defaultValue()); // Should be empty, not null
@@ -92,11 +92,11 @@ class MetaDataValidationTest extends CTestBase {
     }
 
     @Test
-    @DisplayName("MetaData annotation should preserve all parameter values")
-    void testMetaDataAnnotationValues() throws NoSuchFieldException {
+    @DisplayName("AMetaData annotation should preserve all parameter values")
+    void testAMetaDataAnnotationValues() throws NoSuchFieldException {
         final Field nameField = TestEntity.class.getDeclaredField("name");
-        final MetaData metaData = nameField.getAnnotation(MetaData.class);
-        assertNotNull(metaData, "MetaData annotation should be present");
+        final AMetaData metaData = nameField.getAnnotation(AMetaData.class);
+        assertNotNull(metaData, "AMetaData annotation should be present");
         assertEquals("Test Name", metaData.displayName());
         assertTrue(metaData.required());
         assertEquals("A test field for validation", metaData.description());
@@ -106,11 +106,11 @@ class MetaDataValidationTest extends CTestBase {
     }
 
     @Test
-    @DisplayName("MetaData should handle numeric constraints properly")
+    @DisplayName("AMetaData should handle numeric constraints properly")
     void testNumericConstraints() throws NoSuchFieldException {
         final Field numberField = TestEntity.class.getDeclaredField("number");
-        final MetaData metaData = numberField.getAnnotation(MetaData.class);
-        assertNotNull(metaData, "MetaData annotation should be present");
+        final AMetaData metaData = numberField.getAnnotation(AMetaData.class);
+        assertNotNull(metaData, "AMetaData annotation should be present");
         assertEquals(0.0, metaData.min());
         assertEquals(100.0, metaData.max());
         assertEquals("50", metaData.defaultValue());

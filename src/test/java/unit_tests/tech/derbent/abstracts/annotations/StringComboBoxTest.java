@@ -7,7 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
-import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.components.CBinderFactory;
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.domains.CEntityDB;
@@ -23,7 +23,7 @@ class StringComboBoxTest {
      */
     public static class TestEntity extends CEntityDB<TestEntity> {
 
-        @MetaData(displayName = "String Category", required = true, order = 1, dataProviderBean = "someService" // This will cause the issue
+        @AMetaData(displayName = "String Category", required = true, order = 1, dataProviderBean = "someService" // This will cause the issue
         )
         private String category;
 

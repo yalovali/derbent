@@ -30,13 +30,11 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 	public static ApplicationContext getApplicationContext() { return applicationContext; }
 
 	private static Component processLine(final int counter, final CScreen screen, final CScreenLines line) {
-		LOGGER.debug("Processing line: {}", counter);
 		Check.notNull(line, "Line cannot be null");
 		if (line.getRelationFieldName().equals(CEntityFieldService.SECTION)) {
 			final CPanelDetails sectionPanel = new CPanelDetails(line.getSectionName(), line.getDisplayName());
 			return sectionPanel;
 		}
-		// return null;
 		return null;
 	}
 

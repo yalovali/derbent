@@ -23,7 +23,7 @@ This document describes the implementation of a comprehensive user profile dialo
 - **Enhancement**: Added `profilePicturePath` field
 - **Features**:
   - Proper JPA column mapping with 500 character limit
-  - MetaData annotations for form generation
+  - AMetaData annotations for form generation
   - Null-safe getter and setter methods
 
 #### 3. Main Layout Integration
@@ -118,7 +118,7 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 - ✅ Uses existing base classes (`CDBEditDialog`, `CButton`)
 - ✅ Comprehensive logging at function start with parameters
 - ✅ Extensive null checking and validation
-- ✅ Uses MetaData annotations for form generation
+- ✅ Uses AMetaData annotations for form generation
 - ✅ Follows existing dialog and button patterns
 - ✅ Proper JavaDoc documentation
 

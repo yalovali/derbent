@@ -4,7 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.projects.domain.CProject;
 
 /**
@@ -19,17 +19,17 @@ public abstract class CTypeEntity<EntityType> extends CEntityOfProject<EntityTyp
 
     @Column(name = "color", nullable = true, length = 7)
     @Size(max = 7)
-    @MetaData(displayName = "Color", required = false, readOnly = false, defaultValue = "#4A90E2", description = "Hex color code for type visualization (e.g., #4A90E2)", hidden = false, order = 3, maxLength = 7)
+    @AMetaData(displayName = "Color", required = false, readOnly = false, defaultValue = "#4A90E2", description = "Hex color code for type visualization (e.g., #4A90E2)", hidden = false, order = 3, maxLength = 7)
     private String color = "#4A90E2";
 
     @Column(name = "sort_order", nullable = false)
     @NotNull
-    @MetaData(displayName = "Sort Order", required = true, readOnly = false, defaultValue = "100", description = "Display order for type sorting", hidden = false, order = 4)
+    @AMetaData(displayName = "Sort Order", required = true, readOnly = false, defaultValue = "100", description = "Display order for type sorting", hidden = false, order = 4)
     private Integer sortOrder = 100;
 
     @Column(name = "is_active", nullable = false)
     @NotNull
-    @MetaData(displayName = "Is Active", required = true, readOnly = false, defaultValue = "true", description = "Indicates if this type is currently active and available", hidden = false, order = 6)
+    @AMetaData(displayName = "Is Active", required = true, readOnly = false, defaultValue = "true", description = "Indicates if this type is currently active and available", hidden = false, order = 6)
     private Boolean isActive = true;
 
     /**

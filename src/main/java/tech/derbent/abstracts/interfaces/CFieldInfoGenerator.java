@@ -25,7 +25,7 @@ public interface CFieldInfoGenerator {
 
 			for (final var field : getClassName().getDeclaredFields()) {
 				final var meta = field
-					.getAnnotation(tech.derbent.abstracts.annotations.MetaData.class);
+					.getAnnotation(tech.derbent.abstracts.annotations.AMetaData.class);
 
 				if (meta != null) {
 					final EntityFieldInfo info =

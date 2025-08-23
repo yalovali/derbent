@@ -6,7 +6,7 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.annotations.StatusEntity;
 import tech.derbent.abstracts.interfaces.CKanbanStatus;
 import tech.derbent.base.domain.CStatus;
@@ -30,7 +30,7 @@ public class CActivityStatus extends CStatus<CActivityStatus> implements CKanban
 	public static String getIconFilename() { return "vaadin:flag"; }
 
 	@Column (name = "is_final", nullable = false)
-	@MetaData (
+	@AMetaData (
 		displayName = "Is Final Status", required = true, readOnly = false,
 		defaultValue = "false",
 		description = "Indicates if this is a final status (completed/cancelled)",

@@ -2,7 +2,7 @@
 
 ## Overview
 
-The enhanced `CEntityFormBuilder` now supports annotation-based data provider configuration for ComboBox fields, making form creation much simpler and more maintainable. Instead of writing complex `ComboBoxDataProvider` implementations that handle multiple entity types, you can now specify data providers directly in the `@MetaData` annotations on your entity fields.
+The enhanced `CEntityFormBuilder` now supports annotation-based data provider configuration for ComboBox fields, making form creation much simpler and more maintainable. Instead of writing complex `ComboBoxDataProvider` implementations that handle multiple entity types, you can now specify data providers directly in the `@AMetaData` annotations on your entity fields.
 
 ## Problem Solved
 
@@ -31,13 +31,13 @@ Div form = CEntityFormBuilder.buildForm(CActivity.class, binder, dataProvider);
 **After (Simple and Maintainable):**
 ```java
 // In your entity - clean annotations specify data sources
-@MetaData(displayName = "Activity Type", dataProviderBean = "CActivityTypeService")
+@AMetaData(displayName = "Activity Type", dataProviderBean = "CActivityTypeService")
 private CActivityType activityType;
 
-@MetaData(displayName = "Project", dataProviderClass = CProjectService.class, dataProviderMethod = "findAllActive")
+@AMetaData(displayName = "Project", dataProviderClass = CProjectService.class, dataProviderMethod = "findAllActive")
 private CProject project;
 
-@MetaData(displayName = "Assigned User", dataProviderBean = "userService", dataProviderMethod = "listByRole") 
+@AMetaData(displayName = "Assigned User", dataProviderBean = "userService", dataProviderMethod = "listByRole") 
 private CUser assignedUser;
 
 // In your view - super simple!
@@ -50,7 +50,7 @@ Div form = CEntityFormBuilder.buildForm(CActivity.class, binder); // No data pro
 Specify the Spring bean name to use as the data provider:
 
 ```java
-@MetaData(
+@AMetaData(
     displayName = "Activity Type",
     dataProviderBean = "CActivityTypeService"  // Spring bean name
 )
@@ -61,7 +61,7 @@ private CActivityType activityType;
 Specify the Spring service class to use as the data provider:
 
 ```java
-@MetaData(
+@AMetaData(
     displayName = "Project",
     dataProviderClass = CProjectService.class  // Spring service class
 )
@@ -72,7 +72,7 @@ private CProject project;
 Use a specific method on the data provider service:
 
 ```java
-@MetaData(
+@AMetaData(
     displayName = "Active Users",
     dataProviderBean = "userService",
     dataProviderMethod = "findAllActive"  // Custom method name
@@ -84,7 +84,7 @@ private CUser assignedUser;
 No explicit configuration needed - automatically finds service by naming convention:
 
 ```java
-@MetaData(displayName = "Category")
+@AMetaData(displayName = "Category")
 // Automatically looks for: CategoryService, categoryService, or category.service
 private CCategory category;
 ```
@@ -106,7 +106,7 @@ The system tries to find data methods in the following order:
 @Entity
 public class CTask extends CEntityOfProject {
     
-    @MetaData(
+    @AMetaData(
         displayName = "Task Name",
         required = true,
         order = 1,
@@ -114,7 +114,7 @@ public class CTask extends CEntityOfProject {
     )
     private String name;
     
-    @MetaData(
+    @AMetaData(
         displayName = "Task Type",
         required = true,
         order = 2,
@@ -122,7 +122,7 @@ public class CTask extends CEntityOfProject {
     )
     private CTaskType taskType;
     
-    @MetaData(
+    @AMetaData(
         displayName = "Assigned User",
         required = false,
         order = 3,
@@ -131,7 +131,7 @@ public class CTask extends CEntityOfProject {
     )
     private CUser assignedUser;
     
-    @MetaData(
+    @AMetaData(
         displayName = "Priority Level",
         required = true,
         order = 4
@@ -199,15 +199,15 @@ public class CTaskView extends CProjectAwareMDPage<CTask> {
 ## Migration Guide
 
 ### Step 1: Update Your Entities
-Add data provider information to your `@MetaData` annotations:
+Add data provider information to your `@AMetaData` annotations:
 
 ```java
 // Before
-@MetaData(displayName = "Activity Type")
+@AMetaData(displayName = "Activity Type")
 private CActivityType activityType;
 
 // After  
-@MetaData(displayName = "Activity Type", dataProviderBean = "CActivityTypeService")
+@AMetaData(displayName = "Activity Type", dataProviderBean = "CActivityTypeService")
 private CActivityType activityType;
 ```
 
@@ -253,10 +253,10 @@ The system gracefully handles missing services, invalid configurations, and netw
 Different ComboBox fields can use completely different data sources:
 
 ```java
-@MetaData(displayName = "Internal Type", dataProviderBean = "internalTypeService")
+@AMetaData(displayName = "Internal Type", dataProviderBean = "internalTypeService")
 private CInternalType internalType;
 
-@MetaData(displayName = "External Type", dataProviderClass = ExternalTypeService.class)
+@AMetaData(displayName = "External Type", dataProviderClass = ExternalTypeService.class)
 private CExternalType externalType;
 ```
 
@@ -291,6 +291,6 @@ private CExternalType externalType;
 ## Related Documentation
 
 - [COPILOT_AGENT_GUIDELINE.md](COPILOT_AGENT_GUIDELINE.md) - General coding standards
-- [MetaData Javadoc](../main/java/tech/derbent/abstracts/annotations/MetaData.java) - Complete annotation reference
+- [AMetaData Javadoc](../main/java/tech/derbent/abstracts/annotations/AMetaData.java) - Complete annotation reference
 - [CEntityFormBuilder Javadoc](../main/java/tech/derbent/abstracts/annotations/CEntityFormBuilder.java) - Form builder API
 - [CDataProviderResolver Javadoc](../main/java/tech/derbent/abstracts/annotations/CDataProviderResolver.java) - Data resolution details

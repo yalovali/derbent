@@ -11,7 +11,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityDB;
 
 /** CScreenLines - Domain entity representing individual lines/fields in a screen definition. Layer: Domain (MVC) Each line represents a field that
@@ -24,7 +24,7 @@ public class CScreenLines extends CEntityDB<CScreenLines> {
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "screen_id", nullable = false)
 	@NotNull (message = "Screen reference is required")
-	@MetaData (
+	@AMetaData (
 			displayName = "Screen Reference", required = true, readOnly = false, description = "Screen Reference", hidden = false, order = 1,
 			defaultValue = "1"
 	)
@@ -32,14 +32,14 @@ public class CScreenLines extends CEntityDB<CScreenLines> {
 	@Column (name = "line_order", nullable = false)
 	@Min (value = 1, message = "Line order must be at least 1")
 	@Max (value = 999, message = "Line order cannot exceed 999")
-	@MetaData (
+	@AMetaData (
 			displayName = "Line Order", required = true, readOnly = false, description = "Order of this line in the screen (1-999)", hidden = false,
 			order = 1, defaultValue = "0"
 	)
 	private Integer lineOrder = 0;
 	@Column (name = "relationFieldName", nullable = false, length = 100)
 	@Size (max = 100, message = "Relation Field Name cannot exceed 100 characters")
-	@MetaData (
+	@AMetaData (
 			displayName = "Relation Field", required = true, readOnly = false, description = "Relation Field is designed for", hidden = false,
 			order = 2, maxLength = 100, dataProviderBean = "none"
 	)
@@ -47,7 +47,7 @@ public class CScreenLines extends CEntityDB<CScreenLines> {
 	@Column (name = "field_caption", nullable = false, length = 255)
 	@Size (max = 255, message = "Field caption cannot exceed 255 characters")
 	@NotNull (message = "Field caption is required")
-	@MetaData (
+	@AMetaData (
 			displayName = "Field Caption", required = true, readOnly = false, description = "Caption/label to display for this field", hidden = false,
 			order = 2, maxLength = 255
 	)
@@ -55,60 +55,60 @@ public class CScreenLines extends CEntityDB<CScreenLines> {
 	@Column (name = "entity_property", nullable = false, length = 100)
 	@Size (max = 100, message = "Field property name cannot exceed 100 characters")
 	@NotNull (message = "Field propery name is required")
-	@MetaData (
+	@AMetaData (
 			displayName = "Field Property", required = true, readOnly = false, description = "Name of the property in the entity", hidden = false,
 			order = 3, maxLength = 100, dataProviderBean = "none"
 	)
 	private String entityProperty;
 	@Column (name = "sectionName", nullable = true, length = 100)
 	@Size (max = 100, message = "Name cannot exceed 100 characters")
-	@MetaData (
+	@AMetaData (
 			displayName = "Field Property", required = false, readOnly = false, description = "Section of entries below", hidden = false, order = 3,
 			maxLength = 100
 	)
 	private String sectionName;
 	@Column (name = "field_description", nullable = true, length = 500)
 	@Size (max = 500, message = "Field description cannot exceed 500 characters")
-	@MetaData (
+	@AMetaData (
 			displayName = "Field Description", required = false, readOnly = false, description = "Description or help text for this field",
 			hidden = false, order = 4, maxLength = 500
 	)
 	private String fieldDescription;
 	@Column (name = "is_required", nullable = false)
-	@MetaData (
+	@AMetaData (
 			displayName = "Required", required = false, readOnly = false, description = "Whether this field is required", hidden = false, order = 6,
 			defaultValue = "false"
 	)
 	private Boolean isRequired = false;
 	@Column (name = "is_readonly", nullable = false)
-	@MetaData (
+	@AMetaData (
 			displayName = "Read Only", required = false, readOnly = false, description = "Whether this field is read-only", hidden = false, order = 7,
 			defaultValue = "false"
 	)
 	private Boolean isReadonly = false;
 	@Column (name = "is_hidden", nullable = false)
-	@MetaData (
+	@AMetaData (
 			displayName = "Hidden", required = false, readOnly = false, description = "Whether this field is hidden", hidden = false, order = 8,
 			defaultValue = "false"
 	)
 	private Boolean isHidden = false;
 	@Column (name = "default_value", nullable = true, length = 255)
 	@Size (max = 255, message = "Default value cannot exceed 255 characters")
-	@MetaData (
+	@AMetaData (
 			displayName = "Default Value", required = false, readOnly = false, description = "Default value for this field", hidden = false,
 			order = 9, maxLength = 255
 	)
 	private String defaultValue;
 	@Column (name = "related_entity_type", nullable = true, length = 100)
 	@Size (max = 100, message = "Related entity type cannot exceed 100 characters")
-	@MetaData (
+	@AMetaData (
 			displayName = "Related Entity Type", required = false, readOnly = false, description = "Type of related entity for reference fields",
 			hidden = false, order = 10, maxLength = 100
 	)
 	private String relatedEntityType;
 	@Column (name = "data_provider_bean", nullable = true, length = 100)
 	@Size (max = 100, message = "Data provider bean cannot exceed 100 characters")
-	@MetaData (
+	@AMetaData (
 			displayName = "Data Provider Bean", required = false, readOnly = false,
 			description = "Spring bean name for data provider (for comboboxes)", hidden = false, order = 11, maxLength = 100
 	)
@@ -116,12 +116,12 @@ public class CScreenLines extends CEntityDB<CScreenLines> {
 	@Column (name = "max_length", nullable = true)
 	@Min (value = 1, message = "Max length must be at least 1")
 	@Max (value = 10000, message = "Max length cannot exceed 10000")
-	@MetaData (
+	@AMetaData (
 			displayName = "Max Length", required = false, readOnly = false, description = "Maximum length for text fields", hidden = false, order = 12
 	)
 	private Integer maxLength;
 	@Column (name = "is_active", nullable = false)
-	@MetaData (
+	@AMetaData (
 			displayName = "Active", required = false, readOnly = false, description = "Whether this line is active", hidden = false, order = 20,
 			defaultValue = "true"
 	)

@@ -165,7 +165,7 @@ The primary objective is to implement a robust activity management system that a
 
 ### Integration Requirements
 - **Database Integration**: PostgreSQL-only configuration with proper schema management
-- **Form Builder Integration**: MetaData annotations for automatic form generation
+- **Form Builder Integration**: AMetaData annotations for automatic form generation
 - **Status Management Integration**: Polymorphic status handling across entity types
 - **Audit Integration**: Automatic tracking of creation and modification timestamps
 - **Logging Integration**: Comprehensive logging for debugging and monitoring

@@ -13,8 +13,8 @@ import tech.derbent.session.service.CSessionService;
 
 /** COrdersView - Vaadin view for managing orders in the system. Layer: View (MVC) Provides a comprehensive user interface for managing company orders
  * including creation, editing, and viewing of orders with project-aware functionality. This view extends CProjectAwareMDPage to inherit standard
- * master-detail functionality with project context awareness, grid display, and automatic form generation using MetaData annotations. Key Features: -
- * Project-aware order management - Master-detail interface with order grid and form - Automatic form generation from COrder MetaData annotations -
+ * master-detail functionality with project context awareness, grid display, and automatic form generation using AMetaData annotations. Key Features: -
+ * Project-aware order management - Master-detail interface with order grid and form - Automatic form generation from COrder AMetaData annotations -
  * Standard CRUD operations (Create, Read, Update, Delete) - Integration with order service layer - Consistent UI patterns with other entity views */
 @Route ("cordersview/:order_id?/:action?(edit)")
 @PageTitle ("Orders Master Detail")

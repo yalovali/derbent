@@ -184,7 +184,7 @@ public class CSystemSettingsView extends CAbstractPage implements CInterfaceIcon
 	}
 
 	/**
-	 * Creates the system settings form using MetaData annotations.
+	 * Creates the system settings form using AMetaData annotations.
 	 */
 	private void createSystemSettingsForm() {
 		LOGGER.debug("createSystemSettingsForm called");
@@ -192,7 +192,7 @@ public class CSystemSettingsView extends CAbstractPage implements CInterfaceIcon
 		try {
 			// Clear existing content
 			formContainer.removeAll();
-			// Create form using MetaData annotations and CEntityFormBuilder
+			// Create form using AMetaData annotations and CEntityFormBuilder
 			final var formLayout =
 				CEntityFormBuilder.buildForm(CSystemSettings.class, binder);
 			// Bind current settings to form

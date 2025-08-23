@@ -85,7 +85,7 @@ Update the CUser class to support new requirements ensuring adherence to coding 
 - **MVC Architecture**: Clear separation of concerns
 - **Domain-Driven Design**: Rich domain models with business logic
 - **Repository Pattern**: Data access abstraction
-- **Builder Pattern**: Entity form generation using MetaData annotations
+- **Builder Pattern**: Entity form generation using AMetaData annotations
 
 ### 2. Database Integration
 
@@ -110,7 +110,7 @@ ALTER TABLE cuser ADD CONSTRAINT fk_cuser_company FOREIGN KEY (company_id) REFER
 - **Null Safety**: Comprehensive null checking and default value handling
 - **Logging**: Logger statements at function entry with parameter details
 - **Documentation**: Complete JavaDoc for all public methods and classes
-- **MetaData Annotations**: Consistent use for form generation and UI binding
+- **AMetaData Annotations**: Consistent use for form generation and UI binding
 
 #### Testing Strategy
 - **Unit Tests**: Comprehensive coverage for domain logic and role management
@@ -126,7 +126,7 @@ ALTER TABLE cuser ADD CONSTRAINT fk_cuser_company FOREIGN KEY (company_id) REFER
 - Role-based access control for methods and endpoints
 
 ### 2. Vaadin UI Integration
-- MetaData annotations for automatic form generation
+- AMetaData annotations for automatic form generation
 - ComboBox data providers for role and company selection
 - Validation rules for role assignments and company associations
 
@@ -192,7 +192,7 @@ ALTER TABLE cuser ADD CONSTRAINT fk_cuser_company FOREIGN KEY (company_id) REFER
 ### Configuration Changes
 - No application configuration changes required
 - Existing Spring Security configuration remains compatible
-- Vaadin UI components automatically recognize new MetaData annotations
+- Vaadin UI components automatically recognize new AMetaData annotations
 
 ---
 

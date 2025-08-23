@@ -12,6 +12,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
+import tech.derbent.abstracts.utils.Check;
 
 @MappedSuperclass
 public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implements CInterfaceIconSet {
@@ -35,10 +36,7 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 	 * @param source the source entity with updated values
 	 * @param target the target entity to update */
 	public void copyNonNullFields(final EntityClass source, final EntityClass target) {
-		if ((source == null) || (target == null)) {
-			LOGGER.warn("Cannot copy fields: source or target is null");
-			return;
-		}
+		Check.notNull(source, "Source entity cannot be null");
 		try {
 			final Class<?> entityClass = ProxyUtils.getUserClass(source.getClass());
 			final Field[] fields = getAllFields(entityClass);

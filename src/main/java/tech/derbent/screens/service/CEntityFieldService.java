@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.screens.domain.CScreenLines;
 
@@ -35,7 +35,7 @@ public class CEntityFieldService extends CFieldServiceBase {
 		private int maxLength = 255;
 		private String defaultValue = "";
 		private String dataProviderBean = "";
-		// Additional MetaData properties
+		// Additional AMetaData properties
 		private boolean autoSelectFirst = false;
 		private String placeholder = "";
 		private boolean allowCustomValue = false;
@@ -162,7 +162,7 @@ public class CEntityFieldService extends CFieldServiceBase {
 
 	public static EntityFieldInfo createFieldInfo(final Field field) {
 		try {
-			final EntityFieldInfo info = createFieldInfo(field.getAnnotation(MetaData.class));
+			final EntityFieldInfo info = createFieldInfo(field.getAnnotation(AMetaData.class));
 			info.setFieldName(field.getName());
 			info.setFieldType(getSimpleTypeName(field.getType())); // String
 			info.setJavaType(field.getType().getSimpleName());
@@ -173,9 +173,9 @@ public class CEntityFieldService extends CFieldServiceBase {
 		}
 	}
 
-	public static EntityFieldInfo createFieldInfo(final MetaData metaData) {
+	public static EntityFieldInfo createFieldInfo(final AMetaData metaData) {
 		try {
-			Check.notNull(metaData, "MetaData annotation cannot be null");
+			Check.notNull(metaData, "AMetaData annotation cannot be null");
 			final EntityFieldInfo info = new EntityFieldInfo();
 			info.setFieldName("");
 			info.setFieldType("");
@@ -297,7 +297,7 @@ public class CEntityFieldService extends CFieldServiceBase {
 			if (Modifier.isStatic(field.getModifiers()) || field.getName().equals("serialVersionUID") || field.getName().equals("LOGGER")) {
 				continue;
 			}
-			if (field.getAnnotation(MetaData.class) == null) {
+			if (field.getAnnotation(AMetaData.class) == null) {
 				continue;
 			}
 			final EntityFieldInfo fieldInfo = createFieldInfo(field);

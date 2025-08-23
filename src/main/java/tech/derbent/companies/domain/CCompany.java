@@ -10,7 +10,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
-import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityConstants;
 import tech.derbent.abstracts.domains.CEntityNamed;
 
@@ -36,7 +36,7 @@ public class CCompany extends CEntityNamed<CCompany> {
 		length = CEntityConstants.MAX_LENGTH_DESCRIPTION
 	)
 	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
-	@MetaData (
+	@AMetaData (
 		displayName = "Address", required = false, readOnly = false, defaultValue = "",
 		description = "Company address", hidden = false, order = 3,
 		maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
@@ -45,7 +45,7 @@ public class CCompany extends CEntityNamed<CCompany> {
 
 	@Column (name = "phone", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
-	@MetaData (
+	@AMetaData (
 		displayName = "Phone", required = false, readOnly = false, defaultValue = "",
 		description = "Company phone number", hidden = false, order = 4,
 		maxLength = CEntityConstants.MAX_LENGTH_NAME
@@ -54,7 +54,7 @@ public class CCompany extends CEntityNamed<CCompany> {
 
 	@Column (name = "email", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
-	@MetaData (
+	@AMetaData (
 		displayName = "Email", required = false, readOnly = false, defaultValue = "",
 		description = "Company email address", hidden = false, order = 5,
 		maxLength = CEntityConstants.MAX_LENGTH_NAME
@@ -63,7 +63,7 @@ public class CCompany extends CEntityNamed<CCompany> {
 
 	@Column (name = "website", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
-	@MetaData (
+	@AMetaData (
 		displayName = "Website", required = false, readOnly = false, defaultValue = "",
 		description = "Company website URL", hidden = false, order = 6,
 		maxLength = CEntityConstants.MAX_LENGTH_NAME
@@ -74,7 +74,7 @@ public class CCompany extends CEntityNamed<CCompany> {
 		name = "tax_number", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME
 	)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
-	@MetaData (
+	@AMetaData (
 		displayName = "Tax Number", required = false, readOnly = false, defaultValue = "",
 		description = "Company tax identification number", hidden = false, order = 7,
 		maxLength = CEntityConstants.MAX_LENGTH_NAME
@@ -82,14 +82,14 @@ public class CCompany extends CEntityNamed<CCompany> {
 	private String taxNumber;
 
 	@Column (name = "enabled", nullable = false)
-	@MetaData (
+	@AMetaData (
 		displayName = "Active", required = true, readOnly = false, defaultValue = "true",
 		description = "Is company active?", hidden = false, order = 8
 	)
 	private Boolean enabled = Boolean.TRUE;
 
 	@OneToMany (mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@MetaData (
+	@AMetaData (
 		displayName = "Users", required = false, readOnly = true,
 		description = "Users belonging to this company", hidden = false, order = 9
 	)

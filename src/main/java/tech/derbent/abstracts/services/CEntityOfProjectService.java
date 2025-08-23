@@ -26,11 +26,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	 * @return count of entities for the project */
 	@Transactional (readOnly = true)
 	public long countByProject(final CProject project) {
-		LOGGER.debug("countByProject called with project: {} for {}", project != null ? project.getName() : "null", getClass().getSimpleName());
-		if (project == null) {
-			LOGGER.warn("countByProject called with null project for {}", getClass().getSimpleName());
-			return 0L;
-		}
+		Check.notNull(project, "Project cannot be null");
 		try {
 			return ((CEntityOfProjectRepository<EntityClass>) repository).countByProject(project);
 		} catch (final Exception e) {
@@ -41,6 +37,8 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 
 	public EntityClass createEntity(final String name, final CProject project) {
 		try {
+			Check.notNull(project, "Project cannot be null");
+			Check.notBlank(name, "Entity name cannot be null or empty");
 			final EntityClass entity = newEntity(name, project);
 			repository.saveAndFlush(entity);
 			return entity;
@@ -55,11 +53,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	 * @return list of entities with all relationships initialized */
 	@Transactional (readOnly = true)
 	public List<EntityClass> findEntriesByProject(final CProject project) {
-		LOGGER.debug("findEntriesByProject called for project: {}", project != null ? project.getName() : "null");
-		if (project == null) {
-			LOGGER.warn("findEntriesByProject called with null project for {}", getClass().getSimpleName());
-			return List.of();
-		}
+		Check.notNull(project, "Project cannot be null");
 		try {
 			final List<EntityClass> entities = ((CEntityOfProjectRepository<EntityClass>) repository).findByProject(project);
 			// Initialize any additional lazy fields that weren't loaded by the query
@@ -78,10 +72,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	 * @return list of entities with loaded relationships */
 	@Transactional (readOnly = true)
 	public List<EntityClass> findEntriesByProject(final CProject project, final Pageable pageable) {
-		if (project == null) {
-			LOGGER.warn("findEntriesByProject called with null project for {}", getClass().getSimpleName());
-			return List.of();
-		}
+		Check.notNull(project, "Project cannot be null");
 		try {
 			final List<EntityClass> entities = ((CEntityOfProjectRepository<EntityClass>) repository).findByProject(project, pageable);
 			// Initialize any additional lazy fields that weren't loaded by the query
@@ -101,9 +92,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	@Override
 	@Transactional (readOnly = true)
 	public Optional<EntityClass> getById(final Long id) {
-		if (id == null) {
-			return Optional.empty();
-		}
+		Check.notNull(id, "ID must not be null");
 		try {
 			final Optional<EntityClass> entity = repository.findById(id);
 			// With eager loading of small entities, minimal lazy field initialization
@@ -121,9 +110,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	 * @param entity the entity to initialize */
 	@Override
 	public void initializeLazyFields(final EntityClass entity) {
-		if (entity == null) {
-			return;
-		}
+		Check.notNull(entity, "Entity cannot be null");
 		try {
 			super.initializeLazyFields(entity); // This will handle the project
 												// relationship automatically
@@ -153,6 +140,8 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		if ("fail".equals(name)) {
 			throw new RuntimeException("This is for testing the error handler");
 		}
+		Check.notNull(project, "Project cannot be null");
+		Check.notBlank(name, "Entity name cannot be null or empty");
 		// Validate inputs
 		validateEntityName(name);
 		try {
@@ -172,8 +161,6 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	@Transactional
 	public EntityClass save(final EntityClass entity) {
 		Check.notNull(entity, "Entity cannot be null");
-		Check.notBlank(entity.getName(), "Entity name cannot be null or empty");
-		Check.notNull(entity.getProject(), "Entity project cannot be null");
 		// Check for duplicate names (excluding self for updates)
 		final String trimmedName = entity.getName().trim();
 		// search with same name and same project exclude self if updating

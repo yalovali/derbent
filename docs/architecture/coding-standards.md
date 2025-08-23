@@ -51,7 +51,7 @@ Check [project_design_description.md](./project_design_description.md) file for 
 ```
 src/main/java/tech/derbent/
 ├── abstracts/           # Base classes and annotations
-│   ├── annotations/     # MetaData and form generation annotations
+│   ├── annotations/     # AMetaData and form generation annotations
 │   ├── domains/         # Base domain entities (CEntityNamed, CEntityOfProject)
 │   ├── services/        # Base service classes with lazy loading support
 │   ├── views/           # Base UI components (CButton, CDialog, CGrid, CPanelBase)
@@ -239,7 +239,7 @@ After accepting Copilot suggestions, manually review for:
 - Every important function must start with a logger statement detailing function name and parameter values (do not log at function end)
 - Always catch exceptions in Vaadin UI and handle them gracefully
 - Use Vaadin UI components to display exceptions to users where possible
-- Always use `MetaData.java` annotation system to bind and generate forms for entities when possible
+- Always use `AMetaData.java` annotation system to bind and generate forms for entities when possible
 - Extend base classes or add new ones to increase modularity and maintainability
 - Always use appropriate icons for views and UI components
 - For delete operations, always require explicit user approval (e.g., confirmation dialog)
@@ -255,13 +255,13 @@ After accepting Copilot suggestions, manually review for:
 @AttributeOverride(name = "id", column = @Column(name = "activity_id"))
 public class CActivity extends CEntityOfProject {
     
-    @MetaData(
+    @AMetaData(
         displayName = "Activity Type", required = false, readOnly = false,
         description = "Type category of the activity", hidden = false, order = 2,
         dataProviderBean = "CActivityTypeService"
     )
     private CActivityType activityType;
-    // ... more fields with MetaData annotations
+    // ... more fields with AMetaData annotations
 }
 ```
 
@@ -301,9 +301,9 @@ public class CActivityView extends CProjectAwareMDPage<CActivity> {
 - Never add loggers at the end of functions. Always log at the start with full detail about the function and parameters
 - All code must follow Java naming conventions for variables and methods, except for class names which must start with "C"
 
-## 9.1. MetaData Annotation System and Enhanced Binder
+## 9.1. AMetaData Annotation System and Enhanced Binder
 
-This project uses a sophisticated **@MetaData** annotation system combined with **CEnhancedBinder** for automatic form generation and advanced field configuration. This is a key architectural pattern that must be followed:
+This project uses a sophisticated **@AMetaData** annotation system combined with **CEnhancedBinder** for automatic form generation and advanced field configuration. This is a key architectural pattern that must be followed:
 
 ### CEnhancedBinder Pattern
 The enhanced binder provides advanced validation, binding, and form generation capabilities:
@@ -320,18 +320,18 @@ public class CPanelActivityDescription extends CPanelActivityBase {
     
     @Override
     protected void updatePanelEntityFields() {
-        // Enhanced binder automatically generates fields based on MetaData
+        // Enhanced binder automatically generates fields based on AMetaData
         setEntityFields(List.of("name", "description", "activityType", "project"));
     }
 }
 ```
 
-### Advanced MetaData Features
+### Advanced AMetaData Features
 The annotation system now supports comprehensive field configuration:
 
 ```java
-// Enhanced MetaData with ComboBox customization
-@MetaData(
+// Enhanced AMetaData with ComboBox customization
+@AMetaData(
     displayName = "Activity Type", 
     required = false, 
     readOnly = false,
@@ -345,7 +345,7 @@ The annotation system now supports comprehensive field configuration:
 private CActivityType activityType;
 
 // String-based ComboBox with predefined options
-@MetaData(
+@AMetaData(
     displayName = "Status Category",
     stringComboBoxOptions = {"TODO", "IN_PROGRESS", "REVIEW", "COMPLETED", "BLOCKED"},
     allowCustomValue = false,
@@ -354,9 +354,9 @@ private CActivityType activityType;
 private String statusCategory;
 ```
 
-**MetaData Annotation Pattern:**
+**AMetaData Annotation Pattern:**
 ```java
-@MetaData(
+@AMetaData(
     displayName = "User Name",           // UI label
     required = true,                     // Validation requirement
     readOnly = false,                    // Field editability
@@ -373,7 +373,7 @@ private String name;
 **Real Examples from the Codebase:**
 ```java
 // From CActivity.java - Complex relationship with data provider
-@MetaData(
+@AMetaData(
     displayName = "Activity Type", required = false, readOnly = false,
     description = "Type category of the activity", hidden = false, order = 2,
     dataProviderBean = "CActivityTypeService"
@@ -381,7 +381,7 @@ private String name;
 private CActivityType activityType;
 
 // From CUser.java - Simple string field with validation
-@MetaData(
+@AMetaData(
     displayName = "User Name", required = true, readOnly = false,
     defaultValue = "", description = "User's first name", hidden = false,
     order = 1, maxLength = CEntityConstants.MAX_LENGTH_NAME
@@ -389,7 +389,7 @@ private CActivityType activityType;
 private String name;
 ```
 
-**Benefits of MetaData System:**
+**Benefits of AMetaData System:**
 - Automatic form generation using `CEntityFormBuilder`
 - Consistent validation across the application
 - Centralized field configuration
@@ -397,7 +397,7 @@ private String name;
 - Consistent UI labeling and ordering
 
 **Usage Guidelines:**
-- Always use MetaData for all entity fields that appear in UI forms
+- Always use AMetaData for all entity fields that appear in UI forms
 - Specify appropriate `dataProviderBean` for relationship fields
 - Use meaningful `displayName` values for user-friendly labels
 - Set proper `order` values to control form field sequence
@@ -564,7 +564,7 @@ CAbstractPage (base page functionality)
 ```
 
 **Form Building Pattern:**
-- Use `@MetaData` annotations on entity fields
+- Use `@AMetaData` annotations on entity fields
 - Automatic form generation via reflection
 - Consistent validation and data binding
 - ComboBox data providers via service beans
@@ -1114,14 +1114,14 @@ public class CEntity extends CEntityOfProject {
     private Double amount;
     private Long timestamp;
     
-    @MetaData(
+    @AMetaData(
         displayName = "Count", required = false, readOnly = false,
         description = "Number of items", hidden = false, order = 1
     )
     @Column(name = "count_value")
     private Integer count; // Always nullable wrapper types
     
-    @MetaData(
+    @AMetaData(
         displayName = "Active Status", required = false, readOnly = false,
         description = "Whether the entity is active", hidden = false, order = 2
     )
@@ -1248,11 +1248,11 @@ public class CPanelActivityDescription extends CPanelActivityBase {
     
     @Override
     protected void updatePanelEntityFields() {
-        // Enhanced binder automatically processes MetaData annotations
+        // Enhanced binder automatically processes AMetaData annotations
         setEntityFields(List.of("name", "description", "activityType", "status"));
         
         // Automatic validation, data provider binding, and field customization
-        // based on @MetaData annotations
+        // based on @AMetaData annotations
     }
     
     @Override
@@ -1278,7 +1278,7 @@ The new `CScreen` and `CScreenLines` entities provide dynamic UI configuration:
 public class CScreen extends CEntityNamed<CScreen> {
     
     @OneToMany(mappedBy = "screen", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @MetaData(displayName = "Screen Fields", description = "Dynamic field definitions")
+    @AMetaData(displayName = "Screen Fields", description = "Dynamic field definitions")
     private Set<CScreenLines> screenLines = new HashSet<>();
     
     // Screen configuration and field management
@@ -1545,8 +1545,8 @@ public Map<CActivityStatus, List<CActivity>> getEntitiesGroupedByStatus(final CP
 
 ## 4. Metadata and Validation
 
-### 4.1 MetaData Annotations
-- Use @MetaData for UI generation
+### 4.1 AMetaData Annotations
+- Use @AMetaData for UI generation
 - Specify display names, descriptions, and order
 - Set appropriate maxLength values
 - Define data provider beans for relationships
@@ -1660,8 +1660,8 @@ testPanelGeneration(Class<?> entityClass, List<String> expectedFields);
 **Enhanced Binder and Annotation Testing:**
 ```java
 @Test
-void testMetaDataAnnotationProcessing() {
-    // Given - Entity with MetaData annotations
+void testAMetaDataAnnotationProcessing() {
+    // Given - Entity with AMetaData annotations
     final CActivity activity = new CActivity();
     
     // When - Generate form using enhanced binder
@@ -2014,11 +2014,11 @@ public class CButtonFactory {
 public class CActivity extends CEntityOfProject {
     
     // Only specific fields for this entity
-    @MetaData(displayName = "Activity Type", order = 2, 
+    @AMetaData(displayName = "Activity Type", order = 2, 
               dataProviderBean = "CActivityTypeService")
     private CActivityType activityType;
     
-    @MetaData(displayName = "Priority", order = 3,
+    @AMetaData(displayName = "Priority", order = 3,
               dataProviderBean = "CActivityPriorityService")
     private CActivityPriority activityPriority;
     
@@ -2086,8 +2086,8 @@ public abstract class CEntityOfProjectService<T extends CEntityOfProject>
         final Field[] fields = entity.getClass().getDeclaredFields();
         
         for (final Field field : fields) {
-            if (field.isAnnotationPresent(MetaData.class)) {
-                final MetaData metadata = field.getAnnotation(MetaData.class);
+            if (field.isAnnotationPresent(AMetaData.class)) {
+                final AMetaData metadata = field.getAnnotation(AMetaData.class);
                 if (metadata.required()) {
                     validateRequiredField(entity, field, metadata.displayName());
                 }

@@ -7,7 +7,7 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CTypeEntity;
 import tech.derbent.projects.domain.CProject;
 
@@ -35,11 +35,11 @@ public class CCommentPriority extends CTypeEntity<CCommentPriority> {
     }
 
     @Column(name = "priority_level", nullable = false, length = 20)
-    @MetaData(displayName = "Priority Level", required = false, readOnly = false, defaultValue = "3", description = "Priority level of the comment", hidden = false, order = 2, useRadioButtons = false, setBackgroundFromColor = true)
+    @AMetaData(displayName = "Priority Level", required = false, readOnly = false, defaultValue = "3", description = "Priority level of the comment", hidden = false, order = 2, useRadioButtons = false, setBackgroundFromColor = true)
     private Integer priorityLevel = 3; // Default to normal priority
 
     @Column(name = "is_default", nullable = false)
-    @MetaData(displayName = "Is Default", required = false, readOnly = false, defaultValue = "false", description = "Indicates if this is the default priority", hidden = false, order = 7)
+    @AMetaData(displayName = "Is Default", required = false, readOnly = false, defaultValue = "false", description = "Indicates if this is the default priority", hidden = false, order = 7)
     private Boolean isDefault = false;
 
     /**

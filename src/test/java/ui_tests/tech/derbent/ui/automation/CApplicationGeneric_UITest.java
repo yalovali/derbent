@@ -22,7 +22,7 @@ public class CApplicationGeneric_UITest extends CBaseUITest {
             wait_loginscreen();
 
             // Updated for CCustomLoginView - use Check assertions
-            Check.condition(page.locator(".custom-login-view").isVisible(),
+            Check.isTrue(page.locator(".custom-login-view").isVisible(),
                     "Should be redirected to custom login view after logout");
 
             LOGGER.info("✅ Logout functionality test completed successfully");

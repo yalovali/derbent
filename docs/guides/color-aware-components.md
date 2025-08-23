@@ -104,17 +104,17 @@ CColorAwareComboBox<CProject> projectComboBox =
 Use on entity fields to create enhanced ComboBox components (all entities now get enhanced rendering):
 
 ```java
-@MetaData(displayName = "Decision Status", required = false, order = 4)
+@AMetaData(displayName = "Decision Status", required = false, order = 4)
 @ColorAwareComboBox(roundedCorners = true, autoContrast = true)
 private CDecisionStatus decisionStatus;
 
 // For user selection with icons
-@MetaData(displayName = "Assigned User", required = false, order = 5)
+@AMetaData(displayName = "Assigned User", required = false, order = 5)
 @ColorAwareComboBox
 private CUser assignedUser;
 
 // For any entity type - automatically gets appropriate icon
-@MetaData(displayName = "Project", required = false, order = 6)
+@AMetaData(displayName = "Project", required = false, order = 6)
 @ColorAwareComboBox
 private CProject project;
 ```

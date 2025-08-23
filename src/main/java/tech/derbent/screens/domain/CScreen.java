@@ -11,7 +11,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
-import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.projects.domain.CProject;
@@ -33,21 +33,21 @@ public class CScreen extends CEntityOfProject<CScreen> {
 
 	@Column (name = "entity_type", nullable = false, length = 100)
 	@Size (max = 100, message = "Entity type cannot exceed 100 characters")
-	@MetaData (
+	@AMetaData (
 			displayName = "Entity Type", required = true, readOnly = false, description = "Type of entity this screen is designed for",
 			hidden = false, order = 2, maxLength = 100, dataProviderBean = "CViewsService", dataProviderMethod = "getAvailableBaseTypes"
 	)
 	private String entityType;
 	@Column (name = "screen_title", nullable = true, length = 255)
 	@Size (max = 255, message = "Screen title cannot exceed 255 characters")
-	@MetaData (
+	@AMetaData (
 			displayName = "Screen Title", required = false, readOnly = false, description = "Title to display for this screen view", hidden = false,
 			order = 3, maxLength = 255
 	)
 	private String screenTitle;
 	@Column (name = "header_text", nullable = true, length = 500)
 	@Size (max = 500, message = "Header text cannot exceed 500 characters")
-	@MetaData (
+	@AMetaData (
 			displayName = "Header Text", required = false, readOnly = false, description = "Header text to display at the top of the screen",
 			hidden = false, order = 4, maxLength = 500
 	)
@@ -56,7 +56,7 @@ public class CScreen extends CEntityOfProject<CScreen> {
 	@OrderBy ("lineOrder ASC")
 	private List<CScreenLines> screenLines = new ArrayList<>();
 	@Column (name = "is_active", nullable = false)
-	@MetaData (
+	@AMetaData (
 			displayName = "Active", required = false, readOnly = false, description = "Whether this screen definition is active", hidden = false,
 			order = 20, defaultValue = "true"
 	)
@@ -96,7 +96,7 @@ public class CScreen extends CEntityOfProject<CScreen> {
 	}
 
 	public void debug_printScreenInformation() {
-		System.out.println(this.toString());
+		final String title = this.toString();
 		final List<EntityFieldInfo> fields = CEntityFieldService.getEntityFields(this.entityType);
 		if (this.screenLines != null) {
 			for (final CScreenLines line : this.screenLines) {
@@ -104,12 +104,12 @@ public class CScreen extends CEntityOfProject<CScreen> {
 				fields.removeIf(f -> f.getFieldName().equals(line.getEntityProperty()));
 			}
 		} else {
-			System.out.println("No screen lines available.");
+			System.out.printf("No screen lines available for screen type %s.%n", title);
 		}
 		if (fields.isEmpty()) {
-			System.out.println("All entity fields are represented on the screen.");
+			System.out.printf("All entity fields are represented on the screen type %s.%n", title);
 		} else {
-			System.out.println("Not on screen lines:");
+			System.out.printf("Not on screen lines for screen type %s.%n", title);
 			for (final EntityFieldInfo field : fields) {
 				System.out.printf("scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, \"%s\"));%n", field.getFieldName());
 			}

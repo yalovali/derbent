@@ -2,7 +2,6 @@ package tech.derbent.comments.view;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Paragraph;
@@ -12,66 +11,41 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
-
+import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.views.CButton;
 import tech.derbent.comments.domain.CComment;
 import tech.derbent.comments.service.CCommentService;
 
-/**
- * CCommentView - UI component for displaying individual comments. Layer: View (MVC)
- * Displays a comment as a div component with: - Author name and event date header -
- * Comment text content - Priority indicator - Important flag indicator - Styling based on
- * priority and importance
- */
+/** CCommentView - UI component for displaying individual comments. Layer: View (MVC) Displays a comment as a div component with: - Author name and
+ * event date header - Comment text content - Priority indicator - Important flag indicator - Styling based on priority and importance */
 public class CCommentView extends Div {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCommentView.class);
-
 	private static final long serialVersionUID = 1L;
-
 	private final CComment comment;
-
 	private final CCommentService commentService;
-
 	private final VerticalLayout layout;
-
 	private final HorizontalLayout headerLayout;
-
 	private final Paragraph commentTextParagraph;
-
 	private final TextArea editTextArea;
-
 	private final HorizontalLayout editButtonsLayout;
-
 	private final CButton editButton;
-
 	private final CButton saveButton;
-
 	private final CButton cancelButton;
-
 	private Boolean isEditing = Boolean.FALSE;
-
 	private String originalText;
 
-	/**
-	 * Creates a new CCommentView for the given comment (read-only).
-	 * @param comment the comment to display
-	 */
+	/** Creates a new CCommentView for the given comment (read-only).
+	 * @param comment the comment to display */
 	public CCommentView(final CComment comment) {
 		this(comment, null);
 	}
 
-	/**
-	 * Creates a new CCommentView for the given comment.
+	/** Creates a new CCommentView for the given comment.
 	 * @param comment        the comment to display
-	 * @param commentService the comment service for edit operations (can be null for
-	 *                       read-only)
-	 */
+	 * @param commentService the comment service for edit operations (can be null for read-only) */
 	public CCommentView(final CComment comment, final CCommentService commentService) {
-
-		if (comment == null) {
-			throw new IllegalArgumentException("Comment cannot be null");
-		}
+		Check.notNull(comment, "Comment cannot be null");
 		this.comment = comment;
 		this.commentService = commentService;
 		this.layout = new VerticalLayout();
@@ -82,35 +56,23 @@ public class CCommentView extends Div {
 		// Create buttons
 		this.editButton = CButton.createTertiary("Edit", null, event -> startEditing());
 		this.saveButton = CButton.createPrimary("Save", null, event -> saveChanges());
-		this.cancelButton =
-			CButton.createTertiary("Cancel", null, event -> cancelEditing());
+		this.cancelButton = CButton.createTertiary("Cancel", null, event -> cancelEditing());
 		setupLayout();
 		setupEditComponents();
 		updateContent();
 		addClassName("comment-view");
 	}
 
-	/**
-	 * Creates a new CCommentView for a comment loaded by ID from the database.
+	/** Creates a new CCommentView for a comment loaded by ID from the database.
 	 * @param commentId      the ID of the comment to load and display
-	 * @param commentService the service to load the comment and handle edits
-	 */
+	 * @param commentService the service to load the comment and handle edits */
 	public CCommentView(final Long commentId, final CCommentService commentService) {
 		LOGGER.info("CCommentView constructor called with commentId: {}", commentId);
-
-		if (commentId == null) {
-			throw new IllegalArgumentException("Comment ID cannot be null");
-		}
-
-		if (commentService == null) {
-			throw new IllegalArgumentException("Comment service cannot be null");
-		}
-		final java.util.Optional<CComment> commentOptional =
-			commentService.getById(commentId);
-
+		Check.notNull(commentId, "Comment ID cannot be null");
+		Check.notNull(commentService, "Comment service cannot be null");
+		final java.util.Optional<CComment> commentOptional = commentService.getById(commentId);
 		if (commentOptional.isEmpty()) {
-			throw new IllegalArgumentException(
-				"Comment with ID " + commentId + " not found");
+			throw new IllegalArgumentException("Comment with ID " + commentId + " not found");
 		}
 		this.comment = commentOptional.get();
 		this.commentService = commentService;
@@ -122,20 +84,16 @@ public class CCommentView extends Div {
 		// Create buttons
 		this.editButton = CButton.createTertiary("Edit", null, event -> startEditing());
 		this.saveButton = CButton.createPrimary("Save", null, event -> saveChanges());
-		this.cancelButton =
-			CButton.createTertiary("Cancel", null, event -> cancelEditing());
+		this.cancelButton = CButton.createTertiary("Cancel", null, event -> cancelEditing());
 		setupLayout();
 		setupEditComponents();
 		updateContent();
 		addClassName("comment-view");
 	}
 
-	/**
-	 * Cancels editing and reverts to original text.
-	 */
+	/** Cancels editing and reverts to original text. */
 	private void cancelEditing() {
 		isEditing = Boolean.FALSE;
-
 		// Revert any changes made to the comment text
 		if (originalText != null) {
 			comment.setCommentText(originalText);
@@ -143,37 +101,27 @@ public class CCommentView extends Div {
 		updateContent();
 	}
 
-	/**
-	 * Gets the comment associated with this view.
-	 * @return the comment
-	 */
+	/** Gets the comment associated with this view.
+	 * @return the comment */
 	public CComment getComment() { return comment; }
 
-	/**
-	 * Checks if the comment is currently being edited.
-	 * @return true if in edit mode, false otherwise
-	 */
+	/** Checks if the comment is currently being edited.
+	 * @return true if in edit mode, false otherwise */
 	public boolean isEditing() { return Boolean.TRUE.equals(isEditing); }
 
-	/**
-	 * Refreshes the view content (useful after comment updates).
-	 */
+	/** Refreshes the view content (useful after comment updates). */
 	public void refresh() {
 		updateContent();
 	}
 
-	/**
-	 * Saves the edited comment text.
-	 */
+	/** Saves the edited comment text. */
 	private void saveChanges() {
 		final String newText = editTextArea.getValue();
-
 		if ((newText == null) || newText.trim().isEmpty()) {
 			LOGGER.warn("Cannot save empty comment text");
 			// Could show an error notification here
 			return;
 		}
-
 		try {
 			commentService.updateCommentText(comment, newText.trim());
 			isEditing = Boolean.FALSE;
@@ -184,9 +132,7 @@ public class CCommentView extends Div {
 		}
 	}
 
-	/**
-	 * Sets up the edit components.
-	 */
+	/** Sets up the edit components. */
 	private void setupEditComponents() {
 		// Configure edit text area
 		editTextArea.setWidthFull();
@@ -204,9 +150,7 @@ public class CCommentView extends Div {
 		cancelButton.setIcon(new Icon(VaadinIcon.CLOSE));
 	}
 
-	/**
-	 * Sets up the basic layout structure.
-	 */
+	/** Sets up the basic layout structure. */
 	private void setupLayout() {
 		layout.setPadding(true);
 		layout.setSpacing(true);
@@ -219,11 +163,8 @@ public class CCommentView extends Div {
 		add(layout);
 	}
 
-	/**
-	 * Starts editing mode for the comment.
-	 */
+	/** Starts editing mode for the comment. */
 	private void startEditing() {
-
 		if (commentService == null) {
 			LOGGER.warn("Cannot edit comment - no comment service available");
 			return;
@@ -233,17 +174,13 @@ public class CCommentView extends Div {
 		updateContent();
 	}
 
-	/**
-	 * Updates the comment text content.
-	 */
+	/** Updates the comment text content. */
 	private void updateCommentText() {
-
 		if (Boolean.TRUE.equals(isEditing)) {
 			commentTextParagraph.setVisible(false);
 			editTextArea.setValue(comment.getCommentText());
 			editTextArea.setVisible(true);
-		}
-		else {
+		} else {
 			commentTextParagraph.setText(comment.getCommentText());
 			commentTextParagraph.addClassName("comment-text");
 			commentTextParagraph.getStyle().set("white-space", "pre-wrap");
@@ -255,18 +192,14 @@ public class CCommentView extends Div {
 		editButtonsLayout.setVisible(Boolean.TRUE.equals(isEditing));
 	}
 
-	/**
-	 * Updates the content of the comment view.
-	 */
+	/** Updates the content of the comment view. */
 	private void updateContent() {
 		updateHeader();
 		updateCommentText();
 		updateStyling();
 	}
 
-	/**
-	 * Updates the header section with author, date, and indicators.
-	 */
+	/** Updates the header section with author, date, and indicators. */
 	private void updateHeader() {
 		headerLayout.removeAll();
 		// Left side: Author and date
@@ -285,12 +218,10 @@ public class CCommentView extends Div {
 		final HorizontalLayout rightSide = new HorizontalLayout();
 		rightSide.setSpacing(true);
 		rightSide.setAlignItems(HorizontalLayout.Alignment.CENTER);
-
 		// Add edit button if service is available
 		if ((commentService != null) && !Boolean.TRUE.equals(isEditing)) {
 			rightSide.add(editButton);
 		}
-
 		// Priority indicator
 		if (comment.getPriority() != null) {
 			final Span prioritySpan = new Span(comment.getPriorityName());
@@ -300,11 +231,9 @@ public class CCommentView extends Div {
 			prioritySpan.getStyle().set("font-size", "0.75rem");
 			prioritySpan.getStyle().set("font-weight", "bold");
 			prioritySpan.getStyle().set("color", "white");
-			prioritySpan.getStyle().set("background-color",
-				comment.getPriority().getColor());
+			prioritySpan.getStyle().set("background-color", comment.getPriority().getColor());
 			rightSide.add(prioritySpan);
 		}
-
 		// Important indicator
 		if (comment.isImportant()) {
 			final Icon importantIcon = new Icon(VaadinIcon.STAR);
@@ -316,27 +245,22 @@ public class CCommentView extends Div {
 		headerLayout.add(leftSide, rightSide);
 	}
 
-	/**
-	 * Updates the styling based on comment properties.
-	 */
+	/** Updates the styling based on comment properties. */
 	private void updateStyling() {
 		// Base styling
 		getStyle().set("border", "1px solid var(--lumo-contrast-20pct)");
 		getStyle().set("border-radius", "8px");
 		getStyle().set("background-color", "var(--lumo-base-color)");
 		getStyle().set("margin-bottom", "1rem");
-
 		// Important comments get a different styling
 		if (comment.isImportant()) {
 			getStyle().set("border-left", "4px solid #FFD700");
 			getStyle().set("background-color", "#FFFEF7");
 			addClassName("comment-important");
 		}
-
 		// Priority-based styling
 		if (comment.getPriority() != null) {
-			final String priorityClass =
-				"comment-priority-" + comment.getPriority().getPriorityLevel();
+			final String priorityClass = "comment-priority-" + comment.getPriority().getPriorityLevel();
 			addClassName(priorityClass);
 		}
 	}

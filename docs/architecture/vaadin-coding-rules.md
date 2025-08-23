@@ -70,10 +70,10 @@ private String name;
 private String name;
 ```
 
-#### 2. MetaData Annotations
+#### 2. AMetaData Annotations
 ```java
 // ✅ CORRECT: Complete metadata
-@MetaData(
+@AMetaData(
     displayName = "Meeting Type", 
     required = false, 
     readOnly = false,

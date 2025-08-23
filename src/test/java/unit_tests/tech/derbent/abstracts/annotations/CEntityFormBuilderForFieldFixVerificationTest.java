@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
-import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.views.CVerticalLayout;
 
@@ -24,16 +24,16 @@ public class CEntityFormBuilderForFieldFixVerificationTest {
      */
     public static class TestEntityWithNumbers {
 
-        @MetaData(displayName = "Name", order = 1)
+        @AMetaData(displayName = "Name", order = 1)
         private String name;
 
-        @MetaData(displayName = "Price", order = 2)
+        @AMetaData(displayName = "Price", order = 2)
         private BigDecimal price;
 
-        @MetaData(displayName = "Quantity", order = 3)
+        @AMetaData(displayName = "Quantity", order = 3)
         private Integer quantity;
 
-        @MetaData(displayName = "Count", order = 4)
+        @AMetaData(displayName = "Count", order = 4)
         private Long count;
 
         public Long getCount() {

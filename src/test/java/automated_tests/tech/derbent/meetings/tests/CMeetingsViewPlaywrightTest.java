@@ -35,7 +35,7 @@ public class CMeetingsViewPlaywrightTest extends CApplicationGeneric_UITest {
 
             // Open new meeting form
             final var newButtons = page.locator("vaadin-button:has-text('New'), vaadin-button:has-text('Add')");
-            Check.condition(newButtons.count() > 0, "New button should be available in Meetings view");
+            Check.isTrue(newButtons.count() > 0, "New button should be available in Meetings view");
 
             newButtons.first().click();
             wait_1000();
@@ -56,7 +56,7 @@ public class CMeetingsViewPlaywrightTest extends CApplicationGeneric_UITest {
                 final int optionCount = options.count();
                 LOGGER.debug("Found {} options in Meeting Type ComboBox", optionCount);
 
-                Check.condition(optionCount >= 0, "Meeting Type ComboBox should have accessible options");
+                Check.isTrue(optionCount >= 0, "Meeting Type ComboBox should have accessible options");
 
                 if (optionCount > 0) {
                     options.first().click();
@@ -75,7 +75,7 @@ public class CMeetingsViewPlaywrightTest extends CApplicationGeneric_UITest {
                 final int projectOptionCount = projectOptions.count();
                 LOGGER.debug("Found {} options in Project ComboBox", projectOptionCount);
 
-                Check.condition(projectOptionCount >= 0, "Project ComboBox should have accessible options");
+                Check.isTrue(projectOptionCount >= 0, "Project ComboBox should have accessible options");
 
                 if (projectOptions.count() > 0) {
                     projectOptions.first().click();
@@ -114,18 +114,18 @@ public class CMeetingsViewPlaywrightTest extends CApplicationGeneric_UITest {
 
             // Create new meeting
             final var newButtons = page.locator("vaadin-button:has-text('New'), vaadin-button:has-text('Add')");
-            Check.condition(newButtons.count() > 0, "New button should be available for creating meetings");
+            Check.isTrue(newButtons.count() > 0, "New button should be available for creating meetings");
 
             newButtons.first().click();
             wait_1000();
 
             // Verify form opened
             final var formFields = page.locator("vaadin-text-field, vaadin-text-area, vaadin-date-picker");
-            Check.condition(formFields.count() > 0, "Meeting form should have input fields");
+            Check.isTrue(formFields.count() > 0, "Meeting form should have input fields");
 
             // Fill meeting subject/name
             final String meetingName = "Test Meeting " + System.currentTimeMillis();
-            Check.condition(fillFirstTextField(meetingName), "Should be able to fill meeting name field");
+            Check.isTrue(fillFirstTextField(meetingName), "Should be able to fill meeting name field");
             LOGGER.debug("Filled meeting name: {}", meetingName);
 
             // Fill description if available
@@ -151,7 +151,7 @@ public class CMeetingsViewPlaywrightTest extends CApplicationGeneric_UITest {
 
             // Save
             final var saveButtons = page.locator("vaadin-button:has-text('Save'), vaadin-button:has-text('Create')");
-            Check.condition(saveButtons.count() > 0, "Save button should be available");
+            Check.isTrue(saveButtons.count() > 0, "Save button should be available");
 
             saveButtons.first().click();
             wait_2000();
@@ -162,7 +162,7 @@ public class CMeetingsViewPlaywrightTest extends CApplicationGeneric_UITest {
 
             // Verify the workflow completed successfully
             final String currentUrl = page.url();
-            Check.condition(currentUrl.contains("meeting") || currentUrl.contains("meetings"),
+            Check.isTrue(currentUrl.contains("meeting") || currentUrl.contains("meetings"),
                     "Should remain on meetings view after successful workflow");
 
             LOGGER.info("✅ Meetings complete workflow test completed successfully");
@@ -213,7 +213,7 @@ public class CMeetingsViewPlaywrightTest extends CApplicationGeneric_UITest {
 
                 // Verify date was set
                 final String dateValue = datePickers.first().inputValue();
-                Check.condition(dateValue != null && !dateValue.trim().isEmpty(),
+                Check.isTrue(dateValue != null && !dateValue.trim().isEmpty(),
                         "Date picker should accept and store date values");
             }
 
@@ -226,7 +226,7 @@ public class CMeetingsViewPlaywrightTest extends CApplicationGeneric_UITest {
 
                 // Verify time was set
                 final String timeValue = timePickers.first().inputValue();
-                Check.condition(timeValue != null && !timeValue.trim().isEmpty(),
+                Check.isTrue(timeValue != null && !timeValue.trim().isEmpty(),
                         "Time picker should accept and store time values");
             }
 
@@ -239,7 +239,7 @@ public class CMeetingsViewPlaywrightTest extends CApplicationGeneric_UITest {
 
                 // Verify date-time was set
                 final String dateTimeValue = dateTimePickers.first().inputValue();
-                Check.condition(dateTimeValue != null && !dateTimeValue.trim().isEmpty(),
+                Check.isTrue(dateTimeValue != null && !dateTimeValue.trim().isEmpty(),
                         "Date-time picker should accept and store date-time values");
             }
 

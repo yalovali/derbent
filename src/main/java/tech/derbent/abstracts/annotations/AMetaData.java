@@ -6,30 +6,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/** MetaData annotation for field metadata and form generation. Used by CEntityFormBuilder to automatically generate UI components.
- * <p>
- * This annotation provides comprehensive metadata for entity fields to control how they are displayed and validated in automatically generated forms.
- * </p>
- * <p>
- * <strong>Usage Example:</strong>
- * </p>
- *
- * <pre>{@code
- *
- * @MetaData (displayName = "User Name", required = true, description = "The full name of the user", order = 1, maxLength = 255)
- * private String name;
- * }</pre>
- * <p>
- * <strong>Parameter Validation:</strong>
- * </p>
- * <ul>
- * <li>All String parameters are null-safe (empty string used as default)</li>
- * <li>Numeric parameters have sensible defaults and ranges</li>
- * <li>Boolean parameters default to false for safety</li>
- * </ul>
- * @author Derbent Framework
- * @since 1.0
- * @see tech.derbent.abstracts.annotations.CEntityFormBuilder */
 @Documented
 @Retention (RetentionPolicy.RUNTIME)
 @Target (ElementType.FIELD)

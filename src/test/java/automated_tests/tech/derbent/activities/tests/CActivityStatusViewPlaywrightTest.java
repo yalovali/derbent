@@ -34,7 +34,7 @@ public class CActivityStatusViewPlaywrightTest extends CApplicationGeneric_UITes
 
             // Test color picker availability using Check assertions
             final var colorPickers = page.locator("vaadin-color-picker, input[type='color']");
-            Check.condition(colorPickers.count() > 0, "Color picker should be available in the activity status form");
+            Check.isTrue(colorPickers.count() > 0, "Color picker should be available in the activity status form");
 
             // Fill color picker
             colorPickers.first().fill("#2196F3");
@@ -42,7 +42,7 @@ public class CActivityStatusViewPlaywrightTest extends CApplicationGeneric_UITes
 
             // Fill other required fields
             final String statusName = "Colored Status " + System.currentTimeMillis();
-            Check.condition(fillFirstTextField(statusName), "Should be able to fill status name field");
+            Check.isTrue(fillFirstTextField(statusName), "Should be able to fill status name field");
 
             // Save the form
             clickSave();
@@ -50,7 +50,7 @@ public class CActivityStatusViewPlaywrightTest extends CApplicationGeneric_UITes
 
             // Verify save success by checking URL or form state
             final String currentUrl = page.url();
-            Check.condition(currentUrl.contains("activity-status") || currentUrl.contains("activity-statuses"),
+            Check.isTrue(currentUrl.contains("activity-status") || currentUrl.contains("activity-statuses"),
                     "Should remain on activity status view after successful color save");
 
             clickCancel();
@@ -82,7 +82,7 @@ public class CActivityStatusViewPlaywrightTest extends CApplicationGeneric_UITes
 
             // Fill required fields and save successfully
             final String statusName = "Validated Status " + System.currentTimeMillis();
-            Check.condition(fillFirstTextField(statusName), "Should be able to fill status name field");
+            Check.isTrue(fillFirstTextField(statusName), "Should be able to fill status name field");
             LOGGER.debug("Filled status name for validation test: {}", statusName);
 
             // Set color if color picker is available
@@ -99,12 +99,12 @@ public class CActivityStatusViewPlaywrightTest extends CApplicationGeneric_UITes
 
             // Verify successful save by checking we're still on same view and no error messages
             final String currentUrl = page.url();
-            Check.condition(currentUrl.contains("activity-status") || currentUrl.contains("activity-statuses"),
+            Check.isTrue(currentUrl.contains("activity-status") || currentUrl.contains("activity-statuses"),
                     "Should remain on activity status view after successful save");
 
             // Check that error messages are cleared after successful save
             final var remainingErrors = page.locator(".v-errormessage, vaadin-error-message");
-            Check.condition(remainingErrors.count() == 0, "Error messages should be cleared after successful save");
+            Check.isTrue(remainingErrors.count() == 0, "Error messages should be cleared after successful save");
 
             LOGGER.info("✅ Activity Status form validation test completed successfully");
 
@@ -132,7 +132,7 @@ public class CActivityStatusViewPlaywrightTest extends CApplicationGeneric_UITes
 
                 // Click on first row to test lazy loading
                 final var gridRows = page.locator("vaadin-grid-cell-content").first();
-                Check.condition(gridRows.isVisible(), "First grid row should be visible for selection test");
+                Check.isTrue(gridRows.isVisible(), "First grid row should be visible for selection test");
 
                 gridRows.click();
                 wait_1000();
@@ -143,7 +143,7 @@ public class CActivityStatusViewPlaywrightTest extends CApplicationGeneric_UITes
 
                 // Test that form fields are accessible after selection (no lazy loading issues)
                 final var formFields = page.locator("vaadin-text-field, vaadin-text-area");
-                Check.condition(formFields.count() >= 0,
+                Check.isTrue(formFields.count() >= 0,
                         "Form fields should be accessible after grid selection without lazy loading errors");
 
             } else {
@@ -154,14 +154,14 @@ public class CActivityStatusViewPlaywrightTest extends CApplicationGeneric_UITes
                 wait_500();
 
                 final String testStatusName = "Test Status for Selection " + System.currentTimeMillis();
-                Check.condition(fillFirstTextField(testStatusName), "Should be able to fill test status name");
+                Check.isTrue(fillFirstTextField(testStatusName), "Should be able to fill test status name");
 
                 clickSave();
                 wait_2000();
 
                 // Verify the row was created
                 final int newRowCount = getGridRowCount();
-                Check.condition(newRowCount > rowCount, "Grid should have more rows after creating test data");
+                Check.isTrue(newRowCount > rowCount, "Grid should have more rows after creating test data");
 
                 // Now test selection
                 final var gridRows = page.locator("vaadin-grid-cell-content").first();
@@ -199,12 +199,12 @@ public class CActivityStatusViewPlaywrightTest extends CApplicationGeneric_UITes
 
             // Verify form is displayed
             final var formFields = page.locator("vaadin-text-field, vaadin-text-area");
-            Check.condition(formFields.count() > 0,
+            Check.isTrue(formFields.count() > 0,
                     "Form fields should be available when creating new activity status");
 
             // Fill required fields
             final String statusName = "Navigation Test Status " + System.currentTimeMillis();
-            Check.condition(fillFirstTextField(statusName), "Should be able to fill status name field");
+            Check.isTrue(fillFirstTextField(statusName), "Should be able to fill status name field");
             LOGGER.debug("Filled status name: {}", statusName);
 
             // Fill description if available
@@ -227,12 +227,12 @@ public class CActivityStatusViewPlaywrightTest extends CApplicationGeneric_UITes
 
             // Verify we're still on the activity status view by checking URL
             final String currentUrl = page.url();
-            Check.condition(currentUrl.contains("activity-status") || currentUrl.contains("activity-statuses"),
+            Check.isTrue(currentUrl.contains("activity-status") || currentUrl.contains("activity-statuses"),
                     "Should remain on activity status view after save, but was: " + currentUrl);
 
             // Verify the new row was added to the grid
             final int finalRowCount = getGridRowCount();
-            Check.condition(finalRowCount > initialRowCount,
+            Check.isTrue(finalRowCount > initialRowCount,
                     "Grid should have more rows after saving new activity status");
 
             // Test that we can navigate away and back without issues
@@ -240,7 +240,7 @@ public class CActivityStatusViewPlaywrightTest extends CApplicationGeneric_UITes
             wait_1000();
 
             final int reloadRowCount = getGridRowCount();
-            Check.condition(reloadRowCount == finalRowCount, "Row count should be consistent after navigation reload");
+            Check.isTrue(reloadRowCount == finalRowCount, "Row count should be consistent after navigation reload");
 
             LOGGER.info("✅ Activity Status lazy loading and navigation test completed successfully");
 
@@ -283,7 +283,7 @@ public class CActivityStatusViewPlaywrightTest extends CApplicationGeneric_UITes
                 LOGGER.debug("ComboBox {} has {} options available", i, options.count());
 
                 // Verify that ComboBox has accessible options
-                Check.condition(options.count() >= 0, "ComboBox should have accessible options without errors");
+                Check.isTrue(options.count() >= 0, "ComboBox should have accessible options without errors");
 
                 // Close dropdown by clicking elsewhere
                 page.locator("body").click();

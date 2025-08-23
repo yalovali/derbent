@@ -1,14 +1,11 @@
 package tech.derbent.abstracts.components;
 
 import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.utils.CAuxillaries;
 import tech.derbent.abstracts.utils.CColorUtils;
@@ -18,25 +15,17 @@ import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 
 	private static final long serialVersionUID = 1L;
-
-	private static final Logger LOGGER =
-		LoggerFactory.getLogger(CColorAwareComboBox.class);
-
+	@SuppressWarnings ("unused")
+	private static final Logger LOGGER = LoggerFactory.getLogger(CColorAwareComboBox.class);
 	private final Class<T> entityType;
-
 	// Styling configuration
 	private Boolean roundedCorners = Boolean.TRUE;
-
 	private String padding = "4px 8px";
-
 	private Boolean autoContrast = Boolean.TRUE;
-
 	private String minWidth = "100%";
 
-	/**
-	 * Constructor for CColorAwareComboBox with entity type.
-	 * @param entityType the entity class for the ComboBox
-	 */
+	/** Constructor for CColorAwareComboBox with entity type.
+	 * @param entityType the entity class for the ComboBox */
 	public CColorAwareComboBox(final Class<T> entityType) {
 		super();
 		this.entityType = entityType;
@@ -44,29 +33,23 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 		CAuxillaries.setId(this);
 	}
 
-	/**
-	 * Constructor for CColorAwareComboBox with entity type and label.
+	/** Constructor for CColorAwareComboBox with entity type and label.
 	 * @param entityType the entity class for the ComboBox
-	 * @param label      the label for the ComboBox
-	 */
+	 * @param label      the label for the ComboBox */
 	public CColorAwareComboBox(final Class<T> entityType, final String label) {
 		super(label);
 		this.entityType = entityType;
 		initializeComboBox();
 	}
 
-	/**
-	 * Constructor for CColorAwareComboBox with entity type, label, and items.
+	/** Constructor for CColorAwareComboBox with entity type, label, and items.
 	 * @param entityType the entity class for the ComboBox
 	 * @param label      the label for the ComboBox
-	 * @param items      the items to populate the ComboBox
-	 */
-	public CColorAwareComboBox(final Class<T> entityType, final String label,
-		final List<T> items) {
+	 * @param items      the items to populate the ComboBox */
+	public CColorAwareComboBox(final Class<T> entityType, final String label, final List<T> items) {
 		super(label);
 		this.entityType = entityType;
 		initializeComboBox();
-
 		if (items != null) {
 			setItems(items);
 		}
@@ -81,13 +64,9 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 		updateFromInfo(fieldInfo);
 	}
 
-	/**
-	 * Configures the enhanced renderer for entities with colors and/or icons. Now uses
-	 * the new CEntityLabel base class for consistent rendering.
-	 */
+	/** Configures the enhanced renderer for entities with colors and/or icons. Now uses the new CEntityLabel base class for consistent rendering. */
 	private void configureColorRenderer() {
 		setRenderer(new ComponentRenderer<>(item -> {
-
 			if (item == null) {
 				return new Span("N/A");
 			}
@@ -96,10 +75,8 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 		}));
 	}
 
-	/**
-	 * Gets the entity type for this ComboBox.
-	 * @return the entity type class
-	 */
+	/** Gets the entity type for this ComboBox.
+	 * @return the entity type class */
 	public Class<T> getEntityType() { return entityType; }
 
 	@Override
@@ -107,20 +84,10 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 
 	public String getPadding() { return padding; }
 
-	/**
-	 * Initializes the ComboBox with enhanced rendering for all entities. All entities now
-	 * use the enhanced rendering with icons and colors.
-	 */
+	/** Initializes the ComboBox with enhanced rendering for all entities. All entities now use the enhanced rendering with icons and colors. */
 	private void initializeComboBox() {
-		LOGGER.debug("Initializing CColorAwareComboBox for entity type: {}",
-			entityType.getSimpleName());
-		// Following coding guidelines: All selective ComboBoxes must be selection only
 		setAllowCustomValue(false);
-		// Set up item label generator
 		setItemLabelGenerator(item -> CColorUtils.getDisplayTextFromEntity(item));
-		// All entities now use enhanced rendering with the CEntityLabel base class
-		LOGGER.debug("Configuring enhanced rendering for entity type: {}",
-			entityType.getSimpleName());
 		configureColorRenderer();
 	}
 	// Getter and setter methods for styling configuration
@@ -153,17 +120,14 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 	private void updateFromInfo(final EntityFieldInfo fieldInfo) {
 		Check.notNull(fieldInfo, "Field info cannot be null");
 		setAllowCustomValue(fieldInfo.isAllowCustomValue());
-
 		// Set placeholder text if specified
 		if (!fieldInfo.getPlaceholder().trim().isEmpty()) {
 			setPlaceholder(fieldInfo.getPlaceholder());
 		}
-
 		// Set read-only state for combobox if specified
 		if (fieldInfo.isComboboxReadOnly() || fieldInfo.isReadOnly()) {
 			setReadOnly(true);
 		}
-
 		// Set width if specified
 		if (!fieldInfo.getWidth().trim().isEmpty()) {
 			setWidth(fieldInfo.getWidth());

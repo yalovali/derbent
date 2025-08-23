@@ -9,7 +9,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import tech.derbent.abstracts.annotations.MetaData;
+import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.projects.domain.CProject;
 
@@ -29,7 +29,7 @@ public class CRisk extends CEntityOfProject<CRisk> {
 		name = "risk_severity", nullable = false, length = 20,
 		columnDefinition = "VARCHAR(20)"
 	)
-	@MetaData (
+	@AMetaData (
 		displayName = "Risk Severity", required = true, readOnly = false,
 		defaultValue = "LOW", description = "Severity level of the risk", hidden = false,
 		order = 2, useRadioButtons = false
@@ -38,7 +38,7 @@ public class CRisk extends CEntityOfProject<CRisk> {
 
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "criskstatus_id", nullable = true)
-	@MetaData (
+	@AMetaData (
 		displayName = "Status", required = false, readOnly = false,
 		description = "Current status of the risk", hidden = false, order = 3,
 		dataProviderBean = "CRiskStatusService"

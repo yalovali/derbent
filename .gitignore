@@ -21,3 +21,4 @@ javac.*.args
 
 # Profile pictures directory - images should be stored in database, not as files
 profile-pictures/
+/docs.zip

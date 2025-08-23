@@ -59,7 +59,7 @@ public class CTimeLog extends CEntityBase {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(CTimeLog.class);
     
-    @MetaData(
+    @AMetaData(
         displayName = "Activity", required = true, readOnly = false,
         description = "Activity for which time is being tracked", hidden = false, order = 1,
         dataProviderBean = "CActivityService"
@@ -68,7 +68,7 @@ public class CTimeLog extends CEntityBase {
     @JoinColumn(name = "activity_id", nullable = false)
     private CActivity activity;
     
-    @MetaData(
+    @AMetaData(
         displayName = "User", required = true, readOnly = false,
         description = "User who logged the time", hidden = false, order = 2,
         dataProviderBean = "CUserService"
@@ -77,28 +77,28 @@ public class CTimeLog extends CEntityBase {
     @JoinColumn(name = "user_id", nullable = false)
     private CUser user;
     
-    @MetaData(
+    @AMetaData(
         displayName = "Start Time", required = true, readOnly = false,
         description = "When the work started", hidden = false, order = 3
     )
     @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
     
-    @MetaData(
+    @AMetaData(
         displayName = "End Time", required = false, readOnly = false,
         description = "When the work ended", hidden = false, order = 4
     )
     @Column(name = "end_time")
     private LocalDateTime endTime;
     
-    @MetaData(
+    @AMetaData(
         displayName = "Duration (Hours)", required = false, readOnly = true,
         description = "Calculated duration in hours", hidden = false, order = 5
     )
     @Column(name = "duration_hours", precision = 10, scale = 2)
     private BigDecimal durationHours;
     
-    @MetaData(
+    @AMetaData(
         displayName = "Description", required = false, readOnly = false,
         description = "Description of work performed", hidden = false, order = 6,
         maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
@@ -106,7 +106,7 @@ public class CTimeLog extends CEntityBase {
     @Column(name = "description", length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
     private String description;
     
-    @MetaData(
+    @AMetaData(
         displayName = "Time Category", required = true, readOnly = false,
         description = "Category of work performed", hidden = false, order = 7,
         dataProviderBean = "CTimeCategoryService"
@@ -115,42 +115,42 @@ public class CTimeLog extends CEntityBase {
     @JoinColumn(name = "category_id", nullable = false)
     private CTimeCategory timeCategory;
     
-    @MetaData(
+    @AMetaData(
         displayName = "Is Billable", required = true, readOnly = false,
         description = "Whether this time is billable", hidden = false, order = 8
     )
     @Column(name = "is_billable", nullable = false)
     private Boolean isBillable = true;
     
-    @MetaData(
+    @AMetaData(
         displayName = "Hourly Rate", required = false, readOnly = false,
         description = "Hourly rate for this time entry", hidden = false, order = 9
     )
     @Column(name = "hourly_rate", precision = 10, scale = 2)
     private BigDecimal hourlyRate;
     
-    @MetaData(
+    @AMetaData(
         displayName = "Total Cost", required = false, readOnly = true,
         description = "Calculated total cost (duration * rate)", hidden = false, order = 10
     )
     @Column(name = "total_cost", precision = 10, scale = 2)
     private BigDecimal totalCost;
     
-    @MetaData(
+    @AMetaData(
         displayName = "Log Date", required = true, readOnly = false,
         description = "Date when work was performed", hidden = false, order = 11
     )
     @Column(name = "log_date", nullable = false)
     private LocalDate logDate;
     
-    @MetaData(
+    @AMetaData(
         displayName = "Is Submitted", required = true, readOnly = false,
         description = "Whether timesheet entry is submitted", hidden = false, order = 12
     )
     @Column(name = "is_submitted", nullable = false)
     private Boolean isSubmitted = false;
     
-    @MetaData(
+    @AMetaData(
         displayName = "Is Approved", required = true, readOnly = false,
         description = "Whether timesheet entry is approved", hidden = false, order = 13
     )
@@ -327,21 +327,21 @@ public class CTimeCategory extends CTypeEntity {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(CTimeCategory.class);
     
-    @MetaData(
+    @AMetaData(
         displayName = "Is Billable by Default", required = true, readOnly = false,
         description = "Whether this category is billable by default", hidden = false, order = 4
     )
     @Column(name = "is_billable_default", nullable = false)
     private Boolean isBillableDefault = true;
     
-    @MetaData(
+    @AMetaData(
         displayName = "Default Hourly Rate", required = false, readOnly = false,
         description = "Default hourly rate for this category", hidden = false, order = 5
     )
     @Column(name = "default_hourly_rate", precision = 10, scale = 2)
     private BigDecimal defaultHourlyRate;
     
-    @MetaData(
+    @AMetaData(
         displayName = "Category Icon", required = false, readOnly = false,
         description = "VaadinIcon name for this category", hidden = false, order = 6
     )
@@ -416,7 +416,7 @@ public class CTimeTrackingSession extends CEntityBase {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(CTimeTrackingSession.class);
     
-    @MetaData(
+    @AMetaData(
         displayName = "Activity", required = true, readOnly = false,
         description = "Activity being tracked", hidden = false, order = 1,
         dataProviderBean = "CActivityService"
@@ -425,7 +425,7 @@ public class CTimeTrackingSession extends CEntityBase {
     @JoinColumn(name = "activity_id", nullable = false)
     private CActivity activity;
     
-    @MetaData(
+    @AMetaData(
         displayName = "User", required = true, readOnly = false,
         description = "User tracking time", hidden = false, order = 2,
         dataProviderBean = "CUserService"
@@ -434,21 +434,21 @@ public class CTimeTrackingSession extends CEntityBase {
     @JoinColumn(name = "user_id", nullable = false)
     private CUser user;
     
-    @MetaData(
+    @AMetaData(
         displayName = "Start Time", required = true, readOnly = false,
         description = "When tracking started", hidden = false, order = 3
     )
     @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
     
-    @MetaData(
+    @AMetaData(
         displayName = "Last Update", required = false, readOnly = true,
         description = "Last update timestamp", hidden = false, order = 4
     )
     @Column(name = "last_update")
     private LocalDateTime lastUpdate;
     
-    @MetaData(
+    @AMetaData(
         displayName = "Description", required = false, readOnly = false,
         description = "Current work description", hidden = false, order = 5,
         maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
@@ -456,7 +456,7 @@ public class CTimeTrackingSession extends CEntityBase {
     @Column(name = "description", length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
     private String description;
     
-    @MetaData(
+    @AMetaData(
         displayName = "Time Category", required = true, readOnly = false,
         description = "Category of work being performed", hidden = false, order = 6,
         dataProviderBean = "CTimeCategoryService"
@@ -465,14 +465,14 @@ public class CTimeTrackingSession extends CEntityBase {
     @JoinColumn(name = "category_id", nullable = false)
     private CTimeCategory timeCategory;
     
-    @MetaData(
+    @AMetaData(
         displayName = "Is Paused", required = true, readOnly = false,
         description = "Whether tracking is currently paused", hidden = false, order = 7
     )
     @Column(name = "is_paused", nullable = false)
     private Boolean isPaused = false;
     
-    @MetaData(
+    @AMetaData(
         displayName = "Total Pause Duration", required = false, readOnly = true,
         description = "Total time paused in minutes", hidden = false, order = 8
     )
