@@ -14,6 +14,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityOfProject;
+import tech.derbent.decisions.view.CDecisionsView;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
 
@@ -24,7 +25,6 @@ import tech.derbent.users.domain.CUser;
 @Table (name = "cdecision")
 @AttributeOverride (name = "id", column = @Column (name = "decision_id"))
 public class CDecision extends CEntityOfProject<CDecision> {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDecision.class);
 
 	public static String getIconColorCode() {
@@ -32,6 +32,8 @@ public class CDecision extends CEntityOfProject<CDecision> {
 	}
 
 	public static String getIconFilename() { return "vaadin:gavel"; }
+
+	public static Class<?> getViewClass() { return CDecisionsView.class; }
 
 	// Decision Type Classification
 	@ManyToOne (fetch = FetchType.EAGER)

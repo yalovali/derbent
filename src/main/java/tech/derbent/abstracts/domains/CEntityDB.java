@@ -15,9 +15,14 @@ import jakarta.persistence.MappedSuperclass;
 import tech.derbent.abstracts.utils.Check;
 
 @MappedSuperclass
-public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implements CInterfaceIconSet {
-
+public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implements CInterfaceIconSet, IEntityDBStatics {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityDB.class);
+
+	public static Class<?> getViewClass() {
+		Check.fail("CEntityDB.getViewClass() called - returning NONE");
+		return null;
+	}
+
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -29,38 +34,6 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 
 	public CEntityDB(final Class<EntityClass> clazz) {
 		super(clazz);
-	}
-
-	/** Generic method to copy non-null fields from source to target using reflection. This method handles update operations by copying only the
-	 * fields that have values.
-	 * @param source the source entity with updated values
-	 * @param target the target entity to update */
-	public void copyNonNullFields(final EntityClass source, final EntityClass target) {
-		Check.notNull(source, "Source entity cannot be null");
-		try {
-			final Class<?> entityClass = ProxyUtils.getUserClass(source.getClass());
-			final Field[] fields = getAllFields(entityClass);
-			for (final Field field : fields) {
-				// Skip ID field to prevent overwriting existing entity ID
-				if ("id".equals(field.getName())) {
-					continue;
-				}
-				// Skip static and final fields
-				final int modifiers = field.getModifiers();
-				if (java.lang.reflect.Modifier.isStatic(modifiers) || java.lang.reflect.Modifier.isFinal(modifiers)) {
-					continue;
-				}
-				field.setAccessible(true);
-				final Object value = field.get(source);
-				if (value != null) {
-					field.set(target, value);
-				}
-			}
-			LOGGER.debug("Successfully copied non-null fields from {} to {}", source.getClass().getSimpleName(), target.getClass().getSimpleName());
-		} catch (final Exception e) {
-			LOGGER.error("Error copying fields using reflection", e);
-			throw new RuntimeException("Failed to copy entity fields", e);
-		}
 	}
 
 	@SuppressWarnings ("unchecked")

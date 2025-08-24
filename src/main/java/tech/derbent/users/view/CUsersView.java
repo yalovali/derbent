@@ -10,6 +10,8 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
@@ -83,20 +85,18 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser> implements CInte
 
 	@Override
 	protected void createGridForEntity() {
-		LOGGER.info("Creating grid for users with appropriate field widths");
+		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
+		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");
+		grid.addColumnEntityNamed(CUser::getUserType, "Type");
+		grid.addColumnEntityNamed(CUser::getCompany, "Company");
+		grid.addColumn(CEntityNamed::getDescriptionShort, "Description");
+		grid.addDateTimeColumn(CEntityNamed::getCreatedDate, "Created", null);
 		// Add profile picture column first
 		grid.addImageColumn(CUser::getProfilePictureData, "Picture");
-		// Add columns using CGrid methods with field-type-appropriate widths
-		grid.addShortTextColumn(CUser::getName, "Name", "name");
 		grid.addShortTextColumn(CUser::getLastname, "Last Name", "lastname");
 		grid.addShortTextColumn(CUser::getLogin, "Login", "login");
 		grid.addLongTextColumn(CUser::getEmail, "Email", "email");
-		// Status column uses lambda expression - not directly sortable at DB level
 		grid.addBooleanColumn(CUser::isEnabled, "Status", "Enabled", "Disabled");
-		// User type requires join - not directly sortable at DB level
-		grid.addReferenceColumn(item -> item.getUserType() != null ? item.getUserType().getName() : "", "User Type");
-		// Company requires join - not directly sortable at DB level
-		grid.addReferenceColumn(item -> item.getCompany() != null ? item.getCompany().getName() : "", "Company");
 		grid.addShortTextColumn(CUser::getRoles, "Roles", "roles");
 	}
 

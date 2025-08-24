@@ -4,6 +4,9 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.domains.CEntityNamed;
+import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.orders.domain.COrder;
@@ -40,21 +43,13 @@ public class COrdersView extends CProjectAwareMDPage<COrder> implements CInterfa
 
 	@Override
 	protected void createGridForEntity() {
-		// Add grid columns for order display
-		grid.addShortTextColumn(COrder::getProjectName, "Project", "project");
-		grid.addShortTextColumn(COrder::getName, "Order Name", "name");
-		grid.addReferenceColumn(order -> order.getOrderType() != null ? order.getOrderType().getName() : "No Type", "Type");
-		grid.addShortTextColumn(COrder::getProviderCompanyName, "Provider", null);
-		grid.addReferenceColumn(order -> order.getStatus() != null ? order.getStatus().getName() : "No Status", "Status");
-		grid.addShortTextColumn(order -> order.getCurrency() != null ? order.getCurrency().getCurrencyCode() : "No Currency", "Currency", null);
-		grid.addColumn(order -> order.getEstimatedCost() != null ? order.getEstimatedCost().toString() : "0.00", "Est. Cost", null);
-		grid.addColumn(order -> {
-			final String desc = order.getDescription();
-			if (desc == null) {
-				return "Not set";
-			}
-			return desc.length() > 50 ? desc.substring(0, 50) + "..." : desc;
-		}, "Description", null);
+		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
+		grid.addColumnEntityNamed(CEntityOfProject::getProject, "Project");
+		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");
+		grid.addColumnEntityNamed(COrder::getOrderType, "Type");
+		grid.addColumnEntityNamed(COrder::getStatus, "Status");
+		grid.addColumnEntityNamed(COrder::getCurrency, "Currency");
+		grid.addColumn(CEntityNamed::getDescriptionShort, "Description");
 	}
 
 	@Override

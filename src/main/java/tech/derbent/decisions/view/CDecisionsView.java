@@ -3,11 +3,13 @@ package tech.derbent.decisions.view;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.util.Assert;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.domains.CEntityNamed;
+import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.decisions.domain.CDecision;
@@ -54,25 +56,15 @@ public class CDecisionsView extends CProjectAwareMDPage<CDecision> implements CI
 
 	@Override
 	protected void createGridForEntity() {
-		// Configure grid columns for decision display
-		grid.addShortTextColumn(CDecision::getProjectName, "Project", "project");
-		grid.addShortTextColumn(CDecision::getName, "Decision Name", "name");
-		grid.addReferenceColumn(decision -> decision.getDecisionType() != null ? decision.getDecisionType().getName() : "No Type", "Type");
-		grid.addShortTextColumn(decision -> decision.getDecisionStatus() != null ? decision.getDecisionStatus().getName() : "No Status", "Status",
-				null);
-		grid.addShortTextColumn(decision -> decision.getAccountableUser() != null ? decision.getAccountableUser().getName() : "Unassigned",
-				"Accountable", null);
+		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
+		grid.addColumnEntityNamed(CEntityOfProject::getProject, "Project");
+		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");
+		grid.addColumnEntityNamed(CDecision::getDecisionType, "Type");
+		grid.addColumnEntityNamed(CDecision::getDecisionStatus, "Status");
+		grid.addColumnEntityNamed(CDecision::getAccountableUser, "Accountable");
+		grid.addColumn(CEntityNamed::getDescriptionShort, "Description");
 		grid.addColumn(decision -> decision.getEstimatedCost() != null ? decision.getEstimatedCost().toString() : "No Cost", "Est. Cost", null);
-		grid.addColumn(decision -> decision.getCreatedDate() != null ? decision.getCreatedDate().toLocalDate().toString() : "", "Created", null);
-		// Add selection listener to navigate to edit view
-		grid.asSingleSelect().addValueChangeListener(event -> {
-			if (event.getValue() != null) {
-				UI.getCurrent().navigate(String.format(ENTITY_ROUTE_TEMPLATE_EDIT, event.getValue().getId()));
-			} else {
-				clearForm();
-				UI.getCurrent().navigate(CDecisionsView.class);
-			}
-		});
+		grid.addDateTimeColumn(CEntityNamed::getCreatedDate, "Created", null);
 	}
 
 	/** Gets the current decision service.

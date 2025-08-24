@@ -4,6 +4,9 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.domains.CEntityNamed;
+import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.activities.domain.CActivityType;
@@ -18,7 +21,6 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 10.4, icon = "class:tech.derbent.activities.view.CActivityTypeView", title = "Types.Activity Types")
 @PermitAll
 public class CActivityTypeView extends CProjectAwareMDPage<CActivityType> implements CInterfaceIconSet {
-
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() {
@@ -38,13 +40,14 @@ public class CActivityTypeView extends CProjectAwareMDPage<CActivityType> implem
 
 	@Override
 	protected void createGridForEntity() {
-		// Add color-aware type column to show the type with color
+		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
+		grid.addColumnEntityNamed(CEntityOfProject::getProject, "Project");
+		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");
+		grid.addColumn(CEntityNamed::getDescriptionShort, "Description");
 		grid.addStatusColumn(type -> type, "Type", "type");
 		grid.addShortTextColumn(CActivityType::getName, "Name", "name");
-		grid.addLongTextColumn(CActivityType::getDescription, "Description", "description");
 		grid.addShortTextColumn(CActivityType::getColor, "Color", "color");
 		grid.addBooleanColumn(CActivityType::isActive, "Active", "Active", "Inactive");
-		grid.addShortTextColumn(CActivityType::getProjectName, "Project", "project");
 	}
 
 	@Override

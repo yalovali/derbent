@@ -8,8 +8,10 @@ import java.util.stream.Stream;
 import org.springframework.data.domain.Pageable;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
@@ -27,6 +29,7 @@ import jakarta.annotation.PostConstruct;
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.components.CSearchToolbar;
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.domains.IEntityDBStatics;
 import tech.derbent.abstracts.interfaces.CLayoutChangeListener;
 import tech.derbent.abstracts.interfaces.CSearchable;
 import tech.derbent.abstracts.services.CAbstractService;
@@ -238,6 +241,8 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	protected void createGridLayout() {
 		grid = new CGrid<>(entityClass);
+		// Add selection listener to navigate to edit view
+		grid.asSingleSelect().addValueChangeListener(this::onGridSelectionChange);
 		// Create search toolbar if entity supports searching
 		if (CSearchable.class.isAssignableFrom(entityClass)) {
 			searchToolbar = new CSearchToolbar("Search " + entityClass.getSimpleName().replace("C", "").toLowerCase() + "...");
@@ -426,6 +431,26 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		// Unregister from layout change notifications
 		if (layoutService != null) {
 			layoutService.removeLayoutChangeListener(this);
+		}
+	}
+
+	@SuppressWarnings ("unchecked")
+	protected void onGridSelectionChange(final ValueChangeEvent<?> event) {
+		LOGGER.debug("Grid selection changed: {}", event.getValue() != null ? event.getValue().toString() : "null");
+		final EntityClass value = ((EntityClass) event.getValue());
+		if (value != null) {
+			final String routeTemplate = getEntityRouteTemplateEdit();
+			UI.getCurrent().navigate(String.format(routeTemplate, value.getId()));
+			sessionService.setActiveId(entityClass.getSimpleName(), value.getId());
+			populateForm(value);
+		} else {
+			clearForm();
+			try {
+				final Class<? extends Component> viewClass = IEntityDBStatics.viewClassOf(entityClass);
+				UI.getCurrent().navigate(viewClass);
+			} catch (final Exception e) {
+				LOGGER.error("Failed to navigate to view class for {}", entityClass.getSimpleName(), e);
+			}
 		}
 	}
 

@@ -33,10 +33,8 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 1.3, icon = "class:tech.derbent.projects.view.CProjectDetailsView", title = "Project.Project Details")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CProjectDetailsView extends CAbstractNamedEntityPage<CProject> implements CInterfaceIconSet {
-
 	// Layout modes enum
 	public enum LayoutMode {
-
 		ENHANCED_CARDS("Enhanced Cards", "layout-enhanced-cards"), KANBAN_BOARD("Kanban Board", "layout-kanban-board"),
 		CARD_GRID("Card Grid", "layout-card-grid"), COMPACT_SIDEBAR("Compact Sidebar", "layout-compact-sidebar"),
 		DASHBOARD_WIDGETS("Dashboard Widgets", "layout-dashboard-widgets"), TIMELINE_VIEW("Timeline View", "layout-timeline-view");
@@ -333,8 +331,6 @@ public class CProjectDetailsView extends CAbstractNamedEntityPage<CProject> impl
 
 	@Override
 	protected void createGridForEntity() {
-		LOGGER.info("Creating grid for layout mode: " + (currentLayoutMode != null ? currentLayoutMode.getDisplayName() : "Default"));
-		// Apply layout-specific CSS class (handle null case)
 		removeClassNames("layout-enhanced-cards", "layout-kanban-board", "layout-card-grid", "layout-compact-sidebar", "layout-dashboard-widgets",
 				"layout-timeline-view");
 		if (currentLayoutMode != null) {
@@ -620,8 +616,8 @@ public class CProjectDetailsView extends CAbstractNamedEntityPage<CProject> impl
 	}
 
 	/** Common grid selection listener setup */
-		/** Selection handling is now managed by the base class for consistency. This follows the coding guidelines for child class simplicity and
-		 * generic design. */
+												/** Selection handling is now managed by the base class for consistency. This follows the coding
+												 * guidelines for child class simplicity and generic design. */
 	private void setupGridSelectionListener() {
 		// Grid selection is now handled automatically by the base class No custom logic
 		// needed - this follows coding guidelines for generic design

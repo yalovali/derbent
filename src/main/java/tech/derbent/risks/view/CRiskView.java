@@ -1,10 +1,12 @@
 package tech.derbent.risks.view;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.domains.CEntityNamed;
+import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.risks.domain.CRisk;
@@ -43,26 +45,15 @@ public class CRiskView extends CProjectAwareMDPage<CRisk> implements CInterfaceI
 
 	@Override
 	protected void createGridForEntity() {
-		grid.addShortTextColumn(CRisk::getName, "Name", "name");
+		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
+		grid.addColumnEntityNamed(CEntityOfProject::getProject, "Project");
+		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");
+		grid.addColumn(CEntityNamed::getDescriptionShort, "Description");
+		grid.addDateTimeColumn(CEntityNamed::getCreatedDate, "Created", null);
+		// grid.addColumnEntityNamed(CRisk::getRiskSeverity, "Severity");
 		grid.addShortTextColumn(risk -> {
 			return risk.getRiskSeverity().name();
 		}, "Severity", null);
-		grid.addColumn(item -> {
-			final String desc = item.getDescription();
-			if (desc == null) {
-				return "Not set";
-			}
-			return desc.length() > 50 ? desc.substring(0, 50) + "..." : desc;
-		}, "Description", null);
-		/***/
-		grid.asSingleSelect().addValueChangeListener(event -> {
-			if (event.getValue() != null) {
-				UI.getCurrent().navigate(String.format(ENTITY_ROUTE_TEMPLATE_EDIT, event.getValue().getId()));
-			} else {
-				clearForm();
-				UI.getCurrent().navigate("risks");
-			}
-		});
 	}
 
 	@Override

@@ -5,6 +5,9 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.domains.CEntityNamed;
+import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.screens.domain.CScreen;
 import tech.derbent.screens.service.CEntityFieldService;
@@ -18,7 +21,6 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 1.5, icon = "class:tech.derbent.screens.view.CScreenView", title = "Project.Screens")
 @PermitAll // When security is enabled, allow all authenticated users
 public final class CScreenView extends CProjectAwareMDPage<CScreen> {
-
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() {
@@ -57,13 +59,14 @@ public final class CScreenView extends CProjectAwareMDPage<CScreen> {
 
 	@Override
 	protected void createGridForEntity() {
-		grid.addShortTextColumn(CScreen::getProjectName, "Project", "project");
-		grid.addShortTextColumn(CScreen::getName, "Screen Name", "name");
+		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
+		grid.addColumnEntityNamed(CEntityOfProject::getProject, "Project");
+		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");
+		grid.addColumn(CEntityNamed::getDescriptionShort, "Description");
+		grid.addDateTimeColumn(CEntityNamed::getCreatedDate, "Created", null);
 		grid.addShortTextColumn(CScreen::getEntityType, "Entity Type", "entityType");
 		grid.addShortTextColumn(CScreen::getScreenTitle, "Screen Title", "screenTitle");
-		// Show active status
 		grid.addColumn(screen -> screen.getIsActive() ? "Active" : "Inactive", "Status", null);
-		// Show number of screen lines
 		grid.addColumn(screen -> {
 			try {
 				return String.valueOf(screenLinesService.countByScreen(screen));
@@ -71,15 +74,6 @@ public final class CScreenView extends CProjectAwareMDPage<CScreen> {
 				return "0";
 			}
 		}, "Lines Count", null);
-		grid.addColumn(screen -> {
-			final String desc = screen.getDescription();
-			if (desc == null) {
-				return "Not set";
-			}
-			return desc.length() > 50 ? desc.substring(0, 50) + "..." : desc;
-		}, "Description", null);
-		// Selection handling is now managed by the base class - no custom logic needed
-		// This follows the coding guidelines for child class simplicity
 	}
 
 	@Override

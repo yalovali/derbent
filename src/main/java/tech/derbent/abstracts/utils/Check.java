@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Check {
-
 	/** Default error message for condition checks */
 	private static final String DEFAULT_CONDITION_MESSAGE = "Condition check failed";
 	/** Default error message for null checks */
@@ -70,15 +69,6 @@ public class Check {
 		isTrue(condition, DEFAULT_CONDITION_MESSAGE);
 	}
 
-	/** Checks a boolean condition and throws IllegalArgumentException if false. */
-	public static void isTrue(final boolean condition, final String message) {
-		if (!condition) {
-			final String m = msg(message, DEFAULT_CONDITION_MESSAGE);
-			logFail(m);
-			throw new IllegalArgumentException(m);
-		}
-	}
-
 	/** Checks that a collection contains a specific element. Uses default error message. */
 	public static void contains(final Collection<?> collection, final Object element) {
 		contains(collection, element, null);
@@ -130,6 +120,11 @@ public class Check {
 		}
 	}
 
+	public static void fail(final String message) {
+		logFail(message);
+		throw new IllegalArgumentException(message);
+	}
+
 	/** Finds the first stack trace element that is not from Check or java.lang.Thread. */
 	private static StackTraceElement findExternalCaller() {
 		final String self = Check.class.getName();
@@ -172,6 +167,15 @@ public class Check {
 			final String def =
 					String.format("Object of type %s is not an instance of %s", object.getClass().getSimpleName(), expectedClass.getSimpleName());
 			final String m = msg(message, def);
+			logFail(m);
+			throw new IllegalArgumentException(m);
+		}
+	}
+
+	/** Checks a boolean condition and throws IllegalArgumentException if false. */
+	public static void isTrue(final boolean condition, final String message) {
+		if (!condition) {
+			final String m = msg(message, DEFAULT_CONDITION_MESSAGE);
 			logFail(m);
 			throw new IllegalArgumentException(m);
 		}

@@ -5,6 +5,9 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.components.CGridCell;
+import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.domains.CEntityNamed;
+import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.projects.domain.CProject;
@@ -20,7 +23,6 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 4.1, icon = "class:tech.derbent.risks.view.CRiskStatusView", title = "Types.Risk Statuses")
 @PermitAll
 public class CRiskStatusView extends CProjectAwareMDPage<CRiskStatus> implements CInterfaceIconSet {
-
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() {
@@ -41,9 +43,12 @@ public class CRiskStatusView extends CProjectAwareMDPage<CRiskStatus> implements
 
 	@Override
 	protected void createGridForEntity() {
+		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
+		grid.addColumnEntityNamed(CEntityOfProject::getProject, "Project");
+		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");
+		grid.addColumn(CEntityNamed::getDescriptionShort, "Description");
+		grid.addDateTimeColumn(CEntityNamed::getCreatedDate, "Created", null);
 		grid.addStatusColumn(status -> status, "Status", "status");
-		grid.addShortTextColumn(CRiskStatus::getName, "Name", "name");
-		grid.addLongTextColumn(CRiskStatus::getDescription, "Description", "description");
 		grid.addShortTextColumn(entity -> entity.getColor(), "Color", "color");
 		grid.addComponentColumn(entity -> {
 			final CGridCell statusCell = new CGridCell();

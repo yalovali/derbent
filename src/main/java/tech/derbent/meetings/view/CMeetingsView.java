@@ -13,6 +13,9 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.domains.CEntityNamed;
+import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.meetings.domain.CMeeting;
@@ -50,45 +53,14 @@ public class CMeetingsView extends CProjectAwareMDPage<CMeeting> implements CInt
 
 	@Override
 	protected void createGridForEntity() {
-		LOGGER.info("Creating enhanced grid for meetings with project and participant details");
-		// Project Name - Important for context
-		grid.addColumn(meeting -> meeting.getProject() != null ? meeting.getProject().getName() : "No Project").setAutoWidth(true)
-				.setHeader("Project").setSortable(true).setFlexGrow(0);
-		// Meeting Name
-		grid.addColumn(meeting -> meeting.getName()).setAutoWidth(true).setHeader("Meeting Name").setSortable(true).setFlexGrow(1);
-		// Meeting Type
-		grid.addColumn(meeting -> meeting.getMeetingType() != null ? meeting.getMeetingType().getName() : "No Type").setAutoWidth(true)
-				.setHeader("Type").setSortable(true).setFlexGrow(0);
-		// Start Time with proper formatting
-		grid.addColumn(meeting -> {
-			if (meeting.getMeetingDate() != null) {
-				return meeting.getMeetingDate().format(java.time.format.DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm"));
-			}
-			return "Not set";
-		}).setAutoWidth(true).setHeader("Start Time").setSortable(true).setFlexGrow(0);
-		// End Time with proper formatting
-		grid.addColumn(meeting -> {
-			if (meeting.getEndDate() != null) {
-				return meeting.getEndDate().format(java.time.format.DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm"));
-			}
-			return "Not set";
-		}).setAutoWidth(true).setHeader("End Time").setSortable(true).setFlexGrow(0);
-		// Participants with names instead of just count
-		grid.addColumn(meeting -> {
-			if (meeting.getParticipants().isEmpty()) {
-				return "No participants";
-			}
-			return meeting.getParticipants().stream().map(user -> user.getName() != null ? user.getName() : "User #" + user.getId())
-					.collect(java.util.stream.Collectors.joining(", "));
-		}).setAutoWidth(true).setHeader("Participants").setSortable(false).setFlexGrow(1);
-		// Description - shortened for grid display
-		grid.addColumn(meeting -> {
-			if ((meeting.getDescription() == null) || meeting.getDescription().trim().isEmpty()) {
-				return "No description";
-			}
-			final String desc = meeting.getDescription().trim();
-			return desc.length() > 50 ? desc.substring(0, 47) + "..." : desc;
-		}).setAutoWidth(true).setHeader("Description").setSortable(false).setFlexGrow(1);
+		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
+		grid.addColumnEntityNamed(CEntityOfProject::getProject, "Project");
+		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");
+		grid.addColumnEntityNamed(CMeeting::getMeetingType, "Type");
+		grid.addDateTimeColumn(CMeeting::getMeetingDate, "Start Time", "meetingDate");
+		grid.addDateTimeColumn(CMeeting::getEndDate, "End Time", "endDate");
+		grid.addColumnEntityCollection(CMeeting::getParticipants, "Participants");
+		grid.addColumn(CEntityNamed::getDescriptionShort, "Description");
 	}
 
 	@Override

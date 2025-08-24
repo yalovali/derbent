@@ -1,9 +1,11 @@
 package tech.derbent.abstracts.views;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.grid.Grid;
@@ -24,7 +26,6 @@ import tech.derbent.screens.service.CEntityFieldService;
  * fields: Small width (100px) - BigDecimal fields: Medium width (120px) - Date fields: Medium width (150px) - Boolean/Status fields: Small-Medium
  * width (100px) - Short text fields: Medium width (200px) - Long text fields: Large width (300px+) - Reference fields: Medium width (200px) */
 public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<EntityClass> {
-
 	private static final long serialVersionUID = 1L;
 	public static final String WIDTH_ID = "80px";
 	public static final String WIDTH_INTEGER = "100px";
@@ -35,6 +36,18 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 	public static final String WIDTH_LONG_TEXT = "300px";
 	public static final String WIDTH_REFERENCE = "200px";
 	public static final String WIDTH_IMAGE = "60px";
+
+	/** Prefer calling ref.getName(); fall back to toString() if not present. */
+	private static String entityName(final CEntityDB<?> ref) {
+		try {
+			final Method m = ref.getClass().getMethod("getName");
+			final Object v = m.invoke(ref);
+			return v == null ? "" : v.toString();
+		} catch (final ReflectiveOperationException ignore) {
+			return String.valueOf(ref);
+		}
+	}
+
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected boolean showIconInStatusColumns = true;
 	/** Constructor for CGrid with entity class.
@@ -94,11 +107,47 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 		return column;
 	}
 
+	public Column<EntityClass> addColumnEntityCollection(final ValueProvider<EntityClass, ? extends Collection<? extends CEntityDB<?>>> valueProvider,
+			final String header) {
+		Check.notNull(valueProvider, "Value provider cannot be null");
+		Check.notBlank(header, "Header cannot be null or blank");
+		// compute display string from the collection
+		final ValueProvider<EntityClass, String> namesProvider = entity -> {
+			final Collection<? extends CEntityDB<?>> refs = valueProvider.apply(entity);
+			if ((refs == null) || refs.isEmpty()) {
+				return "No " + header.toLowerCase(); // e.g. "No participants"
+			}
+			return refs.stream().map(ref -> {
+				final String name = entityName(ref);
+				return ((name != null) && !name.isBlank()) ? name : "Entity#" + ref.getId();
+			}).collect(java.util.stream.Collectors.joining(", "));
+		};
+		final Column<EntityClass> column = addColumn(namesProvider).setHeader(header).setAutoWidth(true).setSortable(false) // usually collection
+																															// columns aren’t sortable
+				.setFlexGrow(1);
+		Check.notNull(column, "Column creation failed for header: " + header);
+		return column;
+	}
+
+	public Column<EntityClass> addColumnEntityNamed(final ValueProvider<EntityClass, ? extends CEntityDB<?>> valueProvider, final String header) {
+		Check.notNull(valueProvider, "Value provider cannot be null");
+		Check.notBlank(header, "Header cannot be null or blank");
+		// one place to compute the display name
+		final ValueProvider<EntityClass, String> nameProvider = entity -> {
+			final CEntityDB<?> ref = valueProvider.apply(entity);
+			return ref == null ? "" : entityName(ref);
+		};
+		final Column<EntityClass> column = addColumn(nameProvider).setHeader(header).setWidth(WIDTH_REFERENCE).setFlexGrow(0).setSortable(true)
+				// ensure server-side sorting by the shown name
+				.setComparator(nameProvider);
+		Check.notNull(column, "Column creation failed for header: " + header);
+		return column;
+	}
+
 	public Column<EntityClass> addCustomColumn(final ValueProvider<EntityClass, ?> valueProvider, final String header, final String width,
 			final String key, final int flexGrow) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
 		Check.notBlank(header, "Header cannot be null or blank");
-		// Check.notBlank(key, "Key cannot be null or blank");
 		Check.notBlank(width, "Width cannot be null or blank");
 		Check.isTrue(flexGrow >= 0, "Flex grow must be non-negative");
 		final Column<EntityClass> column = addColumn(valueProvider).setHeader(header).setWidth(width).setFlexGrow(flexGrow).setSortable(true);
@@ -112,7 +161,6 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 	public Column<EntityClass> addDateColumn(final ValueProvider<EntityClass, LocalDate> valueProvider, final String header, final String key) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
 		Check.notBlank(header, "Header cannot be null or blank");
-		Check.notBlank(key, "Key cannot be null or blank");
 		return addCustomColumn(valueProvider, header, WIDTH_DATE, key, 0);
 	}
 
@@ -120,14 +168,12 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 			final String key) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
 		Check.notBlank(header, "Header cannot be null or blank");
-		Check.notBlank(key, "Key cannot be null or blank");
 		return addCustomColumn(valueProvider, header, WIDTH_DATE, key, 0);
 	}
 
 	public Column<EntityClass> addDecimalColumn(final ValueProvider<EntityClass, BigDecimal> valueProvider, final String header, final String key) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
 		Check.notBlank(header, "Header cannot be null or blank");
-		Check.notBlank(key, "Key cannot be null or blank");
 		return addCustomColumn(valueProvider, header, WIDTH_DECIMAL, key, 0);
 	}
 
@@ -135,7 +181,6 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 	public Column<EntityClass> addEntityColumn(final ValueProvider<EntityClass, ?> valueProvider, final String header, final String key) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
 		Check.notBlank(header, "Header cannot be null or blank");
-		Check.notBlank(key, "Key cannot be null or blank");
 		Field field;
 		try {
 			field = CEntityFieldService.getEntityField(clazz, key);
@@ -193,7 +238,6 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 	public Column<EntityClass> addIdColumn(final ValueProvider<EntityClass, ?> valueProvider, final String header, final String key) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
 		Check.notBlank(header, "Header cannot be null or blank");
-		Check.notBlank(key, "Key cannot be null or blank");
 		return addCustomColumn(valueProvider, header, WIDTH_ID, key, 0);
 	}
 
@@ -227,14 +271,12 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 	public Column<EntityClass> addIntegerColumn(final ValueProvider<EntityClass, Integer> valueProvider, final String header, final String key) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
 		Check.notBlank(header, "Header cannot be null or blank");
-		Check.notBlank(key, "Key cannot be null or blank");
 		return addCustomColumn(valueProvider, header, WIDTH_INTEGER, key, 0);
 	}
 
 	public Column<EntityClass> addLongTextColumn(final ValueProvider<EntityClass, String> valueProvider, final String header, final String key) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
 		Check.notBlank(header, "Header cannot be null or blank");
-		Check.notBlank(key, "Key cannot be null or blank");
 		return addCustomColumn(valueProvider, header, WIDTH_LONG_TEXT, key, 0);
 	}
 
@@ -247,21 +289,13 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 	public Column<EntityClass> addShortTextColumn(final ValueProvider<EntityClass, String> valueProvider, final String header, final String key) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
 		Check.notBlank(header, "Header cannot be null or blank");
-		// Check.notBlank(key, "Key cannot be null or blank");
 		return addCustomColumn(valueProvider, header, WIDTH_SHORT_TEXT, key, 0);
 	}
 
-	/** Adds a status column with color-aware rendering. This method creates a column that displays status entities with their associated colors as
-	 * background using CGridCell.
-	 * @param valueProvider Provider that returns the status entity
-	 * @param header        Column header text
-	 * @param key           Column key for identification
-	 * @return The created column */
 	public <S extends CEntityDB<S>> Column<EntityClass> addStatusColumn(final ValueProvider<EntityClass, S> valueProvider, final String header,
 			final String key) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
 		Check.notBlank(header, "Header cannot be null or blank");
-		Check.notBlank(key, "Key cannot be null or blank");
 		final Column<EntityClass> column = addComponentColumn(entity -> {
 			final S status = valueProvider.apply(entity);
 			final CGridCell statusCell = new CGridCell();
@@ -306,26 +340,12 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 		});
 	}
 
-	/** Check if icons are displayed in status columns.
-	 * @return true if icons are shown in status columns */
 	public boolean isShowIconInStatusColumns() { return showIconInStatusColumns; }
 
-	/** Override select to add logging for debugging grid selection behavior. */
 	@Override
 	public void select(final EntityClass entity) {
-		//
-		// if (entity != null) {
-		// LOGGER.debug("Selecting entity with ID: {}", entity.getId());
-		// }
-		// else {
-		// LOGGER.debug("Deselecting current entity");
-		// }
 		super.select(entity);
 	}
 
-	/** Enable or disable icon display in status columns. Note: This setting only affects future status columns created after this call.
-	 * @param showIconInStatusColumns true to show icons in status columns */
-	public void setShowIconInStatusColumns(final boolean showIconInStatusColumns) {
-		this.showIconInStatusColumns = showIconInStatusColumns;
-	}
+	public void setShowIconInStatusColumns(final boolean showIconInStatusColumns) { this.showIconInStatusColumns = showIconInStatusColumns; }
 }

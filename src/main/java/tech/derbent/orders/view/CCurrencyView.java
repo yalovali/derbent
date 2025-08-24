@@ -4,6 +4,9 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.domains.CEntityNamed;
+import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.orders.domain.CCurrency;
@@ -34,18 +37,12 @@ public class CCurrencyView extends CProjectAwareMDPage<CCurrency> implements CIn
 
 	@Override
 	protected void createGridForEntity() {
-		// Add grid columns for order display
-		grid.addShortTextColumn(CCurrency::getProjectName, "Project", "project");
-		grid.addShortTextColumn(CCurrency::getName, "Currency Name", "name");
+		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
+		grid.addColumnEntityNamed(CEntityOfProject::getProject, "Project");
+		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");
+		grid.addColumn(CEntityNamed::getDescriptionShort, "Description");
 		grid.addShortTextColumn(CCurrency::getCurrencyCode, "Code", "currencyCode");
 		grid.addShortTextColumn(CCurrency::getCurrencySymbol, "Symbol", "currencySymbol");
-		grid.addColumn(order -> {
-			final String desc = order.getDescription();
-			if (desc == null) {
-				return "Not set";
-			}
-			return desc.length() > 50 ? desc.substring(0, 50) + "..." : desc;
-		}, "Description", null);
 	}
 
 	@Override

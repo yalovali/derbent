@@ -20,6 +20,7 @@ import tech.derbent.abstracts.interfaces.CKanbanEntity;
 import tech.derbent.abstracts.interfaces.CKanbanStatus;
 import tech.derbent.abstracts.interfaces.CKanbanType;
 import tech.derbent.activities.domain.CActivity;
+import tech.derbent.meetings.view.CMeetingsView;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
 
@@ -29,12 +30,13 @@ import tech.derbent.users.domain.CUser;
 // in lowercase
 @AttributeOverride (name = "id", column = @Column (name = "meeting_id"))
 public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntity {
-
 	public static String getIconColorCode() {
 		return "#28a745"; // Green color for meeting entities
 	}
 
 	public static String getIconFilename() { return "vaadin:group"; }
+
+	public static Class<?> getViewClass() { return CMeetingsView.class; }
 
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "cmeetingtype_id", nullable = true)
@@ -43,13 +45,6 @@ public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntit
 			dataProviderBean = "CMeetingTypeService"
 	)
 	private CMeetingType meetingType;
-	@Column (name = "description", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
-	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
-	@AMetaData (
-			displayName = "Description", required = false, readOnly = false, defaultValue = "", description = "Description of the meeting",
-			hidden = false, order = 3, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
-	)
-	private String description;
 	@Column (name = "meeting_date", nullable = true)
 	@AMetaData (
 			displayName = "Start Time", required = false, readOnly = false, description = "Start date and time of the meeting", hidden = false,
@@ -168,9 +163,6 @@ public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntit
 
 	public Set<CUser> getAttendees() { return attendees == null ? new HashSet<>() : new HashSet<>(attendees); }
 
-	@Override
-	public String getDescription() { return description; }
-
 	public LocalDateTime getEndDate() { return endDate; }
 
 	public String getLinkedElement() { return linkedElement; }
@@ -228,9 +220,6 @@ public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntit
 	public void setAgenda(final String agenda) { this.agenda = agenda; }
 
 	public void setAttendees(final Set<CUser> attendees) { this.attendees = attendees != null ? attendees : new HashSet<>(); }
-
-	@Override
-	public void setDescription(final String description) { this.description = description; }
 
 	public void setEndDate(final LocalDateTime endDate) { this.endDate = endDate; }
 

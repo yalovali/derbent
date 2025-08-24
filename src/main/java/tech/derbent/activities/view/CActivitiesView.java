@@ -5,6 +5,9 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.domains.CEntityNamed;
+import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.activities.domain.CActivity;
@@ -19,7 +22,6 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 1.1, icon = "class:tech.derbent.activities.view.CActivitiesView", title = "Project.Activities")
 @PermitAll // When security is enabled, allow all authenticated users
 public final class CActivitiesView extends CProjectAwareMDPage<CActivity> {
-
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() {
@@ -70,24 +72,15 @@ public final class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 
 	@Override
 	protected void createGridForEntity() {
-		grid.addShortTextColumn(CActivity::getProjectName, "Project", "project");
-		grid.addShortTextColumn(CActivity::getName, "Activity Name", "name");
-		grid.addReferenceColumn(item -> item.getActivityType() != null ? item.getActivityType().getName() : "No Type", "Type");
-		grid.addShortTextColumn(item -> item.getStatus() != null ? item.getStatus().getName() : "No Status", "Status", null);
-		// grid.addShortTextColumn(activity -> activity.getPriority() != null ?
-		// activity.getPriority().getName() : "No Priority", "Priority", null);
-		grid.addShortTextColumn(item -> item.getStartDate() != null ? item.getStartDate().toString() : "", "Start Date", null);
-		grid.addShortTextColumn(item -> item.getDueDate() != null ? item.getDueDate().toString() : "", "Due Date", null);
-		grid.addShortTextColumn(item -> item.getParentActivity() != null ? item.getParentActivity().getName() : "No Parent Activity", "Parent", null);
-		grid.addColumn(item -> {
-			final String desc = item.getDescription();
-			if (desc == null) {
-				return "Not set";
-			}
-			return desc.length() > 50 ? desc.substring(0, 50) + "..." : desc;
-		}, "Description", null);
-		// Selection handling is now managed by the base class - no custom logic needed
-		// This follows the coding guidelines for child class simplicity
+		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
+		grid.addColumnEntityNamed(CEntityOfProject::getProject, "Project");
+		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");
+		grid.addColumnEntityNamed(CActivity::getActivityType, "Type");
+		grid.addColumnEntityNamed(CActivity::getStatus, "Status");
+		grid.addDateColumn(CActivity::getStartDate, "Start Time", "meetingDate");
+		grid.addDateColumn(CActivity::getDueDate, "End Time", "endDate");
+		grid.addColumnEntityNamed(CActivity::getParentActivity, "Parent");
+		grid.addColumn(CEntityNamed::getDescriptionShort, "Description");
 	}
 
 	@Override

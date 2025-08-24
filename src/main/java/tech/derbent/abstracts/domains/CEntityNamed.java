@@ -13,7 +13,6 @@ import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
 @MappedSuperclass
 public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
-
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityNamed.class);
 	@Column (name = "name", nullable = false, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
@@ -66,6 +65,16 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	public LocalDateTime getCreatedDate() { return createdDate; }
 
 	public String getDescription() { return description; }
+
+	public String getDescriptionShort() {
+		if ((description == null) || description.isBlank()) {
+			return "No description";
+		}
+		if (description.length() <= 75) {
+			return description;
+		}
+		return description.substring(0, 75) + "...";
+	}
 
 	public Map<String, EntityFieldInfo> getFieldsInfo() { // TODO Auto-generated method
 															// stub

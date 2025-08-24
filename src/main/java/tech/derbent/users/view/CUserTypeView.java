@@ -7,6 +7,9 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
+import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.domains.CEntityNamed;
+import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.projects.domain.CProject;
@@ -22,7 +25,6 @@ import tech.derbent.users.service.CUserTypeService;
 @Menu (order = 10.3, icon = "class:tech.derbent.users.view.CUserTypeView", title = "Settings.User Types")
 @PermitAll
 public class CUserTypeView extends CProjectAwareMDPage<CUserType> implements CInterfaceIconSet {
-
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() {
@@ -52,9 +54,12 @@ public class CUserTypeView extends CProjectAwareMDPage<CUserType> implements CIn
 
 	@Override
 	protected void createGridForEntity() {
-		grid.addShortTextColumn(CUserType::getName, "Name", "name");
-		grid.addLongTextColumn(CUserType::getDescription, "Description", "description");
-		grid.addShortTextColumn(CUserType::getProjectName, "Project", "project");
+		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
+		grid.addColumnEntityNamed(CEntityOfProject::getProject, "Project");
+		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");
+		grid.addColumn(CEntityNamed::getDescriptionShort, "Description");
+		grid.addDateTimeColumn(CEntityNamed::getCreatedDate, "Created", null);
+		// Add profile picture column first
 	}
 
 	@Override

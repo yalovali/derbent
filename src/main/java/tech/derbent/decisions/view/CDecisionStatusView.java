@@ -5,6 +5,9 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.components.CGridCell;
+import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.domains.CEntityNamed;
+import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.decisions.domain.CDecisionStatus;
@@ -20,7 +23,6 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 11.2, icon = "class:tech.derbent.decisions.view.CDecisionStatusView", title = "Types.Decision Statuses")
 @PermitAll
 public class CDecisionStatusView extends CProjectAwareMDPage<CDecisionStatus> implements CInterfaceIconSet {
-
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() {
@@ -42,9 +44,11 @@ public class CDecisionStatusView extends CProjectAwareMDPage<CDecisionStatus> im
 
 	@Override
 	protected void createGridForEntity() {
+		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
+		grid.addColumnEntityNamed(CEntityOfProject::getProject, "Project");
+		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");
+		grid.addColumn(CEntityNamed::getDescriptionShort, "Description");
 		grid.addStatusColumn(status -> status, "Status", "status");
-		grid.addShortTextColumn(CDecisionStatus::getName, "Name", "name");
-		grid.addLongTextColumn(CDecisionStatus::getDescription, "Description", "description");
 		grid.addShortTextColumn(entity -> entity.getColor(), "Color", "color");
 		grid.addComponentColumn(entity -> {
 			final CGridCell statusCell = new CGridCell();

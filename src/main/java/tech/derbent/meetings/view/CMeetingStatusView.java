@@ -6,6 +6,9 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CSpringAuxillaries;
 import tech.derbent.abstracts.components.CGridCell;
+import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.domains.CEntityNamed;
+import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.meetings.domain.CMeetingStatus;
@@ -20,7 +23,6 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 11.3, icon = "class:tech.derbent.meetings.view.CMeetingStatusView", title = "Types.Meeting Statuses")
 @PermitAll
 public class CMeetingStatusView extends CProjectAwareMDPage<CMeetingStatus> implements CInterfaceIconSet {
-
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() {
@@ -44,13 +46,13 @@ public class CMeetingStatusView extends CProjectAwareMDPage<CMeetingStatus> impl
 
 	@Override
 	protected void createGridForEntity() {
-		// Use enhanced color-aware status column that shows both color and icon
+		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
+		grid.addColumnEntityNamed(CEntityOfProject::getProject, "Project");
+		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");
+		grid.addColumn(CEntityNamed::getDescriptionShort, "Description");
+		grid.addDateTimeColumn(CEntityNamed::getCreatedDate, "Created", null);
 		grid.addStatusColumn(status -> status, "Status", "status");
-		grid.addShortTextColumn(CMeetingStatus::getName, "Name", "name");
-		grid.addLongTextColumn(CMeetingStatus::getDescription, "Description", "description");
-		// Color column for reference (hex value)
 		grid.addShortTextColumn(entity -> entity.getColor(), "Color", "color");
-		// Enhanced Type column that shows Final/Active status using CGridCell
 		grid.addComponentColumn(entity -> {
 			final CGridCell statusCell = new CGridCell();
 			statusCell.setFinalActiveValue(entity.getFinalStatus());

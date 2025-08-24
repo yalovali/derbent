@@ -10,6 +10,8 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
 import tech.derbent.abstracts.views.CAccordionDBEntity;
@@ -89,10 +91,9 @@ public class CCompanyView extends CAbstractNamedEntityPage<CCompany> implements 
 
 	@Override
 	protected void createGridForEntity() {
-		LOGGER.info("Creating grid for companies with appropriate field widths");
-		// Add columns for key company information
-		grid.addShortTextColumn(CCompany::getName, "Company Name", "name");
-		grid.addLongTextColumn(CCompany::getDescription, "Description", "description");
+		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
+		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");
+		grid.addColumn(CEntityNamed::getDescriptionShort, "Description");
 		grid.addShortTextColumn(CCompany::getAddress, "Address", "address");
 		grid.addShortTextColumn(CCompany::getPhone, "Phone", "phone");
 		grid.addShortTextColumn(CCompany::getEmail, "Email", "email");

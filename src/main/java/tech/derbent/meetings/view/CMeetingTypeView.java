@@ -4,6 +4,9 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.domains.CEntityNamed;
+import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.meetings.domain.CMeetingType;
@@ -18,7 +21,6 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 10.2, icon = "class:tech.derbent.meetings.view.CMeetingTypeView", title = "Types.Meeting Types")
 @PermitAll
 public class CMeetingTypeView extends CProjectAwareMDPage<CMeetingType> implements CInterfaceIconSet {
-
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() {
@@ -40,13 +42,14 @@ public class CMeetingTypeView extends CProjectAwareMDPage<CMeetingType> implemen
 
 	@Override
 	protected void createGridForEntity() {
-		// Add color-aware type column to show the type with color
+		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
+		grid.addColumnEntityNamed(CEntityOfProject::getProject, "Project");
+		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");
+		grid.addColumn(CEntityNamed::getDescriptionShort, "Description");
+		grid.addDateTimeColumn(CEntityNamed::getCreatedDate, "Created", null);
 		grid.addStatusColumn(type -> type, "Type", "type");
-		grid.addShortTextColumn(CMeetingType::getName, "Name", "name");
-		grid.addLongTextColumn(CMeetingType::getDescription, "Description", "description");
 		grid.addShortTextColumn(CMeetingType::getColor, "Color", "color");
 		grid.addBooleanColumn(CMeetingType::isActive, "Active", "Active", "Inactive");
-		grid.addShortTextColumn(CMeetingType::getProjectName, "Project", "project");
 	}
 
 	@Override

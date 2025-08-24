@@ -158,10 +158,6 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		return page;
 	}
 
-	/** Lists entities with text-based filtering for searchable entities. This method works with entities that implement CSearchable interface.
-	 * @param pageable   pagination information
-	 * @param searchText text to search for (null or empty means no filtering)
-	 * @return list of entities matching the search criteria */
 	@Transactional (readOnly = true)
 	public List<EntityClass> list(final Pageable pageable, final String searchText) {
 		// Validate and fix pageable to prevent "max-results cannot be negative" error
@@ -198,20 +194,6 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	public EntityClass save(final EntityClass entity) {
 		Check.notNull(entity, "Entity cannot be null");
 		return repository.save(entity);
-	}
-
-	/** Generic update method using reflection to copy non-null fields.
-	 * @param id            the ID of the entity to update
-	 * @param updatedEntity entity containing the new values
-	 * @return the updated entity */
-	@Transactional
-	public EntityClass update(final Long id, final EntityClass updatedEntity) {
-		final EntityClass existingEntity = repository.findById(id).orElseThrow(() -> new RuntimeException("Entity not found with ID: " + id));
-		// Use reflection to copy non-null fields
-		existingEntity.copyNonNullFields(updatedEntity, existingEntity);
-		// Perform save with reflection-based audit updates
-		existingEntity.performSave();
-		return repository.save(existingEntity);
 	}
 
 	protected void validateEntity(final EntityClass entity) {
