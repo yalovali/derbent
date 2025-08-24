@@ -8,20 +8,15 @@ import tech.derbent.abstracts.domains.CInterfaceIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.orders.domain.COrder;
 import tech.derbent.orders.service.COrderService;
+import tech.derbent.orders.service.COrdersViewService;
 import tech.derbent.screens.service.CScreenService;
 import tech.derbent.session.service.CSessionService;
 
-/** COrdersView - Vaadin view for managing orders in the system. Layer: View (MVC) Provides a comprehensive user interface for managing company orders
- * including creation, editing, and viewing of orders with project-aware functionality. This view extends CProjectAwareMDPage to inherit standard
- * master-detail functionality with project context awareness, grid display, and automatic form generation using AMetaData annotations. Key Features: -
- * Project-aware order management - Master-detail interface with order grid and form - Automatic form generation from COrder AMetaData annotations -
- * Standard CRUD operations (Create, Read, Update, Delete) - Integration with order service layer - Consistent UI patterns with other entity views */
 @Route ("cordersview/:order_id?/:action?(edit)")
 @PageTitle ("Orders Master Detail")
 @Menu (order = 7.1, icon = "class:tech.derbent.orders.view.COrdersView", title = "Project.Orders")
 @PermitAll // When security is enabled, allow all authenticated users
 public class COrdersView extends CProjectAwareMDPage<COrder> implements CInterfaceIconSet {
-
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() {
@@ -33,12 +28,14 @@ public class COrdersView extends CProjectAwareMDPage<COrder> implements CInterfa
 	private final String ENTITY_ID_FIELD = "order_id";
 	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "cordersview/%s/edit";
 
-	/** Constructor for COrdersView.
-	 * @param entityService  the COrderService for business logic operations
-	 * @param sessionService the SessionService for session management */
 	public COrdersView(final COrderService entityService, final CSessionService sessionService, final CScreenService screenService) {
 		super(COrder.class, entityService, sessionService, screenService);
 		addClassNames("orders-view");
+	}
+
+	@Override
+	protected void createDetailsLayout() {
+		buildScreen(COrdersViewService.BASE_VIEW_NAME);
 	}
 
 	@Override
@@ -67,7 +64,5 @@ public class COrdersView extends CProjectAwareMDPage<COrder> implements CInterfa
 	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
 
 	@Override
-	protected void setupToolbar() {
-		// Standard toolbar setup - can be customized if needed
-	}
+	protected void setupToolbar() {}
 }

@@ -10,32 +10,20 @@ import tech.derbent.abstracts.utils.Check;
 import tech.derbent.orders.domain.COrder;
 import tech.derbent.users.domain.CUser;
 
-/** COrderService - Service layer for COrder entity. Layer: Service (MVC) Handles business logic for order operations including creation, validation,
- * project-based queries, and management of order entities with comprehensive financial and approval workflow support. */
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class COrderService extends CEntityOfProjectService<COrder> {
-
-	/** Constructor for COrderService.
-	 * @param repository the COrderRepository to use for data access
-	 * @param clock      the Clock instance for time-related operations */
 	COrderService(final COrderRepository repository, final Clock clock) {
 		super(repository, clock);
 	}
 
-	/** Finds orders by requestor.
-	 * @param requestor the user who requested the orders
-	 * @return list of orders requested by the user */
 	public List<COrder> findByRequestor(final CUser requestor) {
 		LOGGER.info("findByRequestor called with requestor: {}", requestor != null ? requestor.getName() : "null");
 		Check.notNull(requestor, "Requestor cannot be null");
 		return ((COrderService) repository).findByRequestor(requestor);
 	}
 
-	/** Finds orders by responsible user.
-	 * @param responsible the user responsible for the orders
-	 * @return list of orders managed by the user */
 	public List<COrder> findByResponsible(final CUser responsible) {
 		LOGGER.info("findByResponsible called with responsible: {}", responsible != null ? responsible.getName() : "null");
 		Check.notNull(responsible, "Responsible user cannot be null");
@@ -45,8 +33,6 @@ public class COrderService extends CEntityOfProjectService<COrder> {
 	@Override
 	protected Class<COrder> getEntityClass() { return COrder.class; }
 
-	/** Enhanced initialization of lazy-loaded fields specific to Order entities. Uses improved null-safe patterns.
-	 * @param entity the order entity to initialize */
 	@Override
 	public void initializeLazyFields(final COrder entity) {
 		Check.notNull(entity, "Entity cannot be null");

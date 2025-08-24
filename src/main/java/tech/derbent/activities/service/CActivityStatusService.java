@@ -17,28 +17,13 @@ import tech.derbent.projects.domain.CProject;
 @Service
 @Transactional
 public class CActivityStatusService extends CEntityOfProjectService<CActivityStatus> {
-
+	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityStatusService.class);
 
 	@Autowired
 	public CActivityStatusService(final CActivityStatusRepository activityStatusRepository, final Clock clock) {
 		super(activityStatusRepository, clock);
 		Check.notNull(activityStatusRepository, "ActivityStatusRepository cannot be null");
-	}
-
-	/** Create default activity statuses if they don't exist. This method should be called during application startup. */
-	public void createDefaultStatusesIfNotExist() {
-		LOGGER.debug("createDefaultStatusesIfNotExist() - Creating default activity statuses");
-	}
-
-	/** Find activity status by ID.
-	 * @param id the status ID - must not be null
-	 * @return Optional containing the status if found, empty otherwise */
-	@Transactional (readOnly = true)
-	public Optional<CActivityStatus> findById(final Long id) {
-		Check.notNull(id, "ID must not be null");
-		final Optional<CActivityStatus> status = repository.findById(id);
-		return status;
 	}
 
 	/** Find the default status for new activities.

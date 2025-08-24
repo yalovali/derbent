@@ -51,9 +51,7 @@ import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
 @org.springframework.stereotype.Component
 public final class CEntityFormBuilder<EntityClass> implements ApplicationContextAware {
-
 	public interface ComboBoxDataProvider {
-
 		<T extends CEntityDB<T>> List<T> getItems(Class<T> entityType);
 	}
 
@@ -120,8 +118,7 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 			Check.notNull(method, "Method '" + methodName + "' on service bean for field '" + fieldName + "'");
 			final Object result = method.invoke(serviceBean);
 			Check.notNull(result, "Result of method '" + methodName + "' on service bean for field '" + fieldName + "'");
-			Check.isTrue(result instanceof List,
-					"Method '" + methodName + "' on service bean for field '" + fieldName + "' did not return a List");
+			Check.isTrue(result instanceof List, "Method '" + methodName + "' on service bean for field '" + fieldName + "' did not return a List");
 			final List<?> rawList = (List<?>) result;
 			// Convert to List<String> if possible
 			final List<String> stringList = rawList.stream().filter(item -> item instanceof String).map(item -> (String) item).toList();
@@ -141,8 +138,7 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 			Check.notNull(method, "Method '" + methodName + "' on service bean for field '" + fieldName + "'");
 			final Object result = method.invoke(serviceBean, parameter);
 			Check.notNull(result, "Result of method '" + methodName + "' on service bean for field '" + fieldName + "'");
-			Check.isTrue(result instanceof List,
-					"Method '" + methodName + "' on service bean for field '" + fieldName + "' did not return a List");
+			Check.isTrue(result instanceof List, "Method '" + methodName + "' on service bean for field '" + fieldName + "' did not return a List");
 			final List<?> rawList = (List<?>) result;
 			// Convert to List<String> if possible
 			final List<String> stringList = rawList.stream().filter(item -> item instanceof String).map(item -> (String) item).toList();
@@ -281,6 +277,9 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 		Check.notNull(binder, "Binder for field " + fieldInfo.getDisplayName());
 		final Class<?> fieldType = fieldInfo.getFieldTypeClass();
 		Check.notNull(fieldType, "Field type for field " + fieldInfo.getDisplayName());
+		if (fieldInfo.getFieldName().equals("approvals") || fieldInfo.getFieldName().equals("status")) {
+			LOGGER.info("Skipping field 'approvals' as it is handled separately");
+		}
 		// Check if field should be rendered as ComboBox based on metadata
 		final boolean hasDataProvider = (fieldInfo.getDataProviderBean() != null) && !fieldInfo.getDataProviderBean().trim().isEmpty();
 		if (hasDataProvider && (fieldType == String.class)) {
@@ -638,8 +637,7 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 		// Determine method name to call
 		final String methodName = fieldInfo.getDataProviderMethod();
 		Check.notNull(methodName, "Data provider method name for String field '" + fieldInfo.getFieldName() + "'");
-		Check.isTrue(!methodName.trim().isEmpty(),
-				"Data provider method name for String field '" + fieldInfo.getFieldName() + "' must not be empty");
+		Check.isTrue(!methodName.trim().isEmpty(), "Data provider method name for String field '" + fieldInfo.getFieldName() + "' must not be empty");
 		// Try to call the method
 		if ((fieldInfo.getDataProviderParamMethod() != null) && (fieldInfo.getDataProviderParamMethod().trim().length() > 0)) {
 			try {

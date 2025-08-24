@@ -10,7 +10,6 @@ import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.risks.domain.CRisk;
 import tech.derbent.risks.service.CRiskService;
 import tech.derbent.risks.service.CRiskViewService;
-import tech.derbent.screens.domain.CScreen;
 import tech.derbent.screens.service.CScreenService;
 import tech.derbent.session.service.CSessionService;
 
@@ -21,7 +20,6 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 1.3, icon = "class:tech.derbent.risks.view.CRiskView", title = "Project.Risks")
 @PermitAll
 public class CRiskView extends CProjectAwareMDPage<CRisk> implements CInterfaceIconSet {
-
 	private static final long serialVersionUID = 1L;
 	private static final String ENTITY_ID_FIELD = "risk_id";
 	private static final String ENTITY_ROUTE_TEMPLATE_EDIT = "criskview/%s/edit";
@@ -40,8 +38,7 @@ public class CRiskView extends CProjectAwareMDPage<CRisk> implements CInterfaceI
 
 	@Override
 	protected void createDetailsLayout() throws Exception {
-		final CScreen screen = screenService.findByNameAndProject(sessionService.getActiveProject().orElse(null), CRiskViewService.BASE_VIEW_NAME);
-		detailsBuilder.buildDetails(screen, getBinder(), getBaseDetailsLayout());
+		buildScreen(CRiskViewService.BASE_VIEW_NAME);
 	}
 
 	@Override

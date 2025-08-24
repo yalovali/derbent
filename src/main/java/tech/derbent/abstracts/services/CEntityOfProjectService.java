@@ -10,20 +10,11 @@ import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.projects.domain.CProject;
 
-/** CEntityOfProjectService - Abstract service class for entities that extend CEntityOfProject. Layer: Service (MVC) Provides common business logic
- * operations for project-aware entities including validation, creation, and project-based queries with consistent error handling, logging, and proper
- * lazy loading support. */
 public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProject<EntityClass>> extends CAbstractNamedEntityService<EntityClass> {
-	/** Constructor for CEntityOfProjectService.
-	 * @param repository the repository for data access operations
-	 * @param clock      the Clock instance for time-related operations */
 	public CEntityOfProjectService(final CEntityOfProjectRepository<EntityClass> repository, final Clock clock) {
 		super(repository, clock);
 	}
 
-	/** Counts the number of entities for a specific project.
-	 * @param project the project
-	 * @return count of entities for the project */
 	@Transactional (readOnly = true)
 	public long countByProject(final CProject project) {
 		Check.notNull(project, "Project cannot be null");
@@ -47,10 +38,6 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		}
 	}
 
-	/** Finds entities by project with all relationships eagerly loaded. This is the standard method for project-based queries that loads all
-	 * necessary relationships to prevent LazyInitializationException.
-	 * @param project the project to find entities for
-	 * @return list of entities with all relationships initialized */
 	@Transactional (readOnly = true)
 	public List<EntityClass> findEntriesByProject(final CProject project) {
 		Check.notNull(project, "Project cannot be null");
@@ -65,11 +52,6 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		}
 	}
 
-	/** Finds entities by project with pagination support. This method supports grid functionality while maintaining eager loading of all
-	 * relationships.
-	 * @param project  the project
-	 * @param pageable pagination information
-	 * @return list of entities with loaded relationships */
 	@Transactional (readOnly = true)
 	public Page<EntityClass> findEntriesByProject(final CProject project, final Pageable pageable) {
 		Check.notNull(project, "Project cannot be null");
@@ -85,9 +67,6 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		}
 	}
 
-	/** Minimal lazy field initialization for CEntityOfProject entities. With eager loading of small entities (status, type, user references), this
-	 * mainly handles any remaining complex relationships.
-	 * @param entity the entity to initialize */
 	@Override
 	public void initializeLazyFields(final EntityClass entity) {
 		Check.notNull(entity, "Entity cannot be null");

@@ -15,6 +15,7 @@ import tech.derbent.decisions.domain.CDecision;
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.domain.CMeetingStatus;
 import tech.derbent.meetings.domain.CMeetingType;
+import tech.derbent.orders.domain.COrder;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.risks.domain.CRisk;
 import tech.derbent.risks.domain.CRiskStatus;
@@ -22,7 +23,6 @@ import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserType;
 
 public class CFieldServiceBase {
-
 	static Logger LOGGER = LoggerFactory.getLogger(CFieldServiceBase.class);
 
 	private static void findSubclasses(final File dir, final String packageName, final List<Class<?>> subclasses) {
@@ -56,6 +56,8 @@ public class CFieldServiceBase {
 				return CActivity.class;
 			case "CMeeting":
 				return CMeeting.class;
+			case "COrder":
+				return COrder.class; // COrder.class;
 			case "CRisk":
 				return CRisk.class;
 			case "CCompany":

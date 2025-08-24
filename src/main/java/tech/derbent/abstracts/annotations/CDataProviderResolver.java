@@ -46,7 +46,6 @@ import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
  * </p>
  *
  * <pre>
- *
  * {
  * 	&#64;code
  * 	// Using bean name
@@ -68,7 +67,6 @@ import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
  * @see tech.derbent.abstracts.annotations.CEntityFormBuilder */
 @Service
 public final class CDataProviderResolver {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDataProviderResolver.class);
 	/** Default page size for paginated queries when no specific size is provided. */
 	private static final int DEFAULT_PAGE_SIZE = 1000;
@@ -217,7 +215,6 @@ public final class CDataProviderResolver {
 	@SuppressWarnings ("unchecked")
 	public <T extends CEntityDB<T>> List<T> resolveData(final EntityFieldInfo fieldInfo) {
 		Check.notNull(fieldInfo, "Field info cannot be null");
-		LOGGER.debug("Resolving data provider for field info: {} with AMetaData configuration", fieldInfo.getFieldName());
 		// Strategy 1: Use specified bean name
 		if ((fieldInfo.getDataProviderBean() != null) && !fieldInfo.getDataProviderBean().trim().isEmpty()) {
 			return resolveDataFromBean((Class<T>) fieldInfo.getFieldTypeClass(), fieldInfo.getDataProviderBean(), fieldInfo.getDataProviderMethod());

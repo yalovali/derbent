@@ -15,7 +15,6 @@ import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.service.CProjectService;
-import tech.derbent.screens.domain.CScreen;
 import tech.derbent.screens.service.CScreenService;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
@@ -30,7 +29,6 @@ import tech.derbent.users.service.CUserViewService;
 @Menu (order = 3.2, icon = "class:tech.derbent.users.view.CUsersView", title = "Settings.Users")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CUsersView extends CAbstractNamedEntityPage<CUser> implements CInterfaceIconSet {
-
 	private static final long serialVersionUID = 1L;
 	public static final String ENTITY_ROUTE_TEMPLATE_EDIT = "cusersview/%s/edit";
 
@@ -65,8 +63,9 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser> implements CInte
 	@Override
 	protected void createDetailsLayout() throws Exception {
 		/**********************/
-		final CScreen screen = screenService.findByNameAndProject(sessionService.getActiveProject().orElse(null), CUserViewService.BASE_VIEW_NAME);
-		detailsBuilder.buildDetails(screen, getBinder(), getBaseDetailsLayout());
+		// final CScreen screen = screenService.findByNameAndProject(sessionService.getActiveProject().orElse(null), CUserViewService.BASE_VIEW_NAME);
+		// detailsBuilder.buildDetails(screen, getBinder(), getBaseDetailsLayout());
+		buildScreen(CUserViewService.BASE_VIEW_NAME);
 		/**********************/
 		projectSettingsGrid = new CPanelUserProjectSettings(getCurrentEntity(), getBinder(), (CUserService) entityService, userTypeService,
 				companyService, projectService, userProjectSettingsService);

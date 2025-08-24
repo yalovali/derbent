@@ -9,13 +9,11 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.domains.CInterfaceIconSet;
-import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.decisions.domain.CDecision;
 import tech.derbent.decisions.service.CDecisionService;
 import tech.derbent.decisions.service.CDecisionViewService;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.screens.domain.CScreen;
 import tech.derbent.screens.service.CScreenService;
 import tech.derbent.session.service.CSessionService;
 
@@ -26,7 +24,6 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 1.5, icon = "class:tech.derbent.decisions.view.CDecisionsView", title = "Project.Decisions")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CDecisionsView extends CProjectAwareMDPage<CDecision> implements CInterfaceIconSet {
-
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() {
@@ -49,13 +46,10 @@ public class CDecisionsView extends CProjectAwareMDPage<CDecision> implements CI
 	 * @throws Exception */
 	@Override
 	protected void createDetailsLayout() throws Exception {
-		@SuppressWarnings ("unused")
-		final CAccordionDBEntity<CDecision> panel;
+		// final CAccordionDBEntity<CDecision> panel;
 		// panel = new CPanelDecisionTeamManagement(getCurrentEntity(), getBinder(), (CDecisionService) entityService);
 		// addAccordionPanel(panel);
-		final CScreen screen =
-				screenService.findByNameAndProject(sessionService.getActiveProject().orElse(null), CDecisionViewService.BASE_VIEW_NAME);
-		detailsBuilder.buildDetails(screen, getBinder(), getBaseDetailsLayout());
+		buildScreen(CDecisionViewService.BASE_VIEW_NAME);
 	}
 
 	@Override

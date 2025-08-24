@@ -6,12 +6,14 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.abstracts.services.CTimer;
@@ -45,6 +47,7 @@ import tech.derbent.orders.service.CCurrencyService;
 import tech.derbent.orders.service.COrderService;
 import tech.derbent.orders.service.COrderStatusService;
 import tech.derbent.orders.service.COrderTypeService;
+import tech.derbent.orders.service.COrdersViewService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.risks.domain.CRisk;
@@ -567,25 +570,25 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	}
 
 	/** Creates sample currencies for order management. */
-	private void createSampleCurrencies() {
+	private void createSampleCurrencies(final CProject project) {
 		try {
 			// Create basic currencies
-			final CCurrency usd = new CCurrency("US Dollar");
+			final CCurrency usd = new CCurrency(project, "US Dollar");
 			usd.setDescription("US Dollar");
 			usd.setCurrencyCode("USD");
 			usd.setCurrencySymbol("$");
 			currencyService.save(usd);
-			final CCurrency eur = new CCurrency("Euro");
+			final CCurrency eur = new CCurrency(project, "Euro");
 			eur.setDescription("Euro");
 			eur.setCurrencyCode("EUR");
 			eur.setCurrencySymbol("€");
 			currencyService.save(eur);
-			final CCurrency try_ = new CCurrency("Turkish Lira");
+			final CCurrency try_ = new CCurrency(project, "Turkish Lira");
 			try_.setDescription("Turkish Lira");
 			try_.setCurrencyCode("TRY");
 			try_.setCurrencySymbol("₺");
 			currencyService.save(try_);
-			final CCurrency gbp = new CCurrency("British Pound");
+			final CCurrency gbp = new CCurrency(project, "British Pound");
 			gbp.setDescription("British Pound");
 			gbp.setCurrencyCode("GBP");
 			gbp.setCurrencySymbol("£");
@@ -861,6 +864,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		screenService.save(CRiskViewService.createBasicView(project));
 		screenService.save(CMeetingViewService.createBasicView(project));
 		screenService.save(CDecisionViewService.createBasicView(project));
+		screenService.save(COrdersViewService.createBasicView(project));
 		// Log completion
 		LOGGER.info("Created sample fields for screen: {}", screenName);
 		CTimer.print();
@@ -1557,7 +1561,10 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			initializeActivities();
 			initializeMeetings();
 			initializeRisks();
-			createSampleCurrencies();
+			final List<CProject> projects = projectService.list(Pageable.unpaged()).getContent();
+			projects.forEach(project -> {
+				createSampleCurrencies(project);
+			});
 			createSampleDecisions();
 			createSampleScreens(); // Add sample screens with fields
 			// createSampleOrders(); // Temporarily disabled due to missing dependencies

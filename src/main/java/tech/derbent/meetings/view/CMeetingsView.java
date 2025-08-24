@@ -18,7 +18,6 @@ import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.service.CMeetingService;
 import tech.derbent.meetings.service.CMeetingViewService;
-import tech.derbent.screens.domain.CScreen;
 import tech.derbent.screens.service.CScreenService;
 import tech.derbent.session.service.CSessionService;
 
@@ -46,8 +45,7 @@ public class CMeetingsView extends CProjectAwareMDPage<CMeeting> implements CInt
 
 	@Override
 	protected void createDetailsLayout() throws Exception {
-		final CScreen screen = screenService.findByNameAndProject(sessionService.getActiveProject().orElse(null), CMeetingViewService.BASE_VIEW_NAME);
-		detailsBuilder.buildDetails(screen, getBinder(), getBaseDetailsLayout());
+		buildScreen(CMeetingViewService.BASE_VIEW_NAME);
 	}
 
 	@Override
