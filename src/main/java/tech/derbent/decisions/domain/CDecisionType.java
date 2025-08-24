@@ -7,6 +7,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CTypeEntity;
+import tech.derbent.decisions.view.CDecisionTypeView;
 import tech.derbent.projects.domain.CProject;
 
 /** CDecisionType - Domain entity representing decision categorization types. Provides classification for project decisions to support decision
@@ -17,12 +18,13 @@ import tech.derbent.projects.domain.CProject;
 @Table (name = "cdecisiontype")
 @AttributeOverride (name = "id", column = @Column (name = "cdecisiontype_id"))
 public class CDecisionType extends CTypeEntity<CDecisionType> {
-
 	public static String getIconColorCode() {
 		return "#dc3545"; // Red color for decision type entities
 	}
 
 	public static String getIconFilename() { return "vaadin:tags"; }
+
+	public static Class<?> getViewClass() { return CDecisionTypeView.class; }
 
 	@Column (name = "requires_approval", nullable = false)
 	@NotNull
@@ -39,13 +41,6 @@ public class CDecisionType extends CTypeEntity<CDecisionType> {
 
 	public CDecisionType(final String name, final CProject project) {
 		super(CDecisionType.class, name, project);
-	}
-
-	public CDecisionType(final String name, final CProject project, final String color, final Integer sortOrder, final Boolean requiresApproval) {
-		super(CDecisionType.class, name, project);
-		setColor(color);
-		setSortOrder(sortOrder);
-		this.requiresApproval = requiresApproval;
 	}
 
 	public Boolean getRequiresApproval() { return requiresApproval; }

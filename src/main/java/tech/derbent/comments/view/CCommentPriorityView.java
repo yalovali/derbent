@@ -31,15 +31,10 @@ public class CCommentPriorityView extends CProjectAwareMDPage<CCommentPriority> 
 	public static String getIconFilename() { return CCommentPriority.getIconFileName(); }
 
 	private final String ENTITY_ID_FIELD = "ccommentpriority_id";
-	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "ccommentpriorityview/%s/edit";
 
-	/** Constructor for CCommentPriorityView.
-	 * @param entityService  the service for comment priority operations
-	 * @param sessionService */
 	public CCommentPriorityView(final CCommentPriorityService entityService, final CSessionService sessionService,
 			final CScreenService screenService) {
 		super(CCommentPriority.class, entityService, sessionService, screenService);
-		addClassNames("comment-priorities-view");
 	}
 
 	@Override
@@ -59,12 +54,4 @@ public class CCommentPriorityView extends CProjectAwareMDPage<CCommentPriority> 
 
 	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
-
-	@Override
-	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	@Override
-	protected void setupToolbar() {
-		// Toolbar setup is handled by the parent class
-	}
 }

@@ -21,19 +21,14 @@ import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.interfaces.CKanbanEntity;
 import tech.derbent.abstracts.interfaces.CKanbanStatus;
 import tech.derbent.abstracts.interfaces.CKanbanType;
+import tech.derbent.activities.view.CActivitiesView;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
 
-/** CActivity - Enhanced domain entity representing project activities with comprehensive management features. Layer: Domain (MVC) Supports: -
- * Resource management (user assignments, time tracking) - Task tracking (status, priority, progress) - Project management (milestones, dependencies,
- * deliverables) - Budget planning (cost estimation, actual vs planned tracking) Inspired by Jira and ProjeQtOr functionality for professional project
- * management. */
 @Entity
-@Table (name = "cactivity") // table name for the entity as the default is the class name
-// in lowercase
+@Table (name = "cactivity")
 @AttributeOverride (name = "id", column = @Column (name = "activity_id"))
 public class CActivity extends CEntityOfProject<CActivity> implements CKanbanEntity {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivity.class);
 
 	public static String getIconColorCode() {
@@ -41,6 +36,8 @@ public class CActivity extends CEntityOfProject<CActivity> implements CKanbanEnt
 	}
 
 	public static String getIconFilename() { return "vaadin:tasks"; }
+
+	public static Class<?> getViewClass() { return CActivitiesView.class; }
 
 	// Basic Activity Information
 	@ManyToOne (fetch = FetchType.EAGER)

@@ -8,7 +8,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
-import tech.derbent.abstracts.domains.CInterfaceIconSet;
+import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.abstracts.views.CButton;
 import tech.derbent.administration.domain.CCompanySettings;
@@ -24,8 +24,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Company Administration Settings")
 @Menu (order = 3.5, icon = "class:tech.derbent.administration.view.CCompanySettingsView", title = "Settings.Company Settings")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CCompanySettingsView extends CAbstractEntityDBPage<CCompanySettings> implements CInterfaceIconSet {
-
+public class CCompanySettingsView extends CAbstractEntityDBPage<CCompanySettings> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() {
@@ -35,7 +34,6 @@ public class CCompanySettingsView extends CAbstractEntityDBPage<CCompanySettings
 	public static String getIconFilename() { return "vaadin:cogs"; }
 
 	private final String ENTITY_ID_FIELD = "company_settings_id";
-	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "administration/company-settings/%s/edit";
 	private final CCompanySettingsService companySettingsService;
 
 	/** Constructor for CCompanySettingsView. Annotated with @Autowired to let Spring inject dependencies.
@@ -45,8 +43,6 @@ public class CCompanySettingsView extends CAbstractEntityDBPage<CCompanySettings
 	public CCompanySettingsView(final CCompanySettingsService entityService, final CSessionService sessionService) {
 		super(CCompanySettings.class, entityService, sessionService);
 		this.companySettingsService = entityService;
-		LOGGER.info("CCompanySettingsView constructor called with entityService: {}", entityService.getClass().getSimpleName());
-		addClassNames("company-settings-view");
 	}
 
 	@Override
@@ -139,9 +135,6 @@ public class CCompanySettingsView extends CAbstractEntityDBPage<CCompanySettings
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
 
 	@Override
-	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	@Override
 	public void onLayoutModeChanged(final tech.derbent.session.service.LayoutService.LayoutMode newMode) {
 		LOGGER.debug("onLayoutModeChanged called for CCompanySettingsView with mode: {}", newMode);
 		// Refresh data when layout changes
@@ -174,12 +167,6 @@ public class CCompanySettingsView extends CAbstractEntityDBPage<CCompanySettings
 			LOGGER.error("Error resetting settings to defaults", e);
 			Notification.show("Error resetting settings: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
 		}
-	}
-
-	@Override
-	protected void setupToolbar() {
-		LOGGER.debug("setupToolbar called for CCompanySettingsView");
-		// Toolbar setup is handled by the parent class
 	}
 
 	/** Shows a warning dialog with the specified message.

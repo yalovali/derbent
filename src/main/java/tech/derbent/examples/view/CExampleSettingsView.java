@@ -14,7 +14,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.domains.CInterfaceIconSet;
+import tech.derbent.abstracts.domains.IIconSet;
 
 /**
  * Example view demonstrating responsive flex layout behavior.
@@ -23,7 +23,7 @@ import tech.derbent.abstracts.domains.CInterfaceIconSet;
 @PageTitle("Advanced Settings Example")
 @Menu(order = 998, icon = "class:tech.derbent.examples.view.CExampleSettingsView", title = "Examples.Settings.Advanced")
 @PermitAll
-public class CExampleSettingsView extends Div implements CInterfaceIconSet {
+public class CExampleSettingsView extends Div implements IIconSet {
 
     private static final long serialVersionUID = 1L;
 

@@ -7,6 +7,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityOfProject;
+import tech.derbent.orders.view.CCurrencyView;
 import tech.derbent.projects.domain.CProject;
 
 /** CCurrency - Domain entity representing currencies used in orders. Layer: Domain (MVC) Defines the various currencies that can be used in order
@@ -21,6 +22,8 @@ public class CCurrency extends CEntityOfProject<CCurrency> {
 	}
 
 	public static String getIconFilename() { return "vaadin:dollar"; }
+
+	public static Class<?> getViewClass() { return CCurrencyView.class; }
 
 	@Column (name = "currency_code", nullable = false, length = 3, unique = false)
 	@Size (max = 3, min = 3, message = "Currency code must be exactly 3 characters")

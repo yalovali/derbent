@@ -17,6 +17,7 @@ import tech.derbent.abstracts.utils.Check;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.service.CEntityFieldService;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.screens.view.CScreenView;
 
 /** CScreen - Domain entity representing screen views for entities. Layer: Domain (MVC) Inherits from CEntityOfProject to provide project association.
  * This entity allows creating custom view definitions for various project entities. */
@@ -24,12 +25,13 @@ import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 @Table (name = "cscreen")
 @AttributeOverride (name = "id", column = @Column (name = "screen_id"))
 public class CScreen extends CEntityOfProject<CScreen> {
-
 	public static String getIconColorCode() {
 		return "#6f42c1"; // Purple color for screen entities
 	}
 
 	public static String getIconFilename() { return "vaadin:viewport"; }
+
+	public static Class<?> getViewClass() { return CScreenView.class; }
 
 	@Column (name = "entity_type", nullable = false, length = 100)
 	@Size (max = 100, message = "Entity type cannot exceed 100 characters")

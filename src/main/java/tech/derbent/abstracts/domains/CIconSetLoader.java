@@ -8,7 +8,7 @@ public class CIconSetLoader {
             throws ClassNotFoundException, NoSuchMethodException {
         final Class<?> clazz = Class.forName(className);
 
-        if (!CInterfaceIconSet.class.isAssignableFrom(clazz)) {
+        if (!IIconSet.class.isAssignableFrom(clazz)) {
             throw new RuntimeException("Class " + className + " does not implement CInterfaceIconSet");
         }
         final Method method = clazz.getMethod(methodName);

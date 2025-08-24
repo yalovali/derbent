@@ -8,6 +8,7 @@ import jakarta.persistence.Table;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.annotations.StatusEntity;
 import tech.derbent.abstracts.interfaces.CKanbanStatus;
+import tech.derbent.activities.view.CActivityStatusView;
 import tech.derbent.base.domain.CStatus;
 import tech.derbent.projects.domain.CProject;
 
@@ -23,6 +24,8 @@ public class CActivityStatus extends CStatus<CActivityStatus> implements CKanban
 	}
 
 	public static String getIconFilename() { return "vaadin:flag"; }
+
+	public static Class<?> getViewClass() { return CActivityStatusView.class; }
 
 	@Column (name = "is_final", nullable = false)
 	@AMetaData (

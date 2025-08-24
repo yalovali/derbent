@@ -8,9 +8,8 @@ import tech.derbent.abstracts.components.CGridCell;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
-import tech.derbent.abstracts.domains.CInterfaceIconSet;
+import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
-import tech.derbent.projects.domain.CProject;
 import tech.derbent.risks.domain.CRiskStatus;
 import tech.derbent.risks.service.CRiskStatusService;
 import tech.derbent.screens.service.CScreenService;
@@ -22,21 +21,15 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Risk Statuses")
 @Menu (order = 4.1, icon = "class:tech.derbent.risks.view.CRiskStatusView", title = "Types.Risk Statuses")
 @PermitAll
-public class CRiskStatusView extends CProjectAwareMDPage<CRiskStatus> implements CInterfaceIconSet {
+public class CRiskStatusView extends CProjectAwareMDPage<CRiskStatus> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 
-	public static String getIconColorCode() {
-		return CRiskStatus.getIconColorCode(); // Use the static method from CRiskStatus
-	}
+	public static String getIconColorCode() { return CRiskStatus.getIconColorCode(); }
 
 	public static String getIconFilename() { return CRiskStatus.getIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "risk_status_id";
-	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "criskstatusview/%s/edit";
 
-	/** Constructor for CRiskStatusView.
-	 * @param entityService  the service for risk status operations
-	 * @param sessionService */
 	public CRiskStatusView(final CRiskStatusService entityService, final CSessionService sessionService, final CScreenService screenService) {
 		super(CRiskStatus.class, entityService, sessionService, screenService);
 	}
@@ -60,19 +53,4 @@ public class CRiskStatusView extends CProjectAwareMDPage<CRiskStatus> implements
 
 	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
-
-	@Override
-	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	@Override
-	public void setProjectForEntity(final CRiskStatus entity, final CProject project) {
-		assert entity != null : "Entity must not be null";
-		assert project != null : "Project must not be null";
-		entity.setProject(project);
-	}
-
-	@Override
-	protected void setupToolbar() {
-		// Toolbar setup is handled by the parent class
-	}
 }

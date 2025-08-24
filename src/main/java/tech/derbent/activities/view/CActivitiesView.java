@@ -31,21 +31,14 @@ public final class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 	public static String getIconFilename() { return CActivity.getIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "activity_id";
-	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "cactivitiesview/%s/edit";
 	private final CCommentService commentService;
 
 	public CActivitiesView(final CActivityService entityService, final CSessionService sessionService, final CCommentService commentService,
 			final CScreenService screenService) {
 		super(CActivity.class, entityService, sessionService, screenService);
 		this.commentService = commentService;
-		addClassNames("activities-view");
 	}
 
-	/** Creates the entity details section using CPanelActivityDescription. Follows the same pattern as CUsersView for consistency.
-	 * @throws InvocationTargetException
-	 * @throws IllegalAccessException
-	 * @throws SecurityException
-	 * @throws NoSuchMethodException */
 	@Override
 	protected void createDetailsLayout() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
 		// getBaseDetailsLayout().add(CEntityFormBuilder.buildForm(CActivity.class,
@@ -86,15 +79,5 @@ public final class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 	@Override
 	protected String getEntityRouteIdField() { // TODO Auto-generated method stub
 		return ENTITY_ID_FIELD;
-	}
-
-	@Override
-	protected String getEntityRouteTemplateEdit() { // TODO Auto-generated method stub
-		return ENTITY_ROUTE_TEMPLATE_EDIT;
-	}
-
-	@Override
-	protected void setupToolbar() {
-		// TODO Auto-generated method stub
 	}
 }

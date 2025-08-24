@@ -16,7 +16,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
-import tech.derbent.abstracts.domains.CInterfaceIconSet;
+import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.service.CMeetingService;
@@ -28,7 +28,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Meeting Master Detail")
 @Menu (order = 1.4, icon = "class:tech.derbent.meetings.view.CMeetingsView", title = "Project.Meetings")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CMeetingsView extends CProjectAwareMDPage<CMeeting> implements CInterfaceIconSet {
+public class CMeetingsView extends CProjectAwareMDPage<CMeeting> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() {
@@ -38,12 +38,10 @@ public class CMeetingsView extends CProjectAwareMDPage<CMeeting> implements CInt
 	public static String getIconFilename() { return CMeeting.getIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "meeting_id";
-	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "cmeetingsview/%s/edit";
 	private TextField searchField;
 
 	public CMeetingsView(final CMeetingService entityService, final CSessionService sessionService, final CScreenService screenService) {
 		super(CMeeting.class, entityService, sessionService, screenService);
-		addClassNames("meetings-view");
 	}
 
 	@Override
@@ -65,9 +63,6 @@ public class CMeetingsView extends CProjectAwareMDPage<CMeeting> implements CInt
 
 	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
-
-	@Override
-	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
 
 	/** Checks if a meeting matches the search text by searching across all string fields. */
 	private boolean matchesSearchText(final CMeeting meeting, final String searchText) {

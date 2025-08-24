@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.projects.domain.CProject;
+import tech.derbent.users.view.CUserTypeView;
 
 /** CUserType - Domain entity representing user types. Layer: Domain (MVC) Inherits from CEntityOfProject to provide project-aware type functionality
  * for users. */
@@ -13,12 +14,13 @@ import tech.derbent.projects.domain.CProject;
 @Table (name = "cusertype")
 @AttributeOverride (name = "id", column = @Column (name = "cusertype_id"))
 public class CUserType extends CEntityOfProject<CUserType> {
-
 	public static String getIconColorCode() {
 		return "#6f42c1"; // Purple color for user type entities
 	}
 
 	public static String getIconFilename() { return "vaadin:group"; }
+
+	public static Class<?> getViewClass() { return CUserTypeView.class; }
 
 	public CUserType() {
 		super();

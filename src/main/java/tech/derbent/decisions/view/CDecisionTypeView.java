@@ -4,8 +4,7 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.annotations.CSpringAuxillaries;
-import tech.derbent.abstracts.domains.CInterfaceIconSet;
+import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.decisions.domain.CDecisionType;
 import tech.derbent.decisions.service.CDecisionTypeService;
@@ -16,32 +15,21 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Decision Types")
 @Menu (order = 11.1, icon = "class:tech.derbent.decisions.view.CDecisionTypeView", title = "Types.Decision Types")
 @PermitAll
-public class CDecisionTypeView extends CProjectAwareMDPage<CDecisionType> implements CInterfaceIconSet {
-
+public class CDecisionTypeView extends CProjectAwareMDPage<CDecisionType> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 
-	public static String getIconColorCode() {
-		return CDecisionType.getIconColorCode(); // Use the static method from
-													// CDecisionType
-	}
+	public static String getIconColorCode() { return CDecisionType.getIconColorCode(); }
 
 	public static String getIconFilename() { return CDecisionType.getIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "decisiontype_id";
-	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "cdecisiontypeview/%s/edit";
 
-	/** Constructor for CDecisionTypeView.
-	 * @param entityService  the service for decision type operations
-	 * @param sessionService */
 	public CDecisionTypeView(final CDecisionTypeService entityService, final CSessionService sessionService, final CScreenService screenService) {
 		super(CDecisionType.class, entityService, sessionService, screenService);
-		addClassNames("decision-types-view");
-		LOGGER.info("CDecisionTypeView initialized with route: " + CSpringAuxillaries.getRoutePath(this.getClass()));
 	}
 
 	@Override
 	protected void createGridForEntity() {
-		// Add color-aware type column to show the type with color
 		grid.addStatusColumn(type -> type, "Type", "type");
 		grid.addShortTextColumn(CDecisionType::getName, "Name", "name");
 		grid.addLongTextColumn(CDecisionType::getDescription, "Description", "description");
@@ -53,12 +41,4 @@ public class CDecisionTypeView extends CProjectAwareMDPage<CDecisionType> implem
 
 	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
-
-	@Override
-	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	@Override
-	protected void setupToolbar() {
-		// Toolbar setup is handled by the parent class
-	}
 }

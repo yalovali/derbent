@@ -10,7 +10,7 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.domains.CInterfaceIconSet;
+import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
 import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.projects.domain.CProject;
@@ -26,8 +26,7 @@ import tech.derbent.users.service.CUserService;
 @PageTitle ("Project Master Detail")
 @Menu (order = 1.1, icon = "class:tech.derbent.projects.view.CProjectsView", title = "Settings.Projects")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CProjectsView extends CAbstractNamedEntityPage<CProject> implements CInterfaceIconSet {
-
+public class CProjectsView extends CAbstractNamedEntityPage<CProject> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() {
@@ -37,7 +36,6 @@ public class CProjectsView extends CAbstractNamedEntityPage<CProject> implements
 	public static String getIconFilename() { return CProject.getIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "project_id";
-	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "cprojectsview/%s/edit";
 	private CPanelProjectUsers projectUsersPanel;
 	private final CUserService userService;
 	private final CUserProjectSettingsService userProjectSettingsService;
@@ -81,15 +79,6 @@ public class CProjectsView extends CAbstractNamedEntityPage<CProject> implements
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
 
 	@Override
-	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	@Override
-	protected void initPage() {
-		// Initialize the page components and layout This method can be overridden to set
-		// up the view's components
-	}
-
-	@Override
 	protected void populateForm(final CProject value) {
 		super.populateForm(value);
 		LOGGER.info("Populating form with project data: {}", value != null ? value.getName() : "null");
@@ -113,10 +102,5 @@ public class CProjectsView extends CAbstractNamedEntityPage<CProject> implements
 			};
 			projectUsersPanel.setAccessors(supplier, runnable);
 		}
-	}
-
-	@Override
-	protected void setupToolbar() {
-		// TODO: Implement toolbar setup if needed
 	}
 }

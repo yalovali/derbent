@@ -444,7 +444,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			LOGGER.warn("Project not found for security risk");
 			return;
 		}
-		final CRisk risk = new CRisk("Data Privacy Compliance Gaps", project, ERiskSeverity.CRITICAL);
+		final CRisk risk = new CRisk("Data Privacy Compliance Gaps", project);
+		risk.setRiskSeverity(ERiskSeverity.CRITICAL);
 		risk.setDescription("Current implementation may not fully comply with GDPR and data protection regulations");
 		riskService.save(risk);
 	}
@@ -479,7 +480,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			LOGGER.warn("Project not found for technical risk");
 			return;
 		}
-		final CRisk risk = new CRisk("Legacy System Integration Challenges", project, ERiskSeverity.HIGH);
+		final CRisk risk = new CRisk("Legacy System Integration Challenges", project);
+		risk.setRiskSeverity(ERiskSeverity.HIGH);
 		risk.setDescription("Integration with legacy systems may cause compatibility issues and performance bottlenecks");
 		riskService.save(risk);
 	}
@@ -491,7 +493,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			LOGGER.warn("Project not found for resource risk");
 			return;
 		}
-		final CRisk risk = new CRisk("Team Member Vacation Scheduling Conflicts", project, ERiskSeverity.LOW);
+		final CRisk risk = new CRisk("Team Member Vacation Scheduling Conflicts", project);
+		risk.setRiskSeverity(ERiskSeverity.LOW);
 		risk.setDescription("Overlapping vacation schedules may temporarily reduce team capacity");
 		riskService.save(risk);
 	}
@@ -503,7 +506,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			LOGGER.warn("Project not found for schedule risk");
 			return;
 		}
-		final CRisk risk = new CRisk("Minor Delays in Third-Party Integrations", project, ERiskSeverity.LOW);
+		final CRisk risk = new CRisk("Minor Delays in Third-Party Integrations", project);
+		risk.setRiskSeverity(ERiskSeverity.LOW);
 		risk.setDescription("External vendor may experience minor delays in API delivery");
 		riskService.save(risk);
 	}
@@ -528,7 +532,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			LOGGER.warn("Project not found for budget risk");
 			return;
 		}
-		final CRisk risk = new CRisk("Budget Overrun Due to Scope Creep", project, ERiskSeverity.MEDIUM);
+		final CRisk risk = new CRisk("Budget Overrun Due to Scope Creep", project);
+		risk.setRiskSeverity(ERiskSeverity.MEDIUM);
 		risk.setDescription("Uncontrolled feature additions may cause budget to exceed allocated resources");
 		riskService.save(risk);
 	}

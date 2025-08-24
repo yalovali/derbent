@@ -30,7 +30,6 @@ public final class CScreenView extends CProjectAwareMDPage<CScreen> {
 	public static String getIconFilename() { return CScreen.getIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "screen_id";
-	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "cscreensview/%s/edit";
 	private final CScreenLinesService screenLinesService;
 	private final CEntityFieldService entityFieldService;
 	private final CViewsService viewsService;
@@ -41,14 +40,8 @@ public final class CScreenView extends CProjectAwareMDPage<CScreen> {
 		this.screenLinesService = screenLinesService;
 		this.entityFieldService = entityFieldService;
 		this.viewsService = viewsService;
-		addClassNames("screens-view");
 	}
 
-	/** Creates the entity details section using accordion panels. Follows the same pattern as CActivitiesView for consistency.
-	 * @throws InvocationTargetException
-	 * @throws IllegalAccessException
-	 * @throws SecurityException
-	 * @throws NoSuchMethodException */
 	@Override
 	protected void createDetailsLayout() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
 		addAccordionPanel(new CPanelScreenBasicInfo(getCurrentEntity(), getBinder(), (CScreenService) entityService));
@@ -78,12 +71,4 @@ public final class CScreenView extends CProjectAwareMDPage<CScreen> {
 
 	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
-
-	@Override
-	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	@Override
-	protected void setupToolbar() {
-		// TODO: Implement toolbar setup if needed
-	}
 }

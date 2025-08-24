@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.grid.Grid;
@@ -314,6 +315,7 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 	 * guideline that grids should always have a selected row. */
 	public void ensureSelectionWhenDataAvailable() {
 		try {
+			LOGGER.debug("Ensuring selection when data is available");
 			// Only auto-select if no current selection and data is available
 			if (asSingleSelect().getValue() == null) {
 				getDataProvider().fetch(new com.vaadin.flow.data.provider.Query<>()).findFirst().ifPresent(entity -> {
@@ -329,9 +331,11 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 
 	/** Initialize grid with common settings and styling. */
 	private void initializeGrid() {
-		// addThemeVariants(GridVariant.LUMO_NO_BORDER);
+		addThemeVariants(GridVariant.LUMO_NO_BORDER);
 		addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 		addThemeVariants(GridVariant.LUMO_COMPACT);
+		setItems(Collections.emptyList());
+		getColumns().forEach(this::removeColumn);
 		setHeightFull();
 		CAuxillaries.setId(this);
 		// Ensure grid always has a selected row when data is available
@@ -344,6 +348,11 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 
 	@Override
 	public void select(final EntityClass entity) {
+		LOGGER.debug("Selecting entity: {}", entity != null ? entity.getId() : "null");
+		if (entity == getSelectedItems().stream().findFirst().orElse(null)) {
+			LOGGER.debug("Entity is already selected, skipping.");
+			return;
+		}
 		super.select(entity);
 	}
 

@@ -5,9 +5,9 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import tech.derbent.abstracts.domains.CInterfaceIconSet;
+import tech.derbent.abstracts.domains.IIconSet;
 
-public abstract class CAbstractPage extends Main implements BeforeEnterObserver, CInterfaceIconSet {
+public abstract class CAbstractPage extends Main implements BeforeEnterObserver, IIconSet {
 	private static final long serialVersionUID = 1L;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 

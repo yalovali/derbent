@@ -10,9 +10,8 @@ import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
-import tech.derbent.abstracts.domains.CInterfaceIconSet;
+import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
-import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.service.CScreenService;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUserType;
@@ -24,24 +23,17 @@ import tech.derbent.users.service.CUserTypeService;
 @PageTitle ("User Types")
 @Menu (order = 10.3, icon = "class:tech.derbent.users.view.CUserTypeView", title = "Settings.User Types")
 @PermitAll
-public class CUserTypeView extends CProjectAwareMDPage<CUserType> implements CInterfaceIconSet {
+public class CUserTypeView extends CProjectAwareMDPage<CUserType> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 
-	public static String getIconColorCode() {
-		return CUserType.getIconColorCode(); // Use the static method from CUserType
-	}
+	public static String getIconColorCode() { return CUserType.getIconColorCode(); }
 
 	public static String getIconFilename() { return CUserType.getIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "user_type_id";
-	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "cusertypeview/%s/edit";
 
-	/** Constructor for CUserTypeView.
-	 * @param entityService  the service for user type operations
-	 * @param sessionService */
 	public CUserTypeView(final CUserTypeService entityService, final CSessionService sessionService, final CScreenService screenService) {
 		super(CUserType.class, entityService, sessionService, screenService);
-		addClassNames("user-types-view");
 	}
 
 	@Override
@@ -64,19 +56,4 @@ public class CUserTypeView extends CProjectAwareMDPage<CUserType> implements CIn
 
 	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
-
-	@Override
-	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	@Override
-	public void setProjectForEntity(final CUserType entity, final CProject project) {
-		assert entity != null : "Entity must not be null";
-		assert project != null : "Project must not be null";
-		entity.setProject(project);
-	}
-
-	@Override
-	protected void setupToolbar() {
-		// Toolbar setup is handled by the parent class
-	}
 }

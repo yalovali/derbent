@@ -20,13 +20,13 @@ import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.interfaces.CFieldInfoGenerator;
 import tech.derbent.abstracts.interfaces.CSearchable;
 import tech.derbent.companies.domain.CCompany;
+import tech.derbent.users.view.CUsersView;
 
 @Entity
 @Table (name = "cuser") // Using quoted identifier to ensure exact case matching in
 // PostgreSQL
 @AttributeOverride (name = "id", column = @Column (name = "user_id"))
 public class CUser extends CEntityNamed<CUser> implements CSearchable, CFieldInfoGenerator {
-
 	public static final int MAX_LENGTH_NAME = 255;
 
 	public static String getIconColorCode() {
@@ -34,6 +34,8 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable, CFieldInf
 	}
 
 	public static String getIconFilename() { return "vaadin:users"; }
+
+	public static Class<?> getViewClass() { return CUsersView.class; }
 
 	@Column (name = "lastname", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
 	@AMetaData (
@@ -126,16 +128,6 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable, CFieldInf
 		this.login = username;
 		this.email = email;
 		this.setPassword(password);
-	}
-
-	/** Constructor with user role enum. */
-	public CUser(final String username, final String password, final String name, final String email, final EUserRole userRole) {
-		super(CUser.class, name);
-		this.login = username;
-		this.email = email;
-		this.setPassword(password);
-		this.userRole = userRole != null ? userRole : EUserRole.TEAM_MEMBER;
-		this.setRoles(this.userRole.name()); // Keep roles string in sync
 	}
 
 	public CUser(final String username, final String password, final String name, final String email, final String roles) {

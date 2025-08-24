@@ -15,7 +15,7 @@ import jakarta.persistence.MappedSuperclass;
 import tech.derbent.abstracts.utils.Check;
 
 @MappedSuperclass
-public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implements CInterfaceIconSet, IEntityDBStatics {
+public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implements IIconSet, IEntityDBStatics {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityDB.class);
 
 	public static Class<?> getViewClass() {

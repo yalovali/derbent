@@ -8,7 +8,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.domains.CInterfaceIconSet;
+import tech.derbent.abstracts.domains.IIconSet;
 
 /**
  * Example view to demonstrate 4-level hierarchical menu structure. This view shows how the hierarchical menu parses
@@ -18,7 +18,7 @@ import tech.derbent.abstracts.domains.CInterfaceIconSet;
 @PageTitle("Hierarchical Menu Example")
 @Menu(order = 999, icon = "class:tech.derbent.examples.view.CExampleHierarchicalMenuView", title = "Examples.Hierarchy.DeepMenu.Sample")
 @PermitAll
-public class CExampleHierarchicalMenuView extends Div implements CInterfaceIconSet {
+public class CExampleHierarchicalMenuView extends Div implements IIconSet {
 
     private static final long serialVersionUID = 1L;
 

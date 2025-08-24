@@ -1,7 +1,6 @@
 package tech.derbent.companies.domain;
 
 import java.util.List;
-
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -13,91 +12,69 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityConstants;
 import tech.derbent.abstracts.domains.CEntityNamed;
+import tech.derbent.companies.view.CCompanyView;
 
-/**
- * CCompany - Domain entity representing companies within the organization. Layer: Domain
- * (MVC) Inherits from CEntityDB to provide database functionality.
- */
+/** CCompany - Domain entity representing companies within the organization. Layer: Domain (MVC) Inherits from CEntityDB to provide database
+ * functionality. */
 @Entity
-@Table (name = "ccompany") // table name for the entity as the default is the class name
-// in lowercase
+@Table (name = "ccompany")
 @AttributeOverride (name = "id", column = @Column (name = "company_id"))
 public class CCompany extends CEntityNamed<CCompany> {
 	// name and description fields are now inherited from CEntityNamed
-
 	public static String getIconColorCode() {
 		return "#6c757d"; // Gray color for company entities
 	}
 
 	public static String getIconFilename() { return "vaadin:building"; }
 
-	@Column (
-		name = "address", nullable = true,
-		length = CEntityConstants.MAX_LENGTH_DESCRIPTION
-	)
+	public static Class<?> getViewClass() { return CCompanyView.class; }
+
+	@Column (name = "address", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@AMetaData (
-		displayName = "Address", required = false, readOnly = false, defaultValue = "",
-		description = "Company address", hidden = false, order = 3,
-		maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
+			displayName = "Address", required = false, readOnly = false, defaultValue = "", description = "Company address", hidden = false,
+			order = 3, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
 	)
 	private String address;
-
 	@Column (name = "phone", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
-		displayName = "Phone", required = false, readOnly = false, defaultValue = "",
-		description = "Company phone number", hidden = false, order = 4,
-		maxLength = CEntityConstants.MAX_LENGTH_NAME
+			displayName = "Phone", required = false, readOnly = false, defaultValue = "", description = "Company phone number", hidden = false,
+			order = 4, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String phone;
-
 	@Column (name = "email", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
-		displayName = "Email", required = false, readOnly = false, defaultValue = "",
-		description = "Company email address", hidden = false, order = 5,
-		maxLength = CEntityConstants.MAX_LENGTH_NAME
+			displayName = "Email", required = false, readOnly = false, defaultValue = "", description = "Company email address", hidden = false,
+			order = 5, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String email;
-
 	@Column (name = "website", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
-		displayName = "Website", required = false, readOnly = false, defaultValue = "",
-		description = "Company website URL", hidden = false, order = 6,
-		maxLength = CEntityConstants.MAX_LENGTH_NAME
+			displayName = "Website", required = false, readOnly = false, defaultValue = "", description = "Company website URL", hidden = false,
+			order = 6, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String website;
-
-	@Column (
-		name = "tax_number", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME
-	)
+	@Column (name = "tax_number", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
-		displayName = "Tax Number", required = false, readOnly = false, defaultValue = "",
-		description = "Company tax identification number", hidden = false, order = 7,
-		maxLength = CEntityConstants.MAX_LENGTH_NAME
+			displayName = "Tax Number", required = false, readOnly = false, defaultValue = "", description = "Company tax identification number",
+			hidden = false, order = 7, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String taxNumber;
-
 	@Column (name = "enabled", nullable = false)
 	@AMetaData (
-		displayName = "Active", required = true, readOnly = false, defaultValue = "true",
-		description = "Is company active?", hidden = false, order = 8
+			displayName = "Active", required = true, readOnly = false, defaultValue = "true", description = "Is company active?", hidden = false,
+			order = 8
 	)
 	private Boolean enabled = Boolean.TRUE;
-
 	@OneToMany (mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@AMetaData (
-		displayName = "Users", required = false, readOnly = true,
-		description = "Users belonging to this company", hidden = false, order = 9
-	)
+	@AMetaData (displayName = "Users", required = false, readOnly = true, description = "Users belonging to this company", hidden = false, order = 9)
 	private List<tech.derbent.users.domain.CUser> users;
 
-	/**
-	 * Default constructor for JPA.
-	 */
+	/** Default constructor for JPA. */
 	public CCompany() {
 		super();
 		// Initialize with default values for JPA
@@ -132,17 +109,14 @@ public class CCompany extends CEntityNamed<CCompany> {
 
 	public void setTaxNumber(final String taxNumber) { this.taxNumber = taxNumber; }
 
-	public void setUsers(final List<tech.derbent.users.domain.CUser> users) {
-		this.users = users;
-	}
+	public void setUsers(final List<tech.derbent.users.domain.CUser> users) { this.users = users; }
 
 	public void setWebsite(final String website) { this.website = website; }
 
 	@Override
 	public String toString() {
-		return "CCompany{" + "name='" + getName() + '\'' + ", description='"
-			+ getDescription() + '\'' + ", address='" + address + '\'' + ", phone='"
-			+ phone + '\'' + ", email='" + email + '\'' + ", website='" + website + '\''
-			+ ", taxNumber='" + taxNumber + '\'' + ", enabled=" + enabled + '}';
+		return "CCompany{" + "name='" + getName() + '\'' + ", description='" + getDescription() + '\'' + ", address='" + address + '\'' + ", phone='"
+				+ phone + '\'' + ", email='" + email + '\'' + ", website='" + website + '\'' + ", taxNumber='" + taxNumber + '\'' + ", enabled="
+				+ enabled + '}';
 	}
 }

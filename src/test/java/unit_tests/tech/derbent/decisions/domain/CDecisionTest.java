@@ -13,7 +13,6 @@ import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 
 /** Unit tests for CDecision domain entity. Tests basic functionality, business logic, and approval workflow. */
 class CDecisionTest extends CTestBase {
-
 	@Override
 	protected void setupForTest() {
 		// TODO Auto-generated method stub
@@ -39,19 +38,6 @@ class CDecisionTest extends CTestBase {
 		assertEquals("Test Decision", decision.getName());
 		assertEquals(project, decision.getProject());
 		assertEquals("Test Project", decision.getProjectName());
-	}
-
-	@Test
-	void testDecisionCreationWithDescription() {
-		// Given
-		final String description = "This is a test decision for unit testing";
-		// When
-		final CDecision decision = new CDecision("Test Decision", project, description);
-		// Then
-		assertNotNull(decision);
-		assertEquals("Test Decision", decision.getName());
-		assertEquals(description, decision.getDescription());
-		assertEquals(project, decision.getProject());
 	}
 
 	@Test

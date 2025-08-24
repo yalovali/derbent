@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
-import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.domains.CEntityOfProject;
@@ -41,10 +40,6 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
 	protected void createGridLayoutX() {
 		// LOGGER.debug("Creating grid layout for project-aware MD page");
 		grid = new CGrid<>(entityClass);
-		grid.getColumns().forEach(grid::removeColumn);
-		grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
-		// Initially set empty items - will be populated after view is fully initialized
-		grid.setItems(Collections.emptyList());
 		grid.addIdColumn(entity -> entity.getId().toString(), "ID", "id");
 		// Add selection listener to the grid
 		grid.asSingleSelect().addValueChangeListener(event -> {
@@ -147,6 +142,5 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
 		} else {
 			throw new IllegalArgumentException("Entity must implement CEntityOfProject interface");
 		}
-		LOGGER.debug("Set project {} for entity {}", project.getName(), entity.getId());
 	}
 }

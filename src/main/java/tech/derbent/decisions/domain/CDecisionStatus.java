@@ -7,6 +7,7 @@ import jakarta.persistence.Table;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.annotations.StatusEntity;
 import tech.derbent.base.domain.CStatus;
+import tech.derbent.decisions.view.CDecisionStatusView;
 import tech.derbent.projects.domain.CProject;
 
 /** CDecisionStatus - Domain entity representing decision status types. Layer: Domain (MVC) Inherits from CStatus to provide status functionality for
@@ -16,12 +17,13 @@ import tech.derbent.projects.domain.CProject;
 @Table (name = "cdecisionstatus")
 @AttributeOverride (name = "id", column = @Column (name = "decision_status_id"))
 public class CDecisionStatus extends CStatus<CDecisionStatus> {
-
 	public static String getIconColorCode() {
 		return "#dc3545"; // Red color for decision status entities
 	}
 
 	public static String getIconFilename() { return "vaadin:flag"; }
+
+	public static Class<?> getViewClass() { return CDecisionStatusView.class; }
 
 	@Column (name = "is_final", nullable = false)
 	@AMetaData (
@@ -68,7 +70,9 @@ public class CDecisionStatus extends CStatus<CDecisionStatus> {
 
 	/** Checks if decisions with this status are pending approval.
 	 * @return true if approval is required and status is not final */
-	public Boolean isPendingApproval() { return Boolean.TRUE.equals(requiresApproval) && !Boolean.TRUE.equals(isFinal); }
+	public Boolean isPendingApproval() {
+		return Boolean.TRUE.equals(requiresApproval) && !Boolean.TRUE.equals(isFinal);
+	}
 
 	public void setFinal(final Boolean isFinal) {
 		this.isFinal = isFinal;

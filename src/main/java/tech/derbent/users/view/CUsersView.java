@@ -12,7 +12,7 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
-import tech.derbent.abstracts.domains.CInterfaceIconSet;
+import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
 import tech.derbent.companies.service.CCompanyService;
@@ -30,7 +30,7 @@ import tech.derbent.users.service.CUserViewService;
 @PageTitle ("Users")
 @Menu (order = 3.2, icon = "class:tech.derbent.users.view.CUsersView", title = "Settings.Users")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CUsersView extends CAbstractNamedEntityPage<CUser> implements CInterfaceIconSet {
+public class CUsersView extends CAbstractNamedEntityPage<CUser> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 	public static final String ENTITY_ROUTE_TEMPLATE_EDIT = "cusersview/%s/edit";
 
@@ -48,14 +48,11 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser> implements CInte
 	private final CProjectService projectService;
 	private final CUserProjectSettingsService userProjectSettingsService;
 
-	// private final TextField name; • Annotate the CUsersView constructor with @Autowired
-	// to let Spring inject dependencies.
 	@Autowired
 	public CUsersView(final CUserService entityService, final CProjectService projectService, final CUserTypeService userTypeService,
 			final CCompanyService companyService, final CSessionService sessionService, final CUserProjectSettingsService userProjectSettingsService,
 			final CScreenService screenService) {
 		super(CUser.class, entityService, sessionService, screenService);
-		addClassNames("users-view");
 		this.userTypeService = userTypeService;
 		this.companyService = companyService;
 		this.projectService = projectService;
@@ -102,9 +99,6 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser> implements CInte
 
 	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
-
-	@Override
-	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
 
 	/** Handles password update through the description panel. */
 	private void handlePasswordUpdate() {
@@ -158,10 +152,5 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser> implements CInte
 			};
 			projectSettingsGrid.setAccessors(supplier, runnable);
 		}
-	}
-
-	@Override
-	protected void setupToolbar() {
-		// TODO Auto-generated method stub
 	}
 }

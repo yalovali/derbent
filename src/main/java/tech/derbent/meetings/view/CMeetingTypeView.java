@@ -7,37 +7,28 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
-import tech.derbent.abstracts.domains.CInterfaceIconSet;
+import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.meetings.domain.CMeetingType;
 import tech.derbent.meetings.service.CMeetingTypeService;
 import tech.derbent.screens.service.CScreenService;
 import tech.derbent.session.service.CSessionService;
 
-/** CMeetingTypeView - View for managing meeting types. Layer: View (MVC) Provides CRUD operations for meeting types using the abstract master-detail
- * pattern with project awareness. */
 @Route ("cmeetingtypeview/:meetingtype_id?/:action?(edit)")
 @PageTitle ("Meeting Types")
 @Menu (order = 10.2, icon = "class:tech.derbent.meetings.view.CMeetingTypeView", title = "Types.Meeting Types")
 @PermitAll
-public class CMeetingTypeView extends CProjectAwareMDPage<CMeetingType> implements CInterfaceIconSet {
+public class CMeetingTypeView extends CProjectAwareMDPage<CMeetingType> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 
-	public static String getIconColorCode() {
-		return CMeetingType.getIconColorCode(); // Use the static method from CMeetingType
-	}
+	public static String getIconColorCode() { return CMeetingType.getIconColorCode(); }
 
 	public static String getIconFilename() { return CMeetingType.getIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "meetingtype_id";
-	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "cmeetingtypeview/%s/edit";
 
-	/** Constructor for CMeetingTypeView.
-	 * @param entityService  the service for meeting type operations
-	 * @param sessionService */
 	public CMeetingTypeView(final CMeetingTypeService entityService, final CSessionService sessionService, final CScreenService screenService) {
 		super(CMeetingType.class, entityService, sessionService, screenService);
-		addClassNames("meeting-types-view");
 	}
 
 	@Override
@@ -54,12 +45,4 @@ public class CMeetingTypeView extends CProjectAwareMDPage<CMeetingType> implemen
 
 	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
-
-	@Override
-	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	@Override
-	protected void setupToolbar() {
-		// TODO: Implement toolbar setup if needed
-	}
 }

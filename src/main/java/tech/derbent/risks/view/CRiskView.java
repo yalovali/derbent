@@ -7,7 +7,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
-import tech.derbent.abstracts.domains.CInterfaceIconSet;
+import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.risks.domain.CRisk;
 import tech.derbent.risks.service.CRiskService;
@@ -15,17 +15,13 @@ import tech.derbent.risks.service.CRiskViewService;
 import tech.derbent.screens.service.CScreenService;
 import tech.derbent.session.service.CSessionService;
 
-/** CRiskView - View for managing project risks. Layer: View (MVC) Provides CRUD operations for risks using the project-aware master-detail
- * pattern. */
 @PageTitle ("Project Risks")
 @Route ("criskview/:risk_id?/:action?(edit)")
 @Menu (order = 1.3, icon = "class:tech.derbent.risks.view.CRiskView", title = "Project.Risks")
 @PermitAll
-public class CRiskView extends CProjectAwareMDPage<CRisk> implements CInterfaceIconSet {
+public class CRiskView extends CProjectAwareMDPage<CRisk> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 	private static final String ENTITY_ID_FIELD = "risk_id";
-	private static final String ENTITY_ROUTE_TEMPLATE_EDIT = "criskview/%s/edit";
-
 	public static String getIconColorCode() {
 		return CRisk.getIconColorCode(); // Use the static method from CRisk
 	}
@@ -34,8 +30,6 @@ public class CRiskView extends CProjectAwareMDPage<CRisk> implements CInterfaceI
 
 	public CRiskView(final CRiskService entityService, final CSessionService sessionService, final CScreenService screenService) {
 		super(CRisk.class, entityService, sessionService, screenService);
-		addClassNames("risk-view");
-		// createDetailsLayout();
 	}
 
 	@Override
@@ -58,12 +52,4 @@ public class CRiskView extends CProjectAwareMDPage<CRisk> implements CInterfaceI
 
 	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
-
-	@Override
-	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	@Override
-	protected void setupToolbar() {
-		// TODO: Implement toolbar setup if needed
-	}
 }

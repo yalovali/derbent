@@ -3,7 +3,7 @@ package tech.derbent.abstracts.domains;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class CEntity<EntityClass> implements CInterfaceIconSet {
+public abstract class CEntity<EntityClass> implements IIconSet {
 
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 

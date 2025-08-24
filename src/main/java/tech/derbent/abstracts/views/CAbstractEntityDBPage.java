@@ -8,7 +8,6 @@ import java.util.stream.Stream;
 import org.springframework.data.domain.Pageable;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
@@ -29,7 +28,6 @@ import jakarta.annotation.PostConstruct;
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.components.CSearchToolbar;
 import tech.derbent.abstracts.domains.CEntityDB;
-import tech.derbent.abstracts.domains.IEntityDBStatics;
 import tech.derbent.abstracts.interfaces.CLayoutChangeListener;
 import tech.derbent.abstracts.interfaces.CSearchable;
 import tech.derbent.abstracts.services.CAbstractService;
@@ -120,20 +118,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		}
 	}
 
-	protected void clearForm() {
-		LOGGER.debug("Clearing form for {}", getClass().getSimpleName());
-		sessionService.setActiveId(entityClass.getSimpleName(), null);
-		// First deselect grid to avoid conflicts
-		if (grid != null) {
-			grid.deselectAll();
-		}
-		// Then clear the form
-		populateForm(null);
-	}
-
-	/** Creates a button layout for additional buttons if needed by subclasses. Note: Default save/delete/cancel buttons are now in the details tab.
-	 * This method can be used for additional custom buttons in the main content area.
-	 * @param layout The layout to add buttons to */
 	protected void createButtonLayout(final Div layout) {
 		LOGGER.debug("createButtonLayout called - default save/delete/cancel buttons are now in details tab");
 		// Default implementation does nothing - buttons are in the tab Subclasses can
@@ -142,22 +126,9 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	protected CButton createCancelButton(final String buttonText) {
 		final CButton cancel = CButton.createTertiary(buttonText, null, e -> {
-			try {
-				// Get the last selected entity ID
-				final Long lastSelectedId = sessionService.getActiveId(getClass().getSimpleName());
-				if ((lastSelectedId != null) && (lastSelectedId != -1)) {
-					// Restore selection to the last selected entity
-					restoreGridSelection(lastSelectedId);
-					LOGGER.debug("Reverted to last selected entity with ID: {}", lastSelectedId);
-				} else {
-					// If no previous selection, just clear the form
-					clearForm();
-				}
-			} catch (final Exception exception) {
-				LOGGER.error("Error reverting to last selected entry", exception);
-				// Fallback to clearing form if restoration fails
-				clearForm();
-			}
+			// Get the last selected entity ID
+			final Long lastSelectedId = sessionService.getActiveId(getClass().getSimpleName());
+			restoreGridSelection(lastSelectedId);
 		});
 		return cancel;
 	}
@@ -176,7 +147,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				try {
 					LOGGER.info("Deleting entity: {} with ID: {}", entityClass.getSimpleName(), currentEntity.getId());
 					entityService.delete(currentEntity);
-					clearForm();
+					populateForm(null);
 					refreshGrid();
 					safeShowNotification("Item deleted successfully");
 				} catch (final Exception exception) {
@@ -352,7 +323,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				// Update current entity with saved version (includes generated ID)
 				setCurrentEntity(savedEntity);
 				// Clear form and refresh grid
-				clearForm();
 				refreshGrid();
 				// Show success notification
 				safeShowNotification("Data saved successfully");
@@ -381,8 +351,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	public Div getDetailsTabLayout() { return detailsTabLayout; }
 
 	protected abstract String getEntityRouteIdField();
-
-	protected abstract String getEntityRouteTemplateEdit();
 
 	/** Gets the grid component for testing purposes.
 	 * @return the grid component */
@@ -438,20 +406,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	protected void onGridSelectionChange(final ValueChangeEvent<?> event) {
 		LOGGER.debug("Grid selection changed: {}", event.getValue() != null ? event.getValue().toString() : "null");
 		final EntityClass value = ((EntityClass) event.getValue());
-		if (value != null) {
-			final String routeTemplate = getEntityRouteTemplateEdit();
-			UI.getCurrent().navigate(String.format(routeTemplate, value.getId()));
-			sessionService.setActiveId(entityClass.getSimpleName(), value.getId());
-			populateForm(value);
-		} else {
-			clearForm();
-			try {
-				final Class<? extends Component> viewClass = IEntityDBStatics.viewClassOf(entityClass);
-				UI.getCurrent().navigate(viewClass);
-			} catch (final Exception e) {
-				LOGGER.error("Failed to navigate to view class for {}", entityClass.getSimpleName(), e);
-			}
-		}
+		populateForm(value);
 	}
 
 	@Override
@@ -469,10 +424,14 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	}
 
 	protected void populateForm(final EntityClass value) {
-		LOGGER.debug("Populating form with entity: {}", value);
+		LOGGER.debug("Populating form for entity: {}", value != null ? value.getId() : "null");
 		currentEntity = value;
+		sessionService.setActiveId(entityClass.getSimpleName(), value == null ? null : value.getId());
 		populateAccordionPanels(value);
 		getBinder().readBean(value);
+		if ((value == null) && (grid != null)) {
+			grid.deselectAll();
+		}
 	}
 
 	protected void refreshGrid() {
@@ -493,6 +452,11 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	 * refreshed.
 	 * @param entityId The ID of the entity to select */
 	protected void restoreGridSelection(final Long entityId) {
+		if (entityId == null) {
+			LOGGER.debug("No entity ID provided for selection restore, clearing selection");
+			grid.select(null);
+			return;
+		}
 		LOGGER.debug("Attempting to restore grid selection to entity ID: {}", entityId);
 		try {
 			// Find the entity in the current grid data that matches the ID
@@ -560,9 +524,8 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		updateLayoutOrientation();
 	}
 
-	/** Sets up the toolbar for the page. */
 	@Override
-	protected abstract void setupToolbar();
+	protected void setupToolbar() {}
 
 	/** Populates the form with entity data - public wrapper for testing.
 	 * @param entity the entity to populate the form with */

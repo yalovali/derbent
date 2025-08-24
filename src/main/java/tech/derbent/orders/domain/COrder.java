@@ -18,6 +18,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityOfProject;
+import tech.derbent.orders.view.COrdersView;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
 
@@ -30,6 +31,8 @@ public class COrder extends CEntityOfProject<COrder> {
 	}
 
 	public static String getIconFilename() { return "vaadin:cart"; }
+
+	public static Class<?> getViewClass() { return COrdersView.class; }
 
 	// Order Type and Classification
 	@ManyToOne (fetch = FetchType.EAGER)

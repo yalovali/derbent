@@ -6,12 +6,11 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
-import tech.derbent.abstracts.domains.CInterfaceIconSet;
+import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.abstracts.views.CVerticalLayout;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.service.CActivityStatusService;
-import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.service.CScreenService;
 import tech.derbent.session.service.CSessionService;
 
@@ -21,8 +20,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Activity Statuses")
 @Menu (order = 2.1, icon = "class:tech.derbent.activities.view.CActivityStatusView", title = "Types.Activity Statuses")
 @PermitAll
-public class CActivityStatusView extends CProjectAwareMDPage<CActivityStatus> implements CInterfaceIconSet {
-
+public class CActivityStatusView extends CProjectAwareMDPage<CActivityStatus> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() {
@@ -30,14 +28,10 @@ public class CActivityStatusView extends CProjectAwareMDPage<CActivityStatus> im
 													// CActivityStatus
 	}
 
-	public static String getIconFilename() { return CActivityStatus.getIconFilename(); }
+	public static String getIconFilename() { return IIconSet.resolveIconFilename(CActivityStatus.class); }
 
 	private final String ENTITY_ID_FIELD = "activity_status_id";
-	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "cactivitystatusview/%s/edit";
 
-	/** Constructor for CActivityStatusView.
-	 * @param entityService  the service for activity status operations
-	 * @param sessionService */
 	public CActivityStatusView(final CActivityStatusService entityService, final CSessionService sessionService, final CScreenService screenService) {
 		super(CActivityStatus.class, entityService, sessionService, screenService);
 	}
@@ -62,25 +56,4 @@ public class CActivityStatusView extends CProjectAwareMDPage<CActivityStatus> im
 
 	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
-
-	@Override
-	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	@Override
-	public void setProjectForEntity(final CActivityStatus entity, final CProject project) {
-		assert entity != null : "Entity must not be null";
-		assert project != null : "Project must not be null";
-		entity.setProject(project);
-	}
-
-	@Override
-	protected void setupToolbar() {
-		// Toolbar setup is handled by the parent class
-	}
-
-	/** Test method to expose populateForm for testing binding issues. This method should only be used in tests. */
-	@Override
-	public void testPopulateForm(final CActivityStatus entity) {
-		populateForm(entity);
-	}
 }

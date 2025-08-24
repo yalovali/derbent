@@ -87,22 +87,8 @@ public class CDecision extends CEntityOfProject<CDecision> {
 		super();
 	}
 
-	/** Constructor with name and project.
-	 * @param name    the decision name - must not be null or empty
-	 * @param project the project this decision belongs to - must not be null */
 	public CDecision(final String name, final CProject project) {
 		super(CDecision.class, name, project);
-	}
-
-	/** Constructor with name, project, and description.
-	 * @param name        the decision name - must not be null or empty
-	 * @param project     the project this decision belongs to - must not be null
-	 * @param description detailed description of the decision - can be null */
-	public CDecision(final String name, final CProject project, final String description) {
-		super(CDecision.class, name, project);
-		setDescription(description);
-		LOGGER.debug("CDecision constructor called with name: {}, project: {}, description: {}", name, project != null ? project.getName() : "null",
-				description);
 	}
 
 	@Override

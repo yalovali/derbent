@@ -7,7 +7,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
-import tech.derbent.abstracts.domains.CInterfaceIconSet;
+import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.orders.domain.COrder;
 import tech.derbent.orders.service.COrderService;
@@ -19,7 +19,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Orders Master Detail")
 @Menu (order = 7.1, icon = "class:tech.derbent.orders.view.COrdersView", title = "Project.Orders")
 @PermitAll // When security is enabled, allow all authenticated users
-public class COrdersView extends CProjectAwareMDPage<COrder> implements CInterfaceIconSet {
+public class COrdersView extends CProjectAwareMDPage<COrder> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() {
@@ -29,11 +29,9 @@ public class COrdersView extends CProjectAwareMDPage<COrder> implements CInterfa
 	public static String getIconFilename() { return COrder.getIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "order_id";
-	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "cordersview/%s/edit";
 
 	public COrdersView(final COrderService entityService, final CSessionService sessionService, final CScreenService screenService) {
 		super(COrder.class, entityService, sessionService, screenService);
-		addClassNames("orders-view");
 	}
 
 	@Override
@@ -54,10 +52,4 @@ public class COrdersView extends CProjectAwareMDPage<COrder> implements CInterfa
 
 	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
-
-	@Override
-	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	@Override
-	protected void setupToolbar() {}
 }

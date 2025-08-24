@@ -7,7 +7,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
-import tech.derbent.abstracts.domains.CInterfaceIconSet;
+import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.orders.domain.CCurrency;
 import tech.derbent.orders.service.CCurrencyService;
@@ -18,21 +18,17 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Orders Master Detail")
 @Menu (order = 7.1, icon = "class:tech.derbent.orders.view.CCurrencyView", title = "Types.Currencies")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CCurrencyView extends CProjectAwareMDPage<CCurrency> implements CInterfaceIconSet {
+public class CCurrencyView extends CProjectAwareMDPage<CCurrency> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 
-	public static String getIconColorCode() {
-		return CCurrency.getIconColorCode(); // Use the static method from COrder
-	}
+	public static String getIconColorCode() { return CCurrency.getIconColorCode(); }
 
 	public static String getIconFilename() { return CCurrency.getIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "order_id";
-	private final String ENTITY_ROUTE_TEMPLATE_EDIT = "ccurrencyview/%s/edit";
 
 	public CCurrencyView(final CCurrencyService entityService, final CSessionService sessionService, final CScreenService screenService) {
 		super(CCurrency.class, entityService, sessionService, screenService);
-		addClassNames("orders-view");
 	}
 
 	@Override
@@ -47,10 +43,4 @@ public class CCurrencyView extends CProjectAwareMDPage<CCurrency> implements CIn
 
 	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
-
-	@Override
-	protected String getEntityRouteTemplateEdit() { return ENTITY_ROUTE_TEMPLATE_EDIT; }
-
-	@Override
-	protected void setupToolbar() {}
 }
