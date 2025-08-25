@@ -19,6 +19,7 @@ import tech.derbent.projects.domain.CProject;
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CActivityService extends CEntityOfProjectService<CActivity> implements CKanbanService<CActivity, CActivityStatus> {
+
 	public CActivityService(final CActivityRepository repository, final Clock clock) {
 		super(repository, clock);
 	}
@@ -38,11 +39,6 @@ public class CActivityService extends CEntityOfProjectService<CActivity> impleme
 		final CActivityType noType = new CActivityType("No Type", project);
 		noType.setDescription("Activities without an assigned type");
 		return noType;
-	}
-
-	public CActivity findById(final Long id) {
-		Check.notNull(id, "Activity ID cannot be null");
-		return ((CActivityRepository) repository).findById(id).orElse(null);
 	}
 
 	@Transactional (readOnly = true)
@@ -82,26 +78,6 @@ public class CActivityService extends CEntityOfProjectService<CActivity> impleme
 
 	@Override
 	protected Class<CActivity> getEntityClass() { return CActivity.class; }
-
-	/** Initializes lazy fields for CActivity entity to prevent LazyInitializationException. Specifically handles the lazy-loaded CActivityType and
-	 * CActivityStatus relationships.
-	 * @param entity the CActivity entity to initialize */
-	@Override
-	public void initializeLazyFields(final CActivity entity) {
-		Check.notNull(entity, "Entity cannot be null");
-		try {
-			super.initializeLazyFields(entity); // Handles CEntityOfProject relationships automatically
-			initializeLazyRelationship(entity.getActivityType(), "activityType");
-			initializeLazyRelationship(entity.getAssignedTo(), "assignedTo");
-			initializeLazyRelationship(entity.getCreatedBy(), "createdBy");
-			initializeLazyRelationship(entity.getStatus(), "status");
-			initializeLazyRelationship(entity.getPriority(), "priority");
-			initializeLazyRelationship(entity.getParentActivity(), "parentActivity");
-			// Project is already handled by super.initializeLazyFields() for CEntityOfProject
-		} catch (final Exception e) {
-			LOGGER.warn("Error initializing lazy fields for CActivity with ID: {}", entity.getId(), e);
-		}
-	}
 
 	@Override
 	public CActivity updateEntityStatus(final CActivity entity, final CActivityStatus newStatus) {

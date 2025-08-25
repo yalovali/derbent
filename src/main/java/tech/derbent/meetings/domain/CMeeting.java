@@ -30,6 +30,7 @@ import tech.derbent.users.domain.CUser;
 // in lowercase
 @AttributeOverride (name = "id", column = @Column (name = "meeting_id"))
 public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntity {
+
 	public static String getIconColorCode() {
 		return "#28a745"; // Green color for meeting entities
 	}

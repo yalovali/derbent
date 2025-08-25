@@ -37,25 +37,6 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting> implement
 	@Override
 	protected Class<CMeeting> getEntityClass() { return CMeeting.class; }
 
-	/** Optimized lazy field initialization for CMeeting entity. With improved repository queries using JOIN FETCH, this mainly handles complex
-	 * collections like participants and attendees only when needed.
-	 * @param entity the CMeeting entity to initialize */
-	@Override
-	public void initializeLazyFields(final CMeeting entity) {
-		Check.notNull(entity, "Entity cannot be null");
-		try {
-			super.initializeLazyFields(entity); // Handles CEntityOfProject relationships automatically
-			initializeLazyRelationship(entity.getMeetingType(), "meetingType");
-			initializeLazyRelationship(entity.getStatus(), "status");
-			initializeLazyRelationship(entity.getResponsible(), "responsible");
-			initializeLazyRelationship(entity.getRelatedActivity(), "relatedActivity");
-			initializeLazyRelationship(entity.getParticipants(), "participants");
-			initializeLazyRelationship(entity.getAttendees(), "attendees");
-		} catch (final Exception e) {
-			LOGGER.warn("Error initializing lazy fields for CMeeting with ID: {}", entity.getId(), e);
-		}
-	}
-
 	@Override
 	public CMeeting updateEntityStatus(final CMeeting entity, final CMeetingStatus newStatus) {
 		Check.notNull(entity, "Entity cannot be null");

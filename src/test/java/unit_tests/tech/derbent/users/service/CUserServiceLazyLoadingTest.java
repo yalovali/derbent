@@ -3,7 +3,6 @@ package unit_tests.tech.derbent.users.service;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -48,52 +47,5 @@ public class CUserServiceLazyLoadingTest extends CTestBase {
 			final String companyName = result.get().getCompany().getName();
 			assertNotNull(companyName, "Company name should be accessible");
 		});
-	}
-
-	@Test
-	void testInitializeLazyFieldsHandlesAllRelationships() {
-		// Given
-		final CUser user = new CUser("Test User");
-		final CUserType userType = mock(CUserType.class);
-		final CCompany company = mock(CCompany.class);
-		user.setUserType(userType);
-		user.setCompany(company);
-		// When/Then - should not throw any exceptions
-		assertDoesNotThrow(() -> userService.initializeLazyFields(user));
-	}
-
-	@Test
-	void testInitializeLazyFieldsHandlesCompany() {
-		// Given
-		final CUser user = new CUser("Test User");
-		final CCompany company = mock(CCompany.class);
-		user.setCompany(company);
-		// When/Then - should not throw any exceptions
-		assertDoesNotThrow(() -> userService.initializeLazyFields(user));
-	}
-
-	@Test
-	void testInitializeLazyFieldsHandlesNullUser() {
-		// When/Then - should not throw any exceptions
-		assertDoesNotThrow(() -> userService.initializeLazyFields(null));
-	}
-
-	@Test
-	void testInitializeLazyFieldsHandlesNullUserType() {
-		// Given
-		final CUser user = new CUser("Test User");
-		user.setUserType(null); // Null userType
-		// When/Then - should not throw any exceptions
-		assertDoesNotThrow(() -> userService.initializeLazyFields(user));
-	}
-
-	@Test
-	void testInitializeLazyFieldsHandlesUserType() {
-		// Given
-		final CUser user = new CUser("Test User");
-		final CUserType userType = mock(CUserType.class);
-		user.setUserType(userType);
-		// When/Then - should not throw any exceptions
-		assertDoesNotThrow(() -> userService.initializeLazyFields(user));
 	}
 }

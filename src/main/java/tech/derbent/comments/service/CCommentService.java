@@ -91,17 +91,6 @@ public class CCommentService extends CAbstractService<CComment> {
 	@Override
 	protected Class<CComment> getEntityClass() { return CComment.class; }
 
-	/** Enhanced initialization of lazy-loaded fields specific to Comment entities. Based on CActivityService implementation style.
-	 * @param entity the comment entity to initialize */
-	@Override
-	public void initializeLazyFields(final CComment entity) {
-		Check.notNull(entity, "Comment entity cannot be null");
-		super.initializeLazyFields(entity);
-		initializeLazyRelationship(entity.getAuthor());
-		initializeLazyRelationship(entity.getActivity());
-		initializeLazyRelationship(entity.getPriority());
-	}
-
 	/** Toggles the important flag of a comment.
 	 * @param comment the comment to toggle
 	 * @return the updated comment */

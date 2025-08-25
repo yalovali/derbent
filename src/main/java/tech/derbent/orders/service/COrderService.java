@@ -14,6 +14,7 @@ import tech.derbent.users.domain.CUser;
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class COrderService extends CEntityOfProjectService<COrder> {
+
 	COrderService(final COrderRepository repository, final Clock clock) {
 		super(repository, clock);
 	}
@@ -32,19 +33,4 @@ public class COrderService extends CEntityOfProjectService<COrder> {
 
 	@Override
 	protected Class<COrder> getEntityClass() { return COrder.class; }
-
-	@Override
-	public void initializeLazyFields(final COrder entity) {
-		Check.notNull(entity, "Entity cannot be null");
-		try {
-			super.initializeLazyFields(entity); // Handles CEntityOfProject relationships automatically
-			initializeLazyRelationship(entity.getOrderType(), "orderType");
-			initializeLazyRelationship(entity.getStatus(), "status");
-			if ((entity.getApprovals() != null) && !entity.getApprovals().isEmpty()) {
-				entity.getApprovals().forEach(approval -> initializeLazyRelationship(approval, "approval"));
-			}
-		} catch (final Exception e) {
-			LOGGER.warn("Error initializing lazy fields for Order with ID: {}", entity.getId(), e);
-		}
-	}
 }

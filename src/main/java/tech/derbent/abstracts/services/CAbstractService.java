@@ -12,7 +12,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.abstracts.annotations.CSpringAuxillaries;
 import tech.derbent.abstracts.domains.CEntityDB;
-import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.interfaces.CSearchable;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.utils.PageableUtils;
@@ -20,6 +19,7 @@ import tech.derbent.abstracts.utils.PageableUtils;
 /** CAbstractService - Abstract base service class for entity operations. Layer: Service (MVC) Provides common CRUD operations and lazy loading
  * support for all entity types. */
 public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass>> {
+
 	protected final Clock clock;
 	protected final CAbstractRepository<EntityClass> repository;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
@@ -96,31 +96,10 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 			return Optional.empty();
 		}
 		final Optional<EntityClass> entity = repository.findById(id);
-		// Initialize lazy fields if entity is present
-		entity.ifPresent(this::initializeLazyFields);
 		return entity;
 	}
 
 	protected abstract Class<EntityClass> getEntityClass();
-
-	@SuppressWarnings ("rawtypes")
-	public void initializeLazyFields(final EntityClass entity) {
-		Check.notNull(entity, "Entity cannot be null");
-		try {
-			CSpringAuxillaries.initializeLazily(entity);
-			// Automatic detection and handling of CEntityOfProject relationships
-			if (entity instanceof CEntityOfProject) {
-				final CEntityOfProject projectEntity = (CEntityOfProject) entity;
-				initializeLazyRelationship(projectEntity.getProject(), "project");
-			}
-		} catch (final Exception e) {
-			LOGGER.warn("Error initializing lazy fields for {} with ID: {}", entity.getClass().getSimpleName(), entity.getId(), e);
-		}
-	}
-
-	protected void initializeLazyRelationship(final Object relationshipEntity) {
-		initializeLazyRelationship(relationshipEntity, "unknown");
-	}
 
 	protected void initializeLazyRelationship(final Object relationshipEntity, final String relationshipName) {
 		if (relationshipEntity == null) {
@@ -143,7 +122,6 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		// LOGGER.debug("Listing entities with pageable: {}", safePage);
 		final Page<EntityClass> entities = repository.findAll(safePage);
 		// Initialize lazy fields for all entities
-		entities.forEach(this::initializeLazyFields);
 		return entities;
 	}
 
@@ -154,7 +132,6 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		// LOGGER.debug("Listing entities with filter and pageable");
 		final Page<EntityClass> page = repository.findAll(filter, safePage);
 		// Initialize lazy fields for all entities in the page
-		page.getContent().forEach(this::initializeLazyFields);
 		return page;
 	}
 
@@ -169,7 +146,6 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		// Get all entities and filter using the entity's matches method
 		final List<EntityClass> allEntities = repository.findAll(safePage).toList();
 		// Initialize lazy fields for all entities
-		allEntities.forEach(this::initializeLazyFields);
 		// Filter entities using their search implementation
 		final String trimmedSearchText = searchText.trim();
 		return allEntities.stream().filter(entity -> ((CSearchable) entity).matches(trimmedSearchText)).toList();

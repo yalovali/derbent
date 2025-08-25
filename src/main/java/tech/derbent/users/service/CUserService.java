@@ -25,6 +25,7 @@ import tech.derbent.users.domain.CUser;
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class CUserService extends CAbstractNamedEntityService<CUser> implements UserDetailsService {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserService.class);
 	private final PasswordEncoder passwordEncoder;
 
@@ -94,29 +95,6 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	 * @return the PasswordEncoder instance */
 	public PasswordEncoder getPasswordEncoder() { return passwordEncoder; }
 
-	/** Initializes lazy fields for a user entity to prevent LazyInitializationException. Specifically initializes user type, company, and project
-	 * settings.
-	 * @param entity the user entity to initialize */
-	@Override
-	public void initializeLazyFields(final CUser entity) {
-		if (entity == null) {
-			LOGGER.debug("User entity is null, skipping lazy field initialization");
-			return;
-		}
-		try {
-			super.initializeLazyFields(entity); // Handles CEntityOfProject relationships automatically
-			initializeLazyRelationship(entity.getUserType(), "userType");
-			initializeLazyRelationship(entity.getCompany(), "company");
-			initializeLazyRelationship(entity.getProjectSettings(), "projectSettings");
-		} catch (final Exception e) {
-			LOGGER.warn("Error initializing lazy fields for CUser with ID: {}", entity.getId(), e);
-		}
-	}
-
-	/** Implementation of UserDetailsService.loadUserByUsername(). This is the core method called by Spring Security during authentication.
-	 * @param username the username from the login form
-	 * @return UserDetails object containing user authentication info
-	 * @throws UsernameNotFoundException if user not found in database */
 	@Override
 	public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
 		LOGGER.debug("Attempting to load user by username: {}", username);
@@ -135,10 +113,6 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 				.build();
 	}
 
-	/** Updates user password with proper encoding.
-	 * @param username         the username to update
-	 * @param newPlainPassword the new plain text password
-	 * @throws UsernameNotFoundException if user not found */
 	@Transactional
 	public void updatePassword(final String username, final String newPlainPassword) {
 		final CUser loginUser = ((CUserRepository) repository).findByUsername(username)

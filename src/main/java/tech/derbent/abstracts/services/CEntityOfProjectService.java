@@ -11,6 +11,7 @@ import tech.derbent.abstracts.utils.Check;
 import tech.derbent.projects.domain.CProject;
 
 public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProject<EntityClass>> extends CAbstractNamedEntityService<EntityClass> {
+
 	public CEntityOfProjectService(final CEntityOfProjectRepository<EntityClass> repository, final Clock clock) {
 		super(repository, clock);
 	}
@@ -43,8 +44,6 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		Check.notNull(project, "Project cannot be null");
 		try {
 			final List<EntityClass> entities = ((CEntityOfProjectRepository<EntityClass>) repository).findByProject(project);
-			// Initialize any additional lazy fields that weren't loaded by the query
-			entities.forEach(this::initializeLazyFields);
 			return entities;
 		} catch (final Exception e) {
 			LOGGER.error("Error finding entities by project '{}' in {}: {}", project.getName(), getClass().getSimpleName(), e.getMessage(), e);
@@ -57,28 +56,11 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		Check.notNull(project, "Project cannot be null");
 		try {
 			final Page<EntityClass> entities = ((CEntityOfProjectRepository<EntityClass>) repository).findByProject(project, pageable);
-			// Initialize any additional lazy fields that weren't loaded by the query
-			entities.forEach(this::initializeLazyFields);
 			return entities;
 		} catch (final Exception e) {
 			LOGGER.error("Error finding entities by project '{}' with pagination in {}: {}", project.getName(), getClass().getSimpleName(),
 					e.getMessage(), e);
 			throw new RuntimeException("Failed to find entities by project with pagination", e);
-		}
-	}
-
-	@Override
-	public void initializeLazyFields(final EntityClass entity) {
-		Check.notNull(entity, "Entity cannot be null");
-		try {
-			super.initializeLazyFields(entity); // This will handle the project
-												// relationship automatically
-			// Initialize specific CEntityOfProject relationships that may not be covered
-			// by the base
-			initializeLazyRelationship(entity.getAssignedTo(), "assignedTo");
-			initializeLazyRelationship(entity.getCreatedBy(), "createdBy");
-		} catch (final Exception e) {
-			LOGGER.warn("Error initializing lazy fields for {} with ID: {}", getEntityClass().getSimpleName(), entity.getId(), e);
 		}
 	}
 

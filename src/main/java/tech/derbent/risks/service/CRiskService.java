@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import com.vaadin.flow.router.Menu;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.services.CEntityOfProjectService;
-import tech.derbent.abstracts.utils.Check;
 import tech.derbent.risks.domain.CRisk;
 
 @Service
@@ -21,18 +20,4 @@ public class CRiskService extends CEntityOfProjectService<CRisk> {
 
 	@Override
 	protected Class<CRisk> getEntityClass() { return CRisk.class; }
-
-	/** Enhanced initialization of lazy-loaded fields specific to Risk entities. Uses improved null-safe patterns.
-	 * @param entity the risk entity to initialize */
-	@Override
-	public void initializeLazyFields(final CRisk entity) {
-		Check.notNull(entity, "Entity cannot be null");
-		try {
-			super.initializeLazyFields(entity); // Handles CEntityOfProject relationships
-												// automatically
-			initializeLazyRelationship(entity.getStatus(), "status");
-		} catch (final Exception e) {
-			LOGGER.warn("Error initializing lazy fields for Risk with ID: {}", entity.getId(), e);
-		}
-	}
 }
