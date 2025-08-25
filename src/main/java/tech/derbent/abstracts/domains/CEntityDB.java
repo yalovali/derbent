@@ -16,6 +16,7 @@ import tech.derbent.abstracts.utils.Check;
 
 @MappedSuperclass
 public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implements IIconSet, IEntityDBStatics {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityDB.class);
 
 	public static Class<?> getViewClass() {
@@ -106,6 +107,8 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 	}
 
 	protected void initializeDefaults() {}
+
+	public boolean isNew() { return id == null; }
 
 	/** Generic method to save entity state using reflection. This method can be overridden by subclasses for custom save behavior.
 	 * @return this entity instance for method chaining */

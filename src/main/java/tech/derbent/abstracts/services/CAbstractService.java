@@ -166,6 +166,10 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		}
 	}
 
+	public boolean onBeforeSaveEvent(final EntityClass entity) {
+		return true;
+	}
+
 	@Transactional
 	public EntityClass save(final EntityClass entity) {
 		Check.notNull(entity, "Entity cannot be null");

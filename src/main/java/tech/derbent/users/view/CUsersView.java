@@ -31,6 +31,7 @@ import tech.derbent.users.service.CUserViewService;
 @Menu (order = 3.2, icon = "class:tech.derbent.users.view.CUsersView", title = "Settings.Users")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CUsersView extends CAbstractNamedEntityPage<CUser> implements IIconSet {
+
 	private static final long serialVersionUID = 1L;
 	public static final String ENTITY_ROUTE_TEMPLATE_EDIT = "cusersview/%s/edit";
 
@@ -116,7 +117,7 @@ public class CUsersView extends CAbstractNamedEntityPage<CUser> implements IIcon
 
 	@Override
 	protected boolean onBeforeSaveEvent() {
-		LOGGER.info("onBeforeSaveEvent called for CUsersView");
+		LOGGER.info("onBeforeSaveEvent called for entity: {} in ", getCurrentEntity(), this.getClass().getSimpleName());
 		if (super.onBeforeSaveEvent() == false) {
 			return false; // If the base class validation fails, do not proceed
 		}

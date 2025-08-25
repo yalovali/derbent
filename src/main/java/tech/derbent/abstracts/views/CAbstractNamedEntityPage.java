@@ -11,6 +11,7 @@ import tech.derbent.session.service.CSessionService;
 
 public abstract class CAbstractNamedEntityPage<EntityClass extends CEntityNamed<EntityClass>> extends CAbstractEntityDBPage<EntityClass>
 		implements CLayoutChangeListener {
+
 	private static final long serialVersionUID = 1L;
 	protected final CDetailsBuilder detailsBuilder = new CDetailsBuilder();
 	protected final CScreenService screenService;
@@ -42,5 +43,14 @@ public abstract class CAbstractNamedEntityPage<EntityClass extends CEntityNamed<
 	protected EntityClass createNewEntity() {
 		final String name = "New Item";
 		return ((CAbstractNamedEntityService<EntityClass>) entityService).newEntity(name);
+	}
+
+	@Override
+	protected boolean onBeforeSaveEvent() {
+		LOGGER.info("onBeforeSaveEvent called for entity: {} in ", getCurrentEntity(), this.getClass().getSimpleName());
+		if (super.onBeforeSaveEvent() == false) {
+			return false; // If the base class validation fails, do not proceed
+		}
+		return true; // Default implementation allows save
 	}
 }

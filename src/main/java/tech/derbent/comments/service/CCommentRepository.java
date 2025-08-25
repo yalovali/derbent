@@ -18,6 +18,4 @@ public interface CCommentRepository extends CAbstractRepository<CComment> {
 	List<CComment> findByActivity(@Param ("activity") CActivity activity);
 	@Query ("SELECT c FROM CComment c WHERE c.activity = :activity ORDER BY c.eventDate ASC")
 	Page<CComment> findByActivity(@Param ("activity") CActivity activity, Pageable pageable);
-	@Query ("SELECT c FROM CComment c WHERE c.activity = :activity AND c.important = true ORDER BY c.eventDate ASC")
-	List<CComment> findImportantByActivity(@Param ("activity") CActivity activity);
 }

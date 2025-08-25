@@ -11,7 +11,6 @@ import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.comments.domain.CComment;
-import tech.derbent.comments.domain.CCommentPriority;
 import tech.derbent.users.domain.CUser;
 
 /** CCommentService - Service class for CComment entities. Layer: Service (MVC) Provides business logic operations for comment management including: -
@@ -43,21 +42,6 @@ public class CCommentService extends CAbstractService<CComment> {
 		return save(comment);
 	}
 
-	/** Creates a new comment with priority.
-	 * @param commentText the comment content text
-	 * @param activity    the activity this comment belongs to
-	 * @param author      the user who created this comment
-	 * @param priority    the priority level of this comment
-	 * @return the created comment */
-	@Transactional
-	public CComment createComment(final String commentText, final CActivity activity, final CUser author, final CCommentPriority priority) {
-		Check.notBlank(commentText, "Comment text cannot be null or empty");
-		Check.notNull(activity, "Activity cannot be null");
-		Check.notNull(author, "Author cannot be null");
-		final CComment comment = new CComment(commentText, activity, author, priority);
-		return save(comment);
-	}
-
 	/** Finds all comments for a specific activity, ordered by event date (chronological).
 	 * @param activity the activity
 	 * @return list of comments for the activity ordered by event date */
@@ -77,15 +61,6 @@ public class CCommentService extends CAbstractService<CComment> {
 	public Page<CComment> findByActivity(final CActivity activity, final Pageable pageable) {
 		Check.notNull(activity, "Activity cannot be null");
 		return ((CCommentRepository) repository).findByActivity(activity, pageable);
-	}
-
-	/** Finds important comments for an activity.
-	 * @param activity the activity
-	 * @return list of important comments for the activity ordered by event date */
-	@PreAuthorize ("permitAll()")
-	public List<CComment> findImportantByActivity(final CActivity activity) {
-		Check.notNull(activity, "Activity cannot be null");
-		return ((CCommentRepository) repository).findImportantByActivity(activity);
 	}
 
 	@Override

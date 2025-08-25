@@ -113,6 +113,14 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 				.build();
 	}
 
+	@Override
+	public boolean onBeforeSaveEvent(final CUser entity) {
+		if (super.onBeforeSaveEvent(entity) == false) {
+			return false;
+		}
+		return true;
+	}
+
 	@Transactional
 	public void updatePassword(final String username, final String newPlainPassword) {
 		final CUser loginUser = ((CUserRepository) repository).findByUsername(username)

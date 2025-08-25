@@ -38,6 +38,7 @@ import tech.derbent.session.service.CSessionService;
 import tech.derbent.session.service.LayoutService;
 
 public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<EntityClass>> extends CAbstractPage implements CLayoutChangeListener {
+
 	private static final long serialVersionUID = 1L;
 	protected final Class<EntityClass> entityClass;
 	protected CGrid<EntityClass> grid;// = new CGrid<>(EntityClass.class, false);
@@ -390,6 +391,12 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	}
 
 	protected boolean onBeforeSaveEvent() {
+		if (entityService.onBeforeSaveEvent(currentEntity)) {
+			LOGGER.info("onBeforeSaveEvent passed for entity: {} in {}", getCurrentEntity(), this.getClass().getSimpleName());
+		} else {
+			LOGGER.warn("onBeforeSaveEvent failed for entity: {} in {}", getCurrentEntity(), this.getClass().getSimpleName());
+			return false;
+		}
 		return true;
 	}
 

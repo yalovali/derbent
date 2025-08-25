@@ -1,7 +1,8 @@
 // name: Hello Toolbar
 // description: Test button
-// toolbar: org.eclipse.ui.main.toolbar?after=additions
-
+// toolbar: org.eclipse.ui.main.toolbar
+// image: platform:/plugin/org.eclipse.debug.ui/icons/full/elcl16/relaunch_debug.png
+ 
 print("Hello World from EASE Java Script!");
 
 var ResourcesPlugin = Packages.org.eclipse.core.resources.ResourcesPlugin;

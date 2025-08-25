@@ -119,9 +119,23 @@ public class CPanelActivityComments extends CPanelActivityBase {
 		commentsContainer.removeAll();
 		Check.notNull(commentService, "Comment service cannot be null");
 		Check.notNull(sessionService, "Session service cannot be null");
-		// Check.notNull(getCurrentEntity(), "Current activity cannot be null");
+		final CActivity entity = getCurrentEntity();
+		// 1) Yeni/transient mi?
+		if (entity == null || entity.isNew()) {
+			// Kaydedilmemiş aktivite için yorum yükleme
+			final Div noCommentsDiv = new Div();
+			noCommentsDiv.setText("No comments yet. Save the activity to add comments.");
+			noCommentsDiv.addClassName("no-comments-message");
+			noCommentsDiv.getStyle().set("text-align", "center");
+			noCommentsDiv.getStyle().set("color", "var(--lumo-secondary-text-color)");
+			noCommentsDiv.getStyle().set("font-style", "italic");
+			noCommentsDiv.getStyle().set("padding", "2rem");
+			commentsContainer.add(noCommentsDiv);
+			updateCommentsTitle(); // isterseniz 0 yorum olarak güncelleyin
+			return;
+		}
 		try {
-			final List<CComment> comments = commentService.findByActivity(getCurrentEntity());
+			final List<CComment> comments = commentService.findByActivity(entity);
 			LOGGER.debug("Found {} comments for activity", comments.size());
 			if (comments.isEmpty()) {
 				final Div noCommentsDiv = new Div();

@@ -16,6 +16,7 @@ import tech.derbent.risks.view.CRiskStatusView;
 @Table (name = "criskstatus")
 @AttributeOverride (name = "id", column = @Column (name = "criskstatus_id"))
 public class CRiskStatus extends CStatus<CRiskStatus> {
+
 	public static String getIconColorCode() {
 		return "#6c757d"; // Gray color for status entities
 	}
