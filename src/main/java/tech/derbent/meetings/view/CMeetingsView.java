@@ -17,6 +17,7 @@ import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.domains.IIconSet;
+import tech.derbent.abstracts.views.CGrid;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.service.CMeetingService;
@@ -29,7 +30,6 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 1.4, icon = "class:tech.derbent.meetings.view.CMeetingsView", title = "Project.Meetings")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CMeetingsView extends CProjectAwareMDPage<CMeeting> implements IIconSet {
-
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() {
@@ -51,8 +51,9 @@ public class CMeetingsView extends CProjectAwareMDPage<CMeeting> implements IIco
 	}
 
 	@Override
-	protected void createGridForEntity() {
-		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
+	public void createGridForEntity(final CGrid<CMeeting> grid) {
+		grid.addIdColumn(CEntityDB::getId, "XX#", ENTITY_ID_FIELD);
+		// grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
 		grid.addColumnEntityNamed(CEntityOfProject::getProject, "Project");
 		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");
 		grid.addColumnEntityNamed(CMeeting::getMeetingType, "Type");
@@ -140,9 +141,9 @@ public class CMeetingsView extends CProjectAwareMDPage<CMeeting> implements IIco
 					final List<CMeeting> filteredMeetings =
 							allMeetings.stream().filter(meeting -> matchesSearchText(meeting, searchText.toLowerCase().trim()))
 									.collect(java.util.stream.Collectors.toList());
-					grid.setItems(filteredMeetings);
+					masterViewSection.getGrid().setItems(filteredMeetings);
 				} else {
-					grid.setItems(Collections.emptyList());
+					masterViewSection.getGrid().setItems(Collections.emptyList());
 				}
 			}
 		});

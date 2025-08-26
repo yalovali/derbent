@@ -11,6 +11,7 @@ import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.abstracts.views.CButton;
+import tech.derbent.abstracts.views.CGrid;
 import tech.derbent.administration.domain.CCompanySettings;
 import tech.derbent.administration.service.CCompanySettingsService;
 import tech.derbent.base.ui.dialogs.CConfirmationDialog;
@@ -79,7 +80,7 @@ public class CCompanySettingsView extends CAbstractEntityDBPage<CCompanySettings
 	}
 
 	@Override
-	protected void createGridForEntity() {
+	public void createGridForEntity(final CGrid<CCompanySettings> grid) {
 		LOGGER.debug("createGridForEntity called for CCompanySettingsView");
 		try {
 			// Configure grid columns for company settings

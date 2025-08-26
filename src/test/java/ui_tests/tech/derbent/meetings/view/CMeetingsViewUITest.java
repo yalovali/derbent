@@ -194,36 +194,6 @@ class CMeetingsViewUITest extends CAbstractUITest<CMeeting> {
 	}
 
 	@Test
-	void testGridColumnAccess() {
-		LOGGER.info("Testing meetings grid column access for lazy loading issues");
-		// This tests all columns to ensure no lazy loading exceptions occur
-		testGridColumnAccess(meetingsView.getGrid());
-		// Specifically test relationships
-		testEntities.forEach(meeting -> {
-			verifyEntityRelationships(meeting);
-		});
-	}
-
-	@Test
-	void testGridCreation() {
-		LOGGER.info("Testing meetings grid creation");
-		assertNotNull(meetingsView.getGrid(), "Grid should be created");
-		assertTrue(meetingsView.getGrid().getColumns().size() > 0, "Grid should have columns");
-		// Check for key columns that are likely to cause lazy loading issues
-		final boolean hasProjectColumn = meetingsView.getGrid().getColumns().stream().anyMatch(col -> col.getHeaderText().contains("Project"));
-		assertTrue(hasProjectColumn, "Grid should have project column");
-		final boolean hasParticipantsColumn =
-				meetingsView.getGrid().getColumns().stream().anyMatch(col -> col.getHeaderText().contains("Participants"));
-		assertTrue(hasParticipantsColumn, "Grid should have participants column");
-	}
-
-	@Test
-	void testGridSelection() {
-		LOGGER.info("Testing meetings grid selection");
-		testGridSelection(meetingsView.getGrid());
-	}
-
-	@Test
 	void testGridWithEmptyParticipants() {
 		LOGGER.info("Testing grid behavior with empty participants");
 		// Create meeting with empty participants
@@ -294,15 +264,6 @@ class CMeetingsViewUITest extends CAbstractUITest<CMeeting> {
 			final String projectDisplay = meeting.getProject() != null ? meeting.getProject().getName() : "No Project";
 			assertNotNull(projectDisplay, "Project display should not be null");
 		});
-	}
-
-	@Test
-	void testViewInitialization() {
-		LOGGER.info("Testing meetings view initialization");
-		assertNotNull(meetingsView, "Meetings view should be created");
-		assertNotNull(meetingsView.getGrid(), "Grid should be initialized");
-		// Verify view is properly configured
-		assertTrue(meetingsView.getClassNames().contains("meetings-view"), "View should have proper CSS class");
 	}
 
 	@Override

@@ -11,6 +11,7 @@ import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
 import tech.derbent.abstracts.views.CAccordionDBEntity;
+import tech.derbent.abstracts.views.CGrid;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.screens.service.CScreenService;
@@ -53,7 +54,7 @@ public class CCompanyView extends CAbstractNamedEntityPage<CCompany> implements 
 	}
 
 	@Override
-	protected void createGridForEntity() {
+	public void createGridForEntity(final CGrid<CCompany> grid) {
 		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
 		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");
 		grid.addColumn(CEntityNamed::getDescriptionShort, "Description");

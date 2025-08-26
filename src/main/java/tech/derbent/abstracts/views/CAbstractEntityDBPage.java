@@ -10,7 +10,6 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasComponents;
-import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
@@ -21,7 +20,6 @@ import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.data.binder.ValidationException;
-import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import jakarta.annotation.PostConstruct;
@@ -38,14 +36,13 @@ import tech.derbent.session.service.CSessionService;
 import tech.derbent.session.service.LayoutService;
 
 public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<EntityClass>> extends CAbstractPage implements CLayoutChangeListener {
-
 	private static final long serialVersionUID = 1L;
 	protected final Class<EntityClass> entityClass;
-	protected CGrid<EntityClass> grid;// = new CGrid<>(EntityClass.class, false);
 	private final CEnhancedBinder<EntityClass> binder;
 	// Search functionality
 	protected CSearchToolbar searchToolbar;
 	private String currentSearchText = "";
+	protected CMasterViewSectionGrid<EntityClass> masterViewSection;
 	// divide screen into two parts
 	protected SplitLayout splitLayout = new SplitLayout();
 	private final CFlexLayout baseDetailsLayout;
@@ -77,7 +74,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		scroller.setContent(baseDetailsLayout);
 		scroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
 		// baseDetailsLayout.add(baseDescriptionAccordion);
-		createGridForEntity();
 		// binder = new CEnhancedBinder<>(entityClass
 		final CVerticalLayout detailsBase = new CVerticalLayout(false, false, false);
 		detailsBase.add(detailsTabLayout, scroller);
@@ -96,7 +92,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	@Override
 	public void beforeEnter(final BeforeEnterEvent event) {
 		LOGGER.debug("beforeEnter called for {}", getClass().getSimpleName());
-		if (grid == null) {
+		if (masterViewSection == null) {
 			LOGGER.warn("Grid is null, cannot populate form");
 			return;
 		}
@@ -110,13 +106,8 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		} else {
 			lastEntity = entityService.getById(sessionService.getActiveId(entityClass.getSimpleName()));
 		}
-		if (lastEntity.isEmpty()) {
-			grid.getDataProvider().fetch(new Query<>()).findFirst().ifPresentOrElse(entity -> {
-				grid.select(entity);
-			}, () -> LOGGER.debug("No items available in grid for {}", getClass().getSimpleName()));
-		} else {
-			grid.select(lastEntity.get());
-		}
+		// populateForm(null);
+		masterViewSection.selectLastOrFirst(lastEntity.orElse(null));
 	}
 
 	protected void createButtonLayout(final Div layout) {
@@ -127,9 +118,8 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	protected CButton createCancelButton(final String buttonText) {
 		final CButton cancel = CButton.createTertiary(buttonText, null, e -> {
-			// Get the last selected entity ID
 			final Long lastSelectedId = sessionService.getActiveId(getClass().getSimpleName());
-			restoreGridSelection(lastSelectedId);
+			masterViewSection.selectLastOrFirst(entityService.getById(lastSelectedId).orElse(null));
 		});
 		return cancel;
 	}
@@ -148,8 +138,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				try {
 					LOGGER.info("Deleting entity: {} with ID: {}", entityClass.getSimpleName(), currentEntity.getId());
 					entityService.delete(currentEntity);
-					populateForm(null);
-					refreshGrid();
+					masterViewSection.selectLastOrFirst(null);
 					safeShowNotification("Item deleted successfully");
 				} catch (final Exception exception) {
 					LOGGER.error("Error deleting entity", exception);
@@ -209,12 +198,11 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		getDetailsTabLayout().add(tabContent);
 	}
 
-	protected abstract void createGridForEntity();
+	public void createGridForEntity(final CGrid<EntityClass> grid) {}
 
 	protected void createGridLayout() {
-		grid = new CGrid<>(entityClass);
-		// Add selection listener to navigate to edit view
-		grid.asSingleSelect().addValueChangeListener(this::onGridSelectionChange);
+		masterViewSection = new CMasterViewSectionGrid(entityClass, this);
+		masterViewSection.addSelectionChangeListener(this::onSelectionChanged);
 		// Create search toolbar if entity supports searching
 		if (CSearchable.class.isAssignableFrom(entityClass)) {
 			searchToolbar = new CSearchToolbar("Search " + entityClass.getSimpleName().replace("C", "").toLowerCase() + "...");
@@ -225,7 +213,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		}
 		// Use a custom data provider that properly handles pagination, sorting and
 		// searching
-		grid.setItems(query -> {
+		masterViewSection.getGrid().setItems(query -> {
 			LOGGER.debug("Grid query - offset: {}, limit: {}, sortOrders: {}, searchText: '{}'", query.getOffset(), query.getLimit(),
 					query.getSortOrders(), currentSearchText);
 			try {
@@ -251,14 +239,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				return Stream.empty();
 			}
 		});
-		grid.addIdColumn(entity -> entity.getId().toString(), "ID", "id");
-		// Add selection listener to the grid
-		grid.asSingleSelect().addValueChangeListener(event -> {
-			populateForm(event.getValue());
-			if (event.getValue() != null) {
-				sessionService.setActiveId(entityClass.getClass().getSimpleName(), event.getValue().getId());
-			}
-		});
+		// grid.addIdColumn(entity -> entity.getId().toString(), "ID", "id");
 		// Create the grid container with search toolbar
 		final VerticalLayout gridContainer = new VerticalLayout();
 		gridContainer.setClassName("grid-container");
@@ -268,16 +249,9 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		if (searchToolbar != null) {
 			gridContainer.add(searchToolbar);
 		}
-		gridContainer.add(grid);
-		gridContainer.setFlexGrow(1, grid);
+		gridContainer.add(masterViewSection);
+		gridContainer.setFlexGrow(1, masterViewSection);
 		splitLayout.addToPrimary(gridContainer);
-		// Ensure grid has selection when data is available - follows coding guidelines
-		// for consistent grid behavior across all views
-		grid.getDataProvider().addDataProviderListener(e -> {
-			getUI().ifPresent(ui -> ui.access(() -> {
-				grid.ensureSelectionWhenDataAvailable();
-			}));
-		});
 	}
 
 	protected CButton createNewButton(final String buttonText) {
@@ -353,10 +327,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	protected abstract String getEntityRouteIdField();
 
-	/** Gets the grid component for testing purposes.
-	 * @return the grid component */
-	public CGrid<EntityClass> getGrid() { return grid; }
-
 	/** Gets the search toolbar component, if available.
 	 * @return the search toolbar component, or null if entity doesn't support searching */
 	public CSearchToolbar getSearchToolbar() {
@@ -409,17 +379,22 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		}
 	}
 
-	@SuppressWarnings ("unchecked")
-	protected void onGridSelectionChange(final ValueChangeEvent<?> event) {
-		LOGGER.debug("Grid selection changed: {}", event.getValue() != null ? event.getValue().toString() : "null");
-		final EntityClass value = ((EntityClass) event.getValue());
-		populateForm(value);
-	}
-
 	@Override
 	public void onLayoutModeChanged(final LayoutService.LayoutMode newMode) {
 		LOGGER.debug("Layout mode changed to: {} for {}", newMode, getClass().getSimpleName());
 		updateLayoutOrientation();
+	}
+
+	@SuppressWarnings ("unchecked")
+	private void onSelectionChanged(final CMasterViewSectionGrid.SelectionChangeEvent<EntityClass> event) {
+		final EntityClass value = (event.getSelectedItem());
+		LOGGER.debug("Grid selection changed: {}", Optional.ofNullable(value).map(Object::toString).orElse("NULL"));
+		populateForm(value);
+		if (value == null) {
+			sessionService.setActiveId(entityClass.getClass().getSimpleName(), null);
+		} else {
+			sessionService.setActiveId(entityClass.getClass().getSimpleName(), value.getId());
+		}
 	}
 
 	protected void populateAccordionPanels(final EntityClass entity) {
@@ -436,43 +411,22 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		sessionService.setActiveId(entityClass.getSimpleName(), value == null ? null : value.getId());
 		populateAccordionPanels(value);
 		getBinder().readBean(value);
-		if ((value == null) && (grid != null)) {
-			grid.deselectAll();
+		if ((value == null) && (masterViewSection != null)) {
+			masterViewSection.select(null);
 		}
 	}
 
 	protected void refreshGrid() {
 		LOGGER.info("Refreshing grid for {}", getClass().getSimpleName());
 		// Store the currently selected entity ID to preserve selection after refresh
-		final EntityClass selectedEntity = grid.asSingleSelect().getValue();
+		final EntityClass selectedEntity = masterViewSection.getSelectedItem();
 		final Long selectedEntityId = selectedEntity != null ? selectedEntity.getId() : null;
 		// Clear selection and refresh data
-		grid.select(null);
-		grid.getDataProvider().refreshAll();
+		masterViewSection.select(null);
+		masterViewSection.refresh();
 		// Restore selection if there was a previously selected entity
 		if (selectedEntityId != null) {
-			restoreGridSelection(selectedEntityId);
-		}
-	}
-
-	/** Restores grid selection to the entity with the specified ID after refresh. This prevents losing the current selection when the grid is
-	 * refreshed.
-	 * @param entityId The ID of the entity to select */
-	protected void restoreGridSelection(final Long entityId) {
-		if (entityId == null) {
-			LOGGER.debug("No entity ID provided for selection restore, clearing selection");
-			grid.select(null);
-			return;
-		}
-		LOGGER.debug("Attempting to restore grid selection to entity ID: {}", entityId);
-		try {
-			// Find the entity in the current grid data that matches the ID
-			grid.getDataProvider().fetch(new Query<>()).filter(entity -> entityId.equals(entity.getId())).findFirst().ifPresentOrElse(entity -> {
-				grid.select(entity);
-				LOGGER.debug("Successfully restored selection to entity ID: {}", entityId);
-			}, () -> LOGGER.debug("Entity with ID {} not found in grid after refresh", entityId));
-		} catch (final Exception e) {
-			LOGGER.warn("Error restoring grid selection to entity ID {}: {}", entityId, e.getMessage());
+			masterViewSection.selectLastOrFirst(entityService.getById(selectedEntityId).orElse(null));
 		}
 	}
 

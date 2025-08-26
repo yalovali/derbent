@@ -19,7 +19,6 @@ import tech.derbent.session.service.CSessionService;
  * notifications when the active project changes. */
 public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<EntityClass>> extends CAbstractNamedEntityPage<EntityClass>
 		implements CProjectChangeListener {
-
 	private static final long serialVersionUID = 1L;
 	protected final CSessionService sessionService;
 
@@ -67,26 +66,10 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
 		refreshProjectAwareGrid();
 	}
 
-	@Override
-	protected void refreshGrid() {
-		LOGGER.debug("Refreshing project-aware grid for {}", getClass().getSimpleName());
-		// Store the currently selected entity ID to preserve selection after refresh
-		final EntityClass selectedEntity = grid.asSingleSelect().getValue();
-		final Long selectedEntityId = selectedEntity != null ? selectedEntity.getId() : null;
-		LOGGER.debug("Currently selected entity ID before project-aware refresh: {}", selectedEntityId);
-		// Clear selection and refresh with project-aware data
-		grid.select(null);
-		refreshProjectAwareGrid();
-		// Restore selection if there was a previously selected entity
-		if (selectedEntityId != null) {
-			restoreGridSelection(selectedEntityId);
-		}
-	}
-
 	/** Refreshes the grid with project-aware data. */
 	protected void refreshProjectAwareGrid() {
 		LOGGER.debug("Refreshing project-aware grid");
-		if ((sessionService == null) || (grid == null)) {
+		if ((sessionService == null) || (masterViewSection == null)) {
 			// Not fully initialized yet
 			return;
 		}
@@ -104,11 +87,11 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
 				LOGGER.debug("Entity service is not project-aware, showing all entities");
 				entities = entityService.list(PageableUtils.createSafe(0, 10)).getContent();
 			}
-			grid.setItems(entities);
+			masterViewSection.getGrid().setItems(entities);
 		} else {
 			// If no active project, show empty grid
 			LOGGER.debug("No active project found, clearing grid items");
-			grid.setItems(Collections.emptyList());
+			masterViewSection.getGrid().setItems(Collections.emptyList());
 		}
 	}
 

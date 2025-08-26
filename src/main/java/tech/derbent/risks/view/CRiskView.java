@@ -8,6 +8,7 @@ import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.domains.IIconSet;
+import tech.derbent.abstracts.views.CGrid;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.risks.domain.CRisk;
 import tech.derbent.risks.service.CRiskService;
@@ -22,6 +23,7 @@ import tech.derbent.session.service.CSessionService;
 public class CRiskView extends CProjectAwareMDPage<CRisk> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 	private static final String ENTITY_ID_FIELD = "risk_id";
+
 	public static String getIconColorCode() {
 		return CRisk.getIconColorCode(); // Use the static method from CRisk
 	}
@@ -38,7 +40,7 @@ public class CRiskView extends CProjectAwareMDPage<CRisk> implements IIconSet {
 	}
 
 	@Override
-	protected void createGridForEntity() {
+	public void createGridForEntity(final CGrid<CRisk> grid) {
 		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
 		grid.addColumnEntityNamed(CEntityOfProject::getProject, "Project");
 		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");

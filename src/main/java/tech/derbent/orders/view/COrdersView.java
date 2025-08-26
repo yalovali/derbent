@@ -8,6 +8,7 @@ import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.domains.IIconSet;
+import tech.derbent.abstracts.views.CGrid;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.orders.domain.COrder;
 import tech.derbent.orders.service.COrderService;
@@ -40,7 +41,7 @@ public class COrdersView extends CProjectAwareMDPage<COrder> implements IIconSet
 	}
 
 	@Override
-	protected void createGridForEntity() {
+	public void createGridForEntity(final CGrid<COrder> grid) {
 		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
 		grid.addColumnEntityNamed(CEntityOfProject::getProject, "Project");
 		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");

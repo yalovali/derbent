@@ -13,6 +13,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
 import tech.derbent.abstracts.views.CAccordionDBEntity;
+import tech.derbent.abstracts.views.CGrid;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.screens.service.CScreenService;
@@ -69,7 +70,7 @@ public class CProjectsView extends CAbstractNamedEntityPage<CProject> implements
 	}
 
 	@Override
-	protected void createGridForEntity() {
+	public void createGridForEntity(final CGrid<CProject> grid) {
 		grid.addShortTextColumn(CProject::getName, "Name", "name");
 		grid.addColumn(CProject::getDescription, "Description", "description");
 		grid.addColumn(CProject::getCreatedDate, "Created Date", "createdDate");

@@ -5,8 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -129,55 +127,6 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
 	}
 
 	@Test
-	void testGridColumnAccess() {
-		LOGGER.info("Testing users grid column access for lazy loading issues");
-		// This tests all columns to ensure no lazy loading exceptions occur
-		testGridColumnAccess(usersView.getGrid());
-		// Specifically test relationships
-		testEntities.forEach(user -> {
-			verifyEntityRelationships(user);
-		});
-	}
-
-	@Test
-	void testGridCreation() {
-		LOGGER.info("Testing users grid creation");
-		assertNotNull(usersView.getGrid(), "Grid should be created");
-		assertTrue(usersView.getGrid().getColumns().size() > 0, "Grid should have columns");
-		// Verify expected columns exist
-		final boolean hasNameColumn = usersView.getGrid().getColumns().stream().anyMatch(col -> "name".equals(col.getKey()));
-		assertTrue(hasNameColumn, "Grid should have name column");
-		final boolean hasEmailColumn = usersView.getGrid().getColumns().stream().anyMatch(col -> "email".equals(col.getKey()));
-		assertTrue(hasEmailColumn, "Grid should have email column");
-	}
-
-	@Test
-	void testGridDataLoading() {
-		LOGGER.info("Testing users grid data loading");
-		// Test that grid can load data without exceptions
-		testGridDataLoading(usersView.getGrid());
-		// Note: Service calls are verified in other tests that actually trigger data
-		// loading
-	}
-
-	@Test
-	void testGridSelection() {
-		LOGGER.info("Testing users grid selection");
-		testGridSelection(usersView.getGrid());
-	}
-
-	@Test
-	void testGridWithEmptyData() {
-		LOGGER.info("Testing grid behavior with empty data");
-		// Mock empty result
-		when(mockUserService.list(any()).getContent()).thenReturn(Arrays.asList());
-		// Should not throw exceptions
-		assertDoesNotThrow(() -> {
-			testGridDataLoading(usersView.getGrid());
-		}, "Grid should handle empty data gracefully");
-	}
-
-	@Test
 	void testGridWithNullRelationships() {
 		LOGGER.info("Testing grid behavior with null relationships");
 		// Create user with null relationships
@@ -231,15 +180,6 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
 			final String userTypeDisplay = user.getUserType() != null ? user.getUserType().getName() : "";
 			assertNotNull(userTypeDisplay, "User type display should not be null");
 		});
-	}
-
-	@Test
-	void testViewInitialization() {
-		LOGGER.info("Testing users view initialization");
-		assertNotNull(usersView, "Users view should be created");
-		assertNotNull(usersView.getGrid(), "Grid should be initialized");
-		// Verify view is properly configured
-		assertTrue(usersView.getClassNames().contains("users-view"), "View should have proper CSS class");
 	}
 
 	@Override

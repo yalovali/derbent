@@ -20,6 +20,7 @@ import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
 import tech.derbent.abstracts.views.CButton;
+import tech.derbent.abstracts.views.CGrid;
 import tech.derbent.abstracts.views.CVerticalLayout;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
@@ -114,7 +115,7 @@ public class CProjectDetailsView extends CAbstractNamedEntityPage<CProject> impl
 
 	/** Create card grid view */
 	@SuppressWarnings ("deprecation")
-	private void createCardGridView() {
+	private void createCardGridView(final CGrid<CProject> grid) {
 		grid.addComponentColumn(this::createLargeProjectCard).setAutoWidth(true).setHeader("Project Gallery").setSortable(false);
 		grid.setClassNameGenerator(project -> "card-grid-project-row");
 		setupGridSelectionListener();
@@ -141,7 +142,7 @@ public class CProjectDetailsView extends CAbstractNamedEntityPage<CProject> impl
 
 	/** Create compact sidebar grid */
 	@SuppressWarnings ("deprecation")
-	private void createCompactSidebarGrid() {
+	private void createCompactSidebarGrid(final CGrid<CProject> grid) {
 		grid.addComponentColumn(this::createCompactProjectItem).setAutoWidth(true).setHeader("Projects").setSortable(false);
 		grid.setClassNameGenerator(project -> "compact-project-row");
 		setupGridSelectionListener();
@@ -178,9 +179,10 @@ public class CProjectDetailsView extends CAbstractNamedEntityPage<CProject> impl
 		getBaseDetailsLayout().add(compactLayout);
 	}
 
-	/** Create dashboard grid */
+	/** Create dashboard grid
+	 * @param grid */
 	@SuppressWarnings ("deprecation")
-	private void createDashboardGrid() {
+	private void createDashboardGrid(final CGrid<CProject> grid) {
 		grid.addComponentColumn(this::createDashboardProjectWidget).setAutoWidth(true).setHeader("Project Widgets").setSortable(false);
 		grid.setClassNameGenerator(project -> "dashboard-project-row");
 		setupGridSelectionListener();
@@ -318,7 +320,7 @@ public class CProjectDetailsView extends CAbstractNamedEntityPage<CProject> impl
 
 	/** Create enhanced grid (default layout) */
 	@SuppressWarnings ("deprecation")
-	private void createEnhancedGrid() {
+	private void createEnhancedGrid(final CGrid<CProject> grid) {
 		// Configure grid columns with better styling
 		grid.addComponentColumn(this::createProjectRowComponent).setAutoWidth(true).setHeader("Projects").setSortable(false);
 		// Add row styling
@@ -328,7 +330,7 @@ public class CProjectDetailsView extends CAbstractNamedEntityPage<CProject> impl
 	}
 
 	@Override
-	protected void createGridForEntity() {
+	public void createGridForEntity(final CGrid<CProject> grid) {
 		removeClassNames("layout-enhanced-cards", "layout-kanban-board", "layout-card-grid", "layout-compact-sidebar", "layout-dashboard-widgets",
 				"layout-timeline-view");
 		if (currentLayoutMode != null) {
@@ -338,22 +340,22 @@ public class CProjectDetailsView extends CAbstractNamedEntityPage<CProject> impl
 		final LayoutMode layoutToUse = currentLayoutMode != null ? currentLayoutMode : LayoutMode.ENHANCED_CARDS;
 		switch (layoutToUse) {
 		case KANBAN_BOARD:
-			createKanbanGrid();
+			createKanbanGrid(grid);
 			break;
 		case CARD_GRID:
-			createCardGridView();
+			createCardGridView(grid);
 			break;
 		case COMPACT_SIDEBAR:
-			createCompactSidebarGrid();
+			createCompactSidebarGrid(grid);
 			break;
 		case DASHBOARD_WIDGETS:
-			createDashboardGrid();
+			createDashboardGrid(grid);
 			break;
 		case TIMELINE_VIEW:
-			createTimelineGrid();
+			createTimelineGrid(grid);
 			break;
 		default:
-			createEnhancedGrid();
+			createEnhancedGrid(grid);
 		}
 	}
 
@@ -399,9 +401,10 @@ public class CProjectDetailsView extends CAbstractNamedEntityPage<CProject> impl
 		return column;
 	}
 
-	/** Create kanban-style grid */
+	/** Create kanban-style grid
+	 * @param grid */
 	@SuppressWarnings ("deprecation")
-	private void createKanbanGrid() {
+	private void createKanbanGrid(final CGrid<CProject> grid) {
 		grid.addComponentColumn(this::createKanbanProjectCard).setAutoWidth(true).setHeader("Project Cards").setSortable(false);
 		grid.setClassNameGenerator(project -> "kanban-project-row");
 		setupGridSelectionListener();
@@ -517,7 +520,7 @@ public class CProjectDetailsView extends CAbstractNamedEntityPage<CProject> impl
 
 	/** Create timeline grid */
 	@SuppressWarnings ("deprecation")
-	private void createTimelineGrid() {
+	private void createTimelineGrid(final CGrid<CProject> grid) {
 		grid.addComponentColumn(this::createTimelineProjectItem).setAutoWidth(true).setHeader("Project Timeline").setSortable(false);
 		grid.setClassNameGenerator(project -> "timeline-project-row");
 		setupGridSelectionListener();
@@ -594,7 +597,7 @@ public class CProjectDetailsView extends CAbstractNamedEntityPage<CProject> impl
 
 	private void refreshLayout() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
 		LOGGER.info("Switching to layout mode: " + currentLayoutMode.getDisplayName());
-		createGridForEntity();
+		// createGridForEntity();
 		createDetailsLayout();
 		refreshGrid();
 	}

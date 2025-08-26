@@ -7,6 +7,7 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.domains.IIconSet;
+import tech.derbent.abstracts.views.CGrid;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.abstracts.views.CVerticalLayout;
 import tech.derbent.activities.domain.CActivityStatus;
@@ -45,7 +46,7 @@ public class CActivityStatusView extends CProjectAwareMDPage<CActivityStatus> im
 	/** Creates the grid for displaying activity status entities. Sets up columns for name and description with appropriate headers and sorting. Also
 	 * includes a color-aware column to show the status colors. Now uses the refactored color-aware functionality from CGrid.addStatusColumn(). */
 	@Override
-	protected void createGridForEntity() {
+	public void createGridForEntity(final CGrid<CActivityStatus> grid) {
 		// Color-aware status column using refactored CGrid functionality
 		grid.addStatusColumn(status -> status, "Status", "status");
 		grid.addShortTextColumn(CActivityStatus::getName, "Status Name", "name");

@@ -16,7 +16,6 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 1.1, icon = "class:tech.derbent.gannt.domain.CGanntViewEntity", title = "Project.Gannt")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CProjectGanntView extends CProjectAwareMDPage<CGanntViewEntity> {
-
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() {
@@ -31,9 +30,6 @@ public class CProjectGanntView extends CProjectAwareMDPage<CGanntViewEntity> {
 			final CScreenService screenService) {
 		super(CGanntViewEntity.class, entityService, sessionService, screenService);
 	}
-
-	@Override
-	protected void createGridForEntity() {}
 
 	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }

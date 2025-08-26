@@ -8,6 +8,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
+import tech.derbent.abstracts.views.CGrid;
 import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.screens.domain.CScreen;
 import tech.derbent.screens.service.CEntityFieldService;
@@ -51,7 +52,7 @@ public final class CScreenView extends CProjectAwareMDPage<CScreen> {
 	}
 
 	@Override
-	protected void createGridForEntity() {
+	public void createGridForEntity(final CGrid<CScreen> grid) {
 		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
 		grid.addColumnEntityNamed(CEntityOfProject::getProject, "Project");
 		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");
