@@ -35,6 +35,7 @@ import tech.derbent.decisions.service.CDecisionService;
 import tech.derbent.decisions.service.CDecisionStatusService;
 import tech.derbent.decisions.service.CDecisionTypeService;
 import tech.derbent.decisions.service.CDecisionViewService;
+import tech.derbent.gannt.service.CGanntViewEntityService;
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.domain.CMeetingStatus;
 import tech.derbent.meetings.service.CMeetingService;
@@ -74,6 +75,7 @@ import tech.derbent.users.service.CUserViewService;
 @Component
 @Profile ("!test")
 public class CSampleDataInitializer implements ApplicationRunner {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSampleDataInitializer.class);
 	// Standard password for all users as per coding guidelines
 	private static final String STANDARD_PASSWORD = "test123";
@@ -100,6 +102,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	private final CCurrencyService currencyService;
 	private final CScreenService screenService;
 	private final CScreenLinesService screenLinesService;
+	private final CGanntViewEntityService ganntViewEntityService;
 
 	public CSampleDataInitializer(final CProjectService projectService, final CUserService userService, final CActivityService activityService,
 			final CUserTypeService userTypeService, final CActivityTypeService activityTypeService, final CMeetingTypeService meetingTypeService,
@@ -108,7 +111,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			final CRiskService riskService, final CMeetingStatusService meetingStatusService, final CDecisionStatusService decisionStatusService,
 			final CActivityStatusService activityStatusService, final COrderStatusService orderStatusService,
 			final CApprovalStatusService approvalStatusService, final CDecisionService decisionService, final COrderService orderService,
-			final CCurrencyService currencyService, final CScreenService screenService, final CScreenLinesService screenLinesService) {
+			final CCurrencyService currencyService, final CScreenService screenService, final CScreenLinesService screenLinesService,
+			final CGanntViewEntityService ganntViewEntityService) {
 		this.projectService = projectService;
 		this.userService = userService;
 		this.activityService = activityService;
@@ -128,6 +132,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		this.currencyService = currencyService;
 		this.screenService = screenService;
 		this.screenLinesService = screenLinesService;
+		this.ganntViewEntityService = ganntViewEntityService;
 	}
 
 	/** Clears all sample data from the database to prepare for fresh initialization. This method ensures that restarting the application multiple
@@ -572,6 +577,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CProject project = new CProject(name);
 		project.setDescription(description);
 		projectService.save(project);
+		CGanntViewEntityService.createSample(ganntViewEntityService, project);
 	}
 
 	/** Creates sample currencies for order management. */
@@ -870,6 +876,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		screenService.save(CMeetingViewService.createBasicView(project));
 		screenService.save(CDecisionViewService.createBasicView(project));
 		screenService.save(COrdersViewService.createBasicView(project));
+		// screenService.save(CGanntViewEntityViewService.createBasicView(project));
 		// Log completion
 		LOGGER.info("Created sample fields for screen: {}", screenName);
 		CTimer.print();

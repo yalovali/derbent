@@ -12,6 +12,7 @@ import tech.derbent.projects.domain.CProject;
 @Table (name = "cganntview")
 @AttributeOverride (name = "id", column = @Column (name = "ganntview_id"))
 public class CGanntViewEntity extends CEntityOfProject<CGanntViewEntity> {
+
 	public static String getIconColorCode() { return "#1f3221"; }
 
 	public static String getIconFilename() { return "vaadin:viewport"; }
@@ -22,7 +23,7 @@ public class CGanntViewEntity extends CEntityOfProject<CGanntViewEntity> {
 		super();
 	}
 
-	public CGanntViewEntity(final String name, CProject project) {
+	public CGanntViewEntity(final String name, final CProject project) {
 		super(CGanntViewEntity.class, name, project);
 	}
 }

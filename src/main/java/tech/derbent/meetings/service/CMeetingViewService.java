@@ -55,4 +55,6 @@ public class CMeetingViewService {
 			return null;
 		}
 	}
+
+	public static void createDefaultViews(final CProject project) {}
 }

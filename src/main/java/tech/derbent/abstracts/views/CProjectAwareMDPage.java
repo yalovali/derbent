@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
-import com.vaadin.flow.component.html.Div;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.interfaces.CProjectChangeListener;
@@ -20,6 +19,7 @@ import tech.derbent.session.service.CSessionService;
  * notifications when the active project changes. */
 public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<EntityClass>> extends CAbstractNamedEntityPage<EntityClass>
 		implements CProjectChangeListener {
+
 	private static final long serialVersionUID = 1L;
 	protected final CSessionService sessionService;
 
@@ -35,27 +35,6 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
 	protected void createDetailsLayout() throws Exception {
 		final CVerticalLayout formLayout = CEntityFormBuilder.buildForm(entityClass, getBinder());
 		getBaseDetailsLayout().add(formLayout);
-	}
-
-	protected void createGridLayoutX() {
-		// LOGGER.debug("Creating grid layout for project-aware MD page");
-		grid = new CGrid<>(entityClass);
-		grid.addIdColumn(entity -> entity.getId().toString(), "ID", "id");
-		// Add selection listener to the grid
-		grid.asSingleSelect().addValueChangeListener(event -> {
-			populateForm(event.getValue());
-		});
-		final Div wrapper = new Div();
-		wrapper.setClassName("grid-wrapper");
-		wrapper.add(grid);
-		splitLayout.addToPrimary(wrapper);
-		// Ensure consistent selection behavior for project-aware grids This follows
-		// coding guidelines for generic design
-		grid.getDataProvider().addDataProviderListener(e -> {
-			getUI().ifPresent(ui -> ui.access(() -> {
-				grid.ensureSelectionWhenDataAvailable();
-			}));
-		});
 	}
 
 	@Override
