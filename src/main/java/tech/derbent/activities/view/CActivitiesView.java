@@ -72,7 +72,7 @@ public final class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 		grid.addColumnEntityNamed(CActivity::getStatus, "Status");
 		grid.addDateColumn(CActivity::getStartDate, "Start Time", "meetingDate");
 		grid.addDateColumn(CActivity::getDueDate, "End Time", "endDate");
-		grid.addColumnEntityNamed(CActivity::getParentActivity, "Parent");
+		// grid.addColumnEntityNamed(CActivity::getParentActivity, "Parent");
 		grid.addColumn(CEntityNamed::getDescriptionShort, "Description");
 	}
 

@@ -37,7 +37,9 @@ function execCmd(commandId) {
 
 // 1) Terminate current debug session
 execCmd("org.eclipse.debug.ui.commands.Terminate");
-
+execCmd("org.eclipse.debug.ui.commands.Terminate");
+execCmd("org.eclipse.debug.ui.commands.Terminate");
+execCmd("org.eclipse.debug.ui.commands.RemoveAllTerminatedLaunches");
 // 2) Wait ~1 second
 Thread.sleep(1000);
 

@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.abstracts.services.CEntityOfProjectService;
-import tech.derbent.abstracts.utils.Check;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.projects.domain.CProject;
 
@@ -21,9 +20,8 @@ public class CActivityStatusService extends CEntityOfProjectService<CActivitySta
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityStatusService.class);
 
 	@Autowired
-	public CActivityStatusService(final CActivityStatusRepository activityStatusRepository, final Clock clock) {
-		super(activityStatusRepository, clock);
-		Check.notNull(activityStatusRepository, "ActivityStatusRepository cannot be null");
+	public CActivityStatusService(final CActivityStatusRepository repository, final Clock clock) {
+		super(repository, clock);
 	}
 
 	/** Find the default status for new activities.

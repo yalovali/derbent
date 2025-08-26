@@ -7,9 +7,9 @@ import java.util.stream.Collectors;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.abstracts.domains.CProjectItemService;
 import tech.derbent.abstracts.interfaces.CKanbanService;
 import tech.derbent.abstracts.services.CEntityOfProjectRepository;
-import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.domain.CActivityStatus;
@@ -18,8 +18,7 @@ import tech.derbent.projects.domain.CProject;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CActivityService extends CEntityOfProjectService<CActivity> implements CKanbanService<CActivity, CActivityStatus> {
-
+public class CActivityService extends CProjectItemService<CActivity> implements CKanbanService<CActivity, CActivityStatus> {
 	public CActivityService(final CActivityRepository repository, final Clock clock) {
 		super(repository, clock);
 	}

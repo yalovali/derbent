@@ -17,7 +17,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.AMetaData;
-import tech.derbent.abstracts.domains.CEntityOfProject;
+import tech.derbent.abstracts.domains.CProjectItem;
 import tech.derbent.abstracts.interfaces.CKanbanEntity;
 import tech.derbent.abstracts.interfaces.CKanbanStatus;
 import tech.derbent.abstracts.interfaces.CKanbanType;
@@ -28,7 +28,7 @@ import tech.derbent.users.domain.CUser;
 @Entity
 @Table (name = "cactivity")
 @AttributeOverride (name = "id", column = @Column (name = "activity_id"))
-public class CActivity extends CEntityOfProject<CActivity> implements CKanbanEntity {
+public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivity.class);
 
 	public static String getIconColorCode() {
@@ -135,14 +135,6 @@ public class CActivity extends CEntityOfProject<CActivity> implements CKanbanEnt
 			hidden = false, order = 52
 	)
 	private BigDecimal hourlyRate;
-	// Hierarchical Structure Support
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "parent_activity_id", nullable = true)
-	@AMetaData (
-			displayName = "Parent Activity", required = false, readOnly = false, description = "Parent activity for hierarchical task breakdown",
-			hidden = false, order = 60, dataProviderBean = "CActivityService"
-	)
-	private CActivity parentActivity;
 	// Additional Information
 	@Column (name = "acceptance_criteria", nullable = true, length = 2000)
 	@Size (max = 2000)
@@ -232,8 +224,6 @@ public class CActivity extends CEntityOfProject<CActivity> implements CKanbanEnt
 	public BigDecimal getHourlyRate() { return hourlyRate; }
 
 	public String getNotes() { return notes; }
-
-	public CActivity getParentActivity() { return parentActivity; }
 
 	public CActivityPriority getPriority() { return priority; }
 
@@ -375,15 +365,6 @@ public class CActivity extends CEntityOfProject<CActivity> implements CKanbanEnt
 
 	public void setNotes(final String notes) {
 		this.notes = notes;
-		updateLastModified();
-	}
-
-	public void setParentActivity(final CActivity parentActivity) {
-		if ((parentActivity != null) && parentActivity.equals(this)) {
-			LOGGER.warn("setParentActivity - Attempting to set self as parent for activity id={}", getId());
-			return;
-		}
-		this.parentActivity = parentActivity;
 		updateLastModified();
 	}
 

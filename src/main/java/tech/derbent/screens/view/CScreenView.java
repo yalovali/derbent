@@ -19,7 +19,7 @@ import tech.derbent.session.service.CSessionService;
 @Route ("cscreensview/:screen_id?/:action?(edit)")
 @PageTitle ("Screen Master Detail")
 @Menu (order = 1.5, icon = "class:tech.derbent.screens.view.CScreenView", title = "Project.Screens")
-@PermitAll // When security is enabled, allow all authenticated users
+@PermitAll
 public final class CScreenView extends CProjectAwareMDPage<CScreen> {
 	private static final long serialVersionUID = 1L;
 
