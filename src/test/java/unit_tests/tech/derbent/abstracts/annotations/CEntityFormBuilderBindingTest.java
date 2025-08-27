@@ -12,7 +12,7 @@ import org.springframework.test.context.TestPropertySource;
 
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.components.CEnhancedBinder;
-import tech.derbent.abstracts.views.CVerticalLayout;
+import tech.derbent.abstracts.views.components.CVerticalLayout;
 
 /**
  * Test to verify that the CEntityFormBuilder fixes for incomplete forField bindings work correctly. This specifically

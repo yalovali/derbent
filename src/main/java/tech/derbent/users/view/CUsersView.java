@@ -15,7 +15,7 @@ import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
-import tech.derbent.abstracts.views.CGrid;
+import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.screens.service.CScreenService;

@@ -17,6 +17,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.services.CAbstractService;
+import tech.derbent.abstracts.views.components.CButton;
 import tech.derbent.base.ui.dialogs.CConfirmationDialog;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
 

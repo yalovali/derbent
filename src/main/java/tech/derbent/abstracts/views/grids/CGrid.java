@@ -1,4 +1,4 @@
-package tech.derbent.abstracts.views;
+package tech.derbent.abstracts.views.grids;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

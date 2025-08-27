@@ -11,14 +11,13 @@ import tech.derbent.abstracts.utils.Check;
 import tech.derbent.projects.domain.CProject;
 
 public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProject<EntityClass>> extends CAbstractNamedEntityService<EntityClass> {
-
 	public CEntityOfProjectService(final CEntityOfProjectRepository<EntityClass> repository, final Clock clock) {
 		super(repository, clock);
 	}
 
 	@Transactional (readOnly = true)
 	public long countByProject(final CProject project) {
-		Check.notNull(project, "Project cannot be null");
+		Optional.ofNullable(project).orElse(null);
 		try {
 			return ((CEntityOfProjectRepository<EntityClass>) repository).countByProject(project);
 		} catch (final Exception e) {
@@ -29,7 +28,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 
 	public EntityClass createEntity(final String name, final CProject project) {
 		try {
-			Check.notNull(project, "Project cannot be null");
+			Optional.ofNullable(project).orElse(null);
 			Check.notBlank(name, "Entity name cannot be null or empty");
 			final EntityClass entity = newEntity(name, project);
 			repository.saveAndFlush(entity);
@@ -41,7 +40,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 
 	@Transactional (readOnly = true)
 	public List<EntityClass> findEntriesByProject(final CProject project) {
-		Check.notNull(project, "Project cannot be null");
+		Optional.ofNullable(project).orElse(null);
 		try {
 			final List<EntityClass> entities = ((CEntityOfProjectRepository<EntityClass>) repository).findByProject(project);
 			return entities;
@@ -53,7 +52,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 
 	@Transactional (readOnly = true)
 	public Page<EntityClass> findEntriesByProject(final CProject project, final Pageable pageable) {
-		Check.notNull(project, "Project cannot be null");
+		Optional.ofNullable(project).orElse(null);
 		try {
 			final Page<EntityClass> entities = ((CEntityOfProjectRepository<EntityClass>) repository).findByProject(project, pageable);
 			return entities;
@@ -81,7 +80,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		if ("fail".equals(name)) {
 			throw new RuntimeException("This is for testing the error handler");
 		}
-		Check.notNull(project, "Project cannot be null");
+		Optional.ofNullable(project).orElse(null);
 		Check.notBlank(name, "Entity name cannot be null or empty");
 		// Validate inputs
 		validateEntityName(name);

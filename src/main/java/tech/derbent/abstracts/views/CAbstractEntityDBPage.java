@@ -30,6 +30,11 @@ import tech.derbent.abstracts.interfaces.CLayoutChangeListener;
 import tech.derbent.abstracts.interfaces.CSearchable;
 import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.abstracts.utils.PageableUtils;
+import tech.derbent.abstracts.views.components.CButton;
+import tech.derbent.abstracts.views.components.CFlexLayout;
+import tech.derbent.abstracts.views.components.CVerticalLayout;
+import tech.derbent.abstracts.views.grids.CGrid;
+import tech.derbent.abstracts.views.grids.CMasterViewSectionGrid;
 import tech.derbent.base.ui.dialogs.CConfirmationDialog;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
 import tech.derbent.session.service.CSessionService;
@@ -73,8 +78,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		// FLEX LAYOUT///////////////////
 		scroller.setContent(baseDetailsLayout);
 		scroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
-		// baseDetailsLayout.add(baseDescriptionAccordion);
-		// binder = new CEnhancedBinder<>(entityClass
 		final CVerticalLayout detailsBase = new CVerticalLayout(false, false, false);
 		detailsBase.add(detailsTabLayout, scroller);
 		initSplitLayout(detailsBase);

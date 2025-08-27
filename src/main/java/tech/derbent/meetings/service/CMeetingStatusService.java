@@ -19,7 +19,6 @@ import tech.derbent.projects.domain.CProject;
 @Service
 @Transactional
 public class CMeetingStatusService extends CEntityOfProjectService<CMeetingStatus> {
-
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingStatusService.class);
 
@@ -39,7 +38,7 @@ public class CMeetingStatusService extends CEntityOfProjectService<CMeetingStatu
 	 * @return List of active statuses for the project */
 	@Transactional (readOnly = true)
 	public List<CMeetingStatus> findAllActiveStatusesByProject(final CProject project) {
-		Check.notNull(project, "Project cannot be null");
+		Optional.ofNullable(project).orElse(null);
 		return findEntriesByProject(project).stream().filter(status -> !status.getFinalStatus()).toList();
 	}
 
@@ -47,7 +46,7 @@ public class CMeetingStatusService extends CEntityOfProjectService<CMeetingStatu
 	 * @return Optional containing the default status if found */
 	@Transactional (readOnly = true)
 	public Optional<CMeetingStatus> findDefaultStatus(final CProject project) {
-		Check.notNull(project, "Project cannot be null");
+		Optional.ofNullable(project).orElse(null);
 		final Optional<CMeetingStatus> status = ((CMeetingStatusService) repository).findDefaultStatus(project);
 		return status;
 	}

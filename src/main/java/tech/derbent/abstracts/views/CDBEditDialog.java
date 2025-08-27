@@ -3,6 +3,8 @@ package tech.derbent.abstracts.views;
 import java.util.function.Consumer;
 
 import com.vaadin.flow.component.notification.Notification;
+import tech.derbent.abstracts.views.components.CButton;
+import tech.derbent.abstracts.views.components.CVerticalLayout;
 
 /**
  * Abstract base class for data-aware dialogs. Uses generics to allow any data type.

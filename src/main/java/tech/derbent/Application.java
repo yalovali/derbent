@@ -14,7 +14,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.StreamUtils;
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.theme.Theme;
-import tech.derbent.abstracts.services.CTimer;
+import tech.derbent.abstracts.components.CTimer;
 
 @SpringBootApplication (scanBasePackages = "tech.derbent")
 @Theme ("default")

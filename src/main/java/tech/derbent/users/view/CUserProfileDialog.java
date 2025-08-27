@@ -21,9 +21,8 @@ import com.vaadin.flow.data.validator.StringLengthValidator;
 import com.vaadin.flow.server.streams.InMemoryUploadCallback;
 import com.vaadin.flow.server.streams.InMemoryUploadHandler;
 import com.vaadin.flow.server.streams.UploadMetadata;
-
-import tech.derbent.abstracts.views.CButton;
 import tech.derbent.abstracts.views.CDBEditDialog;
+import tech.derbent.abstracts.views.components.CButton;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
 import tech.derbent.base.utils.CImageUtils;
 import tech.derbent.users.domain.CUser;

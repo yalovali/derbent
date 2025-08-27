@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.components.CBinderFactory;
-import tech.derbent.abstracts.views.CVerticalLayout;
+import tech.derbent.abstracts.views.components.CVerticalLayout;
 import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 
 /**

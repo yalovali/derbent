@@ -29,6 +29,10 @@ public class CProjectGanntView extends CProjectAwareMDPage<CGanntViewEntity> {
 	protected CProjectGanntView(final CGanntViewEntityService entityService, final CSessionService sessionService,
 			final CScreenService screenService) {
 		super(CGanntViewEntity.class, entityService, sessionService, screenService);
+		final CGanntViewEntity viewEntity =
+				entityService.findEntriesByProject(sessionService.getActiveProject().orElse(null)).stream().findFirst().orElse(null);
+		setCurrentEntity(viewEntity);
+		// createDetailsLayout();
 	}
 
 	@Override

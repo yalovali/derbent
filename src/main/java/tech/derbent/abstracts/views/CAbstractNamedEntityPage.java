@@ -4,6 +4,7 @@ import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.interfaces.CLayoutChangeListener;
 import tech.derbent.abstracts.services.CAbstractNamedEntityService;
 import tech.derbent.abstracts.services.CDetailsBuilder;
+import tech.derbent.abstracts.views.components.CDiv;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CScreen;
 import tech.derbent.screens.service.CScreenService;

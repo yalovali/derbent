@@ -1,4 +1,4 @@
-package tech.derbent.abstracts.views;
+package tech.derbent.abstracts.views.components;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;

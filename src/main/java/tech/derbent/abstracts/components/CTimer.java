@@ -1,4 +1,4 @@
-package tech.derbent.abstracts.services;
+package tech.derbent.abstracts.components;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

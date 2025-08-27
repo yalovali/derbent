@@ -11,6 +11,7 @@ import tech.derbent.abstracts.interfaces.CProjectChangeListener;
 import tech.derbent.abstracts.services.CAbstractNamedEntityService;
 import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.abstracts.utils.PageableUtils;
+import tech.derbent.abstracts.views.components.CVerticalLayout;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.service.CScreenService;
 import tech.derbent.session.service.CSessionService;

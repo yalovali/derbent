@@ -1,4 +1,4 @@
-package tech.derbent.abstracts.views;
+package tech.derbent.abstracts.views.grids;
 
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -9,6 +9,8 @@ import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.shared.Registration;
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
+import tech.derbent.abstracts.views.components.CDiv;
 
 public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> extends CMasterViewSectionBase<EntityClass> {
 	// --- Custom Event Definition ---
@@ -38,6 +40,7 @@ public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> 
 	}
 
 	// --- Listener Registration ---
+	@SuppressWarnings ("unchecked")
 	public Registration addSelectionChangeListener(final ComponentEventListener<SelectionChangeEvent<EntityClass>> listener) {
 		return addListener(SelectionChangeEvent.class, (ComponentEventListener) listener);
 	}

@@ -12,6 +12,7 @@ import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.abstracts.utils.Check;
+import tech.derbent.abstracts.views.components.CButton;
 import tech.derbent.base.ui.dialogs.CConfirmationDialog;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
 import tech.derbent.projects.domain.CProject;

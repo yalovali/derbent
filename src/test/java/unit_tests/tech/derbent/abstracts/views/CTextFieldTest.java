@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
 import tech.derbent.abstracts.utils.Check;
-import tech.derbent.abstracts.views.CTextField;
+import tech.derbent.abstracts.views.components.CTextField;
 import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 
 /**

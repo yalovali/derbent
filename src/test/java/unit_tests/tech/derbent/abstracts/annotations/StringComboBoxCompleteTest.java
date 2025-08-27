@@ -19,7 +19,7 @@ import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.components.CBinderFactory;
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.domains.CEntityDB;
-import tech.derbent.abstracts.views.CVerticalLayout;
+import tech.derbent.abstracts.views.components.CVerticalLayout;
 
 /**
  * Complete test demonstrating String ComboBox with working data provider

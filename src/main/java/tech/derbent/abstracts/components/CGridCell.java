@@ -38,7 +38,7 @@ import tech.derbent.abstracts.utils.CColorUtils;
  *
  * @author Derbent Framework
  * @since 1.0
- * @see tech.derbent.abstracts.views.CGrid
+ * @see tech.derbent.abstracts.views.grids.CGrid
  * @see tech.derbent.abstracts.utils.CColorUtils
  */
 public class CGridCell extends Div {

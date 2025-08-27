@@ -12,7 +12,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import tech.derbent.abstracts.utils.Check;
-import tech.derbent.abstracts.views.CButton;
+import tech.derbent.abstracts.views.components.CButton;
 import tech.derbent.comments.domain.CComment;
 import tech.derbent.comments.service.CCommentService;
 

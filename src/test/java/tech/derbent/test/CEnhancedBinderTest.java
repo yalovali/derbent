@@ -21,7 +21,7 @@ import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.components.CBinderFactory;
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.utils.CValidationUtils;
-import tech.derbent.abstracts.views.CVerticalLayout;
+import tech.derbent.abstracts.views.components.CVerticalLayout;
 import tech.derbent.meetings.domain.CMeetingStatus;
 import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 

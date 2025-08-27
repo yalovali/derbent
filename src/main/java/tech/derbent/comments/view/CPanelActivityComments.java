@@ -15,7 +15,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.utils.Check;
-import tech.derbent.abstracts.views.CButton;
+import tech.derbent.abstracts.views.components.CButton;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
 import tech.derbent.activities.view.CPanelActivityBase;

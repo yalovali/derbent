@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.abstracts.services.CTimer;
+import tech.derbent.abstracts.components.CTimer;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.domain.CActivityStatus;

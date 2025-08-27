@@ -6,7 +6,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
 
 import tech.derbent.abstracts.utils.Check;
-import tech.derbent.abstracts.views.CButton;
+import tech.derbent.abstracts.views.components.CButton;
 import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 
 /**

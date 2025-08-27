@@ -32,7 +32,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import tech.derbent.abstracts.interfaces.CProjectListChangeListener;
 import tech.derbent.abstracts.utils.Check;
-import tech.derbent.abstracts.views.CButton;
+import tech.derbent.abstracts.views.components.CButton;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.session.service.LayoutService;

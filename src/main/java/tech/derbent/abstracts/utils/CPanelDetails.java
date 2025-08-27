@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import com.vaadin.flow.component.Component;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
-import tech.derbent.abstracts.views.CAccordion;
-import tech.derbent.abstracts.views.CHorizontalLayout;
+import tech.derbent.abstracts.views.components.CAccordion;
+import tech.derbent.abstracts.views.components.CHorizontalLayout;
 import tech.derbent.screens.domain.CScreen;
 import tech.derbent.screens.domain.CScreenLines;
 

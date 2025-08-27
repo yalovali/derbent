@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import java.util.Arrays;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import tech.derbent.companies.domain.CCompany;
@@ -20,7 +19,6 @@ import tech.derbent.users.domain.CUserType;
 import tech.derbent.users.service.CUserProjectSettingsService;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.CUserTypeService;
-import tech.derbent.users.view.CUsersView;
 import ui_tests.tech.derbent.abstracts.ui.CAbstractUITest;
 
 /** CUsersViewUITest - Comprehensive UI tests for the Users view. Layer: Testing (MVC) Tests grid functionality, lazy loading prevention, data
@@ -40,7 +38,6 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
 	private CSessionService mockSessionService;
 	@Mock
 	private CScreenService screenService;
-	private CUsersView usersView;
 	private CUserType testUserType;
 	private CCompany testCompany;
 	private CProject project;
@@ -87,12 +84,6 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
 		// Create test company
 		testCompany = new CCompany("Test Company");
 		testCompany.setDescription("Test company for users");
-	}
-
-	@BeforeEach
-	void setupUserTests() {
-		usersView = new CUsersView(mockUserService, mockProjectService, mockUserTypeService, mockCompanyService, mockSessionService,
-				mockUserProjectSettingsService, screenService);
 	}
 
 	@Test

@@ -13,7 +13,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
 import tech.derbent.abstracts.views.CAccordionDBEntity;
-import tech.derbent.abstracts.views.CGrid;
+import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.screens.service.CScreenService;

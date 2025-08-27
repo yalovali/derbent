@@ -17,7 +17,7 @@ import tech.derbent.abstracts.components.CBinderFactory;
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.views.CDBEditDialog;
-import tech.derbent.abstracts.views.CDiv;
+import tech.derbent.abstracts.views.components.CDiv;
 import tech.derbent.screens.domain.CScreen;
 import tech.derbent.screens.domain.CScreenLines;
 import tech.derbent.screens.service.CEntityFieldService;

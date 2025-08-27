@@ -18,7 +18,7 @@ import tech.derbent.abstracts.components.CBinderFactory;
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.views.CAbstractPage;
-import tech.derbent.abstracts.views.CButton;
+import tech.derbent.abstracts.views.components.CButton;
 import tech.derbent.base.ui.dialogs.CConfirmationDialog;
 import tech.derbent.base.ui.dialogs.CInformationDialog;
 import tech.derbent.base.ui.dialogs.CWarningDialog;

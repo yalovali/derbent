@@ -8,6 +8,7 @@ import tech.derbent.abstracts.annotations.CEntityFormBuilder.ComboBoxDataProvide
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.services.CAbstractService;
+import tech.derbent.abstracts.views.components.CAccordion;
 
 public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityClass>>
 	extends CAccordion {

@@ -1,4 +1,4 @@
-package tech.derbent.abstracts.views;
+package tech.derbent.abstracts.views.grids;
 
 import java.util.Set;
 import java.util.function.Consumer;
@@ -11,6 +11,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.views.components.CButton;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 

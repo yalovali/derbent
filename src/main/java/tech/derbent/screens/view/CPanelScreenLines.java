@@ -9,7 +9,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.abstracts.components.CEnhancedBinder;
-import tech.derbent.abstracts.views.CGrid;
+import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.screens.domain.CScreen;
 import tech.derbent.screens.domain.CScreenLines;
 import tech.derbent.screens.service.CEntityFieldService;

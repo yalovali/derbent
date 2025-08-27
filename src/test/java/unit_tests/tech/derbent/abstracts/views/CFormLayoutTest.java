@@ -3,7 +3,7 @@ package unit_tests.tech.derbent.abstracts.views;
 import org.junit.jupiter.api.Test;
 
 import tech.derbent.abstracts.utils.Check;
-import tech.derbent.abstracts.views.CFormLayout;
+import tech.derbent.abstracts.views.components.CFormLayout;
 import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 
 /**

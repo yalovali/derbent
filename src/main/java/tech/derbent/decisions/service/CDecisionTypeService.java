@@ -2,6 +2,7 @@ package tech.derbent.decisions.service;
 
 import java.time.Clock;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +16,6 @@ import tech.derbent.projects.domain.CProject;
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CDecisionTypeService extends CEntityOfProjectService<CDecisionType> {
-
 	public CDecisionTypeService(final CDecisionTypeRepository repository, final Clock clock) {
 		super(repository, clock);
 	}
@@ -25,7 +25,7 @@ public class CDecisionTypeService extends CEntityOfProjectService<CDecisionType>
 	 * @return list of active decision types for the project */
 	@Transactional (readOnly = true)
 	public List<CDecisionType> findAllActiveByProject(final CProject project) {
-		Check.notNull(project, "Project cannot be null");
+		Optional.ofNullable(project).orElse(null);
 		return ((CDecisionTypeRepository) repository).findByProjectAndIsActiveTrue(project);
 	}
 
@@ -34,7 +34,7 @@ public class CDecisionTypeService extends CEntityOfProjectService<CDecisionType>
 	 * @return list of decision types that require approval for the project */
 	@Transactional (readOnly = true)
 	public List<CDecisionType> findRequiringApprovalByProject(final CProject project) {
-		Check.notNull(project, "Project cannot be null");
+		Optional.ofNullable(project).orElse(null);
 		return ((CDecisionTypeRepository) repository).findByProjectAndRequiresApprovalTrue(project);
 	}
 

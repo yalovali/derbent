@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import tech.derbent.abstracts.utils.Check;
-import tech.derbent.abstracts.views.CButton;
-import tech.derbent.abstracts.views.CHorizontalLayout;
+import tech.derbent.abstracts.views.components.CButton;
+import tech.derbent.abstracts.views.components.CHorizontalLayout;
 import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 
 /**

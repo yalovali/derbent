@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.components.CEnhancedBinder;
-import tech.derbent.abstracts.views.CVerticalLayout;
+import tech.derbent.abstracts.views.components.CVerticalLayout;
 
 /**
  * Test to verify that the EntityFormBuilder forField fix resolves the CUserView grid click issue. This ensures that

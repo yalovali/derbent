@@ -3,8 +3,7 @@ package tech.derbent.base.ui.dialogs;
 import java.lang.reflect.InvocationTargetException;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
-
-import tech.derbent.abstracts.views.CButton;
+import tech.derbent.abstracts.views.components.CButton;
 
 /**
  * CConfirmationDialog - Dialog for user confirmations with Yes/No options. Layer: View
