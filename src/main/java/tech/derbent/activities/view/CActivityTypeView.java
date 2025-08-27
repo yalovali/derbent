@@ -17,11 +17,12 @@ import tech.derbent.session.service.CSessionService;
 
 /** CActivityTypeView - View for managing activity types. Layer: View (MVC) Provides CRUD operations for activity types using the abstract
  * master-detail pattern with project awareness. */
-@Route ("cactivitytypeview/:activity_type_id?/:action?(edit)")
+@Route ("cactivitytypeview")
 @PageTitle ("Activity Types")
 @Menu (order = 10.4, icon = "class:tech.derbent.activities.view.CActivityTypeView", title = "Types.Activity Types")
 @PermitAll
 public class CActivityTypeView extends CProjectAwareMDPage<CActivityType> implements IIconSet {
+
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() { return CActivityType.getIconColorCode(); }
@@ -41,7 +42,6 @@ public class CActivityTypeView extends CProjectAwareMDPage<CActivityType> implem
 		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");
 		grid.addColumn(CEntityNamed::getDescriptionShort, "Description");
 		grid.addStatusColumn(type -> type, "Type", "type");
-		grid.addShortTextColumn(CActivityType::getName, "Name", "name");
 		grid.addShortTextColumn(CActivityType::getColor, "Color", "color");
 		grid.addBooleanColumn(CActivityType::isActive, "Active", "Active", "Inactive");
 	}

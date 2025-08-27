@@ -14,7 +14,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +50,9 @@ import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
 @org.springframework.stereotype.Component
 public final class CEntityFormBuilder<EntityClass> implements ApplicationContextAware {
+
 	public interface ComboBoxDataProvider {
+
 		<T extends CEntityDB<T>> List<T> getItems(Class<T> entityType);
 	}
 
@@ -240,7 +241,7 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 		return comboBox;
 	}
 
-	@SuppressWarnings ("rawtypes")
+	@SuppressWarnings ("unchecked")
 	private static <T> MultiSelectComboBox<T> createComboBoxMultiSelect(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
 		Check.notNull(fieldInfo, "FieldInfo for ComboBox creation");
 		Check.notNull(binder, "Binder for ComboBox creation");
@@ -248,25 +249,30 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 		final MultiSelectComboBox<T> comboBox = new MultiSelectComboBox<T>(fieldInfo.getDisplayName());
 		comboBox.setItemLabelGenerator(item -> {
 			if (item instanceof CEntityNamed<?>) {
-				return ((CEntityNamed) item).getName();
+				return ((CEntityNamed<?>) item).getName();
 			}
-			if (item instanceof CEntityDB) {
+			if (item instanceof CEntityDB<?>) {
 				return CColorUtils.getDisplayTextFromEntity(item);
 			}
 			if (item instanceof String) {
 				return (String) item;
 			}
-			return "Unknown Item: " + item.toString();
+			return "Unknown Item: " + String.valueOf(item);
 		});
-		// Data provider resolution using CDataProviderResolver
+		// --- Data provider ---
 		Check.notNull(dataProviderResolver, "DataProviderResolver for field " + fieldInfo.getFieldName());
-		final Set<T> items = Set.of(dataProviderResolver.resolveData(fieldInfo).stream().toArray(CEntityDB[]::new));
-		Check.notNull(items, "Items for field " + fieldInfo.getFieldName() + " of type " + fieldInfo.getJavaType());
+		// DİKKAT: Diziye çevirip Set.of(...) kullanmıyoruz — bu, Set<CEntityDB[]> üretip tür çıkarımını bozuyordu.
+		final java.util.List<?> rawList = dataProviderResolver.resolveData(fieldInfo);
+		Check.notNull(rawList, "Items for field " + fieldInfo.getFieldName() + " of type " + fieldInfo.getJavaType());
+		// Tip güvenli toplama: LinkedHashSet ile sıralı ve benzersiz
+		final java.util.LinkedHashSet<T> items = rawList.stream().map(e -> (T) e) // runtime cast; provider sözleşmesine güveniyoruz
+				.collect(java.util.stream.Collectors.toCollection(java.util.LinkedHashSet::new));
 		if (fieldInfo.isClearOnEmptyData() && items.isEmpty()) {
-			comboBox.setValue(Set.of());
+			comboBox.clear(); // Set.of() vermek yerine clear()
 		}
 		comboBox.setItems(items);
-		safeBindComponent(binder, comboBox, fieldInfo.getFieldName(), "ComboBox");
+		// (İsteğe bağlı) Varsayılan değer atama burada yapılabilir.
+		safeBindComponent(binder, comboBox, fieldInfo.getFieldName(), "ComboBox(MultiSelect)");
 		return comboBox;
 	}
 

@@ -25,11 +25,12 @@ import tech.derbent.meetings.service.CMeetingViewService;
 import tech.derbent.screens.service.CScreenService;
 import tech.derbent.session.service.CSessionService;
 
-@Route ("cmeetingsview/:meeting_id?/:action?(edit)")
+@Route ("cmeetingsview")
 @PageTitle ("Meeting Master Detail")
 @Menu (order = 1.4, icon = "class:tech.derbent.meetings.view.CMeetingsView", title = "Project.Meetings")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CMeetingsView extends CProjectAwareMDPage<CMeeting> implements IIconSet {
+
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() {
@@ -52,8 +53,7 @@ public class CMeetingsView extends CProjectAwareMDPage<CMeeting> implements IIco
 
 	@Override
 	public void createGridForEntity(final CGrid<CMeeting> grid) {
-		grid.addIdColumn(CEntityDB::getId, "XX#", ENTITY_ID_FIELD);
-		// grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
+		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
 		grid.addColumnEntityNamed(CEntityOfProject::getProject, "Project");
 		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");
 		grid.addColumnEntityNamed(CMeeting::getMeetingType, "Type");
