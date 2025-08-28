@@ -9,9 +9,9 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.IIconSet;
-import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
 import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.abstracts.views.grids.CGrid;
+import tech.derbent.abstracts.views.grids.CGridViewBaseNamed;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.screens.service.CScreenService;
@@ -21,7 +21,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Company Master Detail")
 @Menu (order = 3.4, icon = "class:tech.derbent.companies.view.CCompanyView", title = "Settings.Companies")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CCompanyView extends CAbstractNamedEntityPage<CCompany> implements IIconSet {
+public class CCompanyView extends CGridViewBaseNamed<CCompany> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() {
@@ -40,20 +40,6 @@ public class CCompanyView extends CAbstractNamedEntityPage<CCompany> implements 
 	}
 
 	@Override
-	protected void createDetailsLayout() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
-		CAccordionDBEntity<CCompany> panel;
-		panel = new CPanelCompanyDescription(getCurrentEntity(), getBinder(), (CCompanyService) entityService);
-		addAccordionPanel(panel);
-		panel = new CPanelCompanySystemStatus(getCurrentEntity(), getBinder(), (CCompanyService) entityService);
-		addAccordionPanel(panel);
-		panel = new CPanelCompanyUsers(getCurrentEntity(), getBinder(), (CCompanyService) entityService);
-		addAccordionPanel(panel);
-		panel = new CPanelCompanyContactDetails(getCurrentEntity(), getBinder(), (CCompanyService) entityService);
-		// final var formLayout = CEntityFormBuilder.buildForm(CCompany.class,
-		// getBinder()); getBaseDetailsLayout().add(formLayout);
-	}
-
-	@Override
 	public void createGridForEntity(final CGrid<CCompany> grid) {
 		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
 		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");
@@ -67,4 +53,18 @@ public class CCompanyView extends CAbstractNamedEntityPage<CCompany> implements 
 
 	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
+
+	@Override
+	protected void updateDetailsComponent() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+		CAccordionDBEntity<CCompany> panel;
+		panel = new CPanelCompanyDescription(getCurrentEntity(), getBinder(), (CCompanyService) entityService);
+		addAccordionPanel(panel);
+		panel = new CPanelCompanySystemStatus(getCurrentEntity(), getBinder(), (CCompanyService) entityService);
+		addAccordionPanel(panel);
+		panel = new CPanelCompanyUsers(getCurrentEntity(), getBinder(), (CCompanyService) entityService);
+		addAccordionPanel(panel);
+		panel = new CPanelCompanyContactDetails(getCurrentEntity(), getBinder(), (CCompanyService) entityService);
+		// final var formLayout = CEntityFormBuilder.buildForm(CCompany.class,
+		// getBinder()); getBaseDetailsLayout().add(formLayout);
+	}
 }

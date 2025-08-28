@@ -7,9 +7,9 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.domains.IIconSet;
-import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.abstracts.views.components.CVerticalLayout;
 import tech.derbent.abstracts.views.grids.CGrid;
+import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.service.CActivityStatusService;
 import tech.derbent.screens.service.CScreenService;
@@ -21,7 +21,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Activity Statuses")
 @Menu (order = 2.1, icon = "class:tech.derbent.activities.view.CActivityStatusView", title = "Types.Activity Statuses")
 @PermitAll
-public class CActivityStatusView extends CProjectAwareMDPage<CActivityStatus> implements IIconSet {
+public class CActivityStatusView extends CGridViewBaseProject<CActivityStatus> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() {
@@ -38,9 +38,8 @@ public class CActivityStatusView extends CProjectAwareMDPage<CActivityStatus> im
 	}
 
 	@Override
-	public void createDetailsLayout() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
-		final CVerticalLayout detailsLayout = CEntityFormBuilder.buildForm(CActivityStatus.class, getBinder());
-		getBaseDetailsLayout().add(detailsLayout);
+	protected void createDetailsComponent() throws Exception {
+		// TODO Auto-generated method stub
 	}
 
 	/** Creates the grid for displaying activity status entities. Sets up columns for name and description with appropriate headers and sorting. Also
@@ -57,4 +56,10 @@ public class CActivityStatusView extends CProjectAwareMDPage<CActivityStatus> im
 
 	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
+
+	@Override
+	public void updateDetailsComponent() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+		final CVerticalLayout detailsLayout = CEntityFormBuilder.buildForm(CActivityStatus.class, getBinder());
+		getBaseDetailsLayout().add(detailsLayout);
+	}
 }

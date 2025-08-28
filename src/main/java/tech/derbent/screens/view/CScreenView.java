@@ -8,8 +8,8 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
-import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.abstracts.views.grids.CGrid;
+import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.screens.domain.CScreen;
 import tech.derbent.screens.service.CEntityFieldService;
 import tech.derbent.screens.service.CScreenLinesService;
@@ -21,7 +21,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Screen Master Detail")
 @Menu (order = 1.5, icon = "class:tech.derbent.screens.view.CScreenView", title = "Project.Screens")
 @PermitAll
-public final class CScreenView extends CProjectAwareMDPage<CScreen> {
+public final class CScreenView extends CGridViewBaseProject<CScreen> {
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() {
@@ -41,14 +41,6 @@ public final class CScreenView extends CProjectAwareMDPage<CScreen> {
 		this.screenLinesService = screenLinesService;
 		this.entityFieldService = entityFieldService;
 		this.viewsService = viewsService;
-	}
-
-	@Override
-	protected void createDetailsLayout() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
-		addAccordionPanel(new CPanelScreenBasicInfo(getCurrentEntity(), getBinder(), (CScreenService) entityService));
-		addAccordionPanel(new CPanelScreenLines(getCurrentEntity(), getBinder(), (CScreenService) entityService, screenLinesService,
-				entityFieldService, viewsService));
-		addAccordionPanel(new CPanelScreenPreview(getCurrentEntity(), getBinder(), (CScreenService) entityService));
 	}
 
 	@Override
@@ -72,4 +64,12 @@ public final class CScreenView extends CProjectAwareMDPage<CScreen> {
 
 	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
+
+	@Override
+	protected void updateDetailsComponent() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+		addAccordionPanel(new CPanelScreenBasicInfo(getCurrentEntity(), getBinder(), (CScreenService) entityService));
+		addAccordionPanel(new CPanelScreenLines(getCurrentEntity(), getBinder(), (CScreenService) entityService, screenLinesService,
+				entityFieldService, viewsService));
+		addAccordionPanel(new CPanelScreenPreview(getCurrentEntity(), getBinder(), (CScreenService) entityService));
+	}
 }

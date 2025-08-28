@@ -8,8 +8,8 @@ import tech.derbent.abstracts.components.CGridCell;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
-import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.abstracts.views.grids.CGrid;
+import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.comments.domain.CCommentPriority;
 import tech.derbent.comments.service.CCommentPriorityService;
 import tech.derbent.screens.service.CScreenService;
@@ -21,7 +21,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Comment Priorities")
 @Menu (order = 12.1, icon = "class:tech.derbent.comments.view.CCommentPriorityView", title = "Types.Comment Priorities")
 @PermitAll
-public class CCommentPriorityView extends CProjectAwareMDPage<CCommentPriority> {
+public class CCommentPriorityView extends CGridViewBaseProject<CCommentPriority> {
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() {

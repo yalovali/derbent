@@ -40,7 +40,9 @@ public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> 
 	}
 
 	// --- Listener Registration ---
-	@SuppressWarnings ("unchecked")
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
 	public Registration addSelectionChangeListener(final ComponentEventListener<SelectionChangeEvent<EntityClass>> listener) {
 		return addListener(SelectionChangeEvent.class, (ComponentEventListener) listener);
 	}

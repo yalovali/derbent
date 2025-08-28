@@ -1,5 +1,6 @@
 package tech.derbent.abstracts.views;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -29,12 +30,6 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
 		this.sessionService = sessionService;
 		// Now that sessionService is set, we can populate the grid
 		refreshProjectAwareGrid();
-	}
-
-	@Override
-	protected void createDetailsLayout() throws Exception {
-		final CVerticalLayout formLayout = CEntityFormBuilder.buildForm(entityClass, getBinder());
-		getBaseDetailsLayout().add(formLayout);
 	}
 
 	@Override
@@ -105,5 +100,12 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
 		} else {
 			throw new IllegalArgumentException("Entity must implement CEntityOfProject interface");
 		}
+	}
+
+	@Override
+	protected void updateDetailsComponent()
+			throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException, Exception {
+		final CVerticalLayout formLayout = CEntityFormBuilder.buildForm(entityClass, getBinder());
+		getBaseDetailsLayout().add(formLayout);
 	}
 }

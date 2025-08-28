@@ -9,8 +9,8 @@ import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.domains.IIconSet;
-import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.abstracts.views.grids.CGrid;
+import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.meetings.domain.CMeetingStatus;
 import tech.derbent.meetings.service.CMeetingStatusService;
 import tech.derbent.screens.service.CScreenService;
@@ -20,7 +20,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Meeting Statuses")
 @Menu (order = 11.3, icon = "class:tech.derbent.meetings.view.CMeetingStatusView", title = "Types.Meeting Statuses")
 @PermitAll
-public class CMeetingStatusView extends CProjectAwareMDPage<CMeetingStatus> implements IIconSet {
+public class CMeetingStatusView extends CGridViewBaseProject<CMeetingStatus> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() { return CMeetingStatus.getIconColorCode(); }

@@ -11,9 +11,9 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.domains.IIconSet;
-import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
 import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.abstracts.views.grids.CGrid;
+import tech.derbent.abstracts.views.grids.CGridViewBaseNamed;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.screens.service.CScreenService;
@@ -27,7 +27,7 @@ import tech.derbent.users.service.CUserService;
 @PageTitle ("Project Master Detail")
 @Menu (order = 1.1, icon = "class:tech.derbent.projects.view.CProjectsView", title = "Settings.Projects")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CProjectsView extends CAbstractNamedEntityPage<CProject> implements IIconSet {
+public class CProjectsView extends CGridViewBaseNamed<CProject> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() {
@@ -47,17 +47,6 @@ public class CProjectsView extends CAbstractNamedEntityPage<CProject> implements
 		super(CProject.class, entityService, sessionService, screenService);
 		this.userService = userService;
 		this.userProjectSettingsService = userProjectSettingsService;
-	}
-
-	@Override
-	protected void createDetailsLayout() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
-		CAccordionDBEntity<CProject> panel;
-		panel = new CPanelProjectBasicInfo(getCurrentEntity(), getBinder(), (CProjectService) entityService);
-		addAccordionPanel(panel);
-		// Add the project users panel for managing users in this project
-		projectUsersPanel =
-				new CPanelProjectUsers(getCurrentEntity(), getBinder(), (CProjectService) entityService, userService, userProjectSettingsService);
-		addAccordionPanel(projectUsersPanel);
 	}
 
 	@Override
@@ -103,5 +92,16 @@ public class CProjectsView extends CAbstractNamedEntityPage<CProject> implements
 			};
 			projectUsersPanel.setAccessors(supplier, runnable);
 		}
+	}
+
+	@Override
+	protected void updateDetailsComponent() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+		CAccordionDBEntity<CProject> panel;
+		panel = new CPanelProjectBasicInfo(getCurrentEntity(), getBinder(), (CProjectService) entityService);
+		addAccordionPanel(panel);
+		// Add the project users panel for managing users in this project
+		projectUsersPanel =
+				new CPanelProjectUsers(getCurrentEntity(), getBinder(), (CProjectService) entityService, userService, userProjectSettingsService);
+		addAccordionPanel(projectUsersPanel);
 	}
 }

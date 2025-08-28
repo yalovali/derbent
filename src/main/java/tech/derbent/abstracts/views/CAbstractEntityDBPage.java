@@ -46,7 +46,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	private final CEnhancedBinder<EntityClass> binder;
 	// Search functionality
 	protected CSearchToolbar searchToolbar;
-	private String currentSearchText = "";
+	protected String currentSearchText = "";
 	protected CMasterViewSectionGrid<EntityClass> masterViewSection;
 	// divide screen into two parts
 	protected SplitLayout splitLayout = new SplitLayout();
@@ -69,7 +69,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		this.baseDetailsLayout = CFlexLayout.forEntityPage();
 		// dont setid here, as it may not be initialized yet
 		binder = new CEnhancedBinder<>(entityClass);
-		createGridLayout();
 		// layout for the secondary part of the split layout create the tab layout for the
 		// details view top
 		detailsTabLayout.setClassName("details-tab-layout");
@@ -153,8 +152,13 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	}
 
 	@PostConstruct
-	protected abstract void createDetailsLayout()
-			throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException, Exception;
+	private final void createDetails() throws Exception {
+		createDetailsViewTab();
+		createDetailsComponent();
+		updateDetailsComponent();
+	}
+
+	protected abstract void createDetailsComponent() throws Exception;
 
 	/** Creates the button layout for the details tab. Contains new, save, cancel, and delete buttons with consistent styling.
 	 * @return HorizontalLayout with action buttons */
@@ -164,12 +168,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		buttonLayout.setSpacing(true);
 		buttonLayout.add(createNewButton("New"), createSaveButton("Save"), createCancelButton("Cancel"), createDeleteButton("Delete"));
 		return buttonLayout;
-	}
-
-	@PostConstruct
-	protected void createDetailsTabLayout() {
-		// Create the default details view tab with buttons
-		createDetailsViewTab();
 	}
 
 	/** Creates the left content of the details tab. Subclasses can override this to provide custom tab content.
@@ -204,7 +202,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	public void createGridForEntity(final CGrid<EntityClass> grid) {}
 
 	protected void createGridLayout() {
-		masterViewSection = new CMasterViewSectionGrid(entityClass, this);
+		masterViewSection = new CMasterViewSectionGrid<EntityClass>(entityClass, this);
 		masterViewSection.addSelectionChangeListener(this::onSelectionChanged);
 		// Create search toolbar if entity supports searching
 		if (CSearchable.class.isAssignableFrom(entityClass)) {
@@ -256,6 +254,14 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		gridContainer.setFlexGrow(1, masterViewSection);
 		splitLayout.addToPrimary(gridContainer);
 	}
+
+	@PostConstruct
+	protected final void createMaster() throws Exception {
+		createMasterComponent();
+		updateMasterComponent();
+	}
+
+	protected abstract void createMasterComponent();
 
 	protected CButton createNewButton(final String buttonText) {
 		final CButton newButton = CButton.createTertiary(buttonText, null, e -> {
@@ -388,8 +394,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		updateLayoutOrientation();
 	}
 
-	@SuppressWarnings ("unchecked")
-	private void onSelectionChanged(final CMasterViewSectionGrid.SelectionChangeEvent<EntityClass> event) {
+	protected void onSelectionChanged(final CMasterViewSectionGrid.SelectionChangeEvent<EntityClass> event) {
 		final EntityClass value = (event.getSelectedItem());
 		LOGGER.debug("Grid selection changed: {}", Optional.ofNullable(value).map(Object::toString).orElse("NULL"));
 		populateForm(value);
@@ -497,6 +502,9 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		populateForm(entity);
 	}
 
+	protected abstract void updateDetailsComponent()
+			throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException, Exception;
+
 	/** Updates the split layout orientation based on the current layout mode. */
 	private void updateLayoutOrientation() {
 		if ((layoutService != null) && (splitLayout != null)) {
@@ -520,6 +528,63 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 			splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
 			splitLayout.setSplitterPosition(30.0);
 		}
+	}
+
+	protected void updateMasterComponent() throws Exception {
+		if (masterViewSection == null) {
+			LOGGER.warn("Grid is null, cannot add selection listener");
+			return;
+		}
+		masterViewSection.addSelectionChangeListener(this::onSelectionChanged);
+		// Create search toolbar if entity supports searching
+		if (CSearchable.class.isAssignableFrom(entityClass)) {
+			searchToolbar = new CSearchToolbar("Search " + entityClass.getSimpleName().replace("C", "").toLowerCase() + "...");
+			searchToolbar.addSearchListener(event -> {
+				currentSearchText = event.getSearchText();
+				refreshGrid();
+			});
+		}
+		// Use a custom data provider that properly handles pagination, sorting and
+		// searching
+		masterViewSection.getGrid().setItems(query -> {
+			LOGGER.debug("Grid query - offset: {}, limit: {}, sortOrders: {}, searchText: '{}'", query.getOffset(), query.getLimit(),
+					query.getSortOrders(), currentSearchText);
+			try {
+				final Pageable originalPageable = VaadinSpringDataHelpers.toSpringPageRequest(query);
+				final Pageable safePageable = PageableUtils.validateAndFix(originalPageable);
+				LOGGER.debug("Safe Pageable - pageNumber: {}, pageSize: {}, sort: {}", safePageable.getPageNumber(), safePageable.getPageSize(),
+						safePageable.getSort());
+				final List<EntityClass> result;
+				if ((currentSearchText != null) && !currentSearchText.trim().isEmpty() && CSearchable.class.isAssignableFrom(entityClass)) {
+					result = entityService.list(safePageable, currentSearchText);
+				} else {
+					result = entityService.list(safePageable).getContent();
+				}
+				LOGGER.debug("Data provider returned {} items", result.size());
+				return result.stream();
+			} catch (final Exception e) {
+				LOGGER.error("Error in grid data provider for {}: {}", entityClass.getSimpleName(), e.getMessage());
+				// Check if this is a lazy loading exception
+				if (e.getCause() instanceof org.hibernate.LazyInitializationException) {
+					LOGGER.error("LazyInitializationException detected - check repository fetch joins for {}", entityClass.getSimpleName());
+				}
+				// Return empty stream on error to prevent UI crashes
+				return Stream.empty();
+			}
+		});
+		// grid.addIdColumn(entity -> entity.getId().toString(), "ID", "id");
+		// Create the grid container with search toolbar
+		final VerticalLayout gridContainer = new VerticalLayout();
+		gridContainer.setClassName("grid-container");
+		gridContainer.setPadding(false);
+		gridContainer.setSpacing(false);
+		// Add search toolbar if available
+		if (searchToolbar != null) {
+			gridContainer.add(searchToolbar);
+		}
+		gridContainer.add(masterViewSection);
+		gridContainer.setFlexGrow(1, masterViewSection);
+		splitLayout.addToPrimary(gridContainer);
 	}
 
 	/** Validates an entity before saving. Subclasses can override this method to add custom validation logic beyond the standard bean validation.

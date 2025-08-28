@@ -19,7 +19,6 @@ import tech.derbent.session.service.CSessionService;
 		"spring.datasource.url=jdbc:h2:mem:testdb", "spring.jpa.hibernate.ddl-auto=create-drop"
 })
 public class CActivityStatusViewUITest {
-
 	@Autowired
 	private CActivityStatusService activityStatusService;
 	@Autowired
@@ -45,7 +44,7 @@ public class CActivityStatusViewUITest {
 		assertDoesNotThrow(() -> {
 			final CActivityStatusView view = new CActivityStatusView(activityStatusService, sessionService, screenService);
 			// This simulates the layout creation that happens during navigation
-			view.createDetailsLayout();
+			view.updateDetailsComponent();
 		}, "Details layout creation should not throw binding errors");
 	}
 
@@ -55,7 +54,7 @@ public class CActivityStatusViewUITest {
 	void testActivityStatusViewPopulateForm() {
 		assertDoesNotThrow(() -> {
 			final CActivityStatusView view = new CActivityStatusView(activityStatusService, sessionService, screenService);
-			view.createDetailsLayout();
+			view.updateDetailsComponent();
 			// Create a test entity
 			final tech.derbent.activities.domain.CActivityStatus testStatus = new tech.derbent.activities.domain.CActivityStatus();
 			testStatus.setName("Test Status");

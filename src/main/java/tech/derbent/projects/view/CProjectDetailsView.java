@@ -18,10 +18,10 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.domains.IIconSet;
-import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
 import tech.derbent.abstracts.views.components.CButton;
 import tech.derbent.abstracts.views.components.CVerticalLayout;
 import tech.derbent.abstracts.views.grids.CGrid;
+import tech.derbent.abstracts.views.grids.CGridViewBaseNamed;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.screens.service.CScreenService;
@@ -33,7 +33,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Project Details")
 @Menu (order = 1.3, icon = "class:tech.derbent.projects.view.CProjectDetailsView", title = "Project.Project Details")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CProjectDetailsView extends CAbstractNamedEntityPage<CProject> implements IIconSet {
+public class CProjectDetailsView extends CGridViewBaseNamed<CProject> implements IIconSet {
 	// Layout modes enum
 	public enum LayoutMode {
 		ENHANCED_CARDS("Enhanced Cards", "layout-enhanced-cards"), KANBAN_BOARD("Kanban Board", "layout-kanban-board"),
@@ -249,37 +249,6 @@ public class CProjectDetailsView extends CAbstractNamedEntityPage<CProject> impl
 		final CVerticalLayout formLayout = CEntityFormBuilder.buildForm(CProject.class, getBinder());
 		dashboardLayout.add(formLayout);
 		getBaseDetailsLayout().add(dashboardLayout);
-	}
-
-	@Override
-	protected void createDetailsLayout() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
-		LOGGER.info("Creating details layout for mode: " + (currentLayoutMode != null ? currentLayoutMode.getDisplayName() : "Default"));
-		// Clear previous layout
-		getBaseDetailsLayout().removeAll();
-		// Default to enhanced cards if currentLayoutMode is null
-		final LayoutMode layoutToUse = currentLayoutMode != null ? currentLayoutMode : LayoutMode.ENHANCED_CARDS;
-		switch (layoutToUse) {
-		case ENHANCED_CARDS:
-			createEnhancedCardsLayout();
-			break;
-		case KANBAN_BOARD:
-			createKanbanBoardLayout();
-			break;
-		case CARD_GRID:
-			createCardGridLayout();
-			break;
-		case COMPACT_SIDEBAR:
-			createCompactSidebarLayout();
-			break;
-		case DASHBOARD_WIDGETS:
-			createDashboardWidgetsLayout();
-			break;
-		case TIMELINE_VIEW:
-			createTimelineViewLayout();
-			break;
-		default:
-			createEnhancedCardsLayout();
-		}
 	}
 
 	@Override
@@ -595,10 +564,10 @@ public class CProjectDetailsView extends CAbstractNamedEntityPage<CProject> impl
 	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
 
-	private void refreshLayout() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+	private void refreshLayout() throws Exception {
 		LOGGER.info("Switching to layout mode: " + currentLayoutMode.getDisplayName());
 		// createGridForEntity();
-		createDetailsLayout();
+		updateDetailsComponent();
 		refreshGrid();
 	}
 
@@ -624,6 +593,9 @@ public class CProjectDetailsView extends CAbstractNamedEntityPage<CProject> impl
 				} catch (NoSuchMethodException | SecurityException | IllegalAccessException | InvocationTargetException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+				} catch (final Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 		});
@@ -640,6 +612,37 @@ public class CProjectDetailsView extends CAbstractNamedEntityPage<CProject> impl
 			// If there's an existing toolbar, add to it, otherwise create new one This
 			// depends on the parent class implementation
 			LOGGER.info("Layout selector added to toolbar");
+		}
+	}
+
+	@Override
+	protected void updateDetailsComponent() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+		LOGGER.info("Creating details layout for mode: " + (currentLayoutMode != null ? currentLayoutMode.getDisplayName() : "Default"));
+		// Clear previous layout
+		getBaseDetailsLayout().removeAll();
+		// Default to enhanced cards if currentLayoutMode is null
+		final LayoutMode layoutToUse = currentLayoutMode != null ? currentLayoutMode : LayoutMode.ENHANCED_CARDS;
+		switch (layoutToUse) {
+		case ENHANCED_CARDS:
+			createEnhancedCardsLayout();
+			break;
+		case KANBAN_BOARD:
+			createKanbanBoardLayout();
+			break;
+		case CARD_GRID:
+			createCardGridLayout();
+			break;
+		case COMPACT_SIDEBAR:
+			createCompactSidebarLayout();
+			break;
+		case DASHBOARD_WIDGETS:
+			createDashboardWidgetsLayout();
+			break;
+		case TIMELINE_VIEW:
+			createTimelineViewLayout();
+			break;
+		default:
+			createEnhancedCardsLayout();
 		}
 	}
 }

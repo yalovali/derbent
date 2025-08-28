@@ -9,8 +9,8 @@ import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.services.CAbstractNamedEntityService;
-import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.abstracts.views.grids.CGrid;
+import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.gannt.domain.CGanntViewEntity;
 import tech.derbent.screens.service.CScreenService;
 import tech.derbent.session.service.CSessionService;
@@ -19,7 +19,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Gannt Views Master Detail")
 @Menu (order = 1.5, icon = "class:tech.derbent.gannt.view.CGanntViewEntityView", title = "Project.GanntViews")
 @PermitAll
-public class CGanntViewEntityView extends CProjectAwareMDPage<CGanntViewEntity> {
+public class CGanntViewEntityView extends CGridViewBaseProject<CGanntViewEntity> {
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() {

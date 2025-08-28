@@ -8,8 +8,8 @@ import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.domains.IIconSet;
-import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.abstracts.views.grids.CGrid;
+import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.activities.domain.CActivityType;
 import tech.derbent.activities.service.CActivityTypeService;
 import tech.derbent.screens.service.CScreenService;
@@ -21,8 +21,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Activity Types")
 @Menu (order = 10.4, icon = "class:tech.derbent.activities.view.CActivityTypeView", title = "Types.Activity Types")
 @PermitAll
-public class CActivityTypeView extends CProjectAwareMDPage<CActivityType> implements IIconSet {
-
+public class CActivityTypeView extends CGridViewBaseProject<CActivityType> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() { return CActivityType.getIconColorCode(); }

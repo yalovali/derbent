@@ -9,23 +9,21 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.domains.IIconSet;
-import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.abstracts.views.components.CButton;
 import tech.derbent.abstracts.views.grids.CGrid;
+import tech.derbent.abstracts.views.grids.CGridViewBaseDBEntity;
 import tech.derbent.administration.domain.CCompanySettings;
 import tech.derbent.administration.service.CCompanySettingsService;
 import tech.derbent.base.ui.dialogs.CConfirmationDialog;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
 import tech.derbent.session.service.CSessionService;
 
-/** CCompanySettingsView - View for managing company-wide administration settings. Layer: View (MVC) Provides a comprehensive interface for
- * administrators to configure company-wide settings including workflow defaults, working hours, notifications, project management preferences, and UI
- * customizations. Each company has one settings record. */
-@Route ("administration/company-settings/:company_settings_id?/:action?(edit)")
+// @Route ("administration/company-settings/:company_settings_id?/:action?(edit)")
+@Route ("administration/company-settings")
 @PageTitle ("Company Administration Settings")
 @Menu (order = 3.5, icon = "class:tech.derbent.administration.view.CCompanySettingsView", title = "Settings.Company Settings")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CCompanySettingsView extends CAbstractEntityDBPage<CCompanySettings> implements IIconSet {
+public class CCompanySettingsView extends CGridViewBaseDBEntity<CCompanySettings> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() {
@@ -61,22 +59,6 @@ public class CCompanySettingsView extends CAbstractEntityDBPage<CCompanySettings
 							() -> performReset(currentEntity));
 			confirmDialog.open();
 		});
-	}
-
-	/** Creates the entity details form using AMetaData annotations. The form is automatically generated based on the CCompanySettings entity
-	 * annotations. */
-	@Override
-	protected void createDetailsLayout() {
-		try {
-			// Create form using AMetaData annotations and CEntityFormBuilder
-			final var formLayout = CEntityFormBuilder.buildForm(CCompanySettings.class, getBinder());
-			// Add form to base details layout
-			getBaseDetailsLayout().add(formLayout);
-			LOGGER.debug("Entity details form created successfully for CCompanySettings");
-		} catch (final Exception e) {
-			LOGGER.error("Error creating entity details form for CCompanySettings", e);
-			Notification.show("Error creating form: " + e.getMessage(), 3000, Notification.Position.MIDDLE);
-		}
 	}
 
 	@Override
@@ -175,5 +157,21 @@ public class CCompanySettingsView extends CAbstractEntityDBPage<CCompanySettings
 	private void showWarningDialog(final String message) {
 		final var warningDialog = new CWarningDialog(message);
 		warningDialog.open();
+	}
+
+	/** Creates the entity details form using AMetaData annotations. The form is automatically generated based on the CCompanySettings entity
+	 * annotations. */
+	@Override
+	protected void updateDetailsComponent() {
+		try {
+			// Create form using AMetaData annotations and CEntityFormBuilder
+			final var formLayout = CEntityFormBuilder.buildForm(CCompanySettings.class, getBinder());
+			// Add form to base details layout
+			getBaseDetailsLayout().add(formLayout);
+			LOGGER.debug("Entity details form created successfully for CCompanySettings");
+		} catch (final Exception e) {
+			LOGGER.error("Error creating entity details form for CCompanySettings", e);
+			Notification.show("Error creating form: " + e.getMessage(), 3000, Notification.Position.MIDDLE);
+		}
 	}
 }

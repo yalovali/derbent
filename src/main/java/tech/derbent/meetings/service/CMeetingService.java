@@ -14,23 +14,15 @@ import tech.derbent.meetings.domain.CMeetingStatus;
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CMeetingService extends CEntityOfProjectService<CMeeting> implements CKanbanService<CMeeting, CMeetingStatus> {
-
 	CMeetingService(final CMeetingRepository repository, final Clock clock) {
 		super(repository, clock);
 	}
 
 	@Override
-	public List<CMeetingStatus> getAllStatuses() {
-		// This would need to be implemented by calling the status service For minimal
-		// changes, returning empty list for now
-		return List.of();
-	}
+	public List<CMeetingStatus> getAllStatuses() { return List.of(); }
 
-	// CKanbanService implementation methods
 	@Override
 	public Map<CMeetingStatus, List<CMeeting>> getEntitiesGroupedByStatus(final Long projectId) {
-		// For minimal changes, returning empty map for now This would need proper
-		// implementation by project ID
 		return Map.of();
 	}
 

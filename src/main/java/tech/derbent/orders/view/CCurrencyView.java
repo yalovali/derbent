@@ -8,8 +8,8 @@ import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.domains.IIconSet;
-import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.abstracts.views.grids.CGrid;
+import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.orders.domain.CCurrency;
 import tech.derbent.orders.service.CCurrencyService;
 import tech.derbent.screens.service.CScreenService;
@@ -19,7 +19,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Orders Master Detail")
 @Menu (order = 7.1, icon = "class:tech.derbent.orders.view.CCurrencyView", title = "Types.Currencies")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CCurrencyView extends CProjectAwareMDPage<CCurrency> implements IIconSet {
+public class CCurrencyView extends CGridViewBaseProject<CCurrency> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() { return CCurrency.getIconColorCode(); }

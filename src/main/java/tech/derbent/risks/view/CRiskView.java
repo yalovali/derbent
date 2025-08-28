@@ -8,8 +8,8 @@ import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.domains.IIconSet;
-import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.abstracts.views.grids.CGrid;
+import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.risks.domain.CRisk;
 import tech.derbent.risks.service.CRiskService;
 import tech.derbent.risks.service.CRiskViewService;
@@ -20,7 +20,7 @@ import tech.derbent.session.service.CSessionService;
 @Route ("criskview/:risk_id?/:action?(edit)")
 @Menu (order = 1.3, icon = "class:tech.derbent.risks.view.CRiskView", title = "Project.Risks")
 @PermitAll
-public class CRiskView extends CProjectAwareMDPage<CRisk> implements IIconSet {
+public class CRiskView extends CGridViewBaseProject<CRisk> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 	private static final String ENTITY_ID_FIELD = "risk_id";
 
@@ -32,11 +32,6 @@ public class CRiskView extends CProjectAwareMDPage<CRisk> implements IIconSet {
 
 	public CRiskView(final CRiskService entityService, final CSessionService sessionService, final CScreenService screenService) {
 		super(CRisk.class, entityService, sessionService, screenService);
-	}
-
-	@Override
-	protected void createDetailsLayout() throws Exception {
-		buildScreen(CRiskViewService.BASE_VIEW_NAME);
 	}
 
 	@Override
@@ -54,4 +49,9 @@ public class CRiskView extends CProjectAwareMDPage<CRisk> implements IIconSet {
 
 	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
+
+	@Override
+	protected void updateDetailsComponent() throws Exception {
+		buildScreen(CRiskViewService.BASE_VIEW_NAME);
+	}
 }

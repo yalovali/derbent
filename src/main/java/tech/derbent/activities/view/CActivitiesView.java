@@ -9,8 +9,8 @@ import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.views.CAccordionDBEntity;
-import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.abstracts.views.grids.CGrid;
+import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
 import tech.derbent.comments.service.CCommentService;
@@ -22,7 +22,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Activity Master Detail")
 @Menu (order = 1.1, icon = "class:tech.derbent.activities.view.CActivitiesView", title = "Project.Activities")
 @PermitAll // When security is enabled, allow all authenticated users
-public final class CActivitiesView extends CProjectAwareMDPage<CActivity> {
+public final class CActivitiesView extends CGridViewBaseProject<CActivity> {
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() {
@@ -41,7 +41,25 @@ public final class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 	}
 
 	@Override
-	protected void createDetailsLayout() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+	public void createGridForEntity(final CGrid<CActivity> grid) {
+		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
+		grid.addColumnEntityNamed(CEntityOfProject::getProject, "Project");
+		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");
+		grid.addColumnEntityNamed(CActivity::getActivityType, "Type");
+		grid.addColumnEntityNamed(CActivity::getStatus, "Status");
+		grid.addDateColumn(CActivity::getStartDate, "Start Time", "meetingDate");
+		grid.addDateColumn(CActivity::getDueDate, "End Time", "endDate");
+		// grid.addColumnEntityNamed(CActivity::getParentActivity, "Parent");
+		grid.addColumn(CEntityNamed::getDescriptionShort, "Description");
+	}
+
+	@Override
+	protected String getEntityRouteIdField() { // TODO Auto-generated method stub
+		return ENTITY_ID_FIELD;
+	}
+
+	@Override
+	protected void updateDetailsComponent() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
 		// getBaseDetailsLayout().add(CEntityFormBuilder.buildForm(CActivity.class,
 		// getBinder(), null));
 		CAccordionDBEntity<CActivity> panel;
@@ -62,23 +80,5 @@ public final class CActivitiesView extends CProjectAwareMDPage<CActivity> {
 		// Add comments panel
 		panel = new CPanelActivityComments(getCurrentEntity(), getBinder(), (CActivityService) entityService, commentService, sessionService);
 		addAccordionPanel(panel);
-	}
-
-	@Override
-	public void createGridForEntity(final CGrid<CActivity> grid) {
-		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
-		grid.addColumnEntityNamed(CEntityOfProject::getProject, "Project");
-		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");
-		grid.addColumnEntityNamed(CActivity::getActivityType, "Type");
-		grid.addColumnEntityNamed(CActivity::getStatus, "Status");
-		grid.addDateColumn(CActivity::getStartDate, "Start Time", "meetingDate");
-		grid.addDateColumn(CActivity::getDueDate, "End Time", "endDate");
-		// grid.addColumnEntityNamed(CActivity::getParentActivity, "Parent");
-		grid.addColumn(CEntityNamed::getDescriptionShort, "Description");
-	}
-
-	@Override
-	protected String getEntityRouteIdField() { // TODO Auto-generated method stub
-		return ENTITY_ID_FIELD;
 	}
 }

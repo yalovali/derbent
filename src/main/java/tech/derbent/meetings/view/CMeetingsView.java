@@ -17,8 +17,8 @@ import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.domains.IIconSet;
-import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.abstracts.views.grids.CGrid;
+import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.service.CMeetingService;
 import tech.derbent.meetings.service.CMeetingViewService;
@@ -29,8 +29,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Meeting Master Detail")
 @Menu (order = 1.4, icon = "class:tech.derbent.meetings.view.CMeetingsView", title = "Project.Meetings")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CMeetingsView extends CProjectAwareMDPage<CMeeting> implements IIconSet {
-
+public class CMeetingsView extends CGridViewBaseProject<CMeeting> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() {
@@ -44,11 +43,6 @@ public class CMeetingsView extends CProjectAwareMDPage<CMeeting> implements IIco
 
 	public CMeetingsView(final CMeetingService entityService, final CSessionService sessionService, final CScreenService screenService) {
 		super(CMeeting.class, entityService, sessionService, screenService);
-	}
-
-	@Override
-	protected void createDetailsLayout() throws Exception {
-		buildScreen(CMeetingViewService.BASE_VIEW_NAME);
 	}
 
 	@Override
@@ -160,5 +154,10 @@ public class CMeetingsView extends CProjectAwareMDPage<CMeeting> implements IIco
 		// Insert toolbar at the beginning of the page
 		getElement().insertChild(0, toolbarWrapper.getElement());
 		LOGGER.info("Search toolbar added to meetings view");
+	}
+
+	@Override
+	protected void updateDetailsComponent() throws Exception {
+		buildScreen(CMeetingViewService.BASE_VIEW_NAME);
 	}
 }

@@ -11,8 +11,8 @@ import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.domains.IIconSet;
-import tech.derbent.abstracts.views.CProjectAwareMDPage;
 import tech.derbent.abstracts.views.grids.CGrid;
+import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.screens.service.CScreenService;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUserType;
@@ -24,7 +24,7 @@ import tech.derbent.users.service.CUserTypeService;
 @PageTitle ("User Types")
 @Menu (order = 10.3, icon = "class:tech.derbent.users.view.CUserTypeView", title = "Settings.User Types")
 @PermitAll
-public class CUserTypeView extends CProjectAwareMDPage<CUserType> implements IIconSet {
+public class CUserTypeView extends CGridViewBaseProject<CUserType> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 
 	public static String getIconColorCode() { return CUserType.getIconColorCode(); }
@@ -35,14 +35,6 @@ public class CUserTypeView extends CProjectAwareMDPage<CUserType> implements IIc
 
 	public CUserTypeView(final CUserTypeService entityService, final CSessionService sessionService, final CScreenService screenService) {
 		super(CUserType.class, entityService, sessionService, screenService);
-	}
-
-	@Override
-	protected void createDetailsLayout() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
-		final Div detailsLayout = new Div();
-		detailsLayout.setClassName("editor-layout");
-		detailsLayout.add(CEntityFormBuilder.buildForm(CUserType.class, getBinder()));
-		getBaseDetailsLayout().add(detailsLayout);
 	}
 
 	@Override
@@ -57,4 +49,12 @@ public class CUserTypeView extends CProjectAwareMDPage<CUserType> implements IIc
 
 	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
+
+	@Override
+	protected void updateDetailsComponent() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+		final Div detailsLayout = new Div();
+		detailsLayout.setClassName("editor-layout");
+		detailsLayout.add(CEntityFormBuilder.buildForm(CUserType.class, getBinder()));
+		getBaseDetailsLayout().add(detailsLayout);
+	}
 }

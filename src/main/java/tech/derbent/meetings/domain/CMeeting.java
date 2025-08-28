@@ -30,7 +30,6 @@ import tech.derbent.users.domain.CUser;
 // in lowercase
 @AttributeOverride (name = "id", column = @Column (name = "meeting_id"))
 public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntity {
-
 	public static String getIconColorCode() {
 		return "#28a745"; // Green color for meeting entities
 	}
@@ -107,7 +106,7 @@ public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntit
 			order = 12, dataProviderBean = "CUserService"
 	)
 	private Set<CUser> attendees = new HashSet<>();
-	@ManyToMany (fetch = FetchType.LAZY)
+	@ManyToMany (fetch = FetchType.EAGER)
 	@JoinTable (name = "cmeeting_participants", joinColumns = @JoinColumn (name = "meeting_id"), inverseJoinColumns = @JoinColumn (name = "user_id"))
 	@AMetaData (
 			displayName = "Participants", required = false, readOnly = false, description = "Users invited to participate in the meeting",
