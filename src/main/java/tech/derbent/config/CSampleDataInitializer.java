@@ -8,14 +8,14 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Component;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import tech.derbent.abstracts.components.CTimer;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.activities.domain.CActivity;
@@ -33,7 +33,6 @@ import tech.derbent.decisions.domain.CDecision;
 import tech.derbent.decisions.domain.CDecisionStatus;
 import tech.derbent.decisions.service.CDecisionService;
 import tech.derbent.decisions.service.CDecisionStatusService;
-import tech.derbent.decisions.service.CDecisionTypeService;
 import tech.derbent.decisions.service.CDecisionViewService;
 import tech.derbent.gannt.service.CGanntViewEntityService;
 import tech.derbent.meetings.domain.CMeeting;
@@ -43,10 +42,7 @@ import tech.derbent.meetings.service.CMeetingStatusService;
 import tech.derbent.meetings.service.CMeetingTypeService;
 import tech.derbent.meetings.service.CMeetingViewService;
 import tech.derbent.orders.domain.CCurrency;
-import tech.derbent.orders.service.CApprovalStatusService;
 import tech.derbent.orders.service.CCurrencyService;
-import tech.derbent.orders.service.COrderService;
-import tech.derbent.orders.service.COrderStatusService;
 import tech.derbent.orders.service.COrderTypeService;
 import tech.derbent.orders.service.COrdersViewService;
 import tech.derbent.projects.domain.CProject;
@@ -66,15 +62,7 @@ import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.CUserTypeService;
 import tech.derbent.users.service.CUserViewService;
 
-/** CSampleDataInitializer - Enhanced sample data initializer following coding guidelines. Layer: Configuration (MVC) This component runs after the
- * application starts and creates comprehensive sample data for core entities if the database is empty. Follows the coding guidelines: - Class name
- * starts with "C" as per coding standards - Creates at least 4 sample items per core entity type - Uses proper service layer for entity creation -
- * Implements proper error handling and logging - Uses standard test123 password for all users Core entities initialized: - CCompany (4 companies with
- * full details) - CUser (5+ users with different roles and companies) - CProject (4 projects with different scopes) - CActivity (4+ comprehensive
- * activities) - Supporting type entities as available */
-@Component
-@Profile ("!test")
-public class CSampleDataInitializer implements ApplicationRunner {
+public class CSampleDataInitializer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSampleDataInitializer.class);
 	// Standard password for all users as per coding guidelines
 	private static final String STANDARD_PASSWORD = "test123";
@@ -102,54 +90,86 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	private final CScreenService screenService;
 	private final CScreenLinesService screenLinesService;
 	private final CGanntViewEntityService ganntViewEntityService;
+	private final JdbcTemplate jdbcTemplate;
+	@PersistenceContext
+	private EntityManager em;
 
-	public CSampleDataInitializer(final CProjectService projectService, final CUserService userService, final CActivityService activityService,
-			final CUserTypeService userTypeService, final CActivityTypeService activityTypeService, final CMeetingTypeService meetingTypeService,
-			final CDecisionTypeService decisionTypeService, final COrderTypeService orderTypeService, final CCompanyService companyService,
-			final CCommentService commentService, final CCommentPriorityService commentPriorityService, final CMeetingService meetingService,
-			final CRiskService riskService, final CMeetingStatusService meetingStatusService, final CDecisionStatusService decisionStatusService,
-			final CActivityStatusService activityStatusService, final COrderStatusService orderStatusService,
-			final CApprovalStatusService approvalStatusService, final CDecisionService decisionService, final COrderService orderService,
-			final CCurrencyService currencyService, final CScreenService screenService, final CScreenLinesService screenLinesService,
-			final CGanntViewEntityService ganntViewEntityService) {
-		this.projectService = projectService;
-		this.userService = userService;
-		this.activityService = activityService;
-		this.userTypeService = userTypeService;
-		this.activityTypeService = activityTypeService;
-		this.meetingTypeService = meetingTypeService;
-		this.orderTypeService = orderTypeService;
-		this.companyService = companyService;
-		this.commentService = commentService;
-		this.commentPriorityService = commentPriorityService;
-		this.meetingService = meetingService;
-		this.riskService = riskService;
-		this.meetingStatusService = meetingStatusService;
-		this.decisionStatusService = decisionStatusService;
-		this.activityStatusService = activityStatusService;
-		this.decisionService = decisionService;
-		this.currencyService = currencyService;
-		this.screenService = screenService;
-		this.screenLinesService = screenLinesService;
-		this.ganntViewEntityService = ganntViewEntityService;
+	public CSampleDataInitializer() {
+		this.projectService = CSpringContext.getBean(CProjectService.class);
+		this.userService = CSpringContext.getBean(CUserService.class);
+		this.activityService = CSpringContext.getBean(CActivityService.class);
+		this.userTypeService = CSpringContext.getBean(CUserTypeService.class);
+		this.activityTypeService = CSpringContext.getBean(CActivityTypeService.class);
+		this.meetingTypeService = CSpringContext.getBean(CMeetingTypeService.class);
+		this.orderTypeService = CSpringContext.getBean(COrderTypeService.class);
+		this.companyService = CSpringContext.getBean(CCompanyService.class);
+		this.commentService = CSpringContext.getBean(CCommentService.class);
+		this.commentPriorityService = CSpringContext.getBean(CCommentPriorityService.class);
+		this.meetingService = CSpringContext.getBean(CMeetingService.class);
+		this.riskService = CSpringContext.getBean(CRiskService.class);
+		this.meetingStatusService = CSpringContext.getBean(CMeetingStatusService.class);
+		this.decisionStatusService = CSpringContext.getBean(CDecisionStatusService.class);
+		this.activityStatusService = CSpringContext.getBean(CActivityStatusService.class);
+		this.decisionService = CSpringContext.getBean(CDecisionService.class);
+		this.currencyService = CSpringContext.getBean(CCurrencyService.class);
+		this.screenService = CSpringContext.getBean(CScreenService.class);
+		this.screenLinesService = CSpringContext.getBean(CScreenLinesService.class);
+		this.ganntViewEntityService = CSpringContext.getBean(CGanntViewEntityService.class);
+		final DataSource ds = CSpringContext.getBean(DataSource.class);
+		this.jdbcTemplate = new JdbcTemplate(ds);
 	}
 
-	/** Clears all sample data from the database to prepare for fresh initialization. This method ensures that restarting the application multiple
-	 * times doesn't create duplicate sample data. Note: This is a simplified cleanup that shows the intent. In a production environment, consider
-	 * using database scripts or admin interfaces for cleanup. */
 	@Transactional
 	private void clearSampleData() {
-		LOGGER.info("Clearing existing sample data from database");
+		LOGGER.warn("Clearing sample data from database (forced)");
 		try {
-			// For this implementation, we'll log a warning and rely on the
-			// isDatabaseEmpty() check to prevent duplicate initialization
-			LOGGER.warn("Sample data cleanup requested but not fully implemented.");
-			LOGGER.warn("Consider manually clearing the database or using --force-init carefully.");
-			LOGGER.warn("The isDatabaseEmpty() check should prevent most duplicate data issues.");
-			// TODO: Implement proper cleanup if needed for production use This could
-			// involve: 1. Using native SQL queries to delete in proper order 2. Using
-			// repository.deleteAll() if available 3. Using database cascade delete rules
-			// 4. Or requiring manual database cleanup
+			// ---- 1) PostgreSQL yolu: public şemadaki tabloları topla ve TRUNCATE et
+			try {
+				final List<String> tableNames = jdbcTemplate.queryForList("""
+						SELECT tablename
+						FROM pg_tables
+						WHERE schemaname = 'public'
+						  AND tablename NOT IN ('flyway_schema_history')
+						""", String.class);
+				if (!tableNames.isEmpty()) {
+					// Tabloları güvenli biçimde tırnakla ve join et
+					final List<String> quoted = tableNames.stream().map(t -> "\"" + t + "\"").toList();
+					final String joined = String.join(", ", quoted);
+					final String sql = "TRUNCATE TABLE " + joined + " RESTART IDENTITY CASCADE";
+					LOGGER.warn("Executing: {}", sql);
+					jdbcTemplate.execute(sql);
+					LOGGER.info("All public tables truncated (PostgreSQL).");
+					return; // İş bitti
+				} else {
+					LOGGER.warn("No user tables found to truncate in public schema.");
+				}
+			} catch (final Exception pgEx) {
+				LOGGER.warn("PostgreSQL truncate path failed or DB is not PostgreSQL. Falling back to JPA deletes. Cause: {}", pgEx.getMessage());
+			}
+			// ---- 2) Fallback: JPA batch silme (FK sırasına dikkat)
+			commentService.deleteAllInBatch();
+			commentPriorityService.deleteAllInBatch();
+			meetingService.deleteAllInBatch();
+			meetingStatusService.deleteAllInBatch();
+			meetingTypeService.deleteAllInBatch();
+			decisionService.deleteAllInBatch();
+			decisionStatusService.deleteAllInBatch();
+			// decisionTypeService.deleteAllInBatch(); // ekleyeceksen
+			activityService.deleteAllInBatch();
+			activityStatusService.deleteAllInBatch();
+			activityTypeService.deleteAllInBatch();
+			riskService.deleteAllInBatch();
+			screenLinesService.deleteAllInBatch();
+			screenService.deleteAllInBatch();
+			currencyService.deleteAllInBatch();
+			orderTypeService.deleteAllInBatch();
+			// orderStatusService.deleteAllInBatch(); // ekleyeceksen
+			userService.deleteAllInBatch();
+			userTypeService.deleteAllInBatch();
+			companyService.deleteAllInBatch();
+			projectService.deleteAllInBatch();
+			ganntViewEntityService.deleteAllInBatch();
+			LOGGER.info("Fallback JPA deleteAllInBatch completed.");
 		} catch (final Exception e) {
 			LOGGER.error("Error during sample data cleanup", e);
 			throw new RuntimeException("Failed to clear sample data", e);
@@ -218,9 +238,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	/** Creates additional activities for Digital Transformation Initiative project. */
 	private void createAdditionalDigitalTransformationActivities() {
 		final CProject project = projectService.findByName("Digital Transformation Initiative").orElseThrow();
-		if (project == null) {
-			return;
-		}
 		// Frontend Development Activity
 		final CActivity frontendDev = new CActivity("Frontend Development", project);
 		final CActivityType developmentType = activityTypeService.findByNameAndProject("Development", project).orElse(null);
@@ -265,9 +282,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	/** Creates additional activities for Infrastructure Modernization project. */
 	private void createAdditionalInfrastructureActivities() {
 		final CProject project = projectService.findByName("Infrastructure Modernization").orElseThrow();
-		if (project == null) {
-			return;
-		}
 		// Security Audit Activity
 		final CActivity securityAudit = new CActivity("Security Audit", project);
 		final CActivityType researchType = activityTypeService.findByNameAndProject("Research", project).orElseThrow();
@@ -313,9 +327,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	/** Creates additional activities for Product Development Phase 2 project. */
 	private void createAdditionalProductDevelopmentActivities() {
 		final CProject project = projectService.findByName("Product Development Phase 2").orElseThrow();
-		if (project == null) {
-			return;
-		}
 		// Code Review Activity
 		final CActivity codeReview = new CActivity("Code Review Process", project);
 		final CActivityType testingType = activityTypeService.findByNameAndProject("Testing", project).orElseThrow();
@@ -379,10 +390,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	/** Creates backend development activity. */
 	private void createBackendDevActivity() {
 		final CProject project = projectService.findByName("Digital Transformation Initiative").orElseThrow();
-		if (project == null) {
-			LOGGER.warn("Project 'Digital Transformation Initiative' not found, skipping backend activity");
-			return;
-		}
 		// Create the activity using new auxiliary methods
 		final CActivity backendDev = new CActivity("Backend API Development", project);
 		// Find and set the activity type
@@ -419,9 +426,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	private void createCommentPriority(final String name, final String description, final String color, final Integer priorityLevel,
 			final boolean isDefault, final int sortOrder) {
 		final CProject project = projectService.findByName("Digital Transformation Initiative").orElseThrow();
-		if (project == null) {
-			LOGGER.warn("Project not found for comment priority creation, using null");
-		}
 		final CCommentPriority priority = new CCommentPriority(name, project, color, sortOrder);
 		priority.setDescription(description);
 		priority.setPriorityLevel(priorityLevel);
@@ -444,10 +448,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 	private void createCriticalSecurityRisk() {
 		final CProject project = projectService.findByName("Customer Experience Enhancement").orElseThrow();
-		if (project == null) {
-			LOGGER.warn("Project not found for security risk");
-			return;
-		}
 		final CRisk risk = new CRisk("Data Privacy Compliance Gaps", project);
 		risk.setRiskSeverity(ERiskSeverity.CRITICAL);
 		risk.setDescription("Current implementation may not fully comply with GDPR and data protection regulations");
@@ -480,10 +480,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	/** Creates high priority technical risk. */
 	private void createHighPriorityTechnicalRisk() {
 		final CProject project = projectService.findByName("Digital Transformation Initiative").orElseThrow();
-		if (project == null) {
-			LOGGER.warn("Project not found for technical risk");
-			return;
-		}
 		final CRisk risk = new CRisk("Legacy System Integration Challenges", project);
 		risk.setRiskSeverity(ERiskSeverity.HIGH);
 		risk.setDescription("Integration with legacy systems may cause compatibility issues and performance bottlenecks");
@@ -493,10 +489,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	/** Creates low priority resource risk. */
 	private void createLowPriorityResourceRisk() {
 		final CProject project = projectService.findByName("Infrastructure Modernization").orElseThrow();
-		if (project == null) {
-			LOGGER.warn("Project not found for resource risk");
-			return;
-		}
 		final CRisk risk = new CRisk("Team Member Vacation Scheduling Conflicts", project);
 		risk.setRiskSeverity(ERiskSeverity.LOW);
 		risk.setDescription("Overlapping vacation schedules may temporarily reduce team capacity");
@@ -506,10 +498,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	/** Creates low priority schedule risk. */
 	private void createLowPriorityScheduleRisk() {
 		final CProject project = projectService.findByName("Digital Transformation Initiative").orElseThrow();
-		if (project == null) {
-			LOGGER.warn("Project not found for schedule risk");
-			return;
-		}
 		final CRisk risk = new CRisk("Minor Delays in Third-Party Integrations", project);
 		risk.setRiskSeverity(ERiskSeverity.LOW);
 		risk.setDescription("External vendor may experience minor delays in API delivery");
@@ -532,10 +520,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	/** Creates medium priority budget risk. */
 	private void createMediumPriorityBudgetRisk() {
 		final CProject project = projectService.findByName("Product Development Phase 2").orElseThrow();
-		if (project == null) {
-			LOGGER.warn("Project not found for budget risk");
-			return;
-		}
 		final CRisk risk = new CRisk("Budget Overrun Due to Scope Creep", project);
 		risk.setRiskSeverity(ERiskSeverity.MEDIUM);
 		risk.setDescription("Uncontrolled feature additions may cause budget to exceed allocated resources");
@@ -663,10 +647,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	/** Creates sample planning meeting. */
 	private void createSamplePlanningMeeting() {
 		final CProject project = projectService.findByName("Product Development Phase 2").orElseThrow();
-		if (project == null) {
-			LOGGER.warn("Project not found for planning meeting");
-			return;
-		}
 		final CMeeting meeting = new CMeeting("Sprint Planning - Q1 2024", project);
 		meeting.setDescription("Planning for next sprint with story estimation and task assignment");
 		meeting.setMeetingDate(LocalDateTime.now().plusDays(3).withHour(14).withMinute(0));
@@ -689,10 +669,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	/** Creates sample project meeting using auxiliary service methods. Demonstrates the use of auxiliary meeting service methods. */
 	private void createSampleProjectMeeting() {
 		final CProject project = projectService.findByName("Digital Transformation Initiative").orElseThrow();
-		if (project == null) {
-			LOGGER.warn("Project 'Digital Transformation Initiative' not found, skipping meeting creation");
-			return;
-		}
 		// Create the meeting using new auxiliary methods
 		final CMeeting meeting = new CMeeting("Weekly Project Status Meeting", project);
 		meeting.setDescription("Weekly status update on project progress, blockers discussion, and next steps planning");
@@ -721,10 +697,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	/** Creates sample retrospective meeting. */
 	private void createSampleRetrospectiveMeeting() {
 		final CProject project = projectService.findByName("Customer Experience Enhancement").orElseThrow();
-		if (project == null) {
-			LOGGER.warn("Project not found for retrospective meeting");
-			return;
-		}
 		final CMeeting meeting = new CMeeting("Sprint Retrospective", project);
 		meeting.setDescription("Team reflection on what went well, what could be improved, and action items");
 		meeting.setMeetingDate(LocalDateTime.now().minusDays(7).withHour(15).withMinute(0));
@@ -758,10 +730,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	/** Creates sample review meeting. */
 	private void createSampleReviewMeeting() {
 		final CProject project = projectService.findByName("Infrastructure Modernization").orElseThrow();
-		if (project == null) {
-			LOGGER.warn("Project not found for review meeting");
-			return;
-		}
 		final CMeeting meeting = new CMeeting("Code Review Session", project);
 		meeting.setDescription("Review of architectural changes and code quality improvements");
 		meeting.setMeetingDate(LocalDateTime.now().minusDays(2).withHour(10).withMinute(0));
@@ -799,10 +767,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	/** Creates sample standup meeting. */
 	private void createSampleStandupMeeting() {
 		final CProject project = projectService.findByName("Digital Transformation Initiative").orElseThrow();
-		if (project == null) {
-			LOGGER.warn("Project not found for standup meeting");
-			return;
-		}
 		final CMeeting meeting = new CMeeting("Daily Standup - Sprint 3", project);
 		meeting.setDescription("Daily progress sync and impediment discussion");
 		meeting.setMeetingDate(LocalDateTime.now().plusDays(1).withHour(9).withMinute(0));
@@ -884,10 +848,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	/** Creates system architecture design activity. */
 	private void createSystemArchitectureActivity() {
 		final CProject project = projectService.findByName("Infrastructure Modernization").orElseThrow();
-		if (project == null) {
-			LOGGER.warn("Project 'Infrastructure Modernization' not found, skipping architecture activity");
-			return;
-		}
 		// Create the activity using new auxiliary methods
 		final CActivity archDesign = new CActivity("System Architecture Design", project);
 		// Find and set the activity type
@@ -1000,10 +960,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	/** Creates technical documentation activity. */
 	private void createTechnicalDocumentationActivity() {
 		final CProject project = projectService.findByName("Customer Experience Enhancement").orElseThrow();
-		if (project == null) {
-			LOGGER.warn("Project 'Customer Experience Enhancement' not found, skipping documentation activity");
-			return;
-		}
 		// Create the activity using new auxiliary methods
 		final CActivity techDoc = new CActivity("Technical Documentation Update", project);
 		// Find and set the activity type
@@ -1042,10 +998,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	/** Creates UI testing activity. */
 	private void createUITestingActivity() {
 		final CProject project = projectService.findByName("Product Development Phase 2").orElseThrow();
-		if (project == null) {
-			LOGGER.warn("Project 'Product Development Phase 2' not found, skipping UI testing activity");
-			return;
-		}
 		// Create the activity using new auxiliary methods
 		final CActivity uiTesting = new CActivity("User Interface Testing", project);
 		// Find and set the activity type
@@ -1110,10 +1062,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			// Define meeting types to create for each project
 			for (final String projectName : projectNames) {
 				final CProject project = projectService.findByName(projectName).orElseThrow();
-				if (project == null) {
-					LOGGER.warn("Project '{}' not found, skipping meeting type creation", projectName);
-					continue;
-				}
 				createActivityStatus("Not Started", project, "Activity has not been started yet", "#95a5a6", false, 1);
 				createActivityStatus("In Progress", project, "Activity is currently in progress", "#3498db", false, 2);
 				createActivityStatus("On Hold", project, "Activity is temporarily on hold", "#f39c12", false, 3);
@@ -1152,10 +1100,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			// Create activity types for each project
 			for (final String projectName : projectNames) {
 				final CProject project = projectService.findByName(projectName).orElseThrow();
-				if (project == null) {
-					LOGGER.warn("Project '{}' not found, skipping activity type creation", projectName);
-					continue;
-				}
 				for (final String[] typeData : activityTypes) {
 					final CActivityType item = activityTypeService.createEntity(typeData[0], project);
 					item.setDescription(typeData[1]);
@@ -1208,10 +1152,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			// Define meeting types to create for each project
 			for (final String projectName : projectNames) {
 				final CProject project = projectService.findByName(projectName).orElseThrow();
-				if (project == null) {
-					LOGGER.warn("Project '{}' not found, skipping meeting type creation", projectName);
-					continue;
-				}
 				createDecisionStatus("Draft", project, "Decision is in draft state", "#95a5a6", false, 1);
 				createDecisionStatus("Under Review", project, "Decision is being reviewed", "#f39c12", false, 2);
 				createDecisionStatus("Approved", project, "Decision has been approved", "#27ae60", false, 3);
@@ -1258,10 +1198,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			// Define meeting types to create for each project
 			for (final String projectName : projectNames) {
 				final CProject project = projectService.findByName(projectName).orElseThrow();
-				if (project == null) {
-					LOGGER.warn("Project '{}' not found, skipping meeting type creation", projectName);
-					continue;
-				}
 				createMeetingStatus("Scheduled", project, "Meeting is scheduled but not yet started", "#3498db", false, 1);
 				createMeetingStatus("In Progress", project, "Meeting is currently in progress", "#f39c12", false, 2);
 				createMeetingStatus("Completed", project, "Meeting has been completed successfully", "#27ae60", true, 3);
@@ -1301,10 +1237,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			// Create meeting types for each project
 			for (final String projectName : projectNames) {
 				final CProject project = projectService.findByName(projectName).orElseThrow();
-				if (project == null) {
-					LOGGER.warn("Project '{}' not found, skipping meeting type creation", projectName);
-					continue;
-				}
 				for (final String[] typeData : meetingTypes) {
 					meetingTypeService.createEntity(typeData[0], project);
 				}
@@ -1345,10 +1277,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			// Create order types for each project
 			for (final String projectName : projectNames) {
 				final CProject project = projectService.findByName(projectName).orElseThrow();
-				if (project == null) {
-					LOGGER.warn("Project '{}' not found, skipping order type creation", projectName);
-					continue;
-				}
 				for (final String[] typeData : orderTypes) {
 					orderTypeService.createEntity(typeData[0], project);
 				}
@@ -1429,10 +1357,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			// Create user types for each project
 			for (final String projectName : projectNames) {
 				final CProject project = projectService.findByName(projectName).orElseThrow();
-				if (project == null) {
-					LOGGER.warn("Project '{}' not found, skipping user type creation", projectName);
-					continue;
-				}
 				for (final String[] typeData : userTypes) {
 					userTypeService.createEntity(typeData[0], project);
 				}
@@ -1444,12 +1368,10 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		}
 	}
 
-	/** Checks if the database is empty by counting users.
-	 * @return true if database is empty, false otherwise */
-	private boolean isDatabaseEmpty() {
-		final long userCount = userService.count();
-		LOGGER.info("User count in database: {}", userCount);
-		return userCount == 0;
+	public boolean isDatabaseEmpty() {
+		final long cnt = userService.count();
+		LOGGER.info("User count = {}", cnt);
+		return cnt == 0;
 	}
 
 	/** Loads profile picture data from the profile-pictures directory.
@@ -1512,28 +1434,10 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		}
 	}
 
-	@Override
-	@Transactional
-	public void run(final ApplicationArguments args) throws Exception {
-		LOGGER.info("CSampleDataInitializer.run called with ApplicationArguments: {}", args);
-		try {
-			// Check for force initialization flag
-			final boolean forceInit = args.containsOption("force-init");
-			// Check if database already has data - if so, skip initialization only on app
-			// startup unless force initialization is requested
-			if (!isDatabaseEmpty() && !forceInit) {
-				LOGGER.info("Database already contains data, skipping sample data initialization on startup");
-				return;
-			}
-			// Clear existing sample data if force initialization is requested
-			if (forceInit && !isDatabaseEmpty()) {
-				LOGGER.info("Force initialization requested - clearing existing sample data");
-				clearSampleData();
-			}
-			loadSampleData(); // Load sample data
-		} catch (final Exception e) {
-			LOGGER.error("Error during sample data initialization", e);
-			throw e;
-		}
+	public void reloadForced() {
+		LOGGER.info("Sample data reload (forced) started");
+		clearSampleData(); // <<<<< ÖNCE TEMİZLE
+		loadSampleData(); // <<<<< SONRA YENİDEN OLUŞTUR
+		LOGGER.info("Sample data reload (forced) finished");
 	}
 }

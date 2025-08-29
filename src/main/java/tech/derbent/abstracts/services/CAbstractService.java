@@ -121,6 +121,10 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		repository.deleteById(id);
 	}
 
+	public void deleteAllInBatch() {
+		repository.deleteAllInBatch();
+	}
+
 	/** Enhanced delete method that attempts soft delete using reflection before hard delete.
 	 * @param entity the entity to delete */
 	@Transactional

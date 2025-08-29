@@ -15,8 +15,8 @@ import tech.derbent.orders.service.CCurrencyService;
 import tech.derbent.screens.service.CScreenService;
 import tech.derbent.session.service.CSessionService;
 
-@Route ("ccurrencyview/:order_id?/:action?(edit)")
-@PageTitle ("Orders Master Detail")
+@Route ("ccurrencyview")
+@PageTitle ("Currencies")
 @Menu (order = 7.1, icon = "class:tech.derbent.orders.view.CCurrencyView", title = "Types.Currencies")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CCurrencyView extends CGridViewBaseProject<CCurrency> implements IIconSet {

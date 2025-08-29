@@ -5,7 +5,9 @@ import java.lang.reflect.Method;
 public class CIconSetLoader {
 	private static Method getClazz(final String className, final String methodName) throws ClassNotFoundException, NoSuchMethodException {
 		try {
-			final Class<?> clazz = Class.forName(className);
+			final ClassLoader cl = Thread.currentThread().getContextClassLoader();
+			final Class<?> clazz = Class.forName(className, true, cl != null ? cl : CIconSetLoader.class.getClassLoader());
+			// final Class<?> clazz = Class.forName(className);
 			if (!IIconSet.class.isAssignableFrom(clazz)) {
 				throw new RuntimeException("Class " + className + " does not implement CInterfaceIconSet");
 			}
@@ -15,7 +17,7 @@ public class CIconSetLoader {
 			}
 			return method;
 		} catch (final ClassNotFoundException e) {
-			throw new RuntimeException("Class " + className + " not found", e);
+			throw new RuntimeException("Class " + className + "  not found", e);
 		}
 	}
 

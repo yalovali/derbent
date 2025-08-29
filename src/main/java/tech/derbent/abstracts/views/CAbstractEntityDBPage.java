@@ -2,7 +2,11 @@ package tech.derbent.abstracts.views;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -18,6 +22,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
+import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import jakarta.annotation.PostConstruct;
 import tech.derbent.abstracts.components.CEnhancedBinder;
@@ -26,6 +31,7 @@ import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.interfaces.CLayoutChangeListener;
 import tech.derbent.abstracts.interfaces.CSearchable;
 import tech.derbent.abstracts.services.CAbstractService;
+import tech.derbent.abstracts.utils.CPageableUtils;
 import tech.derbent.abstracts.views.components.CButton;
 import tech.derbent.abstracts.views.components.CFlexLayout;
 import tech.derbent.abstracts.views.components.CVerticalLayout;
@@ -331,8 +337,30 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	public Div getDetailsTabLayout() { return detailsTabLayout; }
 
 	protected abstract String getEntityRouteIdField();
+	// protected abstract CallbackDataProvider<EntityClass, Void> getMasterQuery();
 
-	protected abstract CallbackDataProvider<EntityClass, Void> getMasterQuery();
+	protected CallbackDataProvider<EntityClass, Void> getMasterQuery() {
+		return new CallbackDataProvider<>(query -> {
+			// --- sort (manuel çeviri)
+			final List<QuerySortOrder> sortOrders = Optional.ofNullable(query.getSortOrders()).orElse(java.util.Collections.emptyList());
+			final Sort springSort = sortOrders.isEmpty() ? Sort.unsorted()
+					: Sort.by(sortOrders.stream().map(so -> new Sort.Order(
+							so.getDirection() == com.vaadin.flow.data.provider.SortDirection.DESCENDING ? Sort.Direction.DESC : Sort.Direction.ASC,
+							so.getSorted())).toList());
+			// --- paging
+			final int limit = query.getLimit();
+			final int offset = query.getOffset();
+			final int page = (limit > 0) ? (offset / limit) : 0;
+			final Pageable pageable = CPageableUtils.validateAndFix(PageRequest.of(page, Math.max(limit, 1), springSort));
+			final String term = (currentSearchText == null) ? "" : currentSearchText.trim();
+			// *** TEK KAYNAK: her zaman search'lü metodu kullan ***
+			return entityService.list(pageable, term).stream();
+		}, query -> {
+			final String term = (currentSearchText == null) ? "" : currentSearchText.trim();
+			final long total = entityService.list(PageRequest.of(0, 1), term).getTotalElements();
+			return (int) Math.min(total, Integer.MAX_VALUE);
+		});
+	}
 
 	/** Gets the search toolbar component, if available.
 	 * @return the search toolbar component, or null if entity doesn't support searching */

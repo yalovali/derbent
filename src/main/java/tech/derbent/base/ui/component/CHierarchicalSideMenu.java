@@ -42,17 +42,23 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		private final String path;
 		private final String targetLevelKey;
 		private final boolean isNavigation;
+		private final String iconColor;
 
-		public CMenuItem(final String name, final String iconName, final String path, final String targetLevelKey, final boolean isNavigation) {
+		public CMenuItem(final Class<? extends Component> clazz, final String name, final String iconName, final String path,
+				final String targetLevelKey, final boolean isNavigation) {
 			this.name = name;
 			if (iconName.startsWith("class:")) {
+				// get icon from class
 				this.iconName = CIconSetLoader.getIconFilename(iconName.replace("class:", ""));
 			} else {
+				// get icon directly
 				this.iconName = iconName;
 			}
 			this.path = path;
 			this.targetLevelKey = targetLevelKey;
 			this.isNavigation = isNavigation;
+			// get icon with full class name
+			this.iconColor = CIconSetLoader.getIconColorCode(clazz.getName());
 		}
 
 		public Component createComponent() {
@@ -65,12 +71,14 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			Icon icon;
 			if ((iconName != null) && !iconName.trim().isEmpty()) {
 				icon = new Icon(iconName);
-				// Apply colorful styling - no color needed, icons will use their natural
-				// colors
 			} else {
 				// Use a transparent placeholder icon to maintain consistent spacing
 				icon = VaadinIcon.CIRCLE.create();
 				icon.getStyle().set("visibility", "hidden");
+			}
+			// set color from iconColor if available
+			if ((iconColor != null) && !iconColor.trim().isEmpty()) {
+				icon.getStyle().set("color", iconColor);
 			}
 			icon.addClassNames(IconSize.MEDIUM);
 			icon.getStyle().set("min-width", "24px").set("min-height", "24px");
@@ -88,7 +96,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 				spacer.setWidthFull();
 				itemLayout.add(spacer);
 				itemLayout.setFlexGrow(1, spacer);
-				final Icon navIcon = VaadinIcon.CHEVRON_RIGHT.create();
+				final Icon navIcon = VaadinIcon.ANGLE_RIGHT.create();
 				navIcon.addClassNames(IconSize.MEDIUM);
 				navIcon.getStyle().set("color", "var(--lumo-primary-color)");
 				navIcon.getStyle().set("min-width", "24px").set("min-height", "24px");
@@ -137,20 +145,16 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			this.displayName = displayName;
 			this.parent = parent;
 			this.items = new ArrayList<>();
-			// LOGGER.debug("Created menu level: {} with display name: {}", levelKey,
-			// displayName);
 		}
 
-		public void addMenuItem(final String name, final String iconName, final String path) {
-			final CMenuItem item = new CMenuItem(name, iconName, path, null, false);
+		public void addMenuItem(final Class<? extends Component> clazz, final String name, final String iconName, final String path) {
+			final CMenuItem item = new CMenuItem(clazz, name, iconName, path, null, false);
 			items.add(item);
-			// LOGGER.debug("Added menu item '{}' to level '{}'", name, levelKey);
 		}
 
-		public void addNavigationItem(final String name, final String iconName, final String targetLevelKey) {
-			final CMenuItem item = new CMenuItem(name, iconName, null, targetLevelKey, true);
+		public void addNavigationItem(final Class<? extends Component> clazz, final String name, final String iconName, final String targetLevelKey) {
+			final CMenuItem item = new CMenuItem(clazz, name, iconName, null, targetLevelKey, true);
 			items.add(item);
-			// LOGGER.debug("Added navigation item '{}' to level '{}'", name, levelKey);
 		}
 
 		public Component createLevelComponent() {
@@ -229,16 +233,13 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 
 	/** Builds the menu hierarchy from route annotations. Parses menu entries in format: parentItem2.childItem1.childofchileitem1 */
 	private void buildMenuHierarchy() {
-		// LOGGER.debug("Building menu hierarchy from route annotations");
 		final var rootLevel = new CMenuLevel("root", "Homepage", null);
 		menuLevels.put("root", rootLevel);
 		// Get menu entries from MenuConfiguration
 		final var menuEntries = MenuConfiguration.getMenuEntries();
-		// LOGGER.debug("Processing {} menu entries", menuEntries.size());
 		for (final MenuEntry menuEntry : menuEntries) {
 			processMenuEntry(menuEntry);
 		}
-		// LOGGER.debug("Menu hierarchy built with {} levels", menuLevels.size());
 	}
 
 	/** Handles back button click events.
@@ -263,6 +264,8 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		final String title = menuEntry.title();
 		final String path = menuEntry.path();
 		final String icon = menuEntry.icon();
+		// get menu view class color
+		// final String iconColor = CIconSetLoader.getIconColorCode(menuEntry.menu);
 		Check.notBlank(title, "Menu entry title must not be blank");
 		// Split title by dots to get hierarchy levels (up to 4 levels)
 		final String[] titleParts = title.split("\\.");
@@ -277,9 +280,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 				final CMenuLevel newLevel = new CMenuLevel(childLevelKey, levelName, parentLevel);
 				menuLevels.put(childLevelKey, newLevel);
 				// Add navigation item to parent level
-				parentLevel.addNavigationItem(levelName, icon, childLevelKey);
-				// LOGGER.debug("Created level: {} under parent: {}", childLevelKey,
-				// currentLevelKey);
+				parentLevel.addNavigationItem(menuEntry.menuClass(), levelName, icon, childLevelKey);
 			}
 			currentLevelKey = childLevelKey;
 		}
@@ -288,9 +289,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			final String itemName = titleParts[levelCount - 1].trim();
 			final CMenuLevel targetLevel = menuLevels.get(currentLevelKey);
 			if (targetLevel != null) {
-				targetLevel.addMenuItem(itemName, icon, path);
-				// LOGGER.debug("Added menu item '{}' to level '{}'", itemName,
-				// currentLevelKey);
+				targetLevel.addMenuItem(menuEntry.menuClass(), itemName, icon, path);
 			}
 		}
 	}
@@ -306,7 +305,6 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	/** Shows the specified menu level with sliding animation.
 	 * @param levelKey The key of the level to show */
 	private void showLevel(final String levelKey) {
-		// LOGGER.debug("Showing menu level: {}", levelKey);
 		final CMenuLevel level = menuLevels.get(levelKey);
 		if (level == null) {
 			LOGGER.warn("Menu level '{}' not found", levelKey);
@@ -380,6 +378,5 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			}
 			navigationPath.add(currentPath);
 		}
-		// LOGGER.debug("Navigation path updated: {}", navigationPath);
 	}
 }
