@@ -1,9 +1,6 @@
 package tech.derbent.abstracts.views;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
@@ -11,7 +8,6 @@ import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.interfaces.CProjectChangeListener;
 import tech.derbent.abstracts.services.CAbstractNamedEntityService;
 import tech.derbent.abstracts.services.CEntityOfProjectService;
-import tech.derbent.abstracts.utils.PageableUtils;
 import tech.derbent.abstracts.views.components.CVerticalLayout;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.service.CScreenService;
@@ -69,26 +65,27 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
 			// Not fully initialized yet
 			return;
 		}
-		final Optional<CProject> activeProject = sessionService.getActiveProject();
-		if (activeProject.isPresent()) {
-			LOGGER.debug("Loading entities for active project: {}", activeProject.get().getName());
-			List<EntityClass> entities;
-			// Check if the entity service is for CEntityOfProject entities
-			if (entityService instanceof CEntityOfProjectService) {
-				final CEntityOfProjectService<EntityClass> projectService = (CEntityOfProjectService<EntityClass>) entityService;
-				entities = projectService.findEntriesByProject(activeProject.get(), PageableUtils.createSafe(0, 10)).getContent();
-			} else {
-				// For non-project entities, show all entities (they don't have project
-				// filtering)
-				LOGGER.debug("Entity service is not project-aware, showing all entities");
-				entities = entityService.list(PageableUtils.createSafe(0, 10)).getContent();
-			}
-			masterViewSection.getGrid().setItems(entities);
-		} else {
-			// If no active project, show empty grid
-			LOGGER.debug("No active project found, clearing grid items");
-			masterViewSection.getGrid().setItems(Collections.emptyList());
-		}
+		masterViewSection.getGrid().getDataProvider().refreshAll();
+		// final Optional<CProject> activeProject = sessionService.getActiveProject();
+		// if (activeProject.isPresent()) {
+		// LOGGER.debug("Loading entities for active project: {}", activeProject.get().getName());
+		// List<EntityClass> entities;
+		// // Check if the entity service is for CEntityOfProject entities
+		// if (entityService instanceof CEntityOfProjectService) {
+		// final CEntityOfProjectService<EntityClass> projectService = (CEntityOfProjectService<EntityClass>) entityService;
+		// entities = projectService.findEntriesByProject(activeProject.get(), CPageableUtils.createSafe(0, 10)).getContent();
+		// } else {
+		// // For non-project entities, show all entities (they don't have project
+		// // filtering)
+		// LOGGER.debug("Entity service is not project-aware, showing all entities");
+		// entities = entityService.list(CPageableUtils.createSafe(0, 10)).getContent();
+		// }
+		// masterViewSection.getGrid().setItems(entities);
+		// } else {
+		// // If no active project, show empty grid
+		// LOGGER.debug("No active project found, clearing grid items");
+		// masterViewSection.getGrid().setItems(Collections.emptyList());
+		// }
 	}
 
 	/** Sets the project for the entity. */

@@ -1,11 +1,9 @@
 package tech.derbent.base.ui.component;
 
 import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.User;
-
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
@@ -33,7 +31,6 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 import com.vaadin.flow.theme.lumo.LumoUtility.IconSize;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
-
 import tech.derbent.abstracts.interfaces.CProjectListChangeListener;
 import tech.derbent.abstracts.views.components.CButton;
 import tech.derbent.projects.domain.CProject;
@@ -41,81 +38,51 @@ import tech.derbent.session.service.CSessionService;
 import tech.derbent.session.service.LayoutService;
 import tech.derbent.users.domain.CUser;
 
-/* CViewToolbar.java
- *
- * This class defines a toolbar for views in the application, providing a
- * consistent header with a title and optional action components.
- *
- * It extends Composite to allow for easy composition of the toolbar's content.
- */
-public final class CViewToolbar extends Composite<Header>
-	implements CProjectListChangeListener {
-
+/* CViewToolbar.java This class defines a toolbar for views in the application, providing a consistent header with a title and optional action
+ * components. It extends Composite to allow for easy composition of the toolbar's content. */
+public final class CViewToolbar extends Composite<Header> implements CProjectListChangeListener {
 	private static final long serialVersionUID = 1L;
 
-	/*
-	 * just used to create a group of components with nice styling. Not related to a
-	 * toolbar
-	 */
+	/* just used to create a group of components with nice styling. Not related to a toolbar */
 	public static Component group(final Component... components) {
 		final var group = new Div(components);
-		group.addClassNames(Display.FLEX, FlexDirection.COLUMN, AlignItems.STRETCH,
-			Gap.SMALL, FlexDirection.Breakpoint.Medium.ROW,
-			AlignItems.Breakpoint.Medium.CENTER);
+		group.addClassNames(Display.FLEX, FlexDirection.COLUMN, AlignItems.STRETCH, Gap.SMALL, FlexDirection.Breakpoint.Medium.ROW,
+				AlignItems.Breakpoint.Medium.CENTER);
 		return group;
 	}
 
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
-
 	private final H1 title;
-
 	private final CSessionService sessionService;
-
 	private final LayoutService layoutService;
-
 	private final AuthenticationContext authenticationContext;
-
 	private ComboBox<CProject> projectComboBox;
-
 	private CButton layoutToggleButton;
-
 	private Avatar userAvatar;
-
 	private Span usernameSpan;
 
-	/**
-	 * Constructs a CViewToolbar with a title and optional components.
+	/** Constructs a CViewToolbar with a title and optional components.
 	 * @param viewTitle      The title of the view to be displayed in the toolbar.
 	 * @param sessionService The session service for managing project selection.
-	 * @param components     Optional components to be added to the toolbar.
-	 */
-	public CViewToolbar(final String viewTitle, final CSessionService sessionService,
-		final Component... components) {
+	 * @param components     Optional components to be added to the toolbar. */
+	public CViewToolbar(final String viewTitle, final CSessionService sessionService, final Component... components) {
 		this(viewTitle, sessionService, null, null, components);
 	}
 
-	/**
-	 * Constructs a CViewToolbar with a title, services, and optional components.
+	/** Constructs a CViewToolbar with a title, services, and optional components.
 	 * @param viewTitle             The title of the view to be displayed in the toolbar.
 	 * @param sessionService        The session service for managing project selection.
-	 * @param layoutService         The layout service for managing layout mode
-	 *                              (optional).
-	 * @param authenticationContext The authentication context for user information
-	 *                              (optional).
-	 * @param components            Optional components to be added to the toolbar.
-	 */
-	public CViewToolbar(final String viewTitle, final CSessionService sessionService,
-		final LayoutService layoutService,
-		final AuthenticationContext authenticationContext,
-		final Component... components) {
+	 * @param layoutService         The layout service for managing layout mode (optional).
+	 * @param authenticationContext The authentication context for user information (optional).
+	 * @param components            Optional components to be added to the toolbar. */
+	public CViewToolbar(final String viewTitle, final CSessionService sessionService, final LayoutService layoutService,
+			final AuthenticationContext authenticationContext, final Component... components) {
 		this.sessionService = sessionService;
 		this.layoutService = layoutService;
 		this.authenticationContext = authenticationContext;
-		addClassNames(Display.FLEX, FlexDirection.ROW, JustifyContent.BETWEEN,
-			AlignItems.CENTER, Gap.MEDIUM);
+		addClassNames(Display.FLEX, FlexDirection.ROW, JustifyContent.BETWEEN, AlignItems.CENTER, Gap.MEDIUM);
 		// Add separation line below the toolbar
-		getContent().getStyle().set("border-bottom",
-			"1px solid var(--lumo-contrast-20pct)");
+		getContent().getStyle().set("border-bottom", "1px solid var(--lumo-contrast-20pct)");
 		// this is a button that toggles the drawer in the app layout
 		final var drawerToggle = new DrawerToggle();
 		drawerToggle.addClassNames(Margin.NONE);
@@ -123,6 +90,7 @@ public final class CViewToolbar extends Composite<Header>
 		final var homeButton = createHomeButton();
 		title = new H1(viewTitle);
 		title.addClassNames(FontSize.XLARGE, Margin.NONE, FontWeight.LIGHT);
+		title.setMinWidth("300px"); // Ensure title has a minimum width
 		// Create project selection combobox
 		createProjectComboBox();
 		// Create quick access toolbar with colorful icons
@@ -130,8 +98,7 @@ public final class CViewToolbar extends Composite<Header>
 		// Left side: toggle, home button, title, quick access, and project selector
 		final var projectSelector = new Div(new Span("Active Project:"), projectComboBox);
 		projectSelector.addClassNames(Display.FLEX, AlignItems.CENTER, Gap.SMALL);
-		final var leftSide =
-			new Div(drawerToggle, homeButton, title, quickAccessToolbar, projectSelector);
+		final var leftSide = new Div(drawerToggle, homeButton, title, quickAccessToolbar, projectSelector);
 		leftSide.addClassNames(Display.FLEX, AlignItems.CENTER, Gap.MEDIUM);
 		// Spacer to push user info and layout toggle to the right
 		final var spacer = new Div();
@@ -140,7 +107,6 @@ public final class CViewToolbar extends Composite<Header>
 		final var rightSide = createRightSideComponents();
 		// Add all components to the toolbar
 		getContent().add(leftSide, spacer, rightSide);
-
 		// add additional components if passed as a parameter
 		if (components.length > 0) {
 			// If there are additional components, add them before the spacer
@@ -154,11 +120,8 @@ public final class CViewToolbar extends Composite<Header>
 		sessionService.addProjectListChangeListener(this);
 	}
 
-	/**
-	 * Creates a colorful icon button for the quick access toolbar.
-	 */
-	private CButton createColorfulIconButton(final VaadinIcon iconType,
-		final String tooltip, final String color, final String route) {
+	/** Creates a colorful icon button for the quick access toolbar. */
+	private CButton createColorfulIconButton(final VaadinIcon iconType, final String tooltip, final String color, final String route) {
 		final Icon icon = iconType.create();
 		icon.addClassNames(IconSize.MEDIUM); // Use same size as menu icons
 		icon.getStyle().set("color", color);
@@ -169,10 +132,8 @@ public final class CViewToolbar extends Composite<Header>
 		// Add hover effect
 		final String originalColor = color;
 		final String hoverColor = color + "99"; // Add transparency for hover
-		button.getElement().addEventListener("mouseenter",
-			e -> icon.getStyle().set("color", hoverColor));
-		button.getElement().addEventListener("mouseleave",
-			e -> icon.getStyle().set("color", originalColor));
+		button.getElement().addEventListener("mouseenter", e -> icon.getStyle().set("color", hoverColor));
+		button.getElement().addEventListener("mouseleave", e -> icon.getStyle().set("color", originalColor));
 		// Navigate to route
 		button.addClickListener(event -> {
 			LOGGER.info("{} button clicked, navigating to {}", tooltip, route);
@@ -181,10 +142,8 @@ public final class CViewToolbar extends Composite<Header>
 		return button;
 	}
 
-	/**
-	 * Creates the home button that navigates to the dashboard.
-	 * @return the home button
-	 */
+	/** Creates the home button that navigates to the dashboard.
+	 * @return the home button */
 	private CButton createHomeButton() {
 		final Icon homeIcon = VaadinIcon.HOME.create();
 		homeIcon.addClassNames(IconSize.MEDIUM);
@@ -195,10 +154,8 @@ public final class CViewToolbar extends Composite<Header>
 		homeButton.getElement().setAttribute("title", "Go to Dashboard");
 		homeButton.addClassNames(Margin.NONE);
 		// Add hover effect for better UX
-		homeButton.getElement().addEventListener("mouseenter",
-			e -> homeIcon.getStyle().set("color", "var(--lumo-primary-color-50pct)"));
-		homeButton.getElement().addEventListener("mouseleave",
-			e -> homeIcon.getStyle().set("color", "var(--lumo-primary-color)"));
+		homeButton.getElement().addEventListener("mouseenter", e -> homeIcon.getStyle().set("color", "var(--lumo-primary-color-50pct)"));
+		homeButton.getElement().addEventListener("mouseleave", e -> homeIcon.getStyle().set("color", "var(--lumo-primary-color)"));
 		// Handle home button click - navigate to dashboard
 		homeButton.addClickListener(event -> {
 			LOGGER.info("Home button clicked, navigating to dashboard");
@@ -207,56 +164,42 @@ public final class CViewToolbar extends Composite<Header>
 		return homeButton;
 	}
 
-	/**
-	 * Creates the layout toggle button.
-	 */
+	/** Creates the layout toggle button. */
 	private void createLayoutToggleButton() {
-
 		if (layoutService != null) {
 			layoutToggleButton = new CButton();
-			layoutToggleButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY,
-				ButtonVariant.LUMO_ICON);
+			layoutToggleButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ICON);
 			layoutToggleButton.getElement().setAttribute("title", "Toggle Layout Mode");
 			// Set initial icon based on current layout mode
 			updateLayoutToggleIcon();
 			// Handle layout toggle
 			layoutToggleButton.addClickListener(event -> {
 				LOGGER.info("Layout toggle button clicked");
-
 				if (layoutService != null) {
-					final LayoutService.LayoutMode oldMode =
-						layoutService.getCurrentLayoutMode();
+					final LayoutService.LayoutMode oldMode = layoutService.getCurrentLayoutMode();
 					layoutService.toggleLayoutMode();
-					final LayoutService.LayoutMode newMode =
-						layoutService.getCurrentLayoutMode();
+					final LayoutService.LayoutMode newMode = layoutService.getCurrentLayoutMode();
 					LOGGER.info("Layout toggled from {} to {}", oldMode, newMode);
 					updateLayoutToggleIcon();
 					// Force UI update
 					final var ui = getUI();
-
 					if (ui.isPresent()) {
 						ui.get().access(() -> {
 							LOGGER.debug("Forcing UI update after layout toggle");
 							ui.get().push();
 						});
 					}
-				}
-				else {
+				} else {
 					LOGGER.warn("LayoutService is null, cannot toggle layout mode");
 				}
 			});
-		}
-		else {
-			LOGGER
-				.debug("LayoutService is null, layout toggle button will not be created");
+		} else {
+			LOGGER.debug("LayoutService is null, layout toggle button will not be created");
 		}
 	}
 
-	/**
-	 * Creates the project selection ComboBox.
-	 */
+	/** Creates the project selection ComboBox. */
 	private void createProjectComboBox() {
-
 		if (sessionService == null) {
 			LOGGER.error("SessionService is null, cannot create project ComboBox");
 			return;
@@ -272,7 +215,6 @@ public final class CViewToolbar extends Composite<Header>
 		// Handle project selection change
 		projectComboBox.addValueChangeListener(event -> {
 			final CProject selectedProject = event.getValue();
-
 			if (selectedProject != null) {
 				LOGGER.info("Project changed to: {}", selectedProject.getName());
 				sessionService.setActiveProject(selectedProject);
@@ -280,36 +222,26 @@ public final class CViewToolbar extends Composite<Header>
 		});
 	}
 
-	/**
-	 * Creates a quick access toolbar with colorful icons for commonly used features.
-	 * @return the quick access toolbar
-	 */
+	/** Creates a quick access toolbar with colorful icons for commonly used features.
+	 * @return the quick access toolbar */
 	private Div createQuickAccessToolbar() {
 		final var quickAccessDiv = new Div();
 		quickAccessDiv.addClassNames(Display.FLEX, AlignItems.CENTER, Gap.SMALL);
 		// Meetings icon - green (consistent with navigation)
-		final var meetingsButton = createColorfulIconButton(VaadinIcon.GROUP, "Meetings",
-			"#28a745", "cmeetingsview");
+		final var meetingsButton = createColorfulIconButton(VaadinIcon.GROUP, "Meetings", "#28a745", "cmeetingsview");
 		// Activities icon - blue
-		final var activitiesButton = createColorfulIconButton(VaadinIcon.TASKS,
-			"Activities", "#007bff", "cactivitiesview");
+		final var activitiesButton = createColorfulIconButton(VaadinIcon.TASKS, "Activities", "#007bff", "cactivitiesview");
 		// Projects icon - orange (consistent with navigation)
-		final var projectsButton = createColorfulIconButton(VaadinIcon.BRIEFCASE,
-			"Projects", "#fd7e14", "cprojectsview");
+		final var projectsButton = createColorfulIconButton(VaadinIcon.BRIEFCASE, "Projects", "#fd7e14", "cprojectsview");
 		// Users icon - purple
-		final var usersButton =
-			createColorfulIconButton(VaadinIcon.USERS, "Users", "#6f42c1", "cusersview");
+		final var usersButton = createColorfulIconButton(VaadinIcon.USERS, "Users", "#6f42c1", "cusersview");
 		// Screens icon - purple (consistent with domain color)
-		final var screensButton = createColorfulIconButton(VaadinIcon.VIEWPORT, "Screens",
-			"#6f42c1", "cscreensview");
-		quickAccessDiv.add(meetingsButton, activitiesButton, projectsButton, usersButton,
-			screensButton);
+		final var screensButton = createColorfulIconButton(VaadinIcon.VIEWPORT, "Screens", "#6f42c1", "cscreensview");
+		quickAccessDiv.add(meetingsButton, activitiesButton, projectsButton, usersButton, screensButton);
 		return quickAccessDiv;
 	}
 
-	/**
-	 * Creates the right side components containing user info and layout toggle.
-	 */
+	/** Creates the right side components containing user info and layout toggle. */
 	private HorizontalLayout createRightSideComponents() {
 		final var rightSide = new HorizontalLayout();
 		rightSide.setSpacing(true);
@@ -318,23 +250,18 @@ public final class CViewToolbar extends Composite<Header>
 		createUserInfoComponents();
 		// Create layout toggle button
 		createLayoutToggleButton();
-
 		// Add components to right side if they are available
 		if ((userAvatar != null) && (usernameSpan != null)) {
 			rightSide.add(userAvatar, usernameSpan);
 		}
-
 		if (layoutToggleButton != null) {
 			rightSide.add(layoutToggleButton);
 		}
 		return rightSide;
 	}
 
-	/**
-	 * Creates user avatar and username components.
-	 */
+	/** Creates user avatar and username components. */
 	private void createUserComponents(final String username) {
-
 		if ((username == null) || username.trim().isEmpty()) {
 			LOGGER.warn("Cannot create user components - username is null or empty");
 			return;
@@ -342,8 +269,7 @@ public final class CViewToolbar extends Composite<Header>
 		// Create simple avatar without icon
 		userAvatar = new Avatar();
 		userAvatar.setName(username);
-		userAvatar.setAbbreviation(
-			username.length() > 0 ? username.substring(0, 1).toUpperCase() : "U");
+		userAvatar.setAbbreviation(username.length() > 0 ? username.substring(0, 1).toUpperCase() : "U");
 		userAvatar.addThemeVariants(AvatarVariant.LUMO_XSMALL);
 		userAvatar.setColorIndex(3);
 		userAvatar.getElement().setAttribute("title", "User: " + username);
@@ -353,23 +279,15 @@ public final class CViewToolbar extends Composite<Header>
 		usernameSpan.getStyle().set("color", "var(--lumo-secondary-text-color)");
 	}
 
-	/**
-	 * Creates user info components (avatar and username).
-	 */
+	/** Creates user info components (avatar and username). */
 	private void createUserInfoComponents() {
-
 		if (authenticationContext != null) {
-
 			// Try to get user from session service first
 			if (sessionService != null) {
 				final var activeUser = sessionService.getActiveUser();
-
 				if (activeUser.isPresent()) {
 					final CUser user = activeUser.get();
-					final String username =
-						(user.getName() != null) && !user.getName().trim().isEmpty()
-							? user.getName() : user.getLogin();
-
+					final String username = (user.getName() != null) && !user.getName().trim().isEmpty() ? user.getName() : user.getLogin();
 					if ((username != null) && !username.trim().isEmpty()) {
 						createUserComponents(username);
 						return;
@@ -377,32 +295,23 @@ public final class CViewToolbar extends Composite<Header>
 				}
 			}
 			// Fallback to authentication context
-			final var authenticatedUser =
-				authenticationContext.getAuthenticatedUser(User.class);
-
+			final var authenticatedUser = authenticationContext.getAuthenticatedUser(User.class);
 			if (authenticatedUser.isPresent()) {
 				final String username = authenticatedUser.get().getUsername();
-
 				if ((username != null) && !username.trim().isEmpty()) {
 					createUserComponents(username);
-				}
-				else {
+				} else {
 					LOGGER.warn("Authenticated user has null or empty username");
 				}
-			}
-			else {
+			} else {
 				LOGGER.debug("No authenticated user found in authentication context");
 			}
-		}
-		else {
-			LOGGER.debug(
-				"AuthenticationContext is null, user info components will not be created");
+		} else {
+			LOGGER.debug("AuthenticationContext is null, user info components will not be created");
 		}
 	}
 
-	/**
-	 * Override onAttach to ensure listener registration on component attach.
-	 */
+	/** Override onAttach to ensure listener registration on component attach. */
 	@Override
 	protected void onAttach(final AttachEvent attachEvent) {
 		super.onAttach(attachEvent);
@@ -410,9 +319,7 @@ public final class CViewToolbar extends Composite<Header>
 		sessionService.addProjectListChangeListener(this);
 	}
 
-	/**
-	 * Override onDetach to clean up listener registration when component is detached.
-	 */
+	/** Override onDetach to clean up listener registration when component is detached. */
 	@Override
 	protected void onDetach(final DetachEvent detachEvent) {
 		super.onDetach(detachEvent);
@@ -420,30 +327,22 @@ public final class CViewToolbar extends Composite<Header>
 		sessionService.removeProjectListChangeListener(this);
 	}
 
-	/**
-	 * Called when the project list changes. Refreshes the ComboBox items.
-	 */
+	/** Called when the project list changes. Refreshes the ComboBox items. */
 	@Override
 	public void onProjectListChanged() {
 		refreshProjectList();
 	}
 
-	/**
-	 * Refreshes the project list in the ComboBox.
-	 */
+	/** Refreshes the project list in the ComboBox. */
 	public void refreshProjectList() {
-
 		if ((sessionService != null) && (projectComboBox != null)) {
-
 			try {
 				final List<CProject> projects = sessionService.getAvailableProjects();
-
 				if (projects == null) {
 					LOGGER.warn("SessionService returned null project list");
 					return;
 				}
 				projectComboBox.setItems(projects);
-
 				// If no project is selected but projects are available, select the first
 				// one
 				if ((projectComboBox.getValue() == null) && !projects.isEmpty()) {
@@ -456,7 +355,6 @@ public final class CViewToolbar extends Composite<Header>
 	}
 
 	public void setPageTitle(final String title) {
-
 		if ((title == null) || title.trim().isEmpty()) {
 			LOGGER.warn("Cannot set page title - title is null or empty");
 			return;
@@ -464,25 +362,18 @@ public final class CViewToolbar extends Composite<Header>
 		this.title.setText(title);
 	}
 
-	/**
-	 * Updates the layout toggle button icon based on current layout mode.
-	 */
+	/** Updates the layout toggle button icon based on current layout mode. */
 	private void updateLayoutToggleIcon() {
-
 		if ((layoutToggleButton != null) && (layoutService != null)) {
-			final LayoutService.LayoutMode currentMode =
-				layoutService.getCurrentLayoutMode();
-
+			final LayoutService.LayoutMode currentMode = layoutService.getCurrentLayoutMode();
 			if (currentMode == null) {
 				LOGGER.warn("Current layout mode is null, using default VERTICAL");
 				return;
 			}
-			final Icon icon = currentMode == LayoutService.LayoutMode.HORIZONTAL
-				? VaadinIcon.GRID_H.create() : VaadinIcon.GRID_V.create();
+			final Icon icon = currentMode == LayoutService.LayoutMode.HORIZONTAL ? VaadinIcon.GRID_H.create() : VaadinIcon.GRID_V.create();
 			icon.addClassNames(IconSize.MEDIUM); // Use same size as menu icons
 			layoutToggleButton.setIcon(icon);
-			layoutToggleButton.getElement().setAttribute("title",
-				"Current: " + currentMode + " - Click to toggle");
+			layoutToggleButton.getElement().setAttribute("title", "Current: " + currentMode + " - Click to toggle");
 		}
 	}
 }

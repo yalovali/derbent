@@ -2,10 +2,7 @@ package tech.derbent.abstracts.views;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
-import org.springframework.data.domain.Pageable;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -20,8 +17,8 @@ import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.data.binder.ValidationException;
+import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import jakarta.annotation.PostConstruct;
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.components.CSearchToolbar;
@@ -29,7 +26,6 @@ import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.interfaces.CLayoutChangeListener;
 import tech.derbent.abstracts.interfaces.CSearchable;
 import tech.derbent.abstracts.services.CAbstractService;
-import tech.derbent.abstracts.utils.PageableUtils;
 import tech.derbent.abstracts.views.components.CButton;
 import tech.derbent.abstracts.views.components.CFlexLayout;
 import tech.derbent.abstracts.views.components.CVerticalLayout;
@@ -214,33 +210,33 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		}
 		// Use a custom data provider that properly handles pagination, sorting and
 		// searching
-		masterViewSection.getGrid().setItems(query -> {
-			LOGGER.debug("Grid query - offset: {}, limit: {}, sortOrders: {}, searchText: '{}'", query.getOffset(), query.getLimit(),
-					query.getSortOrders(), currentSearchText);
-			try {
-				final Pageable originalPageable = VaadinSpringDataHelpers.toSpringPageRequest(query);
-				final Pageable safePageable = PageableUtils.validateAndFix(originalPageable);
-				LOGGER.debug("Safe Pageable - pageNumber: {}, pageSize: {}, sort: {}", safePageable.getPageNumber(), safePageable.getPageSize(),
-						safePageable.getSort());
-				final List<EntityClass> result;
-				if ((currentSearchText != null) && !currentSearchText.trim().isEmpty() && CSearchable.class.isAssignableFrom(entityClass)) {
-					result = entityService.list(safePageable, currentSearchText);
-				} else {
-					result = entityService.list(safePageable).getContent();
-				}
-				LOGGER.debug("Data provider returned {} items", result.size());
-				return result.stream();
-			} catch (final Exception e) {
-				LOGGER.error("Error in grid data provider for {}: {}", entityClass.getSimpleName(), e.getMessage());
-				// Check if this is a lazy loading exception
-				if (e.getCause() instanceof org.hibernate.LazyInitializationException) {
-					LOGGER.error("LazyInitializationException detected - check repository fetch joins for {}", entityClass.getSimpleName());
-				}
-				// Return empty stream on error to prevent UI crashes
-				return Stream.empty();
-			}
-		});
-		// grid.addIdColumn(entity -> entity.getId().toString(), "ID", "id");
+		// masterViewSection.getGrid().setItems(query -> {
+		// LOGGER.debug("Grid query - offset: {}, limit: {}, sortOrders: {}, searchText: '{}'", query.getOffset(), query.getLimit(),
+		// query.getSortOrders(), currentSearchText);
+		// try {
+		// final Pageable originalPageable = VaadinSpringDataHelpers.toSpringPageRequest(query);
+		// final Pageable safePageable = PageableUtils.validateAndFix(originalPageable);
+		// LOGGER.debug("Safe Pageable - pageNumber: {}, pageSize: {}, sort: {}", safePageable.getPageNumber(), safePageable.getPageSize(),
+		// safePageable.getSort());
+		// final List<EntityClass> result;
+		// if ((currentSearchText != null) && !currentSearchText.trim().isEmpty() && CSearchable.class.isAssignableFrom(entityClass)) {
+		// result = entityService.list(safePageable, currentSearchText);
+		// } else {
+		// result = entityService.list(safePageable).getContent();
+		// }
+		// LOGGER.debug("Data provider returned {} items", result.size());
+		// return result.stream();
+		// } catch (final Exception e) {
+		// LOGGER.error("Error in grid data provider for {}: {}", entityClass.getSimpleName(), e.getMessage());
+		// // Check if this is a lazy loading exception
+		// if (e.getCause() instanceof org.hibernate.LazyInitializationException) {
+		// LOGGER.error("LazyInitializationException detected - check repository fetch joins for {}", entityClass.getSimpleName());
+		// }
+		// // Return empty stream on error to prevent UI crashes
+		// return Stream.empty();
+		// }
+		// });
+		masterViewSection.getGrid().setDataProvider(getMasterQuery());
 		// Create the grid container with search toolbar
 		final VerticalLayout gridContainer = new VerticalLayout();
 		gridContainer.setClassName("grid-container");
@@ -335,6 +331,8 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	public Div getDetailsTabLayout() { return detailsTabLayout; }
 
 	protected abstract String getEntityRouteIdField();
+
+	protected abstract CallbackDataProvider<EntityClass, Void> getMasterQuery();
 
 	/** Gets the search toolbar component, if available.
 	 * @return the search toolbar component, or null if entity doesn't support searching */
@@ -509,7 +507,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	private void updateLayoutOrientation() {
 		if ((layoutService != null) && (splitLayout != null)) {
 			final LayoutService.LayoutMode currentMode = layoutService.getCurrentLayoutMode();
-			LOGGER.debug("Updating layout orientation to: {} for {}", currentMode, getClass().getSimpleName());
+			// LOGGER.debug("Updating layout orientation to: {} for {}", currentMode, getClass().getSimpleName());
 			if (currentMode == LayoutService.LayoutMode.HORIZONTAL) {
 				splitLayout.setOrientation(SplitLayout.Orientation.HORIZONTAL);
 				// For horizontal layout, give more space to the grid (left side)
@@ -546,32 +544,33 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		}
 		// Use a custom data provider that properly handles pagination, sorting and
 		// searching
-		masterViewSection.getGrid().setItems(query -> {
-			LOGGER.debug("Grid query - offset: {}, limit: {}, sortOrders: {}, searchText: '{}'", query.getOffset(), query.getLimit(),
-					query.getSortOrders(), currentSearchText);
-			try {
-				final Pageable originalPageable = VaadinSpringDataHelpers.toSpringPageRequest(query);
-				final Pageable safePageable = PageableUtils.validateAndFix(originalPageable);
-				LOGGER.debug("Safe Pageable - pageNumber: {}, pageSize: {}, sort: {}", safePageable.getPageNumber(), safePageable.getPageSize(),
-						safePageable.getSort());
-				final List<EntityClass> result;
-				if ((currentSearchText != null) && !currentSearchText.trim().isEmpty() && CSearchable.class.isAssignableFrom(entityClass)) {
-					result = entityService.list(safePageable, currentSearchText);
-				} else {
-					result = entityService.list(safePageable).getContent();
-				}
-				LOGGER.debug("Data provider returned {} items", result.size());
-				return result.stream();
-			} catch (final Exception e) {
-				LOGGER.error("Error in grid data provider for {}: {}", entityClass.getSimpleName(), e.getMessage());
-				// Check if this is a lazy loading exception
-				if (e.getCause() instanceof org.hibernate.LazyInitializationException) {
-					LOGGER.error("LazyInitializationException detected - check repository fetch joins for {}", entityClass.getSimpleName());
-				}
-				// Return empty stream on error to prevent UI crashes
-				return Stream.empty();
-			}
-		});
+		// masterViewSection.getGrid().setItems(query -> {
+		// LOGGER.debug("Grid query - offset: {}, limit: {}, sortOrders: {}, searchText: '{}'", query.getOffset(), query.getLimit(),
+		// query.getSortOrders(), currentSearchText);
+		// try {
+		// final Pageable originalPageable = VaadinSpringDataHelpers.toSpringPageRequest(query);
+		// final Pageable safePageable = PageableUtils.validateAndFix(originalPageable);
+		// LOGGER.debug("Safe Pageable - pageNumber: {}, pageSize: {}, sort: {}", safePageable.getPageNumber(), safePageable.getPageSize(),
+		// safePageable.getSort());
+		// final List<EntityClass> result;
+		// if ((currentSearchText != null) && !currentSearchText.trim().isEmpty() && CSearchable.class.isAssignableFrom(entityClass)) {
+		// result = entityService.list(safePageable, currentSearchText);
+		// } else {
+		// result = entityService.list(safePageable).getContent();
+		// }
+		// LOGGER.debug("Data provider returned {} items", result.size());
+		// return result.stream();
+		// } catch (final Exception e) {
+		// LOGGER.error("Error in grid data provider for {}: {}", entityClass.getSimpleName(), e.getMessage());
+		// // Check if this is a lazy loading exception
+		// if (e.getCause() instanceof org.hibernate.LazyInitializationException) {
+		// LOGGER.error("LazyInitializationException detected - check repository fetch joins for {}", entityClass.getSimpleName());
+		// }
+		// // Return empty stream on error to prevent UI crashes
+		// return Stream.empty();
+		// }
+		// });
+		masterViewSection.getGrid().setDataProvider(getMasterQuery());
 		// grid.addIdColumn(entity -> entity.getId().toString(), "ID", "id");
 		// Create the grid container with search toolbar
 		final VerticalLayout gridContainer = new VerticalLayout();

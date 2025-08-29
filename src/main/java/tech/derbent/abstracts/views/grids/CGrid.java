@@ -77,8 +77,6 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 	public Column<EntityClass> addColumn(final ValueProvider<EntityClass, String> valueProvider, final String header, final String key) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
 		Check.notBlank(header, "Header cannot be null or blank");
-		// Check.notBlank(key, "Key cannot be null or blank");
-		// flexglow set to 1 to allow the column to grow and fill available space
 		final Column<EntityClass> column = addColumn(valueProvider).setHeader(header).setFlexGrow(1).setSortable(true);
 		Check.notNull(column, "Column creation failed for header: " + header);
 		if (key != null) {

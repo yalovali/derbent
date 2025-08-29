@@ -4,20 +4,32 @@ import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.abstracts.domains.CEntityOfProject;
+import tech.derbent.abstracts.interfaces.CSearchable;
+import tech.derbent.abstracts.utils.CPageableUtils;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.projects.domain.CProject;
+import tech.derbent.session.service.CSessionService;
 
 public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProject<EntityClass>> extends CAbstractNamedEntityService<EntityClass> {
-	public CEntityOfProjectService(final CEntityOfProjectRepository<EntityClass> repository, final Clock clock) {
-		super(repository, clock);
+	public CEntityOfProjectService(final CEntityOfProjectRepository<EntityClass> repository, final Clock clock,
+			final CSessionService sessionService) {
+		super(repository, clock, sessionService);
+	}
+	// CEntityOfProjectService içinde
+
+	@Override
+	public long count() {
+		return countByProject(sessionService.getActiveProject()
+				.orElseThrow(() -> new IllegalStateException("No active project selected, cannot count entities without project context")));
 	}
 
 	@Transactional (readOnly = true)
 	public long countByProject(final CProject project) {
-		Optional.ofNullable(project).orElse(null);
+		Check.notNull(project, "Project cannot be null");
 		try {
 			return ((CEntityOfProjectRepository<EntityClass>) repository).countByProject(project);
 		} catch (final Exception e) {
@@ -28,7 +40,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 
 	public EntityClass createEntity(final String name, final CProject project) {
 		try {
-			Optional.ofNullable(project).orElse(null);
+			Check.notNull(project, "Project cannot be null");
 			Check.notBlank(name, "Entity name cannot be null or empty");
 			final EntityClass entity = newEntity(name, project);
 			repository.saveAndFlush(entity);
@@ -38,11 +50,18 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		}
 	}
 
+	@Override
+	public List<EntityClass> findAll() {
+		final CProject project = sessionService.getActiveProject()
+				.orElseThrow(() -> new IllegalStateException("No active project selected, cannot list entities without project context"));
+		return listByProject(project);
+	}
+
 	@Transactional (readOnly = true)
-	public List<EntityClass> findEntriesByProject(final CProject project) {
-		Optional.ofNullable(project).orElse(null);
+	public Optional<EntityClass> findByNameAndProject(final String name, final CProject project) {
+		Check.notNull(project, "Project cannot be null");
 		try {
-			final List<EntityClass> entities = ((CEntityOfProjectRepository<EntityClass>) repository).findByProject(project);
+			final Optional<EntityClass> entities = ((CEntityOfProjectRepository<EntityClass>) repository).findByNameAndProject(name, project);
 			return entities;
 		} catch (final Exception e) {
 			LOGGER.error("Error finding entities by project '{}' in {}: {}", project.getName(), getClass().getSimpleName(), e.getMessage(), e);
@@ -50,17 +69,64 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		}
 	}
 
+	@Override
 	@Transactional (readOnly = true)
-	public Page<EntityClass> findEntriesByProject(final CProject project, final Pageable pageable) {
-		Optional.ofNullable(project).orElse(null);
+	public Page<EntityClass> list(final Pageable pageable) {
+		final CProject project = sessionService.getActiveProject()
+				.orElseThrow(() -> new IllegalStateException("No active project selected, cannot list entities without project context"));
+		return listByProject(project, pageable);
+	}
+
+	@Override
+	@Transactional (readOnly = true)
+	public Page<EntityClass> list(final Pageable pageable, final String searchText) {
+		final CProject project = sessionService.getActiveProject()
+				.orElseThrow(() -> new IllegalStateException("No active project selected, cannot list entities without project context"));
+		return listByProject(project, pageable, searchText);
+	}
+
+	@Transactional (readOnly = true)
+	public List<EntityClass> listByProject(final CProject project) {
+		Check.notNull(project, "Project cannot be null");
 		try {
-			final Page<EntityClass> entities = ((CEntityOfProjectRepository<EntityClass>) repository).findByProject(project, pageable);
+			final List<EntityClass> entities = ((CEntityOfProjectRepository<EntityClass>) repository).listByProject(project);
 			return entities;
-		} catch (final Exception e) {
-			LOGGER.error("Error finding entities by project '{}' with pagination in {}: {}", project.getName(), getClass().getSimpleName(),
-					e.getMessage(), e);
-			throw new RuntimeException("Failed to find entities by project with pagination", e);
+		} catch (final RuntimeException ex) {
+			LOGGER.error("findByProject failed (project: {}): {}", Optional.ofNullable(project.getName()).orElse("<no-name>"), ex.toString(), ex);
+			throw ex; // Spring’in exception translation’ını koru
 		}
+	}
+
+	@Transactional (readOnly = true)
+	public Page<EntityClass> listByProject(final CProject project, final Pageable pageable) {
+		Check.notNull(project, "Project cannot be null");
+		final Pageable safe = CPageableUtils.validateAndFix(pageable);
+		try {
+			return ((CEntityOfProjectRepository<EntityClass>) repository).listByProject(project, safe);
+		} catch (final RuntimeException ex) {
+			LOGGER.error("findByProject failed (project: {}, page: {}): {}", Optional.ofNullable(project.getName()).orElse("<no-name>"), safe,
+					ex.toString(), ex);
+			throw ex; // Spring’in exception translation’ını koru
+		}
+	}
+
+	@Transactional (readOnly = true)
+	public Page<EntityClass> listByProject(final CProject project, final Pageable pageable, final String searchText) {
+		LOGGER.debug("Listing entities for project:'{}' with search text: '{}'", project != null ? project.getName() : "<null>", searchText);
+		Check.notNull(project, "Project cannot be null");
+		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
+		final String term = (searchText == null) ? "" : searchText.trim();
+		// Pull all for project (ensure repo method DOES NOT fetch to-many relations!)
+		final List<EntityClass> all = ((CEntityOfProjectRepository<EntityClass>) repository).listByProject(project, Pageable.unpaged()).getContent();
+		final boolean searchable = CSearchable.class.isAssignableFrom(getEntityClass());
+		final List<EntityClass> filtered = (term.isEmpty() || !searchable) ? all : all.stream().filter(e -> ((CSearchable) e).matches(term)).toList();
+		// --- apply sort from Pageable (name/id supported here; override to extend)
+		final List<EntityClass> sorted = applySort(filtered, safePage.getSort());
+		// --- slice
+		final int start = (int) Math.min(safePage.getOffset(), sorted.size());
+		final int end = Math.min(start + safePage.getPageSize(), sorted.size());
+		final List<EntityClass> content = sorted.subList(start, end);
+		return new PageImpl<>(content, safePage, filtered.size());
 	}
 
 	@Override
@@ -72,15 +138,14 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	@Override
 	@Transactional
 	public EntityClass newEntity(final String name) {
-		throw new IllegalArgumentException("cannot call newEntity without project name");
+		final CProject project = sessionService.getActiveProject()
+				.orElseThrow(() -> new IllegalStateException("No active project selected, cannot list entities without project context"));
+		return newEntity(name, project);
 	}
 
 	@Transactional
 	public EntityClass newEntity(final String name, final CProject project) {
-		if ("fail".equals(name)) {
-			throw new RuntimeException("This is for testing the error handler");
-		}
-		Optional.ofNullable(project).orElse(null);
+		Check.notNull(project, "Project cannot be null");
 		Check.notBlank(name, "Entity name cannot be null or empty");
 		// Validate inputs
 		validateEntityName(name);
@@ -101,7 +166,6 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	@Transactional
 	public EntityClass save(final EntityClass entity) {
 		Check.notNull(entity, "Entity cannot be null");
-		// Check for duplicate names (excluding self for updates)
 		final String trimmedName = entity.getName().trim();
 		// search with same name and same project exclude self if updating
 		final Optional<EntityClass> existing = ((CEntityOfProjectRepository<EntityClass>) repository)

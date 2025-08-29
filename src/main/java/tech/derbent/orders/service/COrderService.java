@@ -8,15 +8,15 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.orders.domain.COrder;
+import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class COrderService extends CEntityOfProjectService<COrder> {
-
-	COrderService(final COrderRepository repository, final Clock clock) {
-		super(repository, clock);
+	COrderService(final COrderRepository repository, final Clock clock, final CSessionService sessionService) {
+		super(repository, clock, sessionService);
 	}
 
 	public List<COrder> findByRequestor(final CUser requestor) {

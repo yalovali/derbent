@@ -25,7 +25,6 @@ import tech.derbent.users.domain.CUser;
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class CUserService extends CAbstractNamedEntityService<CUser> implements UserDetailsService {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserService.class);
 	private final PasswordEncoder passwordEncoder;
 

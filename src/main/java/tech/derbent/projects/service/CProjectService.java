@@ -9,15 +9,16 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.abstracts.services.CAbstractNamedEntityService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.events.ProjectListChangeEvent;
+import tech.derbent.session.service.CSessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CProjectService extends CAbstractNamedEntityService<CProject> {
-
 	private final ApplicationEventPublisher eventPublisher;
 
-	public CProjectService(final CProjectRepository repository, final Clock clock, final ApplicationEventPublisher eventPublisher) {
-		super(repository, clock);
+	public CProjectService(final CProjectRepository repository, final Clock clock, final CSessionService sessionService,
+			final ApplicationEventPublisher eventPublisher) {
+		super(repository, clock, sessionService);
 		this.eventPublisher = eventPublisher;
 	}
 

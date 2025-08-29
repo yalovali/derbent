@@ -10,12 +10,13 @@ import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.domain.CMeetingStatus;
+import tech.derbent.session.service.CSessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CMeetingService extends CEntityOfProjectService<CMeeting> implements CKanbanService<CMeeting, CMeetingStatus> {
-	CMeetingService(final CMeetingRepository repository, final Clock clock) {
-		super(repository, clock);
+	CMeetingService(final CMeetingRepository repository, final Clock clock, final CSessionService sessionService) {
+		super(repository, clock, sessionService);
 	}
 
 	@Override

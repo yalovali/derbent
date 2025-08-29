@@ -13,6 +13,7 @@ import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.administration.domain.CCompanySettings;
 import tech.derbent.companies.domain.CCompany;
+import tech.derbent.session.service.CSessionService;
 
 /** CCompanySettingsService - Business logic layer for CCompanySettings entities. Layer: Service (MVC) Provides comprehensive business logic for
  * managing company-wide administration settings, including CRUD operations, validation, and specialized business methods for settings management. */
@@ -21,15 +22,14 @@ import tech.derbent.companies.domain.CCompany;
 @Transactional (readOnly = true) // Default to read-only transactions for better
 									// performance
 public class CCompanySettingsService extends CAbstractService<CCompanySettings> {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCompanySettingsService.class);
 	private final CCompanySettingsRepository companySettingsRepository;
 
 	/** Constructor for CCompanySettingsService.
 	 * @param repository the CCompanySettingsRepository instance
 	 * @param clock      the Clock instance for time-related operations */
-	public CCompanySettingsService(final CCompanySettingsRepository repository, final Clock clock) {
-		super(repository, clock);
+	public CCompanySettingsService(final CCompanySettingsRepository repository, final Clock clock, final CSessionService sessionService) {
+		super(repository, clock, sessionService);
 		this.companySettingsRepository = repository;
 	}
 

@@ -712,8 +712,8 @@ public interface CNewEntityRepository extends CEntityOfProjectRepository<CNewEnt
 @PreAuthorize("isAuthenticated()")
 public class CNewEntityService extends CEntityOfProjectService<CNewEntity> {
     
-    public CNewEntityService(final CNewEntityRepository repository, final Clock clock) {
-        super(repository, clock);
+    public CNewEntityService(final CNewEntityRepository repository, final Clock clock, final CSessionService sessionService){
+        super(repository, clock,sessionService);
     }
     
     // ✅ REQUIRED: Override findById for optimized eager loading

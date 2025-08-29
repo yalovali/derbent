@@ -1,15 +1,17 @@
 package tech.derbent.abstracts.services;
 
 import java.time.Clock;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.utils.Check;
+import tech.derbent.session.service.CSessionService;
 
 /** CAbstractNamedEntityService - Abstract service class for entities that extend CEntityNamed. Layer: Service (MVC) Provides common business logic
  * operations for named entities including validation, creation, and name-based queries with consistent error handling and logging. */
 public abstract class CAbstractNamedEntityService<EntityClass extends CEntityNamed<EntityClass>> extends CAbstractService<EntityClass> {
-
 	/** Validates an entity name.
 	 * @param name the name to validate
 	 * @throws IllegalArgumentException if the name is null or empty */
@@ -17,11 +19,17 @@ public abstract class CAbstractNamedEntityService<EntityClass extends CEntityNam
 		Check.notBlank(name, "Entity name cannot be null or empty");
 	}
 
-	/** Constructor for CAbstractNamedEntityService.
-	 * @param repository the repository for data access operations
-	 * @param clock      the Clock instance for time-related operations */
 	public CAbstractNamedEntityService(final CAbstractNamedRepository<EntityClass> repository, final Clock clock) {
 		super(repository, clock);
+	}
+
+	/** Constructor for CAbstractNamedEntityService.
+	 * @param repository     the repository for data access operations
+	 * @param clock          the Clock instance for time-related operations
+	 * @param sessionService */
+	public CAbstractNamedEntityService(final CAbstractNamedRepository<EntityClass> repository, final Clock clock,
+			final CSessionService sessionService) {
+		super(repository, clock, sessionService);
 	}
 
 	@Transactional
@@ -31,32 +39,26 @@ public abstract class CAbstractNamedEntityService<EntityClass extends CEntityNam
 		return entity;
 	}
 
-	/** Checks if an entity name exists (case-insensitive).
-	 * @param name the name to check
-	 * @return true if the name exists, false otherwise */
 	@Transactional (readOnly = true)
 	public boolean existsByName(final String name) {
 		Check.notBlank(name, "Name cannot be null or empty");
-		return ((CAbstractNamedRepository<EntityClass>) repository).existsByNameIgnoreCase(name.trim());
+		return ((CAbstractNamedRepository<EntityClass>) repository).existsByName(name.trim());
 	}
 
-	/** Finds an entity by name (case-insensitive).
-	 * @param name the entity name
-	 * @return Optional containing the entity if found, empty otherwise */
 	@Transactional (readOnly = true)
 	public Optional<EntityClass> findByName(final String name) {
 		Check.notBlank(name, "Name cannot be null or empty");
-		return ((CAbstractNamedRepository<EntityClass>) repository).findByNameIgnoreCase(name.trim());
+		return ((CAbstractNamedRepository<EntityClass>) repository).findByName(name.trim());
 	}
 
-	/** Validates if a name is unique (excluding the current entity being updated).
-	 * @param name      the name to validate
-	 * @param currentId the ID of the current entity being updated (null for new entities)
-	 * @return true if the name is unique, false otherwise */
+	/** Varsayılan sıralama anahtarları. İstediğiniz entity servisinde override edebilirsiniz. */
+	@Override
+	protected Map<String, Function<EntityClass, ?>> getSortKeyExtractors() { return Map.of("name", e -> e.getName(), "id", e -> e.getId()); }
+
 	@Transactional (readOnly = true)
 	public boolean isNameUnique(final String name, final Long currentId) {
 		Check.notBlank(name, "Name cannot be null or empty");
-		final Optional<EntityClass> existingEntity = ((CAbstractNamedRepository<EntityClass>) repository).findByNameIgnoreCase(name.trim());
+		final Optional<EntityClass> existingEntity = ((CAbstractNamedRepository<EntityClass>) repository).findByName(name.trim());
 		if (existingEntity.isEmpty()) {
 			return true;
 		}

@@ -11,6 +11,7 @@ import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.comments.domain.CComment;
+import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
 
 /** CCommentService - Service class for CComment entities. Layer: Service (MVC) Provides business logic operations for comment management including: -
@@ -20,9 +21,9 @@ import tech.derbent.users.domain.CUser;
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class CCommentService extends CAbstractService<CComment> {
-
-	public CCommentService(final CCommentRepository repository, final CCommentPriorityService commentPriorityService, final Clock clock) {
-		super(repository, clock);
+	public CCommentService(final CCommentRepository repository, final CCommentPriorityService commentPriorityService, final Clock clock,
+			final CSessionService sessionService) {
+		super(repository, clock, sessionService);
 	}
 
 	@PreAuthorize ("permitAll()")

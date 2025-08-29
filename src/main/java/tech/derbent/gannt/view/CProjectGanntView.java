@@ -30,7 +30,7 @@ public class CProjectGanntView extends CGridViewBaseProject<CGanntViewEntity> {
 			final CScreenService screenService) {
 		super(CGanntViewEntity.class, entityService, sessionService, screenService);
 		final CGanntViewEntity viewEntity =
-				entityService.findEntriesByProject(sessionService.getActiveProject().orElse(null)).stream().findFirst().orElse(null);
+				entityService.listByProject(sessionService.getActiveProject().orElse(null)).stream().findFirst().orElse(null);
 		setCurrentEntity(viewEntity);
 		// createDetailsLayout();
 	}

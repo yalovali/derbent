@@ -34,5 +34,5 @@ public interface CScreenRepository extends CEntityOfProjectRepository<CScreen> {
 		"SELECT s FROM CScreen s " + "LEFT JOIN FETCH s.project " + "LEFT JOIN FETCH s.assignedTo " + "LEFT JOIN FETCH s.createdBy "
 				+ "WHERE s.project = :project"
 	)
-	Page<CScreen> findByProject(@Param ("project") CProject project, Pageable pageable);;
+	Page<CScreen> listByProject(@Param ("project") CProject project, Pageable pageable);;
 }

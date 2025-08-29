@@ -14,8 +14,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.utils.CPageableUtils;
 import tech.derbent.abstracts.utils.Check;
-import tech.derbent.abstracts.utils.PageableUtils;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
 /** CDataProviderResolver - Service for automatically resolving data providers for ComboBox components based on AMetaData annotations. This service
@@ -133,7 +133,8 @@ public final class CDataProviderResolver {
 				LOGGER.debug("Method '{}' failed on bean '{}': {} - trying next method", currentMethodName, beanClassName, e.getMessage());
 			}
 		}
-		LOGGER.error("No suitable data retrieval method found on bean '{}' for entity type: {}", beanClassName, entityType.getSimpleName());
+		LOGGER.error("No suitable data retrieval method found on bean '{}' for entity type: {} methodname:{}", beanClassName,
+				entityType.getSimpleName(), methodName);
 		return Collections.emptyList();
 	}
 
@@ -345,7 +346,7 @@ public final class CDataProviderResolver {
 				}
 			});
 			if (method != null) {
-				final Pageable pageable = PageableUtils.createSafe(0, DEFAULT_PAGE_SIZE);
+				final Pageable pageable = CPageableUtils.createSafe(0, DEFAULT_PAGE_SIZE);
 				final Object result = method.invoke(serviceBean, pageable);
 				if (result instanceof Page) {
 					return ((Page<T>) result).getContent();

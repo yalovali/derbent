@@ -11,6 +11,7 @@ import tech.derbent.abstracts.utils.Check;
 import tech.derbent.screens.domain.CScreen;
 import tech.derbent.screens.domain.CScreenLines;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.session.service.CSessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -48,8 +49,8 @@ public class CScreenLinesService extends CAbstractService<CScreenLines> {
 
 	private final CScreenLinesRepository screenLinesRepository;
 
-	public CScreenLinesService(final CScreenLinesRepository repository, final Clock clock) {
-		super(repository, clock);
+	public CScreenLinesService(final CScreenLinesRepository repository, final Clock clock, final CSessionService sessionService) {
+		super(repository, clock, sessionService);
 		this.screenLinesRepository = repository;
 	}
 

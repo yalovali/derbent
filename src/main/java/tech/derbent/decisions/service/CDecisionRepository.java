@@ -23,5 +23,5 @@ public interface CDecisionRepository extends CEntityOfProjectRepository<CDecisio
 				+ "LEFT JOIN FETCH d.decisionType " + "LEFT JOIN FETCH d.decisionStatus " + "LEFT JOIN FETCH d.accountableUser "
 				+ "WHERE d.project = :project"
 	)
-	Page<CDecision> findByProject(@Param ("project") CProject project, Pageable pageable);
+	Page<CDecision> listByProject(@Param ("project") CProject project, Pageable pageable);
 }

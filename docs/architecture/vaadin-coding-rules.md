@@ -205,8 +205,8 @@ Optional<EntityName> findByIdWithEagerLoading(@Param("id") Long id);
 public class CActivityService extends CEntityOfProjectService<CActivity> 
         implements CKanbanService<CActivity, CActivityStatus> {
     
-    public CActivityService(final CActivityRepository repository, final Clock clock) {
-        super(repository, clock);
+    public CActivityService(final CActivityRepository repository, final Clock clock, final CSessionService sessionService){
+        super(repository, clock,sessionService);
     }
     
     // Service methods with proper authorization

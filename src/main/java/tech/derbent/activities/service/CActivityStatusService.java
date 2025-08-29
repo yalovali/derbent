@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.projects.domain.CProject;
+import tech.derbent.session.service.CSessionService;
 
 /** CActivityStatusService - Service class for managing CActivityStatus entities. Layer: Service (MVC) Provides business logic for activity status
  * management including CRUD operations, validation, and workflow management. */
@@ -20,8 +21,8 @@ public class CActivityStatusService extends CEntityOfProjectService<CActivitySta
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityStatusService.class);
 
 	@Autowired
-	public CActivityStatusService(final CActivityStatusRepository repository, final Clock clock) {
-		super(repository, clock);
+	public CActivityStatusService(final CActivityStatusRepository repository, final Clock clock, final CSessionService sessionService) {
+		super(repository, clock, sessionService);
 	}
 
 	/** Find the default status for new activities.

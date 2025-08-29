@@ -9,13 +9,13 @@ import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CScreen;
+import tech.derbent.session.service.CSessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CScreenService extends CEntityOfProjectService<CScreen> {
-
-	public CScreenService(final CScreenRepository repository, final Clock clock) {
-		super(repository, clock);
+	public CScreenService(final CScreenRepository repository, final Clock clock, final CSessionService sessionService) {
+		super(repository, clock, sessionService);
 	}
 
 	@Transactional (readOnly = true)

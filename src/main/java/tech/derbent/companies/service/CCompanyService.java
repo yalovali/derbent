@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.abstracts.services.CAbstractNamedEntityService;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.companies.domain.CCompany;
+import tech.derbent.session.service.CSessionService;
 
 /** CCompanyService - Business logic layer for CCompany entities Layer: Service (MVC) Extends CAbstractService to provide standard CRUD operations
  * with additional business logic */
@@ -18,14 +19,13 @@ import tech.derbent.companies.domain.CCompany;
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCompanyService.class);
 
 	/** Constructor for CCompanyService
 	 * @param repository the CCompanyRepository instance
 	 * @param clock      the Clock instance for time-related operations */
-	public CCompanyService(final CCompanyRepository repository, final Clock clock) {
-		super(repository, clock);
+	public CCompanyService(final CCompanyRepository repository, final Clock clock, final CSessionService sessionService) {
+		super(repository, clock, sessionService);
 	}
 
 	/** Soft delete - disables the company instead of deleting it

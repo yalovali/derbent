@@ -75,7 +75,6 @@ import tech.derbent.users.service.CUserViewService;
 @Component
 @Profile ("!test")
 public class CSampleDataInitializer implements ApplicationRunner {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSampleDataInitializer.class);
 	// Standard password for all users as per coding guidelines
 	private static final String STANDARD_PASSWORD = "test123";
@@ -168,16 +167,16 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 	/** Creates additional activities for Customer Experience Enhancement project. */
 	private void createAdditionalCustomerExperienceActivities() {
-		final CProject project = findProjectByName("Customer Experience Enhancement");
+		final CProject project = projectService.findByName("Customer Experience Enhancement").orElseThrow();
 		Check.notNull(project, "Project 'Customer Experience Enhancement' not found");
 		// User Research Activity
 		final CActivity userResearch = new CActivity("User Research & Analysis", project);
-		final CActivityType researchType = findActivityTypeByNameAndProject("Research", project);
+		final CActivityType researchType = activityTypeService.findByNameAndProject("Research", project).orElse(null);
 		Check.notNull(researchType, "Research activity type not found for project");
 		userResearch.setActivityType(researchType);
 		userResearch.setDescription("Conduct user interviews and analyze customer feedback");
-		final CUser analyst = findUserByLogin("ademir");
-		final CUser manager = findUserByLogin("mkaradeniz");
+		final CUser analyst = userService.findByLogin("ademir");
+		final CUser manager = userService.findByLogin("mkaradeniz");
 		userResearch.setAssignedTo(analyst);
 		userResearch.setCreatedBy(manager);
 		userResearch.setEstimatedHours(new BigDecimal("22.00"));
@@ -186,14 +185,14 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		userResearch.setStartDate(LocalDate.now().minusDays(20));
 		userResearch.setDueDate(LocalDate.now().minusDays(10));
 		userResearch.setCompletionDate(LocalDate.now().minusDays(10));
-		final CActivityStatus completedStatus = findActivityStatusByName("Completed");
+		final CActivityStatus completedStatus = activityStatusService.findByNameAndProject("Completed", project).orElseThrow();
 		userResearch.setStatus(completedStatus);
 		userResearch.setProgressPercentage(100);
 		final CActivity uxDesign = new CActivity("UI/UX Design Improvements", project);
-		final CActivityType designType = findActivityTypeByNameAndProject("Design", project);
+		final CActivityType designType = activityTypeService.findByNameAndProject("Design", project).orElse(null);
 		uxDesign.setActivityType(designType);
 		uxDesign.setDescription("Design improved user interface based on research findings");
-		final CUser dev2 = findUserByLogin("msahin");
+		final CUser dev2 = userService.findByLogin("msahin");
 		uxDesign.setAssignedTo(dev2);
 		uxDesign.setCreatedBy(analyst);
 		uxDesign.setEstimatedHours(new BigDecimal("28.00"));
@@ -201,7 +200,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		uxDesign.setRemainingHours(new BigDecimal("13.00"));
 		uxDesign.setStartDate(LocalDate.now().minusDays(8));
 		uxDesign.setDueDate(LocalDate.now().plusDays(5));
-		final CActivityStatus inProgressStatus = findActivityStatusByName("In Progress");
+		final CActivityStatus inProgressStatus = activityStatusService.findByNameAndProject("In Progress", project).orElseThrow();
 		uxDesign.setStatus(inProgressStatus);
 		uxDesign.setProgressPercentage(55);
 		activityService.save(userResearch);
@@ -218,17 +217,17 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 	/** Creates additional activities for Digital Transformation Initiative project. */
 	private void createAdditionalDigitalTransformationActivities() {
-		final CProject project = findProjectByName("Digital Transformation Initiative");
+		final CProject project = projectService.findByName("Digital Transformation Initiative").orElseThrow();
 		if (project == null) {
 			return;
 		}
 		// Frontend Development Activity
 		final CActivity frontendDev = new CActivity("Frontend Development", project);
-		final CActivityType developmentType = findActivityTypeByNameAndProject("Development", project);
+		final CActivityType developmentType = activityTypeService.findByNameAndProject("Development", project).orElse(null);
 		frontendDev.setActivityType(developmentType);
 		frontendDev.setDescription("Develop responsive user interface components using modern frameworks");
-		final CUser dev1 = findUserByLogin("msahin");
-		final CUser manager = findUserByLogin("mkaradeniz");
+		final CUser dev1 = userService.findByLogin("msahin");
+		final CUser manager = userService.findByLogin("mkaradeniz");
 		frontendDev.setAssignedTo(dev1);
 		frontendDev.setCreatedBy(manager);
 		frontendDev.setEstimatedHours(new BigDecimal("32.00"));
@@ -236,7 +235,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		frontendDev.setRemainingHours(new BigDecimal("4.00"));
 		frontendDev.setStartDate(LocalDate.now().minusDays(12));
 		frontendDev.setDueDate(LocalDate.now().plusDays(8));
-		final CActivityStatus inProgressStatus = findActivityStatusByName("In Progress");
+		final CActivityStatus inProgressStatus = activityStatusService.findByNameAndProject("In Progress", project).orElseThrow();
 		frontendDev.setStatus(inProgressStatus);
 		frontendDev.setProgressPercentage(70);
 		activityService.save(frontendDev);
@@ -247,7 +246,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivity dbMigration = new CActivity("Database Migration", project);
 		dbMigration.setActivityType(developmentType);
 		dbMigration.setDescription("Migrate legacy data to new database schema");
-		final CUser admin = findUserByLogin("admin");
+		final CUser admin = userService.findByLogin("admin");
 		dbMigration.setAssignedTo(admin);
 		dbMigration.setCreatedBy(manager);
 		dbMigration.setEstimatedHours(new BigDecimal("20.00"));
@@ -255,7 +254,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		dbMigration.setRemainingHours(new BigDecimal("15.00"));
 		dbMigration.setStartDate(LocalDate.now().plusDays(5));
 		dbMigration.setDueDate(LocalDate.now().plusDays(15));
-		final CActivityStatus notStartedStatus = findActivityStatusByName("Not Started");
+		final CActivityStatus notStartedStatus = activityStatusService.findByNameAndProject("Not Started", project).orElseThrow();
 		dbMigration.setStatus(notStartedStatus);
 		dbMigration.setProgressPercentage(0);
 		activityService.save(dbMigration);
@@ -265,17 +264,17 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 	/** Creates additional activities for Infrastructure Modernization project. */
 	private void createAdditionalInfrastructureActivities() {
-		final CProject project = findProjectByName("Infrastructure Modernization");
+		final CProject project = projectService.findByName("Infrastructure Modernization").orElseThrow();
 		if (project == null) {
 			return;
 		}
 		// Security Audit Activity
 		final CActivity securityAudit = new CActivity("Security Audit", project);
-		final CActivityType researchType = findActivityTypeByNameAndProject("Research", project);
+		final CActivityType researchType = activityTypeService.findByNameAndProject("Research", project).orElseThrow();
 		securityAudit.setActivityType(researchType);
 		securityAudit.setDescription("Comprehensive security assessment and vulnerability analysis");
-		final CUser admin = findUserByLogin("admin");
-		final CUser manager = findUserByLogin("mkaradeniz");
+		final CUser admin = userService.findByLogin("admin");
+		final CUser manager = userService.findByLogin("mkaradeniz");
 		securityAudit.setAssignedTo(admin);
 		securityAudit.setCreatedBy(manager);
 		securityAudit.setEstimatedHours(new BigDecimal("25.00"));
@@ -283,7 +282,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		securityAudit.setRemainingHours(new BigDecimal("25.00"));
 		securityAudit.setStartDate(LocalDate.now().plusDays(10));
 		securityAudit.setDueDate(LocalDate.now().plusDays(18));
-		final CActivityStatus notStartedStatus = findActivityStatusByName("Not Started");
+		final CActivityStatus notStartedStatus = activityStatusService.findByNameAndProject("Not Started", project).orElseThrow();
 		securityAudit.setStatus(notStartedStatus);
 		securityAudit.setProgressPercentage(0);
 		activityService.save(securityAudit);
@@ -291,10 +290,10 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		commentService.createComment("External security firm selected for audit", securityAudit, manager);
 		// Server Migration Activity
 		final CActivity serverMigration = new CActivity("Server Migration", project);
-		final CActivityType developmentType = findActivityTypeByNameAndProject("Development", project);
+		final CActivityType developmentType = activityTypeService.findByNameAndProject("Development", project).orElseThrow();
 		serverMigration.setActivityType(developmentType);
 		serverMigration.setDescription("Migrate applications to new server infrastructure");
-		final CUser dev1 = findUserByLogin("bozkan");
+		final CUser dev1 = userService.findByLogin("bozkan");
 		serverMigration.setAssignedTo(dev1);
 		serverMigration.setCreatedBy(admin);
 		serverMigration.setEstimatedHours(new BigDecimal("35.00"));
@@ -302,7 +301,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		serverMigration.setRemainingHours(new BigDecimal("15.00"));
 		serverMigration.setStartDate(LocalDate.now().minusDays(8));
 		serverMigration.setDueDate(LocalDate.now().plusDays(12));
-		final CActivityStatus onHoldStatus = findActivityStatusByName("On Hold");
+		final CActivityStatus onHoldStatus = activityStatusService.findByNameAndProject("On Hold", project).orElseThrow();
 		serverMigration.setStatus(onHoldStatus);
 		serverMigration.setProgressPercentage(55);
 		activityService.save(serverMigration);
@@ -313,17 +312,17 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 	/** Creates additional activities for Product Development Phase 2 project. */
 	private void createAdditionalProductDevelopmentActivities() {
-		final CProject project = findProjectByName("Product Development Phase 2");
+		final CProject project = projectService.findByName("Product Development Phase 2").orElseThrow();
 		if (project == null) {
 			return;
 		}
 		// Code Review Activity
 		final CActivity codeReview = new CActivity("Code Review Process", project);
-		final CActivityType testingType = findActivityTypeByNameAndProject("Testing", project);
+		final CActivityType testingType = activityTypeService.findByNameAndProject("Testing", project).orElseThrow();
 		codeReview.setActivityType(testingType);
 		codeReview.setDescription("Comprehensive code review and quality assurance");
-		final CUser analyst = findUserByLogin("ademir");
-		final CUser manager = findUserByLogin("mkaradeniz");
+		final CUser analyst = userService.findByLogin("ademir");
+		final CUser manager = userService.findByLogin("mkaradeniz");
 		codeReview.setAssignedTo(analyst);
 		codeReview.setCreatedBy(manager);
 		codeReview.setEstimatedHours(new BigDecimal("12.00"));
@@ -332,7 +331,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		codeReview.setStartDate(LocalDate.now().minusDays(3));
 		codeReview.setDueDate(LocalDate.now().minusDays(1));
 		codeReview.setCompletionDate(LocalDate.now().minusDays(1));
-		final CActivityStatus completedStatus = findActivityStatusByName("Completed");
+		final CActivityStatus completedStatus = activityStatusService.findByNameAndProject("Completed", project).orElseThrow();
 		codeReview.setStatus(completedStatus);
 		codeReview.setProgressPercentage(100);
 		activityService.save(codeReview);
@@ -343,7 +342,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		final CActivity perfTesting = new CActivity("Performance Testing", project);
 		perfTesting.setActivityType(testingType);
 		perfTesting.setDescription("Load testing and performance optimization");
-		final CUser dev2 = findUserByLogin("bozkan");
+		final CUser dev2 = userService.findByLogin("bozkan");
 		perfTesting.setAssignedTo(dev2);
 		perfTesting.setCreatedBy(manager);
 		perfTesting.setEstimatedHours(new BigDecimal("18.00"));
@@ -351,7 +350,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		perfTesting.setRemainingHours(new BigDecimal("8.00"));
 		perfTesting.setStartDate(LocalDate.now().minusDays(5));
 		perfTesting.setDueDate(LocalDate.now().plusDays(2));
-		final CActivityStatus inProgressStatus = findActivityStatusByName("In Progress");
+		final CActivityStatus inProgressStatus = activityStatusService.findByNameAndProject("In Progress", project).orElseThrow();
 		perfTesting.setStatus(inProgressStatus);
 		perfTesting.setProgressPercentage(60);
 		activityService.save(perfTesting);
@@ -372,14 +371,14 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		admin.setUserRole(EUserRole.ADMIN);
 		admin.setRoles("ADMIN,USER");
 		// Set company association directly on entity
-		final CCompany company = findCompanyByName("Of Teknoloji Çözümleri");
+		final CCompany company = companyService.findByName("Of Teknoloji Çözümleri").orElseThrow();
 		admin.setCompany(company);
 		userService.save(admin);
 	}
 
 	/** Creates backend development activity. */
 	private void createBackendDevActivity() {
-		final CProject project = findProjectByName("Digital Transformation Initiative");
+		final CProject project = projectService.findByName("Digital Transformation Initiative").orElseThrow();
 		if (project == null) {
 			LOGGER.warn("Project 'Digital Transformation Initiative' not found, skipping backend activity");
 			return;
@@ -387,7 +386,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		// Create the activity using new auxiliary methods
 		final CActivity backendDev = new CActivity("Backend API Development", project);
 		// Find and set the activity type
-		final CActivityType developmentType = findActivityTypeByNameAndProject("Development", project);
+		final CActivityType developmentType = activityTypeService.findByNameAndProject("Development", project).orElseThrow();
 		if (developmentType == null) {
 			LOGGER.warn("Development activity type not found for project, using null");
 		}
@@ -395,8 +394,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		backendDev.setActivityType(developmentType);
 		backendDev.setDescription("Develop REST API endpoints for user management and authentication");
 		// Set assigned users using auxiliary method
-		final CUser manager = findUserByLogin("mkaradeniz");
-		final CUser admin = findUserByLogin("admin");
+		final CUser manager = userService.findByLogin("mkaradeniz");
+		final CUser admin = userService.findByLogin("admin");
 		backendDev.setAssignedTo(manager);
 		backendDev.setCreatedBy(admin);
 		// Set time tracking using entity methods
@@ -407,7 +406,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		backendDev.setStartDate(LocalDate.now().minusDays(10));
 		backendDev.setDueDate(LocalDate.now().plusDays(5));
 		// Set status and priority using auxiliary method
-		final CActivityStatus inProgressStatus = findActivityStatusByName("In Progress");
+		final CActivityStatus inProgressStatus = activityStatusService.findByNameAndProject("In Progress", project).orElseThrow();
 		backendDev.setStatus(inProgressStatus);
 		backendDev.setProgressPercentage(75);
 		activityService.save(backendDev);
@@ -419,7 +418,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 	private void createCommentPriority(final String name, final String description, final String color, final Integer priorityLevel,
 			final boolean isDefault, final int sortOrder) {
-		final CProject project = findProjectByName("Digital Transformation Initiative");
+		final CProject project = projectService.findByName("Digital Transformation Initiative").orElseThrow();
 		if (project == null) {
 			LOGGER.warn("Project not found for comment priority creation, using null");
 		}
@@ -444,7 +443,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	}
 
 	private void createCriticalSecurityRisk() {
-		final CProject project = findProjectByName("Customer Experience Enhancement");
+		final CProject project = projectService.findByName("Customer Experience Enhancement").orElseThrow();
 		if (project == null) {
 			LOGGER.warn("Project not found for security risk");
 			return;
@@ -480,7 +479,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 	/** Creates high priority technical risk. */
 	private void createHighPriorityTechnicalRisk() {
-		final CProject project = findProjectByName("Digital Transformation Initiative");
+		final CProject project = projectService.findByName("Digital Transformation Initiative").orElseThrow();
 		if (project == null) {
 			LOGGER.warn("Project not found for technical risk");
 			return;
@@ -493,7 +492,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 	/** Creates low priority resource risk. */
 	private void createLowPriorityResourceRisk() {
-		final CProject project = findProjectByName("Infrastructure Modernization");
+		final CProject project = projectService.findByName("Infrastructure Modernization").orElseThrow();
 		if (project == null) {
 			LOGGER.warn("Project not found for resource risk");
 			return;
@@ -506,7 +505,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 	/** Creates low priority schedule risk. */
 	private void createLowPriorityScheduleRisk() {
-		final CProject project = findProjectByName("Digital Transformation Initiative");
+		final CProject project = projectService.findByName("Digital Transformation Initiative").orElseThrow();
 		if (project == null) {
 			LOGGER.warn("Project not found for schedule risk");
 			return;
@@ -532,7 +531,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 	/** Creates medium priority budget risk. */
 	private void createMediumPriorityBudgetRisk() {
-		final CProject project = findProjectByName("Product Development Phase 2");
+		final CProject project = projectService.findByName("Product Development Phase 2").orElseThrow();
 		if (project == null) {
 			LOGGER.warn("Project not found for budget risk");
 			return;
@@ -568,7 +567,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		manager.setUserRole(EUserRole.PROJECT_MANAGER);
 		manager.setRoles("MANAGER,USER");
 		// Set company association directly on entity
-		final CCompany company = findCompanyByName("Of Teknoloji Çözümleri");
+		final CCompany company = companyService.findByName("Of Teknoloji Çözümleri").orElseThrow();
 		manager.setCompany(company);
 		userService.save(manager);
 	}
@@ -613,14 +612,14 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	/** Creates sample decisions for project management. */
 	private void createSampleDecisions() {
 		try {
-			final CProject project1 = findProjectByName("Digital Transformation Initiative");
-			final CProject project2 = findProjectByName("Product Development Phase 2");
+			final CProject project1 = projectService.findByName("Digital Transformation Initiative").orElseThrow();
+			final CProject project2 = projectService.findByName("Product Development Phase 2").orElseThrow();
 			if ((project1 == null) || (project2 == null)) {
 				LOGGER.warn("Projects not found for decisions");
 				return;
 			}
-			final CUser manager = findUserByLogin("mkaradeniz");
-			final CUser admin = findUserByLogin("admin");
+			final CUser manager = userService.findByLogin("mkaradeniz");
+			final CUser admin = userService.findByLogin("admin");
 			// Decision 1: Technology Stack
 			final CDecision techStackDecision = new CDecision("Technology Stack Selection", project1);
 			techStackDecision.setDescription(
@@ -663,7 +662,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 	/** Creates sample planning meeting. */
 	private void createSamplePlanningMeeting() {
-		final CProject project = findProjectByName("Product Development Phase 2");
+		final CProject project = projectService.findByName("Product Development Phase 2").orElseThrow();
 		if (project == null) {
 			LOGGER.warn("Project not found for planning meeting");
 			return;
@@ -675,8 +674,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		meeting.setLocation("Meeting Room B");
 		// Add participants
 		final Set<CUser> participants = new HashSet<>();
-		final CUser manager = findUserByLogin("mkaradeniz");
-		final CUser analyst = findUserByLogin("ademir");
+		final CUser manager = userService.findByLogin("mkaradeniz");
+		final CUser analyst = userService.findByLogin("ademir");
 		if (manager != null) {
 			participants.add(manager);
 		}
@@ -689,7 +688,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 	/** Creates sample project meeting using auxiliary service methods. Demonstrates the use of auxiliary meeting service methods. */
 	private void createSampleProjectMeeting() {
-		final CProject project = findProjectByName("Digital Transformation Initiative");
+		final CProject project = projectService.findByName("Digital Transformation Initiative").orElseThrow();
 		if (project == null) {
 			LOGGER.warn("Project 'Digital Transformation Initiative' not found, skipping meeting creation");
 			return;
@@ -702,18 +701,18 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		meeting.setEndDate(LocalDateTime.now().plusDays(1).withHour(15).withMinute(0));
 		meeting.setLocation("Conference Room A");
 		// Set meeting content using entity methods
-		final CUser responsible = findUserByLogin("mkaradeniz");
+		final CUser responsible = userService.findByLogin("mkaradeniz");
 		meeting.setAgenda("Weekly status update on project progress, blockers discussion, and next steps planning");
 		meeting.setResponsible(responsible);
 		// Set participants using auxiliary method
 		final Set<CUser> participants = new HashSet<>();
-		participants.add(findUserByLogin("admin"));
-		participants.add(findUserByLogin("mkaradeniz"));
-		participants.add(findUserByLogin("bozkan"));
-		participants.add(findUserByLogin("msahin"));
+		participants.add(userService.findByLogin("admin"));
+		participants.add(userService.findByLogin("mkaradeniz"));
+		participants.add(userService.findByLogin("bozkan"));
+		participants.add(userService.findByLogin("msahin"));
 		meeting.setParticipants(participants);
 		// Set meeting status using proper status entity
-		final CMeetingStatus scheduledStatus = findMeetingStatusByName("Scheduled");
+		final CMeetingStatus scheduledStatus = meetingStatusService.findByNameAndProject("Scheduled", project).orElseThrow();
 		meeting.setStatus(scheduledStatus);
 		meeting.setMinutes("Meeting agenda prepared");
 		meeting.setLinkedElement("Project management system");
@@ -721,7 +720,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 	/** Creates sample retrospective meeting. */
 	private void createSampleRetrospectiveMeeting() {
-		final CProject project = findProjectByName("Customer Experience Enhancement");
+		final CProject project = projectService.findByName("Customer Experience Enhancement").orElseThrow();
 		if (project == null) {
 			LOGGER.warn("Project not found for retrospective meeting");
 			return;
@@ -732,14 +731,14 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		meeting.setEndDate(LocalDateTime.now().minusDays(7).withHour(16).withMinute(0));
 		meeting.setLocation("Conference Room C");
 		// Set proper status for completed meeting
-		final CMeetingStatus completedStatus = findMeetingStatusByName("Completed");
+		final CMeetingStatus completedStatus = meetingStatusService.findByNameAndProject("Completed", project).orElseThrow();
 		meeting.setStatus(completedStatus);
 		// Add participants and attendees
 		final Set<CUser> participants = new HashSet<>();
 		final Set<CUser> attendees = new HashSet<>();
-		final CUser manager = findUserByLogin("mkaradeniz");
-		final CUser dev1 = findUserByLogin("ademir");
-		final CUser dev2 = findUserByLogin("msahin");
+		final CUser manager = userService.findByLogin("mkaradeniz");
+		final CUser dev1 = userService.findByLogin("ademir");
+		final CUser dev2 = userService.findByLogin("msahin");
 		if (manager != null) {
 			participants.add(manager);
 			attendees.add(manager);
@@ -758,7 +757,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 	/** Creates sample review meeting. */
 	private void createSampleReviewMeeting() {
-		final CProject project = findProjectByName("Infrastructure Modernization");
+		final CProject project = projectService.findByName("Infrastructure Modernization").orElseThrow();
 		if (project == null) {
 			LOGGER.warn("Project not found for review meeting");
 			return;
@@ -770,8 +769,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		meeting.setLocation("Virtual - Zoom");
 		// Add participants
 		final Set<CUser> participants = new HashSet<>();
-		final CUser manager = findUserByLogin("mkaradeniz");
-		final CUser dev = findUserByLogin("msahin");
+		final CUser manager = userService.findByLogin("mkaradeniz");
+		final CUser dev = userService.findByLogin("msahin");
 		if (manager != null) {
 			participants.add(manager);
 		}
@@ -786,7 +785,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 	private void createSampleScreens() {
 		CTimer.stamp();
 		try {
-			final CProject project1 = findProjectByName("Digital Transformation Initiative");
+			final CProject project1 = projectService.findByName("Digital Transformation Initiative").orElseThrow();
 			if (project1 != null) {
 				createScreenWithFields(project1, "User Management Screen", "CUser", CEntityFieldService.THIS_CLASS, "name", "description");
 			}
@@ -799,7 +798,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 	/** Creates sample standup meeting. */
 	private void createSampleStandupMeeting() {
-		final CProject project = findProjectByName("Digital Transformation Initiative");
+		final CProject project = projectService.findByName("Digital Transformation Initiative").orElseThrow();
 		if (project == null) {
 			LOGGER.warn("Project not found for standup meeting");
 			return;
@@ -810,13 +809,13 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		meeting.setEndDate(LocalDateTime.now().plusDays(1).withHour(9).withMinute(30));
 		meeting.setLocation("Conference Room A");
 		// Set proper status
-		final CMeetingStatus scheduledStatus = findMeetingStatusByName("Scheduled");
+		final CMeetingStatus scheduledStatus = meetingStatusService.findByNameAndProject("Scheduled", project).orElseThrow();
 		meeting.setStatus(scheduledStatus);
 		// Add participants
 		final Set<CUser> participants = new HashSet<>();
-		final CUser manager = findUserByLogin("mkaradeniz");
-		final CUser dev1 = findUserByLogin("ademir");
-		final CUser dev2 = findUserByLogin("msahin");
+		final CUser manager = userService.findByLogin("mkaradeniz");
+		final CUser dev1 = userService.findByLogin("ademir");
+		final CUser dev2 = userService.findByLogin("msahin");
 		if (manager != null) {
 			participants.add(manager);
 		}
@@ -884,7 +883,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 	/** Creates system architecture design activity. */
 	private void createSystemArchitectureActivity() {
-		final CProject project = findProjectByName("Infrastructure Modernization");
+		final CProject project = projectService.findByName("Infrastructure Modernization").orElseThrow();
 		if (project == null) {
 			LOGGER.warn("Project 'Infrastructure Modernization' not found, skipping architecture activity");
 			return;
@@ -892,7 +891,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		// Create the activity using new auxiliary methods
 		final CActivity archDesign = new CActivity("System Architecture Design", project);
 		// Find and set the activity type
-		final CActivityType designType = findActivityTypeByNameAndProject("Design", project);
+		final CActivityType designType = activityTypeService.findByNameAndProject("Design", project).orElseThrow();
 		if (designType == null) {
 			LOGGER.warn("Design activity type not found for project, using null");
 		}
@@ -900,8 +899,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		archDesign.setActivityType(designType);
 		archDesign.setDescription("Design scalable system architecture for infrastructure modernization");
 		// Set assigned users using auxiliary method
-		final CUser teamMember2 = findUserByLogin("bozkan");
-		final CUser admin = findUserByLogin("admin");
+		final CUser teamMember2 = userService.findByLogin("bozkan");
+		final CUser admin = userService.findByLogin("admin");
 		archDesign.setAssignedTo(teamMember2);
 		archDesign.setCreatedBy(admin);
 		// Set time tracking using entity methods
@@ -912,7 +911,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		archDesign.setStartDate(LocalDate.now().minusDays(15));
 		archDesign.setDueDate(LocalDate.now().plusDays(10));
 		// Set status and priority using auxiliary method
-		final CActivityStatus onHoldStatus = findActivityStatusByName("On Hold");
+		final CActivityStatus onHoldStatus = activityStatusService.findByNameAndProject("On Hold", project).orElseThrow();
 		archDesign.setStatus(onHoldStatus);
 		archDesign.setProgressPercentage(65);
 		activityService.save(archDesign);
@@ -937,7 +936,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		analyst.setUserRole(EUserRole.TEAM_MEMBER);
 		analyst.setRoles("USER");
 		// Set company association directly on entity
-		final CCompany company = findCompanyByName("Of Sağlık Teknolojileri");
+		final CCompany company = companyService.findByName("Of Sağlık Teknolojileri").orElseThrow();
 		analyst.setCompany(company);
 		userService.save(analyst);
 	}
@@ -955,7 +954,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		developer.setUserRole(EUserRole.TEAM_MEMBER);
 		developer.setRoles("USER");
 		// Set company association directly on entity
-		final CCompany company = findCompanyByName("Of Stratejik Danışmanlık");
+		final CCompany company = companyService.findByName("Of Stratejik Danışmanlık").orElseThrow();
 		developer.setCompany(company);
 		userService.save(developer);
 	}
@@ -973,7 +972,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		teamMember.setUserRole(EUserRole.TEAM_MEMBER);
 		teamMember.setRoles("USER");
 		// Set company association directly on entity
-		final CCompany company = findCompanyByName("Of Endüstri Dinamikleri");
+		final CCompany company = companyService.findByName("Of Endüstri Dinamikleri").orElseThrow();
 		teamMember.setCompany(company);
 		userService.save(teamMember);
 	}
@@ -1000,7 +999,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 	/** Creates technical documentation activity. */
 	private void createTechnicalDocumentationActivity() {
-		final CProject project = findProjectByName("Customer Experience Enhancement");
+		final CProject project = projectService.findByName("Customer Experience Enhancement").orElseThrow();
 		if (project == null) {
 			LOGGER.warn("Project 'Customer Experience Enhancement' not found, skipping documentation activity");
 			return;
@@ -1008,7 +1007,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		// Create the activity using new auxiliary methods
 		final CActivity techDoc = new CActivity("Technical Documentation Update", project);
 		// Find and set the activity type
-		final CActivityType documentationType = findActivityTypeByNameAndProject("Documentation", project);
+		final CActivityType documentationType = activityTypeService.findByNameAndProject("Documentation", project).orElseThrow();
 		if (documentationType == null) {
 			LOGGER.warn("Documentation activity type not found for project, using null");
 		}
@@ -1016,8 +1015,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		techDoc.setActivityType(documentationType);
 		techDoc.setDescription("Update and enhance technical documentation for customer experience features");
 		// Set assigned users using auxiliary method
-		final CUser analyst = findUserByLogin("ademir");
-		final CUser manager = findUserByLogin("mkaradeniz");
+		final CUser analyst = userService.findByLogin("ademir");
+		final CUser manager = userService.findByLogin("mkaradeniz");
 		techDoc.setAssignedTo(analyst);
 		techDoc.setCreatedBy(manager);
 		// Set time tracking using entity methods (completed activity)
@@ -1029,7 +1028,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		techDoc.setDueDate(LocalDate.now().minusDays(1));
 		techDoc.setCompletionDate(LocalDate.now().minusDays(1));
 		// Set status and priority using auxiliary method (completed activity)
-		final CActivityStatus completedStatus = findActivityStatusByName("Completed");
+		final CActivityStatus completedStatus = activityStatusService.findByNameAndProject("Completed", project).orElseThrow();
 		techDoc.setStatus(completedStatus);
 		techDoc.setProgressPercentage(100);
 		activityService.save(techDoc);
@@ -1042,7 +1041,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 
 	/** Creates UI testing activity. */
 	private void createUITestingActivity() {
-		final CProject project = findProjectByName("Product Development Phase 2");
+		final CProject project = projectService.findByName("Product Development Phase 2").orElseThrow();
 		if (project == null) {
 			LOGGER.warn("Project 'Product Development Phase 2' not found, skipping UI testing activity");
 			return;
@@ -1050,7 +1049,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		// Create the activity using new auxiliary methods
 		final CActivity uiTesting = new CActivity("User Interface Testing", project);
 		// Find and set the activity type
-		final CActivityType testingType = findActivityTypeByNameAndProject("Testing", project);
+		final CActivityType testingType = activityTypeService.findByNameAndProject("Testing", project).orElseThrow();
 		if (testingType == null) {
 			LOGGER.warn("Testing activity type not found for project, using null");
 		}
@@ -1058,8 +1057,8 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		uiTesting.setActivityType(testingType);
 		uiTesting.setDescription("Comprehensive testing of user interface components and workflows");
 		// Set assigned users using auxiliary method
-		final CUser teamMember1 = findUserByLogin("msahin");
-		final CUser manager = findUserByLogin("mkaradeniz");
+		final CUser teamMember1 = userService.findByLogin("msahin");
+		final CUser manager = userService.findByLogin("mkaradeniz");
 		uiTesting.setAssignedTo(teamMember1);
 		uiTesting.setCreatedBy(manager);
 		// Set time tracking using entity methods
@@ -1070,7 +1069,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		uiTesting.setStartDate(LocalDate.now().minusDays(7));
 		uiTesting.setDueDate(LocalDate.now().plusDays(3));
 		// Set status and priority using auxiliary method
-		final CActivityStatus inProgressStatus = findActivityStatusByName("In Progress");
+		final CActivityStatus inProgressStatus = activityStatusService.findByNameAndProject("In Progress", project).orElseThrow();
 		uiTesting.setStatus(inProgressStatus);
 		uiTesting.setProgressPercentage(85);
 		activityService.save(uiTesting);
@@ -1078,80 +1077,6 @@ public class CSampleDataInitializer implements ApplicationRunner {
 		commentService.createComment("UI testing activity initiated with comprehensive test plan", uiTesting, manager);
 		commentService.createComment("Completed responsive design testing across multiple devices", uiTesting, teamMember1);
 		commentService.createComment("Working on accessibility testing and user experience validation", uiTesting, teamMember1);
-	}
-
-	/** Helper method to find activity status by name.
-	 * @param name the status name to search for
-	 * @return the CActivityStatus entity or null if not found */
-	private CActivityStatus findActivityStatusByName(final String name) {
-		try {
-			final var statuses = activityStatusService.list(org.springframework.data.domain.Pageable.unpaged());
-			return statuses.stream().filter(status -> name.equals(status.getName())).findFirst().orElse(null);
-		} catch (final Exception e) {
-			LOGGER.error("Error finding activity status by name: {}", name, e);
-			return null;
-		}
-	}
-
-	private CActivityType findActivityTypeByNameAndProject(final String name, final CProject project) {
-		try {
-			// Get all activity types for the project and find by name
-			final var activityTypes = activityTypeService.list(org.springframework.data.domain.Pageable.unpaged());
-			return activityTypes.stream().filter(type -> name.equals(type.getName()) && project.equals(type.getProject())).findFirst().orElse(null);
-		} catch (final Exception e) {
-			LOGGER.error("Error finding activity type by name: {} for project: {}", name, project.getName(), e);
-			return null;
-		}
-	}
-
-	/** Helper method to find company by name.
-	 * @param name the company name to search for
-	 * @return the CCompany entity or null if not found */
-	private CCompany findCompanyByName(final String name) {
-		try {
-			return companyService.findByName(name).orElse(null);
-		} catch (final Exception e) {
-			LOGGER.warn("Could not find company with name: {}", name);
-			return null;
-		}
-	}
-
-	/** Helper method to find meeting status by name.
-	 * @param name the status name to search for
-	 * @return the CMeetingStatus entity or null if not found */
-	private CMeetingStatus findMeetingStatusByName(final String name) {
-		try {
-			final var statuses = meetingStatusService.list(org.springframework.data.domain.Pageable.unpaged());
-			return statuses.stream().filter(status -> name.equals(status.getName())).findFirst().orElse(null);
-		} catch (final Exception e) {
-			LOGGER.error("Error finding meeting status by name: {}", name, e);
-			return null;
-		}
-	}
-
-	/** Helper method to find project by name.
-	 * @param name the project name to search for
-	 * @return the CProject entity or null if not found */
-	private CProject findProjectByName(final String name) {
-		try {
-			return projectService.findByName(name).orElse(null);
-		} catch (final Exception e) {
-			LOGGER.warn("Could not find project with name: {}", name);
-			return null;
-		}
-	}
-
-	/** Helper method to find user by login.
-	 * @param login the user login to search for
-	 * @return the CUser entity or null if not found */
-	private CUser findUserByLogin(final String login) {
-		// LOGGER.info("findUserByLogin called with login: {}", login);
-		try {
-			return userService.findByLogin(login);
-		} catch (final Exception e) {
-			LOGGER.warn("Could not find user with login: {}", login);
-			return null;
-		}
 	}
 
 	/** Initializes comprehensive activity data with available fields populated. */
@@ -1184,7 +1109,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			};
 			// Define meeting types to create for each project
 			for (final String projectName : projectNames) {
-				final CProject project = findProjectByName(projectName);
+				final CProject project = projectService.findByName(projectName).orElseThrow();
 				if (project == null) {
 					LOGGER.warn("Project '{}' not found, skipping meeting type creation", projectName);
 					continue;
@@ -1226,7 +1151,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			};
 			// Create activity types for each project
 			for (final String projectName : projectNames) {
-				final CProject project = findProjectByName(projectName);
+				final CProject project = projectService.findByName(projectName).orElseThrow();
 				if (project == null) {
 					LOGGER.warn("Project '{}' not found, skipping activity type creation", projectName);
 					continue;
@@ -1282,7 +1207,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			};
 			// Define meeting types to create for each project
 			for (final String projectName : projectNames) {
-				final CProject project = findProjectByName(projectName);
+				final CProject project = projectService.findByName(projectName).orElseThrow();
 				if (project == null) {
 					LOGGER.warn("Project '{}' not found, skipping meeting type creation", projectName);
 					continue;
@@ -1332,7 +1257,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			};
 			// Define meeting types to create for each project
 			for (final String projectName : projectNames) {
-				final CProject project = findProjectByName(projectName);
+				final CProject project = projectService.findByName(projectName).orElseThrow();
 				if (project == null) {
 					LOGGER.warn("Project '{}' not found, skipping meeting type creation", projectName);
 					continue;
@@ -1375,7 +1300,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			};
 			// Create meeting types for each project
 			for (final String projectName : projectNames) {
-				final CProject project = findProjectByName(projectName);
+				final CProject project = projectService.findByName(projectName).orElseThrow();
 				if (project == null) {
 					LOGGER.warn("Project '{}' not found, skipping meeting type creation", projectName);
 					continue;
@@ -1419,7 +1344,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			};
 			// Create order types for each project
 			for (final String projectName : projectNames) {
-				final CProject project = findProjectByName(projectName);
+				final CProject project = projectService.findByName(projectName).orElseThrow();
 				if (project == null) {
 					LOGGER.warn("Project '{}' not found, skipping order type creation", projectName);
 					continue;
@@ -1503,7 +1428,7 @@ public class CSampleDataInitializer implements ApplicationRunner {
 			};
 			// Create user types for each project
 			for (final String projectName : projectNames) {
-				final CProject project = findProjectByName(projectName);
+				final CProject project = projectService.findByName(projectName).orElseThrow();
 				if (project == null) {
 					LOGGER.warn("Project '{}' not found, skipping user type creation", projectName);
 					continue;

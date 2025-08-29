@@ -10,14 +10,15 @@ import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.decisions.domain.CDecisionType;
 import tech.derbent.projects.domain.CProject;
+import tech.derbent.session.service.CSessionService;
 
 /** CDecisionTypeService - Service class for CDecisionType entities. Layer: Service (MVC) Provides business logic operations for project-aware
  * decision type management including validation, creation, and status management. */
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CDecisionTypeService extends CEntityOfProjectService<CDecisionType> {
-	public CDecisionTypeService(final CDecisionTypeRepository repository, final Clock clock) {
-		super(repository, clock);
+	public CDecisionTypeService(final CDecisionTypeRepository repository, final Clock clock, final CSessionService sessionService) {
+		super(repository, clock, sessionService);
 	}
 
 	/** Finds all active decision types for a project.

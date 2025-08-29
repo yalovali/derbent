@@ -14,8 +14,8 @@ import tech.derbent.projects.domain.CProject;
  * Provides common query methods for project-aware entities using standard pagination patterns. */
 @NoRepositoryBean
 public interface CEntityOfProjectRepository<EntityClass extends CEntityOfProject<EntityClass>> extends CAbstractNamedRepository<EntityClass> {
-	@Query ("SELECT COUNT(s) > 0 FROM #{#entityName} s WHERE s.project = :project")
-	int countByProject(@Param ("project") CProject project);
+	@Query ("SELECT COUNT(s) FROM #{#entityName} s WHERE s.project = :project")
+	long countByProject(@Param ("project") CProject project);
 
 	@Query ("SELECT COUNT(s) > 0 FROM #{#entityName} s WHERE LOWER(s.name) = LOWER(:name) AND s.project = :project")
 	boolean existsByNameProject(@Param ("name") String name, @Param ("project") CProject project);
@@ -24,8 +24,8 @@ public interface CEntityOfProjectRepository<EntityClass extends CEntityOfProject
 	Optional<EntityClass> findByNameAndProject(@Param ("name") String name, @Param ("project") CProject project);
 
 	@Query ("SELECT e FROM #{#entityName} e WHERE e.project = :project")
-	List<EntityClass> findByProject(@Param ("project") CProject project);
+	List<EntityClass> listByProject(@Param ("project") CProject project);
 
 	@Query ("SELECT e FROM #{#entityName} e WHERE e.project = :project")
-	Page<EntityClass> findByProject(@Param ("project") CProject project, Pageable pageable);
+	Page<EntityClass> listByProject(@Param ("project") CProject project, Pageable pageable);
 }

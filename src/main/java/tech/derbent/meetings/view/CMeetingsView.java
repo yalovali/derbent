@@ -131,7 +131,7 @@ public class CMeetingsView extends CGridViewBaseProject<CMeeting> implements IIc
 						(tech.derbent.abstracts.services.CEntityOfProjectService<CMeeting>) entityService;
 				final Optional<tech.derbent.projects.domain.CProject> activeProject = sessionService.getActiveProject();
 				if (activeProject.isPresent()) {
-					final List<CMeeting> allMeetings = projectService.findEntriesByProject(activeProject.get(), Pageable.unpaged()).getContent();
+					final List<CMeeting> allMeetings = projectService.listByProject(activeProject.get(), Pageable.unpaged()).getContent();
 					final List<CMeeting> filteredMeetings =
 							allMeetings.stream().filter(meeting -> matchesSearchText(meeting, searchText.toLowerCase().trim()))
 									.collect(java.util.stream.Collectors.toList());

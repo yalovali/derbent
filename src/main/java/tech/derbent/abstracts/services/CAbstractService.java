@@ -1,20 +1,28 @@
 package tech.derbent.abstracts.services;
 
 import java.time.Clock;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.abstracts.annotations.CSpringAuxillaries;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.interfaces.CSearchable;
+import tech.derbent.abstracts.utils.CPageableUtils;
 import tech.derbent.abstracts.utils.Check;
-import tech.derbent.abstracts.utils.PageableUtils;
+import tech.derbent.session.service.CSessionService;
 
 /** CAbstractService - Abstract base service class for entity operations. Layer: Service (MVC) Provides common CRUD operations and lazy loading
  * support for all entity types. */
@@ -22,16 +30,69 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	protected final Clock clock;
 	protected final CAbstractRepository<EntityClass> repository;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+	protected @Nullable CSessionService sessionService;
 
 	public CAbstractService(final CAbstractRepository<EntityClass> repository, final Clock clock) {
 		this.clock = clock;
 		this.repository = repository;
+		this.sessionService = null;
 		Check.notNull(repository, "repository cannot be null");
 	}
 
-	public int count() {
+	public CAbstractService(final CAbstractRepository<EntityClass> repository, final Clock clock, final CSessionService sessionService) {
+		this.clock = clock;
+		this.repository = repository;
+		this.sessionService = sessionService;
+		Check.notNull(repository, "repository cannot be null");
+	}
+
+	protected List<EntityClass> applySort(final List<EntityClass> input, final Sort sort) {
+		if ((sort == null) || sort.isUnsorted() || (input == null) || input.isEmpty()) {
+			return input;
+		}
+		final Map<String, Function<EntityClass, ?>> keyFns = getSortKeyExtractors();
+		Comparator<EntityClass> chain = null;
+		for (final Sort.Order o : sort) {
+			final var keyFn = keyFns.get(o.getProperty());
+			if (keyFn == null) {
+				continue; // tanımadığımız kolonları atla
+			}
+			// El yapımı comparator: nulls last + Comparable check
+			java.util.Comparator<EntityClass> c = (a, b) -> {
+				final Object va = keyFn.apply(a);
+				final Object vb = keyFn.apply(b);
+				if (va == vb) {
+					return 0;
+				}
+				if (va == null) {
+					return 1; // nulls last
+				}
+				if (vb == null) {
+					return -1;
+				}
+				if (va instanceof final Comparable<?> ca && vb instanceof final Comparable<?> cb) {
+					@SuppressWarnings ("unchecked")
+					final int cmp = ((Comparable<Object>) ca).compareTo(cb);
+					return cmp;
+				}
+				return 0; // karşılaştırılamıyorsa eşit say
+			};
+			if (o.isDescending()) {
+				c = c.reversed();
+			}
+			chain = (chain == null) ? c : chain.thenComparing(c);
+		}
+		if (chain == null) {
+			return input;
+		}
+		final ArrayList<EntityClass> copy = new ArrayList<>(input);
+		copy.sort(chain);
+		return copy;
+	}
+
+	public long count() {
 		// LOGGER.debug("Counting entities in {}", getClass().getSimpleName());
-		return (int) repository.count();
+		return repository.count();
 	}
 
 	@Transactional
@@ -101,6 +162,11 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 
 	protected abstract Class<EntityClass> getEntityClass();
 
+	/** Varsayılan sıralama anahtarları. İstediğiniz entity servisinde override edebilirsiniz. */
+	protected Map<String, Function<EntityClass, ?>> getSortKeyExtractors() {
+		return Map.of();
+	}
+
 	protected void initializeLazyRelationship(final Object relationshipEntity, final String relationshipName) {
 		if (relationshipEntity == null) {
 			return;
@@ -117,8 +183,9 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 
 	@Transactional (readOnly = true)
 	public Page<EntityClass> list(final Pageable pageable) {
+		LOGGER.debug("Listing entities with pageable");
 		// Validate and fix pageable to prevent "max-results cannot be negative" error
-		final Pageable safePage = PageableUtils.validateAndFix(pageable);
+		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		// LOGGER.debug("Listing entities with pageable: {}", safePage);
 		final Page<EntityClass> entities = repository.findAll(safePage);
 		// Initialize lazy fields for all entities
@@ -127,8 +194,9 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 
 	@Transactional (readOnly = true)
 	public Page<EntityClass> list(final Pageable pageable, final Specification<EntityClass> filter) {
+		LOGGER.debug("Listing entities with filter specification");
 		// Validate and fix pageable to prevent "max-results cannot be negative" error
-		final Pageable safePage = PageableUtils.validateAndFix(pageable);
+		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		// LOGGER.debug("Listing entities with filter and pageable");
 		final Page<EntityClass> page = repository.findAll(filter, safePage);
 		// Initialize lazy fields for all entities in the page
@@ -136,19 +204,20 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	}
 
 	@Transactional (readOnly = true)
-	public List<EntityClass> list(final Pageable pageable, final String searchText) {
-		// Validate and fix pageable to prevent "max-results cannot be negative" error
-		final Pageable safePage = PageableUtils.validateAndFix(pageable);
-		// If no search text or entity doesn't implement CSearchable, use regular listing
-		if ((searchText == null) || searchText.trim().isEmpty() || !CSearchable.class.isAssignableFrom(getEntityClass())) {
-			return list(safePage).getContent();
-		}
-		// Get all entities and filter using the entity's matches method
-		final List<EntityClass> allEntities = repository.findAll(safePage).toList();
-		// Initialize lazy fields for all entities
-		// Filter entities using their search implementation
-		final String trimmedSearchText = searchText.trim();
-		return allEntities.stream().filter(entity -> ((CSearchable) entity).matches(trimmedSearchText)).toList();
+	public Page<EntityClass> list(final Pageable pageable, final String searchText) {
+		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
+		final String term = (searchText == null) ? "" : searchText.trim();
+		// Pull all for project (ensure repo method DOES NOT fetch to-many relations!)
+		final List<EntityClass> all = repository.findAll(Pageable.unpaged()).getContent();
+		final boolean searchable = CSearchable.class.isAssignableFrom(getEntityClass());
+		final List<EntityClass> filtered = (term.isEmpty() || !searchable) ? all : all.stream().filter(e -> ((CSearchable) e).matches(term)).toList();
+		// --- apply sort from Pageable (name/id supported here; override to extend)
+		final List<EntityClass> sorted = applySort(filtered, safePage.getSort());
+		// --- slice
+		final int start = (int) Math.min(safePage.getOffset(), sorted.size());
+		final int end = Math.min(start + safePage.getPageSize(), sorted.size());
+		final List<EntityClass> content = sorted.subList(start, end);
+		return new PageImpl<>(content, safePage, filtered.size());
 	}
 
 	public EntityClass newEntity() {

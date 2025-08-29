@@ -5,15 +5,15 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.decisions.domain.CDecision;
+import tech.derbent.session.service.CSessionService;
 
 /** CDecisionService - Service class for CDecision entities. Layer: Service (MVC) Provides business logic operations for decision management including
  * validation, creation, approval workflow management, and project-based queries. */
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CDecisionService extends CEntityOfProjectService<CDecision> {
-
-	public CDecisionService(final CDecisionRepository repository, final Clock clock) {
-		super(repository, clock);
+	public CDecisionService(final CDecisionRepository repository, final Clock clock, final CSessionService sessionService) {
+		super(repository, clock, sessionService);
 	}
 
 	@Override

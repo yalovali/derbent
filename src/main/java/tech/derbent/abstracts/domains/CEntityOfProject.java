@@ -8,6 +8,8 @@ import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
 
+// @FilterDef (name = "byProject", parameters = @ParamDef (name = "projectId", type = Long.class))
+// @Filters (@Filter (name = "byProject", condition = "project_id = :projectId"))
 @MappedSuperclass
 public abstract class CEntityOfProject<EntityClass> extends CEntityNamed<EntityClass> {
 	// Many risks belong to one project

@@ -9,9 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.abstracts.services.CEntityOfProjectService;
-import tech.derbent.abstracts.utils.Check;
 import tech.derbent.meetings.domain.CMeetingStatus;
 import tech.derbent.projects.domain.CProject;
+import tech.derbent.session.service.CSessionService;
 
 /** CMeetingStatusService - Service class for managing CMeetingStatus entities. Layer: Service (MVC) Provides business logic for meeting status
  * management including CRUD operations, validation, and workflow management. Since CMeetingStatus extends CStatus which extends CTypeEntity which
@@ -23,9 +23,8 @@ public class CMeetingStatusService extends CEntityOfProjectService<CMeetingStatu
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingStatusService.class);
 
 	@Autowired
-	public CMeetingStatusService(final CMeetingStatusRepository meetingStatusRepository, final Clock clock) {
-		super(meetingStatusRepository, clock);
-		Check.notNull(meetingStatusRepository, "Meeting status repository cannot be null");
+	public CMeetingStatusService(final CMeetingStatusRepository repository, final Clock clock, final CSessionService sessionService) {
+		super(repository, clock, sessionService);
 	}
 
 	/** Create default meeting statuses if they don't exist. This method should be called during application startup. */
@@ -39,7 +38,7 @@ public class CMeetingStatusService extends CEntityOfProjectService<CMeetingStatu
 	@Transactional (readOnly = true)
 	public List<CMeetingStatus> findAllActiveStatusesByProject(final CProject project) {
 		Optional.ofNullable(project).orElse(null);
-		return findEntriesByProject(project).stream().filter(status -> !status.getFinalStatus()).toList();
+		return listByProject(project).stream().filter(status -> !status.getFinalStatus()).toList();
 	}
 
 	/** Find the default status for new meetings.

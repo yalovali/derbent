@@ -22,5 +22,5 @@ public interface CActivityRepository extends CProjectItemRespository<CActivity> 
 		"SELECT a FROM CActivity a " + "LEFT JOIN FETCH a.project " + "LEFT JOIN FETCH a.assignedTo " + "LEFT JOIN FETCH a.createdBy "
 				+ "LEFT JOIN FETCH a.activityType " + "LEFT JOIN FETCH a.status " + "WHERE a.project = :project"
 	)
-	Page<CActivity> findByProject(@Param ("project") CProject project, Pageable pageable);
+	Page<CActivity> listByProject(@Param ("project") CProject project, Pageable pageable);
 }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.meetings.domain.CMeetingType;
+import tech.derbent.session.service.CSessionService;
 
 /** CMeetingTypeService - Service layer for CMeetingType entity. Layer: Service (MVC) Handles business logic for project-aware meeting type
  * operations. */
@@ -15,15 +16,11 @@ import tech.derbent.meetings.domain.CMeetingType;
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class CMeetingTypeService extends CEntityOfProjectService<CMeetingType> {
-
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingTypeService.class);
 
-	/** Constructor for CMeetingTypeService.
-	 * @param repository the CMeetingTypeRepository to use for data access
-	 * @param clock      the Clock instance for time-related operations */
-	CMeetingTypeService(final CMeetingTypeRepository repository, final Clock clock) {
-		super(repository, clock);
+	CMeetingTypeService(final CMeetingTypeRepository repository, final Clock clock, final CSessionService sessionService) {
+		super(repository, clock, sessionService);
 	}
 
 	@Override

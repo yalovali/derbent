@@ -38,7 +38,7 @@ public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntit
 
 	public static Class<?> getViewClass() { return CMeetingsView.class; }
 
-	@ManyToOne (fetch = FetchType.EAGER)
+	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "cmeetingtype_id", nullable = true)
 	@AMetaData (
 			displayName = "Meeting Type", required = false, readOnly = false, description = "Type category of the meeting", hidden = false, order = 2,
@@ -71,21 +71,21 @@ public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntit
 			hidden = false, order = 7, maxLength = 4000
 	)
 	private String agenda;
-	@ManyToOne (fetch = FetchType.EAGER)
+	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "related_activity_id", nullable = true)
 	@AMetaData (
 			displayName = "Related Activity", required = false, readOnly = false, description = "Project activity related to this meeting",
 			hidden = false, order = 8, dataProviderBean = "CActivityService"
 	)
 	private CActivity relatedActivity;
-	@ManyToOne (fetch = FetchType.EAGER)
+	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "meeting_status_id", nullable = true)
 	@AMetaData (
 			displayName = "Status", required = false, readOnly = false, description = "Current status of the meeting", hidden = false, order = 9,
 			dataProviderBean = "CMeetingStatusService"
 	)
 	private CMeetingStatus status;
-	@ManyToOne (fetch = FetchType.EAGER)
+	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "responsible_id", nullable = true)
 	@AMetaData (
 			displayName = "Responsible", required = false, readOnly = false,
@@ -106,7 +106,7 @@ public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntit
 			order = 12, dataProviderBean = "CUserService"
 	)
 	private Set<CUser> attendees = new HashSet<>();
-	@ManyToMany (fetch = FetchType.EAGER)
+	@ManyToMany (fetch = FetchType.LAZY)
 	@JoinTable (name = "cmeeting_participants", joinColumns = @JoinColumn (name = "meeting_id"), inverseJoinColumns = @JoinColumn (name = "user_id"))
 	@AMetaData (
 			displayName = "Participants", required = false, readOnly = false, description = "Users invited to participate in the meeting",

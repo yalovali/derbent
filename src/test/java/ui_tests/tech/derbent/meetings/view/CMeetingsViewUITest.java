@@ -94,7 +94,7 @@ class CMeetingsViewUITest extends CAbstractUITest<CMeeting> {
 	protected void setupServiceMocks() {
 		super.setupServiceMocks();
 		// Mock project-aware methods specific to meetings service
-		when(mockMeetingService.findEntriesByProject(eq(testProject), any(Pageable.class)).getContent()).thenReturn(testEntities);
+		when(mockMeetingService.listByProject(eq(testProject), any(Pageable.class)).getContent()).thenReturn(testEntities);
 		// Mock meeting type and status services with pageable
 		when(mockMeetingTypeService.list(any(Pageable.class)).getContent()).thenReturn(Arrays.asList(testMeetingType));
 		when(mockMeetingStatusService.list(any(Pageable.class)).getContent()).thenReturn(Arrays.asList(testMeetingStatus));

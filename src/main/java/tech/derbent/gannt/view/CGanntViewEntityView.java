@@ -8,10 +8,10 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
-import tech.derbent.abstracts.services.CAbstractNamedEntityService;
 import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.gannt.domain.CGanntViewEntity;
+import tech.derbent.gannt.service.CGanntViewEntityService;
 import tech.derbent.screens.service.CScreenService;
 import tech.derbent.session.service.CSessionService;
 
@@ -32,7 +32,7 @@ public class CGanntViewEntityView extends CGridViewBaseProject<CGanntViewEntity>
 
 	private final String ENTITY_ID_FIELD = "screen_id";
 
-	protected CGanntViewEntityView(final CAbstractNamedEntityService<CGanntViewEntity> entityService, final CSessionService sessionService,
+	protected CGanntViewEntityView(final CGanntViewEntityService entityService, final CSessionService sessionService,
 			final CScreenService screenService) {
 		super(CGanntViewEntity.class, entityService, sessionService, screenService);
 		// TODO Auto-generated constructor stub

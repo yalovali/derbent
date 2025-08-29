@@ -7,13 +7,13 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.decisions.domain.CDecisionStatus;
+import tech.derbent.session.service.CSessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CDecisionStatusService extends CEntityOfProjectService<CDecisionStatus> {
-
-	public CDecisionStatusService(final CDecisionStatusRepository repository, final Clock clock) {
-		super(repository, clock);
+	public CDecisionStatusService(final CDecisionStatusRepository repository, final Clock clock, final CSessionService sessionService) {
+		super(repository, clock, sessionService);
 	}
 
 	@Override
