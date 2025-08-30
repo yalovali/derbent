@@ -22,6 +22,8 @@ import tech.derbent.session.service.CSessionService;
 public class CMeetingTypeView extends CGridViewBaseProject<CMeetingType> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 
+	public static String getEntityColorCode() { return getIconColorCode(); }
+
 	public static String getIconColorCode() { return CMeetingType.getIconColorCode(); }
 
 	public static String getIconFilename() { return CMeetingType.getIconFilename(); }

@@ -31,6 +31,8 @@ import tech.derbent.users.domain.CUser;
 public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivity.class);
 
+	public static String getEntityColorCode() { return getIconColorCode(); }
+
 	public static String getIconColorCode() {
 		return "#007bff"; // Blue color for activity entities
 	}

@@ -24,6 +24,8 @@ public class CRiskView extends CGridViewBaseProject<CRisk> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 	private static final String ENTITY_ID_FIELD = "risk_id";
 
+	public static String getEntityColorCode() { return getIconColorCode(); }
+
 	public static String getIconColorCode() {
 		return CRisk.getIconColorCode(); // Use the static method from CRisk
 	}

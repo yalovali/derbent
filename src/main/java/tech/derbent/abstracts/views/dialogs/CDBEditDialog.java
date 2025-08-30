@@ -9,7 +9,7 @@ import tech.derbent.abstracts.views.components.CVerticalLayout;
  * Child classes must implement form population and validation. */
 public abstract class CDBEditDialog<EntityClass> extends CDialog {
 	private static final long serialVersionUID = 1L;
-	protected final EntityClass entity;
+	private final EntityClass entity;
 	protected final Consumer<EntityClass> onSave;
 	protected final boolean isNew;
 	private CVerticalLayout dialogLayout;
@@ -40,10 +40,10 @@ public abstract class CDBEditDialog<EntityClass> extends CDialog {
 	/** Called when Save is pressed. Handles validation and callback. */
 	protected void save() {
 		try {
-			LOGGER.debug("Saving data: {}", entity);
+			LOGGER.debug("Saving data: {}", getEntity());
 			validateForm();
 			if (onSave != null) {
-				onSave.accept(entity);
+				onSave.accept(getEntity());
 			}
 			close();
 			Notification.show(isNew ? getSuccessCreateMessage() : getSuccessUpdateMessage());
@@ -70,4 +70,8 @@ public abstract class CDBEditDialog<EntityClass> extends CDialog {
 
 	/** Child must implement: validate form fields. */
 	protected abstract void validateForm();
+
+	public EntityClass getEntity() {
+		return entity;
+	}
 }

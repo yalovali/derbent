@@ -29,6 +29,8 @@ import tech.derbent.users.service.CUserService;
 public class CProjectsView extends CGridViewBaseNamed<CProject> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 
+	public static String getEntityColorCode() { return getIconColorCode(); }
+
 	public static String getIconColorCode() {
 		return CProject.getIconColorCode(); // Use the static method from CProject
 	}

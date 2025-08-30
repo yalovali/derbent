@@ -16,6 +16,7 @@ public abstract class CDialog extends Dialog {
 	protected VerticalLayout mainLayout;
 	protected final HorizontalLayout buttonLayout = new HorizontalLayout();
 	private boolean setupDone = false;
+	private H3 formTitle;
 
 	/** Constructor for CDialog. Initializes the dialog with a default layout. */
 	public CDialog() {
@@ -23,15 +24,17 @@ public abstract class CDialog extends Dialog {
 		initializeDialog();
 	}
 
-	/** Child must implement: form title. */
-	protected abstract Icon getFormIcon();
-
-	/** Child must implement: form title. */
-	protected abstract String getFormTitle();
-
 	/** Child must implement: dialog header title. */
-	@Override
-	public abstract String getHeaderTitle();
+	public abstract String getDialogTitleString();
+
+	/** Child must implement: form title.
+	 * @throws Exception */
+	protected abstract Icon getFormIcon() throws Exception;
+
+	public H3 getFormTitle() { return formTitle; }
+
+	/** Child must implement: form title. */
+	protected abstract String getFormTitleString();
 
 	/** Common initialization for all CDialog instances. */
 	protected final void initializeDialog() {
@@ -44,7 +47,7 @@ public abstract class CDialog extends Dialog {
 	protected abstract void setupContent() throws Exception;
 
 	/* call this class in child constructor after all fields are initialized, use setupContent and setupButtons to customize content */
-	protected final void setupDialog() {
+	protected final void setupDialog() throws Exception {
 		setHeaderTitle(getHeaderTitle());
 		setModal(true);
 		setCloseOnEsc(true);
@@ -61,7 +64,8 @@ public abstract class CDialog extends Dialog {
 			icon.setSize("24px");
 			headerLayout.add(icon);
 		}
-		headerLayout.add(new H3(getFormTitle()));
+		formTitle = new H3(getFormTitleString());
+		headerLayout.add(formTitle);
 		mainLayout.add(headerLayout);
 		add(mainLayout);
 		//

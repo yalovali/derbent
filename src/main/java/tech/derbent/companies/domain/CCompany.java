@@ -20,6 +20,8 @@ import tech.derbent.companies.view.CCompanyView;
 @Table (name = "ccompany")
 @AttributeOverride (name = "id", column = @Column (name = "company_id"))
 public class CCompany extends CEntityNamed<CCompany> {
+	public static String getEntityColorCode() { return getIconColorCode(); }
+
 	// name and description fields are now inherited from CEntityNamed
 	public static String getIconColorCode() {
 		return "#6c757d"; // Gray color for company entities

@@ -79,8 +79,8 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 	protected List<RelatedEntityClass> getAvailableRelatedEntities() {
 		final List<RelatedEntityClass> allRelated = detailService.findAll();
 		// check if the relationship already exists
-		if (!isNew && (entity != null)) {
-			final RelatedEntityClass existingRelated = getRelatedEntityFromRelationship(entity);
+		if (!isNew && (getEntity() != null)) {
+			final RelatedEntityClass existingRelated = getRelatedEntityFromRelationship(getEntity());
 			if (existingRelated != null) {
 				// Ensure the existing related entity is included in the list
 				if (!allRelated.contains(existingRelated)) {
@@ -108,7 +108,7 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 
 	/** Sets the related entity field value for editing mode. */
 	protected void populateEntityField() {
-		final RelatedEntityClass relatedEntity = getRelatedEntityFromRelationship(entity);
+		final RelatedEntityClass relatedEntity = getRelatedEntityFromRelationship(getEntity());
 		if (relatedEntity != null) {
 			entityComboBox.setValue(relatedEntity);
 		}
@@ -134,7 +134,7 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 
 	/** Sets the permission field value from existing data. */
 	protected void populatePermissionField() {
-		final String permission = getPermissionFromRelationship(entity);
+		final String permission = getPermissionFromRelationship(getEntity());
 		if (permission != null) {
 			permissionsField.setValue(permission);
 		}
@@ -142,7 +142,7 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 
 	/** Sets the role field value from existing data. */
 	protected void populateRoleField() {
-		final String role = getRoleFromRelationship(entity);
+		final String role = getRoleFromRelationship(getEntity());
 		if (role != null) {
 			rolesField.setValue(role);
 		}
@@ -152,10 +152,10 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 	@Override
 	protected void save() {
 		try {
-			LOGGER.debug("Saving relationship data: {}", entity);
+			LOGGER.debug("Saving relationship data: {}", getEntity());
 			validateForm();
 			if (onSave != null) {
-				onSave.accept(entity);
+				onSave.accept(getEntity());
 			}
 			close();
 			Notification.show(isNew ? getSuccessCreateMessage() : getSuccessUpdateMessage());
@@ -238,10 +238,10 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 
 	/** Updates the relationship data object with validated form values. */
 	protected void updateRelationshipData() {
-		setMainEntityInRelationship(entity, mainEntity);
-		setRelatedEntityInRelationship(entity, entityComboBox.getValue());
-		setRoleInRelationship(entity, rolesField.getValue().trim());
-		setPermissionInRelationship(entity, permissionsField.getValue().trim());
+		setMainEntityInRelationship(getEntity(), mainEntity);
+		setRelatedEntityInRelationship(getEntity(), entityComboBox.getValue());
+		setRoleInRelationship(getEntity(), rolesField.getValue().trim());
+		setPermissionInRelationship(getEntity(), permissionsField.getValue().trim());
 	}
 
 	/** Validates that a related entity has been selected. */

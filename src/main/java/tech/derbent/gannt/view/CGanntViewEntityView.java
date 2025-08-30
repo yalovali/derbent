@@ -22,6 +22,8 @@ import tech.derbent.session.service.CSessionService;
 public class CGanntViewEntityView extends CGridViewBaseProject<CGanntViewEntity> {
 	private static final long serialVersionUID = 1L;
 
+	public static String getEntityColorCode() { return getIconColorCode(); }
+
 	public static String getIconColorCode() {
 		return CGanntViewEntity.getIconColorCode(); // Use the static method from CScreen
 	}

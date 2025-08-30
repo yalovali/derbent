@@ -24,6 +24,8 @@ import tech.derbent.session.service.CSessionService;
 public class CCommentPriorityView extends CGridViewBaseProject<CCommentPriority> {
 	private static final long serialVersionUID = 1L;
 
+	public static String getEntityColorCode() { return getIconColorCode(); }
+
 	public static String getIconColorCode() {
 		return CCommentPriority.getIconColorCode(); // Use the static method from
 													// CActivity

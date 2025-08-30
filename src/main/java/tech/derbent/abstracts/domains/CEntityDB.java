@@ -16,7 +16,6 @@ import tech.derbent.abstracts.utils.Check;
 
 @MappedSuperclass
 public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implements IIconSet, IEntityDBStatics {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityDB.class);
 
 	public static Class<?> getViewClass() {
@@ -91,8 +90,6 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 		}
 		return fields.toArray(new Field[0]);
 	}
-
-	public String getColor() { return null; }
 
 	@Nullable
 	public Long getId() { return id; }

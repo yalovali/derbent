@@ -25,6 +25,8 @@ public class CMeetingKanbanBoardView extends CBaseKanbanBoardView<CMeeting, CMee
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingKanbanBoardView.class);
 
+	public static String getEntityColorCode() { return getIconColorCode(); }
+
 	public static String getIconColorCode() {
 		return "#28a745"; // Green color for meetings
 	}

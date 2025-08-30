@@ -27,6 +27,8 @@ import tech.derbent.users.domain.CUser;
 public class CDecision extends CEntityOfProject<CDecision> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDecision.class);
 
+	public static String getEntityColorCode() { return getIconColorCode(); }
+
 	public static String getIconColorCode() {
 		return "#dc3545"; // Red color for decision entities
 	}

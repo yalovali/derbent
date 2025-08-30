@@ -19,6 +19,8 @@ import tech.derbent.projects.domain.CProject;
 @Table (name = "cactivitystatus")
 @AttributeOverride (name = "id", column = @Column (name = "cactivitystatus_id"))
 public class CActivityStatus extends CStatus<CActivityStatus> implements CKanbanStatus {
+	public static String getEntityColorCode() { return getIconColorCode(); }
+
 	public static String getIconColorCode() {
 		return "#007bff"; // Blue color for activity status entities
 	}

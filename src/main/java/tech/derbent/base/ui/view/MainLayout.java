@@ -62,7 +62,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	private CViewToolbar mainToolbar;
 
 	MainLayout(final AuthenticationContext authenticationContext, final CSessionService sessionService, final LayoutService layoutService,
-			final PasswordEncoder passwordEncoder, final CUserService userService) {
+			final PasswordEncoder passwordEncoder, final CUserService userService) throws Exception {
 		this.authenticationContext = authenticationContext;
 		this.sessionService = sessionService;
 		this.layoutService = layoutService;
@@ -139,7 +139,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		return navBar;
 	}
 
-	private Div createSlidingHeader() {
+	private Div createSlidingHeader() throws Exception {
 		// Add hierarchical side menu below the header content
 		final var hierarchicalMenu = new CHierarchicalSideMenu();
 		hierarchicalMenu.addClassNames(Margin.Top.MEDIUM);

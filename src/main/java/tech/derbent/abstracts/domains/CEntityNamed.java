@@ -110,7 +110,7 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 
 	@Override
 	public String toString() {
-		return name != null ? name : super.toString();
+		return getName();
 	}
 
 	/** Update the last modified date to now. */

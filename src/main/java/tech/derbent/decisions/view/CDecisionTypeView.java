@@ -19,6 +19,8 @@ import tech.derbent.session.service.CSessionService;
 public class CDecisionTypeView extends CGridViewBaseProject<CDecisionType> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 
+	public static String getEntityColorCode() { return getIconColorCode(); }
+
 	public static String getIconColorCode() { return CDecisionType.getIconColorCode(); }
 
 	public static String getIconFilename() { return CDecisionType.getIconFilename(); }

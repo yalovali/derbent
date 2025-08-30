@@ -26,6 +26,8 @@ import tech.derbent.users.domain.CUser;
 @Table (name = "corder")
 @AttributeOverride (name = "id", column = @Column (name = "order_id"))
 public class COrder extends CEntityOfProject<COrder> {
+	public static String getEntityColorCode() { return getIconColorCode(); }
+
 	public static String getIconColorCode() {
 		return "#20c997"; // Teal color for order entities
 	}

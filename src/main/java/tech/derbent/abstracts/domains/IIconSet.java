@@ -4,6 +4,12 @@ import java.lang.reflect.Method;
 import org.slf4j.Logger;
 
 public interface IIconSet {
+	public static String getEntityColorCode() {
+		final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(IIconSet.class);
+		LOGGER.warn("getIconColorCode() not implemented, returning default color.");
+		return "#007bff";
+	}
+
 	public static String getIconColorCode() {
 		final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(IIconSet.class);
 		LOGGER.warn("getIconColorCode() not implemented, returning default color.");

@@ -637,7 +637,7 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 				return callStringDataMethod(serviceBean, methodName, fieldInfo.getFieldName());
 			}
 		} else {
-			return CAuxillaries.invokeStaticMethod(sourceClassName, methodName);
+			return CAuxillaries.invokeStaticMethodOfList(sourceClassName, methodName);
 		}
 	}
 

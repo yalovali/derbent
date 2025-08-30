@@ -17,6 +17,8 @@ import tech.derbent.projects.domain.CProject;
 public class CCommentPriority extends CTypeEntity<CCommentPriority> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCommentPriority.class);
 
+	public static String getEntityColorCode() { return getIconColorCode(); }
+
 	public static String getIconColorCode() {
 		return "#FF9800"; // Default color for comment priority icon
 	}

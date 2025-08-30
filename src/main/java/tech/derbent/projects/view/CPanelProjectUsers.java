@@ -88,12 +88,13 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject, CUserPro
 	}
 
 	/** Validates preconditions and opens dialog for adding new user to project.
+	 * @throws Exception
 	 * @throws InvocationTargetException
 	 * @throws IllegalAccessException
 	 * @throws SecurityException
 	 * @throws NoSuchMethodException */
 	@Override
-	protected void openAddDialog() {
+	protected void openAddDialog() throws Exception {
 		if (!validateProjectSelection() || !validateServiceAvailability("Project")) {
 			return;
 		}
@@ -102,9 +103,10 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject, CUserPro
 		dialog.open();
 	}
 
-	/** Validates preconditions and opens dialog for editing selected user's project access. */
+	/** Validates preconditions and opens dialog for editing selected user's project access.
+	 * @throws Exception */
 	@Override
-	protected void openEditDialog() {
+	protected void openEditDialog() throws Exception {
 		if (!validateGridSelection("edit") || !validateProjectSelection()) {
 			return;
 		}

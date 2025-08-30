@@ -3,9 +3,13 @@ package tech.derbent.abstracts.utils;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 
 public class CAuxillaries {
+	public static final Logger LOGGER = LoggerFactory.getLogger(CAuxillaries.class);
+
 	public static String generateId(final Component component) {
 		final String prefix = component.getClass().getSimpleName().toLowerCase();
 		String suffix;
@@ -23,6 +27,22 @@ public class CAuxillaries {
 		return prefix + "-" + suffix;
 	}
 
+	private static Method getClazzMethodStatic(final String className, final String methodName) throws ClassNotFoundException, NoSuchMethodException {
+		try {
+			final ClassLoader cl = Thread.currentThread().getContextClassLoader();
+			final Class<?> clazz = Class.forName(className, true, cl);
+			final Method method = clazz.getMethod(methodName);
+			if (Modifier.isStatic(method.getModifiers())) {
+				return method;
+			} else {
+				throw new IllegalArgumentException("Method " + methodName + " in class " + className + " is not statric");
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error getting method " + methodName + " from class " + className, e);
+			throw e;
+		}
+	}
+
 	private static String getComponentText(final Component component) {
 		if (component instanceof com.vaadin.flow.component.HasText) {
 			return ((com.vaadin.flow.component.HasText) component).getText();
@@ -30,20 +50,22 @@ public class CAuxillaries {
 		return null;
 	}
 
-	public static List<String> invokeStaticMethod(final String className, final String methodName) throws Exception {
-		final Class<?> clazz = Class.forName(className);
-		final Method method = clazz.getMethod(methodName);
-		Check.notNull(method, "Method " + methodName + " not found in class " + className);
-		if (Modifier.isStatic(method.getModifiers()) && List.class.isAssignableFrom(method.getReturnType())) {
-			@SuppressWarnings ("unchecked")
-			final List<String> result = (List<String>) method.invoke(null);
-			// final List<?> rawList = (List<?>) result;
-			// Convert to List<String> if possible
-			// final List<String> stringList = rawList.stream().filter(item -> item instanceof String).map(item -> (String) item).toList();
-			return result;
-		} else {
+	public static List<String> invokeStaticMethodOfList(final String className, final String methodName) throws Exception {
+		final Method method = getClazzMethodStatic(className, methodName);
+		if (!List.class.isAssignableFrom(method.getReturnType())) {
 			throw new IllegalArgumentException("Method " + methodName + " in class " + className + " is not static or does not return List<String>");
 		}
+		@SuppressWarnings ("unchecked")
+		final List<String> result = (List<String>) method.invoke(null);
+		return result;
+	}
+
+	public static String invokeStaticMethodOfStr(final String className, final String methodName) throws Exception {
+		final Method method = getClazzMethodStatic(className, methodName);
+		if (method.getReturnType() != String.class) {
+			throw new RuntimeException("Method " + methodName + " in class " + className + " does not return String");
+		}
+		return (String) method.invoke(null);
 	}
 
 	public static void setId(final Component component) {

@@ -7,13 +7,13 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.utils.CAuxillaries;
 import tech.derbent.abstracts.utils.CColorUtils;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
 public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
-
 	private static final long serialVersionUID = 1L;
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CColorAwareComboBox.class);
@@ -70,8 +70,11 @@ public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 			if (item == null) {
 				return new Span("N/A");
 			}
+			if ((item instanceof CEntityNamed) == false) {
+				return new Span("Invalid Entity");
+			}
 			// Use the new CEntityLabel for consistent entity display
-			return new CEntityLabel(item, padding, autoContrast, roundedCorners);
+			return new CEntityLabel((CEntityNamed<?>) item, padding, autoContrast, roundedCorners);
 		}));
 	}
 

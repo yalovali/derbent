@@ -26,6 +26,8 @@ import tech.derbent.users.service.CUserTypeService;
 public class CUserTypeView extends CGridViewBaseProject<CUserType> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 
+	public static String getEntityColorCode() { return getIconColorCode(); }
+
 	public static String getIconColorCode() { return CUserType.getIconColorCode(); }
 
 	public static String getIconFilename() { return CUserType.getIconFilename(); }

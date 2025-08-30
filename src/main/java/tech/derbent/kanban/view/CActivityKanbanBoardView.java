@@ -32,9 +32,10 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 1.2, icon = "class:tech.derbent.kanban.view.CActivityKanbanBoardView", title = "Project.Kanban")
 @PermitAll
 public class CActivityKanbanBoardView extends VerticalLayout implements CProjectChangeListener, IIconSet {
-
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityKanbanBoardView.class);
+
+	public static String getEntityColorCode() { return getIconColorCode(); }
 
 	public static String getIconColorCode() {
 		return "#fd7e14"; // Orange color for Kanban boards

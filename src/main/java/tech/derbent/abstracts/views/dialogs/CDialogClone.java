@@ -3,11 +3,12 @@ package tech.derbent.abstracts.views.dialogs;
 import java.util.List;
 import java.util.function.Consumer;
 import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
+import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.utils.CColorUtils;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
-public class CDialogClone<EntityClass> extends CDBEditDialog<EntityClass> {
+public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CDBEditDialog<EntityClass> {
 	private static final long serialVersionUID = 1L;
 
 	public static List<String> getAvailableTypes() {
@@ -15,24 +16,23 @@ public class CDialogClone<EntityClass> extends CDBEditDialog<EntityClass> {
 		return List.of("Type1", "Type2", "Type3");
 	}
 
-	public CDialogClone(final EntityClass entity, final Consumer<EntityClass> onSave) {
+	public CDialogClone(final EntityClass entity, final Consumer<EntityClass> onSave) throws Exception {
 		super(entity, onSave, true);
 		setupDialog();
 	}
 
 	@Override
-	protected Icon getFormIcon() { // TODO Auto-generated method stub
-		return VaadinIcon.COPY.create();
+	public String getDialogTitleString() { // TODO Auto-generated method stub
+		final String title = "Clone " + getEntity().toString();
+		return title;
 	}
 
 	@Override
-	protected String getFormTitle() { // TODO Auto-generated method stub
+	protected Icon getFormIcon() throws Exception { return CColorUtils.getIconForEntity(getEntity()); }
+
+	@Override
+	protected String getFormTitleString() { // TODO Auto-generated method stub
 		return "Clone";
-	}
-
-	@Override
-	public String getHeaderTitle() { // TODO Auto-generated method stub
-		return "Clone Item To Selected Type";
 	}
 
 	@Override
@@ -43,20 +43,18 @@ public class CDialogClone<EntityClass> extends CDBEditDialog<EntityClass> {
 	@Override
 	protected void setupContent() throws Exception {
 		super.setupContent();
-		final CEntityFormBuilder<EntityClass> formBuilder = new CEntityFormBuilder<>(entity.getClass(), null);
+		final CEntityFormBuilder<EntityClass> formBuilder = new CEntityFormBuilder<>(getEntity().getClass(), null);
 		// create a comboxbox to select the type to clone to
 		EntityFieldInfo fieldInfo = new EntityFieldInfo();
 		fieldInfo.setFieldTypeClass(String.class);
 		fieldInfo.setDisplayName("Select Type");
-		fieldInfo.setRequired(true);
 		fieldInfo.setDataProviderBean("tech.derbent.abstracts.views.dialogs.CDialogClone");
 		fieldInfo.setDataProviderMethod("getAvailableTypes");
 		formBuilder.addFieldLine(fieldInfo);
 		//
 		fieldInfo = new EntityFieldInfo();
 		fieldInfo.setFieldTypeClass(String.class);
-		fieldInfo.setDisplayName("Name");
-		fieldInfo.setRequired(true);
+		fieldInfo.setDisplayName("New Name");
 		formBuilder.addFieldLine(fieldInfo);
 		getDialogLayout().add(formBuilder.getFormLayout());
 	}

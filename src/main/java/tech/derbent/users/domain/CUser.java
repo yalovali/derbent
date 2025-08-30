@@ -29,6 +29,8 @@ import tech.derbent.users.view.CUsersView;
 public class CUser extends CEntityNamed<CUser> implements CSearchable, CFieldInfoGenerator {
 	public static final int MAX_LENGTH_NAME = 255;
 
+	public static String getEntityColorCode() { return getIconColorCode(); }
+
 	public static String getIconColorCode() {
 		return "#6f42c1"; // Purple color for user entities
 	}

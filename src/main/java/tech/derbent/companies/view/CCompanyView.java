@@ -23,6 +23,8 @@ import tech.derbent.session.service.CSessionService;
 public class CCompanyView extends CGridViewBaseNamed<CCompany> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 
+	public static String getEntityColorCode() { return getIconColorCode(); }
+
 	public static String getIconColorCode() {
 		return CCompany.getIconColorCode(); // Use the static method from CCompany
 	}

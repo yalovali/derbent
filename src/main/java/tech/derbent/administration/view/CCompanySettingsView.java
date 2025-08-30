@@ -26,6 +26,8 @@ import tech.derbent.session.service.CSessionService;
 public class CCompanySettingsView extends CGridViewBaseDBEntity<CCompanySettings> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 
+	public static String getEntityColorCode() { return getIconColorCode(); }
+
 	public static String getIconColorCode() {
 		return "#6c757d"; // Gray color for admin/settings
 	}

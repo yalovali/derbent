@@ -27,7 +27,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.IconSize;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
-import tech.derbent.abstracts.domains.CIconSetLoader;
+import tech.derbent.abstracts.utils.CColorUtils;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.views.components.CButton;
 
@@ -45,11 +45,11 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		private final String iconColor;
 
 		public CMenuItem(final Class<? extends Component> clazz, final String name, final String iconName, final String path,
-				final String targetLevelKey, final boolean isNavigation) {
+				final String targetLevelKey, final boolean isNavigation) throws Exception {
 			this.name = name;
 			if (iconName.startsWith("class:")) {
 				// get icon from class
-				this.iconName = CIconSetLoader.getIconFilename(iconName.replace("class:", ""));
+				this.iconName = CColorUtils.getIconFilename(iconName.replace("class:", ""));
 			} else {
 				// get icon directly
 				this.iconName = iconName;
@@ -58,7 +58,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			this.targetLevelKey = targetLevelKey;
 			this.isNavigation = isNavigation;
 			// get icon with full class name
-			this.iconColor = CIconSetLoader.getIconColorCode(clazz.getName());
+			this.iconColor = CColorUtils.getIconColorCode(clazz.getName());
 		}
 
 		public Component createComponent() {
@@ -147,12 +147,14 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			this.items = new ArrayList<>();
 		}
 
-		public void addMenuItem(final Class<? extends Component> clazz, final String name, final String iconName, final String path) {
+		public void addMenuItem(final Class<? extends Component> clazz, final String name, final String iconName, final String path)
+				throws Exception {
 			final CMenuItem item = new CMenuItem(clazz, name, iconName, path, null, false);
 			items.add(item);
 		}
 
-		public void addNavigationItem(final Class<? extends Component> clazz, final String name, final String iconName, final String targetLevelKey) {
+		public void addNavigationItem(final Class<? extends Component> clazz, final String name, final String iconName, final String targetLevelKey)
+				throws Exception {
 			final CMenuItem item = new CMenuItem(clazz, name, iconName, null, targetLevelKey, true);
 			items.add(item);
 		}
@@ -193,8 +195,9 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	private CMenuLevel currentLevel;
 	private String currentRoute; // Track current route for highlighting
 
-	/** Constructor initializes the hierarchical side menu component. */
-	public CHierarchicalSideMenu() {
+	/** Constructor initializes the hierarchical side menu component.
+	 * @throws Exception */
+	public CHierarchicalSideMenu() throws Exception {
 		this.navigationPath = new ArrayList<>();
 		this.menuLevels = new HashMap<>();
 		// Initialize main container
@@ -231,8 +234,9 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		}
 	}
 
-	/** Builds the menu hierarchy from route annotations. Parses menu entries in format: parentItem2.childItem1.childofchileitem1 */
-	private void buildMenuHierarchy() {
+	/** Builds the menu hierarchy from route annotations. Parses menu entries in format: parentItem2.childItem1.childofchileitem1
+	 * @throws Exception */
+	private void buildMenuHierarchy() throws Exception {
 		final var rootLevel = new CMenuLevel("root", "Homepage", null);
 		menuLevels.put("root", rootLevel);
 		// Get menu entries from MenuConfiguration
@@ -258,8 +262,9 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	}
 
 	/** Processes a single menu entry and adds it to the appropriate level.
-	 * @param menuEntry The menu entry to process */
-	private void processMenuEntry(final MenuEntry menuEntry) {
+	 * @param menuEntry The menu entry to process
+	 * @throws Exception */
+	private void processMenuEntry(final MenuEntry menuEntry) throws Exception {
 		Check.notNull(menuEntry, "Menu entry must not be null");
 		final String title = menuEntry.title();
 		final String path = menuEntry.path();

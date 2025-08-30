@@ -22,25 +22,26 @@ public class CProjectUserSettingsDialog extends CDBRelationDialog<CUserProjectSe
 	 * @param settings    Existing settings to edit, or null for new assignment
 	 * @param project     The project to manage user assignments for
 	 * @param onSave      Callback executed when settings are successfully saved
+	 * @throws Exception
 	 * @throws InvocationTargetException
 	 * @throws IllegalAccessException
 	 * @throws SecurityException
 	 * @throws NoSuchMethodException */
 	public CProjectUserSettingsDialog(final CProjectService masterService, final CUserService detailService, final CUserProjectSettings settings,
-			final CProject project, final Consumer<CUserProjectSettings> onSave) {
+			final CProject project, final Consumer<CUserProjectSettings> onSave) throws Exception {
 		super(settings != null ? settings : new CUserProjectSettings(), project, masterService, detailService, onSave, settings == null);
 		setupDialog();
 		populateForm();
 	}
 
 	@Override
+	public String getDialogTitleString() { return isNew ? "Add User to Project" : "Edit User Assignment"; }
+
+	@Override
 	protected Icon getFormIcon() { return VaadinIcon.USERS.create(); }
 
 	@Override
-	protected String getFormTitle() { return isNew ? "Add User to Project" : "Edit User Project Assignment"; }
-
-	@Override
-	public String getHeaderTitle() { return isNew ? "Add User to Project" : "Edit User Assignment"; }
+	protected String getFormTitleString() { return isNew ? "Add User to Project" : "Edit User Project Assignment"; }
 
 	@Override
 	protected String getPermissionFromRelationship(final CUserProjectSettings relationship) {

@@ -25,6 +25,8 @@ import tech.derbent.session.service.CSessionService;
 public class CRiskStatusView extends CGridViewBaseProject<CRiskStatus> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 
+	public static String getEntityColorCode() { return getIconColorCode(); }
+
 	public static String getIconColorCode() { return CRiskStatus.getIconColorCode(); }
 
 	public static String getIconFilename() { return CRiskStatus.getIconFilename(); }

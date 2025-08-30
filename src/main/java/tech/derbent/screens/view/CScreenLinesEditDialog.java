@@ -40,7 +40,8 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 	Span tabEntitySpan;
 	TabSheet tabsOfDialog;
 
-	public CScreenLinesEditDialog(final CScreenLines entity, final Consumer<CScreenLines> onSave, final boolean isNew, final CScreen screen) {
+	public CScreenLinesEditDialog(final CScreenLines entity, final Consumer<CScreenLines> onSave, final boolean isNew, final CScreen screen)
+			throws Exception {
 		super(entity, onSave, isNew);
 		this.binder = CBinderFactory.createEnhancedBinder(CScreenLines.class);
 		this.screen = screen;
@@ -74,7 +75,7 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 			cmbFieldClass = ((ComboBox<String>) formClassType.getComponent("relationFieldName"));
 			cmbFieldClass.addValueChangeListener(event -> {
 				final String selectedType = event.getValue();
-				entity.setRelationFieldName(selectedType);
+				getEntity().setRelationFieldName(selectedType);
 				if ((selectedType == null) || selectedType.isEmpty()) {
 					return; // No
 				}
@@ -93,7 +94,7 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 				final String selectedProperty = event.getValue();
 				if ((selectedProperty != null) && !selectedProperty.isEmpty()) {
 					// Update the entity property based on the selected value
-					entity.setProperty(selectedProperty);
+					getEntity().setProperty(selectedProperty);
 					updatePropertyDefaultValues(selectedProperty);
 				}
 			});
@@ -105,13 +106,13 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 	}
 
 	@Override
+	public String getDialogTitleString() { return getFormTitleString(); }
+
+	@Override
 	protected Icon getFormIcon() { return VaadinIcon.EDIT.create(); }
 
 	@Override
-	protected String getFormTitle() { return isNew ? "Add Screen Field" : "Edit Screen Field"; }
-
-	@Override
-	public String getHeaderTitle() { return getFormTitle(); }
+	protected String getFormTitleString() { return isNew ? "Add Screen Field" : "Edit Screen Field"; }
 
 	@Override
 	protected String getSuccessCreateMessage() { return "Screen field added successfully"; }
@@ -126,12 +127,12 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 		divScreenType.setText("Screen type: " + screen.getEntityType());
 		// Initialize ComboBox items before calling readBean to prevent binding errors
 		updateEntityClassComboboxEntries();
-		if (entity != null) {
+		if (getEntity() != null) {
 			// Now populate entityProperty ComboBox if relationFieldName is already set
-			if ((entity.getRelationFieldName() != null) && !entity.getRelationFieldName().isEmpty()) {
+			if ((getEntity().getRelationFieldName() != null) && !getEntity().getRelationFieldName().isEmpty()) {
 				updateEntityPropertyBasedOnClass();
 			}
-			binder.readBean(entity);
+			binder.readBean(getEntity());
 		}
 	}
 
@@ -164,7 +165,7 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 
 	@SuppressWarnings ("unchecked")
 	private void updateEntityPropertyBasedOnClass() {
-		final String relationFieldName = entity.getRelationFieldName();
+		final String relationFieldName = getEntity().getRelationFieldName();
 		LOGGER.debug("Selected field class: {}", relationFieldName);
 		if ((relationFieldName == null) || relationFieldName.isEmpty()) {
 			return;
@@ -174,7 +175,7 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 		// type
 		if (relationFieldName.equals(CEntityFieldService.SECTION)) {
 			cmbFieldProperties.setItems(List.of(CEntityFieldService.SECTION));
-			entity.setProperty(CEntityFieldService.SECTION);
+			getEntity().setProperty(CEntityFieldService.SECTION);
 			return;
 		} else if (relationFieldName.equals(CEntityFieldService.THIS_CLASS)) {
 			fieldProperties = CEntityFieldService.getEntitySimpleFields(screen.getEntityType(), null);
@@ -196,7 +197,7 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 		if ((selectedProperty == null) || selectedProperty.isEmpty()) {
 			return;
 		}
-		final String relationFieldName = entity.getRelationFieldName();
+		final String relationFieldName = getEntity().getRelationFieldName();
 		if ((relationFieldName == null) || relationFieldName.isEmpty()) {
 			return;
 		}
@@ -210,10 +211,10 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 			info = CEntityFieldService.getEntityFieldInfo(info.getJavaType(), selectedProperty);
 		}
 		Check.notNull(info, "Field info must not be null for property: " + selectedProperty);
-		entity.setDefaultValue(info.getDefaultValue());
-		entity.setMaxLength(info.getMaxLength());
-		entity.setDataProviderBean(info.getDataProviderBean());
-		entity.setDescription(info.getDescription());
+		getEntity().setDefaultValue(info.getDefaultValue());
+		getEntity().setMaxLength(info.getMaxLength());
+		getEntity().setDataProviderBean(info.getDataProviderBean());
+		getEntity().setDescription(info.getDescription());
 		divJavaType.setText("Java type: " + info.getJavaType());
 	}
 
@@ -223,6 +224,6 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 			throw new IllegalStateException("Please fill in all required fields correctly");
 		}
 		// Write bean data back to entity
-		binder.writeBeanIfValid(entity);
+		binder.writeBeanIfValid(getEntity());
 	}
 }

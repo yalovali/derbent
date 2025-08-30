@@ -26,7 +26,6 @@ import tech.derbent.users.service.CUserService;
  * project->user panels. */
 public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<MasterClass>, RelationalClass extends CEntityDB<RelationalClass>>
 		extends CPanelRelationalBase<MasterClass, CUserProjectSettings> {
-
 	private static final long serialVersionUID = 1L;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected CUserProjectSettingsService userProjectSettingsService;
@@ -139,16 +138,34 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 
 	/** Abstract method to handle settings save events */
 	protected abstract void onSettingsSaved(final CUserProjectSettings settings);
-	/** Abstract method to open the add dialog */
-	protected abstract void openAddDialog();
-	/** Abstract method to open the edit dialog */
-	protected abstract void openEditDialog();
+
+	/** Abstract method to open the add dialog
+	 * @throws Exception */
+	protected abstract void openAddDialog() throws Exception;
+
+	/** Abstract method to open the edit dialog
+	 * @throws Exception */
+	protected abstract void openEditDialog() throws Exception;
 
 	/** Refreshes the grid data */
 	/** Sets up the action buttons (Add, Edit, Delete) */
 	private void setupButtons() {
-		final CButton addButton = CButton.createPrimary("Add", VaadinIcon.PLUS.create(), e -> openAddDialog());
-		final CButton editButton = new CButton("Edit", VaadinIcon.EDIT.create(), e -> openEditDialog());
+		final CButton addButton = CButton.createPrimary("Add", VaadinIcon.PLUS.create(), e -> {
+			try {
+				openAddDialog();
+			} catch (final Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		});
+		final CButton editButton = new CButton("Edit", VaadinIcon.EDIT.create(), e -> {
+			try {
+				openEditDialog();
+			} catch (final Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		});
 		editButton.setEnabled(false);
 		final CButton deleteButton = CButton.createError("Delete", VaadinIcon.TRASH.create(), e -> deleteSelected());
 		deleteButton.setEnabled(false);

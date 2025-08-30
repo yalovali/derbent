@@ -25,6 +25,8 @@ import tech.derbent.screens.view.CScreenView;
 @Table (name = "cscreen")
 @AttributeOverride (name = "id", column = @Column (name = "screen_id"))
 public class CScreen extends CEntityOfProject<CScreen> {
+	public static String getEntityColorCode() { return getIconColorCode(); }
+
 	public static String getIconColorCode() { return "#6f42c1"; }
 
 	public static String getIconFilename() { return "vaadin:viewport"; }

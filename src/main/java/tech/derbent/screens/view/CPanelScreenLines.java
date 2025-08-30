@@ -54,6 +54,9 @@ public class CPanelScreenLines extends CPanelScreenBase {
 			} catch (NoSuchMethodException | SecurityException | IllegalAccessException | InvocationTargetException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
+			} catch (final Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
 		});
 		final Button deleteButton = new Button("Delete", VaadinIcon.TRASH.create());
@@ -153,11 +156,8 @@ public class CPanelScreenLines extends CPanelScreenBase {
 	}
 
 	/** Opens the add field dialog for creating a new screen field.
-	 * @throws InvocationTargetException
-	 * @throws IllegalAccessException
-	 * @throws SecurityException
-	 * @throws NoSuchMethodException */
-	private void openAddFieldDialog() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+	 * @throws Exception */
+	private void openAddFieldDialog() throws Exception {
 		if ((getCurrentEntity() == null) || (getCurrentEntity().getId() == null)) {
 			Notification.show("Please save the screen first before adding fields", 3000, Notification.Position.MIDDLE);
 			return;
@@ -168,12 +168,8 @@ public class CPanelScreenLines extends CPanelScreenBase {
 	}
 
 	/** Opens the edit dialog for an existing screen field.
-	 * @throws InvocationTargetException
-	 * @throws IllegalAccessException
-	 * @throws SecurityException
-	 * @throws NoSuchMethodException */
-	private void openEditFieldDialog(final CScreenLines screenLine)
-			throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+	 * @throws Exception */
+	private void openEditFieldDialog(final CScreenLines screenLine) throws Exception {
 		if (screenLine == null) {
 			return;
 		}

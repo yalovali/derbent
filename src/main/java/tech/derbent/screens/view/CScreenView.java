@@ -23,6 +23,8 @@ import tech.derbent.session.service.CSessionService;
 public final class CScreenView extends CGridViewBaseProject<CScreen> {
 	private static final long serialVersionUID = 1L;
 
+	public static String getEntityColorCode() { return getIconColorCode(); }
+
 	public static String getIconColorCode() {
 		return CScreen.getIconColorCode(); // Use the static method from CScreen
 	}

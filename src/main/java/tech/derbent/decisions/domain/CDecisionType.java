@@ -18,6 +18,8 @@ import tech.derbent.projects.domain.CProject;
 @Table (name = "cdecisiontype")
 @AttributeOverride (name = "id", column = @Column (name = "cdecisiontype_id"))
 public class CDecisionType extends CTypeEntity<CDecisionType> {
+	public static String getEntityColorCode() { return getIconColorCode(); }
+
 	public static String getIconColorCode() {
 		return "#dc3545"; // Red color for decision type entities
 	}

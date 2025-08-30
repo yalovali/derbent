@@ -42,9 +42,6 @@ class StringComboBoxCompleteTest {
 		)
 		private String type;
 
-		@Override
-		public String getColor() { return color; }
-
 		public String getType() { return type; }
 
 		public void setColor(final String color) { this.color = color; }

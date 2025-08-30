@@ -59,9 +59,10 @@ public class CPanelUserProjectSettings extends CPanelUserProjectBase<CUser, CUse
 		}
 	}
 
-	/** Validates preconditions and opens dialog for adding new project assignment. */
+	/** Validates preconditions and opens dialog for adding new project assignment.
+	 * @throws Exception */
 	@Override
-	protected void openAddDialog() {
+	protected void openAddDialog() throws Exception {
 		if (!validateUserSelection() || !validateServiceAvailability("Project")) {
 			return;
 		}
@@ -70,9 +71,10 @@ public class CPanelUserProjectSettings extends CPanelUserProjectBase<CUser, CUse
 		dialog.open();
 	}
 
-	/** Validates preconditions and opens dialog for editing selected project assignment. */
+	/** Validates preconditions and opens dialog for editing selected project assignment.
+	 * @throws Exception */
 	@Override
-	protected void openEditDialog() {
+	protected void openEditDialog() throws Exception {
 		if (!validateGridSelection("edit") || !validateUserSelection()) {
 			return;
 		}

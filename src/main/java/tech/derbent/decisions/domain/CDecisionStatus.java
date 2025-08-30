@@ -17,6 +17,8 @@ import tech.derbent.projects.domain.CProject;
 @Table (name = "cdecisionstatus")
 @AttributeOverride (name = "id", column = @Column (name = "decision_status_id"))
 public class CDecisionStatus extends CStatus<CDecisionStatus> {
+	public static String getEntityColorCode() { return getIconColorCode(); }
+
 	public static String getIconColorCode() {
 		return "#dc3545"; // Red color for decision status entities
 	}

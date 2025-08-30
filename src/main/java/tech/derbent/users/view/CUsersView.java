@@ -27,13 +27,15 @@ import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.CUserTypeService;
 import tech.derbent.users.service.CUserViewService;
 
-@Route ("cusersview/:user_id?/:action?(edit)")
+@Route ("cusersview")
 @PageTitle ("Users")
 @Menu (order = 3.2, icon = "class:tech.derbent.users.view.CUsersView", title = "Settings.Users")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CUsersView extends CGridViewBaseNamed<CUser> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 	public static final String ENTITY_ROUTE_TEMPLATE_EDIT = "cusersview/%s/edit";
+
+	public static String getEntityColorCode() { return getIconColorCode(); }
 
 	public static String getIconColorCode() {
 		return CUser.getIconColorCode(); // Use the static method from CUser

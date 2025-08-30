@@ -35,6 +35,8 @@ import tech.derbent.setup.service.CSystemSettingsService;
 public class CSystemSettingsView extends CAbstractPage implements IIconSet {
 	private static final long serialVersionUID = 1L;
 
+	public static String getEntityColorCode() { return getIconColorCode(); }
+
 	public static String getIconColorCode() {
 		return "#6c757d"; // Gray color for setup/admin
 	}

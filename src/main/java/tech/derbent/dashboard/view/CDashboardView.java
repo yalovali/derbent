@@ -41,6 +41,8 @@ import tech.derbent.users.service.CUserService;
 public final class CDashboardView extends CAbstractPage implements IIconSet {
 	private static final long serialVersionUID = 1L;
 
+	public static String getEntityColorCode() { return getIconColorCode(); }
+
 	public static String getIconColorCode() {
 		return "var(--lumo-primary-color)"; // Primary color for dashboard
 	}

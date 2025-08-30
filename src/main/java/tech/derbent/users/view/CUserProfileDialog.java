@@ -45,8 +45,9 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 	/** Constructor for CUserProfileDialog.
 	 * @param user            The user to edit
 	 * @param onSave          Callback when user is saved
-	 * @param passwordEncoder Password encoder for password validation and encoding */
-	public CUserProfileDialog(final CUser user, final Consumer<CUser> onSave, final PasswordEncoder passwordEncoder) {
+	 * @param passwordEncoder Password encoder for password validation and encoding
+	 * @throws Exception */
+	public CUserProfileDialog(final CUser user, final Consumer<CUser> onSave, final PasswordEncoder passwordEncoder) throws Exception {
 		super(user, onSave, false); // isNew = false for profile editing
 		LOGGER.info("CUserProfileDialog constructor called for user: {}", user != null ? user.getLogin() : "null");
 		if (passwordEncoder == null) {
@@ -183,13 +184,13 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 	}
 
 	@Override
+	public String getDialogTitleString() { return "Edit Profile"; }
+
+	@Override
 	protected Icon getFormIcon() { return VaadinIcon.USER.create(); }
 
 	@Override
-	public String getFormTitle() { return "User Profile"; }
-
-	@Override
-	public String getHeaderTitle() { return "Edit Profile"; }
+	public String getFormTitleString() { return "User Profile"; }
 
 	@Override
 	public String getSuccessUpdateMessage() { return "Profile updated successfully"; }
@@ -198,12 +199,12 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 	private void handleProfilePictureChange() {
 		if (temporaryImageData != null) {
 			// New picture was uploaded
-			entity.setProfilePictureData(temporaryImageData);
-			LOGGER.info("Profile picture data updated for user: {}", entity.getLogin());
-		} else if (!deleteProfilePictureButton.isEnabled() && (entity.getProfilePictureData() != null)) {
+			getEntity().setProfilePictureData(temporaryImageData);
+			LOGGER.info("Profile picture data updated for user: {}", getEntity().getLogin());
+		} else if (!deleteProfilePictureButton.isEnabled() && (getEntity().getProfilePictureData() != null)) {
 			// Picture was deleted
-			entity.setProfilePictureData(null);
-			LOGGER.info("Profile picture removed for user: {}", entity.getLogin());
+			getEntity().setProfilePictureData(null);
+			LOGGER.info("Profile picture removed for user: {}", getEntity().getLogin());
 		}
 	}
 
@@ -232,13 +233,13 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 
 	@Override
 	protected void populateForm() {
-		LOGGER.info("Populating form for user: {}", entity != null ? entity.getLogin() : "null");
-		if (entity == null) {
+		LOGGER.info("Populating form for user: {}", getEntity() != null ? getEntity().getLogin() : "null");
+		if (getEntity() == null) {
 			LOGGER.warn("Cannot populate form - data is null");
 			return;
 		}
 		// Bind data to form
-		binder.setBean(entity);
+		binder.setBean(getEntity());
 		// Update profile picture preview
 		updateProfilePicturePreview();
 		// Clear password fields
@@ -250,17 +251,17 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 
 	@Override
 	protected void save() {
-		LOGGER.info("Saving user profile for user: {}", entity != null ? entity.getLogin() : "null");
+		LOGGER.info("Saving user profile for user: {}", getEntity() != null ? getEntity().getLogin() : "null");
 		try {
 			validateForm();
 			// Write form data to bean
-			binder.writeBean(entity);
+			binder.writeBean(getEntity());
 			// Handle password change if needed
 			final String newPassword = newPasswordField.getValue();
 			if (!newPassword.isEmpty()) {
 				final String encodedPassword = passwordEncoder.encode(newPassword);
-				entity.setPassword(encodedPassword);
-				LOGGER.info("Password updated for user: {}", entity.getLogin());
+				getEntity().setPassword(encodedPassword);
+				LOGGER.info("Password updated for user: {}", getEntity().getLogin());
 			}
 			// Handle profile picture change
 			handleProfilePictureChange();
@@ -294,9 +295,9 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 
 	/** Updates the profile picture preview based on current user data. */
 	private void updateProfilePicturePreview() {
-		LOGGER.debug("Updating profile picture preview for user: {}", entity != null ? entity.getLogin() : "null");
-		if ((entity != null) && (entity.getProfilePictureData() != null) && (entity.getProfilePictureData().length > 0)) {
-			final String dataUrl = CImageUtils.createDataUrl(entity.getProfilePictureData());
+		LOGGER.debug("Updating profile picture preview for user: {}", getEntity() != null ? getEntity().getLogin() : "null");
+		if ((getEntity() != null) && (getEntity().getProfilePictureData() != null) && (getEntity().getProfilePictureData().length > 0)) {
+			final String dataUrl = CImageUtils.createDataUrl(getEntity().getProfilePictureData());
 			if (dataUrl != null) {
 				profilePicturePreview.setSrc(dataUrl);
 				deleteProfilePictureButton.setEnabled(true);
@@ -312,7 +313,7 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 	@Override
 	protected void validateForm() {
 		LOGGER.debug("Validating user profile form");
-		if (entity == null) {
+		if (getEntity() == null) {
 			throw new IllegalStateException("User data cannot be null");
 		}
 		// Validate profile information
@@ -345,7 +346,7 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 			throw new IllegalArgumentException("New password and confirmation do not match");
 		}
 		// Verify current password
-		if (!passwordEncoder.matches(currentPassword, entity.getPassword())) {
+		if (!passwordEncoder.matches(currentPassword, getEntity().getPassword())) {
 			throw new IllegalArgumentException("Current password is incorrect");
 		}
 		LOGGER.debug("Password validation completed successfully");

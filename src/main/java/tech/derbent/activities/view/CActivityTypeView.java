@@ -24,6 +24,8 @@ import tech.derbent.session.service.CSessionService;
 public class CActivityTypeView extends CGridViewBaseProject<CActivityType> implements IIconSet {
 	private static final long serialVersionUID = 1L;
 
+	public static String getEntityColorCode() { return getIconColorCode(); }
+
 	public static String getIconColorCode() { return CActivityType.getIconColorCode(); }
 
 	public static String getIconFilename() { return CActivityType.getIconFilename(); }

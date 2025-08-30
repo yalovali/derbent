@@ -8,7 +8,6 @@ import tech.derbent.abstracts.views.components.CButton;
 import tech.derbent.abstracts.views.dialogs.CDialog;
 
 public abstract class CBaseInfoDialog extends CDialog {
-
 	private static final long serialVersionUID = 1L;
 	private final String message;
 	private final String title;
@@ -38,13 +37,13 @@ public abstract class CBaseInfoDialog extends CDialog {
 	}
 
 	@Override
+	public String getDialogTitleString() { return title; }
+
+	@Override
 	protected Icon getFormIcon() { return icon; }
 
 	@Override
-	protected String getFormTitle() { return title; }
-
-	@Override
-	public String getHeaderTitle() { return title; }
+	protected String getFormTitleString() { return title; }
 
 	/** Sets up the OK button. */
 	@Override
