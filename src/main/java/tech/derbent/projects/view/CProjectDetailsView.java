@@ -83,11 +83,8 @@ public class CProjectDetailsView extends CGridViewBaseNamed<CProject> implements
 	}
 
 	/** Layout Option 3: Card Grid Layout
-	 * @throws InvocationTargetException
-	 * @throws IllegalAccessException
-	 * @throws SecurityException
-	 * @throws NoSuchMethodException */
-	private void createCardGridLayout() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+	 * @throws Exception */
+	private void createCardGridLayout() throws Exception {
 		final VerticalLayout gridLayout = new VerticalLayout();
 		gridLayout.setClassName("card-grid-layout");
 		gridLayout.setSizeFull();
@@ -149,11 +146,8 @@ public class CProjectDetailsView extends CGridViewBaseNamed<CProject> implements
 	}
 
 	/** Layout Option 4: Compact Sidebar Navigation
-	 * @throws InvocationTargetException
-	 * @throws IllegalAccessException
-	 * @throws SecurityException
-	 * @throws NoSuchMethodException */
-	private void createCompactSidebarLayout() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+	 * @throws Exception */
+	private void createCompactSidebarLayout() throws Exception {
 		final HorizontalLayout compactLayout = new HorizontalLayout();
 		compactLayout.setClassName("compact-sidebar-layout");
 		compactLayout.setSizeFull();
@@ -214,11 +208,8 @@ public class CProjectDetailsView extends CGridViewBaseNamed<CProject> implements
 	}
 
 	/** Layout Option 5: Dashboard with Widgets
-	 * @throws InvocationTargetException
-	 * @throws IllegalAccessException
-	 * @throws SecurityException
-	 * @throws NoSuchMethodException */
-	private void createDashboardWidgetsLayout() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+	 * @throws Exception */
+	private void createDashboardWidgetsLayout() throws Exception {
 		final VerticalLayout dashboardLayout = new VerticalLayout();
 		dashboardLayout.setClassName("dashboard-widgets-layout");
 		dashboardLayout.setSizeFull();
@@ -263,11 +254,8 @@ public class CProjectDetailsView extends CGridViewBaseNamed<CProject> implements
 	}
 
 	/** Layout Option 1: Enhanced Cards (Current Implementation)
-	 * @throws InvocationTargetException
-	 * @throws IllegalAccessException
-	 * @throws SecurityException
-	 * @throws NoSuchMethodException */
-	private void createEnhancedCardsLayout() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+	 * @throws Exception */
+	private void createEnhancedCardsLayout() throws Exception {
 		// Create main form wrapper with card styling
 		final VerticalLayout formWrapper = new VerticalLayout();
 		formWrapper.setClassName("details-form-card");
@@ -329,11 +317,8 @@ public class CProjectDetailsView extends CGridViewBaseNamed<CProject> implements
 	}
 
 	/** Layout Option 2: Kanban Board Style
-	 * @throws InvocationTargetException
-	 * @throws IllegalAccessException
-	 * @throws SecurityException
-	 * @throws NoSuchMethodException */
-	private void createKanbanBoardLayout() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+	 * @throws Exception */
+	private void createKanbanBoardLayout() throws Exception {
 		final VerticalLayout kanbanLayout = new VerticalLayout();
 		kanbanLayout.setClassName("kanban-layout");
 		kanbanLayout.setSizeFull();
@@ -534,11 +519,8 @@ public class CProjectDetailsView extends CGridViewBaseNamed<CProject> implements
 	}
 
 	/** Layout Option 6: Timeline/Activity View
-	 * @throws InvocationTargetException
-	 * @throws IllegalAccessException
-	 * @throws SecurityException
-	 * @throws NoSuchMethodException */
-	private void createTimelineViewLayout() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+	 * @throws Exception */
+	private void createTimelineViewLayout() throws Exception {
 		final VerticalLayout timelineLayout = new VerticalLayout();
 		timelineLayout.setClassName("timeline-layout");
 		timelineLayout.setSizeFull();
@@ -616,7 +598,7 @@ public class CProjectDetailsView extends CGridViewBaseNamed<CProject> implements
 	}
 
 	@Override
-	protected void updateDetailsComponent() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+	protected void updateDetailsComponent() throws Exception {
 		LOGGER.info("Creating details layout for mode: " + (currentLayoutMode != null ? currentLayoutMode.getDisplayName() : "Default"));
 		// Clear previous layout
 		getBaseDetailsLayout().removeAll();

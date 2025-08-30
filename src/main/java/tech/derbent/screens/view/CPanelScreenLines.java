@@ -25,7 +25,7 @@ public class CPanelScreenLines extends CPanelScreenBase {
 
 	public CPanelScreenLines(final CScreen currentEntity, final CEnhancedBinder<CScreen> beanValidationBinder, final CScreenService entityService,
 			final CScreenLinesService screenLinesService, final CEntityFieldService entityFieldService, final CViewsService viewsService)
-			throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+			throws Exception {
 		super("Screen Lines", currentEntity, beanValidationBinder, entityService);
 		this.screenLinesService = screenLinesService;
 		initPanel();

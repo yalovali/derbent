@@ -1,6 +1,5 @@
 package tech.derbent.users.view;
 
-import java.lang.reflect.InvocationTargetException;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
@@ -51,7 +50,7 @@ public class CUserTypeView extends CGridViewBaseProject<CUserType> implements II
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
 
 	@Override
-	protected void updateDetailsComponent() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+	protected void updateDetailsComponent() throws Exception {
 		final Div detailsLayout = new Div();
 		detailsLayout.setClassName("editor-layout");
 		detailsLayout.add(CEntityFormBuilder.buildForm(CUserType.class, getBinder()));

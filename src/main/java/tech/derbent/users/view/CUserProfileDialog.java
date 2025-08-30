@@ -2,9 +2,7 @@ package tech.derbent.users.view;
 
 import java.io.IOException;
 import java.util.function.Consumer;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
@@ -21,57 +19,36 @@ import com.vaadin.flow.data.validator.StringLengthValidator;
 import com.vaadin.flow.server.streams.InMemoryUploadCallback;
 import com.vaadin.flow.server.streams.InMemoryUploadHandler;
 import com.vaadin.flow.server.streams.UploadMetadata;
-import tech.derbent.abstracts.views.CDBEditDialog;
 import tech.derbent.abstracts.views.components.CButton;
+import tech.derbent.abstracts.views.dialogs.CDBEditDialog;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
 import tech.derbent.base.utils.CImageUtils;
 import tech.derbent.users.domain.CUser;
 
-/**
- * User profile dialog for editing user profile information. Extends CDBEditDialog to
- * provide consistent dialog behavior. Allows users to: - Edit display name - Change
- * password - Upload/delete profile picture
- */
+/** User profile dialog for editing user profile information. Extends CDBEditDialog to provide consistent dialog behavior. Allows users to: - Edit
+ * display name - Change password - Upload/delete profile picture */
 public class CUserProfileDialog extends CDBEditDialog<CUser> {
-
 	private static final long serialVersionUID = 1L;
-
 	private static final long MAX_FILE_SIZE = CImageUtils.MAX_IMAGE_SIZE;
-
 	private final PasswordEncoder passwordEncoder;
-
 	private TextField nameField;
-
 	private TextField lastnameField;
-
 	private PasswordField currentPasswordField;
-
 	private PasswordField newPasswordField;
-
 	private PasswordField confirmPasswordField;
-
 	private Upload profilePictureUpload;
-
 	private Image profilePicturePreview;
-
 	private CButton deleteProfilePictureButton;
-
 	private byte[] temporaryImageData;
-
 	private final Binder<CUser> binder = new Binder<>(CUser.class);
 
-	/**
-	 * Constructor for CUserProfileDialog.
+	/** Constructor for CUserProfileDialog.
 	 * @param user            The user to edit
 	 * @param onSave          Callback when user is saved
-	 * @param passwordEncoder Password encoder for password validation and encoding
-	 */
-	public CUserProfileDialog(final CUser user, final Consumer<CUser> onSave,
-		final PasswordEncoder passwordEncoder) {
+	 * @param passwordEncoder Password encoder for password validation and encoding */
+	public CUserProfileDialog(final CUser user, final Consumer<CUser> onSave, final PasswordEncoder passwordEncoder) {
 		super(user, onSave, false); // isNew = false for profile editing
-		LOGGER.info("CUserProfileDialog constructor called for user: {}",
-			user != null ? user.getLogin() : "null");
-
+		LOGGER.info("CUserProfileDialog constructor called for user: {}", user != null ? user.getLogin() : "null");
 		if (passwordEncoder == null) {
 			throw new IllegalArgumentException("PasswordEncoder cannot be null");
 		}
@@ -80,9 +57,7 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 		populateForm();
 	}
 
-	/**
-	 * Creates the password change section.
-	 */
+	/** Creates the password change section. */
 	private void createPasswordChangeSection() {
 		LOGGER.debug("Creating password change section");
 		final Span sectionTitle = new Span("Change Password");
@@ -96,15 +71,12 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 		final FormLayout passwordSection = new FormLayout();
 		passwordSection.add(currentPasswordField);
 		passwordSection.add(newPasswordField, confirmPasswordField);
-		passwordSection.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1),
-			new FormLayout.ResponsiveStep("300px", 2));
+		passwordSection.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1), new FormLayout.ResponsiveStep("300px", 2));
 		mainLayout.add(sectionTitle);
 		mainLayout.add(passwordSection);
 	}
 
-	/**
-	 * Creates the profile information section with name fields.
-	 */
+	/** Creates the profile information section with name fields. */
 	private void createProfileInfoSection() {
 		final Span sectionTitle = new Span("Profile Information");
 		sectionTitle.getStyle().set("font-weight", "bold");
@@ -115,39 +87,27 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 		lastnameField = new TextField("Last Name");
 		lastnameField.setRequired(true);
 		lastnameField.setMaxLength(CUser.MAX_LENGTH_NAME);
-
 		// Bind fields to data
 		try {
-			binder.forField(nameField).withValidator(
-				new StringLengthValidator("Name is required", 1, CUser.MAX_LENGTH_NAME))
-				.bind(CUser::getName, CUser::setName);
+			binder.forField(nameField).withValidator(new StringLengthValidator("Name is required", 1, CUser.MAX_LENGTH_NAME)).bind(CUser::getName,
+					CUser::setName);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to bind name field: {} - using simple binding fallback",
-				e.getMessage());
-
+			LOGGER.error("Failed to bind name field: {} - using simple binding fallback", e.getMessage());
 			try {
 				binder.bind(nameField, "name");
 			} catch (final Exception fallbackException) {
-				LOGGER.error("Simple binding fallback also failed for name field: {}",
-					fallbackException.getMessage());
+				LOGGER.error("Simple binding fallback also failed for name field: {}", fallbackException.getMessage());
 			}
 		}
-
 		try {
-			binder.forField(lastnameField)
-				.withValidator(new StringLengthValidator("Last name is required", 1,
-					CUser.MAX_LENGTH_NAME))
-				.bind(CUser::getLastname, CUser::setLastname);
+			binder.forField(lastnameField).withValidator(new StringLengthValidator("Last name is required", 1, CUser.MAX_LENGTH_NAME))
+					.bind(CUser::getLastname, CUser::setLastname);
 		} catch (final Exception e) {
-			LOGGER.error(
-				"Failed to bind lastname field: {} - using simple binding fallback",
-				e.getMessage());
-
+			LOGGER.error("Failed to bind lastname field: {} - using simple binding fallback", e.getMessage());
 			try {
 				binder.bind(lastnameField, "lastname");
 			} catch (final Exception fallbackException) {
-				LOGGER.error("Simple binding fallback also failed for lastname field: {}",
-					fallbackException.getMessage());
+				LOGGER.error("Simple binding fallback also failed for lastname field: {}", fallbackException.getMessage());
 			}
 		}
 		final FormLayout profileSection = new FormLayout();
@@ -157,9 +117,7 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 		mainLayout.add(profileSection);
 	}
 
-	/**
-	 * Creates the profile picture upload section.
-	 */
+	/** Creates the profile picture upload section. */
 	private void createProfilePictureSection() {
 		final Span sectionTitle = new Span("Profile Picture");
 		sectionTitle.getStyle().set("font-weight", "bold");
@@ -172,50 +130,41 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 		profilePicturePreview.setHeight("100px");
 		profilePicturePreview.getStyle().set("border-radius", "50%");
 		profilePicturePreview.getStyle().set("object-fit", "cover");
-		profilePicturePreview.getStyle().set("border",
-			"2px solid var(--lumo-contrast-20pct)");
+		profilePicturePreview.getStyle().set("border", "2px solid var(--lumo-contrast-20pct)");
 		// File upload component using modern API
 		final InMemoryUploadCallback uploadCallback = (metadata, data) -> {
-			LOGGER.info("Profile picture upload received: {} ({} bytes)",
-				metadata.fileName(), data.length);
-
+			LOGGER.info("Profile picture upload received: {} ({} bytes)", metadata.fileName(), data.length);
 			try {
 				handleProfilePictureUpload(metadata, data);
 			} catch (final IOException e) {
 				LOGGER.error("Error handling profile picture upload", e);
-				new CWarningDialog("Failed to upload profile picture: " + e.getMessage())
-					.open();
+				new CWarningDialog("Failed to upload profile picture: " + e.getMessage()).open();
 			}
 		};
-		final InMemoryUploadHandler uploadHandler =
-			new InMemoryUploadHandler(uploadCallback);
+		final InMemoryUploadHandler uploadHandler = new InMemoryUploadHandler(uploadCallback);
 		profilePictureUpload = new Upload();
 		profilePictureUpload.setId("profile-picture-upload");
 		profilePictureUpload.setUploadHandler(uploadHandler);
 		profilePictureUpload.setAcceptedFileTypes("image/jpeg", "image/png", "image/gif");
 		profilePictureUpload.setMaxFileSize((int) MAX_FILE_SIZE);
 		profilePictureUpload.setDropLabel(new Span("Drop image here or click to upload"));
-		profilePictureUpload
-			.setUploadButton(CButton.createTertiary("Choose File", null, null));
+		profilePictureUpload.setUploadButton(CButton.createTertiary("Choose File", null, null));
 		profilePictureUpload.addAllFinishedListener(event -> {
 			LOGGER.info("Profile picture upload completed");
 		});
 		profilePictureUpload.addFileRejectedListener(event -> {
 			LOGGER.error("Profile picture upload rejected: {}", event.getErrorMessage());
-			new CWarningDialog(
-				"Failed to upload profile picture: " + event.getErrorMessage()).open();
+			new CWarningDialog("Failed to upload profile picture: " + event.getErrorMessage()).open();
 		});
 		// Delete button
-		deleteProfilePictureButton =
-			CButton.createError("Remove Picture", null, e -> deleteProfilePicture());
+		deleteProfilePictureButton = CButton.createError("Remove Picture", null, e -> deleteProfilePicture());
 		deleteProfilePictureButton.setId("profile-picture-delete-button");
 		final HorizontalLayout pictureControls = new HorizontalLayout();
 		pictureControls.add(profilePictureUpload, deleteProfilePictureButton);
 		pictureControls.setAlignItems(HorizontalLayout.Alignment.END);
 		final VerticalLayout pictureSection = new VerticalLayout();
 		pictureSection.add(profilePicturePreview, pictureControls);
-		pictureSection.setHorizontalComponentAlignment(VerticalLayout.Alignment.CENTER,
-			profilePicturePreview);
+		pictureSection.setHorizontalComponentAlignment(VerticalLayout.Alignment.CENTER, profilePicturePreview);
 		pictureSection.setPadding(false);
 		pictureSection.setSpacing(true);
 		// Now update profile picture preview after all components are created
@@ -224,16 +173,13 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 		mainLayout.add(pictureSection);
 	}
 
-	/**
-	 * Deletes the current profile picture.
-	 */
+	/** Deletes the current profile picture. */
 	private void deleteProfilePicture() {
 		// Clear temporary data
 		temporaryImageData = null;
 		// Update preview to default
 		setDefaultProfilePicture();
-		Notification.show("Profile picture removed", 3000,
-			Notification.Position.TOP_CENTER);
+		Notification.show("Profile picture removed", 3000, Notification.Position.TOP_CENTER);
 	}
 
 	@Override
@@ -248,37 +194,26 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 	@Override
 	public String getSuccessUpdateMessage() { return "Profile updated successfully"; }
 
-	/**
-	 * Handles profile picture changes on save.
-	 */
+	/** Handles profile picture changes on save. */
 	private void handleProfilePictureChange() {
-
 		if (temporaryImageData != null) {
 			// New picture was uploaded
 			entity.setProfilePictureData(temporaryImageData);
 			LOGGER.info("Profile picture data updated for user: {}", entity.getLogin());
-		}
-		else if (!deleteProfilePictureButton.isEnabled()
-			&& (entity.getProfilePictureData() != null)) {
+		} else if (!deleteProfilePictureButton.isEnabled() && (entity.getProfilePictureData() != null)) {
 			// Picture was deleted
 			entity.setProfilePictureData(null);
 			LOGGER.info("Profile picture removed for user: {}", entity.getLogin());
 		}
 	}
 
-	/**
-	 * Handles profile picture upload using modern Vaadin Upload API.
-	 */
-	private void handleProfilePictureUpload(final UploadMetadata metadata,
-		final byte[] data) throws IOException {
-		LOGGER.info("Handling profile picture upload: {} ({} bytes)", metadata.fileName(),
-			data.length);
-
+	/** Handles profile picture upload using modern Vaadin Upload API. */
+	private void handleProfilePictureUpload(final UploadMetadata metadata, final byte[] data) throws IOException {
+		LOGGER.info("Handling profile picture upload: {} ({} bytes)", metadata.fileName(), data.length);
 		if ((metadata == null) || (data == null) || (data.length == 0)) {
 			throw new IOException("Invalid upload data");
 		}
 		final String fileName = metadata.fileName();
-
 		if ((fileName == null) || fileName.trim().isEmpty()) {
 			throw new IOException("Invalid file name");
 		}
@@ -292,15 +227,12 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 		final String dataUrl = CImageUtils.createDataUrl(resizedImageData);
 		profilePicturePreview.setSrc(dataUrl);
 		deleteProfilePictureButton.setEnabled(true);
-		Notification.show("Profile picture uploaded and resized successfully", 3000,
-			Notification.Position.TOP_CENTER);
+		Notification.show("Profile picture uploaded and resized successfully", 3000, Notification.Position.TOP_CENTER);
 	}
 
 	@Override
 	protected void populateForm() {
-		LOGGER.info("Populating form for user: {}",
-			entity != null ? entity.getLogin() : "null");
-
+		LOGGER.info("Populating form for user: {}", entity != null ? entity.getLogin() : "null");
 		if (entity == null) {
 			LOGGER.warn("Cannot populate form - data is null");
 			return;
@@ -318,16 +250,13 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 
 	@Override
 	protected void save() {
-		LOGGER.info("Saving user profile for user: {}",
-			entity != null ? entity.getLogin() : "null");
-
+		LOGGER.info("Saving user profile for user: {}", entity != null ? entity.getLogin() : "null");
 		try {
 			validateForm();
 			// Write form data to bean
 			binder.writeBean(entity);
 			// Handle password change if needed
 			final String newPassword = newPasswordField.getValue();
-
 			if (!newPassword.isEmpty()) {
 				final String encodedPassword = passwordEncoder.encode(newPassword);
 				entity.setPassword(encodedPassword);
@@ -343,9 +272,7 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 		}
 	}
 
-	/**
-	 * Sets the default profile picture (user icon).
-	 */
+	/** Sets the default profile picture (user icon). */
 	private void setDefaultProfilePicture() {
 		// Use the default profile picture from CImageUtils
 		profilePicturePreview.setSrc(CImageUtils.getDefaultProfilePictureDataUrl());
@@ -354,7 +281,7 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 	}
 
 	@Override
-	protected void setupContent() {
+	protected void setupContent() throws Exception {
 		LOGGER.debug("Setting up user profile dialog content");
 		super.setupContent();
 		// Create form sections
@@ -365,28 +292,19 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 		setWidth("600px");
 	}
 
-	/**
-	 * Updates the profile picture preview based on current user data.
-	 */
+	/** Updates the profile picture preview based on current user data. */
 	private void updateProfilePicturePreview() {
-		LOGGER.debug("Updating profile picture preview for user: {}",
-			entity != null ? entity.getLogin() : "null");
-
-		if ((entity != null) && (entity.getProfilePictureData() != null)
-			&& (entity.getProfilePictureData().length > 0)) {
-			final String dataUrl =
-				CImageUtils.createDataUrl(entity.getProfilePictureData());
-
+		LOGGER.debug("Updating profile picture preview for user: {}", entity != null ? entity.getLogin() : "null");
+		if ((entity != null) && (entity.getProfilePictureData() != null) && (entity.getProfilePictureData().length > 0)) {
+			final String dataUrl = CImageUtils.createDataUrl(entity.getProfilePictureData());
 			if (dataUrl != null) {
 				profilePicturePreview.setSrc(dataUrl);
 				deleteProfilePictureButton.setEnabled(true);
 				LOGGER.debug("Set profile picture preview from database data");
-			}
-			else {
+			} else {
 				setDefaultProfilePicture();
 			}
-		}
-		else {
+		} else {
 			setDefaultProfilePicture();
 		}
 	}
@@ -394,54 +312,38 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 	@Override
 	protected void validateForm() {
 		LOGGER.debug("Validating user profile form");
-
 		if (entity == null) {
 			throw new IllegalStateException("User data cannot be null");
 		}
-
 		// Validate profile information
 		if (!binder.isValid()) {
-			throw new IllegalArgumentException(
-				"Please fill all required fields correctly");
+			throw new IllegalArgumentException("Please fill all required fields correctly");
 		}
 		// Validate password change if fields are not empty
 		final String currentPassword = currentPasswordField.getValue();
 		final String newPassword = newPasswordField.getValue();
 		final String confirmPassword = confirmPasswordField.getValue();
-
-		if (!currentPassword.isEmpty() || !newPassword.isEmpty()
-			|| !confirmPassword.isEmpty()) {
+		if (!currentPassword.isEmpty() || !newPassword.isEmpty() || !confirmPassword.isEmpty()) {
 			validatePasswordChange(currentPassword, newPassword, confirmPassword);
 		}
 		LOGGER.debug("Form validation completed successfully");
 	}
 
-	/**
-	 * Validates password change fields.
-	 */
-	private void validatePasswordChange(final String currentPassword,
-		final String newPassword, final String confirmPassword) {
+	/** Validates password change fields. */
+	private void validatePasswordChange(final String currentPassword, final String newPassword, final String confirmPassword) {
 		LOGGER.debug("Validating password change");
-
 		if (currentPassword.isEmpty()) {
-			throw new IllegalArgumentException(
-				"Current password is required to change password");
+			throw new IllegalArgumentException("Current password is required to change password");
 		}
-
 		if (newPassword.isEmpty()) {
 			throw new IllegalArgumentException("New password cannot be empty");
 		}
-
 		if (newPassword.length() < 6) {
-			throw new IllegalArgumentException(
-				"New password must be at least 6 characters long");
+			throw new IllegalArgumentException("New password must be at least 6 characters long");
 		}
-
 		if (!newPassword.equals(confirmPassword)) {
-			throw new IllegalArgumentException(
-				"New password and confirmation do not match");
+			throw new IllegalArgumentException("New password and confirmation do not match");
 		}
-
 		// Verify current password
 		if (!passwordEncoder.matches(currentPassword, entity.getPassword())) {
 			throw new IllegalArgumentException("Current password is incorrect");

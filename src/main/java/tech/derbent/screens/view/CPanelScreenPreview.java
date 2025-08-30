@@ -1,8 +1,6 @@
 package tech.derbent.screens.view;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.services.CAbstractService;
@@ -14,22 +12,17 @@ import tech.derbent.screens.service.CEntityFieldService;
 import tech.derbent.screens.service.CScreenService;
 
 public class CPanelScreenPreview extends CPanelScreenBase {
-
 	private static final long serialVersionUID = 1L;
-
 	CDiv divPreview;
 
-	public CPanelScreenPreview(final CScreen currentEntity,
-		final CEnhancedBinder<CScreen> beanValidationBinder,
-		final CScreenService entityService) throws NoSuchMethodException,
-		SecurityException, IllegalAccessException, InvocationTargetException {
+	public CPanelScreenPreview(final CScreen currentEntity, final CEnhancedBinder<CScreen> beanValidationBinder, final CScreenService entityService)
+			throws Exception {
 		super("Preview", currentEntity, beanValidationBinder, entityService);
 		initPanel();
 	}
 
 	@Override
-	protected void createPanelContent() throws NoSuchMethodException, SecurityException,
-		IllegalAccessException, InvocationTargetException {
+	protected void createPanelContent() throws Exception {
 		super.createPanelContent();
 		// Add any specific content for the preview panel here if needed
 		final CButton previewButton = new CButton("Preview", null, null);
@@ -44,38 +37,28 @@ public class CPanelScreenPreview extends CPanelScreenBase {
 	@Override
 	public void populateForm(final CScreen screen) {
 		super.populateForm(screen);
-
 		try {
-
 			if (screen == null) {
-
 				if (divPreview != null) {
 					divPreview.removeAll();
 				}
 				return;
 			}
-
 			if (divPreview != null) {
 				final CDetailsBuilder builder = new CDetailsBuilder();
 				divPreview.removeAll();
 				// get service for the class
-				final Class<?> screenClass =
-					CEntityFieldService.getEntityClass(screen.getEntityType());
+				final Class<?> screenClass = CEntityFieldService.getEntityClass(screen.getEntityType());
 				@SuppressWarnings ("unchecked")
-				final CEnhancedBinder<CEntityDB<?>> binder =
-					new CEnhancedBinder<CEntityDB<?>>((Class<CEntityDB<?>>) screenClass);
+				final CEnhancedBinder<CEntityDB<?>> binder = new CEnhancedBinder<CEntityDB<?>>((Class<CEntityDB<?>>) screenClass);
 				builder.buildDetails(screen, binder, divPreview);
 				// Get related service class for the given class type
 				/** ADD SAMPLE DATA ************************************/
 				final String serviceClassName =
-					screenClass.getPackage().getName().replace("domain", "service") + ".C"
-						+ screenClass.getSimpleName().substring(1) + "Service";
+						screenClass.getPackage().getName().replace("domain", "service") + ".C" + screenClass.getSimpleName().substring(1) + "Service";
 				final Class<?> serviceClass = Class.forName(serviceClassName);
-				final CAbstractService<?> serviceBean = (CAbstractService<
-					?>) CDetailsBuilder.getApplicationContext().getBean(serviceClass);
-				final CEntityDB<?> item =
-					serviceBean.findAll().stream().findFirst().orElse(null);
-
+				final CAbstractService<?> serviceBean = (CAbstractService<?>) CDetailsBuilder.getApplicationContext().getBean(serviceClass);
+				final CEntityDB<?> item = serviceBean.findAll().stream().findFirst().orElse(null);
 				if (item != null) {
 					binder.readBean(item);
 				}

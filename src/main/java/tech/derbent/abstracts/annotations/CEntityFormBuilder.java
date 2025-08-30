@@ -50,9 +50,7 @@ import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
 @org.springframework.stereotype.Component
 public final class CEntityFormBuilder<EntityClass> implements ApplicationContextAware {
-
 	public interface ComboBoxDataProvider {
-
 		<T extends CEntityDB<T>> List<T> getItems(Class<T> entityType);
 	}
 
@@ -62,34 +60,30 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityFormBuilder.class);
 
 	@SuppressWarnings ("unchecked")
-	public static <EntityClass> CVerticalLayout buildEnhancedForm(final Class<?> entityClass)
-			throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+	public static <EntityClass> CVerticalLayout buildEnhancedForm(final Class<?> entityClass) throws Exception {
 		final CEnhancedBinder<EntityClass> enhancedBinder = CBinderFactory.createEnhancedBinder((Class<EntityClass>) entityClass);
 		return buildForm(entityClass, enhancedBinder, null);
 	}
 
 	@SuppressWarnings ("unchecked")
-	public static <EntityClass> CVerticalLayout buildEnhancedForm(final Class<?> entityClass, final List<String> entityFields)
-			throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+	public static <EntityClass> CVerticalLayout buildEnhancedForm(final Class<?> entityClass, final List<String> entityFields) throws Exception {
 		final CEnhancedBinder<EntityClass> enhancedBinder = CBinderFactory.createEnhancedBinder((Class<EntityClass>) entityClass);
 		return buildForm(entityClass, enhancedBinder, entityFields);
 	}
 
-	public static <EntityClass> CVerticalLayout buildForm(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder)
-			throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+	public static <EntityClass> CVerticalLayout buildForm(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder) throws Exception {
 		return buildForm(entityClass, binder, null, null, null, new CVerticalLayout(false, false, false));
 	}
 
 	public static <EntityClass> CVerticalLayout buildForm(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
-			final List<String> entityFields) throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+			final List<String> entityFields) throws Exception {
 		return buildForm(entityClass, binder, entityFields, null, null, new CVerticalLayout(false, false, false));
 	}
 
 	public static <EntityClass> CVerticalLayout buildForm(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
 			List<String> entityFields, final Map<String, Component> mapComponents, final Map<String, CHorizontalLayout> mapHorizontalLayouts,
-			final CVerticalLayout formLayout) throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
-		Check.notNull(entityClass, "Entity class");
-		Check.notNull(binder, "Binder of " + entityClass.getSimpleName());
+			final CVerticalLayout formLayout) throws Exception {
+		Check.notNull(entityClass, "Entity class cannot be null");
 		// final FormLayout formLayout = new FormLayout();
 		final List<Field> allFields = new ArrayList<>();
 		getListOfAllFields(entityClass, allFields);
@@ -151,7 +145,6 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 	}
 
 	private static NumberField createBigDecimalField(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
-		Check.notNull(binder, "Binder for BigDecimal field creation");
 		Check.notNull(fieldInfo, "FieldInfo for BigDecimal field creation");
 		final NumberField numberField = new NumberField();
 		CAuxillaries.setId(numberField);
@@ -184,7 +177,6 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 
 	private static Checkbox createCheckbox(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
 		Check.notNull(fieldInfo, "FieldInfo for checkbox creation");
-		Check.notNull(binder, "Binder for checkbox creation");
 		final Checkbox checkbox = new Checkbox();
 		// Set ID for better test automation
 		CAuxillaries.setId(checkbox);
@@ -210,7 +202,6 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 
 	public static <T extends CEntityDB<T>> ComboBox<T> createComboBox(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
 		Check.notNull(fieldInfo, "FieldInfo for ComboBox creation");
-		Check.notNull(binder, "Binder for ComboBox creation");
 		LOGGER.debug("Creating CColorAwareComboBox for field: {}", fieldInfo.getFieldName());
 		final ComboBox<T> comboBox = new CColorAwareComboBox<>(fieldInfo);
 		comboBox.setItemLabelGenerator(item -> CColorUtils.getDisplayTextFromEntity(item));
@@ -244,7 +235,6 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 	@SuppressWarnings ("unchecked")
 	private static <T> MultiSelectComboBox<T> createComboBoxMultiSelect(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
 		Check.notNull(fieldInfo, "FieldInfo for ComboBox creation");
-		Check.notNull(binder, "Binder for ComboBox creation");
 		LOGGER.debug("Creating MultiSelectComboBox for field: {}", fieldInfo.getFieldName());
 		final MultiSelectComboBox<T> comboBox = new MultiSelectComboBox<T>(fieldInfo.getDisplayName());
 		comboBox.setItemLabelGenerator(item -> {
@@ -276,11 +266,9 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 		return comboBox;
 	}
 
-	private static Component createComponentForField(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder)
-			throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+	private static Component createComponentForField(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) throws Exception {
 		Component component = null;
 		Check.notNull(fieldInfo, "Field");
-		Check.notNull(binder, "Binder for field " + fieldInfo.getDisplayName());
 		final Class<?> fieldType = fieldInfo.getFieldTypeClass();
 		Check.notNull(fieldType, "Field type for field " + fieldInfo.getDisplayName());
 		if (fieldInfo.getFieldName().equals("approvals") || fieldInfo.getFieldName().equals("status")) {
@@ -289,6 +277,7 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 		// Check if field should be rendered as ComboBox based on metadata
 		final boolean hasDataProvider = (fieldInfo.getDataProviderBean() != null) && !fieldInfo.getDataProviderBean().trim().isEmpty();
 		if (hasDataProvider && (fieldType == String.class)) {
+			// gets strings from a method in a spring bean
 			component = createStringComboBox(fieldInfo, binder);
 		} else if (hasDataProvider && fieldInfo.getJavaType().equals("Set")) {
 			component = createComboBoxMultiSelect(fieldInfo, binder);
@@ -391,7 +380,6 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 	}
 
 	private static NumberField createFloatingPointField(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
-		Check.notNull(binder, "Binder for floating point field creation");
 		final NumberField numberField = new NumberField();
 		// Set ID for better test automation
 		CAuxillaries.setId(numberField);
@@ -407,7 +395,6 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 	}
 
 	private static NumberField createIntegerField(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
-		Check.notNull(binder, "Binder for integer field creation");
 		final NumberField numberField = new NumberField();
 		CAuxillaries.setId(numberField);
 		numberField.setStep(1);
@@ -434,10 +421,8 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 		return numberField;
 	}
 
-	private static ComboBox<String> createStringComboBox(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder)
-			throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+	private static ComboBox<String> createStringComboBox(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) throws Exception {
 		Check.notNull(fieldInfo, "Field for String ComboBox creation");
-		Check.notNull(binder, "Binder for String ComboBox creation");
 		final ComboBox<String> comboBox = new ComboBox<>();
 		// Configure basic properties from metadata
 		comboBox.setLabel(fieldInfo.getDisplayName());
@@ -476,7 +461,6 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 	}
 
 	private static TextArea createTextArea(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
-		Check.notNull(binder, "Binder for text area creation");
 		final TextArea item = new TextArea();
 		if (fieldInfo.getMaxLength() > 0) {
 			item.setMaxLength(fieldInfo.getMaxLength());
@@ -501,7 +485,6 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 	}
 
 	private static TextField createTextField(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
-		Check.notNull(binder, "Binder for text field creation");
 		final TextField item = new TextField();
 		// Set ID for better test automation
 		CAuxillaries.setId(item);
@@ -576,7 +559,7 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 
 	public static <EntityClass> Component processField(final CEnhancedBinder<EntityClass> binder, final VerticalLayout formLayout,
 			final Map<String, CHorizontalLayout> mapHorizontalLayouts, final EntityFieldInfo fieldInfo, final Map<String, Component> mapComponents)
-			throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+			throws Exception {
 		Check.notNull(fieldInfo, "field");
 		final Component component = createComponentForField(fieldInfo, binder);
 		final CHorizontalLayout horizontalLayout = createFieldLayout(fieldInfo, component);
@@ -625,48 +608,47 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 		resetComboBoxesRecursively(container);
 	}
 
-	private static List<String> resolveStringData(final EntityFieldInfo fieldInfo)
-			throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+	private static List<String> resolveStringData(final EntityFieldInfo fieldInfo) throws Exception {
 		Check.notNull(fieldInfo, "EntityFieldInfo for String data resolution");
-		Check.notNull(applicationContext, "ApplicationContext for String data resolution");
 		// Try to resolve data provider bean
-		final String beanName = fieldInfo.getDataProviderBean();
-		Check.notNull(beanName, "Data provider bean name for String field '" + fieldInfo.getFieldName() + "'");
-		Check.isTrue(!beanName.trim().isEmpty(), "Data provider bean name for String field '" + fieldInfo.getFieldName() + "' must not be empty");
-		if (beanName.equals("none")) {
+		final String sourceClassName = fieldInfo.getDataProviderBean();
+		final String methodName = fieldInfo.getDataProviderMethod();
+		if (sourceClassName.equals("none")) {
 			return List.of(); // No data provider configured, return empty list
 		}
-		Check.isTrue(applicationContext.containsBean(beanName),
-				"Data provider bean '" + beanName + "' for String field '" + fieldInfo.getFieldName() + "' must be present in Spring context");
-		final Object serviceBean = applicationContext.getBean(beanName);
-		LOGGER.debug("Retrieved data provider bean '{}' for String field '{}'", beanName, fieldInfo.getFieldName());
-		// Determine method name to call
-		final String methodName = fieldInfo.getDataProviderMethod();
-		Check.notNull(methodName, "Data provider method name for String field '" + fieldInfo.getFieldName() + "'");
-		Check.isTrue(!methodName.trim().isEmpty(), "Data provider method name for String field '" + fieldInfo.getFieldName() + "' must not be empty");
-		// Try to call the method
-		if ((fieldInfo.getDataProviderParamMethod() != null) && (fieldInfo.getDataProviderParamMethod().trim().length() > 0)) {
-			try {
-				// call dataprovider param method, returning Object as result
-				final String methodstr = fieldInfo.getDataProviderParamMethod();
-				final Method method = serviceBean.getClass().getMethod(methodstr);
-				Check.notNull(method, "Method '" + methodName + "' on service bean for field '" + fieldInfo.getFieldName() + "'");
-				final Object param = method.invoke(serviceBean);
+		if (applicationContext.containsBean(sourceClassName)) {
+			final Object serviceBean = applicationContext.getBean(sourceClassName);
+			// IT is a BEAN!
+			if ((fieldInfo.getDataProviderParamMethod() != null) && (fieldInfo.getDataProviderParamMethod().trim().length() > 0)) {
+				Object param = null;
+				try {
+					// call dataprovider param method, returning Object as result
+					final String methodstr = fieldInfo.getDataProviderParamMethod();
+					final Method method = serviceBean.getClass().getMethod(methodstr);
+					Check.notNull(method, "Method '" + methodName + "' on service bean for field '" + fieldInfo.getFieldName() + "'");
+					param = method.invoke(serviceBean);
+				} catch (final NoSuchMethodException e) {
+					LOGGER.error("Data provider method '{}' not found on service bean for field '{}': {}", fieldInfo.getDataProviderParamMethod(),
+							fieldInfo.getFieldName(), e.getMessage());
+					throw e;
+				}
 				return callStringDataMethod(serviceBean, methodName, fieldInfo.getFieldName(), param);
-			} catch (final NoSuchMethodException e) {
-				LOGGER.error("Data provider method '{}' not found on service bean for field '{}': {}", fieldInfo.getDataProviderParamMethod(),
-						fieldInfo.getFieldName(), e.getMessage());
-				throw e;
+			} else {
+				return callStringDataMethod(serviceBean, methodName, fieldInfo.getFieldName());
 			}
+		} else {
+			return CAuxillaries.invokeStaticMethod(sourceClassName, methodName);
 		}
-		return callStringDataMethod(serviceBean, methodName, fieldInfo.getFieldName());
 	}
 
 	/** Safely binds a component to a field, ensuring no incomplete bindings are left. This method prevents the "All bindings created with forField
 	 * must be completed" error. */
 	private static void safeBindComponent(final CEnhancedBinder<?> binder, final HasValueAndElement<?, ?> component, final String fieldName,
 			final String componentType) {
-		Check.notNull(binder, "Binder for safe binding");
+		if (binder == null) {
+			LOGGER.warn("Binder is null, wont bind component of type '{}' for field '{}'", componentType, fieldName);
+			return;
+		}
 		Check.notNull(component, "Component for safe binding");
 		Check.notNull(fieldName, "Field name for safe binding");
 		try {
@@ -715,23 +697,25 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 		this.formLayout = new CVerticalLayout(false, false, false);
 	}
 
-	public CEntityFormBuilder(final Class<?> entityClass)
-			throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+	public CEntityFormBuilder(final Class<?> entityClass) throws Exception {
 		this(entityClass, createEnhancedBinder(entityClass), List.of());
 	}
 
-	public CEntityFormBuilder(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder)
-			throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+	public CEntityFormBuilder(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder) throws Exception {
 		this(entityClass, binder, List.of());
 	}
 
 	public CEntityFormBuilder(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder, final List<String> entityFields)
-			throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+			throws Exception {
 		this.componentMap = new HashMap<>();
 		this.horizontalLayoutMap = new HashMap<>();
 		this.formLayout = new CVerticalLayout(false, false, false);
 		this.binder = binder;
 		CEntityFormBuilder.buildForm(entityClass, binder, entityFields, componentMap, horizontalLayoutMap, formLayout);
+	}
+
+	public Component addFieldLine(final EntityFieldInfo fieldInfo) throws Exception {
+		return CEntityFormBuilder.processField(binder, formLayout, horizontalLayoutMap, fieldInfo, componentMap);
 	}
 
 	public Component addFieldLine(final String screenClassType, final CScreenLines line, final VerticalLayout layout) throws Exception {
@@ -746,7 +730,7 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 	}
 
 	public CVerticalLayout build(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder, final List<String> entityFields)
-			throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+			throws Exception {
 		return CEntityFormBuilder.buildForm(entityClass, binder, entityFields, componentMap, horizontalLayoutMap, formLayout);
 	}
 

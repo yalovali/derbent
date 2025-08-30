@@ -1,6 +1,5 @@
 package tech.derbent.projects.view;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
@@ -95,7 +94,7 @@ public class CProjectsView extends CGridViewBaseNamed<CProject> implements IIcon
 	}
 
 	@Override
-	protected void updateDetailsComponent() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+	protected void updateDetailsComponent() throws Exception {
 		CAccordionDBEntity<CProject> panel;
 		panel = new CPanelProjectBasicInfo(getCurrentEntity(), getBinder(), (CProjectService) entityService);
 		addAccordionPanel(panel);

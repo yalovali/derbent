@@ -1,6 +1,5 @@
 package tech.derbent.activities.view;
 
-import java.lang.reflect.InvocationTargetException;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -59,7 +58,7 @@ public final class CActivitiesView extends CGridViewBaseProject<CActivity> {
 	}
 
 	@Override
-	protected void updateDetailsComponent() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+	protected void updateDetailsComponent() throws Exception {
 		// getBaseDetailsLayout().add(CEntityFormBuilder.buildForm(CActivity.class,
 		// getBinder(), null));
 		CAccordionDBEntity<CActivity> panel;

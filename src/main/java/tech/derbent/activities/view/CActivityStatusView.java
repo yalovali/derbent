@@ -1,6 +1,5 @@
 package tech.derbent.activities.view;
 
-import java.lang.reflect.InvocationTargetException;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -58,7 +57,7 @@ public class CActivityStatusView extends CGridViewBaseProject<CActivityStatus> i
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
 
 	@Override
-	public void updateDetailsComponent() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+	public void updateDetailsComponent() throws Exception {
 		final CVerticalLayout detailsLayout = CEntityFormBuilder.buildForm(CActivityStatus.class, getBinder());
 		getBaseDetailsLayout().add(detailsLayout);
 	}

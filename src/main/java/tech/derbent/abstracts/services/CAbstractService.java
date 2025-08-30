@@ -33,6 +33,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	protected @Nullable CSessionService sessionService;
 
 	public CAbstractService(final CAbstractRepository<EntityClass> repository, final Clock clock) {
+		LOGGER.debug("Initializing service for entity: {}", getEntityClass() != null ? getEntityClass().getSimpleName() : "Unknown");
 		this.clock = clock;
 		this.repository = repository;
 		this.sessionService = null;
@@ -40,6 +41,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	}
 
 	public CAbstractService(final CAbstractRepository<EntityClass> repository, final Clock clock, final CSessionService sessionService) {
+		LOGGER.debug("Initializing service for entity: {}", getEntityClass() != null ? getEntityClass().getSimpleName() : "Unknown");
 		this.clock = clock;
 		this.repository = repository;
 		this.sessionService = sessionService;

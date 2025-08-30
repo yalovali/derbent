@@ -5,8 +5,7 @@ import java.util.function.Consumer;
 
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-
-import tech.derbent.abstracts.views.CDBRelationDialog;
+import tech.derbent.abstracts.views.dialogs.CDBRelationDialog;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;

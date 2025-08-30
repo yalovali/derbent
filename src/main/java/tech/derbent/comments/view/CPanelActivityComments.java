@@ -1,6 +1,5 @@
 package tech.derbent.comments.view;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -27,7 +26,6 @@ import tech.derbent.users.domain.CUser;
 /** CPanelActivityComments - Accordion panel for managing comments on activities. Layer: View (MVC) Provides UI for: - Viewing existing comments in
  * chronological order - Adding new comments - Comment count display - Integration with activity details view */
 public class CPanelActivityComments extends CPanelActivityBase {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPanelActivityComments.class);
 	private static final long serialVersionUID = 1L;
 	private final CCommentService commentService;
@@ -43,13 +41,9 @@ public class CPanelActivityComments extends CPanelActivityBase {
 	 * @param activityService the activity service
 	 * @param commentService  the comment service
 	 * @param sessionService  the session service
-	 * @throws InvocationTargetException
-	 * @throws IllegalAccessException
-	 * @throws SecurityException
-	 * @throws NoSuchMethodException */
+	 * @throws Exception */
 	public CPanelActivityComments(final CActivity currentEntity, final CEnhancedBinder<CActivity> binder, final CActivityService activityService,
-			final CCommentService commentService, final CSessionService sessionService)
-			throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+			final CCommentService commentService, final CSessionService sessionService) throws Exception {
 		super("Comments", currentEntity, binder, activityService);
 		this.commentService = commentService;
 		this.sessionService = sessionService;
@@ -121,7 +115,7 @@ public class CPanelActivityComments extends CPanelActivityBase {
 		Check.notNull(sessionService, "Session service cannot be null");
 		final CActivity entity = getCurrentEntity();
 		// 1) Yeni/transient mi?
-		if (entity == null || entity.isNew()) {
+		if ((entity == null) || entity.isNew()) {
 			// Kaydedilmemiş aktivite için yorum yükleme
 			final Div noCommentsDiv = new Div();
 			noCommentsDiv.setText("No comments yet. Save the activity to add comments.");

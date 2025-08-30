@@ -4,8 +4,8 @@ import java.lang.reflect.InvocationTargetException;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import tech.derbent.abstracts.utils.Check;
-import tech.derbent.abstracts.views.CDialog;
 import tech.derbent.abstracts.views.components.CButton;
+import tech.derbent.abstracts.views.dialogs.CDialog;
 
 public abstract class CBaseInfoDialog extends CDialog {
 

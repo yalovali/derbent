@@ -1,6 +1,5 @@
 package tech.derbent.companies.view;
 
-import java.lang.reflect.InvocationTargetException;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
@@ -55,7 +54,7 @@ public class CCompanyView extends CGridViewBaseNamed<CCompany> implements IIconS
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
 
 	@Override
-	protected void updateDetailsComponent() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+	protected void updateDetailsComponent() throws Exception {
 		CAccordionDBEntity<CCompany> panel;
 		panel = new CPanelCompanyDescription(getCurrentEntity(), getBinder(), (CCompanyService) entityService);
 		addAccordionPanel(panel);

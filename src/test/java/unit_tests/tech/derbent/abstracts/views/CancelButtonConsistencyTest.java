@@ -9,9 +9,9 @@ import java.lang.reflect.Method;
 import org.junit.jupiter.api.Test;
 
 import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
-import tech.derbent.abstracts.views.CDBEditDialog;
-import tech.derbent.abstracts.views.CDialog;
 import tech.derbent.abstracts.views.components.CButton;
+import tech.derbent.abstracts.views.dialogs.CDBEditDialog;
+import tech.derbent.abstracts.views.dialogs.CDialog;
 import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 
 /**

@@ -27,6 +27,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import jakarta.annotation.PostConstruct;
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.components.CSearchToolbar;
+import tech.derbent.abstracts.domains.CEntity;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.interfaces.CLayoutChangeListener;
 import tech.derbent.abstracts.interfaces.CSearchable;
@@ -35,6 +36,7 @@ import tech.derbent.abstracts.utils.CPageableUtils;
 import tech.derbent.abstracts.views.components.CButton;
 import tech.derbent.abstracts.views.components.CFlexLayout;
 import tech.derbent.abstracts.views.components.CVerticalLayout;
+import tech.derbent.abstracts.views.dialogs.CDialogClone;
 import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CMasterViewSectionGrid;
 import tech.derbent.base.ui.dialogs.CConfirmationDialog;
@@ -128,6 +130,25 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		return cancel;
 	}
 
+	protected CButton createCloneButton(final String buttonText) {
+		final CButton cloneButton = CButton.createTertiary(buttonText, null, e -> {
+			LOGGER.debug("Clone button clicked");
+			try {
+				if (currentEntity == null) {
+					new CWarningDialog("Please select an item to clone.").open();
+					return;
+				}
+				final EntityClass selectedEntity = masterViewSection.getSelectedItem();
+				final CDialogClone<EntityClass> dialog = new CDialogClone<EntityClass>(selectedEntity, this::onClonedItem);
+				dialog.open();
+			} catch (final Exception exception) {
+				LOGGER.error("Error cloning entity", exception);
+				new CWarningDialog("Failed to clone the item. Please try again.").open();
+			}
+		});
+		return cloneButton;
+	}
+
 	protected CButton createDeleteButton(final String buttonText) {
 		final CButton delete = CButton.createTertiary(buttonText, null, null);
 		delete.addClickListener(e -> {
@@ -168,7 +189,8 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		final HorizontalLayout buttonLayout = new HorizontalLayout();
 		buttonLayout.setClassName("details-tab-button-layout");
 		buttonLayout.setSpacing(true);
-		buttonLayout.add(createNewButton("New"), createSaveButton("Save"), createCancelButton("Cancel"), createDeleteButton("Delete"));
+		buttonLayout.add(createNewButton("New"), createCloneButton("Clone"), createSaveButton("Save"), createCancelButton("Cancel"),
+				createDeleteButton("Delete"));
 		return buttonLayout;
 	}
 
@@ -403,6 +425,10 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 			return false;
 		}
 		return true;
+	}
+
+	protected void onClonedItem(final CEntity<?> clonedItem) {
+		LOGGER.debug("Cloned item callback received: {}", clonedItem);
 	}
 
 	@Override
