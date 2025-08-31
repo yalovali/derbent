@@ -12,13 +12,13 @@ import tech.derbent.abstracts.interfaces.CLayoutChangeListener;
 
 /** Service to manage layout state (horizontal vs vertical) for views. Uses Vaadin session to store layout preference. */
 @Service
-public class LayoutService {
+public class CLayoutService {
 
 	public enum LayoutMode {
 		HORIZONTAL, VERTICAL
 	}
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(LayoutService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CLayoutService.class);
 	private static final String LAYOUT_MODE_KEY = "layoutMode";
 	// Thread-safe set to store layout change listeners
 	private final Set<CLayoutChangeListener> layoutChangeListeners = ConcurrentHashMap.newKeySet();

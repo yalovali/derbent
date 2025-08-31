@@ -1,6 +1,6 @@
 package tech.derbent.abstracts.interfaces;
 
-import tech.derbent.session.service.LayoutService.LayoutMode;
+import tech.derbent.session.service.CLayoutService.LayoutMode;
 
 /**
  * Interface for components that want to be notified when the layout mode changes between horizontal and vertical

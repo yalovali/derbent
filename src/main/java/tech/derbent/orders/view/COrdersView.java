@@ -15,7 +15,7 @@ import tech.derbent.orders.service.COrdersViewService;
 import tech.derbent.screens.service.CScreenService;
 import tech.derbent.session.service.CSessionService;
 
-@Route ("cordersview/:order_id?/:action?(edit)")
+@Route ("cordersview")
 @PageTitle ("Orders Master Detail")
 @Menu (order = 7.1, icon = "class:tech.derbent.orders.view.COrdersView", title = "Project.Orders")
 @PermitAll // When security is enabled, allow all authenticated users

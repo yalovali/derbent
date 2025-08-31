@@ -10,7 +10,6 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.shared.Registration;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.views.CAbstractEntityDBPage;
-import tech.derbent.abstracts.views.components.CDiv;
 
 public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> extends CMasterViewSectionBase<EntityClass> {
 	// --- Custom Event Definition ---
@@ -52,7 +51,6 @@ public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> 
 		grid = new CGrid<>(entityClass);
 		grid.asSingleSelect().addValueChangeListener(this::onSelectionChange);
 		page.createGridForEntity(grid);
-		add(new CDiv("asdfsafs"));
 		add(grid);
 	}
 

@@ -17,7 +17,7 @@ import tech.derbent.session.service.CSessionService;
 
 /** CDecisionsView - Main view for decision management. Layer: View (MVC) Provides a complete decision management interface following the established
  * patterns from CActivitiesView. Includes grid listing, detail editing, and comprehensive panel organization. */
-@Route ("cdecisionsview/:decision_id?/:action?(edit)")
+@Route ("cdecisionsview")
 @PageTitle ("Decision Master Detail")
 @Menu (order = 1.5, icon = "class:tech.derbent.decisions.view.CDecisionsView", title = "Project.Decisions")
 @PermitAll // When security is enabled, allow all authenticated users

@@ -17,7 +17,7 @@ import tech.derbent.session.service.CSessionService;
 
 /** CRiskStatusView - View for managing risk statuses. Layer: View (MVC) Provides CRUD operations for risk statuses using the abstract master-detail
  * pattern. Allows users to create, read, update, and delete risk status definitions. */
-@Route ("criskstatusview/:risk_status_id?/:action?(edit)")
+@Route ("criskstatusview")
 @PageTitle ("Risk Statuses")
 @Menu (order = 4.1, icon = "class:tech.derbent.risks.view.CRiskStatusView", title = "Types.Risk Statuses")
 @PermitAll

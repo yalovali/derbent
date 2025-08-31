@@ -35,7 +35,7 @@ public class CSessionService {
 	private final AuthenticationContext authenticationContext;
 	private final CUserRepository userRepository;
 	private final CProjectRepository projectRepository;
-	private LayoutService layoutService;
+	private CLayoutService layoutService;
 
 	public CSessionService(final AuthenticationContext authenticationContext, final CUserRepository userRepository,
 			final CProjectRepository projectRepository) {
@@ -244,7 +244,7 @@ public class CSessionService {
 	}
 
 	/** Sets the layout service. This is called after bean creation to avoid circular dependency. */
-	public void setLayoutService(final LayoutService layoutService) {
+	public void setLayoutService(final CLayoutService layoutService) {
 		this.layoutService = layoutService;
 	}
 }

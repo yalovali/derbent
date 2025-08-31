@@ -27,20 +27,24 @@ public class CAuxillaries {
 		return prefix + "-" + suffix;
 	}
 
-	private static Method getClazzMethodStatic(final String className, final String methodName) throws ClassNotFoundException, NoSuchMethodException {
+	private static Method getClazzMethodStatic(final Class<?> clazz, final String methodName) throws ClassNotFoundException, NoSuchMethodException {
 		try {
-			final ClassLoader cl = Thread.currentThread().getContextClassLoader();
-			final Class<?> clazz = Class.forName(className, true, cl);
 			final Method method = clazz.getMethod(methodName);
 			if (Modifier.isStatic(method.getModifiers())) {
 				return method;
 			} else {
-				throw new IllegalArgumentException("Method " + methodName + " in class " + className + " is not statric");
+				throw new IllegalArgumentException("Method " + methodName + " in class " + clazz.getName() + " is not statric");
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error getting method " + methodName + " from class " + className, e);
+			LOGGER.error("Error getting method " + methodName + " from class " + clazz.getName(), e);
 			throw e;
 		}
+	}
+
+	private static Method getClazzMethodStatic(final String className, final String methodName) throws ClassNotFoundException, NoSuchMethodException {
+		final ClassLoader cl = Thread.currentThread().getContextClassLoader();
+		final Class<?> clazz = Class.forName(className, true, cl);
+		return getClazzMethodStatic(clazz, methodName);
 	}
 
 	private static String getComponentText(final Component component) {
@@ -60,12 +64,18 @@ public class CAuxillaries {
 		return result;
 	}
 
-	public static String invokeStaticMethodOfStr(final String className, final String methodName) throws Exception {
-		final Method method = getClazzMethodStatic(className, methodName);
+	public static String invokeStaticMethodOfStr(final Class<?> clazz, final String methodName) throws Exception {
+		final Method method = getClazzMethodStatic(clazz, methodName);
 		if (method.getReturnType() != String.class) {
-			throw new RuntimeException("Method " + methodName + " in class " + className + " does not return String");
+			throw new RuntimeException("Method " + methodName + " in class " + clazz.getName() + " does not return String");
 		}
 		return (String) method.invoke(null);
+	}
+
+	public static String invokeStaticMethodOfStr(final String className, final String methodName) throws Exception {
+		final ClassLoader cl = Thread.currentThread().getContextClassLoader();
+		final Class<?> clazz = Class.forName(className, true, cl);
+		return invokeStaticMethodOfStr(clazz, methodName);
 	}
 
 	public static void setId(final Component component) {

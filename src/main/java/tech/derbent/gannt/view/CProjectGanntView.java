@@ -12,8 +12,8 @@ import tech.derbent.screens.service.CScreenService;
 import tech.derbent.session.service.CSessionService;
 
 @Route ("cprojectganntview")
-@PageTitle ("Gannt View")
-@Menu (order = 1.1, icon = "class:tech.derbent.gannt.domain.CGanntViewEntity", title = "Project.Gannt")
+@PageTitle ("Project Gannt View")
+@Menu (order = 1.1, icon = "class:tech.derbent.gannt.domain.CGanntViewEntity", title = "Project.Project Gannt Chart")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CProjectGanntView extends CGridViewBaseProject<CGanntViewEntity> {
 	private static final long serialVersionUID = 1L;

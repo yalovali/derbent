@@ -16,7 +16,7 @@ import tech.derbent.screens.service.CScreenService;
 import tech.derbent.session.service.CSessionService;
 
 @PageTitle ("Project Risks")
-@Route ("criskview/:risk_id?/:action?(edit)")
+@Route ("criskview")
 @Menu (order = 1.3, icon = "class:tech.derbent.risks.view.CRiskView", title = "Project.Risks")
 @PermitAll
 public class CRiskView extends CGridViewBaseProject<CRisk> {

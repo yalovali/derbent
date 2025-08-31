@@ -16,7 +16,7 @@ import tech.derbent.session.service.CSessionService;
 
 /** CActivityStatusView - View for managing activity statuses. Layer: View (MVC) Provides CRUD operations for activity statuses using the abstract
  * master-detail pattern. Allows users to create, read, update, and delete activity status definitions. */
-@Route ("cactivitystatusview/:activity_status_id?/:action?(edit)")
+@Route ("cactivitystatusview")
 @PageTitle ("Activity Statuses")
 @Menu (order = 2.1, icon = "class:tech.derbent.activities.view.CActivityStatusView", title = "Types.Activity Statuses")
 @PermitAll

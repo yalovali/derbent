@@ -28,7 +28,7 @@ import tech.derbent.session.service.CSessionService;
 
 /** CProjectDetailsView - Enhanced project details view with modern UI design and multiple layout options. Layer: View (MVC) Provides CRUD operations
  * for projects with improved visual clarity, responsive design, and interactive elements. */
-@Route ("cprojectdetailsview/:project_id?/:action?(edit)")
+@Route ("cprojectdetailsview")
 @PageTitle ("Project Details")
 @Menu (order = 1.3, icon = "class:tech.derbent.projects.view.CProjectDetailsView", title = "Project.Project Details")
 @PermitAll // When security is enabled, allow all authenticated users

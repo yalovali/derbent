@@ -15,7 +15,7 @@ import tech.derbent.meetings.service.CMeetingStatusService;
 import tech.derbent.screens.service.CScreenService;
 import tech.derbent.session.service.CSessionService;
 
-@Route ("cmeetingstatusview/:meeting_status_id?/:action?(edit)")
+@Route ("cmeetingstatusview")
 @PageTitle ("Meeting Statuses")
 @Menu (order = 11.3, icon = "class:tech.derbent.meetings.view.CMeetingStatusView", title = "Types.Meeting Statuses")
 @PermitAll

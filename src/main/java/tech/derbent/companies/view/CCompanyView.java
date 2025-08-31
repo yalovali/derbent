@@ -15,7 +15,7 @@ import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.screens.service.CScreenService;
 import tech.derbent.session.service.CSessionService;
 
-@Route ("ccompanyview/:company_id?/:action?(edit)")
+@Route ("ccompanyview")
 @PageTitle ("Company Master Detail")
 @Menu (order = 3.4, icon = "class:tech.derbent.companies.view.CCompanyView", title = "Settings.Companies")
 @PermitAll // When security is enabled, allow all authenticated users

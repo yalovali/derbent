@@ -16,9 +16,9 @@ import tech.derbent.screens.service.CScreenService;
 import tech.derbent.screens.service.CViewsService;
 import tech.derbent.session.service.CSessionService;
 
-@Route ("cscreensview/:screen_id?/:action?(edit)")
+@Route ("cscreensview")
 @PageTitle ("Screen Master Detail")
-@Menu (order = 1.5, icon = "class:tech.derbent.screens.view.CScreenView", title = "Project.Screens")
+@Menu (order = 1.5, icon = "class:tech.derbent.screens.view.CScreenView", title = "Settings.Screens")
 @PermitAll
 public final class CScreenView extends CGridViewBaseProject<CScreen> {
 	private static final long serialVersionUID = 1L;

@@ -14,7 +14,7 @@ import tech.derbent.meetings.service.CMeetingTypeService;
 import tech.derbent.screens.service.CScreenService;
 import tech.derbent.session.service.CSessionService;
 
-@Route ("cmeetingtypeview/:meetingtype_id?/:action?(edit)")
+@Route ("cmeetingtypeview")
 @PageTitle ("Meeting Types")
 @Menu (order = 10.2, icon = "class:tech.derbent.meetings.view.CMeetingTypeView", title = "Types.Meeting Types")
 @PermitAll

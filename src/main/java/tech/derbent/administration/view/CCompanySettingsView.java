@@ -130,7 +130,7 @@ public class CCompanySettingsView extends CGridViewBaseDBEntity<CCompanySettings
 	}
 
 	@Override
-	public void onLayoutModeChanged(final tech.derbent.session.service.LayoutService.LayoutMode newMode) {
+	public void onLayoutModeChanged(final tech.derbent.session.service.CLayoutService.LayoutMode newMode) {
 		LOGGER.debug("onLayoutModeChanged called for CCompanySettingsView with mode: {}", newMode);
 		// Refresh data when layout changes
 		refreshGrid();

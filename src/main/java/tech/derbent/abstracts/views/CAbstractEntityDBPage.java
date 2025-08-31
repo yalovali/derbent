@@ -42,7 +42,7 @@ import tech.derbent.abstracts.views.grids.CMasterViewSectionGrid;
 import tech.derbent.base.ui.dialogs.CConfirmationDialog;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
 import tech.derbent.session.service.CSessionService;
-import tech.derbent.session.service.LayoutService;
+import tech.derbent.session.service.CLayoutService;
 
 public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<EntityClass>> extends CAbstractPage implements CLayoutChangeListener {
 	private static final long serialVersionUID = 1L;
@@ -59,7 +59,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	private final Div detailsTabLayout = new Div();
 	private EntityClass currentEntity;
 	protected final CAbstractService<EntityClass> entityService;
-	protected LayoutService layoutService; // Optional injection
+	protected CLayoutService layoutService; // Optional injection
 	ArrayList<CAccordionDBEntity<EntityClass>> AccordionList = new ArrayList<CAccordionDBEntity<EntityClass>>(); // List of accordions
 	{}
 	protected CSessionService sessionService;
@@ -441,7 +441,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	}
 
 	@Override
-	public void onLayoutModeChanged(final LayoutService.LayoutMode newMode) {
+	public void onLayoutModeChanged(final CLayoutService.LayoutMode newMode) {
 		LOGGER.debug("Layout mode changed to: {} for {}", newMode, getClass().getSimpleName());
 		updateLayoutOrientation();
 	}
@@ -539,7 +539,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	}
 
 	/** Sets the layout service. This is typically called via dependency injection or manually after construction. */
-	public void setLayoutService(final LayoutService layoutService) {
+	public void setLayoutService(final CLayoutService layoutService) {
 		this.layoutService = layoutService;
 		// Update layout based on current mode
 		updateLayoutOrientation();
@@ -560,9 +560,9 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	/** Updates the split layout orientation based on the current layout mode. */
 	private void updateLayoutOrientation() {
 		if ((layoutService != null) && (splitLayout != null)) {
-			final LayoutService.LayoutMode currentMode = layoutService.getCurrentLayoutMode();
+			final CLayoutService.LayoutMode currentMode = layoutService.getCurrentLayoutMode();
 			// LOGGER.debug("Updating layout orientation to: {} for {}", currentMode, getClass().getSimpleName());
-			if (currentMode == LayoutService.LayoutMode.HORIZONTAL) {
+			if (currentMode == CLayoutService.LayoutMode.HORIZONTAL) {
 				splitLayout.setOrientation(SplitLayout.Orientation.HORIZONTAL);
 				// For horizontal layout, give more space to the grid (left side)
 				splitLayout.setSplitterPosition(50.0); // 50% for grid, 50% for details

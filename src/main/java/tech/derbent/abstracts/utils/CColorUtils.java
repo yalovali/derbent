@@ -1,12 +1,16 @@
 package tech.derbent.abstracts.utils;
 
 import java.lang.reflect.Method;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
 import tech.derbent.abstracts.domains.CEntity;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CTypeEntity;
+import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
 import tech.derbent.base.domain.CStatus;
 
 /** CColorUtils - Utility class for color operations and status entity color management.
@@ -120,8 +124,16 @@ public final class CColorUtils {
 		return CAuxillaries.invokeStaticMethodOfStr(className, "getEntityColorCode");
 	}
 
+	public static String getIconColorCode(final Class<?> clazz) throws Exception {
+		return CAuxillaries.invokeStaticMethodOfStr(clazz, "getIconColorCode");
+	}
+
 	public static String getIconColorCode(final String className) throws Exception {
 		return CAuxillaries.invokeStaticMethodOfStr(className, "getIconColorCode");
+	}
+
+	public static String getIconFilename(final Class<?> clazz) throws Exception {
+		return CAuxillaries.invokeStaticMethodOfStr(clazz, "getIconFilename");
 	}
 
 	public static String getIconFilename(final String className) throws Exception {
@@ -130,6 +142,24 @@ public final class CColorUtils {
 
 	public static Icon getIconForEntity(final CEntityDB<?> entity) throws Exception {
 		return new Icon(getIconFilename(entity.getClass().getName()));
+	}
+
+	public static Icon getIconForViewClass(final CAbstractNamedEntityPage view) throws Exception {
+		return new Icon(getIconFilename(view.getClass().getName()));
+	}
+
+	public static Icon getIconForViewClass(final Class<? extends CAbstractNamedEntityPage> clazz) throws Exception {
+		return new Icon(getIconFilename(clazz));
+	}
+
+	public static String getRouteForView(final Class<? extends CAbstractNamedEntityPage<?>> clazz) {
+		return Optional.ofNullable(clazz.getAnnotation(Route.class)).map(Route::value).filter(s -> !s.isBlank()) // boş string durumunu da kontrol et
+				.orElseThrow(() -> new IllegalArgumentException("Missing @Route on " + clazz.getSimpleName()));
+	}
+
+	public static String getTitleForView(final Class<? extends CAbstractNamedEntityPage<?>> clazz) {
+		return Optional.ofNullable(clazz.getAnnotation(PageTitle.class)).map(PageTitle::value)
+				.orElseThrow(() -> new IllegalArgumentException("Missing @PageTitle on " + clazz.getSimpleName()));
 	}
 
 	public static boolean isStatusEntity(final Class<?> entityType) {

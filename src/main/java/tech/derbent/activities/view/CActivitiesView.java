@@ -17,7 +17,7 @@ import tech.derbent.comments.view.CPanelActivityComments;
 import tech.derbent.screens.service.CScreenService;
 import tech.derbent.session.service.CSessionService;
 
-@Route ("cactivitiesview/:activity_id?/:action?(edit)")
+@Route ("cactivitiesview")
 @PageTitle ("Activity Master Detail")
 @Menu (order = 1.1, icon = "class:tech.derbent.activities.view.CActivitiesView", title = "Project.Activities")
 @PermitAll // When security is enabled, allow all authenticated users

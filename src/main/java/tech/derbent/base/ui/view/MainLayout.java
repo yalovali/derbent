@@ -34,8 +34,8 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.base.ui.component.CHierarchicalSideMenu;
 import tech.derbent.base.ui.component.CViewToolbar;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
+import tech.derbent.session.service.CLayoutService;
 import tech.derbent.session.service.CSessionService;
-import tech.derbent.session.service.LayoutService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.view.CUserProfileDialog;
@@ -56,12 +56,12 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	private final User currentUser;
 	private final AuthenticationContext authenticationContext;
 	private final CSessionService sessionService;
-	private final LayoutService layoutService;
+	private final CLayoutService layoutService;
 	private final PasswordEncoder passwordEncoder;
 	private final CUserService userService;
 	private CViewToolbar mainToolbar;
 
-	MainLayout(final AuthenticationContext authenticationContext, final CSessionService sessionService, final LayoutService layoutService,
+	MainLayout(final AuthenticationContext authenticationContext, final CSessionService sessionService, final CLayoutService layoutService,
 			final PasswordEncoder passwordEncoder, final CUserService userService) throws Exception {
 		this.authenticationContext = authenticationContext;
 		this.sessionService = sessionService;
@@ -130,7 +130,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		return header;
 	}
 
-	private Div createNavBar() {
+	private Div createNavBar() throws Exception {
 		final Div navBar = new Div();
 		// dont add any other compoents to the navbar, just the toolbar otherwise call it
 		// with ,xyz,xyz etc..

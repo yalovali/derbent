@@ -21,7 +21,7 @@ import tech.derbent.users.service.CUserProjectSettingsService;
 import tech.derbent.users.service.CUserService;
 
 /** CProjectsView - View for managing projects. Layer: View (MVC) Provides CRUD operations for projects using the abstract master-detail pattern. */
-@Route ("cprojectsview/:project_id?/:action?(edit)")
+@Route ("cprojectsview")
 @PageTitle ("Project Master Detail")
 @Menu (order = 1.1, icon = "class:tech.derbent.projects.view.CProjectsView", title = "Settings.Projects")
 @PermitAll // When security is enabled, allow all authenticated users

@@ -17,7 +17,7 @@ import tech.derbent.session.service.CSessionService;
 
 /** CCommentPriorityView - View for managing comment priorities. Layer: View (MVC) Provides CRUD operations for comment priorities using the abstract
  * master-detail pattern. Manages different priority levels that comments can have to categorize their importance. */
-@Route ("ccommentpriorityview/:ccommentpriority_id?/:action?(edit)")
+@Route ("ccommentpriorityview")
 @PageTitle ("Comment Priorities")
 @Menu (order = 12.1, icon = "class:tech.derbent.comments.view.CCommentPriorityView", title = "Types.Comment Priorities")
 @PermitAll

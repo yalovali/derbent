@@ -17,7 +17,7 @@ import tech.derbent.session.service.CSessionService;
 
 /** CDecisionStatusView - View for managing decision statuses. Layer: View (MVC) Provides CRUD operations for decision statuses using the abstract
  * master-detail pattern. Manages different status types that decisions can have throughout their lifecycle. */
-@Route ("cdecisionstatusview/:decision_status_id?/:action?(edit)")
+@Route ("cdecisionstatusview")
 @PageTitle ("Decision Statuses")
 @Menu (order = 11.2, icon = "class:tech.derbent.decisions.view.CDecisionStatusView", title = "Types.Decision Statuses")
 @PermitAll

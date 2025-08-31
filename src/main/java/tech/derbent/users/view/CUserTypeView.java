@@ -18,7 +18,7 @@ import tech.derbent.users.service.CUserTypeService;
 
 /** CUserTypeView - View for managing user types. Layer: View (MVC) Provides CRUD operations for user types using the abstract master-detail pattern
  * with project awareness. */
-@Route ("cusertypeview/:user_type_id?/:action?(edit)")
+@Route ("cusertypeview")
 @PageTitle ("User Types")
 @Menu (order = 10.3, icon = "class:tech.derbent.users.view.CUserTypeView", title = "Settings.User Types")
 @PermitAll

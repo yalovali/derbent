@@ -3,7 +3,7 @@ package tech.derbent.session.config;
 import org.springframework.context.annotation.Configuration;
 
 import jakarta.annotation.PostConstruct;
-import tech.derbent.session.service.LayoutService;
+import tech.derbent.session.service.CLayoutService;
 import tech.derbent.session.service.CSessionService;
 
 /**
@@ -13,9 +13,9 @@ import tech.derbent.session.service.CSessionService;
 public class SessionConfiguration {
 
     private final CSessionService sessionService;
-    private final LayoutService layoutService;
+    private final CLayoutService layoutService;
 
-    public SessionConfiguration(final CSessionService sessionService, final LayoutService layoutService) {
+    public SessionConfiguration(final CSessionService sessionService, final CLayoutService layoutService) {
         this.sessionService = sessionService;
         this.layoutService = layoutService;
     }
