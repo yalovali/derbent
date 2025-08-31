@@ -8,7 +8,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
-import tech.derbent.abstracts.domains.IIconSet;
+import tech.derbent.abstracts.domains.IDisplayView;
 import tech.derbent.abstracts.views.components.CButton;
 import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseDBEntity;
@@ -23,7 +23,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Company Administration Settings")
 @Menu (order = 3.5, icon = "class:tech.derbent.administration.view.CCompanySettingsView", title = "Settings.Company Settings")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CCompanySettingsView extends CGridViewBaseDBEntity<CCompanySettings> implements IIconSet {
+public class CCompanySettingsView extends CGridViewBaseDBEntity<CCompanySettings> implements IDisplayView {
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }
@@ -117,7 +117,17 @@ public class CCompanySettingsView extends CGridViewBaseDBEntity<CCompanySettings
 	}
 
 	@Override
+	public String getDisplayName() { // TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
+
+	@Override
+	public Class<?> getViewClass() { // TODO Auto-generated method stub
+		return null;
+	}
 
 	@Override
 	public void onLayoutModeChanged(final tech.derbent.session.service.LayoutService.LayoutMode newMode) {

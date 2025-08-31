@@ -18,7 +18,7 @@ public class CGanntViewEntity extends CEntityOfProject<CGanntViewEntity> {
 
 	public static String getIconFilename() { return "vaadin:viewport"; }
 
-	public static Class<?> getViewClass() { return CGanntViewEntityView.class; }
+	public static Class<?> getViewClassStatic() { return CGanntViewEntityView.class; }
 
 	public CGanntViewEntity() {
 		super();
@@ -26,5 +26,10 @@ public class CGanntViewEntity extends CEntityOfProject<CGanntViewEntity> {
 
 	public CGanntViewEntity(final String name, final CProject project) {
 		super(CGanntViewEntity.class, name, project);
+	}
+
+	@Override
+	public String getDisplayName() { // TODO Auto-generated method stub
+		return null;
 	}
 }

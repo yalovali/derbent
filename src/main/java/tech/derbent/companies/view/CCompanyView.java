@@ -7,7 +7,6 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
-import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseNamed;
@@ -20,7 +19,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Company Master Detail")
 @Menu (order = 3.4, icon = "class:tech.derbent.companies.view.CCompanyView", title = "Settings.Companies")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CCompanyView extends CGridViewBaseNamed<CCompany> implements IIconSet {
+public class CCompanyView extends CGridViewBaseNamed<CCompany> {
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

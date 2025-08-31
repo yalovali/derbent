@@ -3,15 +3,11 @@ package tech.derbent.abstracts.domains;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class CEntity<EntityClass> implements IIconSet {
-
+public abstract class CEntity<EntityClass> {
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
-
 	protected final Class<EntityClass> clazz;
 
-	/**
-	 * Default constructor for JPA. Uses reflection to determine the entity class.
-	 */
+	/** Default constructor for JPA. Uses reflection to determine the entity class. */
 	@SuppressWarnings ("unchecked")
 	protected CEntity() {
 		// For JPA compatibility - derive class from generic type information

@@ -13,14 +13,14 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.domains.IIconSet;
+import tech.derbent.abstracts.domains.IDisplayView;
 
 /** Example view demonstrating responsive flex layout behavior. */
 @Route ("examples/settings/advanced")
 @PageTitle ("Advanced Settings Example")
 @Menu (order = 998, icon = "class:tech.derbent.examples.view.CExampleSettingsView", title = "Examples.Settings.Advanced")
 @PermitAll
-public class CExampleSettingsView extends Div implements IIconSet {
+public class CExampleSettingsView extends Div implements IDisplayView {
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

@@ -7,7 +7,6 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
-import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.decisions.domain.CDecision;
@@ -22,7 +21,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Decision Master Detail")
 @Menu (order = 1.5, icon = "class:tech.derbent.decisions.view.CDecisionsView", title = "Project.Decisions")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CDecisionsView extends CGridViewBaseProject<CDecision> implements IIconSet {
+public class CDecisionsView extends CGridViewBaseProject<CDecision> {
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

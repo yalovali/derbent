@@ -29,6 +29,8 @@ import tech.derbent.users.view.CUsersView;
 public class CUser extends CEntityNamed<CUser> implements CSearchable, CFieldInfoGenerator {
 	public static final int MAX_LENGTH_NAME = 255;
 
+	public static String getDisplayNameStatic() { return "User"; }
+
 	public static String getEntityColorCode() { return getIconColorCode(); }
 
 	public static String getIconColorCode() {
@@ -37,7 +39,7 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable, CFieldInf
 
 	public static String getIconFilename() { return "vaadin:users"; }
 
-	public static Class<?> getViewClass() { return CUsersView.class; }
+	public static Class<?> getViewClassStatic() { return CUsersView.class; }
 
 	@Column (name = "lastname", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
 	@AMetaData (
@@ -154,6 +156,11 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable, CFieldInf
 	}
 
 	public CCompany getCompany() { return company; }
+
+	@Override
+	public String getDisplayName() { // TODO Auto-generated method stub
+		return null;
+	}
 
 	public String getEmail() { return email; }
 

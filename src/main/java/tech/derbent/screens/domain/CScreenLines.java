@@ -143,6 +143,11 @@ public class CScreenLines extends CEntityDB<CScreenLines> {
 
 	public String getDefaultValue() { return defaultValue; }
 
+	@Override
+	public String getDisplayName() { // TODO Auto-generated method stub
+		return null;
+	}
+
 	public String getEntityProperty() { return entityProperty; }
 
 	public String getFieldCaption() { return fieldCaption; }
@@ -168,6 +173,11 @@ public class CScreenLines extends CEntityDB<CScreenLines> {
 	public CScreen getScreen() { return screen; }
 
 	public String getSectionName() { return sectionName; }
+
+	@Override
+	public Class<?> getViewClass() { // TODO Auto-generated method stub
+		return null;
+	}
 
 	public void printLine() {
 		System.out.println("CScreenLines{" + "id=" + getId() + ", lineOrder=" + lineOrder + ", fieldCaption='" + fieldCaption + '\''

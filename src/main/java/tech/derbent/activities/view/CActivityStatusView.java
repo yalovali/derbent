@@ -5,7 +5,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
-import tech.derbent.abstracts.domains.IIconSet;
+import tech.derbent.abstracts.domains.IDisplayEntity;
 import tech.derbent.abstracts.views.components.CVerticalLayout;
 import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
@@ -20,7 +20,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Activity Statuses")
 @Menu (order = 2.1, icon = "class:tech.derbent.activities.view.CActivityStatusView", title = "Types.Activity Statuses")
 @PermitAll
-public class CActivityStatusView extends CGridViewBaseProject<CActivityStatus> implements IIconSet {
+public class CActivityStatusView extends CGridViewBaseProject<CActivityStatus> {
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }
@@ -30,7 +30,7 @@ public class CActivityStatusView extends CGridViewBaseProject<CActivityStatus> i
 													// CActivityStatus
 	}
 
-	public static String getIconFilename() { return IIconSet.resolveIconFilename(CActivityStatus.class); }
+	public static String getIconFilename() { return IDisplayEntity.resolveIconFilename(CActivityStatus.class); }
 
 	private final String ENTITY_ID_FIELD = "activity_status_id";
 

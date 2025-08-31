@@ -8,7 +8,6 @@ import tech.derbent.abstracts.components.CGridCell;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
-import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.risks.domain.CRiskStatus;
@@ -22,7 +21,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Risk Statuses")
 @Menu (order = 4.1, icon = "class:tech.derbent.risks.view.CRiskStatusView", title = "Types.Risk Statuses")
 @PermitAll
-public class CRiskStatusView extends CGridViewBaseProject<CRiskStatus> implements IIconSet {
+public class CRiskStatusView extends CGridViewBaseProject<CRiskStatus> {
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

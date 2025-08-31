@@ -23,7 +23,7 @@ public class CMeetingType extends CTypeEntity<CMeetingType> implements CKanbanTy
 
 	public static String getIconFilename() { return "vaadin:tags"; }
 
-	public static Class<?> getViewClass() { return CMeetingTypeView.class; }
+	public static Class<?> getViewClassStatic() { return CMeetingTypeView.class; }
 
 	/** Default constructor for JPA. */
 	public CMeetingType() {
@@ -32,5 +32,10 @@ public class CMeetingType extends CTypeEntity<CMeetingType> implements CKanbanTy
 
 	public CMeetingType(final String name, final CProject project) {
 		super(CMeetingType.class, name, project);
+	}
+
+	@Override
+	public String getDisplayName() { // TODO Auto-generated method stub
+		return null;
 	}
 }

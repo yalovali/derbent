@@ -34,7 +34,7 @@ public class COrder extends CEntityOfProject<COrder> {
 
 	public static String getIconFilename() { return "vaadin:cart"; }
 
-	public static Class<?> getViewClass() { return COrdersView.class; }
+	public static Class<?> getViewClassStatic() { return COrdersView.class; }
 
 	// Order Type and Classification
 	@ManyToOne (fetch = FetchType.EAGER)
@@ -181,6 +181,11 @@ public class COrder extends CEntityOfProject<COrder> {
 	public String getDeliveryAddress() { return deliveryAddress; }
 
 	public LocalDate getDeliveryDate() { return deliveryDate; }
+
+	@Override
+	public String getDisplayName() { // TODO Auto-generated method stub
+		return null;
+	}
 
 	public BigDecimal getEstimatedCost() { return estimatedCost; }
 

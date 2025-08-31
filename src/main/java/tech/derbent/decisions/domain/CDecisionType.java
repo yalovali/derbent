@@ -26,7 +26,7 @@ public class CDecisionType extends CTypeEntity<CDecisionType> {
 
 	public static String getIconFilename() { return "vaadin:tags"; }
 
-	public static Class<?> getViewClass() { return CDecisionTypeView.class; }
+	public static Class<?> getViewClassStatic() { return CDecisionTypeView.class; }
 
 	@Column (name = "requires_approval", nullable = false)
 	@NotNull
@@ -43,6 +43,11 @@ public class CDecisionType extends CTypeEntity<CDecisionType> {
 
 	public CDecisionType(final String name, final CProject project) {
 		super(CDecisionType.class, name, project);
+	}
+
+	@Override
+	public String getDisplayName() { // TODO Auto-generated method stub
+		return null;
 	}
 
 	public Boolean getRequiresApproval() { return requiresApproval; }

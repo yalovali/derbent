@@ -25,7 +25,7 @@ public class CCurrency extends CEntityOfProject<CCurrency> {
 
 	public static String getIconFilename() { return "vaadin:dollar"; }
 
-	public static Class<?> getViewClass() { return CCurrencyView.class; }
+	public static Class<?> getViewClassStatic() { return CCurrencyView.class; }
 
 	@Column (name = "currency_code", nullable = false, length = 3, unique = false)
 	@Size (max = 3, min = 3, message = "Currency code must be exactly 3 characters")
@@ -53,6 +53,11 @@ public class CCurrency extends CEntityOfProject<CCurrency> {
 	public String getCurrencyCode() { return currencyCode; }
 
 	public String getCurrencySymbol() { return currencySymbol; }
+
+	@Override
+	public String getDisplayName() { // TODO Auto-generated method stub
+		return null;
+	}
 
 	public void setCurrencyCode(final String currencyCode) {
 		this.currencyCode = currencyCode;

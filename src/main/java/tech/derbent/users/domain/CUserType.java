@@ -22,7 +22,7 @@ public class CUserType extends CEntityOfProject<CUserType> {
 
 	public static String getIconFilename() { return "vaadin:group"; }
 
-	public static Class<?> getViewClass() { return CUserTypeView.class; }
+	public static Class<?> getViewClassStatic() { return CUserTypeView.class; }
 
 	public CUserType() {
 		super();
@@ -30,5 +30,10 @@ public class CUserType extends CEntityOfProject<CUserType> {
 
 	public CUserType(final String name, final CProject project) {
 		super(CUserType.class, name, project);
+	}
+
+	@Override
+	public String getDisplayName() { // TODO Auto-generated method stub
+		return null;
 	}
 }

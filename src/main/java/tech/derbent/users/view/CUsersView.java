@@ -12,7 +12,6 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
-import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseNamed;
@@ -31,7 +30,7 @@ import tech.derbent.users.service.CUserViewService;
 @PageTitle ("Users")
 @Menu (order = 3.2, icon = "class:tech.derbent.users.view.CUsersView", title = "Settings.Users")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CUsersView extends CGridViewBaseNamed<CUser> implements IIconSet {
+public class CUsersView extends CGridViewBaseNamed<CUser> {
 	private static final long serialVersionUID = 1L;
 	public static final String ENTITY_ROUTE_TEMPLATE_EDIT = "cusersview/%s/edit";
 

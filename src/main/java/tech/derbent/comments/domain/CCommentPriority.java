@@ -25,7 +25,7 @@ public class CCommentPriority extends CTypeEntity<CCommentPriority> {
 
 	public static String getIconFileName() { return "vaadin:exclamation-circle"; }
 
-	public static Class<?> getViewClass() { return CCommentPriorityView.class; }
+	public static Class<?> getViewClassStatic() { return CCommentPriorityView.class; }
 
 	@Column (name = "priority_level", nullable = false, length = 20)
 	@AMetaData (
@@ -57,6 +57,11 @@ public class CCommentPriority extends CTypeEntity<CCommentPriority> {
 		super(CCommentPriority.class, name, project);
 		setColor(color);
 		setSortOrder(sortOrder);
+	}
+
+	@Override
+	public String getDisplayName() { // TODO Auto-generated method stub
+		return null;
 	}
 
 	public Boolean getIsDefault() { return isDefault; }

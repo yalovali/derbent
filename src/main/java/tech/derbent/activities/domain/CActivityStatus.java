@@ -27,7 +27,7 @@ public class CActivityStatus extends CStatus<CActivityStatus> implements CKanban
 
 	public static String getIconFilename() { return "vaadin:flag"; }
 
-	public static Class<?> getViewClass() { return CActivityStatusView.class; }
+	public static Class<?> getViewClassStatic() { return CActivityStatusView.class; }
 
 	@Column (name = "is_final", nullable = false)
 	@AMetaData (
@@ -63,6 +63,11 @@ public class CActivityStatus extends CStatus<CActivityStatus> implements CKanban
 			return false;
 		}
 		return super.equals(o);
+	}
+
+	@Override
+	public String getDisplayName() { // TODO Auto-generated method stub
+		return null;
 	}
 
 	public Boolean getFinalStatus() { return finalStatus; }

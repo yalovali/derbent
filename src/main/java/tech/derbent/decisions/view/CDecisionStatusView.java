@@ -8,7 +8,6 @@ import tech.derbent.abstracts.components.CGridCell;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
-import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.decisions.domain.CDecisionStatus;
@@ -22,7 +21,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Decision Statuses")
 @Menu (order = 11.2, icon = "class:tech.derbent.decisions.view.CDecisionStatusView", title = "Types.Decision Statuses")
 @PermitAll
-public class CDecisionStatusView extends CGridViewBaseProject<CDecisionStatus> implements IIconSet {
+public class CDecisionStatusView extends CGridViewBaseProject<CDecisionStatus> {
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

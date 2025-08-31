@@ -12,7 +12,7 @@ import tech.derbent.abstracts.utils.Check;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
 @MappedSuperclass
-public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
+public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> implements IDisplayEntity {
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityNamed.class);
 	@Column (name = "name", nullable = false, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
@@ -84,6 +84,12 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {
 	public LocalDateTime getLastModifiedDate() { return lastModifiedDate; }
 
 	public String getName() { return name; }
+
+	@Override
+	public Class<?> getViewClass() {
+		Check.fail("CEntityDB.getViewClass() called - returning NONE");
+		return null;
+	}
 
 	@Override
 	protected void initializeDefaults() {

@@ -7,7 +7,6 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
-import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.orders.domain.COrder;
@@ -20,7 +19,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Orders Master Detail")
 @Menu (order = 7.1, icon = "class:tech.derbent.orders.view.COrdersView", title = "Project.Orders")
 @PermitAll // When security is enabled, allow all authenticated users
-public class COrdersView extends CGridViewBaseProject<COrder> implements IIconSet {
+public class COrdersView extends CGridViewBaseProject<COrder> {
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

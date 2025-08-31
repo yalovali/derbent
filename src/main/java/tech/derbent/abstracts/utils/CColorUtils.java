@@ -155,25 +155,6 @@ public final class CColorUtils {
 		}
 	}
 
-	/** Normalizes a color string to ensure it starts with #.
-	 * @param color the color string to normalize
-	 * @return the normalized color string with # prefix, or null if input is invalid */
-	public static String normalizeColor(final String color) {
-		if ((color == null) || color.trim().isEmpty()) {
-			return null;
-		}
-		String normalizedColor = color.trim();
-		if (!normalizedColor.startsWith("#")) {
-			normalizedColor = "#" + normalizedColor;
-		}
-		// Validate hex color format
-		if ((normalizedColor.length() == 7) && normalizedColor.matches("#[0-9A-Fa-f]{6}")) {
-			return normalizedColor;
-		}
-		LOGGER.warn("Invalid color format: {}", color);
-		return null;
-	}
-
 	/** Private constructor to prevent instantiation. */
 	private CColorUtils() {
 		// Utility class - no instantiation

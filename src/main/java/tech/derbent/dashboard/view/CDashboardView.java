@@ -21,7 +21,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.views.CAbstractPage;
 import tech.derbent.activities.service.CActivityService;
@@ -38,7 +37,7 @@ import tech.derbent.users.service.CUserService;
 @PageTitle ("Home")
 @Menu (order = 0, icon = "class:tech.derbent.dashboard.view.CDashboardView", title = "Home")
 @PermitAll
-public final class CDashboardView extends CAbstractPage implements IIconSet {
+public final class CDashboardView extends CAbstractPage {
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

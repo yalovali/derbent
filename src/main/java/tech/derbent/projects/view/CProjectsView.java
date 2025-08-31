@@ -9,7 +9,6 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.views.CAccordionDBEntity;
 import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseNamed;
@@ -26,7 +25,7 @@ import tech.derbent.users.service.CUserService;
 @PageTitle ("Project Master Detail")
 @Menu (order = 1.1, icon = "class:tech.derbent.projects.view.CProjectsView", title = "Settings.Projects")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CProjectsView extends CGridViewBaseNamed<CProject> implements IIconSet {
+public class CProjectsView extends CGridViewBaseNamed<CProject> {
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

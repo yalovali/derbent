@@ -24,7 +24,6 @@ import tech.derbent.users.domain.CUser;
 @Table (name = "ccomment")
 @AttributeOverride (name = "id", column = @Column (name = "comment_id"))
 public class CComment extends CEvent<CComment> {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComment.class);
 	// Comment text content
 	@Column (name = "comment_text", nullable = false, length = 4000)
@@ -112,9 +111,19 @@ public class CComment extends CEvent<CComment> {
 
 	public String getCommentText() { return commentText; }
 
+	@Override
+	public String getDisplayName() { // TODO Auto-generated method stub
+		return null;
+	}
+
 	public CCommentPriority getPriority() { return priority; }
 
 	public String getPriorityName() { return (priority != null) ? priority.getName() : "Normal"; }
+
+	@Override
+	public Class<?> getViewClass() { // TODO Auto-generated method stub
+		return null;
+	}
 
 	@Override
 	protected void initializeDefaults() {

@@ -17,7 +17,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
-import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.views.components.CButton;
 import tech.derbent.abstracts.views.components.CVerticalLayout;
 import tech.derbent.abstracts.views.grids.CGrid;
@@ -33,7 +32,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Project Details")
 @Menu (order = 1.3, icon = "class:tech.derbent.projects.view.CProjectDetailsView", title = "Project.Project Details")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CProjectDetailsView extends CGridViewBaseNamed<CProject> implements IIconSet {
+public class CProjectDetailsView extends CGridViewBaseNamed<CProject> {
 	// Layout modes enum
 	public enum LayoutMode {
 		ENHANCED_CARDS("Enhanced Cards", "layout-enhanced-cards"), KANBAN_BOARD("Kanban Board", "layout-kanban-board"),

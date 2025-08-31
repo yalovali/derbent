@@ -26,7 +26,7 @@ public class CRisk extends CEntityOfProject<CRisk> {
 
 	public static String getIconFilename() { return "vaadin:warning"; }
 
-	public static Class<?> getViewClass() { return CRiskView.class; }
+	public static Class<?> getViewClassStatic() { return CRiskView.class; }
 
 	@Enumerated (EnumType.STRING)
 	@Column (name = "risk_severity", nullable = false, length = 20, columnDefinition = "VARCHAR(20)")
@@ -52,6 +52,11 @@ public class CRisk extends CEntityOfProject<CRisk> {
 
 	public CRisk(final String name, final CProject project) {
 		super(CRisk.class, name, project);
+	}
+
+	@Override
+	public String getDisplayName() { // TODO Auto-generated method stub
+		return null;
 	}
 
 	public ERiskSeverity getRiskSeverity() { return riskSeverity; }

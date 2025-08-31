@@ -16,4 +16,9 @@ public class COrderStatus extends CStatus<COrderStatus> {
 	public COrderStatus(final String name, final CProject project) {
 		super(COrderStatus.class, name, project);
 	}
+
+	@Override
+	public String getDisplayName() { // TODO Auto-generated method stub
+		return null;
+	}
 }

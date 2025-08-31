@@ -15,7 +15,7 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.domains.IIconSet;
+import tech.derbent.abstracts.domains.IDisplayView;
 import tech.derbent.abstracts.interfaces.CProjectChangeListener;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.activities.domain.CActivity;
@@ -31,7 +31,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Activity Kanban Board")
 @Menu (order = 1.2, icon = "class:tech.derbent.kanban.view.CActivityKanbanBoardView", title = "Project.Kanban")
 @PermitAll
-public class CActivityKanbanBoardView extends VerticalLayout implements CProjectChangeListener, IIconSet {
+public class CActivityKanbanBoardView extends VerticalLayout implements CProjectChangeListener, IDisplayView {
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityKanbanBoardView.class);
 

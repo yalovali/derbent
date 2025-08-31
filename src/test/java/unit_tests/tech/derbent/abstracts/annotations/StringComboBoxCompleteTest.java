@@ -42,7 +42,17 @@ class StringComboBoxCompleteTest {
 		)
 		private String type;
 
+		@Override
+		public String getDisplayName() { // TODO Auto-generated method stub
+			return null;
+		}
+
 		public String getType() { return type; }
+
+		@Override
+		public Class<?> getViewClass() { // TODO Auto-generated method stub
+			return null;
+		}
 
 		public void setColor(final String color) { this.color = color; }
 

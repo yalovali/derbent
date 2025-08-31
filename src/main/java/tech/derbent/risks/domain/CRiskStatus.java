@@ -24,7 +24,7 @@ public class CRiskStatus extends CStatus<CRiskStatus> {
 
 	public static String getIconFilename() { return "vaadin:flag"; }
 
-	public static Class<?> getViewClass() { return CRiskStatusView.class; }
+	public static Class<?> getViewClassStatic() { return CRiskStatusView.class; }
 
 	@Column (name = "is_final", nullable = false)
 	@AMetaData (
@@ -53,6 +53,11 @@ public class CRiskStatus extends CStatus<CRiskStatus> {
 			return false;
 		}
 		return super.equals(o);
+	}
+
+	@Override
+	public String getDisplayName() { // TODO Auto-generated method stub
+		return null;
 	}
 
 	public Boolean getIsFinal() { return isFinal; }

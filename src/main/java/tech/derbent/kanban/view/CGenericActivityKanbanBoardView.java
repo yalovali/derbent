@@ -7,7 +7,6 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.service.CActivityService;
@@ -21,7 +20,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Activity Kanban Board (Generic)")
 @Menu (order = 1.3, icon = "class:tech.derbent.kanban.view.CGenericActivityKanbanBoardView", title = "Project.Generic Kanban")
 @PermitAll
-public class CGenericActivityKanbanBoardView extends CBaseKanbanBoardView<CActivity, CActivityStatus> implements IIconSet {
+public class CGenericActivityKanbanBoardView extends CBaseKanbanBoardView<CActivity, CActivityStatus> {
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CGenericActivityKanbanBoardView.class);
 

@@ -12,17 +12,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
-import tech.derbent.abstracts.utils.Check;
 
 @MappedSuperclass
-public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implements IIconSet, IEntityDBStatics {
+public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implements IDisplayEntity, IEntityDBStatics {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityDB.class);
-
-	public static Class<?> getViewClass() {
-		Check.fail("CEntityDB.getViewClass() called - returning NONE");
-		return null;
-	}
-
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
 	private Long id;

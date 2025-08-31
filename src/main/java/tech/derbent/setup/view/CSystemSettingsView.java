@@ -16,7 +16,6 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.components.CBinderFactory;
 import tech.derbent.abstracts.components.CEnhancedBinder;
-import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.views.CAbstractPage;
 import tech.derbent.abstracts.views.components.CButton;
 import tech.derbent.base.ui.dialogs.CConfirmationDialog;
@@ -32,7 +31,7 @@ import tech.derbent.setup.service.CSystemSettingsService;
 @PageTitle ("System Setup & Configuration")
 @Menu (order = 100.1, icon = "class:tech.derbent.setup.view.CSystemSettingsView", title = "Setup.System Settings")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CSystemSettingsView extends CAbstractPage implements IIconSet {
+public class CSystemSettingsView extends CAbstractPage {
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

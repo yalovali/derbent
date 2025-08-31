@@ -39,7 +39,7 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 
 	public static String getIconFilename() { return "vaadin:tasks"; }
 
-	public static Class<?> getViewClass() { return CActivitiesView.class; }
+	public static Class<?> getViewClassStatic() { return CActivitiesView.class; }
 
 	// Basic Activity Information
 	@ManyToOne (fetch = FetchType.EAGER)
@@ -216,6 +216,11 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 	public BigDecimal getActualHours() { return actualHours != null ? actualHours : BigDecimal.ZERO; }
 
 	public LocalDate getCompletionDate() { return completionDate; }
+
+	@Override
+	public String getDisplayName() { // TODO Auto-generated method stub
+		return getName();
+	}
 
 	public LocalDate getDueDate() { return dueDate; }
 

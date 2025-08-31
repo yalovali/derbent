@@ -1,13 +1,13 @@
 package tech.derbent.abstracts.views.grids;
 
 import tech.derbent.abstracts.domains.CEntityDB;
-import tech.derbent.abstracts.domains.IIconSet;
+import tech.derbent.abstracts.domains.IDisplayEntity;
 import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.session.service.CSessionService;
 
 public abstract class CGridViewBaseDBEntity<EntityClass extends CEntityDB<EntityClass>> extends CAbstractEntityDBPage<EntityClass>
-		implements IIconSet {
+		implements IDisplayEntity {
 	private static final long serialVersionUID = 1L;
 
 	public CGridViewBaseDBEntity(final Class<EntityClass> entityClass, final CAbstractService<EntityClass> entityService,

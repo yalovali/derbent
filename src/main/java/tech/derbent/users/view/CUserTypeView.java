@@ -9,7 +9,6 @@ import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
-import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.screens.service.CScreenService;
@@ -23,7 +22,7 @@ import tech.derbent.users.service.CUserTypeService;
 @PageTitle ("User Types")
 @Menu (order = 10.3, icon = "class:tech.derbent.users.view.CUserTypeView", title = "Settings.User Types")
 @PermitAll
-public class CUserTypeView extends CGridViewBaseProject<CUserType> implements IIconSet {
+public class CUserTypeView extends CGridViewBaseProject<CUserType> {
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

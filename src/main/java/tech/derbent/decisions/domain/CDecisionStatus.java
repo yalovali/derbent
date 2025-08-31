@@ -25,7 +25,7 @@ public class CDecisionStatus extends CStatus<CDecisionStatus> {
 
 	public static String getIconFilename() { return "vaadin:flag"; }
 
-	public static Class<?> getViewClass() { return CDecisionStatusView.class; }
+	public static Class<?> getViewClassStatic() { return CDecisionStatusView.class; }
 
 	@Column (name = "is_final", nullable = false)
 	@AMetaData (
@@ -60,6 +60,11 @@ public class CDecisionStatus extends CStatus<CDecisionStatus> {
 			return false;
 		}
 		return super.equals(o);
+	}
+
+	@Override
+	public String getDisplayName() { // TODO Auto-generated method stub
+		return null;
 	}
 
 	public Boolean getIsFinal() { return isFinal; }

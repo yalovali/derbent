@@ -17,4 +17,9 @@ public class COrderType extends CEntityOfProject<COrderType> {
 	public COrderType(final String name, final CProject project) {
 		super(COrderType.class, name, project);
 	}
+
+	@Override
+	public String getDisplayName() { // TODO Auto-generated method stub
+		return null;
+	}
 }

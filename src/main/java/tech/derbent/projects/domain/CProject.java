@@ -27,7 +27,7 @@ public class CProject extends CEntityNamed<CProject> implements CSearchable {
 
 	public static String getIconFilename() { return "vaadin:briefcase"; }
 
-	public static Class<?> getViewClass() { return CProjectsView.class; }
+	public static Class<?> getViewClassStatic() { return CProjectsView.class; }
 
 	// lets keep it layzily loaded to avoid loading all user settings at once
 	@OneToMany (mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
@@ -40,6 +40,11 @@ public class CProject extends CEntityNamed<CProject> implements CSearchable {
 
 	public CProject(final String name) {
 		super(CProject.class, name);
+	}
+
+	@Override
+	public String getDisplayName() { // TODO Auto-generated method stub
+		return null;
 	}
 
 	/** Gets the list of user project settings for this project. */

@@ -7,7 +7,6 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
-import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.risks.domain.CRisk;
@@ -20,7 +19,7 @@ import tech.derbent.session.service.CSessionService;
 @Route ("criskview/:risk_id?/:action?(edit)")
 @Menu (order = 1.3, icon = "class:tech.derbent.risks.view.CRiskView", title = "Project.Risks")
 @PermitAll
-public class CRiskView extends CGridViewBaseProject<CRisk> implements IIconSet {
+public class CRiskView extends CGridViewBaseProject<CRisk> {
 	private static final long serialVersionUID = 1L;
 	private static final String ENTITY_ID_FIELD = "risk_id";
 

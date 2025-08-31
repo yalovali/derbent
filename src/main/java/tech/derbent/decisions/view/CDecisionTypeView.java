@@ -4,7 +4,6 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.decisions.domain.CDecisionType;
@@ -16,7 +15,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Decision Types")
 @Menu (order = 11.1, icon = "class:tech.derbent.decisions.view.CDecisionTypeView", title = "Types.Decision Types")
 @PermitAll
-public class CDecisionTypeView extends CGridViewBaseProject<CDecisionType> implements IIconSet {
+public class CDecisionTypeView extends CGridViewBaseProject<CDecisionType> {
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

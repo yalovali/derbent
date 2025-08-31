@@ -27,7 +27,7 @@ public class CMeetingStatus extends CStatus<CMeetingStatus> implements CKanbanSt
 
 	public static String getIconFilename() { return "vaadin:flag"; }
 
-	public static Class<?> getViewClass() { return CMeetingStatusView.class; }
+	public static Class<?> getViewClassStatic() { return CMeetingStatusView.class; }
 
 	@Column (name = "is_final", nullable = false)
 	@AMetaData (
@@ -56,6 +56,11 @@ public class CMeetingStatus extends CStatus<CMeetingStatus> implements CKanbanSt
 		}
 		final CMeetingStatus that = (CMeetingStatus) o;
 		return super.equals(that);
+	}
+
+	@Override
+	public String getDisplayName() { // TODO Auto-generated method stub
+		return null;
 	}
 
 	public Boolean getFinalStatus() { return finalStatus; }

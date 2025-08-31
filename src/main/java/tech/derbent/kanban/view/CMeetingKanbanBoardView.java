@@ -7,7 +7,6 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.base.ui.CBaseKanbanBoardView;
 import tech.derbent.base.ui.CBaseKanbanColumn;
 import tech.derbent.meetings.domain.CMeeting;
@@ -21,7 +20,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Meeting Kanban Board")
 @Menu (order = 3.1, icon = "class:tech.derbent.kanban.view.CMeetingKanbanBoardView", title = "Projects.MeetingsKanban")
 @PermitAll
-public class CMeetingKanbanBoardView extends CBaseKanbanBoardView<CMeeting, CMeetingStatus> implements IIconSet {
+public class CMeetingKanbanBoardView extends CBaseKanbanBoardView<CMeeting, CMeetingStatus> {
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingKanbanBoardView.class);
 

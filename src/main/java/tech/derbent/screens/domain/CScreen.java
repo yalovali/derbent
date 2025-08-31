@@ -31,7 +31,7 @@ public class CScreen extends CEntityOfProject<CScreen> {
 
 	public static String getIconFilename() { return "vaadin:viewport"; }
 
-	public static Class<?> getViewClass() { return CScreenView.class; }
+	public static Class<?> getViewClassStatic() { return CScreenView.class; }
 
 	@Column (name = "entity_type", nullable = false, length = 100)
 	@Size (max = 100, message = "Entity type cannot exceed 100 characters")
@@ -116,6 +116,11 @@ public class CScreen extends CEntityOfProject<CScreen> {
 				System.out.printf("scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, \"%s\"));%n", field.getFieldName());
 			}
 		}
+	}
+
+	@Override
+	public String getDisplayName() { // TODO Auto-generated method stub
+		return null;
 	}
 
 	public String getEntityType() { return entityType; }

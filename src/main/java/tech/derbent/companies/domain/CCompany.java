@@ -29,7 +29,7 @@ public class CCompany extends CEntityNamed<CCompany> {
 
 	public static String getIconFilename() { return "vaadin:building"; }
 
-	public static Class<?> getViewClass() { return CCompanyView.class; }
+	public static Class<?> getViewClassStatic() { return CCompanyView.class; }
 
 	@Column (name = "address", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
@@ -88,6 +88,11 @@ public class CCompany extends CEntityNamed<CCompany> {
 	}
 
 	public String getAddress() { return address; }
+
+	@Override
+	public String getDisplayName() { // TODO Auto-generated method stub
+		return null;
+	}
 
 	public String getEmail() { return email; }
 

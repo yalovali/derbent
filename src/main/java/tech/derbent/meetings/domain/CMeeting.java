@@ -38,7 +38,7 @@ public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntit
 
 	public static String getIconFilename() { return "vaadin:group"; }
 
-	public static Class<?> getViewClass() { return CMeetingsView.class; }
+	public static Class<?> getViewClassStatic() { return CMeetingsView.class; }
 
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "cmeetingtype_id", nullable = true)
@@ -164,6 +164,11 @@ public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntit
 	public String getAgenda() { return agenda; }
 
 	public Set<CUser> getAttendees() { return attendees == null ? new HashSet<>() : new HashSet<>(attendees); }
+
+	@Override
+	public String getDisplayName() { // TODO Auto-generated method stub
+		return null;
+	}
 
 	public LocalDateTime getEndDate() { return endDate; }
 

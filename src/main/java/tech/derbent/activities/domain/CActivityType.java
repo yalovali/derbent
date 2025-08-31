@@ -21,7 +21,7 @@ public class CActivityType extends CTypeEntity<CActivityType> implements CKanban
 
 	public static String getIconFilename() { return "vaadin:tags"; }
 
-	public static Class<?> getViewClass() { return CActivityTypeView.class; }
+	public static Class<?> getViewClassStatic() { return CActivityTypeView.class; }
 
 	/** Default constructor for JPA. */
 	public CActivityType() {
@@ -30,5 +30,10 @@ public class CActivityType extends CTypeEntity<CActivityType> implements CKanban
 
 	public CActivityType(final String name, final CProject project) {
 		super(CActivityType.class, name, project);
+	}
+
+	@Override
+	public String getDisplayName() { // TODO Auto-generated method stub
+		return null;
 	}
 }

@@ -3,24 +3,30 @@ package tech.derbent.abstracts.domains;
 import java.lang.reflect.Method;
 import org.slf4j.Logger;
 
-public interface IIconSet {
+public interface IDisplayEntity {
+	public static String getClassDisplayNameStatic() { return "N/A"; }
+
+	public static String getDisplayNameStatic() { return "N/A"; }
+
 	public static String getEntityColorCode() {
-		final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(IIconSet.class);
+		final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(IDisplayEntity.class);
 		LOGGER.warn("getIconColorCode() not implemented, returning default color.");
 		return "#007bff";
 	}
 
 	public static String getIconColorCode() {
-		final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(IIconSet.class);
+		final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(IDisplayEntity.class);
 		LOGGER.warn("getIconColorCode() not implemented, returning default color.");
 		return "#007bff";
 	}
 
 	public static String getIconFilename() {
-		final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(IIconSet.class);
+		final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(IDisplayEntity.class);
 		LOGGER.warn("getIconFilename() not implemented, returning default icon.");
 		return "vaadin:calendar-clock";
 	}
+
+	public static Class<?> getViewClassStatic() { return null; }
 
 	public static String resolveIconFilename(final Class<?> entityClass) {
 		try {
@@ -35,4 +41,8 @@ public interface IIconSet {
 			throw new RuntimeException("Error invoking getIconFilename() on " + entityClass.getName(), e);
 		}
 	}
+
+	public String getDisplayName();
+
+	public Class<?> getViewClass();
 }

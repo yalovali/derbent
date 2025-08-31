@@ -45,9 +45,19 @@ public class CParentChildRelation extends CEntityDB<CParentChildRelation> {
 
 	public String getChildType() { return childType; }
 
+	@Override
+	public String getDisplayName() { // TODO Auto-generated method stub
+		return null;
+	}
+
 	public Long getParentId() { return parentId; }
 
 	public String getParentType() { return parentType; }
+
+	@Override
+	public Class<?> getViewClass() { // TODO Auto-generated method stub
+		return null;
+	}
 
 	public void setChildId(final Long childId) { this.childId = childId; }
 

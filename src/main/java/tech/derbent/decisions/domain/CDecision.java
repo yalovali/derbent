@@ -35,7 +35,7 @@ public class CDecision extends CEntityOfProject<CDecision> {
 
 	public static String getIconFilename() { return "vaadin:gavel"; }
 
-	public static Class<?> getViewClass() { return CDecisionsView.class; }
+	public static Class<?> getViewClassStatic() { return CDecisionsView.class; }
 
 	// Decision Type Classification
 	@ManyToOne (fetch = FetchType.EAGER)
@@ -109,6 +109,11 @@ public class CDecision extends CEntityOfProject<CDecision> {
 	public CDecisionStatus getDecisionStatus() { return decisionStatus; }
 
 	public CDecisionType getDecisionType() { return decisionType; }
+
+	@Override
+	public String getDisplayName() { // TODO Auto-generated method stub
+		return null;
+	}
 
 	public BigDecimal getEstimatedCost() { return estimatedCost; }
 

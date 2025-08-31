@@ -16,7 +16,6 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
-import tech.derbent.abstracts.domains.IIconSet;
 import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.meetings.domain.CMeeting;
@@ -29,7 +28,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Meeting Master Detail")
 @Menu (order = 1.4, icon = "class:tech.derbent.meetings.view.CMeetingsView", title = "Project.Meetings")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CMeetingsView extends CGridViewBaseProject<CMeeting> implements IIconSet {
+public class CMeetingsView extends CGridViewBaseProject<CMeeting> {
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }
