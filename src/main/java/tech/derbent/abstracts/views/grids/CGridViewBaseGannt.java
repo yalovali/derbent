@@ -11,15 +11,9 @@ import tech.derbent.session.service.CSessionService;
 
 /* display a Gannt chart for any entity of project type */
 public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<EntityClass>> extends CProjectAwareMDPage<EntityClass> {
-
 	private static final long serialVersionUID = 1L;
 	protected final CActivityService activityService;
 	protected final CMeetingService meetingService;
-
-	protected CGridViewBaseGannt(final Class<EntityClass> entityClass, final CEntityOfProjectService<EntityClass> entityService,
-			final CSessionService sessionService, final CScreenService screenService) {
-		this(entityClass, entityService, sessionService, screenService, null, null);
-	}
 
 	protected CGridViewBaseGannt(final Class<EntityClass> entityClass, final CEntityOfProjectService<EntityClass> entityService,
 			final CSessionService sessionService, final CScreenService screenService, final CActivityService activityService,
