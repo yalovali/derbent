@@ -51,7 +51,6 @@ import tech.derbent.users.view.CUserProfileDialog;
 @Layout
 @PermitAll // When security is enabled, allow all authenticated users
 public final class MainLayout extends AppLayout implements AfterNavigationObserver {
-
 	private static final long serialVersionUID = 1L;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	private final User currentUser;
@@ -60,7 +59,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	private final CLayoutService layoutService;
 	private final PasswordEncoder passwordEncoder;
 	private final CUserService userService;
-	private CViewToolbar mainToolbar;
+	private CViewToolbar<?> mainToolbar;
 
 	MainLayout(final AuthenticationContext authenticationContext, final CSessionService sessionService, final CLayoutService layoutService,
 			final PasswordEncoder passwordEncoder, final CUserService userService) throws Exception {
@@ -135,7 +134,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		final Div navBar = new Div();
 		// dont add any other compoents to the navbar, just the toolbar otherwise call it
 		// with ,xyz,xyz etc..
-		mainToolbar = new CViewToolbar("Main Layout", sessionService, layoutService, authenticationContext);
+		mainToolbar = new CViewToolbar<>("Main Layout", sessionService, layoutService, authenticationContext);
 		navBar.add(mainToolbar);
 		return navBar;
 	}
@@ -234,7 +233,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	 * @param avatar The avatar component to update
 	 * @param user   The user whose profile picture should be displayed */
 	@SuppressWarnings ({
-			"removal", "deprecation"
+			"removal"
 	})
 	private void setAvatarImage(final Avatar avatar, final CUser user) {
 		if (user == null) {

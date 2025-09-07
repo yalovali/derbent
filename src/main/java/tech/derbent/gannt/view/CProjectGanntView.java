@@ -11,7 +11,6 @@ import tech.derbent.abstracts.views.grids.CGridViewBaseGannt;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.gannt.domain.CGanntViewEntity;
 import tech.derbent.gannt.service.CGanntViewEntityService;
-import tech.derbent.gannt.service.CGanttDataService;
 import tech.derbent.screens.service.CScreenService;
 import tech.derbent.session.service.CSessionService;
 
@@ -32,9 +31,9 @@ public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 
 	private final String ENTITY_ID_FIELD = "ganntview_id";
 
-	protected CProjectGanntView(final CGanntViewEntityService entityService, final CSessionService sessionService, final CScreenService screenService,
-			final CGanttDataService ganttDataService) {
-		super(CGanntViewEntity.class, entityService, sessionService, screenService, ganttDataService);
+	protected CProjectGanntView(final CGanntViewEntityService entityService, final CSessionService sessionService,
+			final CScreenService screenService) {
+		super(CGanntViewEntity.class, entityService, sessionService, screenService);
 		final CGanntViewEntity viewEntity =
 				entityService.listByProject(sessionService.getActiveProject().orElse(null)).stream().findFirst().orElse(null);
 		setCurrentEntity(viewEntity);

@@ -24,7 +24,6 @@ import tech.derbent.base.domain.CStatus;
  * @author Derbent Framework
  * @since 1.0 */
 public final class CColorUtils {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CColorUtils.class);
 	/** Default color for status entities without color */
 	public static final String DEFAULT_COLOR = "#95a5a6";
@@ -145,11 +144,11 @@ public final class CColorUtils {
 		return new Icon(getIconFilename(entity.getClass().getName()));
 	}
 
-	public static Icon getIconForViewClass(final CAbstractNamedEntityPage view) throws Exception {
+	public static Icon getIconForViewClass(final CAbstractNamedEntityPage<?> view) throws Exception {
 		return new Icon(getIconFilename(view.getClass().getName()));
 	}
 
-	public static Icon getIconForViewClass(final Class<? extends CAbstractNamedEntityPage> clazz) throws Exception {
+	public static Icon getIconForViewClass(final Class<? extends CAbstractNamedEntityPage<?>> clazz) throws Exception {
 		return new Icon(getIconFilename(clazz));
 	}
 
