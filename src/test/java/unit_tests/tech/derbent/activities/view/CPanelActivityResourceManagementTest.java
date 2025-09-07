@@ -13,6 +13,7 @@ import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 /** Test class for CPanelActivityResourceManagement to ensure proper field grouping. */
 @ExtendWith (MockitoExtension.class)
 class CPanelActivityResourceManagementTest extends CTestBase {
+
 	private CPanelActivityResourceManagement panel;
 	private CEnhancedBinder<CActivity> binder;
 

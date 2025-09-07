@@ -25,6 +25,7 @@ import tech.derbent.users.domain.CUser;
 @Table (name = "cdecision")
 @AttributeOverride (name = "id", column = @Column (name = "decision_id"))
 public class CDecision extends CEntityOfProject<CDecision> {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDecision.class);
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

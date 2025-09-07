@@ -12,6 +12,7 @@ import tech.derbent.session.service.CSessionService;
 @Service
 @Transactional
 public class CActivityPriorityService extends CEntityOfProjectService<CActivityPriority> {
+
 	public CActivityPriorityService(final CActivityPriorityRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}

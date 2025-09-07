@@ -15,6 +15,7 @@ import tech.derbent.users.service.CUserService;
  * CUserProjectSettings entities. It allows project managers to: - Add new users to a project with specific roles and permissions - Edit existing user
  * assignments for the project Inherits common relationship management logic from CDBRelationDialog. */
 public class CProjectUserSettingsDialog extends CDBRelationDialog<CUserProjectSettings, CProject, CUser> {
+
 	private static final long serialVersionUID = 1L;
 
 	/** Constructor for the dialog.

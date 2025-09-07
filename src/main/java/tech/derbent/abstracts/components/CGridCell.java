@@ -35,6 +35,7 @@ import tech.derbent.abstracts.utils.CColorUtils;
  * @see tech.derbent.abstracts.views.grids.CGrid
  * @see tech.derbent.abstracts.utils.CColorUtils */
 public class CGridCell extends Div {
+
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CGridCell.class);
 	// Simplified styling configuration - only essential properties

@@ -38,6 +38,7 @@ import tech.derbent.users.service.CUserService;
 @Menu (order = 0, icon = "class:tech.derbent.dashboard.view.CDashboardView", title = "Home")
 @PermitAll
 public final class CDashboardView extends CAbstractPage {
+
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

@@ -21,6 +21,7 @@ import tech.derbent.abstracts.domains.IDisplayView;
 @Menu (order = 998, icon = "class:tech.derbent.examples.view.CExampleSettingsView", title = "Examples.Settings.Advanced")
 @PermitAll
 public class CExampleSettingsView extends Div implements IDisplayView {
+
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

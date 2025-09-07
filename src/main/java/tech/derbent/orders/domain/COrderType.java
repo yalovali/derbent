@@ -11,6 +11,7 @@ import tech.derbent.projects.domain.CProject;
 @Table (name = "cordertype")
 @AttributeOverride (name = "id", column = @Column (name = "order_type_id"))
 public class COrderType extends CEntityOfProject<COrderType> {
+
 	/** Constructor with name and project.
 	 * @param name    the name of the order type
 	 * @param project the project this type belongs to */

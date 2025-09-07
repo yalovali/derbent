@@ -23,6 +23,7 @@ import tech.derbent.users.service.CUserRepository;
 /** Service to manage user session state including active user and active project. Uses Vaadin session to store session-specific information. */
 @Service
 public class CSessionService {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSessionService.class);
 	private static final String ACTIVE_PROJECT_KEY = "activeProject";
 	private static final String ACTIVE_USER_KEY = "activeUser";

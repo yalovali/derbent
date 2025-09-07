@@ -23,8 +23,10 @@ import unit_tests.tech.derbent.abstracts.domains.CTestBase;
  * different configurations and error conditions. Note: These are unit tests that focus on the resolver's logic rather than actual Spring integration.
  * Integration tests are handled separately to test the full Spring context integration. */
 class CDataProviderResolverTest extends CTestBase {
+
 	/** Test entity for ComboBox testing */
 	public static class TestEntity extends CEntityDB<TestEntity> {
+
 		private String name;
 
 		public TestEntity() {

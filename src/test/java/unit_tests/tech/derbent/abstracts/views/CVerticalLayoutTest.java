@@ -1,17 +1,13 @@
 package unit_tests.tech.derbent.abstracts.views;
 
 import org.junit.jupiter.api.Test;
-
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.views.components.CButton;
 import tech.derbent.abstracts.views.components.CVerticalLayout;
 import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 
-/**
- * Test class for CVerticalLayout to verify enhanced functionality and inheritance.
- */
+/** Test class for CVerticalLayout to verify enhanced functionality and inheritance. */
 class CVerticalLayoutTest extends CTestBase {
 
 	@Override
@@ -62,8 +58,7 @@ class CVerticalLayoutTest extends CTestBase {
 		Check.notNull(layout);
 		Check.condition(layout.isSpacing());
 		Check.equals(2, (int) layout.getChildren().count());
-		Check.equals(VerticalLayout.Alignment.START,
-			layout.getDefaultHorizontalComponentAlignment());
+		Check.equals(VerticalLayout.Alignment.START, layout.getDefaultHorizontalComponentAlignment());
 	}
 
 	@Test

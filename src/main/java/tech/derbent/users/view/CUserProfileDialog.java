@@ -28,6 +28,7 @@ import tech.derbent.users.domain.CUser;
 /** User profile dialog for editing user profile information. Extends CDBEditDialog to provide consistent dialog behavior. Allows users to: - Edit
  * display name - Change password - Upload/delete profile picture */
 public class CUserProfileDialog extends CDBEditDialog<CUser> {
+
 	private static final long serialVersionUID = 1L;
 	private static final long MAX_FILE_SIZE = CImageUtils.MAX_IMAGE_SIZE;
 	private final PasswordEncoder passwordEncoder;

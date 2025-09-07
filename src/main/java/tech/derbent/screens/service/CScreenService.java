@@ -14,6 +14,7 @@ import tech.derbent.session.service.CSessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CScreenService extends CEntityOfProjectService<CScreen> {
+
 	public CScreenService(final CScreenRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}

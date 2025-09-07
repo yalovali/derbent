@@ -28,6 +28,7 @@ import tech.derbent.config.CSampleDataInitializer;
 @PageTitle ("Login")
 @AnonymousAllowed
 public class CCustomLoginView extends Main implements BeforeEnterObserver {
+
 	private static final long serialVersionUID = 1L;
 	private final TextField usernameField = new TextField();
 	private final PasswordField passwordField = new PasswordField();

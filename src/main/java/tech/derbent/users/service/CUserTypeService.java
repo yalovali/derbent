@@ -15,6 +15,7 @@ import tech.derbent.users.domain.CUserType;
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class CUserTypeService extends CEntityOfProjectService<CUserType> {
+
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserTypeService.class);
 

@@ -12,8 +12,10 @@ import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 
 public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> extends CMasterViewSectionBase<EntityClass> {
+
 	// --- Custom Event Definition ---
 	public static class SelectionChangeEvent<T extends CEntityDB<T>> extends ComponentEvent<CMasterViewSectionGrid<T>> {
+
 		private static final long serialVersionUID = 1L;
 		private final T selectedItem;
 

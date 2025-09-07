@@ -11,6 +11,7 @@ import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 
 /** Test class for CRiskStatusService functionality. Tests CRUD operations and entity creation. */
 class CRiskStatusServiceTest extends CTestBase {
+
 	@Override
 	protected void setupForTest() {
 		// Test setup if needed

@@ -17,6 +17,7 @@ import tech.derbent.abstracts.services.CAbstractService;
  * @param <RelatedEntityClass> The related entity type being selected */
 public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<RelationshipClass>, MainEntityClass extends CEntityDB<MainEntityClass>,
 		RelatedEntityClass extends CEntityDB<RelatedEntityClass>> extends CDBEditDialog<RelationshipClass> {
+
 	private static final long serialVersionUID = 1L;
 	protected final MainEntityClass mainEntity;
 	protected CAbstractService<MainEntityClass> masterService;
@@ -93,16 +94,12 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 
 	/** Gets the permission from the relationship object. Child classes must implement this to extract the permission. */
 	protected abstract String getPermissionFromRelationship(RelationshipClass relationship);
-
 	/** Returns the display text for related entities in the ComboBox. Child classes must implement this to provide appropriate display formatting. */
 	protected abstract String getRelatedEntityDisplayText(RelatedEntityClass entity);
-
 	/** Gets the related entity from the relationship object. Child classes must implement this to extract the related entity. */
 	protected abstract RelatedEntityClass getRelatedEntityFromRelationship(RelationshipClass relationship);
-
 	/** Returns the label text for the related entity selection field. Child classes must implement this to provide appropriate labeling. */
 	protected abstract String getRelatedEntitySelectionLabel();
-
 	/** Gets the role from the relationship object. Child classes must implement this to extract the role. */
 	protected abstract String getRoleFromRelationship(RelationshipClass relationship);
 
@@ -226,13 +223,10 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 
 	/** Sets the main entity in the relationship object. Child classes must implement this to set the main entity. */
 	protected abstract void setMainEntityInRelationship(RelationshipClass relationship, MainEntityClass mainEntity);
-
 	/** Sets the permission in the relationship object. Child classes must implement this to set the permission. */
 	protected abstract void setPermissionInRelationship(RelationshipClass relationship, String permission);
-
 	/** Sets the related entity in the relationship object. Child classes must implement this to set the related entity. */
 	protected abstract void setRelatedEntityInRelationship(RelationshipClass relationship, RelatedEntityClass relatedEntity);
-
 	/** Sets the role in the relationship object. Child classes must implement this to set the role. */
 	protected abstract void setRoleInRelationship(RelationshipClass relationship, String role);
 

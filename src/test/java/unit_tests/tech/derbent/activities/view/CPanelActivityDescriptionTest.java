@@ -17,6 +17,7 @@ import unit_tests.tech.derbent.abstracts.domains.CTestBase;
  * provider resolution. */
 @ExtendWith (MockitoExtension.class)
 class CPanelActivityDescriptionTest extends CTestBase {
+
 	@Mock
 	private CActivityService activityService;
 	@Mock

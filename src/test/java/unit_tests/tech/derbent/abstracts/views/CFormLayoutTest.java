@@ -1,14 +1,11 @@
 package unit_tests.tech.derbent.abstracts.views;
 
 import org.junit.jupiter.api.Test;
-
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.views.components.CFormLayout;
 import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 
-/**
- * Test class for CFormLayout to verify functionality and inheritance.
- */
+/** Test class for CFormLayout to verify functionality and inheritance. */
 class CFormLayoutTest extends CTestBase {
 
 	@Override

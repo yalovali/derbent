@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import com.vaadin.flow.component.Component;
 
 public interface IEntityDBStatics {
+
 	@SuppressWarnings ("unchecked")
 	static Class<? extends Component> viewClassOf(final Class<?> entityClass) {
 		try {

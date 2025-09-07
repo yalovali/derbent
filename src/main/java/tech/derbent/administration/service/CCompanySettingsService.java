@@ -22,6 +22,7 @@ import tech.derbent.session.service.CSessionService;
 @Transactional (readOnly = true) // Default to read-only transactions for better
 									// performance
 public class CCompanySettingsService extends CAbstractService<CCompanySettings> {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCompanySettingsService.class);
 	private final CCompanySettingsRepository companySettingsRepository;
 

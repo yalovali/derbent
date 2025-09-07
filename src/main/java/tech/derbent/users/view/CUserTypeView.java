@@ -23,6 +23,7 @@ import tech.derbent.users.service.CUserTypeService;
 @Menu (order = 10.3, icon = "class:tech.derbent.users.view.CUserTypeView", title = "Settings.User Types")
 @PermitAll
 public class CUserTypeView extends CGridViewBaseProject<CUserType> {
+
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

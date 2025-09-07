@@ -11,6 +11,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import tech.derbent.abstracts.utils.CAuxillaries;
 
 public abstract class CDialog extends Dialog {
+
 	private static final long serialVersionUID = 1L;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected VerticalLayout mainLayout;
@@ -26,7 +27,6 @@ public abstract class CDialog extends Dialog {
 
 	/** Child must implement: dialog header title. */
 	public abstract String getDialogTitleString();
-
 	/** Child must implement: form title.
 	 * @throws Exception */
 	protected abstract Icon getFormIcon() throws Exception;
@@ -43,7 +43,6 @@ public abstract class CDialog extends Dialog {
 	}
 
 	protected abstract void setupButtons();
-
 	protected abstract void setupContent() throws Exception;
 
 	/* call this class in child constructor after all fields are initialized, use setupContent and setupButtons to customize content */

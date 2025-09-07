@@ -13,6 +13,7 @@ import tech.derbent.projects.domain.CProject;
 @Table (name = "cactivitytype")
 @AttributeOverride (name = "id", column = @Column (name = "cactivitytype_id"))
 public class CActivityType extends CTypeEntity<CActivityType> implements CKanbanType {
+
 	public static String getEntityColorCode() { return getIconColorCode(); }
 
 	public static String getIconColorCode() {

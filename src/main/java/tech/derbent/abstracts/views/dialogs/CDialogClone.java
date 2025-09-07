@@ -9,6 +9,7 @@ import tech.derbent.abstracts.utils.CColorUtils;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
 public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CDBEditDialog<EntityClass> {
+
 	private static final long serialVersionUID = 1L;
 
 	public static List<String> getAvailableTypes() {

@@ -16,6 +16,7 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 11.1, icon = "class:tech.derbent.decisions.view.CDecisionTypeView", title = "Types.Decision Types")
 @PermitAll
 public class CDecisionTypeView extends CGridViewBaseProject<CDecisionType> {
+
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

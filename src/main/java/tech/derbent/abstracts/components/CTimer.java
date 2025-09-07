@@ -6,10 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CTimer {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CTimer.class);
 	private static long start = System.nanoTime();
 	private static final int MAX_ENTRIES = 1000;
 	private static final Map<String, Long> stamps = new LinkedHashMap<>() {
+
 		private static final long serialVersionUID = 1L;
 
 		protected boolean removeEldestEntry(final Map.Entry<String, Long> eldest) {

@@ -11,9 +11,10 @@ import tech.derbent.session.service.CSessionService;
 /** Abstract service class for managing entity-to-entity relationships. Provides common operations for relationship entities.
  * @param <RelationEntity> The relationship entity type */
 public abstract class CAbstractEntityRelationService<RelationEntity extends CEntityDB<RelationEntity>> extends CAbstractService<RelationEntity> {
+
 	public CAbstractEntityRelationService(final CAbstractRepository<RelationEntity> repository, final Clock clock,
 			final CSessionService sessionService) {
-		super(repository, clock,sessionService);
+		super(repository, clock, sessionService);
 	}
 
 	/** Count relationships for a child entity */
@@ -56,15 +57,12 @@ public abstract class CAbstractEntityRelationService<RelationEntity extends CEnt
 	/** Find all relationships for a specific child entity by ID */
 	@Transactional (readOnly = true)
 	public abstract List<RelationEntity> findByChildEntityId(final Long childEntityId);
-
 	/** Find all relationships for a specific parent entity by ID */
 	@Transactional (readOnly = true)
 	public abstract List<RelationEntity> findByParentEntityId(final Long parentEntityId);
-
 	/** Find a specific relationship between two entities */
 	@Transactional (readOnly = true)
 	public abstract Optional<RelationEntity> findRelationship(final Long parentEntityId, final Long childEntityId);
-
 	/** Check if a relationship already exists between two entities */
 	@Transactional (readOnly = true)
 	public abstract boolean relationshipExists(final Long parentEntityId, final Long childEntityId);

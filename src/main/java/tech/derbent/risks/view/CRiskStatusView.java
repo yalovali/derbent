@@ -22,6 +22,7 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 4.1, icon = "class:tech.derbent.risks.view.CRiskStatusView", title = "Types.Risk Statuses")
 @PermitAll
 public class CRiskStatusView extends CGridViewBaseProject<CRiskStatus> {
+
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

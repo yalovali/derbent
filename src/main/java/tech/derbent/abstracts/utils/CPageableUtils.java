@@ -11,6 +11,7 @@ import tech.derbent.abstracts.domains.CEntityConstants;
  * @author Derbent Framework
  * @since 1.0 */
 public final class CPageableUtils {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageableUtils.class);
 
 	/** Creates a default Pageable object for data provider usage.

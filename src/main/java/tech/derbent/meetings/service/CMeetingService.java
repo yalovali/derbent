@@ -15,6 +15,7 @@ import tech.derbent.session.service.CSessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CMeetingService extends CEntityOfProjectService<CMeeting> implements CKanbanService<CMeeting, CMeetingStatus> {
+
 	CMeetingService(final CMeetingRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}

@@ -12,6 +12,7 @@ import tech.derbent.users.domain.CUser;
 // @Filters (@Filter (name = "byProject", condition = "project_id = :projectId"))
 @MappedSuperclass
 public abstract class CEntityOfProject<EntityClass> extends CEntityNamed<EntityClass> {
+
 	// Many risks belong to one project
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "project_id", nullable = false)

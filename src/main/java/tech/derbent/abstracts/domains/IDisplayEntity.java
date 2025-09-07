@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import org.slf4j.Logger;
 
 public interface IDisplayEntity {
+
 	public static String getClassDisplayNameStatic() { return "N/A"; }
 
 	public static String getDisplayNameStatic() { return "N/A"; }
@@ -43,6 +44,5 @@ public interface IDisplayEntity {
 	}
 
 	public String getDisplayName();
-
 	public Class<?> getViewClass();
 }

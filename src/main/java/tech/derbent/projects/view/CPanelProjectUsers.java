@@ -17,6 +17,7 @@ import tech.derbent.users.service.CUserService;
  * features: - Add new users to the project - Edit existing user roles/permissions - Remove users from the project - Automatic data synchronization
  * with parent entity */
 public class CPanelProjectUsers extends CPanelUserProjectBase<CProject, CUserProjectSettings> {
+
 	private static final long serialVersionUID = 1L;
 	private CProject currentProject;
 	private final CUserService userService;

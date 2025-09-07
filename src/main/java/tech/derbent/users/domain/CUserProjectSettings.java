@@ -16,6 +16,7 @@ import tech.derbent.projects.domain.CProject;
 })) // table name for the entity
 @AttributeOverride (name = "id", column = @Column (name = "cuserprojectsettings_id"))
 public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
+
 	public static void addUserToProject(final CProject project, final CUser user, final CUserProjectSettings settings) {
 		if ((project == null) || (user == null)) {
 			throw new IllegalArgumentException("Project and User cannot be null");

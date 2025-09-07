@@ -8,6 +8,7 @@ import tech.derbent.session.service.CSessionService;
 
 public abstract class CGridViewBaseDBEntity<EntityClass extends CEntityDB<EntityClass>> extends CAbstractEntityDBPage<EntityClass>
 		implements IDisplayEntity {
+
 	private static final long serialVersionUID = 1L;
 
 	public CGridViewBaseDBEntity(final Class<EntityClass> entityClass, final CAbstractService<EntityClass> entityService,

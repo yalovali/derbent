@@ -21,6 +21,7 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 2.1, icon = "class:tech.derbent.activities.view.CActivityStatusView", title = "Types.Activity Statuses")
 @PermitAll
 public class CActivityStatusView extends CGridViewBaseProject<CActivityStatus> {
+
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

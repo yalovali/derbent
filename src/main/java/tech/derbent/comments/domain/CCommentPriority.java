@@ -15,6 +15,7 @@ import tech.derbent.projects.domain.CProject;
 @Table (name = "ccommentpriority")
 @AttributeOverride (name = "id", column = @Column (name = "ccommentpriority_id"))
 public class CCommentPriority extends CTypeEntity<CCommentPriority> {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCommentPriority.class);
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

@@ -29,6 +29,7 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 1.4, icon = "class:tech.derbent.meetings.view.CMeetingsView", title = "Project.Meetings")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CMeetingsView extends CGridViewBaseProject<CMeeting> {
+
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

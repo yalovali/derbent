@@ -15,6 +15,7 @@ import jakarta.persistence.MappedSuperclass;
 
 @MappedSuperclass
 public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implements IDisplayEntity, IEntityDBStatics {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityDB.class);
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)

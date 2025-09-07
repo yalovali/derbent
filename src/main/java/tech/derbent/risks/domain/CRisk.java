@@ -18,6 +18,7 @@ import tech.derbent.risks.view.CRiskView;
 @Table (name = "\"crisk\"") // Using quoted identifiers for PostgreSQL
 @AttributeOverride (name = "id", column = @Column (name = "risk_id"))
 public class CRisk extends CEntityOfProject<CRisk> {
+
 	public static String getEntityColorCode() { return getIconColorCode(); }
 
 	public static String getIconColorCode() {

@@ -17,6 +17,7 @@ import tech.derbent.users.service.CUserTypeService;
  * project assignments - Editing existing project roles/permissions - Removing project assignments The panel automatically updates when the current
  * user changes and maintains data consistency through proper accessor patterns. */
 public class CPanelUserProjectSettings extends CPanelUserProjectBase<CUser, CUserProjectSettings> {
+
 	private static final long serialVersionUID = 1L;
 	private CUser currentUser;
 	private final CProjectService projectService;

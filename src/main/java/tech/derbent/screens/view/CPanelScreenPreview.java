@@ -12,6 +12,7 @@ import tech.derbent.screens.service.CEntityFieldService;
 import tech.derbent.screens.service.CScreenService;
 
 public class CPanelScreenPreview extends CPanelScreenBase {
+
 	private static final long serialVersionUID = 1L;
 	CDiv divPreview;
 

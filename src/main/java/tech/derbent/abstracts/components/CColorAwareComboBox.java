@@ -14,6 +14,7 @@ import tech.derbent.abstracts.utils.Check;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
 public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
+
 	private static final long serialVersionUID = 1L;
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CColorAwareComboBox.class);

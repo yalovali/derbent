@@ -19,6 +19,7 @@ import tech.derbent.session.service.CSessionService;
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCompanyService.class);
 
 	/** Constructor for CCompanyService

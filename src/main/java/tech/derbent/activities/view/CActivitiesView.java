@@ -22,6 +22,7 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 1.1, icon = "class:tech.derbent.activities.view.CActivitiesView", title = "Project.Activities")
 @PermitAll // When security is enabled, allow all authenticated users
 public final class CActivitiesView extends CGridViewBaseProject<CActivity> {
+
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

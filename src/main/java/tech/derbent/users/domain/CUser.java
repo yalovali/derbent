@@ -27,6 +27,7 @@ import tech.derbent.users.view.CUsersView;
 // PostgreSQL
 @AttributeOverride (name = "id", column = @Column (name = "user_id"))
 public class CUser extends CEntityNamed<CUser> implements CSearchable, CFieldInfoGenerator {
+
 	public static final int MAX_LENGTH_NAME = 255;
 
 	public static String getDisplayNameStatic() { return "User"; }

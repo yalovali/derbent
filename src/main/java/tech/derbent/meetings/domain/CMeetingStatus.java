@@ -19,6 +19,7 @@ import tech.derbent.projects.domain.CProject;
 @Table (name = "cmeetingstatus")
 @AttributeOverride (name = "id", column = @Column (name = "cmeetingstatus_id"))
 public class CMeetingStatus extends CStatus<CMeetingStatus> implements CKanbanStatus {
+
 	public static String getEntityColorCode() { return getIconColorCode(); }
 
 	public static String getIconColorCode() {

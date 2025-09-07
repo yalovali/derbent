@@ -8,6 +8,7 @@ import tech.derbent.screens.domain.CScreen;
 import tech.derbent.screens.service.CScreenLinesService;
 
 public class COrdersViewService {
+
 	public static final String BASE_VIEW_NAME = "Orders View";
 	public static final String BASE_PANEL_NAME = "Orders Information";
 	private static Logger LOGGER = LoggerFactory.getLogger(COrdersViewService.class);

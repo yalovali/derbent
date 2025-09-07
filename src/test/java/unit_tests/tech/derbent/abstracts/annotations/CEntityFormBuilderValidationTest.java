@@ -15,8 +15,10 @@ import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 /** Test class to verify CEntityFormBuilder improvements including: - Enhanced null pointer checking - Better logging and error handling - Robust
  * parameter validation */
 class CEntityFormBuilderValidationTest extends CTestBase {
+
 	/** Test entity with various AMetaData annotations and proper getters/setters */
 	public static class TestEntity {
+
 		@AMetaData (
 				displayName = "Test String", required = true, description = "A test string field", order = 1, maxLength = 50, defaultValue = "test"
 		)
@@ -60,6 +62,7 @@ class CEntityFormBuilderValidationTest extends CTestBase {
 	void testBuildFormWithoutAMetaData() throws Exception {
 		// Test entity without AMetaData annotations
 		class EntityWithoutAMetaData {
+
 			@SuppressWarnings ("unused")
 			private String plainField;
 		}

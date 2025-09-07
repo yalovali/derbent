@@ -11,6 +11,7 @@ import tech.derbent.projects.domain.CProject;
 @Table (name = "capprovalstatus")
 @AttributeOverride (name = "id", column = @Column (name = "approval_status_id"))
 public class CApprovalStatus extends CEntityOfProject<CApprovalStatus> {
+
 	public CApprovalStatus(final String name, final CProject project) {
 		super(CApprovalStatus.class, name, project);
 	}

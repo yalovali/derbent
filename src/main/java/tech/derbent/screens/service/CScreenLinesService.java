@@ -16,6 +16,7 @@ import tech.derbent.session.service.CSessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CScreenLinesService extends CAbstractService<CScreenLines> {
+
 	public static CScreenLines createLineFromDefaults(final Class<?> entityClass, final String fieldName) throws NoSuchFieldException {
 		final Field field = CEntityFieldService.getEntityField(entityClass, fieldName);
 		Check.notNull(field, "Field not found: " + fieldName + " in class " + entityClass.getSimpleName());

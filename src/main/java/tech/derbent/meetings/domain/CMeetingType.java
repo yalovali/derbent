@@ -15,6 +15,7 @@ import tech.derbent.projects.domain.CProject;
 @Table (name = "cmeetingtype")
 @AttributeOverride (name = "id", column = @Column (name = "cmeetingtype_id"))
 public class CMeetingType extends CTypeEntity<CMeetingType> implements CKanbanType {
+
 	public static String getEntityColorCode() { return getIconColorCode(); }
 
 	public static String getIconColorCode() {

@@ -24,6 +24,7 @@ import ui_tests.tech.derbent.abstracts.ui.CAbstractUITest;
 /** CUsersViewUITest - Comprehensive UI tests for the Users view. Layer: Testing (MVC) Tests grid functionality, lazy loading prevention, data
  * loading, and user interactions for the Users view including profile picture handling and relationship access. */
 class CUsersViewUITest extends CAbstractUITest<CUser> {
+
 	@Mock
 	private CUserService mockUserService;
 	@Mock

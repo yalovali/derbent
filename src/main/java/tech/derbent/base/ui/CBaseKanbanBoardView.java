@@ -26,6 +26,7 @@ import tech.derbent.session.service.CSessionService;
  * @param <S> the type of status used for organizing entities */
 public abstract class CBaseKanbanBoardView<T extends CKanbanEntity, S extends CKanbanStatus> extends VerticalLayout
 		implements CProjectChangeListener, IDisplayView {
+
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBaseKanbanBoardView.class);
 	protected final CKanbanService<T, S> kanbanService;
@@ -51,11 +52,9 @@ public abstract class CBaseKanbanBoardView<T extends CKanbanEntity, S extends CK
 	 * @param entities the entities for this column
 	 * @return the created kanban column */
 	protected abstract CBaseKanbanColumn<T, S> createKanbanColumn(S status, List<T> entities);
-
 	/** Gets the CSS class name for this kanban board. Subclasses should override this to provide specific styling.
 	 * @return the CSS class name */
 	protected abstract String getBoardCssClass();
-
 	/** Gets the title for this kanban board. Subclasses should override this to provide specific titles.
 	 * @return the board title */
 	protected abstract String getBoardTitle();

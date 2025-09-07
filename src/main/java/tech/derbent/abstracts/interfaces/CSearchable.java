@@ -5,6 +5,7 @@ package tech.derbent.abstracts.interfaces;
  * @author Derbent Framework
  * @since 1.0 */
 public interface CSearchable {
+
 	/** Determines if this entity matches the given search text. The implementation should check relevant string fields in a case-insensitive manner.
 	 * @param searchText the text to search for (null or empty means match all)
 	 * @return true if the entity matches the search text, false otherwise */

@@ -16,6 +16,7 @@ import tech.derbent.users.domain.CUserProjectSettings;
 @Service
 @Transactional (readOnly = true)
 public class CUserProjectSettingsService extends CAbstractEntityRelationService<CUserProjectSettings> {
+
 	private final CUserProjectSettingsRepository repository;
 
 	@Autowired

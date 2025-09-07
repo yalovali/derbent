@@ -7,6 +7,7 @@ import tech.derbent.abstracts.services.CEntityOfProjectRepository;
 import tech.derbent.orders.domain.COrder;
 
 public interface COrderRepository extends CEntityOfProjectRepository<COrder> {
+
 	@Override
 	@Query (
 		"SELECT o FROM COrder o " + "LEFT JOIN FETCH o.project " + "LEFT JOIN FETCH o.assignedTo " + "LEFT JOIN FETCH o.createdBy "

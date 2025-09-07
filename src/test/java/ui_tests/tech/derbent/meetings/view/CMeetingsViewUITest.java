@@ -32,6 +32,7 @@ import ui_tests.tech.derbent.abstracts.ui.CAbstractUITest;
 /** CMeetingsViewUITest - Comprehensive UI tests for the Meetings view. Layer: Testing (MVC) Tests grid functionality, lazy loading prevention for
  * participants and attendees, data loading, and complex relationship handling in the meetings grid. */
 class CMeetingsViewUITest extends CAbstractUITest<CMeeting> {
+
 	@Mock
 	private CMeetingService mockMeetingService;
 	@Mock

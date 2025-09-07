@@ -20,6 +20,7 @@ import tech.derbent.abstracts.domains.CEntityDB;
 @Table (name = "csystemsettings")
 @AttributeOverride (name = "id", column = @Column (name = "system_settings_id"))
 public class CSystemSettings extends CEntityDB<CSystemSettings> {
+
 	// Application Configuration
 	@Column (name = "application_name", nullable = false, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)

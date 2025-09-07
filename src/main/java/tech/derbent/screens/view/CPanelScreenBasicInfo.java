@@ -6,6 +6,7 @@ import tech.derbent.screens.domain.CScreen;
 import tech.derbent.screens.service.CScreenService;
 
 public class CPanelScreenBasicInfo extends CPanelScreenBase {
+
 	private static final long serialVersionUID = 1L;
 
 	public CPanelScreenBasicInfo(final CScreen currentEntity, final CEnhancedBinder<CScreen> beanValidationBinder, final CScreenService entityService)

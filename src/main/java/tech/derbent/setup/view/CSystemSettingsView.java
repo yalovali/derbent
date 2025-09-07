@@ -32,6 +32,7 @@ import tech.derbent.setup.service.CSystemSettingsService;
 @Menu (order = 100.1, icon = "class:tech.derbent.setup.view.CSystemSettingsView", title = "Setup.System Settings")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CSystemSettingsView extends CAbstractPage {
+
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

@@ -63,6 +63,7 @@ import tech.derbent.users.service.CUserTypeService;
 import tech.derbent.users.service.CUserViewService;
 
 public class CSampleDataInitializer {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSampleDataInitializer.class);
 	// Standard password for all users as per coding guidelines
 	private static final String STANDARD_PASSWORD = "test123";

@@ -27,6 +27,7 @@ import tech.derbent.screens.service.CEntityFieldService;
  * fields: Small width (100px) - BigDecimal fields: Medium width (120px) - Date fields: Medium width (150px) - Boolean/Status fields: Small-Medium
  * width (100px) - Short text fields: Medium width (200px) - Long text fields: Large width (300px+) - Reference fields: Medium width (200px) */
 public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<EntityClass> {
+
 	private static final long serialVersionUID = 1L;
 	public static final String WIDTH_ID = "80px";
 	public static final String WIDTH_INTEGER = "100px";

@@ -21,6 +21,7 @@ import tech.derbent.users.domain.CUser;
 @Table (name = "corderapproval")
 @AttributeOverride (name = "id", column = @Column (name = "order_approval_id"))
 public class COrderApproval extends CEntityNamed<COrderApproval> {
+
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "order_id", nullable = false)
 	@AMetaData (

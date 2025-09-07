@@ -26,6 +26,7 @@ import tech.derbent.users.domain.CUser;
 /** CPanelActivityComments - Accordion panel for managing comments on activities. Layer: View (MVC) Provides UI for: - Viewing existing comments in
  * chronological order - Adding new comments - Comment count display - Integration with activity details view */
 public class CPanelActivityComments extends CPanelActivityBase {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPanelActivityComments.class);
 	private static final long serialVersionUID = 1L;
 	private final CCommentService commentService;

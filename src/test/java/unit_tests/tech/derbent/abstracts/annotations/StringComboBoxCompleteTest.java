@@ -24,8 +24,10 @@ import tech.derbent.abstracts.views.components.CVerticalLayout;
 		StringComboBoxCompleteTest.TestConfiguration.class
 })
 class StringComboBoxCompleteTest {
+
 	@Configuration
 	static class TestConfiguration {
+
 		@Bean ("testStringService")
 		public TestStringService testStringService() {
 			return new TestStringService();
@@ -34,6 +36,7 @@ class StringComboBoxCompleteTest {
 
 	/** Test entity with String ComboBox fields */
 	public static class TestStringEntity extends CEntityDB<TestStringEntity> {
+
 		@AMetaData (displayName = "Color", required = true, order = 1, dataProviderBean = "testStringService", defaultValue = "Red")
 		private String color;
 		@AMetaData (
@@ -61,6 +64,7 @@ class StringComboBoxCompleteTest {
 
 	/** Service that provides String data */
 	public static class TestStringService {
+
 		public List<String> getTypes() { return Arrays.asList("Type A", "Type B", "Type C"); }
 
 		public List<String> list() {

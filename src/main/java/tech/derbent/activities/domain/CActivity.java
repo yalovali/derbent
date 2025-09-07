@@ -29,6 +29,7 @@ import tech.derbent.users.domain.CUser;
 @Table (name = "cactivity")
 @AttributeOverride (name = "id", column = @Column (name = "activity_id"))
 public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivity.class);
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

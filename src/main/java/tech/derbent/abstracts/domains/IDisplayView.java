@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import org.slf4j.Logger;
 
 public interface IDisplayView {
+
 	public static String getDisplayNameStatic() { return "Unnamed"; }
 
 	public static String getEntityColorCode() {

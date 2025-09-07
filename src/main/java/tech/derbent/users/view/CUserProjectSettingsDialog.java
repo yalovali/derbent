@@ -15,6 +15,7 @@ import tech.derbent.users.service.CUserService;
  * existing ones. It allows users to be assigned to projects with specific roles and permissions. Inherits common relationship management logic from
  * CDBRelationDialog. */
 public class CUserProjectSettingsDialog extends CDBRelationDialog<CUserProjectSettings, CUser, CProject> {
+
 	private static final long serialVersionUID = 1L;
 
 	/** Constructor for the dialog.

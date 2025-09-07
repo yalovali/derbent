@@ -8,6 +8,7 @@ import tech.derbent.activities.service.CActivityService;
 /** CPanelActivityBudgetManagement - Panel for grouping budget management related fields of CActivity entity. Layer: View (MVC) Groups fields:
  * estimatedCost, actualCost, hourlyRate */
 public class CPanelActivityBudgetManagement extends CPanelActivityBase {
+
 	private static final long serialVersionUID = 1L;
 
 	public CPanelActivityBudgetManagement(final CActivity currentEntity, final CEnhancedBinder<CActivity> beanValidationBinder,

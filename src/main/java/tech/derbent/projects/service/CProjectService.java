@@ -14,6 +14,7 @@ import tech.derbent.session.service.CSessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CProjectService extends CAbstractNamedEntityService<CProject> {
+
 	private final ApplicationEventPublisher eventPublisher;
 
 	public CProjectService(final CProjectRepository repository, final Clock clock, final CSessionService sessionService,

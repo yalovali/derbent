@@ -18,6 +18,7 @@ import tech.derbent.screens.service.CScreenService;
 import tech.derbent.screens.service.CViewsService;
 
 public class CPanelScreenLines extends CPanelScreenBase {
+
 	private static final long serialVersionUID = 1L;
 	private final CScreenLinesService screenLinesService;
 	private CGrid<CScreenLines> grid;

@@ -19,6 +19,7 @@ import tech.derbent.setup.domain.CSystemSettings;
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSystemSettingsService.class);
 
 	/** Constructor for CSystemSettingsService.

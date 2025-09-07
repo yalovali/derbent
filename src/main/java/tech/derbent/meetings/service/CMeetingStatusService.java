@@ -19,6 +19,7 @@ import tech.derbent.session.service.CSessionService;
 @Service
 @Transactional
 public class CMeetingStatusService extends CEntityOfProjectService<CMeetingStatus> {
+
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingStatusService.class);
 

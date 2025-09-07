@@ -14,6 +14,7 @@ import jakarta.validation.constraints.NotNull;
 		})
 })
 public class CParentChildRelation extends CEntityDB<CParentChildRelation> {
+
 	@NotNull
 	@Column (name = "child_id", nullable = false)
 	private Long childId;

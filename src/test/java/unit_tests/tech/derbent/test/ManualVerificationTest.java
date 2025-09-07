@@ -24,6 +24,7 @@ import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 })
 @Transactional
 public class ManualVerificationTest extends CTestBase {
+
 	@Autowired
 	private CUserService userService;
 	@SuppressWarnings ("unused")
