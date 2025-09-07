@@ -11,6 +11,7 @@ import tech.derbent.projects.domain.CProject;
 
 /** CGanntGrid - Gantt items displayed in a unified grid. */
 public class CGanntGrid extends CGrid<CGanttItem> {
+
 	private static final long serialVersionUID = 1L;
 	private final CGanttDataProvider dataProvider;
 

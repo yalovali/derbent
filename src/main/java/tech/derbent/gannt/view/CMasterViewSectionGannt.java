@@ -13,8 +13,10 @@ import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 
 public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>> extends CMasterViewSectionBase<EntityClass> {
+
 	// --- Custom Event Definition ---
 	public static class SelectionChangeEvent<T extends CEntityDB<T>> extends ComponentEvent<CMasterViewSectionGannt<T>> {
+
 		private static final long serialVersionUID = 1L;
 		private final T selectedItem;
 
