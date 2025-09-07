@@ -3,7 +3,6 @@ package tech.derbent.gannt.view;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
@@ -36,14 +35,13 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 	private static final long serialVersionUID = 1L;
 	protected CGanttChart ganttChart;
 
-	@Autowired
 	private CGanttDataService ganttDataService;
-
-	@Autowired
 	private CSessionService sessionService;
 
-	public CMasterViewSectionGannt(final Class<EntityClass> entityClass, final CAbstractEntityDBPage<EntityClass> page) {
+	public CMasterViewSectionGannt(final Class<EntityClass> entityClass, final CAbstractEntityDBPage<EntityClass> page, CGanttDataService ganttDataService, CSessionService sessionService) {
 		super(entityClass, page);
+		this.ganttDataService = ganttDataService;
+		this.sessionService = sessionService;
 		LOGGER.debug("Initializing CMasterViewSectionGannt for entity: {}", entityClass.getSimpleName());
 		createMasterView();
 	}
