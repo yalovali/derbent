@@ -8,6 +8,7 @@ import tech.derbent.activities.service.CActivityService;
 /** CPanelActivityStatusPriority - Panel for grouping status and priority related fields of CActivity entity. Layer: View (MVC) Groups fields: status,
  * priority, progressPercentage */
 public class CPanelActivityStatusPriority extends CPanelActivityBase {
+
 	private static final long serialVersionUID = 1L;
 
 	public CPanelActivityStatusPriority(final CActivity currentEntity, final CEnhancedBinder<CActivity> beanValidationBinder,

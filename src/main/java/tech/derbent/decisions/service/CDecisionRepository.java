@@ -10,13 +10,13 @@ import tech.derbent.decisions.domain.CDecision;
 import tech.derbent.projects.domain.CProject;
 
 public interface CDecisionRepository extends CEntityOfProjectRepository<CDecision> {
+
 	@Override
 	@Query (
 		"SELECT d FROM CDecision d " + "LEFT JOIN FETCH d.project " + "LEFT JOIN FETCH d.assignedTo " + "LEFT JOIN FETCH d.createdBy "
 				+ "LEFT JOIN FETCH d.decisionType " + "LEFT JOIN FETCH d.decisionStatus " + "LEFT JOIN FETCH d.accountableUser " + "WHERE d.id = :id"
 	)
 	Optional<CDecision> findById(@Param ("id") Long id);
-
 	@Override
 	@Query (
 		"SELECT d FROM CDecision d " + "LEFT JOIN FETCH d.project " + "LEFT JOIN FETCH d.assignedTo " + "LEFT JOIN FETCH d.createdBy "

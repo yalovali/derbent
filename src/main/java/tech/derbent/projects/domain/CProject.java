@@ -19,6 +19,7 @@ import tech.derbent.users.domain.CUserProjectSettings;
 @Table (name = "cproject")
 @AttributeOverride (name = "id", column = @Column (name = "project_id"))
 public class CProject extends CEntityNamed<CProject> implements CSearchable {
+
 	public static String getEntityColorCode() { return getIconColorCode(); }
 
 	public static String getIconColorCode() {

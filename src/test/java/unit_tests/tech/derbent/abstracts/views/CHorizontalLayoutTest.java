@@ -1,17 +1,13 @@
 package unit_tests.tech.derbent.abstracts.views;
 
 import org.junit.jupiter.api.Test;
-
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.views.components.CButton;
 import tech.derbent.abstracts.views.components.CHorizontalLayout;
 import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 
-/**
- * Test class for CHorizontalLayout to verify enhanced functionality and inheritance.
- */
+/** Test class for CHorizontalLayout to verify enhanced functionality and inheritance. */
 class CHorizontalLayoutTest extends CTestBase {
 
 	@Override
@@ -56,18 +52,14 @@ class CHorizontalLayoutTest extends CTestBase {
 
 	@Test
 	void testFluentAPIMethods() {
-		final CHorizontalLayout layout = new CHorizontalLayout().withSpacing(true)
-			.withPadding(true).withMargin(true).withWidthFull().withHeightFull()
-			.withDefaultAlignment(HorizontalLayout.Alignment.CENTER)
-			.withJustifyContentMode(HorizontalLayout.JustifyContentMode.CENTER);
+		final CHorizontalLayout layout = new CHorizontalLayout().withSpacing(true).withPadding(true).withMargin(true).withWidthFull().withHeightFull()
+				.withDefaultAlignment(HorizontalLayout.Alignment.CENTER).withJustifyContentMode(HorizontalLayout.JustifyContentMode.CENTER);
 		Check.notNull(layout);
 		Check.condition(layout.isSpacing());
 		Check.condition(layout.isPadding());
 		Check.condition(layout.isMargin());
-		Check.equals(HorizontalLayout.Alignment.CENTER,
-			layout.getDefaultVerticalComponentAlignment());
-		Check.equals(HorizontalLayout.JustifyContentMode.CENTER,
-			layout.getJustifyContentMode());
+		Check.equals(HorizontalLayout.Alignment.CENTER, layout.getDefaultVerticalComponentAlignment());
+		Check.equals(HorizontalLayout.JustifyContentMode.CENTER, layout.getJustifyContentMode());
 	}
 
 	@Test
@@ -78,8 +70,7 @@ class CHorizontalLayoutTest extends CTestBase {
 		Check.notNull(layout);
 		Check.condition(layout.isSpacing());
 		Check.equals(2, (int) layout.getChildren().count());
-		Check.equals(HorizontalLayout.Alignment.CENTER,
-			layout.getDefaultVerticalComponentAlignment());
+		Check.equals(HorizontalLayout.Alignment.CENTER, layout.getDefaultVerticalComponentAlignment());
 	}
 
 	@Test
@@ -90,10 +81,8 @@ class CHorizontalLayoutTest extends CTestBase {
 		Check.notNull(layout);
 		Check.condition(layout.isSpacing());
 		Check.equals(2, (int) layout.getChildren().count());
-		Check.equals(HorizontalLayout.Alignment.CENTER,
-			layout.getDefaultVerticalComponentAlignment());
-		Check.equals(HorizontalLayout.JustifyContentMode.START,
-			layout.getJustifyContentMode());
+		Check.equals(HorizontalLayout.Alignment.CENTER, layout.getDefaultVerticalComponentAlignment());
+		Check.equals(HorizontalLayout.JustifyContentMode.START, layout.getJustifyContentMode());
 	}
 
 	@Test

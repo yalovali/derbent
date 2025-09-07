@@ -19,6 +19,7 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 7.1, icon = "class:tech.derbent.orders.view.CCurrencyView", title = "Types.Currencies")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CCurrencyView extends CGridViewBaseProject<CCurrency> {
+
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

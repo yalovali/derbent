@@ -13,6 +13,7 @@ import tech.derbent.projects.domain.CProject;
  * @since 1.0 */
 @MappedSuperclass
 public abstract class CTypeEntity<EntityType> extends CEntityOfProject<EntityType> {
+
 	@Column (name = "color", nullable = true, length = 7)
 	@Size (max = 7)
 	@AMetaData (

@@ -20,6 +20,7 @@ import tech.derbent.abstracts.domains.CEntityDB;
 @Table (name = "cscreen_lines")
 @AttributeOverride (name = "id", column = @Column (name = "screen_line_id"))
 public class CScreenLines extends CEntityDB<CScreenLines> {
+
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "screen_id", nullable = false)
 	@NotNull (message = "Screen reference is required")

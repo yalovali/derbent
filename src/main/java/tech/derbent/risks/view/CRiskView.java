@@ -20,6 +20,7 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 1.3, icon = "class:tech.derbent.risks.view.CRiskView", title = "Project.Risks")
 @PermitAll
 public class CRiskView extends CGridViewBaseProject<CRisk> {
+
 	private static final long serialVersionUID = 1L;
 	private static final String ENTITY_ID_FIELD = "risk_id";
 

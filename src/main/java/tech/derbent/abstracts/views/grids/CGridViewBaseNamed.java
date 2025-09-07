@@ -7,6 +7,7 @@ import tech.derbent.screens.service.CScreenService;
 import tech.derbent.session.service.CSessionService;
 
 public abstract class CGridViewBaseNamed<EntityClass extends CEntityNamed<EntityClass>> extends CAbstractNamedEntityPage<EntityClass> {
+
 	private static final long serialVersionUID = 1L;
 
 	public CGridViewBaseNamed(final Class<EntityClass> entityClass, final CAbstractNamedEntityService<EntityClass> entityService,

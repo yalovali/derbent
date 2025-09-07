@@ -16,6 +16,7 @@ import tech.derbent.session.service.CSessionService;
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class CMeetingTypeService extends CEntityOfProjectService<CMeetingType> {
+
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingTypeService.class);
 

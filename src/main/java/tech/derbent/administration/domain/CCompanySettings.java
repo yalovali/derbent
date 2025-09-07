@@ -25,6 +25,7 @@ import tech.derbent.companies.domain.CCompany;
 @Table (name = "ccompanysettings")
 @AttributeOverride (name = "id", column = @Column (name = "company_settings_id"))
 public class CCompanySettings extends CEntityDB<CCompanySettings> {
+
 	@ManyToOne
 	@JoinColumn (name = "company_id", nullable = false)
 	@AMetaData (

@@ -16,6 +16,7 @@ import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 
 /** Test class for CActivityStatusService functionality. Tests CRUD operations, error handling, and lazy loading concerns. */
 class CActivityStatusServiceTest extends CTestBase {
+
 	@Override
 	protected void setupForTest() {
 		// Initialize the service with mocked dependencies

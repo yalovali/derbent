@@ -13,6 +13,7 @@ import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 
 /** Unit tests for CDecision domain entity. Tests basic functionality, business logic, and approval workflow. */
 class CDecisionTest extends CTestBase {
+
 	@Override
 	protected void setupForTest() {
 		// TODO Auto-generated method stub

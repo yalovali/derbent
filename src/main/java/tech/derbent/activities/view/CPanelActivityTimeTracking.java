@@ -8,6 +8,7 @@ import tech.derbent.activities.service.CActivityService;
 /** CPanelActivityTimeTracking - Panel for grouping time tracking related fields of CActivity entity. Layer: View (MVC) Groups fields: estimatedHours,
  * actualHours, remainingHours, startDate, dueDate, completionDate */
 public class CPanelActivityTimeTracking extends CPanelActivityBase {
+
 	private static final long serialVersionUID = 1L;
 
 	public CPanelActivityTimeTracking(final CActivity currentEntity, final CEnhancedBinder<CActivity> beanValidationBinder,

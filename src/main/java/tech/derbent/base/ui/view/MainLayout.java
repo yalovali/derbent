@@ -51,6 +51,7 @@ import tech.derbent.users.view.CUserProfileDialog;
 @Layout
 @PermitAll // When security is enabled, allow all authenticated users
 public final class MainLayout extends AppLayout implements AfterNavigationObserver {
+
 	private static final long serialVersionUID = 1L;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	private final User currentUser;

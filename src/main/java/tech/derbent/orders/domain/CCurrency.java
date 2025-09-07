@@ -17,6 +17,7 @@ import tech.derbent.projects.domain.CProject;
 @Table (name = "ccurrency")
 @AttributeOverride (name = "id", column = @Column (name = "currency_id"))
 public class CCurrency extends CEntityOfProject<CCurrency> {
+
 	public static String getEntityColorCode() { return getIconColorCode(); }
 
 	public static String getIconColorCode() {

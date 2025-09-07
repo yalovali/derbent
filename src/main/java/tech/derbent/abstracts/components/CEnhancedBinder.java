@@ -112,7 +112,9 @@ public class CEnhancedBinder<BEAN> extends BeanValidationBinder<BEAN> {
 
 	/** Gets detailed validation error information from the last validation attempt.
 	 * @return map of field names to error messages */
-	public Map<String, String> getLastValidationErrors() { return new HashMap<>(lastValidationErrors); }
+	public Map<String, String> getLastValidationErrors() {
+		return new HashMap<>(lastValidationErrors);
+	}
 
 	/** Checks if there are any field validation errors.
 	 * @return true if there are validation errors */

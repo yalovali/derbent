@@ -20,6 +20,7 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 11.3, icon = "class:tech.derbent.meetings.view.CMeetingStatusView", title = "Types.Meeting Statuses")
 @PermitAll
 public class CMeetingStatusView extends CGridViewBaseProject<CMeetingStatus> {
+
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

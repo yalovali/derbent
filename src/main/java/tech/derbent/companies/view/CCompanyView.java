@@ -20,6 +20,7 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 3.4, icon = "class:tech.derbent.companies.view.CCompanyView", title = "Settings.Companies")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CCompanyView extends CGridViewBaseNamed<CCompany> {
+
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

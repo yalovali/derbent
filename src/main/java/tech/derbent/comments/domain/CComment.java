@@ -24,6 +24,7 @@ import tech.derbent.users.domain.CUser;
 @Table (name = "ccomment")
 @AttributeOverride (name = "id", column = @Column (name = "comment_id"))
 public class CComment extends CEvent<CComment> {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComment.class);
 	// Comment text content
 	@Column (name = "comment_text", nullable = false, length = 4000)

@@ -23,6 +23,7 @@ import tech.derbent.screens.service.CScreenService;
 
 @org.springframework.stereotype.Component
 public final class CDetailsBuilder implements ApplicationContextAware {
+
 	private static ApplicationContext applicationContext;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDetailsBuilder.class);
 

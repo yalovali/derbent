@@ -16,9 +16,7 @@ public class CFlexLayout extends FlexLayout {
 		return layout;
 	}
 
-	/**
-	 * Default constructor.
-	 */
+	/** Default constructor. */
 	public CFlexLayout() {
 		super();
 		initializeFlexLayout();

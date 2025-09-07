@@ -22,6 +22,7 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 12.1, icon = "class:tech.derbent.comments.view.CCommentPriorityView", title = "Types.Comment Priorities")
 @PermitAll
 public class CCommentPriorityView extends CGridViewBaseProject<CCommentPriority> {
+
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

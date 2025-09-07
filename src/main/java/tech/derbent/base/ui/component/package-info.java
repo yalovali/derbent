@@ -1,6 +1,4 @@
-/**
- * This package contains reusable UI components.
- */
+/** This package contains reusable UI components. */
 @NullMarked
 package tech.derbent.base.ui.component;
 

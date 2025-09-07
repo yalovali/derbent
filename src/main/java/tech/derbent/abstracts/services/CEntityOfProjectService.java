@@ -15,6 +15,7 @@ import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 
 public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProject<EntityClass>> extends CAbstractNamedEntityService<EntityClass> {
+
 	public CEntityOfProjectService(final CEntityOfProjectRepository<EntityClass> repository, final Clock clock,
 			final CSessionService sessionService) {
 		super(repository, clock, sessionService);

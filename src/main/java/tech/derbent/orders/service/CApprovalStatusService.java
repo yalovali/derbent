@@ -14,6 +14,7 @@ import tech.derbent.session.service.CSessionService;
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class CApprovalStatusService extends CEntityOfProjectService<CApprovalStatus> {
+
 	CApprovalStatusService(final CApprovalStatusRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}

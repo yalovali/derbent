@@ -9,6 +9,7 @@ import tech.derbent.users.domain.CUser;
 
 /** Test class for reflection-based methods in CEntityDB base class. */
 class CEntityDBReflectionTest {
+
 	@Test
 	void testPerformSave() {
 		final CUser user = new CUser("Test User");

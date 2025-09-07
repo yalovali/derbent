@@ -20,6 +20,7 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 7.1, icon = "class:tech.derbent.orders.view.COrdersView", title = "Project.Orders")
 @PermitAll // When security is enabled, allow all authenticated users
 public class COrdersView extends CGridViewBaseProject<COrder> {
+
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

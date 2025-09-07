@@ -22,6 +22,7 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 11.2, icon = "class:tech.derbent.decisions.view.CDecisionStatusView", title = "Types.Decision Statuses")
 @PermitAll
 public class CDecisionStatusView extends CGridViewBaseProject<CDecisionStatus> {
+
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

@@ -46,6 +46,7 @@ import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
  * </p>
  *
  * <pre>
+ * 
  * {
  * 	&#64;code
  * 	// Using bean name
@@ -67,6 +68,7 @@ import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
  * @see tech.derbent.abstracts.annotations.CEntityFormBuilder */
 @Service
 public final class CDataProviderResolver {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDataProviderResolver.class);
 	/** Default page size for paginated queries when no specific size is provided. */
 	private static final int DEFAULT_PAGE_SIZE = 1000;

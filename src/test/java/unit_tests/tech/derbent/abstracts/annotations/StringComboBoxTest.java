@@ -13,8 +13,10 @@ import tech.derbent.abstracts.views.components.CVerticalLayout;
 
 /** Simple test to demonstrate the String ComboBox issue */
 class StringComboBoxTest {
+
 	/** Test entity with String field that should be rendered as ComboBox */
 	public static class TestEntity extends CEntityDB<TestEntity> {
+
 		@AMetaData (
 				displayName = "String Category", required = true, order = 1, dataProviderBean = "someService" // This will cause the issue
 		)

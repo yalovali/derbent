@@ -10,6 +10,7 @@ import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.projects.domain.CProject;
 
 public interface CMeetingRepository extends CEntityOfProjectRepository<CMeeting> {
+
 	@Override
 	@Query ("""
 			   SELECT DISTINCT m
@@ -24,7 +25,6 @@ public interface CMeetingRepository extends CEntityOfProjectRepository<CMeeting>
 			   WHERE m.id = :id
 			""")
 	Optional<CMeeting> findById(@Param ("id") Long id);
-
 	@Override
 	@Query ("""
 			   SELECT m

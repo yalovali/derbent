@@ -50,6 +50,7 @@ import tech.derbent.users.view.CUsersView;
 /* CViewToolbar.java This class defines a toolbar for views in the application, providing a consistent header with a title and optional action
  * components. It extends Composite to allow for easy composition of the toolbar's content. */
 public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>> extends Composite<Header> implements CProjectListChangeListener {
+
 	private static final long serialVersionUID = 1L;
 
 	/* just used to create a group of components with nice styling. Not related to a toolbar */

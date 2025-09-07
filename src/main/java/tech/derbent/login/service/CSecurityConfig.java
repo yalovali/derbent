@@ -18,6 +18,7 @@ import tech.derbent.users.service.CUserService;
 @EnableWebSecurity
 @Configuration
 class CSecurityConfig extends VaadinWebSecurity {
+
 	private final CUserService loginUserService;
 
 	/** Constructor injection of CLoginUserService. This service provides UserDetailsService implementation for database authentication. */

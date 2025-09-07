@@ -10,6 +10,7 @@ import tech.derbent.abstracts.utils.CAuxillaries;
 /** CDiv - Enhanced base class for div containers in the application. Layer: View (MVC) Provides common initialization patterns, utility methods for
  * styling, sizing, and content management. Extends Vaadin Div with application-specific enhancements. */
 public class CDiv extends Div {
+
 	private static final long serialVersionUID = 1L;
 
 	/** Creates a flex spacer div that grows to fill available space.

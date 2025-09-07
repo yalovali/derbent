@@ -32,6 +32,7 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 1.2, icon = "class:tech.derbent.kanban.view.CActivityKanbanBoardView", title = "Project.Kanban")
 @PermitAll
 public class CActivityKanbanBoardView extends VerticalLayout implements CProjectChangeListener, IDisplayView {
+
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityKanbanBoardView.class);
 

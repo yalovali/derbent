@@ -23,6 +23,7 @@ import tech.derbent.abstracts.utils.CColorUtils;
  * </p>
  *
  * <pre>{@code
+ * 
  * // Simple usage
  * CEntityLabel userLabel = new CEntityLabel(userEntity);
  * // With custom styling
@@ -33,6 +34,7 @@ import tech.derbent.abstracts.utils.CColorUtils;
  * @since 1.0
  * @see tech.derbent.abstracts.utils.CColorUtils */
 public class CEntityLabel extends HorizontalLayout {
+
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityLabel.class);
 	// Default styling configuration

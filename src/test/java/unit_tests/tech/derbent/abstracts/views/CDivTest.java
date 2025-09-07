@@ -1,15 +1,12 @@
 package unit_tests.tech.derbent.abstracts.views;
 
 import org.junit.jupiter.api.Test;
-
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.views.components.CButton;
 import tech.derbent.abstracts.views.components.CDiv;
 import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 
-/**
- * Test class for CDiv to verify functionality and inheritance.
- */
+/** Test class for CDiv to verify functionality and inheritance. */
 class CDivTest extends CTestBase {
 
 	@Override
@@ -55,9 +52,8 @@ class CDivTest extends CTestBase {
 
 	@Test
 	void testFluentAPIMethods() {
-		final CDiv div = new CDiv().withWidthFull().withHeightFull()
-			.withClassName("test-class").withStyle("color", "red").withPadding("10px")
-			.withMargin("5px").withBorderRadius("4px").withBackgroundColor("#f0f0f0");
+		final CDiv div = new CDiv().withWidthFull().withHeightFull().withClassName("test-class").withStyle("color", "red").withPadding("10px")
+				.withMargin("5px").withBorderRadius("4px").withBackgroundColor("#f0f0f0");
 		Check.notNull(div);
 		Check.equals("100%", div.getWidth());
 		Check.equals("100%", div.getHeight());

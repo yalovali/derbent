@@ -21,6 +21,7 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 1.3, icon = "class:tech.derbent.kanban.view.CGenericActivityKanbanBoardView", title = "Project.Generic Kanban")
 @PermitAll
 public class CGenericActivityKanbanBoardView extends CBaseKanbanBoardView<CActivity, CActivityStatus> {
+
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CGenericActivityKanbanBoardView.class);
 

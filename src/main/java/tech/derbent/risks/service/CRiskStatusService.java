@@ -15,6 +15,7 @@ import tech.derbent.session.service.CSessionService;
 @Service
 @Transactional
 public class CRiskStatusService extends CEntityOfProjectService<CRiskStatus> {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskStatusService.class);
 
 	@Autowired

@@ -19,6 +19,7 @@ import tech.derbent.session.service.CSessionService;
 		"spring.datasource.url=jdbc:h2:mem:testdb", "spring.jpa.hibernate.ddl-auto=create-drop"
 })
 public class CActivityStatusViewUITest {
+
 	@Autowired
 	private CActivityStatusService activityStatusService;
 	@Autowired

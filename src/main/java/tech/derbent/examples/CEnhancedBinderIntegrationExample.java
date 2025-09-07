@@ -15,8 +15,10 @@ import tech.derbent.session.service.CSessionService;
 /** Example showing how to integrate enhanced binder with existing views with minimal changes. This demonstrates the migration path from standard to
  * enhanced binders. */
 public class CEnhancedBinderIntegrationExample {
+
 	/** MIGRATION STRATEGY: Gradual migration with configuration */
 	public static class ConfigurableMeetingStatusView {
+
 		private final CEnhancedBinder<CMeetingStatus> binder;
 		private final CAbstractService<CMeetingStatus> service;
 
@@ -56,6 +58,7 @@ public class CEnhancedBinderIntegrationExample {
 
 	/** AFTER: Enhanced implementation with minimal changes Only the binder creation and error handling are changed */
 	public static class EnhancedMeetingStatusView {
+
 		private final CEnhancedBinder<CMeetingStatus> binder; // Same type!
 		private final CAbstractService<CMeetingStatus> service;
 
@@ -83,6 +86,7 @@ public class CEnhancedBinderIntegrationExample {
 
 	/** ALTERNATIVE: Direct enhanced binder usage with explicit typing */
 	public static class ExplicitEnhancedMeetingStatusView {
+
 		private final CEnhancedBinder<CMeetingStatus> enhancedBinder;
 		private final CAbstractService<CMeetingStatus> service;
 
@@ -126,6 +130,7 @@ public class CEnhancedBinderIntegrationExample {
 
 	/** BEFORE: Standard implementation using BeanValidationBinder */
 	public static class StandardMeetingStatusView {
+
 		private final CEnhancedBinder<CMeetingStatus> binder;
 		private final CAbstractService<CMeetingStatus> service;
 

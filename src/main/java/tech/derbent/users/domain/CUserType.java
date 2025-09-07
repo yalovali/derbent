@@ -14,6 +14,7 @@ import tech.derbent.users.view.CUserTypeView;
 @Table (name = "cusertype")
 @AttributeOverride (name = "id", column = @Column (name = "cusertype_id"))
 public class CUserType extends CEntityOfProject<CUserType> {
+
 	public static String getEntityColorCode() { return getIconColorCode(); }
 
 	public static String getIconColorCode() {

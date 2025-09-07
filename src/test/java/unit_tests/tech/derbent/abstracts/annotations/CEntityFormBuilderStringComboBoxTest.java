@@ -14,8 +14,10 @@ import org.springframework.test.context.ContextConfiguration;
 		CEntityFormBuilderStringComboBoxTest.TestConfiguration.class
 })
 class CEntityFormBuilderStringComboBoxTest {
+
 	/** Mock service to provide string data for testing */
 	public static class StringDataService {
+
 		public List<String> getCategories() { return Arrays.asList("Category A", "Category B", "Category C"); }
 
 		public List<String> list() {
@@ -26,6 +28,7 @@ class CEntityFormBuilderStringComboBoxTest {
 	/** Test configuration providing a mock service for String ComboBox data */
 	@Configuration
 	static class TestConfiguration {
+
 		/** Mock service that provides string data for ComboBox */
 		@Bean ("stringDataService")
 		public StringDataService stringDataService() {

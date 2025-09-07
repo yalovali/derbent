@@ -9,6 +9,7 @@ import tech.derbent.session.service.CSessionService;
 /** CPanelActivityAdditionalInfo - Panel for grouping additional information fields of CActivity entity. Layer: View (MVC) Groups fields:
  * acceptanceCriteria, notes */
 public class CPanelActivityAdditionalInfo extends CPanelActivityBase {
+
 	private static final long serialVersionUID = 1L;
 
 	public CPanelActivityAdditionalInfo(final CActivity currentEntity, final CEnhancedBinder<CActivity> beanValidationBinder,

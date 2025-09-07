@@ -11,6 +11,7 @@ import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 /** Test class for CHierarchicalSideMenu component. Tests the menu hierarchy parsing and structure creation. */
 @ExtendWith (MockitoExtension.class)
 class CHierarchicalSideMenuTest extends CTestBase {
+
 	private CHierarchicalSideMenu hierarchicalSideMenu;
 
 	/** Demonstration test showing the hierarchical menu features. */

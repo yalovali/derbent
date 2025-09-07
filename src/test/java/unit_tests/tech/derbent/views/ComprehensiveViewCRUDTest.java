@@ -33,6 +33,7 @@ import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 @SpringBootTest (classes = tech.derbent.Application.class)
 @Transactional
 public class ComprehensiveViewCRUDTest extends CTestBase {
+
 	// Meeting services
 	@Override
 	protected void setupForTest() {

@@ -16,6 +16,7 @@ import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 /** Unit tests for CUserProfileDialog. Tests the dialog creation and basic functionality. */
 @ExtendWith (MockitoExtension.class)
 class CUserProfileDialogTest extends CTestBase {
+
 	@Mock
 	private PasswordEncoder passwordEncoder;
 	@Mock

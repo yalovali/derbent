@@ -22,6 +22,7 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 1.5, icon = "class:tech.derbent.decisions.view.CDecisionsView", title = "Project.Decisions")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CDecisionsView extends CGridViewBaseProject<CDecision> {
+
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

@@ -35,8 +35,10 @@ import tech.derbent.abstracts.views.components.CButton;
  * levels of menu hierarchy - Sliding animations between levels - Back button navigation - Parses menu entries from route annotations in format:
  * parentItem2.childItem1.childofchileitem1 - Responsive design with proper styling - Current page highlighting */
 public final class CHierarchicalSideMenu extends Div implements AfterNavigationObserver {
+
 	/** Inner class representing a single menu item. */
 	private final class CMenuItem {
+
 		private final String name;
 		private final String iconName;
 		private final String path;
@@ -135,6 +137,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 
 	/** Inner class representing a single level in the menu hierarchy. */
 	private final class CMenuLevel {
+
 		private final String levelKey;
 		private final String displayName;
 		private final CMenuLevel parent;

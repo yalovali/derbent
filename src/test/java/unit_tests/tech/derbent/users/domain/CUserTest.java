@@ -12,6 +12,7 @@ import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 
 /** Unit tests for CUser domain class focusing on user roles and company relationships. Layer: Test (MVC) */
 class CUserTest extends CTestBase {
+
 	@Override
 	protected void setupForTest() {
 		// TODO Auto-generated method stub

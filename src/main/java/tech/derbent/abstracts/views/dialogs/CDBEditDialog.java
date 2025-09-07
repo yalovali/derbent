@@ -8,6 +8,7 @@ import tech.derbent.abstracts.views.components.CVerticalLayout;
 /** Abstract base class for data-aware dialogs. Uses generics to allow any data type. Handles dialog setup, form layout, and save/cancel button logic.
  * Child classes must implement form population and validation. */
 public abstract class CDBEditDialog<EntityClass> extends CDialog {
+
 	private static final long serialVersionUID = 1L;
 	private final EntityClass entity;
 	protected final Consumer<EntityClass> onSave;
@@ -71,7 +72,5 @@ public abstract class CDBEditDialog<EntityClass> extends CDialog {
 	/** Child must implement: validate form fields. */
 	protected abstract void validateForm();
 
-	public EntityClass getEntity() {
-		return entity;
-	}
+	public EntityClass getEntity() { return entity; }
 }

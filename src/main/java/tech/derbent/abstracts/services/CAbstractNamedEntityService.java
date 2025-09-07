@@ -12,6 +12,7 @@ import tech.derbent.session.service.CSessionService;
 /** CAbstractNamedEntityService - Abstract service class for entities that extend CEntityNamed. Layer: Service (MVC) Provides common business logic
  * operations for named entities including validation, creation, and name-based queries with consistent error handling and logging. */
 public abstract class CAbstractNamedEntityService<EntityClass extends CEntityNamed<EntityClass>> extends CAbstractService<EntityClass> {
+
 	/** Validates an entity name.
 	 * @param name the name to validate
 	 * @throws IllegalArgumentException if the name is null or empty */

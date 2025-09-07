@@ -33,8 +33,10 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 1.3, icon = "class:tech.derbent.projects.view.CProjectDetailsView", title = "Project.Project Details")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CProjectDetailsView extends CGridViewBaseNamed<CProject> {
+
 	// Layout modes enum
 	public enum LayoutMode {
+
 		ENHANCED_CARDS("Enhanced Cards", "layout-enhanced-cards"), KANBAN_BOARD("Kanban Board", "layout-kanban-board"),
 		CARD_GRID("Card Grid", "layout-card-grid"), COMPACT_SIDEBAR("Compact Sidebar", "layout-compact-sidebar"),
 		DASHBOARD_WIDGETS("Dashboard Widgets", "layout-dashboard-widgets"), TIMELINE_VIEW("Timeline View", "layout-timeline-view");

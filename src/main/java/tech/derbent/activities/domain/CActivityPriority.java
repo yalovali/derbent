@@ -16,6 +16,7 @@ import tech.derbent.projects.domain.CProject;
 @Table (name = "cactivitypriority")
 @AttributeOverride (name = "id", column = @Column (name = "cactivitypriority_id"))
 public class CActivityPriority extends CTypeEntity<CActivityPriority> {
+
 	/** Priority level for the activity (1=Highest, 5=Lowest). */
 	@Column (name = "priority_level", nullable = false)
 	@AMetaData (

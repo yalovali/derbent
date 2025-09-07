@@ -8,6 +8,7 @@ import tech.derbent.decisions.service.CDecisionService;
 /** CPanelDecisionTeamManagement - Panel for decision team and accountability management. Layer: View (MVC) Displays and allows editing of decision
  * team members and accountable personnel. */
 public class CPanelDecisionTeamManagement extends CPanelDecisionBase {
+
 	private static final long serialVersionUID = 1L;
 
 	/** Constructor for decision team management panel.

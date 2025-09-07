@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Check {
+
 	/** Default error message for condition checks */
 	private static final String DEFAULT_CONDITION_MESSAGE = "Condition check failed";
 	/** Default error message for null checks */

@@ -20,6 +20,7 @@ import tech.derbent.session.service.CSessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CActivityService extends CProjectItemService<CActivity> implements CKanbanService<CActivity, CActivityStatus> {
+
 	public CActivityService(final CActivityRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}

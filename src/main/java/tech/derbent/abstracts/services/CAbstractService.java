@@ -27,6 +27,7 @@ import tech.derbent.session.service.CSessionService;
 /** CAbstractService - Abstract base service class for entity operations. Layer: Service (MVC) Provides common CRUD operations and lazy loading
  * support for all entity types. */
 public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass>> {
+
 	protected final Clock clock;
 	protected final CAbstractRepository<EntityClass> repository;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());

@@ -11,6 +11,7 @@ import tech.derbent.projects.domain.CProject;
 @Table (name = "corderstatus")
 @AttributeOverride (name = "id", column = @Column (name = "order_status_id"))
 public class COrderStatus extends CStatus<COrderStatus> {
+
 	/** Constructor with name.
 	 * @param name the name of the order status */
 	public COrderStatus(final String name, final CProject project) {

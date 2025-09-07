@@ -26,6 +26,7 @@ import tech.derbent.users.service.CUserService;
 @Menu (order = 1.1, icon = "class:tech.derbent.projects.view.CProjectsView", title = "Settings.Projects")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CProjectsView extends CGridViewBaseNamed<CProject> {
+
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

@@ -10,6 +10,7 @@ import tech.derbent.screens.domain.CScreen;
 import tech.derbent.screens.domain.CScreenLines;
 
 public class CPanelDetails extends CAccordion {
+
 	private static final long serialVersionUID = 1L;
 	private final String name;
 	final Map<String, Component> componentMap;

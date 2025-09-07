@@ -15,6 +15,7 @@ import tech.derbent.abstracts.domains.IDisplayView;
 @Menu (order = 999, icon = "class:tech.derbent.examples.view.CExampleHierarchicalMenuView", title = "Examples.Hierarchy.DeepMenu.Sample")
 @PermitAll
 public class CExampleHierarchicalMenuView extends Div implements IDisplayView {
+
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }

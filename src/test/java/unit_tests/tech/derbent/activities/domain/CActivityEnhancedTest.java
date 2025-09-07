@@ -19,6 +19,7 @@ import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 /** Unit tests for enhanced CActivity class functionality. Tests the new features added for comprehensive project management. */
 @DisplayName ("Enhanced CActivity Tests")
 class CActivityEnhancedTest extends CTestBase {
+
 	private CActivity activity;
 	private CUser user1;
 	private CUser user2;
