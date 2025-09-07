@@ -24,6 +24,7 @@ import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserType;
 
 public class CFieldServiceBase {
+
 	static Logger LOGGER = LoggerFactory.getLogger(CFieldServiceBase.class);
 
 	private static void findSubclasses(final File dir, final String packageName, final List<Class<?>> subclasses) {

@@ -17,6 +17,7 @@ import tech.derbent.session.service.CSessionService;
  * notifications when the active project changes. */
 public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<EntityClass>> extends CAbstractNamedEntityPage<EntityClass>
 		implements CProjectChangeListener {
+
 	private static final long serialVersionUID = 1L;
 	protected final CSessionService sessionService;
 

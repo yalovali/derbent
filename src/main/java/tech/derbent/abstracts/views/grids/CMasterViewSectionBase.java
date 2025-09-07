@@ -10,6 +10,7 @@ import tech.derbent.abstracts.views.components.CDiv;
 import tech.derbent.abstracts.views.grids.CMasterViewSectionGrid.SelectionChangeEvent;
 
 public abstract class CMasterViewSectionBase<EntityClass extends CEntityDB<EntityClass>> extends CDiv {
+
 	private static final long serialVersionUID = 1L;
 	protected final Class<EntityClass> entityClass;
 	protected final CAbstractEntityDBPage<EntityClass> page;
@@ -32,16 +33,10 @@ public abstract class CMasterViewSectionBase<EntityClass extends CEntityDB<Entit
 
 	public abstract void createMasterView();
 	// Additional methods and properties can be added here
-
 	public abstract EntityClass getSelectedItem();
-
 	public abstract void refreshMasterView();
-
 	public abstract void select(EntityClass object);
-
 	public abstract void selectLastOrFirst(EntityClass orElse);
-
 	public abstract void setDataProvider(CallbackDataProvider<EntityClass, Void> masterQuery);
-
 	public abstract void setItems(List<EntityClass> filteredMeetings);
 }

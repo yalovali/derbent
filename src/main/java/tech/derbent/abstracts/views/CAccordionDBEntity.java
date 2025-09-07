@@ -9,6 +9,7 @@ import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.abstracts.views.components.CAccordion;
 
 public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityClass>> extends CAccordion {
+
 	private static final long serialVersionUID = 1L;
 	protected final Class<EntityClass> entityClass;
 	private final CEnhancedBinder<EntityClass> binder;

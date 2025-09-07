@@ -46,6 +46,7 @@ import tech.derbent.session.service.CLayoutService;
 import tech.derbent.session.service.CSessionService;
 
 public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<EntityClass>> extends CAbstractPage implements CLayoutChangeListener {
+
 	private static final long serialVersionUID = 1L;
 	protected final Class<EntityClass> entityClass;
 	private final CEnhancedBinder<EntityClass> binder;
