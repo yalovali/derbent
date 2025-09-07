@@ -9,6 +9,7 @@ import tech.derbent.users.domain.CUser;
 /** CGanttItem - Data transfer object for Gantt chart representation of project entities. This class wraps project entities to provide a unified
  * interface for Gantt chart display. Follows coding standards with C prefix and provides standardized access to entity properties. */
 public class CGanttItem extends CEntityDB<CGanttItem> {
+
 	private final CEntityOfProject<?> entity;
 	private final String entityType;
 	private final LocalDate startDate;

@@ -1,5 +1,6 @@
 package tech.derbent.gannt.view;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -9,16 +10,19 @@ import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseGannt;
 import tech.derbent.activities.domain.CActivity;
+import tech.derbent.activities.service.CActivityService;
 import tech.derbent.gannt.domain.CGanntViewEntity;
 import tech.derbent.gannt.service.CGanntViewEntityService;
 import tech.derbent.screens.service.CScreenService;
 import tech.derbent.session.service.CSessionService;
+import tech.derbent.meetings.service.CMeetingService;
 
 @Route ("cprojectganntview")
 @PageTitle ("Project Gannt View")
 @Menu (order = 1.1, icon = "class:tech.derbent.gannt.domain.CGanntViewEntity", title = "Project.Project Gannt Chart")
 @PermitAll
 public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
+
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }
