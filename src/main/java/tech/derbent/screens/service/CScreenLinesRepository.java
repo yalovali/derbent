@@ -14,7 +14,7 @@ public interface CScreenLinesRepository extends CAbstractRepository<CScreenLines
 	@Query ("SELECT sl FROM CScreenLines sl " + "WHERE sl.screen = :screen AND sl.isActive = true " + "ORDER BY sl.lineOrder ASC")
 	List<CScreenLines> findActiveByScreen(@Param ("screen") CScreen screen);
 	@Query ("SELECT sl FROM CScreenLines sl " + "WHERE sl.screen = :screen " + "ORDER BY sl.lineOrder ASC")
-	List<CScreenLines> findByScreen(@Param ("screen") CScreen screen);
+	List<CScreenLines> findByMaster(@Param ("screen") CScreen screen);
 	@Query ("SELECT COALESCE(MAX(sl.lineOrder), 0) + 1 FROM CScreenLines sl " + "WHERE sl.screen = :screen")
 	Integer getNextLineOrder(@Param ("screen") CScreen screen);
 }

@@ -29,7 +29,6 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 1.4, icon = "class:tech.derbent.meetings.view.CMeetingsView", title = "Project.Meetings")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CMeetingsView extends CGridViewBaseProject<CMeeting> {
-
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }
@@ -137,9 +136,9 @@ public class CMeetingsView extends CGridViewBaseProject<CMeeting> {
 					final List<CMeeting> filteredMeetings =
 							allMeetings.stream().filter(meeting -> matchesSearchText(meeting, searchText.toLowerCase().trim()))
 									.collect(java.util.stream.Collectors.toList());
-					masterViewSection.getGrid().setItems(filteredMeetings);
+					masterViewSection.setItems(filteredMeetings);
 				} else {
-					masterViewSection.getGrid().setItems(Collections.emptyList());
+					masterViewSection.setItems(Collections.emptyList());
 				}
 			}
 		});

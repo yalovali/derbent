@@ -16,7 +16,6 @@ import tech.derbent.session.service.CSessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CScreenLinesService extends CAbstractService<CScreenLines> {
-
 	public static CScreenLines createLineFromDefaults(final Class<?> entityClass, final String fieldName) throws NoSuchFieldException {
 		final Field field = CEntityFieldService.getEntityField(entityClass, fieldName);
 		Check.notNull(field, "Field not found: " + fieldName + " in class " + entityClass.getSimpleName());
@@ -70,29 +69,26 @@ public class CScreenLinesService extends CAbstractService<CScreenLines> {
 		return screenLinesRepository.findActiveByScreen(screen);
 	}
 
-	/** Find screen lines by screen ordered by line order.
-	 * @param screen the screen
-	 * @return list of screen lines ordered by line order */
 	@Transactional (readOnly = true)
-	public List<CScreenLines> findByScreen(final CScreen screen) {
-		return screenLinesRepository.findByScreen(screen);
+	public List<CScreenLines> findByMaster(final CScreen master) {
+		Check.notNull(master, "Master cannot be null");
+		if (master.getId() == null) {
+			// new instance, no lines yet
+			return List.of();
+		}
+		return screenLinesRepository.findByMaster(master);
 	}
 
 	@Override
 	protected Class<CScreenLines> getEntityClass() { return CScreenLines.class; }
 
-	/** Get the next available line order for a screen.
-	 * @param screen the screen
-	 * @return the next line order number */
 	public Integer getNextLineOrder(final CScreen screen) {
 		return screenLinesRepository.getNextLineOrder(screen);
 	}
 
-	/** Move a screen line down in the order.
-	 * @param screenLine the screen line to move down */
 	@Transactional
 	public void moveLineDown(final CScreenLines screenLine) {
-		final List<CScreenLines> lines = findByScreen(screenLine.getScreen());
+		final List<CScreenLines> lines = findByMaster(screenLine.getScreen());
 		for (int i = 0; i < lines.size(); i++) {
 			if (lines.get(i).getId().equals(screenLine.getId()) && (i < (lines.size() - 1))) {
 				// Swap orders
@@ -108,13 +104,11 @@ public class CScreenLinesService extends CAbstractService<CScreenLines> {
 		}
 	}
 
-	/** Move a screen line up in the order.
-	 * @param screenLine the screen line to move up */
 	@Transactional
 	public void moveLineUp(final CScreenLines screenLine) {
 		if (screenLine.getLineOrder() > 1) {
 			// Find the line with the previous order
-			final List<CScreenLines> lines = findByScreen(screenLine.getScreen());
+			final List<CScreenLines> lines = findByMaster(screenLine.getScreen());
 			for (int i = 0; i < lines.size(); i++) {
 				if (lines.get(i).getId().equals(screenLine.getId()) && (i > 0)) {
 					// Swap orders
@@ -148,7 +142,7 @@ public class CScreenLinesService extends CAbstractService<CScreenLines> {
 	 * @param screen the screen to reorder lines for */
 	@Transactional
 	public void reorderLines(final CScreen screen) {
-		final List<CScreenLines> lines = findByScreen(screen);
+		final List<CScreenLines> lines = findByMaster(screen);
 		for (int i = 0; i < lines.size(); i++) {
 			final CScreenLines line = lines.get(i);
 			line.setLineOrder(i + 1);

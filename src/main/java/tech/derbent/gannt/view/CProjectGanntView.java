@@ -4,7 +4,10 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
+import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.domains.CEntityNamed;
+import tech.derbent.abstracts.views.grids.CGrid;
+import tech.derbent.abstracts.views.grids.CGridViewBaseGannt;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.gannt.domain.CGanntViewEntity;
 import tech.derbent.gannt.service.CGanntViewEntityService;
@@ -14,9 +17,8 @@ import tech.derbent.session.service.CSessionService;
 @Route ("cprojectganntview")
 @PageTitle ("Project Gannt View")
 @Menu (order = 1.1, icon = "class:tech.derbent.gannt.domain.CGanntViewEntity", title = "Project.Project Gannt Chart")
-@PermitAll // When security is enabled, allow all authenticated users
-public class CProjectGanntView extends CGridViewBaseProject<CGanntViewEntity> {
-
+@PermitAll
+public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }
@@ -36,6 +38,14 @@ public class CProjectGanntView extends CGridViewBaseProject<CGanntViewEntity> {
 				entityService.listByProject(sessionService.getActiveProject().orElse(null)).stream().findFirst().orElse(null);
 		setCurrentEntity(viewEntity);
 		// createDetailsLayout();
+	}
+
+	@Override
+	public void createGridForEntity(final CGrid<CGanntViewEntity> grid) {
+		LOGGER.debug("Creating grid for CGanntViewEntity");
+		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
+		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");
+		grid.addColumn(CEntityNamed::getDescriptionShort, "Description");
 	}
 
 	@Override

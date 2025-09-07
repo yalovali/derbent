@@ -9,7 +9,6 @@ import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.abstracts.views.components.CAccordion;
 
 public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityClass>> extends CAccordion {
-
 	private static final long serialVersionUID = 1L;
 	protected final Class<EntityClass> entityClass;
 	private final CEnhancedBinder<EntityClass> binder;
@@ -59,12 +58,12 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 		currentEntity = entity;
 		if (entity == null) {
 			clearForm();
-		} else {
-			// LOGGER.debug("Populating form with entity: {}", entity); Populate the form
-			// fields with the entity data
-			LOGGER.debug("Populating form with entity: {}", entity.getId() != null ? entity.getId() : "null");
-			binder.readBean(entity);
+			return;
 		}
+		// LOGGER.debug("Populating form with entity: {}", entity); Populate the form
+		// fields with the entity data
+		LOGGER.debug("Populating accordion {} with entity: {}", getAccordionTitle(), entity.getId() != null ? entity.getId() : "null");
+		binder.readBean(entity);
 	}
 
 	// used if there is a specific save logic for the entity

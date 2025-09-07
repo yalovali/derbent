@@ -12,6 +12,7 @@ import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.domain.CActivityType;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.decisions.domain.CDecision;
+import tech.derbent.gannt.view.CProjectGanntView;
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.domain.CMeetingStatus;
 import tech.derbent.meetings.domain.CMeetingType;
@@ -23,7 +24,6 @@ import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserType;
 
 public class CFieldServiceBase {
-
 	static Logger LOGGER = LoggerFactory.getLogger(CFieldServiceBase.class);
 
 	private static void findSubclasses(final File dir, final String packageName, final List<Class<?>> subclasses) {
@@ -83,6 +83,8 @@ public class CFieldServiceBase {
 				return CMeetingStatus.class;
 			case "CRiskStatus":
 				return CRiskStatus.class;
+			case "CProjectGanntView":
+				return CProjectGanntView.class;
 			default:
 				LOGGER.error("Unknown entity type: " + entityType);
 				throw new IllegalArgumentException("Unknown entity type: " + entityType);

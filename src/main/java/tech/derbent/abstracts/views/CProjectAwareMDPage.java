@@ -17,7 +17,6 @@ import tech.derbent.session.service.CSessionService;
  * notifications when the active project changes. */
 public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<EntityClass>> extends CAbstractNamedEntityPage<EntityClass>
 		implements CProjectChangeListener {
-
 	private static final long serialVersionUID = 1L;
 	protected final CSessionService sessionService;
 
@@ -66,27 +65,7 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
 			// Not fully initialized yet
 			return;
 		}
-		masterViewSection.getGrid().getDataProvider().refreshAll();
-		// final Optional<CProject> activeProject = sessionService.getActiveProject();
-		// if (activeProject.isPresent()) {
-		// LOGGER.debug("Loading entities for active project: {}", activeProject.get().getName());
-		// List<EntityClass> entities;
-		// // Check if the entity service is for CEntityOfProject entities
-		// if (entityService instanceof CEntityOfProjectService) {
-		// final CEntityOfProjectService<EntityClass> projectService = (CEntityOfProjectService<EntityClass>) entityService;
-		// entities = projectService.findEntriesByProject(activeProject.get(), CPageableUtils.createSafe(0, 10)).getContent();
-		// } else {
-		// // For non-project entities, show all entities (they don't have project
-		// // filtering)
-		// LOGGER.debug("Entity service is not project-aware, showing all entities");
-		// entities = entityService.list(CPageableUtils.createSafe(0, 10)).getContent();
-		// }
-		// masterViewSection.getGrid().setItems(entities);
-		// } else {
-		// // If no active project, show empty grid
-		// LOGGER.debug("No active project found, clearing grid items");
-		// masterViewSection.getGrid().setItems(Collections.emptyList());
-		// }
+		masterViewSection.refreshMasterView();
 	}
 
 	/** Sets the project for the entity. */

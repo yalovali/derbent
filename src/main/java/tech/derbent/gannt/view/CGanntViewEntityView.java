@@ -20,7 +20,6 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 1.5, icon = "class:tech.derbent.gannt.view.CGanntViewEntityView", title = "Settings.GanntViews")
 @PermitAll
 public class CGanntViewEntityView extends CGridViewBaseProject<CGanntViewEntity> {
-
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }
@@ -43,6 +42,7 @@ public class CGanntViewEntityView extends CGridViewBaseProject<CGanntViewEntity>
 
 	@Override
 	public void createGridForEntity(final CGrid<CGanntViewEntity> grid) {
+		LOGGER.debug("Creating grid for CGanntViewEntity");
 		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
 		grid.addColumnEntityNamed(CEntityOfProject::getProject, "Project");
 		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");

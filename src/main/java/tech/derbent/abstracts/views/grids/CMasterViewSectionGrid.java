@@ -1,21 +1,22 @@
 package tech.derbent.abstracts.views.grids;
 
+import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ComponentEvent;
-import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.Query;
-import com.vaadin.flow.shared.Registration;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.views.CAbstractEntityDBPage;
+/* Master view section using a grid for entity selection. inherited from CMasterViewSectionBase. Provides selection change events and methods to
+ * manipulate selection. Super class for: - CMasterViewSectionTreeGrid - CMasterViewSectionGridWithFilter - CMasterViewSectionGridWithFilterAndSearch
+ * - CMasterViewSectionGridWithSearch - CMasterViewSectionGridWithTree Atma kafadan AI !!! */
 
 public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> extends CMasterViewSectionBase<EntityClass> {
-
 	// --- Custom Event Definition ---
 	public static class SelectionChangeEvent<T extends CEntityDB<T>> extends ComponentEvent<CMasterViewSectionGrid<T>> {
-
 		private static final long serialVersionUID = 1L;
 		private final T selectedItem;
 
@@ -30,22 +31,10 @@ public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> 
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMasterViewSectionGrid.class);
 	protected CGrid<EntityClass> grid;
-	protected final Class<EntityClass> entityClass;
-	private final CAbstractEntityDBPage<EntityClass> page;
 
 	public CMasterViewSectionGrid(final Class<EntityClass> entityClass, final CAbstractEntityDBPage<EntityClass> page) {
-		super();
-		this.entityClass = entityClass;
-		this.page = page;
+		super(entityClass, page);
 		createMasterView();
-	}
-
-	// --- Listener Registration ---
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	public Registration addSelectionChangeListener(final ComponentEventListener<SelectionChangeEvent<EntityClass>> listener) {
-		return addListener(SelectionChangeEvent.class, (ComponentEventListener) listener);
 	}
 
 	@Override
@@ -69,8 +58,9 @@ public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> 
 		return grid.getDataProvider().fetch(new Query<>(index, 1, null, null, null)).findFirst();
 	}
 
-	public CGrid<EntityClass> getGrid() { return grid; }
+	private CGrid<EntityClass> getGrid() { return grid; }
 
+	@Override
 	public EntityClass getSelectedItem() { return grid.asSingleSelect().getValue(); }
 	// ---------- Internal utilities ----------
 
@@ -81,8 +71,9 @@ public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> 
 		fireEvent(new SelectionChangeEvent<>(this, value));
 	}
 
-	public void refresh() {
-		grid.getDataProvider().refreshAll();
+	@Override
+	public void refreshMasterView() {
+		getGrid().getDataProvider().refreshAll();
 	}
 
 	/** Select a specific item (null clears). */
@@ -118,11 +109,22 @@ public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> 
 	}
 
 	/** Convenience: try to select last; if none, select first (clears when empty). */
+	@Override
 	public void selectLastOrFirst(final EntityClass lastEntity) {
 		if (lastEntity != null) {
 			select(lastEntity);
 			return;
 		}
 		selectFirst();
+	}
+
+	@Override
+	public void setDataProvider(final CallbackDataProvider<EntityClass, Void> masterQuery) {
+		getGrid().setDataProvider(masterQuery);
+	}
+
+	@Override
+	public void setItems(final List<EntityClass> filteredMeetings) {
+		getGrid().setItems(filteredMeetings);
 	}
 }

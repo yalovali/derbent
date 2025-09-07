@@ -18,7 +18,6 @@ import tech.derbent.screens.service.CScreenService;
 import tech.derbent.screens.service.CViewsService;
 
 public class CPanelScreenLines extends CPanelScreenBase {
-
 	private static final long serialVersionUID = 1L;
 	private final CScreenLinesService screenLinesService;
 	private CGrid<CScreenLines> grid;
@@ -185,8 +184,9 @@ public class CPanelScreenLines extends CPanelScreenBase {
 	}
 
 	private void refreshLinesGrid() {
-		if (getCurrentEntity() != null) {
-			final List<CScreenLines> lines = screenLinesService.findByScreen(getCurrentEntity());
+		final CScreen screen = getCurrentEntity();
+		if (screen != null) {
+			final List<CScreenLines> lines = screenLinesService.findByMaster(screen);
 			grid.setItems(lines);
 		} else {
 			grid.setItems();

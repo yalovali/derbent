@@ -38,21 +38,21 @@ import tech.derbent.abstracts.views.components.CFlexLayout;
 import tech.derbent.abstracts.views.components.CVerticalLayout;
 import tech.derbent.abstracts.views.dialogs.CDialogClone;
 import tech.derbent.abstracts.views.grids.CGrid;
+import tech.derbent.abstracts.views.grids.CMasterViewSectionBase;
 import tech.derbent.abstracts.views.grids.CMasterViewSectionGrid;
 import tech.derbent.base.ui.dialogs.CConfirmationDialog;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
-import tech.derbent.session.service.CSessionService;
 import tech.derbent.session.service.CLayoutService;
+import tech.derbent.session.service.CSessionService;
 
 public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<EntityClass>> extends CAbstractPage implements CLayoutChangeListener {
-
 	private static final long serialVersionUID = 1L;
 	protected final Class<EntityClass> entityClass;
 	private final CEnhancedBinder<EntityClass> binder;
 	// Search functionality
 	protected CSearchToolbar searchToolbar;
 	protected String currentSearchText = "";
-	protected CMasterViewSectionGrid<EntityClass> masterViewSection;
+	protected CMasterViewSectionBase<EntityClass> masterViewSection;
 	// divide screen into two parts
 	protected SplitLayout splitLayout = new SplitLayout();
 	private final CFlexLayout baseDetailsLayout;
@@ -224,7 +224,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		getDetailsTabLayout().add(tabContent);
 	}
 
-	public void createGridForEntity(final CGrid<EntityClass> grid) {}
+	public abstract void createGridForEntity(final CGrid<EntityClass> grid);
 
 	protected void createGridLayout() {
 		masterViewSection = new CMasterViewSectionGrid<EntityClass>(entityClass, this);
@@ -237,35 +237,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				refreshGrid();
 			});
 		}
-		// Use a custom data provider that properly handles pagination, sorting and
-		// searching
-		// masterViewSection.getGrid().setItems(query -> {
-		// LOGGER.debug("Grid query - offset: {}, limit: {}, sortOrders: {}, searchText: '{}'", query.getOffset(), query.getLimit(),
-		// query.getSortOrders(), currentSearchText);
-		// try {
-		// final Pageable originalPageable = VaadinSpringDataHelpers.toSpringPageRequest(query);
-		// final Pageable safePageable = PageableUtils.validateAndFix(originalPageable);
-		// LOGGER.debug("Safe Pageable - pageNumber: {}, pageSize: {}, sort: {}", safePageable.getPageNumber(), safePageable.getPageSize(),
-		// safePageable.getSort());
-		// final List<EntityClass> result;
-		// if ((currentSearchText != null) && !currentSearchText.trim().isEmpty() && CSearchable.class.isAssignableFrom(entityClass)) {
-		// result = entityService.list(safePageable, currentSearchText);
-		// } else {
-		// result = entityService.list(safePageable).getContent();
-		// }
-		// LOGGER.debug("Data provider returned {} items", result.size());
-		// return result.stream();
-		// } catch (final Exception e) {
-		// LOGGER.error("Error in grid data provider for {}: {}", entityClass.getSimpleName(), e.getMessage());
-		// // Check if this is a lazy loading exception
-		// if (e.getCause() instanceof org.hibernate.LazyInitializationException) {
-		// LOGGER.error("LazyInitializationException detected - check repository fetch joins for {}", entityClass.getSimpleName());
-		// }
-		// // Return empty stream on error to prevent UI crashes
-		// return Stream.empty();
-		// }
-		// });
-		masterViewSection.getGrid().setDataProvider(getMasterQuery());
+		masterViewSection.setDataProvider(getMasterQuery());
 		// Create the grid container with search toolbar
 		final VerticalLayout gridContainer = new VerticalLayout();
 		gridContainer.setClassName("grid-container");
@@ -484,7 +456,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		final Long selectedEntityId = selectedEntity != null ? selectedEntity.getId() : null;
 		// Clear selection and refresh data
 		masterViewSection.select(null);
-		masterViewSection.refresh();
+		masterViewSection.refreshMasterView();
 		// Restore selection if there was a previously selected entity
 		if (selectedEntityId != null) {
 			masterViewSection.selectLastOrFirst(entityService.getById(selectedEntityId).orElse(null));
@@ -597,36 +569,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				refreshGrid();
 			});
 		}
-		// Use a custom data provider that properly handles pagination, sorting and
-		// searching
-		// masterViewSection.getGrid().setItems(query -> {
-		// LOGGER.debug("Grid query - offset: {}, limit: {}, sortOrders: {}, searchText: '{}'", query.getOffset(), query.getLimit(),
-		// query.getSortOrders(), currentSearchText);
-		// try {
-		// final Pageable originalPageable = VaadinSpringDataHelpers.toSpringPageRequest(query);
-		// final Pageable safePageable = PageableUtils.validateAndFix(originalPageable);
-		// LOGGER.debug("Safe Pageable - pageNumber: {}, pageSize: {}, sort: {}", safePageable.getPageNumber(), safePageable.getPageSize(),
-		// safePageable.getSort());
-		// final List<EntityClass> result;
-		// if ((currentSearchText != null) && !currentSearchText.trim().isEmpty() && CSearchable.class.isAssignableFrom(entityClass)) {
-		// result = entityService.list(safePageable, currentSearchText);
-		// } else {
-		// result = entityService.list(safePageable).getContent();
-		// }
-		// LOGGER.debug("Data provider returned {} items", result.size());
-		// return result.stream();
-		// } catch (final Exception e) {
-		// LOGGER.error("Error in grid data provider for {}: {}", entityClass.getSimpleName(), e.getMessage());
-		// // Check if this is a lazy loading exception
-		// if (e.getCause() instanceof org.hibernate.LazyInitializationException) {
-		// LOGGER.error("LazyInitializationException detected - check repository fetch joins for {}", entityClass.getSimpleName());
-		// }
-		// // Return empty stream on error to prevent UI crashes
-		// return Stream.empty();
-		// }
-		// });
-		masterViewSection.getGrid().setDataProvider(getMasterQuery());
-		// grid.addIdColumn(entity -> entity.getId().toString(), "ID", "id");
+		masterViewSection.setDataProvider(getMasterQuery());
 		// Create the grid container with search toolbar
 		final VerticalLayout gridContainer = new VerticalLayout();
 		gridContainer.setClassName("grid-container");

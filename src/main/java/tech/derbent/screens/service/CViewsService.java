@@ -8,12 +8,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CViewsService {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CViewsService.class);
 
 	public List<String> getAvailableBaseTypes() {
 		LOGGER.debug("Retrieving available base types for views");
-		return List.of("CActivity", "CMeeting", "CRisk", "CProject", "CUser");
+		return List.of("CActivity", "CMeeting", "CRisk", "CProject", "CUser", "CProjectGannt");
 	}
 
 	/** Get available entity line class types for a given base entity type. This includes the entity itself and related entities accessible through

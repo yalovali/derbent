@@ -21,7 +21,6 @@ import tech.derbent.users.domain.CUser;
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class CCommentService extends CAbstractService<CComment> {
-
 	public CCommentService(final CCommentRepository repository, final CCommentPriorityService commentPriorityService, final Clock clock,
 			final CSessionService sessionService) {
 		super(repository, clock, sessionService);
@@ -48,11 +47,13 @@ public class CCommentService extends CAbstractService<CComment> {
 	 * @param activity the activity
 	 * @return list of comments for the activity ordered by event date */
 	@PreAuthorize ("permitAll()")
-	public List<CComment> findByActivity(final CActivity activity) {
-		if (activity == null) {
+	public List<CComment> findByActivity(final CActivity master) {
+		Check.notNull(master, "Master cannot be null");
+		if (master.getId() == null) {
+			// new instance, no lines yet
 			return List.of();
 		}
-		return ((CCommentRepository) repository).findByActivity(activity);
+		return ((CCommentRepository) repository).findByActivity(master);
 	}
 
 	/** Finds all comments for a specific activity with pagination.
@@ -60,9 +61,13 @@ public class CCommentService extends CAbstractService<CComment> {
 	 * @param pageable pagination information
 	 * @return page of comments for the activity ordered by event date */
 	@PreAuthorize ("permitAll()")
-	public Page<CComment> findByActivity(final CActivity activity, final Pageable pageable) {
-		Check.notNull(activity, "Activity cannot be null");
-		return ((CCommentRepository) repository).findByActivity(activity, pageable);
+	public Page<CComment> findByActivity(final CActivity master, final Pageable pageable) {
+		Check.notNull(master, "Master cannot be null");
+		if (master.getId() == null) {
+			// new instance, no lines yet
+			return Page.empty();
+		}
+		return ((CCommentRepository) repository).findByActivity(master, pageable);
 	}
 
 	@Override
