@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CViewsService {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CViewsService.class);
 
 	public List<String> getAvailableBaseTypes() {
