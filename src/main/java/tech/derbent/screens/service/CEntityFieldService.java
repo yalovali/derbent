@@ -18,10 +18,8 @@ import tech.derbent.screens.domain.CScreenLines;
  * entities. */
 @Service
 public class CEntityFieldService extends CFieldServiceBase {
-
 	/** Data class to hold entity field information. */
 	public static class EntityFieldInfo {
-
 		private String fieldName = "fieldName";
 		private String displayName = "displayName";
 		private String description = "description";
@@ -160,19 +158,6 @@ public class CEntityFieldService extends CFieldServiceBase {
 	public static final String THIS_CLASS = "This Class";
 	public static final String SECTION = "Section";
 
-	public static EntityFieldInfo createFieldInfo(final Field field) {
-		try {
-			final EntityFieldInfo info = createFieldInfo(field.getAnnotation(AMetaData.class));
-			info.setFieldName(field.getName());
-			info.setFieldType(getSimpleTypeName(field.getType())); // String
-			info.setJavaType(field.getType().getSimpleName());
-			info.setFieldTypeClass(field.getType()); // Class<?> ata
-			return info;
-		} catch (final Exception e) {
-			throw e;
-		}
-	}
-
 	public static EntityFieldInfo createFieldInfo(final AMetaData metaData) {
 		try {
 			Check.notNull(metaData, "AMetaData annotation cannot be null");
@@ -201,6 +186,19 @@ public class CEntityFieldService extends CFieldServiceBase {
 			info.setPasswordField(metaData.passwordField());
 			info.setDataUpdateMethod(metaData.dataUpdateMethod());
 			info.setPasswordRevealButton(metaData.passwordRevealButton());
+			return info;
+		} catch (final Exception e) {
+			throw e;
+		}
+	}
+
+	public static EntityFieldInfo createFieldInfo(final Field field) {
+		try {
+			final EntityFieldInfo info = createFieldInfo(field.getAnnotation(AMetaData.class));
+			info.setFieldName(field.getName());
+			info.setFieldType(getSimpleTypeName(field.getType())); // String
+			info.setJavaType(field.getType().getSimpleName());
+			info.setFieldTypeClass(field.getType()); // Class<?> ata
 			return info;
 		} catch (final Exception e) {
 			throw e;
@@ -317,8 +315,8 @@ public class CEntityFieldService extends CFieldServiceBase {
 		}
 		final List<Field> allFields = getAllFields(entityClass);
 		for (final Field field : allFields) {
-			if (Modifier.isStatic(field.getModifiers()) || field.getName().equals("serialVersionUID") || field.getName().equals("LOGGER")
-					|| !isFieldComplexType(field.getType())) {
+			if ((field.getAnnotation(AMetaData.class) == null) || Modifier.isStatic(field.getModifiers())
+					|| field.getName().equals("serialVersionUID") || field.getName().equals("LOGGER") || !isFieldComplexType(field.getType())) {
 				continue;
 			}
 			final EntityFieldInfo fieldInfo = createFieldInfo(field);
@@ -396,8 +394,9 @@ public class CEntityFieldService extends CFieldServiceBase {
 			return false;
 		}
 		// final String typeName = type.getSimpleName();
-		if (type == String.class || type == Integer.class || type == Long.class || type == BigDecimal.class || type == Double.class
-				|| type == Float.class || type == LocalDate.class || type == LocalDateTime.class || type == Date.class || type == Boolean.class) {
+		if ((type == String.class) || (type == Integer.class) || (type == Long.class) || (type == BigDecimal.class) || (type == Double.class)
+				|| (type == Float.class) || (type == LocalDate.class) || (type == LocalDateTime.class) || (type == Date.class)
+				|| (type == Boolean.class)) {
 			return false;
 		} else {
 			if (type.getSimpleName().startsWith("E")) {

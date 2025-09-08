@@ -24,6 +24,7 @@ import tech.derbent.activities.domain.CActivityType;
 import tech.derbent.activities.service.CActivityService;
 import tech.derbent.activities.service.CActivityStatusService;
 import tech.derbent.activities.service.CActivityTypeService;
+import tech.derbent.activities.service.CActivityViewService;
 import tech.derbent.comments.domain.CCommentPriority;
 import tech.derbent.comments.service.CCommentPriorityService;
 import tech.derbent.comments.service.CCommentService;
@@ -63,7 +64,6 @@ import tech.derbent.users.service.CUserTypeService;
 import tech.derbent.users.service.CUserViewService;
 
 public class CSampleDataInitializer {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSampleDataInitializer.class);
 	// Standard password for all users as per coding guidelines
 	private static final String STANDARD_PASSWORD = "test123";
@@ -187,8 +187,7 @@ public class CSampleDataInitializer {
 	}
 
 	/** Creates additional activities for Customer Experience Enhancement project. */
-	private void createAdditionalCustomerExperienceActivities() {
-		final CProject project = projectService.findByName("Customer Experience Enhancement").orElseThrow();
+	private void createAdditionalCustomerExperienceActivities(final CProject project) {
 		Check.notNull(project, "Project 'Customer Experience Enhancement' not found");
 		// User Research Activity
 		final CActivity userResearch = new CActivity("User Research & Analysis", project);
@@ -225,6 +224,7 @@ public class CSampleDataInitializer {
 		uxDesign.setStatus(inProgressStatus);
 		uxDesign.setProgressPercentage(55);
 		activityService.save(userResearch);
+		uxDesign.setParent(userResearch); // Set parent-child relationship)
 		activityService.save(uxDesign);
 		commentService.createComment("Design system updated with new patterns", uxDesign, dev2);
 		commentService.createComment("Wireframes created for key user journeys", uxDesign, dev2);
@@ -237,8 +237,7 @@ public class CSampleDataInitializer {
 	// Additional meeting creation methods
 
 	/** Creates additional activities for Digital Transformation Initiative project. */
-	private void createAdditionalDigitalTransformationActivities() {
-		final CProject project = projectService.findByName("Digital Transformation Initiative").orElseThrow();
+	private void createAdditionalDigitalTransformationActivities(final CProject project) {
 		// Frontend Development Activity
 		final CActivity frontendDev = new CActivity("Frontend Development", project);
 		final CActivityType developmentType = activityTypeService.findByNameAndProject("Development", project).orElse(null);
@@ -281,8 +280,7 @@ public class CSampleDataInitializer {
 	}
 
 	/** Creates additional activities for Infrastructure Modernization project. */
-	private void createAdditionalInfrastructureActivities() {
-		final CProject project = projectService.findByName("Infrastructure Modernization").orElseThrow();
+	private void createAdditionalInfrastructureActivities(final CProject project) {
 		// Security Audit Activity
 		final CActivity securityAudit = new CActivity("Security Audit", project);
 		final CActivityType researchType = activityTypeService.findByNameAndProject("Research", project).orElseThrow();
@@ -319,6 +317,7 @@ public class CSampleDataInitializer {
 		final CActivityStatus onHoldStatus = activityStatusService.findByNameAndProject("On Hold", project).orElseThrow();
 		serverMigration.setStatus(onHoldStatus);
 		serverMigration.setProgressPercentage(55);
+		serverMigration.setParent(securityAudit); // Set parent-child relationship
 		activityService.save(serverMigration);
 		commentService.createComment("Server migration plan created", serverMigration, dev1);
 		commentService.createComment("Testing environment successfully migrated", serverMigration, dev1);
@@ -326,8 +325,7 @@ public class CSampleDataInitializer {
 	}
 
 	/** Creates additional activities for Product Development Phase 2 project. */
-	private void createAdditionalProductDevelopmentActivities() {
-		final CProject project = projectService.findByName("Product Development Phase 2").orElseThrow();
+	private void createAdditionalProductDevelopmentActivities(final CProject project) {
 		// Code Review Activity
 		final CActivity codeReview = new CActivity("Code Review Process", project);
 		final CActivityType testingType = activityTypeService.findByNameAndProject("Testing", project).orElseThrow();
@@ -365,6 +363,7 @@ public class CSampleDataInitializer {
 		final CActivityStatus inProgressStatus = activityStatusService.findByNameAndProject("In Progress", project).orElseThrow();
 		perfTesting.setStatus(inProgressStatus);
 		perfTesting.setProgressPercentage(60);
+		perfTesting.setParent(codeReview); // Set parent-child relationship
 		activityService.save(perfTesting);
 		commentService.createComment("Performance testing framework setup", perfTesting, dev2);
 		commentService.createComment("Baseline performance metrics collected", perfTesting, dev2);
@@ -389,8 +388,7 @@ public class CSampleDataInitializer {
 	}
 
 	/** Creates backend development activity. */
-	private void createBackendDevActivity() {
-		final CProject project = projectService.findByName("Digital Transformation Initiative").orElseThrow();
+	private void createBackendDevActivity(final CProject project) {
 		// Create the activity using new auxiliary methods
 		final CActivity backendDev = new CActivity("Backend API Development", project);
 		// Find and set the activity type
@@ -646,8 +644,7 @@ public class CSampleDataInitializer {
 	}
 
 	/** Creates sample planning meeting. */
-	private void createSamplePlanningMeeting() {
-		final CProject project = projectService.findByName("Product Development Phase 2").orElseThrow();
+	private void createSamplePlanningMeeting(final CProject project) {
 		final CMeeting meeting = new CMeeting("Sprint Planning - Q1 2024", project);
 		meeting.setDescription("Planning for next sprint with story estimation and task assignment");
 		meeting.setMeetingDate(LocalDateTime.now().plusDays(3).withHour(14).withMinute(0));
@@ -668,8 +665,7 @@ public class CSampleDataInitializer {
 	}
 
 	/** Creates sample project meeting using auxiliary service methods. Demonstrates the use of auxiliary meeting service methods. */
-	private void createSampleProjectMeeting() {
-		final CProject project = projectService.findByName("Digital Transformation Initiative").orElseThrow();
+	private void createSampleProjectMeeting(final CProject project) {
 		// Create the meeting using new auxiliary methods
 		final CMeeting meeting = new CMeeting("Weekly Project Status Meeting", project);
 		meeting.setDescription("Weekly status update on project progress, blockers discussion, and next steps planning");
@@ -696,8 +692,7 @@ public class CSampleDataInitializer {
 	}
 
 	/** Creates sample retrospective meeting. */
-	private void createSampleRetrospectiveMeeting() {
-		final CProject project = projectService.findByName("Customer Experience Enhancement").orElseThrow();
+	private void createSampleRetrospectiveMeeting(final CProject project) {
 		final CMeeting meeting = new CMeeting("Sprint Retrospective", project);
 		meeting.setDescription("Team reflection on what went well, what could be improved, and action items");
 		meeting.setMeetingDate(LocalDateTime.now().minusDays(7).withHour(15).withMinute(0));
@@ -729,8 +724,7 @@ public class CSampleDataInitializer {
 	}
 
 	/** Creates sample review meeting. */
-	private void createSampleReviewMeeting() {
-		final CProject project = projectService.findByName("Infrastructure Modernization").orElseThrow();
+	private void createSampleReviewMeeting(final CProject project) {
 		final CMeeting meeting = new CMeeting("Code Review Session", project);
 		meeting.setDescription("Review of architectural changes and code quality improvements");
 		meeting.setMeetingDate(LocalDateTime.now().minusDays(2).withHour(10).withMinute(0));
@@ -766,8 +760,7 @@ public class CSampleDataInitializer {
 	}
 
 	/** Creates sample standup meeting. */
-	private void createSampleStandupMeeting() {
-		final CProject project = projectService.findByName("Digital Transformation Initiative").orElseThrow();
+	private void createSampleStandupMeeting(final CProject project) {
 		final CMeeting meeting = new CMeeting("Daily Standup - Sprint 3", project);
 		meeting.setDescription("Daily progress sync and impediment discussion");
 		meeting.setMeetingDate(LocalDateTime.now().plusDays(1).withHour(9).withMinute(0));
@@ -840,6 +833,7 @@ public class CSampleDataInitializer {
 		screenService.save(CMeetingViewService.createBasicView(project));
 		screenService.save(CDecisionViewService.createBasicView(project));
 		screenService.save(COrdersViewService.createBasicView(project));
+		screenService.save(CActivityViewService.createBasicView(project));
 		// screenService.save(CGanntViewEntityViewService.createBasicView(project));
 		// Log completion
 		LOGGER.info("Created sample fields for screen: {}", screenName);
@@ -847,8 +841,7 @@ public class CSampleDataInitializer {
 	}
 
 	/** Creates system architecture design activity. */
-	private void createSystemArchitectureActivity() {
-		final CProject project = projectService.findByName("Infrastructure Modernization").orElseThrow();
+	private void createSystemArchitectureActivity(final CProject project) {
 		// Create the activity using new auxiliary methods
 		final CActivity archDesign = new CActivity("System Architecture Design", project);
 		// Find and set the activity type
@@ -959,8 +952,7 @@ public class CSampleDataInitializer {
 	}
 
 	/** Creates technical documentation activity. */
-	private void createTechnicalDocumentationActivity() {
-		final CProject project = projectService.findByName("Customer Experience Enhancement").orElseThrow();
+	private void createTechnicalDocumentationActivity(final CProject project) {
 		// Create the activity using new auxiliary methods
 		final CActivity techDoc = new CActivity("Technical Documentation Update", project);
 		// Find and set the activity type
@@ -997,8 +989,7 @@ public class CSampleDataInitializer {
 	}
 
 	/** Creates UI testing activity. */
-	private void createUITestingActivity() {
-		final CProject project = projectService.findByName("Product Development Phase 2").orElseThrow();
+	private void createUITestingActivity(final CProject project) {
 		// Create the activity using new auxiliary methods
 		final CActivity uiTesting = new CActivity("User Interface Testing", project);
 		// Find and set the activity type
@@ -1033,18 +1024,18 @@ public class CSampleDataInitializer {
 	}
 
 	/** Initializes comprehensive activity data with available fields populated. */
-	private void initializeActivities() {
+	private void initializeActivities(final CProject project) {
 		try {
 			// Create at least 3 activities per project
-			createBackendDevActivity();
-			createUITestingActivity();
-			createSystemArchitectureActivity();
-			createTechnicalDocumentationActivity();
+			createBackendDevActivity(project);
+			createUITestingActivity(project);
+			createSystemArchitectureActivity(project);
+			createTechnicalDocumentationActivity(project);
 			// Additional activities to meet 3+ per project requirement
-			createAdditionalDigitalTransformationActivities();
-			createAdditionalProductDevelopmentActivities();
-			createAdditionalInfrastructureActivities();
-			createAdditionalCustomerExperienceActivities();
+			createAdditionalInfrastructureActivities(project);
+			createAdditionalDigitalTransformationActivities(project);
+			createAdditionalProductDevelopmentActivities(project);
+			createAdditionalCustomerExperienceActivities(project);
 			// LOGGER.info("Successfully created comprehensive activity samples");
 		} catch (final Exception e) {
 			LOGGER.error("Error creating sample activities", e);
@@ -1077,13 +1068,8 @@ public class CSampleDataInitializer {
 
 	/** Initializes activity types for categorizing different kinds of work. Creates types for all projects to ensure project-specific
 	 * categorization. */
-	private void initializeActivityTypes() {
+	private void initializeActivityTypes(final CProject project) {
 		try {
-			// Get all projects
-			final String[] projectNames = {
-					"Digital Transformation Initiative", "Product Development Phase 2", "Infrastructure Modernization",
-					"Customer Experience Enhancement"
-			};
 			// Define activity types to create for each project
 			final String[][] activityTypes = {
 					{
@@ -1098,13 +1084,9 @@ public class CSampleDataInitializer {
 							"Research", "Research and analysis activities"
 					}
 			};
-			// Create activity types for each project
-			for (final String projectName : projectNames) {
-				final CProject project = projectService.findByName(projectName).orElseThrow();
-				for (final String[] typeData : activityTypes) {
-					final CActivityType item = activityTypeService.createEntity(typeData[0], project);
-					item.setDescription(typeData[1]);
-				}
+			for (final String[] typeData : activityTypes) {
+				final CActivityType item = activityTypeService.createEntity(typeData[0], project);
+				item.setDescription(typeData[1]);
 			}
 			LOGGER.info("Successfully created activity types for all projects");
 		} catch (final Exception e) {
@@ -1174,13 +1156,13 @@ public class CSampleDataInitializer {
 	}
 
 	/** Initializes sample meetings with participants and content. */
-	private void initializeMeetings() {
+	private void initializeMeetings(final CProject project) {
 		try {
-			createSampleProjectMeeting();
-			createSampleStandupMeeting();
-			createSamplePlanningMeeting();
-			createSampleReviewMeeting();
-			createSampleRetrospectiveMeeting();
+			createSampleProjectMeeting(project);
+			createSampleStandupMeeting(project);
+			createSamplePlanningMeeting(project);
+			createSampleReviewMeeting(project);
+			createSampleRetrospectiveMeeting(project);
 			LOGGER.info("Successfully created 5 sample meetings");
 		} catch (final Exception e) {
 			LOGGER.error("Error creating sample meetings", e);
@@ -1405,8 +1387,7 @@ public class CSampleDataInitializer {
 		try {
 			// Initialize data in proper dependency order
 			initializeCompanies();
-			initializeProjects(); // Projects must be created before project-aware
-									// entities
+			initializeProjects();
 			initializeMeetingStatuses(); // Initialize status entities first
 			initializeDecisionStatuses();
 			initializeActivityStatuses();
@@ -1417,12 +1398,12 @@ public class CSampleDataInitializer {
 			initializeDecisionTypes();
 			initializeOrderTypes();
 			initializeUsers();
-			initializeActivityTypes();
-			initializeActivities();
-			initializeMeetings();
 			initializeRisks();
 			final List<CProject> projects = projectService.list(Pageable.unpaged()).getContent();
 			projects.forEach(project -> {
+				initializeActivityTypes(project);
+				initializeActivities(project);
+				initializeMeetings(project);
 				createSampleCurrencies(project);
 			});
 			createSampleDecisions();

@@ -12,13 +12,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
+import tech.derbent.abstracts.annotations.AMetaData;
 
 @MappedSuperclass
 public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implements IDisplayEntity, IEntityDBStatics {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityDB.class);
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
+	@AMetaData (displayName = "#", required = false, readOnly = true, description = "No", hidden = false, order = 0)
 	private Long id;
 
 	/** Default constructor for JPA. */

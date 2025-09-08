@@ -7,9 +7,9 @@ import tech.derbent.projects.domain.CProject;
 
 @MappedSuperclass
 public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityClass> {
-
 	// Hierarchical Structure Support
 	@Column (name = "parent_id", nullable = true)
+	@AMetaData (displayName = "Parent #", required = false, readOnly = true, description = "ID of the parent entity", hidden = true, order = 62)
 	private Long parentId;
 	@Column (name = "parent_type", nullable = true)
 	@AMetaData (displayName = "Parent Type", required = false, readOnly = true, description = "Type of the parent entity", hidden = true, order = 61)
