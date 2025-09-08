@@ -16,14 +16,14 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> i
 
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityNamed.class);
-	@Column (name = "name", nullable = false, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
+	@Column (nullable = false, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
 			displayName = "Name", required = true, readOnly = false, defaultValue = "", description = "Name", hidden = false, order = 0,
 			maxLength = CEntityConstants.MAX_LENGTH_NAME, setBackgroundFromColor = true
 	)
 	private String name;
-	@Column (name = "description", nullable = true, length = 2000)
+	@Column (nullable = true, length = 2000)
 	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@AMetaData (
 			displayName = "Description", required = false, readOnly = false, defaultValue = "", description = "Detailed description of the project",

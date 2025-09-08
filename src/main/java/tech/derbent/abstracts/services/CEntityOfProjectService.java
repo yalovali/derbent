@@ -61,6 +61,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	@Transactional (readOnly = true)
 	public Optional<EntityClass> findByNameAndProject(final String name, final CProject project) {
 		Check.notNull(project, "Project cannot be null");
+		Check.notBlank(name, "Entity name cannot be null or empty");
 		try {
 			final Optional<EntityClass> entities = ((CEntityOfProjectRepository<EntityClass>) repository).findByNameAndProject(name, project);
 			return entities;

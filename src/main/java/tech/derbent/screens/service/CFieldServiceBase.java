@@ -17,6 +17,7 @@ import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.domain.CMeetingStatus;
 import tech.derbent.meetings.domain.CMeetingType;
 import tech.derbent.orders.domain.COrder;
+import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.risks.domain.CRisk;
 import tech.derbent.risks.domain.CRiskStatus;
@@ -86,8 +87,10 @@ public class CFieldServiceBase {
 				return CRiskStatus.class;
 			case "CProjectGanntView":
 				return CProjectGanntView.class;
+			case "CPageEntity":
+				return CPageEntity.class;
 			default:
-				LOGGER.error("Unknown entity type: " + entityType);
+				LOGGER.error("Unknown entity type: " + entityType + " dont forget to update CFieldServiceBase");
 				throw new IllegalArgumentException("Unknown entity type: " + entityType);
 			}
 		} catch (final Exception e) {

@@ -46,6 +46,9 @@ import tech.derbent.orders.domain.CCurrency;
 import tech.derbent.orders.service.CCurrencyService;
 import tech.derbent.orders.service.COrderTypeService;
 import tech.derbent.orders.service.COrdersViewService;
+import tech.derbent.page.domain.CPageEntity;
+import tech.derbent.page.service.CPageEntityService;
+import tech.derbent.page.service.CPageEntityViewService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.risks.domain.CRisk;
@@ -64,6 +67,7 @@ import tech.derbent.users.service.CUserTypeService;
 import tech.derbent.users.service.CUserViewService;
 
 public class CSampleDataInitializer {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSampleDataInitializer.class);
 	// Standard password for all users as per coding guidelines
 	private static final String STANDARD_PASSWORD = "test123";
@@ -90,6 +94,7 @@ public class CSampleDataInitializer {
 	private final CCurrencyService currencyService;
 	private final CScreenService screenService;
 	private final CScreenLinesService screenLinesService;
+	private final CPageEntityService pageEntityService;
 	private final CGanntViewEntityService ganntViewEntityService;
 	private final JdbcTemplate jdbcTemplate;
 	@PersistenceContext
@@ -115,6 +120,7 @@ public class CSampleDataInitializer {
 		this.currencyService = CSpringContext.getBean(CCurrencyService.class);
 		this.screenService = CSpringContext.getBean(CScreenService.class);
 		this.screenLinesService = CSpringContext.getBean(CScreenLinesService.class);
+		this.pageEntityService = CSpringContext.getBean(CPageEntityService.class);
 		this.ganntViewEntityService = CSpringContext.getBean(CGanntViewEntityService.class);
 		final DataSource ds = CSpringContext.getBean(DataSource.class);
 		this.jdbcTemplate = new JdbcTemplate(ds);
@@ -169,6 +175,7 @@ public class CSampleDataInitializer {
 			userTypeService.deleteAllInBatch();
 			companyService.deleteAllInBatch();
 			projectService.deleteAllInBatch();
+			pageEntityService.deleteAllInBatch();
 			ganntViewEntityService.deleteAllInBatch();
 			LOGGER.info("Fallback JPA deleteAllInBatch completed.");
 		} catch (final Exception e) {
@@ -834,6 +841,7 @@ public class CSampleDataInitializer {
 		screenService.save(CDecisionViewService.createBasicView(project));
 		screenService.save(COrdersViewService.createBasicView(project));
 		screenService.save(CActivityViewService.createBasicView(project));
+		screenService.save(CPageEntityViewService.createBasicView(project));
 		// screenService.save(CGanntViewEntityViewService.createBasicView(project));
 		// Log completion
 		LOGGER.info("Created sample fields for screen: {}", screenName);
@@ -1382,6 +1390,28 @@ public class CSampleDataInitializer {
 		}
 	}
 
+	private void initializePageEntities(final CProject project) {
+		try {
+			// Create sample page entities for the project
+			final CPageEntity page1 = new CPageEntity("Project Overview", project);
+			page1.setDescription("Overview of project objectives, scope, and key milestones");
+			page1.setRoute("pages." + page1.getName());
+			pageEntityService.save(page1);
+			final CPageEntity page2 = new CPageEntity("Team Directory", project);
+			page2.setDescription("List of team members with roles and contact information");
+			page2.setRoute("pages." + page2.getName());
+			pageEntityService.save(page2);
+			final CPageEntity page3 = new CPageEntity("Resource Library", project);
+			page3.setDescription("Collection of project-related documents and resources");
+			page3.setRoute("pages." + page3.getName());
+			pageEntityService.save(page3);
+			LOGGER.info("Successfully created sample page entities for project: {}", project.getName());
+		} catch (final Exception e) {
+			LOGGER.error("Error creating sample page entities for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize page entities for project: " + project.getName(), e);
+		}
+	}
+
 	public void loadSampleData() {
 		LOGGER.info("loadSampleData called - initializing sample data for core entities");
 		try {
@@ -1405,6 +1435,7 @@ public class CSampleDataInitializer {
 				initializeActivities(project);
 				initializeMeetings(project);
 				createSampleCurrencies(project);
+				initializePageEntities(project);
 			});
 			createSampleDecisions();
 			createSampleScreens(); // Add sample screens with fields

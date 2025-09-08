@@ -51,7 +51,12 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			this.name = name;
 			if (iconName.startsWith("class:")) {
 				// get icon from class
-				this.iconName = CColorUtils.getIconFilename(iconName.replace("class:", ""));
+				try {
+					this.iconName = CColorUtils.getIconFilename(iconName.replace("class:", ""));
+				} catch (Exception e) {
+					LOGGER.warn("Check route information for icon retrieval. Probably missing Class path or function.");
+					throw e;
+				}
 			} else {
 				// get icon directly
 				this.iconName = iconName;

@@ -1,7 +1,6 @@
 package tech.derbent.login.view;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
@@ -21,6 +20,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import tech.derbent.base.ui.dialogs.CInformationDialog;
 import tech.derbent.config.CSampleDataInitializer;
 
 /** Custom login view using basic Vaadin components instead of LoginOverlay. This provides an alternative login interface for testing purposes. */
@@ -117,7 +117,9 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 							final CSampleDataInitializer init = new CSampleDataInitializer();
 							init.reloadForced(); // veya empty check’li bir metod yaz
 							Notification.show("Sample data yeniden yüklendi.", 4000, Notification.Position.MIDDLE);
-							UI.getCurrent().getPage().reload();
+							CInformationDialog info = new CInformationDialog("Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
+							info.open();
+							// UI.getCurrent().getPage().reload();
 						} catch (final Exception ex) {
 							Notification.show("Hata: " + ex.getMessage(), 6000, Notification.Position.MIDDLE);
 						}

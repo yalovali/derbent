@@ -51,7 +51,7 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 	)
 	private CActivityType activityType;
 	// Time Tracking
-	@Column (name = "estimated_hours", nullable = true, precision = 10, scale = 2)
+	@Column (nullable = true, precision = 10, scale = 2)
 	@DecimalMin (value = "0.0", message = "Estimated hours must be positive")
 	@DecimalMax (value = "9999.99", message = "Estimated hours cannot exceed 9999.99")
 	@AMetaData (
@@ -59,7 +59,7 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 			description = "Estimated time in hours to complete this activity", hidden = false, order = 20
 	)
 	private BigDecimal estimatedHours;
-	@Column (name = "actual_hours", nullable = true, precision = 10, scale = 2)
+	@Column (nullable = true, precision = 10, scale = 2)
 	@DecimalMin (value = "0.0", message = "Actual hours must be positive")
 	@DecimalMax (value = "9999.99", message = "Actual hours cannot exceed 9999.99")
 	@AMetaData (
@@ -67,7 +67,7 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 			description = "Actual time spent on this activity in hours", hidden = false, order = 21
 	)
 	private BigDecimal actualHours = BigDecimal.ZERO;
-	@Column (name = "remaining_hours", nullable = true, precision = 10, scale = 2)
+	@Column (nullable = true, precision = 10, scale = 2)
 	@DecimalMin (value = "0.0", message = "Remaining hours must be positive")
 	@DecimalMax (value = "9999.99", message = "Remaining hours cannot exceed 9999.99")
 	@AMetaData (
@@ -90,7 +90,7 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 			dataProviderBean = "CActivityPriorityService"
 	)
 	private CActivityPriority priority;
-	@Column (name = "progress_percentage", nullable = true)
+	@Column (nullable = true)
 	@Min (value = 0, message = "Progress percentage must be between 0 and 100")
 	@Max (value = 100, message = "Progress percentage must be between 0 and 100")
 	@AMetaData (
@@ -99,13 +99,13 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 	)
 	private Integer progressPercentage = 0;
 	// Date Management
-	@Column (name = "start_date", nullable = true)
+	@Column (nullable = true)
 	@AMetaData (
 			displayName = "Start Date", required = false, readOnly = false, description = "Planned or actual start date of the activity",
 			hidden = false, order = 40
 	)
 	private LocalDate startDate;
-	@Column (name = "due_date", nullable = true)
+	@Column (nullable = true)
 	@AMetaData (displayName = "Due Date", required = false, readOnly = false, description = "Expected completion date", hidden = false, order = 41)
 	private LocalDate dueDate;
 	@Column (name = "completion_date", nullable = true)
@@ -114,7 +114,7 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 	)
 	private LocalDate completionDate;
 	// Budget Management
-	@Column (name = "estimated_cost", nullable = true, precision = 12, scale = 2)
+	@Column (nullable = true, precision = 12, scale = 2)
 	@DecimalMin (value = "0.0", message = "Estimated cost must be positive")
 	@DecimalMax (value = "999999.99", message = "Estimated cost cannot exceed 999999.99")
 	@AMetaData (
@@ -122,7 +122,7 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 			description = "Estimated cost to complete this activity", hidden = false, order = 50
 	)
 	private BigDecimal estimatedCost;
-	@Column (name = "actual_cost", nullable = true, precision = 12, scale = 2)
+	@Column (nullable = true, precision = 12, scale = 2)
 	@DecimalMin (value = "0.0", message = "Actual cost must be positive")
 	@DecimalMax (value = "999999.99", message = "Actual cost cannot exceed 999999.99")
 	@AMetaData (
@@ -130,7 +130,7 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 			description = "Actual cost spent on this activity", hidden = false, order = 51
 	)
 	private BigDecimal actualCost = BigDecimal.ZERO;
-	@Column (name = "hourly_rate", nullable = true, precision = 10, scale = 2)
+	@Column (nullable = true, precision = 10, scale = 2)
 	@DecimalMin (value = "0.0", message = "Hourly rate must be positive")
 	@DecimalMax (value = "9999.99", message = "Hourly rate cannot exceed 9999.99")
 	@AMetaData (
@@ -139,21 +139,21 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 	)
 	private BigDecimal hourlyRate;
 	// Additional Information
-	@Column (name = "acceptance_criteria", nullable = true, length = 2000)
+	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
 	@AMetaData (
 			displayName = "Acceptance Criteria", required = false, readOnly = false, defaultValue = "",
 			description = "Criteria that must be met for the activity to be considered complete", hidden = false, order = 70, maxLength = 2000
 	)
 	private String acceptanceCriteria;
-	@Column (name = "notes", nullable = true, length = 2000)
+	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
 	@AMetaData (
 			displayName = "Notes", required = false, readOnly = false, defaultValue = "", description = "Additional notes and comments",
 			hidden = false, order = 71, maxLength = 2000
 	)
 	private String notes;
-	@Column (name = "results", nullable = true, length = 2000)
+	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
 	@AMetaData (
 			displayName = "Results", required = false, readOnly = false, defaultValue = "", description = "Results and outcomes of the activity",

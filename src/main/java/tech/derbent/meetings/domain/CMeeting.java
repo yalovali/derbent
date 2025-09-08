@@ -128,7 +128,6 @@ public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntit
 	/** Default constructor for JPA. */
 	public CMeeting() {
 		super();
-		// Initialize collections for JPA
 		this.attendees = new HashSet<>();
 		this.participants = new HashSet<>();
 	}
