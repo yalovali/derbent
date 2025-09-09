@@ -121,7 +121,7 @@ public class CScreen extends CEntityOfProject<CScreen> {
 
 	@Override
 	public String getDisplayName() { // TODO Auto-generated method stub
-		return null;
+		return "Screen: " + getName();
 	}
 
 	public String getEntityType() { return entityType; }
