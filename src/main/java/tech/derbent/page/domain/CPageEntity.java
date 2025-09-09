@@ -45,7 +45,7 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 			displayName = "Menu Order", required = true, readOnly = false, defaultValue = "1.1", description = "Menu Order", hidden = false,
 			order = 70, maxLength = 100
 	)
-	private String order;
+	private String menuOrder;
 	@Column (nullable = false, length = 100)
 	@Size (max = 100)
 	@AMetaData (
@@ -54,9 +54,9 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 	)
 	private String icon;
 
-	public String getOrder() { return order; }
+	public String getOrder() { return menuOrder; }
 
-	public void setOrder(String order) { this.order = order; }
+	public void setOrder(String order) { this.menuOrder = order; }
 
 	public String getIcon() { return icon; }
 

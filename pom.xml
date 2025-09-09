@@ -137,7 +137,7 @@
 			<version>1.40.0</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<!-- Selenium WebDriver for cross-browser testing -->
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
@@ -229,110 +229,111 @@
 				<artifactId>maven-wrapper-plugin</artifactId>
 				<version>3.3.2</version>
 			</plugin>
-			
+
 		</plugins>
 	</build>
 
 	<profiles>
-		<profile>
-			<!--
-            To avoid problems, you should use the same database engine in development and
-			in production. Docker,
-            Testcontainers and service connections make this easy to do. However, this
-			requires you to install and
-            run Docker on your development machine.
-
-            This Maven profile makes it possible to start the skeleton quickly, using an H2
-			in-memory database and
-            does not require installing Docker. It does, however, still use Testcontainers
-			and PostgreSQL for
-            integration tests.
-
-            If you have Docker installed and running on your machine, you can delete this
-			profile. When you do this,
-            you should also change the default goal to `spring-boot:test-run` (at the
-			beginning of the <build> section).
-             -->
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<id>h2-local-development</id>
-			<dependencies>
-				<dependency>
-					<groupId>com.h2database</groupId>
-					<artifactId>h2</artifactId>
-					<scope>runtime</scope>
-				</dependency>
-				<!-- remove teest dependecy it makes dublicate 	-->
-				<!-- <dependency>
-                    <groupId>org.postgresql</groupId>
-                    <artifactId>postgresql</artifactId>
-                    <scope>test</scope>
-                </dependency>
-                -->
-				<dependency>
-					<groupId>org.postgresql</groupId>
-					<artifactId>postgresql</artifactId>
-					<scope>runtime</scope>
-				</dependency>
-			</dependencies>
-		</profile>
-		<profile>
-			<id>production</id>
-			<dependencies>
-				<dependency>
-					<!-- Exclude development dependencies from production -->
-					<groupId>com.vaadin</groupId>
-					<artifactId>vaadin-core</artifactId>
-					<exclusions>
-						<exclusion>
-							<groupId>com.vaadin</groupId>
-							<artifactId>vaadin-dev</artifactId>
-						</exclusion>
-					</exclusions>
-				</dependency>
-			</dependencies>
-			<build>
-				<plugins>
-					<plugin>
+	<profile>
+		<activation>
+			<activeByDefault>true</activeByDefault>
+		</activation>
+		<id>h2-local-development</id>
+		<dependencies>
+			<dependency>
+				<groupId>com.h2database</groupId>
+				<artifactId>h2</artifactId>
+				<scope>runtime</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.postgresql</groupId>
+				<artifactId>postgresql</artifactId>
+				<scope>runtime</scope>
+			</dependency>
+		</dependencies>
+	</profile>
+	<profile>
+		<id>production</id>
+		<dependencies>
+			<dependency>
+				<!-- Exclude development dependencies from production -->
+				<groupId>com.vaadin</groupId>
+				<artifactId>vaadin-core</artifactId>
+				<exclusions>
+					<exclusion>
 						<groupId>com.vaadin</groupId>
-						<artifactId>vaadin-maven-plugin</artifactId>
-						<version>${vaadin.version}</version>
-						<executions>
-							<execution>
-								<goals>
-									<goal>build-frontend</goal>
-								</goals>
-								<phase>compile</phase>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>integration-test</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-failsafe-plugin</artifactId>
-						<executions>
-							<execution>
-								<goals>
-									<goal>integration-test</goal>
-									<goal>verify</goal>
-								</goals>
-							</execution>
-						</executions>
-						<configuration>
-							<trimStackTrace>false</trimStackTrace>
-							<enableAssertions>true</enableAssertions>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
+						<artifactId>vaadin-dev</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+		</dependencies>
+		<build>
+			<plugins>
+				<plugin>
+					<groupId>com.vaadin</groupId>
+					<artifactId>vaadin-maven-plugin</artifactId>
+					<version>${vaadin.version}</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>build-frontend</goal>
+							</goals>
+							<phase>compile</phase>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</build>
+	</profile>
+	<profile>
+		<id>integration-test</id>
+		<build>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<executions>
+						<execution>
+							<goals>
+								<goal>integration-test</goal>
+								<goal>verify</goal>
+							</goals>
+						</execution>
+					</executions>
+					<configuration>
+						<trimStackTrace>false</trimStackTrace>
+						<enableAssertions>true</enableAssertions>
+					</configuration>
+				</plugin>
+			</plugins>
+		</build>
+	</profile>
+	<profile>
+	<id>reset-db</id>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<mainClass>tech.derbent.Application</mainClass>
+					<profiles>reset-db</profiles>
+					<arguments>
+						<argument>--spring.profiles.active=reset-db</argument>
+					</arguments>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</profile>
+
 	</profiles>
 
 </project>
