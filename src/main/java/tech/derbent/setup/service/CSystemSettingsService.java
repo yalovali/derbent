@@ -259,7 +259,7 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 
 	/** Updates the auto-login settings.
 	 * @param autoLoginEnabled true to enable auto-login, false to disable
-	 * @param defaultView the default view to navigate to after login
+	 * @param defaultView      the default view to navigate to after login
 	 * @return the updated CSystemSettings */
 	@Transactional
 	public CSystemSettings updateAutoLoginSettings(final boolean autoLoginEnabled, final String defaultView) {

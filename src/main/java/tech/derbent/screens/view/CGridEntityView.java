@@ -1,12 +1,17 @@
 package tech.derbent.screens.view;
 
+import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
+import tech.derbent.abstracts.views.components.CVerticalLayout;
 import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.screens.domain.CGridEntity;
@@ -31,6 +36,7 @@ public class CGridEntityView extends CGridViewBaseProject<CGridEntity> {
 	public static String getIconFilename() { return CGridEntity.getIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "grid_entity_id";
+	private CFieldSelectionComponent fieldSelectionComponent;
 
 	public CGridEntityView(final CGridEntityService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
 		super(CGridEntity.class, entityService, sessionService, screenService);
@@ -42,8 +48,99 @@ public class CGridEntityView extends CGridViewBaseProject<CGridEntity> {
 		grid.addColumnEntityNamed(CEntityOfProject::getProject, "Project");
 		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");
 		grid.addColumn(CEntityNamed::getDescriptionShort, "Description");
+		grid.addShortTextColumn(CGridEntity::getDataServiceBeanName, "Data Service Bean", "dataServiceBeanName");
 	}
 
 	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
+
+	@Override
+	protected void createDetailsComponent() throws Exception {
+		// Create the field selection component
+		fieldSelectionComponent = new CFieldSelectionComponent();
+	}
+
+	@Override
+	public void updateDetailsComponent() throws Exception {
+		// Create the basic form using the entity annotations
+		final CVerticalLayout basicFormLayout = CEntityFormBuilder.buildForm(CGridEntity.class, getBinder());
+		// Create tabs for basic info and field selection
+		Tab basicTab = new Tab("Basic Information");
+		Tab fieldsTab = new Tab("Field Selection");
+		Tabs tabs = new Tabs(basicTab, fieldsTab);
+		tabs.addThemeVariants(TabsVariant.LUMO_MINIMAL);
+		tabs.setWidthFull();
+		// Create content areas
+		CVerticalLayout basicContent = new CVerticalLayout();
+		basicContent.add(basicFormLayout);
+		basicContent.setVisible(true);
+		CVerticalLayout fieldsContent = new CVerticalLayout();
+		fieldsContent.add(fieldSelectionComponent);
+		fieldsContent.setVisible(false);
+		// Handle tab changes
+		tabs.addSelectedChangeListener(event -> {
+			boolean isBasicSelected = event.getSelectedTab() == basicTab;
+			basicContent.setVisible(isBasicSelected);
+			fieldsContent.setVisible(!isBasicSelected);
+			// Update field selection when switching to fields tab
+			if (!isBasicSelected) {
+				updateFieldSelectionComponent();
+			}
+		});
+		// Add content to details layout
+		getBaseDetailsLayout().add(tabs, basicContent, fieldsContent);
+		// Set up data binding for field selection
+		setupFieldSelectionBinding();
+	}
+
+	private void updateFieldSelectionComponent() {
+		CGridEntity currentEntity = getCurrentEntity();
+		if (currentEntity != null && currentEntity.getDataServiceBeanName() != null) {
+			// Extract entity type from bean name (assuming convention like CActivityService -> CActivity)
+			String beanName = currentEntity.getDataServiceBeanName();
+			String entityType = extractEntityTypeFromBeanName(beanName);
+			if (entityType != null) {
+				fieldSelectionComponent.setEntityType(entityType);
+				// Load existing selection
+				String existingSelection = currentEntity.getSelectedFields();
+				if (existingSelection != null) {
+					fieldSelectionComponent.setSelectedFieldsFromString(existingSelection);
+				}
+			}
+		}
+	}
+
+	private String extractEntityTypeFromBeanName(String beanName) {
+		if (beanName == null || beanName.isEmpty()) {
+			return null;
+		}
+		// Convert service bean name to entity class name
+		// E.g., CActivityService -> CActivity
+		if (beanName.endsWith("Service")) {
+			return beanName.substring(0, beanName.length() - "Service".length());
+		}
+		return beanName;
+	}
+
+	private void setupFieldSelectionBinding() {
+		// The field selection will be handled manually during save process
+		// since our custom component doesn't directly implement HasValue<String>
+	}
+
+	@Override
+	protected void populateForm(CGridEntity entity) {
+		super.populateForm(entity);
+		// Load field selection when entity is loaded
+		updateFieldSelectionComponent();
+	}
+
+	@Override
+	protected boolean onBeforeSaveEvent() {
+		// Save field selection before entity save
+		if (fieldSelectionComponent != null && getCurrentEntity() != null) {
+			String selectedFieldsString = fieldSelectionComponent.getSelectedFieldsAsString();
+			getCurrentEntity().setSelectedFields(selectedFieldsString);
+		}
+		return super.onBeforeSaveEvent();
+	}
 }
