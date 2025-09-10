@@ -1,5 +1,6 @@
 package tech.derbent.screens.view;
 
+import java.util.List;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
@@ -8,6 +9,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
+import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
@@ -57,13 +59,15 @@ public class CGridEntityView extends CGridViewBaseProject<CGridEntity> {
 	@Override
 	protected void createDetailsComponent() throws Exception {
 		// Create the field selection component
-		fieldSelectionComponent = new CFieldSelectionComponent();
+		fieldSelectionComponent = new CFieldSelectionComponent("Field Selection");
 	}
 
 	@Override
 	public void updateDetailsComponent() throws Exception {
+		// buildScreen(CMeetingViewService.BASE_VIEW_NAME);
 		// Create the basic form using the entity annotations
-		final CVerticalLayout basicFormLayout = CEntityFormBuilder.buildForm(CGridEntity.class, getBinder());
+		final List<String> entityFields = List.of("name", "description", "dataServiceBeanName");
+		final CVerticalLayout basicFormLayout = CEntityFormBuilder.buildForm(CGridEntity.class, getBinder(), entityFields);
 		// Create tabs for basic info and field selection
 		Tab basicTab = new Tab("Basic Information");
 		Tab fieldsTab = new Tab("Field Selection");
@@ -130,17 +134,23 @@ public class CGridEntityView extends CGridViewBaseProject<CGridEntity> {
 	@Override
 	protected void populateForm(CGridEntity entity) {
 		super.populateForm(entity);
-		// Load field selection when entity is loaded
 		updateFieldSelectionComponent();
 	}
 
 	@Override
 	protected boolean onBeforeSaveEvent() {
-		// Save field selection before entity save
-		if (fieldSelectionComponent != null && getCurrentEntity() != null) {
-			String selectedFieldsString = fieldSelectionComponent.getSelectedFieldsAsString();
-			getCurrentEntity().setSelectedFields(selectedFieldsString);
+		if (!super.onBeforeSaveEvent()) {
+			LOGGER.warn("Superclass onBeforeSaveEvent failed, cannot save entity.");
+			return false;
 		}
-		return super.onBeforeSaveEvent();
+		final CEnhancedBinder<CGridEntity> binder = getBinder();
+		CGridEntity bean = binder.getBean();
+		if (bean == null) {
+			LOGGER.warn("No entity bound to binder; cannot save.");
+			return false;
+		}
+		final String selected = fieldSelectionComponent.getSelectedFieldsAsString();
+		bean.setSelectedFields(selected != null ? selected : "");
+		return true;
 	}
 }

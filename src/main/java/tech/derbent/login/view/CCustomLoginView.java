@@ -1,7 +1,9 @@
 package tech.derbent.login.view;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -23,9 +25,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import tech.derbent.base.ui.dialogs.CInformationDialog;
 import tech.derbent.config.CSampleDataInitializer;
 import tech.derbent.setup.service.CSystemSettingsService;
@@ -70,14 +69,13 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		if (continueParams != null && !continueParams.isEmpty()) {
 			String requestedPage = continueParams.get(0);
 			if (requestedPage != null && !requestedPage.trim().isEmpty()) {
-				// Map the URL back to view name and set it in the combobox
-				String viewName = mapUrlToViewName(requestedPage);
-				if (viewName != null) {
-					defaultViewComboBox.setValue(viewName);
-					// Save this selection to system settings
-					saveAutoLoginSettings();
-					LOGGER.debug("Set default view from continue parameter: {} -> {}", requestedPage, viewName);
-				}
+				// tring viewName = mapUrlToViewName(requestedPage);
+				// if (viewName != null) {
+				defaultViewComboBox.setValue(requestedPage);
+				// Save this selection to system settings
+				saveAutoLoginSettings();
+				LOGGER.debug("Set default view from continue parameter: {}", requestedPage);
+				// }
 			}
 		}
 	}
@@ -230,8 +228,8 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	/** Initialize auto-login and view selection components */
 	private void initializeComponents() {
 		// Initialize default view combobox with available views
-		defaultViewComboBox.setItems("home", "cdashboardview", "cprojectsview", "cactivitiesview", "cmeetingsview", "cusersview", "cganntview",
-				"cordersview");
+		defaultViewComboBox.setItems("home", "cgridentityview", "cdashboardview", "cprojectsview", "cactivitiesview", "cmeetingsview", "cusersview",
+				"cganntview", "cordersview");
 		defaultViewComboBox.setItemLabelGenerator(this::getViewDisplayName);
 		defaultViewComboBox.setValue("home"); // Default value
 		defaultViewComboBox.setWidthFull();
@@ -254,6 +252,8 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		switch (route) {
 		case "home":
 			return "Home/Dashboard";
+		case "cgridentityview":
+			return "Grid Entities";
 		case "cdashboardview":
 			return "Dashboard";
 		case "cprojectsview":
@@ -269,14 +269,17 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		case "cordersview":
 			return "Orders";
 		default:
+			assert false : "Unknown route: " + route;
 			return route;
 		}
 	}
 
 	/** Maps URLs back to view names for the combobox. This is the reverse of the mapping used in CAuthenticationSuccessHandler. */
-	private String mapUrlToViewName(String url) {
-		if (url == null)
+	@Deprecated
+	private String mapUrlToViewNameXXX(String url) {
+		if (url == null) {
 			return null;
+		}
 		// Remove leading slash and any query parameters
 		String cleanUrl = url.startsWith("/") ? url.substring(1) : url;
 		int queryIndex = cleanUrl.indexOf('?');
@@ -299,6 +302,8 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 			return "cganttview";
 		case "cordersview":
 			return "cordersview";
+		case "cgridentityview":
+			return "cgridentityview";
 		default:
 			// For unknown URLs, return null so we don't change the selection
 			return null;

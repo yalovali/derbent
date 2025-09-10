@@ -48,7 +48,6 @@ public abstract class CAbstractNamedEntityPage<EntityClass extends CEntityNamed<
 
 	@Override
 	protected boolean onBeforeSaveEvent() {
-		LOGGER.info("onBeforeSaveEvent called for entity: {} in ", getCurrentEntity(), this.getClass().getSimpleName());
 		if (super.onBeforeSaveEvent() == false) {
 			return false; // If the base class validation fails, do not proceed
 		}

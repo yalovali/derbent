@@ -11,9 +11,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.shared.Registration;
-import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.screens.service.CEntityFieldService;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
@@ -45,9 +43,6 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 		}
 	}
 
-	// Dependencies
-	private final CEntityFieldService entityFieldService;
-	private final Binder<?> binder;
 	// UI Components
 	private ListBox<EntityFieldInfo> availableFields;
 	private ListBox<FieldSelection> selectedFields;
@@ -63,31 +58,20 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 	// Event handling
 	private final List<ValueChangeListener<? super ValueChangeEvent<String>>> listeners = new ArrayList<>();
 
-	/** Default constructor for backward compatibility. */
-	public CFieldSelectionComponent() {
-		this(null, null);
-	}
-
-	/** Constructor taking service and binder as required. */
-	public CFieldSelectionComponent(CEntityFieldService entityFieldService, Binder<?> binder) {
-		this.entityFieldService = entityFieldService;
-		this.binder = binder;
+	/** Constructor with enhanced binder and property name.
+	 * @param title */
+	public CFieldSelectionComponent(String title) {
 		this.sourceList = new ArrayList<>();
 		this.selections = new ArrayList<>();
-		initializeUI();
+		initializeUI(title);
 		setupEventHandlers();
 	}
 
-	/** Constructor with enhanced binder. */
-	public CFieldSelectionComponent(CEntityFieldService entityFieldService, CEnhancedBinder<?> binder) {
-		this(entityFieldService, (Binder<?>) binder);
-	}
-
-	private void initializeUI() {
+	private void initializeUI(String title) {
 		setSpacing(true);
 		setPadding(false);
 		// Available fields section
-		H4 availableHeader = new H4("Available Fields");
+		H4 availableHeader = new H4(title);
 		availableFields = new ListBox<>();
 		availableFields.setHeight("200px");
 		availableFields.setWidth("100%");
@@ -134,6 +118,9 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 		downButton.addClickListener(e -> moveDown());
 	}
 
+	/**
+	 * Adds the selected field from availableFields to selections.
+	 */
 	private void addSelectedField() {
 		EntityFieldInfo selected = availableFields.getValue();
 		if (selected != null) {
@@ -148,6 +135,9 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 		}
 	}
 
+	/**
+	 * Removes the selected field from selections.
+	 */
 	private void removeSelectedField() {
 		FieldSelection selected = selectedFields.getValue();
 		if (selected != null) {
@@ -161,6 +151,9 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 		}
 	}
 
+	/**
+	 * Moves the selected field up in the order.
+	 */
 	private void moveUp() {
 		FieldSelection selected = selectedFields.getValue();
 		if (selected != null) {
@@ -179,6 +172,9 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 		}
 	}
 
+	/**
+	 * Moves the selected field down in the order.
+	 */
 	private void moveDown() {
 		FieldSelection selected = selectedFields.getValue();
 		if (selected != null) {
@@ -197,16 +193,24 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 		}
 	}
 
+	/**
+	 * Refreshes the selectedFields list and fires value change event.
+	 */
 	private void refreshSelections() {
 		selectedFields.setItems(selections);
 		fireValueChangeEvent();
 	}
 
+	/**
+	 * Fires a value change event to listeners.
+	 */
 	private void fireValueChangeEvent() {
 		String oldValue = currentValue;
 		String newValue = getValue();
 		currentValue = newValue;
 		ValueChangeEvent<String> event = new ValueChangeEvent<String>() {
+
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			public HasValue<?, String> getHasValue() { return CFieldSelectionComponent.this; }
@@ -224,16 +228,25 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 	}
 
 	// HasValue implementation
+	/**
+	 * Returns the current value as a string.
+	 */
 	@Override
 	public String getValue() {
 		return selections.stream().map(fs -> fs.getFieldInfo().getFieldName() + ":" + fs.getOrder()).collect(Collectors.joining(","));
 	}
 
+	/**
+	 * Sets the value from a string.
+	 */
 	@Override
 	public void setValue(String value) {
-		loadFromString(value);
+		setSelectedFieldsFromString(value);
 	}
 
+	/**
+	 * Adds a value change listener.
+	 */
 	@Override
 	public Registration addValueChangeListener(ValueChangeListener<? super ValueChangeEvent<String>> listener) {
 		listeners.add(listener);
@@ -243,6 +256,9 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 	@Override
 	public boolean isReadOnly() { return readOnly; }
 
+	/**
+	 * Sets the component to read-only mode.
+	 */
 	@Override
 	public void setReadOnly(boolean readOnly) {
 		this.readOnly = readOnly;
@@ -264,6 +280,9 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 	}
 
 	// API methods for external usage
+	/**
+	 * Sets the entity type and loads available fields.
+	 */
 	public void setEntityType(String entityType) {
 		if (entityType != null) {
 			sourceList = CEntityFieldService.getEntityFields(entityType);
@@ -271,19 +290,38 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 		}
 	}
 
-	public void loadFromBinder() {
-		if (binder != null) {
-			// Load from binder if needed - implementation depends on use case
-		}
-	}
+	/**
+	 * Returns the selected fields as a string.
+	 */
+	public String getSelectedFieldsAsString() { return getValue(); }
 
-	public void saveToBinder() {
-		if (binder != null) {
-			// Save to binder if needed - implementation depends on use case
+	/**
+	 * Sets the selected fields from a string value.
+	 */
+	public void setSelectedFieldsFromString(String value) {
+		selections.clear();
+		if (value != null && !value.trim().isEmpty()) {
+			String[] fieldPairs = value.split(",");
+			for (String fieldPair : fieldPairs) {
+				String[] parts = fieldPair.trim().split(":");
+				if (parts.length == 2) {
+					String fieldName = parts[0].trim();
+					try {
+						int order = Integer.parseInt(parts[1].trim());
+						// Find field info in source list
+						EntityFieldInfo fieldInfo = sourceList.stream().filter(f -> f.getFieldName().equals(fieldName)).findFirst().orElse(null);
+						if (fieldInfo != null) {
+							selections.add(new FieldSelection(fieldInfo, order));
+						}
+					} catch (NumberFormatException e) {
+						// Skip invalid entries
+					}
+				}
+			}
+			// Sort by order
+			selections.sort((a, b) -> Integer.compare(a.getOrder(), b.getOrder()));
 		}
-	}
-
-	public void loadFromString(String value) {
+		refreshSelections();
 		selections.clear();
 		if (value != null && !value.trim().isEmpty()) {
 			String[] fieldPairs = value.split(",");
@@ -309,11 +347,8 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 		refreshSelections();
 	}
 
-	public String getSelectedFieldsAsString() { return getValue(); }
-
-	public void setSelectedFieldsFromString(String value) {
-		loadFromString(value);
-	}
-
+	/**
+	 * Returns the selected fields as a list.
+	 */
 	public List<FieldSelection> getSelectedFields() { return new ArrayList<>(selections); }
 }

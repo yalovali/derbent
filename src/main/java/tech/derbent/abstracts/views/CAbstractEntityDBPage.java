@@ -392,9 +392,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	}
 
 	protected boolean onBeforeSaveEvent() {
-		if (entityService.onBeforeSaveEvent(currentEntity)) {
-			LOGGER.info("onBeforeSaveEvent passed for entity: {} in {}", getCurrentEntity(), this.getClass().getSimpleName());
-		} else {
+		if (!entityService.onBeforeSaveEvent(currentEntity)) {
 			LOGGER.warn("onBeforeSaveEvent failed for entity: {} in {}", getCurrentEntity(), this.getClass().getSimpleName());
 			return false;
 		}
@@ -444,7 +442,8 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		currentEntity = value;
 		sessionService.setActiveId(entityClass.getSimpleName(), value == null ? null : value.getId());
 		populateAccordionPanels(value);
-		getBinder().readBean(value);
+		// getBinder().readBean(value);
+		getBinder().setBean(value);
 		if ((value == null) && (masterViewSection != null)) {
 			masterViewSection.select(null);
 		}
