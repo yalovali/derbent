@@ -22,10 +22,15 @@ import tech.derbent.users.service.CUserService;
 class CSecurityConfig extends VaadinWebSecurity {
 
 	private final CUserService loginUserService;
+	private final CAuthenticationSuccessHandler authenticationSuccessHandler;
+	private final CAuthenticationEntryPoint authenticationEntryPoint;
 
-	/** Constructor injection of CLoginUserService. This service provides UserDetailsService implementation for database authentication. */
-	public CSecurityConfig(final CUserService loginUserService) {
+	/** Constructor injection of CLoginUserService, authentication success handler, and entry point. */
+	public CSecurityConfig(final CUserService loginUserService, final CAuthenticationSuccessHandler authenticationSuccessHandler, 
+			final CAuthenticationEntryPoint authenticationEntryPoint) {
 		this.loginUserService = loginUserService;
+		this.authenticationSuccessHandler = authenticationSuccessHandler;
+		this.authenticationEntryPoint = authenticationEntryPoint;
 	}
 
 	/** Configures HTTP security settings. Sets up the login view and delegates other security configuration to Vaadin.
@@ -41,6 +46,16 @@ class CSecurityConfig extends VaadinWebSecurity {
 		setLoginView(http, CCustomLoginView.class);
 		// Configure the UserDetailsService for authentication
 		http.userDetailsService(loginUserService);
+		
+		// Configure custom authentication success handler for post-login redirection
+		http.formLogin(form -> form
+			.successHandler(authenticationSuccessHandler)
+		);
+		
+		// Configure custom authentication entry point to save requested URLs
+		http.exceptionHandling(exceptions -> exceptions
+			.authenticationEntryPoint(authenticationEntryPoint)
+		);
 	}
 
 	/** Provides BCrypt password encoder bean. BCrypt is a secure hashing function designed for password storage. Password Encoding Flow: 1. When
