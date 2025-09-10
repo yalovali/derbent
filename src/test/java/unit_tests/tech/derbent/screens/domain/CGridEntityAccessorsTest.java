@@ -30,6 +30,29 @@ public class CGridEntityAccessorsTest {
 	}
 
 	@Test
+	void testSelectedFieldsGetterSetter() {
+		// Create a new CGridEntity instance
+		final CGridEntity entity = new CGridEntity();
+		// Verify getter returns null initially
+		assertNull(entity.getSelectedFields(), "Initial value should be null");
+		// Test setter and getter with field selection string
+		final String testValue = "fieldName:1,otherField:2,thirdField:3";
+		entity.setSelectedFields(testValue);
+		// Verify the value was set correctly
+		assertEquals(testValue, entity.getSelectedFields(), "Getter should return the value set by setter");
+		// Test setting null value
+		entity.setSelectedFields(null);
+		assertNull(entity.getSelectedFields(), "Should be able to set null value");
+		// Test setting empty string
+		entity.setSelectedFields("");
+		assertEquals("", entity.getSelectedFields(), "Should be able to set empty string");
+		// Test setting a complex field selection string
+		final String complexValue = "name:1,description:2,createdDate:3,assignedTo:4";
+		entity.setSelectedFields(complexValue);
+		assertEquals(complexValue, entity.getSelectedFields(), "Should handle complex field selection strings");
+	}
+
+	@Test
 	void testEntityInstantiation() {
 		// Test that the entity can be instantiated without issues
 		final CGridEntity entity = new CGridEntity();
