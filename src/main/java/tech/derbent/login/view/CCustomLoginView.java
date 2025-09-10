@@ -23,6 +23,8 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import tech.derbent.base.ui.dialogs.CInformationDialog;
 import tech.derbent.config.CSampleDataInitializer;
@@ -35,6 +37,7 @@ import tech.derbent.setup.service.CSystemSettingsService;
 public class CCustomLoginView extends Main implements BeforeEnterObserver {
 
 	private static final long serialVersionUID = 1L;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CCustomLoginView.class);
 	private final TextField usernameField = new TextField();
 	private final PasswordField passwordField = new PasswordField();
 	private final Button loginButton = new Button("Login");
@@ -54,12 +57,29 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		initializeComponents();
 	}
 
-	/** Handles navigation events before entering the view. Checks for authentication failure indicators and displays error messages. */
+	/** Handles navigation events before entering the view. Checks for authentication failure indicators and displays error messages. 
+	 * Also handles the 'continue' parameter to set the default view selection. */
 	@Override
 	public void beforeEnter(final BeforeEnterEvent event) {
 		// Check if the URL contains an error parameter
 		if (event.getLocation().getQueryParameters().getParameters().containsKey("error")) {
 			showError("Invalid username or password");
+		}
+		
+		// Check for 'continue' parameter (originally requested page)
+		var continueParams = event.getLocation().getQueryParameters().getParameters().get("continue");
+		if (continueParams != null && !continueParams.isEmpty()) {
+			String requestedPage = continueParams.get(0);
+			if (requestedPage != null && !requestedPage.trim().isEmpty()) {
+				// Map the URL back to view name and set it in the combobox
+				String viewName = mapUrlToViewName(requestedPage);
+				if (viewName != null) {
+					defaultViewComboBox.setValue(viewName);
+					// Save this selection to system settings
+					saveAutoLoginSettings();
+					LOGGER.debug("Set default view from continue parameter: {} -> {}", requestedPage, viewName);
+				}
+			}
 		}
 	}
 
@@ -256,6 +276,42 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 			case "cganntview": return "Gantt Chart";
 			case "cordersview": return "Orders";
 			default: return route;
+		}
+	}
+
+	/**
+	 * Maps URLs back to view names for the combobox.
+	 * This is the reverse of the mapping used in CAuthenticationSuccessHandler.
+	 */
+	private String mapUrlToViewName(String url) {
+		if (url == null) return null;
+		
+		// Remove leading slash and any query parameters
+		String cleanUrl = url.startsWith("/") ? url.substring(1) : url;
+		int queryIndex = cleanUrl.indexOf('?');
+		if (queryIndex > 0) {
+			cleanUrl = cleanUrl.substring(0, queryIndex);
+		}
+		
+		switch (cleanUrl.toLowerCase()) {
+			case "":
+			case "home":
+				return "home";
+			case "cprojectsview":
+				return "cprojectsview";
+			case "cactivitiesview":
+				return "cactivitiesview";
+			case "cmeetingsview":
+				return "cmeetingsview";
+			case "cusersview":
+				return "cusersview";
+			case "cganttview":
+				return "cganttview";
+			case "cordersview":
+				return "cordersview";
+			default:
+				// For unknown URLs, return null so we don't change the selection
+				return null;
 		}
 	}
 
