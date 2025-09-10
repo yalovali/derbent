@@ -45,11 +45,12 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	private final Div errorMessage = new Div();
 	private final Checkbox autoLoginCheckbox = new Checkbox("Auto-login after 2 seconds");
 	private final ComboBox<String> defaultViewComboBox = new ComboBox<>("Go to view after login");
-	@Autowired
-	private CSystemSettingsService systemSettingsService;
+	private final CSystemSettingsService systemSettingsService;
 
 	/** Constructor sets up the custom login form with basic Vaadin components. */
-	public CCustomLoginView() {
+	@Autowired
+	public CCustomLoginView(CSystemSettingsService systemSettingsService) {
+		this.systemSettingsService = systemSettingsService;
 		addClassNames("custom-login-view");
 		setSizeFull();
 		setupForm();

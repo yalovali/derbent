@@ -14,7 +14,6 @@ import tech.derbent.screens.view.CGridEntityView;
 @Table (name = "cgridentity")
 @AttributeOverride (name = "id", column = @Column (name = "grid_entity_id"))
 public class CGridEntity extends CEntityOfProject<CGridEntity> {
-
 	public static String getEntityColorCode() { return getIconColorCode(); }
 
 	public static String getIconColorCode() { return "#6f42c1"; }
@@ -22,10 +21,6 @@ public class CGridEntity extends CEntityOfProject<CGridEntity> {
 	public static String getIconFilename() { return "vaadin:viewport"; }
 
 	public static Class<?> getViewClassStatic() { return CGridEntityView.class; }
-
-	public CGridEntity() {
-		super();
-	}
 
 	@Column (name = "data_service_bean_name", nullable = false, length = 100)
 	@Size (max = 100)
@@ -43,20 +38,24 @@ public class CGridEntity extends CEntityOfProject<CGridEntity> {
 	)
 	private String selectedFields;
 
+	public CGridEntity() {
+		super();
+	}
+
 	public CGridEntity(final String name, final CProject project) {
 		super(CGridEntity.class, name, project);
 	}
+
+	public String getDataServiceBeanName() { return dataServiceBeanName; }
 
 	@Override
 	public String getDisplayName() { // TODO Auto-generated method stub
 		return "GridEntity: " + getName();
 	}
 
-	public String getDataServiceBeanName() { return dataServiceBeanName; }
+	public String getSelectedFields() { return selectedFields; }
 
 	public void setDataServiceBeanName(final String dataServiceBeanName) { this.dataServiceBeanName = dataServiceBeanName; }
-
-	public String getSelectedFields() { return selectedFields; }
 
 	public void setSelectedFields(final String selectedFields) { this.selectedFields = selectedFields; }
 }

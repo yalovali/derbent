@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +26,7 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 	/** Constructor for CSystemSettingsService.
 	 * @param repository the CSystemSettingsRepository instance
 	 * @param clock      the Clock instance for time-related operations */
-	public CSystemSettingsService(final CSystemSettingsRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CSystemSettingsService(final CSystemSettingsRepository repository, final Clock clock, @Lazy final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

@@ -27,9 +27,6 @@ import tech.derbent.setup.service.CSystemSettingsService;
 class CCustomLoginViewUrlMappingTest {
 
     @Mock
-    private CSystemSettingsService systemSettingsService;
-    
-    @Mock
     private BeforeEnterEvent event;
     
     @Mock
@@ -39,10 +36,12 @@ class CCustomLoginViewUrlMappingTest {
     private QueryParameters queryParameters;
     
     private CCustomLoginView loginView;
-    
+    private CSystemSettingsService systemSettingsService;
+
     @BeforeEach
     void setUp() {
-        loginView = new CCustomLoginView();
+        systemSettingsService = mock(CSystemSettingsService.class);
+        loginView = new CCustomLoginView(systemSettingsService);
         // Inject the mock service using reflection since it's @Autowired
         try {
             var field = CCustomLoginView.class.getDeclaredField("systemSettingsService");
