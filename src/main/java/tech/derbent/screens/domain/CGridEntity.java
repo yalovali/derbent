@@ -14,6 +14,7 @@ import tech.derbent.screens.view.CGridEntityView;
 @Table (name = "cgridentity")
 @AttributeOverride (name = "id", column = @Column (name = "grid_entity_id"))
 public class CGridEntity extends CEntityOfProject<CGridEntity> {
+
 	public static String getEntityColorCode() { return getIconColorCode(); }
 
 	public static String getIconColorCode() { return "#6f42c1"; }
