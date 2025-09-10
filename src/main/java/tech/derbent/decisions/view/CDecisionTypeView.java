@@ -28,7 +28,8 @@ public class CDecisionTypeView extends CGridViewBaseProject<CDecisionType> {
 
 	private final String ENTITY_ID_FIELD = "decisiontype_id";
 
-	public CDecisionTypeView(final CDecisionTypeService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
+	public CDecisionTypeView(final CDecisionTypeService entityService, final CSessionService sessionService,
+			final CDetailSectionService screenService) {
 		super(CDecisionType.class, entityService, sessionService, screenService);
 	}
 

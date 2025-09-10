@@ -30,7 +30,8 @@ public class CMeetingTypeView extends CGridViewBaseProject<CMeetingType> {
 
 	private final String ENTITY_ID_FIELD = "meetingtype_id";
 
-	public CMeetingTypeView(final CMeetingTypeService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
+	public CMeetingTypeView(final CMeetingTypeService entityService, final CSessionService sessionService,
+			final CDetailSectionService screenService) {
 		super(CMeetingType.class, entityService, sessionService, screenService);
 	}
 

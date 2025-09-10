@@ -32,7 +32,8 @@ public class CActivityTypeView extends CGridViewBaseProject<CActivityType> {
 
 	private final String ENTITY_ID_FIELD = "activity_type_id";
 
-	public CActivityTypeView(final CActivityTypeService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
+	public CActivityTypeView(final CActivityTypeService entityService, final CSessionService sessionService,
+			final CDetailSectionService screenService) {
 		super(CActivityType.class, entityService, sessionService, screenService);
 	}
 

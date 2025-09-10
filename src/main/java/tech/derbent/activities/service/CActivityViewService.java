@@ -11,6 +11,7 @@ import tech.derbent.screens.service.CDetailLinesService;
 import tech.derbent.users.service.CUserViewService;
 
 public class CActivityViewService {
+
 	public static final String BASE_VIEW_NAME = "Activity View";
 	public static final String BASE_PANEL_NAME = "Activity Information";
 	static EntityFieldInfo info;

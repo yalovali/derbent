@@ -9,42 +9,39 @@ import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
-import tech.derbent.screens.domain.CDetailSection;
-import tech.derbent.screens.domain.CMasterSection;
+import tech.derbent.screens.domain.CGridEntity;
 import tech.derbent.screens.service.CDetailSectionService;
-import tech.derbent.screens.service.CMasterSectionService;
+import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.session.service.CSessionService;
 
-@Route ("cmastersectionview")
-@PageTitle ("Master Section Detail")
-@Menu (order = 1.5, icon = "class:tech.derbent.screens.view.CMasterSectionView", title = "UI.MasterSections")
+@Route ("cgridentityview")
+@PageTitle ("Grids Detail")
+@Menu (order = 1.5, icon = "class:tech.derbent.screens.view.CGridEntityView", title = "UI.Grids")
 @PermitAll
-public class CMasterSectionView extends CGridViewBaseProject<CMasterSection> {
+public class CGridEntityView extends CGridViewBaseProject<CGridEntity> {
 
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }
 
 	public static String getIconColorCode() {
-		return CDetailSection.getIconColorCode(); // Use the static method from CScreen
+		return CGridEntity.getIconColorCode(); // Use the static method from CScreen
 	}
 
-	public static String getIconFilename() { return CDetailSection.getIconFilename(); }
+	public static String getIconFilename() { return CGridEntity.getIconFilename(); }
 
-	private final String ENTITY_ID_FIELD = "master_section_id";
+	private final String ENTITY_ID_FIELD = "grid_entity_id";
 
-	public CMasterSectionView(final CMasterSectionService entityService, final CSessionService sessionService,
-			final CDetailSectionService screenService) {
-		super(CMasterSection.class, entityService, sessionService, screenService);
+	public CGridEntityView(final CGridEntityService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
+		super(CGridEntity.class, entityService, sessionService, screenService);
 	}
 
 	@Override
-	public void createGridForEntity(final CGrid<CMasterSection> grid) {
+	public void createGridForEntity(final CGrid<CGridEntity> grid) {
 		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
 		grid.addColumnEntityNamed(CEntityOfProject::getProject, "Project");
 		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");
 		grid.addColumn(CEntityNamed::getDescriptionShort, "Description");
-		grid.addDateTimeColumn(CEntityNamed::getCreatedDate, "Created", null);
 	}
 
 	@Override

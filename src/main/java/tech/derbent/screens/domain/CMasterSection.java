@@ -4,6 +4,8 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
+import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.view.CMasterSectionView;
@@ -20,6 +22,21 @@ public class CMasterSection extends CEntityOfProject<CMasterSection> {
 	public static String getIconFilename() { return "vaadin:viewport"; }
 
 	public static Class<?> getViewClassStatic() { return CMasterSectionView.class; }
+
+	@Column (name = "section_db_name", nullable = true, length = 200)
+	@Size (max = 200)
+	@AMetaData (
+			displayName = "Section DB Name", required = true, readOnly = false, description = "Section DB Name", hidden = false, order = 10,
+			maxLength = 200
+	)
+	private String sectionDBName;
+	@Column (name = "section_type", nullable = false, length = 200)
+	@Size (max = 200)
+	@AMetaData (
+			displayName = "Section Type", required = true, readOnly = false, description = "Section Type", hidden = false, order = 10,
+			maxLength = 200, dataProviderBean = "CMasterSectionService", dataProviderMethod = "getAvailableTypes"
+	)
+	private String sectionType;
 
 	public CMasterSection() {
 		super();

@@ -29,7 +29,7 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 			defaultValue = "1"
 	)
 	private CDetailSection detailSection;
-	@Column (name = "line_order", nullable = false)
+	@Column (name = "lineOrder", nullable = false)
 	@Min (value = 1, message = "Line order must be at least 1")
 	@Max (value = 999, message = "Line order cannot exceed 999")
 	@AMetaData (

@@ -5,14 +5,14 @@ import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import tech.derbent.abstracts.services.CEntityOfProjectService;
-import tech.derbent.screens.domain.CMasterSection;
+import tech.derbent.screens.domain.CGridEntity;
 import tech.derbent.session.service.CSessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CMasterSectionService extends CEntityOfProjectService<CMasterSection> {
+public class CGridEntityService extends CEntityOfProjectService<CGridEntity> {
 
-	public CMasterSectionService(final CMasterSectionRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CGridEntityService(final CGridEntityRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 
@@ -21,5 +21,5 @@ public class CMasterSectionService extends CEntityOfProjectService<CMasterSectio
 	}
 
 	@Override
-	protected Class<CMasterSection> getEntityClass() { return CMasterSection.class; }
+	protected Class<CGridEntity> getEntityClass() { return CGridEntity.class; }
 }

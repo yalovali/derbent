@@ -16,14 +16,14 @@ public interface CDetailSectionRepository extends CEntityOfProjectRepository<CDe
 	List<CDetailSection> findActiveByProject(@Param ("project") CProject project);
 	@Query (
 		"SELECT s FROM CDetailSection s " + "LEFT JOIN FETCH s.project " + "LEFT JOIN FETCH s.assignedTo " + "LEFT JOIN FETCH s.createdBy "
-				+ "LEFT JOIN FETCH s.screenLines WHERE s.id = :id"
+				+ "LEFT JOIN FETCH s.detailLines WHERE s.id = :id"
 	)
 	Optional<CDetailSection> findByIdWithEagerLoading(@Param ("id") Long id);
-	@Query ("SELECT s FROM CDetailSection s LEFT JOIN FETCH s.detailSection WHERE s.id = :id")
+	@Query ("SELECT s FROM CDetailSection s LEFT JOIN FETCH s.detailLines WHERE s.id = :id")
 	Optional<CDetailSection> findByIdWithScreenLines(@Param ("id") Long id);
 	@Query (
 		"SELECT s FROM CDetailSection s " + "LEFT JOIN FETCH s.project " + "LEFT JOIN FETCH s.assignedTo " + "LEFT JOIN FETCH s.createdBy "
-				+ "LEFT JOIN FETCH s.detailSection " + "WHERE s.project = :project AND s.name = :name"
+				+ "LEFT JOIN FETCH s.detailLines " + "WHERE s.project = :project AND s.name = :name"
 	)
 	Optional<CDetailSection> findByNameAndProject(@Param ("project") CProject project, @Param ("name") String name);
 	@Override

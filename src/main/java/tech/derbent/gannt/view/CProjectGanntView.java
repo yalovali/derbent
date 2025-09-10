@@ -21,6 +21,7 @@ import tech.derbent.session.service.CSessionService;
 @Menu (order = 1.1, icon = "class:tech.derbent.gannt.domain.CGanntViewEntity", title = "Project.Project Gannt Chart")
 @PermitAll
 public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
+
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }
@@ -33,8 +34,8 @@ public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 
 	private final String ENTITY_ID_FIELD = "ganntview_id";
 
-	protected CProjectGanntView(final CGanntViewEntityService entityService, final CSessionService sessionService, final CDetailSectionService screenService,
-			final CActivityService activityService, final CMeetingService meetingService) {
+	protected CProjectGanntView(final CGanntViewEntityService entityService, final CSessionService sessionService,
+			final CDetailSectionService screenService, final CActivityService activityService, final CMeetingService meetingService) {
 		super(CGanntViewEntity.class, entityService, sessionService, screenService, activityService, meetingService);
 		final CGanntViewEntity viewEntity =
 				entityService.listByProject(sessionService.getActiveProject().orElse(null)).stream().findFirst().orElse(null);

@@ -35,7 +35,8 @@ public class CActivityStatusView extends CGridViewBaseProject<CActivityStatus> {
 
 	private final String ENTITY_ID_FIELD = "activity_status_id";
 
-	public CActivityStatusView(final CActivityStatusService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
+	public CActivityStatusView(final CActivityStatusService entityService, final CSessionService sessionService,
+			final CDetailSectionService screenService) {
 		super(CActivityStatus.class, entityService, sessionService, screenService);
 	}
 

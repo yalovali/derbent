@@ -33,7 +33,8 @@ public class CDecisionStatusView extends CGridViewBaseProject<CDecisionStatus> {
 
 	private final String ENTITY_ID_FIELD = "decision_status_id";
 
-	public CDecisionStatusView(final CDecisionStatusService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
+	public CDecisionStatusView(final CDecisionStatusService entityService, final CSessionService sessionService,
+			final CDetailSectionService screenService) {
 		super(CDecisionStatus.class, entityService, sessionService, screenService);
 	}
 

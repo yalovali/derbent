@@ -9,8 +9,8 @@ public class CPanelDetailSectionBasicInfo extends CPanelDetailSectionBase {
 
 	private static final long serialVersionUID = 1L;
 
-	public CPanelDetailSectionBasicInfo(final CDetailSection currentEntity, final CEnhancedBinder<CDetailSection> beanValidationBinder, final CDetailSectionService entityService)
-			throws Exception {
+	public CPanelDetailSectionBasicInfo(final CDetailSection currentEntity, final CEnhancedBinder<CDetailSection> beanValidationBinder,
+			final CDetailSectionService entityService) throws Exception {
 		super("Basic Information", currentEntity, beanValidationBinder, entityService);
 		initPanel();
 	}

@@ -55,11 +55,11 @@ import tech.derbent.risks.domain.CRisk;
 import tech.derbent.risks.domain.ERiskSeverity;
 import tech.derbent.risks.service.CRiskService;
 import tech.derbent.risks.service.CRiskViewService;
-import tech.derbent.screens.domain.CDetailSection;
 import tech.derbent.screens.domain.CDetailLines;
-import tech.derbent.screens.service.CEntityFieldService;
+import tech.derbent.screens.domain.CDetailSection;
 import tech.derbent.screens.service.CDetailLinesService;
 import tech.derbent.screens.service.CDetailSectionService;
+import tech.derbent.screens.service.CEntityFieldService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.EUserRole;
 import tech.derbent.users.service.CUserService;
@@ -69,61 +69,61 @@ import tech.derbent.users.service.CUserViewService;
 public class CSampleDataInitializer {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSampleDataInitializer.class);
-	// Standard password for all users as per coding guidelines
-	private static final String STANDARD_PASSWORD = "test123";
 	// Profile picture filenames mapping for users
 	private static final java.util.Map<String, String> PROFILE_PICTURE_MAPPING = java.util.Map.of("admin", "admin.svg", "mkaradeniz",
 			"michael_chen.svg", "msahin", "sophia_brown.svg", "bozkan", "david_kim.svg", "ademir", "emma_wilson.svg");
-	// Service dependencies - injected via constructor
-	private final CProjectService projectService;
-	private final CUserService userService;
+	// Standard password for all users as per coding guidelines
+	private static final String STANDARD_PASSWORD = "test123";
 	private final CActivityService activityService;
-	private final CUserTypeService userTypeService;
-	private final CActivityTypeService activityTypeService;
-	private final CMeetingTypeService meetingTypeService;
-	private final COrderTypeService orderTypeService;
-	private final CCompanyService companyService;
-	private final CCommentService commentService;
-	private final CCommentPriorityService commentPriorityService;
-	private final CMeetingService meetingService;
-	private final CRiskService riskService;
-	private final CMeetingStatusService meetingStatusService;
-	private final CDecisionStatusService decisionStatusService;
 	private final CActivityStatusService activityStatusService;
-	private final CDecisionService decisionService;
+	private final CActivityTypeService activityTypeService;
+	private final CCommentPriorityService commentPriorityService;
+	private final CCommentService commentService;
+	private final CCompanyService companyService;
 	private final CCurrencyService currencyService;
-	private final CDetailSectionService screenService;
-	private final CDetailLinesService screenLinesService;
-	private final CPageEntityService pageEntityService;
-	private final CGanntViewEntityService ganntViewEntityService;
-	private final JdbcTemplate jdbcTemplate;
+	private final CDecisionService decisionService;
+	private final CDecisionStatusService decisionStatusService;
 	@PersistenceContext
 	private EntityManager em;
+	private final CGanntViewEntityService ganntViewEntityService;
+	private final JdbcTemplate jdbcTemplate;
+	private final CMeetingService meetingService;
+	private final CMeetingStatusService meetingStatusService;
+	private final CMeetingTypeService meetingTypeService;
+	private final COrderTypeService orderTypeService;
+	private final CPageEntityService pageEntityService;
+	// Service dependencies - injected via constructor
+	private final CProjectService projectService;
+	private final CRiskService riskService;
+	private final CDetailLinesService screenLinesService;
+	private final CDetailSectionService screenService;
+	private final CUserService userService;
+	private final CUserTypeService userTypeService;
 
 	public CSampleDataInitializer() {
-		this.projectService = CSpringContext.getBean(CProjectService.class);
-		this.userService = CSpringContext.getBean(CUserService.class);
-		this.activityService = CSpringContext.getBean(CActivityService.class);
-		this.userTypeService = CSpringContext.getBean(CUserTypeService.class);
-		this.activityTypeService = CSpringContext.getBean(CActivityTypeService.class);
-		this.meetingTypeService = CSpringContext.getBean(CMeetingTypeService.class);
-		this.orderTypeService = CSpringContext.getBean(COrderTypeService.class);
-		this.companyService = CSpringContext.getBean(CCompanyService.class);
-		this.commentService = CSpringContext.getBean(CCommentService.class);
-		this.commentPriorityService = CSpringContext.getBean(CCommentPriorityService.class);
-		this.meetingService = CSpringContext.getBean(CMeetingService.class);
-		this.riskService = CSpringContext.getBean(CRiskService.class);
-		this.meetingStatusService = CSpringContext.getBean(CMeetingStatusService.class);
-		this.decisionStatusService = CSpringContext.getBean(CDecisionStatusService.class);
-		this.activityStatusService = CSpringContext.getBean(CActivityStatusService.class);
-		this.decisionService = CSpringContext.getBean(CDecisionService.class);
-		this.currencyService = CSpringContext.getBean(CCurrencyService.class);
-		this.screenService = CSpringContext.getBean(CDetailSectionService.class);
-		this.screenLinesService = CSpringContext.getBean(CDetailLinesService.class);
-		this.pageEntityService = CSpringContext.getBean(CPageEntityService.class);
-		this.ganntViewEntityService = CSpringContext.getBean(CGanntViewEntityService.class);
+		projectService = CSpringContext.getBean(CProjectService.class);
+		userService = CSpringContext.getBean(CUserService.class);
+		activityService = CSpringContext.getBean(CActivityService.class);
+		userTypeService = CSpringContext.getBean(CUserTypeService.class);
+		activityTypeService = CSpringContext.getBean(CActivityTypeService.class);
+		meetingTypeService = CSpringContext.getBean(CMeetingTypeService.class);
+		orderTypeService = CSpringContext.getBean(COrderTypeService.class);
+		companyService = CSpringContext.getBean(CCompanyService.class);
+		commentService = CSpringContext.getBean(CCommentService.class);
+		commentPriorityService = CSpringContext.getBean(CCommentPriorityService.class);
+		meetingService = CSpringContext.getBean(CMeetingService.class);
+		riskService = CSpringContext.getBean(CRiskService.class);
+		meetingStatusService = CSpringContext.getBean(CMeetingStatusService.class);
+		decisionStatusService = CSpringContext.getBean(CDecisionStatusService.class);
+		activityStatusService = CSpringContext.getBean(CActivityStatusService.class);
+		decisionService = CSpringContext.getBean(CDecisionService.class);
+		currencyService = CSpringContext.getBean(CCurrencyService.class);
+		screenService = CSpringContext.getBean(CDetailSectionService.class);
+		screenLinesService = CSpringContext.getBean(CDetailLinesService.class);
+		pageEntityService = CSpringContext.getBean(CPageEntityService.class);
+		ganntViewEntityService = CSpringContext.getBean(CGanntViewEntityService.class);
 		final DataSource ds = CSpringContext.getBean(DataSource.class);
-		this.jdbcTemplate = new JdbcTemplate(ds);
+		jdbcTemplate = new JdbcTemplate(ds);
 	}
 
 	@Transactional
@@ -1279,6 +1279,35 @@ public class CSampleDataInitializer {
 		}
 	}
 
+	private void initializePageEntities(final CProject project) {
+		try {
+			// Create sample page entities for the project
+			final CPageEntity page1 = new CPageEntity("Project Overview", project);
+			page1.setDescription("Overview of project objectives, scope, and key milestones");
+			page1.setTitle("pages." + page1.getName());
+			page1.setPageTitle("Project Overview");
+			page1.setRoute("route_index_" + (pageEntityService.countByProject(project) + 1));
+			pageEntityService.save(page1);
+			final CPageEntity page2 = new CPageEntity("Team Directory", project);
+			page2.setDescription("List of team members with roles and contact information");
+			page2.setTitle("pages." + page2.getName());
+			page2.setPageTitle("Team Directory");
+			page2.setRoute("route_index_" + (pageEntityService.countByProject(project) + 1));
+			pageEntityService.save(page2);
+			final CPageEntity page3 = new CPageEntity("Resource Library", project);
+			page3.setDescription("Collection of project-related documents and resources");
+			page3.setTitle("pages." + page3.getName());
+			page3.setPageTitle("Resource Library");
+			page3.setTitle("Resource Library");
+			page3.setRoute("route_index_" + (pageEntityService.countByProject(project) + 1));
+			pageEntityService.save(page3);
+			LOGGER.info("Successfully created sample page entities for project: {}", project.getName());
+		} catch (final Exception e) {
+			LOGGER.error("Error creating sample page entities for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize page entities for project: " + project.getName(), e);
+		}
+	}
+
 	/** Initializes sample projects with different scopes and characteristics. */
 	private void initializeProjects() {
 		try {
@@ -1387,28 +1416,6 @@ public class CSampleDataInitializer {
 		} catch (final Exception e) {
 			LOGGER.error("Error loading profile picture: {}", filename, e);
 			return null;
-		}
-	}
-
-	private void initializePageEntities(final CProject project) {
-		try {
-			// Create sample page entities for the project
-			final CPageEntity page1 = new CPageEntity("Project Overview", project);
-			page1.setDescription("Overview of project objectives, scope, and key milestones");
-			page1.setRoute("pages." + page1.getName());
-			pageEntityService.save(page1);
-			final CPageEntity page2 = new CPageEntity("Team Directory", project);
-			page2.setDescription("List of team members with roles and contact information");
-			page2.setRoute("pages." + page2.getName());
-			pageEntityService.save(page2);
-			final CPageEntity page3 = new CPageEntity("Resource Library", project);
-			page3.setDescription("Collection of project-related documents and resources");
-			page3.setRoute("pages." + page3.getName());
-			pageEntityService.save(page3);
-			LOGGER.info("Successfully created sample page entities for project: {}", project.getName());
-		} catch (final Exception e) {
-			LOGGER.error("Error creating sample page entities for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize page entities for project: " + project.getName(), e);
 		}
 	}
 

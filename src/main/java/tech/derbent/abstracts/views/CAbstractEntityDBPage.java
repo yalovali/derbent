@@ -48,23 +48,23 @@ import tech.derbent.session.service.CSessionService;
 public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<EntityClass>> extends CAbstractPage implements CLayoutChangeListener {
 
 	private static final long serialVersionUID = 1L;
-	protected final Class<EntityClass> entityClass;
-	private final CEnhancedBinder<EntityClass> binder;
-	// Search functionality
-	protected CSearchToolbar searchToolbar;
-	protected String currentSearchText = "";
-	protected CMasterViewSectionBase<EntityClass> masterViewSection;
-	// divide screen into two parts
-	protected SplitLayout splitLayout = new SplitLayout();
+	ArrayList<CAccordionDBEntity<EntityClass>> AccordionList = new ArrayList<CAccordionDBEntity<EntityClass>>(); // List of accordions
 	private final CFlexLayout baseDetailsLayout;
+	private final CEnhancedBinder<EntityClass> binder;
+	private EntityClass currentEntity;
+	protected String currentSearchText = "";
 	// private final VerticalLayout baseDetailsLayout = new VerticalLayout();
 	private final Div detailsTabLayout = new Div();
-	private EntityClass currentEntity;
+	protected final Class<EntityClass> entityClass;
 	protected final CAbstractService<EntityClass> entityService;
 	protected CLayoutService layoutService; // Optional injection
-	ArrayList<CAccordionDBEntity<EntityClass>> AccordionList = new ArrayList<CAccordionDBEntity<EntityClass>>(); // List of accordions
-	{}
+	protected CMasterViewSectionBase<EntityClass> masterViewSection;
+	// Search functionality
+	protected CSearchToolbar searchToolbar;
 	protected CSessionService sessionService;
+	// divide screen into two parts
+	protected SplitLayout splitLayout = new SplitLayout();
+	{}
 
 	protected CAbstractEntityDBPage(final Class<EntityClass> entityClass, final CAbstractService<EntityClass> entityService,
 			final CSessionService sessionService) {
@@ -72,7 +72,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		this.entityClass = entityClass;
 		this.entityService = entityService;
 		this.sessionService = sessionService;
-		this.baseDetailsLayout = CFlexLayout.forEntityPage();
+		baseDetailsLayout = CFlexLayout.forEntityPage();
 		// dont setid here, as it may not be initialized yet
 		binder = new CEnhancedBinder<>(entityClass);
 		// layout for the secondary part of the split layout create the tab layout for the

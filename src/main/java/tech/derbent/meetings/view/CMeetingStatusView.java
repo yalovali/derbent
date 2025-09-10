@@ -31,7 +31,8 @@ public class CMeetingStatusView extends CGridViewBaseProject<CMeetingStatus> {
 
 	private final String ENTITY_ID_FIELD = "meeting_status_id";
 
-	public CMeetingStatusView(final CMeetingStatusService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
+	public CMeetingStatusView(final CMeetingStatusService entityService, final CSessionService sessionService,
+			final CDetailSectionService screenService) {
 		super(CMeetingStatus.class, entityService, sessionService, screenService);
 	}
 

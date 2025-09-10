@@ -16,8 +16,8 @@ public class CPanelDetailSectionPreview extends CPanelDetailSectionBase {
 	private static final long serialVersionUID = 1L;
 	CDiv divPreview;
 
-	public CPanelDetailSectionPreview(final CDetailSection currentEntity, final CEnhancedBinder<CDetailSection> beanValidationBinder, final CDetailSectionService entityService)
-			throws Exception {
+	public CPanelDetailSectionPreview(final CDetailSection currentEntity, final CEnhancedBinder<CDetailSection> beanValidationBinder,
+			final CDetailSectionService entityService) throws Exception {
 		super("Preview", currentEntity, beanValidationBinder, entityService);
 		initPanel();
 	}

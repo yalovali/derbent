@@ -1,5 +1,6 @@
 package tech.derbent.login.service;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,6 +18,7 @@ import tech.derbent.users.service.CUserService;
  * successful, user is authenticated and granted access 8. User roles determine what resources they can access */
 @EnableWebSecurity
 @Configuration
+@ConditionalOnWebApplication
 class CSecurityConfig extends VaadinWebSecurity {
 
 	private final CUserService loginUserService;

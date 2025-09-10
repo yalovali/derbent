@@ -18,6 +18,7 @@ import tech.derbent.projects.domain.CProject;
 /** CGanttDataProvider - Combines activities and meetings of a project into unified CGanttItem list. Provides a single data source for Gantt grids and
  * charts. */
 public class CGanttDataProvider extends AbstractBackEndDataProvider<CGanttItem, Void> {
+
 	private static final long serialVersionUID = 1L;
 	/** Zaman çizelgesi için tarih öncelikli sıralama: startDate (null'lar sonda) → endDate (null'lar sonda) */
 	private static final Comparator<CGanttItem> BY_TIMELINE =

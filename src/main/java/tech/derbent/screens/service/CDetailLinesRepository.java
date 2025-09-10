@@ -15,6 +15,6 @@ public interface CDetailLinesRepository extends CAbstractRepository<CDetailLines
 	List<CDetailLines> findActiveByScreen(@Param ("detailSection") CDetailSection detailSection);
 	@Query ("SELECT sl FROM CDetailLines sl " + "WHERE sl.detailSection = :detailSection " + "ORDER BY sl.lineOrder ASC")
 	List<CDetailLines> findByMaster(@Param ("detailSection") CDetailSection detailSection);
-	@Query ("SELECT COALESCE(MAX(sl.lineOrder), 0) + 1 FROM CDetailSection sl " + "WHERE sl.detailSection = :detailSection")
+	@Query ("SELECT COALESCE(MAX(sl.lineOrder), 0) + 1 FROM CDetailLines sl WHERE sl.detailSection = :detailSection")
 	Integer getNextLineOrder(@Param ("detailSection") CDetailSection detailSection);
 }
