@@ -43,4 +43,8 @@ public class CGridEntity extends CEntityOfProject<CGridEntity> {
 	public String getDisplayName() { // TODO Auto-generated method stub
 		return "GridEntity: " + getName();
 	}
+
+	public String getDataServiceBeanName() { return dataServiceBeanName; }
+
+	public void setDataServiceBeanName(final String dataServiceBeanName) { this.dataServiceBeanName = dataServiceBeanName; }
 }
