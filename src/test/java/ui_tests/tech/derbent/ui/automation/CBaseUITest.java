@@ -89,11 +89,11 @@ public class CBaseUITest {
 	// All views combined for comprehensive testing
 	protected Class<?>[] allViewClasses = {
 			CProjectsView.class, CActivitiesView.class, CMeetingsView.class, CDecisionsView.class, CUsersView.class, COrdersView.class,
-			CRiskView.class, CCompanyView.class, CDetailSectionView.class, CActivityStatusView.class, CActivityTypeView.class, CDecisionStatusView.class,
-			CDecisionTypeView.class, CMeetingStatusView.class, CMeetingTypeView.class, CUserTypeView.class, CRiskStatusView.class,
-			CCommentPriorityView.class, CCompanySettingsView.class, CSystemSettingsView.class, CDashboardView.class, CActivityKanbanBoardView.class,
-			CMeetingKanbanBoardView.class, CGenericActivityKanbanBoardView.class, CExampleHierarchicalMenuView.class, CExampleSettingsView.class,
-			CSearchDemoView.class, CSearchShowcaseView.class, CProjectDetailsView.class
+			CRiskView.class, CCompanyView.class, CDetailSectionView.class, CActivityStatusView.class, CActivityTypeView.class,
+			CDecisionStatusView.class, CDecisionTypeView.class, CMeetingStatusView.class, CMeetingTypeView.class, CUserTypeView.class,
+			CRiskStatusView.class, CCommentPriorityView.class, CCompanySettingsView.class, CSystemSettingsView.class, CDashboardView.class,
+			CActivityKanbanBoardView.class, CMeetingKanbanBoardView.class, CGenericActivityKanbanBoardView.class, CExampleHierarchicalMenuView.class,
+			CExampleSettingsView.class, CSearchDemoView.class, CSearchShowcaseView.class, CProjectDetailsView.class
 	};
 	// Legacy property for backward compatibility
 	protected Class<?>[] viewClasses = mainViewClasses;
