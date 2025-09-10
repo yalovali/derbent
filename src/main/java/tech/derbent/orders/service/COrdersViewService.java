@@ -4,8 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.orders.domain.COrder;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.screens.domain.CScreen;
-import tech.derbent.screens.service.CScreenLinesService;
+import tech.derbent.screens.domain.CDetailSection;
+import tech.derbent.screens.service.CDetailLinesService;
 
 public class COrdersViewService {
 
@@ -13,9 +13,9 @@ public class COrdersViewService {
 	public static final String BASE_PANEL_NAME = "Orders Information";
 	private static Logger LOGGER = LoggerFactory.getLogger(COrdersViewService.class);
 
-	public static CScreen createBasicView(final CProject project) {
+	public static CDetailSection createBasicView(final CProject project) {
 		try {
-			final CScreen scr = new CScreen();
+			final CDetailSection scr = new CDetailSection();
 			final Class<?> clazz = COrder.class;
 			final String entityType = clazz.getSimpleName().replaceFirst("^C", "");
 			scr.setProject(project);
@@ -26,32 +26,32 @@ public class COrdersViewService {
 			scr.setName(BASE_VIEW_NAME);
 			scr.setDescription(entityType + " View Details");
 			// create screen lines
-			scr.addScreenLine(CScreenLinesService.createSection(COrdersViewService.BASE_PANEL_NAME));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "name"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "description"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "project"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "orderType"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "status"));
-			scr.addScreenLine(CScreenLinesService.createSection("Schedule"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "createdBy"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "createdDate"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "orderDate"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "requiredDate"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "deliveryDate"));
-			scr.addScreenLine(CScreenLinesService.createSection("Provieder Information"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "providerCompanyName"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "providerContactName"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "providerEmail"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "requestor"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "responsible"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "currency"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "estimatedCost"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "actualCost"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "orderNumber"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "deliveryAddress"));
+			scr.addScreenLine(CDetailLinesService.createSection(COrdersViewService.BASE_PANEL_NAME));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "orderType"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
+			scr.addScreenLine(CDetailLinesService.createSection("Schedule"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "orderDate"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "requiredDate"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "deliveryDate"));
+			scr.addScreenLine(CDetailLinesService.createSection("Provieder Information"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "providerCompanyName"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "providerContactName"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "providerEmail"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "requestor"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "responsible"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "currency"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "estimatedCost"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actualCost"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "orderNumber"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "deliveryAddress"));
 			// scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "approvals"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "assignedTo"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {

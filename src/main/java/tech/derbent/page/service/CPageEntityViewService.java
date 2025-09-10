@@ -4,34 +4,34 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.screens.domain.CScreen;
-import tech.derbent.screens.service.CScreenLineSampleBase;
-import tech.derbent.screens.service.CScreenLinesService;
+import tech.derbent.screens.domain.CDetailSection;
+import tech.derbent.screens.service.CDetailLinesSampleBase;
+import tech.derbent.screens.service.CDetailLinesService;
 
-public class CPageEntityViewService extends CScreenLineSampleBase {
+public class CPageEntityViewService extends CDetailLinesSampleBase {
 
 	public static final String BASE_VIEW_NAME = "Page View";
 	public static final String BASE_PANEL_NAME = "Page Information";
 	private static Logger LOGGER = LoggerFactory.getLogger(CPageEntityViewService.class);
 
-	public static CScreen createBasicView(final CProject project) {
+	public static CDetailSection createBasicView(final CProject project) {
 		try {
 			final Class<?> clazz = CPageEntity.class;
-			CScreen scr = createBaseScreenEntity(project, clazz, BASE_VIEW_NAME);
+			CDetailSection scr = createBaseScreenEntity(project, clazz, BASE_VIEW_NAME);
 			// create screen lines
-			scr.addScreenLine(CScreenLinesService.createSection(BASE_PANEL_NAME));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "id"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "name"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "description"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "project"));
-			scr.addScreenLine(CScreenLinesService.createSection("Route Information"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "route"));
+			scr.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
+			scr.addScreenLine(CDetailLinesService.createSection("Route Information"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "route"));
 			/******************/
-			scr.addScreenLine(CScreenLinesService.createSection("System Access"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "assignedTo"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "createdBy"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "createdDate"));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
+			scr.addScreenLine(CDetailLinesService.createSection("System Access"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {

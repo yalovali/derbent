@@ -7,16 +7,16 @@ import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.abstracts.services.CDetailsBuilder;
 import tech.derbent.abstracts.views.components.CButton;
 import tech.derbent.abstracts.views.components.CDiv;
-import tech.derbent.screens.domain.CScreen;
+import tech.derbent.screens.domain.CDetailSection;
 import tech.derbent.screens.service.CEntityFieldService;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 
-public class CPanelScreenPreview extends CPanelScreenBase {
+public class CPanelDetailSectionPreview extends CPanelDetailSectionBase {
 
 	private static final long serialVersionUID = 1L;
 	CDiv divPreview;
 
-	public CPanelScreenPreview(final CScreen currentEntity, final CEnhancedBinder<CScreen> beanValidationBinder, final CScreenService entityService)
+	public CPanelDetailSectionPreview(final CDetailSection currentEntity, final CEnhancedBinder<CDetailSection> beanValidationBinder, final CDetailSectionService entityService)
 			throws Exception {
 		super("Preview", currentEntity, beanValidationBinder, entityService);
 		initPanel();
@@ -36,7 +36,7 @@ public class CPanelScreenPreview extends CPanelScreenBase {
 	}
 
 	@Override
-	public void populateForm(final CScreen screen) {
+	public void populateForm(final CDetailSection screen) {
 		super.populateForm(screen);
 		try {
 			if (screen == null) {

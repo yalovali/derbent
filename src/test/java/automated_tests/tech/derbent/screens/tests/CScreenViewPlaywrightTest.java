@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.TestPropertySource;
-import tech.derbent.screens.view.CScreenView;
+import tech.derbent.screens.view.CDetailSectionView;
 import ui_tests.tech.derbent.ui.automation.CBaseUITest;
 
 /** CScreenViewPlaywrightTest - Comprehensive Playwright test suite for CScreenView. Tests the screen configuration UI with focus on ID-based
@@ -27,7 +27,7 @@ public class CScreenViewPlaywrightTest extends CBaseUITest {
 		LOGGER.info("🧪 Testing CScreenView loading...");
 		// Login and navigate to screen view
 		loginToApplication();
-		navigateToViewByClass(CScreenView.class);
+		navigateToViewByClass(CDetailSectionView.class);
 		// Take screenshot for documentation
 		takeScreenshot("cscreenview-loading", false);
 		// Assert that the view loads successfully
@@ -41,7 +41,7 @@ public class CScreenViewPlaywrightTest extends CBaseUITest {
 	void testScreenViewGridPresence() {
 		LOGGER.info("🧪 Testing CScreenView grid presence...");
 		loginToApplication();
-		navigateToViewByClass(CScreenView.class);
+		navigateToViewByClass(CDetailSectionView.class);
 		// Wait for grid to be visible
 		waitForElementById("grid", 10);
 		// Assert grid exists and is visible
@@ -55,7 +55,7 @@ public class CScreenViewPlaywrightTest extends CBaseUITest {
 	void testScreenCRUDOperations() {
 		LOGGER.info("🧪 Testing CScreenView CRUD operations...");
 		loginToApplication();
-		navigateToViewByClass(CScreenView.class);
+		navigateToViewByClass(CDetailSectionView.class);
 		// Wait for page to load
 		waitForElementById("main-content", 5);
 		// Test create operation - click add button
@@ -88,7 +88,7 @@ public class CScreenViewPlaywrightTest extends CBaseUITest {
 	void testScreenLineOperations() {
 		LOGGER.info("🧪 Testing CScreenView screen line operations...");
 		loginToApplication();
-		navigateToViewByClass(CScreenView.class);
+		navigateToViewByClass(CDetailSectionView.class);
 		// Wait for page to load
 		waitForElementById("main-content", 5);
 		// Take screenshot of the main view
@@ -154,7 +154,7 @@ public class CScreenViewPlaywrightTest extends CBaseUITest {
 	void testScreenViewFormValidation() {
 		LOGGER.info("🧪 Testing CScreenView form validation...");
 		loginToApplication();
-		navigateToViewByClass(CScreenView.class);
+		navigateToViewByClass(CDetailSectionView.class);
 		// Wait for page to load
 		waitForElementById("main-content", 5);
 		// This test specifically addresses the validation issue mentioned in the problem statement
@@ -201,7 +201,7 @@ public class CScreenViewPlaywrightTest extends CBaseUITest {
 	void testScreenViewResponsiveDesign() {
 		LOGGER.info("🧪 Testing CScreenView responsive design...");
 		loginToApplication();
-		navigateToViewByClass(CScreenView.class);
+		navigateToViewByClass(CDetailSectionView.class);
 		// Test different viewport sizes
 		int[][] viewports = {
 				{

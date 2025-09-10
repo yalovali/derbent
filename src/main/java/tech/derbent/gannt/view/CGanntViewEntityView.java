@@ -12,7 +12,7 @@ import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.gannt.domain.CGanntViewEntity;
 import tech.derbent.gannt.service.CGanntViewEntityService;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 
 @Route ("cganntviewentityview")
@@ -36,7 +36,7 @@ public class CGanntViewEntityView extends CGridViewBaseProject<CGanntViewEntity>
 	private final String ENTITY_ID_FIELD = "screen_id";
 
 	protected CGanntViewEntityView(final CGanntViewEntityService entityService, final CSessionService sessionService,
-			final CScreenService screenService) {
+			final CDetailSectionService screenService) {
 		super(CGanntViewEntity.class, entityService, sessionService, screenService);
 		// TODO Auto-generated constructor stub
 	}

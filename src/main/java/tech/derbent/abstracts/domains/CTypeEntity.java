@@ -28,13 +28,6 @@ public abstract class CTypeEntity<EntityType> extends CEntityOfProject<EntityTyp
 			hidden = false, order = 4
 	)
 	private Integer sortOrder = 100;
-	@Column (name = "is_active", nullable = false)
-	@NotNull
-	@AMetaData (
-			displayName = "Is Active", required = true, readOnly = false, defaultValue = "true",
-			description = "Indicates if this type is currently active and available", hidden = false, order = 6
-	)
-	private Boolean isActive = true;
 
 	/** Default constructor for JPA. */
 	protected CTypeEntity() {
@@ -42,7 +35,6 @@ public abstract class CTypeEntity<EntityType> extends CEntityOfProject<EntityTyp
 		// Initialize with default values for JPA
 		this.color = "#4A90E2";
 		this.sortOrder = 100;
-		this.isActive = true;
 	}
 
 	/** Constructor with required fields.
@@ -61,10 +53,6 @@ public abstract class CTypeEntity<EntityType> extends CEntityOfProject<EntityTyp
 	 * @return the hex color code */
 	public String getColor() { return color; }
 
-	/** Gets the active status of this type.
-	 * @return true if active, false otherwise */
-	public Boolean getIsActive() { return isActive; }
-
 	/** Gets the sort order for this type.
 	 * @return the sort order */
 	public Integer getSortOrder() { return sortOrder; }
@@ -75,17 +63,9 @@ public abstract class CTypeEntity<EntityType> extends CEntityOfProject<EntityTyp
 		return super.hashCode();
 	}
 
-	/** Convenience method to check if this type is active.
-	 * @return true if active, false otherwise */
-	public boolean isActive() { return Boolean.TRUE.equals(isActive); }
-
 	/** Sets the color code for this type.
 	 * @param color the hex color code to set */
 	public void setColor(final String color) { this.color = color; }
-
-	/** Sets the active status of this type.
-	 * @param isActive the active status to set */
-	public void setIsActive(final Boolean isActive) { this.isActive = isActive; }
 
 	/** Sets the sort order for this type.
 	 * @param sortOrder the sort order to set */
@@ -93,7 +73,7 @@ public abstract class CTypeEntity<EntityType> extends CEntityOfProject<EntityTyp
 
 	@Override
 	public String toString() {
-		return String.format("%s{id=%d, name='%s', color='%s', sortOrder=%d, isActive=%s, project=%s}", getClass().getSimpleName(), getId(),
-				getName(), color, sortOrder, isActive, getProject() != null ? getProject().getName() : "null");
+		return String.format("%s{id=%d, name='%s', color='%s', sortOrder=%d, project=%s}", getClass().getSimpleName(), getId(), getName(), color,
+				sortOrder, getProject() != null ? getProject().getName() : "null");
 	}
 }

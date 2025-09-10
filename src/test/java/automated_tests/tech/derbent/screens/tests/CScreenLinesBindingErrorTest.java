@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.TestPropertySource;
-import tech.derbent.screens.view.CScreenView;
+import tech.derbent.screens.view.CDetailSectionView;
 import ui_tests.tech.derbent.ui.automation.CBaseUITest;
 
 /** Specific test to reproduce and verify fix for the CEnhancedBinder incomplete bindings error that occurs when clicking "Add Screen Field
@@ -27,7 +27,7 @@ public class CScreenLinesBindingErrorTest extends CBaseUITest {
 		LOGGER.info("🧪 Testing CScreenLinesEditDialog binding error reproduction...");
 		// Login and navigate to screen view
 		loginToApplication();
-		navigateToViewByClass(CScreenView.class);
+		navigateToViewByClass(CDetailSectionView.class);
 		// Wait for page to load
 		waitForElementById("main-content", 5);
 		takeScreenshot("screen-view-loaded", false);

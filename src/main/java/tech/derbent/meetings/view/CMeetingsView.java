@@ -21,7 +21,7 @@ import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.service.CMeetingService;
 import tech.derbent.meetings.service.CMeetingViewService;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 
 @Route ("cmeetingsview")
@@ -43,7 +43,7 @@ public class CMeetingsView extends CGridViewBaseProject<CMeeting> {
 	private final String ENTITY_ID_FIELD = "meeting_id";
 	private TextField searchField;
 
-	public CMeetingsView(final CMeetingService entityService, final CSessionService sessionService, final CScreenService screenService) {
+	public CMeetingsView(final CMeetingService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
 		super(CMeeting.class, entityService, sessionService, screenService);
 	}
 

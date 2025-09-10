@@ -11,7 +11,7 @@ import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.orders.domain.CCurrency;
 import tech.derbent.orders.service.CCurrencyService;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 
 @Route ("ccurrencyview")
@@ -30,7 +30,7 @@ public class CCurrencyView extends CGridViewBaseProject<CCurrency> {
 
 	private final String ENTITY_ID_FIELD = "order_id";
 
-	public CCurrencyView(final CCurrencyService entityService, final CSessionService sessionService, final CScreenService screenService) {
+	public CCurrencyView(final CCurrencyService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
 		super(CCurrency.class, entityService, sessionService, screenService);
 	}
 

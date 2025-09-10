@@ -12,7 +12,7 @@ import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.risks.domain.CRiskStatus;
 import tech.derbent.risks.service.CRiskStatusService;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 
 /** CRiskStatusView - View for managing risk statuses. Layer: View (MVC) Provides CRUD operations for risk statuses using the abstract master-detail
@@ -33,7 +33,7 @@ public class CRiskStatusView extends CGridViewBaseProject<CRiskStatus> {
 
 	private final String ENTITY_ID_FIELD = "risk_status_id";
 
-	public CRiskStatusView(final CRiskStatusService entityService, final CSessionService sessionService, final CScreenService screenService) {
+	public CRiskStatusView(final CRiskStatusService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
 		super(CRiskStatus.class, entityService, sessionService, screenService);
 	}
 

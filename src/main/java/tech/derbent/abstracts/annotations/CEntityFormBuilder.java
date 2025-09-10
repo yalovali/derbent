@@ -44,7 +44,7 @@ import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.views.components.CDiv;
 import tech.derbent.abstracts.views.components.CHorizontalLayout;
 import tech.derbent.abstracts.views.components.CVerticalLayout;
-import tech.derbent.screens.domain.CScreenLines;
+import tech.derbent.screens.domain.CDetailLines;
 import tech.derbent.screens.service.CEntityFieldService;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
@@ -720,12 +720,12 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 		return CEntityFormBuilder.processField(binder, formLayout, horizontalLayoutMap, fieldInfo, componentMap);
 	}
 
-	public Component addFieldLine(final String screenClassType, final CScreenLines line, final VerticalLayout layout) throws Exception {
+	public Component addFieldLine(final String screenClassType, final CDetailLines line, final VerticalLayout layout) throws Exception {
 		final EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(screenClassType, line);
 		return CEntityFormBuilder.processField(binder, layout, horizontalLayoutMap, fieldInfo, componentMap);
 	}
 
-	public Component addFieldLine(final String screenClassType, final CScreenLines line, final VerticalLayout layout,
+	public Component addFieldLine(final String screenClassType, final CDetailLines line, final VerticalLayout layout,
 			final Map<String, Component> componentMap, final Map<String, CHorizontalLayout> horizontalLayoutMap) throws Exception {
 		final EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(screenClassType, line);
 		return CEntityFormBuilder.processField(binder, layout, horizontalLayoutMap, fieldInfo, componentMap);

@@ -1,12 +1,12 @@
 package tech.derbent.screens.service;
 
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.screens.domain.CScreen;
+import tech.derbent.screens.domain.CDetailSection;
 
-public abstract class CScreenLineSampleBase {
+public abstract class CDetailLinesSampleBase {
 
-	protected static CScreen createBaseScreenEntity(CProject project, Class<?> clazz, String baseViewName) {
-		final CScreen scr = new CScreen();
+	protected static CDetailSection createBaseScreenEntity(CProject project, Class<?> clazz, String baseViewName) {
+		final CDetailSection scr = new CDetailSection();
 		scr.setProject(project);
 		scr.setEntityType(clazz.getSimpleName());
 		final String entityType = clazz.getSimpleName().replaceFirst("^C", "");

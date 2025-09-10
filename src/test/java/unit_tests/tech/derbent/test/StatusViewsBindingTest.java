@@ -17,7 +17,7 @@ import tech.derbent.activities.view.CActivityStatusView;
 import tech.derbent.meetings.domain.CMeetingStatus;
 import tech.derbent.meetings.service.CMeetingStatusService;
 import tech.derbent.meetings.view.CMeetingStatusView;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 import unit_tests.tech.derbent.abstracts.domains.CTestBase;
 
@@ -60,7 +60,7 @@ class StatusViewsBindingTest extends CTestBase {
 		assertDoesNotThrow(() -> {
 			final var mockService = mock(CActivityStatusService.class);
 			final var mockSessionService = mock(CSessionService.class);
-			final var mockScreenService = mock(CScreenService.class);
+			final var mockScreenService = mock(CDetailSectionService.class);
 			// This should not throw binding exceptions
 			final var view = new CActivityStatusView(mockService, mockSessionService, mockScreenService);
 			assertNotNull(view, "Activity status view should be created");
@@ -72,7 +72,7 @@ class StatusViewsBindingTest extends CTestBase {
 		assertDoesNotThrow(() -> {
 			final var mockService = mock(CActivityStatusService.class);
 			final var mockSessionService = mock(CSessionService.class);
-			final var mockScreenService = mock(CScreenService.class);
+			final var mockScreenService = mock(CDetailSectionService.class);
 			final var view = new CActivityStatusView(mockService, mockSessionService, mockScreenService);
 			// Test the exposed populateForm method if it exists
 			final var testEntity = new CActivityStatus();
@@ -109,7 +109,7 @@ class StatusViewsBindingTest extends CTestBase {
 		assertDoesNotThrow(() -> {
 			final var mockService = mock(CMeetingStatusService.class);
 			final var mockSessionService = mock(CSessionService.class);
-			final var mockScreenService = mock(CScreenService.class);
+			final var mockScreenService = mock(CDetailSectionService.class);
 			// This should not throw binding exceptions
 			final var view = new CMeetingStatusView(mockService, mockSessionService, mockScreenService);
 			assertNotNull(view, "Meeting status view should be created");

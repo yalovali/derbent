@@ -55,11 +55,11 @@ import tech.derbent.risks.domain.CRisk;
 import tech.derbent.risks.domain.ERiskSeverity;
 import tech.derbent.risks.service.CRiskService;
 import tech.derbent.risks.service.CRiskViewService;
-import tech.derbent.screens.domain.CScreen;
-import tech.derbent.screens.domain.CScreenLines;
+import tech.derbent.screens.domain.CDetailSection;
+import tech.derbent.screens.domain.CDetailLines;
 import tech.derbent.screens.service.CEntityFieldService;
-import tech.derbent.screens.service.CScreenLinesService;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailLinesService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.EUserRole;
 import tech.derbent.users.service.CUserService;
@@ -92,8 +92,8 @@ public class CSampleDataInitializer {
 	private final CActivityStatusService activityStatusService;
 	private final CDecisionService decisionService;
 	private final CCurrencyService currencyService;
-	private final CScreenService screenService;
-	private final CScreenLinesService screenLinesService;
+	private final CDetailSectionService screenService;
+	private final CDetailLinesService screenLinesService;
 	private final CPageEntityService pageEntityService;
 	private final CGanntViewEntityService ganntViewEntityService;
 	private final JdbcTemplate jdbcTemplate;
@@ -118,8 +118,8 @@ public class CSampleDataInitializer {
 		this.activityStatusService = CSpringContext.getBean(CActivityStatusService.class);
 		this.decisionService = CSpringContext.getBean(CDecisionService.class);
 		this.currencyService = CSpringContext.getBean(CCurrencyService.class);
-		this.screenService = CSpringContext.getBean(CScreenService.class);
-		this.screenLinesService = CSpringContext.getBean(CScreenLinesService.class);
+		this.screenService = CSpringContext.getBean(CDetailSectionService.class);
+		this.screenLinesService = CSpringContext.getBean(CDetailLinesService.class);
 		this.pageEntityService = CSpringContext.getBean(CPageEntityService.class);
 		this.ganntViewEntityService = CSpringContext.getBean(CGanntViewEntityService.class);
 		final DataSource ds = CSpringContext.getBean(DataSource.class);
@@ -798,15 +798,15 @@ public class CSampleDataInitializer {
 			final String entityProperty1, final String entityProperty2) throws Exception {
 		// Create the screen
 		CTimer.stamp();
-		final CScreen screen = new CScreen(screenName, project);
+		final CDetailSection screen = new CDetailSection(screenName, project);
 		screen.setEntityType(entityType);
 		screen.setScreenTitle(screenName);
 		screen.setDescription("Sample screen for " + entityType + " entity management");
 		screen.setIsActive(true);
-		final CScreen savedScreen = screenService.save(screen);
+		final CDetailSection savedScreen = screenService.save(screen);
 		LOGGER.info("Created sample screen: {} for project: {}", screenName, project.getName());
 		// create section
-		CScreenLines line = screenLinesService.newEntity(savedScreen, CEntityFieldService.SECTION, "Main Section");
+		CDetailLines line = screenLinesService.newEntity(savedScreen, CEntityFieldService.SECTION, "Main Section");
 		line.setSectionName("Main Section");
 		line.setDescription("Description for " + entityProperty1.toLowerCase());
 		line.setIsRequired(true);

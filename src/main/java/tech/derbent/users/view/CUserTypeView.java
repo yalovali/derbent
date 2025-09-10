@@ -11,7 +11,7 @@ import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUserType;
 import tech.derbent.users.service.CUserTypeService;
@@ -34,7 +34,7 @@ public class CUserTypeView extends CGridViewBaseProject<CUserType> {
 
 	private final String ENTITY_ID_FIELD = "user_type_id";
 
-	public CUserTypeView(final CUserTypeService entityService, final CSessionService sessionService, final CScreenService screenService) {
+	public CUserTypeView(final CUserTypeService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
 		super(CUserType.class, entityService, sessionService, screenService);
 	}
 

@@ -8,6 +8,7 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.util.ProxyUtils;
+import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -16,19 +17,32 @@ import tech.derbent.abstracts.annotations.AMetaData;
 
 @MappedSuperclass
 public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implements IDisplayEntity, IEntityDBStatics {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityDB.class);
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
 	@AMetaData (displayName = "#", required = false, readOnly = true, description = "No", hidden = false, order = 0)
 	private Long id;
+	@Column (name = "is_active", nullable = false)
+	@AMetaData (
+			displayName = "Active", required = false, readOnly = false, description = "Whether this entity definition is active", hidden = false,
+			order = 20, defaultValue = "true"
+	)
+	private Boolean isActive = true;
+
+	public Boolean getIsActive() { return isActive; }
+
+	public void setIsActive(Boolean isActive) { this.isActive = isActive; }
 
 	/** Default constructor for JPA. */
 	protected CEntityDB() {
 		super();
+		isActive = true;
 	}
 
 	public CEntityDB(final Class<EntityClass> clazz) {
 		super(clazz);
+		isActive = true;
 	}
 
 	@SuppressWarnings ("unchecked")

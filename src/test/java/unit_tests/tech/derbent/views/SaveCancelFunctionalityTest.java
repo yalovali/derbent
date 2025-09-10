@@ -9,7 +9,7 @@ import tech.derbent.decisions.service.CDecisionService;
 import tech.derbent.decisions.view.CDecisionsView;
 import tech.derbent.orders.service.COrderService;
 import tech.derbent.orders.view.COrdersView;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 
 /** SaveCancelFunctionalityTest - Tests save/cancel functionality inheritance for all entity views. This test verifies that all main entity views
@@ -26,7 +26,7 @@ public class SaveCancelFunctionalityTest {
 	void testDecisionsViewSaveCancelInheritance() {
 		final CDecisionService mockDecisionService = mock(CDecisionService.class);
 		final CSessionService mockSessionService = mock(CSessionService.class);
-		final CScreenService mockScreenService = mock(CScreenService.class);
+		final CDetailSectionService mockScreenService = mock(CDetailSectionService.class);
 		final CDecisionsView decisionsView = new CDecisionsView(mockDecisionService, mockSessionService, mockScreenService);
 		assertNotNull(decisionsView, "Decisions view should be instantiable");
 		// The view inherits save/cancel functionality from CProjectAwareMDPage ->
@@ -39,7 +39,7 @@ public class SaveCancelFunctionalityTest {
 	void testOrdersViewSaveCancelInheritance() {
 		final COrderService mockOrderService = mock(COrderService.class);
 		final CSessionService mockSessionService = mock(CSessionService.class);
-		final CScreenService mockScreenService = mock(CScreenService.class);
+		final CDetailSectionService mockScreenService = mock(CDetailSectionService.class);
 		final COrdersView ordersView = new COrdersView(mockOrderService, mockSessionService, mockScreenService);
 		assertNotNull(ordersView, "Orders view should be instantiable");
 		// The view inherits save/cancel functionality from CProjectAwareMDPage ->

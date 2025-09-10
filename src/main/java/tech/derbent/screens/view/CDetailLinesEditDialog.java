@@ -16,20 +16,20 @@ import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.views.components.CDiv;
 import tech.derbent.abstracts.views.dialogs.CDBEditDialog;
-import tech.derbent.screens.domain.CScreen;
-import tech.derbent.screens.domain.CScreenLines;
+import tech.derbent.screens.domain.CDetailLines;
+import tech.derbent.screens.domain.CDetailSection;
 import tech.derbent.screens.service.CEntityFieldService;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
-/** Dialog for editing screen field descriptions (CScreenLines entities). Extends CDBEditDialog to provide a consistent dialog experience. */
-public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
+/** Dialog for editing screen field descriptions (detailSection entities). Extends CDBEditDialog to provide a consistent dialog experience. */
+public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 
 	private static final long serialVersionUID = 1L;
-	private final CEnhancedBinder<CScreenLines> binder;
-	private final CScreen screen;
-	private final CEntityFormBuilder<CScreenLines> formEntity;
-	private final CEntityFormBuilder<CScreenLines> formSection;
-	private final CEntityFormBuilder<CScreenLines> formClassType;
+	private final CEnhancedBinder<CDetailLines> binder;
+	private final CDetailSection screen;
+	private final CEntityFormBuilder<CDetailLines> formEntity;
+	private final CEntityFormBuilder<CDetailLines> formSection;
+	private final CEntityFormBuilder<CDetailLines> formClassType;
 	private final CDiv divScreenType = new CDiv();
 	private final CDiv divJavaType = new CDiv();
 	// Div to
@@ -41,14 +41,14 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 	Span tabEntitySpan;
 	TabSheet tabsOfDialog;
 
-	public CScreenLinesEditDialog(final CScreenLines entity, final Consumer<CScreenLines> onSave, final boolean isNew, final CScreen screen)
+	public CDetailLinesEditDialog(final CDetailLines entity, final Consumer<CDetailLines> onSave, final boolean isNew, final CDetailSection screen)
 			throws Exception {
 		super(entity, onSave, isNew);
-		this.binder = CBinderFactory.createEnhancedBinder(CScreenLines.class);
+		this.binder = CBinderFactory.createEnhancedBinder(CDetailLines.class);
 		this.screen = screen;
-		this.formEntity = new CEntityFormBuilder<CScreenLines>();
-		this.formSection = new CEntityFormBuilder<CScreenLines>();
-		this.formClassType = new CEntityFormBuilder<CScreenLines>();
+		this.formEntity = new CEntityFormBuilder<CDetailLines>();
+		this.formSection = new CEntityFormBuilder<CDetailLines>();
+		this.formClassType = new CEntityFormBuilder<CDetailLines>();
 		this.tabsOfDialog = new TabSheet();
 		this.tabEntitySpan = new Span();
 		this.tabSectionSpan = new Span();
@@ -64,14 +64,14 @@ public class CScreenLinesEditDialog extends CDBEditDialog<CScreenLines> {
 		try {
 			// create the combobox to select the field class
 			getDialogLayout().add(divScreenType);
-			getDialogLayout().add(formClassType.build(CScreenLines.class, binder, List.of("relationFieldName")));
+			getDialogLayout().add(formClassType.build(CDetailLines.class, binder, List.of("relationFieldName")));
 			// add tab here
 			getDialogLayout().add(tabsOfDialog);
 			// BUILD ENTITY TAB
-			tabEntitySpan.add(formEntity.build(CScreenLines.class, binder, List.of("entityProperty", "lineOrder", "fieldCaption", "fieldDescription",
+			tabEntitySpan.add(formEntity.build(CDetailLines.class, binder, List.of("entityProperty", "lineOrder", "fieldCaption", "fieldDescription",
 					"isRequired", "isReadonly", "isHidden", "defaultValue", "relatedEntityType", "dataProviderBean", "maxLength", "isActive")));
 			// BUILD SECTION TAB
-			tabSectionSpan.add(formSection.build(CScreenLines.class, binder, List.of("sectionName", "fieldCaption", "isActive")));
+			tabSectionSpan.add(formSection.build(CDetailLines.class, binder, List.of("sectionName", "fieldCaption", "isActive")));
 			// SETUP ENTITY TAB COMBOXBOXES
 			cmbFieldClass = ((ComboBox<String>) formClassType.getComponent("relationFieldName"));
 			cmbFieldClass.addValueChangeListener(event -> {

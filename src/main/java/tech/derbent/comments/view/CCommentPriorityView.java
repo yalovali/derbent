@@ -12,7 +12,7 @@ import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.comments.domain.CCommentPriority;
 import tech.derbent.comments.service.CCommentPriorityService;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 
 /** CCommentPriorityView - View for managing comment priorities. Layer: View (MVC) Provides CRUD operations for comment priorities using the abstract
@@ -37,7 +37,7 @@ public class CCommentPriorityView extends CGridViewBaseProject<CCommentPriority>
 	private final String ENTITY_ID_FIELD = "ccommentpriority_id";
 
 	public CCommentPriorityView(final CCommentPriorityService entityService, final CSessionService sessionService,
-			final CScreenService screenService) {
+			final CDetailSectionService screenService) {
 		super(CCommentPriority.class, entityService, sessionService, screenService);
 	}
 

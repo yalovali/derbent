@@ -7,9 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
-import tech.derbent.screens.domain.CScreen;
-import tech.derbent.screens.domain.CScreenLines;
-import tech.derbent.screens.view.CScreenLinesEditDialog;
+import tech.derbent.screens.domain.CDetailSection;
+import tech.derbent.screens.domain.CDetailLines;
+import tech.derbent.screens.view.CDetailLinesEditDialog;
 
 /** Unit test to verify that CScreenLinesEditDialog does not throw binding exceptions when created and populated. This specifically tests the fix for
  * the incomplete bindings error that occurred when clicking "Add Screen Field Description". */
@@ -26,11 +26,11 @@ class CScreenLinesEditDialogBindingTest {
 	void testDialogCreationWithComplexEntityFieldName() {
 		LOGGER.info("🧪 Testing dialog creation with complex Entity Field Name...");
 		// Create a test screen
-		final CScreen screen = new CScreen();
+		final CDetailSection screen = new CDetailSection();
 		screen.setName("Complex Test Screen");
 		screen.setEntityType("tech.derbent.activities.domain.CActivity");
 		// Create screen line with the specific field that was causing the error
-		final CScreenLines screenLine = new CScreenLines(screen, "Entity Field Name", "entityProperty");
+		final CDetailLines screenLine = new CDetailLines(screen, "Entity Field Name", "entityProperty");
 		screenLine.setProperty("name"); // This is a valid field for CActivity
 		screenLine.setLineOrder(5);
 		screenLine.setIsRequired(true);
@@ -39,7 +39,7 @@ class CScreenLinesEditDialogBindingTest {
 		screenLine.setIsActive(true);
 		// This test specifically targets the "Entity Field Name" field binding error
 		assertDoesNotThrow(() -> {
-			final CScreenLinesEditDialog dialog = new CScreenLinesEditDialog(screenLine, (savedLine) -> {
+			final CDetailLinesEditDialog dialog = new CDetailLinesEditDialog(screenLine, (savedLine) -> {
 				LOGGER.info("Save callback called for complex field: {}", savedLine);
 			}, false, screen);
 			assertNotNull(dialog, "Dialog should be created successfully with complex Entity Field Name");
@@ -51,12 +51,12 @@ class CScreenLinesEditDialogBindingTest {
 	void testDialogCreationWithNullData() {
 		LOGGER.info("🧪 Testing dialog creation with null data (new entry)...");
 		// Create a test screen
-		final CScreen screen = new CScreen();
+		final CDetailSection screen = new CDetailSection();
 		screen.setName("Test Screen for New Entry");
 		screen.setEntityType("tech.derbent.activities.domain.CActivity");
 		// Test with null data (new entry scenario)
 		assertDoesNotThrow(() -> {
-			final CScreenLinesEditDialog dialog = new CScreenLinesEditDialog(null, (savedLine) -> {
+			final CDetailLinesEditDialog dialog = new CDetailLinesEditDialog(null, (savedLine) -> {
 				LOGGER.info("Save callback called for new entry: {}", savedLine);
 			}, true, screen);
 			assertNotNull(dialog, "Dialog should be created successfully with null data");

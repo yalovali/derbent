@@ -12,7 +12,7 @@ import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.meetings.domain.CMeetingStatus;
 import tech.derbent.meetings.service.CMeetingStatusService;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 
 @Route ("cmeetingstatusview")
@@ -31,7 +31,7 @@ public class CMeetingStatusView extends CGridViewBaseProject<CMeetingStatus> {
 
 	private final String ENTITY_ID_FIELD = "meeting_status_id";
 
-	public CMeetingStatusView(final CMeetingStatusService entityService, final CSessionService sessionService, final CScreenService screenService) {
+	public CMeetingStatusView(final CMeetingStatusService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
 		super(CMeetingStatus.class, entityService, sessionService, screenService);
 	}
 

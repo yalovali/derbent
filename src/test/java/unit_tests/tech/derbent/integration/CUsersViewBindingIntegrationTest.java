@@ -8,7 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.service.CProjectService;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.service.CUserProjectSettingsService;
 import tech.derbent.users.service.CUserService;
@@ -35,7 +35,7 @@ public class CUsersViewBindingIntegrationTest {
 	@Autowired
 	private CSessionService sessionService;
 	@Autowired
-	private CScreenService screenService;
+	private CDetailSectionService screenService;
 	@Autowired
 	private CUserProjectSettingsService userProjectSettingsService;
 

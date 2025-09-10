@@ -12,14 +12,16 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.utils.Check;
-import tech.derbent.screens.domain.CScreenLines;
+import tech.derbent.screens.domain.CDetailLines;
 
 /** Service to provide entity field information for screen line configuration. This service uses reflection to extract field information from domain
  * entities. */
 @Service
 public class CEntityFieldService extends CFieldServiceBase {
+
 	/** Data class to hold entity field information. */
 	public static class EntityFieldInfo {
+
 		private String fieldName = "fieldName";
 		private String displayName = "displayName";
 		private String description = "description";
@@ -205,7 +207,7 @@ public class CEntityFieldService extends CFieldServiceBase {
 		}
 	}
 
-	public static EntityFieldInfo createFieldInfo(final String screenClassName, final CScreenLines line) throws Exception {
+	public static EntityFieldInfo createFieldInfo(final String screenClassName, final CDetailLines line) throws Exception {
 		try {
 			Check.notNull(line, "Line cannot be null");
 			String relationFieldName = line.getRelationFieldName();
@@ -254,7 +256,7 @@ public class CEntityFieldService extends CFieldServiceBase {
 	public static List<String> getDataProviderBeans() {
 		return List.of("CActivityService", "CActivityTypeService", "CActivityStatusService", "CActivityPriorityService", "CMeetingService",
 				"CMeetingTypeService", "CMeetingStatusService", "CRiskService", "CRiskTypeService", "CRiskStatusService", "CRiskPriorityService",
-				"CProjectService", "CUserService", "CUserTypeService", "CCompanyService", "CScreenService", "CScreenLinesService");
+				"CProjectService", "CUserService", "CUserTypeService", "CCompanyService", "CDetailSectionService", "CDetailLinesService");
 	}
 
 	public static Field getEntityField(Class<?> type, final String fieldName) throws NoSuchFieldException {

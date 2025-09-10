@@ -12,7 +12,7 @@ import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.decisions.domain.CDecisionStatus;
 import tech.derbent.decisions.service.CDecisionStatusService;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 
 /** CDecisionStatusView - View for managing decision statuses. Layer: View (MVC) Provides CRUD operations for decision statuses using the abstract
@@ -33,7 +33,7 @@ public class CDecisionStatusView extends CGridViewBaseProject<CDecisionStatus> {
 
 	private final String ENTITY_ID_FIELD = "decision_status_id";
 
-	public CDecisionStatusView(final CDecisionStatusService entityService, final CSessionService sessionService, final CScreenService screenService) {
+	public CDecisionStatusView(final CDecisionStatusService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
 		super(CDecisionStatus.class, entityService, sessionService, screenService);
 	}
 

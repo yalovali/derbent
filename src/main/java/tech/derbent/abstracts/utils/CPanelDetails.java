@@ -6,8 +6,8 @@ import com.vaadin.flow.component.Component;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.views.components.CAccordion;
 import tech.derbent.abstracts.views.components.CHorizontalLayout;
-import tech.derbent.screens.domain.CScreen;
-import tech.derbent.screens.domain.CScreenLines;
+import tech.derbent.screens.domain.CDetailSection;
+import tech.derbent.screens.domain.CDetailLines;
 
 public class CPanelDetails extends CAccordion {
 
@@ -32,7 +32,7 @@ public class CPanelDetails extends CAccordion {
 
 	public String getName() { return name; }
 
-	public void processLine(final int counter, final CScreen screen, final CScreenLines line, final CEntityFormBuilder<?> formBuilder)
+	public void processLine(final int counter, final CDetailSection screen, final CDetailLines line, final CEntityFormBuilder<?> formBuilder)
 			throws Exception {
 		try {
 			formBuilder.addFieldLine(screen.getEntityType(), line, getBaseLayout(), componentMap, horizontalLayoutMap);

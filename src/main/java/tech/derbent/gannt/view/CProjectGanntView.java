@@ -13,7 +13,7 @@ import tech.derbent.activities.service.CActivityService;
 import tech.derbent.gannt.domain.CGanntViewEntity;
 import tech.derbent.gannt.service.CGanntViewEntityService;
 import tech.derbent.meetings.service.CMeetingService;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 
 @Route ("cprojectganntview")
@@ -33,7 +33,7 @@ public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 
 	private final String ENTITY_ID_FIELD = "ganntview_id";
 
-	protected CProjectGanntView(final CGanntViewEntityService entityService, final CSessionService sessionService, final CScreenService screenService,
+	protected CProjectGanntView(final CGanntViewEntityService entityService, final CSessionService sessionService, final CDetailSectionService screenService,
 			final CActivityService activityService, final CMeetingService meetingService) {
 		super(CGanntViewEntity.class, entityService, sessionService, screenService, activityService, meetingService);
 		final CGanntViewEntity viewEntity =

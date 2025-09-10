@@ -41,7 +41,7 @@ import tech.derbent.gannt.view.CProjectGanntView;
 import tech.derbent.meetings.view.CMeetingsView;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.view.CProjectsView;
-import tech.derbent.screens.view.CScreenView;
+import tech.derbent.screens.view.CDetailSectionView;
 import tech.derbent.session.service.CLayoutService;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
@@ -250,7 +250,7 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 		final CButton meetingsButton = createNavigateButtonForView(CMeetingsView.class);
 		final CButton activitiesButton = createNavigateButtonForView(CActivitiesView.class);
 		final CButton usersButton = createNavigateButtonForView(CUsersView.class);
-		final CButton screensButton = createNavigateButtonForView(CScreenView.class);
+		final CButton screensButton = createNavigateButtonForView(CDetailSectionView.class);
 		return new CDiv(ganntButton, projectsButton, usersButton, activitiesButton, meetingsButton, screensButton);
 	}
 

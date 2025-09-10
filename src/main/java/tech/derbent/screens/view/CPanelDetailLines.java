@@ -10,35 +10,35 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.views.grids.CGrid;
-import tech.derbent.screens.domain.CScreen;
-import tech.derbent.screens.domain.CScreenLines;
+import tech.derbent.screens.domain.CDetailLines;
+import tech.derbent.screens.domain.CDetailSection;
+import tech.derbent.screens.service.CDetailLinesService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.screens.service.CEntityFieldService;
-import tech.derbent.screens.service.CScreenLinesService;
-import tech.derbent.screens.service.CScreenService;
 import tech.derbent.screens.service.CViewsService;
 
-public class CPanelScreenLines extends CPanelScreenBase {
+public class CPanelDetailLines extends CPanelDetailSectionBase {
 
 	private static final long serialVersionUID = 1L;
-	private final CScreenLinesService screenLinesService;
-	private CGrid<CScreenLines> grid;
-	private CScreenLines selectedLine;
+	private final CDetailLinesService detailLinesService;
+	private CGrid<CDetailLines> grid;
+	private CDetailLines selectedLine;
 
-	public CPanelScreenLines(final CScreen currentEntity, final CEnhancedBinder<CScreen> beanValidationBinder, final CScreenService entityService,
-			final CScreenLinesService screenLinesService, final CEntityFieldService entityFieldService, final CViewsService viewsService)
-			throws Exception {
+	public CPanelDetailLines(final CDetailSection currentEntity, final CEnhancedBinder<CDetailSection> beanValidationBinder,
+			final CDetailSectionService entityService, final CDetailLinesService screenLinesService, final CEntityFieldService entityFieldService,
+			final CViewsService viewsService) throws Exception {
 		super("Screen Lines", currentEntity, beanValidationBinder, entityService);
-		this.screenLinesService = screenLinesService;
+		this.detailLinesService = screenLinesService;
 		initPanel();
 		createScreenLinesLayout();
 	}
 
 	private void createLinesGrid() {
-		grid = new CGrid<CScreenLines>(CScreenLines.class);
+		grid = new CGrid<CDetailLines>(CDetailLines.class);
 		grid.setHeightFull();
-		grid.addColumn(CScreenLines::getLineOrder).setHeader("Order").setWidth("80px");
-		grid.addColumn(CScreenLines::getFieldCaption).setHeader("Caption").setAutoWidth(true);
-		grid.addColumn(CScreenLines::getEntityProperty).setHeader("Field Name").setAutoWidth(true);
+		grid.addColumn(CDetailLines::getLineOrder).setHeader("Order").setWidth("80px");
+		grid.addColumn(CDetailLines::getFieldCaption).setHeader("Caption").setAutoWidth(true);
+		grid.addColumn(CDetailLines::getEntityProperty).setHeader("Field Name").setAutoWidth(true);
 		grid.addColumn(line -> line.getIsRequired() ? "Yes" : "No").setHeader("Required").setWidth("80px");
 		grid.addColumn(line -> line.getIsActive() ? "Active" : "Inactive").setHeader("Status").setWidth("80px");
 		grid.setMinHeight("300px");
@@ -121,7 +121,7 @@ public class CPanelScreenLines extends CPanelScreenBase {
 	private void deleteSelectedLine() {
 		if ((selectedLine != null) && (selectedLine.getId() != null)) {
 			try {
-				screenLinesService.delete(selectedLine);
+				detailLinesService.delete(selectedLine);
 				refreshLinesGrid();
 				// Clear selection
 				grid.asSingleSelect().clear();
@@ -135,7 +135,7 @@ public class CPanelScreenLines extends CPanelScreenBase {
 	private void moveLineDown() {
 		if (selectedLine != null) {
 			try {
-				screenLinesService.moveLineDown(selectedLine);
+				detailLinesService.moveLineDown(selectedLine);
 				refreshLinesGrid();
 				Notification.show("Line moved down", 2000, Notification.Position.BOTTOM_START);
 			} catch (final Exception e) {
@@ -147,7 +147,7 @@ public class CPanelScreenLines extends CPanelScreenBase {
 	private void moveLineUp() {
 		if (selectedLine != null) {
 			try {
-				screenLinesService.moveLineUp(selectedLine);
+				detailLinesService.moveLineUp(selectedLine);
 				refreshLinesGrid();
 				Notification.show("Line moved up", 2000, Notification.Position.BOTTOM_START);
 			} catch (final Exception e) {
@@ -163,31 +163,31 @@ public class CPanelScreenLines extends CPanelScreenBase {
 			Notification.show("Please save the screen first before adding fields", 3000, Notification.Position.MIDDLE);
 			return;
 		}
-		final CScreenLines newLine = screenLinesService.newEntity(getCurrentEntity(), CEntityFieldService.THIS_CLASS, "name");
-		final CScreenLinesEditDialog dialog = new CScreenLinesEditDialog(newLine, this::saveScreenLine, true, currentEntity);
+		final CDetailLines newLine = detailLinesService.newEntity(getCurrentEntity(), CEntityFieldService.THIS_CLASS, "name");
+		final CDetailLinesEditDialog dialog = new CDetailLinesEditDialog(newLine, this::saveScreenLine, true, currentEntity);
 		dialog.open();
 	}
 
 	/** Opens the edit dialog for an existing screen field.
 	 * @throws Exception */
-	private void openEditFieldDialog(final CScreenLines screenLine) throws Exception {
-		if (screenLine == null) {
+	private void openEditFieldDialog(final CDetailLines detailLine) throws Exception {
+		if (detailLine == null) {
 			return;
 		}
-		final CScreenLinesEditDialog dialog = new CScreenLinesEditDialog(screenLine, this::saveScreenLine, false, currentEntity);
+		final CDetailLinesEditDialog dialog = new CDetailLinesEditDialog(detailLine, this::saveScreenLine, false, currentEntity);
 		dialog.open();
 	}
 
 	@Override
-	public void populateForm(final CScreen entity) {
+	public void populateForm(final CDetailSection entity) {
 		super.populateForm(entity);
 		refreshLinesGrid();
 	}
 
 	private void refreshLinesGrid() {
-		final CScreen screen = getCurrentEntity();
-		if (screen != null) {
-			final List<CScreenLines> lines = screenLinesService.findByMaster(screen);
+		final CDetailSection detailSection = getCurrentEntity();
+		if (detailSection != null) {
+			final List<CDetailLines> lines = detailLinesService.findByMaster(detailSection);
 			grid.setItems(lines);
 		} else {
 			grid.setItems();
@@ -195,9 +195,9 @@ public class CPanelScreenLines extends CPanelScreenBase {
 	}
 
 	/** Saves a screen line and refreshes the grid. */
-	private void saveScreenLine(final CScreenLines screenLine) {
+	private void saveScreenLine(final CDetailLines detailLine) {
 		try {
-			screenLinesService.save(screenLine);
+			detailLinesService.save(detailLine);
 			refreshLinesGrid();
 			// Clear selection to avoid confusion
 			grid.asSingleSelect().clear();
@@ -208,8 +208,6 @@ public class CPanelScreenLines extends CPanelScreenBase {
 
 	@Override
 	protected void updatePanelEntityFields() {
-		// This panel doesn't use the standard entity fields approach as it manages
-		// CScreenLines separately
 		setEntityFields(List.of());
 	}
 }

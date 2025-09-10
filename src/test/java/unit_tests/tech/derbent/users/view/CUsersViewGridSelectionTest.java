@@ -9,7 +9,7 @@ import org.springframework.test.context.TestPropertySource;
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.service.CProjectService;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.service.CUserProjectSettingsService;
@@ -37,7 +37,7 @@ public class CUsersViewGridSelectionTest {
 	@Autowired
 	private CSessionService sessionService;
 	@Autowired
-	private CScreenService screenService;
+	private CDetailSectionService screenService;
 	@Autowired
 	private CUserProjectSettingsService userProjectSettingsService;
 

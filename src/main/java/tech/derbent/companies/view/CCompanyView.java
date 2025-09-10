@@ -12,7 +12,7 @@ import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseNamed;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 
 @Route ("ccompanyview")
@@ -36,7 +36,7 @@ public class CCompanyView extends CGridViewBaseNamed<CCompany> {
 	/** Constructor for CCompanyView Annotated with @Autowired to let Spring inject dependencies
 	 * @param entityService the CCompanyService instance */
 	@Autowired
-	public CCompanyView(final CCompanyService entityService, final CSessionService sessionService, final CScreenService screenService) {
+	public CCompanyView(final CCompanyService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
 		super(CCompany.class, entityService, sessionService, screenService);
 	}
 

@@ -17,14 +17,14 @@ import tech.derbent.abstracts.utils.Check;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.service.CEntityFieldService;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
-import tech.derbent.screens.view.CScreenView;
+import tech.derbent.screens.view.CDetailSectionView;
 
 /** CScreen - Domain entity representing screen views for entities. Layer: Domain (MVC) Inherits from CEntityOfProject to provide project association.
  * This entity allows creating custom view definitions for various project entities. */
 @Entity
-@Table (name = "cscreen")
-@AttributeOverride (name = "id", column = @Column (name = "screen_id"))
-public class CScreen extends CEntityOfProject<CScreen> {
+@Table (name = "cdetailsection")
+@AttributeOverride (name = "id", column = @Column (name = "detailsection_id"))
+public class CDetailSection extends CEntityOfProject<CDetailSection> {
 
 	public static String getEntityColorCode() { return getIconColorCode(); }
 
@@ -32,7 +32,7 @@ public class CScreen extends CEntityOfProject<CScreen> {
 
 	public static String getIconFilename() { return "vaadin:viewport"; }
 
-	public static Class<?> getViewClassStatic() { return CScreenView.class; }
+	public static Class<?> getViewClassStatic() { return CDetailSectionView.class; }
 
 	@Column (name = "entity_type", nullable = false, length = 100)
 	@Size (max = 100, message = "Entity type cannot exceed 100 characters")
@@ -55,32 +55,26 @@ public class CScreen extends CEntityOfProject<CScreen> {
 			hidden = false, order = 4, maxLength = 500
 	)
 	private String headerText;
-	@OneToMany (mappedBy = "screen", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	@OneToMany (mappedBy = "detailSection", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@OrderBy ("lineOrder ASC")
-	private List<CScreenLines> screenLines = new ArrayList<>();
-	@Column (name = "is_active", nullable = false)
-	@AMetaData (
-			displayName = "Active", required = false, readOnly = false, description = "Whether this screen definition is active", hidden = false,
-			order = 20, defaultValue = "true"
-	)
-	private Boolean isActive = true;
+	private List<CDetailLines> detailLines = new ArrayList<>();
 
 	/** Default constructor for JPA. */
-	public CScreen() {
+	public CDetailSection() {
 		super();
 	}
 
-	public CScreen(final String name, final CProject project) {
-		super(CScreen.class, name, project);
+	public CDetailSection(final String name, final CProject project) {
+		super(CDetailSection.class, name, project);
 	}
 	// Getters and Setters
 
 	/** Helper method to add a screen line */
-	public void addScreenLine(final CScreenLines screenLine) {
+	public void addScreenLine(final CDetailLines screenLine) {
 		Check.notNull(screenLine, "screenLine must not be null");
 		// check screen name dublicate
 		if (screenLine.getSectionName() != null) {
-			for (final CScreenLines line : screenLines) {
+			for (final CDetailLines line : detailLines) {
 				if (line.getSectionName() == null) {
 					continue;
 				}
@@ -92,17 +86,17 @@ public class CScreen extends CEntityOfProject<CScreen> {
 		}
 		if (screenLine.getLineOrder() == 0) {
 			// default line order is the next available number
-			screenLine.setLineOrder(screenLines.size() + 1);
+			screenLine.setLineOrder(detailLines.size() + 1);
 		}
-		screenLines.add(screenLine);
-		screenLine.setScreen(this);
+		detailLines.add(screenLine);
+		screenLine.setDetailSection(this);
 	}
 
 	public void debug_printScreenInformation() {
 		final String title = this.toString();
 		final List<EntityFieldInfo> fields = CEntityFieldService.getEntityFields(this.entityType);
-		if (this.screenLines != null) {
-			for (final CScreenLines line : this.screenLines) {
+		if (this.detailLines != null) {
+			for (final CDetailLines line : this.detailLines) {
 				// line.printLine();
 				fields.removeIf(f -> f.getFieldName().equals(line.getEntityProperty()));
 			}
@@ -114,7 +108,7 @@ public class CScreen extends CEntityOfProject<CScreen> {
 		} else {
 			System.out.printf("Not on screen lines for screen type %s.%n", title);
 			for (final EntityFieldInfo field : fields) {
-				System.out.printf("scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, \"%s\"));%n", field.getFieldName());
+				System.out.printf("scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, \"%s\"));%n", field.getFieldName());
 			}
 		}
 	}
@@ -128,25 +122,21 @@ public class CScreen extends CEntityOfProject<CScreen> {
 
 	public String getHeaderText() { return headerText; }
 
-	public Boolean getIsActive() { return isActive; }
-
-	public List<CScreenLines> getScreenLines() { return screenLines; }
+	public List<CDetailLines> getScreenLines() { return detailLines; }
 
 	public String getScreenTitle() { return screenTitle; }
 
 	/** Helper method to remove a screen line */
-	public void removeScreenLine(final CScreenLines screenLine) {
-		screenLines.remove(screenLine);
-		screenLine.setScreen(null);
+	public void removeScreenLine(final CDetailLines screenLine) {
+		detailLines.remove(screenLine);
+		screenLine.setDetailSection(null);
 	}
 
 	public void setEntityType(final String entityType) { this.entityType = entityType; }
 
 	public void setHeaderText(final String headerText) { this.headerText = headerText; }
 
-	public void setIsActive(final Boolean isActive) { this.isActive = isActive; }
-
-	public void setScreenLines(final List<CScreenLines> screenLines) { this.screenLines = screenLines; }
+	public void setScreenLines(final List<CDetailLines> screenLines) { this.detailLines = screenLines; }
 
 	public void setScreenTitle(final String screenTitle) { this.screenTitle = screenTitle; }
 

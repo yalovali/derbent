@@ -17,7 +17,7 @@ import com.vaadin.flow.data.provider.DataProvider;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.abstracts.utils.Check;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.service.CUserProjectSettingsService;
 
@@ -32,7 +32,7 @@ public abstract class CAbstractUITest<EntityClass extends CEntityDB<EntityClass>
 	@Mock
 	protected CSessionService mockSessionService;
 	@Mock
-	protected CScreenService mocScreenService;
+	protected CDetailSectionService mocScreenService;
 	@Mock
 	protected CUserProjectSettingsService mockUserProjectSettingsService;
 	protected Class<EntityClass> entityClass;

@@ -11,7 +11,7 @@ import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.activities.domain.CActivityType;
 import tech.derbent.activities.service.CActivityTypeService;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 
 /** CActivityTypeView - View for managing activity types. Layer: View (MVC) Provides CRUD operations for activity types using the abstract
@@ -32,7 +32,7 @@ public class CActivityTypeView extends CGridViewBaseProject<CActivityType> {
 
 	private final String ENTITY_ID_FIELD = "activity_type_id";
 
-	public CActivityTypeView(final CActivityTypeService entityService, final CSessionService sessionService, final CScreenService screenService) {
+	public CActivityTypeView(final CActivityTypeService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
 		super(CActivityType.class, entityService, sessionService, screenService);
 	}
 
@@ -44,7 +44,7 @@ public class CActivityTypeView extends CGridViewBaseProject<CActivityType> {
 		grid.addColumn(CEntityNamed::getDescriptionShort, "Description");
 		grid.addStatusColumn(type -> type, "Type", "type");
 		grid.addShortTextColumn(CActivityType::getColor, "Color", "color");
-		grid.addBooleanColumn(CActivityType::isActive, "Active", "Active", "Inactive");
+		grid.addBooleanColumn(CEntityNamed::getIsActive, "Active", "Active", "Inactive");
 	}
 
 	@Override

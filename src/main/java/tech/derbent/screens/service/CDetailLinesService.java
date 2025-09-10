@@ -8,21 +8,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.abstracts.utils.Check;
-import tech.derbent.screens.domain.CScreen;
-import tech.derbent.screens.domain.CScreenLines;
+import tech.derbent.screens.domain.CDetailSection;
+import tech.derbent.screens.domain.CDetailLines;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.session.service.CSessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CScreenLinesService extends CAbstractService<CScreenLines> {
+public class CDetailLinesService extends CAbstractService<CDetailLines> {
 
-	public static CScreenLines createLineFromDefaults(final Class<?> entityClass, final String fieldName) throws NoSuchFieldException {
+	public static CDetailLines createLineFromDefaults(final Class<?> entityClass, final String fieldName) throws NoSuchFieldException {
 		final Field field = CEntityFieldService.getEntityField(entityClass, fieldName);
 		Check.notNull(field, "Field not found: " + fieldName + " in class " + entityClass.getSimpleName());
 		final EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(field);
 		Check.notNull(fieldInfo, "Field info not found for field: " + fieldName + " in class " + entityClass.getSimpleName());
-		final CScreenLines line = new CScreenLines();
+		final CDetailLines line = new CDetailLines();
 		line.setProperty(fieldInfo.getFieldName());
 		line.setDescription(fieldInfo.getDescription());
 		line.setFieldCaption(fieldInfo.getDisplayName());
@@ -30,70 +30,70 @@ public class CScreenLinesService extends CAbstractService<CScreenLines> {
 		return line;
 	}
 
-	public static CScreenLines createLineFromDefaults(final Class<?> entityClass, final String fieldName, final String propertyName)
+	public static CDetailLines createLineFromDefaults(final Class<?> entityClass, final String fieldName, final String propertyName)
 			throws NoSuchFieldException {
 		final Field field = CEntityFieldService.getEntityField(entityClass, fieldName);
 		Check.notNull(field, "Field not found: " + fieldName + " in class " + entityClass.getSimpleName());
-		final CScreenLines line = CScreenLinesService.createLineFromDefaults(field.getType(), propertyName);
+		final CDetailLines line = CDetailLinesService.createLineFromDefaults(field.getType(), propertyName);
 		Check.notNull(line, "Line not created for property: " + propertyName + " in class " + field.getType().getSimpleName());
 		line.setRelationFieldName(fieldName);
 		return line;
 	}
 
-	public static CScreenLines createSection(final String sectionName) {
-		final CScreenLines line = new CScreenLines();
+	public static CDetailLines createSection(final String sectionName) {
+		final CDetailLines line = new CDetailLines();
 		line.setRelationFieldName(CEntityFieldService.SECTION);
 		line.setProperty(CEntityFieldService.SECTION);
 		line.setSectionName(sectionName);
 		return line;
 	}
 
-	private final CScreenLinesRepository screenLinesRepository;
+	private final CDetailLinesRepository detailLinesRepository;
 
-	public CScreenLinesService(final CScreenLinesRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CDetailLinesService(final CDetailLinesRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
-		this.screenLinesRepository = repository;
+		this.detailLinesRepository = repository;
 	}
 
 	/** Count the number of lines for a screen.
 	 * @param screen the screen
 	 * @return the count of lines */
-	public Long countByScreen(final CScreen screen) {
-		return screenLinesRepository.countByScreen(screen);
+	public Long countByScreen(final CDetailSection screen) {
+		return detailLinesRepository.countByScreen(screen);
 	}
 
 	/** Find active screen lines by screen ordered by line order.
 	 * @param screen the screen
 	 * @return list of active screen lines ordered by line order */
 	@Transactional (readOnly = true)
-	public List<CScreenLines> findActiveByScreen(final CScreen screen) {
-		return screenLinesRepository.findActiveByScreen(screen);
+	public List<CDetailLines> findActiveByScreen(final CDetailSection screen) {
+		return detailLinesRepository.findActiveByScreen(screen);
 	}
 
 	@Transactional (readOnly = true)
-	public List<CScreenLines> findByMaster(final CScreen master) {
+	public List<CDetailLines> findByMaster(final CDetailSection master) {
 		Check.notNull(master, "Master cannot be null");
 		if (master.getId() == null) {
 			// new instance, no lines yet
 			return List.of();
 		}
-		return screenLinesRepository.findByMaster(master);
+		return detailLinesRepository.findByMaster(master);
 	}
 
 	@Override
-	protected Class<CScreenLines> getEntityClass() { return CScreenLines.class; }
+	protected Class<CDetailLines> getEntityClass() { return CDetailLines.class; }
 
-	public Integer getNextLineOrder(final CScreen screen) {
-		return screenLinesRepository.getNextLineOrder(screen);
+	public Integer getNextLineOrder(final CDetailSection screen) {
+		return detailLinesRepository.getNextLineOrder(screen);
 	}
 
 	@Transactional
-	public void moveLineDown(final CScreenLines screenLine) {
-		final List<CScreenLines> lines = findByMaster(screenLine.getScreen());
+	public void moveLineDown(final CDetailLines screenLine) {
+		final List<CDetailLines> lines = findByMaster(screenLine.getDetailSection());
 		for (int i = 0; i < lines.size(); i++) {
 			if (lines.get(i).getId().equals(screenLine.getId()) && (i < (lines.size() - 1))) {
 				// Swap orders
-				final CScreenLines nextLine = lines.get(i + 1);
+				final CDetailLines nextLine = lines.get(i + 1);
 				final Integer currentOrder = screenLine.getLineOrder();
 				final Integer nextOrder = nextLine.getLineOrder();
 				screenLine.setLineOrder(nextOrder);
@@ -106,14 +106,14 @@ public class CScreenLinesService extends CAbstractService<CScreenLines> {
 	}
 
 	@Transactional
-	public void moveLineUp(final CScreenLines screenLine) {
+	public void moveLineUp(final CDetailLines screenLine) {
 		if (screenLine.getLineOrder() > 1) {
 			// Find the line with the previous order
-			final List<CScreenLines> lines = findByMaster(screenLine.getScreen());
+			final List<CDetailLines> lines = findByMaster(screenLine.getDetailSection());
 			for (int i = 0; i < lines.size(); i++) {
 				if (lines.get(i).getId().equals(screenLine.getId()) && (i > 0)) {
 					// Swap orders
-					final CScreenLines previousLine = lines.get(i - 1);
+					final CDetailLines previousLine = lines.get(i - 1);
 					final Integer currentOrder = screenLine.getLineOrder();
 					final Integer previousOrder = previousLine.getLineOrder();
 					screenLine.setLineOrder(previousOrder);
@@ -131,8 +131,8 @@ public class CScreenLinesService extends CAbstractService<CScreenLines> {
 	 * @param fieldCaption    the field caption
 	 * @param entityFieldName the entity field name
 	 * @return the new screen line */
-	public CScreenLines newEntity(final CScreen screen, final String relationFieldName, final String entityProperty) {
-		final CScreenLines screenLine = new CScreenLines(screen, relationFieldName, entityProperty);
+	public CDetailLines newEntity(final CDetailSection screen, final String relationFieldName, final String entityProperty) {
+		final CDetailLines screenLine = new CDetailLines(screen, relationFieldName, entityProperty);
 		screenLine.setLineOrder(getNextLineOrder(screen));
 		screenLine.setMaxLength(255); // Default max length for text fields
 		screenLine.setIsActive(true);
@@ -142,10 +142,10 @@ public class CScreenLinesService extends CAbstractService<CScreenLines> {
 	/** Reorder all lines for a screen to ensure sequential numbering.
 	 * @param screen the screen to reorder lines for */
 	@Transactional
-	public void reorderLines(final CScreen screen) {
-		final List<CScreenLines> lines = findByMaster(screen);
+	public void reorderLines(final CDetailSection screen) {
+		final List<CDetailLines> lines = findByMaster(screen);
 		for (int i = 0; i < lines.size(); i++) {
-			final CScreenLines line = lines.get(i);
+			final CDetailLines line = lines.get(i);
 			line.setLineOrder(i + 1);
 			save(line);
 		}

@@ -17,7 +17,7 @@ import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseNamed;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.service.CProjectService;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserProjectSettings;
@@ -54,7 +54,7 @@ public class CUsersView extends CGridViewBaseNamed<CUser> {
 	@Autowired
 	public CUsersView(final CUserService entityService, final CProjectService projectService, final CUserTypeService userTypeService,
 			final CCompanyService companyService, final CSessionService sessionService, final CUserProjectSettingsService userProjectSettingsService,
-			final CScreenService screenService) {
+			final CDetailSectionService screenService) {
 		super(CUser.class, entityService, sessionService, screenService);
 		this.userTypeService = userTypeService;
 		this.companyService = companyService;

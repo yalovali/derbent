@@ -12,7 +12,7 @@ import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.decisions.domain.CDecision;
 import tech.derbent.decisions.service.CDecisionService;
 import tech.derbent.decisions.service.CDecisionViewService;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 
 /** CDecisionsView - Main view for decision management. Layer: View (MVC) Provides a complete decision management interface following the established
@@ -35,7 +35,7 @@ public class CDecisionsView extends CGridViewBaseProject<CDecision> {
 
 	private final String ENTITY_ID_FIELD = "decision_id";
 
-	public CDecisionsView(final CDecisionService entityService, final CSessionService sessionService, final CScreenService screenService) {
+	public CDecisionsView(final CDecisionService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
 		super(CDecision.class, entityService, sessionService, screenService);
 	}
 

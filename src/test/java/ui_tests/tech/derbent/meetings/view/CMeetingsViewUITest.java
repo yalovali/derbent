@@ -24,7 +24,7 @@ import tech.derbent.meetings.service.CMeetingStatusService;
 import tech.derbent.meetings.service.CMeetingTypeService;
 import tech.derbent.meetings.view.CMeetingsView;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.service.CUserService;
 import ui_tests.tech.derbent.abstracts.ui.CAbstractUITest;
@@ -42,7 +42,7 @@ class CMeetingsViewUITest extends CAbstractUITest<CMeeting> {
 	@Mock
 	private CMeetingStatusService mockMeetingStatusService;
 	@Mock
-	private CScreenService mockScreenService;
+	private CDetailSectionService mockScreenService;
 	private CMeetingsView meetingsView;
 	private CProject testProject;
 	private CMeetingType testMeetingType;

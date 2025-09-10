@@ -12,7 +12,7 @@ import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.page.service.CPageEntityService;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 
 @Route ("cpageentityview")
@@ -29,7 +29,7 @@ public final class CPageEntityView extends CGridViewBaseProject<CPageEntity> {
 		return CActivity.getIconColorCode(); // Use the static method from CActivity
 	}
 
-	public CPageEntityView(final CPageEntityService entityService, final CSessionService sessionService, final CScreenService screenService) {
+	public CPageEntityView(final CPageEntityService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
 		super(CPageEntity.class, entityService, sessionService, screenService);
 	}
 

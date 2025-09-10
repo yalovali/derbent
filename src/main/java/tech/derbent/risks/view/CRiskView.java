@@ -12,7 +12,7 @@ import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.risks.domain.CRisk;
 import tech.derbent.risks.service.CRiskService;
 import tech.derbent.risks.service.CRiskViewService;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 
 @PageTitle ("Project Risks")
@@ -32,7 +32,7 @@ public class CRiskView extends CGridViewBaseProject<CRisk> {
 
 	public static String getIconFilename() { return CRisk.getIconFilename(); }
 
-	public CRiskView(final CRiskService entityService, final CSessionService sessionService, final CScreenService screenService) {
+	public CRiskView(final CRiskService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
 		super(CRisk.class, entityService, sessionService, screenService);
 	}
 

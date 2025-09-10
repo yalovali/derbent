@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import tech.derbent.screens.domain.CScreen;
+import tech.derbent.screens.domain.CDetailSection;
 import tech.derbent.screens.service.CEntityFieldService;
 import tech.derbent.screens.service.CViewsService;
 
@@ -14,13 +14,13 @@ import tech.derbent.screens.service.CViewsService;
 class CScreenLinesEditDialogIntegrationTest {
 
 	private CViewsService viewsService;
-	private CScreen testScreen;
+	private CDetailSection testScreen;
 
 	@BeforeEach
 	void setUp() {
 		viewsService = new CViewsService();
 		// Create a test screen for CActivity
-		testScreen = new CScreen();
+		testScreen = new CDetailSection();
 		testScreen.setEntityType("CActivity");
 		testScreen.setName("Test Activity Screen");
 	}

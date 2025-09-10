@@ -6,7 +6,7 @@ import static org.mockito.Mockito.mock;
 import org.junit.jupiter.api.Test;
 import tech.derbent.risks.service.CRiskStatusService;
 import tech.derbent.risks.view.CRiskStatusView;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 
 /** Test class for CRiskStatusView to ensure constructor and basic functionality work correctly. */
@@ -17,7 +17,7 @@ class CRiskStatusViewTest {
 		// Given
 		final CRiskStatusService mockService = mock(CRiskStatusService.class);
 		final CSessionService mockSessionService = mock(CSessionService.class);
-		final CScreenService mockScreenService = mock(CScreenService.class);
+		final CDetailSectionService mockScreenService = mock(CDetailSectionService.class);
 		// When/Then - should not throw exception
 		assertDoesNotThrow(() -> {
 			final CRiskStatusView view = new CRiskStatusView(mockService, mockSessionService, mockScreenService);
@@ -30,7 +30,7 @@ class CRiskStatusViewTest {
 		// Given
 		final CRiskStatusService mockService = mock(CRiskStatusService.class);
 		final CSessionService mockSessionService = mock(CSessionService.class);
-		final CScreenService mockScreenService = mock(CScreenService.class);
+		final CDetailSectionService mockScreenService = mock(CDetailSectionService.class);
 		final CRiskStatusView view = new CRiskStatusView(mockService, mockSessionService, mockScreenService);
 		// When/Then - method should exist and be callable
 		assertDoesNotThrow(() -> {

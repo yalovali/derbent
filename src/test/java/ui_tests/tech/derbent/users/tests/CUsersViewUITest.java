@@ -12,7 +12,7 @@ import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserType;
@@ -38,7 +38,7 @@ class CUsersViewUITest extends CAbstractUITest<CUser> {
 	@Mock
 	private CSessionService mockSessionService;
 	@Mock
-	private CScreenService screenService;
+	private CDetailSectionService screenService;
 	private CUserType testUserType;
 	private CCompany testCompany;
 	private CProject project;

@@ -11,7 +11,7 @@ import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.service.CActivityStatusService;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 
 /** CActivityStatusView - View for managing activity statuses. Layer: View (MVC) Provides CRUD operations for activity statuses using the abstract
@@ -35,7 +35,7 @@ public class CActivityStatusView extends CGridViewBaseProject<CActivityStatus> {
 
 	private final String ENTITY_ID_FIELD = "activity_status_id";
 
-	public CActivityStatusView(final CActivityStatusService entityService, final CSessionService sessionService, final CScreenService screenService) {
+	public CActivityStatusView(final CActivityStatusService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
 		super(CActivityStatus.class, entityService, sessionService, screenService);
 	}
 

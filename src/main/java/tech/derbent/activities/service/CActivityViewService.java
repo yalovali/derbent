@@ -5,9 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.screens.domain.CScreen;
+import tech.derbent.screens.domain.CDetailSection;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
-import tech.derbent.screens.service.CScreenLinesService;
+import tech.derbent.screens.service.CDetailLinesService;
 import tech.derbent.users.service.CUserViewService;
 
 public class CActivityViewService {
@@ -17,9 +17,9 @@ public class CActivityViewService {
 	static Map<String, EntityFieldInfo> fields;
 	private static Logger LOGGER = LoggerFactory.getLogger(CActivityViewService.class);
 
-	public static CScreen createBasicView(final CProject project) {
+	public static CDetailSection createBasicView(final CProject project) {
 		try {
-			final CScreen scr = new CScreen();
+			final CDetailSection scr = new CDetailSection();
 			final Class<?> clazz = CActivity.class;
 			final String entityType = clazz.getSimpleName().replaceFirst("^C", "");
 			scr.setProject(project);
@@ -30,10 +30,10 @@ public class CActivityViewService {
 			scr.setName(BASE_VIEW_NAME);
 			scr.setDescription(entityType + " View Details");
 			// create screen lines
-			scr.addScreenLine(CScreenLinesService.createSection(CUserViewService.BASE_PANEL_NAME));
-			scr.addScreenLine(CScreenLinesService.createLineFromDefaults(clazz, "name"));
+			scr.addScreenLine(CDetailLinesService.createSection(CUserViewService.BASE_PANEL_NAME));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
 			/******************/
-			scr.addScreenLine(CScreenLinesService.createSection("System Access"));
+			scr.addScreenLine(CDetailLinesService.createSection("System Access"));
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {

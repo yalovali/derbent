@@ -9,51 +9,52 @@ import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
-import tech.derbent.screens.domain.CScreen;
+import tech.derbent.screens.domain.CDetailSection;
+import tech.derbent.screens.service.CDetailLinesService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.screens.service.CEntityFieldService;
-import tech.derbent.screens.service.CScreenLinesService;
-import tech.derbent.screens.service.CScreenService;
 import tech.derbent.screens.service.CViewsService;
 import tech.derbent.session.service.CSessionService;
 
-@Route ("cscreensview")
-@PageTitle ("Screen Master Detail")
-@Menu (order = 1.5, icon = "class:tech.derbent.screens.view.CScreenView", title = "Settings.Screens")
+@Route ("cdetailsectionview")
+@PageTitle ("Detail Master View")
+@Menu (order = 1.5, icon = "class:tech.derbent.screens.view.CDetailSectionView", title = "Settings.Detail Sections")
 @PermitAll
-public final class CScreenView extends CGridViewBaseProject<CScreen> {
+public final class CDetailSectionView extends CGridViewBaseProject<CDetailSection> {
 
 	private static final long serialVersionUID = 1L;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }
 
 	public static String getIconColorCode() {
-		return CScreen.getIconColorCode(); // Use the static method from CScreen
+		return CDetailSection.getIconColorCode(); // Use the static method from CScreen
 	}
 
-	public static String getIconFilename() { return CScreen.getIconFilename(); }
+	public static String getIconFilename() { return CDetailSection.getIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "screen_id";
-	private final CScreenLinesService screenLinesService;
+	private final CDetailLinesService screenLinesService;
 	private final CEntityFieldService entityFieldService;
 	private final CViewsService viewsService;
 
-	public CScreenView(final CScreenService entityService, final CSessionService sessionService, final CScreenLinesService screenLinesService,
-			final CEntityFieldService entityFieldService, final CViewsService viewsService, final CScreenService screenService) {
-		super(CScreen.class, entityService, sessionService, screenService);
+	public CDetailSectionView(final CDetailSectionService entityService, final CSessionService sessionService,
+			final CDetailLinesService screenLinesService, final CEntityFieldService entityFieldService, final CViewsService viewsService,
+			final CDetailSectionService screenService) {
+		super(CDetailSection.class, entityService, sessionService, screenService);
 		this.screenLinesService = screenLinesService;
 		this.entityFieldService = entityFieldService;
 		this.viewsService = viewsService;
 	}
 
 	@Override
-	public void createGridForEntity(final CGrid<CScreen> grid) {
+	public void createGridForEntity(final CGrid<CDetailSection> grid) {
 		grid.addIdColumn(CEntityDB::getId, "#", ENTITY_ID_FIELD);
 		grid.addColumnEntityNamed(CEntityOfProject::getProject, "Project");
 		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");
 		grid.addColumn(CEntityNamed::getDescriptionShort, "Description");
 		grid.addDateTimeColumn(CEntityNamed::getCreatedDate, "Created", null);
-		grid.addShortTextColumn(CScreen::getEntityType, "Entity Type", "entityType");
-		grid.addShortTextColumn(CScreen::getScreenTitle, "Screen Title", "screenTitle");
+		grid.addShortTextColumn(CDetailSection::getEntityType, "Entity Type", "entityType");
+		grid.addShortTextColumn(CDetailSection::getScreenTitle, "Screen Title", "screenTitle");
 		grid.addColumn(screen -> screen.getIsActive() ? "Active" : "Inactive", "Status", null);
 		grid.addColumn(screen -> {
 			try {
@@ -69,9 +70,9 @@ public final class CScreenView extends CGridViewBaseProject<CScreen> {
 
 	@Override
 	protected void updateDetailsComponent() throws Exception {
-		addAccordionPanel(new CPanelScreenBasicInfo(getCurrentEntity(), getBinder(), (CScreenService) entityService));
-		addAccordionPanel(new CPanelScreenLines(getCurrentEntity(), getBinder(), (CScreenService) entityService, screenLinesService,
+		addAccordionPanel(new CPanelDetailSectionBasicInfo(getCurrentEntity(), getBinder(), (CDetailSectionService) entityService));
+		addAccordionPanel(new CPanelDetailLines(getCurrentEntity(), getBinder(), (CDetailSectionService) entityService, screenLinesService,
 				entityFieldService, viewsService));
-		addAccordionPanel(new CPanelScreenPreview(getCurrentEntity(), getBinder(), (CScreenService) entityService));
+		addAccordionPanel(new CPanelDetailSectionPreview(getCurrentEntity(), getBinder(), (CDetailSectionService) entityService));
 	}
 }

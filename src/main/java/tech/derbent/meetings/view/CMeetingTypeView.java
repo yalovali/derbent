@@ -11,7 +11,7 @@ import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.meetings.domain.CMeetingType;
 import tech.derbent.meetings.service.CMeetingTypeService;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 
 @Route ("cmeetingtypeview")
@@ -30,7 +30,7 @@ public class CMeetingTypeView extends CGridViewBaseProject<CMeetingType> {
 
 	private final String ENTITY_ID_FIELD = "meetingtype_id";
 
-	public CMeetingTypeView(final CMeetingTypeService entityService, final CSessionService sessionService, final CScreenService screenService) {
+	public CMeetingTypeView(final CMeetingTypeService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
 		super(CMeetingType.class, entityService, sessionService, screenService);
 	}
 
@@ -43,7 +43,7 @@ public class CMeetingTypeView extends CGridViewBaseProject<CMeetingType> {
 		grid.addDateTimeColumn(CEntityNamed::getCreatedDate, "Created", null);
 		grid.addStatusColumn(type -> type, "Type", "type");
 		grid.addShortTextColumn(CMeetingType::getColor, "Color", "color");
-		grid.addBooleanColumn(CMeetingType::isActive, "Active", "Active", "Inactive");
+		grid.addBooleanColumn(CEntityNamed::getIsActive, "Active", "Active", "Inactive");
 	}
 
 	@Override

@@ -2,7 +2,7 @@ package tech.derbent.projects.service;
 
 import java.util.Map;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.screens.domain.CScreen;
+import tech.derbent.screens.domain.CDetailSection;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.users.domain.CUser;
 
@@ -13,9 +13,9 @@ public class CProjectViewService {
 	static EntityFieldInfo info;
 	static Map<String, EntityFieldInfo> fields;
 
-	public static CScreen createBasicView(final CProject project) {
+	public static CDetailSection createBasicView(final CProject project) {
 		try {
-			final CScreen scr = new CScreen();
+			final CDetailSection scr = new CDetailSection();
 			scr.setProject(project);
 			scr.setEntityType(CUser.class.getSimpleName());
 			scr.setHeaderText("User View");

@@ -14,7 +14,7 @@ import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
 import tech.derbent.comments.service.CCommentService;
 import tech.derbent.comments.view.CPanelActivityComments;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 
 @Route ("cactivitiesview")
@@ -37,7 +37,7 @@ public final class CActivitiesView extends CGridViewBaseProject<CActivity> {
 	private final CCommentService commentService;
 
 	public CActivitiesView(final CActivityService entityService, final CSessionService sessionService, final CCommentService commentService,
-			final CScreenService screenService) {
+			final CDetailSectionService screenService) {
 		super(CActivity.class, entityService, sessionService, screenService);
 		this.commentService = commentService;
 	}

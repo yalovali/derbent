@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.TestPropertySource;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.service.CProjectService;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.service.CUserProjectSettingsService;
 import tech.derbent.users.service.CUserService;
@@ -39,7 +39,7 @@ public class CUsersViewNavigationTest {
 	@Autowired
 	private CUserProjectSettingsService userProjectSettingsService;
 	@Autowired
-	private CScreenService screenService;
+	private CDetailSectionService screenService;
 
 	/** Test that form clearing and repopulation works correctly. This simulates the navigation scenario that could trigger binding errors. */
 	@Test

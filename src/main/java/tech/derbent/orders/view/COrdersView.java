@@ -12,7 +12,7 @@ import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.orders.domain.COrder;
 import tech.derbent.orders.service.COrderService;
 import tech.derbent.orders.service.COrdersViewService;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 
 @Route ("cordersview")
@@ -33,7 +33,7 @@ public class COrdersView extends CGridViewBaseProject<COrder> {
 
 	private final String ENTITY_ID_FIELD = "order_id";
 
-	public COrdersView(final COrderService entityService, final CSessionService sessionService, final CScreenService screenService) {
+	public COrdersView(final COrderService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
 		super(COrder.class, entityService, sessionService, screenService);
 	}
 

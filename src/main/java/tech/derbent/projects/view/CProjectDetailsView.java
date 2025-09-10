@@ -23,7 +23,7 @@ import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseNamed;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 
 /** CProjectDetailsView - Enhanced project details view with modern UI design and multiple layout options. Layer: View (MVC) Provides CRUD operations
@@ -68,7 +68,7 @@ public class CProjectDetailsView extends CGridViewBaseNamed<CProject> {
 	private LayoutMode currentLayoutMode = LayoutMode.ENHANCED_CARDS;
 	private Select<LayoutMode> layoutSelector;
 
-	public CProjectDetailsView(final CProjectService entityService, final CSessionService sessionService, final CScreenService screenService) {
+	public CProjectDetailsView(final CProjectService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
 		super(CProject.class, entityService, sessionService, screenService);
 		// Apply default layout mode CSS class
 		addClassName(currentLayoutMode.getCssClass());

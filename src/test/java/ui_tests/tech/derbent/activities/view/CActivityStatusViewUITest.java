@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.TestPropertySource;
 import tech.derbent.activities.service.CActivityStatusService;
 import tech.derbent.activities.view.CActivityStatusView;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 
 /** Test for CActivityStatusView to detect and prevent the binding issue that prevents the view from opening. This test specifically addresses the
@@ -25,7 +25,7 @@ public class CActivityStatusViewUITest {
 	@Autowired
 	private CSessionService sessionService;
 	@Autowired
-	private CScreenService screenService;
+	private CDetailSectionService screenService;
 
 	/** Test that CActivityStatusView can be instantiated without throwing binding errors. This test reproduces the exact issue: "All bindings created
 	 * with forField must be completed before calling readBean" */

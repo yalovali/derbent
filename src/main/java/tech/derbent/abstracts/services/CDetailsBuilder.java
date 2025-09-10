@@ -16,10 +16,10 @@ import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.utils.CPanelDetails;
 import tech.derbent.abstracts.utils.Check;
-import tech.derbent.screens.domain.CScreen;
-import tech.derbent.screens.domain.CScreenLines;
+import tech.derbent.screens.domain.CDetailSection;
+import tech.derbent.screens.domain.CDetailLines;
 import tech.derbent.screens.service.CEntityFieldService;
-import tech.derbent.screens.service.CScreenService;
+import tech.derbent.screens.service.CDetailSectionService;
 
 @org.springframework.stereotype.Component
 public final class CDetailsBuilder implements ApplicationContextAware {
@@ -29,7 +29,7 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 
 	public static ApplicationContext getApplicationContext() { return applicationContext; }
 
-	private static Component processLine(final int counter, final CScreen screen, final CScreenLines line) {
+	private static Component processLine(final int counter, final CDetailSection screen, final CDetailLines line) {
 		Check.notNull(line, "Line cannot be null");
 		if (line.getRelationFieldName().equals(CEntityFieldService.SECTION)) {
 			final CPanelDetails sectionPanel = new CPanelDetails(line.getSectionName(), line.getFieldCaption());
@@ -46,7 +46,7 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		this.mapSectionPanels = new HashMap<>();
 	}
 
-	public HasComponents buildDetails(CScreen screen, final CEnhancedBinder<?> binder, final HasComponents layout) throws Exception {
+	public HasComponents buildDetails(CDetailSection screen, final CEnhancedBinder<?> binder, final HasComponents layout) throws Exception {
 		Check.notNull(screen, "Screen cannot be null");
 		Check.notNull(binder, "Binder cannot be null");
 		Check.notNull(applicationContext, "Details name cannot be null");
@@ -55,7 +55,7 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		} else {
 			formLayout = new FormLayout();
 		}
-		final CScreenService screenService = applicationContext.getBean(CScreenService.class);
+		final CDetailSectionService screenService = applicationContext.getBean(CDetailSectionService.class);
 		Check.notNull(screenService, "Screen service cannot be null");
 		// for lazy loading of screen lines
 		final PersistenceUtil persistenceUtil = Persistence.getPersistenceUtil();
@@ -73,8 +73,8 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		CPanelDetails currentSection = null;
 		final int counter = 0;
 		// screen.getScreenLines().size(); // Ensure lines are loaded
-		final List<CScreenLines> lines = screen.getScreenLines();
-		for (final CScreenLines line : lines) {
+		final List<CDetailLines> lines = screen.getScreenLines();
+		for (final CDetailLines line : lines) {
 			if (line.getRelationFieldName().equals(CEntityFieldService.SECTION)) {
 				// no more current section. switch to base
 				currentSection = null;
