@@ -50,4 +50,12 @@ public class CMasterSection extends CEntityOfProject<CMasterSection> {
 	public String getDisplayName() { // TODO Auto-generated method stub
 		return "Master Section: " + getName();
 	}
+
+	public String getSectionDBName() { return sectionDBName; }
+
+	public void setSectionDBName(final String sectionDBName) { this.sectionDBName = sectionDBName; }
+
+	public String getSectionType() { return sectionType; }
+
+	public void setSectionType(final String sectionType) { this.sectionType = sectionType; }
 }
