@@ -2,6 +2,7 @@ package unit_tests.tech.derbent.screens.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,12 +22,13 @@ class CViewsServiceTest {
 	@Test
 	void testGetAvailableBaseTypes() {
 		final List<String> baseTypes = viewsService.getAvailableBaseTypes();
-		assertEquals(5, baseTypes.size());
+		assertEquals(6, baseTypes.size());
 		assertTrue(baseTypes.contains("CActivity"));
 		assertTrue(baseTypes.contains("CMeeting"));
 		assertTrue(baseTypes.contains("CRisk"));
 		assertTrue(baseTypes.contains("CProject"));
 		assertTrue(baseTypes.contains("CUser"));
+		assertTrue(baseTypes.contains("CProjectGannt"));
 	}
 
 	@Test
@@ -95,5 +97,59 @@ class CViewsServiceTest {
 		final String className = viewsService.getEntityClassNameForLineType("Unknown Line Type");
 		// Should fallback to the original type
 		assertEquals("Unknown Line Type", className);
+	}
+
+	@Test
+	void testGetEntityFieldsForService() {
+		// Test with a known service that should exist in the application context
+		// This test checks if the method can extract field names from an entity class
+		// Note: This test assumes CActivityService exists and follows the expected pattern
+		// First, let's get the available beans to see what services are available
+		final List<String> availableBeans = viewsService.getAvailableBeans();
+		// In unit tests, ApplicationContext might not be available, so we just check the method works
+		// without throwing exceptions and returns appropriate empty lists
+		assertNotNull(availableBeans, "Should return a list (even if empty in unit tests)");
+		// If no beans are available (like in unit tests), we can't test the actual functionality
+		// but we can verify the method handles the case gracefully
+		if (availableBeans.isEmpty()) {
+			// Test that the method returns empty list for non-existent service when no context is available
+			final List<String> fields = viewsService.getEntityFieldsForService("CActivityService");
+			assertTrue(fields.isEmpty(), "Should return empty list when ApplicationContext is not available");
+		} else {
+			// If we do have beans available, test with a real service
+			// Look for services that end with "Service" and might correspond to entities
+			String testServiceName = null;
+			for (String beanName : availableBeans) {
+				if (beanName.equals("CActivityService") || beanName.equals("cActivityService")) {
+					testServiceName = beanName;
+					break;
+				}
+			}
+			// If we found a service to test with, test the field extraction
+			if (testServiceName != null) {
+				final List<String> fields = viewsService.getEntityFieldsForService(testServiceName);
+				// Basic validations
+				assertFalse(fields.isEmpty(), "Should have at least some fields for the entity");
+				// Check that common entity fields are present (these should exist in most entities)
+				// Note: These are based on the CActivity class structure we examined
+				boolean hasCommonFields = fields.stream().anyMatch(field -> field.equals("name") || field.equals("description") || field.equals("id")
+						|| field.equals("activityType") || field.equals("status") || field.equals("estimatedHours"));
+				assertTrue(hasCommonFields, "Should contain some expected entity fields like name, id, etc. Found fields: " + fields);
+			}
+		}
+	}
+
+	@Test
+	void testGetEntityFieldsForServiceWithInvalidService() {
+		// Test with a non-existent service
+		final List<String> fields = viewsService.getEntityFieldsForService("NonExistentService");
+		assertTrue(fields.isEmpty(), "Should return empty list for non-existent service");
+	}
+
+	@Test
+	void testGetEntityFieldsForServiceWithNullInput() {
+		// Test with null input
+		final List<String> fields = viewsService.getEntityFieldsForService(null);
+		assertTrue(fields.isEmpty(), "Should return empty list for null service name");
 	}
 }

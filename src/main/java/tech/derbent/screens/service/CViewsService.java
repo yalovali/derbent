@@ -1,11 +1,15 @@
 package tech.derbent.screens.service;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import com.vaadin.hilla.ApplicationContextProvider;
+import tech.derbent.abstracts.services.CAbstractService;
 
 @Service
 public class CViewsService {
@@ -106,14 +110,87 @@ public class CViewsService {
 		LOGGER.debug("Retrieving available service beans for views");
 		// get beans from application context
 		List<String> serviceBeans = new ArrayList<>();
-		for (final String beanName : ApplicationContextProvider.getApplicationContext().getBeanDefinitionNames()) {
-			LOGGER.debug("Bean found: {}", beanName);
-			if (beanName.endsWith("Service")) {
-				serviceBeans.add(beanName);
+		try {
+			if (ApplicationContextProvider.getApplicationContext() == null) {
+				LOGGER.warn("ApplicationContext is not available, returning empty list");
+				return serviceBeans;
 			}
+			for (final String beanName : ApplicationContextProvider.getApplicationContext().getBeanDefinitionNames()) {
+				LOGGER.debug("Bean found: {}", beanName);
+				if (beanName.endsWith("Service")) {
+					serviceBeans.add(beanName);
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.error("Error retrieving service beans: {}", e.getMessage(), e);
 		}
 		// Return the list of service beans
 		return serviceBeans;
 		// Note: Ensure these service classes exist in your application
+	}
+
+	/** Get the entity field names for a given service bean name. For example, if given "CActivityService", returns the field names of the CActivity
+	 * entity class.
+	 * @param serviceBeanName the name of the service bean (e.g., "CActivityService")
+	 * @return list of field names from the corresponding entity class */
+	public List<String> getEntityFieldsForService(final String serviceBeanName) {
+		LOGGER.debug("Getting entity fields for service bean: {}", serviceBeanName);
+		try {
+			// Check for null or empty service name
+			if (serviceBeanName == null || serviceBeanName.trim().isEmpty()) {
+				LOGGER.debug("Service bean name is null or empty");
+				return List.of();
+			}
+			// Check if ApplicationContext is available
+			if (ApplicationContextProvider.getApplicationContext() == null) {
+				LOGGER.warn("ApplicationContext is not available");
+				return List.of();
+			}
+			// Get the service bean from Spring application context
+			Object serviceBean = ApplicationContextProvider.getApplicationContext().getBean(serviceBeanName);
+			// Check if the service extends CAbstractService
+			if (!(serviceBean instanceof CAbstractService)) {
+				LOGGER.warn("Service bean {} does not extend CAbstractService", serviceBeanName);
+				return List.of();
+			}
+			// Cast to CAbstractService and get the entity class
+			CAbstractService<?> abstractService = (CAbstractService<?>) serviceBean;
+			Class<?> entityClass = getEntityClassFromService(abstractService);
+			if (entityClass == null) {
+				LOGGER.warn("Could not determine entity class for service: {}", serviceBeanName);
+				return List.of();
+			}
+			// Get all declared fields from the entity class
+			List<String> fieldNames = new ArrayList<>();
+			Field[] fields = entityClass.getDeclaredFields();
+			for (Field field : fields) {
+				// Skip static fields and logger fields
+				if (java.lang.reflect.Modifier.isStatic(field.getModifiers()) || "LOGGER".equals(field.getName())
+						|| field.getName().startsWith("$")) {
+					continue;
+				}
+				fieldNames.add(field.getName());
+			}
+			LOGGER.debug("Found {} fields for entity class {}", fieldNames.size(), entityClass.getSimpleName());
+			return fieldNames;
+		} catch (Exception e) {
+			LOGGER.error("Error getting entity fields for service {}: {}", serviceBeanName, e.getMessage(), e);
+			return List.of();
+		}
+	}
+
+	/** Helper method to get the entity class from a service using reflection.
+	 * @param service the service instance
+	 * @return the entity class or null if not found */
+	private Class<?> getEntityClassFromService(final CAbstractService<?> service) {
+		try {
+			// Try to call the getEntityClass() method using reflection
+			Method getEntityClassMethod = service.getClass().getMethod("getEntityClass");
+			getEntityClassMethod.setAccessible(true);
+			return (Class<?>) getEntityClassMethod.invoke(service);
+		} catch (Exception e) {
+			LOGGER.debug("Could not get entity class from service using getEntityClass() method: {}", e.getMessage());
+			return null;
+		}
 	}
 }
