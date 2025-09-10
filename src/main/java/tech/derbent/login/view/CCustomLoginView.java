@@ -1,8 +1,11 @@
 package tech.derbent.login.view;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
@@ -20,8 +23,10 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import org.springframework.beans.factory.annotation.Autowired;
 import tech.derbent.base.ui.dialogs.CInformationDialog;
 import tech.derbent.config.CSampleDataInitializer;
+import tech.derbent.setup.service.CSystemSettingsService;
 
 /** Custom login view using basic Vaadin components instead of LoginOverlay. This provides an alternative login interface for testing purposes. */
 @Route (value = "login", autoLayout = false)
@@ -35,12 +40,18 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	private final Button loginButton = new Button("Login");
 	private final Button resetDbButton = new Button("Reset Database");
 	private final Div errorMessage = new Div();
+	private final Checkbox autoLoginCheckbox = new Checkbox("Auto-login after 2 seconds");
+	private final ComboBox<String> defaultViewComboBox = new ComboBox<>("Go to view after login");
+
+	@Autowired
+	private CSystemSettingsService systemSettingsService;
 
 	/** Constructor sets up the custom login form with basic Vaadin components. */
 	public CCustomLoginView() {
 		addClassNames("custom-login-view");
 		setSizeFull();
 		setupForm();
+		initializeComponents();
 	}
 
 	/** Handles navigation events before entering the view. Checks for authentication failure indicators and displays error messages. */
@@ -73,12 +84,25 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 			showError("Please enter both username and password");
 			return;
 		}
-		// Create form and submit to Spring Security endpoint
+		
+		// Save settings before login
+		saveAutoLoginSettings();
+		
+		// Get selected view for redirect
+		String redirectView = defaultViewComboBox.getValue();
+		if (redirectView == null || redirectView.isEmpty()) {
+			redirectView = "home";
+		}
+		
+		// Create form and submit to Spring Security endpoint with redirect parameter
 		getElement().executeJs("const form = document.createElement('form');" + "form.method = 'POST';" + "form.action = 'login';"
 				+ "const usernameInput = document.createElement('input');" + "usernameInput.type = 'hidden';" + "usernameInput.name = 'username';"
 				+ "usernameInput.value = $0;" + "form.appendChild(usernameInput);" + "const passwordInput = document.createElement('input');"
 				+ "passwordInput.type = 'hidden';" + "passwordInput.name = 'password';" + "passwordInput.value = $1;"
-				+ "form.appendChild(passwordInput);" + "document.body.appendChild(form);" + "form.submit();", username, password);
+				+ "form.appendChild(passwordInput);" 
+				+ "const redirectInput = document.createElement('input');" + "redirectInput.type = 'hidden';" + "redirectInput.name = 'redirect';"
+				+ "redirectInput.value = $2;" + "form.appendChild(redirectInput);"
+				+ "document.body.appendChild(form);" + "form.submit();", username, password, redirectView);
 	}
 
 	private void setupForm() {
@@ -106,6 +130,11 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		// Setup form fields horizontally
 		final HorizontalLayout usernameLayout = createHorizontalField("Username:", usernameField);
 		final HorizontalLayout passwordLayout = createHorizontalField("Password:", passwordField);
+		
+		// Setup auto-login components
+		autoLoginCheckbox.setId("auto-login-checkbox");
+		autoLoginCheckbox.addClassNames(LumoUtility.Margin.Top.SMALL);
+		
 		// Setup form fields
 		setupFormFields();
 		// Database reset button setup
@@ -143,7 +172,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		//
 		buttonsLayout.add(resetDbButton);
 		// Add components to form card
-		formCard.add(headerlayout, subtitle, usernameLayout, passwordLayout, errorMessage, loginButton, passwordHint, buttonsLayout);
+		formCard.add(headerlayout, subtitle, usernameLayout, passwordLayout, autoLoginCheckbox, defaultViewComboBox, errorMessage, loginButton, passwordHint, buttonsLayout);
 		container.add(formCard);
 		add(container);
 	}
@@ -154,11 +183,17 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		usernameField.setRequired(true);
 		usernameField.setRequiredIndicatorVisible(true);
 		usernameField.setId("custom-username-input");
+		// Add value change listener to trigger auto-login timer
+		usernameField.addValueChangeListener(e -> checkAutoLoginConditions());
+		
 		// Password field setup
 		passwordField.setWidthFull();
 		passwordField.setRequired(true);
 		passwordField.setRequiredIndicatorVisible(true);
 		passwordField.setId("custom-password-input");
+		// Add value change listener to trigger auto-login timer
+		passwordField.addValueChangeListener(e -> checkAutoLoginConditions());
+		
 		// Login button setup
 		loginButton.setWidthFull();
 		loginButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -169,7 +204,111 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		passwordField.addKeyPressListener(com.vaadin.flow.component.Key.ENTER, e -> handleLogin());
 	}
 
+	private void checkAutoLoginConditions() {
+		// Start auto-login timer if checkbox is checked and both fields are filled
+		if (autoLoginCheckbox.getValue() && 
+			!usernameField.getValue().trim().isEmpty() && 
+			!passwordField.getValue().trim().isEmpty()) {
+			startAutoLoginTimer();
+		}
+	}
+
 	private void showError(final String message) {
 		errorMessage.setText(message);
+	}
+
+	/** Initialize auto-login and view selection components */
+	private void initializeComponents() {
+		// Initialize default view combobox with available views
+		defaultViewComboBox.setItems(
+			"home", "cdashboardview", "cprojectsview", "cactivitiesview", 
+			"cmeetingsview", "cusersview", "cganntview", "cordersview"
+		);
+		defaultViewComboBox.setItemLabelGenerator(this::getViewDisplayName);
+		defaultViewComboBox.setValue("home"); // Default value
+		defaultViewComboBox.setWidthFull();
+
+		// Load settings from database
+		loadSettingsFromDatabase();
+
+		// Add value change listeners to save settings
+		autoLoginCheckbox.addValueChangeListener(e -> saveAutoLoginSettings());
+		defaultViewComboBox.addValueChangeListener(e -> saveAutoLoginSettings());
+
+		// Handle auto-login checkbox state change
+		autoLoginCheckbox.addValueChangeListener(e -> {
+			if (e.getValue()) {
+				startAutoLoginTimer();
+			} else {
+				stopAutoLoginTimer();
+			}
+		});
+	}
+
+	private String getViewDisplayName(String route) {
+		switch (route) {
+			case "home": return "Home/Dashboard";
+			case "cdashboardview": return "Dashboard";
+			case "cprojectsview": return "Projects";
+			case "cactivitiesview": return "Activities";
+			case "cmeetingsview": return "Meetings";
+			case "cusersview": return "Users";
+			case "cganntview": return "Gantt Chart";
+			case "cordersview": return "Orders";
+			default: return route;
+		}
+	}
+
+	private void loadSettingsFromDatabase() {
+		try {
+			if (systemSettingsService != null) {
+				boolean autoLoginEnabled = systemSettingsService.isAutoLoginEnabled();
+				String defaultView = systemSettingsService.getDefaultLoginView();
+				
+				autoLoginCheckbox.setValue(autoLoginEnabled);
+				if (defaultView != null && !defaultView.isEmpty()) {
+					defaultViewComboBox.setValue(defaultView);
+				}
+			}
+		} catch (Exception e) {
+			// Log error but don't break the UI
+			System.err.println("Error loading auto-login settings: " + e.getMessage());
+		}
+	}
+
+	private void saveAutoLoginSettings() {
+		try {
+			if (systemSettingsService != null) {
+				boolean autoLoginEnabled = autoLoginCheckbox.getValue();
+				String defaultView = defaultViewComboBox.getValue();
+				if (defaultView == null) {
+					defaultView = "home";
+				}
+				systemSettingsService.updateAutoLoginSettings(autoLoginEnabled, defaultView);
+			}
+		} catch (Exception e) {
+			// Log error but don't break the UI
+			System.err.println("Error saving auto-login settings: " + e.getMessage());
+		}
+	}
+
+	private void startAutoLoginTimer() {
+		// Only start timer if both username and password are filled
+		if (!usernameField.getValue().trim().isEmpty() && !passwordField.getValue().trim().isEmpty()) {
+			// Use JavaScript to start a 2-second timer
+			getElement().executeJs(
+				"setTimeout(() => { " +
+				"  const loginBtn = document.getElementById('custom-submit-button'); " +
+				"  if (loginBtn && document.getElementById('auto-login-checkbox').checked) { " +
+				"    loginBtn.click(); " +
+				"  } " +
+				"}, 2000);"
+			);
+		}
+	}
+
+	private void stopAutoLoginTimer() {
+		// Clear any existing timer (this is a simple approach)
+		// In a more complex implementation, you might want to track the timer ID
 	}
 }

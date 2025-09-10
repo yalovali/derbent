@@ -241,6 +241,20 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 			description = "Display system information to administrators", hidden = false, order = 29
 	)
 	private Boolean showSystemInfo = Boolean.TRUE;
+	// Auto-Login Settings
+	@Column (name = "auto_login_enabled", nullable = false)
+	@AMetaData (
+			displayName = "Auto Login Enabled", required = true, readOnly = false, defaultValue = "false",
+			description = "Enable automatic login after 2 seconds", hidden = false, order = 30
+	)
+	private Boolean autoLoginEnabled = Boolean.FALSE;
+	@Column (name = "default_login_view", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@AMetaData (
+			displayName = "Default Login View", required = false, readOnly = false, defaultValue = "home",
+			description = "Default view to navigate to after login", hidden = false, order = 31, maxLength = CEntityConstants.MAX_LENGTH_NAME
+	)
+	private String defaultLoginView = "home";
 
 	/** Default constructor required by JPA. Initializes entity with default values. */
 	public CSystemSettings() {
@@ -314,6 +328,10 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 
 	public String getSystemEmailFrom() { return systemEmailFrom; }
 
+	public Boolean getAutoLoginEnabled() { return autoLoginEnabled; }
+
+	public String getDefaultLoginView() { return defaultLoginView; }
+
 	@Override
 	public Class<?> getViewClass() { // TODO Auto-generated method stub
 		return null;
@@ -346,6 +364,8 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	public Boolean isShowSystemInfo() { return showSystemInfo; }
 
 	public Boolean isSmtpUseTls() { return smtpUseTls; }
+
+	public Boolean isAutoLoginEnabled() { return autoLoginEnabled; }
 
 	public void setAccountLockoutDurationMinutes(final Integer accountLockoutDurationMinutes) {
 		this.accountLockoutDurationMinutes = accountLockoutDurationMinutes;
@@ -410,6 +430,10 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	public void setSupportEmail(final String supportEmail) { this.supportEmail = supportEmail; }
 
 	public void setSystemEmailFrom(final String systemEmailFrom) { this.systemEmailFrom = systemEmailFrom; }
+
+	public void setAutoLoginEnabled(final Boolean autoLoginEnabled) { this.autoLoginEnabled = autoLoginEnabled; }
+
+	public void setDefaultLoginView(final String defaultLoginView) { this.defaultLoginView = defaultLoginView; }
 
 	@Override
 	public String toString() {

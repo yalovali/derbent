@@ -233,6 +233,44 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 		}
 	}
 
+	/** Gets the auto-login enabled setting.
+	 * @return true if auto-login is enabled, false otherwise */
+	public boolean isAutoLoginEnabled() {
+		try {
+			final CSystemSettings settings = getOrCreateSystemSettings();
+			return settings.getAutoLoginEnabled() != null ? settings.getAutoLoginEnabled() : false;
+		} catch (final Exception e) {
+			LOGGER.error("Error retrieving auto-login enabled setting", e);
+			return false; // Default to false for security
+		}
+	}
+
+	/** Gets the default login view setting.
+	 * @return the default view to navigate to after login */
+	public String getDefaultLoginView() {
+		try {
+			final CSystemSettings settings = getOrCreateSystemSettings();
+			return settings.getDefaultLoginView() != null ? settings.getDefaultLoginView() : "home";
+		} catch (final Exception e) {
+			LOGGER.error("Error retrieving default login view setting", e);
+			return "home"; // Default fallback
+		}
+	}
+
+	/** Updates the auto-login settings.
+	 * @param autoLoginEnabled true to enable auto-login, false to disable
+	 * @param defaultView the default view to navigate to after login
+	 * @return the updated CSystemSettings */
+	@Transactional
+	public CSystemSettings updateAutoLoginSettings(final boolean autoLoginEnabled, final String defaultView) {
+		final CSystemSettings settings = getOrCreateSystemSettings();
+		settings.setAutoLoginEnabled(autoLoginEnabled);
+		if ((defaultView != null) && !defaultView.trim().isEmpty()) {
+			settings.setDefaultLoginView(defaultView.trim());
+		}
+		return updateSystemSettings(settings);
+	}
+
 	/** Validates business rules for system settings.
 	 * @param settings the settings to validate
 	 * @throws IllegalArgumentException if validation fails */
