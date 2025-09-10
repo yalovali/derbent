@@ -9,26 +9,26 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.listbox.ListBox;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.flow.component.ComponentEvent;
-import com.vaadin.flow.component.ComponentEventListener;
-import tech.derbent.abstracts.utils.Check;
+import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.screens.service.CEntityFieldService;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
-/** Component for selecting and ordering entity fields for grid display. Allows users to select fields from available entity fields and order them
- * using up/down buttons. The selection is stored as a comma-separated string with order information. */
+/** Simple field selection component for selecting and ordering entity fields. Integrates with binders and provides up/down ordering functionality. */
 public class CFieldSelectionComponent extends VerticalLayout implements HasValue<HasValue.ValueChangeEvent<String>, String> {
-	/** Data class to hold field information with order */
+
+	private static final long serialVersionUID = 1L;
+
+	// Data class for field selections with order
 	public static class FieldSelection {
-		private EntityFieldInfo fieldInfo;
+
+		private final EntityFieldInfo fieldInfo;
 		private int order;
 
-		public FieldSelection(final EntityFieldInfo fieldInfo, final int order) {
+		public FieldSelection(EntityFieldInfo fieldInfo, int order) {
 			this.fieldInfo = fieldInfo;
 			this.order = order;
 		}
@@ -37,9 +37,7 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 
 		public int getOrder() { return order; }
 
-		public void setFieldInfo(final EntityFieldInfo fieldInfo) { this.fieldInfo = fieldInfo; }
-
-		public void setOrder(final int order) { this.order = order; }
+		public void setOrder(int order) { this.order = order; }
 
 		@Override
 		public String toString() {
@@ -47,277 +45,275 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 		}
 	}
 
-	public static class ValueChangeEvent extends ComponentEvent<CFieldSelectionComponent> {
-		private final String oldValue;
-		private final String newValue;
-		private final boolean fromClient;
-
-		public ValueChangeEvent(CFieldSelectionComponent source, String oldValue, String newValue, boolean fromClient) {
-			super(source, fromClient);
-			this.oldValue = oldValue;
-			this.newValue = newValue;
-			this.fromClient = fromClient;
-		}
-
-		public String getOldValue() { return oldValue; }
-		public String getNewValue() { return newValue; }
-		public boolean isFromClient() { return fromClient; }
-	}
-
-	private static final long serialVersionUID = 1L;
-	private ListBox<EntityFieldInfo> availableFieldsListBox;
-	private ListBox<FieldSelection> selectedFieldsListBox;
+	// Dependencies
+	private final CEntityFieldService entityFieldService;
+	private final Binder<?> binder;
+	// UI Components
+	private ListBox<EntityFieldInfo> availableFields;
+	private ListBox<FieldSelection> selectedFields;
 	private Button addButton;
 	private Button removeButton;
-	private Button moveUpButton;
-	private Button moveDownButton;
-	private String entityTypeName;
-	private List<EntityFieldInfo> availableFields;
-	private List<FieldSelection> selectedFields;
-	private String value = "";
+	private Button upButton;
+	private Button downButton;
+	// Data
+	private List<EntityFieldInfo> sourceList;
+	private List<FieldSelection> selections;
+	private String currentValue = "";
 	private boolean readOnly = false;
-	private boolean requiredIndicatorVisible = false;
-	private final List<ComponentEventListener<ValueChangeEvent>> listeners = new ArrayList<>();
-	private final List<HasValue.ValueChangeListener<? super HasValue.ValueChangeEvent<String>>> hvListeners = new ArrayList<>();
+	// Event handling
+	private final List<ValueChangeListener<? super ValueChangeEvent<String>>> listeners = new ArrayList<>();
 
+	/** Default constructor for backward compatibility. */
 	public CFieldSelectionComponent() {
+		this(null, null);
+	}
+
+	/** Constructor taking service and binder as required. */
+	public CFieldSelectionComponent(CEntityFieldService entityFieldService, Binder<?> binder) {
+		this.entityFieldService = entityFieldService;
+		this.binder = binder;
+		this.sourceList = new ArrayList<>();
+		this.selections = new ArrayList<>();
+		initializeUI();
+		setupEventHandlers();
+	}
+
+	/** Constructor with enhanced binder. */
+	public CFieldSelectionComponent(CEntityFieldService entityFieldService, CEnhancedBinder<?> binder) {
+		this(entityFieldService, (Binder<?>) binder);
+	}
+
+	private void initializeUI() {
 		setSpacing(true);
 		setPadding(false);
-		initializeComponent();
+		// Available fields section
+		H4 availableHeader = new H4("Available Fields");
+		availableFields = new ListBox<>();
+		availableFields.setHeight("200px");
+		availableFields.setWidth("100%");
+		// Selected fields section
+		H4 selectedHeader = new H4("Selected Fields");
+		selectedFields = new ListBox<>();
+		selectedFields.setHeight("200px");
+		selectedFields.setWidth("100%");
+		// Control buttons
+		addButton = new Button("Add →", VaadinIcon.ARROW_RIGHT.create());
+		addButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		removeButton = new Button("← Remove", VaadinIcon.ARROW_LEFT.create());
+		removeButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
+		// Order buttons
+		upButton = new Button("Up", VaadinIcon.ARROW_UP.create());
+		downButton = new Button("Down", VaadinIcon.ARROW_DOWN.create());
+		// Layout
+		HorizontalLayout controlButtons = new HorizontalLayout(addButton, removeButton);
+		HorizontalLayout orderButtons = new HorizontalLayout(upButton, downButton);
+		VerticalLayout availableSection = new VerticalLayout(availableHeader, availableFields, controlButtons);
+		availableSection.setSpacing(false);
+		availableSection.setPadding(false);
+		VerticalLayout selectedSection = new VerticalLayout(selectedHeader, selectedFields, orderButtons);
+		selectedSection.setSpacing(false);
+		selectedSection.setPadding(false);
+		HorizontalLayout mainLayout = new HorizontalLayout(availableSection, selectedSection);
+		mainLayout.setWidthFull();
+		add(mainLayout);
+	}
+
+	private void setupEventHandlers() {
+		// Enable/disable buttons based on selection
+		availableFields.addValueChangeListener(e -> addButton.setEnabled(e.getValue() != null && !readOnly));
+		selectedFields.addValueChangeListener(e -> {
+			boolean hasSelection = e.getValue() != null && !readOnly;
+			removeButton.setEnabled(hasSelection);
+			upButton.setEnabled(hasSelection);
+			downButton.setEnabled(hasSelection);
+		});
+		// Button actions
+		addButton.addClickListener(e -> addSelectedField());
+		removeButton.addClickListener(e -> removeSelectedField());
+		upButton.addClickListener(e -> moveUp());
+		downButton.addClickListener(e -> moveDown());
 	}
 
 	private void addSelectedField() {
-		final EntityFieldInfo selected = availableFieldsListBox.getValue();
+		EntityFieldInfo selected = availableFields.getValue();
 		if (selected != null) {
 			// Check if already selected
-			final boolean alreadySelected = selectedFields.stream().anyMatch(fs -> fs.getFieldInfo().getFieldName().equals(selected.getFieldName()));
-			if (alreadySelected) {
-				Notification.show("Field is already selected", 2000, Notification.Position.MIDDLE);
-				return;
+			boolean alreadySelected = selections.stream().anyMatch(fs -> fs.getFieldInfo().getFieldName().equals(selected.getFieldName()));
+			if (!alreadySelected) {
+				int order = selections.size() + 1;
+				selections.add(new FieldSelection(selected, order));
+				refreshSelections();
+				availableFields.clear();
 			}
-			final int order = selectedFields.size() + 1;
-			final FieldSelection fieldSelection = new FieldSelection(selected, order);
-			selectedFields.add(fieldSelection);
-			refreshSelectedFieldsList();
-			availableFieldsListBox.clear();
 		}
 	}
 
+	private void removeSelectedField() {
+		FieldSelection selected = selectedFields.getValue();
+		if (selected != null) {
+			selections.remove(selected);
+			// Reorder remaining items
+			for (int i = 0; i < selections.size(); i++) {
+				selections.get(i).setOrder(i + 1);
+			}
+			refreshSelections();
+			selectedFields.clear();
+		}
+	}
+
+	private void moveUp() {
+		FieldSelection selected = selectedFields.getValue();
+		if (selected != null) {
+			int index = selections.indexOf(selected);
+			if (index > 0) {
+				// Swap with previous
+				FieldSelection previous = selections.get(index - 1);
+				selections.set(index - 1, selected);
+				selections.set(index, previous);
+				// Update orders
+				selected.setOrder(index);
+				previous.setOrder(index + 1);
+				refreshSelections();
+				selectedFields.setValue(selected);
+			}
+		}
+	}
+
+	private void moveDown() {
+		FieldSelection selected = selectedFields.getValue();
+		if (selected != null) {
+			int index = selections.indexOf(selected);
+			if (index < selections.size() - 1) {
+				// Swap with next
+				FieldSelection next = selections.get(index + 1);
+				selections.set(index + 1, selected);
+				selections.set(index, next);
+				// Update orders
+				selected.setOrder(index + 2);
+				next.setOrder(index + 1);
+				refreshSelections();
+				selectedFields.setValue(selected);
+			}
+		}
+	}
+
+	private void refreshSelections() {
+		selectedFields.setItems(selections);
+		fireValueChangeEvent();
+	}
+
+	private void fireValueChangeEvent() {
+		String oldValue = currentValue;
+		String newValue = getValue();
+		currentValue = newValue;
+		ValueChangeEvent<String> event = new ValueChangeEvent<String>() {
+
+			@Override
+			public HasValue<?, String> getHasValue() { return CFieldSelectionComponent.this; }
+
+			@Override
+			public boolean isFromClient() { return true; }
+
+			@Override
+			public String getOldValue() { return oldValue; }
+
+			@Override
+			public String getValue() { return newValue; }
+		};
+		listeners.forEach(listener -> listener.valueChanged(event));
+	}
+
+	// HasValue implementation
 	@Override
-	public Registration addValueChangeListener(final ComponentEventListener<ValueChangeEvent> listener) {
+	public String getValue() {
+		return selections.stream().map(fs -> fs.getFieldInfo().getFieldName() + ":" + fs.getOrder()).collect(Collectors.joining(","));
+	}
+
+	@Override
+	public void setValue(String value) {
+		loadFromString(value);
+	}
+
+	@Override
+	public Registration addValueChangeListener(ValueChangeListener<? super ValueChangeEvent<String>> listener) {
 		listeners.add(listener);
 		return () -> listeners.remove(listener);
 	}
 
 	@Override
-	public Registration addValueChangeListener(HasValue.ValueChangeListener<? super HasValue.ValueChangeEvent<String>> listener) {
-		hvListeners.add(listener);
-		return () -> hvListeners.remove(listener);
-	}
+	public boolean isReadOnly() { return readOnly; }
 
-	private void fireValueChangeEvent(final boolean fromClient) {
-		String oldValue = value;
-		String newValue = getSelectedFieldsAsString();
-		value = newValue;
-		final ValueChangeEvent event = new ValueChangeEvent(this, oldValue, newValue, fromClient);
-		for (final ComponentEventListener<ValueChangeEvent> listener : listeners) {
-			listener.onComponentEvent(event);
-		}
-		final HasValue.ValueChangeEvent<String> hvEvent = new HasValue.ValueChangeEvent<>(this, oldValue, newValue, fromClient);
-		for (final HasValue.ValueChangeListener<? super HasValue.ValueChangeEvent<String>> listener : hvListeners) {
-			listener.valueChanged(hvEvent);
-		}
-	}
-
-	private void refreshSelectedFieldsList() {
-		selectedFieldsListBox.setItems(selectedFields);
-		fireValueChangeEvent(true);
-	}
-
-	private void removeSelectedField() {
-		final FieldSelection selected = selectedFieldsListBox.getValue();
-		if (selected != null) {
-			selectedFields.remove(selected);
-			for (int i = 0; i < selectedFields.size(); i++) {
-				selectedFields.get(i).setOrder(i + 1);
-			}
-			refreshSelectedFieldsList();
-			selectedFieldsListBox.clear();
-		}
-	}
-
-	private void moveSelectedFieldUp() {
-		final FieldSelection selected = selectedFieldsListBox.getValue();
-		if (selected != null) {
-			final int index = selectedFields.indexOf(selected);
-			if (index > 0) {
-				final FieldSelection previous = selectedFields.get(index - 1);
-				selectedFields.set(index - 1, selected);
-				selectedFields.set(index, previous);
-				selected.setOrder(index);
-				previous.setOrder(index + 1);
-				refreshSelectedFieldsList();
-				selectedFieldsListBox.setValue(selected);
-			}
-		}
-	}
-
-	private void moveSelectedFieldDown() {
-		final FieldSelection selected = selectedFieldsListBox.getValue();
-		if (selected != null) {
-			final int index = selectedFields.indexOf(selected);
-			if (index < (selectedFields.size() - 1)) {
-				final FieldSelection next = selectedFields.get(index + 1);
-				selectedFields.set(index + 1, selected);
-				selectedFields.set(index, next);
-				selected.setOrder(index + 2);
-				next.setOrder(index + 1);
-				refreshSelectedFieldsList();
-				selectedFieldsListBox.setValue(selected);
-			}
-		}
-	}
-
-	private HorizontalLayout createControlButtons() {
-		final HorizontalLayout layout = new HorizontalLayout();
-		layout.setSpacing(true);
-		addButton = new Button("Add →", VaadinIcon.ARROW_RIGHT.create());
-		addButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		addButton.setEnabled(false);
-		removeButton = new Button("← Remove", VaadinIcon.ARROW_LEFT.create());
-		removeButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
-		removeButton.setEnabled(false);
-		layout.add(addButton, removeButton);
-		return layout;
-	}
-
-	private HorizontalLayout createOrderButtons() {
-		final HorizontalLayout layout = new HorizontalLayout();
-		layout.setSpacing(true);
-		moveUpButton = new Button("Move Up", VaadinIcon.ARROW_UP.create());
-		moveUpButton.setEnabled(false);
-		moveDownButton = new Button("Move Down", VaadinIcon.ARROW_DOWN.create());
-		moveDownButton.setEnabled(false);
-		layout.add(moveUpButton, moveDownButton);
-		return layout;
-	}
-
-	private void initializeComponent() {
-		// Create available fields section
-		final H4 availableHeader = new H4("Available Fields");
-		availableFieldsListBox = new ListBox<>();
-		availableFieldsListBox.setHeight("200px");
-		availableFieldsListBox.setWidth("100%");
-		availableFieldsListBox.setRenderer(new ComponentRenderer<>(
-				field -> new com.vaadin.flow.component.html.Span(field.getDisplayName() + " (" + field.getFieldName() + ")")));
-		// Create selected fields section
-		final H4 selectedHeader = new H4("Selected Fields (in order)");
-		selectedFieldsListBox = new ListBox<>();
-		selectedFieldsListBox.setHeight("200px");
-		selectedFieldsListBox.setWidth("100%");
-		selectedFieldsListBox
-				.setRenderer(new ComponentRenderer<>(fieldSelection -> new com.vaadin.flow.component.html.Span(fieldSelection.toString())));
-		// Create control buttons
-		final HorizontalLayout controlButtons = createControlButtons();
-		final HorizontalLayout orderButtons = createOrderButtons();
-		// Layout
-		final VerticalLayout availableSection = new VerticalLayout(availableHeader, availableFieldsListBox, controlButtons);
-		availableSection.setSpacing(false);
-		availableSection.setPadding(false);
-		final VerticalLayout selectedSection = new VerticalLayout(selectedHeader, selectedFieldsListBox, orderButtons);
-		selectedSection.setSpacing(false);
-		selectedSection.setPadding(false);
-		final HorizontalLayout mainLayout = new HorizontalLayout(availableSection, selectedSection);
-		mainLayout.setWidthFull();
-		add(mainLayout);
-		// Initialize data
-		selectedFields = new ArrayList<>();
-		setupEventHandlers();
-	}
-
-	private void setupEventHandlers() {
-		// Available fields selection
-		availableFieldsListBox.addValueChangeListener(e -> {
-			addButton.setEnabled(e.getValue() != null);
-		});
-		// Selected fields selection
-		selectedFieldsListBox.addValueChangeListener(e -> {
-			final boolean hasSelection = e.getValue() != null;
-			removeButton.setEnabled(hasSelection);
-			moveUpButton.setEnabled(hasSelection);
-			moveDownButton.setEnabled(hasSelection);
-		});
-		// Button actions
-		addButton.addClickListener(e -> addSelectedField());
-		removeButton.addClickListener(e -> removeSelectedField());
-		moveUpButton.addClickListener(e -> moveSelectedFieldUp());
-		moveDownButton.addClickListener(e -> moveSelectedFieldDown());
-	}
-
-	/** Get the list of selected field selections */
-	public List<FieldSelection> getSelectedFields() { return new ArrayList<>(selectedFields); }
-
-	/** Get the selected fields as a comma-separated string */
-	public String getSelectedFieldsAsString() {
-		return selectedFields.stream().map(fs -> fs.getFieldInfo().getFieldName() + ":" + fs.getOrder()).collect(Collectors.joining(","));
+	@Override
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
+		addButton.setEnabled(!readOnly && availableFields.getValue() != null);
+		removeButton.setEnabled(!readOnly && selectedFields.getValue() != null);
+		upButton.setEnabled(!readOnly && selectedFields.getValue() != null);
+		downButton.setEnabled(!readOnly && selectedFields.getValue() != null);
 	}
 
 	@Override
-	public String getValue() { return getSelectedFieldsAsString(); }
+	public boolean isEmpty() { return selections.isEmpty(); }
 
-	/** Set the selected fields from a comma-separated string */
-	public void setSelectedFieldsFromString(final String selectedFieldsString) {
-		selectedFields.clear();
-		if ((selectedFieldsString != null) && !selectedFieldsString.trim().isEmpty()) {
-			final String[] fieldPairs = selectedFieldsString.split(",");
-			for (final String fieldPair : fieldPairs) {
-				final String[] parts = fieldPair.trim().split(":");
+	@Override
+	public boolean isRequiredIndicatorVisible() { return false; }
+
+	@Override
+	public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
+		// No-op for simplicity
+	}
+
+	// API methods for external usage
+	public void setEntityType(String entityType) {
+		if (entityType != null) {
+			sourceList = CEntityFieldService.getEntityFields(entityType);
+			availableFields.setItems(sourceList);
+		}
+	}
+
+	public void loadFromBinder() {
+		if (binder != null) {
+			// Load from binder if needed - implementation depends on use case
+		}
+	}
+
+	public void saveToBinder() {
+		if (binder != null) {
+			// Save to binder if needed - implementation depends on use case
+		}
+	}
+
+	public void loadFromString(String value) {
+		selections.clear();
+		if (value != null && !value.trim().isEmpty()) {
+			String[] fieldPairs = value.split(",");
+			for (String fieldPair : fieldPairs) {
+				String[] parts = fieldPair.trim().split(":");
 				if (parts.length == 2) {
-					final String fieldName = parts[0].trim();
+					String fieldName = parts[0].trim();
 					try {
-						final int order = Integer.parseInt(parts[1].trim());
-						// Find the field info
-						final EntityFieldInfo fieldInfo =
-								availableFields.stream().filter(f -> f.getFieldName().equals(fieldName)).findFirst().orElse(null);
+						int order = Integer.parseInt(parts[1].trim());
+						// Find field info in source list
+						EntityFieldInfo fieldInfo = sourceList.stream().filter(f -> f.getFieldName().equals(fieldName)).findFirst().orElse(null);
 						if (fieldInfo != null) {
-							selectedFields.add(new FieldSelection(fieldInfo, order));
+							selections.add(new FieldSelection(fieldInfo, order));
 						}
-					} catch (final NumberFormatException e) {
-						// Skip invalid order values
+					} catch (NumberFormatException e) {
+						// Skip invalid entries
 					}
 				}
 			}
 			// Sort by order
-			selectedFields.sort((a, b) -> Integer.compare(a.getOrder(), b.getOrder()));
+			selections.sort((a, b) -> Integer.compare(a.getOrder(), b.getOrder()));
 		}
-		refreshSelectedFieldsList();
+		refreshSelections();
 	}
 
-	@Override
-	public void setValue(final String value) {
-		setSelectedFieldsFromString(value);
-		this.value = getSelectedFieldsAsString();
-		fireValueChangeEvent(false);
+	public String getSelectedFieldsAsString() { return getValue(); }
+
+	public void setSelectedFieldsFromString(String value) {
+		loadFromString(value);
 	}
 
-	@Override
-	public boolean isEmpty() { return (getValue() == null) || getValue().isEmpty(); }
-
-	@Override
-	public boolean isReadOnly() { return readOnly; }
-
-	@Override
-	public boolean isRequiredIndicatorVisible() { return requiredIndicatorVisible; }
-
-	@Override
-	public void setReadOnly(final boolean readOnly) {
-		this.readOnly = readOnly;
-		addButton.setEnabled(!readOnly);
-		removeButton.setEnabled(!readOnly);
-		moveUpButton.setEnabled(!readOnly);
-		moveDownButton.setEnabled(!readOnly);
-	}
-
-	@Override
-	public void setRequiredIndicatorVisible(final boolean requiredIndicatorVisible) { this.requiredIndicatorVisible = requiredIndicatorVisible; }
+	public List<FieldSelection> getSelectedFields() { return new ArrayList<>(selections); }
 }

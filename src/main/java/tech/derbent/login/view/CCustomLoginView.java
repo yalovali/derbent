@@ -57,15 +57,14 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		initializeComponents();
 	}
 
-	/** Handles navigation events before entering the view. Checks for authentication failure indicators and displays error messages. 
-	 * Also handles the 'continue' parameter to set the default view selection. */
+	/** Handles navigation events before entering the view. Checks for authentication failure indicators and displays error messages. Also handles the
+	 * 'continue' parameter to set the default view selection. */
 	@Override
 	public void beforeEnter(final BeforeEnterEvent event) {
 		// Check if the URL contains an error parameter
 		if (event.getLocation().getQueryParameters().getParameters().containsKey("error")) {
 			showError("Invalid username or password");
 		}
-		
 		// Check for 'continue' parameter (originally requested page)
 		var continueParams = event.getLocation().getQueryParameters().getParameters().get("continue");
 		if (continueParams != null && !continueParams.isEmpty()) {
@@ -274,39 +273,35 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		}
 	}
 
-	/**
-	 * Maps URLs back to view names for the combobox.
-	 * This is the reverse of the mapping used in CAuthenticationSuccessHandler.
-	 */
+	/** Maps URLs back to view names for the combobox. This is the reverse of the mapping used in CAuthenticationSuccessHandler. */
 	private String mapUrlToViewName(String url) {
-		if (url == null) return null;
-		
+		if (url == null)
+			return null;
 		// Remove leading slash and any query parameters
 		String cleanUrl = url.startsWith("/") ? url.substring(1) : url;
 		int queryIndex = cleanUrl.indexOf('?');
 		if (queryIndex > 0) {
 			cleanUrl = cleanUrl.substring(0, queryIndex);
 		}
-		
 		switch (cleanUrl.toLowerCase()) {
-			case "":
-			case "home":
-				return "home";
-			case "cprojectsview":
-				return "cprojectsview";
-			case "cactivitiesview":
-				return "cactivitiesview";
-			case "cmeetingsview":
-				return "cmeetingsview";
-			case "cusersview":
-				return "cusersview";
-			case "cganttview":
-				return "cganttview";
-			case "cordersview":
-				return "cordersview";
-			default:
-				// For unknown URLs, return null so we don't change the selection
-				return null;
+		case "":
+		case "home":
+			return "home";
+		case "cprojectsview":
+			return "cprojectsview";
+		case "cactivitiesview":
+			return "cactivitiesview";
+		case "cmeetingsview":
+			return "cmeetingsview";
+		case "cusersview":
+			return "cusersview";
+		case "cganttview":
+			return "cganttview";
+		case "cordersview":
+			return "cordersview";
+		default:
+			// For unknown URLs, return null so we don't change the selection
+			return null;
 		}
 	}
 

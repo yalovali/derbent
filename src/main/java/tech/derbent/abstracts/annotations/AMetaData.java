@@ -10,6 +10,7 @@ import java.lang.annotation.Target;
 @Retention (RetentionPolicy.RUNTIME)
 @Target (ElementType.FIELD)
 public @interface AMetaData {
+
 	boolean allowCustomValue() default false;
 
 	boolean autoSelectFirst() default false;
