@@ -4,6 +4,8 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
+import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.view.CGridEntityView;
@@ -24,6 +26,14 @@ public class CGridEntity extends CEntityOfProject<CGridEntity> {
 	public CGridEntity() {
 		super();
 	}
+
+	@Column (name = "data_service_bean_name", nullable = false, length = 100)
+	@Size (max = 100)
+	@AMetaData (
+			displayName = "Data Service Bean", required = true, readOnly = false, description = "Data Service Bean", hidden = false, order = 2,
+			maxLength = 100, dataProviderBean = "CViewsService", dataProviderMethod = "getAvailableBeans"
+	)
+	private String dataServiceBeanName;
 
 	public CGridEntity(final String name, final CProject project) {
 		super(CGridEntity.class, name, project);

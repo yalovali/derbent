@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import com.vaadin.hilla.ApplicationContextProvider;
 
 @Service
 public class CViewsService {
@@ -98,5 +99,21 @@ public class CViewsService {
 		}
 		LOGGER.warn("Unknown entity line type: {}", entityLineType);
 		return entityLineType; // fallback to the original type
+	}
+
+	public List<String> getAvailableBeans() {
+		// These are the service class names corresponding to the entity types
+		LOGGER.debug("Retrieving available service beans for views");
+		// get beans from application context
+		List<String> serviceBeans = new ArrayList<>();
+		for (final String beanName : ApplicationContextProvider.getApplicationContext().getBeanDefinitionNames()) {
+			LOGGER.debug("Bean found: {}", beanName);
+			if (beanName.endsWith("Service")) {
+				serviceBeans.add(beanName);
+			}
+		}
+		// Return the list of service beans
+		return serviceBeans;
+		// Note: Ensure these service classes exist in your application
 	}
 }
