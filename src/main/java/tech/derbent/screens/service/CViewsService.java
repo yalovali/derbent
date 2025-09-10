@@ -184,8 +184,14 @@ public class CViewsService {
 	 * @return the entity class or null if not found */
 	private Class<?> getEntityClassFromService(final CAbstractService<?> service) {
 		try {
+			// Handle CGLIB proxies by getting the superclass if needed
+			Class<?> serviceClass = service.getClass();
+			// If this is a CGLIB proxy, get the actual superclass
+			if (serviceClass.getName().contains("$$SpringCGLIB$$")) {
+				serviceClass = serviceClass.getSuperclass();
+			}
 			// Try to call the getEntityClass() method using reflection
-			Method getEntityClassMethod = service.getClass().getMethod("getEntityClass");
+			Method getEntityClassMethod = serviceClass.getDeclaredMethod("getEntityClass");
 			getEntityClassMethod.setAccessible(true);
 			return (Class<?>) getEntityClassMethod.invoke(service);
 		} catch (Exception e) {
