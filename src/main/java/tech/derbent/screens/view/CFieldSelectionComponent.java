@@ -118,9 +118,7 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 		downButton.addClickListener(e -> moveDown());
 	}
 
-	/**
-	 * Adds the selected field from availableFields to selections.
-	 */
+	/** Adds the selected field from availableFields to selections. */
 	private void addSelectedField() {
 		EntityFieldInfo selected = availableFields.getValue();
 		if (selected != null) {
@@ -135,9 +133,7 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 		}
 	}
 
-	/**
-	 * Removes the selected field from selections.
-	 */
+	/** Removes the selected field from selections. */
 	private void removeSelectedField() {
 		FieldSelection selected = selectedFields.getValue();
 		if (selected != null) {
@@ -151,9 +147,7 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 		}
 	}
 
-	/**
-	 * Moves the selected field up in the order.
-	 */
+	/** Moves the selected field up in the order. */
 	private void moveUp() {
 		FieldSelection selected = selectedFields.getValue();
 		if (selected != null) {
@@ -172,9 +166,7 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 		}
 	}
 
-	/**
-	 * Moves the selected field down in the order.
-	 */
+	/** Moves the selected field down in the order. */
 	private void moveDown() {
 		FieldSelection selected = selectedFields.getValue();
 		if (selected != null) {
@@ -193,17 +185,13 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 		}
 	}
 
-	/**
-	 * Refreshes the selectedFields list and fires value change event.
-	 */
+	/** Refreshes the selectedFields list and fires value change event. */
 	private void refreshSelections() {
 		selectedFields.setItems(selections);
 		fireValueChangeEvent();
 	}
 
-	/**
-	 * Fires a value change event to listeners.
-	 */
+	/** Fires a value change event to listeners. */
 	private void fireValueChangeEvent() {
 		String oldValue = currentValue;
 		String newValue = getValue();
@@ -228,25 +216,19 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 	}
 
 	// HasValue implementation
-	/**
-	 * Returns the current value as a string.
-	 */
+	/** Returns the current value as a string. */
 	@Override
 	public String getValue() {
 		return selections.stream().map(fs -> fs.getFieldInfo().getFieldName() + ":" + fs.getOrder()).collect(Collectors.joining(","));
 	}
 
-	/**
-	 * Sets the value from a string.
-	 */
+	/** Sets the value from a string. */
 	@Override
 	public void setValue(String value) {
 		setSelectedFieldsFromString(value);
 	}
 
-	/**
-	 * Adds a value change listener.
-	 */
+	/** Adds a value change listener. */
 	@Override
 	public Registration addValueChangeListener(ValueChangeListener<? super ValueChangeEvent<String>> listener) {
 		listeners.add(listener);
@@ -256,9 +238,7 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 	@Override
 	public boolean isReadOnly() { return readOnly; }
 
-	/**
-	 * Sets the component to read-only mode.
-	 */
+	/** Sets the component to read-only mode. */
 	@Override
 	public void setReadOnly(boolean readOnly) {
 		this.readOnly = readOnly;
@@ -280,9 +260,7 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 	}
 
 	// API methods for external usage
-	/**
-	 * Sets the entity type and loads available fields.
-	 */
+	/** Sets the entity type and loads available fields. */
 	public void setEntityType(String entityType) {
 		if (entityType != null) {
 			sourceList = CEntityFieldService.getEntityFields(entityType);
@@ -290,14 +268,10 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 		}
 	}
 
-	/**
-	 * Returns the selected fields as a string.
-	 */
+	/** Returns the selected fields as a string. */
 	public String getSelectedFieldsAsString() { return getValue(); }
 
-	/**
-	 * Sets the selected fields from a string value.
-	 */
+	/** Sets the selected fields from a string value. */
 	public void setSelectedFieldsFromString(String value) {
 		selections.clear();
 		if (value != null && !value.trim().isEmpty()) {
@@ -347,8 +321,6 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 		refreshSelections();
 	}
 
-	/**
-	 * Returns the selected fields as a list.
-	 */
+	/** Returns the selected fields as a list. */
 	public List<FieldSelection> getSelectedFields() { return new ArrayList<>(selections); }
 }
