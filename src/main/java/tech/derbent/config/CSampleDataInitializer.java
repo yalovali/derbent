@@ -25,6 +25,7 @@ import tech.derbent.activities.service.CActivityService;
 import tech.derbent.activities.service.CActivityStatusService;
 import tech.derbent.activities.service.CActivityTypeService;
 import tech.derbent.activities.service.CActivityViewService;
+import tech.derbent.activities.view.CActivitiesView;
 import tech.derbent.comments.domain.CCommentPriority;
 import tech.derbent.comments.service.CCommentPriorityService;
 import tech.derbent.comments.service.CCommentService;
@@ -42,6 +43,7 @@ import tech.derbent.meetings.service.CMeetingService;
 import tech.derbent.meetings.service.CMeetingStatusService;
 import tech.derbent.meetings.service.CMeetingTypeService;
 import tech.derbent.meetings.service.CMeetingViewService;
+import tech.derbent.meetings.view.CMeetingsView;
 import tech.derbent.orders.domain.CCurrency;
 import tech.derbent.orders.service.CCurrencyService;
 import tech.derbent.orders.service.COrderTypeService;
@@ -57,9 +59,11 @@ import tech.derbent.risks.service.CRiskService;
 import tech.derbent.risks.service.CRiskViewService;
 import tech.derbent.screens.domain.CDetailLines;
 import tech.derbent.screens.domain.CDetailSection;
+import tech.derbent.screens.domain.CGridEntity;
 import tech.derbent.screens.service.CDetailLinesService;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.screens.service.CEntityFieldService;
+import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.EUserRole;
 import tech.derbent.users.service.CUserService;
@@ -86,6 +90,7 @@ public class CSampleDataInitializer {
 	@PersistenceContext
 	private EntityManager em;
 	private final CGanntViewEntityService ganntViewEntityService;
+	private final CGridEntityService gridEntityService;
 	private final JdbcTemplate jdbcTemplate;
 	private final CMeetingService meetingService;
 	private final CMeetingStatusService meetingStatusService;
@@ -101,6 +106,7 @@ public class CSampleDataInitializer {
 	private final CUserTypeService userTypeService;
 
 	public CSampleDataInitializer() {
+		gridEntityService = CSpringContext.getBean(CGridEntityService.class);
 		projectService = CSpringContext.getBean(CProjectService.class);
 		userService = CSpringContext.getBean(CUserService.class);
 		activityService = CSpringContext.getBean(CActivityService.class);
@@ -1163,6 +1169,29 @@ public class CSampleDataInitializer {
 		// TODO fix
 	}
 
+	private void initializeGridEntity(CProject project) {
+		try {
+			// Create sample grid entity for the project
+			CGridEntity grid = new CGridEntity(CActivitiesView.VIEW_NAME, project);
+			grid.setDescription("Default grid for " + CActivitiesView.VIEW_NAME);
+			grid.setDataServiceBeanName("CActivityService");
+			grid.setSelectedFields("name:1,activityType:2,status:2,actualCost:3,estimatedHours:4,progressPercentage:5");
+			gridEntityService.save(grid);
+			// Create sample grid entity for the project
+			grid = new CGridEntity(CMeetingsView.VIEW_NAME, project);
+			grid.setDescription("Default grid for " + CMeetingsView.VIEW_NAME);
+			grid.setDescription("Meeting management grid with status and priority columns");
+			grid.setDataServiceBeanName("CMeetingService");
+			grid.setSelectedFields("name:1,status:2,meetingType:2,meetingDate:3,location:4");
+			gridEntityService.save(grid);
+			// Log completion
+			LOGGER.info("Successfully created sample grid entity for project: {}", project.getName());
+		} catch (final Exception e) {
+			LOGGER.error("Error creating sample grid entity for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize grid entity for project: " + project.getName(), e);
+		}
+	}
+
 	/** Initializes sample meetings with participants and content. */
 	private void initializeMeetings(final CProject project) {
 		try {
@@ -1443,6 +1472,7 @@ public class CSampleDataInitializer {
 				initializeMeetings(project);
 				createSampleCurrencies(project);
 				initializePageEntities(project);
+				initializeGridEntity(project);
 			});
 			createSampleDecisions();
 			createSampleScreens(); // Add sample screens with fields

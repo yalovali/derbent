@@ -31,6 +31,7 @@ import tech.derbent.session.service.CSessionService;
 public class CMeetingsView extends CGridViewBaseProject<CMeeting> {
 
 	private static final long serialVersionUID = 1L;
+	public static final String VIEW_NAME = "Meetings View";
 
 	public static String getEntityColorCode() { return getIconColorCode(); }
 

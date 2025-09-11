@@ -24,6 +24,7 @@ import tech.derbent.session.service.CSessionService;
 public final class CActivitiesView extends CGridViewBaseProject<CActivity> {
 
 	private static final long serialVersionUID = 1L;
+	public final static String VIEW_NAME = "Activities View";
 
 	public static String getEntityColorCode() { return getIconColorCode(); }
 
@@ -33,8 +34,8 @@ public final class CActivitiesView extends CGridViewBaseProject<CActivity> {
 
 	public static String getIconFilename() { return CActivity.getIconFilename(); }
 
-	private final String ENTITY_ID_FIELD = "activity_id";
 	private final CCommentService commentService;
+	private final String ENTITY_ID_FIELD = "activity_id";
 
 	public CActivitiesView(final CActivityService entityService, final CSessionService sessionService, final CCommentService commentService,
 			final CDetailSectionService screenService) {
