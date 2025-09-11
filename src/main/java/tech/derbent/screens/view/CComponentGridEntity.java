@@ -19,7 +19,7 @@ public class CComponentGridEntity extends CDiv {
 	private void createContent() {
 		grid = new CGrid<>(CGridEntity.class);
 		// get the class from CGridEntity dataprovider
-		grid.addColumn(null)
+		// grid.addColumn(null);
 		// get columns from selectedFields and create columns in the grid
 		this.add(grid);
 	}
