@@ -1171,21 +1171,68 @@ public class CSampleDataInitializer {
 
 	private void initializeGridEntity(CProject project) {
 		try {
-			// Create sample grid entity for the project
+			// Create sample grid entity for Activities
 			CGridEntity grid = new CGridEntity(CActivitiesView.VIEW_NAME, project);
 			grid.setDescription("Default grid for " + CActivitiesView.VIEW_NAME);
 			grid.setDataServiceBeanName("CActivityService");
-			grid.setSelectedFields("name:1,activityType:2,status:2,actualCost:3,estimatedHours:4,progressPercentage:5");
+			grid.setSelectedFields("name:1,activityType:2,status:3,estimatedHours:4,progressPercentage:5");
 			gridEntityService.save(grid);
-			// Create sample grid entity for the project
+			// Create sample grid entity for Meetings
 			grid = new CGridEntity(CMeetingsView.VIEW_NAME, project);
 			grid.setDescription("Default grid for " + CMeetingsView.VIEW_NAME);
-			grid.setDescription("Meeting management grid with status and priority columns");
 			grid.setDataServiceBeanName("CMeetingService");
-			grid.setSelectedFields("name:1,status:2,meetingType:2,meetingDate:3,location:4");
+			grid.setSelectedFields("name:1,status:2,meetingType:3,meetingDate:4,location:5");
+			gridEntityService.save(grid);
+			// Create sample grid entity for Users
+			grid = new CGridEntity("CUsersView", project);
+			grid.setDescription("User management grid with role and contact information");
+			grid.setDataServiceBeanName("CUserService");
+			grid.setSelectedFields("name:1,lastname:2,userRole:3,email:4,phone:5");
+			gridEntityService.save(grid);
+			// Create sample grid entity for Projects
+			grid = new CGridEntity("CProjectsView", project);
+			grid.setDescription("Project management grid with basic project information");
+			grid.setDataServiceBeanName("CProjectService");
+			grid.setSelectedFields("name:1,description:2,createdBy:3,createdDate:4");
+			gridEntityService.save(grid);
+			// Create sample grid entity for Risks
+			grid = new CGridEntity("CRisksView", project);
+			grid.setDescription("Risk management grid with severity and status tracking");
+			grid.setDataServiceBeanName("CRiskService");
+			grid.setSelectedFields("name:1,riskSeverity:2,description:3,createdBy:4,createdDate:5");
+			gridEntityService.save(grid);
+			// Create sample grid entity for Decisions
+			grid = new CGridEntity("CDecisionsView", project);
+			grid.setDescription("Decision tracking grid with status and accountability");
+			grid.setDataServiceBeanName("CDecisionService");
+			grid.setSelectedFields("name:1,status:2,accountableUser:3,implementationDate:4,description:5");
+			gridEntityService.save(grid);
+			// Create sample grid entity for Companies
+			grid = new CGridEntity("CCompaniesView", project);
+			grid.setDescription("Company directory grid with contact and business information");
+			grid.setDataServiceBeanName("CCompanyService");
+			grid.setSelectedFields("name:1,email:2,phone:3,website:4,enabled:5");
+			gridEntityService.save(grid);
+			// Create sample grid entity for Activity Types
+			grid = new CGridEntity("CActivityTypesView", project);
+			grid.setDescription("Activity type management grid with color coding");
+			grid.setDataServiceBeanName("CActivityTypeService");
+			grid.setSelectedFields("name:1,description:2,color:3,sortOrder:4");
+			gridEntityService.save(grid);
+			// Create sample grid entity for Activity Status
+			grid = new CGridEntity("CActivityStatusView", project);
+			grid.setDescription("Activity status management grid with workflow tracking");
+			grid.setDataServiceBeanName("CActivityStatusService");
+			grid.setSelectedFields("name:1,description:2,color:3,sortOrder:4");
+			gridEntityService.save(grid);
+			// Create sample grid entity for Meeting Types
+			grid = new CGridEntity("CMeetingTypesView", project);
+			grid.setDescription("Meeting type configuration grid");
+			grid.setDataServiceBeanName("CMeetingTypeService");
+			grid.setSelectedFields("name:1,description:2,sortOrder:3");
 			gridEntityService.save(grid);
 			// Log completion
-			LOGGER.info("Successfully created sample grid entity for project: {}", project.getName());
+			LOGGER.info("Successfully created sample grid entities for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error creating sample grid entity for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize grid entity for project: " + project.getName(), e);

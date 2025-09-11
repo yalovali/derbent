@@ -1,5 +1,6 @@
 package tech.derbent.screens.domain;
 
+import java.lang.reflect.Field;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,6 +9,7 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.projects.domain.CProject;
+import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.screens.view.CGridEntityView;
 
 @Entity
@@ -59,4 +61,40 @@ public class CGridEntity extends CEntityOfProject<CGridEntity> {
 	public void setDataServiceBeanName(final String dataServiceBeanName) { this.dataServiceBeanName = dataServiceBeanName; }
 
 	public void setSelectedFields(final String selectedFields) { this.selectedFields = selectedFields; }
+
+	/** Common data class for field selections with order, used across the project for grid field configuration. */
+	public static class FieldSelection {
+
+		private final EntityFieldInfo fieldInfo;
+		private int order;
+
+		public FieldSelection(EntityFieldInfo fieldInfo, int order) {
+			this.fieldInfo = fieldInfo;
+			this.order = order;
+		}
+
+		public EntityFieldInfo getFieldInfo() { return fieldInfo; }
+
+		public int getOrder() { return order; }
+
+		public void setOrder(int order) { this.order = order; }
+
+		@Override
+		public String toString() {
+			return fieldInfo.getDisplayName() + " (" + fieldInfo.getFieldName() + ")";
+		}
+	}
+
+	/** Extended field selection that includes the actual Java Field for reflection-based operations. */
+	public static class FieldConfig extends FieldSelection {
+
+		private final Field field;
+
+		public FieldConfig(EntityFieldInfo fieldInfo, int order, Field field) {
+			super(fieldInfo, order);
+			this.field = field;
+		}
+
+		public Field getField() { return field; }
+	}
 }
