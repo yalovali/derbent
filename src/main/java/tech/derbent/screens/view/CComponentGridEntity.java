@@ -64,7 +64,7 @@ public class CComponentGridEntity extends CDiv {
 				createColumnForField(fieldConfig);
 			}
 			// Load data from the service
-			loadDataFromService(serviceBeanName);
+			loadDataFromService(serviceBeanName, gridEntity.getProject());
 			this.add(grid);
 		} catch (Exception e) {
 			LOGGER.error("Error creating grid content: {}", e.getMessage(), e);
@@ -305,7 +305,7 @@ public class CComponentGridEntity extends CDiv {
 	@SuppressWarnings ({
 			"unchecked", "rawtypes"
 	})
-	private void loadDataFromService(String serviceBeanName) {
+	private void loadDataFromService(String serviceBeanName, tech.derbent.projects.domain.CProject project) {
 		try {
 			if (ApplicationContextProvider.getApplicationContext() == null) {
 				LOGGER.warn("ApplicationContext is not available for loading data");
@@ -319,7 +319,19 @@ public class CComponentGridEntity extends CDiv {
 			CAbstractService service = (CAbstractService) serviceBean;
 			// Use pageable to get data - limit to first 1000 records for performance
 			PageRequest pageRequest = PageRequest.of(0, 1000);
-			List data = service.list(pageRequest).getContent();
+			List data;
+			// Check if this is a project-specific service and filter by the gridEntity's project
+			if (service instanceof tech.derbent.abstracts.services.CEntityOfProjectService) {
+				tech.derbent.abstracts.services.CEntityOfProjectService projectService =
+						(tech.derbent.abstracts.services.CEntityOfProjectService) service;
+				LOGGER.debug("Using project-specific service to load data for project: {}", project.getName());
+				data = projectService.listByProject(project, pageRequest).getContent();
+			} else {
+				// For non-project services, use regular list method
+				LOGGER.debug("Using regular service to load data (no project filtering)");
+				data = service.list(pageRequest).getContent();
+			}
+			LOGGER.info("Loaded {} records from service {} for project {}", data != null ? data.size() : 0, serviceBeanName, project.getName());
 			grid.setItems(data != null ? data : Collections.emptyList());
 		} catch (Exception e) {
 			LOGGER.error("Error loading data from service {}: {}", serviceBeanName, e.getMessage());
