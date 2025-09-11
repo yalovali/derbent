@@ -14,7 +14,7 @@ import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
-import ui_tests.tech.derbent.ui.automation.CBaseUITest;
+import automated_tests.tech.derbent.ui.automation.CBaseUITest;
 
 /** Simple Playwright test to demonstrate screenshot functionality This test uses a minimal setup to avoid browser download issues */
 @SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class)
