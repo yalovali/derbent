@@ -87,12 +87,6 @@ public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> i
 	public String getName() { return name; }
 
 	@Override
-	public Class<?> getViewClass() {
-		Check.fail("CEntityDB.getViewClass() called - returning NONE");
-		return null;
-	}
-
-	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
 		if (this.createdDate == null) {

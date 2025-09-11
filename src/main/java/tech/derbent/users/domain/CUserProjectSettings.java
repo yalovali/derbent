@@ -8,6 +8,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.projects.domain.CProject;
 
 @Entity
@@ -82,9 +83,11 @@ public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 	public CUser getUser() { return user; }
 
 	@Override
-	public Class<?> getViewClass() { // TODO Auto-generated method stub
-		return null;
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
+		return CUserProjectSettings.getViewClassStatic();
 	}
+
+	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return null; }
 
 	public void setPermission(final String permission) { this.permission = permission; }
 

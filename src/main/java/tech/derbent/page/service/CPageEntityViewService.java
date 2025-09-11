@@ -10,14 +10,13 @@ import tech.derbent.screens.service.CDetailLinesService;
 
 public class CPageEntityViewService extends CDetailLinesSampleBase {
 
-	public static final String BASE_VIEW_NAME = "Page View";
 	public static final String BASE_PANEL_NAME = "Page Information";
 	private static Logger LOGGER = LoggerFactory.getLogger(CPageEntityViewService.class);
 
 	public static CDetailSection createBasicView(final CProject project) {
 		try {
 			final Class<?> clazz = CPageEntity.class;
-			CDetailSection scr = createBaseScreenEntity(project, clazz, BASE_VIEW_NAME);
+			CDetailSection scr = createBaseScreenEntity(project, clazz);
 			// create screen lines
 			scr.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));

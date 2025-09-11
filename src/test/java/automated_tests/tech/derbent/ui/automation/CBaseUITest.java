@@ -12,12 +12,10 @@ import org.springframework.test.context.ActiveProfiles;
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.BrowserType;
-import com.microsoft.playwright.ElementHandle;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.vaadin.flow.router.Route;
-import tech.derbent.abstracts.utils.Check;
 import tech.derbent.activities.view.CActivitiesView;
 import tech.derbent.activities.view.CActivityStatusView;
 import tech.derbent.activities.view.CActivityTypeView;
@@ -37,12 +35,10 @@ import tech.derbent.users.view.CUsersView;
 public abstract class CBaseUITest {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBaseUITest.class);
-
 	private Playwright playwright;
 	private Browser browser;
 	private BrowserContext context;
 	protected Page page;
-
 	@LocalServerPort
 	private int port;
 
@@ -74,7 +70,6 @@ public abstract class CBaseUITest {
 		}
 		LOGGER.info("✅ Test environment teardown complete");
 	}
-
 	// ===========================================
 	// LOGIN AND AUTHENTICATION METHODS
 	// ===========================================
@@ -95,7 +90,6 @@ public abstract class CBaseUITest {
 		LOGGER.info("✅ Login successful - redirected to projects view");
 		takeScreenshot("post-login", false);
 	}
-
 	// ===========================================
 	// NAVIGATION METHODS
 	// ===========================================
@@ -140,7 +134,6 @@ public abstract class CBaseUITest {
 			return false;
 		}
 	}
-
 	// ===========================================
 	// FORM AND INPUT METHODS
 	// ===========================================
@@ -171,7 +164,6 @@ public abstract class CBaseUITest {
 			LOGGER.warn("⚠️ No ComboBox options found");
 		}
 	}
-
 	// ===========================================
 	// BUTTON ACTION METHODS
 	// ===========================================
@@ -210,7 +202,6 @@ public abstract class CBaseUITest {
 		page.locator("vaadin-button:has-text('Edit')").click();
 		wait_500();
 	}
-
 	// ===========================================
 	// GRID INTERACTION METHODS
 	// ===========================================
@@ -237,7 +228,6 @@ public abstract class CBaseUITest {
 		LOGGER.info("📊 Grid has data: {}", hasData);
 		return hasData;
 	}
-
 	// ===========================================
 	// TESTING UTILITY METHODS
 	// ===========================================
@@ -289,7 +279,6 @@ public abstract class CBaseUITest {
 			Thread.currentThread().interrupt();
 		}
 	}
-
 	// ===========================================
 	// ADVANCED TESTING METHODS
 	// ===========================================
@@ -297,8 +286,17 @@ public abstract class CBaseUITest {
 	/** Tests responsive design by checking layout at different viewport sizes. */
 	protected void testResponsiveDesign() {
 		LOGGER.info("📱 Testing responsive design across viewport sizes");
-		final int[][] viewports = { { 1920, 1080 }, { 1366, 768 }, { 768, 1024 }, { 375, 667 } };
-
+		final int[][] viewports = {
+				{
+						1920, 1080
+				}, {
+						1366, 768
+				}, {
+						768, 1024
+				}, {
+						375, 667
+				}
+		};
 		for (final int[] viewport : viewports) {
 			page.setViewportSize(viewport[0], viewport[1]);
 			wait_500();
@@ -310,34 +308,29 @@ public abstract class CBaseUITest {
 	/** Performs complete CRUD testing workflow for the current view. */
 	protected void performCRUDWorkflow(final String entityName) {
 		LOGGER.info("🔄 Performing CRUD workflow for: {}", entityName);
-
 		// CREATE
 		clickNew();
 		fillFirstTextField("Test " + entityName);
 		selectFirstComboBoxOption();
 		clickSave();
 		takeScreenshot("crud-create-" + entityName.toLowerCase(), false);
-
 		// READ - verify in grid
 		wait_1000();
 		final boolean hasData = verifyGridHasData();
 		if (hasData) {
 			LOGGER.info("✅ CREATE operation successful for: {}", entityName);
 		}
-
 		// UPDATE
 		clickFirstGridRow();
 		clickEdit();
 		fillFirstTextField("Updated " + entityName);
 		clickSave();
 		takeScreenshot("crud-update-" + entityName.toLowerCase(), false);
-
 		// DELETE
 		wait_1000();
 		clickFirstGridRow();
 		clickDelete();
 		takeScreenshot("crud-delete-" + entityName.toLowerCase(), false);
-
 		LOGGER.info("✅ CRUD workflow complete for: {}", entityName);
 	}
 
@@ -346,7 +339,6 @@ public abstract class CBaseUITest {
 		LOGGER.info("📋 Testing all ComboBox components");
 		final Locator comboBoxes = page.locator("vaadin-combo-box");
 		final int comboBoxCount = comboBoxes.count();
-
 		for (int i = 0; i < comboBoxCount; i++) {
 			try {
 				final Locator comboBox = comboBoxes.nth(i);
@@ -372,16 +364,13 @@ public abstract class CBaseUITest {
 		final Locator interactiveElements = page.locator("button, input, vaadin-combo-box, vaadin-grid");
 		final int elementCount = interactiveElements.count();
 		LOGGER.info("♿ Found {} interactive elements for accessibility check", elementCount);
-
 		// Test keyboard navigation
 		page.keyboard().press("Tab");
 		wait_500();
 		page.keyboard().press("Enter");
 		wait_500();
-
 		LOGGER.info("✅ Accessibility verification complete");
 	}
-
 	// ===========================================
 	// VIEW-SPECIFIC NAVIGATION HELPERS
 	// ===========================================
@@ -405,31 +394,25 @@ public abstract class CBaseUITest {
 	protected void navigateToUsers() {
 		navigateToViewByClass(CUsersView.class);
 	}
-
 	// ===========================================
 	// MISSING METHODS FOR COMPATIBILITY
 	// ===========================================
 
 	/** Array of main view classes for testing */
 	protected Class<?>[] mainViewClasses = {
-		CProjectsView.class, CActivitiesView.class, CMeetingsView.class, CUsersView.class,
-		CActivityStatusView.class, CActivityTypeView.class, CDecisionStatusView.class, CRiskStatusView.class
+			CProjectsView.class, CActivitiesView.class, CMeetingsView.class, CUsersView.class, CActivityStatusView.class, CActivityTypeView.class,
+			CDecisionStatusView.class, CRiskStatusView.class
 	};
-
 	/** Legacy property for backward compatibility */
 	protected Class<?>[] viewClasses = mainViewClasses;
-
 	/** Status and type view classes */
 	protected Class<?>[] statusAndTypeViewClasses = {
-		CActivityStatusView.class, CActivityTypeView.class, CDecisionStatusView.class, CRiskStatusView.class
+			CActivityStatusView.class, CActivityTypeView.class, CDecisionStatusView.class, CRiskStatusView.class
 	};
-
 	/** Admin view classes */
 	protected Class<?>[] adminViewClasses = {};
-
 	/** All view classes */
 	protected Class<?>[] allViewClasses = mainViewClasses;
-
 	/** Kanban view classes */
 	protected Class<?>[] kanbanViewClasses = {};
 
@@ -462,8 +445,7 @@ public abstract class CBaseUITest {
 	/** Waits for login screen to be ready */
 	protected void wait_loginscreen() {
 		try {
-			page.waitForSelector("input[type='text'], input[type='email'], vaadin-text-field", 
-				new Page.WaitForSelectorOptions().setTimeout(10000));
+			page.waitForSelector("input[type='text'], input[type='email'], vaadin-text-field", new Page.WaitForSelectorOptions().setTimeout(10000));
 		} catch (Exception e) {
 			LOGGER.warn("⚠️ Login screen not detected: {}", e.getMessage());
 		}
@@ -479,9 +461,7 @@ public abstract class CBaseUITest {
 	}
 
 	/** Checks if browser is available */
-	protected boolean isBrowserAvailable() {
-		return page != null && !page.isClosed();
-	}
+	protected boolean isBrowserAvailable() { return page != null && !page.isClosed(); }
 
 	/** Assert browser is available */
 	protected void assertBrowserAvailable() {

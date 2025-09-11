@@ -7,6 +7,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityOfProject;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.orders.view.CCurrencyView;
 import tech.derbent.projects.domain.CProject;
 
@@ -26,7 +27,7 @@ public class CCurrency extends CEntityOfProject<CCurrency> {
 
 	public static String getIconFilename() { return "vaadin:dollar"; }
 
-	public static Class<?> getViewClassStatic() { return CCurrencyView.class; }
+	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CCurrencyView.class; }
 
 	@Column (name = "currency_code", nullable = false, length = 3, unique = false)
 	@Size (max = 3, min = 3, message = "Currency code must be exactly 3 characters")
@@ -73,5 +74,10 @@ public class CCurrency extends CEntityOfProject<CCurrency> {
 	@Override
 	public String toString() {
 		return currencyCode != null ? currencyCode + " (" + getName() + ")" : super.toString();
+	}
+
+	@Override
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
+		return CCurrency.getViewClassStatic();
 	}
 }

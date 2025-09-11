@@ -11,7 +11,6 @@ import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.risks.domain.CRisk;
 import tech.derbent.risks.service.CRiskService;
-import tech.derbent.risks.service.CRiskViewService;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 
@@ -23,6 +22,7 @@ public class CRiskView extends CGridViewBaseProject<CRisk> {
 
 	private static final long serialVersionUID = 1L;
 	private static final String ENTITY_ID_FIELD = "risk_id";
+	public static final String VIEW_NAME = "Risks View";
 
 	public static String getEntityColorCode() { return getIconColorCode(); }
 
@@ -54,6 +54,6 @@ public class CRiskView extends CGridViewBaseProject<CRisk> {
 
 	@Override
 	protected void updateDetailsComponent() throws Exception {
-		buildScreen(CRiskViewService.BASE_VIEW_NAME);
+		buildScreen(CRiskView.VIEW_NAME);
 	}
 }

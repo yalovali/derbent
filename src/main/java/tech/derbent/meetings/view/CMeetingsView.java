@@ -20,7 +20,6 @@ import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.service.CMeetingService;
-import tech.derbent.meetings.service.CMeetingViewService;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 
@@ -161,6 +160,6 @@ public class CMeetingsView extends CGridViewBaseProject<CMeeting> {
 
 	@Override
 	protected void updateDetailsComponent() throws Exception {
-		buildScreen(CMeetingViewService.BASE_VIEW_NAME);
+		buildScreen(CMeetingsView.VIEW_NAME);
 	}
 }

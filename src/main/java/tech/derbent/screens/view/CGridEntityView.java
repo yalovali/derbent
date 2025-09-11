@@ -23,7 +23,7 @@ import tech.derbent.session.service.CSessionService;
 
 @Route ("cgridentityview")
 @PageTitle ("Grids Detail")
-@Menu (order = 1.5, icon = "class:tech.derbent.screens.view.CGridEntityView", title = "UI.Grids")
+@Menu (order = 1.5, icon = "class:tech.derbent.screens.view.CGridEntityView", title = "Setup.UI.Grids")
 @PermitAll
 public class CGridEntityView extends CGridViewBaseProject<CGridEntity> {
 

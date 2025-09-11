@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CTypeEntity;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.projects.domain.CProject;
 
 /** CActivityPriority - Domain entity representing activity priority levels. Provides predefined priority levels for activity categorization and
@@ -69,9 +70,6 @@ public class CActivityPriority extends CTypeEntity<CActivityPriority> {
 
 	public Integer getPriorityLevel() { return priorityLevel; }
 
-	@Override
-	public Class<?> getViewClass() { return null; }
-
 	/** Convenience method to check if this is the default priority.
 	 * @return true if this is the default priority, false otherwise */
 	public boolean isDefault() { return Boolean.TRUE.equals(isDefault); }
@@ -88,4 +86,9 @@ public class CActivityPriority extends CTypeEntity<CActivityPriority> {
 				getId(), getName(), getColor(), getSortOrder(), getIsActive(), getProject() != null ? getProject().getName() : "null", priorityLevel,
 				isDefault);
 	}
+
+	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return null; }
+
+	@Override
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { return null; }
 }

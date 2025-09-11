@@ -7,6 +7,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CProjectItem;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.page.view.CPageEntityView;
 import tech.derbent.projects.domain.CProject;
 
@@ -21,7 +22,7 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 
 	public static String getIconFilename() { return "vaadin:tasks"; }
 
-	public static Class<?> getViewClassStatic() { return CPageEntityView.class; }
+	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CPageEntityView.class; }
 
 	@Column (nullable = true, length = 100)
 	@Size (max = 100)
@@ -105,4 +106,9 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 	public void setRoute(final String route) { this.route = route; }
 
 	public void setTitle(String title) { this.title = title; }
+
+	@Override
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
+		return CPageEntity.getViewClassStatic();
+	}
 }

@@ -11,7 +11,6 @@ import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.orders.domain.COrder;
 import tech.derbent.orders.service.COrderService;
-import tech.derbent.orders.service.COrdersViewService;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 
@@ -22,6 +21,7 @@ import tech.derbent.session.service.CSessionService;
 public class COrdersView extends CGridViewBaseProject<COrder> {
 
 	private static final long serialVersionUID = 1L;
+	public static final String VIEW_NAME = "Orders View";
 
 	public static String getEntityColorCode() { return getIconColorCode(); }
 
@@ -53,6 +53,6 @@ public class COrdersView extends CGridViewBaseProject<COrder> {
 
 	@Override
 	protected void updateDetailsComponent() {
-		buildScreen(COrdersViewService.BASE_VIEW_NAME);
+		buildScreen(COrdersView.VIEW_NAME);
 	}
 }

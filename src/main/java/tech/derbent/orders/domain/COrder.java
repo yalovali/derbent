@@ -18,6 +18,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityOfProject;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.orders.view.COrdersView;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
@@ -35,7 +36,7 @@ public class COrder extends CEntityOfProject<COrder> {
 
 	public static String getIconFilename() { return "vaadin:cart"; }
 
-	public static Class<?> getViewClassStatic() { return COrdersView.class; }
+	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return COrdersView.class; }
 
 	// Order Type and Classification
 	@ManyToOne (fetch = FetchType.EAGER)
@@ -299,5 +300,10 @@ public class COrder extends CEntityOfProject<COrder> {
 	public void setStatus(final COrderStatus status) {
 		this.status = status;
 		updateLastModified();
+	}
+
+	@Override
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
+		return COrder.getViewClassStatic();
 	}
 }

@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.TestPropertySource;
-import automated_tests.tech.derbent.ui.automation.CBaseUITest;
 
 /** Mock Playwright test that demonstrates screenshot functionality for ALL views. This creates sample screenshots to show the comprehensive view
  * testing feature is working. */

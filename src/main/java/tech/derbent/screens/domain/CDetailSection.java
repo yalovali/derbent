@@ -14,6 +14,7 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.utils.Check;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.service.CEntityFieldService;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
@@ -32,7 +33,7 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 
 	public static String getIconFilename() { return "vaadin:viewport"; }
 
-	public static Class<?> getViewClassStatic() { return CDetailSectionView.class; }
+	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CDetailSectionView.class; }
 
 	@Column (name = "entity_type", nullable = false, length = 100)
 	@Size (max = 100, message = "Entity type cannot exceed 100 characters")
@@ -143,5 +144,10 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 	@Override
 	public String toString() {
 		return String.format("CScreen{id=%d, name='%s', entityType='%s', screenTitle='%s'}", getId(), getName(), entityType, screenTitle);
+	}
+
+	@Override
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
+		return CDetailSection.getViewClassStatic();
 	}
 }

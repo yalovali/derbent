@@ -1,29 +1,20 @@
 package tech.derbent.gannt.service;
 
-import tech.derbent.abstracts.services.CViewService;
 import tech.derbent.gannt.domain.CGanntViewEntity;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CDetailSection;
+import tech.derbent.screens.service.CDetailLinesSampleBase;
 import tech.derbent.screens.service.CDetailLinesService;
 
 /* NOT USED YET - FOR FUTURE DEVELOPMENT */
-public class CGanntViewEntityViewService extends CViewService {
+public class CGanntViewEntityViewService extends CDetailLinesSampleBase {
 
-	public static final String BASE_VIEW_NAME = "Gannt View";
 	public static final String BASE_PANEL_NAME = ">Gannsts Information";
 
 	public static CDetailSection createBasicView(final CProject project) {
 		try {
-			final CDetailSection scr = new CDetailSection();
 			final Class<?> clazz = CGanntViewEntity.class;
-			final String entityType = clazz.getSimpleName().replaceFirst("^C", "");
-			scr.setProject(project);
-			scr.setEntityType(clazz.getSimpleName());
-			scr.setHeaderText(entityType + " View");
-			scr.setIsActive(Boolean.TRUE);
-			scr.setScreenTitle(entityType + " View");
-			scr.setName(BASE_VIEW_NAME);
-			scr.setDescription(entityType + " View Details");
+			CDetailSection scr = createBaseScreenEntity(project, clazz);
 			// create screen lines
 			scr.addScreenLine(CDetailLinesService.createSection(CGanntViewEntityViewService.BASE_PANEL_NAME));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
@@ -36,19 +27,5 @@ public class CGanntViewEntityViewService extends CViewService {
 			e.printStackTrace();
 			return null;
 		}
-	}
-
-	@Override
-	public void createDefaultViews(final CProject project) {
-		final CDetailSection scr = new CDetailSection();
-		final Class<?> clazz = CGanntViewEntity.class;
-		final String entityType = clazz.getSimpleName().replaceFirst("^C", "");
-		scr.setProject(project);
-		scr.setEntityType(clazz.getSimpleName());
-		scr.setHeaderText(entityType + " View");
-		scr.setIsActive(Boolean.TRUE);
-		scr.setScreenTitle(entityType + " View");
-		scr.setName(BASE_VIEW_NAME);
-		scr.setDescription(entityType + " View Details");
 	}
 }

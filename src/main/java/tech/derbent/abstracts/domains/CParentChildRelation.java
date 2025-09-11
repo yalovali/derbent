@@ -6,6 +6,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 
 @Entity
 @Table (name = "cparentchildrelation", uniqueConstraints = {
@@ -56,7 +57,7 @@ public class CParentChildRelation extends CEntityDB<CParentChildRelation> {
 	public String getParentType() { return parentType; }
 
 	@Override
-	public Class<?> getViewClass() { // TODO Auto-generated method stub
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
 		return null;
 	}
 

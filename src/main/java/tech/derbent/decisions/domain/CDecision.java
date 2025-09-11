@@ -14,6 +14,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityOfProject;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.decisions.view.CDecisionsView;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
@@ -36,7 +37,7 @@ public class CDecision extends CEntityOfProject<CDecision> {
 
 	public static String getIconFilename() { return "vaadin:gavel"; }
 
-	public static Class<?> getViewClassStatic() { return CDecisionsView.class; }
+	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CDecisionsView.class; }
 
 	// Decision Type Classification
 	@ManyToOne (fetch = FetchType.EAGER)
@@ -163,5 +164,10 @@ public class CDecision extends CEntityOfProject<CDecision> {
 	@Override
 	public String toString() {
 		return getName() != null ? getName() : super.toString();
+	}
+
+	@Override
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
+		return CDecision.getViewClassStatic();
 	}
 }

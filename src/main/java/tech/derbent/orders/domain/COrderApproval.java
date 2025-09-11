@@ -11,6 +11,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityNamed;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.users.domain.CUser;
 
 /** COrderApproval - Domain entity representing individual approval records for orders. Layer: Domain (MVC) Tracks individual approval steps for
@@ -116,5 +117,10 @@ public class COrderApproval extends CEntityNamed<COrderApproval> {
 	public void setOrder(final COrder order) {
 		this.order = order;
 		updateLastModified();
+	}
+
+	@Override
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
+		return null;
 	}
 }

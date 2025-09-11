@@ -7,6 +7,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityOfProject;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.view.CMasterSectionView;
 
@@ -21,7 +22,7 @@ public class CMasterSection extends CEntityOfProject<CMasterSection> {
 
 	public static String getIconFilename() { return "vaadin:viewport"; }
 
-	public static Class<?> getViewClassStatic() { return CMasterSectionView.class; }
+	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CMasterSectionView.class; }
 
 	@Column (name = "section_db_name", nullable = true, length = 200)
 	@Size (max = 200)
@@ -58,4 +59,9 @@ public class CMasterSection extends CEntityOfProject<CMasterSection> {
 	public String getSectionType() { return sectionType; }
 
 	public void setSectionType(final String sectionType) { this.sectionType = sectionType; }
+
+	@Override
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
+		return CMasterSection.getViewClassStatic();
+	}
 }

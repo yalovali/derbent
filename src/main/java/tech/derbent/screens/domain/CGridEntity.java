@@ -8,6 +8,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityOfProject;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.screens.view.CGridEntityView;
@@ -23,7 +24,7 @@ public class CGridEntity extends CEntityOfProject<CGridEntity> {
 
 	public static String getIconFilename() { return "vaadin:viewport"; }
 
-	public static Class<?> getViewClassStatic() { return CGridEntityView.class; }
+	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CGridEntityView.class; }
 
 	@Column (name = "data_service_bean_name", nullable = false, length = 100)
 	@Size (max = 100)
@@ -96,5 +97,10 @@ public class CGridEntity extends CEntityOfProject<CGridEntity> {
 		}
 
 		public Field getField() { return field; }
+	}
+
+	@Override
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
+		return CGridEntity.getViewClassStatic();
 	}
 }

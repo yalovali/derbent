@@ -12,6 +12,7 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityConstants;
 import tech.derbent.abstracts.domains.CEntityNamed;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.companies.view.CCompanyView;
 
 /** CCompany - Domain entity representing companies within the organization. Layer: Domain (MVC) Inherits from CEntityDB to provide database
@@ -30,7 +31,7 @@ public class CCompany extends CEntityNamed<CCompany> {
 
 	public static String getIconFilename() { return "vaadin:building"; }
 
-	public static Class<?> getViewClassStatic() { return CCompanyView.class; }
+	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CCompanyView.class; }
 
 	@Column (name = "address", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
@@ -126,5 +127,10 @@ public class CCompany extends CEntityNamed<CCompany> {
 		return "CCompany{" + "name='" + getName() + '\'' + ", description='" + getDescription() + '\'' + ", address='" + address + '\'' + ", phone='"
 				+ phone + '\'' + ", email='" + email + '\'' + ", website='" + website + '\'' + ", taxNumber='" + taxNumber + '\'' + ", enabled="
 				+ enabled + '}';
+	}
+
+	@Override
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
+		return CCompany.getViewClassStatic();
 	}
 }

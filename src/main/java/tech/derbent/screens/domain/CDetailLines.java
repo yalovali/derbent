@@ -13,6 +13,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 
 /** CDetailLines - Domain entity representing individual lines/fields in a screen definition. Layer: Domain (MVC) Each line represents a field that
  * should be displayed in the screen view. */
@@ -167,9 +168,11 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 
 	public String getSectionName() { return sectionName; }
 
+	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return null; }
+
 	@Override
-	public Class<?> getViewClass() { // TODO Auto-generated method stub
-		return null;
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
+		return CDetailLines.getViewClassStatic();
 	}
 
 	public void printLine() {

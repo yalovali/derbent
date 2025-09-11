@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.abstracts.domains.CTypeEntity;
 import tech.derbent.abstracts.interfaces.CKanbanType;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.meetings.view.CMeetingTypeView;
 import tech.derbent.projects.domain.CProject;
 
@@ -24,7 +25,7 @@ public class CMeetingType extends CTypeEntity<CMeetingType> implements CKanbanTy
 
 	public static String getIconFilename() { return "vaadin:tags"; }
 
-	public static Class<?> getViewClassStatic() { return CMeetingTypeView.class; }
+	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CMeetingTypeView.class; }
 
 	/** Default constructor for JPA. */
 	public CMeetingType() {
@@ -38,5 +39,10 @@ public class CMeetingType extends CTypeEntity<CMeetingType> implements CKanbanTy
 	@Override
 	public String getDisplayName() { // TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
+		return CMeetingType.getViewClassStatic();
 	}
 }

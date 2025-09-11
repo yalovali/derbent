@@ -3,25 +3,17 @@ package tech.derbent.meetings.service;
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CDetailSection;
+import tech.derbent.screens.service.CDetailLinesSampleBase;
 import tech.derbent.screens.service.CDetailLinesService;
 
-public class CMeetingViewService {
+public class CMeetingViewService extends CDetailLinesSampleBase {
 
-	public static final String BASE_VIEW_NAME = "Meetings View";
 	public static final String BASE_PANEL_NAME = "Meetings Information";
 
 	public static CDetailSection createBasicView(final CProject project) {
 		try {
-			final CDetailSection scr = new CDetailSection();
 			final Class<?> clazz = CMeeting.class;
-			final String entityType = clazz.getSimpleName().replaceFirst("^C", "");
-			scr.setProject(project);
-			scr.setEntityType(clazz.getSimpleName());
-			scr.setHeaderText(entityType + " View");
-			scr.setIsActive(Boolean.TRUE);
-			scr.setScreenTitle(entityType + " View");
-			scr.setName(BASE_VIEW_NAME);
-			scr.setDescription(entityType + " View Details");
+			CDetailSection scr = createBaseScreenEntity(project, clazz);
 			// create screen lines
 			scr.addScreenLine(CDetailLinesService.createSection(CMeetingViewService.BASE_PANEL_NAME));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));

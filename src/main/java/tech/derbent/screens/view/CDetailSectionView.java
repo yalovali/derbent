@@ -18,7 +18,7 @@ import tech.derbent.session.service.CSessionService;
 
 @Route ("cdetailsectionview")
 @PageTitle ("Detail Master View")
-@Menu (order = 1.5, icon = "class:tech.derbent.screens.view.CDetailSectionView", title = "Settings.Detail Sections")
+@Menu (order = 1.5, icon = "class:tech.derbent.screens.view.CDetailSectionView", title = "Setup.UI.Detail Sections")
 @PermitAll
 public final class CDetailSectionView extends CGridViewBaseProject<CDetailSection> {
 

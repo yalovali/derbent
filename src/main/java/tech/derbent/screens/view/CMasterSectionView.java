@@ -17,7 +17,7 @@ import tech.derbent.session.service.CSessionService;
 
 @Route ("cmastersectionview")
 @PageTitle ("Master Section Detail")
-@Menu (order = 1.5, icon = "class:tech.derbent.screens.view.CMasterSectionView", title = "UI.MasterSections")
+@Menu (order = 1.5, icon = "class:tech.derbent.screens.view.CMasterSectionView", title = "Setup.UI.MasterSections")
 @PermitAll
 public class CMasterSectionView extends CGridViewBaseProject<CMasterSection> {
 

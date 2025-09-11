@@ -19,6 +19,7 @@ import tech.derbent.abstracts.domains.CEntityConstants;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.interfaces.CFieldInfoGenerator;
 import tech.derbent.abstracts.interfaces.CSearchable;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.users.view.CUsersView;
 
@@ -40,7 +41,7 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable, CFieldInf
 
 	public static String getIconFilename() { return "vaadin:users"; }
 
-	public static Class<?> getViewClassStatic() { return CUsersView.class; }
+	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CUsersView.class; }
 
 	@Column (name = "lastname", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
 	@AMetaData (
@@ -311,5 +312,10 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable, CFieldInf
 			return login;
 		}
 		return "User #" + getId();
+	}
+
+	@Override
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
+		return CUser.getViewClassStatic();
 	}
 }

@@ -12,6 +12,7 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityConstants;
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 
 /** CSystemSettings - Domain entity representing system-wide configuration settings. Layer: Domain (MVC) This entity stores application-level
  * configurations that apply across the entire system regardless of company, including application metadata, security settings, file management, email
@@ -333,9 +334,11 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	public String getDefaultLoginView() { return defaultLoginView; }
 
 	@Override
-	public Class<?> getViewClass() { // TODO Auto-generated method stub
-		return null;
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
+		return CSystemSettings.getViewClassStatic();
 	}
+
+	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return null; }
 
 	@Override
 	protected void initializeDefaults() {

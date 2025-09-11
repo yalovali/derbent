@@ -7,6 +7,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CTypeEntity;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.decisions.view.CDecisionTypeView;
 import tech.derbent.projects.domain.CProject;
 
@@ -27,7 +28,7 @@ public class CDecisionType extends CTypeEntity<CDecisionType> {
 
 	public static String getIconFilename() { return "vaadin:tags"; }
 
-	public static Class<?> getViewClassStatic() { return CDecisionTypeView.class; }
+	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CDecisionTypeView.class; }
 
 	@Column (name = "requires_approval", nullable = false)
 	@NotNull
@@ -58,4 +59,9 @@ public class CDecisionType extends CTypeEntity<CDecisionType> {
 	}
 
 	public void setRequiresApproval(final Boolean requiresApproval) { this.requiresApproval = requiresApproval; }
+
+	@Override
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
+		return CDecisionType.getViewClassStatic();
+	}
 }

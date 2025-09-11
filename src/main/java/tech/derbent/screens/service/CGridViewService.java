@@ -9,13 +9,12 @@ import tech.derbent.screens.domain.CGridEntity;
 public class CGridViewService extends CDetailLinesSampleBase {
 
 	public static final String BASE_PANEL_NAME = "Grid Information";
-	public static final String BASE_VIEW_NAME = "Grid View";
 	private static Logger LOGGER = LoggerFactory.getLogger(CGridViewService.class);
 
 	public static CDetailSection createBasicView(final CProject project) {
 		try {
 			final Class<?> clazz = CGridEntity.class;
-			CDetailSection scr = createBaseScreenEntity(project, clazz, BASE_VIEW_NAME);
+			CDetailSection scr = createBaseScreenEntity(project, clazz);
 			// create screen lines
 			scr.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));

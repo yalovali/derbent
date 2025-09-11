@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityOfProject;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.users.domain.CUser;
 
 /** CGanttItem - Data transfer object for Gantt chart representation of project entities. This class wraps project entities to provide a unified
@@ -233,7 +234,7 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	public LocalDate getStartDate() { return startDate; }
 
 	@Override
-	public Class<?> getViewClass() { // TODO Auto-generated method stub
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
 		return null;
 	}
 

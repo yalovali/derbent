@@ -2,6 +2,7 @@ package tech.derbent.abstracts.domains;
 
 import java.lang.reflect.Method;
 import org.slf4j.Logger;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 
 public interface IDisplayEntity {
 
@@ -44,5 +45,5 @@ public interface IDisplayEntity {
 	}
 
 	public String getDisplayName();
-	public Class<?> getViewClass();
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass();
 }

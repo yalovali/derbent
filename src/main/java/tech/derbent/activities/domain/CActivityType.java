@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.abstracts.domains.CTypeEntity;
 import tech.derbent.abstracts.interfaces.CKanbanType;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.activities.view.CActivityTypeView;
 import tech.derbent.projects.domain.CProject;
 
@@ -22,7 +23,7 @@ public class CActivityType extends CTypeEntity<CActivityType> implements CKanban
 
 	public static String getIconFilename() { return "vaadin:tags"; }
 
-	public static Class<?> getViewClassStatic() { return CActivityTypeView.class; }
+	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CActivityTypeView.class; }
 
 	/** Default constructor for JPA. */
 	public CActivityType() {
@@ -36,5 +37,10 @@ public class CActivityType extends CTypeEntity<CActivityType> implements CKanban
 	@Override
 	public String getDisplayName() { // TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
+		return CActivityType.getViewClassStatic();
 	}
 }

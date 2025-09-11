@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CTypeEntity;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.comments.view.CCommentPriorityView;
 import tech.derbent.projects.domain.CProject;
 
@@ -26,7 +27,7 @@ public class CCommentPriority extends CTypeEntity<CCommentPriority> {
 
 	public static String getIconFileName() { return "vaadin:exclamation-circle"; }
 
-	public static Class<?> getViewClassStatic() { return CCommentPriorityView.class; }
+	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CCommentPriorityView.class; }
 
 	@Column (name = "priority_level", nullable = false, length = 20)
 	@AMetaData (
@@ -80,5 +81,10 @@ public class CCommentPriority extends CTypeEntity<CCommentPriority> {
 		return String.format("CCommentPriority{id=%d, name='%s', color='%s', sortOrder=%d, isActive=%s, project=%s, priorityLevel=%d, isDefault=%s}",
 				getId(), getName(), getColor(), getSortOrder(), getIsActive(), getProject() != null ? getProject().getName() : "null", priorityLevel,
 				isDefault);
+	}
+
+	@Override
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
+		return CCommentPriority.getViewClassStatic();
 	}
 }

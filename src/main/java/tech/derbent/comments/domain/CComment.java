@@ -13,6 +13,7 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEvent;
 import tech.derbent.abstracts.utils.Check;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.users.domain.CUser;
 
@@ -122,9 +123,7 @@ public class CComment extends CEvent<CComment> {
 	public String getPriorityName() { return (priority != null) ? priority.getName() : "Normal"; }
 
 	@Override
-	public Class<?> getViewClass() { // TODO Auto-generated method stub
-		return null;
-	}
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { return null; }
 
 	@Override
 	protected void initializeDefaults() {

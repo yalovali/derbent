@@ -28,6 +28,7 @@ import tech.derbent.users.service.CUserService;
 public class CProjectsView extends CGridViewBaseNamed<CProject> {
 
 	private static final long serialVersionUID = 1L;
+	public static final String VIEW_NAME = "Projects View";
 
 	public static String getEntityColorCode() { return getIconColorCode(); }
 

@@ -22,6 +22,7 @@ import tech.derbent.session.service.CSessionService;
 public class CCompanyView extends CGridViewBaseNamed<CCompany> {
 
 	private static final long serialVersionUID = 1L;
+	public static final String VIEW_NAME = "Company View";
 
 	public static String getEntityColorCode() { return getIconColorCode(); }
 

@@ -26,16 +26,20 @@ import tech.derbent.activities.service.CActivityStatusService;
 import tech.derbent.activities.service.CActivityTypeService;
 import tech.derbent.activities.service.CActivityViewService;
 import tech.derbent.activities.view.CActivitiesView;
+import tech.derbent.activities.view.CActivityStatusView;
+import tech.derbent.activities.view.CActivityTypeView;
 import tech.derbent.comments.domain.CCommentPriority;
 import tech.derbent.comments.service.CCommentPriorityService;
 import tech.derbent.comments.service.CCommentService;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
+import tech.derbent.companies.view.CCompanyView;
 import tech.derbent.decisions.domain.CDecision;
 import tech.derbent.decisions.domain.CDecisionStatus;
 import tech.derbent.decisions.service.CDecisionService;
 import tech.derbent.decisions.service.CDecisionStatusService;
 import tech.derbent.decisions.service.CDecisionViewService;
+import tech.derbent.decisions.view.CDecisionsView;
 import tech.derbent.gannt.service.CGanntViewEntityService;
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.domain.CMeetingStatus;
@@ -43,6 +47,7 @@ import tech.derbent.meetings.service.CMeetingService;
 import tech.derbent.meetings.service.CMeetingStatusService;
 import tech.derbent.meetings.service.CMeetingTypeService;
 import tech.derbent.meetings.service.CMeetingViewService;
+import tech.derbent.meetings.view.CMeetingTypeView;
 import tech.derbent.meetings.view.CMeetingsView;
 import tech.derbent.orders.domain.CCurrency;
 import tech.derbent.orders.service.CCurrencyService;
@@ -53,22 +58,22 @@ import tech.derbent.page.service.CPageEntityService;
 import tech.derbent.page.service.CPageEntityViewService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
+import tech.derbent.projects.view.CProjectsView;
 import tech.derbent.risks.domain.CRisk;
 import tech.derbent.risks.domain.ERiskSeverity;
 import tech.derbent.risks.service.CRiskService;
 import tech.derbent.risks.service.CRiskViewService;
-import tech.derbent.screens.domain.CDetailLines;
-import tech.derbent.screens.domain.CDetailSection;
+import tech.derbent.risks.view.CRiskView;
 import tech.derbent.screens.domain.CGridEntity;
 import tech.derbent.screens.service.CDetailLinesService;
 import tech.derbent.screens.service.CDetailSectionService;
-import tech.derbent.screens.service.CEntityFieldService;
 import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.EUserRole;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.CUserTypeService;
 import tech.derbent.users.service.CUserViewService;
+import tech.derbent.users.view.CUsersView;
 
 public class CSampleDataInitializer {
 
@@ -757,21 +762,6 @@ public class CSampleDataInitializer {
 		meetingService.save(meeting);
 	}
 
-	/** Creates sample screens with two fields per project as per requirements. */
-	private void createSampleScreens() {
-		CTimer.stamp();
-		try {
-			final CProject project1 = projectService.findByName("Digital Transformation Initiative").orElseThrow();
-			if (project1 != null) {
-				createScreenWithFields(project1, "User Management Screen", "CUser", CEntityFieldService.THIS_CLASS, "name", "description");
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error creating sample screens", e);
-			throw new RuntimeException("Failed to create sample screens", e);
-		}
-		CTimer.print();
-	}
-
 	/** Creates sample standup meeting. */
 	private void createSampleStandupMeeting(final CProject project) {
 		final CMeeting meeting = new CMeeting("Daily Standup - Sprint 3", project);
@@ -800,46 +790,9 @@ public class CSampleDataInitializer {
 		meetingService.save(meeting);
 	}
 
-	private void createScreenWithFields(final CProject project, final String screenName, final String entityType, final String relationFieldName,
-			final String entityProperty1, final String entityProperty2) throws Exception {
+	private void initializeScreenWithFields(final CProject project) throws Exception {
 		// Create the screen
 		CTimer.stamp();
-		final CDetailSection screen = new CDetailSection(screenName, project);
-		screen.setEntityType(entityType);
-		screen.setScreenTitle(screenName);
-		screen.setDescription("Sample screen for " + entityType + " entity management");
-		screen.setIsActive(true);
-		final CDetailSection savedScreen = screenService.save(screen);
-		LOGGER.info("Created sample screen: {} for project: {}", screenName, project.getName());
-		// create section
-		CDetailLines line = screenLinesService.newEntity(savedScreen, CEntityFieldService.SECTION, "Main Section");
-		line.setSectionName("Main Section");
-		line.setDescription("Description for " + entityProperty1.toLowerCase());
-		line.setIsRequired(true);
-		line.setIsActive(true);
-		line.setLineOrder(1);
-		line.setFieldCaption(relationFieldName + " " + entityProperty1);
-		// check
-		CEntityFieldService.createFieldInfo(screen.getEntityType(), line);
-		screenLinesService.save(line);
-		// Create first field
-		line = screenLinesService.newEntity(savedScreen, relationFieldName, entityProperty1);
-		line.setDescription("Description for " + entityProperty1.toLowerCase());
-		line.setIsRequired(true);
-		line.setIsActive(true);
-		line.setLineOrder(1);
-		line.setFieldCaption(relationFieldName + " " + entityProperty1);
-		CEntityFieldService.createFieldInfo(screen.getEntityType(), line);
-		screenLinesService.save(line);
-		// Create second field
-		line = screenLinesService.newEntity(savedScreen, relationFieldName, entityProperty2);
-		line.setDescription("Description for " + entityProperty2.toLowerCase());
-		line.setIsRequired(false);
-		line.setIsActive(true);
-		line.setLineOrder(2);
-		line.setFieldCaption(relationFieldName + " " + entityProperty2);
-		CEntityFieldService.createFieldInfo(screen.getEntityType(), line);
-		screenLinesService.save(line);
 		//
 		screenService.save(CUserViewService.createBasicView(project));
 		screenService.save(CRiskViewService.createBasicView(project));
@@ -848,9 +801,6 @@ public class CSampleDataInitializer {
 		screenService.save(COrdersViewService.createBasicView(project));
 		screenService.save(CActivityViewService.createBasicView(project));
 		screenService.save(CPageEntityViewService.createBasicView(project));
-		// screenService.save(CGanntViewEntityViewService.createBasicView(project));
-		// Log completion
-		LOGGER.info("Created sample fields for screen: {}", screenName);
 		CTimer.print();
 	}
 
@@ -1184,49 +1134,49 @@ public class CSampleDataInitializer {
 			grid.setSelectedFields("name:1,status:2,meetingType:3,meetingDate:4,location:5");
 			gridEntityService.save(grid);
 			// Create sample grid entity for Users
-			grid = new CGridEntity("CUsersView", project);
+			grid = new CGridEntity(CUsersView.VIEW_NAME, project);
 			grid.setDescription("User management grid with role and contact information");
 			grid.setDataServiceBeanName("CUserService");
 			grid.setSelectedFields("name:1,lastname:2,userRole:3,email:4,phone:5");
 			gridEntityService.save(grid);
 			// Create sample grid entity for Projects
-			grid = new CGridEntity("CProjectsView", project);
+			grid = new CGridEntity(CProjectsView.VIEW_NAME, project);
 			grid.setDescription("Project management grid with basic project information");
 			grid.setDataServiceBeanName("CProjectService");
 			grid.setSelectedFields("name:1,description:2,createdBy:3,createdDate:4");
 			gridEntityService.save(grid);
 			// Create sample grid entity for Risks
-			grid = new CGridEntity("CRisksView", project);
+			grid = new CGridEntity(CRiskView.VIEW_NAME, project);
 			grid.setDescription("Risk management grid with severity and status tracking");
 			grid.setDataServiceBeanName("CRiskService");
 			grid.setSelectedFields("name:1,riskSeverity:2,description:3,createdBy:4,createdDate:5");
 			gridEntityService.save(grid);
 			// Create sample grid entity for Decisions
-			grid = new CGridEntity("CDecisionsView", project);
+			grid = new CGridEntity(CDecisionsView.VIEW_NAME, project);
 			grid.setDescription("Decision tracking grid with status and accountability");
 			grid.setDataServiceBeanName("CDecisionService");
 			grid.setSelectedFields("name:1,status:2,accountableUser:3,implementationDate:4,description:5");
 			gridEntityService.save(grid);
 			// Create sample grid entity for Companies
-			grid = new CGridEntity("CCompaniesView", project);
+			grid = new CGridEntity(CCompanyView.VIEW_NAME, project);
 			grid.setDescription("Company directory grid with contact and business information");
 			grid.setDataServiceBeanName("CCompanyService");
 			grid.setSelectedFields("name:1,email:2,phone:3,website:4,enabled:5");
 			gridEntityService.save(grid);
 			// Create sample grid entity for Activity Types
-			grid = new CGridEntity("CActivityTypesView", project);
+			grid = new CGridEntity(CActivityTypeView.VIEW_NAME, project);
 			grid.setDescription("Activity type management grid with color coding");
 			grid.setDataServiceBeanName("CActivityTypeService");
 			grid.setSelectedFields("name:1,description:2,color:3,sortOrder:4");
 			gridEntityService.save(grid);
 			// Create sample grid entity for Activity Status
-			grid = new CGridEntity("CActivityStatusView", project);
+			grid = new CGridEntity(CActivityStatusView.VIEW_NAME, project);
 			grid.setDescription("Activity status management grid with workflow tracking");
 			grid.setDataServiceBeanName("CActivityStatusService");
 			grid.setSelectedFields("name:1,description:2,color:3,sortOrder:4");
 			gridEntityService.save(grid);
 			// Create sample grid entity for Meeting Types
-			grid = new CGridEntity("CMeetingTypesView", project);
+			grid = new CGridEntity(CMeetingTypeView.VIEW_NAME, project);
 			grid.setDescription("Meeting type configuration grid");
 			grid.setDataServiceBeanName("CMeetingTypeService");
 			grid.setSelectedFields("name:1,description:2,sortOrder:3");
@@ -1514,15 +1464,19 @@ public class CSampleDataInitializer {
 			initializeRisks();
 			final List<CProject> projects = projectService.list(Pageable.unpaged()).getContent();
 			projects.forEach(project -> {
-				initializeActivityTypes(project);
-				initializeActivities(project);
-				initializeMeetings(project);
-				createSampleCurrencies(project);
-				initializePageEntities(project);
-				initializeGridEntity(project);
+				try {
+					initializeActivityTypes(project);
+					initializeActivities(project);
+					initializeMeetings(project);
+					initializeScreenWithFields(project);
+					createSampleCurrencies(project);
+					initializePageEntities(project);
+					initializeGridEntity(project);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			});
 			createSampleDecisions();
-			createSampleScreens(); // Add sample screens with fields
 			// createSampleOrders(); // Temporarily disabled due to missing dependencies
 			LOGGER.info("Sample data initialization completed successfully");
 		} catch (final Exception e) {

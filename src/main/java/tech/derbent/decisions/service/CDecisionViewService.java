@@ -5,26 +5,18 @@ import org.slf4j.LoggerFactory;
 import tech.derbent.decisions.domain.CDecision;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CDetailSection;
+import tech.derbent.screens.service.CDetailLinesSampleBase;
 import tech.derbent.screens.service.CDetailLinesService;
 
-public class CDecisionViewService {
+public class CDecisionViewService extends CDetailLinesSampleBase {
 
-	public static final String BASE_VIEW_NAME = "Decisions View";
 	public static final String BASE_PANEL_NAME = "Decisions Information";
 	private static Logger LOGGER = LoggerFactory.getLogger(CDecisionViewService.class);
 
 	public static CDetailSection createBasicView(final CProject project) {
 		try {
-			final CDetailSection scr = new CDetailSection();
 			final Class<?> clazz = CDecision.class;
-			final String entityType = clazz.getSimpleName().replaceFirst("^C", "");
-			scr.setProject(project);
-			scr.setEntityType(clazz.getSimpleName());
-			scr.setHeaderText(entityType + " View");
-			scr.setIsActive(Boolean.TRUE);
-			scr.setScreenTitle(entityType + " View");
-			scr.setName(BASE_VIEW_NAME);
-			scr.setDescription(entityType + " View Details");
+			CDetailSection scr = createBaseScreenEntity(project, clazz);
 			// create screen lines
 			scr.addScreenLine(CDetailLinesService.createSection(CDecisionViewService.BASE_PANEL_NAME));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));

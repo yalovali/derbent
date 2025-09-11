@@ -11,6 +11,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityOfProject;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.risks.view.CRiskView;
 
@@ -27,7 +28,7 @@ public class CRisk extends CEntityOfProject<CRisk> {
 
 	public static String getIconFilename() { return "vaadin:warning"; }
 
-	public static Class<?> getViewClassStatic() { return CRiskView.class; }
+	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CRiskView.class; }
 
 	@Enumerated (EnumType.STRING)
 	@Column (name = "risk_severity", nullable = false, length = 20, columnDefinition = "VARCHAR(20)")
@@ -67,4 +68,9 @@ public class CRisk extends CEntityOfProject<CRisk> {
 	public void setRiskSeverity(final ERiskSeverity riskSeverity) { this.riskSeverity = riskSeverity; }
 
 	public void setStatus(final CRiskStatus status) { this.status = status; }
+
+	@Override
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
+		return CRisk.getViewClassStatic();
+	}
 }

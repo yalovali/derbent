@@ -19,6 +19,7 @@ import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.interfaces.CKanbanEntity;
 import tech.derbent.abstracts.interfaces.CKanbanStatus;
 import tech.derbent.abstracts.interfaces.CKanbanType;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.meetings.view.CMeetingsView;
 import tech.derbent.projects.domain.CProject;
@@ -39,7 +40,7 @@ public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntit
 
 	public static String getIconFilename() { return "vaadin:group"; }
 
-	public static Class<?> getViewClassStatic() { return CMeetingsView.class; }
+	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CMeetingsView.class; }
 
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "cmeetingtype_id", nullable = true)
@@ -255,4 +256,9 @@ public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntit
 	}
 
 	public void setStatus(final CMeetingStatus status) { this.status = status; }
+
+	@Override
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
+		return CMeeting.getViewClassStatic();
+	}
 }

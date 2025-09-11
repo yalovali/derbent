@@ -48,8 +48,7 @@ public class CComponentGridEntity extends CDiv implements CProjectChangeListener
 
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentGridEntity.class);
-	@SuppressWarnings ("rawtypes")
-	private CGrid grid;
+	private CGrid<?> grid;
 	private CGridEntity gridEntity;
 	private CSessionService sessionService;
 
@@ -112,7 +111,6 @@ public class CComponentGridEntity extends CDiv implements CProjectChangeListener
 	}
 
 	/** Handles grid selection changes and fires SelectionChangeEvent */
-	@SuppressWarnings ("unchecked")
 	protected void onSelectionChange(ValueChangeEvent<?> event) {
 		LOGGER.debug("Grid selection changed: {}", event.getValue() != null ? event.getValue().toString() : "null");
 		CEntityDB<?> selectedEntity = (CEntityDB<?>) event.getValue();
@@ -120,10 +118,9 @@ public class CComponentGridEntity extends CDiv implements CProjectChangeListener
 	}
 
 	/** Gets the currently selected item from the grid */
-	@SuppressWarnings ("unchecked")
 	public CEntityDB<?> getSelectedItem() {
 		if (grid != null) {
-			return (CEntityDB<?>) grid.asSingleSelect().getValue();
+			return grid.asSingleSelect().getValue();
 		}
 		return null;
 	}
@@ -135,7 +132,6 @@ public class CComponentGridEntity extends CDiv implements CProjectChangeListener
 	}
 
 	private void createContent() {
-
 		try {
 			if (gridEntity == null) {
 				add(new Div("No grid configuration provided"));

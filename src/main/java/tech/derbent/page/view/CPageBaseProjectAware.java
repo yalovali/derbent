@@ -2,18 +2,30 @@ package tech.derbent.page.view;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.router.BeforeEnterEvent;
+import tech.derbent.abstracts.components.CEnhancedBinder;
+import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.interfaces.CProjectChangeListener;
+import tech.derbent.abstracts.services.CDetailsBuilder;
+import tech.derbent.abstracts.views.components.CDiv;
 import tech.derbent.projects.domain.CProject;
+import tech.derbent.screens.domain.CDetailSection;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 
 public abstract class CPageBaseProjectAware extends CPageBase implements CProjectChangeListener {
 
 	private static final long serialVersionUID = 1L;
 	protected final CSessionService sessionService;
+	protected CDiv divDetails;
+	CEnhancedBinder<CEntityDB<?>> binder = new CEnhancedBinder(CEntityDB.class);
+	protected final CDetailsBuilder detailsBuilder = new CDetailsBuilder();
+	private CDetailSectionService screenService;
 
-	protected CPageBaseProjectAware(final CSessionService sessionService) {
+	protected CPageBaseProjectAware(final CSessionService sessionService, CDetailSectionService screenService) {
 		super();
+		this.screenService = screenService;
 		this.sessionService = sessionService;
 	}
 
@@ -44,8 +56,29 @@ public abstract class CPageBaseProjectAware extends CPageBase implements CProjec
 		LOGGER.debug("Project change notification received: {}", newProject != null ? newProject.getName() : "null");
 	}
 
+	protected CEnhancedBinder<CEntityDB<?>> getBinder() { return binder; }
+
+	public HasComponents getBaseDetailsLayout() { return divDetails; }
+
 	@Override
 	protected void setupToolbar() {
 		LOGGER.debug("Setting up toolbar in Sample Page");
+	}
+
+	protected void buildScreen(final String baseViewName) {
+		try {
+			final CDetailSection screen = screenService.findByNameAndProject(sessionService.getActiveProject().orElse(null), baseViewName);
+			if (screen == null) {
+				final String errorMsg = "Screen not found: " + baseViewName + " for project: "
+						+ sessionService.getActiveProject().map(CProject::getName).orElse("No Project");
+				getBaseDetailsLayout().add(new CDiv(errorMsg));
+				return;
+			}
+			detailsBuilder.buildDetails(screen, getBinder(), getBaseDetailsLayout());
+		} catch (final Exception e) {
+			final String errorMsg = "Error building details layout for screen: " + baseViewName;
+			e.printStackTrace();
+			getBaseDetailsLayout().add(new CDiv(errorMsg));
+		}
 	}
 }

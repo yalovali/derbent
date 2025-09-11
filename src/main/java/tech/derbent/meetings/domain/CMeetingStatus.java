@@ -8,6 +8,7 @@ import jakarta.persistence.Table;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.annotations.StatusEntity;
 import tech.derbent.abstracts.interfaces.CKanbanStatus;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.base.domain.CStatus;
 import tech.derbent.meetings.view.CMeetingStatusView;
 import tech.derbent.projects.domain.CProject;
@@ -28,7 +29,7 @@ public class CMeetingStatus extends CStatus<CMeetingStatus> implements CKanbanSt
 
 	public static String getIconFilename() { return "vaadin:flag"; }
 
-	public static Class<?> getViewClassStatic() { return CMeetingStatusView.class; }
+	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CMeetingStatusView.class; }
 
 	@Column (name = "is_final", nullable = false)
 	@AMetaData (
@@ -76,5 +77,10 @@ public class CMeetingStatus extends CStatus<CMeetingStatus> implements CKanbanSt
 	@Override
 	public String toString() {
 		return getName() != null ? getName() : super.toString();
+	}
+
+	@Override
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
+		return CMeetingStatus.getViewClassStatic();
 	}
 }

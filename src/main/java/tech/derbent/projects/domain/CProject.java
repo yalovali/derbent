@@ -11,6 +11,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.interfaces.CSearchable;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.projects.view.CProjectsView;
 import tech.derbent.users.domain.CUserProjectSettings;
 
@@ -28,7 +29,7 @@ public class CProject extends CEntityNamed<CProject> implements CSearchable {
 
 	public static String getIconFilename() { return "vaadin:briefcase"; }
 
-	public static Class<?> getViewClassStatic() { return CProjectsView.class; }
+	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CProjectsView.class; }
 
 	// lets keep it layzily loaded to avoid loading all user settings at once
 	@OneToMany (mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
@@ -70,5 +71,10 @@ public class CProject extends CEntityNamed<CProject> implements CSearchable {
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
+		return CProject.getViewClassStatic();
 	}
 }

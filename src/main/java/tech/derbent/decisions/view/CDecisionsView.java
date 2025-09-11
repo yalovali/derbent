@@ -11,7 +11,6 @@ import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.decisions.domain.CDecision;
 import tech.derbent.decisions.service.CDecisionService;
-import tech.derbent.decisions.service.CDecisionViewService;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 
@@ -24,6 +23,7 @@ import tech.derbent.session.service.CSessionService;
 public class CDecisionsView extends CGridViewBaseProject<CDecision> {
 
 	private static final long serialVersionUID = 1L;
+	public static final String VIEW_NAME = "Decisions View";
 
 	public static String getEntityColorCode() { return getIconColorCode(); }
 
@@ -62,6 +62,6 @@ public class CDecisionsView extends CGridViewBaseProject<CDecision> {
 		// final CAccordionDBEntity<CDecision> panel;
 		// panel = new CPanelDecisionTeamManagement(getCurrentEntity(), getBinder(), (CDecisionService) entityService);
 		// addAccordionPanel(panel);
-		buildScreen(CDecisionViewService.BASE_VIEW_NAME);
+		buildScreen(CDecisionsView.VIEW_NAME);
 	}
 }

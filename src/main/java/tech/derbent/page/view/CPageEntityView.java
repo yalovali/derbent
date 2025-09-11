@@ -22,6 +22,7 @@ import tech.derbent.session.service.CSessionService;
 public final class CPageEntityView extends CGridViewBaseProject<CPageEntity> {
 
 	private static final long serialVersionUID = 1L;
+	public static final String VIEW_NAME = "Pages View";
 
 	public static String getEntityColorCode() { return getIconColorCode(); }
 

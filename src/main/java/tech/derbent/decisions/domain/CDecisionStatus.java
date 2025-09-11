@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.annotations.StatusEntity;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.base.domain.CStatus;
 import tech.derbent.decisions.view.CDecisionStatusView;
 import tech.derbent.projects.domain.CProject;
@@ -26,7 +27,7 @@ public class CDecisionStatus extends CStatus<CDecisionStatus> {
 
 	public static String getIconFilename() { return "vaadin:flag"; }
 
-	public static Class<?> getViewClassStatic() { return CDecisionStatusView.class; }
+	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CDecisionStatusView.class; }
 
 	@Column (name = "is_final", nullable = false)
 	@AMetaData (
@@ -95,5 +96,10 @@ public class CDecisionStatus extends CStatus<CDecisionStatus> {
 	@Override
 	public String toString() {
 		return getName() != null ? getName() : super.toString();
+	}
+
+	@Override
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
+		return CDecisionStatus.getViewClassStatic();
 	}
 }

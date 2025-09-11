@@ -16,6 +16,7 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.abstracts.annotations.AMetaData;
 import tech.derbent.abstracts.domains.CEntityConstants;
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.companies.domain.CCompany;
 
 /** CCompanySettings - Domain entity representing company-wide administration settings. Layer: Domain (MVC) This entity stores administrative
@@ -219,9 +220,7 @@ public class CCompanySettings extends CEntityDB<CCompanySettings> {
 	public Integer getStartWorkHour() { return startWorkHour; }
 
 	@Override
-	public Class<?> getViewClass() { // TODO Auto-generated method stub
-		return null;
-	}
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { return null; }
 
 	public Integer getWorkingDaysPerWeek() { return workingDaysPerWeek; }
 

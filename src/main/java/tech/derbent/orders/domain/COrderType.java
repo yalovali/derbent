@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import tech.derbent.abstracts.domains.CEntityOfProject;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.projects.domain.CProject;
 
 @Entity
@@ -21,6 +22,11 @@ public class COrderType extends CEntityOfProject<COrderType> {
 
 	@Override
 	public String getDisplayName() { // TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
 		return null;
 	}
 }

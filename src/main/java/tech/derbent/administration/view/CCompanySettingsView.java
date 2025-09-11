@@ -9,6 +9,7 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
 import tech.derbent.abstracts.domains.IDisplayView;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.abstracts.views.components.CButton;
 import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseDBEntity;
@@ -126,11 +127,6 @@ public class CCompanySettingsView extends CGridViewBaseDBEntity<CCompanySettings
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
 
 	@Override
-	public Class<?> getViewClass() { // TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public void onLayoutModeChanged(final tech.derbent.session.service.CLayoutService.LayoutMode newMode) {
 		LOGGER.debug("onLayoutModeChanged called for CCompanySettingsView with mode: {}", newMode);
 		// Refresh data when layout changes
@@ -186,5 +182,10 @@ public class CCompanySettingsView extends CGridViewBaseDBEntity<CCompanySettings
 			LOGGER.error("Error creating entity details form for CCompanySettings", e);
 			Notification.show("Error creating form: " + e.getMessage(), 3000, Notification.Position.MIDDLE);
 		}
+	}
+
+	@Override
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
+		return null;
 	}
 }

@@ -21,6 +21,7 @@ import tech.derbent.abstracts.domains.CProjectItem;
 import tech.derbent.abstracts.interfaces.CKanbanEntity;
 import tech.derbent.abstracts.interfaces.CKanbanStatus;
 import tech.derbent.abstracts.interfaces.CKanbanType;
+import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.activities.view.CActivitiesView;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
@@ -431,4 +432,7 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 			setStatus((CActivityStatus) status);
 		}
 	}
+
+	@Override
+	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { return CActivitiesView.class; }
 }

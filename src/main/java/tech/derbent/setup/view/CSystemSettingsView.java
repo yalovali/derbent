@@ -1,6 +1,8 @@
 package tech.derbent.setup.view;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
@@ -21,6 +23,7 @@ import tech.derbent.abstracts.views.components.CButton;
 import tech.derbent.base.ui.dialogs.CConfirmationDialog;
 import tech.derbent.base.ui.dialogs.CInformationDialog;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
+import tech.derbent.config.CSampleDataInitializer;
 import tech.derbent.setup.domain.CSystemSettings;
 import tech.derbent.setup.service.CSystemSettingsService;
 
@@ -88,9 +91,30 @@ public class CSystemSettingsView extends CAbstractPage {
 		}
 	}
 
+	/** Reloads the system settings from the database. */
+	private void resetDatabase() {
+		final ConfirmDialog dialog =
+				new ConfirmDialog("Onay", "Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?", "Evet, sıfırla", ev -> {
+					try {
+						final CSampleDataInitializer init = new CSampleDataInitializer();
+						init.reloadForced(); // veya empty check’li bir metod yaz
+						Notification.show("Sample data yeniden yüklendi.", 4000, Notification.Position.MIDDLE);
+						CInformationDialog info = new CInformationDialog("Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
+						info.open();
+						// UI.getCurrent().getPage().reload();
+					} catch (final Exception ex) {
+						Notification.show("Hata: " + ex.getMessage(), 6000, Notification.Position.MIDDLE);
+					}
+				}, "Vazgeç", ev -> {});
+		dialog.open();
+	}
+
 	private Div createButtonLayout() {
 		final var buttonLayout = new Div();
 		buttonLayout.addClassName("button-layout");
+		final var resetDbButton = new CButton("Reset Database", null, null);
+		resetDbButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
+		resetDbButton.addClickListener(e -> resetDatabase());
 		// Save Settings button
 		final var saveButton = new CButton("Save Settings", null, null);
 		saveButton.addClassName("primary");
@@ -111,7 +135,7 @@ public class CSystemSettingsView extends CAbstractPage {
 		final var testButton = new CButton("Test Configuration", null, null);
 		testButton.addClassName("success");
 		testButton.addClickListener(event -> testConfiguration());
-		buttonLayout.add(saveButton, cancelButton, reloadButton, resetButton, testButton);
+		buttonLayout.add(resetDbButton, saveButton, cancelButton, reloadButton, resetButton, testButton);
 		return buttonLayout;
 	}
 
@@ -158,7 +182,7 @@ public class CSystemSettingsView extends CAbstractPage {
 			// Create button layout
 			final var buttonLayout = createButtonLayout();
 			// Add form and buttons to container
-			formContainer.add(formLayout, buttonLayout);
+			formContainer.add(buttonLayout, formLayout);
 			LOGGER.debug("System settings form created successfully");
 		} catch (final Exception e) {
 			LOGGER.error("Error creating system settings form", e);

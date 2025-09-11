@@ -23,6 +23,7 @@ import tech.derbent.session.service.CSessionService;
 public class CActivityTypeView extends CGridViewBaseProject<CActivityType> {
 
 	private static final long serialVersionUID = 1L;
+	public static final String VIEW_NAME = "Activity Types View";
 
 	public static String getEntityColorCode() { return getIconColorCode(); }
 
