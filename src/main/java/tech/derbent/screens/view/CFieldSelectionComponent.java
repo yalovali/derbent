@@ -14,35 +14,12 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.shared.Registration;
 import tech.derbent.screens.service.CEntityFieldService;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.screens.domain.CGridEntity.FieldSelection;
 
 /** Simple field selection component for selecting and ordering entity fields. Integrates with binders and provides up/down ordering functionality. */
 public class CFieldSelectionComponent extends VerticalLayout implements HasValue<HasValue.ValueChangeEvent<String>, String> {
 
 	private static final long serialVersionUID = 1L;
-
-	// Data class for field selections with order
-	public static class FieldSelection {
-
-		private final EntityFieldInfo fieldInfo;
-		private int order;
-
-		public FieldSelection(EntityFieldInfo fieldInfo, int order) {
-			this.fieldInfo = fieldInfo;
-			this.order = order;
-		}
-
-		public EntityFieldInfo getFieldInfo() { return fieldInfo; }
-
-		public int getOrder() { return order; }
-
-		public void setOrder(int order) { this.order = order; }
-
-		@Override
-		public String toString() {
-			return fieldInfo.getDisplayName() + " (" + fieldInfo.getFieldName() + ")";
-		}
-	}
-
 	// UI Components
 	private ListBox<EntityFieldInfo> availableFields;
 	private ListBox<FieldSelection> selectedFields;

@@ -19,6 +19,7 @@ import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.abstracts.views.components.CDiv;
 import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.screens.domain.CGridEntity;
+import tech.derbent.screens.domain.CGridEntity.FieldConfig;
 import tech.derbent.screens.service.CEntityFieldService;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
@@ -324,25 +325,5 @@ public class CComponentGridEntity extends CDiv {
 			LOGGER.error("Error loading data from service {}: {}", serviceBeanName, e.getMessage());
 			grid.setItems(Collections.emptyList());
 		}
-	}
-
-	// Helper class to hold field configuration
-	private static class FieldConfig {
-
-		private final EntityFieldInfo fieldInfo;
-		private final int order;
-		private final Field field;
-
-		public FieldConfig(EntityFieldInfo fieldInfo, int order, Field field) {
-			this.fieldInfo = fieldInfo;
-			this.order = order;
-			this.field = field;
-		}
-
-		public EntityFieldInfo getFieldInfo() { return fieldInfo; }
-
-		public int getOrder() { return order; }
-
-		public Field getField() { return field; }
 	}
 }
