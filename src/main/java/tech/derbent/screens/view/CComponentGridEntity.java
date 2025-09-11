@@ -11,30 +11,86 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.hilla.ApplicationContextProvider;
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.interfaces.CProjectChangeListener;
 import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.abstracts.views.components.CDiv;
 import tech.derbent.abstracts.views.grids.CGrid;
+import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CGridEntity;
 import tech.derbent.screens.domain.CGridEntity.FieldConfig;
 import tech.derbent.screens.service.CEntityFieldService;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.session.service.CSessionService;
 
-public class CComponentGridEntity extends CDiv {
+public class CComponentGridEntity extends CDiv implements CProjectChangeListener {
 
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentGridEntity.class);
 	@SuppressWarnings ("rawtypes")
 	private CGrid grid;
 	private CGridEntity gridEntity;
+	private CSessionService sessionService;
 
 	public CComponentGridEntity(CGridEntity gridEntity) {
 		super();
 		this.gridEntity = gridEntity;
+		// Get session service for project change notifications
+		try {
+			if (ApplicationContextProvider.getApplicationContext() != null) {
+				this.sessionService = ApplicationContextProvider.getApplicationContext().getBean(CSessionService.class);
+			}
+		} catch (Exception e) {
+			LOGGER.warn("Could not get SessionService: {}", e.getMessage());
+		}
 		createContent();
+	}
+
+	@Override
+	protected void onAttach(AttachEvent attachEvent) {
+		super.onAttach(attachEvent);
+		// Register for project change notifications
+		if (sessionService != null) {
+			sessionService.addProjectChangeListener(this);
+			LOGGER.debug("Registered CComponentGridEntity for project change notifications");
+		}
+	}
+
+	@Override
+	protected void onDetach(DetachEvent detachEvent) {
+		super.onDetach(detachEvent);
+		// Unregister from project change notifications to prevent memory leaks
+		if (sessionService != null) {
+			sessionService.removeProjectChangeListener(this);
+			LOGGER.debug("Unregistered CComponentGridEntity from project change notifications");
+		}
+	}
+
+	@Override
+	public void onProjectChanged(CProject newProject) {
+		LOGGER.debug("Project change notification received in CComponentGridEntity: {}", newProject != null ? newProject.getName() : "null");
+		// Refresh grid data with new project
+		if (gridEntity != null) {
+			refreshGridData();
+		}
+	}
+
+	/** Refresh grid data based on current project */
+	private void refreshGridData() {
+		String serviceBeanName = gridEntity.getDataServiceBeanName();
+		if (serviceBeanName != null && !serviceBeanName.trim().isEmpty()) {
+			CProject currentProject = sessionService != null ? sessionService.getActiveProject().orElse(null) : null;
+			if (currentProject != null) {
+				loadDataFromService(serviceBeanName, currentProject);
+			} else {
+				LOGGER.warn("No active project available for grid refresh");
+			}
+		}
 	}
 
 	private void createContent() {
@@ -158,17 +214,18 @@ public class CComponentGridEntity extends CDiv {
 		try {
 			// Handle different field types using appropriate CGrid methods
 			if (CEntityDB.class.isAssignableFrom(fieldType)) {
-				// Entity reference - use addColumnEntityNamed for better formatting with colors/styling
+				// Entity reference - use addEntityColumn for better color support and metadata-based styling
 				ValueProvider valueProvider = entity -> {
 					try {
 						field.setAccessible(true);
-						return (CEntityDB<?>) field.get(entity);
+						return field.get(entity);
 					} catch (Exception e) {
 						LOGGER.warn("Error accessing entity field {}: {}", fieldName, e.getMessage());
 						return null;
 					}
 				};
-				grid.addColumnEntityNamed(valueProvider, displayName);
+				// Use addEntityColumn for full entity support including colors
+				grid.addEntityColumn(valueProvider, displayName, fieldName);
 			} else if (Collection.class.isAssignableFrom(fieldType)) {
 				// Collection field - use addColumnEntityCollection if it contains entities
 				ValueProvider valueProvider = entity -> {
@@ -283,7 +340,7 @@ public class CComponentGridEntity extends CDiv {
 				};
 				grid.addShortTextColumn(valueProvider, displayName, fieldName);
 			} else {
-				// For any other type, try to use addEntityColumn which provides metadata-based styling
+				// For any other type, use addEntityColumn which provides metadata-based styling
 				ValueProvider valueProvider = entity -> {
 					try {
 						field.setAccessible(true);
