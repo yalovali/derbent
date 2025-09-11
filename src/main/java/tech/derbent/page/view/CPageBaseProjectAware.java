@@ -74,7 +74,7 @@ public abstract class CPageBaseProjectAware extends CPageBase implements CProjec
 				return;
 			}
 			// Create a local binder for this specific screen instead of using page-level binder
-			@SuppressWarnings("unchecked")
+			@SuppressWarnings ("unchecked")
 			final CEnhancedBinder<CEntityDB<?>> localBinder = new CEnhancedBinder<>((Class<CEntityDB<?>>) (Class<?>) CEntityDB.class);
 			detailsBuilder.buildDetails(screen, localBinder, getBaseDetailsLayout());
 		} catch (final Exception e) {
