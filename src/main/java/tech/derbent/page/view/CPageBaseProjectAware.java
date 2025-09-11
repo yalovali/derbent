@@ -19,7 +19,6 @@ public abstract class CPageBaseProjectAware extends CPageBase implements CProjec
 	private static final long serialVersionUID = 1L;
 	protected final CSessionService sessionService;
 	protected CDiv divDetails;
-	CEnhancedBinder<CEntityDB<?>> binder = new CEnhancedBinder(CEntityDB.class);
 	protected final CDetailsBuilder detailsBuilder = new CDetailsBuilder();
 	private CDetailSectionService screenService;
 
@@ -56,8 +55,6 @@ public abstract class CPageBaseProjectAware extends CPageBase implements CProjec
 		LOGGER.debug("Project change notification received: {}", newProject != null ? newProject.getName() : "null");
 	}
 
-	protected CEnhancedBinder<CEntityDB<?>> getBinder() { return binder; }
-
 	public HasComponents getBaseDetailsLayout() { return divDetails; }
 
 	@Override
@@ -67,6 +64,8 @@ public abstract class CPageBaseProjectAware extends CPageBase implements CProjec
 
 	protected void buildScreen(final String baseViewName) {
 		try {
+			// Clear previous content from details layout to avoid accumulation
+			getBaseDetailsLayout().removeAll();
 			final CDetailSection screen = screenService.findByNameAndProject(sessionService.getActiveProject().orElse(null), baseViewName);
 			if (screen == null) {
 				final String errorMsg = "Screen not found: " + baseViewName + " for project: "
@@ -74,7 +73,10 @@ public abstract class CPageBaseProjectAware extends CPageBase implements CProjec
 				getBaseDetailsLayout().add(new CDiv(errorMsg));
 				return;
 			}
-			detailsBuilder.buildDetails(screen, getBinder(), getBaseDetailsLayout());
+			// Create a local binder for this specific screen instead of using page-level binder
+			@SuppressWarnings("unchecked")
+			final CEnhancedBinder<CEntityDB<?>> localBinder = new CEnhancedBinder<>((Class<CEntityDB<?>>) (Class<?>) CEntityDB.class);
+			detailsBuilder.buildDetails(screen, localBinder, getBaseDetailsLayout());
 		} catch (final Exception e) {
 			final String errorMsg = "Error building details layout for screen: " + baseViewName;
 			e.printStackTrace();

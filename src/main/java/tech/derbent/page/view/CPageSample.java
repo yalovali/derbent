@@ -7,6 +7,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.domains.CEntityDB;
+import tech.derbent.abstracts.interfaces.CEntityUpdateListener;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.abstracts.views.components.CDiv;
@@ -22,9 +23,10 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Sample Page")
 @Menu (order = 1.1, icon = "class:tech.derbent.page.view.CPageEntityView", title = "Settings.Sample Page")
 @PermitAll // When security is enabled, allow all authenticated users
-public class CPageSample extends CPageBaseProjectAware {
+public class CPageSample extends CPageBaseProjectAware implements CEntityUpdateListener {
 
 	private static final long serialVersionUID = 1L;
+	private CComponentGridEntity grid;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }
 
@@ -46,7 +48,7 @@ public class CPageSample extends CPageBaseProjectAware {
 		// Create and configure grid
 		CGridEntity gridEntity =
 				gridEntityService.findByNameAndProject(CActivitiesView.VIEW_NAME, sessionService.getActiveProject().orElseThrow()).orElse(null);
-		CComponentGridEntity grid = new CComponentGridEntity(gridEntity);
+		grid = new CComponentGridEntity(gridEntity);
 		// Listen for selection changes from the grid
 		grid.addSelectionChangeListener(event -> {
 			try {
@@ -70,6 +72,22 @@ public class CPageSample extends CPageBaseProjectAware {
 		populateEntityDetails(selectedEntity);
 	}
 
+	/** Implementation of CEntityUpdateListener - called when an entity is saved */
+	@Override
+	public void onEntitySaved(CEntityDB<?> entity) {
+		LOGGER.debug("Entity saved notification received: {}", entity != null ? entity.getClass().getSimpleName() : "null");
+		refreshGrid();
+	}
+
+	/** Implementation of CEntityUpdateListener - called when an entity is deleted */
+	@Override
+	public void onEntityDeleted(CEntityDB<?> entity) {
+		LOGGER.debug("Entity deleted notification received: {}", entity != null ? entity.getClass().getSimpleName() : "null");
+		refreshGrid();
+		// Clear the details section since the entity no longer exists
+		getBaseDetailsLayout().removeAll();
+	}
+
 	/** Populates the entity details section with information from the selected entity */
 	private void populateEntityDetails(CEntityDB<?> entity) throws Exception {
 		if (entity == null) {
@@ -81,5 +99,20 @@ public class CPageSample extends CPageBaseProjectAware {
 		Field viewNameField = entityViewClass.getField("VIEW_NAME");
 		String viewName = (String) viewNameField.get(null);
 		buildScreen(viewName);
+	}
+
+	/** Refreshes the grid to show updated data */
+	private void refreshGrid() {
+		if (grid != null) {
+			try {
+				// Use reflection to call the private refreshGridData method
+				java.lang.reflect.Method refreshMethod = grid.getClass().getDeclaredMethod("refreshGridData");
+				refreshMethod.setAccessible(true);
+				refreshMethod.invoke(grid);
+				LOGGER.debug("Grid refreshed successfully");
+			} catch (Exception e) {
+				LOGGER.warn("Error refreshing grid: {}", e.getMessage());
+			}
+		}
 	}
 }
