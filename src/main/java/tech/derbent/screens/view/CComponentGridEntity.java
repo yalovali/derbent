@@ -12,7 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.hilla.ApplicationContextProvider;
@@ -29,6 +31,20 @@ import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.session.service.CSessionService;
 
 public class CComponentGridEntity extends CDiv implements CProjectChangeListener {
+
+	// --- Custom Event Definition ---
+	public static class SelectionChangeEvent extends ComponentEvent<CComponentGridEntity> {
+
+		private static final long serialVersionUID = 1L;
+		private final CEntityDB<?> selectedItem;
+
+		public SelectionChangeEvent(CComponentGridEntity source, CEntityDB<?> selectedItem) {
+			super(source, false);
+			this.selectedItem = selectedItem;
+		}
+
+		public CEntityDB<?> getSelectedItem() { return selectedItem; }
+	}
 
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentGridEntity.class);
@@ -93,6 +109,29 @@ public class CComponentGridEntity extends CDiv implements CProjectChangeListener
 		}
 	}
 
+	/** Handles grid selection changes and fires SelectionChangeEvent */
+	@SuppressWarnings ("unchecked")
+	protected void onSelectionChange(ValueChangeEvent<?> event) {
+		LOGGER.debug("Grid selection changed: {}", event.getValue() != null ? event.getValue().toString() : "null");
+		CEntityDB<?> selectedEntity = (CEntityDB<?>) event.getValue();
+		fireEvent(new SelectionChangeEvent(this, selectedEntity));
+	}
+
+	/** Gets the currently selected item from the grid */
+	@SuppressWarnings ("unchecked")
+	public CEntityDB<?> getSelectedItem() {
+		if (grid != null) {
+			return (CEntityDB<?>) grid.asSingleSelect().getValue();
+		}
+		return null;
+	}
+
+	/** Adds a selection change listener to receive notifications when the grid selection changes */
+	public com.vaadin.flow.shared.Registration
+			addSelectionChangeListener(com.vaadin.flow.component.ComponentEventListener<SelectionChangeEvent> listener) {
+		return addListener(SelectionChangeEvent.class, listener);
+	}
+
 	private void createContent() {
 		try {
 			if (gridEntity == null) {
@@ -112,6 +151,8 @@ public class CComponentGridEntity extends CDiv implements CProjectChangeListener
 			}
 			// Create the grid
 			grid = new CGrid(entityClass);
+			// Add selection listener to emit signals when selection changes
+			grid.asSingleSelect().addValueChangeListener(this::onSelectionChange);
 			// Parse selected fields and create columns
 			String selectedFields = gridEntity.getSelectedFields();
 			List<FieldConfig> fieldConfigs = parseSelectedFields(selectedFields, entityClass);
