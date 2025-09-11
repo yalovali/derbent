@@ -21,6 +21,7 @@ public abstract class CPageBaseProjectAware extends CPageBase implements CProjec
 	protected CDiv divDetails;
 	protected final CDetailsBuilder detailsBuilder = new CDetailsBuilder();
 	private CDetailSectionService screenService;
+	protected CEnhancedBinder<CEntityDB<?>> currentBinder; // Store current binder for data binding
 
 	protected CPageBaseProjectAware(final CSessionService sessionService, CDetailSectionService screenService) {
 		super();
@@ -71,16 +72,22 @@ public abstract class CPageBaseProjectAware extends CPageBase implements CProjec
 				final String errorMsg = "Screen not found: " + baseViewName + " for project: "
 						+ sessionService.getActiveProject().map(CProject::getName).orElse("No Project");
 				getBaseDetailsLayout().add(new CDiv(errorMsg));
+				currentBinder = null; // Clear binder if screen not found
 				return;
 			}
 			// Create a local binder for this specific screen instead of using page-level binder
 			@SuppressWarnings ("unchecked")
 			final CEnhancedBinder<CEntityDB<?>> localBinder = new CEnhancedBinder<>((Class<CEntityDB<?>>) (Class<?>) CEntityDB.class);
+			currentBinder = localBinder; // Store the binder for data binding
 			detailsBuilder.buildDetails(screen, localBinder, getBaseDetailsLayout());
 		} catch (final Exception e) {
 			final String errorMsg = "Error building details layout for screen: " + baseViewName;
 			e.printStackTrace();
 			getBaseDetailsLayout().add(new CDiv(errorMsg));
+			currentBinder = null; // Clear binder on error
 		}
 	}
+
+	/** Get the current binder for data binding operations */
+	protected CEnhancedBinder<CEntityDB<?>> getCurrentBinder() { return currentBinder; }
 }

@@ -2,6 +2,10 @@ package tech.derbent.page.view;
 
 import java.lang.reflect.Field;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -11,6 +15,7 @@ import tech.derbent.abstracts.interfaces.CEntityUpdateListener;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.abstracts.views.components.CDiv;
+import tech.derbent.abstracts.views.components.CVerticalLayout;
 import tech.derbent.activities.view.CActivitiesView;
 import tech.derbent.orders.domain.COrder;
 import tech.derbent.screens.domain.CGridEntity;
@@ -27,6 +32,10 @@ public class CPageSample extends CPageBaseProjectAware implements CEntityUpdateL
 
 	private static final long serialVersionUID = 1L;
 	private CComponentGridEntity grid;
+	private SplitLayout splitLayout;
+	private VerticalLayout detailsContainer;
+	private HorizontalLayout toolbar;
+	private Scroller detailsScroller;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }
 
@@ -45,6 +54,11 @@ public class CPageSample extends CPageBaseProjectAware implements CEntityUpdateL
 	}
 
 	private void createPageContent() {
+		// Create SplitLayout
+		splitLayout = new SplitLayout();
+		splitLayout.setSizeFull();
+		splitLayout.setOrientation(SplitLayout.Orientation.HORIZONTAL);
+		splitLayout.setSplitterPosition(50.0); // 50% for grid, 50% for details
 		// Create and configure grid
 		CGridEntity gridEntity =
 				gridEntityService.findByNameAndProject(CActivitiesView.VIEW_NAME, sessionService.getActiveProject().orElseThrow()).orElse(null);
@@ -54,15 +68,46 @@ public class CPageSample extends CPageBaseProjectAware implements CEntityUpdateL
 			try {
 				onEntitySelected(event);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOGGER.error("Error handling entity selection", e);
 			}
 		});
-		this.add(grid);
-		divDetails = new CDiv();
-		this.add(divDetails);
+		// Add grid to the primary (left) section
+		splitLayout.addToPrimary(grid);
+		// Create details section with toolbar and scrollable content
+		createDetailsSection();
+		// Add split layout to the page
+		this.add(splitLayout);
+		// Add project info below
 		add(new Div("This is a sample page. Project: "
 				+ (sessionService.getActiveProject().get() != null ? sessionService.getActiveProject().get().getName() : "None")));
+	}
+
+	private void createDetailsSection() {
+		// Create the main details container
+		detailsContainer = new CVerticalLayout(false, false, false);
+		detailsContainer.setSizeFull();
+		// Create toolbar at the top
+		toolbar = new HorizontalLayout();
+		toolbar.setWidthFull();
+		toolbar.setPadding(true);
+		toolbar.setSpacing(true);
+		toolbar.addClassName("details-toolbar");
+		// Add a simple label to the toolbar for now
+		Div toolbarLabel = new Div("Entity Details");
+		toolbarLabel.addClassName("details-toolbar-label");
+		toolbar.add(toolbarLabel);
+		// Create scrollable content area
+		divDetails = new CDiv();
+		detailsScroller = new Scroller();
+		detailsScroller.setContent(divDetails);
+		detailsScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
+		detailsScroller.setSizeFull();
+		// Add toolbar and scroller to details container
+		detailsContainer.add(toolbar, detailsScroller);
+		detailsContainer.setFlexGrow(0, toolbar); // Toolbar keeps its natural height
+		detailsContainer.setFlexGrow(1, detailsScroller); // Scroller takes remaining space
+		// Add details container to the secondary (right) section of split layout
+		splitLayout.addToSecondary(detailsContainer);
 	}
 
 	/** Handles entity selection events from the grid
@@ -91,6 +136,9 @@ public class CPageSample extends CPageBaseProjectAware implements CEntityUpdateL
 	/** Populates the entity details section with information from the selected entity */
 	private void populateEntityDetails(CEntityDB<?> entity) throws Exception {
 		if (entity == null) {
+			// Clear the details when no entity is selected
+			getBaseDetailsLayout().removeAll();
+			currentBinder = null;
 			return;
 		}
 		Class<? extends CAbstractEntityDBPage<?>> entityViewClass = entity.getViewClass();
@@ -98,7 +146,20 @@ public class CPageSample extends CPageBaseProjectAware implements CEntityUpdateL
 		// get view name by invoke static field named VIEW_NAME of entityViewClass
 		Field viewNameField = entityViewClass.getField("VIEW_NAME");
 		String viewName = (String) viewNameField.get(null);
+		// Build the screen structure
 		buildScreen(viewName);
+		// Bind the entity data to the form if binder is available
+		if (getCurrentBinder() != null) {
+			try {
+				getCurrentBinder().setBean(entity);
+				LOGGER.debug("Entity data bound to form: {}", entity.getClass().getSimpleName() + " ID: " + entity.getId());
+			} catch (Exception e) {
+				LOGGER.warn("Error binding entity data to form: {}", e.getMessage());
+				getBaseDetailsLayout().add(new CDiv("Error loading entity data: " + e.getMessage()));
+			}
+		} else {
+			LOGGER.warn("No binder available for data binding");
+		}
 	}
 
 	/** Refreshes the grid to show updated data */
