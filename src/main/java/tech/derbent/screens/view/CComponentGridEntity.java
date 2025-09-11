@@ -56,6 +56,8 @@ public class CComponentGridEntity extends CDiv implements CProjectChangeListener
 	public CComponentGridEntity(CGridEntity gridEntity) {
 		super();
 		this.gridEntity = gridEntity;
+		// Set size to full so the grid can expand properly
+		setSizeFull();
 		// Get session service for project change notifications
 		try {
 			if (ApplicationContextProvider.getApplicationContext() != null) {
