@@ -657,9 +657,8 @@ public final class CEntityFormBuilder<EntityClass> implements ApplicationContext
 			binder.bind(component, fieldName);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to bind {} for field '{}': {} - this may cause incomplete bindings", componentType, fieldName, e.getMessage(), e);
-			// Don't throw - just log the error to prevent form generation failure But
-			// warn that this might cause incomplete bindings
-			binder.removeBinding(fieldName); // Eğer CEnhancedBinder bunu destekliyorsa
+			// Don't throw - just log the error to prevent form generation failure
+			// The incomplete binding will be handled by CEnhancedBinder's validateBindingsComplete() method
 		}
 	}
 
