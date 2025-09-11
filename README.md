@@ -15,14 +15,12 @@ For complete documentation, see [`docs/`](./docs/):
 ### Quick Start Guides
 - **[Architecture & Design](./docs/architecture/)** - Project design and coding standards
 - **[Implementation Guides](./docs/implementation/)** - Feature implementation patterns
-- **[Development Guides](./docs/guides/)** - UI components and best practices
-- **[Testing Documentation](./docs/testing/)** - Testing strategies and automation
+- **[Testing Documentation](./docs/testing/)** - Playwright UI testing strategies
 
 ### Key Documents
-- [Enhanced Binder Guide](./docs/guides/enhanced-binder-guide.md) - Form binding best practices
 - [Activity Management](./docs/implementation/activity-management.md) - Core business logic patterns  
-- [CSS Guidelines](./docs/guides/css-guidelines.md) - Styling standards and Vaadin theming
-- [Testing Guide](./docs/testing/comprehensive-testing-guide.md) - Complete testing strategy
+- [Administration Setup](./docs/implementation/administration-setup.md) - System administration implementation
+- [Playwright Testing](./docs/testing/playwright-infrastructure.md) - Complete UI testing strategy
 
 ## Getting Started
 
@@ -49,7 +47,7 @@ src/
 │   ├── projects/            # Project management
 │   ├── setup/              # System settings
 │   └── users/              # User management
-└── test/                   # Unit and integration tests
+└── test/                   # Playwright UI automation tests
 docs/                       # Complete documentation
 ```
 

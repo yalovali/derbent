@@ -1,5 +1,5 @@
 # Derbent Project Management Application
-Derbent is a Java Spring Boot + Vaadin collaborative project management application inspired by Jira and ProjeQtOr, targeting small to medium-sized offices. Built with Java 17, Spring Boot 3.5, Vaadin 24.8, and comprehensive testing infrastructure.
+Derbent is a Java Spring Boot + Vaadin collaborative project management application inspired by Jira and ProjeQtOr, targeting small to medium-sized offices. Built with Java 17, Spring Boot 3.5, Vaadin 24.8, and Playwright-based UI testing infrastructure.
 
 **ALWAYS reference these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here.**
 
@@ -48,15 +48,10 @@ mvn spring-boot:run -Ph2-local-development
 
 ### Testing Infrastructure  
 ```bash
-# Run unit tests (NEVER CANCEL: takes 90+ seconds, some failures expected)
-mvn test -Dtest="**/unit_tests/**/*Test"
-# TIMEOUT: Set 10+ minutes. Expected time: 1-2 minutes
-# Note: Some test failures are expected in development environment
-
 # Run Playwright UI automation tests with screenshots (NEVER CANCEL: takes 37+ seconds)
 ./run-playwright-tests.sh mock
 # TIMEOUT: Set 5+ minutes. Expected time: 37-40 seconds
-# Generates 84 screenshots in target/screenshots/
+# Generates screenshots in target/screenshots/
 
 # Run comprehensive Playwright tests (NEVER CANCEL: takes 2+ minutes)
 ./run-playwright-tests.sh comprehensive
@@ -105,7 +100,7 @@ kill $APP_PID
 ```bash
 # ALWAYS test UI changes with Playwright screenshots
 ./run-playwright-tests.sh mock
-# Expected: 84 screenshots generated successfully in 37-40 seconds
+# Expected: Screenshots generated successfully in 37-40 seconds
 # Check target/screenshots/ for generated images
 
 # For specific UI changes, run targeted tests
@@ -140,20 +135,17 @@ When making UI or business logic changes, ALWAYS manually test these workflows:
 - **clean**: 2-5 seconds
 - **compile**: 12-15 seconds (incremental builds after first compile)
 - **test-compile**: 10-15 seconds
-- **test**: 1-2 minutes (with failures expected)
 - **spotless:apply**: ~5 seconds
 - **spotless:check**: ~2-3 seconds
 - **spring-boot:run**: 12-15 seconds to start
 
 ### CRITICAL Timeout Settings:
 - **Build commands**: MINIMUM 5 minutes timeout
-- **Test commands**: MINIMUM 10 minutes timeout  
 - **Playwright tests**: MINIMUM 5 minutes timeout
 - **Application startup**: MINIMUM 2 minutes timeout
 
 ### NEVER CANCEL warnings:
 - **mvn clean compile** - Takes 12-15 seconds for incremental builds, DO NOT CANCEL
-- **mvn test** - Takes 90+ seconds with expected failures, DO NOT CANCEL  
 - **./run-playwright-tests.sh** - Takes 37+ seconds minimum, DO NOT CANCEL
 - **mvn spring-boot:run** - Takes 12-15 seconds to start, DO NOT CANCEL
 
@@ -171,11 +163,10 @@ src/main/java/tech/derbent/
 ├── setup/              # System settings
 └── administration/     # Company settings
 
-docs/                   # Comprehensive documentation
+docs/                   # Essential documentation
 ├── architecture/       # Design patterns and coding standards
-├── guides/            # Component and development guides  
-├── implementation/    # Feature implementation patterns
-└── testing/           # Testing strategies
+├── implementation/     # Key feature implementation patterns
+└── testing/           # Playwright testing strategies
 ```
 
 ### Coding Standards (CRITICAL - Follow Strictly)
@@ -193,10 +184,9 @@ docs/                   # Comprehensive documentation
 - **Sample Data**: Automatically loaded on startup via CSampleDataInitializer
 
 ### Testing Strategy
-- **Unit Tests**: Located in `src/test/java/unit_tests/`
-- **UI Tests**: Playwright automation in `src/test/java/automated_tests/`
-- **Integration Tests**: Spring Boot with TestContainers
-- **Manual Tests**: Documented scenarios in test classes
+- **Playwright Tests**: Located in `src/test/java/automated_tests/`
+- **UI Automation**: Browser-based testing with screenshot capture
+- **Manual Tests**: Documented scenarios for critical workflows
 
 ## Common Tasks
 
@@ -206,8 +196,7 @@ docs/                   # Comprehensive documentation
 3. Create service class extending `CAbstractService<T>`
 4. Create view class extending appropriate `CAbstract*Page`
 5. Add navigation entry in `MainLayout.java`
-6. Create unit tests following existing patterns
-7. Add Playwright tests for UI validation
+6. Add Playwright tests for UI validation
 
 ### Debugging Issues
 ```bash
@@ -219,11 +208,11 @@ mvn spring-boot:run -Dspring.profiles.active=h2 | grep -E "(ERROR|WARN|DEBUG)"
 # URL: jdbc:h2:mem:testdb, User: sa, Password: (empty)
 
 # Check test failures
-mvn test 2>&1 | grep -A 5 -B 5 "FAILURE\|ERROR"
+./run-playwright-tests.sh mock 2>&1 | grep -A 5 -B 5 "FAILURE\|ERROR"
 
-# Generate test reports
-mvn test jacoco:report
-# Reports in target/site/jacoco/
+# Generate test reports with screenshots
+./run-playwright-tests.sh all
+# Reports and screenshots in target/screenshots/
 ```
 
 ### Code Quality Checks
@@ -234,7 +223,6 @@ mvn spotless:check      # Verify formatting
 mvn clean compile      # Full build verification (NEVER CANCEL: 12-15 seconds)
 
 # Optional quality checks:
-mvn test               # Run tests (some failures expected)
 ./run-playwright-tests.sh mock  # UI validation (37-40 seconds)
 ```
 
@@ -251,16 +239,13 @@ mvn test               # Run tests (some failures expected)
 
 ### Testing Technologies
 - **JUnit 5** - Unit testing framework
-- **Mockito** - Mocking framework
-- **TestContainers** - Integration testing
 - **Playwright** - Browser automation testing
-- **Selenium WebDriver** - Alternative browser testing
+- **Spring Boot Test** - Application testing framework
 
 ### Development Tools
 - **Spotless** - Code formatting (Eclipse formatter)
 - **Spring DevTools** - Hot reload in development
 - **Vaadin Control Center** - Development tools
-- **Jacoco** - Code coverage reporting
 
 ## Common Failures and Solutions
 
@@ -291,14 +276,11 @@ mvn test               # Run tests (some failures expected)
 
 ### Important Documentation  
 - `docs/architecture/coding-standards.md` - CRITICAL coding guidelines
-- `docs/testing/comprehensive-testing-guide.md` - Testing strategies
-- `docs/guides/enhanced-binder-guide.md` - Form binding patterns
+- `docs/testing/playwright-*.md` - Playwright testing strategies
 - `README.md` - Project overview and quick start
 
 ### Build and Test Scripts
 - `run-playwright-tests.sh` - Playwright UI automation
-- `run-ui-tests.sh` - Dual framework UI testing  
-- `generate-test-report.sh` - Test report generation
 - `mvnw` / `mvnw.cmd` - Maven wrapper scripts
 
 ---

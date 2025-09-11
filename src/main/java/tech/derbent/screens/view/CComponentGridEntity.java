@@ -135,6 +135,7 @@ public class CComponentGridEntity extends CDiv implements CProjectChangeListener
 	}
 
 	private void createContent() {
+
 		try {
 			if (gridEntity == null) {
 				add(new Div("No grid configuration provided"));
