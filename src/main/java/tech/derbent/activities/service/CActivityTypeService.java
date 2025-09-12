@@ -19,9 +19,22 @@ public class CActivityTypeService extends CEntityOfProjectService<CActivityType>
 
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityTypeService.class);
+	private final CActivityRepository activityRepository;
 
-	public CActivityTypeService(final CActivityTypeRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CActivityTypeService(final CActivityTypeRepository repository, final Clock clock, final CSessionService sessionService,
+			final CActivityRepository activityRepository) {
 		super(repository, clock, sessionService);
+		this.activityRepository = activityRepository;
+	}
+
+	/** Counts the number of activities that use this activity type.
+	 * @param activityType the activity type to check
+	 * @return the number of activities using this type */
+	public long countActivitiesUsingType(final CActivityType activityType) {
+		if (activityType == null) {
+			return 0;
+		}
+		return activityRepository.countByActivityType(activityType);
 	}
 
 	@Override
