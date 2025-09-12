@@ -14,8 +14,8 @@ import tech.derbent.users.service.CUserViewService;
 public class CActivityViewService extends CDetailLinesSampleBase {
 
 	public static final String BASE_PANEL_NAME = "Activity Information";
-	static EntityFieldInfo info;
 	static Map<String, EntityFieldInfo> fields;
+	static EntityFieldInfo info;
 	private static Logger LOGGER = LoggerFactory.getLogger(CActivityViewService.class);
 
 	public static CDetailSection createBasicView(final CProject project) {
@@ -27,6 +27,36 @@ public class CActivityViewService extends CDetailLinesSampleBase {
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
 			/******************/
 			scr.addScreenLine(CDetailLinesService.createSection("System Access"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "activityType"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "assignedTo"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdBy"));
+			scr.addScreenLine(CDetailLinesService.createSection("Schedule"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "startDate"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dueDate"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "completionDate"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "progressPercentage"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "estimatedHours"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actualHours"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "remainingHours"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "status"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "priority"));
+			scr.addScreenLine(CDetailLinesService.createSection("Financials"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "estimatedCost"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "actualCost"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "hourlyRate"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "acceptanceCriteria"));
+			/******************/
+			scr.addScreenLine(CDetailLinesService.createSection("Additional Information"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "notes"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "results"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parentId"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "parentType"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {

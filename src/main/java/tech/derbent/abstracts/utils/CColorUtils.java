@@ -118,6 +118,16 @@ public final class CColorUtils {
 		if (item == null) {
 			return "N/A";
 		}
+		// Try to get the name property if the object has one
+		if (item instanceof CEntityDB) {
+			try {
+				final Method m = item.getClass().getMethod("getName");
+				final Object v = m.invoke(item);
+				return v == null ? "" : v.toString();
+			} catch (final ReflectiveOperationException ignore) {
+				// Fallback to toString if getName() is not available
+			}
+		}
 		return item.toString();
 	}
 
