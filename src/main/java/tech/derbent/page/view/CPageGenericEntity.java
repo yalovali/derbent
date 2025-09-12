@@ -89,10 +89,25 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 		createDetailsSection();
 	}
 
-	/** Abstract method to get the entity color code for UI styling */
-	public abstract String getEntityColorCode();
-	/** Abstract method to get the entity icon filename */
-	public abstract String getIconFilename();
+	/** Get the entity color code for UI styling using reflection */
+	public String getEntityColorCode() {
+		try {
+			return tech.derbent.abstracts.utils.CAuxillaries.invokeStaticMethodOfStr(this.getClass(), "getStaticEntityColorCode");
+		} catch (Exception e) {
+			LOGGER.warn("Error getting entity color code for {}: {}", this.getClass().getSimpleName(), e.getMessage());
+			return "#007bff"; // Default color
+		}
+	}
+
+	/** Get the entity icon filename using reflection */
+	public String getIconFilename() {
+		try {
+			return tech.derbent.abstracts.utils.CAuxillaries.invokeStaticMethodOfStr(this.getClass(), "getStaticIconFilename");
+		} catch (Exception e) {
+			LOGGER.warn("Error getting icon filename for {}: {}", this.getClass().getSimpleName(), e.getMessage());
+			return "vaadin:question"; // Default icon
+		}
+	}
 
 	private void initSplitLayout(final VerticalLayout detailsBase) {
 		splitLayout.setSizeFull();
