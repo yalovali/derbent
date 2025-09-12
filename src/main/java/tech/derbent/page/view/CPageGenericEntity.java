@@ -60,6 +60,11 @@ public abstract class CPageGenericEntity<EntityType extends CEntityDB<EntityType
 	/** Abstract method to create a new entity instance with project set */
 	protected abstract EntityType createNewEntity();
 
+	/** Hook method for subclasses to configure the CRUD toolbar with specific behavior like dependency checking */
+	protected void configureCrudToolbar(CCrudToolbar<EntityType> toolbar) {
+		// Default implementation does nothing - subclasses can override to add specific configuration
+	}
+
 	private void createPageContent() {
 		// Create SplitLayout
 		splitLayout = new SplitLayout();
@@ -174,6 +179,8 @@ public abstract class CPageGenericEntity<EntityType extends CEntityDB<EntityType
 				});
 				// Register this page as listener for CRUD operations
 				toolbar.addUpdateListener(this);
+				// Configure toolbar with subclass-specific settings
+				configureCrudToolbar(toolbar);
 				// Set current entity
 				toolbar.setCurrentEntity(typedEntity);
 				this.crudToolbar = toolbar;

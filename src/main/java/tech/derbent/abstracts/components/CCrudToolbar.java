@@ -3,9 +3,11 @@ package tech.derbent.abstracts.components;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -33,6 +35,7 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	private EntityClass currentEntity;
 	private Supplier<EntityClass> newEntitySupplier;
 	private Consumer<EntityClass> refreshCallback;
+	private Function<EntityClass, String> dependencyChecker;
 	private CButton createButton;
 	private CButton saveButton;
 	private CButton deleteButton;
@@ -74,6 +77,12 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	public void setRefreshCallback(final Consumer<EntityClass> refreshCallback) {
 		this.refreshCallback = refreshCallback;
 		updateButtonStates();
+	}
+
+	/** Sets the dependency checker function that returns error message if entity cannot be deleted.
+	 * @param dependencyChecker function that returns null if entity can be deleted, or error message if it cannot */
+	public void setDependencyChecker(final Function<EntityClass, String> dependencyChecker) {
+		this.dependencyChecker = dependencyChecker;
 	}
 
 	/** Updates the current entity and refreshes button states.
@@ -179,6 +188,13 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 			LOGGER.info("Entity saved successfully: {} with ID: {}", entityClass.getSimpleName(), savedEntity.getId());
 			// Update current entity reference
 			currentEntity = savedEntity;
+			// Re-bind the saved entity to refresh the form with updated data (like generated IDs, timestamps)
+			try {
+				binder.setBean(savedEntity);
+				LOGGER.debug("Form refreshed with saved entity data: {} ID: {}", entityClass.getSimpleName(), savedEntity.getId());
+			} catch (Exception bindingException) {
+				LOGGER.warn("Error refreshing form after save: {}", bindingException.getMessage());
+			}
 			updateButtonStates();
 			showSuccessNotification("Data saved successfully");
 			// Notify listeners
@@ -200,6 +216,20 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		if (currentEntity == null || currentEntity.getId() == null) {
 			showErrorNotification("Cannot delete: No entity selected or entity not saved yet.");
 			return;
+		}
+		// Check for dependencies before showing confirmation dialog
+		if (dependencyChecker != null) {
+			try {
+				String dependencyError = dependencyChecker.apply(currentEntity);
+				if (dependencyError != null) {
+					showErrorNotification(dependencyError);
+					return;
+				}
+			} catch (Exception e) {
+				LOGGER.warn("Error checking dependencies for deletion: {}", e.getMessage());
+				showErrorNotification("Error checking if entity can be deleted. Please try again.");
+				return;
+			}
 		}
 		// Show confirmation dialog
 		CConfirmationDialog confirmDialog =
@@ -223,9 +253,26 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 			showSuccessNotification("Entity deleted successfully");
 			// Notify listeners
 			notifyListenersDeleted(entityToDelete);
+		} catch (final DataIntegrityViolationException exception) {
+			LOGGER.error("Data integrity violation during delete", exception);
+			// Check if it's a foreign key constraint violation
+			String errorMessage = exception.getMessage();
+			if (errorMessage != null && errorMessage.contains("foreign key constraint")) {
+				showErrorNotification("Cannot delete this " + entityClass.getSimpleName()
+						+ " because it is referenced by other data. Please remove related records first.");
+			} else {
+				showErrorNotification("Cannot delete this " + entityClass.getSimpleName() + " due to data integrity constraints.");
+			}
 		} catch (final Exception exception) {
 			LOGGER.error("Error during delete operation for entity: {}", entityClass.getSimpleName(), exception);
-			showErrorNotification("An error occurred while deleting. Please try again.");
+			// Check if it's a constraint violation in the exception message
+			String errorMessage = exception.getMessage();
+			if (errorMessage != null && (errorMessage.contains("foreign key constraint") || errorMessage.contains("violates"))) {
+				showErrorNotification("Cannot delete this " + entityClass.getSimpleName()
+						+ " because it has related data. Please remove comments or other associated records first.");
+			} else {
+				showErrorNotification("An error occurred while deleting. Please try again.");
+			}
 		}
 	}
 
