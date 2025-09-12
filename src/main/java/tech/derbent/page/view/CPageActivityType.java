@@ -61,7 +61,7 @@ public class CPageActivityType extends CPageGenericEntity<CActivityType> {
 	}
 
 	@Override
-	protected CActivityType createNewEntity() {
+	protected CActivityType createNewEntityInstance() {
 		CActivityType newActivityType = new CActivityType();
 		// Set project if available
 		sessionService.getActiveProject().ifPresent(newActivityType::setProject);

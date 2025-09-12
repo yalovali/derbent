@@ -154,7 +154,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 		// Use static factory method to create toolbar
 		CCrudToolbar<EntityClass> toolbar = CCrudToolbar.create(typedBinder, entityService, entityClass);
 		toolbar.setCurrentEntity(typedEntity);
-		toolbar.setNewEntitySupplier(this::createNewEntity);
+		toolbar.setNewEntitySupplier(this::createNewEntityInstance);
 		toolbar.setRefreshCallback((currentEntity) -> {
 			refreshGrid();
 			if (currentEntity != null && currentEntity.getId() != null) {
@@ -261,5 +261,12 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 	/** Creates a new entity instance.
 	 * @return a new entity instance of type EntityClass */
 	@Override
-	protected abstract EntityClass createNewEntity();
+	@SuppressWarnings ("unchecked")
+	protected <T extends CEntityDB<T>> T createNewEntity() {
+		return (T) createNewEntityInstance();
+	}
+
+	/** Creates a new entity instance of the specific entity type.
+	 * @return a new entity instance of type EntityClass */
+	protected abstract EntityClass createNewEntityInstance();
 }

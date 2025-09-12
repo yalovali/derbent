@@ -22,9 +22,7 @@ public class CPageSample extends CPageGenericEntity<CActivity> {
 
 	private static final long serialVersionUID = 1L;
 
-	public static String getIconColorCode() {
-		return CPageSample.getStaticIconColorCode(); // Use the static method from COrder
-	}
+	public static String getIconColorCode() { return getStaticIconColorCode(); }
 
 	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
@@ -63,7 +61,7 @@ public class CPageSample extends CPageGenericEntity<CActivity> {
 	}
 
 	@Override
-	protected CActivity createNewEntity() {
+	protected CActivity createNewEntityInstance() {
 		CActivity newActivity = new CActivity();
 		// Set project if available
 		sessionService.getActiveProject().ifPresent(newActivity::setProject);

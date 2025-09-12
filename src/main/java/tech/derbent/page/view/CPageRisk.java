@@ -19,19 +19,13 @@ public class CPageRisk extends CPageGenericEntity<CRisk> {
 
 	private static final long serialVersionUID = 1L;
 
-	public static String getIconColorCode() {
-		return CPageSample.getStaticIconColorCode(); // Use the static method from COrder
-	}
+	public static String getIconColorCode() { return getStaticIconColorCode(); }
 
 	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getStaticIconColorCode() {
-		return CRisk.getIconColorCode(); // Red color for risk entities
-	}
+	public static String getStaticIconColorCode() { return CRisk.getIconColorCode(); }
 
-	public static String getStaticIconFilename() {
-		return CRisk.getIconFilename(); // Warning icon
-	}
+	public static String getStaticIconFilename() { return CRisk.getIconFilename(); }
 
 	public CPageRisk(final CSessionService sessionService, final CGridEntityService gridEntityService, final CDetailSectionService screenService,
 			final CRiskService riskService) {
@@ -39,7 +33,7 @@ public class CPageRisk extends CPageGenericEntity<CRisk> {
 	}
 
 	@Override
-	protected CRisk createNewEntity() {
+	protected CRisk createNewEntityInstance() {
 		CRisk newRisk = new CRisk();
 		// Set project if available
 		sessionService.getActiveProject().ifPresent(newRisk::setProject);
