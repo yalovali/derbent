@@ -10,6 +10,7 @@ import com.vaadin.flow.component.splitlayout.SplitLayout;
 import tech.derbent.abstracts.components.CCrudToolbar;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.interfaces.CEntityUpdateListener;
+import tech.derbent.abstracts.interfaces.CLayoutChangeListener;
 import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.views.CAbstractEntityDBPage;
@@ -18,12 +19,14 @@ import tech.derbent.screens.domain.CGridEntity;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.screens.view.CComponentGridEntity;
+import tech.derbent.session.service.CLayoutService;
 import tech.derbent.session.service.CSessionService;
 
 /** Generic base class for entity management pages that provides common functionality for displaying and managing different entity types through
  * reflection and generic patterns.
  * @param <EntityType> The entity type this page manages */
-public abstract class CPageGenericEntity<EntityType extends CEntityDB<EntityType>> extends CPageBaseProjectAware implements CEntityUpdateListener {
+public abstract class CPageGenericEntity<EntityType extends CEntityDB<EntityType>> extends CPageBaseProjectAware
+		implements CEntityUpdateListener, CLayoutChangeListener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageGenericEntity.class);
 	private static final long serialVersionUID = 1L;
@@ -39,6 +42,7 @@ public abstract class CPageGenericEntity<EntityType extends CEntityDB<EntityType
 	protected final CGridEntityService gridEntityService;
 	protected SplitLayout splitLayout;
 	protected final String viewName;
+	protected CLayoutService layoutService;
 
 	/** Constructor for generic entity page */
 	protected CPageGenericEntity(final CSessionService sessionService, final CDetailSectionService screenService,
@@ -50,6 +54,37 @@ public abstract class CPageGenericEntity<EntityType extends CEntityDB<EntityType
 		this.entityClass = entityClass;
 		this.viewName = viewName;
 		createPageContent();
+	}
+
+	/** Sets the layout service for managing split layout orientation.
+	 * @param layoutService the layout service */
+	public void setLayoutService(final CLayoutService layoutService) {
+		this.layoutService = layoutService;
+		if (layoutService != null) {
+			layoutService.addLayoutChangeListener(this);
+			updateLayoutOrientation();
+		}
+	}
+
+	/** Implementation of CLayoutChangeListener - called when layout mode changes */
+	@Override
+	public void onLayoutModeChanged(final CLayoutService.LayoutMode newMode) {
+		LOGGER.debug("Layout mode changed to: {} for {}", newMode, getClass().getSimpleName());
+		updateLayoutOrientation();
+	}
+
+	/** Updates the split layout orientation based on the current layout mode */
+	private void updateLayoutOrientation() {
+		if ((layoutService != null) && (splitLayout != null)) {
+			final CLayoutService.LayoutMode currentMode = layoutService.getCurrentLayoutMode();
+			if (currentMode == CLayoutService.LayoutMode.HORIZONTAL) {
+				splitLayout.setOrientation(SplitLayout.Orientation.HORIZONTAL);
+				splitLayout.setSplitterPosition(50.0); // 50% for grid, 50% for details
+			} else {
+				splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
+				splitLayout.setSplitterPosition(60.0); // 60% for grid, 40% for details
+			}
+		}
 	}
 
 	private void createDetailsSection() {
@@ -79,11 +114,11 @@ public abstract class CPageGenericEntity<EntityType extends CEntityDB<EntityType
 	}
 
 	private void createPageContent() {
-		// Create SplitLayout
+		// Create SplitLayout - vertical by default as requested
 		splitLayout = new SplitLayout();
 		splitLayout.setSizeFull();
-		splitLayout.setOrientation(SplitLayout.Orientation.HORIZONTAL);
-		splitLayout.setSplitterPosition(50.0); // 50% for grid, 50% for details
+		splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
+		splitLayout.setSplitterPosition(60.0); // 60% for grid, 40% for details
 		// Create and configure grid
 		CGridEntity gridEntity = gridEntityService.findByNameAndProject(viewName, sessionService.getActiveProject().orElseThrow()).orElse(null);
 		grid = new CComponentGridEntity(gridEntity);
@@ -118,6 +153,8 @@ public abstract class CPageGenericEntity<EntityType extends CEntityDB<EntityType
 		refreshGrid();
 		// Clear the details section since the entity no longer exists
 		getBaseDetailsLayout().removeAll();
+		// Try to select the next item in the grid or the first item if no next item
+		selectNextItemInGrid();
 	}
 
 	/** Implementation of CEntityUpdateListener - called when an entity is saved */
@@ -125,6 +162,55 @@ public abstract class CPageGenericEntity<EntityType extends CEntityDB<EntityType
 	public void onEntitySaved(CEntityDB<?> entity) {
 		LOGGER.debug("Entity saved notification received: {}", entity != null ? entity.getClass().getSimpleName() : "null");
 		refreshGrid();
+		// Keep the same item selected in the grid after save
+		if (entity != null && grid != null) {
+			try {
+				// Refresh the grid and then re-select the saved entity
+				java.lang.reflect.Method refreshMethod = grid.getClass().getDeclaredMethod("refreshGridData");
+				refreshMethod.setAccessible(true);
+				refreshMethod.invoke(grid);
+				// Try to re-select the saved entity in the grid
+				selectEntityInGrid(entity);
+			} catch (Exception e) {
+				LOGGER.warn("Error re-selecting entity after save: {}", e.getMessage());
+			}
+		}
+	}
+
+	/** Selects a specific entity in the grid */
+	private void selectEntityInGrid(CEntityDB<?> entity) {
+		if (grid != null && entity != null) {
+			try {
+				// Use reflection to access the grid's selection mechanism if available
+				java.lang.reflect.Method selectMethod = grid.getClass().getDeclaredMethod("selectEntity", CEntityDB.class);
+				selectMethod.setAccessible(true);
+				selectMethod.invoke(grid, entity);
+			} catch (Exception e) {
+				LOGGER.debug("Could not select entity in grid: {}", e.getMessage());
+			}
+		}
+	}
+
+	/** Selects the next item in the grid after deletion */
+	private void selectNextItemInGrid() {
+		if (grid != null) {
+			try {
+				// Use reflection to access grid's selection mechanism for next item
+				java.lang.reflect.Method selectNextMethod = grid.getClass().getDeclaredMethod("selectNextItem");
+				selectNextMethod.setAccessible(true);
+				selectNextMethod.invoke(grid);
+			} catch (Exception e) {
+				LOGGER.debug("Could not select next item in grid: {}", e.getMessage());
+				// Fallback: try to select the first item
+				try {
+					java.lang.reflect.Method selectFirstMethod = grid.getClass().getDeclaredMethod("selectFirstItem");
+					selectFirstMethod.setAccessible(true);
+					selectFirstMethod.invoke(grid);
+				} catch (Exception e2) {
+					LOGGER.debug("Could not select first item in grid: {}", e2.getMessage());
+				}
+			}
+		}
 	}
 
 	/** Handles entity selection events from the grid */

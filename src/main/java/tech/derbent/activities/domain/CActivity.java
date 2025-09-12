@@ -2,14 +2,18 @@ package tech.derbent.activities.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -23,6 +27,7 @@ import tech.derbent.abstracts.interfaces.CKanbanStatus;
 import tech.derbent.abstracts.interfaces.CKanbanType;
 import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.activities.view.CActivitiesView;
+import tech.derbent.comments.domain.CComment;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
 
@@ -161,6 +166,9 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 			hidden = false, order = 72, maxLength = 2000
 	)
 	private String results;
+	// One-to-Many relationship with comments - cascade delete enabled
+	@OneToMany (mappedBy = "activity", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	private List<CComment> comments = new ArrayList<>();
 
 	/** Default constructor for JPA. */
 	public CActivity() {
@@ -241,6 +249,17 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 	public BigDecimal getRemainingHours() { return remainingHours; }
 
 	public String getResults() { return results; }
+
+	/** Gets the list of comments associated with this activity.
+	 * @return list of comments, never null */
+	public List<CComment> getComments() { return comments != null ? comments : new ArrayList<>(); }
+
+	/** Sets the list of comments for this activity.
+	 * @param comments the list of comments */
+	public void setComments(final List<CComment> comments) {
+		this.comments = comments != null ? comments : new ArrayList<>();
+		updateLastModified();
+	}
 
 	public LocalDate getStartDate() { return startDate; }
 
