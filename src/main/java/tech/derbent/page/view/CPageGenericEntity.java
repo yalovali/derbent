@@ -1,13 +1,12 @@
 package tech.derbent.page.view;
 
 import java.lang.reflect.Field;
-import com.vaadin.flow.component.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import tech.derbent.abstracts.components.CCrudToolbar;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.interfaces.CEntityUpdateListener;
@@ -28,18 +27,18 @@ public abstract class CPageGenericEntity<EntityType extends CEntityDB<EntityType
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageGenericEntity.class);
 	private static final long serialVersionUID = 1L;
-	// UI Components
-	protected CComponentGridEntity grid;
-	protected SplitLayout splitLayout;
-	protected FlexLayout detailsContainer;
-	protected Scroller detailsScroller;
-	// Services and Entity Information
-	protected final CGridEntityService gridEntityService;
-	protected final CAbstractService<EntityType> entityService;
-	protected final Class<EntityType> entityClass;
-	protected final String viewName;
 	// Current state
 	protected CCrudToolbar<EntityType> crudToolbar;
+	protected FlexLayout detailsContainer;
+	protected Scroller detailsScroller;
+	protected final Class<EntityType> entityClass;
+	protected final CAbstractService<EntityType> entityService;
+	// UI Components
+	protected CComponentGridEntity grid;
+	// Services and Entity Information
+	protected final CGridEntityService gridEntityService;
+	protected SplitLayout splitLayout;
+	protected final String viewName;
 
 	/** Constructor for generic entity page */
 	protected CPageGenericEntity(final CSessionService sessionService, final CDetailSectionService screenService,
@@ -53,10 +52,24 @@ public abstract class CPageGenericEntity<EntityType extends CEntityDB<EntityType
 		createPageContent();
 	}
 
-	/** Abstract method to get the entity color code for UI styling */
-	public abstract String getEntityColorCode();
-	/** Abstract method to get the entity icon filename */
-	public abstract String getIconFilename();
+	private void createDetailsSection() {
+		// Create the main details container using FlexLayout for proper accordion filling
+		detailsContainer = new FlexLayout();
+		detailsContainer.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
+		detailsContainer.setSizeFull();
+		// Create scrollable content area
+		divDetails = new CDiv();
+		detailsScroller = new Scroller();
+		detailsScroller.setContent(divDetails);
+		detailsScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
+		detailsScroller.setSizeFull();
+		// Add scroller to details container (toolbar will be added by buildScreen)
+		detailsContainer.add(detailsScroller);
+		detailsContainer.setFlexGrow(1, detailsScroller); // Scroller takes remaining space
+		// Add details container to the secondary (right) section of split layout
+		splitLayout.addToSecondary(detailsContainer);
+	}
+
 	/** Abstract method to create a new entity instance with project set */
 	protected abstract EntityType createNewEntity();
 
@@ -88,29 +101,18 @@ public abstract class CPageGenericEntity<EntityType extends CEntityDB<EntityType
 				+ (sessionService.getActiveProject().get() != null ? sessionService.getActiveProject().get().getName() : "None")));
 	}
 
-	private void createDetailsSection() {
-		// Create the main details container using FlexLayout for proper accordion filling
-		detailsContainer = new FlexLayout();
-		detailsContainer.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
-		detailsContainer.setSizeFull();
-		// Create scrollable content area
-		divDetails = new CDiv();
-		detailsScroller = new Scroller();
-		detailsScroller.setContent(divDetails);
-		detailsScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
-		detailsScroller.setSizeFull();
-		// Add scroller to details container (toolbar will be added by buildScreen)
-		detailsContainer.add(detailsScroller);
-		detailsContainer.setFlexGrow(1, detailsScroller); // Scroller takes remaining space
-		// Add details container to the secondary (right) section of split layout
-		splitLayout.addToSecondary(detailsContainer);
-	}
+	/** Abstract method to get the entity color code for UI styling */
+	public abstract String getEntityColorCode();
+	/** Abstract method to get the entity icon filename */
+	public abstract String getIconFilename();
 
-	/** Handles entity selection events from the grid */
-	@SuppressWarnings ("unchecked")
-	private void onEntitySelected(CComponentGridEntity.SelectionChangeEvent event) throws Exception {
-		CEntityDB<?> selectedEntity = event.getSelectedItem();
-		populateEntityDetails(selectedEntity);
+	/** Implementation of CEntityUpdateListener - called when an entity is deleted */
+	@Override
+	public void onEntityDeleted(CEntityDB<?> entity) {
+		LOGGER.debug("Entity deleted notification received: {}", entity != null ? entity.getClass().getSimpleName() : "null");
+		refreshGrid();
+		// Clear the details section since the entity no longer exists
+		getBaseDetailsLayout().removeAll();
 	}
 
 	/** Implementation of CEntityUpdateListener - called when an entity is saved */
@@ -120,13 +122,10 @@ public abstract class CPageGenericEntity<EntityType extends CEntityDB<EntityType
 		refreshGrid();
 	}
 
-	/** Implementation of CEntityUpdateListener - called when an entity is deleted */
-	@Override
-	public void onEntityDeleted(CEntityDB<?> entity) {
-		LOGGER.debug("Entity deleted notification received: {}", entity != null ? entity.getClass().getSimpleName() : "null");
-		refreshGrid();
-		// Clear the details section since the entity no longer exists
-		getBaseDetailsLayout().removeAll();
+	/** Handles entity selection events from the grid */
+	private void onEntitySelected(CComponentGridEntity.SelectionChangeEvent event) throws Exception {
+		CEntityDB<?> selectedEntity = event.getSelectedItem();
+		populateEntityDetails(selectedEntity);
 	}
 
 	/** Populates the entity details section with information from the selected entity */
@@ -176,7 +175,7 @@ public abstract class CPageGenericEntity<EntityType extends CEntityDB<EntityType
 				toolbar.addUpdateListener(this);
 				// Set current entity
 				toolbar.setCurrentEntity(typedEntity);
-				this.crudToolbar = toolbar;
+				crudToolbar = toolbar;
 				// Rebuild screen with toolbar
 				buildScreen(entityViewName, entity.getClass(), toolbar);
 			}

@@ -20,24 +20,22 @@ public class CPageSample extends CPageGenericEntity<CActivity> {
 
 	private static final long serialVersionUID = 1L;
 
-	public CPageSample(final CSessionService sessionService, final CGridEntityService gridEntityService, final CDetailSectionService screenService,
-			final CActivityService activityService) {
-		super(sessionService, screenService, gridEntityService, activityService, CActivity.class, CActivitiesView.VIEW_NAME);
+	public static String getIconColorCode() {
+		return CPageSample.getStaticIconColorCode(); // Use the static method from COrder
 	}
 
 	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
 	public static String getStaticIconColorCode() {
-		return COrder.getIconColorCode(); // Use the static method from COrder
+		return "#102bff"; // Blue color for activity entities
 	}
 
 	public static String getStaticIconFilename() { return COrder.getIconFilename(); }
 
-	@Override
-	public String getEntityColorCode() { return CActivity.getEntityColorCode(); }
-
-	@Override
-	public String getIconFilename() { return CActivity.getIconFilename(); }
+	public CPageSample(final CSessionService sessionService, final CGridEntityService gridEntityService, final CDetailSectionService screenService,
+			final CActivityService activityService) {
+		super(sessionService, screenService, gridEntityService, activityService, CActivity.class, CActivitiesView.VIEW_NAME);
+	}
 
 	@Override
 	protected CActivity createNewEntity() {
@@ -46,4 +44,10 @@ public class CPageSample extends CPageGenericEntity<CActivity> {
 		sessionService.getActiveProject().ifPresent(newActivity::setProject);
 		return newActivity;
 	}
+
+	@Override
+	public String getEntityColorCode() { return getIconColorCode(); }
+
+	@Override
+	public String getIconFilename() { return CActivity.getIconFilename(); }
 }

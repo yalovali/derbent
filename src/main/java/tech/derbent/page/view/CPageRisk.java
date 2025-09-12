@@ -19,9 +19,8 @@ public class CPageRisk extends CPageGenericEntity<CRisk> {
 
 	private static final long serialVersionUID = 1L;
 
-	public CPageRisk(final CSessionService sessionService, final CGridEntityService gridEntityService, final CDetailSectionService screenService,
-			final CRiskService riskService) {
-		super(sessionService, screenService, gridEntityService, riskService, CRisk.class, CRiskView.VIEW_NAME);
+	public static String getIconColorCode() {
+		return CPageSample.getStaticIconColorCode(); // Use the static method from COrder
 	}
 
 	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
@@ -34,11 +33,10 @@ public class CPageRisk extends CPageGenericEntity<CRisk> {
 		return CRisk.getIconFilename(); // Warning icon
 	}
 
-	@Override
-	public String getEntityColorCode() { return CRisk.getEntityColorCode(); }
-
-	@Override
-	public String getIconFilename() { return CRisk.getIconFilename(); }
+	public CPageRisk(final CSessionService sessionService, final CGridEntityService gridEntityService, final CDetailSectionService screenService,
+			final CRiskService riskService) {
+		super(sessionService, screenService, gridEntityService, riskService, CRisk.class, CRiskView.VIEW_NAME);
+	}
 
 	@Override
 	protected CRisk createNewEntity() {
@@ -47,4 +45,10 @@ public class CPageRisk extends CPageGenericEntity<CRisk> {
 		sessionService.getActiveProject().ifPresent(newRisk::setProject);
 		return newRisk;
 	}
+
+	@Override
+	public String getEntityColorCode() { return getIconColorCode(); }
+
+	@Override
+	public String getIconFilename() { return CRisk.getIconFilename(); }
 }
