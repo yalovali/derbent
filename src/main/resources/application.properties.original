@@ -1,0 +1,47 @@
+server.port=${PORT:8080}
+# Launch the default browser when starting the application in development mode
+vaadin.launch-browser=true
+vaadin.allowed-packages=com.vaadin,org.vaadin,com.flowingcode,tech.derbent
+spring.jpa.hibernate.ddl-auto=update
+vaadin.devserver.enabled=false
+# Production uses PostgreSQL as per coding guidelines
+spring.datasource.url=jdbc:postgresql://localhost:5432/derbent
+spring.datasource.username=postgres
+spring.datasource.password=derbent
+spring.datasource.driver-class-name=org.postgresql.Driver
+#dont create or drop tables automatically
+spring.jpa.hibernate.ddl-auto=update
+spring.sql.init.mode=never
+#cok fazla debug mesaji uretiyor
+#debug=true
+logging.level.root=INFO
+logging.level.com.vaadin=WARN
+logging.level.org.springframework=ERROR
+logging.level.org.springframework.boot.devtools=warn
+logging.level.org.atmosphere=WARN
+logging.level.org.apache.catalina=WARN
+logging.level.org.hibernate=WARN
+logging.level.com.zaxxer.hikari=WARN
+#######################################################################################
+logging.level.tech.derbent.security.dev.DevSecurityConfig=DEBUG
+logging.level.tech.derbent=DEBUG
+logging.level.tech.derbent.Application=DEBUG
+logging.level.ui_tests=DEBUG
+# Make %wEx print a short exception (first line per frame, no packaging data)
+logging.exception-conversion-word=%ex{short}
+#################################################### ###################################
+#spring.main.banner-mode=on
+#to make the colors work in the console
+spring.output.ansi.enabled=ALWAYS
+#logging.pattern.console=%clr(%d{${LOG_DATEFORMAT_PATTERN:HH:mm:ss.S}}){magenta} %clr(${LOG_LEVEL_PATTERN:-%5p})-%clr(%-40.40logger{39}){cyan}: \\(%clr(%file:%line){cyan}\\) %clr(%msg){red}%n
+logging.pattern.console=%clr(%d{${LOG_DATEFORMAT_PATTERN:HH:mm:ss.S}}){magenta} %clr(${LOG_LEVEL_PATTERN:%-5.5p}) \\(%clr(%file:%line){cyan}\\) %clr(%msg){red} %clr(%-40.40logger{39}){cyan}%n
+# Prefer logger-based SQL (cleaner than show_sql)
+spring.jpa.show-sql=false
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.use_sql_comments=true  # shows where a query came from
+
+# Hibernate 6 bind/SQL loggers
+#logging.level.org.hibernate.SQL=DEBUG
+logging.level.org.hibernate.SQL=ERROR
+logging.level.org.hibernate.orm.jdbc.bind=ERROR
+logging.level.org.hibernate.orm.jdbc.extract=ERROR
