@@ -7,6 +7,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
 import tech.derbent.activities.view.CActivitiesView;
+import tech.derbent.comments.service.CCommentService;
 import tech.derbent.orders.domain.COrder;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.screens.service.CGridEntityService;
@@ -32,9 +33,30 @@ public class CPageSample extends CPageGenericEntity<CActivity> {
 
 	public static String getStaticIconFilename() { return COrder.getIconFilename(); }
 
+	private final CCommentService commentService;
+
 	public CPageSample(final CSessionService sessionService, final CGridEntityService gridEntityService, final CDetailSectionService screenService,
-			final CActivityService activityService) {
+			final CActivityService activityService, final CCommentService commentService) {
 		super(sessionService, screenService, gridEntityService, activityService, CActivity.class, CActivitiesView.VIEW_NAME);
+		this.commentService = commentService;
+	}
+
+	/** Configures the dependency checker for activities to prevent deletion when comments exist */
+	@Override
+	protected void configureCrudToolbar(tech.derbent.abstracts.components.CCrudToolbar<CActivity> toolbar) {
+		super.configureCrudToolbar(toolbar);
+		// Add dependency checker for activities with comments
+		toolbar.setDependencyChecker(activity -> {
+			try {
+				long commentCount = commentService.countByActivity(activity);
+				if (commentCount > 0) {
+					return "Cannot delete this activity because it has " + commentCount + " comment(s). Please remove the comments first.";
+				}
+				return null; // No dependencies, deletion allowed
+			} catch (Exception e) {
+				return "Error checking for dependent data. Please try again.";
+			}
+		});
 	}
 
 	@Override
