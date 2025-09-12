@@ -31,11 +31,13 @@ import com.vaadin.flow.theme.lumo.LumoUtility.IconSize;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.base.service.CRouteDiscoveryService;
 import tech.derbent.base.ui.component.CHierarchicalSideMenu;
 import tech.derbent.base.ui.component.CViewToolbar;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
 import tech.derbent.session.service.CLayoutService;
 import tech.derbent.session.service.CSessionService;
+import tech.derbent.setup.service.CSystemSettingsService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.view.CUserProfileDialog;
@@ -60,15 +62,20 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	private final CLayoutService layoutService;
 	private final PasswordEncoder passwordEncoder;
 	private final CUserService userService;
+	private final CSystemSettingsService systemSettingsService;
+	private final CRouteDiscoveryService routeDiscoveryService;
 	private CViewToolbar<?> mainToolbar;
 
 	MainLayout(final AuthenticationContext authenticationContext, final CSessionService sessionService, final CLayoutService layoutService,
-			final PasswordEncoder passwordEncoder, final CUserService userService) throws Exception {
+			final PasswordEncoder passwordEncoder, final CUserService userService, final CSystemSettingsService systemSettingsService,
+			final CRouteDiscoveryService routeDiscoveryService) throws Exception {
 		this.authenticationContext = authenticationContext;
 		this.sessionService = sessionService;
 		this.layoutService = layoutService;
 		this.passwordEncoder = passwordEncoder;
 		this.userService = userService;
+		this.systemSettingsService = systemSettingsService;
+		this.routeDiscoveryService = routeDiscoveryService;
 		this.currentUser = authenticationContext.getAuthenticatedUser(User.class).orElse(null);
 		setId("main-layout");
 		setPrimarySection(Section.DRAWER);
@@ -135,7 +142,8 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		final Div navBar = new Div();
 		// dont add any other compoents to the navbar, just the toolbar otherwise call it
 		// with ,xyz,xyz etc..
-		mainToolbar = new CViewToolbar<>("Main Layout", sessionService, layoutService, authenticationContext);
+		mainToolbar =
+				new CViewToolbar<>("Main Layout", sessionService, layoutService, authenticationContext, systemSettingsService, routeDiscoveryService);
 		navBar.add(mainToolbar);
 		return navBar;
 	}
