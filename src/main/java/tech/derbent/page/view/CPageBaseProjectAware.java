@@ -78,28 +78,19 @@ public abstract class CPageBaseProjectAware extends CPageBase implements CProjec
 				final CEnhancedBinder<CEntityDB<?>> localBinder = new CEnhancedBinder<>((Class<CEntityDB<?>>) (Class<?>) entityClass);
 				currentBinder = localBinder;
 			}
-			// Create a main container that will hold toolbar (fixed at top) and scrollable content
+			// Add toolbar and scrollable content directly to base layout (similar to CAbstractEntityDBPage pattern)
 			if (toolbar != null) {
-				// Create the main container following the same pattern as CAbstractEntityDBPage
-				final CVerticalLayout mainContainer = new CVerticalLayout(false, false, false);
-				mainContainer.setClassName("details-container");
-				mainContainer.setPadding(false);
-				mainContainer.setSpacing(false);
-				mainContainer.setSizeFull();
 				// Add toolbar first (stays at top, not scrollable)
 				toolbar.addClassName("crud-toolbar");
-				mainContainer.add(toolbar);
+				getBaseDetailsLayout().add(toolbar);
 				// Create scrollable content area
 				CFlexLayout scrollableContent = CFlexLayout.forEntityPage();
 				final Scroller contentScroller = new Scroller();
 				contentScroller.setContent(scrollableContent);
 				contentScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
-				contentScroller.setSizeFull();
 				// Add scrollable content below toolbar
-				mainContainer.add(contentScroller);
-				mainContainer.setFlexGrow(1, contentScroller);
-				// Add the main container to the base layout
-				getBaseDetailsLayout().add(mainContainer);
+				getBaseDetailsLayout().add(contentScroller);
+				getBaseDetailsLayout().setFlexGrow(1, contentScroller);
 				// Build details in the scrollable content area
 				detailsBuilder.buildDetails(screen, currentBinder, scrollableContent);
 			} else {
