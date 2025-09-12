@@ -181,11 +181,18 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		}
 		try {
 			LOGGER.debug("Save button clicked for entity: {} ID: {}", entityClass.getSimpleName(), currentEntity.getId());
+			// Debug: Log current entity state before binding
+			LOGGER.debug("Entity state before writeBean: {}", currentEntity.toString());
 			// Write form data to entity (this will validate)
 			binder.writeBean(currentEntity);
+			LOGGER.debug("writeBean completed successfully for entity: {}", entityClass.getSimpleName());
+			// Debug: Log entity state after binding
+			LOGGER.debug("Entity state after writeBean: {}", currentEntity.toString());
 			// Save entity
 			final EntityClass savedEntity = entityService.save(currentEntity);
 			LOGGER.info("Entity saved successfully: {} with ID: {}", entityClass.getSimpleName(), savedEntity.getId());
+			// Debug: Log saved entity state
+			LOGGER.debug("Saved entity state: {}", savedEntity.toString());
 			// Update current entity reference
 			currentEntity = savedEntity;
 			// Re-bind the saved entity to refresh the form with updated data (like generated IDs, timestamps)
