@@ -192,12 +192,23 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 					final CLayoutService.LayoutMode newMode = layoutService.getCurrentLayoutMode();
 					LOGGER.info("Layout toggled from {} to {}", oldMode, newMode);
 					updateLayoutToggleIcon();
-					// Force UI update
+					// Try to force UI update, but handle case where push is not enabled
 					final var ui = getUI();
 					if (ui.isPresent()) {
 						ui.get().access(() -> {
 							LOGGER.debug("Forcing UI update after layout toggle");
-							ui.get().push();
+							try {
+								ui.get().push();
+								LOGGER.debug("UI push successful after layout toggle");
+							} catch (final IllegalStateException e) {
+								if (e.getMessage() != null && e.getMessage().contains("Push not enabled")) {
+									LOGGER.debug("Push not enabled, layout change will be reflected on next user interaction");
+								} else {
+									LOGGER.warn("Error during UI push in toolbar: {}", e.getMessage());
+								}
+							} catch (final Exception e) {
+								LOGGER.warn("Error during UI push in toolbar: {}", e.getMessage());
+							}
 						});
 					}
 				} else {

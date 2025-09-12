@@ -88,9 +88,16 @@ public abstract class CPageBaseProjectAware extends CPageBase implements CProjec
 			@SuppressWarnings ("unchecked")
 			final CEnhancedBinder<CEntityDB<?>> localBinder = new CEnhancedBinder<>((Class<CEntityDB<?>>) (Class<?>) entityClass);
 			currentBinder = localBinder; // Store the binder for data binding
-			// If toolbar is provided, add it first (at the top)
-			if (toolbar != null) {
-				getBaseDetailsLayout().add(toolbar);
+			// If toolbar is provided, add it to the details container (at top level, above the scroller)
+			if (toolbar != null && this instanceof CPageGenericEntity) {
+				CPageGenericEntity<?> pageEntity = (CPageGenericEntity<?>) this;
+				// Clear any existing toolbar from details container first
+				pageEntity.detailsContainer.getChildren()
+						.filter(child -> child == toolbar || child.getClass().getSimpleName().contains("CrudToolbar"))
+						.forEach(pageEntity.detailsContainer::remove);
+				// Add toolbar at the top of details container (before the scroller)
+				pageEntity.detailsContainer.addComponentAsFirst(toolbar);
+				pageEntity.detailsContainer.setFlexGrow(0, toolbar); // Toolbar has fixed size
 			}
 			detailsBuilder.buildDetails(screen, localBinder, getBaseDetailsLayout());
 		} catch (final Exception e) {
