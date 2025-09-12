@@ -92,15 +92,15 @@ public abstract class CPageGenericEntity<EntityType extends CEntityDB<EntityType
 		detailsContainer = new FlexLayout();
 		detailsContainer.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
 		detailsContainer.setSizeFull();
-		// Create scrollable content area
+		// Create scrollable content area for field details
 		divDetails = new CDiv();
 		detailsScroller = new Scroller();
 		detailsScroller.setContent(divDetails);
 		detailsScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
 		detailsScroller.setSizeFull();
-		// Add scroller to details container (toolbar will be added by buildScreen)
+		// Add scroller to details container (toolbar will be added at the top by buildScreen)
 		detailsContainer.add(detailsScroller);
-		detailsContainer.setFlexGrow(1, detailsScroller); // Scroller takes remaining space
+		detailsContainer.setFlexGrow(1, detailsScroller); // Scroller takes remaining space after toolbar
 		// Add details container to the secondary (right) section of split layout
 		splitLayout.addToSecondary(detailsContainer);
 	}
