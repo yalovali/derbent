@@ -1,10 +1,10 @@
 package tech.derbent.page.view;
 
 import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
+import tech.derbent.abstracts.components.CCrudToolbar;
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.interfaces.CProjectChangeListener;
@@ -39,42 +39,36 @@ public abstract class CPageBaseProjectAware extends CPageBase implements CProjec
 		LOGGER.debug("Entering Sample Page");
 	}
 
+	/** Hook method for subclasses to configure the CRUD toolbar with specific behavior like dependency checking */
+	protected void configureCrudToolbar(CCrudToolbar<?> toolbar) {
+		// Default implementation does nothing - subclasses can override to add specific configuration
+	}
+
+	/** Abstract method to create a new entity instance with project set */
+	protected abstract <T extends CEntityDB<T>> T createNewEntity();
+
 	protected void buildScreen(final String baseViewName) {
-		buildScreen(baseViewName, CEntityDB.class, null);
+		buildScreen(baseViewName, CEntityDB.class);
 	}
 
 	protected <T extends CEntityDB<?>> void buildScreen(final String baseViewName, final Class<T> entityClass) {
-		buildScreen(baseViewName, entityClass, null);
-	}
-
-	protected <T extends CEntityDB<?>> void buildScreen(final String baseViewName, final Class<T> entityClass, final Component toolbar) {
 		try {
-			// Clear previous content from details layout to avoid accumulation
 			getBaseDetailsLayout().removeAll();
 			final CDetailSection screen = screenService.findByNameAndProject(sessionService.getActiveProject().orElse(null), baseViewName);
 			if (screen == null) {
 				final String errorMsg = "Screen not found: " + baseViewName + " for project: "
 						+ sessionService.getActiveProject().map(CProject::getName).orElse("No Project");
 				getBaseDetailsLayout().add(new CDiv(errorMsg));
-				currentBinder = null; // Clear binder if screen not found
+				currentBinder = null;
 				return;
 			}
-			// Create a local binder for this specific screen using the actual entity class
-			@SuppressWarnings ("unchecked")
-			final CEnhancedBinder<CEntityDB<?>> localBinder = new CEnhancedBinder<>((Class<CEntityDB<?>>) (Class<?>) entityClass);
-			currentBinder = localBinder; // Store the binder for data binding
-			// If toolbar is provided, add it to the details container (at top level, above the scroller)
-			if (toolbar != null && this instanceof CPageGenericEntity) {
-				CPageGenericEntity<?> pageEntity = (CPageGenericEntity<?>) this;
-				// Clear any existing toolbar from details container first
-				pageEntity.baseDetailsLayout.getChildren()
-						.filter(child -> child == toolbar || child.getClass().getSimpleName().contains("CrudToolbar"))
-						.forEach(pageEntity.baseDetailsLayout::remove);
-				// Add toolbar at the top of details container (before the scroller)
-				pageEntity.baseDetailsLayout.addComponentAsFirst(toolbar);
-				pageEntity.baseDetailsLayout.setFlexGrow(0, toolbar); // Toolbar has fixed size
+			// Only create binder if not already set for this entity type
+			if (currentBinder == null || !currentBinder.getBeanType().equals(entityClass)) {
+				@SuppressWarnings ("unchecked")
+				final CEnhancedBinder<CEntityDB<?>> localBinder = new CEnhancedBinder<>((Class<CEntityDB<?>>) (Class<?>) entityClass);
+				currentBinder = localBinder;
 			}
-			detailsBuilder.buildDetails(screen, localBinder, getBaseDetailsLayout());
+			detailsBuilder.buildDetails(screen, currentBinder, getBaseDetailsLayout());
 		} catch (final Exception e) {
 			final String errorMsg = "Error building details layout for screen: " + baseViewName;
 			e.printStackTrace();

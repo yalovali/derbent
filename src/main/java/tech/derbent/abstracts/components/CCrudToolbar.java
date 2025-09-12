@@ -45,8 +45,7 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	 * @param binder        the binder for form validation and data binding
 	 * @param entityService the service for CRUD operations
 	 * @param entityClass   the entity class type */
-	public CCrudToolbar(final CEnhancedBinder<EntityClass> binder, final CAbstractService<EntityClass> entityService,
-			final Class<EntityClass> entityClass) {
+	public CCrudToolbar(final CEnhancedBinder<EntityClass> binder, final CAbstractService<EntityClass> entityService, final Class<EntityClass> entityClass) {
 		this.binder = binder;
 		this.entityService = entityService;
 		this.entityClass = entityClass;
@@ -54,7 +53,7 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		setPadding(true);
 		addClassName("crud-toolbar");
 		createToolbarButtons();
-		LOGGER.debug("Created CCrudToolbar for entity type: {}", entityClass.getSimpleName());
+		LOGGER.debug("Created CCrudToolbar for entity: {}", entityClass.getSimpleName());
 	}
 
 	/** Adds an update listener to be notified of CRUD operations.
@@ -184,6 +183,7 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 			// Debug: Log current entity state before binding
 			LOGGER.debug("Entity state before writeBean: {}", currentEntity.toString());
 			// Write form data to entity (this will validate)
+			LOGGER.debug("Bean name: {} currentEntity name:{}", binder.getBean().toString(), currentEntity.toString());
 			binder.writeBean(currentEntity);
 			LOGGER.debug("writeBean completed successfully for entity: {}", entityClass.getSimpleName());
 			// Debug: Log entity state after binding

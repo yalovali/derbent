@@ -13,7 +13,6 @@ import tech.derbent.abstracts.interfaces.CLayoutChangeListener;
 import tech.derbent.abstracts.services.CAbstractService;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.views.CAbstractEntityDBPage;
-import tech.derbent.abstracts.views.components.CDiv;
 import tech.derbent.abstracts.views.components.CFlexLayout;
 import tech.derbent.abstracts.views.components.CVerticalLayout;
 import tech.derbent.screens.domain.CGridEntity;
@@ -52,11 +51,6 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 		createPageContent();
 	}
 
-	/** Hook method for subclasses to configure the CRUD toolbar with specific behavior like dependency checking */
-	protected void configureCrudToolbar(CCrudToolbar<EntityClass> toolbar) {
-		// Default implementation does nothing - subclasses can override to add specific configuration
-	}
-
 	private void createDetailsSection() {
 		baseDetailsLayout = CFlexLayout.forEntityPage();
 		final Scroller detailsScroller = new Scroller();
@@ -87,9 +81,6 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 		this.add(splitLayout);
 		// Create details section with toolbar and scrollable content
 	}
-
-	/** Abstract method to create a new entity instance with project set */
-	protected abstract EntityClass createNewEntity();
 
 	private void createPageContent() {
 		baseDetailsLayout = CFlexLayout.forEntityPage();
@@ -153,75 +144,50 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 		updateLayoutOrientation();
 	}
 
+	CCrudToolbar<EntityClass> createCrudToolbar() {
+		return crudToolbar;
+	}
+
 	/** Populates the entity details section with information from the selected entity */
 	@SuppressWarnings ("unchecked")
 	private void populateEntityDetails(CEntityDB<?> entity) throws Exception {
 		if (entity == null) {
-			// Clear the details when no entity is selected
 			getBaseDetailsLayout().removeAll();
 			currentBinder = null;
 			crudToolbar = null;
 			return;
 		}
+		Check.notNull(getCurrentBinder(), "Binder must be initialized before populating entity details");
 		Class<? extends CAbstractEntityDBPage<?>> entityViewClass = entity.getViewClass();
 		Check.notNull(entityViewClass, "Entity view class cannot be null for entity: " + entity.getClass().getSimpleName());
-		// Get view name by invoking static field named VIEW_NAME of entityViewClass
 		Field viewNameField = entityViewClass.getField("VIEW_NAME");
 		String entityViewName = (String) viewNameField.get(null);
-		// Check if the selected entity is of the expected type
-		if (entityClass.isInstance(entity)) {
-			EntityClass typedEntity = (EntityClass) entity;
-			// Build the screen structure first to get the binder
-			buildScreen(entityViewName, entity.getClass());
-			// Create CRUD toolbar with the binder
-			if (getCurrentBinder() != null) {
-				CCrudToolbar<EntityClass> toolbar =
-						new CCrudToolbar<>(
-								(tech.derbent.abstracts.components.CEnhancedBinder<
-										EntityClass>) (tech.derbent.abstracts.components.CEnhancedBinder<?>) getCurrentBinder(),
-								entityService, entityClass);
-				// Configure toolbar callbacks
-				toolbar.setNewEntitySupplier(this::createNewEntity);
-				toolbar.setRefreshCallback((currentEntity) -> {
-					refreshGrid();
-					if (currentEntity != null && currentEntity.getId() != null) {
-						// Reload entity from database
-						try {
-							EntityClass reloadedEntity = entityService.getById(currentEntity.getId()).orElse(null);
-							if (reloadedEntity != null) {
-								populateEntityDetails(reloadedEntity);
-							}
-						} catch (Exception e) {
-							LOGGER.warn("Error reloading entity: {}", e.getMessage());
-						}
+		Check.isTrue(entityClass.isAssignableFrom(entity.getClass()),
+				"Selected entity type " + entity.getClass().getSimpleName() + " does not match expected type " + entityClass.getSimpleName());
+		EntityClass typedEntity = (EntityClass) entity;
+		// Create and configure toolbar
+		CCrudToolbar<EntityClass> toolbar = new CCrudToolbar<>(getCurrentBinder(), entityService, entityClass);
+		toolbar.setCurrentEntity(typedEntity);
+		toolbar.setNewEntitySupplier(this::createNewEntity);
+		toolbar.setRefreshCallback((currentEntity) -> {
+			refreshGrid();
+			if (currentEntity != null && currentEntity.getId() != null) {
+				try {
+					EntityClass reloadedEntity = entityService.getById(currentEntity.getId()).orElse(null);
+					if (reloadedEntity != null) {
+						populateEntityDetails(reloadedEntity);
 					}
-				});
-				// Register this page as listener for CRUD operations
-				toolbar.addUpdateListener(this);
-				// Configure toolbar with subclass-specific settings
-				configureCrudToolbar(toolbar);
-				// Set current entity
-				toolbar.setCurrentEntity(typedEntity);
-				crudToolbar = toolbar;
-				// Rebuild screen with toolbar
-				buildScreen(entityViewName, entity.getClass(), toolbar);
+				} catch (Exception e) {
+					LOGGER.warn("Error reloading entity: {}", e.getMessage());
+				}
 			}
-		} else {
-			// For entities not of the expected type, build screen without toolbar
-			buildScreen(entityViewName, entity.getClass());
-		}
-		// Bind the entity data to the form if binder is available
-		if (getCurrentBinder() != null) {
-			try {
-				getCurrentBinder().setBean(entity);
-				LOGGER.debug("Entity data bound to form: {}", entity.getClass().getSimpleName() + " ID: " + entity.getId());
-			} catch (Exception e) {
-				LOGGER.warn("Error binding entity data to form: {}", e.getMessage());
-				getBaseDetailsLayout().add(new CDiv("Error loading entity data: " + e.getMessage()));
-			}
-		} else {
-			LOGGER.warn("No binder available for data binding");
-		}
+		});
+		toolbar.addUpdateListener(this);
+		configureCrudToolbar(toolbar);
+		crudToolbar = toolbar;
+		// Build screen with toolbar
+		buildScreen(entityViewName, entity.getClass(), toolbar);
+		getCurrentBinder().setBean(entity);
 	}
 
 	/** Refreshes the grid to show updated data */
@@ -309,4 +275,9 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 			splitLayout.setSplitterPosition(30.0);
 		}
 	}
+
+	/** Creates a new entity instance.
+	 * @return a new entity instance of type EntityClass */
+	@Override
+	protected abstract EntityClass createNewEntity();
 }
