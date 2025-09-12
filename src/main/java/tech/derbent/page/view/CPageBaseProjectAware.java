@@ -64,6 +64,10 @@ public abstract class CPageBaseProjectAware extends CPageBase implements CProjec
 	}
 
 	protected void buildScreen(final String baseViewName) {
+		buildScreen(baseViewName, CEntityDB.class);
+	}
+
+	protected <T extends CEntityDB<?>> void buildScreen(final String baseViewName, final Class<T> entityClass) {
 		try {
 			// Clear previous content from details layout to avoid accumulation
 			getBaseDetailsLayout().removeAll();
@@ -75,9 +79,9 @@ public abstract class CPageBaseProjectAware extends CPageBase implements CProjec
 				currentBinder = null; // Clear binder if screen not found
 				return;
 			}
-			// Create a local binder for this specific screen instead of using page-level binder
+			// Create a local binder for this specific screen using the actual entity class
 			@SuppressWarnings ("unchecked")
-			final CEnhancedBinder<CEntityDB<?>> localBinder = new CEnhancedBinder<>((Class<CEntityDB<?>>) (Class<?>) CEntityDB.class);
+			final CEnhancedBinder<CEntityDB<?>> localBinder = new CEnhancedBinder<>((Class<CEntityDB<?>>) (Class<?>) entityClass);
 			currentBinder = localBinder; // Store the binder for data binding
 			detailsBuilder.buildDetails(screen, localBinder, getBaseDetailsLayout());
 		} catch (final Exception e) {

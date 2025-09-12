@@ -146,8 +146,8 @@ public class CPageSample extends CPageBaseProjectAware implements CEntityUpdateL
 		// get view name by invoke static field named VIEW_NAME of entityViewClass
 		Field viewNameField = entityViewClass.getField("VIEW_NAME");
 		String viewName = (String) viewNameField.get(null);
-		// Build the screen structure
-		buildScreen(viewName);
+		// Build the screen structure using the actual entity class
+		buildScreen(viewName, entity.getClass());
 		// Bind the entity data to the form if binder is available
 		if (getCurrentBinder() != null) {
 			try {
