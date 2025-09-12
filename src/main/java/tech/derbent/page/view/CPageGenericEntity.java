@@ -109,7 +109,9 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 		// Clear the details section since the entity no longer exists
 		getBaseDetailsLayout().removeAll();
 		// Try to select the next item in the grid or the first item if no next item
-		selectNextItemInGrid();
+		if (grid != null) {
+			grid.selectNextItem();
+		}
 	}
 
 	/** Implementation of CEntityUpdateListener - called when an entity is saved */
@@ -121,11 +123,10 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 		if (entity != null && grid != null) {
 			try {
 				// Refresh the grid and then re-select the saved entity
-				java.lang.reflect.Method refreshMethod = grid.getClass().getDeclaredMethod("refreshGridData");
-				refreshMethod.setAccessible(true);
-				refreshMethod.invoke(grid);
+				refreshGrid();
 				// Try to re-select the saved entity in the grid
-				selectEntityInGrid(entity);
+				grid.selectEntity(entity);
+				LOGGER.debug("Re-selected saved entity in grid: {}", entity.getId());
 			} catch (Exception e) {
 				LOGGER.warn("Error re-selecting entity after save: {}", e.getMessage());
 			}
@@ -208,42 +209,6 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 				LOGGER.debug("Grid refreshed successfully");
 			} catch (Exception e) {
 				LOGGER.warn("Error refreshing grid: {}", e.getMessage());
-			}
-		}
-	}
-
-	/** Selects a specific entity in the grid */
-	private void selectEntityInGrid(CEntityDB<?> entity) {
-		if (grid != null && entity != null) {
-			try {
-				// Use reflection to access the grid's selection mechanism if available
-				java.lang.reflect.Method selectMethod = grid.getClass().getDeclaredMethod("selectEntity", CEntityDB.class);
-				selectMethod.setAccessible(true);
-				selectMethod.invoke(grid, entity);
-			} catch (Exception e) {
-				LOGGER.debug("Could not select entity in grid: {}", e.getMessage());
-			}
-		}
-	}
-
-	/** Selects the next item in the grid after deletion */
-	private void selectNextItemInGrid() {
-		if (grid != null) {
-			try {
-				// Use reflection to access grid's selection mechanism for next item
-				java.lang.reflect.Method selectNextMethod = grid.getClass().getDeclaredMethod("selectNextItem");
-				selectNextMethod.setAccessible(true);
-				selectNextMethod.invoke(grid);
-			} catch (Exception e) {
-				LOGGER.debug("Could not select next item in grid: {}", e.getMessage());
-				// Fallback: try to select the first item
-				try {
-					java.lang.reflect.Method selectFirstMethod = grid.getClass().getDeclaredMethod("selectFirstItem");
-					selectFirstMethod.setAccessible(true);
-					selectFirstMethod.invoke(grid);
-				} catch (Exception e2) {
-					LOGGER.debug("Could not select first item in grid: {}", e2.getMessage());
-				}
 			}
 		}
 	}
