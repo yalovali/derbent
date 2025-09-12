@@ -2,7 +2,6 @@ package tech.derbent.page.view;
 
 import java.lang.reflect.Field;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
@@ -10,12 +9,15 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.abstracts.components.CCrudToolbar;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.interfaces.CEntityUpdateListener;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.abstracts.views.components.CDiv;
 import tech.derbent.abstracts.views.components.CVerticalLayout;
+import tech.derbent.activities.domain.CActivity;
+import tech.derbent.activities.service.CActivityService;
 import tech.derbent.activities.view.CActivitiesView;
 import tech.derbent.orders.domain.COrder;
 import tech.derbent.screens.domain.CGridEntity;
@@ -34,7 +36,6 @@ public class CPageSample extends CPageBaseProjectAware implements CEntityUpdateL
 	private CComponentGridEntity grid;
 	private SplitLayout splitLayout;
 	private VerticalLayout detailsContainer;
-	private HorizontalLayout toolbar;
 	private Scroller detailsScroller;
 
 	public static String getEntityColorCode() { return getIconColorCode(); }
@@ -46,10 +47,14 @@ public class CPageSample extends CPageBaseProjectAware implements CEntityUpdateL
 	public static String getIconFilename() { return COrder.getIconFilename(); }
 
 	private CGridEntityService gridEntityService;
+	private CActivityService activityService;
+	private CCrudToolbar<CActivity> crudToolbar;
 
-	public CPageSample(final CSessionService sessionService, final CGridEntityService gridEntityService, final CDetailSectionService screenService) {
+	public CPageSample(final CSessionService sessionService, final CGridEntityService gridEntityService, final CDetailSectionService screenService,
+			final CActivityService activityService) {
 		super(sessionService, screenService);
 		this.gridEntityService = gridEntityService;
+		this.activityService = activityService;
 		createPageContent();
 	}
 
@@ -86,25 +91,14 @@ public class CPageSample extends CPageBaseProjectAware implements CEntityUpdateL
 		// Create the main details container
 		detailsContainer = new CVerticalLayout(false, false, false);
 		detailsContainer.setSizeFull();
-		// Create toolbar at the top
-		toolbar = new HorizontalLayout();
-		toolbar.setWidthFull();
-		toolbar.setPadding(true);
-		toolbar.setSpacing(true);
-		toolbar.addClassName("details-toolbar");
-		// Add a simple label to the toolbar for now
-		Div toolbarLabel = new Div("Entity Details");
-		toolbarLabel.addClassName("details-toolbar-label");
-		toolbar.add(toolbarLabel);
 		// Create scrollable content area
 		divDetails = new CDiv();
 		detailsScroller = new Scroller();
 		detailsScroller.setContent(divDetails);
 		detailsScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
 		detailsScroller.setSizeFull();
-		// Add toolbar and scroller to details container
-		detailsContainer.add(toolbar, detailsScroller);
-		detailsContainer.setFlexGrow(0, toolbar); // Toolbar keeps its natural height
+		// Add scroller to details container (toolbar will be added by buildScreen)
+		detailsContainer.add(detailsScroller);
 		detailsContainer.setFlexGrow(1, detailsScroller); // Scroller takes remaining space
 		// Add details container to the secondary (right) section of split layout
 		splitLayout.addToSecondary(detailsContainer);
@@ -139,6 +133,7 @@ public class CPageSample extends CPageBaseProjectAware implements CEntityUpdateL
 			// Clear the details when no entity is selected
 			getBaseDetailsLayout().removeAll();
 			currentBinder = null;
+			crudToolbar = null;
 			return;
 		}
 		Class<? extends CAbstractEntityDBPage<?>> entityViewClass = entity.getViewClass();
@@ -146,8 +141,52 @@ public class CPageSample extends CPageBaseProjectAware implements CEntityUpdateL
 		// get view name by invoke static field named VIEW_NAME of entityViewClass
 		Field viewNameField = entityViewClass.getField("VIEW_NAME");
 		String viewName = (String) viewNameField.get(null);
-		// Build the screen structure using the actual entity class
-		buildScreen(viewName, entity.getClass());
+		// Create CRUD toolbar for CActivity entities if this is an activity
+		if (entity instanceof CActivity) {
+			@SuppressWarnings ("unchecked")
+			CActivity activity = (CActivity) entity;
+			// Build the screen structure first to get the binder
+			buildScreen(viewName, entity.getClass());
+			// Create CRUD toolbar with the binder
+			if (getCurrentBinder() != null) {
+				@SuppressWarnings ("unchecked")
+				CCrudToolbar<CActivity> toolbar = new CCrudToolbar<>(
+						(tech.derbent.abstracts.components.CEnhancedBinder<
+								CActivity>) (tech.derbent.abstracts.components.CEnhancedBinder<?>) getCurrentBinder(),
+						activityService, CActivity.class);
+				// Configure toolbar callbacks
+				toolbar.setNewEntitySupplier(() -> {
+					CActivity newActivity = new CActivity();
+					// Set project if available
+					sessionService.getActiveProject().ifPresent(newActivity::setProject);
+					return newActivity;
+				});
+				toolbar.setRefreshCallback((currentEntity) -> {
+					refreshGrid();
+					if (currentEntity != null && currentEntity.getId() != null) {
+						// Reload entity from database
+						try {
+							CActivity reloadedActivity = activityService.getById(currentEntity.getId()).orElse(null);
+							if (reloadedActivity != null) {
+								populateEntityDetails(reloadedActivity);
+							}
+						} catch (Exception e) {
+							LOGGER.warn("Error reloading entity: {}", e.getMessage());
+						}
+					}
+				});
+				// Register this page as listener for CRUD operations
+				toolbar.addUpdateListener(this);
+				// Set current entity
+				toolbar.setCurrentEntity(activity);
+				this.crudToolbar = toolbar;
+				// Rebuild screen with toolbar
+				buildScreen(viewName, entity.getClass(), toolbar);
+			}
+		} else {
+			// For non-activity entities, build screen without toolbar
+			buildScreen(viewName, entity.getClass());
+		}
 		// Bind the entity data to the form if binder is available
 		if (getCurrentBinder() != null) {
 			try {

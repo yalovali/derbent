@@ -1,6 +1,7 @@
 package tech.derbent.page.view;
 
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -64,10 +65,14 @@ public abstract class CPageBaseProjectAware extends CPageBase implements CProjec
 	}
 
 	protected void buildScreen(final String baseViewName) {
-		buildScreen(baseViewName, CEntityDB.class);
+		buildScreen(baseViewName, CEntityDB.class, null);
 	}
 
 	protected <T extends CEntityDB<?>> void buildScreen(final String baseViewName, final Class<T> entityClass) {
+		buildScreen(baseViewName, entityClass, null);
+	}
+
+	protected <T extends CEntityDB<?>> void buildScreen(final String baseViewName, final Class<T> entityClass, final Component toolbar) {
 		try {
 			// Clear previous content from details layout to avoid accumulation
 			getBaseDetailsLayout().removeAll();
@@ -83,6 +88,10 @@ public abstract class CPageBaseProjectAware extends CPageBase implements CProjec
 			@SuppressWarnings ("unchecked")
 			final CEnhancedBinder<CEntityDB<?>> localBinder = new CEnhancedBinder<>((Class<CEntityDB<?>>) (Class<?>) entityClass);
 			currentBinder = localBinder; // Store the binder for data binding
+			// If toolbar is provided, add it first (at the top)
+			if (toolbar != null) {
+				getBaseDetailsLayout().add(toolbar);
+			}
 			detailsBuilder.buildDetails(screen, localBinder, getBaseDetailsLayout());
 		} catch (final Exception e) {
 			final String errorMsg = "Error building details layout for screen: " + baseViewName;
