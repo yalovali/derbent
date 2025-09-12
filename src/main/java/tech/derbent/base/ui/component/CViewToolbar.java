@@ -37,6 +37,7 @@ import tech.derbent.abstracts.views.CAbstractNamedEntityPage;
 import tech.derbent.abstracts.views.components.CButton;
 import tech.derbent.abstracts.views.components.CDiv;
 import tech.derbent.activities.view.CActivitiesView;
+import tech.derbent.base.service.CRouteDiscoveryService;
 import tech.derbent.gannt.view.CProjectGanntView;
 import tech.derbent.meetings.view.CMeetingsView;
 import tech.derbent.projects.domain.CProject;
@@ -44,6 +45,7 @@ import tech.derbent.projects.view.CProjectsView;
 import tech.derbent.screens.view.CDetailSectionView;
 import tech.derbent.session.service.CLayoutService;
 import tech.derbent.session.service.CSessionService;
+import tech.derbent.setup.service.CSystemSettingsService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.view.CUsersView;
 
@@ -66,6 +68,8 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 	private final CSessionService sessionService;
 	private final CLayoutService layoutService;
 	private final AuthenticationContext authenticationContext;
+	private final CSystemSettingsService systemSettingsService;
+	private final CRouteDiscoveryService routeDiscoveryService;
 	private ComboBox<CProject> projectComboBox;
 	private CButton layoutToggleButton;
 	private Avatar userAvatar;
@@ -80,9 +84,26 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 	 * @throws Exception */
 	public CViewToolbar(final String viewTitle, final CSessionService sessionService, final CLayoutService layoutService,
 			final AuthenticationContext authenticationContext, final Component... components) throws Exception {
+		this(viewTitle, sessionService, layoutService, authenticationContext, null, null, components);
+	}
+
+	/** Constructs a CViewToolbar with a title, services, and optional components.
+	 * @param viewTitle             The title of the view to be displayed in the toolbar.
+	 * @param sessionService        The session service for managing project selection.
+	 * @param layoutService         The layout service for managing layout mode (optional).
+	 * @param authenticationContext The authentication context for user information (optional).
+	 * @param systemSettingsService The system settings service for last visited functionality (optional).
+	 * @param routeDiscoveryService The route discovery service for dynamic routes (optional).
+	 * @param components            Optional components to be added to the toolbar.
+	 * @throws Exception */
+	public CViewToolbar(final String viewTitle, final CSessionService sessionService, final CLayoutService layoutService,
+			final AuthenticationContext authenticationContext, final CSystemSettingsService systemSettingsService,
+			final CRouteDiscoveryService routeDiscoveryService, final Component... components) throws Exception {
 		this.sessionService = sessionService;
 		this.layoutService = layoutService;
 		this.authenticationContext = authenticationContext;
+		this.systemSettingsService = systemSettingsService;
+		this.routeDiscoveryService = routeDiscoveryService;
 		addClassNames(Display.FLEX, FlexDirection.ROW, JustifyContent.BETWEEN, AlignItems.CENTER, Gap.MEDIUM);
 		// Add separation line below the toolbar
 		getContent().getStyle().set("border-bottom", "1px solid var(--lumo-contrast-20pct)");
@@ -251,7 +272,11 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 		final CButton activitiesButton = createNavigateButtonForView(CActivitiesView.class);
 		final CButton usersButton = createNavigateButtonForView(CUsersView.class);
 		final CButton screensButton = createNavigateButtonForView(CDetailSectionView.class);
-		return new CDiv(ganntButton, projectsButton, usersButton, activitiesButton, meetingsButton, screensButton);
+		
+		// Create last visited button
+		final CButton lastVisitedButton = createLastVisitedButton();
+		
+		return new CDiv(lastVisitedButton, ganntButton, projectsButton, usersButton, activitiesButton, meetingsButton, screensButton);
 	}
 
 	/** Creates the right side components containing user info and layout toggle. */
@@ -388,5 +413,52 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 			layoutToggleButton.setIcon(icon);
 			layoutToggleButton.getElement().setAttribute("title", "Current: " + currentMode + " - Click to toggle");
 		}
+	}
+
+	/** Creates the last visited button for quick access to the last visited page. */
+	private CButton createLastVisitedButton() {
+		final Icon icon = VaadinIcon.CLOCK.create();
+		icon.addClassNames(IconSize.MEDIUM);
+		icon.getStyle().set("color", "#e67e22"); // Orange color for last visited
+		
+		final CButton lastVisitedButton = new CButton("", icon, null);
+		lastVisitedButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ICON);
+		lastVisitedButton.getElement().setAttribute("title", "Go to Last Visited Page");
+		lastVisitedButton.addClassNames(Margin.NONE);
+		
+		// Add hover effect
+		lastVisitedButton.getElement().addEventListener("mouseenter", e -> icon.getStyle().set("color", "#e67e2299"));
+		lastVisitedButton.getElement().addEventListener("mouseleave", e -> icon.getStyle().set("color", "#e67e22"));
+		
+		// Handle click - navigate to last visited page
+		lastVisitedButton.addClickListener(event -> {
+			try {
+				String lastVisitedRoute = getLastVisitedRoute();
+				if (lastVisitedRoute != null && !lastVisitedRoute.trim().isEmpty()) {
+					LOGGER.info("Last visited button clicked, navigating to: {}", lastVisitedRoute);
+					UI.getCurrent().navigate(lastVisitedRoute);
+				} else {
+					LOGGER.info("No last visited route found, navigating to home");
+					UI.getCurrent().navigate("home");
+				}
+			} catch (Exception e) {
+				LOGGER.warn("Error navigating to last visited page: {}", e.getMessage());
+				UI.getCurrent().navigate("home");
+			}
+		});
+		
+		return lastVisitedButton;
+	}
+
+	/** Gets the last visited route from system settings. */
+	private String getLastVisitedRoute() {
+		try {
+			if (systemSettingsService != null) {
+				return systemSettingsService.getLastVisitedView();
+			}
+		} catch (Exception e) {
+			LOGGER.warn("Error getting last visited route: {}", e.getMessage());
+		}
+		return "home"; // Default fallback
 	}
 }

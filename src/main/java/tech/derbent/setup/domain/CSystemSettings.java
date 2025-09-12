@@ -256,6 +256,13 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 			description = "Default view to navigate to after login", hidden = false, order = 31, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String defaultLoginView = "home";
+	@Column (name = "last_visited_view", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@AMetaData (
+			displayName = "Last Visited View", required = false, readOnly = false, defaultValue = "home",
+			description = "Last visited view route for quick access", hidden = false, order = 32, maxLength = CEntityConstants.MAX_LENGTH_NAME
+	)
+	private String lastVisitedView = "home";
 
 	/** Default constructor required by JPA. Initializes entity with default values. */
 	public CSystemSettings() {
@@ -332,6 +339,8 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	public Boolean getAutoLoginEnabled() { return autoLoginEnabled; }
 
 	public String getDefaultLoginView() { return defaultLoginView; }
+
+	public String getLastVisitedView() { return lastVisitedView; }
 
 	@Override
 	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
@@ -437,6 +446,8 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	public void setAutoLoginEnabled(final Boolean autoLoginEnabled) { this.autoLoginEnabled = autoLoginEnabled; }
 
 	public void setDefaultLoginView(final String defaultLoginView) { this.defaultLoginView = defaultLoginView; }
+
+	public void setLastVisitedView(final String lastVisitedView) { this.lastVisitedView = lastVisitedView; }
 
 	@Override
 	public String toString() {

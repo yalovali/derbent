@@ -1,5 +1,7 @@
 package tech.derbent.login.view;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import tech.derbent.base.service.CRouteDiscoveryService;
 import tech.derbent.base.ui.dialogs.CInformationDialog;
 import tech.derbent.config.CSampleDataInitializer;
 import tech.derbent.setup.service.CSystemSettingsService;
@@ -45,11 +48,13 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	private final Checkbox autoLoginCheckbox = new Checkbox("Auto-login after 2 seconds");
 	private final ComboBox<String> defaultViewComboBox = new ComboBox<>("Go to view after login");
 	private final CSystemSettingsService systemSettingsService;
+	private final CRouteDiscoveryService routeDiscoveryService;
 
 	/** Constructor sets up the custom login form with basic Vaadin components. */
 	@Autowired
-	public CCustomLoginView(CSystemSettingsService systemSettingsService) {
+	public CCustomLoginView(CSystemSettingsService systemSettingsService, CRouteDiscoveryService routeDiscoveryService) {
 		this.systemSettingsService = systemSettingsService;
+		this.routeDiscoveryService = routeDiscoveryService;
 		addClassNames("custom-login-view");
 		setSizeFull();
 		setupForm();
@@ -227,9 +232,9 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 
 	/** Initialize auto-login and view selection components */
 	private void initializeComponents() {
-		// Initialize default view combobox with available views
-		defaultViewComboBox.setItems("home", "cgridentityview", "cdashboardview", "cprojectsview", "cactivitiesview", "cmeetingsview", "cusersview",
-				"cganntview", "cordersview");
+		// Initialize default view combobox with dynamically discovered routes
+		List<CRouteDiscoveryService.RouteInfo> availableRoutes = routeDiscoveryService.discoverAllRoutes();
+		defaultViewComboBox.setItems(availableRoutes.stream().map(CRouteDiscoveryService.RouteInfo::getRoute).collect(Collectors.toList()));
 		defaultViewComboBox.setItemLabelGenerator(this::getViewDisplayName);
 		defaultViewComboBox.setValue("home"); // Default value
 		defaultViewComboBox.setWidthFull();
@@ -249,6 +254,12 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	}
 
 	private String getViewDisplayName(String route) {
+		CRouteDiscoveryService.RouteInfo routeInfo = routeDiscoveryService.getRouteInfo(route);
+		if (routeInfo != null) {
+			return routeInfo.getDisplayName();
+		}
+		
+		// Fallback for routes not found in discovery service
 		switch (route) {
 		case "home":
 			return "Home/Dashboard";
@@ -265,12 +276,16 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		case "cusersview":
 			return "Users";
 		case "cganntview":
+		case "cprojectganntview":
 			return "Gantt Chart";
 		case "cordersview":
 			return "Orders";
 		default:
-			assert false : "Unknown route: " + route;
-			return route;
+			// Convert route to display name as fallback
+			return route.replaceAll("([a-z])([A-Z])", "$1 $2")
+					.replaceAll("^c", "")
+					.replaceAll("view$", "")
+					.trim();
 		}
 	}
 

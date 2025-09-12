@@ -272,6 +272,30 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 		return updateSystemSettings(settings);
 	}
 
+	/** Gets the last visited view setting.
+	 * @return the last visited view route */
+	public String getLastVisitedView() {
+		try {
+			final CSystemSettings settings = getOrCreateSystemSettings();
+			return settings.getLastVisitedView() != null ? settings.getLastVisitedView() : "home";
+		} catch (final Exception e) {
+			LOGGER.error("Error retrieving last visited view setting", e);
+			return "home"; // Default fallback
+		}
+	}
+
+	/** Updates the last visited view setting.
+	 * @param lastVisitedView the route of the last visited view
+	 * @return the updated CSystemSettings */
+	@Transactional
+	public CSystemSettings updateLastVisitedView(final String lastVisitedView) {
+		final CSystemSettings settings = getOrCreateSystemSettings();
+		if ((lastVisitedView != null) && !lastVisitedView.trim().isEmpty()) {
+			settings.setLastVisitedView(lastVisitedView.trim());
+		}
+		return updateSystemSettings(settings);
+	}
+
 	/** Validates business rules for system settings.
 	 * @param settings the settings to validate
 	 * @throws IllegalArgumentException if validation fails */
