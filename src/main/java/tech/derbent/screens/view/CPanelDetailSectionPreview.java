@@ -50,7 +50,6 @@ public class CPanelDetailSectionPreview extends CPanelDetailSectionBase {
 				divPreview.removeAll();
 				// get service for the class
 				final Class<?> screenClass = CEntityFieldService.getEntityClass(screen.getEntityType());
-				
 				// Instead of creating a new binder, reuse the existing one from the base class
 				// This fixes the issue of multiple binders being created unnecessarily
 				CEnhancedBinder<?> sharedBinder = getBinder();
@@ -60,7 +59,6 @@ public class CPanelDetailSectionPreview extends CPanelDetailSectionBase {
 					final CEnhancedBinder<CEntityDB<?>> binder = new CEnhancedBinder<CEntityDB<?>>((Class<CEntityDB<?>>) screenClass);
 					sharedBinder = binder;
 				}
-				
 				builder.buildDetails(screen, sharedBinder, divPreview);
 				// Get related service class for the given class type
 				/** ADD SAMPLE DATA ************************************/
@@ -71,7 +69,7 @@ public class CPanelDetailSectionPreview extends CPanelDetailSectionBase {
 				final CEntityDB<?> item = serviceBean.findAll().stream().findFirst().orElse(null);
 				if (item != null) {
 					// Safe casting for readBean - the binder type should match the item type
-					@SuppressWarnings("unchecked")
+					@SuppressWarnings ("unchecked")
 					CEnhancedBinder<Object> objectBinder = (CEnhancedBinder<Object>) sharedBinder;
 					objectBinder.readBean(item);
 				}

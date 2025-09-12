@@ -41,7 +41,7 @@ public class CPageActivityType extends CPageGenericEntity<CActivityType> {
 
 	/** Configures the dependency checker for activity types to prevent deletion when activities are using them */
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings ("unchecked")
 	protected void configureCrudToolbar(CCrudToolbar<?> toolbar) {
 		super.configureCrudToolbar(toolbar);
 		// Add dependency checker for activity types with activities

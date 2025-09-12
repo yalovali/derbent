@@ -76,12 +76,10 @@ public abstract class CPageBaseProjectAware extends CPageBase implements CProjec
 				final CEnhancedBinder<CEntityDB<?>> localBinder = new CEnhancedBinder<>((Class<CEntityDB<?>>) (Class<?>) entityClass);
 				currentBinder = localBinder;
 			}
-			
 			// Add toolbar to layout if provided - it will use the same binder
 			if (toolbar != null) {
 				getBaseDetailsLayout().add(toolbar);
 			}
-			
 			// Build details using the shared binder
 			detailsBuilder.buildDetails(screen, currentBinder, getBaseDetailsLayout());
 		} catch (final Exception e) {

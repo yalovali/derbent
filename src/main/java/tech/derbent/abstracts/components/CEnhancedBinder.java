@@ -39,9 +39,7 @@ public class CEnhancedBinder<BEAN> extends BeanValidationBinder<BEAN> {
 
 	/** Returns the bean type this binder is configured for.
 	 * @return the bean class */
-	public Class<BEAN> getBeanType() {
-		return beanType;
-	}
+	public Class<BEAN> getBeanType() { return beanType; }
 	// Overload bind methods to add detailed logging
 
 	@Override
