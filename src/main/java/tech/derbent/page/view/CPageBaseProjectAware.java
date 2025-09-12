@@ -78,22 +78,28 @@ public abstract class CPageBaseProjectAware extends CPageBase implements CProjec
 				final CEnhancedBinder<CEntityDB<?>> localBinder = new CEnhancedBinder<>((Class<CEntityDB<?>>) (Class<?>) entityClass);
 				currentBinder = localBinder;
 			}
-			// Create a structure with sticky toolbar and scrollable content
+			// Create a main container that will hold toolbar (fixed at top) and scrollable content
 			if (toolbar != null) {
-				// Create toolbar container with sticky positioning
-				CVerticalLayout toolbarContainer = new CVerticalLayout(false, false, false);
-				toolbarContainer.addClassName("sticky-toolbar");
-				toolbarContainer.setWidthFull();
-				toolbarContainer.add(toolbar);
+				// Create the main container following the same pattern as CAbstractEntityDBPage
+				final CVerticalLayout mainContainer = new CVerticalLayout(false, false, false);
+				mainContainer.setClassName("details-container");
+				mainContainer.setPadding(false);
+				mainContainer.setSpacing(false);
+				mainContainer.setSizeFull();
+				// Add toolbar first (stays at top, not scrollable)
+				toolbar.addClassName("crud-toolbar");
+				mainContainer.add(toolbar);
 				// Create scrollable content area
 				CFlexLayout scrollableContent = CFlexLayout.forEntityPage();
 				final Scroller contentScroller = new Scroller();
 				contentScroller.setContent(scrollableContent);
 				contentScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
 				contentScroller.setSizeFull();
-				// Add toolbar at top (sticky) and scrollable content below
-				getBaseDetailsLayout().add(toolbarContainer);
-				getBaseDetailsLayout().add(contentScroller);
+				// Add scrollable content below toolbar
+				mainContainer.add(contentScroller);
+				mainContainer.setFlexGrow(1, contentScroller);
+				// Add the main container to the base layout
+				getBaseDetailsLayout().add(mainContainer);
 				// Build details in the scrollable content area
 				detailsBuilder.buildDetails(screen, currentBinder, scrollableContent);
 			} else {

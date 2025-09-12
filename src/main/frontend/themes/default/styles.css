@@ -154,12 +154,4 @@ vaadin-scroller{
     gap: var(--lumo-space-s);
 }
 
-/* Sticky Toolbar Container */
-.sticky-toolbar {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    width: 100% !important;
-    background: var(--lumo-base-color);
-    border-bottom: 1px solid var(--lumo-contrast-10pct);
-}
+
