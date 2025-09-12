@@ -4,6 +4,7 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.abstracts.components.CCrudToolbar;
 import tech.derbent.activities.domain.CActivityType;
 import tech.derbent.activities.service.CActivityTypeService;
 import tech.derbent.activities.view.CActivityTypeView;
@@ -40,10 +41,12 @@ public class CPageActivityType extends CPageGenericEntity<CActivityType> {
 
 	/** Configures the dependency checker for activity types to prevent deletion when activities are using them */
 	@Override
-	protected void configureCrudToolbar(tech.derbent.abstracts.components.CCrudToolbar<CActivityType> toolbar) {
+	@SuppressWarnings ("unchecked")
+	protected void configureCrudToolbar(CCrudToolbar<?> toolbar) {
 		super.configureCrudToolbar(toolbar);
 		// Add dependency checker for activity types with activities
-		toolbar.setDependencyChecker(activityType -> {
+		CCrudToolbar<CActivityType> typedToolbar = (CCrudToolbar<CActivityType>) toolbar;
+		typedToolbar.setDependencyChecker(activityType -> {
 			try {
 				long activityCount = activityTypeService.countActivitiesUsingType(activityType);
 				if (activityCount > 0) {
@@ -58,7 +61,7 @@ public class CPageActivityType extends CPageGenericEntity<CActivityType> {
 	}
 
 	@Override
-	protected CActivityType createNewEntity() {
+	protected CActivityType createNewEntityInstance() {
 		CActivityType newActivityType = new CActivityType();
 		// Set project if available
 		sessionService.getActiveProject().ifPresent(newActivityType::setProject);

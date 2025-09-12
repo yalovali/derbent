@@ -131,6 +131,83 @@ public class CComponentGridEntity extends CDiv implements CProjectChangeListener
 		return addListener(SelectionChangeEvent.class, listener);
 	}
 
+	/** Selects a specific entity in the grid */
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
+	public void selectEntity(CEntityDB<?> entity) {
+		if (grid != null && entity != null) {
+			try {
+				// Cast to raw grid to avoid generic type issues
+				CGrid rawGrid = (CGrid) grid;
+				rawGrid.select(entity);
+				LOGGER.debug("Selected entity in grid: {}", entity.getId());
+			} catch (Exception e) {
+				LOGGER.warn("Error selecting entity in grid: {}", e.getMessage());
+			}
+		}
+	}
+
+	/** Selects the next item in the grid (useful after deletion) */
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
+	public void selectNextItem() {
+		if (grid != null) {
+			try {
+				CEntityDB<?> currentSelection = getSelectedItem();
+				java.util.List<?> items =
+						grid.getDataProvider().fetch(new com.vaadin.flow.data.provider.Query<>()).collect(java.util.stream.Collectors.toList());
+				if (!items.isEmpty()) {
+					if (currentSelection != null) {
+						// Find the current item's index and select the next one
+						int currentIndex = -1;
+						for (int i = 0; i < items.size(); i++) {
+							CEntityDB<?> item = (CEntityDB<?>) items.get(i);
+							if (item.getId().equals(currentSelection.getId())) {
+								currentIndex = i;
+								break;
+							}
+						}
+						// Select next item, or first item if we were at the end
+						int nextIndex = (currentIndex + 1) < items.size() ? (currentIndex + 1) : 0;
+						Object nextItem = items.get(nextIndex);
+						// Cast to raw grid to avoid generic type issues
+						CGrid rawGrid = (CGrid) grid;
+						rawGrid.select(nextItem);
+						LOGGER.debug("Selected next item at index: {}", nextIndex);
+					} else {
+						// No current selection, select first item
+						selectFirstItem();
+					}
+				}
+			} catch (Exception e) {
+				LOGGER.warn("Error selecting next item in grid: {}", e.getMessage());
+				// Fallback to first item
+				selectFirstItem();
+			}
+		}
+	}
+
+	/** Selects the first item in the grid */
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
+	public void selectFirstItem() {
+		if (grid != null) {
+			try {
+				// Cast to raw grid to avoid generic type issues
+				CGrid rawGrid = (CGrid) grid;
+				grid.getDataProvider().fetch(new com.vaadin.flow.data.provider.Query<>()).findFirst().ifPresent(entity -> {
+					rawGrid.select(entity);
+					LOGGER.debug("Selected first item in grid");
+				});
+			} catch (Exception e) {
+				LOGGER.warn("Error selecting first item in grid: {}", e.getMessage());
+			}
+		}
+	}
+
 	private void createContent() {
 		try {
 			if (gridEntity == null) {

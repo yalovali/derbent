@@ -22,9 +22,7 @@ public class CPageSample extends CPageGenericEntity<CActivity> {
 
 	private static final long serialVersionUID = 1L;
 
-	public static String getIconColorCode() {
-		return CPageSample.getStaticIconColorCode(); // Use the static method from COrder
-	}
+	public static String getIconColorCode() { return getStaticIconColorCode(); }
 
 	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
@@ -44,10 +42,12 @@ public class CPageSample extends CPageGenericEntity<CActivity> {
 
 	/** Configures the dependency checker for activities to prevent deletion when comments exist */
 	@Override
-	protected void configureCrudToolbar(CCrudToolbar<CActivity> toolbar) {
+	@SuppressWarnings ("unchecked")
+	protected void configureCrudToolbar(CCrudToolbar<?> toolbar) {
 		super.configureCrudToolbar(toolbar);
 		// Add dependency checker for activities with comments
-		toolbar.setDependencyChecker(activity -> {
+		CCrudToolbar<CActivity> typedToolbar = (CCrudToolbar<CActivity>) toolbar;
+		typedToolbar.setDependencyChecker(activity -> {
 			try {
 				long commentCount = commentService.countByActivity(activity);
 				if (commentCount > 0) {
@@ -61,7 +61,7 @@ public class CPageSample extends CPageGenericEntity<CActivity> {
 	}
 
 	@Override
-	protected CActivity createNewEntity() {
+	protected CActivity createNewEntityInstance() {
 		CActivity newActivity = new CActivity();
 		// Set project if available
 		sessionService.getActiveProject().ifPresent(newActivity::setProject);

@@ -7,6 +7,7 @@ import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import tech.derbent.abstracts.components.CCrudToolbar;
+import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.interfaces.CEntityUpdateListener;
 import tech.derbent.abstracts.interfaces.CLayoutChangeListener;
@@ -108,7 +109,9 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 		// Clear the details section since the entity no longer exists
 		getBaseDetailsLayout().removeAll();
 		// Try to select the next item in the grid or the first item if no next item
-		selectNextItemInGrid();
+		if (grid != null) {
+			grid.selectNextItem();
+		}
 	}
 
 	/** Implementation of CEntityUpdateListener - called when an entity is saved */
@@ -120,11 +123,10 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 		if (entity != null && grid != null) {
 			try {
 				// Refresh the grid and then re-select the saved entity
-				java.lang.reflect.Method refreshMethod = grid.getClass().getDeclaredMethod("refreshGridData");
-				refreshMethod.setAccessible(true);
-				refreshMethod.invoke(grid);
+				refreshGrid();
 				// Try to re-select the saved entity in the grid
-				selectEntityInGrid(entity);
+				grid.selectEntity(entity);
+				LOGGER.debug("Re-selected saved entity in grid: {}", entity.getId());
 			} catch (Exception e) {
 				LOGGER.warn("Error re-selecting entity after save: {}", e.getMessage());
 			}
@@ -144,31 +146,15 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 		updateLayoutOrientation();
 	}
 
-	CCrudToolbar<EntityClass> createCrudToolbar() {
-		return crudToolbar;
-	}
-
-	/** Populates the entity details section with information from the selected entity */
-	@SuppressWarnings ("unchecked")
-	private void populateEntityDetails(CEntityDB<?> entity) throws Exception {
-		if (entity == null) {
-			getBaseDetailsLayout().removeAll();
-			currentBinder = null;
-			crudToolbar = null;
-			return;
-		}
-		Check.notNull(getCurrentBinder(), "Binder must be initialized before populating entity details");
-		Class<? extends CAbstractEntityDBPage<?>> entityViewClass = entity.getViewClass();
-		Check.notNull(entityViewClass, "Entity view class cannot be null for entity: " + entity.getClass().getSimpleName());
-		Field viewNameField = entityViewClass.getField("VIEW_NAME");
-		String entityViewName = (String) viewNameField.get(null);
-		Check.isTrue(entityClass.isAssignableFrom(entity.getClass()),
-				"Selected entity type " + entity.getClass().getSimpleName() + " does not match expected type " + entityClass.getSimpleName());
-		EntityClass typedEntity = (EntityClass) entity;
-		// Create and configure toolbar
-		CCrudToolbar<EntityClass> toolbar = new CCrudToolbar<>(getCurrentBinder(), entityService, entityClass);
+	/** Creates a new CCrudToolbar instance for the given entity type and binder.
+	 * @param typedBinder the properly typed binder for the entity
+	 * @param typedEntity the current entity instance
+	 * @return a configured CCrudToolbar instance */
+	protected CCrudToolbar<EntityClass> createCrudToolbar(final CEnhancedBinder<EntityClass> typedBinder, final EntityClass typedEntity) {
+		// Use static factory method to create toolbar
+		CCrudToolbar<EntityClass> toolbar = CCrudToolbar.create(typedBinder, entityService, entityClass);
 		toolbar.setCurrentEntity(typedEntity);
-		toolbar.setNewEntitySupplier(this::createNewEntity);
+		toolbar.setNewEntitySupplier(this::createNewEntityInstance);
 		toolbar.setRefreshCallback((currentEntity) -> {
 			refreshGrid();
 			if (currentEntity != null && currentEntity.getId() != null) {
@@ -184,10 +170,42 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 		});
 		toolbar.addUpdateListener(this);
 		configureCrudToolbar(toolbar);
+		return toolbar;
+	}
+
+	CCrudToolbar<EntityClass> createCrudToolbar() {
+		return crudToolbar;
+	}
+
+	/** Populates the entity details section with information from the selected entity */
+	@SuppressWarnings ("unchecked")
+	private void populateEntityDetails(CEntityDB<?> entity) throws Exception {
+		if (entity == null) {
+			getBaseDetailsLayout().removeAll();
+			currentBinder = null;
+			crudToolbar = null;
+			return;
+		}
+		Class<? extends CAbstractEntityDBPage<?>> entityViewClass = entity.getViewClass();
+		Check.notNull(entityViewClass, "Entity view class cannot be null for entity: " + entity.getClass().getSimpleName());
+		Field viewNameField = entityViewClass.getField("VIEW_NAME");
+		String entityViewName = (String) viewNameField.get(null);
+		Check.isTrue(entityClass.isAssignableFrom(entity.getClass()),
+				"Selected entity type " + entity.getClass().getSimpleName() + " does not match expected type " + entityClass.getSimpleName());
+		EntityClass typedEntity = (EntityClass) entity;
+		// Create a properly typed binder for this specific entity type - this solves the issue
+		// of having multiple binders by creating one shared binder for both form and toolbar
+		CEnhancedBinder<EntityClass> typedBinder = new CEnhancedBinder<>(entityClass);
+		// Create and configure toolbar using the factory method
+		CCrudToolbar<EntityClass> toolbar = createCrudToolbar(typedBinder, typedEntity);
 		crudToolbar = toolbar;
-		// Build screen with toolbar
+		// Update the current binder to be the properly typed one - this ensures buildScreen uses the same binder
+		@SuppressWarnings ("unchecked")
+		CEnhancedBinder<CEntityDB<?>> genericBinder = (CEnhancedBinder<CEntityDB<?>>) (CEnhancedBinder<?>) typedBinder;
+		currentBinder = genericBinder;
+		// Build screen with toolbar - the toolbar and form will now use the same shared binder
 		buildScreen(entityViewName, entity.getClass(), toolbar);
-		getCurrentBinder().setBean(entity);
+		typedBinder.setBean(typedEntity);
 	}
 
 	/** Refreshes the grid to show updated data */
@@ -201,42 +219,6 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 				LOGGER.debug("Grid refreshed successfully");
 			} catch (Exception e) {
 				LOGGER.warn("Error refreshing grid: {}", e.getMessage());
-			}
-		}
-	}
-
-	/** Selects a specific entity in the grid */
-	private void selectEntityInGrid(CEntityDB<?> entity) {
-		if (grid != null && entity != null) {
-			try {
-				// Use reflection to access the grid's selection mechanism if available
-				java.lang.reflect.Method selectMethod = grid.getClass().getDeclaredMethod("selectEntity", CEntityDB.class);
-				selectMethod.setAccessible(true);
-				selectMethod.invoke(grid, entity);
-			} catch (Exception e) {
-				LOGGER.debug("Could not select entity in grid: {}", e.getMessage());
-			}
-		}
-	}
-
-	/** Selects the next item in the grid after deletion */
-	private void selectNextItemInGrid() {
-		if (grid != null) {
-			try {
-				// Use reflection to access grid's selection mechanism for next item
-				java.lang.reflect.Method selectNextMethod = grid.getClass().getDeclaredMethod("selectNextItem");
-				selectNextMethod.setAccessible(true);
-				selectNextMethod.invoke(grid);
-			} catch (Exception e) {
-				LOGGER.debug("Could not select next item in grid: {}", e.getMessage());
-				// Fallback: try to select the first item
-				try {
-					java.lang.reflect.Method selectFirstMethod = grid.getClass().getDeclaredMethod("selectFirstItem");
-					selectFirstMethod.setAccessible(true);
-					selectFirstMethod.invoke(grid);
-				} catch (Exception e2) {
-					LOGGER.debug("Could not select first item in grid: {}", e2.getMessage());
-				}
 			}
 		}
 	}
@@ -279,5 +261,12 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 	/** Creates a new entity instance.
 	 * @return a new entity instance of type EntityClass */
 	@Override
-	protected abstract EntityClass createNewEntity();
+	@SuppressWarnings ("unchecked")
+	protected <T extends CEntityDB<T>> T createNewEntity() {
+		return (T) createNewEntityInstance();
+	}
+
+	/** Creates a new entity instance of the specific entity type.
+	 * @return a new entity instance of type EntityClass */
+	protected abstract EntityClass createNewEntityInstance();
 }

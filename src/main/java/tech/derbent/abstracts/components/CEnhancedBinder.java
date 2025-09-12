@@ -36,6 +36,10 @@ public class CEnhancedBinder<BEAN> extends BeanValidationBinder<BEAN> {
 		this.beanType = beanType;
 		LOGGER.debug("Created CEnhancedBinder for bean type: {}", beanType.getSimpleName());
 	}
+
+	/** Returns the bean type this binder is configured for.
+	 * @return the bean class */
+	public Class<BEAN> getBeanType() { return beanType; }
 	// Overload bind methods to add detailed logging
 
 	@Override
