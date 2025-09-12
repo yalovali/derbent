@@ -67,8 +67,19 @@ public class CLayoutService {
 						LOGGER.warn("Encountered null listener in the list");
 					}
 				});
-				// Force push to update the UI immediately
-				ui.push();
+				// Try to push UI updates, but handle case where push is not enabled
+				try {
+					ui.push();
+					LOGGER.debug("UI push successful after layout change");
+				} catch (final IllegalStateException e) {
+					if (e.getMessage() != null && e.getMessage().contains("Push not enabled")) {
+						LOGGER.debug("Push not enabled, layout change will be reflected on next user interaction");
+					} else {
+						LOGGER.warn("Error during UI push: {}", e.getMessage());
+					}
+				} catch (final Exception e) {
+					LOGGER.warn("Error during UI push: {}", e.getMessage());
+				}
 			});
 		} else {
 			// If no UI context, try direct notification
