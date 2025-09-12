@@ -222,6 +222,10 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 			return addComponentColumn(item -> {
 				final Object value = valueProvider.apply(item);
 				final CGridCell cell = new CGridCell();
+				// Enable icon display if configured in metadata
+				if (meta.useIcon()) {
+					cell.setShowIcon(true);
+				}
 				// Set the value which will handle color rendering if entity has color
 				if (value instanceof CEntityDB) {
 					cell.setEntityValue((CEntityDB<?>) value);

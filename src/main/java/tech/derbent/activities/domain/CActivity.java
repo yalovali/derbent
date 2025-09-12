@@ -48,7 +48,7 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 	@JoinColumn (name = "cactivitytype_id", nullable = true)
 	@AMetaData (
 			displayName = "Activity Type", required = false, readOnly = false, description = "Type category of the activity", hidden = false,
-			order = 2, dataProviderBean = "CActivityTypeService"
+			order = 2, dataProviderBean = "CActivityTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CActivityType activityType;
 	// Time Tracking
@@ -81,14 +81,14 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 	@JoinColumn (name = "cactivitystatus_id", nullable = true)
 	@AMetaData (
 			displayName = "Status", required = false, readOnly = false, description = "Current status of the activity", hidden = false, order = 30,
-			dataProviderBean = "CActivityStatusService"
+			dataProviderBean = "CActivityStatusService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CActivityStatus status;
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "cactivitypriority_id", nullable = true)
 	@AMetaData (
 			displayName = "Priority", required = false, readOnly = false, description = "Priority level of the activity", hidden = false, order = 31,
-			dataProviderBean = "CActivityPriorityService"
+			dataProviderBean = "CActivityPriorityService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CActivityPriority priority;
 	@Column (nullable = true)

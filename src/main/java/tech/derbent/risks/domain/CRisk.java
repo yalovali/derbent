@@ -41,7 +41,7 @@ public class CRisk extends CEntityOfProject<CRisk> {
 	@JoinColumn (name = "criskstatus_id", nullable = true)
 	@AMetaData (
 			displayName = "Status", required = false, readOnly = false, description = "Current status of the risk", hidden = false, order = 3,
-			dataProviderBean = "CRiskStatusService"
+			dataProviderBean = "CRiskStatusService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CRiskStatus status;
 
