@@ -49,7 +49,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	private static final long serialVersionUID = 1L;
 	ArrayList<CAccordionDBEntity<EntityClass>> AccordionList = new ArrayList<CAccordionDBEntity<EntityClass>>(); // List of accordions
-	private final CFlexLayout baseDetailsLayout;
+	private CFlexLayout baseDetailsLayout;
 	private final CEnhancedBinder<EntityClass> binder;
 	private EntityClass currentEntity;
 	protected String currentSearchText = "";
@@ -64,7 +64,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	protected CSessionService sessionService;
 	// divide screen into two parts
 	protected SplitLayout splitLayout = new SplitLayout();
-	{}
 
 	protected CAbstractEntityDBPage(final Class<EntityClass> entityClass, final CAbstractService<EntityClass> entityService,
 			final CSessionService sessionService) {
@@ -72,22 +71,8 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		this.entityClass = entityClass;
 		this.entityService = entityService;
 		this.sessionService = sessionService;
-		baseDetailsLayout = CFlexLayout.forEntityPage();
-		// dont setid here, as it may not be initialized yet
 		binder = new CEnhancedBinder<>(entityClass);
-		// layout for the secondary part of the split layout create the tab layout for the
-		// details view top
-		detailsTabLayout.setClassName("details-tab-layout");
-		// now the content are!!!
-		final Scroller scroller = new Scroller();
-		// FLEX LAYOUT///////////////////
-		scroller.setContent(baseDetailsLayout);
-		scroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
-		final CVerticalLayout detailsBase = new CVerticalLayout(false, false, false);
-		detailsBase.add(detailsTabLayout, scroller);
-		initSplitLayout(detailsBase);
-		// Initial layout setup - will be updated when layout service is available
-		updateLayoutOrientation();
+		createPageContent();
 	}
 
 	// for details view
@@ -185,6 +170,21 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	protected abstract void createDetailsComponent() throws Exception;
 
+	private void createDetailsSection() {
+		baseDetailsLayout = CFlexLayout.forEntityPage();
+		detailsTabLayout.setClassName("details-tab-layout");
+		// now the content are!!!
+		final Scroller detailsScroller = new Scroller();
+		// FLEX LAYOUT///////////////////
+		detailsScroller.setContent(baseDetailsLayout);
+		detailsScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
+		final CVerticalLayout detailsBase = new CVerticalLayout(false, false, false);
+		detailsBase.add(detailsTabLayout, detailsScroller);
+		initSplitLayout(detailsBase);
+		// Initial layout setup - will be updated when layout service is available
+		updateLayoutOrientation();
+	}
+
 	/** Creates the button layout for the details tab. Contains new, save, cancel, and delete buttons with consistent styling.
 	 * @return HorizontalLayout with action buttons */
 	protected HorizontalLayout createDetailsTabButtonLayout() {
@@ -280,6 +280,10 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	protected EntityClass createNewEntity() {
 		return entityService.newEntity();
+	}
+
+	private void createPageContent() {
+		createDetailsSection();
 	}
 
 	protected CButton createSaveButton(final String buttonText) {

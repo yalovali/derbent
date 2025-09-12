@@ -4,6 +4,7 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.abstracts.components.CCrudToolbar;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
 import tech.derbent.activities.view.CActivitiesView;
@@ -43,7 +44,7 @@ public class CPageSample extends CPageGenericEntity<CActivity> {
 
 	/** Configures the dependency checker for activities to prevent deletion when comments exist */
 	@Override
-	protected void configureCrudToolbar(tech.derbent.abstracts.components.CCrudToolbar<CActivity> toolbar) {
+	protected void configureCrudToolbar(CCrudToolbar<CActivity> toolbar) {
 		super.configureCrudToolbar(toolbar);
 		// Add dependency checker for activities with comments
 		toolbar.setDependencyChecker(activity -> {
