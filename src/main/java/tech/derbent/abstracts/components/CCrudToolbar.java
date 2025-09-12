@@ -41,6 +41,17 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	private CButton deleteButton;
 	private CButton refreshButton;
 
+	/** Creates a comprehensive CRUD toolbar using static factory method.
+	 * @param <T>           the entity type
+	 * @param binder        the binder for form validation and data binding
+	 * @param entityService the service for CRUD operations
+	 * @param entityClass   the entity class type
+	 * @return a new configured CCrudToolbar instance */
+	public static <T extends CEntityDB<T>> CCrudToolbar<T> create(final CEnhancedBinder<T> binder, final CAbstractService<T> entityService,
+			final Class<T> entityClass) {
+		return new CCrudToolbar<>(binder, entityService, entityClass);
+	}
+
 	/** Creates a comprehensive CRUD toolbar.
 	 * @param binder        the binder for form validation and data binding
 	 * @param entityService the service for CRUD operations
@@ -53,6 +64,7 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		setSpacing(true);
 		setPadding(true);
 		addClassName("crud-toolbar");
+		setWidthFull(); // Make toolbar take full width
 		createToolbarButtons();
 		LOGGER.debug("Created CCrudToolbar for entity: {}", entityClass.getSimpleName());
 	}

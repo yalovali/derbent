@@ -2,6 +2,7 @@ package tech.derbent.page.view;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import tech.derbent.abstracts.components.CCrudToolbar;
@@ -11,6 +12,7 @@ import tech.derbent.abstracts.interfaces.CProjectChangeListener;
 import tech.derbent.abstracts.services.CDetailsBuilder;
 import tech.derbent.abstracts.views.components.CDiv;
 import tech.derbent.abstracts.views.components.CFlexLayout;
+import tech.derbent.abstracts.views.components.CVerticalLayout;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CDetailSection;
 import tech.derbent.screens.service.CDetailSectionService;
@@ -76,12 +78,28 @@ public abstract class CPageBaseProjectAware extends CPageBase implements CProjec
 				final CEnhancedBinder<CEntityDB<?>> localBinder = new CEnhancedBinder<>((Class<CEntityDB<?>>) (Class<?>) entityClass);
 				currentBinder = localBinder;
 			}
-			// Add toolbar to layout if provided - it will use the same binder
+			// Create a structure with sticky toolbar and scrollable content
 			if (toolbar != null) {
-				getBaseDetailsLayout().add(toolbar);
+				// Create toolbar container with sticky positioning
+				CVerticalLayout toolbarContainer = new CVerticalLayout(false, false, false);
+				toolbarContainer.addClassName("sticky-toolbar");
+				toolbarContainer.setWidthFull();
+				toolbarContainer.add(toolbar);
+				// Create scrollable content area
+				CFlexLayout scrollableContent = CFlexLayout.forEntityPage();
+				final Scroller contentScroller = new Scroller();
+				contentScroller.setContent(scrollableContent);
+				contentScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
+				contentScroller.setSizeFull();
+				// Add toolbar at top (sticky) and scrollable content below
+				getBaseDetailsLayout().add(toolbarContainer);
+				getBaseDetailsLayout().add(contentScroller);
+				// Build details in the scrollable content area
+				detailsBuilder.buildDetails(screen, currentBinder, scrollableContent);
+			} else {
+				// No toolbar - build details directly
+				detailsBuilder.buildDetails(screen, currentBinder, getBaseDetailsLayout());
 			}
-			// Build details using the shared binder
-			detailsBuilder.buildDetails(screen, currentBinder, getBaseDetailsLayout());
 		} catch (final Exception e) {
 			final String errorMsg = "Error building details layout for screen: " + baseViewName;
 			e.printStackTrace();

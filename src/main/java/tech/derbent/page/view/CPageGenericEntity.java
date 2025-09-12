@@ -146,6 +146,33 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 		updateLayoutOrientation();
 	}
 
+	/** Creates a new CCrudToolbar instance for the given entity type and binder.
+	 * @param typedBinder the properly typed binder for the entity
+	 * @param typedEntity the current entity instance
+	 * @return a configured CCrudToolbar instance */
+	protected CCrudToolbar<EntityClass> createCrudToolbar(final CEnhancedBinder<EntityClass> typedBinder, final EntityClass typedEntity) {
+		// Use static factory method to create toolbar
+		CCrudToolbar<EntityClass> toolbar = CCrudToolbar.create(typedBinder, entityService, entityClass);
+		toolbar.setCurrentEntity(typedEntity);
+		toolbar.setNewEntitySupplier(this::createNewEntity);
+		toolbar.setRefreshCallback((currentEntity) -> {
+			refreshGrid();
+			if (currentEntity != null && currentEntity.getId() != null) {
+				try {
+					EntityClass reloadedEntity = entityService.getById(currentEntity.getId()).orElse(null);
+					if (reloadedEntity != null) {
+						populateEntityDetails(reloadedEntity);
+					}
+				} catch (Exception e) {
+					LOGGER.warn("Error reloading entity: {}", e.getMessage());
+				}
+			}
+		});
+		toolbar.addUpdateListener(this);
+		configureCrudToolbar(toolbar);
+		return toolbar;
+	}
+
 	CCrudToolbar<EntityClass> createCrudToolbar() {
 		return crudToolbar;
 	}
@@ -169,25 +196,8 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 		// Create a properly typed binder for this specific entity type - this solves the issue
 		// of having multiple binders by creating one shared binder for both form and toolbar
 		CEnhancedBinder<EntityClass> typedBinder = new CEnhancedBinder<>(entityClass);
-		// Create and configure toolbar using the typed binder
-		CCrudToolbar<EntityClass> toolbar = new CCrudToolbar<EntityClass>(typedBinder, entityService, entityClass);
-		toolbar.setCurrentEntity(typedEntity);
-		toolbar.setNewEntitySupplier(this::createNewEntity);
-		toolbar.setRefreshCallback((currentEntity) -> {
-			refreshGrid();
-			if (currentEntity != null && currentEntity.getId() != null) {
-				try {
-					EntityClass reloadedEntity = entityService.getById(currentEntity.getId()).orElse(null);
-					if (reloadedEntity != null) {
-						populateEntityDetails(reloadedEntity);
-					}
-				} catch (Exception e) {
-					LOGGER.warn("Error reloading entity: {}", e.getMessage());
-				}
-			}
-		});
-		toolbar.addUpdateListener(this);
-		configureCrudToolbar(toolbar);
+		// Create and configure toolbar using the factory method
+		CCrudToolbar<EntityClass> toolbar = createCrudToolbar(typedBinder, typedEntity);
 		crudToolbar = toolbar;
 		// Update the current binder to be the properly typed one - this ensures buildScreen uses the same binder
 		@SuppressWarnings ("unchecked")
