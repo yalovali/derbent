@@ -67,7 +67,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	private CViewToolbar<?> mainToolbar;
 
 	MainLayout(final AuthenticationContext authenticationContext, final CSessionService sessionService, final CLayoutService layoutService,
-			final PasswordEncoder passwordEncoder, final CUserService userService, final CSystemSettingsService systemSettingsService, 
+			final PasswordEncoder passwordEncoder, final CUserService userService, final CSystemSettingsService systemSettingsService,
 			final CRouteDiscoveryService routeDiscoveryService) throws Exception {
 		this.authenticationContext = authenticationContext;
 		this.sessionService = sessionService;
@@ -142,8 +142,8 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		final Div navBar = new Div();
 		// dont add any other compoents to the navbar, just the toolbar otherwise call it
 		// with ,xyz,xyz etc..
-		mainToolbar = new CViewToolbar<>("Main Layout", sessionService, layoutService, authenticationContext, 
-				systemSettingsService, routeDiscoveryService);
+		mainToolbar =
+				new CViewToolbar<>("Main Layout", sessionService, layoutService, authenticationContext, systemSettingsService, routeDiscoveryService);
 		navBar.add(mainToolbar);
 		return navBar;
 	}

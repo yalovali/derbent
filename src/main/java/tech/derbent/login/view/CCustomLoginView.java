@@ -258,7 +258,6 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		if (routeInfo != null) {
 			return routeInfo.getDisplayName();
 		}
-		
 		// Fallback for routes not found in discovery service
 		switch (route) {
 		case "home":
@@ -282,10 +281,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 			return "Orders";
 		default:
 			// Convert route to display name as fallback
-			return route.replaceAll("([a-z])([A-Z])", "$1 $2")
-					.replaceAll("^c", "")
-					.replaceAll("view$", "")
-					.trim();
+			return route.replaceAll("([a-z])([A-Z])", "$1 $2").replaceAll("^c", "").replaceAll("view$", "").trim();
 		}
 	}
 

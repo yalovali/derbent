@@ -272,10 +272,8 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 		final CButton activitiesButton = createNavigateButtonForView(CActivitiesView.class);
 		final CButton usersButton = createNavigateButtonForView(CUsersView.class);
 		final CButton screensButton = createNavigateButtonForView(CDetailSectionView.class);
-		
 		// Create last visited button
 		final CButton lastVisitedButton = createLastVisitedButton();
-		
 		return new CDiv(lastVisitedButton, ganntButton, projectsButton, usersButton, activitiesButton, meetingsButton, screensButton);
 	}
 
@@ -420,16 +418,13 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 		final Icon icon = VaadinIcon.CLOCK.create();
 		icon.addClassNames(IconSize.MEDIUM);
 		icon.getStyle().set("color", "#e67e22"); // Orange color for last visited
-		
 		final CButton lastVisitedButton = new CButton("", icon, null);
 		lastVisitedButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ICON);
 		lastVisitedButton.getElement().setAttribute("title", "Go to Last Visited Page");
 		lastVisitedButton.addClassNames(Margin.NONE);
-		
 		// Add hover effect
 		lastVisitedButton.getElement().addEventListener("mouseenter", e -> icon.getStyle().set("color", "#e67e2299"));
 		lastVisitedButton.getElement().addEventListener("mouseleave", e -> icon.getStyle().set("color", "#e67e22"));
-		
 		// Handle click - navigate to last visited page
 		lastVisitedButton.addClickListener(event -> {
 			try {
@@ -446,7 +441,6 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 				UI.getCurrent().navigate("home");
 			}
 		});
-		
 		return lastVisitedButton;
 	}
 
