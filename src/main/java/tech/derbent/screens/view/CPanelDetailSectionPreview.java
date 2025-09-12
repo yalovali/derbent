@@ -50,9 +50,18 @@ public class CPanelDetailSectionPreview extends CPanelDetailSectionBase {
 				divPreview.removeAll();
 				// get service for the class
 				final Class<?> screenClass = CEntityFieldService.getEntityClass(screen.getEntityType());
-				@SuppressWarnings ("unchecked")
-				final CEnhancedBinder<CEntityDB<?>> binder = new CEnhancedBinder<CEntityDB<?>>((Class<CEntityDB<?>>) screenClass);
-				builder.buildDetails(screen, binder, divPreview);
+				
+				// Instead of creating a new binder, reuse the existing one from the base class
+				// This fixes the issue of multiple binders being created unnecessarily
+				CEnhancedBinder<?> sharedBinder = getBinder();
+				if (sharedBinder == null || !sharedBinder.getBeanType().equals(screenClass)) {
+					// Only create new binder if current one doesn't match the type
+					@SuppressWarnings ("unchecked")
+					final CEnhancedBinder<CEntityDB<?>> binder = new CEnhancedBinder<CEntityDB<?>>((Class<CEntityDB<?>>) screenClass);
+					sharedBinder = binder;
+				}
+				
+				builder.buildDetails(screen, sharedBinder, divPreview);
 				// Get related service class for the given class type
 				/** ADD SAMPLE DATA ************************************/
 				final String serviceClassName =
@@ -61,7 +70,10 @@ public class CPanelDetailSectionPreview extends CPanelDetailSectionBase {
 				final CAbstractService<?> serviceBean = (CAbstractService<?>) CDetailsBuilder.getApplicationContext().getBean(serviceClass);
 				final CEntityDB<?> item = serviceBean.findAll().stream().findFirst().orElse(null);
 				if (item != null) {
-					binder.readBean(item);
+					// Safe casting for readBean - the binder type should match the item type
+					@SuppressWarnings("unchecked")
+					CEnhancedBinder<Object> objectBinder = (CEnhancedBinder<Object>) sharedBinder;
+					objectBinder.readBean(item);
 				}
 			}
 		} catch (final Exception e) {

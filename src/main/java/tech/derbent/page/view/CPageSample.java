@@ -44,10 +44,12 @@ public class CPageSample extends CPageGenericEntity<CActivity> {
 
 	/** Configures the dependency checker for activities to prevent deletion when comments exist */
 	@Override
-	protected void configureCrudToolbar(CCrudToolbar<CActivity> toolbar) {
+	@SuppressWarnings("unchecked")
+	protected void configureCrudToolbar(CCrudToolbar<?> toolbar) {
 		super.configureCrudToolbar(toolbar);
 		// Add dependency checker for activities with comments
-		toolbar.setDependencyChecker(activity -> {
+		CCrudToolbar<CActivity> typedToolbar = (CCrudToolbar<CActivity>) toolbar;
+		typedToolbar.setDependencyChecker(activity -> {
 			try {
 				long commentCount = commentService.countByActivity(activity);
 				if (commentCount > 0) {

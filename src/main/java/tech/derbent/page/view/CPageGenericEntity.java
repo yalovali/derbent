@@ -7,6 +7,7 @@ import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import tech.derbent.abstracts.components.CCrudToolbar;
+import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.interfaces.CEntityUpdateListener;
 import tech.derbent.abstracts.interfaces.CLayoutChangeListener;
@@ -157,7 +158,6 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 			crudToolbar = null;
 			return;
 		}
-		Check.notNull(getCurrentBinder(), "Binder must be initialized before populating entity details");
 		Class<? extends CAbstractEntityDBPage<?>> entityViewClass = entity.getViewClass();
 		Check.notNull(entityViewClass, "Entity view class cannot be null for entity: " + entity.getClass().getSimpleName());
 		Field viewNameField = entityViewClass.getField("VIEW_NAME");
@@ -165,8 +165,13 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 		Check.isTrue(entityClass.isAssignableFrom(entity.getClass()),
 				"Selected entity type " + entity.getClass().getSimpleName() + " does not match expected type " + entityClass.getSimpleName());
 		EntityClass typedEntity = (EntityClass) entity;
-		// Create and configure toolbar
-		CCrudToolbar<EntityClass> toolbar = new CCrudToolbar<>(getCurrentBinder(), entityService, entityClass);
+		
+		// Create a properly typed binder for this specific entity type - this solves the issue
+		// of having multiple binders by creating one shared binder for both form and toolbar
+		CEnhancedBinder<EntityClass> typedBinder = new CEnhancedBinder<>(entityClass);
+		
+		// Create and configure toolbar using the typed binder
+		CCrudToolbar<EntityClass> toolbar = new CCrudToolbar<>(typedBinder, entityService, entityClass);
 		toolbar.setCurrentEntity(typedEntity);
 		toolbar.setNewEntitySupplier(this::createNewEntity);
 		toolbar.setRefreshCallback((currentEntity) -> {
@@ -185,9 +190,15 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 		toolbar.addUpdateListener(this);
 		configureCrudToolbar(toolbar);
 		crudToolbar = toolbar;
-		// Build screen with toolbar
+		
+		// Update the current binder to be the properly typed one - this ensures buildScreen uses the same binder
+		@SuppressWarnings("unchecked")
+		CEnhancedBinder<CEntityDB<?>> genericBinder = (CEnhancedBinder<CEntityDB<?>>) (CEnhancedBinder<?>) typedBinder;
+		currentBinder = genericBinder;
+		
+		// Build screen with toolbar - the toolbar and form will now use the same shared binder
 		buildScreen(entityViewName, entity.getClass(), toolbar);
-		getCurrentBinder().setBean(entity);
+		typedBinder.setBean(typedEntity);
 	}
 
 	/** Refreshes the grid to show updated data */

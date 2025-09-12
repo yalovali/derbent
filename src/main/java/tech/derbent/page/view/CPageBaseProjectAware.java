@@ -52,6 +52,14 @@ public abstract class CPageBaseProjectAware extends CPageBase implements CProjec
 	}
 
 	protected <T extends CEntityDB<?>> void buildScreen(final String baseViewName, final Class<T> entityClass) {
+		buildScreen(baseViewName, entityClass, null);
+	}
+
+	/** Build screen with optional toolbar integration. Creates its own binder to use for both form and toolbar components.
+	 * @param baseViewName the view name to build
+	 * @param entityClass  the entity class type
+	 * @param toolbar      optional toolbar that will use the same binder (can be null) */
+	protected <T extends CEntityDB<?>> void buildScreen(final String baseViewName, final Class<T> entityClass, final CCrudToolbar<?> toolbar) {
 		try {
 			getBaseDetailsLayout().removeAll();
 			final CDetailSection screen = screenService.findByNameAndProject(sessionService.getActiveProject().orElse(null), baseViewName);
@@ -62,12 +70,19 @@ public abstract class CPageBaseProjectAware extends CPageBase implements CProjec
 				currentBinder = null;
 				return;
 			}
-			// Only create binder if not already set for this entity type
+			// Only create binder if not already set for this entity type or if no current binder exists
 			if (currentBinder == null || !currentBinder.getBeanType().equals(entityClass)) {
 				@SuppressWarnings ("unchecked")
 				final CEnhancedBinder<CEntityDB<?>> localBinder = new CEnhancedBinder<>((Class<CEntityDB<?>>) (Class<?>) entityClass);
 				currentBinder = localBinder;
 			}
+			
+			// Add toolbar to layout if provided - it will use the same binder
+			if (toolbar != null) {
+				getBaseDetailsLayout().add(toolbar);
+			}
+			
+			// Build details using the shared binder
 			detailsBuilder.buildDetails(screen, currentBinder, getBaseDetailsLayout());
 		} catch (final Exception e) {
 			final String errorMsg = "Error building details layout for screen: " + baseViewName;

@@ -45,7 +45,8 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	 * @param binder        the binder for form validation and data binding
 	 * @param entityService the service for CRUD operations
 	 * @param entityClass   the entity class type */
-	public CCrudToolbar(final CEnhancedBinder<EntityClass> binder, final CAbstractService<EntityClass> entityService, final Class<EntityClass> entityClass) {
+	public CCrudToolbar(final CEnhancedBinder<EntityClass> binder, final CAbstractService<EntityClass> entityService,
+			final Class<EntityClass> entityClass) {
 		this.binder = binder;
 		this.entityService = entityService;
 		this.entityClass = entityClass;
