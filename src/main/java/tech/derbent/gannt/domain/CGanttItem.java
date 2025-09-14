@@ -44,31 +44,27 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 		this.hierarchyLevel = hierarchyLevel;
 	}
 
-	/** Extract end date from entity using reflection.
+	/** Extract end date from entity using interface or fallback to cached reflection.
 	 * @param entity The entity to extract from
 	 * @return The end date or null */
 	private LocalDate extractEndDate(final CEntityOfProject<?> entity) {
+		// First try the interface approach
+		if (entity instanceof tech.derbent.abstracts.interfaces.CGanttDisplayable) {
+			return ((tech.derbent.abstracts.interfaces.CGanttDisplayable) entity).getGanttEndDate();
+		}
+		// Fallback to cached reflection for backward compatibility
 		try {
 			// Try dueDate first (for activities)
-			try {
-				final java.lang.reflect.Method method = entity.getClass().getMethod("getDueDate");
-				final LocalDate dueDate = (LocalDate) method.invoke(entity);
-				if (dueDate != null) {
-					return dueDate;
-				}
-			} catch (final Exception ignored) {
-				// Try endDate (for meetings)
+			Object result = tech.derbent.abstracts.utils.CReflectionCache.safeInvoke(entity, "getDueDate");
+			if (result instanceof LocalDate) {
+				return (LocalDate) result;
 			}
-			try {
-				final java.lang.reflect.Method method = entity.getClass().getMethod("getEndDate");
-				final Object endDate = method.invoke(entity);
-				if (endDate instanceof LocalDate) {
-					return (LocalDate) endDate;
-				} else if (endDate instanceof LocalDateTime) {
-					return ((LocalDateTime) endDate).toLocalDate();
-				}
-			} catch (final Exception ignored) {
-				// No end date available
+			// Try endDate (for meetings)
+			result = tech.derbent.abstracts.utils.CReflectionCache.safeInvoke(entity, "getEndDate");
+			if (result instanceof LocalDate) {
+				return (LocalDate) result;
+			} else if (result instanceof LocalDateTime) {
+				return ((LocalDateTime) result).toLocalDate();
 			}
 		} catch (final Exception e) {
 			// Ignore reflection errors
@@ -76,55 +72,53 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 		return null;
 	}
 
-	/** Extract parent ID from entity.
+	/** Extract parent ID from entity using interface or fallback to cached reflection.
 	 * @param entity The entity to extract from
 	 * @return The parent ID or null */
 	private Long extractParentId(final CEntityOfProject<?> entity) {
-		try {
-			final java.lang.reflect.Method method = entity.getClass().getMethod("getParentId");
-			return (Long) method.invoke(entity);
-		} catch (final Exception e) {
-			return null;
+		// First try the interface approach
+		if (entity instanceof tech.derbent.abstracts.interfaces.CGanttDisplayable) {
+			return ((tech.derbent.abstracts.interfaces.CGanttDisplayable) entity).getGanttParentId();
 		}
+		// Fallback to cached reflection for backward compatibility
+		Object result = tech.derbent.abstracts.utils.CReflectionCache.safeInvoke(entity, "getParentId");
+		return result instanceof Long ? (Long) result : null;
 	}
 
-	/** Extract parent type from entity.
+	/** Extract parent type from entity using interface or fallback to cached reflection.
 	 * @param entity The entity to extract from
 	 * @return The parent type or null */
 	private String extractParentType(final CEntityOfProject<?> entity) {
-		try {
-			final java.lang.reflect.Method method = entity.getClass().getMethod("getParentType");
-			return (String) method.invoke(entity);
-		} catch (final Exception e) {
-			return null;
+		// First try the interface approach
+		if (entity instanceof tech.derbent.abstracts.interfaces.CGanttDisplayable) {
+			return ((tech.derbent.abstracts.interfaces.CGanttDisplayable) entity).getGanttParentType();
 		}
+		// Fallback to cached reflection for backward compatibility
+		Object result = tech.derbent.abstracts.utils.CReflectionCache.safeInvoke(entity, "getParentType");
+		return result instanceof String ? (String) result : null;
 	}
 
-	/** Extract start date from entity using reflection.
+	/** Extract start date from entity using interface or fallback to cached reflection.
 	 * @param entity The entity to extract from
 	 * @return The start date or null */
 	private LocalDate extractStartDate(final CEntityOfProject<?> entity) {
+		// First try the interface approach
+		if (entity instanceof tech.derbent.abstracts.interfaces.CGanttDisplayable) {
+			return ((tech.derbent.abstracts.interfaces.CGanttDisplayable) entity).getGanttStartDate();
+		}
+		// Fallback to cached reflection for backward compatibility
 		try {
 			// Try startDate first (for activities)
-			try {
-				final java.lang.reflect.Method method = entity.getClass().getMethod("getStartDate");
-				final LocalDate startDate = (LocalDate) method.invoke(entity);
-				if (startDate != null) {
-					return startDate;
-				}
-			} catch (final Exception ignored) {
-				// Try meetingDate (for meetings)
+			Object result = tech.derbent.abstracts.utils.CReflectionCache.safeInvoke(entity, "getStartDate");
+			if (result instanceof LocalDate) {
+				return (LocalDate) result;
 			}
-			try {
-				final java.lang.reflect.Method method = entity.getClass().getMethod("getMeetingDate");
-				final Object meetingDate = method.invoke(entity);
-				if (meetingDate instanceof LocalDate) {
-					return (LocalDate) meetingDate;
-				} else if (meetingDate instanceof LocalDateTime) {
-					return ((LocalDateTime) meetingDate).toLocalDate();
-				}
-			} catch (final Exception ignored) {
-				// No start date available
+			// Try meetingDate (for meetings)
+			result = tech.derbent.abstracts.utils.CReflectionCache.safeInvoke(entity, "getMeetingDate");
+			if (result instanceof LocalDate) {
+				return (LocalDate) result;
+			} else if (result instanceof LocalDateTime) {
+				return ((LocalDateTime) result).toLocalDate();
 			}
 		} catch (final Exception e) {
 			// Ignore reflection errors
@@ -132,15 +126,23 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 		return null;
 	}
 
-	/** Get the entity color code for visual representation.
+	/** Get the entity color code for visual representation using interface or fallback to cached reflection.
 	 * @return The color code string */
 	public String getColorCode() {
-		try {
-			final java.lang.reflect.Method method = entity.getClass().getMethod("getEntityColorCode");
-			return (String) method.invoke(null);
-		} catch (final Exception e) {
-			return "#6c757d"; // Default gray color
+		// First try the interface approach
+		if (entity instanceof tech.derbent.abstracts.interfaces.CGanttDisplayable) {
+			return ((tech.derbent.abstracts.interfaces.CGanttDisplayable) entity).getGanttColorCode();
 		}
+		// Fallback to cached reflection for backward compatibility
+		try {
+			Object result = tech.derbent.abstracts.utils.CReflectionCache.safeInvoke(entity.getClass(), "getEntityColorCode");
+			if (result instanceof String) {
+				return (String) result;
+			}
+		} catch (final Exception e) {
+			// Ignore reflection errors
+		}
+		return "#6c757d"; // Default gray color
 	}
 
 	/** Get the entity description.

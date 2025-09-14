@@ -21,11 +21,11 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting> implement
 	}
 
 	@Override
-	public List<CMeetingStatus> getAllStatuses() { return List.of(); }
+	public List<CMeetingStatus> getAllStatuses() { return tech.derbent.abstracts.utils.CKanbanUtils.getEmptyStatusList(this.getClass()); }
 
 	@Override
 	public Map<CMeetingStatus, List<CMeeting>> getEntitiesGroupedByStatus(final Long projectId) {
-		return Map.of();
+		return tech.derbent.abstracts.utils.CKanbanUtils.getEmptyGroupedStatus(this.getClass());
 	}
 
 	@Override
@@ -33,9 +33,7 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting> implement
 
 	@Override
 	public CMeeting updateEntityStatus(final CMeeting entity, final CMeetingStatus newStatus) {
-		Check.notNull(entity, "Entity cannot be null");
-		Check.notNull(newStatus, "New status cannot be null");
-		entity.setStatus(newStatus);
+		tech.derbent.abstracts.utils.CKanbanUtils.updateEntityStatusSimple(entity, newStatus, CMeeting::setStatus);
 		return save(entity);
 	}
 }
