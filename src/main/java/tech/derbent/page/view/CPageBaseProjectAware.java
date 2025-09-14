@@ -10,9 +10,9 @@ import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.interfaces.CProjectChangeListener;
 import tech.derbent.abstracts.services.CDetailsBuilder;
+import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.views.components.CDiv;
 import tech.derbent.abstracts.views.components.CFlexLayout;
-import tech.derbent.abstracts.views.components.CVerticalLayout;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CDetailSection;
 import tech.derbent.screens.service.CDetailSectionService;
@@ -74,14 +74,10 @@ public abstract class CPageBaseProjectAware extends CPageBase implements CProjec
 			final CFlexLayout detailsLayout) {
 		try {
 			detailsLayout.removeAll();
-			final CDetailSection screen = screenService.findByNameAndProject(sessionService.getActiveProject().orElse(null), baseViewName);
-			if (screen == null) {
-				final String errorMsg = "Screen not found: " + baseViewName + " for project: "
-						+ sessionService.getActiveProject().map(CProject::getName).orElse("No Project");
-				detailsLayout.add(new CDiv(errorMsg));
-				currentBinder = null;
-				return;
-			}
+			final CDetailSection screen = screenService.findByNameAndProject(
+					sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found for new activity.")),
+					baseViewName);
+			Check.notNull(screen, "Screen not found: " + baseViewName);
 			// Only create binder if not already set for this entity type or if no current binder exists
 			if (currentBinder == null || !currentBinder.getBeanType().equals(entityClass)) {
 				@SuppressWarnings ("unchecked")

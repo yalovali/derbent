@@ -1,8 +1,6 @@
 package tech.derbent.meetings.view;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -16,10 +14,12 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
+import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.service.CMeetingService;
+import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 
@@ -128,19 +128,14 @@ public class CMeetingsView extends CGridViewBaseProject<CMeeting> {
 				// Clear filter - use the existing grid refresh mechanism
 				refreshProjectAwareGrid();
 			} else // Apply filter
-			if (entityService instanceof tech.derbent.abstracts.services.CEntityOfProjectService) {
-				final tech.derbent.abstracts.services.CEntityOfProjectService<CMeeting> projectService =
-						(tech.derbent.abstracts.services.CEntityOfProjectService<CMeeting>) entityService;
-				final Optional<tech.derbent.projects.domain.CProject> activeProject = sessionService.getActiveProject();
-				if (activeProject.isPresent()) {
-					final List<CMeeting> allMeetings = projectService.listByProject(activeProject.get(), Pageable.unpaged()).getContent();
-					final List<CMeeting> filteredMeetings =
-							allMeetings.stream().filter(meeting -> matchesSearchText(meeting, searchText.toLowerCase().trim()))
-									.collect(java.util.stream.Collectors.toList());
-					masterViewSection.setItems(filteredMeetings);
-				} else {
-					masterViewSection.setItems(Collections.emptyList());
-				}
+			if (entityService instanceof CEntityOfProjectService) {
+				final CEntityOfProjectService<CMeeting> projectService = (CEntityOfProjectService<CMeeting>) entityService;
+				CProject activeProject = sessionService.getActiveProject()
+						.orElseThrow(() -> new IllegalStateException("No active project found while filtering meetings with search text."));
+				final List<CMeeting> allMeetings = projectService.listByProject(activeProject, Pageable.unpaged()).getContent();
+				final List<CMeeting> filteredMeetings = allMeetings.stream()
+						.filter(meeting -> matchesSearchText(meeting, searchText.toLowerCase().trim())).collect(java.util.stream.Collectors.toList());
+				masterViewSection.setItems(filteredMeetings);
 			}
 		});
 		// Create toolbar layout

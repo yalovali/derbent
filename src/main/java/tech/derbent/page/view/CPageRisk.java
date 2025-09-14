@@ -32,9 +32,9 @@ public class CPageRisk extends CPageGenericEntity<CRisk> {
 
 	@Override
 	protected CRisk createNewEntityInstance() {
-		CRisk newRisk = new CRisk();
+		CRisk item = new CRisk();
 		// Set project if available
-		sessionService.getActiveProject().ifPresent(newRisk::setProject);
-		return newRisk;
+		item.setProject(sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project set in session")));
+		return item;
 	}
 }
