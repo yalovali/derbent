@@ -1307,27 +1307,103 @@ public class CSampleDataInitializer {
 
 	private void initializePageEntities(final CProject project) {
 		try {
-			// Create sample page entities for the project
-			final CPageEntity page1 = new CPageEntity("Project Overview", project);
-			page1.setDescription("Overview of project objectives, scope, and key milestones");
-			page1.setTitle("pages." + page1.getName());
-			page1.setPageTitle("Project Overview");
-			page1.setRoute("route_index_" + (pageEntityService.countByProject(project) + 1));
-			pageEntityService.save(page1);
-			final CPageEntity page2 = new CPageEntity("Team Directory", project);
-			page2.setDescription("List of team members with roles and contact information");
-			page2.setTitle("pages." + page2.getName());
-			page2.setPageTitle("Team Directory");
-			page2.setRoute("route_index_" + (pageEntityService.countByProject(project) + 1));
-			pageEntityService.save(page2);
-			final CPageEntity page3 = new CPageEntity("Resource Library", project);
-			page3.setDescription("Collection of project-related documents and resources");
-			page3.setTitle("pages." + page3.getName());
-			page3.setPageTitle("Resource Library");
-			page3.setTitle("Resource Library");
-			page3.setRoute("route_index_" + (pageEntityService.countByProject(project) + 1));
-			pageEntityService.save(page3);
-			LOGGER.info("Successfully created sample page entities for project: {}", project.getName());
+			LOGGER.info("Creating sample page entities for project: {}", project.getName());
+			
+			// Page 1: Project Overview (root level)
+			final CPageEntity projectOverview = new CPageEntity("Project Overview", "Project Overview", "project-overview-" + project.getId(), project);
+			projectOverview.setDescription("Overview of project objectives, scope, key milestones and current status");
+			projectOverview.setTitle("Project.Overview");
+			projectOverview.setMenuOrder("5.1");
+			projectOverview.setIcon("vaadin:clipboard-text");
+			projectOverview.setContent(
+				"<h2>Project Objectives</h2>" +
+				"<p>This project aims to deliver comprehensive solutions that meet all stakeholder requirements.</p>" +
+				"<h3>Current Status</h3>" +
+				"<p>The project is currently in the planning phase with initial requirements gathering completed.</p>" +
+				"<h3>Key Milestones</h3>" +
+				"<ul>" +
+				"<li>Requirements Analysis - Completed</li>" +
+				"<li>System Design - In Progress</li>" +
+				"<li>Development Phase - Planned</li>" +
+				"<li>Testing & Deployment - Planned</li>" +
+				"</ul>"
+			);
+			pageEntityService.save(projectOverview);
+
+			// Page 2: Team Directory (under Project submenu)
+			final CPageEntity teamDirectory = new CPageEntity("Team Directory", "Team Directory", "team-directory-" + project.getId(), project);
+			teamDirectory.setDescription("Complete directory of team members with their roles, responsibilities, and contact information");
+			teamDirectory.setTitle("Project.Team.Directory");
+			teamDirectory.setMenuOrder("5.2");
+			teamDirectory.setIcon("vaadin:users");
+			teamDirectory.setContent(
+				"<h2>Project Team</h2>" +
+				"<p>Our dedicated project team brings together diverse expertise to ensure project success.</p>" +
+				"<h3>Core Team Members</h3>" +
+				"<div style='margin: 20px 0;'>" +
+				"<h4>Project Manager</h4>" +
+				"<p><strong>Mehmet Karadeniz</strong><br>" +
+				"Email: mkaradeniz@derbent.tech<br>" +
+				"Role: Overall project coordination and stakeholder management</p>" +
+				"<h4>Lead Developer</h4>" +
+				"<p><strong>Muhammed Şahin</strong><br>" +
+				"Email: msahin@derbent.tech<br>" +
+				"Role: Technical leadership and architecture design</p>" +
+				"<h4>System Analyst</h4>" +
+				"<p><strong>Can Özdemir</strong><br>" +
+				"Email: cozdemir@derbent.tech<br>" +
+				"Role: Requirements analysis and system design</p>" +
+				"</div>" +
+				"<h3>Contact Information</h3>" +
+				"<p>For project-related inquiries, please contact the appropriate team member or reach out to the project manager.</p>"
+			);
+			pageEntityService.save(teamDirectory);
+
+			// Page 3: Resource Library (under Project submenu)
+			final CPageEntity resourceLibrary = new CPageEntity("Resource Library", "Resource Library", "resource-library-" + project.getId(), project);
+			resourceLibrary.setDescription("Centralized repository of project documents, templates, references, and other important resources");
+			resourceLibrary.setTitle("Project.Resources.Library");
+			resourceLibrary.setMenuOrder("5.3");
+			resourceLibrary.setIcon("vaadin:archive");
+			resourceLibrary.setContent(
+				"<h2>Project Resources</h2>" +
+				"<p>Access all project-related documents, templates, and reference materials from this central library.</p>" +
+				"<h3>Document Categories</h3>" +
+				"<div style='margin: 20px 0;'>" +
+				"<h4>📋 Project Documentation</h4>" +
+				"<ul>" +
+				"<li>Project Charter and Scope Document</li>" +
+				"<li>Requirements Specification</li>" +
+				"<li>Technical Architecture Document</li>" +
+				"<li>Risk Assessment and Mitigation Plan</li>" +
+				"</ul>" +
+				"<h4>📝 Templates</h4>" +
+				"<ul>" +
+				"<li>Meeting Minutes Template</li>" +
+				"<li>Status Report Template</li>" +
+				"<li>Change Request Form</li>" +
+				"<li>Testing Documentation Template</li>" +
+				"</ul>" +
+				"<h4>📚 Reference Materials</h4>" +
+				"<ul>" +
+				"<li>Technical Standards and Guidelines</li>" +
+				"<li>Best Practices Documentation</li>" +
+				"<li>External API Documentation</li>" +
+				"<li>Coding Standards and Conventions</li>" +
+				"</ul>" +
+				"<h4>🔧 Tools and Utilities</h4>" +
+				"<ul>" +
+				"<li>Development Environment Setup Guide</li>" +
+				"<li>Deployment Scripts and Procedures</li>" +
+				"<li>Testing Tools and Configurations</li>" +
+				"<li>Project Management Tool Access</li>" +
+				"</ul>" +
+				"</div>" +
+				"<p><em>All resources are regularly updated to ensure accuracy and relevance to the current project phase.</em></p>"
+			);
+			pageEntityService.save(resourceLibrary);
+
+			LOGGER.info("Successfully created {} sample page entities for project: {}", 3, project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error creating sample page entities for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize page entities for project: " + project.getName(), e);
