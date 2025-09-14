@@ -40,7 +40,7 @@ public abstract class CBaseUITest {
 	private BrowserContext context;
 	protected Page page;
 	@LocalServerPort
-	protected int port;
+	protected int port = 8080;
 
 	@BeforeEach
 	void setupTestEnvironment() {

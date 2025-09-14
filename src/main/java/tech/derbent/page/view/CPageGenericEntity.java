@@ -71,7 +71,10 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 
 	protected void createMasterSection() {
 		// Create and configure grid
-		CGridEntity gridEntity = gridEntityService.findByNameAndProject(viewName, sessionService.getActiveProject().orElseThrow()).orElse(null);
+		CGridEntity gridEntity = gridEntityService
+				.findByNameAndProject(viewName,
+						sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found for new activity.")))
+				.orElse(null);
 		grid = new CComponentGridEntity(gridEntity);
 		// Listen for selection changes from the grid
 		grid.addSelectionChangeListener(event -> {
@@ -131,27 +134,24 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 		// Clear the details section since the entity no longer exists
 		getBaseDetailsLayout().removeAll();
 		// Try to select the next item in the grid or the first item if no next item
-		if (grid != null) {
-			grid.selectNextItem();
-		}
+		grid.selectNextItem();
 	}
 
 	/** Implementation of CEntityUpdateListener - called when an entity is saved */
 	@Override
 	public void onEntitySaved(CEntityDB<?> entity) {
 		LOGGER.debug("Entity saved notification received: {}", entity != null ? entity.getClass().getSimpleName() : "null");
+		Check.notNull(entity, "Saved entity cannot be null");
+		Check.notNull(grid, "Grid component is not initialized");
 		refreshGrid();
-		// Keep the same item selected in the grid after save
-		if (entity != null && grid != null) {
-			try {
-				// Refresh the grid and then re-select the saved entity
-				refreshGrid();
-				// Try to re-select the saved entity in the grid
-				grid.selectEntity(entity);
-				LOGGER.debug("Re-selected saved entity in grid: {}", entity.getId());
-			} catch (Exception e) {
-				LOGGER.warn("Error re-selecting entity after save: {}", e.getMessage());
-			}
+		try {
+			// Refresh the grid and then re-select the saved entity
+			refreshGrid();
+			// Try to re-select the saved entity in the grid
+			grid.selectEntity(entity);
+			LOGGER.debug("Re-selected saved entity in grid: {}", entity.getId());
+		} catch (Exception e) {
+			LOGGER.warn("Error re-selecting entity after save: {}", e.getMessage());
 		}
 	}
 
@@ -283,52 +283,47 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 
 	/** Refreshes the grid to show updated data */
 	protected void refreshGrid() {
-		if (grid != null) {
-			try {
-				// Use reflection to call the private refreshGridData method
-				java.lang.reflect.Method refreshMethod = grid.getClass().getDeclaredMethod("refreshGridData");
-				refreshMethod.setAccessible(true);
-				refreshMethod.invoke(grid);
-				LOGGER.debug("Grid refreshed successfully");
-			} catch (Exception e) {
-				LOGGER.warn("Error refreshing grid: {}", e.getMessage());
-			}
+		Check.notNull(grid, "Grid component is not initialized");
+		try {
+			// Use reflection to call the private refreshGridData method
+			java.lang.reflect.Method refreshMethod = grid.getClass().getDeclaredMethod("refreshGridData");
+			refreshMethod.setAccessible(true);
+			refreshMethod.invoke(grid);
+			LOGGER.debug("Grid refreshed successfully");
+		} catch (Exception e) {
+			LOGGER.warn("Error refreshing grid: {}", e.getMessage());
 		}
 	}
 
 	/** Sets the layout service for managing split layout orientation.
 	 * @param layoutService the layout service */
 	public void setLayoutService(final CLayoutService layoutService) {
+		Check.notNull(layoutService, "Layout service cannot be null");
 		this.layoutService = layoutService;
-		if (layoutService != null) {
-			layoutService.addLayoutChangeListener(this);
-			updateLayoutOrientation();
-		}
+		layoutService.addLayoutChangeListener(this);
+		updateLayoutOrientation();
 	}
 
 	/** Updates the split layout orientation based on the current layout mode */
 	private void updateLayoutOrientation() {
-		if ((layoutService != null) && (splitLayout != null)) {
-			final CLayoutService.LayoutMode currentMode = layoutService.getCurrentLayoutMode();
-			// LOGGER.debug("Updating layout orientation to: {} for {}", currentMode, getClass().getSimpleName());
-			if (currentMode == CLayoutService.LayoutMode.HORIZONTAL) {
-				splitLayout.setOrientation(SplitLayout.Orientation.HORIZONTAL);
-				// For horizontal layout, give more space to the grid (left side)
-				splitLayout.setSplitterPosition(50.0); // 50% for grid, 50% for details
-			} else {
-				splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
-				// For vertical layout, give more space to the grid (top)
-				splitLayout.setSplitterPosition(30.0); // 30% for grid, 70% for details
-			}
-			// Force UI refresh to apply changes immediately
-			getUI().ifPresent(ui -> ui.access(() -> {
-				splitLayout.getElement().callJsFunction("$server.requestUpdate");
-			}));
+		Check.notNull(splitLayout, "Split layout is not initialized");
+		Check.notNull(sessionService, "Session service is not initialized");
+		Check.notNull(layoutService, "Layout service is not set");
+		final CLayoutService.LayoutMode currentMode = layoutService.getCurrentLayoutMode();
+		// LOGGER.debug("Updating layout orientation to: {} for {}", currentMode, getClass().getSimpleName());
+		if (currentMode == CLayoutService.LayoutMode.HORIZONTAL) {
+			splitLayout.setOrientation(SplitLayout.Orientation.HORIZONTAL);
+			// For horizontal layout, give more space to the grid (left side)
+			splitLayout.setSplitterPosition(50.0); // 50% for grid, 50% for details
 		} else {
-			// Default fallback when no layout service is available
 			splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
-			splitLayout.setSplitterPosition(30.0);
+			// For vertical layout, give more space to the grid (top)
+			splitLayout.setSplitterPosition(30.0); // 30% for grid, 70% for details
 		}
+		// Force UI refresh to apply changes immediately
+		getUI().ifPresent(ui -> ui.access(() -> {
+			splitLayout.getElement().callJsFunction("$server.requestUpdate");
+		}));
 	}
 
 	/** Creates a new entity instance.

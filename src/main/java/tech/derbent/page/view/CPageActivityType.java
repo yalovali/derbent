@@ -61,7 +61,8 @@ public class CPageActivityType extends CPageGenericEntity<CActivityType> {
 	protected CActivityType createNewEntityInstance() {
 		CActivityType newActivityType = new CActivityType();
 		// Set project if available
-		sessionService.getActiveProject().ifPresent(newActivityType::setProject);
+		newActivityType.setProject(
+				sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found for new activity type.")));
 		return newActivityType;
 	}
 }

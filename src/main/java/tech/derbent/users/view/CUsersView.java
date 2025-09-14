@@ -148,11 +148,7 @@ public class CUsersView extends CGridViewBaseNamed<CUser> {
 
 	@Override
 	protected void updateDetailsComponent() throws Exception {
-		/**********************/
-		// final CScreen screen = screenService.findByNameAndProject(sessionService.getActiveProject().orElse(null), CUserViewService.BASE_VIEW_NAME);
-		// detailsBuilder.buildDetails(screen, getBinder(), getBaseDetailsLayout());
 		buildScreen(CUserViewService.BASE_VIEW_NAME);
-		/**********************/
 		projectSettingsGrid = new CPanelUserProjectSettings(getCurrentEntity(), getBinder(), (CUserService) entityService, userTypeService,
 				companyService, projectService, userProjectSettingsService);
 		addAccordionPanel(projectSettingsGrid);

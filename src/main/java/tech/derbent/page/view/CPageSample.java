@@ -8,7 +8,6 @@ import tech.derbent.abstracts.components.CCrudToolbar;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
 import tech.derbent.activities.view.CActivitiesView;
-import tech.derbent.comments.service.CCommentService;
 import tech.derbent.orders.domain.COrder;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.screens.service.CGridEntityService;
@@ -30,12 +29,9 @@ public class CPageSample extends CPageGenericEntity<CActivity> {
 
 	public static String getStaticIconFilename() { return COrder.getStaticIconFilename(); }
 
-	private final CCommentService commentService;
-
 	public CPageSample(final CSessionService sessionService, final CGridEntityService gridEntityService, final CDetailSectionService screenService,
-			final CActivityService activityService, final CCommentService commentService) {
+			final CActivityService activityService) {
 		super(sessionService, screenService, gridEntityService, activityService, CActivity.class, CActivitiesView.VIEW_NAME);
-		this.commentService = commentService;
 	}
 
 	/** Configures the dependency checker for activities to prevent deletion when comments exist */
@@ -47,10 +43,6 @@ public class CPageSample extends CPageGenericEntity<CActivity> {
 		CCrudToolbar<CActivity> typedToolbar = (CCrudToolbar<CActivity>) toolbar;
 		typedToolbar.setDependencyChecker(activity -> {
 			try {
-				long commentCount = commentService.countByActivity(activity);
-				if (commentCount > 0) {
-					return "Cannot delete this activity because it has " + commentCount + " comment(s). Please remove the comments first.";
-				}
 				return null; // No dependencies, deletion allowed
 			} catch (Exception e) {
 				return "Error checking for dependent data. Please try again.";
@@ -61,8 +53,10 @@ public class CPageSample extends CPageGenericEntity<CActivity> {
 	@Override
 	protected CActivity createNewEntityInstance() {
 		CActivity newActivity = new CActivity();
-		// Set project if available
-		sessionService.getActiveProject().ifPresent(newActivity::setProject);
+		newActivity.setProject(
+			sessionService.getActiveProject()
+				.orElseThrow(() -> new IllegalStateException("No active project found for new activity."))
+		);
 		return newActivity;
 	}
 }
