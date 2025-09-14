@@ -25,13 +25,13 @@ public class CDecisionsView extends CGridViewBaseProject<CDecision> {
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "Decisions View";
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
-		return CDecision.getIconColorCode(); // Use the static method from CDecision
+	public static String getStaticIconColorCode() {
+		return CDecision.getStaticIconColorCode(); // Use the static method from CDecision
 	}
 
-	public static String getIconFilename() { return CDecision.getIconFilename(); }
+	public static String getStaticIconFilename() { return CDecision.getStaticIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "decision_id";
 

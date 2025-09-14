@@ -16,11 +16,11 @@ import tech.derbent.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "pageentity_id"))
 public class CPageEntity extends CProjectItem<CPageEntity> {
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() { return "#207bff"; }
+	public static String getStaticIconColorCode() { return "#207bff"; }
 
-	public static String getIconFilename() { return "vaadin:tasks"; }
+	public static String getStaticIconFilename() { return "vaadin:tasks"; }
 
 	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CPageEntityView.class; }
 
@@ -89,7 +89,7 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		icon = getIconFilename();
+		icon = getStaticIconFilename();
 		menuOrder = "1.1";
 		// must be unique
 		route = "UnknownHTTPRoute";

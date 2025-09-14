@@ -32,13 +32,13 @@ public class CMeetingsView extends CGridViewBaseProject<CMeeting> {
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "Meetings View";
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
-		return CMeeting.getIconColorCode(); // Use the static method from CMeeting
+	public static String getStaticIconColorCode() {
+		return CMeeting.getStaticIconColorCode(); // Use the static method from CMeeting
 	}
 
-	public static String getIconFilename() { return CMeeting.getIconFilename(); }
+	public static String getStaticIconFilename() { return CMeeting.getStaticIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "meeting_id";
 	private TextField searchField;

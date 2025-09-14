@@ -38,13 +38,13 @@ public class CSystemSettingsView extends CAbstractPage {
 
 	private static final long serialVersionUID = 1L;
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
+	public static String getStaticIconColorCode() {
 		return "#6c757d"; // Gray color for setup/admin
 	}
 
-	public static String getIconFilename() { return "vaadin:tools"; }
+	public static String getStaticIconFilename() { return "vaadin:tools"; }
 
 	private final CSystemSettingsService systemSettingsService;
 	private CSystemSettings currentSettings;

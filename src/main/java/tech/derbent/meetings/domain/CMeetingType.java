@@ -17,13 +17,13 @@ import tech.derbent.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "cmeetingtype_id"))
 public class CMeetingType extends CTypeEntity<CMeetingType> implements CKanbanType {
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
+	public static String getStaticIconColorCode() {
 		return "#28a745"; // Green color for meeting type entities
 	}
 
-	public static String getIconFilename() { return "vaadin:tags"; }
+	public static String getStaticIconFilename() { return "vaadin:tags"; }
 
 	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CMeetingTypeView.class; }
 

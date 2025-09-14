@@ -26,11 +26,11 @@ public class CUserTypeView extends CGridViewBaseProject<CUserType> {
 
 	private static final long serialVersionUID = 1L;
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() { return CUserType.getIconColorCode(); }
+	public static String getStaticIconColorCode() { return CUserType.getStaticIconColorCode(); }
 
-	public static String getIconFilename() { return CUserType.getIconFilename(); }
+	public static String getStaticIconFilename() { return CUserType.getStaticIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "user_type_id";
 

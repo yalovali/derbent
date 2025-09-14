@@ -18,13 +18,13 @@ public class CExampleHierarchicalMenuView extends Div implements IDisplayView {
 
 	private static final long serialVersionUID = 1L;
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
+	public static String getStaticIconColorCode() {
 		return "var(--lumo-primary-color)"; // Primary color for examples
 	}
 
-	public static String getIconFilename() { return "vaadin:tree-table"; }
+	public static String getStaticIconFilename() { return "vaadin:tree-table"; }
 
 	public CExampleHierarchicalMenuView() {
 		// Create content to demonstrate the hierarchical menu

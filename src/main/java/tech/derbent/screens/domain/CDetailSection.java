@@ -27,11 +27,11 @@ import tech.derbent.screens.view.CDetailSectionView;
 @AttributeOverride (name = "id", column = @Column (name = "detailsection_id"))
 public class CDetailSection extends CEntityOfProject<CDetailSection> {
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() { return "#6f42c1"; }
+	public static String getStaticIconColorCode() { return "#6f42c1"; }
 
-	public static String getIconFilename() { return "vaadin:viewport"; }
+	public static String getStaticIconFilename() { return "vaadin:viewport"; }
 
 	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CDetailSectionView.class; }
 

@@ -21,9 +21,9 @@ public class CPageRisk extends CPageGenericEntity<CRisk> {
 
 	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getStaticIconColorCode() { return CRisk.getIconColorCode(); }
+	public static String getStaticIconColorCode() { return CRisk.getStaticIconColorCode(); }
 
-	public static String getStaticIconFilename() { return CRisk.getIconFilename(); }
+	public static String getStaticIconFilename() { return CRisk.getStaticIconFilename(); }
 
 	public CPageRisk(final CSessionService sessionService, final CGridEntityService gridEntityService, final CDetailSectionService screenService,
 			final CRiskService riskService) {

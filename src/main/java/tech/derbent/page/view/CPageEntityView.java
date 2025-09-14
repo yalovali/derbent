@@ -9,7 +9,6 @@ import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
 import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
-import tech.derbent.activities.domain.CActivity;
 import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.page.service.CPageEntityService;
 import tech.derbent.screens.service.CDetailSectionService;
@@ -24,17 +23,17 @@ public final class CPageEntityView extends CGridViewBaseProject<CPageEntity> {
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "Pages View";
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
-		return CActivity.getIconColorCode(); // Use the static method from CActivity
+	public static String getStaticIconColorCode() {
+		return CPageEntity.getStaticIconColorCode(); // Use the static method from CActivity
 	}
 
 	public CPageEntityView(final CPageEntityService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
 		super(CPageEntity.class, entityService, sessionService, screenService);
 	}
 
-	public static String getIconFilename() { return CPageEntity.getIconFilename(); }
+	public static String getStaticIconFilename() { return CPageEntity.getStaticIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "pageentity_id";
 

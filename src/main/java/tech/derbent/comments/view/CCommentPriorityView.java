@@ -25,14 +25,14 @@ public class CCommentPriorityView extends CGridViewBaseProject<CCommentPriority>
 
 	private static final long serialVersionUID = 1L;
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
-		return CCommentPriority.getIconColorCode(); // Use the static method from
-													// CActivity
+	public static String getStaticIconColorCode() {
+		return CCommentPriority.getStaticIconColorCode(); // Use the static method from
+		// CActivity
 	}
 
-	public static String getIconFilename() { return CCommentPriority.getIconFileName(); }
+	public static String getStaticIconFilename() { return CCommentPriority.getStaticIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "ccommentpriority_id";
 

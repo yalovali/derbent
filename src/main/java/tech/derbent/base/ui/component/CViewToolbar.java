@@ -245,7 +245,7 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 		final String title = CColorUtils.getTitleForView(clazz);
 		final String route = CColorUtils.getRouteForView(clazz);
 		final Icon icon = CColorUtils.getIconForViewClass(clazz);
-		final String color = CColorUtils.getIconColorCode(clazz);
+		final String color = CColorUtils.getStaticIconColorCode(clazz);
 		return createColorfulIconButton(icon, title, color, route);
 	}
 

@@ -8,7 +8,6 @@ import tech.derbent.abstracts.components.CCrudToolbar;
 import tech.derbent.activities.domain.CActivityType;
 import tech.derbent.activities.service.CActivityTypeService;
 import tech.derbent.activities.view.CActivityTypeView;
-import tech.derbent.orders.domain.COrder;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.session.service.CSessionService;
@@ -27,7 +26,7 @@ public class CPageActivityType extends CPageGenericEntity<CActivityType> {
 		return "#007bff"; // Blue color for activity type entities
 	}
 
-	public static String getStaticIconFilename() { return CActivityType.getIconFilename(); }
+	public static String getStaticIconFilename() { return CActivityType.getStaticIconFilename(); }
 
 	private final CActivityTypeService activityTypeService;
 

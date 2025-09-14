@@ -25,13 +25,13 @@ public class CMeetingKanbanBoardView extends CBaseKanbanBoardView<CMeeting, CMee
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingKanbanBoardView.class);
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
+	public static String getStaticIconColorCode() {
 		return "#28a745"; // Green color for meetings
 	}
 
-	public static String getIconFilename() { return "vaadin:calendar"; }
+	public static String getStaticIconFilename() { return "vaadin:calendar"; }
 
 	/** Constructor for CMeetingKanbanBoardView.
 	 * @param meetingService the meeting service for data operations

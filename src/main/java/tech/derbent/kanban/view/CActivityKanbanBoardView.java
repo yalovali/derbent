@@ -36,13 +36,13 @@ public class CActivityKanbanBoardView extends VerticalLayout implements CProject
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityKanbanBoardView.class);
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
+	public static String getStaticIconColorCode() {
 		return "#fd7e14"; // Orange color for Kanban boards
 	}
 
-	public static String getIconFilename() { return "vaadin:dashboard"; }
+	public static String getStaticIconFilename() { return "vaadin:dashboard"; }
 
 	private final CActivityService activityService;
 	private final CSessionService sessionService;

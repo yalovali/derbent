@@ -28,7 +28,7 @@ public class CPageSample extends CPageGenericEntity<CActivity> {
 		return "#102bff"; // Blue color for activity entities
 	}
 
-	public static String getStaticIconFilename() { return COrder.getIconFilename(); }
+	public static String getStaticIconFilename() { return COrder.getStaticIconFilename(); }
 
 	private final CCommentService commentService;
 

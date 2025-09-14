@@ -25,11 +25,11 @@ public class CRiskStatusView extends CGridViewBaseProject<CRiskStatus> {
 
 	private static final long serialVersionUID = 1L;
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() { return CRiskStatus.getIconColorCode(); }
+	public static String getStaticIconColorCode() { return CRiskStatus.getStaticIconColorCode(); }
 
-	public static String getIconFilename() { return CRiskStatus.getIconFilename(); }
+	public static String getStaticIconFilename() { return CRiskStatus.getStaticIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "risk_status_id";
 

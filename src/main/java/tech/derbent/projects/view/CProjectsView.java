@@ -30,13 +30,13 @@ public class CProjectsView extends CGridViewBaseNamed<CProject> {
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "Projects View";
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
-		return CProject.getIconColorCode(); // Use the static method from CProject
+	public static String getStaticIconColorCode() {
+		return CProject.getStaticIconColorCode(); // Use the static method from CProject
 	}
 
-	public static String getIconFilename() { return CProject.getIconFilename(); }
+	public static String getStaticIconFilename() { return CProject.getStaticIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "project_id";
 	private CPanelProjectUsers projectUsersPanel;

@@ -5,7 +5,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.annotations.CEntityFormBuilder;
-import tech.derbent.abstracts.domains.IDisplayEntity;
 import tech.derbent.abstracts.views.components.CVerticalLayout;
 import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
@@ -25,14 +24,14 @@ public class CActivityStatusView extends CGridViewBaseProject<CActivityStatus> {
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "Activity Statuses View";
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
-		return CActivityStatus.getIconColorCode(); // Use the static method from
-													// CActivityStatus
+	public static String getStaticIconColorCode() {
+		return CActivityStatus.getStaticIconColorCode(); // Use the static method from
+		// CActivityStatus
 	}
 
-	public static String getIconFilename() { return IDisplayEntity.resolveIconFilename(CActivityStatus.class); }
+	public static String getStaticIconFilename() { return CActivityStatus.getStaticIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "activity_status_id";
 

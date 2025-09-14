@@ -33,13 +33,13 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable, CFieldInf
 
 	public static String getDisplayNameStatic() { return "User"; }
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
+	public static String getStaticIconColorCode() {
 		return "#6f42c1"; // Purple color for user entities
 	}
 
-	public static String getIconFilename() { return "vaadin:users"; }
+	public static String getStaticIconFilename() { return "vaadin:users"; }
 
 	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CUsersView.class; }
 

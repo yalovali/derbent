@@ -25,13 +25,13 @@ public class CGenericActivityKanbanBoardView extends CBaseKanbanBoardView<CActiv
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CGenericActivityKanbanBoardView.class);
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
+	public static String getStaticIconColorCode() {
 		return "#fd7e14"; // Orange color for Kanban boards
 	}
 
-	public static String getIconFilename() { return "vaadin:grid-big"; }
+	public static String getStaticIconFilename() { return "vaadin:grid-big"; }
 
 	/** Constructor for CGenericActivityKanbanBoardView.
 	 * @param activityService the activity service for data operations

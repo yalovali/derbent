@@ -23,13 +23,13 @@ public class CMasterSectionView extends CGridViewBaseProject<CMasterSection> {
 
 	private static final long serialVersionUID = 1L;
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
-		return CDetailSection.getIconColorCode(); // Use the static method from CScreen
+	public static String getStaticIconColorCode() {
+		return CDetailSection.getStaticIconColorCode(); // Use the static method from CScreen
 	}
 
-	public static String getIconFilename() { return CDetailSection.getIconFilename(); }
+	public static String getStaticIconFilename() { return CDetailSection.getStaticIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "master_section_id";
 

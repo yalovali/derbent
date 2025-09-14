@@ -26,13 +26,13 @@ public final class CActivitiesView extends CGridViewBaseProject<CActivity> {
 	private static final long serialVersionUID = 1L;
 	public final static String VIEW_NAME = "Activities View";
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
-		return CActivity.getIconColorCode(); // Use the static method from CActivity
+	public static String getStaticIconColorCode() {
+		return CActivity.getStaticIconColorCode(); // Use the static method from CActivity
 	}
 
-	public static String getIconFilename() { return CActivity.getIconFilename(); }
+	public static String getStaticIconFilename() { return CActivity.getStaticIconFilename(); }
 
 	private final CCommentService commentService;
 	private final String ENTITY_ID_FIELD = "activity_id";

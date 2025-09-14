@@ -23,14 +23,14 @@ public class CGanntViewEntityView extends CGridViewBaseProject<CGanntViewEntity>
 
 	private static final long serialVersionUID = 1L;
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
-		return CGanntViewEntity.getIconColorCode(); // Use the static method from CScreen
+	public static String getStaticIconColorCode() {
+		return CGanntViewEntity.getStaticIconColorCode(); // Use the static method from CScreen
 	}
 
-	public static String getIconFilename() {
-		return Optional.ofNullable(CGanntViewEntity.getIconFilename()).orElseThrow(() -> new IllegalArgumentException("Value cannot be null"));
+	public static String getStaticIconFilename() {
+		return Optional.ofNullable(CGanntViewEntity.getStaticIconFilename()).orElseThrow(() -> new IllegalArgumentException("Value cannot be null"));
 	}
 
 	private final String ENTITY_ID_FIELD = "screen_id";

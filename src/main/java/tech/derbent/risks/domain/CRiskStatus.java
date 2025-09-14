@@ -18,13 +18,13 @@ import tech.derbent.risks.view.CRiskStatusView;
 @AttributeOverride (name = "id", column = @Column (name = "criskstatus_id"))
 public class CRiskStatus extends CStatus<CRiskStatus> {
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
+	public static String getStaticIconColorCode() {
 		return "#6c757d"; // Gray color for status entities
 	}
 
-	public static String getIconFilename() { return "vaadin:flag"; }
+	public static String getStaticIconFilename() { return "vaadin:flag"; }
 
 	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CRiskStatusView.class; }
 

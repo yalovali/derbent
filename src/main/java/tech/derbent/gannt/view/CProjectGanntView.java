@@ -8,7 +8,6 @@ import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseGannt;
-import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
 import tech.derbent.gannt.domain.CGanntViewEntity;
 import tech.derbent.gannt.service.CGanntViewEntityService;
@@ -24,13 +23,13 @@ public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 
 	private static final long serialVersionUID = 1L;
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
-		return CActivity.getIconColorCode(); // Use the static method from CActivity
+	public static String getStaticIconColorCode() {
+		return CGanntViewEntity.getStaticIconColorCode(); // Use the static method from CActivity
 	}
 
-	public static String getIconFilename() { return CGanntViewEntity.getIconFilename(); }
+	public static String getStaticIconFilename() { return CGanntViewEntity.getStaticIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "ganntview_id";
 

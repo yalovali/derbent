@@ -14,11 +14,11 @@ import tech.derbent.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "ganntview_id"))
 public class CGanntViewEntity extends CEntityOfProject<CGanntViewEntity> {
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() { return "#1f3221"; }
+	public static String getStaticIconColorCode() { return "#1f3221"; }
 
-	public static String getIconFilename() { return "vaadin:viewport"; }
+	public static String getStaticIconFilename() { return "vaadin:viewport"; }
 
 	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CGanntViewEntityView.class; }
 

@@ -24,13 +24,13 @@ public class CCompanyView extends CGridViewBaseNamed<CCompany> {
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "Company View";
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
-		return CCompany.getIconColorCode(); // Use the static method from CCompany
+	public static String getStaticIconColorCode() {
+		return CCompany.getStaticIconColorCode(); // Use the static method from CCompany
 	}
 
-	public static String getIconFilename() { return CCompany.getIconFilename(); }
+	public static String getStaticIconFilename() { return CCompany.getStaticIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "company_id";
 

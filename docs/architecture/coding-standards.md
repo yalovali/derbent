@@ -28,9 +28,9 @@ public class CActivity extends CEntityOfProject<CActivity> {
 
 ### Icon & Color Standards
 ```java
-public static String getIconFilename() { return "vaadin:tasks"; }
-public static String getIconColorCode() { return "#007bff"; }
-public static String getEntityColorCode() { return getIconColorCode(); }
+public static String getStaticIconFilename() { return "vaadin:tasks"; }
+public static String getStaticIconColorCode() { return "#007bff"; }
+public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 ```
 
 ## Service Layer

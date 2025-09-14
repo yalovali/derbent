@@ -20,13 +20,13 @@ import tech.derbent.risks.view.CRiskView;
 @AttributeOverride (name = "id", column = @Column (name = "risk_id"))
 public class CRisk extends CEntityOfProject<CRisk> {
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
+	public static String getStaticIconColorCode() {
 		return "#dc3545"; // Red color for risk entities
 	}
 
-	public static String getIconFilename() { return "vaadin:warning"; }
+	public static String getStaticIconFilename() { return "vaadin:warning"; }
 
 	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CRiskView.class; }
 

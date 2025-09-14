@@ -25,7 +25,8 @@
     background-color: transparent;
     box-shadow: none;
     padding: 0;
-	border-bottom: 1px solid transparent;
+	border: 1px solid lightgray;	
+	border-radius: 5px;
 	/*background: linear-gradient(to right, gray, transparent);*/
 
 
@@ -33,8 +34,9 @@
 
 ::part(input-field):focus-within {
     background-color: var(--lumo-base-color);
-    border-radius: var(--lumo-border-radius);
+    border-radius: 5px;
 	border-bottom: 1px solid var(--lumo-primary-color);
+	/*margin-bottom: -2px;*/
 }
 
 .form-field-ComboBox{

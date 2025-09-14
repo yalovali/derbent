@@ -19,13 +19,13 @@ import tech.derbent.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "decision_status_id"))
 public class CDecisionStatus extends CStatus<CDecisionStatus> {
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
+	public static String getStaticIconColorCode() {
 		return "#dc3545"; // Red color for decision status entities
 	}
 
-	public static String getIconFilename() { return "vaadin:flag"; }
+	public static String getStaticIconFilename() { return "vaadin:flag"; }
 
 	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CDecisionStatusView.class; }
 

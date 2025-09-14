@@ -25,11 +25,11 @@ public class CActivityTypeView extends CGridViewBaseProject<CActivityType> {
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "Activity Types View";
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() { return CActivityType.getIconColorCode(); }
+	public static String getStaticIconColorCode() { return CActivityType.getStaticIconColorCode(); }
 
-	public static String getIconFilename() { return CActivityType.getIconFilename(); }
+	public static String getStaticIconFilename() { return CActivityType.getStaticIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "activity_type_id";
 

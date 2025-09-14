@@ -22,11 +22,11 @@ public class CCurrencyView extends CGridViewBaseProject<CCurrency> {
 
 	private static final long serialVersionUID = 1L;
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() { return CCurrency.getIconColorCode(); }
+	public static String getStaticIconColorCode() { return CCurrency.getStaticIconColorCode(); }
 
-	public static String getIconFilename() { return CCurrency.getIconFilename(); }
+	public static String getStaticIconFilename() { return CCurrency.getStaticIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "order_id";
 

@@ -21,13 +21,13 @@ import tech.derbent.users.domain.CUserProjectSettings;
 @AttributeOverride (name = "id", column = @Column (name = "project_id"))
 public class CProject extends CEntityNamed<CProject> implements CSearchable {
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
+	public static String getStaticIconColorCode() {
 		return "#fd7e14"; // Orange color for project entities
 	}
 
-	public static String getIconFilename() { return "vaadin:briefcase"; }
+	public static String getStaticIconFilename() { return "vaadin:briefcase"; }
 
 	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CProjectsView.class; }
 

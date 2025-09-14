@@ -28,13 +28,13 @@ import tech.derbent.users.domain.CUser;
 @AttributeOverride (name = "id", column = @Column (name = "order_id"))
 public class COrder extends CEntityOfProject<COrder> {
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
+	public static String getStaticIconColorCode() {
 		return "#20c997"; // Teal color for order entities
 	}
 
-	public static String getIconFilename() { return "vaadin:cart"; }
+	public static String getStaticIconFilename() { return "vaadin:cart"; }
 
 	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return COrdersView.class; }
 

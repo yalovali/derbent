@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
+import tech.derbent.abstracts.components.CComponentDetailsMasterToolbar;
 import tech.derbent.abstracts.components.CCrudToolbar;
 import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.domains.CEntityDB;
@@ -80,8 +81,11 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 				LOGGER.error("Error handling entity selection", e);
 			}
 		});
+		CVerticalLayout gridLayout = new CVerticalLayout();
+		gridLayout.add(new CComponentDetailsMasterToolbar(grid));
+		gridLayout.add(grid);
 		// Add grid to the primary (left) section
-		splitLayout.addToPrimary(grid);
+		splitLayout.addToPrimary(gridLayout);
 		this.add(splitLayout);
 		// Create details section with toolbar and scrollable content
 	}
@@ -170,7 +174,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 	 * @return a configured CCrudToolbar instance */
 	protected CCrudToolbar<EntityClass> createCrudToolbar(final CEnhancedBinder<EntityClass> typedBinder, final EntityClass typedEntity) {
 		// Use static factory method to create toolbar
-		CCrudToolbar<EntityClass> toolbar = CCrudToolbar.create(typedBinder, entityService, entityClass);
+		CCrudToolbar<EntityClass> toolbar = new CCrudToolbar(typedBinder, entityService, entityClass);
 		toolbar.setCurrentEntity(typedEntity);
 		toolbar.setNewEntitySupplier(this::createNewEntityInstance);
 		toolbar.setRefreshCallback((currentEntity) -> {

@@ -19,13 +19,13 @@ public class CCommentPriority extends CTypeEntity<CCommentPriority> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCommentPriority.class);
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
+	public static String getStaticIconColorCode() {
 		return "#FF9800"; // Default color for comment priority icon
 	}
 
-	public static String getIconFileName() { return "vaadin:exclamation-circle"; }
+	public static String getStaticIconFilename() { return "vaadin:exclamation-circle"; }
 
 	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CCommentPriorityView.class; }
 

@@ -16,13 +16,13 @@ import tech.derbent.users.view.CUserTypeView;
 @AttributeOverride (name = "id", column = @Column (name = "cusertype_id"))
 public class CUserType extends CEntityOfProject<CUserType> {
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
+	public static String getStaticIconColorCode() {
 		return "#6f42c1"; // Purple color for user type entities
 	}
 
-	public static String getIconFilename() { return "vaadin:group"; }
+	public static String getStaticIconFilename() { return "vaadin:group"; }
 
 	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CUserTypeView.class; }
 

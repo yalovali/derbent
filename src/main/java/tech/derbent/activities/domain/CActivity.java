@@ -38,13 +38,13 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivity.class);
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
+	public static String getStaticIconColorCode() {
 		return "#007bff"; // Blue color for activity entities
 	}
 
-	public static String getIconFilename() { return "vaadin:tasks"; }
+	public static String getStaticIconFilename() { return "vaadin:tasks"; }
 
 	public static Class<?> getViewClassStatic() { return CActivitiesView.class; }
 

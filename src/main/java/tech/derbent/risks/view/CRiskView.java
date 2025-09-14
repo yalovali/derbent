@@ -24,13 +24,13 @@ public class CRiskView extends CGridViewBaseProject<CRisk> {
 	private static final String ENTITY_ID_FIELD = "risk_id";
 	public static final String VIEW_NAME = "Risks View";
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
-		return CRisk.getIconColorCode(); // Use the static method from CRisk
+	public static String getStaticIconColorCode() {
+		return CRisk.getStaticIconColorCode(); // Use the static method from CRisk
 	}
 
-	public static String getIconFilename() { return CRisk.getIconFilename(); }
+	public static String getStaticIconFilename() { return CRisk.getStaticIconFilename(); }
 
 	public CRiskView(final CRiskService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
 		super(CRisk.class, entityService, sessionService, screenService);

@@ -15,13 +15,13 @@ import tech.derbent.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "cactivitytype_id"))
 public class CActivityType extends CTypeEntity<CActivityType> implements CKanbanType {
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
+	public static String getStaticIconColorCode() {
 		return "#007bff"; // Blue color for activity type entities
 	}
 
-	public static String getIconFilename() { return "vaadin:tags"; }
+	public static String getStaticIconFilename() { return "vaadin:tags"; }
 
 	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CActivityTypeView.class; }
 

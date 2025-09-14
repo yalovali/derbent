@@ -25,11 +25,11 @@ public class CDecisionStatusView extends CGridViewBaseProject<CDecisionStatus> {
 
 	private static final long serialVersionUID = 1L;
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() { return CDecisionStatus.getIconColorCode(); }
+	public static String getStaticIconColorCode() { return CDecisionStatus.getStaticIconColorCode(); }
 
-	public static String getIconFilename() { return CDecisionStatus.getIconFilename(); }
+	public static String getStaticIconFilename() { return CDecisionStatus.getStaticIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "decision_status_id";
 

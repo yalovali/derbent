@@ -29,13 +29,13 @@ public class CDecision extends CEntityOfProject<CDecision> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDecision.class);
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
+	public static String getStaticIconColorCode() {
 		return "#dc3545"; // Red color for decision entities
 	}
 
-	public static String getIconFilename() { return "vaadin:gavel"; }
+	public static String getStaticIconFilename() { return "vaadin:gavel"; }
 
 	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CDecisionsView.class; }
 

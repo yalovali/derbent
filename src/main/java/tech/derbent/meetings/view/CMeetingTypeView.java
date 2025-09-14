@@ -23,11 +23,11 @@ public class CMeetingTypeView extends CGridViewBaseProject<CMeetingType> {
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "Meeting Types View";
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() { return CMeetingType.getIconColorCode(); }
+	public static String getStaticIconColorCode() { return CMeetingType.getStaticIconColorCode(); }
 
-	public static String getIconFilename() { return CMeetingType.getIconFilename(); }
+	public static String getStaticIconFilename() { return CMeetingType.getStaticIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "meetingtype_id";
 

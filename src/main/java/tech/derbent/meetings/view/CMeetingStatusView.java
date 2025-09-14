@@ -23,11 +23,11 @@ public class CMeetingStatusView extends CGridViewBaseProject<CMeetingStatus> {
 
 	private static final long serialVersionUID = 1L;
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() { return CMeetingStatus.getIconColorCode(); }
+	public static String getStaticIconColorCode() { return CMeetingStatus.getStaticIconColorCode(); }
 
-	public static String getIconFilename() { return CMeetingStatus.getIconFilename(); }
+	public static String getStaticIconFilename() { return CMeetingStatus.getStaticIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "meeting_status_id";
 

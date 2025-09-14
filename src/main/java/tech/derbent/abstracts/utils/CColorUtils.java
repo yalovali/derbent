@@ -78,7 +78,7 @@ public final class CColorUtils {
 			return typeEntity.getColor();
 		}
 		if (entity instanceof CEntityDB) {
-			return CAuxillaries.invokeStaticMethodOfStr(entity.getClass().getName(), "getEntityColorCode");
+			return CAuxillaries.invokeStaticMethodOfStr(entity.getClass().getName(), "getStaticEntityColorCode");
 		}
 		LOGGER.debug("Entity of type {} does not support color extraction", entity.getClass().getSimpleName());
 		return null;
@@ -131,36 +131,36 @@ public final class CColorUtils {
 		return item.toString();
 	}
 
-	public static String getEntityColorCode(final String className) throws Exception {
-		return CAuxillaries.invokeStaticMethodOfStr(className, "getEntityColorCode");
+	public static String getStaticEntityColorCode(final String className) throws Exception {
+		return CAuxillaries.invokeStaticMethodOfStr(className, "getStaticEntityColorCode");
 	}
 
-	public static String getIconColorCode(final Class<?> clazz) throws Exception {
-		return CAuxillaries.invokeStaticMethodOfStr(clazz, "getIconColorCode");
+	public static String getStaticIconColorCode(final Class<?> clazz) throws Exception {
+		return CAuxillaries.invokeStaticMethodOfStr(clazz, "getStaticIconColorCode");
 	}
 
-	public static String getIconColorCode(final String className) throws Exception {
-		return CAuxillaries.invokeStaticMethodOfStr(className, "getIconColorCode");
+	public static String getStaticIconColorCode(final String className) throws Exception {
+		return CAuxillaries.invokeStaticMethodOfStr(className, "getStaticIconColorCode");
 	}
 
-	public static String getIconFilename(final Class<?> clazz) throws Exception {
-		return CAuxillaries.invokeStaticMethodOfStr(clazz, "getIconFilename");
+	public static String getStaticIconFilename(final Class<?> clazz) throws Exception {
+		return CAuxillaries.invokeStaticMethodOfStr(clazz, "getStaticIconFilename");
 	}
 
-	public static String getIconFilename(final String className) throws Exception {
-		return CAuxillaries.invokeStaticMethodOfStr(className, "getIconFilename");
+	public static String getStaticIconFilename(final String className) throws Exception {
+		return CAuxillaries.invokeStaticMethodOfStr(className, "getStaticIconFilename");
 	}
 
 	public static Icon getIconForEntity(final CEntityDB<?> entity) throws Exception {
-		return new Icon(getIconFilename(entity.getClass().getName()));
+		return new Icon(getStaticIconFilename(entity.getClass().getName()));
 	}
 
 	public static Icon getIconForViewClass(final CAbstractNamedEntityPage<?> view) throws Exception {
-		return new Icon(getIconFilename(view.getClass().getName()));
+		return new Icon(getStaticIconFilename(view.getClass().getName()));
 	}
 
 	public static Icon getIconForViewClass(final Class<? extends CAbstractNamedEntityPage<?>> clazz) throws Exception {
-		return new Icon(getIconFilename(clazz));
+		return new Icon(getStaticIconFilename(clazz));
 	}
 
 	public static String getRouteForView(final Class<? extends CAbstractNamedEntityPage<?>> clazz) {

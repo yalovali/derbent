@@ -19,13 +19,13 @@ import tech.derbent.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "currency_id"))
 public class CCurrency extends CEntityOfProject<CCurrency> {
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
+	public static String getStaticIconColorCode() {
 		return "#20c917"; // Teal color for order entities
 	}
 
-	public static String getIconFilename() { return "vaadin:dollar"; }
+	public static String getStaticIconFilename() { return "vaadin:dollar"; }
 
 	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CCurrencyView.class; }
 

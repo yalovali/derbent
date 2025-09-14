@@ -29,13 +29,13 @@ public class CGridEntityView extends CGridViewBaseProject<CGridEntity> {
 
 	private static final long serialVersionUID = 1L;
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
-		return CGridEntity.getIconColorCode(); // Use the static method from CScreen
+	public static String getStaticIconColorCode() {
+		return CGridEntity.getStaticIconColorCode(); // Use the static method from CScreen
 	}
 
-	public static String getIconFilename() { return CGridEntity.getIconFilename(); }
+	public static String getStaticIconFilename() { return CGridEntity.getStaticIconFilename(); }
 
 	private final String ENTITY_ID_FIELD = "grid_entity_id";
 	private CFieldSelectionComponent fieldSelectionComponent;

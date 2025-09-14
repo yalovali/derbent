@@ -22,14 +22,14 @@ import tech.derbent.companies.view.CCompanyView;
 @AttributeOverride (name = "id", column = @Column (name = "company_id"))
 public class CCompany extends CEntityNamed<CCompany> {
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
 	// name and description fields are now inherited from CEntityNamed
-	public static String getIconColorCode() {
+	public static String getStaticIconColorCode() {
 		return "#6c757d"; // Gray color for company entities
 	}
 
-	public static String getIconFilename() { return "vaadin:building"; }
+	public static String getStaticIconFilename() { return "vaadin:building"; }
 
 	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CCompanyView.class; }
 

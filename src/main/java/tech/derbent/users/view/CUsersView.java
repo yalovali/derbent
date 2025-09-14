@@ -36,13 +36,13 @@ public class CUsersView extends CGridViewBaseNamed<CUser> {
 	public static final String ENTITY_ROUTE_TEMPLATE_EDIT = "cusersview/%s/edit";
 	public static final String VIEW_NAME = "Users View";
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
-		return CUser.getIconColorCode(); // Use the static method from CUser
+	public static String getStaticIconColorCode() {
+		return CUser.getStaticIconColorCode(); // Use the static method from CUser
 	}
 
-	public static String getIconFilename() { return CUser.getIconFilename(); }
+	public static String getStaticIconFilename() { return CUser.getStaticIconFilename(); }
 
 	// private PasswordField passwordField;
 	private final String ENTITY_ID_FIELD = "user_id";

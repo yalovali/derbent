@@ -41,13 +41,13 @@ public final class CDashboardView extends CAbstractPage {
 
 	private static final long serialVersionUID = 1L;
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
+	public static String getStaticIconColorCode() {
 		return "var(--lumo-primary-color)"; // Primary color for dashboard
 	}
 
-	public static String getIconFilename() { return "vaadin:home"; }
+	public static String getStaticIconFilename() { return "vaadin:home"; }
 
 	private final CProjectService projectService;
 	private final CUserService userService;

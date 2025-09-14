@@ -52,7 +52,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			if (iconName.startsWith("class:")) {
 				// get icon from class
 				try {
-					this.iconName = CColorUtils.getIconFilename(iconName.replace("class:", ""));
+					this.iconName = CColorUtils.getStaticIconFilename(iconName.replace("class:", ""));
 				} catch (Exception e) {
 					LOGGER.warn("Check route information for icon retrieval. Probably missing Class path or function.");
 					throw e;
@@ -65,7 +65,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			this.targetLevelKey = targetLevelKey;
 			this.isNavigation = isNavigation;
 			// get icon with full class name
-			this.iconColor = CColorUtils.getIconColorCode(clazz.getName());
+			this.iconColor = CColorUtils.getStaticIconColorCode(clazz.getName());
 		}
 
 		public Component createComponent() {
@@ -278,7 +278,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		final String path = menuEntry.path();
 		final String icon = menuEntry.icon();
 		// get menu view class color
-		// final String iconColor = CIconSetLoader.getIconColorCode(menuEntry.menu);
+		// final String iconColor = CIconSetLoadergetStaticIconColorCode(menuEntry.menu);
 		Check.notBlank(title, "Menu entry title must not be blank");
 		// Split title by dots to get hierarchy levels (up to 4 levels)
 		final String[] titleParts = title.split("\\.");

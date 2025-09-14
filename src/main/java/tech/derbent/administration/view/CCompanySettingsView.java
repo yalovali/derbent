@@ -28,13 +28,13 @@ public class CCompanySettingsView extends CGridViewBaseDBEntity<CCompanySettings
 
 	private static final long serialVersionUID = 1L;
 
-	public static String getEntityColorCode() { return getIconColorCode(); }
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
 
-	public static String getIconColorCode() {
+	public static String getStaticIconColorCode() {
 		return "#6c757d"; // Gray color for admin/settings
 	}
 
-	public static String getIconFilename() { return "vaadin:cogs"; }
+	public static String getStaticIconFilename() { return "vaadin:cogs"; }
 
 	private final String ENTITY_ID_FIELD = "company_settings_id";
 	private final CCompanySettingsService companySettingsService;
