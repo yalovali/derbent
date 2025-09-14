@@ -6,10 +6,11 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.views.components.CButton;
+import tech.derbent.screens.domain.CGridEntity;
 import tech.derbent.screens.view.CComponentGridEntity;
 import tech.derbent.screens.view.CFieldSelectionDialog;
-import tech.derbent.screens.domain.CGridEntity;
 
 public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 
@@ -59,27 +60,23 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 
 	private void handleEditGridEntity() {
 		try {
-			if (grid != null) {
-				// Get current grid entity information
-				CGridEntity gridEntity = getCurrentGridEntity();
-				if (gridEntity != null) {
-					String entityType = extractEntityTypeFromService(gridEntity.getDataServiceBeanName());
-					String currentSelections = gridEntity.getSelectedFields();
-					// Open field selection dialog
-					CFieldSelectionDialog dialog = new CFieldSelectionDialog(entityType, currentSelections, selectedFields -> {
-						// Update grid entity with new field selection
-						String newSelectionString = selectedFields.stream().map(fs -> fs.getFieldInfo().getFieldName() + ":" + fs.getOrder())
-								.reduce((a, b) -> a + "," + b).orElse("");
-						gridEntity.setSelectedFields(newSelectionString);
-						// Refresh grid
-						grid.refreshGrid();
-						Notification.show("Grid columns updated successfully");
-					});
-					dialog.open();
-				} else {
-					Notification.show("No grid entity found for editing", 3000, Notification.Position.MIDDLE);
-				}
-			}
+			Check.notNull(grid, "Grid component is not set");
+			// Get current grid entity information
+			CGridEntity gridEntity = getCurrentGridEntity();
+			Check.notNull(gridEntity, "No grid entity found for the current grid");
+			String entityType = extractEntityTypeFromService(gridEntity.getDataServiceBeanName());
+			String currentSelections = gridEntity.getSelectedFields();
+			// Open field selection dialog
+			CFieldSelectionDialog dialog = new CFieldSelectionDialog(entityType, currentSelections, selectedFields -> {
+				// Update grid entity with new field selection
+				String newSelectionString = selectedFields.stream().map(fs -> fs.getFieldInfo().getFieldName() + ":" + fs.getOrder())
+						.reduce((a, b) -> a + "," + b).orElse("");
+				gridEntity.setSelectedFields(newSelectionString);
+				// Refresh grid
+				grid.refreshGrid();
+				Notification.show("Grid columns updated successfully");
+			});
+			dialog.open();
 		} catch (Exception e) {
 			LOGGER.error("Error opening grid editor", e);
 			Notification.show("Error opening grid editor: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
@@ -88,10 +85,7 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 
 	/** Gets the current grid entity being displayed */
 	private CGridEntity getCurrentGridEntity() {
-		// This would normally be provided by the parent context
-		// For now, return null - this needs to be connected to the actual grid context
-		LOGGER.warn("getCurrentGridEntity() not implemented - needs integration with parent view");
-		return null;
+		return grid != null ? grid.getGridEntity() : null;
 	}
 
 	/** Extracts entity type from service bean name */
@@ -101,11 +95,5 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 			return serviceBeanName.substring(0, serviceBeanName.length() - "Service".length());
 		}
 		return null;
-	}
-
-	/** Sets the grid entity for editing */
-	public void setGridEntity(CGridEntity gridEntity) {
-		// This method can be called by the parent to set the current grid entity
-		// Implementation would depend on the parent view structure
 	}
 }

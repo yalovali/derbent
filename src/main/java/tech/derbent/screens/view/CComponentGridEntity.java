@@ -68,6 +68,10 @@ public class CComponentGridEntity extends CDiv implements CProjectChangeListener
 		createContent();
 	}
 
+	public CGridEntity getGridEntity() { return gridEntity; }
+
+	public void setGridEntity(CGridEntity gridEntity) { this.gridEntity = gridEntity; }
+
 	@Override
 	protected void onAttach(AttachEvent attachEvent) {
 		super.onAttach(attachEvent);
