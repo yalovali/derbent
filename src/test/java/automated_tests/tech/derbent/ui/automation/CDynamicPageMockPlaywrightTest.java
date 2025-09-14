@@ -18,9 +18,8 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.TestPropertySource;
 
 /** Mock Playwright test for the Dynamic Page System that demonstrates the comprehensive testing capabilities without requiring browser installation.
- * This creates sample screenshots showing all aspects of the dynamic page system testing.
- * 
- * Note: This test does NOT inherit from CBaseUITest to avoid browser dependencies. */
+ * This creates sample screenshots showing all aspects of the dynamic page system testing. Note: This test does NOT inherit from CBaseUITest to avoid
+ * browser dependencies. */
 @SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class)
 @TestPropertySource (properties = {
 		"spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa", "spring.datasource.password=",
@@ -201,81 +200,175 @@ public class CDynamicPageMockPlaywrightTest {
 
 	private void drawGenericPageContent(Graphics2D g2d, String pageName) {
 		g2d.setColor(Color.BLACK);
-		g2d.setFont(new Font("Arial", Font.PLAIN, 14));
-		g2d.drawString("Dynamic page content for: " + pageName, 220, 190);
-		g2d.drawString("This page is dynamically loaded from the database", 220, 220);
-		g2d.drawString("Content can include rich HTML, images, and interactive elements", 220, 250);
-		// Sample content blocks
-		for (int i = 0; i < 5; i++) {
-			g2d.setStroke(new BasicStroke(1));
-			g2d.drawRect(240, 280 + i * 60, 600, 50);
-			g2d.drawString("Content block " + (i + 1) + " for " + pageName, 250, 305 + i * 60);
+		g2d.setFont(new Font("Arial", Font.BOLD, 16));
+		if (pageName.equals("project-roadmap")) {
+			g2d.drawString("🗺️ Project Roadmap", 220, 190);
+			g2d.setFont(new Font("Arial", Font.PLAIN, 14));
+			g2d.drawString("Strategic timeline with quarterly objectives and milestones", 220, 220);
+			// Draw roadmap timeline
+			String[] quarters = {
+					"Q1 2024: Foundation", "Q2 2024: Development", "Q3 2024: Testing", "Q4 2024: Launch"
+			};
+			for (int i = 0; i < quarters.length; i++) {
+				g2d.setColor(new Color(25, 118, 210));
+				g2d.fillRect(240 + i * 200, 260, 180, 40);
+				g2d.setColor(Color.WHITE);
+				g2d.setFont(new Font("Arial", Font.BOLD, 12));
+				g2d.drawString(quarters[i], 250 + i * 200, 285);
+			}
+		} else if (pageName.equals("quality-standards")) {
+			g2d.drawString("🏆 Quality Standards", 220, 190);
+			g2d.setFont(new Font("Arial", Font.PLAIN, 14));
+			g2d.drawString("Comprehensive quality assurance framework and testing procedures", 220, 220);
+			// Quality metrics
+			String[] metrics = {
+					"97.2% Code Coverage", "0 Critical Issues", "1.8s Avg Response", "99.8% Uptime"
+			};
+			for (int i = 0; i < metrics.length; i++) {
+				g2d.setColor(new Color(198, 40, 40));
+				g2d.fillRect(240 + i * 180, 260, 160, 50);
+				g2d.setColor(Color.WHITE);
+				g2d.setFont(new Font("Arial", Font.BOLD, 12));
+				g2d.drawString(metrics[i], 250 + i * 180, 290);
+			}
+		} else if (pageName.equals("communication-hub")) {
+			g2d.drawString("📢 Communication Hub", 220, 190);
+			g2d.setFont(new Font("Arial", Font.PLAIN, 14));
+			g2d.drawString("Central communication center for stakeholder updates and announcements", 220, 220);
+			// Recent updates
+			String[] updates = {
+					"Sprint 3 Completed", "Security Audit Passed", "Training Schedule Released"
+			};
+			for (int i = 0; i < updates.length; i++) {
+				g2d.setColor(new Color(69, 90, 100));
+				g2d.fillRect(240, 260 + i * 60, 600, 45);
+				g2d.setColor(Color.WHITE);
+				g2d.setFont(new Font("Arial", Font.BOLD, 12));
+				g2d.drawString("📰 " + updates[i], 250, 285 + i * 60);
+			}
+		} else {
+			// Default content
+			g2d.drawString("Dynamic page content for: " + pageName, 220, 190);
+			g2d.setFont(new Font("Arial", Font.PLAIN, 14));
+			g2d.drawString("This page is dynamically loaded from the database", 220, 220);
+			g2d.drawString("Content can include rich HTML, images, and interactive elements", 220, 250);
+			// Sample content blocks
+			for (int i = 0; i < 5; i++) {
+				g2d.setStroke(new BasicStroke(1));
+				g2d.drawRect(240, 280 + i * 60, 600, 50);
+				g2d.drawString("Content block " + (i + 1) + " for " + pageName, 250, 305 + i * 60);
+			}
 		}
 	}
 
 	/** Creates a mock screenshot showing the Project Pages overview with navigation. */
 	private void createProjectPagesOverviewMock() throws Exception {
-		BufferedImage image = new BufferedImage(1200, 800, BufferedImage.TYPE_INT_RGB);
+		BufferedImage image = new BufferedImage(1400, 1000, BufferedImage.TYPE_INT_RGB);
 		Graphics2D g2d = image.createGraphics();
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 		// Background
 		g2d.setColor(Color.WHITE);
-		g2d.fillRect(0, 0, 1200, 800);
+		g2d.fillRect(0, 0, 1400, 1000);
 		// Header
-		g2d.setColor(new Color(156, 39, 176));
-		g2d.fillRect(0, 0, 1200, 80);
+		g2d.setColor(new Color(25, 118, 210));
+		g2d.fillRect(0, 0, 1400, 80);
 		g2d.setColor(Color.WHITE);
 		g2d.setFont(new Font("Arial", Font.BOLD, 24));
-		g2d.drawString("Derbent - Project Pages Overview", 20, 45);
+		g2d.drawString("🏢 Derbent - Project Pages Overview", 20, 45);
 		// Navigation menu
 		g2d.setColor(new Color(245, 245, 245));
-		g2d.fillRect(0, 80, 200, 720);
+		g2d.fillRect(0, 80, 200, 920);
+		g2d.setColor(Color.BLACK);
+		g2d.setFont(new Font("Arial", Font.PLAIN, 14));
+		String[] menuItems = {
+				"📊 Dashboard", "📁 Projects", "📋 Activities", "👥 Meetings", "👤 Users", "📄 Project Pages"
+		};
+		for (int i = 0; i < menuItems.length; i++) {
+			if (menuItems[i].contains("Project Pages")) {
+				g2d.setColor(new Color(25, 118, 210));
+				g2d.fillRect(10, 120 + i * 35 - 5, 180, 30);
+				g2d.setColor(Color.WHITE);
+			}
+			g2d.drawString(menuItems[i], 20, 120 + i * 35 + 15);
+			g2d.setColor(Color.BLACK);
+		}
 		// Page grid
 		g2d.setColor(Color.BLACK);
-		g2d.setFont(new Font("Arial", Font.BOLD, 18));
-		g2d.drawString("Available Project Pages", 220, 120);
-		// Page cards
+		g2d.setFont(new Font("Arial", Font.BOLD, 20));
+		g2d.drawString("📚 Available Project Pages", 220, 120);
+		g2d.setFont(new Font("Arial", Font.PLAIN, 14));
+		g2d.drawString("Comprehensive collection of project-specific pages with rich content and professional icons", 220, 145);
+		// Enhanced page cards with better icons and design
 		String[][] pages = {
 				{
-						"Project Overview", "/project-overview", "Comprehensive project information and status"
+						"Project Overview", "/project-overview", "📊", "Comprehensive project status and milestones", "#1976d2"
 				}, {
-						"Team Directory", "/team-directory", "Team member profiles and contact information"
+						"Team Directory", "/team-directory", "👥", "Team member profiles and contact information", "#7b1fa2"
 				}, {
-						"Resource Library", "/resource-library", "Documents, templates, and knowledge base"
+						"Resource Library", "/resource-library", "📚", "Documents, templates, and knowledge base", "#d32f2f"
+				}, {
+						"Project Roadmap", "/project-roadmap", "🗺️", "Strategic timeline and future planning", "#00796b"
+				}, {
+						"Quality Standards", "/quality-standards", "🏆", "Quality assurance and testing procedures", "#c62828"
+				}, {
+						"Communication Hub", "/communication-hub", "📢", "Stakeholder updates and announcements", "#455a64"
 				}
 		};
+		// Draw cards in 2 columns
 		for (int i = 0; i < pages.length; i++) {
-			// Card
+			int col = i % 2;
+			int row = i / 2;
+			int x = 240 + col * 450;
+			int y = 180 + row * 140;
+			// Card background
 			g2d.setColor(new Color(248, 249, 250));
-			g2d.fillRect(240, 150 + i * 120, 900, 100);
-			g2d.setColor(new Color(63, 81, 181));
-			g2d.drawRect(240, 150 + i * 120, 900, 100);
-			// Page icon
-			g2d.setColor(new Color(63, 81, 181));
-			g2d.fillRect(260, 170 + i * 120, 60, 60);
+			g2d.fillRect(x, y, 420, 120);
+			// Card border with page color
+			Color pageColor = Color.decode(pages[i][4]);
+			g2d.setColor(pageColor);
+			g2d.setStroke(new BasicStroke(2));
+			g2d.drawRect(x, y, 420, 120);
+			// Icon background
+			g2d.fillRect(x + 15, y + 15, 60, 60);
 			g2d.setColor(Color.WHITE);
-			g2d.setFont(new Font("Arial", Font.BOLD, 24));
-			g2d.drawString("📄", 280, 210 + i * 120);
-			// Page info
-			g2d.setColor(Color.BLACK);
+			g2d.setFont(new Font("Arial", Font.BOLD, 30));
+			g2d.drawString(pages[i][2], x + 35, y + 55);
+			// Page title
+			g2d.setColor(pageColor);
 			g2d.setFont(new Font("Arial", Font.BOLD, 16));
-			g2d.drawString(pages[i][0], 340, 185 + i * 120);
+			g2d.drawString(pages[i][0], x + 90, y + 30);
+			// Route
+			g2d.setColor(Color.GRAY);
+			g2d.setFont(new Font("Arial", Font.ITALIC, 12));
+			g2d.drawString("Route: " + pages[i][1], x + 90, y + 50);
+			// Description
+			g2d.setColor(Color.BLACK);
 			g2d.setFont(new Font("Arial", Font.PLAIN, 12));
-			g2d.drawString("Route: " + pages[i][1], 340, 205 + i * 120);
-			g2d.drawString(pages[i][2], 340, 225 + i * 120);
+			g2d.drawString(pages[i][3], x + 90, y + 70);
 			// View button
 			g2d.setColor(new Color(76, 175, 80));
-			g2d.fillRect(1000, 180 + i * 120, 100, 30);
+			g2d.fillRect(x + 320, y + 85, 80, 25);
 			g2d.setColor(Color.WHITE);
-			g2d.setFont(new Font("Arial", Font.BOLD, 12));
-			g2d.drawString("VIEW PAGE", 1015, 200 + i * 120);
+			g2d.setFont(new Font("Arial", Font.BOLD, 10));
+			g2d.drawString("VIEW PAGE", x + 335, y + 100);
 		}
+		// Status info
+		g2d.setColor(new Color(232, 245, 233));
+		g2d.fillRect(220, 900, 1150, 80);
+		g2d.setColor(new Color(46, 125, 50));
+		g2d.fillRect(220, 900, 5, 80);
+		g2d.setColor(new Color(27, 94, 32));
+		g2d.setFont(new Font("Arial", Font.BOLD, 16));
+		g2d.drawString("✅ Enhanced Page System Features", 240, 925);
+		g2d.setFont(new Font("Arial", Font.PLAIN, 12));
+		g2d.drawString("• Professional icons with brand colors  • Rich HTML content with modern styling  • Responsive design support", 240, 945);
+		g2d.drawString("• Database-driven content  • Project-aware filtering  • Comprehensive Playwright test coverage", 240, 965);
 		g2d.dispose();
 		String filename = "mock-project-pages-overview-" + System.currentTimeMillis() + ".png";
 		File outputFile = new File("target/screenshots/" + filename);
 		ImageIO.write(image, "png", outputFile);
-		LOGGER.info("📸 Project pages overview mock screenshot saved: {}", filename);
+		LOGGER.info("📸 Enhanced project pages overview mock screenshot saved: {}", filename);
 	}
 
 	/** Tests the dynamic page system mock functionality by creating comprehensive screenshots. */
@@ -288,11 +381,16 @@ public class CDynamicPageMockPlaywrightTest {
 			// Create project pages overview
 			LOGGER.info("📖 Creating Project Pages overview mock...");
 			createProjectPagesOverviewMock();
-			// Create individual page mocks
+			// Create individual page mocks - original 3 pages
 			LOGGER.info("📄 Creating individual dynamic page mocks...");
 			createDynamicPageMockScreenshot("project-overview", "Project Overview", "Comprehensive project information, status, and milestones");
 			createDynamicPageMockScreenshot("team-directory", "Team Directory", "Team member profiles, roles, and contact information");
 			createDynamicPageMockScreenshot("resource-library", "Resource Library", "Project documents, templates, and knowledge base");
+			// Create new enhanced page mocks
+			LOGGER.info("🆕 Creating enhanced page mocks...");
+			createDynamicPageMockScreenshot("project-roadmap", "Project Roadmap", "Strategic timeline and future planning with quarterly objectives");
+			createDynamicPageMockScreenshot("quality-standards", "Quality Standards", "Quality assurance framework and testing procedures");
+			createDynamicPageMockScreenshot("communication-hub", "Communication Hub", "Stakeholder updates, announcements, and key contacts");
 			// Create workflow summary
 			createDynamicPageWorkflowSummary();
 			LOGGER.info("✅ Dynamic page system mock screenshots created successfully");
