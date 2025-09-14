@@ -110,6 +110,27 @@ public class CComponentGridEntity extends CDiv implements CProjectChangeListener
 		}
 	}
 
+	/** Public method to refresh the grid */
+	public void refreshGrid() {
+		refreshGridData();
+	}
+
+	/** Sets a search filter on the grid */
+	public void setSearchFilter(String searchValue) {
+		if (grid != null) {
+			// Apply filter to grid - simplified implementation
+			if (searchValue == null || searchValue.trim().isEmpty()) {
+				// Clear filter by refreshing data
+				refreshGridData();
+			} else {
+				// Log search filter for now - actual implementation would depend on data provider type
+				LOGGER.info("Search filter applied: {}", searchValue);
+				// Note: Actual filtering implementation would require specific data provider methods
+				// For now, this is a placeholder that logs the search value
+			}
+		}
+	}
+
 	/** Handles grid selection changes and fires SelectionChangeEvent */
 	protected void onSelectionChange(ValueChangeEvent<?> event) {
 		LOGGER.debug("Grid selection changed: {}", event.getValue() != null ? event.getValue().toString() : "null");

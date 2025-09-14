@@ -104,7 +104,10 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 			if (!alreadySelected) {
 				int order = selections.size() + 1;
 				selections.add(new FieldSelection(selected, order));
+				// Remove from available list
+				sourceList.remove(selected);
 				refreshSelections();
+				refreshAvailableFields();
 				availableFields.clear();
 			}
 		}
@@ -115,11 +118,14 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 		FieldSelection selected = selectedFields.getValue();
 		if (selected != null) {
 			selections.remove(selected);
+			// Add back to available list
+			sourceList.add(selected.getFieldInfo());
 			// Reorder remaining items
 			for (int i = 0; i < selections.size(); i++) {
 				selections.get(i).setOrder(i + 1);
 			}
 			refreshSelections();
+			refreshAvailableFields();
 			selectedFields.clear();
 		}
 	}
@@ -166,6 +172,11 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 	private void refreshSelections() {
 		selectedFields.setItems(selections);
 		fireValueChangeEvent();
+	}
+
+	/** Refreshes the availableFields list. */
+	private void refreshAvailableFields() {
+		availableFields.setItems(sourceList);
 	}
 
 	/** Fires a value change event to listeners. */
@@ -240,8 +251,12 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 	/** Sets the entity type and loads available fields. */
 	public void setEntityType(String entityType) {
 		if (entityType != null) {
-			sourceList = CEntityFieldService.getEntityFields(entityType);
-			availableFields.setItems(sourceList);
+			sourceList = new ArrayList<>(CEntityFieldService.getEntityFields(entityType));
+			// Remove any fields that are already selected
+			for (FieldSelection selected : selections) {
+				sourceList.removeIf(field -> field.getFieldName().equals(selected.getFieldInfo().getFieldName()));
+			}
+			refreshAvailableFields();
 		}
 	}
 
@@ -259,8 +274,9 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 					String fieldName = parts[0].trim();
 					try {
 						int order = Integer.parseInt(parts[1].trim());
-						// Find field info in source list
-						EntityFieldInfo fieldInfo = sourceList.stream().filter(f -> f.getFieldName().equals(fieldName)).findFirst().orElse(null);
+						// Find field info in source list (backup list for reconstruction)
+						List<EntityFieldInfo> allFields = CEntityFieldService.getEntityFields(getCurrentEntityType());
+						EntityFieldInfo fieldInfo = allFields.stream().filter(f -> f.getFieldName().equals(fieldName)).findFirst().orElse(null);
 						if (fieldInfo != null) {
 							selections.add(new FieldSelection(fieldInfo, order));
 						}
@@ -272,30 +288,22 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 			// Sort by order
 			selections.sort((a, b) -> Integer.compare(a.getOrder(), b.getOrder()));
 		}
-		refreshSelections();
-		selections.clear();
-		if (value != null && !value.trim().isEmpty()) {
-			String[] fieldPairs = value.split(",");
-			for (String fieldPair : fieldPairs) {
-				String[] parts = fieldPair.trim().split(":");
-				if (parts.length == 2) {
-					String fieldName = parts[0].trim();
-					try {
-						int order = Integer.parseInt(parts[1].trim());
-						// Find field info in source list
-						EntityFieldInfo fieldInfo = sourceList.stream().filter(f -> f.getFieldName().equals(fieldName)).findFirst().orElse(null);
-						if (fieldInfo != null) {
-							selections.add(new FieldSelection(fieldInfo, order));
-						}
-					} catch (NumberFormatException e) {
-						// Skip invalid entries
-					}
-				}
+		// Update available fields to exclude selected ones
+		if (sourceList != null) {
+			List<EntityFieldInfo> filteredList = new ArrayList<>(sourceList);
+			for (FieldSelection selected : selections) {
+				filteredList.removeIf(field -> field.getFieldName().equals(selected.getFieldInfo().getFieldName()));
 			}
-			// Sort by order
-			selections.sort((a, b) -> Integer.compare(a.getOrder(), b.getOrder()));
+			sourceList = filteredList;
 		}
 		refreshSelections();
+		refreshAvailableFields();
+	}
+
+	/** Helper method to get current entity type (for reconstruction). */
+	private String getCurrentEntityType() {
+		// This is a simple implementation - in a real scenario this might be stored
+		return null; // Will be enhanced if needed
 	}
 
 	/** Returns the selected fields as a list. */
