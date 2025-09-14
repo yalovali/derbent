@@ -59,19 +59,17 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 			description = "Use like, Project.Page, separate parent with . ", hidden = false, order = 70, maxLength = 100
 	)
 	private String title;
-	
 	@Column (nullable = false)
 	@AMetaData (
 			displayName = "Requires Authentication", required = false, readOnly = false, defaultValue = "true",
 			description = "Whether this page requires user authentication", hidden = false, order = 80
 	)
 	private boolean requiresAuthentication = true;
-	
 	@Column (nullable = true, length = 10000)
 	@Size (max = 10000)
 	@AMetaData (
-			displayName = "Page Content", required = false, readOnly = false, defaultValue = "",
-			description = "HTML content of the page", hidden = false, order = 90, maxLength = 10000
+			displayName = "Page Content", required = false, readOnly = false, defaultValue = "", description = "HTML content of the page",
+			hidden = false, order = 90, maxLength = 10000
 	)
 	private String content;
 
@@ -100,9 +98,9 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 	public String getRoute() { return route; }
 
 	public String getTitle() { return title; }
-	
+
 	public boolean getRequiresAuthentication() { return requiresAuthentication; }
-	
+
 	public String getContent() { return content; }
 
 	@Override
@@ -127,9 +125,9 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 	public void setRoute(final String route) { this.route = route; }
 
 	public void setTitle(String title) { this.title = title; }
-	
+
 	public void setRequiresAuthentication(boolean requiresAuthentication) { this.requiresAuthentication = requiresAuthentication; }
-	
+
 	public void setContent(String content) { this.content = content; }
 
 	@Override
