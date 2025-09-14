@@ -16,17 +16,14 @@ import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.page.service.CPageService;
 import tech.derbent.session.service.CSessionService;
 
-/**
- * Route for Project Overview dynamic page.
- */
-@Route(value = "project-overview", layout = tech.derbent.base.ui.view.MainLayout.class)
-@PageTitle("Project Overview")
+/** Route for Project Overview dynamic page. */
+@Route (value = "project-overview", layout = tech.derbent.base.ui.view.MainLayout.class)
+@PageTitle ("Project Overview")
 @PermitAll
 class CProjectOverviewPage extends Div implements BeforeEnterObserver {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectOverviewPage.class);
 	private static final long serialVersionUID = 1L;
-
 	private final CPageService pageService;
 	private final CSessionService sessionService;
 
@@ -43,11 +40,9 @@ class CProjectOverviewPage extends Div implements BeforeEnterObserver {
 			showError("No active project selected");
 			return;
 		}
-
 		// Find the project overview page for the current project
 		String targetRoute = "project-overview-" + activeProject.get().getId();
 		Optional<CPageEntity> pageEntity = pageService.findByRoute(targetRoute);
-
 		if (pageEntity.isPresent()) {
 			CDynamicPageView dynamicPage = new CDynamicPageView(pageEntity.get(), sessionService);
 			removeAll();
@@ -64,17 +59,14 @@ class CProjectOverviewPage extends Div implements BeforeEnterObserver {
 	}
 }
 
-/**
- * Route for Team Directory dynamic page.
- */
-@Route(value = "team-directory", layout = tech.derbent.base.ui.view.MainLayout.class)
-@PageTitle("Team Directory")
+/** Route for Team Directory dynamic page. */
+@Route (value = "team-directory", layout = tech.derbent.base.ui.view.MainLayout.class)
+@PageTitle ("Team Directory")
 @PermitAll
 class CTeamDirectoryPage extends Div implements BeforeEnterObserver {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CTeamDirectoryPage.class);
 	private static final long serialVersionUID = 1L;
-
 	private final CPageService pageService;
 	private final CSessionService sessionService;
 
@@ -91,11 +83,9 @@ class CTeamDirectoryPage extends Div implements BeforeEnterObserver {
 			showError("No active project selected");
 			return;
 		}
-
 		// Find the team directory page for the current project
 		String targetRoute = "team-directory-" + activeProject.get().getId();
 		Optional<CPageEntity> pageEntity = pageService.findByRoute(targetRoute);
-
 		if (pageEntity.isPresent()) {
 			CDynamicPageView dynamicPage = new CDynamicPageView(pageEntity.get(), sessionService);
 			removeAll();
@@ -112,17 +102,14 @@ class CTeamDirectoryPage extends Div implements BeforeEnterObserver {
 	}
 }
 
-/**
- * Route for Resource Library dynamic page.
- */
-@Route(value = "resource-library", layout = tech.derbent.base.ui.view.MainLayout.class)
-@PageTitle("Resource Library")
+/** Route for Resource Library dynamic page. */
+@Route (value = "resource-library", layout = tech.derbent.base.ui.view.MainLayout.class)
+@PageTitle ("Resource Library")
 @PermitAll
 class CResourceLibraryPage extends Div implements BeforeEnterObserver {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CResourceLibraryPage.class);
 	private static final long serialVersionUID = 1L;
-
 	private final CPageService pageService;
 	private final CSessionService sessionService;
 
@@ -139,11 +126,9 @@ class CResourceLibraryPage extends Div implements BeforeEnterObserver {
 			showError("No active project selected");
 			return;
 		}
-
 		// Find the resource library page for the current project
 		String targetRoute = "resource-library-" + activeProject.get().getId();
 		Optional<CPageEntity> pageEntity = pageService.findByRoute(targetRoute);
-
 		if (pageEntity.isPresent()) {
 			CDynamicPageView dynamicPage = new CDynamicPageView(pageEntity.get(), sessionService);
 			removeAll();

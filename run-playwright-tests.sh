@@ -52,7 +52,35 @@ run_playwright_tests() {
     fi
 }
 
-# Function to run mock tests that demonstrate screenshot functionality
+# Function to run specific mock tests
+run_mock_tests_specific() {
+    local test_class=$1
+    echo "🎭 Running mock tests for: $test_class"
+    echo "==========================================="
+    
+    # Create screenshots directory
+    mkdir -p target/screenshots
+    
+    # Run specific mock tests
+    if mvn test -Dtest="$test_class" -Dspring.profiles.active=test --batch-mode; then
+        echo "✅ Mock tests for $test_class completed successfully!"
+        
+        # Show screenshot count
+        screenshot_count=$(find target/screenshots -name "*.png" 2>/dev/null | wc -l)
+        if [[ $screenshot_count -gt 0 ]]; then
+            echo "📸 Generated $screenshot_count mock screenshots in target/screenshots/"
+            echo "Screenshots created:"
+            ls -1 target/screenshots/*.png 2>/dev/null | head -10 || true
+            if [[ $screenshot_count -gt 10 ]]; then
+                echo "... and $((screenshot_count - 10)) more screenshots"
+            fi
+        fi
+        
+    else
+        echo "❌ Mock tests for $test_class failed!"
+        return 1
+    fi
+}
 run_mock_tests() {
     echo "🎭 Running mock Playwright tests with screenshot generation..."
     echo "============================================================="
@@ -116,6 +144,8 @@ show_usage() {
     echo "  main-views    Run main business views tests only (new)"
     echo "  admin-views   Run administrative views tests only (new)"
     echo "  kanban-views  Run kanban board views tests only (new)"
+    echo "  dynamic-pages Run dynamic page system tests only (new)"
+    echo "  dynamic-pages-mock Run dynamic page system mock tests (new)"
     echo "  mock          Run mock tests that demonstrate screenshot functionality"
     echo "  docker        Run tests using Docker (recommended)"
     echo "  login         Run login/logout tests only"
@@ -137,6 +167,8 @@ show_usage() {
     echo "  $0 comprehensive  # Run tests for ALL views (new comprehensive testing)"
     echo "  $0 status-types   # Run tests for all status and type views"
     echo "  $0 main-views     # Run tests for all main business views"
+    echo "  $0 dynamic-pages  # Run tests for the dynamic page system"
+    echo "  $0 dynamic-pages-mock # Run mock tests for dynamic page system"
     echo "  $0 docker         # Run real Playwright tests using Docker (recommended)"
     echo "  $0 all            # Run all Playwright automation tests"
     echo "  $0 playwright     # Run complete Playwright test suite"
@@ -187,6 +219,16 @@ main() {
         "kanban-views")
             echo "📋 Running kanban board views tests..."
             run_playwright_tests "tech.derbent.ui.automation.PlaywrightUIAutomationTest#testAllKanbanViews" "Kanban Board Views Tests"
+            ;;
+            
+        "dynamic-pages")
+            echo "📄 Running dynamic page system tests..."
+            run_playwright_tests "automated_tests.tech.derbent.ui.automation.CDynamicPagePlaywrightTest" "Dynamic Page System Tests"
+            ;;
+            
+        "dynamic-pages-mock")
+            echo "📄 Running dynamic page system mock tests..."
+            run_mock_tests_specific "CDynamicPageMockPlaywrightTest"
             ;;
             
         "colors")

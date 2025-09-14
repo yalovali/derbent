@@ -32,36 +32,33 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 	@Size (max = 100)
 	@AMetaData (
 			displayName = "Icon method/File", required = false, readOnly = false, defaultValue = "vaadin:tasks",
-			description = "Icon for the page in the menu (e.g., 'vaadin:tasks' or 'class:full.class.name')", hidden = false, order = 30, maxLength = 100
+			description = "Icon for the page in the menu (e.g., 'vaadin:tasks' or 'class:full.class.name')", hidden = false, order = 30,
+			maxLength = 100
 	)
 	private String icon;
-
 	@Column (nullable = true, length = 20)
 	@Size (max = 20)
 	@AMetaData (
-			displayName = "Menu Order", required = false, readOnly = false, defaultValue = "1.1", 
+			displayName = "Menu Order", required = false, readOnly = false, defaultValue = "1.1",
 			description = "Menu order for hierarchical display (e.g., '1.1', '2.3.1')", hidden = false, order = 40, maxLength = 20
 	)
 	private String menuOrder;
-
 	@Column (nullable = false, length = 100)
 	@Size (max = 100)
 	@NotBlank (message = "Page title is required")
 	@AMetaData (
-			displayName = "Page Title", required = true, readOnly = false, defaultValue = "New Page", 
+			displayName = "Page Title", required = true, readOnly = false, defaultValue = "New Page",
 			description = "Title displayed in browser tab and page header", hidden = false, order = 10, maxLength = 100
 	)
 	private String pageTitle;
-
 	@Column (nullable = false, length = 100, unique = true)
 	@Size (max = 100)
 	@NotBlank (message = "Route is required")
 	@AMetaData (
-			displayName = "Page Route", required = true, readOnly = false, defaultValue = "", 
+			displayName = "Page Route", required = true, readOnly = false, defaultValue = "",
 			description = "Unique URL route for the page (e.g., 'project-overview')", hidden = false, order = 20, maxLength = 100
 	)
 	private String route;
-
 	@Column (nullable = false, length = 100)
 	@Size (max = 100)
 	@NotBlank (message = "Menu title is required")
@@ -70,7 +67,6 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 			description = "Hierarchical menu title (e.g., 'Project.Overview' for nested menus)", hidden = false, order = 15, maxLength = 100
 	)
 	private String title;
-
 	@ManyToOne
 	@JoinColumn (name = "parent_page_id")
 	@AMetaData (
@@ -78,22 +74,19 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 			description = "Parent page for hierarchical organization", hidden = false, order = 50
 	)
 	private CPageEntity parentPage;
-
 	@Lob
 	@Column (nullable = true, columnDefinition = "TEXT")
 	@AMetaData (
-			displayName = "Page Content", required = false, readOnly = false, defaultValue = "",
-			description = "HTML/Markdown content for the page", hidden = false, order = 60
+			displayName = "Page Content", required = false, readOnly = false, defaultValue = "", description = "HTML/Markdown content for the page",
+			hidden = false, order = 60
 	)
 	private String content;
-
 	@Column (nullable = false)
 	@AMetaData (
 			displayName = "Is Active", required = true, readOnly = false, defaultValue = "true",
 			description = "Whether the page is active and visible in menus", hidden = false, order = 70
 	)
 	private Boolean isActive = true;
-
 	@Column (nullable = false)
 	@AMetaData (
 			displayName = "Requires Authentication", required = true, readOnly = false, defaultValue = "true",
@@ -120,9 +113,7 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 	}
 
 	@Override
-	public String getDisplayName() {
-		return pageTitle != null ? pageTitle : getName();
-	}
+	public String getDisplayName() { return pageTitle != null ? pageTitle : getName(); }
 
 	public String getContent() { return content; }
 

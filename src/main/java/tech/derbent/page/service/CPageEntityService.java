@@ -66,7 +66,9 @@ public class CPageEntityService extends CProjectItemService<CPageEntity> {
 
 	@Override
 	@Transactional
-	@CacheEvict (value = { "project-pages", "page-by-route", "child-pages", "root-pages", "page-hierarchy" }, allEntries = true)
+	@CacheEvict (value = {
+			"project-pages", "page-by-route", "child-pages", "root-pages", "page-hierarchy"
+	}, allEntries = true)
 	public CPageEntity save(final CPageEntity entity) {
 		validatePage(entity);
 		LOGGER.info("Saving page: {} for project: {}", entity.getPageTitle(), entity.getProject().getName());

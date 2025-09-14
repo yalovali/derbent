@@ -15,16 +15,12 @@ import tech.derbent.page.service.CPageService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 
-/**
- * Route handler for dynamic pages defined in the database.
- * This component manages the routing for CPageEntity instances.
- */
+/** Route handler for dynamic pages defined in the database. This component manages the routing for CPageEntity instances. */
 @SpringComponent
 @UIScope
 public class CDynamicRouteHandler {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicRouteHandler.class);
-	
 	private final CPageService pageService;
 	private final CSessionService sessionService;
 
@@ -35,48 +31,36 @@ public class CDynamicRouteHandler {
 		LOGGER.info("CDynamicRouteHandler initialized");
 	}
 
-	/**
-	 * Get component for the given route if it's a dynamic page.
-	 */
+	/** Get component for the given route if it's a dynamic page. */
 	public Optional<Component> getComponentForRoute(String route) {
 		LOGGER.debug("Checking for dynamic page component for route: {}", route);
 		return pageService.getPageInstance(route);
 	}
 
-	/**
-	 * Get all dynamic pages for the current project.
-	 */
+	/** Get all dynamic pages for the current project. */
 	public List<CPageEntity> getDynamicPagesForCurrentProject() {
 		Optional<CProject> activeProject = sessionService.getActiveProject();
 		if (activeProject.isEmpty()) {
 			LOGGER.debug("No active project, returning empty dynamic pages list");
 			return List.of();
 		}
-		
 		return pageService.getMenuPagesForProject(activeProject.get());
 	}
 
-	/**
-	 * Check if a route is handled by a dynamic page.
-	 */
+	/** Check if a route is handled by a dynamic page. */
 	public boolean isHandledByDynamicPage(String route) {
 		return pageService.getPageInstance(route).isPresent();
 	}
 
-	/**
-	 * Register all dynamic routes for the current project.
-	 * This is called during application initialization.
-	 */
+	/** Register all dynamic routes for the current project. This is called during application initialization. */
 	public void registerDynamicRoutes() {
 		Optional<CProject> activeProject = sessionService.getActiveProject();
 		if (activeProject.isEmpty()) {
 			LOGGER.debug("No active project, skipping dynamic route registration");
 			return;
 		}
-		
 		List<CPageEntity> pages = pageService.getMenuPagesForProject(activeProject.get());
 		LOGGER.info("Registering {} dynamic routes for project: {}", pages.size(), activeProject.get().getName());
-		
 		for (CPageEntity page : pages) {
 			try {
 				registerDynamicRoute(page);
@@ -86,24 +70,17 @@ public class CDynamicRouteHandler {
 		}
 	}
 
-	/**
-	 * Register a single dynamic route.
-	 */
+	/** Register a single dynamic route. */
 	private void registerDynamicRoute(CPageEntity page) {
 		String route = page.getRoute();
 		LOGGER.debug("Registering dynamic route: {} for page: {}", route, page.getPageTitle());
-		
 		// Note: In a production system, you would need to handle dynamic route registration
 		// more carefully. For this implementation, routes are handled at the view level.
 		// The actual route registration happens when users navigate to the routes.
 	}
 
-	/**
-	 * Get cache information for monitoring.
-	 */
+	/** Get cache information for monitoring. */
 	public String getCacheInfo() {
-		return String.format("Dynamic pages cache size: %d, Eager loading: %s", 
-				pageService.getCacheSize(), 
-				pageService.isEagerLoadingEnabled());
+		return String.format("Dynamic pages cache size: %d, Eager loading: %s", pageService.getCacheSize(), pageService.isEagerLoadingEnabled());
 	}
 }
