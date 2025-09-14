@@ -43,6 +43,9 @@ public final class CPageEntityView extends CGridViewBaseProject<CPageEntity> {
 		grid.addColumnEntityNamed(CEntityOfProject::getProject, "Project");
 		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");
 		grid.addColumn(CEntityNamed::getDescriptionShort, "Description");
+		grid.addColumn(CPageEntity::getMainEntityType, "Entity Type");
+		grid.addColumn(CPageEntity::getMasterViewClass, "Master View");
+		grid.addColumn(CPageEntity::getDetailViewClass, "Detail View");
 	}
 
 	@Override

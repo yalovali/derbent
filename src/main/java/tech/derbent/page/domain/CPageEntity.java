@@ -59,6 +59,41 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 			description = "Use like, Project.Page, separate parent with . ", hidden = false, order = 70, maxLength = 100
 	)
 	private String title;
+	@Column (nullable = false)
+	@AMetaData (
+			displayName = "Requires Authentication", required = false, readOnly = false, defaultValue = "true",
+			description = "Whether this page requires user authentication", hidden = false, order = 80
+	)
+	private boolean requiresAuthentication = true;
+	@Column (nullable = true, length = 10000)
+	@Size (max = 10000)
+	@AMetaData (
+			displayName = "Page Content", required = false, readOnly = false, defaultValue = "", description = "HTML content of the page",
+			hidden = false, order = 90, maxLength = 10000
+	)
+	private String content;
+	@Column (nullable = true, length = 200)
+	@Size (max = 200)
+	@AMetaData (
+			displayName = "Main Entity Type", required = false, readOnly = false, defaultValue = "",
+			description = "The main entity type this page is associated with (e.g., activities, meetings, projects)", hidden = false, order = 95,
+			maxLength = 200
+	)
+	private String mainEntityType;
+	@Column (nullable = true, length = 200)
+	@Size (max = 200)
+	@AMetaData (
+			displayName = "Master View Class", required = false, readOnly = false, defaultValue = "",
+			description = "Full class name of the master view for this entity type", hidden = false, order = 96, maxLength = 200
+	)
+	private String masterViewClass;
+	@Column (nullable = true, length = 200)
+	@Size (max = 200)
+	@AMetaData (
+			displayName = "Detail View Class", required = false, readOnly = false, defaultValue = "",
+			description = "Full class name of the detail view for this entity type", hidden = false, order = 97, maxLength = 200
+	)
+	private String detailViewClass;
 
 	/** Default constructor for JPA. */
 	public CPageEntity() {
@@ -86,6 +121,16 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 
 	public String getTitle() { return title; }
 
+	public boolean getRequiresAuthentication() { return requiresAuthentication; }
+
+	public String getContent() { return content; }
+
+	public String getMainEntityType() { return mainEntityType; }
+
+	public String getMasterViewClass() { return masterViewClass; }
+
+	public String getDetailViewClass() { return detailViewClass; }
+
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
@@ -95,6 +140,8 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 		route = "UnknownHTTPRoute";
 		// must be unique
 		title = "Unknown.NewPage";
+		requiresAuthentication = true;
+		content = "<h1>Default Page Content</h1><p>This is a dynamic page.</p>";
 	}
 
 	public void setIcon(String icon) { this.icon = icon; }
@@ -106,6 +153,16 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 	public void setRoute(final String route) { this.route = route; }
 
 	public void setTitle(String title) { this.title = title; }
+
+	public void setRequiresAuthentication(boolean requiresAuthentication) { this.requiresAuthentication = requiresAuthentication; }
+
+	public void setContent(String content) { this.content = content; }
+
+	public void setMainEntityType(String mainEntityType) { this.mainEntityType = mainEntityType; }
+
+	public void setMasterViewClass(String masterViewClass) { this.masterViewClass = masterViewClass; }
+
+	public void setDetailViewClass(String detailViewClass) { this.detailViewClass = detailViewClass; }
 
 	@Override
 	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
