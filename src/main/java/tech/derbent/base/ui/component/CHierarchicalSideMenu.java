@@ -30,6 +30,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 import tech.derbent.abstracts.utils.CColorUtils;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.views.components.CButton;
+import tech.derbent.page.service.CPageMenuIntegrationService;
 
 /** CHierarchicalSideMenu - A hierarchical side menu component with up to 4 levels of navigation. Layer: View (MVC) Features: - Supports up to 4
  * levels of menu hierarchy - Sliding animations between levels - Back button navigation - Parses menu entries from route annotations in format:
@@ -197,6 +198,8 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	private final VerticalLayout menuContainer;
 	private final HorizontalLayout headerLayout;
 	private final Div currentLevelContainer;
+	// Services for dynamic menu integration
+	private final CPageMenuIntegrationService pageMenuService;
 	// Navigation state
 	private final List<String> navigationPath;
 	private final Map<String, CMenuLevel> menuLevels;
@@ -204,8 +207,10 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	private String currentRoute; // Track current route for highlighting
 
 	/** Constructor initializes the hierarchical side menu component.
+	 * @param pageMenuService Service for dynamic page menu integration
 	 * @throws Exception */
-	public CHierarchicalSideMenu() throws Exception {
+	public CHierarchicalSideMenu(CPageMenuIntegrationService pageMenuService) throws Exception {
+		this.pageMenuService = pageMenuService;
 		this.navigationPath = new ArrayList<>();
 		this.menuLevels = new HashMap<>();
 		// Initialize main container
@@ -247,9 +252,29 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	private void buildMenuHierarchy() throws Exception {
 		final var rootLevel = new CMenuLevel("root", "Homepage", null);
 		menuLevels.put("root", rootLevel);
-		// Get menu entries from MenuConfiguration
-		final var menuEntries = MenuConfiguration.getMenuEntries();
-		for (final MenuEntry menuEntry : menuEntries) {
+		
+		// Create unified list of menu entries from both static and dynamic sources
+		List<MenuEntry> allMenuEntries = new ArrayList<>();
+		
+		// Get static menu entries from MenuConfiguration
+		final var staticMenuEntries = MenuConfiguration.getMenuEntries();
+		allMenuEntries.addAll(staticMenuEntries);
+		
+		// Get dynamic menu entries from CPageMenuIntegrationService if available and ready
+		if (pageMenuService != null && pageMenuService.isReady()) {
+			try {
+				final var dynamicMenuEntries = pageMenuService.getDynamicMenuEntries();
+				allMenuEntries.addAll(dynamicMenuEntries);
+				LOGGER.info("Integrated {} static and {} dynamic menu entries", staticMenuEntries.size(), dynamicMenuEntries.size());
+			} catch (Exception e) {
+				LOGGER.warn("Failed to load dynamic menu entries, using static only: {}", e.getMessage());
+			}
+		} else {
+			LOGGER.debug("Page menu service not ready, using static menu entries only");
+		}
+		
+		// Process all menu entries (both static and dynamic)
+		for (final MenuEntry menuEntry : allMenuEntries) {
 			processMenuEntry(menuEntry);
 		}
 	}
