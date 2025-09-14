@@ -10,8 +10,9 @@ import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouterLayout;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
+import tech.derbent.abstracts.utils.Check;
 import tech.derbent.page.domain.CPageEntity;
-import tech.derbent.page.service.CPageService;
+import tech.derbent.page.service.CPageEntityService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 
@@ -21,47 +22,52 @@ import tech.derbent.session.service.CSessionService;
 public class CDynamicRouteHandler {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicRouteHandler.class);
-	private final CPageService pageService;
+	private final CPageEntityService pageEntityService;
 	private final CSessionService sessionService;
 
 	@Autowired
-	public CDynamicRouteHandler(CPageService pageService, CSessionService sessionService) {
-		this.pageService = pageService;
+	public CDynamicRouteHandler(CPageEntityService pageEntityService, CSessionService sessionService) {
+		Check.notNull(pageEntityService, "CPageEntityService cannot be null");
+		Check.notNull(sessionService, "CSessionService cannot be null");
+		this.pageEntityService = pageEntityService;
 		this.sessionService = sessionService;
 		LOGGER.info("CDynamicRouteHandler initialized");
 	}
 
 	/** Get component for the given route if it's a dynamic page. */
 	public Optional<Component> getComponentForRoute(String route) {
+		Check.notBlank(route, "Route cannot be blank");
 		LOGGER.debug("Checking for dynamic page component for route: {}", route);
-		return pageService.getPageInstance(route);
+		Optional<CPageEntity> pageEntity = pageEntityService.findByRoute(route);
+		if (pageEntity.isEmpty()) {
+			return Optional.empty();
+		}
+		// Create page instance
+		CDynamicPageView pageView = new CDynamicPageView(pageEntity.get(), sessionService);
+		return Optional.of(pageView);
 	}
 
 	/** Get all dynamic pages for the current project. */
 	public List<CPageEntity> getDynamicPagesForCurrentProject() {
-		Optional<CProject> activeProject = sessionService.getActiveProject();
-		if (activeProject.isEmpty()) {
-			LOGGER.debug("No active project, returning empty dynamic pages list");
-			return List.of();
-		}
-		return pageService.getMenuPagesForProject(activeProject.get());
+		CProject activeProject =
+				sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found for dynamic pages"));
+		return pageEntityService.findActivePagesByProject(activeProject);
 	}
 
 	/** Check if a route is handled by a dynamic page. */
 	public boolean isHandledByDynamicPage(String route) {
-		return pageService.getPageInstance(route).isPresent();
+		Check.notBlank(route, "Route cannot be blank");
+		return pageEntityService.findByRoute(route).isPresent();
 	}
 
 	/** Register all dynamic routes for the current project. This is called during application initialization. */
 	public void registerDynamicRoutes() {
-		Optional<CProject> activeProject = sessionService.getActiveProject();
-		if (activeProject.isEmpty()) {
-			LOGGER.debug("No active project, skipping dynamic route registration");
-			return;
-		}
-		List<CPageEntity> pages = pageService.getMenuPagesForProject(activeProject.get());
-		LOGGER.info("Registering {} dynamic routes for project: {}", pages.size(), activeProject.get().getName());
+		CProject activeProject =
+				sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found for route registration"));
+		List<CPageEntity> pages = pageEntityService.findActivePagesByProject(activeProject);
+		LOGGER.info("Registering {} dynamic routes for project: {}", pages.size(), activeProject.getName());
 		for (CPageEntity page : pages) {
+			Check.notNull(page, "Page entity cannot be null");
 			try {
 				registerDynamicRoute(page);
 			} catch (Exception e) {
@@ -72,7 +78,9 @@ public class CDynamicRouteHandler {
 
 	/** Register a single dynamic route. */
 	private void registerDynamicRoute(CPageEntity page) {
+		Check.notNull(page, "Page entity cannot be null");
 		String route = page.getRoute();
+		Check.notBlank(route, "Page route cannot be blank");
 		LOGGER.debug("Registering dynamic route: {} for page: {}", route, page.getPageTitle());
 		// Note: In a production system, you would need to handle dynamic route registration
 		// more carefully. For this implementation, routes are handled at the view level.
@@ -80,7 +88,5 @@ public class CDynamicRouteHandler {
 	}
 
 	/** Get cache information for monitoring. */
-	public String getCacheInfo() {
-		return String.format("Dynamic pages cache size: %d, Eager loading: %s", pageService.getCacheSize(), pageService.isEagerLoadingEnabled());
-	}
+	public String getCacheInfo() { return "Dynamic pages handled directly by CPageEntityService"; }
 }
