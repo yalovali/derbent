@@ -122,17 +122,111 @@ public class CComponentGridEntity extends CDiv implements CProjectChangeListener
 	/** Sets a search filter on the grid */
 	public void setSearchFilter(String searchValue) {
 		if (grid != null) {
-			// Apply filter to grid - simplified implementation
+			// Apply filter to grid
 			if (searchValue == null || searchValue.trim().isEmpty()) {
 				// Clear filter by refreshing data
 				refreshGridData();
 			} else {
-				// Log search filter for now - actual implementation would depend on data provider type
+				// Apply search filter
 				LOGGER.info("Search filter applied: {}", searchValue);
-				// Note: Actual filtering implementation would require specific data provider methods
-				// For now, this is a placeholder that logs the search value
+				applySearchFilter(searchValue.trim().toLowerCase());
 			}
 		}
+	}
+
+	/** Applies search filter to the grid data */
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
+	private void applySearchFilter(String searchText) {
+		try {
+			String serviceBeanName = gridEntity.getDataServiceBeanName();
+			if (serviceBeanName == null || serviceBeanName.trim().isEmpty()) {
+				LOGGER.warn("No service bean name available for search filtering");
+				return;
+			}
+			// Get the service and entity class
+			Object serviceBean = ApplicationContextProvider.getApplicationContext().getBean(serviceBeanName);
+			if (!(serviceBean instanceof CAbstractService)) {
+				LOGGER.warn("Service bean {} does not extend CAbstractService", serviceBeanName);
+				return;
+			}
+			CAbstractService<?> abstractService = (CAbstractService<?>) serviceBean;
+			// Check if service supports project-based filtering
+			if (abstractService instanceof tech.derbent.abstracts.services.CEntityOfProjectService) {
+				tech.derbent.abstracts.services.CEntityOfProjectService<?> projectService =
+						(tech.derbent.abstracts.services.CEntityOfProjectService<?>) abstractService;
+				CProject currentProject = sessionService != null ? sessionService.getActiveProject().orElse(null) : null;
+				if (currentProject != null) {
+					// Get all entities for the current project
+					List allEntities = projectService.listByProject(currentProject, PageRequest.of(0, Integer.MAX_VALUE)).getContent();
+					// Filter entities based on search text
+					List filteredEntities = (List) allEntities.stream().filter(entity -> matchesSearchText(entity, searchText))
+							.collect(java.util.stream.Collectors.toList());
+					// Update grid with filtered data
+					grid.setItems(filteredEntities);
+					LOGGER.debug("Applied search filter '{}' - {} results out of {} total", searchText, filteredEntities.size(), allEntities.size());
+				} else {
+					LOGGER.warn("No active project available for search filtering");
+				}
+			} else {
+				LOGGER.warn("Service {} does not support project-based filtering", serviceBeanName);
+			}
+		} catch (Exception e) {
+			LOGGER.error("Error applying search filter: {}", e.getMessage(), e);
+			// Fallback to refresh data on error
+			refreshGridData();
+		}
+	}
+
+	/** Checks if an entity matches the search text using reflection */
+	private boolean matchesSearchText(Object entity, String searchText) {
+		if (entity == null || searchText == null || searchText.isEmpty()) {
+			return true;
+		}
+		try {
+			Class<?> entityClass = entity.getClass();
+			// Search in common string fields using reflection
+			Field[] fields = entityClass.getDeclaredFields();
+			for (Field field : fields) {
+				field.setAccessible(true);
+				Object value = field.get(entity);
+				if (value != null) {
+					String stringValue = null;
+					// Handle different field types
+					if (value instanceof String) {
+						stringValue = (String) value;
+					} else if (value instanceof tech.derbent.abstracts.domains.CEntityNamed) {
+						// For related entities, search in their name
+						tech.derbent.abstracts.domains.CEntityNamed namedEntity = (tech.derbent.abstracts.domains.CEntityNamed) value;
+						stringValue = namedEntity.getName();
+					}
+					// Check if the string value contains the search text
+					if (stringValue != null && stringValue.toLowerCase().contains(searchText)) {
+						return true;
+					}
+				}
+			}
+			// Also check inherited fields from superclasses
+			Class<?> superClass = entityClass.getSuperclass();
+			while (superClass != null && !superClass.equals(Object.class)) {
+				Field[] superFields = superClass.getDeclaredFields();
+				for (Field field : superFields) {
+					field.setAccessible(true);
+					Object value = field.get(entity);
+					if (value instanceof String) {
+						String stringValue = (String) value;
+						if (stringValue.toLowerCase().contains(searchText)) {
+							return true;
+						}
+					}
+				}
+				superClass = superClass.getSuperclass();
+			}
+		} catch (Exception e) {
+			LOGGER.warn("Error checking search match for entity {}: {}", entity.getClass().getSimpleName(), e.getMessage());
+		}
+		return false;
 	}
 
 	/** Handles grid selection changes and fires SelectionChangeEvent */
