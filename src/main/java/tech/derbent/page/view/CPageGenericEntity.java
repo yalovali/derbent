@@ -308,7 +308,13 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 	private void updateLayoutOrientation() {
 		Check.notNull(splitLayout, "Split layout is not initialized");
 		Check.notNull(sessionService, "Session service is not initialized");
-		Check.notNull(layoutService, "Layout service is not set");
+		// If layout service is not available yet (during bean construction), use default vertical layout
+		if (layoutService == null) {
+			LOGGER.debug("Layout service not yet available, using default vertical orientation for {}", getClass().getSimpleName());
+			splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
+			splitLayout.setSplitterPosition(30.0); // Default: 30% for grid, 70% for details (same as vertical mode)
+			return;
+		}
 		final CLayoutService.LayoutMode currentMode = layoutService.getCurrentLayoutMode();
 		// LOGGER.debug("Updating layout orientation to: {} for {}", currentMode, getClass().getSimpleName());
 		if (currentMode == CLayoutService.LayoutMode.HORIZONTAL) {
