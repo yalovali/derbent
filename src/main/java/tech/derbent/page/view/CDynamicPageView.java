@@ -9,8 +9,8 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
-import com.vaadin.flow.router.PageTitle;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.orders.domain.COrder;
 import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.session.service.CSessionService;
 
@@ -22,6 +22,14 @@ public class CDynamicPageView extends VerticalLayout implements BeforeEnterObser
 	private static final long serialVersionUID = 1L;
 	private final CPageEntity pageEntity;
 	private final CSessionService sessionService;
+
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
+
+	public static String getStaticIconColorCode() {
+		return "#102bff"; // Blue color for activity entities
+	}
+
+	public static String getStaticIconFilename() { return COrder.getStaticIconFilename(); }
 
 	public CDynamicPageView(final CPageEntity pageEntity, final CSessionService sessionService) {
 		this.pageEntity = pageEntity;
