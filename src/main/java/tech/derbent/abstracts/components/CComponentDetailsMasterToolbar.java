@@ -91,8 +91,17 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 	/** Extracts entity type from service bean name */
 	private String extractEntityTypeFromService(String serviceBeanName) {
 		if (serviceBeanName != null && serviceBeanName.endsWith("Service")) {
-			// Convert CActivityService -> CActivity
-			return serviceBeanName.substring(0, serviceBeanName.length() - "Service".length());
+			// Convert activityService -> CActivity or CActivityService -> CActivity
+			String baseName = serviceBeanName.substring(0, serviceBeanName.length() - "Service".length());
+			// If it's already in the format "CActivity", return as is
+			if (baseName.startsWith("C") && baseName.length() > 1 && Character.isUpperCase(baseName.charAt(1))) {
+				return baseName;
+			}
+			// Convert from camelCase bean name to proper class name
+			// activityService -> CActivity, meetingService -> CMeeting, etc.
+			if (baseName.length() > 0) {
+				return "C" + Character.toUpperCase(baseName.charAt(0)) + baseName.substring(1);
+			}
 		}
 		return null;
 	}
