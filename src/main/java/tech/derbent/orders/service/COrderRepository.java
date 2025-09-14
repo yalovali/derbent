@@ -13,5 +13,5 @@ public interface COrderRepository extends CEntityOfProjectRepository<COrder> {
 		"SELECT o FROM COrder o " + "LEFT JOIN FETCH o.project " + "LEFT JOIN FETCH o.assignedTo " + "LEFT JOIN FETCH o.createdBy "
 				+ "LEFT JOIN FETCH o.orderType " + "LEFT JOIN FETCH o.status " + "WHERE o.id = :id"
 	)
-	Optional<COrder> findById(@Param ("id") Long id);
+	Optional<COrder> findByIdWithEagerLoading(@Param ("id") Long id);
 }

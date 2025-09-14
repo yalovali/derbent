@@ -61,20 +61,19 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 				activity -> activity.getActivityType() != null ? activity.getActivityType() : createNoTypeInstance(project), Collectors.toList()));
 	}
 
-	@Override
-	public List<CActivityStatus> getAllStatuses() {
-		// This would need to be implemented by calling the status service For minimal
-		// changes, returning empty list for now
-		return List.of();
-	}
-
 	// CKanbanService implementation methods
 	@Override
 	public Map<CActivityStatus, List<CActivity>> getEntitiesGroupedByStatus(final Long projectId) {
-		// Find project by ID For now, we'll use the existing method that takes CProject
-		// In a real implementation, you'd want to fetch the project by ID This is a
-		// simplification for the minimal change approach
-		return Map.of(); // This would need proper implementation
+		// For now, returning empty as per the original minimal implementation
+		// This would need proper implementation based on project requirements
+		return tech.derbent.abstracts.utils.CKanbanUtils.getEmptyGroupedStatus(this.getClass());
+	}
+
+	@Override
+	public List<CActivityStatus> getAllStatuses() {
+		// This would need to be implemented by calling the status service
+		// For minimal changes, using the utility method
+		return tech.derbent.abstracts.utils.CKanbanUtils.getEmptyStatusList(this.getClass());
 	}
 
 	@Override
@@ -82,9 +81,7 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 
 	@Override
 	public CActivity updateEntityStatus(final CActivity entity, final CActivityStatus newStatus) {
-		Check.notNull(entity, "Entity cannot be null");
-		Check.notNull(newStatus, "New status cannot be null");
-		entity.setStatus(newStatus);
+		tech.derbent.abstracts.utils.CKanbanUtils.updateEntityStatusSimple(entity, newStatus, CActivity::setStatus);
 		return save(entity);
 	}
 }

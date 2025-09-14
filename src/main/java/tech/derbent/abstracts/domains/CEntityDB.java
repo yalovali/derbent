@@ -67,21 +67,12 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 		return (id != null) && id.equals(other.getId());
 	}
 
-	/** Helper method to find a method by name in class hierarchy.
+	/** Helper method to find a method by name in class hierarchy using cache.
 	 * @param clazz      the class to search in
 	 * @param methodName the method name to find
 	 * @return the method if found, null otherwise */
 	private Method findMethod(final Class<?> clazz, final String methodName) {
-		Class<?> currentClass = clazz;
-		while (currentClass != null) {
-			try {
-				return currentClass.getDeclaredMethod(methodName);
-			} catch (final NoSuchMethodException e) {
-				// Continue searching in parent class
-			}
-			currentClass = currentClass.getSuperclass();
-		}
-		return null;
+		return tech.derbent.abstracts.utils.CReflectionCache.getCachedMethod(clazz, methodName);
 	}
 
 	/** Helper method to get all fields including inherited fields.
@@ -170,13 +161,12 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 		return "%s{id=%s}".formatted(getClass().getSimpleName(), getId());
 	}
 
-	/** Helper method to update audit fields using reflection. Looks for common audit fields like 'lastModifiedDate', 'updatedAt'. */
+	/** Helper method to update audit fields using cached reflection. Looks for common audit fields like 'lastModifiedDate', 'updatedAt'. */
 	private void updateAuditFields() {
 		try {
 			final Class<?> entityClass = ProxyUtils.getUserClass(this.getClass());
-			final Method updateMethod = findMethod(entityClass, "updateLastModified");
+			final Method updateMethod = tech.derbent.abstracts.utils.CReflectionCache.getCachedMethod(entityClass, "updateLastModified");
 			if (updateMethod != null) {
-				updateMethod.setAccessible(true);
 				updateMethod.invoke(this);
 				LOGGER.debug("Updated audit fields for: {}", this.getClass().getSimpleName());
 			}

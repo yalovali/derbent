@@ -8,8 +8,15 @@ import tech.derbent.abstracts.domains.CEntityDB;
 
 @NoRepositoryBean // 🔥 Bu şart!
 public interface CAbstractRepository<EntityClass extends CEntityDB<EntityClass>>
-		extends JpaRepository<EntityClass, Long>, JpaSpecificationExecutor<EntityClass> {
+		extends JpaRepository<EntityClass, Long>, JpaSpecificationExecutor<EntityClass>, CEagerLoadingCapable<EntityClass> {
 
 	@Override
 	abstract Optional<EntityClass> findById(Long id);
+
+	/** Default implementation of eager loading - subclasses should override with specific eager loading queries. Falls back to standard findById if
+	 * not overridden. */
+	@Override
+	default Optional<EntityClass> findByIdWithEagerLoading(Long id) {
+		return findById(id);
+	}
 }
