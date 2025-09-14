@@ -252,14 +252,11 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	private void buildMenuHierarchy() throws Exception {
 		final var rootLevel = new CMenuLevel("root", "Homepage", null);
 		menuLevels.put("root", rootLevel);
-		
 		// Create unified list of menu entries from both static and dynamic sources
 		List<MenuEntry> allMenuEntries = new ArrayList<>();
-		
 		// Get static menu entries from MenuConfiguration
 		final var staticMenuEntries = MenuConfiguration.getMenuEntries();
 		allMenuEntries.addAll(staticMenuEntries);
-		
 		// Get dynamic menu entries from CPageMenuIntegrationService if available and ready
 		if (pageMenuService != null && pageMenuService.isReady()) {
 			try {
@@ -272,7 +269,6 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		} else {
 			LOGGER.debug("Page menu service not ready, using static menu entries only");
 		}
-		
 		// Process all menu entries (both static and dynamic)
 		for (final MenuEntry menuEntry : allMenuEntries) {
 			processMenuEntry(menuEntry);

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.vaadin.flow.server.menu.MenuEntry;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.page.domain.CPageEntity;
+import tech.derbent.page.view.CDynamicPageRouter;
 import tech.derbent.page.view.CDynamicPageView;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
@@ -53,10 +54,10 @@ public class CPageMenuIntegrationService {
 	/** Create a MenuEntry from a CPageEntity. */
 	private MenuEntry createMenuEntryFromPage(CPageEntity page) {
 		Check.notNull(page, "Page entity cannot be null");
-		String title = page.getTitle(); // e.g., "Project.Overview"
+		String title = page.getTitle(); // e.g., "pages.Project Overview"
 		Check.notBlank(title, "Page title cannot be blank");
-		String path = page.getRoute(); // e.g., "project-overview-1"
-		Check.notBlank(path, "Page route cannot be blank");
+		String route = page.getRoute(); // e.g., "route_index_01"
+		Check.notBlank(route, "Page route cannot be blank");
 		String icon = page.getIcon() != null ? page.getIcon() : "vaadin:file-text";
 		Double order;
 		try {
@@ -67,8 +68,11 @@ public class CPageMenuIntegrationService {
 			LOGGER.warn("Invalid menu order for page {}: {}", page.getPageTitle(), page.getMenuOrder());
 			order = 999.0; // Default to end of menu
 		}
+		// Create the navigation URL that points to our dynamic page router with the route as parameter
+		String navigationPath = "project-pages/" + route;
 		// Create MenuEntry using the record constructor
-		return new MenuEntry(title, path, order, icon, CDynamicPageView.class);
+		// Point to CDynamicPageRouter which will handle the actual route resolution
+		return new MenuEntry(title, navigationPath, order, icon, CDynamicPageRouter.class);
 	}
 
 	/** Get page hierarchy structure for building nested menus. */
