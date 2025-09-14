@@ -47,8 +47,7 @@ public class CFieldSelectionDialog extends CDBEditDialog<List<FieldSelection>> {
 	}
 
 	private void createFormFields() {
-		fieldSelectionComponent = new CFieldSelectionComponent("Available Fields");
-		fieldSelectionComponent.setEntityType(entityType);
+		fieldSelectionComponent = new CFieldSelectionComponent("Available Fields", entityType);
 		getDialogLayout().add(fieldSelectionComponent);
 	}
 

@@ -52,10 +52,10 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 
 	/** Handles search field value changes */
 	private void handleSearch(String searchValue) {
-		if (grid != null) {
-			// Apply search filter to grid
-			grid.setSearchFilter(searchValue);
-		}
+		Check.notNull(searchValue, "Search value is null");
+		Check.notNull(grid, "Grid component is not set");
+		// Apply search filter to grid
+		grid.setSearchFilter(searchValue);
 	}
 
 	private void handleEditGridEntity() {
@@ -90,18 +90,18 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 
 	/** Extracts entity type from service bean name */
 	private String extractEntityTypeFromService(String serviceBeanName) {
-		if (serviceBeanName != null && serviceBeanName.endsWith("Service")) {
-			// Convert activityService -> CActivity or CActivityService -> CActivity
-			String baseName = serviceBeanName.substring(0, serviceBeanName.length() - "Service".length());
-			// If it's already in the format "CActivity", return as is
-			if (baseName.startsWith("C") && baseName.length() > 1 && Character.isUpperCase(baseName.charAt(1))) {
-				return baseName;
-			}
-			// Convert from camelCase bean name to proper class name
-			// activityService -> CActivity, meetingService -> CMeeting, etc.
-			if (baseName.length() > 0) {
-				return "C" + Character.toUpperCase(baseName.charAt(0)) + baseName.substring(1);
-			}
+		Check.notNull(serviceBeanName, "Service bean name is null");
+		Check.isTrue(serviceBeanName.endsWith("Service"), "Service bean name does not end with 'Service'");
+		// Convert activityService -> CActivity or CActivityService -> CActivity
+		String baseName = serviceBeanName.substring(0, serviceBeanName.length() - "Service".length());
+		// If it's already in the format "CActivity", return as is
+		if (baseName.startsWith("C") && baseName.length() > 1 && Character.isUpperCase(baseName.charAt(1))) {
+			return baseName;
+		}
+		// Convert from camelCase bean name to proper class name
+		// activityService -> CActivity, meetingService -> CMeeting, etc.
+		if (baseName.length() > 0) {
+			return "C" + Character.toUpperCase(baseName.charAt(0)) + baseName.substring(1);
 		}
 		return null;
 	}

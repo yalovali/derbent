@@ -13,6 +13,7 @@ import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.abstracts.domains.CEntityDB;
 import tech.derbent.abstracts.domains.CEntityNamed;
 import tech.derbent.abstracts.domains.CEntityOfProject;
+import tech.derbent.abstracts.utils.Check;
 import tech.derbent.abstracts.views.components.CVerticalLayout;
 import tech.derbent.abstracts.views.grids.CGrid;
 import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
@@ -59,7 +60,7 @@ public class CGridEntityView extends CGridViewBaseProject<CGridEntity> {
 	@Override
 	protected void createDetailsComponent() throws Exception {
 		// Create the field selection component
-		fieldSelectionComponent = new CFieldSelectionComponent("Field Selection");
+		fieldSelectionComponent = new CFieldSelectionComponent("Field Selection", getCurrentEntity().getClass().getSimpleName());
 	}
 
 	@Override
@@ -99,31 +100,28 @@ public class CGridEntityView extends CGridViewBaseProject<CGridEntity> {
 
 	private void updateFieldSelectionComponent() {
 		CGridEntity currentEntity = getCurrentEntity();
-		if (currentEntity != null && currentEntity.getDataServiceBeanName() != null) {
-			// Extract entity type from bean name (assuming convention like CActivityService -> CActivity)
-			String beanName = currentEntity.getDataServiceBeanName();
-			String entityType = extractEntityTypeFromBeanName(beanName);
-			if (entityType != null) {
-				fieldSelectionComponent.setEntityType(entityType);
-				// Load existing selection
-				String existingSelection = currentEntity.getSelectedFields();
-				if (existingSelection != null) {
-					fieldSelectionComponent.setSelectedFieldsFromString(existingSelection);
-				}
-			}
-		}
+		Check.notNull(currentEntity, "Current entity cannot be null");
+		Check.notNull(fieldSelectionComponent, "Field selection component is not initialized");
+		Check.notNull(currentEntity.getDataServiceBeanName(), "Data service bean name cannot be null");
+		// Extract entity type from bean name (assuming convention like CActivityService -> CActivity)
+		String beanName = currentEntity.getDataServiceBeanName();
+		String entityType = extractEntityTypeFromBeanName(beanName);
+		Check.notBlank(entityType, "Extracted entity type cannot be null or empty");
+		fieldSelectionComponent.setEntityType(entityType);
+		// Load existing selection
+		String existingSelection = currentEntity.getSelectedFields();
+		Check.notNull(existingSelection, "Existing selection cannot be null");
+		fieldSelectionComponent.setSelectedFieldsFromString(existingSelection);
 	}
 
 	private String extractEntityTypeFromBeanName(String beanName) {
-		if (beanName == null || beanName.isEmpty()) {
-			return null;
-		}
+		Check.notNull(beanName, "Bean name cannot be null");
+		Check.notBlank(beanName, "Bean name cannot be empty");
 		// Convert service bean name to entity class name
 		// E.g., CActivityService -> CActivity
-		if (beanName.endsWith("Service")) {
-			return beanName.substring(0, beanName.length() - "Service".length());
-		}
-		return beanName;
+		Check.isTrue(beanName.length() > "Service".length(), "Bean name is too short to extract entity type");
+		Check.isTrue(beanName.endsWith("Service"), "Bean name must end with 'Service'");
+		return beanName.substring(0, beanName.length() - "Service".length());
 	}
 
 	private void setupFieldSelectionBinding() {
@@ -144,11 +142,10 @@ public class CGridEntityView extends CGridViewBaseProject<CGridEntity> {
 			return false;
 		}
 		final CEnhancedBinder<CGridEntity> binder = getBinder();
+		Check.notNull(binder, "Binder is not initialized");
 		CGridEntity bean = binder.getBean();
-		if (bean == null) {
-			LOGGER.warn("No entity bound to binder; cannot save.");
-			return false;
-		}
+		Check.notNull(bean, "No entity is bound to the binder");
+		Check.notNull(fieldSelectionComponent, "Field selection component is not initialized");
 		final String selected = fieldSelectionComponent.getSelectedFieldsAsString();
 		bean.setSelectedFields(selected != null ? selected : "");
 		return true;
