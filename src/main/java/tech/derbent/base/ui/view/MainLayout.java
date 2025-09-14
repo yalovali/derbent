@@ -35,6 +35,7 @@ import tech.derbent.base.service.CRouteDiscoveryService;
 import tech.derbent.base.ui.component.CHierarchicalSideMenu;
 import tech.derbent.base.ui.component.CViewToolbar;
 import tech.derbent.base.ui.dialogs.CWarningDialog;
+import tech.derbent.page.service.CPageMenuIntegrationService;
 import tech.derbent.session.service.CLayoutService;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.setup.service.CSystemSettingsService;
@@ -64,11 +65,12 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 	private final CUserService userService;
 	private final CSystemSettingsService systemSettingsService;
 	private final CRouteDiscoveryService routeDiscoveryService;
+	private final CPageMenuIntegrationService pageMenuService;
 	private CViewToolbar<?> mainToolbar;
 
 	MainLayout(final AuthenticationContext authenticationContext, final CSessionService sessionService, final CLayoutService layoutService,
 			final PasswordEncoder passwordEncoder, final CUserService userService, final CSystemSettingsService systemSettingsService,
-			final CRouteDiscoveryService routeDiscoveryService) throws Exception {
+			final CRouteDiscoveryService routeDiscoveryService, final CPageMenuIntegrationService pageMenuService) throws Exception {
 		this.authenticationContext = authenticationContext;
 		this.sessionService = sessionService;
 		this.layoutService = layoutService;
@@ -76,6 +78,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		this.userService = userService;
 		this.systemSettingsService = systemSettingsService;
 		this.routeDiscoveryService = routeDiscoveryService;
+		this.pageMenuService = pageMenuService;
 		this.currentUser = authenticationContext.getAuthenticatedUser(User.class).orElse(null);
 		setId("main-layout");
 		setPrimarySection(Section.DRAWER);
@@ -150,7 +153,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 
 	private Div createSlidingHeader() throws Exception {
 		// Add hierarchical side menu below the header content
-		final var hierarchicalMenu = new CHierarchicalSideMenu();
+		final var hierarchicalMenu = new CHierarchicalSideMenu(pageMenuService);
 		hierarchicalMenu.addClassNames(Margin.Top.MEDIUM);
 		// Create container for the complete sliding header with menu
 		final var completeHeader = new Div();
