@@ -72,6 +72,28 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 			hidden = false, order = 90, maxLength = 10000
 	)
 	private String content;
+	@Column (nullable = true, length = 200)
+	@Size (max = 200)
+	@AMetaData (
+			displayName = "Main Entity Type", required = false, readOnly = false, defaultValue = "",
+			description = "The main entity type this page is associated with (e.g., activities, meetings, projects)", hidden = false, order = 95,
+			maxLength = 200
+	)
+	private String mainEntityType;
+	@Column (nullable = true, length = 200)
+	@Size (max = 200)
+	@AMetaData (
+			displayName = "Master View Class", required = false, readOnly = false, defaultValue = "",
+			description = "Full class name of the master view for this entity type", hidden = false, order = 96, maxLength = 200
+	)
+	private String masterViewClass;
+	@Column (nullable = true, length = 200)
+	@Size (max = 200)
+	@AMetaData (
+			displayName = "Detail View Class", required = false, readOnly = false, defaultValue = "",
+			description = "Full class name of the detail view for this entity type", hidden = false, order = 97, maxLength = 200
+	)
+	private String detailViewClass;
 
 	/** Default constructor for JPA. */
 	public CPageEntity() {
@@ -103,6 +125,12 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 
 	public String getContent() { return content; }
 
+	public String getMainEntityType() { return mainEntityType; }
+
+	public String getMasterViewClass() { return masterViewClass; }
+
+	public String getDetailViewClass() { return detailViewClass; }
+
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
@@ -129,6 +157,12 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 	public void setRequiresAuthentication(boolean requiresAuthentication) { this.requiresAuthentication = requiresAuthentication; }
 
 	public void setContent(String content) { this.content = content; }
+
+	public void setMainEntityType(String mainEntityType) { this.mainEntityType = mainEntityType; }
+
+	public void setMasterViewClass(String masterViewClass) { this.masterViewClass = masterViewClass; }
+
+	public void setDetailViewClass(String detailViewClass) { this.detailViewClass = detailViewClass; }
 
 	@Override
 	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub

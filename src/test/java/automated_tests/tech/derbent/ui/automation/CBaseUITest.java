@@ -24,6 +24,7 @@ import tech.derbent.meetings.view.CMeetingsView;
 import tech.derbent.projects.view.CProjectsView;
 import tech.derbent.risks.view.CRiskStatusView;
 import tech.derbent.users.view.CUsersView;
+import tech.derbent.abstracts.utils.Check;
 
 /** Enhanced base UI test class that provides common functionality for Playwright tests. This class includes 25+ auxiliary methods for testing all
  * views and business functions. The base class follows strict coding guidelines and provides comprehensive testing utilities for: - Login and
@@ -96,9 +97,12 @@ public abstract class CBaseUITest {
 
 	/** Navigates to a view by its text content in the navigation menu. Returns true if navigation was successful. */
 	protected boolean navigateToViewByText(final String viewText) {
+		Check.notBlank(viewText, "View text cannot be blank");
 		LOGGER.info("🧭 Navigating to view: {}", viewText);
 		try {
-			final Locator navItem = page.locator("vaadin-side-nav-item").filter(new Locator.FilterOptions().setHasText(viewText));
+			final Locator navItem = getLocatorWithCheck("vaadin-side-nav-item", "Navigation item for " + viewText)
+					.filter(new Locator.FilterOptions().setHasText(viewText));
+			Check.notNull(navItem, "Navigation item not found for: " + viewText);
 			if (navItem.count() > 0) {
 				navItem.first().click();
 				wait_500();
@@ -467,6 +471,31 @@ public abstract class CBaseUITest {
 	protected void assertBrowserAvailable() {
 		if (!isBrowserAvailable()) {
 			throw new AssertionError("Browser is not available");
+		}
+	}
+
+	/** Safe locator method with null check */
+	protected Locator getLocatorWithCheck(String selector, String description) {
+		Check.notNull(selector, "Selector cannot be null");
+		Check.notBlank(description, "Description cannot be blank");
+		try {
+			Locator locator = page.locator(selector);
+			Check.notNull(locator, "Failed to find element: " + description);
+			return locator;
+		} catch (Exception e) {
+			throw new AssertionError("Element not found: " + description + " (selector: " + selector + ")", e);
+		}
+	}
+
+	/** Safe wait for selector with check */
+	protected Locator waitForSelectorWithCheck(String selector, String description) {
+		Check.notNull(selector, "Selector cannot be null");
+		Check.notBlank(description, "Description cannot be blank");
+		try {
+			page.waitForSelector(selector, new Page.WaitForSelectorOptions().setTimeout(10000));
+			return getLocatorWithCheck(selector, description);
+		} catch (Exception e) {
+			throw new AssertionError("Element not found after wait: " + description + " (selector: " + selector + ")", e);
 		}
 	}
 

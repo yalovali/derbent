@@ -32,6 +32,19 @@ public final class CColorUtils {
 	public static final String DEFAULT_DARK_TEXT = "black";
 	/** Default text color for dark backgrounds */
 	public static final String DEFAULT_LIGHT_TEXT = "white";
+	// CRUD Button Color Constants
+	/** Color for Create/New buttons */
+	public static final String CRUD_CREATE_COLOR = "#28a745";
+	/** Color for Read/View buttons */
+	public static final String CRUD_READ_COLOR = "#17a2b8";
+	/** Color for Update/Edit buttons */
+	public static final String CRUD_UPDATE_COLOR = "#ffc107";
+	/** Color for Delete/Remove buttons */
+	public static final String CRUD_DELETE_COLOR = "#dc3545";
+	/** Color for Save buttons */
+	public static final String CRUD_SAVE_COLOR = "#007bff";
+	/** Color for Cancel buttons */
+	public static final String CRUD_CANCEL_COLOR = "#6c757d";
 
 	/** Applies color styling to a component using CSS styles. This is a helper method that can be used with any component that has getStyle() method.
 	 * @param component       the component to style (must have getStyle() method)
