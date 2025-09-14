@@ -54,9 +54,7 @@ public class CPageSample extends CPageGenericEntity<CActivity> {
 	protected CActivity createNewEntityInstance() {
 		CActivity newActivity = new CActivity();
 		newActivity.setProject(
-			sessionService.getActiveProject()
-				.orElseThrow(() -> new IllegalStateException("No active project found for new activity."))
-		);
+				sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found for new activity.")));
 		return newActivity;
 	}
 }
