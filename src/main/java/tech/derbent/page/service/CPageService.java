@@ -170,6 +170,14 @@ public class CPageService {
 	}
 
 	/**
+	 * Find page by route.
+	 */
+	public Optional<CPageEntity> findByRoute(final String route) {
+		LOGGER.debug("Finding page by route: {}", route);
+		return pageEntityService.findByRoute(route);
+	}
+
+	/**
 	 * Register dynamic routes for database-defined pages.
 	 */
 	private void registerDynamicRoutes(final List<CPageEntity> pages) {
