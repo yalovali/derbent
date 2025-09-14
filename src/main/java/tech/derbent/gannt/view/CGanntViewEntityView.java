@@ -17,7 +17,7 @@ import tech.derbent.session.service.CSessionService;
 
 @Route ("cganntviewentityview")
 @PageTitle ("Gannt Views Master Detail")
-@Menu (order = 1.5, icon = "class:tech.derbent.gannt.view.CGanntViewEntityView", title = "Settings.GanntViews")
+@Menu (order = 1.5, icon = "class:tech.derbent.gannt.view.CGanntViewEntityView", title = "Setup.UI.GanntViews")
 @PermitAll
 public class CGanntViewEntityView extends CGridViewBaseProject<CGanntViewEntity> {
 

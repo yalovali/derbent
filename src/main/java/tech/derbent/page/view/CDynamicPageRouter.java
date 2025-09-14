@@ -10,25 +10,37 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.abstracts.utils.Check;
+import tech.derbent.base.ui.view.MainLayout;
+import tech.derbent.orders.domain.COrder;
 import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.page.service.CPageEntityService;
+import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 
 /** Router for dynamic pages that handles all database-defined page routes. This acts as a router for dynamic project pages. */
-@Route (value = "project-pages", layout = tech.derbent.base.ui.view.MainLayout.class)
+@Route (value = "cdynamicpagerouter", layout = MainLayout.class)
 @PageTitle ("Project Pages")
 @PermitAll
-public class CDynamicPageRouter extends Div implements BeforeEnterObserver, com.vaadin.flow.router.HasUrlParameter<String> {
+public class CDynamicPageRouter extends Div implements BeforeEnterObserver, HasUrlParameter<String> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicPageRouter.class);
 	private static final long serialVersionUID = 1L;
 	private final CPageEntityService pageEntityService;
 	private final CSessionService sessionService;
 	private String routeParameter = null;
+
+	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
+
+	public static String getStaticIconColorCode() {
+		return "#102bff"; // Blue color for activity entities
+	}
+
+	public static String getStaticIconFilename() { return COrder.getStaticIconFilename(); }
 
 	@Autowired
 	public CDynamicPageRouter(CPageEntityService pageEntityService, CSessionService sessionService) {
@@ -54,7 +66,7 @@ public class CDynamicPageRouter extends Div implements BeforeEnterObserver, com.
 		}
 		// Otherwise, show page listing
 		LOGGER.debug("Loading project pages overview");
-		tech.derbent.projects.domain.CProject activeProject =
+		CProject activeProject =
 				sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found for project pages"));
 		Check.notNull(activeProject, "Active project cannot be null");
 		// Get all dynamic pages for the current project

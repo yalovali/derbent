@@ -10,7 +10,6 @@ import com.vaadin.flow.server.menu.MenuEntry;
 import tech.derbent.abstracts.utils.Check;
 import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.page.view.CDynamicPageRouter;
-import tech.derbent.page.view.CDynamicPageView;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 
@@ -38,16 +37,14 @@ public class CPageMenuIntegrationService {
 		List<CPageEntity> pages = pageEntityService.findActivePagesByProject(activeProject);
 		List<MenuEntry> menuEntries = new ArrayList<>();
 		for (CPageEntity page : pages) {
-			Check.notNull(page, "Page entity cannot be null");
 			try {
 				MenuEntry entry = createMenuEntryFromPage(page);
 				menuEntries.add(entry);
-				LOGGER.debug("Created menu entry for page: {}", page.getPageTitle());
 			} catch (Exception e) {
 				LOGGER.error("Failed to create menu entry for page: {}", page.getPageTitle(), e);
+				throw new RuntimeException("Failed to create menu entry for page: " + page.getPageTitle(), e);
 			}
 		}
-		LOGGER.info("Created {} dynamic menu entries for project: {}", menuEntries.size(), activeProject.getName());
 		return menuEntries;
 	}
 
@@ -60,34 +57,10 @@ public class CPageMenuIntegrationService {
 		Check.notBlank(route, "Page route cannot be blank");
 		String icon = page.getIcon() != null ? page.getIcon() : "vaadin:file-text";
 		Double order;
-		try {
-			String menuOrderStr = page.getMenuOrder();
-			Check.notBlank(menuOrderStr, "Menu order cannot be blank");
-			order = Double.parseDouble(menuOrderStr);
-		} catch (NumberFormatException e) {
-			LOGGER.warn("Invalid menu order for page {}: {}", page.getPageTitle(), page.getMenuOrder());
-			order = 999.0; // Default to end of menu
-		}
-		// CRITICAL FIX: The issue is that CHierarchicalSideMenu creates intermediate navigation items
-		// using the MenuEntry's menuClass(). For hierarchical titles like "pages.Project Overview",
-		// it creates a navigation item for "pages" that points to CDynamicPageRouter.class.
-		// But CDynamicPageRouter expects a route parameter, not a standalone navigation.
-		//
-		// SOLUTION: Use a non-hierarchical title for the MenuEntry to avoid creating intermediate
-		// navigation items that can't be handled properly. Instead of "pages.Project Overview",
-		// use just "Project Overview" and let the menu system handle it as a direct navigation item.
-		String menuTitle = title;
-		if (title.contains(".")) {
-			// Extract the last part of the hierarchical title for the menu display
-			String[] titleParts = title.split("\\.");
-			menuTitle = titleParts[titleParts.length - 1].trim();
-			LOGGER.debug("Converted hierarchical title '{}' to menu title '{}'", title, menuTitle);
-		}
-		// Create the navigation URL that points to our dynamic page router with the route as parameter
-		String navigationPath = "project-pages/" + route;
-		// Create MenuEntry using the simplified title to avoid hierarchy issues
-		// This ensures direct navigation without creating problematic intermediate levels
-		return new MenuEntry(menuTitle, navigationPath, order, icon, CDynamicPageRouter.class);
+		String menuOrderStr = page.getMenuOrder();
+		order = Double.parseDouble(menuOrderStr);
+		// mark dynamic
+		return new MenuEntry("dynamic." + page.getTitle(), "dynamic/" + page.getRoute(), order, icon, CDynamicPageRouter.class);
 	}
 
 	/** Get page hierarchy structure for building nested menus. */

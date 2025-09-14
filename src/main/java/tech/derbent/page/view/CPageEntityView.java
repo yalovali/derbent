@@ -16,7 +16,7 @@ import tech.derbent.session.service.CSessionService;
 
 @Route ("cpageentityview")
 @PageTitle ("Page Master Detail")
-@Menu (order = 1.1, icon = "class:tech.derbent.page.view.CPageEntityView", title = "Settings.Pages")
+@Menu (order = 1.1, icon = "class:tech.derbent.page.view.CPageEntityView", title = "Setup.UI.Pages")
 @PermitAll // When security is enabled, allow all authenticated users
 public final class CPageEntityView extends CGridViewBaseProject<CPageEntity> {
 

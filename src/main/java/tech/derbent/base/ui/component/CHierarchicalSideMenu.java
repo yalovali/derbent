@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -16,7 +17,6 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
-import com.vaadin.flow.server.menu.MenuConfiguration;
 import com.vaadin.flow.server.menu.MenuEntry;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.Display;
@@ -129,14 +129,23 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			return itemLayout;
 		}
 
-		private void handleItemClick(final com.vaadin.flow.component.ClickEvent<HorizontalLayout> event) {
+		private void handleItemClick(final ClickEvent<HorizontalLayout> event) {
 			if (isNavigation && (targetLevelKey != null)) {
 				// Navigate to sub-level
 				showLevel(targetLevelKey);
 			} else if ((path != null) && !path.trim().isEmpty()) {
 				// Navigate to actual page
 				LOGGER.debug("Navigating to path: {}", path);
-				com.vaadin.flow.component.UI.getCurrent().navigate(path);
+				if (path.startsWith("dynamic.")) {
+					// Remove "dynamic." prefix and navigate
+					String dynamicPath = path.substring("dynamic.".length());
+					// give rest of path as a parameter to dynamicview page
+					String dynamicViewPath = "cdynamicpagerouter/" + dynamicPath;
+					UI.getCurrent().navigate(dynamicViewPath);
+					return;
+				} else {
+					UI.getCurrent().navigate(path);
+				}
 			}
 		}
 	}
@@ -252,23 +261,13 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	private void buildMenuHierarchy() throws Exception {
 		final var rootLevel = new CMenuLevel("root", "Homepage", null);
 		menuLevels.put("root", rootLevel);
-		// Create unified list of menu entries from both static and dynamic sources
 		List<MenuEntry> allMenuEntries = new ArrayList<>();
 		// Get static menu entries from MenuConfiguration
-		final var staticMenuEntries = MenuConfiguration.getMenuEntries();
-		allMenuEntries.addAll(staticMenuEntries);
-		// Get dynamic menu entries from CPageMenuIntegrationService if available and ready
-		if (pageMenuService != null && pageMenuService.isReady()) {
-			try {
-				final var dynamicMenuEntries = pageMenuService.getDynamicMenuEntries();
-				allMenuEntries.addAll(dynamicMenuEntries);
-				LOGGER.info("Integrated {} static and {} dynamic menu entries", staticMenuEntries.size(), dynamicMenuEntries.size());
-			} catch (Exception e) {
-				LOGGER.warn("Failed to load dynamic menu entries, using static only: {}", e.getMessage());
-			}
-		} else {
-			LOGGER.debug("Page menu service not ready, using static menu entries only");
-		}
+		// final var staticMenuEntries = MenuConfiguration.getMenuEntries();
+		// allMenuEntries.addAll(staticMenuEntries);
+		Check.notNull(pageMenuService, "Page menu service must not be null");
+		final var dynamicMenuEntries = pageMenuService.getDynamicMenuEntries();
+		allMenuEntries.addAll(dynamicMenuEntries);
 		// Process all menu entries (both static and dynamic)
 		for (final MenuEntry menuEntry : allMenuEntries) {
 			processMenuEntry(menuEntry);
