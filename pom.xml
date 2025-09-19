@@ -310,6 +310,13 @@
 	</profile>
 	<profile>
 	<id>reset-db</id>
+	<dependencies>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+	</dependencies>
 	<build>
 		<plugins>
 			<plugin>
@@ -323,7 +330,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<mainClass>tech.derbent.Application</mainClass>
+					<mainClass>tech.derbent.DbResetApplication</mainClass>
 					<profiles>reset-db</profiles>
 					<arguments>
 						<argument>--spring.profiles.active=reset-db</argument>

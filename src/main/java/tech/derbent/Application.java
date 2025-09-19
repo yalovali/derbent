@@ -9,12 +9,14 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.StreamUtils;
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.theme.Theme;
 import tech.derbent.abstracts.components.CTimer;
+import tech.derbent.config.CSampleDataInitializer;
 
 @SpringBootApplication (scanBasePackages = "tech.derbent")
 @Theme ("default")
@@ -55,20 +57,29 @@ public class Application implements AppShellConfigurator {
 	}
 
 	@Bean
-	public ApplicationRunner dataInitializer(final JdbcTemplate jdbcTemplate) {
+	public ApplicationRunner dataInitializer(final JdbcTemplate jdbcTemplate, final Environment environment) {
 		return args -> {
-			// Temporarily disable data initialization due to SQL syntax issues
-			// LOGGER.info("Data initialization temporarily disabled");
+			// Normal application startup - load sample data only if database is empty
 			try {
 				final Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cuser", Integer.class);
-				// disabled by count <0
-				if ((count != null) && (count == 0) && (count < 0)) {
-					final String sql = StreamUtils.copyToString(new ClassPathResource("data.sql").getInputStream(), StandardCharsets.UTF_8);
-					jdbcTemplate.execute(sql);
+				// Only load sample data if database is empty
+				if ((count != null) && (count == 0)) {
+					LOGGER.info("Database is empty - loading sample data");
+					final CSampleDataInitializer initializer = new CSampleDataInitializer();
+					initializer.loadSampleData();
+				} else {
+					LOGGER.info("Database already contains data - skipping sample data initialization");
 				}
 			} catch (final Exception e) {
 				// Table might not exist yet if Hibernate hasn't created it
 				LOGGER.debug("Could not query cuser table - table may not exist yet: {}", e.getMessage());
+				// Try to load sample data if tables don't exist yet
+				try {
+					final CSampleDataInitializer initializer = new CSampleDataInitializer();
+					initializer.loadSampleData();
+				} catch (final Exception loadException) {
+					LOGGER.warn("Could not load sample data during startup: {}", loadException.getMessage());
+				}
 			}
 		};
 	}
