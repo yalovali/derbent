@@ -74,7 +74,6 @@ public class Application implements AppShellConfigurator {
 				}
 				return;
 			}
-			
 			// Normal application startup - load sample data only if database is empty
 			try {
 				final Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cuser", Integer.class);
