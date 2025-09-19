@@ -184,6 +184,9 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<mainClass>tech.derbent.Application</mainClass>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>com.diffplug.spotless</groupId>
@@ -330,7 +333,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<mainClass>tech.derbent.DbResetApplication</mainClass>
+					<mainClass>tech.derbent.Application</mainClass>
 					<profiles>reset-db</profiles>
 					<arguments>
 						<argument>--spring.profiles.active=reset-db</argument>

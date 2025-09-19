@@ -59,6 +59,22 @@ public class Application implements AppShellConfigurator {
 	@Bean
 	public ApplicationRunner dataInitializer(final JdbcTemplate jdbcTemplate, final Environment environment) {
 		return args -> {
+			// Check if reset-db profile is active
+			if (java.util.Arrays.asList(environment.getActiveProfiles()).contains("reset-db")) {
+				LOGGER.info("Reset-db profile active - forcing sample data reload");
+				try {
+					final CSampleDataInitializer initializer = new CSampleDataInitializer();
+					initializer.reloadForced();
+					LOGGER.info("Database reset completed successfully");
+					// Exit the application after reset is complete
+					System.exit(0);
+				} catch (final Exception e) {
+					LOGGER.error("Error during database reset", e);
+					System.exit(1);
+				}
+				return;
+			}
+			
 			// Normal application startup - load sample data only if database is empty
 			try {
 				final Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cuser", Integer.class);
