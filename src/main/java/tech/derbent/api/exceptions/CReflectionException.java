@@ -1,9 +1,5 @@
 package tech.derbent.api.exceptions;
-
-/**
- * Exception thrown when reflection operations fail.
- * Provides specific error handling for reflection-based operations.
- */
+/** Exception thrown when reflection operations fail. Provides specific error handling for reflection-based operations. */
 public class CReflectionException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;

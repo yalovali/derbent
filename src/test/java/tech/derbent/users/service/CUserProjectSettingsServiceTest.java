@@ -110,22 +110,18 @@ public class CUserProjectSettingsServiceTest {
 	void testUserProjectSettingsInitialization_PreventConstraintViolation() {
 		// Test that new CUserProjectSettings instances can be created with proper initialization
 		// This test simulates what the dialogs should do to prevent user_id constraint violations
-		
 		// Given - Create a new settings instance like dialogs do
 		CUser testUser = new CUser("Dialog Test User");
 		CProject testProject = new CProject("Dialog Test Project");
-		
 		// When - Create new settings and immediately set required relationships
 		CUserProjectSettings settings = new CUserProjectSettings();
 		settings.setUser(testUser);
 		settings.setProject(testProject);
-		
 		// Then - Verify that required fields are set to prevent constraint violations
 		assertNotNull(settings.getUser(), "User must be set to prevent user_id constraint violation");
 		assertNotNull(settings.getProject(), "Project must be set to prevent project_id constraint violation");
 		assertEquals(testUser, settings.getUser(), "User should be correctly set");
 		assertEquals(testProject, settings.getProject(), "Project should be correctly set");
-		
 		// Verify that role and permission can be null (as per entity definition)
 		assertNull(settings.getRole(), "Role can be null as per entity definition");
 		assertNull(settings.getPermission(), "Permission can be null as per entity definition");

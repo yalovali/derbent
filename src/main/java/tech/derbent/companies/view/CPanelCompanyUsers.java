@@ -13,7 +13,7 @@ public class CPanelCompanyUsers extends CPanelCompanyBase {
 
 	public CPanelCompanyUsers(IContentOwner parentContent, final CCompany currentEntity, final CEnhancedBinder<CCompany> beanValidationBinder,
 			final CCompanyService entityService) {
-		super("Users", parentContent,beanValidationBinder, entityService);
+		super("Users", parentContent, beanValidationBinder, entityService);
 	}
 
 	@Override

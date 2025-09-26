@@ -177,7 +177,6 @@ public final class CDashboardView extends CAbstractPage {
 		Check.notNull(projects, "Projects list cannot be null");
 		Check.notNull(usersByProject, "UsersByProject map cannot be null");
 		Check.notNull(activitiesByProject, "ActivitiesByProject map cannot be null");
-		
 		final Div breakdown = new Div();
 		breakdown.addClassNames(LumoUtility.Margin.Top.XLARGE);
 		final H3 title = new H3("Project Breakdown");

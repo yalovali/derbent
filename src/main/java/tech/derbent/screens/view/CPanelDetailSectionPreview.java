@@ -19,7 +19,7 @@ public class CPanelDetailSectionPreview extends CPanelDetailSectionBase {
 
 	public CPanelDetailSectionPreview(IContentOwner parentContent, final CDetailSection currentEntity,
 			final CEnhancedBinder<CDetailSection> beanValidationBinder, final CDetailSectionService entityService) throws Exception {
-		super("Preview", parentContent,beanValidationBinder, entityService);
+		super("Preview", parentContent, beanValidationBinder, entityService);
 		initPanel();
 	}
 

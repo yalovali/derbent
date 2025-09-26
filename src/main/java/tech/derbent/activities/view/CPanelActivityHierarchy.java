@@ -11,7 +11,7 @@ public class CPanelActivityHierarchy extends CPanelActivityBase {
 
 	public CPanelActivityHierarchy(IContentOwner parentContent, final CActivity currentEntity, final CEnhancedBinder<CActivity> beanValidationBinder,
 			final CActivityService entityService) throws Exception {
-		super("Hierarchy", parentContent,beanValidationBinder, entityService);
+		super("Hierarchy", parentContent, beanValidationBinder, entityService);
 		initPanel();
 	}
 

@@ -16,7 +16,7 @@ public class CPanelActivityAdditionalInfo extends CPanelActivityBase {
 	public CPanelActivityAdditionalInfo(IContentOwner parentContent, final CActivity currentEntity,
 			final CEnhancedBinder<CActivity> beanValidationBinder, final CActivityService entityService, final CSessionService sessionService)
 			throws Exception {
-		super("Additional Info", parentContent,beanValidationBinder, entityService);
+		super("Additional Info", parentContent, beanValidationBinder, entityService);
 		initPanel();
 	}
 

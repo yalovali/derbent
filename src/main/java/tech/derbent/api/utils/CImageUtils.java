@@ -28,18 +28,14 @@ public final class CImageUtils {
 			"jpg", "jpeg", "png", "gif"
 	};
 
-	/**
-	 * Creates a data URL from image bytes for display in HTML components.
-	 * Validates input data and generates base64-encoded data URL with proper MIME type detection.
-	 * 
+	/** Creates a data URL from image bytes for display in HTML components. Validates input data and generates base64-encoded data URL with proper
+	 * MIME type detection.
 	 * @param imageData Image data as byte array
 	 * @return Data URL string for use in img src attribute (e.g., "data:image/jpeg;base64,...")
-	 * @throws IllegalArgumentException if image data is null or empty
-	 */
+	 * @throws IllegalArgumentException if image data is null or empty */
 	public static String createDataUrl(final byte[] imageData) {
 		Check.notNull(imageData, "Image data cannot be null");
 		Check.notEmpty(imageData, "Image data cannot be empty");
-		
 		final String mimeType = detectImageMimeType(imageData);
 		final String base64Image = java.util.Base64.getEncoder().encodeToString(imageData);
 		final String dataUrl = "data:" + mimeType + ";base64," + base64Image;
@@ -50,7 +46,6 @@ public final class CImageUtils {
 	private static String detectImageMimeType(final byte[] imageData) {
 		Check.notNull(imageData, "Image data cannot be null");
 		Check.isTrue(imageData.length >= 4, "Image data must have at least 4 bytes");
-		
 		// Check for SVG (starts with "<svg" or "<?xml")
 		final String start = new String(imageData, 0, Math.min(20, imageData.length)).toLowerCase();
 		if (start.contains("<svg") || start.contains("<?xml")) {
@@ -91,7 +86,6 @@ public final class CImageUtils {
 
 	private static String getFileExtension(final String fileName) {
 		Check.notBlank(fileName, "File name cannot be null or blank");
-		
 		final int lastDotIndex = fileName.lastIndexOf('.');
 		if ((lastDotIndex > 0) && (lastDotIndex < (fileName.length() - 1))) {
 			return fileName.substring(lastDotIndex + 1).toLowerCase();
@@ -99,25 +93,20 @@ public final class CImageUtils {
 		return "";
 	}
 
-	/**
-	 * Resizes an image to the specified dimensions with high quality scaling.
-	 * Uses bilinear interpolation and high-quality rendering hints for optimal results.
-	 * Validates input parameters and handles various image formats, outputting JPEG format.
-	 * 
-	 * @param imageData Original image data as byte array
-	 * @param targetWidth Target width in pixels (must be positive)
+	/** Resizes an image to the specified dimensions with high quality scaling. Uses bilinear interpolation and high-quality rendering hints for
+	 * optimal results. Validates input parameters and handles various image formats, outputting JPEG format.
+	 * @param imageData    Original image data as byte array
+	 * @param targetWidth  Target width in pixels (must be positive)
 	 * @param targetHeight Target height in pixels (must be positive)
 	 * @return Resized image data as byte array in JPEG format
-	 * @throws IllegalArgumentException if imageData is null/empty or dimensions are not positive
-	 * @throws CImageProcessingException if image reading, processing, or writing fails
-	 */
+	 * @throws IllegalArgumentException  if imageData is null/empty or dimensions are not positive
+	 * @throws CImageProcessingException if image reading, processing, or writing fails */
 	public static byte[] resizeImage(final byte[] imageData, final int targetWidth, final int targetHeight) {
 		LOGGER.info("CImageUtils.resizeImage called with targetWidth={}, targetHeight={}", targetWidth, targetHeight);
 		Check.notNull(imageData, "Image data cannot be null");
 		Check.notEmpty(imageData, "Image data cannot be empty");
 		Check.checkPositive(targetWidth, "Target width must be positive");
 		Check.checkPositive(targetHeight, "Target height must be positive");
-		
 		try {
 			// Read original image
 			final ByteArrayInputStream inputStream = new ByteArrayInputStream(imageData);
@@ -152,27 +141,21 @@ public final class CImageUtils {
 		return resizeImage(imageData, PROFILE_PICTURE_WIDTH, PROFILE_PICTURE_HEIGHT);
 	}
 
-	/**
-	 * Validates image data for profile picture usage with comprehensive checks.
-	 * Performs null/empty validation, size limits, format validation, and image readability testing.
-	 * Supports multiple image formats and provides detailed error messages for validation failures.
-	 * 
+	/** Validates image data for profile picture usage with comprehensive checks. Performs null/empty validation, size limits, format validation, and
+	 * image readability testing. Supports multiple image formats and provides detailed error messages for validation failures.
 	 * @param imageData Image data to validate as byte array
-	 * @param fileName Original file name for format validation (must include extension)
-	 * @throws IllegalArgumentException if imageData is null/empty or fileName is null/blank
-	 * @throws CImageProcessingException if size exceeds limit, format unsupported, or image invalid
-	 */
+	 * @param fileName  Original file name for format validation (must include extension)
+	 * @throws IllegalArgumentException  if imageData is null/empty or fileName is null/blank
+	 * @throws CImageProcessingException if size exceeds limit, format unsupported, or image invalid */
 	public static void validateImageData(final byte[] imageData, final String fileName) {
 		LOGGER.info("CImageUtils.validateImageData called with fileName={}", fileName);
 		Check.notNull(imageData, "Image data cannot be null");
 		Check.notEmpty(imageData, "Image data cannot be empty");
 		Check.notBlank(fileName, "File name cannot be null or empty");
-		
 		if (imageData.length > MAX_IMAGE_SIZE) {
 			throw new CImageProcessingException(
 					String.format("Image size (%d bytes) exceeds maximum allowed size (%d bytes)", imageData.length, MAX_IMAGE_SIZE));
 		}
-		
 		// Validate file format
 		final String fileExtension = getFileExtension(fileName);
 		boolean isSupported = false;

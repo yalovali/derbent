@@ -37,12 +37,10 @@ public class CProjectUserSettingsDialog extends CDBRelationDialog<CUserProjectSe
 		super(parentContent, settings != null ? settings : new CUserProjectSettings(), project, masterService, detailService, onSave,
 				settings == null);
 		this.userProjectSettingsService = userProjectSettingsService;
-		
 		// Ensure the project is set in the relationship entity immediately for new entities
 		if (settings == null && project != null) {
 			getEntity().setProject(project);
 		}
-		
 		setupDialog();
 		populateForm();
 	}

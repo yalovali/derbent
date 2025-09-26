@@ -14,7 +14,6 @@ public interface CProjectRepository extends CAbstractNamedRepository<CProject> {
 	 * @return the project with eagerly loaded user settings, or empty if not found */
 	@Query ("SELECT p FROM CProject p LEFT JOIN FETCH p.userSettings WHERE p.id = :projectId")
 	Optional<CProject> findByIdWithUserSettings(@Param ("projectId") Long projectId);
-
 	/** Finds all projects that are not assigned to a specific user.
 	 * @param userId the ID of the user
 	 * @return list of projects not assigned to the user */

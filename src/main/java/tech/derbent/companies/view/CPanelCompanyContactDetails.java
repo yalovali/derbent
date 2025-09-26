@@ -14,7 +14,7 @@ public class CPanelCompanyContactDetails extends CPanelCompanyBase {
 
 	public CPanelCompanyContactDetails(IContentOwner parentContent, final CCompany currentEntity,
 			final CEnhancedBinder<CCompany> beanValidationBinder, final CCompanyService entityService) throws Exception {
-		super("Contact Details", parentContent,beanValidationBinder, entityService);
+		super("Contact Details", parentContent, beanValidationBinder, entityService);
 		initPanel();
 	}
 

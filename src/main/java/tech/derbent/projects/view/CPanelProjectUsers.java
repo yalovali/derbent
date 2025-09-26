@@ -101,7 +101,7 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject, CUserPro
 		if (!validateProjectSelection() || !validateServiceAvailability("Project")) {
 			return;
 		}
-		final CProjectUserSettingsDialog dialog = new CProjectUserSettingsDialog(parentContent, (CProjectService) entityService, userService, 
+		final CProjectUserSettingsDialog dialog = new CProjectUserSettingsDialog(parentContent, (CProjectService) entityService, userService,
 				userProjectSettingsService, null, currentProject, this::onSettingsSaved);
 		dialog.open();
 	}

@@ -12,7 +12,7 @@ public class CPanelActivityResourceManagement extends CPanelActivityBase {
 
 	public CPanelActivityResourceManagement(IContentOwner parentContent, final CActivity currentEntity,
 			final CEnhancedBinder<CActivity> beanValidationBinder, final CActivityService entityService) throws Exception {
-		super("Resource Management", parentContent,beanValidationBinder, entityService);
+		super("Resource Management", parentContent, beanValidationBinder, entityService);
 		initPanel();
 	}
 

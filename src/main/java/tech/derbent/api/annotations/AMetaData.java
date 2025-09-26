@@ -28,11 +28,9 @@ public @interface AMetaData {
 	String dataProviderMethod() default "list";
 
 	String dataProviderParamMethod() default "";
-	
-	/**
-	 * Indicates that the data provider should call a method on the content owner (page)
-	 * instead of a service bean. Use "content" to call methods on the current page/context.
-	 */
+
+	/** Indicates that the data provider should call a method on the content owner (page) instead of a service bean. Use "content" to call methods on
+	 * the current page/context. */
 	String dataProviderOwner() default "";
 
 	String dataUpdateMethod() default "";

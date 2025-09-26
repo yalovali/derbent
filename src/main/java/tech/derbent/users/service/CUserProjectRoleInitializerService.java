@@ -76,25 +76,19 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 		Check.notNull(gridEntityService, "GridEntityService must not be null");
 		Check.notNull(screenService, "ScreenService must not be null");
 		Check.notNull(pageEntityService, "PageEntityService must not be null");
-		
 		try {
 			LOGGER.info("Initializing CUserProjectRole for project: {}", project.getName());
-			
 			// Create and save basic view
 			final CDetailSection detailSection = createBasicView(project);
 			screenService.save(detailSection);
-			
 			// Create and save basic grid
 			final CGridEntity gridEntity = createBasicGrid(project);
 			gridEntityService.save(gridEntity);
-			
 			// Create and save page entity
-			final CPageEntity page = createPageEntity(clazz, project, gridEntity, detailSection, 
-				"User Management.Project Roles", "Project Role Management", 
-				"Manage user roles within the project context");
+			final CPageEntity page = createPageEntity(clazz, project, gridEntity, detailSection, "User Management.Project Roles",
+					"Project Role Management", "Manage user roles within the project context");
 			page.setAttributeShowInQuickToolbar(false); // Don't show in quick toolbar by default
 			pageEntityService.save(page);
-			
 			LOGGER.info("Successfully initialized CUserProjectRole for project: {}", project.getName());
 		} catch (Exception e) {
 			LOGGER.error("Error initializing CUserProjectRole for project: {}", project.getName(), e);

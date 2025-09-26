@@ -22,7 +22,6 @@ public class CActivityPriorityInitializerService extends CInitializerServiceBase
 
 	public static CDetailSection createBasicView(final CProject project) {
 		Check.notNull(project, "Project cannot be null");
-		
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));

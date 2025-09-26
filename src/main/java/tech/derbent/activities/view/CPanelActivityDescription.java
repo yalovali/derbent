@@ -12,7 +12,7 @@ public class CPanelActivityDescription extends CPanelActivityBase {
 
 	public CPanelActivityDescription(IContentOwner parentContent, final CActivity currentEntity,
 			final CEnhancedBinder<CActivity> beanValidationBinder, final CActivityService entityService) throws Exception {
-		super("Basic Information", parentContent,beanValidationBinder, entityService);
+		super("Basic Information", parentContent, beanValidationBinder, entityService);
 		initPanel();
 	}
 

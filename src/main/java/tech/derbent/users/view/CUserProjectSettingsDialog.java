@@ -31,12 +31,10 @@ public class CUserProjectSettingsDialog extends CDBRelationDialog<CUserProjectSe
 			final Consumer<CUserProjectSettings> onSave) throws Exception {
 		super(parentContent, settings != null ? settings : new CUserProjectSettings(), user, masterService, detailService, onSave, settings == null);
 		this.userProjectSettingsService = userProjectSettingsService;
-		
 		// Ensure the user is set in the relationship entity immediately for new entities
 		if (settings == null && user != null) {
 			getEntity().setUser(user);
 		}
-		
 		setupDialog();
 		populateForm();
 	}

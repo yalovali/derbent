@@ -14,7 +14,7 @@ public class CPanelActivityBudgetManagement extends CPanelActivityBase {
 
 	public CPanelActivityBudgetManagement(IContentOwner parentContent, final CActivity currentEntity,
 			final CEnhancedBinder<CActivity> beanValidationBinder, final CActivityService entityService) throws Exception {
-		super("Budget Management", parentContent,beanValidationBinder, entityService);
+		super("Budget Management", parentContent, beanValidationBinder, entityService);
 		initPanel();
 	}
 

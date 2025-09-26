@@ -37,7 +37,7 @@ public abstract class CAbstractEntityRelationPanel<ParentEntity extends CEntityD
 	public CAbstractEntityRelationPanel(final String title, IContentOwner parentContent, final ParentEntity currentEntity,
 			final CEnhancedBinder<ParentEntity> beanValidationBinder, final Class<ParentEntity> entityClass,
 			final CAbstractService<ParentEntity> entityService) {
-		super(title, parentContent,beanValidationBinder, entityClass, entityService);
+		super(title, parentContent, beanValidationBinder, entityClass, entityService);
 		setupGrid();
 		setupButtons();
 		closePanel();
