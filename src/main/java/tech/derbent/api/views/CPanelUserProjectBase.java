@@ -75,10 +75,8 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 			final CProject project = selected.getProject();
 			final CUser user = selected.getUser();
 			try {
-				userProjectSettingsService.removeUserFromProject(user, project);
+				userProjectSettingsService.deleteByUserProject(user, project);
 				LOGGER.debug("Successfully removed user {} from project {}", user, project);
-				// Refresh collections from database to ensure synchronization
-				userProjectSettingsService.refreshUserProjectCollections(user, project);
 			} catch (Exception e) {
 				LOGGER.error("Error removing user from project: {}", e.getMessage(), e);
 				new CWarningDialog("Failed to remove user from project: " + e.getMessage()).open();

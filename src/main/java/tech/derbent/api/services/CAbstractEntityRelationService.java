@@ -48,10 +48,9 @@ public abstract class CAbstractEntityRelationService<RelationEntity extends CEnt
 	@Transactional
 	public void deleteRelationship(final Long parentEntityId, final Long childEntityId) {
 		LOGGER.debug("Deleting relationship between parent {} and child {}", parentEntityId, childEntityId);
-		final Optional<RelationEntity> relationship = findRelationship(parentEntityId, childEntityId);
-		if (relationship.isPresent()) {
-			delete(relationship.get());
-		}
+		final RelationEntity relationship = findRelationship(parentEntityId, childEntityId)
+				.orElseThrow(() -> new RuntimeException("No relationship exists between the specified entities"));
+		delete(relationship);
 	}
 
 	/** Find all relationships for a specific child entity by ID */

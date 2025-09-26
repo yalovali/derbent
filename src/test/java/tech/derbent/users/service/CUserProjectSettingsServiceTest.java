@@ -35,7 +35,7 @@ public class CUserProjectSettingsServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		service = new CUserProjectSettingsService(repository, clock, sessionService);
+		service = new CUserProjectSettingsService(repository, clock, sessionService, null, null);
 		user = new CUser("Test User");
 		user.setLogin("testuser");
 		user.setEmail("test@example.com");
@@ -69,7 +69,7 @@ public class CUserProjectSettingsServiceTest {
 	@Test
 	void testRemoveUserFromProject_NullIds() {
 		// When & Then - user and project with null IDs should fail
-		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.removeUserFromProject(user, project));
+		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.deleteByUserProject(user, project));
 		assertTrue(exception.getMessage().contains("User must have a valid ID") || exception.getMessage().contains("Project must have a valid ID"));
 		verify(repository, never()).findByUserIdAndProjectId(any(), any());
 	}
@@ -100,8 +100,8 @@ public class CUserProjectSettingsServiceTest {
 	@Test
 	void testRemoveUserFromProject_NullArguments() {
 		// When & Then - null arguments should fail
-		IllegalArgumentException exception1 = assertThrows(IllegalArgumentException.class, () -> service.removeUserFromProject(null, project));
-		IllegalArgumentException exception2 = assertThrows(IllegalArgumentException.class, () -> service.removeUserFromProject(user, null));
+		IllegalArgumentException exception1 = assertThrows(IllegalArgumentException.class, () -> service.deleteByUserProject(null, project));
+		IllegalArgumentException exception2 = assertThrows(IllegalArgumentException.class, () -> service.deleteByUserProject(user, null));
 		assertTrue(exception1.getMessage().contains("User cannot be null"));
 		assertTrue(exception2.getMessage().contains("Project cannot be null"));
 	}
@@ -127,63 +127,31 @@ public class CUserProjectSettingsServiceTest {
 		assertNull(settings.getPermission(), "Permission can be null as per entity definition");
 	}
 
-	/**
-	 * Test specifically for the delete relationship fix.
-	 * This test validates that our bidirectional collection management works correctly.
-	 */
+	/** Test specifically for the delete relationship fix. This test validates that our bidirectional collection management works correctly. */
 	@Test
 	void testDeleteRelationshipFix_BidirectionalCollectionManagement() {
 		// Given - Create a user, project and their relationship
 		CUser testUser = new CUser("Test User");
 		CProject testProject = new CProject("Test Project");
-		
 		CUserProjectSettings settings = new CUserProjectSettings();
 		settings.setUser(testUser);
 		settings.setProject(testProject);
 		settings.setPermission("READ_WRITE");
-
 		// Set up bidirectional relationships
 		testUser.addProjectSettings(settings);
 		testProject.addUserSettings(settings);
-
 		// Verify initial state
 		assertEquals(1, testUser.getProjectSettings().size(), "User should have one project setting");
 		assertEquals(1, testProject.getUserSettings().size(), "Project should have one user setting");
 		assertTrue(testUser.getProjectSettings().contains(settings), "User should contain the settings");
 		assertTrue(testProject.getUserSettings().contains(settings), "Project should contain the settings");
-
 		// When - Remove the relationship (simulating what our fixed service method does)
 		testUser.removeProjectSettings(settings);
 		testProject.removeUserSettings(settings);
-
 		// Then - Verify collections are properly cleared
 		assertTrue(testUser.getProjectSettings().isEmpty(), "User project settings should be empty after removal");
 		assertTrue(testProject.getUserSettings().isEmpty(), "Project user settings should be empty after removal");
 		assertNull(settings.getUser(), "Settings should not reference user after removal");
 		assertNull(settings.getProject(), "Settings should not reference project after removal");
-	}
-
-	/**
-	 * Test the refreshUserProjectCollections method we added to ensure collections 
-	 * are properly synchronized with database state.
-	 */
-	@Test
-	void testRefreshUserProjectCollections_EmptyCollections() {
-		// Given - User and project (IDs will be null for new entities in test)
-		CUser testUser = new CUser("Test User");
-		CProject testProject = new CProject("Test Project");
-
-		// When - Call refreshUserProjectCollections (this would normally fetch from DB)
-		// Note: In a real scenario, this would call the repository methods
-		// For this test, we're just testing the method exists and can be called without error
-		assertNotNull(service, "Service should be properly initialized");
-		
-		// The method should not throw an exception when called with valid entities
-		// In actual usage, it would refresh collections from database
-		service.refreshUserProjectCollections(testUser, testProject);
-		
-		// Then - Collections should remain empty in this test case
-		assertTrue(testUser.getProjectSettings().isEmpty(), "User project settings should be empty");
-		assertTrue(testProject.getUserSettings().isEmpty(), "Project user settings should be empty");
 	}
 }

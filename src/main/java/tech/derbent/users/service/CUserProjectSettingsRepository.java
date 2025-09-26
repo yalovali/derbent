@@ -2,9 +2,11 @@ package tech.derbent.users.service;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.services.CAbstractRepository;
 import tech.derbent.users.domain.CUserProjectSettings;
 
@@ -35,4 +37,19 @@ public interface CUserProjectSettingsRepository extends CAbstractRepository<CUse
 	long countByProjectId(Long projectId);
 	/** Count projects for a specific user */
 	long countByUserId(Long userId);
+	/** Delete a specific user-project relationship by user and project IDs. */
+	@Modifying
+	@Transactional
+	@Query ("DELETE FROM CUserProjectSettings ups WHERE ups.user.id = :userId AND ups.project.id = :projectId")
+	void deleteByUserIdProjectId(@Param ("userId") Long userId, @Param ("projectId") Long projectId);
+	/** Delete all user-project relationships for a specific user. */
+	@Modifying
+	@Transactional
+	@Query ("DELETE FROM CUserProjectSettings ups WHERE ups.user.id = :userId")
+	void deleteByUserId(@Param ("userId") Long userId);
+	/** Delete all user-project relationships for a specific project. */
+	@Modifying
+	@Transactional
+	@Query ("DELETE FROM CUserProjectSettings ups WHERE ups.project.id = :projectId")
+	void deleteByProjectId(@Param ("projectId") Long projectId);
 }

@@ -17,6 +17,7 @@ import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.interfaces.CFieldInfoGenerator;
 import tech.derbent.api.interfaces.CSearchable;
+import tech.derbent.api.utils.Check;
 import tech.derbent.companies.domain.CCompany;
 
 @Entity
@@ -250,9 +251,8 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable, CFieldInf
 	/** Remove a project setting from this user and maintain bidirectional relationship.
 	 * @param projectSettings the project settings to remove */
 	public void removeProjectSettings(final CUserProjectSettings projectSettings) {
-		if (projectSettings == null || this.projectSettings == null) {
-			return;
-		}
+		Check.notNull(projectSettings, "Project settings cannot be null");
+		Check.notNull(this.projectSettings, "User's project settings collection cannot be null");
 		if (this.projectSettings.remove(projectSettings)) {
 			projectSettings.setUser(null);
 		}

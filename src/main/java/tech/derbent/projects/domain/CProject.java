@@ -11,6 +11,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.interfaces.CSearchable;
+import tech.derbent.api.utils.Check;
 import tech.derbent.users.domain.CUserProjectSettings;
 
 /** CProject - Domain entity representing projects. Layer: Domain (MVC) Inherits from CEntityDB to provide database functionality. */
@@ -53,9 +54,7 @@ public class CProject extends CEntityNamed<CProject> implements CSearchable {
 	/** Remove a user setting from this project and maintain bidirectional relationship.
 	 * @param userSettings the user settings to remove */
 	public void removeUserSettings(final CUserProjectSettings userSettings) {
-		if (userSettings == null) {
-			return;
-		}
+		Check.notNull(userSettings, "User settings cannot be null");
 		if (this.userSettings.remove(userSettings)) {
 			userSettings.setProject(null);
 		}

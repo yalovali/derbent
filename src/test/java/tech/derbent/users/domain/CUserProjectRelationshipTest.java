@@ -90,30 +90,6 @@ public class CUserProjectRelationshipTest {
 	}
 
 	@Test
-	void testStaticHelperMethods() {
-		// Test the static helper methods in CUserProjectSettings
-		CUserProjectSettings.addUserToProject(project, user, settings);
-		// Verify that both sides of the relationship are maintained
-		assertEquals(1, user.getProjectSettings().size(), "User should have one project setting");
-		assertEquals(1, project.getUserSettings().size(), "Project should have one user setting");
-		assertEquals(user, settings.getUser(), "Settings should reference the user");
-		assertEquals(project, settings.getProject(), "Settings should reference the project");
-	}
-
-	@Test
-	void testStaticRemoveMethod() {
-		// Set up the relationship first
-		settings.setUser(user);
-		settings.setProject(project);
-		user.addProjectSettings(settings);
-		project.addUserSettings(settings);
-		// Remove using static method
-		CUserProjectSettings.removeUserFromProject(project, user);
-		assertTrue(user.getProjectSettings().isEmpty(), "User projectSettings should be empty after removal");
-		assertTrue(project.getUserSettings().isEmpty(), "Project userSettings should be empty after removal");
-	}
-
-	@Test
 	void testNullSafetyInAddMethods() {
 		// Test null safety
 		user.addProjectSettings(null);
