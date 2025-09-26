@@ -113,13 +113,32 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 		Check.notNull(user.getId(), "User must have a valid ID");
 		Check.notNull(project.getId(), "Project must have a valid ID");
 		// Find the relationship first to maintain bidirectional collections
-		// final Optional<CUserProjectSettings> settingsOpt = findRelationship(user.getId(), project.getId());
-		// final CUserProjectSettings settings = settingsOpt.orElseThrow(() -> new IllegalArgumentException("User is not assigned to this project"));
-		// Remove from bidirectional collections
-		// user.removeProjectSettings(settings);
-		// project.removeUserSettings(settings);
+		final Optional<CUserProjectSettings> settingsOpt = findRelationship(user.getId(), project.getId());
+		if (settingsOpt.isEmpty()) {
+			LOGGER.warn("No relationship found between user {} and project {}", user.getId(), project.getId());
+			return;
+		}
+		final CUserProjectSettings settings = settingsOpt.get();
+		// Remove from bidirectional collections first to maintain consistency
+		user.removeProjectSettings(settings);
+		project.removeUserSettings(settings);
 		// Delete the relationship using the parent method that handles ID checking
 		deleteRelationship(user.getId(), project.getId());
+		LOGGER.debug("Successfully removed user {} from project {}", user.getId(), project.getId());
+	}
+
+	/** Refresh user project settings from database - useful after deletion to ensure collections are synchronized */
+	@Transactional (readOnly = true)
+	public void refreshUserProjectCollections(final CUser user, final CProject project) {
+		if (user != null && user.getId() != null) {
+			final List<CUserProjectSettings> userSettings = findByParentEntityId(user.getId());
+			user.setProjectSettings(userSettings);
+		}
+		if (project != null && project.getId() != null) {
+			final List<CUserProjectSettings> projectSettings = findByChildEntityId(project.getId());
+			project.getUserSettings().clear();
+			project.getUserSettings().addAll(projectSettings);
+		}
 	}
 
 	/** Update user role and permissions for a project */
