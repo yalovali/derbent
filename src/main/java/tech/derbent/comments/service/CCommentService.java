@@ -7,9 +7,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.abstracts.services.CAbstractService;
-import tech.derbent.abstracts.utils.Check;
 import tech.derbent.activities.domain.CActivity;
+import tech.derbent.api.services.CAbstractService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.comments.domain.CComment;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
@@ -29,9 +29,7 @@ public class CCommentService extends CAbstractService<CComment> {
 
 	@PreAuthorize ("permitAll()")
 	public long countByActivity(final CActivity activity) {
-		if (activity == null) {
-			return 0L;
-		}
+		Check.notNull(activity, "Activity cannot be null");
 		return ((CCommentRepository) repository).countByActivity(activity);
 	}
 

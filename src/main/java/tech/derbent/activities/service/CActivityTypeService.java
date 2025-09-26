@@ -6,8 +6,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.abstracts.services.CEntityOfProjectService;
 import tech.derbent.activities.domain.CActivityType;
+import tech.derbent.api.services.CEntityOfProjectService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.session.service.CSessionService;
 
 /** CActivityTypeService - Service layer for CActivityType entity. Layer: Service (MVC) Handles business logic for project-aware activity type
@@ -31,9 +32,8 @@ public class CActivityTypeService extends CEntityOfProjectService<CActivityType>
 	 * @param activityType the activity type to check
 	 * @return the number of activities using this type */
 	public long countActivitiesUsingType(final CActivityType activityType) {
-		if (activityType == null) {
-			return 0;
-		}
+		Check.notNull(activityRepository, "Activity repository cannot be null");
+		Check.notNull(activityType, "Activity type cannot be null");
 		return activityRepository.countByActivityType(activityType);
 	}
 

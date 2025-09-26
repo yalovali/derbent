@@ -4,7 +4,7 @@ import java.time.Clock;
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import tech.derbent.abstracts.services.CEntityOfProjectService;
+import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.screens.domain.CMasterSection;
 import tech.derbent.session.service.CSessionService;
 

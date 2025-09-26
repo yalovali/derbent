@@ -7,7 +7,7 @@ import com.vaadin.flow.component.Component;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.view.CActivityCard;
-import tech.derbent.base.ui.CBaseKanbanColumn;
+import tech.derbent.api.ui.CBaseKanbanColumn;
 
 /** CGenericActivityKanbanColumn - Generic Kanban column for activities using the base kanban classes. Layer: View (MVC) This implementation uses the
  * new generic kanban base classes to provide drag-and-drop functionality for activity cards. */

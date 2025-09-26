@@ -20,13 +20,11 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
-import tech.derbent.abstracts.annotations.AMetaData;
-import tech.derbent.abstracts.domains.CProjectItem;
-import tech.derbent.abstracts.interfaces.CKanbanEntity;
-import tech.derbent.abstracts.interfaces.CKanbanStatus;
-import tech.derbent.abstracts.interfaces.CKanbanType;
-import tech.derbent.abstracts.views.CAbstractEntityDBPage;
-import tech.derbent.activities.view.CActivitiesView;
+import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.domains.CProjectItem;
+import tech.derbent.api.interfaces.CKanbanEntity;
+import tech.derbent.api.interfaces.CKanbanStatus;
+import tech.derbent.api.interfaces.CKanbanType;
 import tech.derbent.comments.domain.CComment;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
@@ -36,18 +34,18 @@ import tech.derbent.users.domain.CUser;
 @AttributeOverride (name = "id", column = @Column (name = "activity_id"))
 public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity {
 
+	public static final String DEFAULT_COLOR = "#DC143C";
+	public static final String DEFAULT_ICON = "vaadin:tasks";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivity.class);
-
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() {
-		return "#007bff"; // Blue color for activity entities
-	}
-
-	public static String getStaticIconFilename() { return "vaadin:tasks"; }
-
-	public static Class<?> getViewClassStatic() { return CActivitiesView.class; }
-
+	public final static String VIEW_NAME = "Activities View";
+	// Additional Information
+	@Column (nullable = true, length = 2000)
+	@Size (max = 2000)
+	@AMetaData (
+			displayName = "Acceptance Criteria", required = false, readOnly = false, defaultValue = "",
+			description = "Criteria that must be met for the activity to be considered complete", hidden = false, order = 70, maxLength = 2000
+	)
+	private String acceptanceCriteria;
 	// Basic Activity Information
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "cactivitytype_id", nullable = true)
@@ -56,6 +54,42 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 			order = 2, dataProviderBean = "CActivityTypeService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CActivityType activityType;
+	@Column (nullable = true, precision = 12, scale = 2)
+	@DecimalMin (value = "0.0", message = "Actual cost must be positive")
+	@DecimalMax (value = "999999.99", message = "Actual cost cannot exceed 999999.99")
+	@AMetaData (
+			displayName = "Actual Cost", required = false, readOnly = false, defaultValue = "0.00",
+			description = "Actual cost spent on this activity", hidden = false, order = 51
+	)
+	private BigDecimal actualCost = BigDecimal.ZERO;
+	@Column (nullable = true, precision = 10, scale = 2)
+	@DecimalMin (value = "0.0", message = "Actual hours must be positive")
+	@DecimalMax (value = "9999.99", message = "Actual hours cannot exceed 9999.99")
+	@AMetaData (
+			displayName = "Actual Hours", required = false, readOnly = false, defaultValue = "0.00",
+			description = "Actual time spent on this activity in hours", hidden = false, order = 21
+	)
+	private BigDecimal actualHours = BigDecimal.ZERO;
+	// One-to-Many relationship with comments - cascade delete enabled
+	@OneToMany (mappedBy = "activity", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	private List<CComment> comments = new ArrayList<>();
+	@Column (name = "completion_date", nullable = true)
+	@AMetaData (
+			displayName = "Completion Date", required = false, readOnly = true, description = "Actual completion date", hidden = false, order = 42
+	)
+	private LocalDate completionDate;
+	@Column (nullable = true)
+	@AMetaData (displayName = "Due Date", required = false, readOnly = false, description = "Expected completion date", hidden = false, order = 41)
+	private LocalDate dueDate;
+	// Budget Management
+	@Column (nullable = true, precision = 12, scale = 2)
+	@DecimalMin (value = "0.0", message = "Estimated cost must be positive")
+	@DecimalMax (value = "999999.99", message = "Estimated cost cannot exceed 999999.99")
+	@AMetaData (
+			displayName = "Estimated Cost", required = false, readOnly = false, defaultValue = "0.00",
+			description = "Estimated cost to complete this activity", hidden = false, order = 50
+	)
+	private BigDecimal estimatedCost;
 	// Time Tracking
 	@Column (nullable = true, precision = 10, scale = 2)
 	@DecimalMin (value = "0.0", message = "Estimated hours must be positive")
@@ -66,29 +100,20 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 	)
 	private BigDecimal estimatedHours;
 	@Column (nullable = true, precision = 10, scale = 2)
-	@DecimalMin (value = "0.0", message = "Actual hours must be positive")
-	@DecimalMax (value = "9999.99", message = "Actual hours cannot exceed 9999.99")
+	@DecimalMin (value = "0.0", message = "Hourly rate must be positive")
+	@DecimalMax (value = "9999.99", message = "Hourly rate cannot exceed 9999.99")
 	@AMetaData (
-			displayName = "Actual Hours", required = false, readOnly = false, defaultValue = "0.00",
-			description = "Actual time spent on this activity in hours", hidden = false, order = 21
+			displayName = "Hourly Rate", required = false, readOnly = false, defaultValue = "0.00", description = "Hourly rate for cost calculation",
+			hidden = false, order = 52
 	)
-	private BigDecimal actualHours = BigDecimal.ZERO;
-	@Column (nullable = true, precision = 10, scale = 2)
-	@DecimalMin (value = "0.0", message = "Remaining hours must be positive")
-	@DecimalMax (value = "9999.99", message = "Remaining hours cannot exceed 9999.99")
+	private BigDecimal hourlyRate;
+	@Column (nullable = true, length = 2000)
+	@Size (max = 2000)
 	@AMetaData (
-			displayName = "Remaining Hours", required = false, readOnly = false, defaultValue = "0.00",
-			description = "Estimated remaining time in hours", hidden = false, order = 22
+			displayName = "Notes", required = false, readOnly = false, defaultValue = "", description = "Additional notes and comments",
+			hidden = false, order = 71, maxLength = 2000
 	)
-	private BigDecimal remainingHours;
-	// Status and Priority Management
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "cactivitystatus_id", nullable = true)
-	@AMetaData (
-			displayName = "Status", required = false, readOnly = false, description = "Current status of the activity", hidden = false, order = 30,
-			dataProviderBean = "CActivityStatusService", setBackgroundFromColor = true, useIcon = true
-	)
-	private CActivityStatus status;
+	private String notes;
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "cactivitypriority_id", nullable = true)
 	@AMetaData (
@@ -104,61 +129,14 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 			hidden = false, order = 32
 	)
 	private Integer progressPercentage = 0;
-	// Date Management
-	@Column (nullable = true)
-	@AMetaData (
-			displayName = "Start Date", required = false, readOnly = false, description = "Planned or actual start date of the activity",
-			hidden = false, order = 40
-	)
-	private LocalDate startDate;
-	@Column (nullable = true)
-	@AMetaData (displayName = "Due Date", required = false, readOnly = false, description = "Expected completion date", hidden = false, order = 41)
-	private LocalDate dueDate;
-	@Column (name = "completion_date", nullable = true)
-	@AMetaData (
-			displayName = "Completion Date", required = false, readOnly = true, description = "Actual completion date", hidden = false, order = 42
-	)
-	private LocalDate completionDate;
-	// Budget Management
-	@Column (nullable = true, precision = 12, scale = 2)
-	@DecimalMin (value = "0.0", message = "Estimated cost must be positive")
-	@DecimalMax (value = "999999.99", message = "Estimated cost cannot exceed 999999.99")
-	@AMetaData (
-			displayName = "Estimated Cost", required = false, readOnly = false, defaultValue = "0.00",
-			description = "Estimated cost to complete this activity", hidden = false, order = 50
-	)
-	private BigDecimal estimatedCost;
-	@Column (nullable = true, precision = 12, scale = 2)
-	@DecimalMin (value = "0.0", message = "Actual cost must be positive")
-	@DecimalMax (value = "999999.99", message = "Actual cost cannot exceed 999999.99")
-	@AMetaData (
-			displayName = "Actual Cost", required = false, readOnly = false, defaultValue = "0.00",
-			description = "Actual cost spent on this activity", hidden = false, order = 51
-	)
-	private BigDecimal actualCost = BigDecimal.ZERO;
 	@Column (nullable = true, precision = 10, scale = 2)
-	@DecimalMin (value = "0.0", message = "Hourly rate must be positive")
-	@DecimalMax (value = "9999.99", message = "Hourly rate cannot exceed 9999.99")
+	@DecimalMin (value = "0.0", message = "Remaining hours must be positive")
+	@DecimalMax (value = "9999.99", message = "Remaining hours cannot exceed 9999.99")
 	@AMetaData (
-			displayName = "Hourly Rate", required = false, readOnly = false, defaultValue = "0.00", description = "Hourly rate for cost calculation",
-			hidden = false, order = 52
+			displayName = "Remaining Hours", required = false, readOnly = false, defaultValue = "0.00",
+			description = "Estimated remaining time in hours", hidden = false, order = 22
 	)
-	private BigDecimal hourlyRate;
-	// Additional Information
-	@Column (nullable = true, length = 2000)
-	@Size (max = 2000)
-	@AMetaData (
-			displayName = "Acceptance Criteria", required = false, readOnly = false, defaultValue = "",
-			description = "Criteria that must be met for the activity to be considered complete", hidden = false, order = 70, maxLength = 2000
-	)
-	private String acceptanceCriteria;
-	@Column (nullable = true, length = 2000)
-	@Size (max = 2000)
-	@AMetaData (
-			displayName = "Notes", required = false, readOnly = false, defaultValue = "", description = "Additional notes and comments",
-			hidden = false, order = 71, maxLength = 2000
-	)
-	private String notes;
+	private BigDecimal remainingHours;
 	@Column (nullable = true, length = 2000)
 	@Size (max = 2000)
 	@AMetaData (
@@ -166,9 +144,21 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 			hidden = false, order = 72, maxLength = 2000
 	)
 	private String results;
-	// One-to-Many relationship with comments - cascade delete enabled
-	@OneToMany (mappedBy = "activity", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-	private List<CComment> comments = new ArrayList<>();
+	// Date Management
+	@Column (nullable = true)
+	@AMetaData (
+			displayName = "Start Date", required = false, readOnly = false, description = "Planned or actual start date of the activity",
+			hidden = false, order = 40
+	)
+	private LocalDate startDate;
+	// Status and Priority Management
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "cactivitystatus_id", nullable = true)
+	@AMetaData (
+			displayName = "Status", required = false, readOnly = false, description = "Current status of the activity", hidden = false, order = 30,
+			dataProviderBean = "CActivityStatusService", setBackgroundFromColor = true, useIcon = true
+	)
+	private CActivityStatus status;
 
 	/** Default constructor for JPA. */
 	public CActivity() {
@@ -225,12 +215,11 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 
 	public BigDecimal getActualHours() { return actualHours != null ? actualHours : BigDecimal.ZERO; }
 
-	public LocalDate getCompletionDate() { return completionDate; }
+	/** Gets the list of comments associated with this activity.
+	 * @return list of comments, never null */
+	public List<CComment> getComments() { return comments != null ? comments : new ArrayList<>(); }
 
-	@Override
-	public String getDisplayName() { // TODO Auto-generated method stub
-		return getName();
-	}
+	public LocalDate getCompletionDate() { return completionDate; }
 
 	public LocalDate getDueDate() { return dueDate; }
 
@@ -250,17 +239,6 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 
 	public String getResults() { return results; }
 
-	/** Gets the list of comments associated with this activity.
-	 * @return list of comments, never null */
-	public List<CComment> getComments() { return comments != null ? comments : new ArrayList<>(); }
-
-	/** Sets the list of comments for this activity.
-	 * @param comments the list of comments */
-	public void setComments(final List<CComment> comments) {
-		this.comments = comments != null ? comments : new ArrayList<>();
-		updateLastModified();
-	}
-
 	public LocalDate getStartDate() { return startDate; }
 
 	@Override
@@ -273,35 +251,35 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		if (this.actualHours == null) {
-			this.actualHours = BigDecimal.ZERO;
+		if (actualHours == null) {
+			actualHours = BigDecimal.ZERO;
 		}
-		if (this.actualCost == null) {
-			this.actualCost = BigDecimal.ZERO;
+		if (actualCost == null) {
+			actualCost = BigDecimal.ZERO;
 		}
-		if (this.progressPercentage == null) {
-			this.progressPercentage = 0;
+		if (progressPercentage == null) {
+			progressPercentage = 0;
 		}
-		if (this.estimatedHours == null) {
-			this.estimatedHours = BigDecimal.ZERO;
+		if (estimatedHours == null) {
+			estimatedHours = BigDecimal.ZERO;
 		}
-		if (this.estimatedCost == null) {
-			this.estimatedCost = BigDecimal.ZERO;
+		if (estimatedCost == null) {
+			estimatedCost = BigDecimal.ZERO;
 		}
-		if (this.remainingHours == null) {
-			this.remainingHours = BigDecimal.ZERO;
+		if (remainingHours == null) {
+			remainingHours = BigDecimal.ZERO;
 		}
-		if (this.hourlyRate == null) {
-			this.hourlyRate = BigDecimal.ZERO;
+		if (hourlyRate == null) {
+			hourlyRate = BigDecimal.ZERO;
 		}
-		if (this.startDate == null) {
-			this.startDate = LocalDate.now();
+		if (startDate == null) {
+			startDate = LocalDate.now();
 		}
-		if (this.dueDate == null) {
-			this.dueDate = LocalDate.now().plusDays(7); // Default to 1 week from today
+		if (dueDate == null) {
+			dueDate = LocalDate.now().plusDays(7); // Default to 1 week from today
 		}
-		if (this.completionDate == null) {
-			this.completionDate = null; // No completion date by default
+		if (completionDate == null) {
+			completionDate = null; // No completion date by default
 		}
 	}
 
@@ -354,10 +332,17 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 		updateLastModified();
 	}
 
+	/** Sets the list of comments for this activity.
+	 * @param comments the list of comments */
+	public void setComments(final List<CComment> comments) {
+		this.comments = comments != null ? comments : new ArrayList<>();
+		updateLastModified();
+	}
+
 	public void setCompletionDate(final LocalDate completionDate) {
 		this.completionDate = completionDate;
 		if ((completionDate != null) && (progressPercentage != null) && (progressPercentage < 100)) {
-			this.progressPercentage = 100;
+			progressPercentage = 100;
 		}
 		updateLastModified();
 	}
@@ -409,7 +394,7 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 		this.progressPercentage = progressPercentage != null ? progressPercentage : 0;
 		// Auto-set completion date if progress reaches 100%
 		if ((progressPercentage != null) && (progressPercentage >= 100) && (completionDate == null)) {
-			this.completionDate = LocalDate.now();
+			completionDate = LocalDate.now();
 		}
 		updateLastModified();
 	}
@@ -436,9 +421,9 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 		this.status = status;
 		// Auto-set completion date if status is final
 		if ((status != null) && status.getFinalStatus() && (completionDate == null)) {
-			this.completionDate = LocalDate.now();
+			completionDate = LocalDate.now();
 			if ((progressPercentage != null) && (progressPercentage < 100)) {
-				this.progressPercentage = 100;
+				progressPercentage = 100;
 			}
 		}
 		updateLastModified();
@@ -451,7 +436,4 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 			setStatus((CActivityStatus) status);
 		}
 	}
-
-	@Override
-	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { return CActivitiesView.class; }
 }

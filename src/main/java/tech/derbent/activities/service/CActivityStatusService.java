@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.abstracts.services.CEntityOfProjectService;
+import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;

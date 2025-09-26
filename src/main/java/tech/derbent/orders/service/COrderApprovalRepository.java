@@ -1,6 +1,6 @@
 package tech.derbent.orders.service;
 
-import tech.derbent.abstracts.services.CAbstractNamedRepository;
+import tech.derbent.api.services.CAbstractNamedRepository;
 import tech.derbent.orders.domain.COrderApproval;
 
 /** COrderApprovalRepository - Repository interface for COrderApproval entities. Layer: Service (MVC) Provides data access operations for order

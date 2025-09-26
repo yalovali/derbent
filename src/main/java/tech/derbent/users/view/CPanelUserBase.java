@@ -1,10 +1,11 @@
 package tech.derbent.users.view;
 
-import tech.derbent.abstracts.annotations.CEntityFormBuilder;
-import tech.derbent.abstracts.annotations.CEntityFormBuilder.ComboBoxDataProvider;
-import tech.derbent.abstracts.components.CEnhancedBinder;
-import tech.derbent.abstracts.domains.CEntityDB;
-import tech.derbent.abstracts.views.CAccordionDBEntity;
+import tech.derbent.api.annotations.CFormBuilder;
+import tech.derbent.api.annotations.CFormBuilder.ComboBoxDataProvider;
+import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.interfaces.IContentOwner;
+import tech.derbent.api.views.CAccordionDBEntity;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.users.domain.CUser;
@@ -25,16 +26,17 @@ public abstract class CPanelUserBase extends CAccordionDBEntity<CUser> {
 	 * @param currentEntity        current user entity
 	 * @param beanValidationBinder validation binder
 	 * @param entityService        user service */
-	public CPanelUserBase(final String title, final CUser currentEntity, final CEnhancedBinder<CUser> beanValidationBinder,
-			final CUserService entityService, final CUserTypeService userTypeService, final CCompanyService companyService) {
-		super(title, currentEntity, beanValidationBinder, CUser.class, entityService);
+	public CPanelUserBase(final String title, IContentOwner parentContent, final CUser currentEntity,
+			final CEnhancedBinder<CUser> beanValidationBinder, final CUserService entityService, final CUserTypeService userTypeService,
+			final CCompanyService companyService) {
+		super(title, parentContent,beanValidationBinder, CUser.class, entityService);
 		this.userTypeService = userTypeService;
 		this.companyService = companyService;
 	}
 
 	@Override
 	protected ComboBoxDataProvider createComboBoxDataProvider() {
-		final CEntityFormBuilder.ComboBoxDataProvider dataProvider = new CEntityFormBuilder.ComboBoxDataProvider() {
+		final CFormBuilder.ComboBoxDataProvider dataProvider = new CFormBuilder.ComboBoxDataProvider() {
 
 			@Override
 			@SuppressWarnings ("unchecked")

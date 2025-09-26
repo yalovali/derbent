@@ -2,10 +2,13 @@ package tech.derbent.users.view;
 
 import java.util.List;
 import java.util.function.Supplier;
-import tech.derbent.abstracts.components.CEnhancedBinder;
-import tech.derbent.abstracts.views.CPanelUserProjectBase;
-import tech.derbent.base.ui.dialogs.CWarningDialog;
+import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.interfaces.IContentOwner;
+import tech.derbent.api.ui.dialogs.CWarningDialog;
+import tech.derbent.api.utils.Check;
+import tech.derbent.api.views.CPanelUserProjectBase;
 import tech.derbent.companies.service.CCompanyService;
+import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserProjectSettings;
@@ -23,13 +26,19 @@ public class CPanelUserProjectSettings extends CPanelUserProjectBase<CUser, CUse
 	private final CProjectService projectService;
 	private final CUserProjectSettingsService userProjectSettingsService;
 
-	public CPanelUserProjectSettings(final CUser currentEntity, final CEnhancedBinder<CUser> beanValidationBinder, final CUserService entityService,
-			final CUserTypeService userTypeService, final CCompanyService companyService, final CProjectService projectService,
-			final CUserProjectSettingsService userProjectSettingsService) throws Exception {
-		super("Project Settings", currentEntity, beanValidationBinder, CUser.class, entityService, userProjectSettingsService);
+	public CPanelUserProjectSettings(IContentOwner parentContent, final CUser currentEntity, final CEnhancedBinder<CUser> beanValidationBinder,
+			final CUserService entityService, final CUserTypeService userTypeService, final CCompanyService companyService,
+			final CProjectService projectService, final CUserProjectSettingsService userProjectSettingsService) throws Exception {
+		super("Project Settings", parentContent, beanValidationBinder, CUser.class, entityService, userProjectSettingsService);
 		this.userProjectSettingsService = userProjectSettingsService;
 		this.projectService = projectService;
 		initPanel();
+	}
+
+	public List<CProject> getAvailableProjects() {
+		Long userId = (currentUser != null) ? currentUser.getId() : null;
+		Check.notNull(userId, "Current user must be selected to get available projects");
+		return projectService.getAvailableProjectsForUser(userId);
 	}
 
 	@Override
@@ -67,8 +76,9 @@ public class CPanelUserProjectSettings extends CPanelUserProjectBase<CUser, CUse
 		if (!validateUserSelection() || !validateServiceAvailability("Project")) {
 			return;
 		}
-		final CUserProjectSettingsDialog dialog =
-				new CUserProjectSettingsDialog((CUserService) entityService, projectService, null, currentUser, this::onSettingsSaved);
+		final CUserProjectSettingsDialog dialog;
+		dialog = new CUserProjectSettingsDialog(this, (CUserService) entityService, projectService, userProjectSettingsService, null, currentUser,
+				this::onSettingsSaved);
 		dialog.open();
 	}
 
@@ -80,8 +90,9 @@ public class CPanelUserProjectSettings extends CPanelUserProjectBase<CUser, CUse
 			return;
 		}
 		final CUserProjectSettings selected = grid.asSingleSelect().getValue();
-		final CUserProjectSettingsDialog dialog =
-				new CUserProjectSettingsDialog((CUserService) entityService, projectService, selected, currentUser, this::onSettingsSaved);
+		final CUserProjectSettingsDialog dialog;
+		dialog = new CUserProjectSettingsDialog(this, (CUserService) entityService, projectService, userProjectSettingsService, selected, currentUser,
+				this::onSettingsSaved);
 		dialog.open();
 	}
 
@@ -90,7 +101,7 @@ public class CPanelUserProjectSettings extends CPanelUserProjectBase<CUser, CUse
 		setSettingsAccessors(getProjectUsers, saveEntity);
 	}
 
-	public void setCurrentUser(final CUser user) { this.currentUser = user; }
+	public void setCurrentUser(final CUser user) { currentUser = user; }
 
 	public void setProjectSettingsAccessors(final java.util.function.Supplier<List<CUserProjectSettings>> getProjectSettings,
 			final Runnable saveEntity) {

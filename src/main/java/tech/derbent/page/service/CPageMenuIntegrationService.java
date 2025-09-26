@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import com.vaadin.flow.server.menu.MenuEntry;
-import tech.derbent.abstracts.utils.Check;
+import tech.derbent.api.utils.Check;
 import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.page.view.CDynamicPageRouter;
 import tech.derbent.projects.domain.CProject;
@@ -30,6 +30,38 @@ public class CPageMenuIntegrationService {
 		LOGGER.info("CPageMenuIntegrationService initialized");
 	}
 
+	/** Create a MenuEntry from a CPageEntity. */
+	private MenuEntry createMenuEntryFromPage(CPageEntity page) {
+		Check.notNull(page, "Page entity cannot be null");
+		// Get icon with fallback
+		String icon = page.getIcon();
+		if (icon == null || icon.trim().isEmpty()) {
+			icon = "vaadin:file-text-o";
+		}
+		// Parse menu order with fallback
+		Double order;
+		try {
+			String menuOrderStr = page.getMenuOrder();
+			if (menuOrderStr != null && !menuOrderStr.trim().isEmpty()) {
+				order = Double.parseDouble(menuOrderStr);
+			} else {
+				order = 50.0; // Default order
+			}
+		} catch (NumberFormatException e) {
+			LOGGER.warn("Invalid menu order for page {}: {}", page.getPageTitle(), page.getMenuOrder());
+			order = 50.0;
+		}
+		// Create menu title with tooltip-friendly formatting
+		String menuTitle = page.getMenuTitle();
+		if (menuTitle == null || menuTitle.trim().isEmpty()) {
+			menuTitle = "dynamic/" + page.getPageTitle();
+		} else {
+			menuTitle = "dynamic/" + menuTitle;
+		}
+		// Create the menu entry with enhanced metadata
+		return new MenuEntry("dynamic." + page.getId(), menuTitle, order, icon, CDynamicPageRouter.class);
+	}
+
 	/** Get menu entries for database-defined pages for the current project. These entries can be added to the existing menu system. */
 	public List<MenuEntry> getDynamicMenuEntries() {
 		CProject activeProject =
@@ -48,26 +80,19 @@ public class CPageMenuIntegrationService {
 		return menuEntries;
 	}
 
-	/** Create a MenuEntry from a CPageEntity. */
-	private MenuEntry createMenuEntryFromPage(CPageEntity page) {
-		Check.notNull(page, "Page entity cannot be null");
-		String title = page.getTitle(); // e.g., "pages.Project Overview"
-		Check.notBlank(title, "Page title cannot be blank");
-		String route = page.getRoute(); // e.g., "route_index_01"
-		Check.notBlank(route, "Page route cannot be blank");
-		String icon = page.getIcon() != null ? page.getIcon() : "vaadin:file-text";
-		Double order;
-		String menuOrderStr = page.getMenuOrder();
-		order = Double.parseDouble(menuOrderStr);
-		// mark dynamic
-		return new MenuEntry("dynamic." + page.getTitle(), "dynamic/" + page.getRoute(), order, icon, CDynamicPageRouter.class);
-	}
-
 	/** Get page hierarchy structure for building nested menus. */
 	public List<CPageEntity> getPageHierarchyForCurrentProject() {
 		CProject activeProject =
 				sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found for page hierarchy"));
 		return pageEntityService.getPageHierarchyForProject(activeProject);
+	}
+
+	/** Get pages that should be shown in the quick access toolbar for the current project. */
+	public List<CPageEntity> getQuickToolbarPages() {
+		CProject activeProject =
+				sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found for quick toolbar pages"));
+		List<CPageEntity> allPages = pageEntityService.listQuickAccess(activeProject);
+		return allPages;
 	}
 
 	/** Get root pages (no parent) for the current project. */
@@ -76,9 +101,6 @@ public class CPageMenuIntegrationService {
 				sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found for root pages"));
 		return pageEntityService.findRootPagesByProject(activeProject);
 	}
-
-	/** Check if the service is ready (has an active project). */
-	public boolean isReady() { return sessionService.getActiveProject().isPresent(); }
 
 	/** Get status information for debugging. */
 	public String getStatusInfo() {
@@ -89,5 +111,13 @@ public class CPageMenuIntegrationService {
 		CProject activeProject = activeProjectOpt.get();
 		List<CPageEntity> pages = pageEntityService.findActivePagesByProject(activeProject);
 		return String.format("Project: %s, Pages: %d", activeProject.getName(), pages.size());
+	}
+
+	/** Check if the service is ready (has an active project). */
+	public boolean isReady() { return sessionService.getActiveProject().isPresent(); }
+
+	/** Get a page entity by ID for icon color retrieval. */
+	public CPageEntity getPageEntityById(Long pageId) {
+		return pageEntityService.getById(pageId).orElse(null);
 	}
 }

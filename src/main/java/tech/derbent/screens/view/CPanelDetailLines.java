@@ -8,8 +8,9 @@ import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import tech.derbent.abstracts.components.CEnhancedBinder;
-import tech.derbent.abstracts.views.grids.CGrid;
+import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.interfaces.IContentOwner;
+import tech.derbent.api.views.grids.CGrid;
 import tech.derbent.screens.domain.CDetailLines;
 import tech.derbent.screens.domain.CDetailSection;
 import tech.derbent.screens.service.CDetailLinesService;
@@ -24,10 +25,11 @@ public class CPanelDetailLines extends CPanelDetailSectionBase {
 	private CGrid<CDetailLines> grid;
 	private CDetailLines selectedLine;
 
-	public CPanelDetailLines(final CDetailSection currentEntity, final CEnhancedBinder<CDetailSection> beanValidationBinder,
-			final CDetailSectionService entityService, final CDetailLinesService screenLinesService, final CEntityFieldService entityFieldService,
-			final CViewsService viewsService) throws Exception {
-		super("Screen Lines", currentEntity, beanValidationBinder, entityService);
+	public CPanelDetailLines(IContentOwner parentContent, final CDetailSection currentEntity,
+			final CEnhancedBinder<CDetailSection> beanValidationBinder, final CDetailSectionService entityService,
+			final CDetailLinesService screenLinesService, final CEntityFieldService entityFieldService, final CViewsService viewsService)
+			throws Exception {
+		super("Screen Lines", parentContent,beanValidationBinder, entityService);
 		this.detailLinesService = screenLinesService;
 		initPanel();
 		createScreenLinesLayout();
@@ -164,7 +166,7 @@ public class CPanelDetailLines extends CPanelDetailSectionBase {
 			return;
 		}
 		final CDetailLines newLine = detailLinesService.newEntity(getCurrentEntity(), CEntityFieldService.THIS_CLASS, "name");
-		final CDetailLinesEditDialog dialog = new CDetailLinesEditDialog(newLine, this::saveScreenLine, true, currentEntity);
+		final CDetailLinesEditDialog dialog = new CDetailLinesEditDialog(newLine, this::saveScreenLine, true, getCurrentEntity());
 		dialog.open();
 	}
 
@@ -174,7 +176,7 @@ public class CPanelDetailLines extends CPanelDetailSectionBase {
 		if (detailLine == null) {
 			return;
 		}
-		final CDetailLinesEditDialog dialog = new CDetailLinesEditDialog(detailLine, this::saveScreenLine, false, currentEntity);
+		final CDetailLinesEditDialog dialog = new CDetailLinesEditDialog(detailLine, this::saveScreenLine, false, getCurrentEntity());
 		dialog.open();
 	}
 

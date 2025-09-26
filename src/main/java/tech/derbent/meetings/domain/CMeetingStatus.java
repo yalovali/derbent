@@ -5,32 +5,25 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import tech.derbent.abstracts.annotations.AMetaData;
-import tech.derbent.abstracts.annotations.StatusEntity;
-import tech.derbent.abstracts.interfaces.CKanbanStatus;
-import tech.derbent.abstracts.views.CAbstractEntityDBPage;
-import tech.derbent.base.domain.CStatus;
-import tech.derbent.meetings.view.CMeetingStatusView;
+import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.annotations.StatusEntity;
+import tech.derbent.api.domains.CStatus;
+import tech.derbent.api.interfaces.CKanbanStatus;
 import tech.derbent.projects.domain.CProject;
 
 /** CMeetingStatus - Domain entity representing meeting status types. Layer: Domain (MVC) Inherits from CStatus to provide status functionality for
  * meetings. This entity defines the possible statuses a meeting can have (e.g., PLANNED, IN_PROGRESS, COMPLETED, CANCELLED). */
 @StatusEntity (category = "meeting", colorField = "color", nameField = "name")
 @Entity
-@Table (name = "cmeetingstatus")
+@Table (name = "cmeetingstatus", uniqueConstraints = @jakarta.persistence.UniqueConstraint (columnNames = {
+		"name", "project_id"
+}))
 @AttributeOverride (name = "id", column = @Column (name = "cmeetingstatus_id"))
 public class CMeetingStatus extends CStatus<CMeetingStatus> implements CKanbanStatus {
 
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() {
-		return "#28a745"; // Green color for meeting status entities
-	}
-
-	public static String getStaticIconFilename() { return "vaadin:flag"; }
-
-	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CMeetingStatusView.class; }
-
+	public static final String DEFAULT_COLOR = "#28a745";
+	public static final String DEFAULT_ICON = "vaadin:flag";
+	public static final String VIEW_NAME = "Meeting Status View";
 	@Column (name = "is_final", nullable = false)
 	@AMetaData (
 			displayName = "Is Final Status", required = true, readOnly = false, defaultValue = "false",
@@ -41,11 +34,14 @@ public class CMeetingStatus extends CStatus<CMeetingStatus> implements CKanbanSt
 	/** Default constructor for JPA. */
 	public CMeetingStatus() {
 		super();
-		this.finalStatus = Boolean.FALSE;
+		finalStatus = Boolean.FALSE;
+		setColor(DEFAULT_COLOR);
 	}
 
 	public CMeetingStatus(final String name, final CProject project) {
 		super(CMeetingStatus.class, name, project);
+		setColor(DEFAULT_COLOR);
+		finalStatus = Boolean.FALSE;
 	}
 
 	@Override
@@ -60,11 +56,6 @@ public class CMeetingStatus extends CStatus<CMeetingStatus> implements CKanbanSt
 		return super.equals(that);
 	}
 
-	@Override
-	public String getDisplayName() { // TODO Auto-generated method stub
-		return null;
-	}
-
 	public Boolean getFinalStatus() { return finalStatus; }
 
 	@Override
@@ -77,10 +68,5 @@ public class CMeetingStatus extends CStatus<CMeetingStatus> implements CKanbanSt
 	@Override
 	public String toString() {
 		return getName() != null ? getName() : super.toString();
-	}
-
-	@Override
-	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
-		return CMeetingStatus.getViewClassStatic();
 	}
 }

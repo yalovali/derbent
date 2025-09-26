@@ -5,11 +5,9 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import tech.derbent.abstracts.annotations.AMetaData;
-import tech.derbent.abstracts.views.CAbstractEntityDBPage;
-import tech.derbent.base.domain.CStatus;
+import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.domains.CStatus;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.risks.view.CRiskStatusView;
 
 /** CRiskStatus - Domain entity representing risk status types. Layer: Domain (MVC) Inherits from CStatus to provide status functionality for risks.
  * This entity defines the possible statuses a risk can have (e.g., IDENTIFIED, MITIGATED, RESOLVED, CLOSED). */
@@ -18,16 +16,9 @@ import tech.derbent.risks.view.CRiskStatusView;
 @AttributeOverride (name = "id", column = @Column (name = "criskstatus_id"))
 public class CRiskStatus extends CStatus<CRiskStatus> {
 
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() {
-		return "#6c757d"; // Gray color for status entities
-	}
-
-	public static String getStaticIconFilename() { return "vaadin:flag"; }
-
-	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CRiskStatusView.class; }
-
+	public static final String DEFAULT_COLOR = "#003f52";
+	public static final String DEFAULT_ICON = "vaadin:camera";
+	public static final String VIEW_NAME = "Risk Status View";
 	@Column (name = "is_final", nullable = false)
 	@AMetaData (
 			displayName = "Is Final Status", required = true, readOnly = false, defaultValue = "false",
@@ -39,11 +30,13 @@ public class CRiskStatus extends CStatus<CRiskStatus> {
 	public CRiskStatus() {
 		super();
 		// Initialize with default values for JPA
-		this.isFinal = Boolean.FALSE;
+		isFinal = Boolean.FALSE;
+		setColor(DEFAULT_COLOR);
 	}
 
 	public CRiskStatus(final String name, final CProject project) {
 		super(CRiskStatus.class, name, project);
+		setColor(DEFAULT_COLOR);
 	}
 
 	@Override
@@ -55,11 +48,6 @@ public class CRiskStatus extends CStatus<CRiskStatus> {
 			return false;
 		}
 		return super.equals(o);
-	}
-
-	@Override
-	public String getDisplayName() { // TODO Auto-generated method stub
-		return null;
 	}
 
 	public Boolean getIsFinal() { return isFinal; }
@@ -76,10 +64,5 @@ public class CRiskStatus extends CStatus<CRiskStatus> {
 	@Override
 	public String toString() {
 		return getName() != null ? getName() : super.toString();
-	}
-
-	@Override
-	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
-		return CRiskStatus.getViewClassStatic();
 	}
 }

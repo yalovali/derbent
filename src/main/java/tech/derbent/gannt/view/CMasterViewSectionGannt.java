@@ -3,16 +3,16 @@ package tech.derbent.gannt.view;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.ComponentEvent;
-import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
-import tech.derbent.abstracts.domains.CEntityDB;
-import tech.derbent.abstracts.interfaces.CProjectChangeListener;
-import tech.derbent.abstracts.views.CAbstractEntityDBPage;
-import tech.derbent.abstracts.views.grids.CMasterViewSectionBase;
 import tech.derbent.activities.service.CActivityService;
+import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.interfaces.CProjectChangeListener;
+import tech.derbent.api.views.CAbstractEntityDBPage;
+import tech.derbent.api.views.grids.CMasterViewSectionBase;
 import tech.derbent.gannt.view.components.CGanntGrid;
 import tech.derbent.meetings.service.CMeetingService;
 import tech.derbent.projects.domain.CProject;
@@ -37,10 +37,10 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMasterViewSectionGannt.class);
 	private static final long serialVersionUID = 1L;
-	private final CSessionService sessionService;
 	private final CActivityService activityService;
-	private final CMeetingService meetingService;
 	private CGanntGrid ganttGrid;
+	private final CMeetingService meetingService;
+	private final CSessionService sessionService;
 
 	public CMasterViewSectionGannt(final Class<EntityClass> entityClass, final CAbstractEntityDBPage<EntityClass> page,
 			final CSessionService sessionService, final CActivityService activityService, final CMeetingService meetingService) {
@@ -59,6 +59,12 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 	}
 
 	@Override
+	public EntityClass getSelectedItem() {
+		LOGGER.debug("Getting selected item from Gantt chart");
+		return null; // Gantt chart doesn't have traditional selection
+	}
+
+	@Override
 	protected void onAttach(final AttachEvent attachEvent) {
 		super.onAttach(attachEvent);
 		// Register this component to receive project change notifications
@@ -74,18 +80,19 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 		LOGGER.debug("Unregistered CMasterViewSectionGannt from project change notifications");
 	}
 
-	@Override
-	public EntityClass getSelectedItem() {
-		LOGGER.debug("Getting selected item from Gantt chart");
-		return null; // Gantt chart doesn't have traditional selection
-	}
-
 	/** Implementation of CProjectChangeListener interface. Called when the active project changes via the SessionService.
 	 * @param newProject The newly selected project */
 	@Override
 	public void onProjectChanged(final CProject newProject) {
 		LOGGER.debug("Project change notification received: {}", newProject != null ? newProject.getName() : "null");
 		refreshMasterView();
+	}
+
+	@SuppressWarnings ("unchecked")
+	protected void onSelectionChange(final ValueChangeEvent<?> event) {
+		LOGGER.debug("Gantt chart selection changed: {}", event.getValue() != null ? event.getValue().toString() : "null");
+		final EntityClass value = (EntityClass) event.getValue();
+		fireEvent(new SelectionChangeEvent<>(this, value));
 	}
 
 	@Override
@@ -98,7 +105,7 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 				currentProject = sessionService.getActiveProject().orElse(null);
 			}
 		} catch (final Exception e) {
-			LOGGER.warn("Error getting active project from session", e);
+			LOGGER.error("Error getting active project from session", e);
 		}
 		// Remove existing grid if present
 		if (ganttGrid != null) {
@@ -123,13 +130,6 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 		} catch (final Exception e) {
 			LOGGER.error("Error creating Gantt grid for project: {}", currentProject.getName(), e);
 		}
-	}
-
-	@SuppressWarnings ("unchecked")
-	protected void onSelectionChange(final ValueChangeEvent<?> event) {
-		LOGGER.debug("Gantt chart selection changed: {}", event.getValue() != null ? event.getValue().toString() : "null");
-		final EntityClass value = (EntityClass) event.getValue();
-		fireEvent(new SelectionChangeEvent<>(this, value));
 	}
 
 	@Override

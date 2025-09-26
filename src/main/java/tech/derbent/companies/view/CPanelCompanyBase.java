@@ -1,7 +1,8 @@
 package tech.derbent.companies.view;
 
-import tech.derbent.abstracts.components.CEnhancedBinder;
-import tech.derbent.abstracts.views.CAccordionDBEntity;
+import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.interfaces.IContentOwner;
+import tech.derbent.api.views.CAccordionDBEntity;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
 
@@ -16,8 +17,8 @@ public abstract class CPanelCompanyBase extends CAccordionDBEntity<CCompany> {
 	 * @param currentEntity        current company entity
 	 * @param beanValidationBinder validation binder
 	 * @param entityService        company service */
-	public CPanelCompanyBase(final String title, final CCompany currentEntity, final CEnhancedBinder<CCompany> beanValidationBinder,
+	public CPanelCompanyBase(final String title, IContentOwner parentContent, final CEnhancedBinder<CCompany> beanValidationBinder,
 			final CCompanyService entityService) {
-		super(title, currentEntity, beanValidationBinder, CCompany.class, entityService);
+		super(title, parentContent, beanValidationBinder, CCompany.class, entityService);
 	}
 }

@@ -5,10 +5,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
-import tech.derbent.abstracts.annotations.AMetaData;
-import tech.derbent.abstracts.domains.CEntityOfProject;
-import tech.derbent.abstracts.views.CAbstractEntityDBPage;
-import tech.derbent.orders.view.CCurrencyView;
+import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.domains.CEntityOfProject;
 import tech.derbent.projects.domain.CProject;
 
 /** CCurrency - Domain entity representing currencies used in orders. Layer: Domain (MVC) Defines the various currencies that can be used in order
@@ -19,16 +17,9 @@ import tech.derbent.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "currency_id"))
 public class CCurrency extends CEntityOfProject<CCurrency> {
 
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() {
-		return "#20c917"; // Teal color for order entities
-	}
-
-	public static String getStaticIconFilename() { return "vaadin:dollar"; }
-
-	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CCurrencyView.class; }
-
+	public static final String DEFAULT_COLOR = "#ffc107";
+	public static final String DEFAULT_ICON = "vaadin:dollar";
+	public static final String VIEW_NAME = "Currency View";
 	@Column (name = "currency_code", nullable = false, length = 3, unique = false)
 	@Size (max = 3, min = 3, message = "Currency code must be exactly 3 characters")
 	@AMetaData (
@@ -56,11 +47,6 @@ public class CCurrency extends CEntityOfProject<CCurrency> {
 
 	public String getCurrencySymbol() { return currencySymbol; }
 
-	@Override
-	public String getDisplayName() { // TODO Auto-generated method stub
-		return null;
-	}
-
 	public void setCurrencyCode(final String currencyCode) {
 		this.currencyCode = currencyCode;
 		updateLastModified();
@@ -74,10 +60,5 @@ public class CCurrency extends CEntityOfProject<CCurrency> {
 	@Override
 	public String toString() {
 		return currencyCode != null ? currencyCode + " (" + getName() + ")" : super.toString();
-	}
-
-	@Override
-	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
-		return CCurrency.getViewClassStatic();
 	}
 }

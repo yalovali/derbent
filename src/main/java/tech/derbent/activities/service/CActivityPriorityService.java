@@ -4,16 +4,16 @@ import java.time.Clock;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.abstracts.services.CEntityOfProjectService;
+import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.activities.domain.CActivityPriority;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 @Service
 @Transactional
 public class CActivityPriorityService extends CEntityOfProjectService<CActivityPriority> {
 
-	public CActivityPriorityService(final CActivityPriorityRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CActivityPriorityService(final CActivityPriorityRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

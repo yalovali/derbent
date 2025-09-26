@@ -17,29 +17,55 @@ import tech.derbent.setup.service.CSystemSettingsService;
 @Component
 public class CAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
+	private static final String DEFAULT_SUCCESS_URL = "/home";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CAuthenticationSuccessHandler.class);
 	private static final String REQUESTED_URL_SESSION_KEY = "requestedUrl";
-	private static final String DEFAULT_SUCCESS_URL = "/home";
+
+	/** Constructs the full request URL from the request. */
+	private static String getFullRequestUrl(HttpServletRequest request) {
+		String requestUrl = request.getRequestURL().toString();
+		String queryString = request.getQueryString();
+		if (queryString != null) {
+			requestUrl += "?" + queryString;
+		}
+		return requestUrl;
+	}
+
+	/** Stores the originally requested URL in the session. This method should be called when a user is redirected to login. */
+	public static void saveRequestedUrl(HttpServletRequest request) {
+		String requestedUrl = getFullRequestUrl(request);
+		// Don't save login URLs or static resources
+		if (!shouldSaveUrl(requestedUrl)) {
+			return;
+		}
+		HttpSession session = request.getSession(true);
+		session.setAttribute(REQUESTED_URL_SESSION_KEY, requestedUrl);
+		LOGGER.debug("Saved requested URL in session: {}", requestedUrl);
+	}
+
+	/** Determines if a URL should be saved as the requested URL. Excludes login pages, static resources, etc. */
+	private static boolean shouldSaveUrl(String url) {
+		if (url == null) {
+			return false;
+		}
+		String lowerUrl = url.toLowerCase();
+		// Don't save login-related URLs
+		if (lowerUrl.contains("/login")) {
+			return false;
+		}
+		// Don't save static resources
+		if (lowerUrl.contains("/vaadin/") || lowerUrl.contains("/static/") || lowerUrl.contains("/css/") || lowerUrl.contains("/js/")
+				|| lowerUrl.contains("/images/") || lowerUrl.endsWith(".css") || lowerUrl.endsWith(".js") || lowerUrl.endsWith(".png")
+				|| lowerUrl.endsWith(".jpg") || lowerUrl.endsWith(".ico")) {
+			return false;
+		}
+		return true;
+	}
+
 	private final CSystemSettingsService systemSettingsService;
 
 	public CAuthenticationSuccessHandler(CSystemSettingsService systemSettingsService) {
 		this.systemSettingsService = systemSettingsService;
-	}
-
-	@Override
-	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
-			throws IOException, ServletException {
-		LOGGER.debug("Authentication successful for user: {}", authentication.getName());
-		// Get the target URL for redirection
-		String targetUrl = determineTargetUrl(request);
-		LOGGER.info("Redirecting user {} to: {}", authentication.getName(), targetUrl);
-		// Clear the requested URL from session since we're about to redirect
-		HttpSession session = request.getSession(false);
-		if (session != null) {
-			session.removeAttribute(REQUESTED_URL_SESSION_KEY);
-		}
-		// Perform the redirect
-		response.sendRedirect(targetUrl);
 	}
 
 	/** Determines the target URL for post-login redirection. Priority order: 1. 'redirect' parameter from login form 2. Originally requested URL
@@ -70,7 +96,8 @@ public class CAuthenticationSuccessHandler implements AuthenticationSuccessHandl
 				return url;
 			}
 		} catch (Exception e) {
-			LOGGER.warn("Error retrieving default login view from settings: {}", e.getMessage());
+			LOGGER.error("Error retrieving default login view from settings: {}", e.getMessage());
+			throw e;
 		}
 		// Fallback to default
 		LOGGER.debug("Using fallback default URL: {}", DEFAULT_SUCCESS_URL);
@@ -101,44 +128,19 @@ public class CAuthenticationSuccessHandler implements AuthenticationSuccessHandl
 		}
 	}
 
-	/** Stores the originally requested URL in the session. This method should be called when a user is redirected to login. */
-	public static void saveRequestedUrl(HttpServletRequest request) {
-		String requestedUrl = getFullRequestUrl(request);
-		// Don't save login URLs or static resources
-		if (!shouldSaveUrl(requestedUrl)) {
-			return;
+	@Override
+	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
+			throws IOException, ServletException {
+		LOGGER.debug("Authentication successful for user: {}", authentication.getName());
+		// Get the target URL for redirection
+		String targetUrl = determineTargetUrl(request);
+		LOGGER.info("Redirecting user {} to: {}", authentication.getName(), targetUrl);
+		// Clear the requested URL from session since we're about to redirect
+		HttpSession session = request.getSession(false);
+		if (session != null) {
+			session.removeAttribute(REQUESTED_URL_SESSION_KEY);
 		}
-		HttpSession session = request.getSession(true);
-		session.setAttribute(REQUESTED_URL_SESSION_KEY, requestedUrl);
-		LOGGER.debug("Saved requested URL in session: {}", requestedUrl);
-	}
-
-	/** Constructs the full request URL from the request. */
-	private static String getFullRequestUrl(HttpServletRequest request) {
-		String requestUrl = request.getRequestURL().toString();
-		String queryString = request.getQueryString();
-		if (queryString != null) {
-			requestUrl += "?" + queryString;
-		}
-		return requestUrl;
-	}
-
-	/** Determines if a URL should be saved as the requested URL. Excludes login pages, static resources, etc. */
-	private static boolean shouldSaveUrl(String url) {
-		if (url == null) {
-			return false;
-		}
-		String lowerUrl = url.toLowerCase();
-		// Don't save login-related URLs
-		if (lowerUrl.contains("/login")) {
-			return false;
-		}
-		// Don't save static resources
-		if (lowerUrl.contains("/vaadin/") || lowerUrl.contains("/static/") || lowerUrl.contains("/css/") || lowerUrl.contains("/js/")
-				|| lowerUrl.contains("/images/") || lowerUrl.endsWith(".css") || lowerUrl.endsWith(".js") || lowerUrl.endsWith(".png")
-				|| lowerUrl.endsWith(".jpg") || lowerUrl.endsWith(".ico")) {
-			return false;
-		}
-		return true;
+		// Perform the redirect
+		response.sendRedirect(targetUrl);
 	}
 }

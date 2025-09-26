@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import tech.derbent.abstracts.services.CEntityOfProjectRepository;
+import tech.derbent.api.services.CEntityOfProjectRepository;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CDetailSection;
 
@@ -26,6 +26,8 @@ public interface CDetailSectionRepository extends CEntityOfProjectRepository<CDe
 				+ "LEFT JOIN FETCH s.detailLines " + "WHERE s.project = :project AND s.name = :name"
 	)
 	Optional<CDetailSection> findByNameAndProject(@Param ("project") CProject project, @Param ("name") String name);
+	@Query ("SELECT s FROM CDetailSection s WHERE s.project = :project AND s.entityType = :entityType")
+	Optional<CDetailSection> findByEntityTypeAndProject(@Param ("project") CProject project, @Param ("entityType") String entityType);
 	@Override
 	@Query (
 		"SELECT s FROM CDetailSection s " + "LEFT JOIN FETCH s.project " + "LEFT JOIN FETCH s.assignedTo " + "LEFT JOIN FETCH s.createdBy "

@@ -6,22 +6,18 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
-import tech.derbent.abstracts.annotations.AMetaData;
-import tech.derbent.abstracts.domains.CEntityConstants;
-import tech.derbent.abstracts.domains.CEntityNamed;
-import tech.derbent.abstracts.interfaces.CFieldInfoGenerator;
-import tech.derbent.abstracts.interfaces.CSearchable;
-import tech.derbent.abstracts.views.CAbstractEntityDBPage;
+import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.domains.CEntityConstants;
+import tech.derbent.api.domains.CEntityNamed;
+import tech.derbent.api.interfaces.CFieldInfoGenerator;
+import tech.derbent.api.interfaces.CSearchable;
 import tech.derbent.companies.domain.CCompany;
-import tech.derbent.users.view.CUsersView;
 
 @Entity
 @Table (name = "cuser") // Using quoted identifier to ensure exact case matching in
@@ -29,20 +25,27 @@ import tech.derbent.users.view.CUsersView;
 @AttributeOverride (name = "id", column = @Column (name = "user_id"))
 public class CUser extends CEntityNamed<CUser> implements CSearchable, CFieldInfoGenerator {
 
+	public static final String DEFAULT_COLOR = "#00546d";
+	public static final String DEFAULT_ICON = "vaadin:book";
 	public static final int MAX_LENGTH_NAME = 255;
-
-	public static String getDisplayNameStatic() { return "User"; }
-
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() {
-		return "#6f42c1"; // Purple color for user entities
-	}
-
-	public static String getStaticIconFilename() { return "vaadin:users"; }
-
-	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CUsersView.class; }
-
+	public static final String VIEW_NAME = "Users View";
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "company_id", nullable = true)
+	@AMetaData (displayName = "Company", required = false, readOnly = false, description = "Company the user belongs to", hidden = false, order = 10)
+	private CCompany company;
+	@AMetaData (
+			displayName = "Email", required = true, readOnly = false, defaultValue = "", description = "User's email address", hidden = false,
+			order = 4, maxLength = CEntityConstants.MAX_LENGTH_NAME
+	)
+	@Column (name = "email", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	private String email;
+	@AMetaData (
+			displayName = "Enabled", required = true, readOnly = false, defaultValue = "true", description = "Is user account enabled?",
+			hidden = false, order = 8
+	)
+	@Column (name = "enabled", nullable = false)
+	private Boolean enabled = Boolean.TRUE; // User account status, default is enabled
 	@Column (name = "lastname", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
 	@AMetaData (
 			displayName = "Last Name", required = true, readOnly = false, defaultValue = "", description = "User's last name", hidden = false,
@@ -57,34 +60,6 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable, CFieldInf
 	@Column (name = "login", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = true)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	private String login;
-	@AMetaData (
-			displayName = "Email", required = true, readOnly = false, defaultValue = "", description = "User's email address", hidden = false,
-			order = 4, maxLength = CEntityConstants.MAX_LENGTH_NAME
-	)
-	@Column (name = "email", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
-	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
-	private String email;
-	@AMetaData (
-			displayName = "Phone", required = false, readOnly = false, defaultValue = "", description = "Phone number", hidden = false, order = 5,
-			maxLength = CEntityConstants.MAX_LENGTH_NAME
-	)
-	@Column (name = "phone", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
-	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
-	private String phone;
-	@Column (name = "roles", nullable = false, length = 255)
-	@Size (max = 255)
-	@AMetaData (
-			displayName = "Roles", required = true, readOnly = false, defaultValue = "USER", description = "User roles (comma-separated)",
-			hidden = false, order = 6, maxLength = 255
-	)
-	private String roles = "USER";
-	@Enumerated (EnumType.STRING)
-	@Column (name = "user_role", nullable = false, length = 50, columnDefinition = "VARCHAR(50)")
-	@AMetaData (
-			displayName = "User Role", required = true, readOnly = false, defaultValue = "TEAM_MEMBER",
-			description = "Primary user role in the system", hidden = false, order = 7, maxLength = 50
-	)
-	private EUserRole userRole = EUserRole.TEAM_MEMBER;
 	@Column (name = "password", nullable = true, length = 255)
 	@Size (max = 255)
 	@AMetaData (
@@ -93,36 +68,38 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable, CFieldInf
 	)
 	private String password; // Encoded password
 	@AMetaData (
-			displayName = "Enabled", required = true, readOnly = false, defaultValue = "true", description = "Is user account enabled?",
-			hidden = false, order = 8
+			displayName = "Phone", required = false, readOnly = false, defaultValue = "", description = "Phone number", hidden = false, order = 5,
+			maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
-	@Column (name = "enabled", nullable = false)
-	private Boolean enabled = Boolean.TRUE; // User account status, default is enabled
+	@Column (name = "phone", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	private String phone;
 	@AMetaData (
 			displayName = "Profile Picture", required = false, readOnly = false, defaultValue = "",
-			description = "User's profile picture stored as binary data", hidden = false, order = 11
+			description = "User's profile picture stored as binary data", hidden = false, order = 11, imageData = true
 	)
 	@Column (name = "profile_picture_data", nullable = true, length = 10000, columnDefinition = "bytea")
 	private byte[] profilePictureData;
 	// load it eagerly because there a few projects that use this field
 	@OneToMany (mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-	private List<CUserProjectSettings> projectSettings;
+	private List<CUserProjectSettings> projectSettings = new ArrayList<>();
+	// User-Company relationship settings
+	@OneToMany (mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+	@AMetaData (
+			displayName = "Company Settings", required = false, readOnly = true, description = "User's company memberships and roles", hidden = false,
+			order = 21
+	)
+	private List<CUserCompanySettings> companySettings = new ArrayList<>();
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "cusertype_id", nullable = true)
 	@AMetaData (displayName = "User Type", required = false, readOnly = false, description = "Type category of the user", hidden = false, order = 9)
 	private CUserType userType;
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "company_id", nullable = true)
-	@AMetaData (displayName = "Company", required = false, readOnly = false, description = "Company the user belongs to", hidden = false, order = 10)
-	private CCompany company;
 
 	/** Default constructor for JPA. */
 	public CUser() {
 		super();
 		// Initialize with default values for JPA
-		this.roles = "USER";
-		this.userRole = EUserRole.TEAM_MEMBER;
-		this.enabled = true;
+		enabled = true;
 	}
 
 	public CUser(final String name) {
@@ -131,20 +108,17 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable, CFieldInf
 
 	public CUser(final String username, final String password, final String name, final String email) {
 		super(CUser.class, name);
-		this.login = username;
+		login = username;
 		this.email = email;
-		this.setPassword(password);
+		setPassword(password);
 	}
 
 	public CUser(final String username, final String password, final String name, final String email, final String roles) {
 		super(CUser.class, name);
-		this.login = username;
+		login = username;
 		super.setName(name);
 		this.email = email;
-		this.setPassword(password);
-		this.setRoles(roles);
-		// Set userRole based on roles string for backward compatibility
-		this.userRole = parseUserRoleFromRoles(roles);
+		setPassword(password);
 	}
 
 	@Override
@@ -158,11 +132,6 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable, CFieldInf
 	}
 
 	public CCompany getCompany() { return company; }
-
-	@Override
-	public String getDisplayName() { // TODO Auto-generated method stub
-		return null;
-	}
 
 	public String getEmail() { return email; }
 
@@ -188,13 +157,9 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable, CFieldInf
 	// Getter and setter with safe initialization to prevent lazy loading issues
 	public List<CUserProjectSettings> getProjectSettings() { return projectSettings; }
 
-	public String getRoles() { return roles; }
-
 	public String getUsername() {
 		return getLogin(); // Convenience method to get username for authentication
 	}
-
-	public EUserRole getUserRole() { return userRole; }
 
 	public CUserType getUserType() { return userType; }
 
@@ -235,26 +200,6 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable, CFieldInf
 		return false;
 	}
 
-	/** Parses user role from legacy roles string.
-	 * @param roles comma-separated roles string
-	 * @return corresponding CUserRole enum value */
-	private EUserRole parseUserRoleFromRoles(final String roles) {
-		if ((roles == null) || roles.trim().isEmpty()) {
-			return EUserRole.TEAM_MEMBER;
-		}
-		final String upperRoles = roles.toUpperCase();
-		if (upperRoles.contains("ADMIN")) {
-			return EUserRole.ADMIN;
-		}
-		if (upperRoles.contains("PROJECT_MANAGER") || upperRoles.contains("MANAGER")) {
-			return EUserRole.PROJECT_MANAGER;
-		}
-		if (upperRoles.contains("GUEST")) {
-			return EUserRole.GUEST;
-		}
-		return EUserRole.TEAM_MEMBER;
-	}
-
 	public void setCompany(final CCompany company) { this.company = company; }
 
 	public void setEmail(final String email) { this.email = email; }
@@ -285,15 +230,99 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable, CFieldInf
 		this.projectSettings = projectSettings != null ? projectSettings : new ArrayList<>();
 	}
 
-	public void setRoles(final String roles) { this.roles = roles != null ? roles : "USER"; }
+	public void setUserType(final CUserType userType) { this.userType = userType; }
 
-	public void setUserRole(final EUserRole userRole) {
-		this.userRole = userRole != null ? userRole : EUserRole.TEAM_MEMBER;
-		// Keep roles string in sync for backward compatibility
-		this.setRoles(this.userRole.name());
+	/** Add a project setting to this user and maintain bidirectional relationship.
+	 * @param projectSettings the project settings to add */
+	public void addProjectSettings(final CUserProjectSettings projectSettings) {
+		if (projectSettings == null) {
+			return;
+		}
+		if (this.projectSettings == null) {
+			this.projectSettings = new ArrayList<>();
+		}
+		if (!this.projectSettings.contains(projectSettings)) {
+			this.projectSettings.add(projectSettings);
+			projectSettings.setUser(this);
+		}
 	}
 
-	public void setUserType(final CUserType userType) { this.userType = userType; }
+	/** Remove a project setting from this user and maintain bidirectional relationship.
+	 * @param projectSettings the project settings to remove */
+	public void removeProjectSettings(final CUserProjectSettings projectSettings) {
+		if (projectSettings == null || this.projectSettings == null) {
+			return;
+		}
+		if (this.projectSettings.remove(projectSettings)) {
+			projectSettings.setUser(null);
+		}
+	}
+
+	// Getter and setter for company settings with safe initialization
+	public List<CUserCompanySettings> getCompanySettings() {
+		if (companySettings == null) {
+			companySettings = new ArrayList<>();
+		}
+		return companySettings;
+	}
+
+	public void setCompanySettings(final List<CUserCompanySettings> companySettings) {
+		this.companySettings = companySettings != null ? companySettings : new ArrayList<>();
+	}
+
+	/** Add a company setting to this user and maintain bidirectional relationship.
+	 * @param companySettings the company settings to add */
+	public void addCompanySettings(final CUserCompanySettings companySettings) {
+		if (companySettings == null) {
+			return;
+		}
+		if (this.companySettings == null) {
+			this.companySettings = new ArrayList<>();
+		}
+		if (!this.companySettings.contains(companySettings)) {
+			this.companySettings.add(companySettings);
+			companySettings.setUser(this);
+		}
+	}
+
+	/** Remove a company setting from this user and maintain bidirectional relationship.
+	 * @param companySettings the company settings to remove */
+	public void removeCompanySettings(final CUserCompanySettings companySettings) {
+		if (companySettings == null || this.companySettings == null) {
+			return;
+		}
+		if (this.companySettings.remove(companySettings)) {
+			companySettings.setUser(null);
+		}
+	}
+
+	/** Get the user's primary company.
+	 * @return the primary company or null if not set */
+	public CCompany getPrimaryCompany() {
+		if (companySettings == null) {
+			return null;
+		}
+		return companySettings.stream().filter(CUserCompanySettings::isPrimaryCompany).map(CUserCompanySettings::getCompany).findFirst().orElse(null);
+	}
+
+	/** Check if user has admin privileges in any company.
+	 * @return true if user is admin in at least one company */
+	public boolean isCompanyAdmin() {
+		if (companySettings == null) {
+			return false;
+		}
+		return companySettings.stream().anyMatch(CUserCompanySettings::isCompanyAdmin);
+	}
+
+	/** Check if user has admin privileges in a specific company.
+	 * @param company the company to check
+	 * @return true if user is admin in the specified company */
+	public boolean isCompanyAdmin(final CCompany company) {
+		if (companySettings == null || company == null) {
+			return false;
+		}
+		return companySettings.stream().filter(settings -> settings.getCompany().equals(company)).anyMatch(CUserCompanySettings::isCompanyAdmin);
+	}
 
 	/** Returns a comprehensive string representation of the user including all key fields. Note: This method is used for debugging and logging
 	 * purposes. For ComboBox display in the UI, the CEntityFormBuilder now uses getName() method automatically to show only the user's name instead
@@ -312,10 +341,5 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable, CFieldInf
 			return login;
 		}
 		return "User #" + getId();
-	}
-
-	@Override
-	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
-		return CUser.getViewClassStatic();
 	}
 }

@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.abstracts.services.CAbstractNamedEntityService;
-import tech.derbent.abstracts.utils.Check;
+import tech.derbent.api.services.CAbstractNamedEntityService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.session.service.CSessionService;
 

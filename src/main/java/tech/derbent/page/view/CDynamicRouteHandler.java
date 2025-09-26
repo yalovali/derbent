@@ -6,11 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.router.RouteConfiguration;
-import com.vaadin.flow.router.RouterLayout;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
-import tech.derbent.abstracts.utils.Check;
+import tech.derbent.api.utils.Check;
 import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.page.service.CPageEntityService;
 import tech.derbent.projects.domain.CProject;
@@ -33,6 +31,9 @@ public class CDynamicRouteHandler {
 		this.sessionService = sessionService;
 		LOGGER.info("CDynamicRouteHandler initialized");
 	}
+
+	/** Get cache information for monitoring. */
+	public String getCacheInfo() { return "Dynamic pages handled directly by CPageEntityService"; }
 
 	/** Get component for the given route if it's a dynamic page. */
 	public Optional<Component> getComponentForRoute(String route) {
@@ -60,6 +61,17 @@ public class CDynamicRouteHandler {
 		return pageEntityService.findByRoute(route).isPresent();
 	}
 
+	/** Register a single dynamic route. */
+	private void registerDynamicRoute(CPageEntity page) {
+		Check.notNull(page, "Page entity cannot be null");
+		String route = page.getRoute();
+		Check.notBlank(route, "Page route cannot be blank");
+		LOGGER.debug("Registering dynamic route: {} for page: {}", route, page.getPageTitle());
+		// Note: In a production system, you would need to handle dynamic route registration
+		// more carefully. For this implementation, routes are handled at the view level.
+		// The actual route registration happens when users navigate to the routes.
+	}
+
 	/** Register all dynamic routes for the current project. This is called during application initialization. */
 	public void registerDynamicRoutes() {
 		CProject activeProject =
@@ -75,18 +87,4 @@ public class CDynamicRouteHandler {
 			}
 		}
 	}
-
-	/** Register a single dynamic route. */
-	private void registerDynamicRoute(CPageEntity page) {
-		Check.notNull(page, "Page entity cannot be null");
-		String route = page.getRoute();
-		Check.notBlank(route, "Page route cannot be blank");
-		LOGGER.debug("Registering dynamic route: {} for page: {}", route, page.getPageTitle());
-		// Note: In a production system, you would need to handle dynamic route registration
-		// more carefully. For this implementation, routes are handled at the view level.
-		// The actual route registration happens when users navigate to the routes.
-	}
-
-	/** Get cache information for monitoring. */
-	public String getCacheInfo() { return "Dynamic pages handled directly by CPageEntityService"; }
 }

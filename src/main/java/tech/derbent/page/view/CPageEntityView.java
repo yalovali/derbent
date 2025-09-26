@@ -4,11 +4,11 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.domains.CEntityDB;
-import tech.derbent.abstracts.domains.CEntityNamed;
-import tech.derbent.abstracts.domains.CEntityOfProject;
-import tech.derbent.abstracts.views.grids.CGrid;
-import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
+import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.domains.CEntityNamed;
+import tech.derbent.api.domains.CEntityOfProject;
+import tech.derbent.api.views.grids.CGrid;
+import tech.derbent.api.views.grids.CGridViewBaseProject;
 import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.page.service.CPageEntityService;
 import tech.derbent.screens.service.CDetailSectionService;
@@ -22,20 +22,13 @@ public final class CPageEntityView extends CGridViewBaseProject<CPageEntity> {
 
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "Pages View";
-
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() {
-		return CPageEntity.getStaticIconColorCode(); // Use the static method from CActivity
-	}
+	public static final String DEFAULT_COLOR = tech.derbent.page.domain.CPageEntity.DEFAULT_COLOR;
+	public static final String DEFAULT_ICON = tech.derbent.page.domain.CPageEntity.DEFAULT_ICON;
+	private final String ENTITY_ID_FIELD = "pageentity_id";
 
 	public CPageEntityView(final CPageEntityService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
 		super(CPageEntity.class, entityService, sessionService, screenService);
 	}
-
-	public static String getStaticIconFilename() { return CPageEntity.getStaticIconFilename(); }
-
-	private final String ENTITY_ID_FIELD = "pageentity_id";
 
 	@Override
 	public void createGridForEntity(final CGrid<CPageEntity> grid) {
@@ -43,9 +36,6 @@ public final class CPageEntityView extends CGridViewBaseProject<CPageEntity> {
 		grid.addColumnEntityNamed(CEntityOfProject::getProject, "Project");
 		grid.addShortTextColumn(CEntityNamed::getName, "Name", "name");
 		grid.addColumn(CEntityNamed::getDescriptionShort, "Description");
-		grid.addColumn(CPageEntity::getMainEntityType, "Entity Type");
-		grid.addColumn(CPageEntity::getMasterViewClass, "Master View");
-		grid.addColumn(CPageEntity::getDetailViewClass, "Detail View");
 	}
 
 	@Override

@@ -4,38 +4,42 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.orders.domain.COrder;
+import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.services.CAbstractService;
+import tech.derbent.api.utils.CAuxillaries;
+import tech.derbent.api.utils.Check;
 import tech.derbent.page.domain.CPageEntity;
+import tech.derbent.screens.domain.CDetailSection;
+import tech.derbent.screens.domain.CGridEntity;
+import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 
 /** Dynamic page view for rendering database-defined pages. This view displays content stored in CPageEntity instances. */
 @PermitAll
-public class CDynamicPageView extends VerticalLayout implements BeforeEnterObserver {
+public class CDynamicPageView extends CDynamicPageViewWithSections {
 
+	public static final String DEFAULT_COLOR = "#4b2900";
+	public static final String DEFAULT_ICON = "vaadin:dashboard";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicPageView.class);
 	private static final long serialVersionUID = 1L;
 	private final CPageEntity pageEntity;
 	private final CSessionService sessionService;
 
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() {
-		return "#102bff"; // Blue color for activity entities
-	}
-
-	public static String getStaticIconFilename() { return COrder.getStaticIconFilename(); }
-
-	public CDynamicPageView(final CPageEntity pageEntity, final CSessionService sessionService) {
+	public CDynamicPageView(final CPageEntity pageEntity, final CSessionService sessionService, final CDetailSectionService detailSectionService) {
+		// For backward compatibility, we need to create the missing services
+		super(pageEntity, sessionService, detailSectionService, null, null);
 		this.pageEntity = pageEntity;
 		this.sessionService = sessionService;
-		LOGGER.debug("Creating dynamic page view for: {}", pageEntity.getPageTitle());
 		initializePage();
+		LOGGER.debug("Creating dynamic page view for: {}", pageEntity.getPageTitle());
+	}
+
+	// Backward compatibility constructor - gets services from Spring context
+	public CDynamicPageView(final CPageEntity pageEntity, final CSessionService sessionService) {
+		this(pageEntity, sessionService, null);
 	}
 
 	@Override
@@ -55,107 +59,45 @@ public class CDynamicPageView extends VerticalLayout implements BeforeEnterObser
 		LOGGER.debug("User accessing page: {}", pageEntity.getPageTitle());
 	}
 
-	/** Initialize the page layout and content. */
-	private void initializePage() {
-		setSizeFull();
-		setPadding(true);
-		setSpacing(true);
-		// Set page title for browser tab
-		getElement().executeJs("document.title = $0", pageEntity.getPageTitle());
-		// Create page header
-		createPageHeader();
-		// Create page content
-		createPageContent();
-		// Create page footer with metadata
-		createPageFooter();
-		LOGGER.debug("Dynamic page view initialized for: {}", pageEntity.getPageTitle());
-	}
-
-	/** Create the page header with title and description. */
-	private void createPageHeader() {
-		H1 pageTitle = new H1(pageEntity.getPageTitle());
-		pageTitle.addClassNames("page-title");
-		add(pageTitle);
-		if (pageEntity.getDescription() != null && !pageEntity.getDescription().trim().isEmpty()) {
-			Paragraph description = new Paragraph(pageEntity.getDescription());
-			description.addClassNames("page-description");
-			add(description);
+	/** Initialize the entity service based on the configured entity type. */
+	@Override
+	protected void initializeEntityService() {
+		try {
+			// Try to get the service bean from the configured grid entity
+			CGridEntity gridEntity = pageEntity.getGridEntity();
+			Check.notNull(gridEntity, "Grid entity cannot be null");
+			Check.notBlank(gridEntity.getDataServiceBeanName(), "Data service bean name cannot be blank");
+			// Get the service bean from the application context
+			Object serviceBean = applicationContext.getBean(gridEntity.getDataServiceBeanName());
+			Check.notNull(serviceBean, "Service bean not found: " + gridEntity.getDataServiceBeanName());
+			Check.isTrue(serviceBean instanceof CAbstractService<?>,
+					"Service bean is not an instance of CAbstractService: " + serviceBean.getClass());
+			entityService = (CAbstractService<?>) serviceBean;
+			// Get the entity class from the detail section
+			CDetailSection detailSection = pageEntity.getDetailSection();
+			Check.notNull(detailSection, "Detail section cannot be null");
+			Check.notBlank(detailSection.getEntityType(), "Entity type cannot be blank");
+			entityClass = CAuxillaries.getEntityClass(detailSection.getEntityType());
+			Check.notNull(entityClass, "Entity class not found for type: " + detailSection.getEntityType());
+			Check.isTrue(CEntityDB.class.isAssignableFrom(entityClass), "Entity class does not extend CEntityDB: " + entityClass);
+		} catch (Exception e) {
+			LOGGER.error("Failed to initialize entity service for entity type", e);
+			throw new RuntimeException("Failed to initialize entity service", e);
 		}
 	}
 
 	/** Create the main page content area. */
-	private void createPageContent() {
+	private void createGridAndDetailSections() {
+		// NO GRID!
+		Check.notNull(pageEntity, "pageEntity cannot be null");
+		Check.notNull(pageEntity.getContent(), "pageEntity content cannot be null");
+		// Only create content area if there is actual content
 		Div contentArea = new Div();
 		contentArea.addClassNames("page-content");
 		contentArea.setSizeFull();
-		if (pageEntity.getContent() != null && !pageEntity.getContent().trim().isEmpty()) {
-			// For now, render content as HTML
-			// In a production system, you might want to use a more sophisticated
-			// content rendering system (Markdown, rich text editor, etc.)
-			contentArea.getElement().setProperty("innerHTML", sanitizeContent(pageEntity.getContent()));
-		} else {
-			// Default content for empty pages
-			createDefaultContent(contentArea);
-		}
+		// Render content as HTML
+		contentArea.getElement().setProperty("innerHTML", sanitizeContent(pageEntity.getContent()));
 		add(contentArea);
-	}
-
-	/** Create default content for pages without specific content. */
-	private void createDefaultContent(Div contentArea) {
-		H2 welcomeTitle = new H2("Welcome to " + pageEntity.getPageTitle());
-		Paragraph welcomeText =
-				new Paragraph("This is a dynamically generated page. " + "Content can be customized through the page management system.");
-		if (pageEntity.getProject() != null) {
-			Paragraph projectInfo = new Paragraph("This page belongs to project: " + pageEntity.getProject().getName());
-			projectInfo.addClassNames("project-info");
-			contentArea.add(welcomeTitle, welcomeText, projectInfo);
-		} else {
-			contentArea.add(welcomeTitle, welcomeText);
-		}
-		// Add some sample content based on page type
-		addSampleContentByType(contentArea);
-	}
-
-	/** Add sample content based on the page name/type. */
-	private void addSampleContentByType(Div contentArea) {
-		String pageName = pageEntity.getName().toLowerCase();
-		if (pageName.contains("overview")) {
-			addOverviewContent(contentArea);
-		} else if (pageName.contains("directory") || pageName.contains("team")) {
-			addDirectoryContent(contentArea);
-		} else if (pageName.contains("library") || pageName.contains("resource")) {
-			addLibraryContent(contentArea);
-		} else {
-			addGenericContent(contentArea);
-		}
-	}
-
-	private void addOverviewContent(Div contentArea) {
-		H2 section = new H2("Project Overview");
-		Paragraph content = new Paragraph("This section provides a comprehensive overview of the project objectives, "
-				+ "current status, key milestones, and important information for team members.");
-		contentArea.add(section, content);
-	}
-
-	private void addDirectoryContent(Div contentArea) {
-		H2 section = new H2("Team Directory");
-		Paragraph content = new Paragraph("Here you can find contact information for all team members, "
-				+ "their roles, responsibilities, and current assignments within the project.");
-		contentArea.add(section, content);
-	}
-
-	private void addLibraryContent(Div contentArea) {
-		H2 section = new H2("Resource Library");
-		Paragraph content = new Paragraph("This area contains important project documents, reference materials, "
-				+ "templates, and other resources that team members may need.");
-		contentArea.add(section, content);
-	}
-
-	private void addGenericContent(Div contentArea) {
-		H2 section = new H2("Page Content");
-		Paragraph content = new Paragraph("This page is ready for custom content. You can edit this page "
-				+ "through the page management interface to add specific information.");
-		contentArea.add(section, content);
 	}
 
 	/** Create page footer with metadata. */
@@ -170,6 +112,47 @@ public class CDynamicPageView extends VerticalLayout implements BeforeEnterObser
 		add(footer);
 	}
 
+	/** Create the page header with title and description. */
+	private void createPageHeader() {
+		// Only create header if pageTitle is not empty
+		if (pageEntity.getPageTitle() != null && !pageEntity.getPageTitle().trim().isEmpty()) {
+			H1 pageTitle = new H1(pageEntity.getPageTitle());
+			pageTitle.addClassNames("page-title");
+			add(pageTitle);
+		}
+		// Only create description if it exists and is not empty
+		if (pageEntity.getDescription() != null && !pageEntity.getDescription().trim().isEmpty()) {
+			Paragraph description = new Paragraph(pageEntity.getDescription());
+			description.addClassNames("page-description");
+			add(description);
+		}
+	}
+
+	/** Get the page entity this view represents. */
+	@Override
+	public CPageEntity getPageEntity() { return pageEntity; }
+
+	/** Implementation of IPageTitleProvider - provides the page title from the CPageEntity */
+	@Override
+	public String getPageTitle() { return pageEntity != null ? pageEntity.getPageTitle() : null; }
+
+	/** Initialize the page layout and content. */
+	@Override
+	protected void initializePage() {
+		setSizeFull();
+		// Set page title for browser tab only if pageTitle is not empty
+		if (pageEntity.getPageTitle() != null && !pageEntity.getPageTitle().trim().isEmpty()) {
+			getElement().executeJs("document.title = $0", pageEntity.getPageTitle());
+		}
+		// Create page header
+		createPageHeader();
+		// Create page content
+		createGridAndDetailSections();
+		// Create page footer with metadata
+		createPageFooter();
+		LOGGER.debug("Dynamic page view initialized for: {}", pageEntity.getPageTitle());
+	}
+
 	/** Basic HTML sanitization for content. In a production system, use a proper HTML sanitization library. */
 	private String sanitizeContent(String content) {
 		if (content == null) {
@@ -178,7 +161,4 @@ public class CDynamicPageView extends VerticalLayout implements BeforeEnterObser
 		// Very basic sanitization - remove script tags
 		return content.replaceAll("(?i)<script[^>]*>.*?</script>", "").replaceAll("(?i)<script[^>]*/>", "");
 	}
-
-	/** Get the page entity this view represents. */
-	public CPageEntity getPageEntity() { return pageEntity; }
 }

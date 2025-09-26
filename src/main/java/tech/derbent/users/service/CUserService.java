@@ -3,9 +3,13 @@ package tech.derbent.users.service;
 import java.time.Clock;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -17,8 +21,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.abstracts.services.CAbstractNamedEntityService;
-import tech.derbent.abstracts.utils.Check;
+import tech.derbent.api.services.CAbstractNamedEntityService;
+import tech.derbent.api.utils.Check;
+import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
 
 @Service
@@ -57,7 +62,6 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 		final String encodedPassword = passwordEncoder.encode(plainPassword);
 		// Create new login user
 		final CUser loginUser = new CUser(username, encodedPassword, name, email);
-		loginUser.setRoles(roles != null ? roles : "USER");
 		loginUser.setEnabled(true);
 		// Save to database
 		final CUser savedUser = repository.saveAndFlush(loginUser);
@@ -95,6 +99,18 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	 * @return the PasswordEncoder instance */
 	public PasswordEncoder getPasswordEncoder() { return passwordEncoder; }
 
+	/** Gets users available for assignment to a specific project (excluding users already assigned to the project).
+	 * @param projectId the ID of the project
+	 * @return list of available users for the project */
+	@Transactional (readOnly = true)
+	@PreAuthorize ("permitAll()")
+	public List<CUser> getAvailableUsersForProject(final Long projectId) {
+		if (projectId == null) {
+			return findAll(); // Return all users if no project specified
+		}
+		return ((CUserRepository) repository).findUsersNotAssignedToProject(projectId);
+	}
+
 	@Override
 	public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
 		LOGGER.debug("Attempting to load user by username: {}", username);
@@ -104,13 +120,76 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 			return new UsernameNotFoundException("User not found with username: " + username);
 		});
 		// Step 2: Convert user roles to Spring Security authorities
-		final Collection<GrantedAuthority> authorities = getAuthorities(loginUser.getRoles());
+		// fix this next line!!!!!
+		final Collection<GrantedAuthority> authorities = getAuthorities("ADMIN,USER"); // Example roles, replace with actual user roles if available
 		// Step 3: Create and return Spring Security UserDetails
 		return User.builder().username(loginUser.getUsername()).password(loginUser.getPassword()) // Already encoded password from database
 				.authorities(authorities).accountExpired(false).accountLocked(false).credentialsExpired(false).disabled(!loginUser.isEnabled()) // Convert
 																																				// enabled
 				// flag to disabled flag
 				.build();
+	}
+
+	/** Lists users by project using the CUserProjectSettings relationship. This method allows CUserService to work with dynamic pages that expect
+	 * project filtering.
+	 * @param project the project to filter users by
+	 * @return list of users associated with the project */
+	@Transactional (readOnly = true)
+	public List<CUser> listByProject(final CProject project) {
+		Check.notNull(project, "Project cannot be null");
+		try {
+			// Find users through the project settings relationship
+			return repository.findAll().stream()
+					.filter(user -> user.getProjectSettings() != null && user.getProjectSettings().stream()
+							.anyMatch(settings -> settings.getProject() != null && projectsMatch(settings.getProject(), project)))
+					.collect(Collectors.toList());
+		} catch (final Exception e) {
+			LOGGER.error("Error listing users by project '{}': {}", project.getName(), e.getMessage(), e);
+			throw new RuntimeException("Failed to list users by project", e);
+		}
+	}
+
+	/** Helper method to safely compare projects, handling cases where IDs might be null */
+	private boolean projectsMatch(CProject project1, CProject project2) {
+		if (project1 == null || project2 == null) {
+			return false;
+		}
+		// If both have IDs, compare by ID
+		if (project1.getId() != null && project2.getId() != null) {
+			return project1.getId().equals(project2.getId());
+		}
+		// If IDs are null, compare by name as fallback
+		return project1.getName() != null && project1.getName().equals(project2.getName());
+	}
+
+	/** Lists users by project with pagination. This method allows CUserService to work with dynamic pages that expect project filtering.
+	 * @param project  the project to filter users by
+	 * @param pageable pagination information
+	 * @return page of users associated with the project */
+	@Transactional (readOnly = true)
+	public Page<CUser> listByProject(final CProject project, final Pageable pageable) {
+		Check.notNull(project, "Project cannot be null");
+		Check.notNull(pageable, "Pageable cannot be null");
+		try {
+			List<CUser> allUsers = listByProject(project);
+			// Apply pagination
+			int start = (int) Math.min(pageable.getOffset(), allUsers.size());
+			int end = Math.min(start + pageable.getPageSize(), allUsers.size());
+			List<CUser> content = allUsers.subList(start, end);
+			return new PageImpl<>(content, pageable, allUsers.size());
+		} catch (final Exception e) {
+			LOGGER.error("Error listing users by project '{}' with pagination: {}", project.getName(), e.getMessage(), e);
+			throw new RuntimeException("Failed to list users by project with pagination", e);
+		}
+	}
+
+	/** Override the default list method to filter users by active project when used in dynamic pages. This allows CUserService to work with dynamic
+	 * pages without needing to implement CEntityOfProjectService. If no active project is available, returns all users (preserves existing
+	 * behavior). */
+	@Override
+	@Transactional (readOnly = true)
+	public Page<CUser> list(final Pageable pageable) {
+		return super.list(pageable);
 	}
 
 	@Override

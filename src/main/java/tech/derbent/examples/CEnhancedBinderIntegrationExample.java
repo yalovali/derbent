@@ -3,12 +3,12 @@ package tech.derbent.examples;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.data.binder.ValidationException;
-import tech.derbent.abstracts.annotations.CEntityFormBuilder;
-import tech.derbent.abstracts.components.CBinderFactory;
-import tech.derbent.abstracts.components.CEnhancedBinder;
-import tech.derbent.abstracts.services.CAbstractService;
-import tech.derbent.abstracts.utils.CValidationUtils;
-import tech.derbent.base.ui.dialogs.CWarningDialog;
+import tech.derbent.api.annotations.CFormBuilder;
+import tech.derbent.api.components.CBinderFactory;
+import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.services.CAbstractService;
+import tech.derbent.api.utils.CValidationUtils;
+import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.meetings.domain.CMeetingStatus;
 import tech.derbent.session.service.CSessionService;
 
@@ -32,7 +32,7 @@ public class CEnhancedBinderIntegrationExample {
 				// Use standard binder
 				this.binder = CBinderFactory.createStandardBinder(CMeetingStatus.class);
 			}
-			CEntityFormBuilder.buildForm(CMeetingStatus.class, binder);
+			CFormBuilder.buildForm(CMeetingStatus.class, binder);
 		}
 
 		public void save() {
@@ -66,7 +66,7 @@ public class CEnhancedBinderIntegrationExample {
 			this.service = service;
 			// MINIMAL CHANGE: Use factory method instead of direct instantiation
 			this.binder = CBinderFactory.createEnhancedBinder(CMeetingStatus.class);
-			CEntityFormBuilder.buildForm(CMeetingStatus.class, binder);
+			CFormBuilder.buildForm(CMeetingStatus.class, binder);
 		}
 
 		public void save() {
@@ -94,8 +94,8 @@ public class CEnhancedBinderIntegrationExample {
 				throws Exception {
 			this.service = service;
 			// Direct enhanced binder creation
-			this.enhancedBinder = CEntityFormBuilder.createEnhancedBinder(CMeetingStatus.class);
-			CEntityFormBuilder.buildEnhancedForm(CMeetingStatus.class);
+			this.enhancedBinder = CFormBuilder.createEnhancedBinder(CMeetingStatus.class);
+			CFormBuilder.buildEnhancedForm(CMeetingStatus.class);
 		}
 
 		public void save() {
@@ -138,7 +138,7 @@ public class CEnhancedBinderIntegrationExample {
 			this.service = service;
 			// Standard binder creation
 			this.binder = CBinderFactory.createEnhancedBinder(CMeetingStatus.class);
-			CEntityFormBuilder.buildForm(CMeetingStatus.class, binder);
+			CFormBuilder.buildForm(CMeetingStatus.class, binder);
 		}
 
 		public void save() {

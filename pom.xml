@@ -91,6 +91,10 @@
 			<artifactId>spring-boot-devtools</artifactId>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
 
 		<!-- Testing -->
 		<dependency>
@@ -154,6 +158,11 @@
 			<artifactId>webdrivermanager</artifactId>
 			<version>5.5.3</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.reflections</groupId>
+			<artifactId>reflections</artifactId>
+			<version>0.10.2</version>
 		</dependency>
 	</dependencies>
 
@@ -315,9 +324,25 @@
 	<id>reset-db</id>
 	<dependencies>
 		<dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
 			<scope>runtime</scope>
+		</dependency>
+		<!-- Exclude Vaadin dependencies that cause issues in reset mode -->
+		<dependency>
+			<groupId>com.vaadin</groupId>
+			<artifactId>vaadin</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.vaadin</groupId>
+			<artifactId>vaadin-spring-boot-starter</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.vaadin</groupId>
+			<artifactId>control-center-starter</artifactId>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 	<build>
@@ -333,7 +358,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<mainClass>tech.derbent.Application</mainClass>
+					<mainClass>tech.derbent.SimpleDbResetApplication</mainClass>
 					<profiles>reset-db</profiles>
 					<arguments>
 						<argument>--spring.profiles.active=reset-db</argument>

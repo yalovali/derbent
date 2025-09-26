@@ -10,11 +10,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
-import tech.derbent.abstracts.annotations.AMetaData;
-import tech.derbent.abstracts.domains.CEvent;
-import tech.derbent.abstracts.utils.Check;
-import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.activities.domain.CActivity;
+import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.domains.CEvent;
+import tech.derbent.api.utils.Check;
 import tech.derbent.users.domain.CUser;
 
 /** CComment - Domain entity representing user comments on activities. Layer: Domain (MVC) Inherits from CEvent to provide event-based functionality
@@ -27,14 +26,6 @@ import tech.derbent.users.domain.CUser;
 public class CComment extends CEvent<CComment> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComment.class);
-	// Comment text content
-	@Column (name = "comment_text", nullable = false, length = 4000)
-	@Size (max = 4000)
-	@AMetaData (
-			displayName = "Comment Text", required = true, readOnly = false, description = "The comment content text", hidden = false, order = 1,
-			maxLength = 4000
-	)
-	private String commentText;
 	// Activity this comment belongs to
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "activity_id", nullable = false)
@@ -43,6 +34,21 @@ public class CComment extends CEvent<CComment> {
 			dataProviderBean = "CActivityService"
 	)
 	private CActivity activity;
+	// Comment text content
+	@Column (name = "comment_text", nullable = false, length = 4000)
+	@Size (max = 4000)
+	@AMetaData (
+			displayName = "Comment Text", required = true, readOnly = false, description = "The comment content text", hidden = false, order = 1,
+			maxLength = 4000
+	)
+	private String commentText;
+	// Flag for important comments
+	@Column (name = "is_important", nullable = false)
+	@AMetaData (
+			displayName = "Important", required = false, readOnly = false, defaultValue = "false", description = "Mark this comment as important",
+			hidden = false, order = 4
+	)
+	private Boolean important = Boolean.FALSE;
 	// Priority of the comment
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "priority_id", nullable = true)
@@ -51,19 +57,12 @@ public class CComment extends CEvent<CComment> {
 			dataProviderBean = "CCommentPriorityService"
 	)
 	private CCommentPriority priority;
-	// Flag for important comments
-	@Column (name = "is_important", nullable = false)
-	@AMetaData (
-			displayName = "Important", required = false, readOnly = false, defaultValue = "false", description = "Mark this comment as important",
-			hidden = false, order = 4
-	)
-	private Boolean important = Boolean.FALSE;
 
 	/** Default constructor for JPA. */
 	public CComment() {
 		super();
 		// Initialize with default values for JPA
-		this.important = false;
+		important = false;
 	}
 
 	/** Constructor with comment text, activity, and author.
@@ -90,9 +89,7 @@ public class CComment extends CEvent<CComment> {
 	public CActivity getActivity() { return activity; }
 
 	public String getActivityName() {
-		if (activity == null) {
-			return "No Activity";
-		}
+		Check.notNull(activity, "Activity cannot be null");
 		try {
 			// Safe access to avoid LazyInitializationException
 			return activity.getName();
@@ -113,23 +110,15 @@ public class CComment extends CEvent<CComment> {
 
 	public String getCommentText() { return commentText; }
 
-	@Override
-	public String getDisplayName() { // TODO Auto-generated method stub
-		return null;
-	}
-
 	public CCommentPriority getPriority() { return priority; }
 
 	public String getPriorityName() { return (priority != null) ? priority.getName() : "Normal"; }
 
 	@Override
-	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { return null; }
-
-	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		if (this.commentText == null) {
-			this.commentText = "";
+		if (commentText == null) {
+			commentText = "";
 		}
 	}
 

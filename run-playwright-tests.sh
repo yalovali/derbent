@@ -108,45 +108,64 @@ run_with_docker() {
 show_usage() {
     echo "Usage: $0 [option]"
     echo ""
-    echo "Options:"
+    echo "🎯 FOCUSED TESTS (Recommended - Refactored & Optimized):"
+    echo "  focused       Run all new focused tests (CRUD, Menu, Project Activation, DB Init, User Profile)"
+    echo "  crud          Run CRUD operation tests using enhanced base classes"
+    echo "  menu          Run menu navigation tests using enhanced base classes"
+    echo "  project-activation  Run project activation and change tracking tests"
+    echo "  db-init       Run database initialization tests"
+    echo "  navigation    Run navigation tests using enhanced base classes"
+    echo "  user-profile  Run user profile image tests with ID/XPath selectors"
+    echo "  complete-suite Run complete Playwright test suite including all features"
+    echo ""
+    echo "🔄 LEGACY TESTS (For Comparison):"
+    echo "  legacy-crud   Run legacy CRUD operation tests"
+    echo "  legacy-navigation  Run legacy navigation tests"
+    echo ""
+    echo "📊 COMPREHENSIVE TESTS:"
     echo "  all           Run all Playwright UI automation tests"
     echo "  playwright    Run Playwright browser automation tests"
-    echo "  comprehensive Run comprehensive tests for ALL views (new)"
-    echo "  status-types  Run status and type views tests only (new)"
-    echo "  main-views    Run main business views tests only (new)"
-    echo "  admin-views   Run administrative views tests only (new)"
-    echo "  kanban-views  Run kanban board views tests only (new)"
-    echo "  mock          Run mock tests that demonstrate screenshot functionality"
-    echo "  docker        Run tests using Docker (recommended)"
+    echo "  comprehensive Run comprehensive tests for ALL views"
+    echo "  status-types  Run status and type views tests only"
+    echo "  main-views    Run main business views tests only"
+    echo "  admin-views   Run administrative views tests only"
+    echo "  kanban-views  Run kanban board views tests only"
+    echo ""
+    echo "🔧 SPECIFIC FEATURE TESTS:"
     echo "  login         Run login/logout tests only"
-    echo "  crud          Run CRUD operation tests only"
     echo "  grid          Run grid interaction tests only"
     echo "  search        Run search functionality tests only"
-    echo "  navigation    Run navigation tests only"
     echo "  responsive    Run responsive design tests only"
     echo "  accessibility Run accessibility tests only"
     echo "  validation    Run form validation tests only"
     echo "  workflow      Run complete workflow tests"
     echo "  colors        Run user color and entry views tests only"
-    echo "  clean         Clean previous test results"
+    echo ""
+    echo "🔧 UTILITIES:"
+    echo "  docker        Run tests using Docker (recommended)"
+    echo "  mock          Run mock tests that demonstrate screenshot functionality"
     echo "  install       Install Playwright browsers"
+    echo "  clean         Clean previous test results"
     echo "  help          Show this help message"
     echo ""
-    echo "Examples:"
-    echo "  $0 mock           # Run mock tests to demonstrate screenshot functionality"
-    echo "  $0 comprehensive  # Run tests for ALL views (new comprehensive testing)"
-    echo "  $0 status-types   # Run tests for all status and type views"
-    echo "  $0 main-views     # Run tests for all main business views"
-    echo "  $0 docker         # Run real Playwright tests using Docker (recommended)"
-    echo "  $0 all            # Run all Playwright automation tests"
-    echo "  $0 playwright     # Run complete Playwright test suite"
-    echo "  $0 login          # Run only login/logout tests"
-    echo "  $0 colors         # Run only user color and entry views tests"
-    echo "  $0 install        # Install Playwright browsers"
-    echo "  $0 clean          # Clean up test artifacts"
+    echo "📖 EXAMPLES:"
+    echo "  $0 focused        # 🎯 Run all new refactored focused tests (RECOMMENDED)"
+    echo "  $0 crud           # 📝 Run enhanced CRUD tests with proper base classes"
+    echo "  $0 menu           # 🧭 Run enhanced menu navigation tests"
+    echo "  $0 user-profile   # 👤 Run user profile image tests with ID/XPath selectors"
+    echo "  $0 complete-suite # 🧪 Run complete Playwright test suite"
+    echo "  $0 project-activation  # 🔄 Run project activation and change tracking tests"
+    echo "  $0 db-init        # 🗄️ Run database initialization verification tests"
+    echo "  $0 docker         # 🐳 Run real Playwright tests using Docker"
+    echo "  $0 comprehensive  # 📊 Run tests for ALL views (comprehensive testing)"
+    echo "  $0 install        # 🔧 Install Playwright browsers"
+    echo "  $0 clean          # 🧹 Clean up test artifacts"
     echo ""
-    echo "Note: Use 'mock' option to see screenshot functionality without browser issues."
-    echo "      Use 'docker' option for full Playwright testing with real browsers."
+    echo "💡 NOTES:"
+    echo "   • Use 'focused' for the new refactored test suite with enhanced base classes"
+    echo "   • Use 'docker' option for full Playwright testing with real browsers"
+    echo "   • Enhanced tests include better error handling and common function usage"
+    echo "   • Screenshots are saved to target/screenshots/ directory"
 }
 
 # Main execution
@@ -206,7 +225,42 @@ main() {
             
         "crud")
             echo "📝 Running CRUD operation tests..."
-            run_playwright_tests "tech.derbent.ui.automation.PlaywrightUIAutomationTest#testCRUDOperationsInProjects,tech.derbent.ui.automation.PlaywrightUIAutomationTest#testCRUDOperationsInMeetings" "CRUD Operation Tests"
+            run_playwright_tests "automated_tests.tech.derbent.ui.automation.CCrudFunctionsTest" "CRUD Operation Tests"
+            ;;
+            
+        "menu")
+            echo "🧭 Running menu navigation tests..."
+            run_playwright_tests "automated_tests.tech.derbent.ui.automation.CMenuNavigationTest" "Menu Navigation Tests"
+            ;;
+            
+        "project-activation")
+            echo "🔄 Running project activation tests..."
+            run_playwright_tests "automated_tests.tech.derbent.ui.automation.CProjectActivationTest" "Project Activation Tests"
+            ;;
+            
+        "db-init")
+            echo "🗄️ Running database initialization tests..."
+            run_playwright_tests "automated_tests.tech.derbent.ui.automation.CDbInitializationTest" "Database Initialization Tests"
+            ;;
+            
+        "focused")
+            echo "🎯 Running all focused tests (CRUD, Menu, Project Activation, DB Init, User Profile)..."
+            run_playwright_tests "automated_tests.tech.derbent.ui.automation.CCrudFunctionsTest,automated_tests.tech.derbent.ui.automation.CMenuNavigationTest,automated_tests.tech.derbent.ui.automation.CProjectActivationTest,automated_tests.tech.derbent.ui.automation.CDbInitializationTest,automated_tests.tech.derbent.ui.automation.CUserProfileImageTest" "Focused Tests Suite"
+            ;;
+            
+        "user-profile")
+            echo "👤 Running user profile image tests..."
+            run_playwright_tests "automated_tests.tech.derbent.ui.automation.CUserProfileImageTest" "User Profile Image Tests"
+            ;;
+            
+        "complete-suite")
+            echo "🧪 Running complete Playwright test suite..."
+            run_playwright_tests "automated_tests.tech.derbent.ui.automation.CCompletePlaywrightTestSuite" "Complete Playwright Test Suite"
+            ;;
+            
+        "legacy-crud")
+            echo "📝 Running legacy CRUD operation tests..."
+            run_playwright_tests "tech.derbent.ui.automation.PlaywrightUIAutomationTest#testCRUDOperationsInProjects,tech.derbent.ui.automation.PlaywrightUIAutomationTest#testCRUDOperationsInMeetings" "Legacy CRUD Operation Tests"
             ;;
             
         "grid")
@@ -221,7 +275,12 @@ main() {
             
         "navigation")
             echo "🧭 Running navigation tests..."
-            run_playwright_tests "tech.derbent.ui.automation.PlaywrightUIAutomationTest#testNavigationBetweenViews,tech.derbent.ui.automation.PlaywrightUIAutomationTest#testComprehensiveAllViewsNavigation" "Navigation Tests"
+            run_playwright_tests "automated_tests.tech.derbent.ui.automation.CMenuNavigationTest" "Navigation Tests"
+            ;;
+            
+        "legacy-navigation")
+            echo "🧭 Running legacy navigation tests..."
+            run_playwright_tests "tech.derbent.ui.automation.PlaywrightUIAutomationTest#testNavigationBetweenViews,tech.derbent.ui.automation.PlaywrightUIAutomationTest#testComprehensiveAllViewsNavigation" "Legacy Navigation Tests"
             ;;
             
         "responsive")

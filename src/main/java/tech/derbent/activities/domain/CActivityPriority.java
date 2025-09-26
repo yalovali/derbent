@@ -4,9 +4,8 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import tech.derbent.abstracts.annotations.AMetaData;
-import tech.derbent.abstracts.domains.CTypeEntity;
-import tech.derbent.abstracts.views.CAbstractEntityDBPage;
+import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.projects.domain.CProject;
 
 /** CActivityPriority - Domain entity representing activity priority levels. Provides predefined priority levels for activity categorization and
@@ -18,13 +17,6 @@ import tech.derbent.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "cactivitypriority_id"))
 public class CActivityPriority extends CTypeEntity<CActivityPriority> {
 
-	/** Priority level for the activity (1=Highest, 5=Lowest). */
-	@Column (name = "priority_level", nullable = false)
-	@AMetaData (
-			displayName = "Priority Level", required = false, readOnly = false, defaultValue = "3",
-			description = "Priority level (1=Highest, 5=Lowest)", hidden = false, order = 2
-	)
-	private Integer priorityLevel = 3;
 	/** Indicates if this is the default priority. */
 	@Column (name = "is_default", nullable = false)
 	@AMetaData (
@@ -32,13 +24,20 @@ public class CActivityPriority extends CTypeEntity<CActivityPriority> {
 			description = "Indicates if this is the default priority", hidden = false, order = 7
 	)
 	private Boolean isDefault = false;
+	/** Priority level for the activity (1=Highest, 5=Lowest). */
+	@Column (name = "priority_level", nullable = false)
+	@AMetaData (
+			displayName = "Priority Level", required = false, readOnly = false, defaultValue = "3",
+			description = "Priority level (1=Highest, 5=Lowest)", hidden = false, order = 2
+	)
+	private Integer priorityLevel = 3;
 
 	/** Default constructor for JPA. */
 	public CActivityPriority() {
 		super();
 		// Initialize with default values for JPA
-		this.priorityLevel = 3;
-		this.isDefault = false;
+		priorityLevel = 3;
+		isDefault = false;
 	}
 
 	/** Constructor with required fields only.
@@ -57,11 +56,6 @@ public class CActivityPriority extends CTypeEntity<CActivityPriority> {
 		super(CActivityPriority.class, name, project);
 		setColor(color);
 		setSortOrder(sortOrder);
-	}
-
-	@Override
-	public String getDisplayName() { // TODO Auto-generated method stub
-		return null;
 	}
 
 	/** Gets the default status of this priority.
@@ -86,9 +80,4 @@ public class CActivityPriority extends CTypeEntity<CActivityPriority> {
 				getId(), getName(), getColor(), getSortOrder(), getIsActive(), getProject() != null ? getProject().getName() : "null", priorityLevel,
 				isDefault);
 	}
-
-	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return null; }
-
-	@Override
-	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { return null; }
 }

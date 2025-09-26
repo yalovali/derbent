@@ -13,15 +13,13 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
-import tech.derbent.abstracts.annotations.AMetaData;
-import tech.derbent.abstracts.domains.CEntityConstants;
-import tech.derbent.abstracts.domains.CEntityOfProject;
-import tech.derbent.abstracts.interfaces.CKanbanEntity;
-import tech.derbent.abstracts.interfaces.CKanbanStatus;
-import tech.derbent.abstracts.interfaces.CKanbanType;
-import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 import tech.derbent.activities.domain.CActivity;
-import tech.derbent.meetings.view.CMeetingsView;
+import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.domains.CEntityConstants;
+import tech.derbent.api.domains.CEntityOfProject;
+import tech.derbent.api.interfaces.CKanbanEntity;
+import tech.derbent.api.interfaces.CKanbanStatus;
+import tech.derbent.api.interfaces.CKanbanType;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
 
@@ -32,42 +30,9 @@ import tech.derbent.users.domain.CUser;
 @AttributeOverride (name = "id", column = @Column (name = "meeting_id"))
 public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntity {
 
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() {
-		return "#28a745"; // Green color for meeting entities
-	}
-
-	public static String getStaticIconFilename() { return "vaadin:group"; }
-
-	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CMeetingsView.class; }
-
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "cmeetingtype_id", nullable = true)
-	@AMetaData (
-			displayName = "Meeting Type", required = false, readOnly = false, description = "Type category of the meeting", hidden = false, order = 2,
-			dataProviderBean = "CMeetingTypeService"
-	)
-	private CMeetingType meetingType;
-	@Column (name = "meeting_date", nullable = true)
-	@AMetaData (
-			displayName = "Start Time", required = false, readOnly = false, description = "Start date and time of the meeting", hidden = false,
-			order = 4
-	)
-	private LocalDateTime meetingDate;
-	@Column (name = "end_date", nullable = true)
-	@AMetaData (
-			displayName = "End Time", required = false, readOnly = false, description = "End date and time of the meeting", hidden = false, order = 5
-	)
-	private LocalDateTime endDate;
-	@Column (name = "location", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
-	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
-	@AMetaData (
-			displayName = "Location", required = false, readOnly = false, defaultValue = "",
-			description = "Physical or virtual location of the meeting", hidden = false, order = 6,
-			maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
-	)
-	private String location;
+	public static final String DEFAULT_COLOR = "#fd7e14";
+	public static final String DEFAULT_ICON = "vaadin:calendar";
+	public static final String VIEW_NAME = "Meetings View";
 	@Column (name = "agenda", nullable = true, length = 4000)
 	@Size (max = 4000)
 	@AMetaData (
@@ -75,34 +40,6 @@ public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntit
 			hidden = false, order = 7, maxLength = 4000
 	)
 	private String agenda;
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "related_activity_id", nullable = true)
-	@AMetaData (
-			displayName = "Related Activity", required = false, readOnly = false, description = "Project activity related to this meeting",
-			hidden = false, order = 8, dataProviderBean = "CActivityService"
-	)
-	private CActivity relatedActivity;
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "meeting_status_id", nullable = true)
-	@AMetaData (
-			displayName = "Status", required = false, readOnly = false, description = "Current status of the meeting", hidden = false, order = 9,
-			dataProviderBean = "CMeetingStatusService"
-	)
-	private CMeetingStatus status;
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "responsible_id", nullable = true)
-	@AMetaData (
-			displayName = "Responsible", required = false, readOnly = false,
-			description = "Person responsible for organizing and leading the meeting", hidden = false, order = 10, dataProviderBean = "CUserService"
-	)
-	private CUser responsible;
-	@Column (name = "minutes", nullable = true, length = 4000)
-	@Size (max = 4000)
-	@AMetaData (
-			displayName = "Meeting Minutes", required = false, readOnly = false, defaultValue = "",
-			description = "Notes and minutes from the meeting", hidden = false, order = 11, maxLength = 4000
-	)
-	private String minutes;
 	@ManyToMany (fetch = FetchType.LAZY)
 	@JoinTable (name = "cmeeting_attendees", joinColumns = @JoinColumn (name = "meeting_id"), inverseJoinColumns = @JoinColumn (name = "user_id"))
 	@AMetaData (
@@ -110,13 +47,11 @@ public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntit
 			order = 12, dataProviderBean = "CUserService"
 	)
 	private Set<CUser> attendees = new HashSet<>();
-	@ManyToMany (fetch = FetchType.LAZY)
-	@JoinTable (name = "cmeeting_participants", joinColumns = @JoinColumn (name = "meeting_id"), inverseJoinColumns = @JoinColumn (name = "user_id"))
+	@Column (name = "end_date", nullable = true)
 	@AMetaData (
-			displayName = "Participants", required = false, readOnly = false, description = "Users invited to participate in the meeting",
-			hidden = false, order = 13, dataProviderBean = "CUserService"
+			displayName = "End Time", required = false, readOnly = false, description = "End date and time of the meeting", hidden = false, order = 5
 	)
-	private Set<CUser> participants = new HashSet<>();
+	private LocalDateTime endDate;
 	@Column (name = "linked_element", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@AMetaData (
@@ -125,12 +60,68 @@ public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntit
 			maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
 	)
 	private String linkedElement;
+	@Column (name = "location", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
+	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
+	@AMetaData (
+			displayName = "Location", required = false, readOnly = false, defaultValue = "",
+			description = "Physical or virtual location of the meeting", hidden = false, order = 6,
+			maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
+	)
+	private String location;
+	@Column (name = "meeting_date", nullable = true)
+	@AMetaData (
+			displayName = "Start Time", required = false, readOnly = false, description = "Start date and time of the meeting", hidden = false,
+			order = 4
+	)
+	private LocalDateTime meetingDate;
+	@ManyToOne (fetch = FetchType.LAZY)
+	@JoinColumn (name = "cmeetingtype_id", nullable = true)
+	@AMetaData (
+			displayName = "Meeting Type", required = false, readOnly = false, description = "Type category of the meeting", hidden = false, order = 2,
+			dataProviderBean = "CMeetingTypeService"
+	)
+	private CMeetingType meetingType;
+	@Column (name = "minutes", nullable = true, length = 4000)
+	@Size (max = 4000)
+	@AMetaData (
+			displayName = "Meeting Minutes", required = false, readOnly = false, defaultValue = "",
+			description = "Notes and minutes from the meeting", hidden = false, order = 11, maxLength = 4000
+	)
+	private String minutes;
+	@ManyToMany (fetch = FetchType.LAZY)
+	@JoinTable (name = "cmeeting_participants", joinColumns = @JoinColumn (name = "meeting_id"), inverseJoinColumns = @JoinColumn (name = "user_id"))
+	@AMetaData (
+			displayName = "Participants", required = false, readOnly = false, description = "Users invited to participate in the meeting",
+			hidden = false, order = 13, dataProviderBean = "CUserService"
+	)
+	private Set<CUser> participants = new HashSet<>();
+	@ManyToOne (fetch = FetchType.LAZY)
+	@JoinColumn (name = "related_activity_id", nullable = true)
+	@AMetaData (
+			displayName = "Related Activity", required = false, readOnly = false, description = "Project activity related to this meeting",
+			hidden = false, order = 8, dataProviderBean = "CActivityService"
+	)
+	private CActivity relatedActivity;
+	@ManyToOne (fetch = FetchType.LAZY)
+	@JoinColumn (name = "responsible_id", nullable = true)
+	@AMetaData (
+			displayName = "Responsible", required = false, readOnly = false,
+			description = "Person responsible for organizing and leading the meeting", hidden = false, order = 10, dataProviderBean = "CUserService"
+	)
+	private CUser responsible;
+	@ManyToOne (fetch = FetchType.LAZY)
+	@JoinColumn (name = "meeting_status_id", nullable = true)
+	@AMetaData (
+			displayName = "Status", required = false, readOnly = false, description = "Current status of the meeting", hidden = false, order = 9,
+			dataProviderBean = "CMeetingStatusService"
+	)
+	private CMeetingStatus status;
 
 	/** Default constructor for JPA. */
 	public CMeeting() {
 		super();
-		this.attendees = new HashSet<>();
-		this.participants = new HashSet<>();
+		attendees = new HashSet<>();
+		participants = new HashSet<>();
 	}
 
 	public CMeeting(final String name, final CProject project) {
@@ -165,11 +156,6 @@ public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntit
 	public String getAgenda() { return agenda; }
 
 	public Set<CUser> getAttendees() { return attendees == null ? new HashSet<>() : new HashSet<>(attendees); }
-
-	@Override
-	public String getDisplayName() { // TODO Auto-generated method stub
-		return null;
-	}
 
 	public LocalDateTime getEndDate() { return endDate; }
 
@@ -256,9 +242,4 @@ public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntit
 	}
 
 	public void setStatus(final CMeetingStatus status) { this.status = status; }
-
-	@Override
-	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
-		return CMeeting.getViewClassStatic();
-	}
 }

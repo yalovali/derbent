@@ -11,8 +11,8 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
-import tech.derbent.abstracts.utils.Check;
-import tech.derbent.abstracts.views.components.CButton;
+import tech.derbent.api.utils.Check;
+import tech.derbent.api.views.components.CButton;
 import tech.derbent.comments.domain.CComment;
 import tech.derbent.comments.service.CCommentService;
 
@@ -117,11 +117,7 @@ public class CCommentView extends Div {
 	/** Saves the edited comment text. */
 	private void saveChanges() {
 		final String newText = editTextArea.getValue();
-		if ((newText == null) || newText.trim().isEmpty()) {
-			LOGGER.warn("Cannot save empty comment text");
-			// Could show an error notification here
-			return;
-		}
+		Check.notBlank(newText, "Cannot save empty comment text");
 		try {
 			commentService.updateCommentText(comment, newText.trim());
 			isEditing = Boolean.FALSE;
@@ -165,10 +161,7 @@ public class CCommentView extends Div {
 
 	/** Starts editing mode for the comment. */
 	private void startEditing() {
-		if (commentService == null) {
-			LOGGER.warn("Cannot edit comment - no comment service available");
-			return;
-		}
+		Check.notNull(commentService, "Cannot edit comment - no comment service available");
 		isEditing = Boolean.TRUE;
 		originalText = comment.getCommentText();
 		updateContent();

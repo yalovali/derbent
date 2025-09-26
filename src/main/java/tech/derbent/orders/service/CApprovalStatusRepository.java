@@ -1,6 +1,6 @@
 package tech.derbent.orders.service;
 
-import tech.derbent.abstracts.services.CEntityOfProjectRepository;
+import tech.derbent.api.services.CEntityOfProjectRepository;
 import tech.derbent.orders.domain.CApprovalStatus;
 
 /** CApprovalStatusRepository - Repository interface for CApprovalStatus entities. Layer: Service (MVC) Provides data access operations for approval

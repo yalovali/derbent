@@ -4,7 +4,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
-import tech.derbent.base.ui.CBaseKanbanColumn;
+import tech.derbent.api.ui.CBaseKanbanColumn;
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.domain.CMeetingStatus;
 import tech.derbent.meetings.view.CMeetingCard;

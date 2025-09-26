@@ -21,10 +21,10 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.utils.Check;
-import tech.derbent.abstracts.views.CAbstractPage;
 import tech.derbent.activities.service.CActivityService;
-import tech.derbent.base.ui.dialogs.CExceptionDialog;
+import tech.derbent.api.ui.dialogs.CExceptionDialog;
+import tech.derbent.api.utils.Check;
+import tech.derbent.api.views.CAbstractPage;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
@@ -39,19 +39,12 @@ import tech.derbent.users.service.CUserService;
 @PermitAll
 public final class CDashboardView extends CAbstractPage {
 
+	public static final String DEFAULT_COLOR = "var(--lumo-primary-color)";
+	public static final String DEFAULT_ICON = "vaadin:home";
 	private static final long serialVersionUID = 1L;
-
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() {
-		return "var(--lumo-primary-color)"; // Primary color for dashboard
-	}
-
-	public static String getStaticIconFilename() { return "vaadin:home"; }
-
+	private final CActivityService activityService;
 	private final CProjectService projectService;
 	private final CUserService userService;
-	private final CActivityService activityService;
 
 	/** Constructor for CDashboardView.
 	 * @param projectService  Service for project-related operations, must not be null
@@ -84,27 +77,17 @@ public final class CDashboardView extends CAbstractPage {
 	 * @return Map containing project names as keys and activity counts as values, never null */
 	private final Map<String, Long> calculateActivitiesByProject(final List<CProject> projects) {
 		Check.notNull(projects, "Projects list cannot be null");
-		try {
-			return projects.stream().filter(project -> (project != null) && (project.getName() != null))
-					.collect(Collectors.toMap(CProject::getName, project -> {
-						try {
-							if (activityService == null) {
-								LOGGER.warn("ActivityService is null");
-								return 0L;
-							}
-							final var activities = activityService.listByProject(project);
-							final long activityCount = activities != null ? activities.size() : 0L;
-							LOGGER.debug("Project {} has {} activities", project.getName(), activityCount);
-							return activityCount;
-						} catch (final Exception e) {
-							LOGGER.warn("Error calculating activities for project {}: {}", project.getName(), e.getMessage());
-							return 0L;
-						}
-					}));
-		} catch (final Exception e) {
-			LOGGER.error("Error in calculateActivitiesByProject: {}", e.getMessage(), e);
-			return Collections.emptyMap();
-		}
+		return projects.stream().filter(project -> (project != null) && (project.getName() != null))
+				.collect(Collectors.toMap(CProject::getName, project -> {
+					if (activityService == null) {
+						LOGGER.error("ActivityService is null");
+						throw new IllegalStateException("ActivityService is null");
+					}
+					final var activities = activityService.listByProject(project);
+					final long activityCount = activities != null ? activities.size() : 0L;
+					LOGGER.debug("Project {} has {} activities", project.getName(), activityCount);
+					return activityCount;
+				}));
 	}
 
 	/** Calculates the number of users per project.
@@ -112,96 +95,75 @@ public final class CDashboardView extends CAbstractPage {
 	 * @return Map containing project names as keys and user counts as values, never null */
 	private final Map<String, Long> calculateUsersByProject(final List<CProject> projects) {
 		Check.notNull(projects, "Projects list cannot be null");
-		try {
-			return projects.stream().filter(project -> (project != null) && (project.getName() != null))
-					.collect(Collectors.toMap(CProject::getName, project -> {
-						try {
-							if (userService == null) {
-								LOGGER.warn("UserService is null");
-								return 0L;
-							}
-							// Get all users and count those that have project settings for
-							// this project
-							final List<CUser> allUsers = userService.list(Pageable.unpaged()).getContent();
-							if (allUsers == null) {
-								LOGGER.warn("User service returned null list");
-								return 0L;
-							}
-							final long userCount = allUsers.stream().filter(user -> (user != null) && (user.getProjectSettings() != null))
-									.flatMap(user -> user.getProjectSettings().stream()).filter(settings -> settings instanceof CUserProjectSettings)
-									.map(settings -> settings).filter(settings -> settings.getProject() != null)
-									.filter(settings -> settings.getProject().getId().equals(project.getId())).count();
-							LOGGER.debug("Project {} has {} users", project.getName(), userCount);
-							return userCount;
-						} catch (final Exception e) {
-							LOGGER.warn("Error calculating users for project {}: {}", project.getName(), e.getMessage());
-							return 0L;
-						}
-					}));
-		} catch (final Exception e) {
-			LOGGER.error("Error in calculateUsersByProject: {}", e.getMessage(), e);
-			return Collections.emptyMap();
-		}
+		return projects.stream().filter(project -> (project != null) && (project.getName() != null))
+				.collect(Collectors.toMap(CProject::getName, project -> {
+					if (userService == null) {
+						LOGGER.error("UserService is null");
+						throw new IllegalStateException("UserService is null");
+					}
+					// Get all users and count those that have project settings for this project
+					final List<CUser> allUsers = userService.list(Pageable.unpaged()).getContent();
+					if (allUsers == null) {
+						LOGGER.error("User service returned null list");
+						throw new IllegalStateException("User service returned null list");
+					}
+					final long userCount = allUsers.stream().filter(user -> (user != null) && (user.getProjectSettings() != null))
+							.flatMap(user -> user.getProjectSettings().stream()).filter(settings -> settings instanceof CUserProjectSettings)
+							.map(settings -> settings).filter(settings -> settings.getProject() != null)
+							.filter(settings -> settings.getProject().getId().equals(project.getId())).count();
+					LOGGER.debug("Project {} has {} users", project.getName(), userCount);
+					return userCount;
+				}));
 	}
 
 	/** Creates a card displaying the total number of activities across all projects.
 	 * @param activitiesByProject Map containing activity counts per project, must not be null
-	 * @return Div containing the activities card, or null if creation fails */
+	 * @return Div containing the activities card */
 	private final Div createActivitiesCard(final Map<String, Long> activitiesByProject) {
 		LOGGER.debug("createActivitiesCard called with activitiesByProject size={}", activitiesByProject != null ? activitiesByProject.size() : 0);
 		Check.notNull(activitiesByProject, "activitiesByProject cannot be null");
-		try {
-			final Div card = createCard();
-			Check.notNull(card, "Card creation failed");
-			final Icon icon = VaadinIcon.TASKS.create();
-			if (icon != null) {
-				icon.addClassNames(LumoUtility.IconSize.LARGE, LumoUtility.TextColor.WARNING);
-			}
-			final long totalActivities = activitiesByProject.values().stream().mapToLong(Long::longValue).sum();
-			final Span count = new Span(String.valueOf(totalActivities));
-			Check.notNull(count, "Count creation failed");
-			count.addClassNames(LumoUtility.FontSize.XXXLARGE, LumoUtility.FontWeight.BOLD);
-			final Span label = new Span("Total Activities");
-			Check.notNull(label, "Label creation failed");
-			label.addClassNames(LumoUtility.TextColor.SECONDARY);
-			final VerticalLayout content = new VerticalLayout(icon, count, label);
-			Check.notNull(content, "Content layout creation failed");
-			content.setAlignItems(FlexComponent.Alignment.CENTER);
-			content.setSpacing(false);
-			card.add(content);
-			return card;
-		} catch (final Exception e) {
-			LOGGER.error("Error creating activities card: {}", e.getMessage(), e);
-			return null;
+		final Div card = createCard();
+		Check.notNull(card, "Card creation failed");
+		final Icon icon = VaadinIcon.TASKS.create();
+		if (icon != null) {
+			icon.addClassNames(LumoUtility.IconSize.LARGE, LumoUtility.TextColor.WARNING);
 		}
+		final long totalActivities = activitiesByProject.values().stream().mapToLong(Long::longValue).sum();
+		final Span count = new Span(String.valueOf(totalActivities));
+		Check.notNull(count, "Count creation failed");
+		count.addClassNames(LumoUtility.FontSize.XXXLARGE, LumoUtility.FontWeight.BOLD);
+		final Span label = new Span("Total Activities");
+		Check.notNull(label, "Label creation failed");
+		label.addClassNames(LumoUtility.TextColor.SECONDARY);
+		final VerticalLayout content = new VerticalLayout(icon, count, label);
+		Check.notNull(content, "Content layout creation failed");
+		content.setAlignItems(FlexComponent.Alignment.CENTER);
+		content.setSpacing(false);
+		card.add(content);
+		return card;
 	}
 
 	/** Creates a styled card component with consistent appearance and hover effects.
-	 * @return Div configured as a card, or null if creation fails */
+	 * @return Div configured as a card */
 	private final Div createCard() {
 		LOGGER.debug("createCard called");
-		try {
-			final Div card = new Div();
-			card.addClassNames(LumoUtility.Background.CONTRAST_5, LumoUtility.BorderRadius.LARGE, LumoUtility.Padding.LARGE, LumoUtility.Border.ALL,
-					LumoUtility.BorderColor.CONTRAST_10);
-			card.getStyle().set("box-shadow", "0 2px 4px rgba(0,0,0,0.1)").set("transition", "transform 0.2s ease, box-shadow 0.2s ease")
-					.set("min-height", "150px").set("flex", "1");
-			// Add hover effect
-			card.getElement().addEventListener("mouseenter", e -> {
-				if (card.getStyle() != null) {
-					card.getStyle().set("transform", "translateY(-2px)").set("box-shadow", "0 4px 8px rgba(0,0,0,0.15)");
-				}
-			});
-			card.getElement().addEventListener("mouseleave", e -> {
-				if (card.getStyle() != null) {
-					card.getStyle().set("transform", "translateY(0)").set("box-shadow", "0 2px 4px rgba(0,0,0,0.1)");
-				}
-			});
-			return card;
-		} catch (final Exception e) {
-			LOGGER.error("Error creating card: {}", e.getMessage(), e);
-			return null;
-		}
+		final Div card = new Div();
+		card.addClassNames(LumoUtility.Background.CONTRAST_5, LumoUtility.BorderRadius.LARGE, LumoUtility.Padding.LARGE, LumoUtility.Border.ALL,
+				LumoUtility.BorderColor.CONTRAST_10);
+		card.getStyle().set("box-shadow", "0 2px 4px rgba(0,0,0,0.1)").set("transition", "transform 0.2s ease, box-shadow 0.2s ease")
+				.set("min-height", "150px").set("flex", "1");
+		// Add hover effect
+		card.getElement().addEventListener("mouseenter", e -> {
+			if (card.getStyle() != null) {
+				card.getStyle().set("transform", "translateY(-2px)").set("box-shadow", "0 4px 8px rgba(0,0,0,0.15)");
+			}
+		});
+		card.getElement().addEventListener("mouseleave", e -> {
+			if (card.getStyle() != null) {
+				card.getStyle().set("transform", "translateY(0)").set("box-shadow", "0 2px 4px rgba(0,0,0,0.1)");
+			}
+		});
+		return card;
 	}
 
 	/** Creates the detailed project breakdown section showing individual project statistics.
@@ -212,38 +174,32 @@ public final class CDashboardView extends CAbstractPage {
 	private final Div createDetailedBreakdown(final List<CProject> projects, final Map<String, Long> usersByProject,
 			final Map<String, Long> activitiesByProject) {
 		LOGGER.debug("createDetailedBreakdown called with {} projects", projects != null ? projects.size() : 0);
-		if ((projects == null) || (usersByProject == null) || (activitiesByProject == null)) {
-			LOGGER.warn("One or more parameters are null - projects: {}, usersByProject: {}, activitiesByProject: {}", projects != null,
-					usersByProject != null, activitiesByProject != null);
-			return null;
+		Check.notNull(projects, "Projects list cannot be null");
+		Check.notNull(usersByProject, "UsersByProject map cannot be null");
+		Check.notNull(activitiesByProject, "ActivitiesByProject map cannot be null");
+		
+		final Div breakdown = new Div();
+		breakdown.addClassNames(LumoUtility.Margin.Top.XLARGE);
+		final H3 title = new H3("Project Breakdown");
+		if (title != null) {
+			title.addClassNames(LumoUtility.Margin.Bottom.MEDIUM);
+			breakdown.add(title);
 		}
-		try {
-			final Div breakdown = new Div();
-			breakdown.addClassNames(LumoUtility.Margin.Top.XLARGE);
-			final H3 title = new H3("Project Breakdown");
-			if (title != null) {
-				title.addClassNames(LumoUtility.Margin.Bottom.MEDIUM);
-				breakdown.add(title);
-			}
-			final VerticalLayout projectList = new VerticalLayout();
-			if (projectList != null) {
-				projectList.setSpacing(true);
-				projectList.setWidthFull();
-				for (final CProject project : projects) {
-					if (project != null) {
-						final Div projectCard = createProjectBreakdownCard(project, usersByProject, activitiesByProject);
-						if (projectCard != null) {
-							projectList.add(projectCard);
-						}
+		final VerticalLayout projectList = new VerticalLayout();
+		if (projectList != null) {
+			projectList.setSpacing(true);
+			projectList.setWidthFull();
+			for (final CProject project : projects) {
+				if (project != null) {
+					final Div projectCard = createProjectBreakdownCard(project, usersByProject, activitiesByProject);
+					if (projectCard != null) {
+						projectList.add(projectCard);
 					}
 				}
-				breakdown.add(projectList);
 			}
-			return breakdown;
-		} catch (final Exception e) {
-			LOGGER.error("Error creating detailed breakdown: {}", e.getMessage(), e);
-			return null;
+			breakdown.add(projectList);
 		}
+		return breakdown;
 	}
 
 	/** Creates a fallback error card when dialog creation fails.
@@ -448,6 +404,11 @@ public final class CDashboardView extends CAbstractPage {
 			LOGGER.error("Error creating users card: {}", e.getMessage(), e);
 			return null;
 		}
+	}
+
+	@Override
+	public String getPageTitle() { // TODO Auto-generated method stub
+		return "Home";
 	}
 
 	/** Handles errors by displaying them to the user using CExceptionDialog.

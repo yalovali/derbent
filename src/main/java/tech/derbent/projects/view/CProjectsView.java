@@ -9,9 +9,9 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.views.CAccordionDBEntity;
-import tech.derbent.abstracts.views.grids.CGrid;
-import tech.derbent.abstracts.views.grids.CGridViewBaseNamed;
+import tech.derbent.api.views.CAccordionDBEntity;
+import tech.derbent.api.views.grids.CGrid;
+import tech.derbent.api.views.grids.CGridViewBaseNamed;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.screens.service.CDetailSectionService;
@@ -29,15 +29,8 @@ public class CProjectsView extends CGridViewBaseNamed<CProject> {
 
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "Projects View";
-
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() {
-		return CProject.getStaticIconColorCode(); // Use the static method from CProject
-	}
-
-	public static String getStaticIconFilename() { return CProject.getStaticIconFilename(); }
-
+	public static final String DEFAULT_COLOR = tech.derbent.projects.domain.CProject.DEFAULT_COLOR;
+	public static final String DEFAULT_ICON = tech.derbent.projects.domain.CProject.DEFAULT_ICON;
 	private final String ENTITY_ID_FIELD = "project_id";
 	private CPanelProjectUsers projectUsersPanel;
 	private final CUserService userService;
@@ -99,11 +92,11 @@ public class CProjectsView extends CGridViewBaseNamed<CProject> {
 	@Override
 	protected void updateDetailsComponent() throws Exception {
 		CAccordionDBEntity<CProject> panel;
-		panel = new CPanelProjectBasicInfo(getCurrentEntity(), getBinder(), (CProjectService) entityService);
+		panel = new CPanelProjectBasicInfo(this, getBinder(), (CProjectService) entityService);
 		addAccordionPanel(panel);
 		// Add the project users panel for managing users in this project
-		projectUsersPanel =
-				new CPanelProjectUsers(getCurrentEntity(), getBinder(), (CProjectService) entityService, userService, userProjectSettingsService);
+		projectUsersPanel = new CPanelProjectUsers(this, getCurrentEntity(), getBinder(), (CProjectService) entityService, userService,
+				userProjectSettingsService);
 		addAccordionPanel(projectUsersPanel);
 	}
 }

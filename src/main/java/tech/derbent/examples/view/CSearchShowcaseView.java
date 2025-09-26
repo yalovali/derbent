@@ -7,7 +7,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.components.CSearchToolbar;
+import tech.derbent.api.components.CSearchToolbar;
 
 /** CSearchShowcaseView - Simple showcase of search components. Layer: View (MVC) A minimal demo page that shows the search components working without
  * complex dependencies. */

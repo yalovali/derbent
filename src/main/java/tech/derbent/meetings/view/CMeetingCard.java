@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Span;
-import tech.derbent.abstracts.utils.Check;
+import tech.derbent.api.utils.Check;
 import tech.derbent.meetings.domain.CMeeting;
 
 /** CMeetingCard - UI component representing a meeting card in Kanban boards. Layer: View (MVC) Displays meeting information in a compact card format

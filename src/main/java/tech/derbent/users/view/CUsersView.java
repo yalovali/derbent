@@ -10,21 +10,22 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.domains.CEntityDB;
-import tech.derbent.abstracts.domains.CEntityNamed;
-import tech.derbent.abstracts.utils.Check;
-import tech.derbent.abstracts.views.grids.CGrid;
-import tech.derbent.abstracts.views.grids.CGridViewBaseNamed;
+import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.domains.CEntityNamed;
+import tech.derbent.api.utils.Check;
+import tech.derbent.api.views.grids.CGrid;
+import tech.derbent.api.views.grids.CGridViewBaseNamed;
 import tech.derbent.companies.service.CCompanyService;
+import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserProjectSettings;
+import tech.derbent.users.service.CUserInitializerService;
 import tech.derbent.users.service.CUserProjectSettingsService;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.CUserTypeService;
-import tech.derbent.users.service.CUserViewService;
 
 @Route ("cusersview")
 @PageTitle ("Users")
@@ -32,25 +33,18 @@ import tech.derbent.users.service.CUserViewService;
 @PermitAll // When security is enabled, allow all authenticated users
 public class CUsersView extends CGridViewBaseNamed<CUser> {
 
-	private static final long serialVersionUID = 1L;
+	public static final String DEFAULT_COLOR = "#006988";
+	public static final String DEFAULT_ICON = "vaadin:archive";
 	public static final String ENTITY_ROUTE_TEMPLATE_EDIT = "cusersview/%s/edit";
+	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "Users View";
-
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() {
-		return CUser.getStaticIconColorCode(); // Use the static method from CUser
-	}
-
-	public static String getStaticIconFilename() { return CUser.getStaticIconFilename(); }
-
+	private final CCompanyService companyService;
 	// private PasswordField passwordField;
 	private final String ENTITY_ID_FIELD = "user_id";
-	private CPanelUserProjectSettings projectSettingsGrid;
-	private final CUserTypeService userTypeService;
-	private final CCompanyService companyService;
 	private final CProjectService projectService;
+	private CPanelUserProjectSettings projectSettingsGrid;
 	private final CUserProjectSettingsService userProjectSettingsService;
+	private final CUserTypeService userTypeService;
 
 	@Autowired
 	public CUsersView(final CUserService entityService, final CProjectService projectService, final CUserTypeService userTypeService,
@@ -86,7 +80,6 @@ public class CUsersView extends CGridViewBaseNamed<CUser> {
 		grid.addShortTextColumn(CUser::getLogin, "Login", "login");
 		grid.addLongTextColumn(CUser::getEmail, "Email", "email");
 		grid.addBooleanColumn(CUser::isEnabled, "Status", "Enabled", "Disabled");
-		grid.addShortTextColumn(CUser::getRoles, "Roles", "roles");
 	}
 
 	@Override
@@ -94,7 +87,7 @@ public class CUsersView extends CGridViewBaseNamed<CUser> {
 
 	/** Handles password update through the description panel. */
 	private void handlePasswordUpdate() {
-		final PasswordField passwordField = (PasswordField) detailsBuilder.getComponentByName(CUserViewService.BASE_PANEL_NAME, "password");
+		final PasswordField passwordField = (PasswordField) detailsBuilder.getComponentByName(CUserInitializerService.BASE_PANEL_NAME, "password");
 		Check.notNull(passwordField, "Password field cannot be null");
 		// Handle password update if a new password was entered
 		if ((passwordField != null) && !passwordField.isEmpty()) {
@@ -148,9 +141,27 @@ public class CUsersView extends CGridViewBaseNamed<CUser> {
 
 	@Override
 	protected void updateDetailsComponent() throws Exception {
-		buildScreen(CUserViewService.BASE_VIEW_NAME);
-		projectSettingsGrid = new CPanelUserProjectSettings(getCurrentEntity(), getBinder(), (CUserService) entityService, userTypeService,
+		buildScreen(CUsersView.VIEW_NAME);
+		projectSettingsGrid = new CPanelUserProjectSettings(this, getCurrentEntity(), getBinder(), (CUserService) entityService, userTypeService,
 				companyService, projectService, userProjectSettingsService);
 		addAccordionPanel(projectSettingsGrid);
+	}
+
+	/** Content owner method to provide available projects for the current user context. This method demonstrates context-aware data provision.
+	 * @return list of available projects */
+	public List<CProject> getAvailableProjects() {
+		LOGGER.debug("Getting available projects for user context");
+		final CUser currentUser = getCurrentEntity();
+		if (currentUser == null) {
+			LOGGER.debug("No current user, returning all projects");
+			return projectService.findAll();
+		}
+		// Get all projects - could be filtered based on user's company, role, etc.
+		final List<CProject> allProjects = projectService.findAll();
+		LOGGER.debug("Found {} available projects for user: {}", allProjects.size(),
+				currentUser.getName() != null ? currentUser.getName() : "Unknown");
+		// For demonstration, return all projects
+		// In a real scenario, you might filter based on user's company, permissions, etc.
+		return allProjects;
 	}
 }

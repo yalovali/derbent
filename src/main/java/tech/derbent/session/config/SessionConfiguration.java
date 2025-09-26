@@ -1,18 +1,20 @@
 package tech.derbent.session.config;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import jakarta.annotation.PostConstruct;
 import tech.derbent.session.service.CLayoutService;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.CWebSessionService;
 
 /** Configuration class to handle the circular dependency between SessionService and LayoutService. */
 @Configuration
+@Profile ("!reset-db")
 public class SessionConfiguration {
 
-	private final CSessionService sessionService;
+	private final CWebSessionService sessionService;
 	private final CLayoutService layoutService;
 
-	public SessionConfiguration(final CSessionService sessionService, final CLayoutService layoutService) {
+	public SessionConfiguration(final CWebSessionService sessionService, final CLayoutService layoutService) {
 		this.sessionService = sessionService;
 		this.layoutService = layoutService;
 	}

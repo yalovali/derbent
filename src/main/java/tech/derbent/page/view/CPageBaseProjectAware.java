@@ -5,14 +5,14 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
-import tech.derbent.abstracts.components.CCrudToolbar;
-import tech.derbent.abstracts.components.CEnhancedBinder;
-import tech.derbent.abstracts.domains.CEntityDB;
-import tech.derbent.abstracts.interfaces.CProjectChangeListener;
-import tech.derbent.abstracts.services.CDetailsBuilder;
-import tech.derbent.abstracts.utils.Check;
-import tech.derbent.abstracts.views.components.CDiv;
-import tech.derbent.abstracts.views.components.CFlexLayout;
+import tech.derbent.api.components.CCrudToolbar;
+import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.interfaces.CProjectChangeListener;
+import tech.derbent.api.services.CDetailsBuilder;
+import tech.derbent.api.utils.Check;
+import tech.derbent.api.views.components.CDiv;
+import tech.derbent.api.views.components.CFlexLayout;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CDetailSection;
 import tech.derbent.screens.service.CDetailSectionService;
@@ -40,14 +40,6 @@ public abstract class CPageBaseProjectAware extends CPageBase implements CProjec
 	public void beforeEnter(BeforeEnterEvent event) {
 		LOGGER.debug("Entering Sample Page");
 	}
-
-	/** Hook method for subclasses to configure the CRUD toolbar with specific behavior like dependency checking */
-	protected void configureCrudToolbar(CCrudToolbar<?> toolbar) {
-		// Default implementation does nothing - subclasses can override to add specific configuration
-	}
-
-	/** Abstract method to create a new entity instance with project set */
-	protected abstract <T extends CEntityDB<T>> T createNewEntity();
 
 	protected void buildScreen(final String baseViewName) {
 		buildScreen(baseViewName, CEntityDB.class, null, getBaseDetailsLayout());
@@ -105,11 +97,19 @@ public abstract class CPageBaseProjectAware extends CPageBase implements CProjec
 			}
 		} catch (final Exception e) {
 			final String errorMsg = "Error building details layout for screen: " + baseViewName;
-			e.printStackTrace();
+			LOGGER.error("Error building details layout for screen '{}': {}", baseViewName, e.getMessage(), e);
 			detailsLayout.add(new CDiv(errorMsg));
 			currentBinder = null; // Clear binder on error
 		}
 	}
+
+	/** Hook method for subclasses to configure the CRUD toolbar with specific behavior like dependency checking */
+	protected void configureCrudToolbar(CCrudToolbar<?> toolbar) {
+		// Default implementation does nothing - subclasses can override to add specific configuration
+	}
+
+	/** Abstract method to create a new entity instance with project set */
+	protected abstract <T extends CEntityDB<T>> T createNewEntity();
 
 	public CFlexLayout getBaseDetailsLayout() { return baseDetailsLayout; }
 

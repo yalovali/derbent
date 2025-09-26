@@ -9,27 +9,18 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import tech.derbent.abstracts.annotations.AMetaData;
-import tech.derbent.abstracts.domains.CEntityOfProject;
-import tech.derbent.abstracts.views.CAbstractEntityDBPage;
+import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.domains.CEntityOfProject;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.risks.view.CRiskView;
 
 @Entity
 @Table (name = "\"crisk\"") // Using quoted identifiers for PostgreSQL
 @AttributeOverride (name = "id", column = @Column (name = "risk_id"))
 public class CRisk extends CEntityOfProject<CRisk> {
 
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() {
-		return "#dc3545"; // Red color for risk entities
-	}
-
-	public static String getStaticIconFilename() { return "vaadin:warning"; }
-
-	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CRiskView.class; }
-
+	public static final String DEFAULT_COLOR = "#003444";
+	public static final String DEFAULT_ICON = "vaadin:cart";
+	public static final String VIEW_NAME = "Risks View";
 	@Enumerated (EnumType.STRING)
 	@Column (name = "risk_severity", nullable = false, length = 20, columnDefinition = "VARCHAR(20)")
 	@AMetaData (
@@ -49,16 +40,11 @@ public class CRisk extends CEntityOfProject<CRisk> {
 	public CRisk() {
 		super();
 		// Initialize with default values for JPA
-		this.riskSeverity = ERiskSeverity.LOW;
+		riskSeverity = ERiskSeverity.LOW;
 	}
 
 	public CRisk(final String name, final CProject project) {
 		super(CRisk.class, name, project);
-	}
-
-	@Override
-	public String getDisplayName() { // TODO Auto-generated method stub
-		return null;
 	}
 
 	public ERiskSeverity getRiskSeverity() { return riskSeverity; }
@@ -68,9 +54,4 @@ public class CRisk extends CEntityOfProject<CRisk> {
 	public void setRiskSeverity(final ERiskSeverity riskSeverity) { this.riskSeverity = riskSeverity; }
 
 	public void setStatus(final CRiskStatus status) { this.status = status; }
-
-	@Override
-	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
-		return CRisk.getViewClassStatic();
-	}
 }

@@ -1,7 +1,8 @@
 package tech.derbent.companies.view;
 
 import java.util.List;
-import tech.derbent.abstracts.components.CEnhancedBinder;
+import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
 
@@ -11,9 +12,9 @@ public class CPanelCompanyContactDetails extends CPanelCompanyBase {
 
 	private static final long serialVersionUID = 1L;
 
-	public CPanelCompanyContactDetails(final CCompany currentEntity, final CEnhancedBinder<CCompany> beanValidationBinder,
-			final CCompanyService entityService) throws Exception {
-		super("Contact Details", currentEntity, beanValidationBinder, entityService);
+	public CPanelCompanyContactDetails(IContentOwner parentContent, final CCompany currentEntity,
+			final CEnhancedBinder<CCompany> beanValidationBinder, final CCompanyService entityService) throws Exception {
+		super("Contact Details", parentContent,beanValidationBinder, entityService);
 		initPanel();
 	}
 

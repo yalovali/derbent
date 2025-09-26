@@ -5,10 +5,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
-import tech.derbent.abstracts.annotations.AMetaData;
-import tech.derbent.abstracts.domains.CTypeEntity;
-import tech.derbent.abstracts.views.CAbstractEntityDBPage;
-import tech.derbent.decisions.view.CDecisionTypeView;
+import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.projects.domain.CProject;
 
 /** CDecisionType - Domain entity representing decision categorization types. Provides classification for project decisions to support decision
@@ -16,20 +14,15 @@ import tech.derbent.projects.domain.CProject;
  * @author Derbent Team
  * @since 1.0 */
 @Entity
-@Table (name = "cdecisiontype")
+@Table (name = "cdecisiontype", uniqueConstraints = @jakarta.persistence.UniqueConstraint (columnNames = {
+		"name", "project_id"
+}))
 @AttributeOverride (name = "id", column = @Column (name = "cdecisiontype_id"))
 public class CDecisionType extends CTypeEntity<CDecisionType> {
 
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() {
-		return "#dc3545"; // Red color for decision type entities
-	}
-
-	public static String getStaticIconFilename() { return "vaadin:tags"; }
-
-	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CDecisionTypeView.class; }
-
+	public static final String DEFAULT_COLOR = "#17a2b8";
+	public static final String DEFAULT_ICON = "vaadin:tag";
+	public static final String VIEW_NAME = "Decision Types View";
 	@Column (name = "requires_approval", nullable = false)
 	@NotNull
 	@AMetaData (
@@ -40,16 +33,11 @@ public class CDecisionType extends CTypeEntity<CDecisionType> {
 
 	public CDecisionType() {
 		super();
-		this.requiresApproval = false;
+		requiresApproval = false;
 	}
 
 	public CDecisionType(final String name, final CProject project) {
 		super(CDecisionType.class, name, project);
-	}
-
-	@Override
-	public String getDisplayName() { // TODO Auto-generated method stub
-		return null;
 	}
 
 	public Boolean getRequiresApproval() { return requiresApproval; }
@@ -59,9 +47,4 @@ public class CDecisionType extends CTypeEntity<CDecisionType> {
 	}
 
 	public void setRequiresApproval(final Boolean requiresApproval) { this.requiresApproval = requiresApproval; }
-
-	@Override
-	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
-		return CDecisionType.getViewClassStatic();
-	}
 }

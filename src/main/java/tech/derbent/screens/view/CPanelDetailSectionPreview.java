@@ -1,14 +1,15 @@
 package tech.derbent.screens.view;
 
 import java.util.List;
-import tech.derbent.abstracts.components.CEnhancedBinder;
-import tech.derbent.abstracts.domains.CEntityDB;
-import tech.derbent.abstracts.services.CAbstractService;
-import tech.derbent.abstracts.services.CDetailsBuilder;
-import tech.derbent.abstracts.views.components.CButton;
-import tech.derbent.abstracts.views.components.CDiv;
+import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.interfaces.IContentOwner;
+import tech.derbent.api.services.CAbstractService;
+import tech.derbent.api.services.CDetailsBuilder;
+import tech.derbent.api.utils.CAuxillaries;
+import tech.derbent.api.views.components.CButton;
+import tech.derbent.api.views.components.CDiv;
 import tech.derbent.screens.domain.CDetailSection;
-import tech.derbent.screens.service.CEntityFieldService;
 import tech.derbent.screens.service.CDetailSectionService;
 
 public class CPanelDetailSectionPreview extends CPanelDetailSectionBase {
@@ -16,9 +17,9 @@ public class CPanelDetailSectionPreview extends CPanelDetailSectionBase {
 	private static final long serialVersionUID = 1L;
 	CDiv divPreview;
 
-	public CPanelDetailSectionPreview(final CDetailSection currentEntity, final CEnhancedBinder<CDetailSection> beanValidationBinder,
-			final CDetailSectionService entityService) throws Exception {
-		super("Preview", currentEntity, beanValidationBinder, entityService);
+	public CPanelDetailSectionPreview(IContentOwner parentContent, final CDetailSection currentEntity,
+			final CEnhancedBinder<CDetailSection> beanValidationBinder, final CDetailSectionService entityService) throws Exception {
+		super("Preview", parentContent,beanValidationBinder, entityService);
 		initPanel();
 	}
 
@@ -29,7 +30,7 @@ public class CPanelDetailSectionPreview extends CPanelDetailSectionBase {
 		final CButton previewButton = new CButton("Preview", null, null);
 		getBaseLayout().add(previewButton);
 		previewButton.addClickListener(event -> {
-			populateForm(currentEntity);
+			populateForm(getCurrentEntity());
 		});
 		divPreview = new CDiv();
 		getBaseLayout().add(divPreview);
@@ -49,7 +50,7 @@ public class CPanelDetailSectionPreview extends CPanelDetailSectionBase {
 				final CDetailsBuilder builder = new CDetailsBuilder();
 				divPreview.removeAll();
 				// get service for the class
-				final Class<?> screenClass = CEntityFieldService.getEntityClass(screen.getEntityType());
+				final Class<?> screenClass = CAuxillaries.getEntityClass(screen.getEntityType());
 				// Instead of creating a new binder, reuse the existing one from the base class
 				// This fixes the issue of multiple binders being created unnecessarily
 				CEnhancedBinder<?> sharedBinder = getBinder();

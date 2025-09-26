@@ -6,7 +6,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.abstracts.services.CAbstractNamedEntityService;
+import tech.derbent.api.services.CAbstractNamedEntityService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.events.ProjectListChangeEvent;
 import tech.derbent.session.service.CSessionService;
@@ -43,10 +44,18 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 		return ((CProjectRepository) repository).findByIdWithUserSettings(projectId).orElse(null);
 	}
 
-	@Override
-	protected Class<CProject> getEntityClass() { // TODO Auto-generated method stub
-		return CProject.class;
+	/** Gets projects available for assignment to a specific user (excluding projects the user is already assigned to).
+	 * @param userId the ID of the user
+	 * @return list of available projects for the user */
+	@Transactional (readOnly = true)
+	@PreAuthorize ("permitAll()")
+	public List<CProject> getAvailableProjectsForUser(final Long userId) {
+		Check.notNull(userId, "User ID must not be null");
+		return ((CProjectRepository) repository).findProjectsNotAssignedToUser(userId);
 	}
+
+	@Override
+	protected Class<CProject> getEntityClass() { return CProject.class; }
 
 	@PreAuthorize ("permitAll()")
 	public long getTotalProjectCount() { return repository.count(); }

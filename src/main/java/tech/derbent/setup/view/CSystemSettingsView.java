@@ -15,15 +15,15 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.annotations.CEntityFormBuilder;
-import tech.derbent.abstracts.components.CBinderFactory;
-import tech.derbent.abstracts.components.CEnhancedBinder;
-import tech.derbent.abstracts.views.CAbstractPage;
-import tech.derbent.abstracts.views.components.CButton;
-import tech.derbent.base.ui.dialogs.CConfirmationDialog;
-import tech.derbent.base.ui.dialogs.CInformationDialog;
-import tech.derbent.base.ui.dialogs.CWarningDialog;
-import tech.derbent.config.CSampleDataInitializer;
+import tech.derbent.api.annotations.CFormBuilder;
+import tech.derbent.api.components.CBinderFactory;
+import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.ui.dialogs.CConfirmationDialog;
+import tech.derbent.api.ui.dialogs.CInformationDialog;
+import tech.derbent.api.ui.dialogs.CWarningDialog;
+import tech.derbent.api.views.CAbstractPage;
+import tech.derbent.api.views.components.CButton;
+import tech.derbent.config.CDataInitializer;
 import tech.derbent.setup.domain.CSystemSettings;
 import tech.derbent.setup.service.CSystemSettingsService;
 
@@ -36,26 +36,20 @@ import tech.derbent.setup.service.CSystemSettingsService;
 @PermitAll // When security is enabled, allow all authenticated users
 public class CSystemSettingsView extends CAbstractPage {
 
+	public static final String DEFAULT_COLOR = "#00495f";
+	public static final String DEFAULT_ICON = "vaadin:calendar";
 	private static final long serialVersionUID = 1L;
-
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() {
-		return "#6c757d"; // Gray color for setup/admin
-	}
-
-	public static String getStaticIconFilename() { return "vaadin:tools"; }
-
-	private final CSystemSettingsService systemSettingsService;
-	private CSystemSettings currentSettings;
+	public static final String VIEW_NAME = "System Settings View";
 	private final CEnhancedBinder<CSystemSettings> binder;
-	private VerticalLayout mainLayout;
+	private CSystemSettings currentSettings;
 	private Div formContainer;
+	private VerticalLayout mainLayout;
+	private final CSystemSettingsService systemSettingsService;
 
 	@Autowired
 	public CSystemSettingsView(final CSystemSettingsService systemSettingsService) {
 		this.systemSettingsService = systemSettingsService;
-		this.binder = CBinderFactory.createBinder(CSystemSettings.class);
+		binder = CBinderFactory.createBinder(CSystemSettings.class);
 		LOGGER.info("CSystemSettingsView constructor called with systemSettingsService: {}", systemSettingsService.getClass().getSimpleName());
 	}
 
@@ -89,24 +83,6 @@ public class CSystemSettingsView extends CAbstractPage {
 			LOGGER.error("Error cancelling changes and reverting form", e);
 			new CWarningDialog("Error cancelling changes: " + e.getMessage()).open();
 		}
-	}
-
-	/** Reloads the system settings from the database. */
-	private void resetDatabase() {
-		final ConfirmDialog dialog =
-				new ConfirmDialog("Onay", "Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?", "Evet, sıfırla", ev -> {
-					try {
-						final CSampleDataInitializer init = new CSampleDataInitializer();
-						init.reloadForced(); // veya empty check’li bir metod yaz
-						Notification.show("Sample data yeniden yüklendi.", 4000, Notification.Position.MIDDLE);
-						CInformationDialog info = new CInformationDialog("Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
-						info.open();
-						// UI.getCurrent().getPage().reload();
-					} catch (final Exception ex) {
-						Notification.show("Hata: " + ex.getMessage(), 6000, Notification.Position.MIDDLE);
-					}
-				}, "Vazgeç", ev -> {});
-		dialog.open();
 	}
 
 	private Div createButtonLayout() {
@@ -176,7 +152,7 @@ public class CSystemSettingsView extends CAbstractPage {
 			// Clear existing content
 			formContainer.removeAll();
 			// Create form using AMetaData annotations and CEntityFormBuilder
-			final var formLayout = CEntityFormBuilder.buildForm(CSystemSettings.class, binder);
+			final var formLayout = CFormBuilder.buildForm(CSystemSettings.class, binder);
 			// Bind current settings to form
 			binder.readBean(currentSettings);
 			// Create button layout
@@ -197,6 +173,11 @@ public class CSystemSettingsView extends CAbstractPage {
 	/** Gets the current system settings.
 	 * @return the current CSystemSettings or null if not loaded */
 	public CSystemSettings getCurrentSettings() { return currentSettings; }
+
+	@Override
+	public String getPageTitle() { // TODO Auto-generated method stub
+		return "System Setup & Configuration";
+	}
 
 	@Override
 	protected void initPage() {
@@ -290,6 +271,24 @@ public class CSystemSettingsView extends CAbstractPage {
 			LOGGER.error("Error reloading system settings", e);
 			Notification.show("Error reloading settings: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
 		}
+	}
+
+	/** Reloads the system settings from the database. */
+	private void resetDatabase() {
+		final ConfirmDialog dialog =
+				new ConfirmDialog("Onay", "Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?", "Evet, sıfırla", ev -> {
+					try {
+						final CDataInitializer init = new CDataInitializer();
+						init.reloadForced(); // veya empty check’li bir metod yaz
+						Notification.show("Sample data yeniden yüklendi.", 4000, Notification.Position.MIDDLE);
+						CInformationDialog info = new CInformationDialog("Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
+						info.open();
+						// UI.getCurrent().getPage().reload();
+					} catch (final Exception ex) {
+						Notification.show("Hata: " + ex.getMessage(), 6000, Notification.Position.MIDDLE);
+					}
+				}, "Vazgeç", ev -> {});
+		dialog.open();
 	}
 
 	/** Resets all settings to default values. Shows confirmation dialog before proceeding. */

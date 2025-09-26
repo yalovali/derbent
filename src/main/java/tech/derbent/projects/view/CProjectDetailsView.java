@@ -16,11 +16,11 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.annotations.CEntityFormBuilder;
-import tech.derbent.abstracts.views.components.CButton;
-import tech.derbent.abstracts.views.components.CVerticalLayout;
-import tech.derbent.abstracts.views.grids.CGrid;
-import tech.derbent.abstracts.views.grids.CGridViewBaseNamed;
+import tech.derbent.api.annotations.CFormBuilder;
+import tech.derbent.api.views.components.CButton;
+import tech.derbent.api.views.components.CVerticalLayout;
+import tech.derbent.api.views.grids.CGrid;
+import tech.derbent.api.views.grids.CGridViewBaseNamed;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.screens.service.CDetailSectionService;
@@ -37,12 +37,12 @@ public class CProjectDetailsView extends CGridViewBaseNamed<CProject> {
 	// Layout modes enum
 	public enum LayoutMode {
 
-		ENHANCED_CARDS("Enhanced Cards", "layout-enhanced-cards"), KANBAN_BOARD("Kanban Board", "layout-kanban-board"),
 		CARD_GRID("Card Grid", "layout-card-grid"), COMPACT_SIDEBAR("Compact Sidebar", "layout-compact-sidebar"),
-		DASHBOARD_WIDGETS("Dashboard Widgets", "layout-dashboard-widgets"), TIMELINE_VIEW("Timeline View", "layout-timeline-view");
+		DASHBOARD_WIDGETS("Dashboard Widgets", "layout-dashboard-widgets"), ENHANCED_CARDS("Enhanced Cards", "layout-enhanced-cards"),
+		KANBAN_BOARD("Kanban Board", "layout-kanban-board"), TIMELINE_VIEW("Timeline View", "layout-timeline-view");
 
-		private final String displayName;
 		private final String cssClass;
+		private final String displayName;
 
 		LayoutMode(final String displayName, final String cssClass) {
 			this.displayName = displayName;
@@ -54,18 +54,12 @@ public class CProjectDetailsView extends CGridViewBaseNamed<CProject> {
 		public String getDisplayName() { return displayName; }
 	}
 
+	public static final String DEFAULT_COLOR = "#794500";
+	public static final String DEFAULT_ICON = "vaadin:cube";
 	private static final long serialVersionUID = 1L;
-
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() {
-		return CProject.getStaticIconColorCode(); // Use the static method from CProject
-	}
-
-	public static String getStaticIconFilename() { return CProject.getStaticIconFilename(); }
-
-	private final String ENTITY_ID_FIELD = "project_id";
+	public static final String VIEW_NAME = "Project Details View";
 	private LayoutMode currentLayoutMode = LayoutMode.ENHANCED_CARDS;
+	private final String ENTITY_ID_FIELD = "project_id";
 	private Select<LayoutMode> layoutSelector;
 
 	public CProjectDetailsView(final CProjectService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
@@ -108,7 +102,7 @@ public class CProjectDetailsView extends CGridViewBaseNamed<CProject> {
 		cardsContainer.setClassName("project-cards-container");
 		gridLayout.add(cardsContainer);
 		// Add form at bottom
-		final CVerticalLayout formLayout = CEntityFormBuilder.buildForm(CProject.class, getBinder());
+		final CVerticalLayout formLayout = CFormBuilder.buildForm(CProject.class, getBinder());
 		gridLayout.add(formLayout);
 		getBaseDetailsLayout().add(gridLayout);
 	}
@@ -170,7 +164,7 @@ public class CProjectDetailsView extends CGridViewBaseNamed<CProject> {
 		contentHeader.add(new Icon(VaadinIcon.FILE_TEXT), new Span("Project Details"));
 		mainContent.add(contentHeader);
 		// Add form
-		final CVerticalLayout formLayout = CEntityFormBuilder.buildForm(CProject.class, getBinder());
+		final CVerticalLayout formLayout = CFormBuilder.buildForm(CProject.class, getBinder());
 		mainContent.add(formLayout);
 		compactLayout.add(sidebar, mainContent);
 		getBaseDetailsLayout().add(compactLayout);
@@ -240,7 +234,7 @@ public class CProjectDetailsView extends CGridViewBaseNamed<CProject> {
 		chartsSection.add(chartPlaceholder);
 		dashboardLayout.add(chartsSection);
 		// Add form
-		final CVerticalLayout formLayout = CEntityFormBuilder.buildForm(CProject.class, getBinder());
+		final CVerticalLayout formLayout = CFormBuilder.buildForm(CProject.class, getBinder());
 		dashboardLayout.add(formLayout);
 		getBaseDetailsLayout().add(dashboardLayout);
 	}
@@ -270,7 +264,7 @@ public class CProjectDetailsView extends CGridViewBaseNamed<CProject> {
 		formHeader.add(new Icon(VaadinIcon.FOLDER), new Span("Project Details"));
 		formWrapper.add(formHeader);
 		// Build the form using the existing form builder
-		final CVerticalLayout formLayout = CEntityFormBuilder.buildForm(CProject.class, getBinder());
+		final CVerticalLayout formLayout = CFormBuilder.buildForm(CProject.class, getBinder());
 		formWrapper.add(formLayout);
 		// Add additional project information section
 		final Div projectInfoCard = createProjectInfoCard();
@@ -340,7 +334,7 @@ public class CProjectDetailsView extends CGridViewBaseNamed<CProject> {
 		columnsLayout.add(activeColumn, planningColumn, completedColumn);
 		kanbanLayout.add(columnsLayout);
 		// Add form at bottom
-		final CVerticalLayout formLayout = CEntityFormBuilder.buildForm(CProject.class, getBinder());
+		final CVerticalLayout formLayout = CFormBuilder.buildForm(CProject.class, getBinder());
 		kanbanLayout.add(formLayout);
 		getBaseDetailsLayout().add(kanbanLayout);
 	}
@@ -541,7 +535,7 @@ public class CProjectDetailsView extends CGridViewBaseNamed<CProject> {
 				createTimelineItem("Milestone Reached", "First milestone completed", "2025-02-01", VaadinIcon.FLAG));
 		timelineLayout.add(timelineContainer);
 		// Add form
-		final CVerticalLayout formLayout = CEntityFormBuilder.buildForm(CProject.class, getBinder());
+		final CVerticalLayout formLayout = CFormBuilder.buildForm(CProject.class, getBinder());
 		timelineLayout.add(formLayout);
 		getBaseDetailsLayout().add(timelineLayout);
 	}
@@ -576,11 +570,11 @@ public class CProjectDetailsView extends CGridViewBaseNamed<CProject> {
 				try {
 					refreshLayout();
 				} catch (NoSuchMethodException | SecurityException | IllegalAccessException | InvocationTargetException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOGGER.error("Error refreshing layout due to reflection issues: {}", e.getMessage(), e);
+					throw new RuntimeException("Failed to refresh layout due to reflection issues", e);
 				} catch (final Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOGGER.error("Unexpected error refreshing layout: {}", e.getMessage(), e);
+					throw new RuntimeException("Failed to refresh layout", e);
 				}
 			}
 		});

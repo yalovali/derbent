@@ -1,6 +1,6 @@
 package tech.derbent.orders.service;
 
-import tech.derbent.abstracts.services.CEntityOfProjectRepository;
+import tech.derbent.api.services.CEntityOfProjectRepository;
 import tech.derbent.orders.domain.COrderStatus;
 
 /** COrderStatusRepository - Repository interface for COrderStatus entities. Layer: Service (MVC) Provides data access operations for order statuses.

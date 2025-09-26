@@ -5,11 +5,11 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.domains.CEntityDB;
-import tech.derbent.abstracts.domains.CEntityNamed;
-import tech.derbent.abstracts.views.CAccordionDBEntity;
-import tech.derbent.abstracts.views.grids.CGrid;
-import tech.derbent.abstracts.views.grids.CGridViewBaseNamed;
+import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.domains.CEntityNamed;
+import tech.derbent.api.views.CAccordionDBEntity;
+import tech.derbent.api.views.grids.CGrid;
+import tech.derbent.api.views.grids.CGridViewBaseNamed;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.screens.service.CDetailSectionService;
@@ -17,21 +17,14 @@ import tech.derbent.session.service.CSessionService;
 
 @Route ("ccompanyview")
 @PageTitle ("Company Master Detail")
-@Menu (order = 3.4, icon = "class:tech.derbent.companies.view.CCompanyView", title = "Settings.Companies")
+@Menu (order = 3.4, icon = "class:tech.derbent.companies.domain.CCompany", title = "Settings.Companies")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CCompanyView extends CGridViewBaseNamed<CCompany> {
 
+	public static final String DEFAULT_COLOR = "#fad998";
+	public static final String DEFAULT_ICON = "vaadin:office";
 	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "Company View";
-
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() {
-		return CCompany.getStaticIconColorCode(); // Use the static method from CCompany
-	}
-
-	public static String getStaticIconFilename() { return CCompany.getStaticIconFilename(); }
-
 	private final String ENTITY_ID_FIELD = "company_id";
 
 	/** Constructor for CCompanyView Annotated with @Autowired to let Spring inject dependencies
@@ -59,13 +52,13 @@ public class CCompanyView extends CGridViewBaseNamed<CCompany> {
 	@Override
 	protected void updateDetailsComponent() throws Exception {
 		CAccordionDBEntity<CCompany> panel;
-		panel = new CPanelCompanyDescription(getCurrentEntity(), getBinder(), (CCompanyService) entityService);
+		panel = new CPanelCompanyDescription(this, getCurrentEntity(), getBinder(), (CCompanyService) entityService);
 		addAccordionPanel(panel);
-		panel = new CPanelCompanySystemStatus(getCurrentEntity(), getBinder(), (CCompanyService) entityService);
+		panel = new CPanelCompanySystemStatus(this, getCurrentEntity(), getBinder(), (CCompanyService) entityService);
 		addAccordionPanel(panel);
-		panel = new CPanelCompanyUsers(getCurrentEntity(), getBinder(), (CCompanyService) entityService);
+		panel = new CPanelCompanyUsers(this, getCurrentEntity(), getBinder(), (CCompanyService) entityService);
 		addAccordionPanel(panel);
-		panel = new CPanelCompanyContactDetails(getCurrentEntity(), getBinder(), (CCompanyService) entityService);
+		panel = new CPanelCompanyContactDetails(this, getCurrentEntity(), getBinder(), (CCompanyService) entityService);
 		// final var formLayout = CEntityFormBuilder.buildForm(CCompany.class,
 		// getBinder()); getBaseDetailsLayout().add(formLayout);
 	}

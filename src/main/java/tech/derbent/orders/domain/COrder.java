@@ -16,10 +16,9 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
-import tech.derbent.abstracts.annotations.AMetaData;
-import tech.derbent.abstracts.domains.CEntityOfProject;
-import tech.derbent.abstracts.views.CAbstractEntityDBPage;
-import tech.derbent.orders.view.COrdersView;
+import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.domains.CEntityOfProject;
+import tech.derbent.api.utils.Check;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
 
@@ -28,16 +27,66 @@ import tech.derbent.users.domain.CUser;
 @AttributeOverride (name = "id", column = @Column (name = "order_id"))
 public class COrder extends CEntityOfProject<COrder> {
 
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() {
-		return "#20c997"; // Teal color for order entities
-	}
-
-	public static String getStaticIconFilename() { return "vaadin:cart"; }
-
-	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return COrdersView.class; }
-
+	public static final String DEFAULT_COLOR = "#fd7e14";
+	public static final String DEFAULT_ICON = "vaadin:invoice";
+	public static final String VIEW_NAME = "Orders View";
+	@Column (name = "actual_cost", nullable = true, precision = 15, scale = 2)
+	@DecimalMin (value = "0.00", message = "Actual cost must be positive")
+	@DecimalMax (value = "99999999999.99", message = "Actual cost cannot exceed 99,999,999,999.99")
+	@AMetaData (
+			displayName = "Actual Cost", required = false, readOnly = false, defaultValue = "0.00", description = "Actual cost of the order",
+			hidden = false, order = 42
+	)
+	private BigDecimal actualCost = BigDecimal.ZERO;
+	// Approval Management (One-to-Many relationship)
+	@OneToMany (mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@AMetaData (
+			displayName = "Approvals", required = false, readOnly = true, description = "Approval records for this order", hidden = false, order = 70
+	)
+	private List<COrderApproval> approvals = new ArrayList<>();
+	// Financial Information
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "currency_id", nullable = false)
+	@AMetaData (
+			displayName = "Currency", required = true, readOnly = false, description = "Currency for the order cost", hidden = false, order = 40,
+			dataProviderBean = "CCurrencyService"
+	)
+	private CCurrency currency;
+	@Column (name = "delivery_address", nullable = true, length = 500)
+	@Size (max = 500)
+	@AMetaData (
+			displayName = "Delivery Address", required = false, readOnly = false, description = "Address where the order should be delivered",
+			hidden = false, order = 61, maxLength = 500
+	)
+	private String deliveryAddress;
+	@Column (name = "delivery_date", nullable = true)
+	@AMetaData (
+			displayName = "Delivery Date", required = false, readOnly = false, description = "Actual or planned delivery date", hidden = false,
+			order = 52
+	)
+	private LocalDate deliveryDate;
+	@Column (name = "estimated_cost", nullable = true, precision = 15, scale = 2)
+	@DecimalMin (value = "0.00", message = "Estimated cost must be positive")
+	@DecimalMax (value = "99999999999.99", message = "Estimated cost cannot exceed 99,999,999,999.99")
+	@AMetaData (
+			displayName = "Estimated Cost", required = false, readOnly = false, defaultValue = "0.00", description = "Estimated cost of the order",
+			hidden = false, order = 41
+	)
+	private BigDecimal estimatedCost = BigDecimal.ZERO;
+	// Date Management
+	@Column (name = "order_date", nullable = false)
+	@AMetaData (
+			displayName = "Order Date", required = true, readOnly = false, description = "Date when the order was created", hidden = false, order = 50
+	)
+	private LocalDate orderDate;
+	// Additional Details
+	@Column (name = "order_number", nullable = true, length = 50)
+	@Size (max = 50)
+	@AMetaData (
+			displayName = "Order Number", required = false, readOnly = false, description = "External order reference number", hidden = false,
+			order = 60, maxLength = 50
+	)
+	private String orderNumber;
 	// Order Type and Classification
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "order_type_id", nullable = false)
@@ -77,6 +126,12 @@ public class COrder extends CEntityOfProject<COrder> {
 			dataProviderBean = "CUserService"
 	)
 	private CUser requestor;
+	@Column (name = "required_date", nullable = true)
+	@AMetaData (
+			displayName = "Required Date", required = false, readOnly = false, description = "Date when the order is required to be completed",
+			hidden = false, order = 51
+	)
+	private LocalDate requiredDate;
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "responsible_id", nullable = true)
 	@AMetaData (
@@ -92,86 +147,22 @@ public class COrder extends CEntityOfProject<COrder> {
 			dataProviderBean = "COrderStatusService"
 	)
 	private COrderStatus status;
-	// Financial Information
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "currency_id", nullable = false)
-	@AMetaData (
-			displayName = "Currency", required = true, readOnly = false, description = "Currency for the order cost", hidden = false, order = 40,
-			dataProviderBean = "CCurrencyService"
-	)
-	private CCurrency currency;
-	@Column (name = "estimated_cost", nullable = true, precision = 15, scale = 2)
-	@DecimalMin (value = "0.00", message = "Estimated cost must be positive")
-	@DecimalMax (value = "99999999999.99", message = "Estimated cost cannot exceed 99,999,999,999.99")
-	@AMetaData (
-			displayName = "Estimated Cost", required = false, readOnly = false, defaultValue = "0.00", description = "Estimated cost of the order",
-			hidden = false, order = 41
-	)
-	private BigDecimal estimatedCost = BigDecimal.ZERO;
-	@Column (name = "actual_cost", nullable = true, precision = 15, scale = 2)
-	@DecimalMin (value = "0.00", message = "Actual cost must be positive")
-	@DecimalMax (value = "99999999999.99", message = "Actual cost cannot exceed 99,999,999,999.99")
-	@AMetaData (
-			displayName = "Actual Cost", required = false, readOnly = false, defaultValue = "0.00", description = "Actual cost of the order",
-			hidden = false, order = 42
-	)
-	private BigDecimal actualCost = BigDecimal.ZERO;
-	// Date Management
-	@Column (name = "order_date", nullable = false)
-	@AMetaData (
-			displayName = "Order Date", required = true, readOnly = false, description = "Date when the order was created", hidden = false, order = 50
-	)
-	private LocalDate orderDate;
-	@Column (name = "required_date", nullable = true)
-	@AMetaData (
-			displayName = "Required Date", required = false, readOnly = false, description = "Date when the order is required to be completed",
-			hidden = false, order = 51
-	)
-	private LocalDate requiredDate;
-	@Column (name = "delivery_date", nullable = true)
-	@AMetaData (
-			displayName = "Delivery Date", required = false, readOnly = false, description = "Actual or planned delivery date", hidden = false,
-			order = 52
-	)
-	private LocalDate deliveryDate;
-	// Additional Details
-	@Column (name = "order_number", nullable = true, length = 50)
-	@Size (max = 50)
-	@AMetaData (
-			displayName = "Order Number", required = false, readOnly = false, description = "External order reference number", hidden = false,
-			order = 60, maxLength = 50
-	)
-	private String orderNumber;
-	@Column (name = "delivery_address", nullable = true, length = 500)
-	@Size (max = 500)
-	@AMetaData (
-			displayName = "Delivery Address", required = false, readOnly = false, description = "Address where the order should be delivered",
-			hidden = false, order = 61, maxLength = 500
-	)
-	private String deliveryAddress;
-	// Approval Management (One-to-Many relationship)
-	@OneToMany (mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@AMetaData (
-			displayName = "Approvals", required = false, readOnly = true, description = "Approval records for this order", hidden = false, order = 70
-	)
-	private List<COrderApproval> approvals = new ArrayList<>();
 
 	/** Constructor with name and project.
 	 * @param name    the name/description of the order
 	 * @param project the project this order belongs to */
 	public COrder(final String name, final CProject project) {
 		super(COrder.class, name, project);
-		this.orderDate = LocalDate.now();
+		orderDate = LocalDate.now();
 	}
 
 	/** Add an approval to this order.
 	 * @param approval the approval to add */
 	public void addApproval(final COrderApproval approval) {
-		if (approval != null) {
-			approvals.add(approval);
-			approval.setOrder(this);
-			updateLastModified();
-		}
+		Check.notNull(approval, "Approval cannot be null");
+		approvals.add(approval);
+		approval.setOrder(this);
+		updateLastModified();
 	}
 
 	public BigDecimal getActualCost() { return actualCost; }
@@ -183,11 +174,6 @@ public class COrder extends CEntityOfProject<COrder> {
 	public String getDeliveryAddress() { return deliveryAddress; }
 
 	public LocalDate getDeliveryDate() { return deliveryDate; }
-
-	@Override
-	public String getDisplayName() { // TODO Auto-generated method stub
-		return null;
-	}
 
 	public BigDecimal getEstimatedCost() { return estimatedCost; }
 
@@ -215,11 +201,10 @@ public class COrder extends CEntityOfProject<COrder> {
 	/** Remove an approval from this order.
 	 * @param approval the approval to remove */
 	public void removeApproval(final COrderApproval approval) {
-		if (approval != null) {
-			approvals.remove(approval);
-			approval.setOrder(null);
-			updateLastModified();
-		}
+		Check.notNull(approval, "Approval cannot be null");
+		approvals.remove(approval);
+		approval.setOrder(null);
+		updateLastModified();
 	}
 
 	public void setActualCost(final BigDecimal actualCost) {
@@ -300,10 +285,5 @@ public class COrder extends CEntityOfProject<COrder> {
 	public void setStatus(final COrderStatus status) {
 		this.status = status;
 		updateLastModified();
-	}
-
-	@Override
-	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
-		return COrder.getViewClassStatic();
 	}
 }

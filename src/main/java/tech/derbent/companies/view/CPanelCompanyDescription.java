@@ -1,7 +1,8 @@
 package tech.derbent.companies.view;
 
 import java.util.List;
-import tech.derbent.abstracts.components.CEnhancedBinder;
+import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
 
@@ -10,9 +11,9 @@ public class CPanelCompanyDescription extends CPanelCompanyBase {
 
 	private static final long serialVersionUID = 1L;
 
-	public CPanelCompanyDescription(final CCompany currentEntity, final CEnhancedBinder<CCompany> beanValidationBinder,
+	public CPanelCompanyDescription(IContentOwner parentContent, final CCompany currentEntity, final CEnhancedBinder<CCompany> beanValidationBinder,
 			final CCompanyService entityService) {
-		super("Basic Information", currentEntity, beanValidationBinder, entityService);
+		super("Basic Information", parentContent,beanValidationBinder, entityService);
 		// only open this panel
 		openPanel();
 	}

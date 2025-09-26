@@ -6,10 +6,8 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import tech.derbent.abstracts.annotations.AMetaData;
-import tech.derbent.abstracts.domains.CTypeEntity;
-import tech.derbent.abstracts.views.CAbstractEntityDBPage;
-import tech.derbent.comments.view.CCommentPriorityView;
+import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.projects.domain.CProject;
 
 @Entity
@@ -17,37 +15,29 @@ import tech.derbent.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "ccommentpriority_id"))
 public class CCommentPriority extends CTypeEntity<CCommentPriority> {
 
+	public static final String DEFAULT_COLOR = "#ffc107";
+	public static final String DEFAULT_ICON = "vaadin:star";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCommentPriority.class);
-
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() {
-		return "#FF9800"; // Default color for comment priority icon
-	}
-
-	public static String getStaticIconFilename() { return "vaadin:exclamation-circle"; }
-
-	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CCommentPriorityView.class; }
-
-	@Column (name = "priority_level", nullable = false, length = 20)
-	@AMetaData (
-			displayName = "Priority Level", required = false, readOnly = false, defaultValue = "3", description = "Priority level of the comment",
-			hidden = false, order = 2, useRadioButtons = false, setBackgroundFromColor = true
-	)
-	private Integer priorityLevel = 3; // Default to normal priority
+	public static final String VIEW_NAME = "Comment Priority View";
 	@Column (name = "is_default", nullable = false)
 	@AMetaData (
 			displayName = "Is Default", required = false, readOnly = false, defaultValue = "false",
 			description = "Indicates if this is the default priority", hidden = false, order = 7
 	)
 	private Boolean isDefault = false;
+	@Column (name = "priority_level", nullable = false, length = 20)
+	@AMetaData (
+			displayName = "Priority Level", required = false, readOnly = false, defaultValue = "3", description = "Priority level of the comment",
+			hidden = false, order = 2, useRadioButtons = false, setBackgroundFromColor = true
+	)
+	private Integer priorityLevel = 3; // Default to normal priority
 
 	/** Default constructor for JPA. */
 	public CCommentPriority() {
 		super();
 		// Initialize with default values for JPA
-		this.priorityLevel = 3;
-		this.isDefault = false;
+		priorityLevel = 3;
+		isDefault = false;
 	}
 
 	public CCommentPriority(final String name, final CProject project) {
@@ -59,11 +49,6 @@ public class CCommentPriority extends CTypeEntity<CCommentPriority> {
 		super(CCommentPriority.class, name, project);
 		setColor(color);
 		setSortOrder(sortOrder);
-	}
-
-	@Override
-	public String getDisplayName() { // TODO Auto-generated method stub
-		return null;
 	}
 
 	public Boolean getIsDefault() { return isDefault; }
@@ -81,10 +66,5 @@ public class CCommentPriority extends CTypeEntity<CCommentPriority> {
 		return String.format("CCommentPriority{id=%d, name='%s', color='%s', sortOrder=%d, isActive=%s, project=%s, priorityLevel=%d, isDefault=%s}",
 				getId(), getName(), getColor(), getSortOrder(), getIsActive(), getProject() != null ? getProject().getName() : "null", priorityLevel,
 				isDefault);
-	}
-
-	@Override
-	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
-		return CCommentPriority.getViewClassStatic();
 	}
 }

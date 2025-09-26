@@ -1,7 +1,8 @@
 package tech.derbent.projects.view;
 
 import java.util.List;
-import tech.derbent.abstracts.components.CEnhancedBinder;
+import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 
@@ -10,9 +11,9 @@ public class CPanelProjectBasicInfo extends CPanelProjectBase {
 
 	private static final long serialVersionUID = 1L;
 
-	public CPanelProjectBasicInfo(final CProject currentEntity, final CEnhancedBinder<CProject> beanValidationBinder,
+	public CPanelProjectBasicInfo(IContentOwner parentContent, final CEnhancedBinder<CProject> beanValidationBinder,
 			final CProjectService entityService) throws Exception {
-		super("Basic Information", currentEntity, beanValidationBinder, entityService);
+		super("Basic Information", parentContent, beanValidationBinder, entityService);
 		// only open this panel
 		initPanel();
 	}

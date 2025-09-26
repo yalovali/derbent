@@ -4,11 +4,11 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.domains.CEntityDB;
-import tech.derbent.abstracts.domains.CEntityNamed;
-import tech.derbent.abstracts.views.grids.CGrid;
-import tech.derbent.abstracts.views.grids.CGridViewBaseGannt;
 import tech.derbent.activities.service.CActivityService;
+import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.domains.CEntityNamed;
+import tech.derbent.api.views.grids.CGrid;
+import tech.derbent.api.views.grids.CGridViewBaseGannt;
 import tech.derbent.gannt.domain.CGanntViewEntity;
 import tech.derbent.gannt.service.CGanntViewEntityService;
 import tech.derbent.meetings.service.CMeetingService;
@@ -21,16 +21,10 @@ import tech.derbent.session.service.CSessionService;
 @PermitAll
 public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 
+	public static final String DEFAULT_COLOR = "#fd7e14";
+	public static final String DEFAULT_ICON = "vaadin:timeline";
 	private static final long serialVersionUID = 1L;
-
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() {
-		return CGanntViewEntity.getStaticIconColorCode(); // Use the static method from CActivity
-	}
-
-	public static String getStaticIconFilename() { return CGanntViewEntity.getStaticIconFilename(); }
-
+	public static final String VIEW_NAME = "GanntEntity View";
 	private final String ENTITY_ID_FIELD = "ganntview_id";
 
 	protected CProjectGanntView(final CGanntViewEntityService entityService, final CSessionService sessionService,

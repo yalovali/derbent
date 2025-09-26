@@ -4,27 +4,21 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import tech.derbent.abstracts.domains.CEntityOfProject;
-import tech.derbent.abstracts.views.CAbstractEntityDBPage;
+import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.users.view.CUserTypeView;
 
-/** CUserType - Domain entity representing user types. Layer: Domain (MVC) Inherits from CEntityOfProject to provide project-aware type functionality
- * for users. */
+/** CUserType - Domain entity representing user types. Layer: Domain (MVC) Inherits from CTypeEntity to provide project-aware type functionality for
+ * users with color support. */
 @Entity
-@Table (name = "cusertype")
+@Table (name = "cusertype", uniqueConstraints = @jakarta.persistence.UniqueConstraint (columnNames = {
+		"name", "project_id"
+}))
 @AttributeOverride (name = "id", column = @Column (name = "cusertype_id"))
-public class CUserType extends CEntityOfProject<CUserType> {
+public class CUserType extends CTypeEntity<CUserType> {
 
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() {
-		return "#6f42c1"; // Purple color for user type entities
-	}
-
-	public static String getStaticIconFilename() { return "vaadin:group"; }
-
-	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CUserTypeView.class; }
+	public static final String DEFAULT_COLOR = "#005e7b";
+	public static final String DEFAULT_ICON = "vaadin:bell";
+	public static final String VIEW_NAME = "User Type View";
 
 	public CUserType() {
 		super();
@@ -32,15 +26,5 @@ public class CUserType extends CEntityOfProject<CUserType> {
 
 	public CUserType(final String name, final CProject project) {
 		super(CUserType.class, name, project);
-	}
-
-	@Override
-	public String getDisplayName() { // TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
-		return CUserType.getViewClassStatic();
 	}
 }

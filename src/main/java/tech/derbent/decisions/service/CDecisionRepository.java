@@ -5,7 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import tech.derbent.abstracts.services.CEntityOfProjectRepository;
+import tech.derbent.api.services.CEntityOfProjectRepository;
 import tech.derbent.decisions.domain.CDecision;
 import tech.derbent.projects.domain.CProject;
 

@@ -9,10 +9,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import tech.derbent.abstracts.domains.CEntityNamed;
-import tech.derbent.abstracts.interfaces.CSearchable;
-import tech.derbent.abstracts.views.CAbstractEntityDBPage;
-import tech.derbent.projects.view.CProjectsView;
+import tech.derbent.api.domains.CEntityNamed;
+import tech.derbent.api.interfaces.CSearchable;
 import tech.derbent.users.domain.CUserProjectSettings;
 
 /** CProject - Domain entity representing projects. Layer: Domain (MVC) Inherits from CEntityDB to provide database functionality. */
@@ -21,16 +19,9 @@ import tech.derbent.users.domain.CUserProjectSettings;
 @AttributeOverride (name = "id", column = @Column (name = "project_id"))
 public class CProject extends CEntityNamed<CProject> implements CSearchable {
 
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() {
-		return "#fd7e14"; // Orange color for project entities
-	}
-
-	public static String getStaticIconFilename() { return "vaadin:briefcase"; }
-
-	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CProjectsView.class; }
-
+	public static final String DEFAULT_COLOR = "#905300";
+	public static final String DEFAULT_ICON = "vaadin:credit-card";
+	public static final String VIEW_NAME = "Projects View";
 	// lets keep it layzily loaded to avoid loading all user settings at once
 	@OneToMany (mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	private final List<CUserProjectSettings> userSettings = new ArrayList<>();
@@ -44,13 +35,31 @@ public class CProject extends CEntityNamed<CProject> implements CSearchable {
 		super(CProject.class, name);
 	}
 
-	@Override
-	public String getDisplayName() { // TODO Auto-generated method stub
-		return null;
-	}
-
 	/** Gets the list of user project settings for this project. */
 	public List<CUserProjectSettings> getUserSettings() { return userSettings; }
+
+	/** Add a user setting to this project and maintain bidirectional relationship.
+	 * @param userSettings the user settings to add */
+	public void addUserSettings(final CUserProjectSettings userSettings) {
+		if (userSettings == null) {
+			return;
+		}
+		if (!this.userSettings.contains(userSettings)) {
+			this.userSettings.add(userSettings);
+			userSettings.setProject(this);
+		}
+	}
+
+	/** Remove a user setting from this project and maintain bidirectional relationship.
+	 * @param userSettings the user settings to remove */
+	public void removeUserSettings(final CUserProjectSettings userSettings) {
+		if (userSettings == null) {
+			return;
+		}
+		if (this.userSettings.remove(userSettings)) {
+			userSettings.setProject(null);
+		}
+	}
 
 	@Override
 	public boolean matches(final String searchText) {
@@ -71,10 +80,5 @@ public class CProject extends CEntityNamed<CProject> implements CSearchable {
 			return true;
 		}
 		return false;
-	}
-
-	@Override
-	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
-		return CProject.getViewClassStatic();
 	}
 }

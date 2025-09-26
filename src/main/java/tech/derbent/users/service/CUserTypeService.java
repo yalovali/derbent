@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.abstracts.services.CEntityOfProjectService;
+import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUserType;
 

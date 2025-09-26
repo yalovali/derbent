@@ -9,51 +9,61 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import tech.derbent.abstracts.annotations.AMetaData;
-import tech.derbent.abstracts.utils.Check;
+import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.utils.CAuxillaries;
+import tech.derbent.api.utils.Check;
 import tech.derbent.screens.domain.CDetailLines;
 
 /** Service to provide entity field information for screen line configuration. This service uses reflection to extract field information from domain
  * entities. */
 @Service
-public class CEntityFieldService extends CFieldServiceBase {
+public class CEntityFieldService {
 
 	/** Data class to hold entity field information. */
 	public static class EntityFieldInfo {
 
-		private String fieldName = "fieldName";
-		private String displayName = "displayName";
-		private String description = "description";
-		private String fieldType = "fieldType";
-		private String javaType;
-		private Class<?> fieldTypeClass;
-		private boolean required = false;
-		private boolean readOnly = false;
-		private boolean hidden = false;
-		private int order = 999;
-		private int maxLength = 255;
-		private String defaultValue = "";
-		private String dataProviderBean = "";
+		private boolean allowCustomValue = false;
 		// Additional AMetaData properties
 		private boolean autoSelectFirst = false;
-		private String placeholder = "";
-		private boolean allowCustomValue = false;
-		private boolean useRadioButtons = false;
-		private boolean comboboxReadOnly = false;
 		private boolean clearOnEmptyData = false;
-		private String width = "";
+		private boolean colorField = false;
+		private boolean comboboxReadOnly = false;
+		private String dataProviderBean = "";
 		private String dataProviderMethod = "";
 		private String dataProviderParamMethod = "";
+		private String dataProviderOwner = "";
 		private String dataUpdateMethod = "";
+		private String defaultValue = "";
+		private String description = "description";
+		private String displayName = "displayName";
+		private String fieldName = "fieldName";
+		private String fieldType = "fieldType";
+		private Class<?> fieldTypeClass;
+		private boolean hidden = false;
+		private boolean imageData = false;
+		private String javaType;
+		private int maxLength = 255;
+		private int order = 999;
 		private boolean passwordField;
 		private boolean passwordRevealButton;
+		private String placeholder = "";
+		private boolean readOnly = false;
+		private boolean required = false;
+		private boolean setBackgroundFromColor = false;
+		private boolean useIcon = false;
+		private boolean useRadioButtons = false;
+		private String width = "";
 
 		public String getDataProviderBean() { return dataProviderBean; }
 
 		public String getDataProviderMethod() { return dataProviderMethod; }
 
 		public String getDataProviderParamMethod() { return dataProviderParamMethod; }
+
+		public String getDataProviderOwner() { return dataProviderOwner; }
 
 		public String getDataUpdateMethod() { return dataUpdateMethod; }
 
@@ -86,9 +96,13 @@ public class CEntityFieldService extends CFieldServiceBase {
 
 		public boolean isClearOnEmptyData() { return clearOnEmptyData; }
 
+		public boolean isColorField() { return colorField; }
+
 		public boolean isComboboxReadOnly() { return comboboxReadOnly; }
 
 		public boolean isHidden() { return hidden; }
+
+		public boolean isImageData() { return imageData; }
 
 		public boolean isPasswordField() { return passwordField; }
 
@@ -98,13 +112,19 @@ public class CEntityFieldService extends CFieldServiceBase {
 
 		public boolean isRequired() { return required; }
 
+		public boolean isSetBackgroundFromColor() { return setBackgroundFromColor; }
+
 		public boolean isUseRadioButtons() { return useRadioButtons; }
+
+		public boolean isUseIcon() { return useIcon; }
 
 		public void setAllowCustomValue(final boolean allowCustomValue) { this.allowCustomValue = allowCustomValue; }
 
 		public void setAutoSelectFirst(final boolean autoSelectFirst) { this.autoSelectFirst = autoSelectFirst; }
 
 		public void setClearOnEmptyData(final boolean clearOnEmptyData) { this.clearOnEmptyData = clearOnEmptyData; }
+
+		public void setColorField(final boolean colorField) { this.colorField = colorField; }
 
 		public void setComboboxReadOnly(final boolean comboboxReadOnly) { this.comboboxReadOnly = comboboxReadOnly; }
 
@@ -113,6 +133,8 @@ public class CEntityFieldService extends CFieldServiceBase {
 		public void setDataProviderMethod(final String dataProviderMethod) { this.dataProviderMethod = dataProviderMethod; }
 
 		public void setDataProviderParamMethod(final String dataProviderParamMethod) { this.dataProviderParamMethod = dataProviderParamMethod; }
+
+		public void setDataProviderOwner(final String dataProviderOwner) { this.dataProviderOwner = dataProviderOwner; }
 
 		public void setDataUpdateMethod(final String dataUpdateMethod) { this.dataUpdateMethod = dataUpdateMethod; }
 
@@ -130,6 +152,8 @@ public class CEntityFieldService extends CFieldServiceBase {
 
 		public void setHidden(final boolean hidden) { this.hidden = hidden; }
 
+		public void setImageData(final boolean imageData) { this.imageData = imageData; }
+
 		public void setJavaType(final String javaType) { this.javaType = javaType; }
 
 		public void setMaxLength(final int maxLength) { this.maxLength = maxLength; }
@@ -146,7 +170,11 @@ public class CEntityFieldService extends CFieldServiceBase {
 
 		public void setRequired(final boolean required) { this.required = required; }
 
+		public void setSetBackgroundFromColor(final boolean setBackgroundFromColor) { this.setBackgroundFromColor = setBackgroundFromColor; }
+
 		public void setUseRadioButtons(final boolean useRadioButtons) { this.useRadioButtons = useRadioButtons; }
+
+		public void setUseIcon(final boolean useIcon) { this.useIcon = useIcon; }
 
 		public void setWidth(final String width) { this.width = width; }
 
@@ -157,8 +185,9 @@ public class CEntityFieldService extends CFieldServiceBase {
 		}
 	}
 
-	public static final String THIS_CLASS = "This Class";
+	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityFieldService.class);
 	public static final String SECTION = "Section";
+	public static final String THIS_CLASS = "This Class";
 
 	public static EntityFieldInfo createFieldInfo(final AMetaData metaData) {
 		try {
@@ -172,22 +201,27 @@ public class CEntityFieldService extends CFieldServiceBase {
 			info.setRequired(metaData.required());
 			info.setReadOnly(metaData.readOnly());
 			info.setHidden(metaData.hidden());
+			info.setImageData(metaData.imageData());
 			info.setOrder(metaData.order());
 			info.setMaxLength(metaData.maxLength());
 			info.setDefaultValue(metaData.defaultValue());
 			info.setDataProviderBean(metaData.dataProviderBean());
+			info.setDataProviderOwner(metaData.dataProviderOwner());
 			info.setAutoSelectFirst(metaData.autoSelectFirst());
 			info.setPlaceholder(metaData.placeholder());
 			info.setAllowCustomValue(metaData.allowCustomValue());
 			info.setUseRadioButtons(metaData.useRadioButtons());
 			info.setComboboxReadOnly(metaData.comboboxReadOnly());
 			info.setClearOnEmptyData(metaData.clearOnEmptyData());
+			info.setColorField(metaData.colorField());
+			info.setSetBackgroundFromColor(metaData.setBackgroundFromColor());
 			info.setWidth(metaData.width());
 			info.setDataProviderMethod(metaData.dataProviderMethod());
 			info.setDataProviderParamMethod(metaData.dataProviderParamMethod());
 			info.setPasswordField(metaData.passwordField());
 			info.setDataUpdateMethod(metaData.dataUpdateMethod());
 			info.setPasswordRevealButton(metaData.passwordRevealButton());
+			info.setUseIcon(metaData.useIcon());
 			return info;
 		} catch (final Exception e) {
 			throw e;
@@ -274,12 +308,14 @@ public class CEntityFieldService extends CFieldServiceBase {
 	}
 
 	public static Field getEntityField(final String entityType, final String fieldName) throws NoSuchFieldException {
-		final Class<?> currentClass = getEntityClass(entityType);
+		Check.notBlank(entityType, "Entity type must not be empty");
+		final Class<?> currentClass = CAuxillaries.getEntityClass(entityType);
 		Check.notNull(currentClass, "Entity class must not be null for type: " + entityType);
 		return getEntityField(currentClass, fieldName);
 	}
 
 	public static EntityFieldInfo getEntityFieldInfo(final String entityType, final String fieldName) {
+		Check.notBlank(entityType, "Entity type must not be empty");
 		final List<EntityFieldInfo> fields = getEntityFields(entityType);
 		Check.notNull(fields, "Fields list must not be null for type: " + entityType);
 		return fields.stream().filter(field -> field.getFieldName().equals(fieldName)).findFirst().orElse(null);
@@ -289,7 +325,8 @@ public class CEntityFieldService extends CFieldServiceBase {
 	 * @param entityType the entity type name
 	 * @return list of field information */
 	public static List<EntityFieldInfo> getEntityFields(final String entityType) {
-		final Class<?> entityClass = getEntityClass(entityType);
+		Check.notBlank(entityType, "Entity type must not be empty");
+		final Class<?> entityClass = CAuxillaries.getEntityClass(entityType);
 		Check.notNull(entityClass, "Entity class must not be null for type: " + entityType);
 		final List<EntityFieldInfo> fields = new ArrayList<>();
 		final List<Field> allFields = getAllFields(entityClass);
@@ -309,7 +346,8 @@ public class CEntityFieldService extends CFieldServiceBase {
 	}
 
 	public static List<EntityFieldInfo> getEntityRelationFields(final String entityType, final List<EntityFieldInfo> listOfAdditionalFields) {
-		final Class<?> entityClass = getEntityClass(entityType);
+		Check.notBlank(entityType, "Entity type must not be empty");
+		final Class<?> entityClass = CAuxillaries.getEntityClass(entityType);
 		Check.notNull(entityClass, "Entity class must not be null for type: " + entityType);
 		final List<EntityFieldInfo> fields = new ArrayList<>();
 		if (listOfAdditionalFields != null) {
@@ -330,7 +368,8 @@ public class CEntityFieldService extends CFieldServiceBase {
 	}
 
 	public static List<EntityFieldInfo> getEntitySimpleFields(final String entityType, final List<EntityFieldInfo> listOfAdditionalFields) {
-		final Class<?> entityClass = getEntityClass(entityType);
+		Check.notBlank(entityType, "Entity type must not be empty");
+		final Class<?> entityClass = CAuxillaries.getEntityClass(entityType);
 		Check.notNull(entityClass, "Entity class must not be null for type: " + entityType);
 		final List<EntityFieldInfo> fields = new ArrayList<>();
 		if (listOfAdditionalFields != null) {
@@ -409,29 +448,31 @@ public class CEntityFieldService extends CFieldServiceBase {
 		}
 	}
 
+	/** Prints detailed field information for debugging purposes.
+	 * @param fieldInfo the field information to print */
 	public static void printFieldInfo(final EntityFieldInfo fieldInfo) {
 		if (fieldInfo == null) {
-			System.out.println("Field info is null");
+			LOGGER.debug("Field info is null");
 			return;
 		}
-		System.out.println("Field Name: " + fieldInfo.getFieldName());
-		System.out.println("Display Name: " + fieldInfo.getDisplayName());
-		System.out.println("Description: " + fieldInfo.getDescription());
-		System.out.println("Field Type: " + fieldInfo.getFieldType());
-		System.out.println("Java Type: " + fieldInfo.getJavaType());
-		System.out.println("Required: " + fieldInfo.isRequired());
-		System.out.println("Read Only: " + fieldInfo.isReadOnly());
-		System.out.println("Hidden: " + fieldInfo.isHidden());
-		System.out.println("Order: " + fieldInfo.getOrder());
-		System.out.println("Max Length: " + fieldInfo.getMaxLength());
-		System.out.println("Default Value: " + fieldInfo.getDefaultValue());
-		System.out.println("Data Provider Bean: " + fieldInfo.getDataProviderBean());
-		System.out.println("Auto Select First: " + fieldInfo.isAutoSelectFirst());
-		System.out.println("Placeholder: " + fieldInfo.getPlaceholder());
-		System.out.println("Allow Custom Value: " + fieldInfo.isAllowCustomValue());
-		System.out.println("Use Radio Buttons: " + fieldInfo.isUseRadioButtons());
-		System.out.println("Combobox Read Only: " + fieldInfo.isComboboxReadOnly());
-		System.out.println("Clear On Empty Data: " + fieldInfo.isClearOnEmptyData());
-		System.out.println("Width: " + fieldInfo.getWidth());
+		LOGGER.debug("Field Name: {}", fieldInfo.getFieldName());
+		LOGGER.debug("Display Name: {}", fieldInfo.getDisplayName());
+		LOGGER.debug("Description: {}", fieldInfo.getDescription());
+		LOGGER.debug("Field Type: {}", fieldInfo.getFieldType());
+		LOGGER.debug("Java Type: {}", fieldInfo.getJavaType());
+		LOGGER.debug("Required: {}", fieldInfo.isRequired());
+		LOGGER.debug("Read Only: {}", fieldInfo.isReadOnly());
+		LOGGER.debug("Hidden: {}", fieldInfo.isHidden());
+		LOGGER.debug("Order: {}", fieldInfo.getOrder());
+		LOGGER.debug("Max Length: {}", fieldInfo.getMaxLength());
+		LOGGER.debug("Default Value: {}", fieldInfo.getDefaultValue());
+		LOGGER.debug("Data Provider Bean: {}", fieldInfo.getDataProviderBean());
+		LOGGER.debug("Auto Select First: {}", fieldInfo.isAutoSelectFirst());
+		LOGGER.debug("Placeholder: {}", fieldInfo.getPlaceholder());
+		LOGGER.debug("Allow Custom Value: {}", fieldInfo.isAllowCustomValue());
+		LOGGER.debug("Use Radio Buttons: {}", fieldInfo.isUseRadioButtons());
+		LOGGER.debug("Combobox Read Only: {}", fieldInfo.isComboboxReadOnly());
+		LOGGER.debug("Clear On Empty Data: {}", fieldInfo.isClearOnEmptyData());
+		LOGGER.debug("Width: {}", fieldInfo.getWidth());
 	}
 }

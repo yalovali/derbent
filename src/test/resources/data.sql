@@ -134,11 +134,11 @@ INSERT INTO ccompany (
 -- =====================================================================
 INSERT INTO cuser (
     created_date, email, enabled, lastname, login, name, password, phone, roles, 
-    last_modified_date, cusertype_id, user_role
+    last_modified_date, cusertype_id
 ) VALUES 
 -- System Administrator with full enrichment
 ('2025-01-15 08:00:00', 'admin@derbent.tech', TRUE, 'Administrator', 'admin', 'System', 
- '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-0001', 'ADMIN,USER', 
+ '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-0001',  
  '2025-01-15 08:00:00', 1, 'TEAM_MEMBER'),
 
 -- Senior Developer with full enrichment

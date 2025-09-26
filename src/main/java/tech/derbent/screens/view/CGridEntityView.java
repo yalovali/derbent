@@ -8,15 +8,15 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.annotations.CEntityFormBuilder;
-import tech.derbent.abstracts.components.CEnhancedBinder;
-import tech.derbent.abstracts.domains.CEntityDB;
-import tech.derbent.abstracts.domains.CEntityNamed;
-import tech.derbent.abstracts.domains.CEntityOfProject;
-import tech.derbent.abstracts.utils.Check;
-import tech.derbent.abstracts.views.components.CVerticalLayout;
-import tech.derbent.abstracts.views.grids.CGrid;
-import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
+import tech.derbent.api.annotations.CFormBuilder;
+import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.domains.CEntityNamed;
+import tech.derbent.api.domains.CEntityOfProject;
+import tech.derbent.api.utils.Check;
+import tech.derbent.api.views.components.CVerticalLayout;
+import tech.derbent.api.views.grids.CGrid;
+import tech.derbent.api.views.grids.CGridViewBaseProject;
 import tech.derbent.screens.domain.CGridEntity;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.screens.service.CGridEntityService;
@@ -28,21 +28,20 @@ import tech.derbent.session.service.CSessionService;
 @PermitAll
 public class CGridEntityView extends CGridViewBaseProject<CGridEntity> {
 
+	public static final String DEFAULT_COLOR = "#001f29";
+	public static final String DEFAULT_ICON = "vaadin:check";
 	private static final long serialVersionUID = 1L;
-
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() {
-		return CGridEntity.getStaticIconColorCode(); // Use the static method from CScreen
-	}
-
-	public static String getStaticIconFilename() { return CGridEntity.getStaticIconFilename(); }
-
 	private final String ENTITY_ID_FIELD = "grid_entity_id";
 	private CFieldSelectionComponent fieldSelectionComponent;
 
 	public CGridEntityView(final CGridEntityService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
 		super(CGridEntity.class, entityService, sessionService, screenService);
+	}
+
+	@Override
+	protected void createDetailsComponent() throws Exception {
+		// Check.notNull(getCurrentEntity(), "Current entity cannot be null when creating details component");
+		fieldSelectionComponent = new CFieldSelectionComponent("Field Selection", getEntityClass().getSimpleName());
 	}
 
 	@Override
@@ -54,21 +53,52 @@ public class CGridEntityView extends CGridViewBaseProject<CGridEntity> {
 		grid.addShortTextColumn(CGridEntity::getDataServiceBeanName, "Data Service Bean", "dataServiceBeanName");
 	}
 
+	private String extractEntityTypeFromBeanName(String beanName) {
+		Check.notNull(beanName, "Bean name cannot be null");
+		Check.notBlank(beanName, "Bean name cannot be empty");
+		// Convert service bean name to entity class name
+		// E.g., CActivityService -> CActivity
+		Check.isTrue(beanName.length() > "Service".length(), "Bean name is too short to extract entity type");
+		Check.isTrue(beanName.endsWith("Service"), "Bean name must end with 'Service'");
+		return beanName.substring(0, beanName.length() - "Service".length());
+	}
+
 	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
 
 	@Override
-	protected void createDetailsComponent() throws Exception {
-		// Create the field selection component
-		fieldSelectionComponent = new CFieldSelectionComponent("Field Selection", getCurrentEntity().getClass().getSimpleName());
+	protected boolean onBeforeSaveEvent() {
+		if (!super.onBeforeSaveEvent()) {
+			LOGGER.warn("Superclass onBeforeSaveEvent failed, cannot save entity.");
+			return false;
+		}
+		final CEnhancedBinder<CGridEntity> binder = getBinder();
+		Check.notNull(binder, "Binder is not initialized");
+		CGridEntity bean = binder.getBean();
+		Check.notNull(bean, "No entity is bound to the binder");
+		Check.notNull(fieldSelectionComponent, "Field selection component is not initialized");
+		final String selected = fieldSelectionComponent.getSelectedFieldsAsString();
+		bean.setSelectedFields(selected != null ? selected : "");
+		return true;
+	}
+
+	@Override
+	protected void populateForm(CGridEntity entity) {
+		super.populateForm(entity);
+		updateFieldSelectionComponent();
+	}
+
+	private void setupFieldSelectionBinding() {
+		// The field selection will be handled manually during save process
+		// since our custom component doesn't directly implement HasValue<String>
 	}
 
 	@Override
 	public void updateDetailsComponent() throws Exception {
 		// buildScreen(CMeetingViewService.BASE_VIEW_NAME);
 		// Create the basic form using the entity annotations
-		final List<String> entityFields = List.of("name", "description", "dataServiceBeanName");
-		final CVerticalLayout basicFormLayout = CEntityFormBuilder.buildForm(CGridEntity.class, getBinder(), entityFields);
+		final List<String> entityFields = List.of("name", "description", "dataServiceBeanName", "attributeNonDeletable", "attributeNone");
+		final CVerticalLayout basicFormLayout = CFormBuilder.buildForm(CGridEntity.class, getBinder(), entityFields);
 		// Create tabs for basic info and field selection
 		Tab basicTab = new Tab("Basic Information");
 		Tab fieldsTab = new Tab("Field Selection");
@@ -112,42 +142,5 @@ public class CGridEntityView extends CGridViewBaseProject<CGridEntity> {
 		String existingSelection = currentEntity.getSelectedFields();
 		Check.notNull(existingSelection, "Existing selection cannot be null");
 		fieldSelectionComponent.setSelectedFieldsFromString(existingSelection);
-	}
-
-	private String extractEntityTypeFromBeanName(String beanName) {
-		Check.notNull(beanName, "Bean name cannot be null");
-		Check.notBlank(beanName, "Bean name cannot be empty");
-		// Convert service bean name to entity class name
-		// E.g., CActivityService -> CActivity
-		Check.isTrue(beanName.length() > "Service".length(), "Bean name is too short to extract entity type");
-		Check.isTrue(beanName.endsWith("Service"), "Bean name must end with 'Service'");
-		return beanName.substring(0, beanName.length() - "Service".length());
-	}
-
-	private void setupFieldSelectionBinding() {
-		// The field selection will be handled manually during save process
-		// since our custom component doesn't directly implement HasValue<String>
-	}
-
-	@Override
-	protected void populateForm(CGridEntity entity) {
-		super.populateForm(entity);
-		updateFieldSelectionComponent();
-	}
-
-	@Override
-	protected boolean onBeforeSaveEvent() {
-		if (!super.onBeforeSaveEvent()) {
-			LOGGER.warn("Superclass onBeforeSaveEvent failed, cannot save entity.");
-			return false;
-		}
-		final CEnhancedBinder<CGridEntity> binder = getBinder();
-		Check.notNull(binder, "Binder is not initialized");
-		CGridEntity bean = binder.getBean();
-		Check.notNull(bean, "No entity is bound to the binder");
-		Check.notNull(fieldSelectionComponent, "Field selection component is not initialized");
-		final String selected = fieldSelectionComponent.getSelectedFieldsAsString();
-		bean.setSelectedFields(selected != null ? selected : "");
-		return true;
 	}
 }

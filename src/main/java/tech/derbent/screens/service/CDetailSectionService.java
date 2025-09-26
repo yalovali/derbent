@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.abstracts.services.CEntityOfProjectService;
-import tech.derbent.abstracts.utils.Check;
+import tech.derbent.api.services.CEntityOfProjectService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CDetailSection;
 import tech.derbent.session.service.CSessionService;
@@ -24,9 +24,14 @@ public class CDetailSectionService extends CEntityOfProjectService<CDetailSectio
 		return ((CDetailSectionRepository) repository).findActiveByProject(project);
 	}
 
-	public CDetailSection findById(final Long id) {
-		Check.notNull(id, "ID must not be null");
-		return ((CDetailSectionRepository) repository).findByIdWithEagerLoading(id).orElse(null);
+	@Transactional (readOnly = true)
+	public CDetailSection findByEntityTypeAndProject(final String entityType, final CProject project) {
+		Check.notBlank(entityType, "Entity type must not be blank");
+		Check.notNull(project, "Project must not be null");
+		if ((project == null) || (entityType == null) || entityType.isBlank()) {
+			return null;
+		}
+		return ((CDetailSectionRepository) repository).findByEntityTypeAndProject(project, entityType).orElse(null);
 	}
 
 	@Transactional (readOnly = true)

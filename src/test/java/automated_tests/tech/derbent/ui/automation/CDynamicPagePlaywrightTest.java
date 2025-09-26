@@ -1,6 +1,5 @@
 package automated_tests.tech.derbent.ui.automation;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -313,9 +312,6 @@ public class CDynamicPagePlaywrightTest extends CBaseUITest {
 			navigateToProjects();
 			wait_1000();
 			takeScreenshot("workflow-06-back-to-projects", false);
-			navigateToActivities();
-			wait_1000();
-			takeScreenshot("workflow-07-activities-view", false);
 			// Phase 5: Return to dynamic pages
 			LOGGER.info("🔄 Phase 5: Return to dynamic pages...");
 			page.navigate("http://localhost:" + port + "/project-pages");

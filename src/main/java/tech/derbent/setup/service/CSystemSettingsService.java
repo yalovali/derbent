@@ -9,7 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityNotFoundException;
-import tech.derbent.abstracts.services.CAbstractService;
+import tech.derbent.api.services.CAbstractService;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.setup.domain.CSystemSettings;
 

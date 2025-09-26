@@ -3,7 +3,7 @@ package tech.derbent.gannt.service;
 import java.time.Clock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import tech.derbent.abstracts.services.CEntityOfProjectService;
+import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.gannt.domain.CGanntViewEntity;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;

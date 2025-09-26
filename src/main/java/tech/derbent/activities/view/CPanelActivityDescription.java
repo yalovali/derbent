@@ -1,17 +1,18 @@
 package tech.derbent.activities.view;
 
 import java.util.List;
-import tech.derbent.abstracts.components.CEnhancedBinder;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
+import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.interfaces.IContentOwner;
 
 public class CPanelActivityDescription extends CPanelActivityBase {
 
 	private static final long serialVersionUID = 1L;
 
-	public CPanelActivityDescription(final CActivity currentEntity, final CEnhancedBinder<CActivity> beanValidationBinder,
-			final CActivityService entityService) throws Exception {
-		super("Basic Information", currentEntity, beanValidationBinder, entityService);
+	public CPanelActivityDescription(IContentOwner parentContent, final CActivity currentEntity,
+			final CEnhancedBinder<CActivity> beanValidationBinder, final CActivityService entityService) throws Exception {
+		super("Basic Information", parentContent,beanValidationBinder, entityService);
 		initPanel();
 	}
 

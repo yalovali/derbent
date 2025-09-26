@@ -4,12 +4,11 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.domains.CEntityDB;
-import tech.derbent.abstracts.domains.CEntityNamed;
-import tech.derbent.abstracts.domains.CEntityOfProject;
-import tech.derbent.abstracts.views.grids.CGrid;
-import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
-import tech.derbent.screens.domain.CDetailSection;
+import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.domains.CEntityNamed;
+import tech.derbent.api.domains.CEntityOfProject;
+import tech.derbent.api.views.grids.CGrid;
+import tech.derbent.api.views.grids.CGridViewBaseProject;
 import tech.derbent.screens.domain.CMasterSection;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.screens.service.CMasterSectionService;
@@ -21,16 +20,10 @@ import tech.derbent.session.service.CSessionService;
 @PermitAll
 public class CMasterSectionView extends CGridViewBaseProject<CMasterSection> {
 
+	public static final String DEFAULT_COLOR = "#002a36";
+	public static final String DEFAULT_ICON = "vaadin:chart";
 	private static final long serialVersionUID = 1L;
-
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() {
-		return CDetailSection.getStaticIconColorCode(); // Use the static method from CScreen
-	}
-
-	public static String getStaticIconFilename() { return CDetailSection.getStaticIconFilename(); }
-
+	public static final String VIEW_NAME = "Master Section View";
 	private final String ENTITY_ID_FIELD = "master_section_id";
 
 	public CMasterSectionView(final CMasterSectionService entityService, final CSessionService sessionService,

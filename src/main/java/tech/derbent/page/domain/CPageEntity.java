@@ -3,32 +3,79 @@ package tech.derbent.page.domain;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Size;
-import tech.derbent.abstracts.annotations.AMetaData;
-import tech.derbent.abstracts.domains.CProjectItem;
-import tech.derbent.abstracts.views.CAbstractEntityDBPage;
-import tech.derbent.page.view.CPageEntityView;
+import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.domains.CProjectItem;
 import tech.derbent.projects.domain.CProject;
+import tech.derbent.screens.domain.CDetailSection;
+import tech.derbent.screens.domain.CGridEntity;
 
 @Entity
-@Table (name = "cpageentity")
+@Table (name = "cpageentity", uniqueConstraints = @UniqueConstraint (columnNames = {
+		"menu_title", "project_id"
+}))
 @AttributeOverride (name = "id", column = @Column (name = "pageentity_id"))
 public class CPageEntity extends CProjectItem<CPageEntity> {
 
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() { return "#207bff"; }
-
-	public static String getStaticIconFilename() { return "vaadin:tasks"; }
-
-	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CPageEntityView.class; }
-
+	public static final String DEFAULT_COLOR = "#6f42c1";
+	public static final String DEFAULT_ICON = "vaadin:file";
+	public static final String VIEW_NAME = "Pages View";
+	@Column (nullable = false)
+	@AMetaData (
+			displayName = "Non Deletable", required = false, readOnly = false, defaultValue = "false",
+			description = "Whether this page entity cannot be deleted by users", hidden = false, order = 82
+	)
+	private boolean attributeNonDeletable = false;
+	@Column (nullable = false)
+	@AMetaData (
+			displayName = "Read Only", required = false, readOnly = false, defaultValue = "false",
+			description = "Whether this page entity is read-only and cannot be modified", hidden = false, order = 81
+	)
+	private boolean attributeReadonly = false;
+	@Column (name = "attributeShowInQuickToolbar", nullable = false)
+	@AMetaData (
+			displayName = "Show in Quick Toolbar", required = false, readOnly = false, defaultValue = "false",
+			description = "Whether this page should appear as a button in the quick access toolbar", hidden = false, order = 85
+	)
+	private boolean attributeShowInQuickToolbar = false;
+	@Column (name = "color", nullable = true, length = 7)
+	@Size (max = 7)
+	@AMetaData (
+			displayName = "Color", required = false, readOnly = false, defaultValue = "#4A90E2", colorField = true,
+			description = "Hex color code (e.g., #4A90E2)", hidden = false, order = 3, maxLength = 7
+	)
+	private String color = "#4A90E2";
+	@Column (nullable = true, length = 10000)
+	@Size (max = 10000)
+	@AMetaData (
+			displayName = "Page Content", required = false, readOnly = false, defaultValue = "", description = "HTML content of the page",
+			hidden = false, order = 90, maxLength = 10000
+	)
+	private String content;
+	@ManyToOne
+	@JoinColumn (name = "detail_section_id")
+	@AMetaData (
+			displayName = "Detail Section", required = false, readOnly = false, description = "Detail section configuration for this page",
+			hidden = false, order = 99
+	)
+	private CDetailSection detailSection;
+	@ManyToOne
+	@JoinColumn (name = "grid_entity_id")
+	@AMetaData (
+			displayName = "Grid Entity", required = false, readOnly = false, description = "Grid entity configuration for this page", hidden = false,
+			dataProviderMethod = "listForComboboxSelectorByProjectId", dataProviderBean = "CGridEntityService",
+			dataProviderParamMethod = "getProjectId", order = 98
+	)
+	private CGridEntity gridEntity;
 	@Column (nullable = true, length = 100)
 	@Size (max = 100)
 	@AMetaData (
-			displayName = "Icon method/File", required = true, readOnly = false, defaultValue = "class:tech.derbent.meetings.view.CMeetingsView",
-			description = "class:tech.derbent.meetings.view.CMeetingsView", hidden = false, order = 70, maxLength = 100
+			displayName = "Icon", required = true, readOnly = false, defaultValue = "vaadin:file", description = "Icon for the page menu item",
+			hidden = false, order = 70, maxLength = 100, useIcon = true
 	)
 	private String icon;
 	@Column (nullable = true, length = 100)
@@ -38,62 +85,26 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 			order = 70, maxLength = 100
 	)
 	private String menuOrder;
-	@Column (nullable = false, length = 100, unique = true)
+	@Column (name = "menu_title", nullable = false, length = 100)
+	@Size (max = 100)
+	@AMetaData (
+			displayName = "Menu Title", required = true, readOnly = false, defaultValue = "Project.Page",
+			description = "Use like, Project.Page, separate parent with . ", hidden = false, order = 70, maxLength = 100
+	)
+	private String menuTitle;
+	@Column (nullable = false, length = 100)
 	@Size (max = 100)
 	@AMetaData (
 			displayName = "Page Title", required = true, readOnly = false, defaultValue = "Title of Page", description = "Title of Page",
 			hidden = false, order = 70, maxLength = 100
 	)
 	private String pageTitle;
-	@Column (nullable = false, length = 100, unique = true)
-	@Size (max = 100)
-	@AMetaData (
-			displayName = "Page route", required = true, readOnly = false, defaultValue = "", description = "Page section to be displayed under",
-			hidden = false, order = 70, maxLength = 100
-	)
-	private String route;
-	@Column (nullable = false, length = 100, unique = true)
-	@Size (max = 100)
-	@AMetaData (
-			displayName = "Title", required = true, readOnly = false, defaultValue = "Project.Page",
-			description = "Use like, Project.Page, separate parent with . ", hidden = false, order = 70, maxLength = 100
-	)
-	private String title;
 	@Column (nullable = false)
 	@AMetaData (
 			displayName = "Requires Authentication", required = false, readOnly = false, defaultValue = "true",
 			description = "Whether this page requires user authentication", hidden = false, order = 80
 	)
 	private boolean requiresAuthentication = true;
-	@Column (nullable = true, length = 10000)
-	@Size (max = 10000)
-	@AMetaData (
-			displayName = "Page Content", required = false, readOnly = false, defaultValue = "", description = "HTML content of the page",
-			hidden = false, order = 90, maxLength = 10000
-	)
-	private String content;
-	@Column (nullable = true, length = 200)
-	@Size (max = 200)
-	@AMetaData (
-			displayName = "Main Entity Type", required = false, readOnly = false, defaultValue = "",
-			description = "The main entity type this page is associated with (e.g., activities, meetings, projects)", hidden = false, order = 95,
-			maxLength = 200
-	)
-	private String mainEntityType;
-	@Column (nullable = true, length = 200)
-	@Size (max = 200)
-	@AMetaData (
-			displayName = "Master View Class", required = false, readOnly = false, defaultValue = "",
-			description = "Full class name of the master view for this entity type", hidden = false, order = 96, maxLength = 200
-	)
-	private String masterViewClass;
-	@Column (nullable = true, length = 200)
-	@Size (max = 200)
-	@AMetaData (
-			displayName = "Detail View Class", required = false, readOnly = false, defaultValue = "",
-			description = "Full class name of the detail view for this entity type", hidden = false, order = 97, maxLength = 200
-	)
-	private String detailViewClass;
 
 	/** Default constructor for JPA. */
 	public CPageEntity() {
@@ -106,66 +117,73 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 		initializeDefaults();
 	}
 
-	@Override
-	public String getDisplayName() { // TODO Auto-generated method stub
-		return getName();
-	}
+	public boolean getAttributeNonDeletable() { return attributeNonDeletable; }
+
+	public boolean getAttributeReadonly() { return attributeReadonly; }
+
+	public boolean getAttributeShowInQuickToolbar() { return attributeShowInQuickToolbar; }
+
+	public String getColor() { return color; }
+
+	public String getContent() { return content; }
+
+	public CDetailSection getDetailSection() { return detailSection; }
+
+	public CGridEntity getGridEntity() { return gridEntity; }
 
 	public String getIcon() { return icon; }
 
 	public String getMenuOrder() { return menuOrder; }
 
+	public String getMenuTitle() { return menuTitle; }
+
 	public String getPageTitle() { return pageTitle; }
-
-	public String getRoute() { return route; }
-
-	public String getTitle() { return title; }
 
 	public boolean getRequiresAuthentication() { return requiresAuthentication; }
 
-	public String getContent() { return content; }
-
-	public String getMainEntityType() { return mainEntityType; }
-
-	public String getMasterViewClass() { return masterViewClass; }
-
-	public String getDetailViewClass() { return detailViewClass; }
+	public String getRoute() { return "cdynamicpagerouter/" + getId(); }
 
 	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
-		icon = getStaticIconFilename();
-		menuOrder = "1.1";
-		// must be unique
-		route = "UnknownHTTPRoute";
-		// must be unique
-		title = "Unknown.NewPage";
+		icon = DEFAULT_ICON;
+		menuOrder = "10.0";
+		menuTitle = "System.New Page";
+		pageTitle = "New Dynamic Page";
 		requiresAuthentication = true;
-		content = "<h1>Default Page Content</h1><p>This is a dynamic page.</p>";
+		attributeReadonly = false;
+		attributeNonDeletable = false;
+		attributeShowInQuickToolbar = false;
+		content = "<div style=\"padding: 20px;\">" + "<h1 style=\"color: #2196F3; margin-bottom: 16px;\">📄 Dynamic Page</h1>"
+				+ "<p style=\"font-size: 16px; line-height: 1.6; color: #666;\">This is a customizable dynamic page. "
+				+ "You can edit the content, configure navigation, and set up data grids through the administration interface.</p>"
+				+ "<div style=\"background: #f5f5f5; padding: 16px; border-radius: 8px; margin-top: 20px;\">"
+				+ "<h3 style=\"margin-top: 0; color: #333;\">✨ Features</h3>" + "<ul style=\"margin: 0; color: #666;\">"
+				+ "<li>Custom HTML content</li>" + "<li>Configurable navigation menu</li>" + "<li>Data grid integration</li>"
+				+ "<li>Role-based access control</li>" + "</ul></div></div>";
 	}
+
+	public void setAttributeNonDeletable(boolean attributeNonDeletable) { this.attributeNonDeletable = attributeNonDeletable; }
+
+	public void setAttributeReadonly(boolean attributeReadonly) { this.attributeReadonly = attributeReadonly; }
+
+	public void setAttributeShowInQuickToolbar(boolean showInQuickToolbar) { attributeShowInQuickToolbar = showInQuickToolbar; }
+
+	public void setColor(String color) { this.color = color; }
+
+	public void setContent(String content) { this.content = content; }
+
+	public void setDetailSection(CDetailSection detailSection) { this.detailSection = detailSection; }
+
+	public void setGridEntity(CGridEntity gridEntity) { this.gridEntity = gridEntity; }
 
 	public void setIcon(String icon) { this.icon = icon; }
 
 	public void setMenuOrder(String menuOrder) { this.menuOrder = menuOrder; }
 
+	public void setMenuTitle(String title) { menuTitle = title; }
+
 	public void setPageTitle(String pageTitle) { this.pageTitle = pageTitle; }
 
-	public void setRoute(final String route) { this.route = route; }
-
-	public void setTitle(String title) { this.title = title; }
-
 	public void setRequiresAuthentication(boolean requiresAuthentication) { this.requiresAuthentication = requiresAuthentication; }
-
-	public void setContent(String content) { this.content = content; }
-
-	public void setMainEntityType(String mainEntityType) { this.mainEntityType = mainEntityType; }
-
-	public void setMasterViewClass(String masterViewClass) { this.masterViewClass = masterViewClass; }
-
-	public void setDetailViewClass(String detailViewClass) { this.detailViewClass = detailViewClass; }
-
-	@Override
-	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
-		return CPageEntity.getViewClassStatic();
-	}
 }

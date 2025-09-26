@@ -4,11 +4,11 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.domains.CEntityDB;
-import tech.derbent.abstracts.domains.CEntityNamed;
-import tech.derbent.abstracts.domains.CEntityOfProject;
-import tech.derbent.abstracts.views.grids.CGrid;
-import tech.derbent.abstracts.views.grids.CGridViewBaseProject;
+import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.domains.CEntityNamed;
+import tech.derbent.api.domains.CEntityOfProject;
+import tech.derbent.api.views.grids.CGrid;
+import tech.derbent.api.views.grids.CGridViewBaseProject;
 import tech.derbent.screens.domain.CDetailSection;
 import tech.derbent.screens.service.CDetailLinesService;
 import tech.derbent.screens.service.CDetailSectionService;
@@ -22,19 +22,13 @@ import tech.derbent.session.service.CSessionService;
 @PermitAll
 public final class CDetailSectionView extends CGridViewBaseProject<CDetailSection> {
 
+	public static final String DEFAULT_COLOR = "#00141b";
+	public static final String DEFAULT_ICON = "vaadin:clipboard";
 	private static final long serialVersionUID = 1L;
-
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() {
-		return CDetailSection.getStaticIconColorCode(); // Use the static method from CScreen
-	}
-
-	public static String getStaticIconFilename() { return CDetailSection.getStaticIconFilename(); }
-
+	public static final String VIEW_NAME = "Detail Section View";
 	private final String ENTITY_ID_FIELD = "screen_id";
-	private final CDetailLinesService screenLinesService;
 	private final CEntityFieldService entityFieldService;
+	private final CDetailLinesService screenLinesService;
 	private final CViewsService viewsService;
 
 	public CDetailSectionView(final CDetailSectionService entityService, final CSessionService sessionService,
@@ -70,9 +64,9 @@ public final class CDetailSectionView extends CGridViewBaseProject<CDetailSectio
 
 	@Override
 	protected void updateDetailsComponent() throws Exception {
-		addAccordionPanel(new CPanelDetailSectionBasicInfo(getCurrentEntity(), getBinder(), (CDetailSectionService) entityService));
-		addAccordionPanel(new CPanelDetailLines(getCurrentEntity(), getBinder(), (CDetailSectionService) entityService, screenLinesService,
+		addAccordionPanel(new CPanelDetailSectionBasicInfo(this, getCurrentEntity(), getBinder(), (CDetailSectionService) entityService));
+		addAccordionPanel(new CPanelDetailLines(this, getCurrentEntity(), getBinder(), (CDetailSectionService) entityService, screenLinesService,
 				entityFieldService, viewsService));
-		addAccordionPanel(new CPanelDetailSectionPreview(getCurrentEntity(), getBinder(), (CDetailSectionService) entityService));
+		addAccordionPanel(new CPanelDetailSectionPreview(this, getCurrentEntity(), getBinder(), (CDetailSectionService) entityService));
 	}
 }

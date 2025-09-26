@@ -3,7 +3,7 @@ package tech.derbent.risks.service;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import tech.derbent.abstracts.services.CEntityOfProjectRepository;
+import tech.derbent.api.services.CEntityOfProjectRepository;
 import tech.derbent.risks.domain.CRisk;
 
 public interface CRiskRepository extends CEntityOfProjectRepository<CRisk> {
@@ -16,5 +16,5 @@ public interface CRiskRepository extends CEntityOfProjectRepository<CRisk> {
 		"SELECT r FROM CRisk r " + "LEFT JOIN FETCH r.project " + "LEFT JOIN FETCH r.assignedTo " + "LEFT JOIN FETCH r.createdBy "
 				+ "LEFT JOIN FETCH r.status " + "WHERE r.id = :id"
 	)
-	Optional<CRisk> findByIdWithEagerLoading(@Param ("id") Long id);
+	Optional<CRisk> findById(@Param ("id") Long id);
 }

@@ -5,7 +5,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import com.vaadin.flow.router.Menu;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.services.CEntityOfProjectService;
+import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.risks.domain.CRisk;
 import tech.derbent.session.service.CSessionService;
 

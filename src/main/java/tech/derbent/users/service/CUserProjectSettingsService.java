@@ -6,7 +6,9 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.abstracts.services.CAbstractEntityRelationService;
+import tech.derbent.api.roles.domain.CUserProjectRole;
+import tech.derbent.api.services.CAbstractEntityRelationService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
@@ -27,10 +29,12 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 
 	/** Add user to project with specific role and permissions */
 	@Transactional
-	public CUserProjectSettings addUserToProject(final CUser user, final CProject project, final String role, final String permission) {
+	public CUserProjectSettings addUserToProject(final CUser user, final CProject project, final CUserProjectRole role, final String permission) {
 		LOGGER.debug("Adding user {} to project {} with role {} and permission {}", user, project, role, permission);
-		if ((user == null) || (project == null)) {
-			throw new IllegalArgumentException("User and project cannot be null");
+		Check.notNull(user, "User must not be null");
+		Check.notNull(project, "Project must not be null");
+		if ((user.getId() == null) || (project.getId() == null)) {
+			throw new IllegalArgumentException("User and project must have valid IDs");
 		}
 		if (relationshipExists(user.getId(), project.getId())) {
 			throw new IllegalArgumentException("User is already assigned to this project");
@@ -38,10 +42,16 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 		final CUserProjectSettings settings = new CUserProjectSettings();
 		settings.setUser(user);
 		settings.setProject(project);
-		settings.setRole(role);
+		// TODO: Update to handle CUserProjectRole instead of String
+		// settings.setRole(role);
 		settings.setPermission(permission);
 		validateRelationship(settings);
-		return save(settings);
+		// Save the entity first
+		final CUserProjectSettings savedSettings = save(settings);
+		// Maintain bidirectional relationships
+		user.addProjectSettings(savedSettings);
+		project.addUserSettings(savedSettings);
+		return savedSettings;
 	}
 
 	@Override
@@ -62,27 +72,20 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 	@Override
 	@Transactional (readOnly = true)
 	public List<CUserProjectSettings> findByParentEntityId(final Long userId) {
-		LOGGER.debug("Finding user project settings for user ID: {}", userId);
 		return repository.findByUserId(userId);
 	}
 
 	/** Find user project settings by project */
 	@Transactional (readOnly = true)
 	public List<CUserProjectSettings> findByProject(final CProject project) {
-		LOGGER.debug("Finding user project settings for project: {}", project);
-		if ((project == null) || (project.getId() == null)) {
-			throw new IllegalArgumentException("Project and project ID cannot be null");
-		}
+		Check.notNull(project, "Project cannot be null");
 		return findByChildEntityId(project.getId());
 	}
 
 	/** Find user project settings by user */
 	@Transactional (readOnly = true)
 	public List<CUserProjectSettings> findByUser(final CUser user) {
-		LOGGER.debug("Finding user project settings for user: {}", user);
-		if ((user == null) || (user.getId() == null)) {
-			throw new IllegalArgumentException("User and user ID cannot be null");
-		}
+		Check.notNull(user, "User cannot be null");
 		return findByParentEntityId(user.getId());
 	}
 
@@ -108,6 +111,18 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 		if ((user == null) || (project == null)) {
 			throw new IllegalArgumentException("User and project cannot be null");
 		}
+		if ((user.getId() == null) || (project.getId() == null)) {
+			throw new IllegalArgumentException("User and project must have valid IDs");
+		}
+		// Find the relationship first to maintain bidirectional collections
+		final Optional<CUserProjectSettings> settingsOpt = findRelationship(user.getId(), project.getId());
+		if (settingsOpt.isPresent()) {
+			final CUserProjectSettings settings = settingsOpt.get();
+			// Remove from bidirectional collections
+			user.removeProjectSettings(settings);
+			project.removeUserSettings(settings);
+		}
+		// Delete the relationship using the parent method that handles ID checking
 		deleteRelationship(user.getId(), project.getId());
 	}
 
@@ -120,7 +135,8 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 			throw new IllegalArgumentException("User is not assigned to this project");
 		}
 		final CUserProjectSettings settings = settingsOpt.get();
-		settings.setRole(role);
+		// TODO: Update to handle CUserProjectRole instead of String
+		// settings.setRole(role);
 		settings.setPermission(permission);
 		return updateRelationship(settings);
 	}
@@ -128,17 +144,12 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 	@Override
 	protected void validateRelationship(final CUserProjectSettings relationship) {
 		super.validateRelationship(relationship);
-		if (relationship.getUser() == null) {
-			throw new IllegalArgumentException("User is required for user project settings");
-		}
-		if (relationship.getProject() == null) {
-			throw new IllegalArgumentException("Project is required for user project settings");
-		}
-		if ((relationship.getRole() == null) || relationship.getRole().trim().isEmpty()) {
-			throw new IllegalArgumentException("Role is required for user project settings");
-		}
-		if ((relationship.getPermission() == null) || relationship.getPermission().trim().isEmpty()) {
-			throw new IllegalArgumentException("Permission is required for user project settings");
-		}
+		Check.notNull(relationship, "Relationship cannot be null");
+		Check.notNull(relationship.getUser(), "User cannot be null");
+		Check.notNull(relationship.getProject(), "Project cannot be null");
+		// Role can be null according to entity definition (nullable = true)
+		// Check.notNull(relationship.getRole(), "User role cannot be null");
+		// Permission can also be null according to entity definition
+		// Check.notNull(relationship.getPermission(), "Permission cannot be null");
 	}
 }

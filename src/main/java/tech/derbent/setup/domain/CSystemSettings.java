@@ -9,10 +9,9 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
-import tech.derbent.abstracts.annotations.AMetaData;
-import tech.derbent.abstracts.domains.CEntityConstants;
-import tech.derbent.abstracts.domains.CEntityDB;
-import tech.derbent.abstracts.views.CAbstractEntityDBPage;
+import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.domains.CEntityConstants;
+import tech.derbent.api.domains.CEntityDB;
 
 /** CSystemSettings - Domain entity representing system-wide configuration settings. Layer: Domain (MVC) This entity stores application-level
  * configurations that apply across the entire system regardless of company, including application metadata, security settings, file management, email
@@ -22,6 +21,32 @@ import tech.derbent.abstracts.views.CAbstractEntityDBPage;
 @AttributeOverride (name = "id", column = @Column (name = "system_settings_id"))
 public class CSystemSettings extends CEntityDB<CSystemSettings> {
 
+	public static final String DEFAULT_COLOR = "#DC143C";
+	public static final String DEFAULT_ICON = "vaadin:tasks";
+	public static final String VIEW_NAME = "System Settings View";
+	@Column (name = "account_lockout_duration_minutes", nullable = false)
+	@Min (value = 1, message = "Lockout duration must be at least 1 minute")
+	@Max (value = 1440, message = "Lockout duration cannot exceed 1440 minutes")
+	@AMetaData (
+			displayName = "Account Lockout Duration (Minutes)", required = true, readOnly = false, defaultValue = "15",
+			description = "Account lockout duration after failed attempts", hidden = false, order = 7
+	)
+	private Integer accountLockoutDurationMinutes = 15;
+	@Column (name = "allowed_file_extensions", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
+	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
+	@AMetaData (
+			displayName = "Allowed File Extensions", required = false, readOnly = false,
+			defaultValue = ".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.txt,.zip", description = "Comma-separated list of allowed file extensions",
+			hidden = false, order = 11, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
+	)
+	private String allowedFileExtensions = ".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.txt,.zip";
+	@Column (name = "application_description", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
+	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
+	@AMetaData (
+			displayName = "Application Description", required = false, readOnly = false, defaultValue = "Comprehensive project management solution",
+			description = "Brief description of the application", hidden = false, order = 3, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
+	)
+	private String applicationDescription = "Comprehensive project management solution";
 	// Application Configuration
 	@Column (name = "application_name", nullable = false, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
@@ -37,117 +62,44 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 			description = "Current version of the application", hidden = false, order = 2, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String applicationVersion = "1.0.0";
-	@Column (name = "application_description", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
-	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
+	// Auto-Login Settings
+	@Column (name = "auto_login_enabled", nullable = false)
 	@AMetaData (
-			displayName = "Application Description", required = false, readOnly = false, defaultValue = "Comprehensive project management solution",
-			description = "Brief description of the application", hidden = false, order = 3, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
+			displayName = "Auto Login Enabled", required = true, readOnly = false, defaultValue = "false",
+			description = "Enable automatic login after 2 seconds", hidden = false, order = 30
 	)
-	private String applicationDescription = "Comprehensive project management solution";
-	@Column (name = "support_email", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+	private Boolean autoLoginEnabled = Boolean.FALSE;
+	@Column (name = "backup_retention_days", nullable = false)
+	@Min (value = 1, message = "Backup retention must be at least 1 day")
+	@Max (value = 365, message = "Backup retention cannot exceed 365 days")
+	@AMetaData (
+			displayName = "Backup Retention (Days)", required = true, readOnly = false, defaultValue = "30",
+			description = "Number of days to retain backups", hidden = false, order = 24
+	)
+	private Integer backupRetentionDays = 30;
+	@Column (name = "backup_schedule_cron", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
-			displayName = "Support Email", required = false, readOnly = false, defaultValue = "support@derbent.tech",
-			description = "Support contact email", hidden = false, order = 4, maxLength = CEntityConstants.MAX_LENGTH_NAME
+			displayName = "Backup Schedule (Cron)", required = false, readOnly = false, defaultValue = "0 2 * * *",
+			description = "Cron expression for backup schedule", hidden = false, order = 23, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
-	private String supportEmail = "support@derbent.tech";
-	// Security and Session Settings
-	@Column (name = "session_timeout_minutes", nullable = false)
-	@Min (value = 5, message = "Session timeout must be at least 5 minutes")
-	@Max (value = 1440, message = "Session timeout cannot exceed 1440 minutes (24 hours)")
+	private String backupScheduleCron = "0 2 * * *";
+	@Column (name = "cache_ttl_minutes", nullable = false)
+	@Min (value = 1, message = "Cache TTL must be at least 1 minute")
+	@Max (value = 1440, message = "Cache TTL cannot exceed 1440 minutes")
 	@AMetaData (
-			displayName = "Session Timeout (Minutes)", required = true, readOnly = false, defaultValue = "60",
-			description = "User session timeout in minutes", hidden = false, order = 5
+			displayName = "Cache TTL (Minutes)", required = true, readOnly = false, defaultValue = "30",
+			description = "Cache time-to-live in minutes", hidden = false, order = 21
 	)
-	private Integer sessionTimeoutMinutes = 60;
-	@Column (name = "max_login_attempts", nullable = false)
-	@Min (value = 1, message = "Max login attempts must be at least 1")
-	@Max (value = 10, message = "Max login attempts cannot exceed 10")
+	private Integer cacheTtlMinutes = 30;
+	@Column (name = "database_connection_pool_size", nullable = false)
+	@Min (value = 1, message = "Connection pool size must be at least 1")
+	@Max (value = 100, message = "Connection pool size cannot exceed 100")
 	@AMetaData (
-			displayName = "Max Login Attempts", required = true, readOnly = false, defaultValue = "3",
-			description = "Maximum failed login attempts before lockout", hidden = false, order = 6
+			displayName = "Database Connection Pool Size", required = true, readOnly = false, defaultValue = "10",
+			description = "Maximum database connections in pool", hidden = false, order = 19
 	)
-	private Integer maxLoginAttempts = 3;
-	@Column (name = "account_lockout_duration_minutes", nullable = false)
-	@Min (value = 1, message = "Lockout duration must be at least 1 minute")
-	@Max (value = 1440, message = "Lockout duration cannot exceed 1440 minutes")
-	@AMetaData (
-			displayName = "Account Lockout Duration (Minutes)", required = true, readOnly = false, defaultValue = "15",
-			description = "Account lockout duration after failed attempts", hidden = false, order = 7
-	)
-	private Integer accountLockoutDurationMinutes = 15;
-	@Column (name = "require_strong_passwords", nullable = false)
-	@AMetaData (
-			displayName = "Require Strong Passwords", required = true, readOnly = false, defaultValue = "true",
-			description = "Enforce strong password requirements", hidden = false, order = 8
-	)
-	private Boolean requireStrongPasswords = Boolean.TRUE;
-	@Column (name = "password_expiry_days", nullable = true)
-	@Min (value = 1, message = "Password expiry must be at least 1 day")
-	@Max (value = 365, message = "Password expiry cannot exceed 365 days")
-	@AMetaData (
-			displayName = "Password Expiry (Days)", required = false, readOnly = false, defaultValue = "90",
-			description = "Password expiration in days (null for no expiry)", hidden = false, order = 9
-	)
-	private Integer passwordExpiryDays = 90;
-	// File Management Settings
-	@Column (name = "max_file_upload_size_mb", nullable = false, precision = 8, scale = 2)
-	@DecimalMin (value = "0.1", message = "Max file size must be at least 0.1 MB")
-	@AMetaData (
-			displayName = "Max File Upload Size (MB)", required = true, readOnly = false, defaultValue = "50.0",
-			description = "Maximum file upload size in megabytes", hidden = false, order = 10
-	)
-	private BigDecimal maxFileUploadSizeMb = new BigDecimal("50.0");
-	@Column (name = "allowed_file_extensions", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
-	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
-	@AMetaData (
-			displayName = "Allowed File Extensions", required = false, readOnly = false,
-			defaultValue = ".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.txt,.zip", description = "Comma-separated list of allowed file extensions",
-			hidden = false, order = 11, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
-	)
-	private String allowedFileExtensions = ".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.txt,.zip";
-	@Column (name = "file_storage_path", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
-	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
-	@AMetaData (
-			displayName = "File Storage Path", required = false, readOnly = false, defaultValue = "./uploads",
-			description = "Base path for file storage", hidden = false, order = 12, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
-	)
-	private String fileStoragePath = "./uploads";
-	@Column (name = "enable_file_versioning", nullable = false)
-	@AMetaData (
-			displayName = "Enable File Versioning", required = true, readOnly = false, defaultValue = "true",
-			description = "Enable file version tracking", hidden = false, order = 13
-	)
-	private Boolean enableFileVersioning = Boolean.TRUE;
-	// Email Configuration
-	@Column (name = "smtp_server", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
-	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
-	@AMetaData (
-			displayName = "SMTP Server", required = false, readOnly = false, defaultValue = "localhost", description = "SMTP server hostname",
-			hidden = false, order = 14, maxLength = CEntityConstants.MAX_LENGTH_NAME
-	)
-	private String smtpServer = "localhost";
-	@Column (name = "smtp_port", nullable = false)
-	@Min (value = 1, message = "SMTP port must be positive")
-	@Max (value = 65535, message = "SMTP port must be valid")
-	@AMetaData (
-			displayName = "SMTP Port", required = true, readOnly = false, defaultValue = "587", description = "SMTP server port", hidden = false,
-			order = 15
-	)
-	private Integer smtpPort = 587;
-	@Column (name = "smtp_use_tls", nullable = false)
-	@AMetaData (
-			displayName = "SMTP Use TLS", required = true, readOnly = false, defaultValue = "true", description = "Use TLS for SMTP connection",
-			hidden = false, order = 16
-	)
-	private Boolean smtpUseTls = Boolean.TRUE;
-	@Column (name = "system_email_from", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
-	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
-	@AMetaData (
-			displayName = "System Email From", required = false, readOnly = false, defaultValue = "noreply@derbent.tech",
-			description = "Default from email address", hidden = false, order = 17, maxLength = CEntityConstants.MAX_LENGTH_NAME
-	)
-	private String systemEmailFrom = "noreply@derbent.tech";
+	private Integer databaseConnectionPoolSize = 10;
 	// Database and Performance Settings
 	@Column (name = "database_name", nullable = false, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME, message = "Database name cannot exceed " + CEntityConstants.MAX_LENGTH_NAME + " characters")
@@ -158,70 +110,13 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 			description = "Name of the database to connect to", hidden = false, order = 17, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String databaseName = "derbent";
-	@Column (name = "enable_database_logging", nullable = false)
-	@AMetaData (
-			displayName = "Enable Database Logging", required = true, readOnly = false, defaultValue = "false",
-			description = "Enable detailed database query logging", hidden = false, order = 18
-	)
-	private Boolean enableDatabaseLogging = Boolean.FALSE;
-	@Column (name = "database_connection_pool_size", nullable = false)
-	@Min (value = 1, message = "Connection pool size must be at least 1")
-	@Max (value = 100, message = "Connection pool size cannot exceed 100")
-	@AMetaData (
-			displayName = "Database Connection Pool Size", required = true, readOnly = false, defaultValue = "10",
-			description = "Maximum database connections in pool", hidden = false, order = 19
-	)
-	private Integer databaseConnectionPoolSize = 10;
-	@Column (name = "enable_caching", nullable = false)
-	@AMetaData (
-			displayName = "Enable Caching", required = true, readOnly = false, defaultValue = "true",
-			description = "Enable application-level caching", hidden = false, order = 20
-	)
-	private Boolean enableCaching = Boolean.TRUE;
-	@Column (name = "cache_ttl_minutes", nullable = false)
-	@Min (value = 1, message = "Cache TTL must be at least 1 minute")
-	@Max (value = 1440, message = "Cache TTL cannot exceed 1440 minutes")
-	@AMetaData (
-			displayName = "Cache TTL (Minutes)", required = true, readOnly = false, defaultValue = "30",
-			description = "Cache time-to-live in minutes", hidden = false, order = 21
-	)
-	private Integer cacheTtlMinutes = 30;
-	// Backup and Maintenance Settings
-	@Column (name = "enable_automatic_backups", nullable = false)
-	@AMetaData (
-			displayName = "Enable Automatic Backups", required = true, readOnly = false, defaultValue = "true",
-			description = "Enable scheduled database backups", hidden = false, order = 22
-	)
-	private Boolean enableAutomaticBackups = Boolean.TRUE;
-	@Column (name = "backup_schedule_cron", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+	@Column (name = "default_login_view", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
-			displayName = "Backup Schedule (Cron)", required = false, readOnly = false, defaultValue = "0 2 * * *",
-			description = "Cron expression for backup schedule", hidden = false, order = 23, maxLength = CEntityConstants.MAX_LENGTH_NAME
+			displayName = "Default Login View", required = false, readOnly = false, defaultValue = "home",
+			description = "Default view to navigate to after login", hidden = false, order = 31, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
-	private String backupScheduleCron = "0 2 * * *";
-	@Column (name = "backup_retention_days", nullable = false)
-	@Min (value = 1, message = "Backup retention must be at least 1 day")
-	@Max (value = 365, message = "Backup retention cannot exceed 365 days")
-	@AMetaData (
-			displayName = "Backup Retention (Days)", required = true, readOnly = false, defaultValue = "30",
-			description = "Number of days to retain backups", hidden = false, order = 24
-	)
-	private Integer backupRetentionDays = 30;
-	@Column (name = "maintenance_mode_enabled", nullable = false)
-	@AMetaData (
-			displayName = "Maintenance Mode", required = true, readOnly = false, defaultValue = "false", description = "Enable maintenance mode",
-			hidden = false, order = 25
-	)
-	private Boolean maintenanceModeEnabled = Boolean.FALSE;
-	@Column (name = "maintenance_message", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
-	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
-	@AMetaData (
-			displayName = "Maintenance Message", required = false, readOnly = false,
-			defaultValue = "System is under maintenance. Please try again later.", description = "Message displayed during maintenance",
-			hidden = false, order = 26, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
-	)
-	private String maintenanceMessage = "System is under maintenance. Please try again later.";
+	private String defaultLoginView = "home";
 	// UI and Theming Settings
 	@Column (name = "default_system_theme", nullable = false, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
@@ -230,32 +125,44 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 			description = "Default UI theme for the application", hidden = false, order = 27, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String defaultSystemTheme = "lumo";
+	// Backup and Maintenance Settings
+	@Column (name = "enable_automatic_backups", nullable = false)
+	@AMetaData (
+			displayName = "Enable Automatic Backups", required = true, readOnly = false, defaultValue = "true",
+			description = "Enable scheduled database backups", hidden = false, order = 22
+	)
+	private Boolean enableAutomaticBackups = Boolean.TRUE;
+	@Column (name = "enable_caching", nullable = false)
+	@AMetaData (
+			displayName = "Enable Caching", required = true, readOnly = false, defaultValue = "true",
+			description = "Enable application-level caching", hidden = false, order = 20
+	)
+	private Boolean enableCaching = Boolean.TRUE;
 	@Column (name = "enable_dark_mode", nullable = false)
 	@AMetaData (
 			displayName = "Enable Dark Mode", required = true, readOnly = false, defaultValue = "true",
 			description = "Allow users to switch to dark mode", hidden = false, order = 28
 	)
 	private Boolean enableDarkMode = Boolean.TRUE;
-	@Column (name = "show_system_info", nullable = false)
+	@Column (name = "enable_database_logging", nullable = false)
 	@AMetaData (
-			displayName = "Show System Info", required = true, readOnly = false, defaultValue = "true",
-			description = "Display system information to administrators", hidden = false, order = 29
+			displayName = "Enable Database Logging", required = true, readOnly = false, defaultValue = "false",
+			description = "Enable detailed database query logging", hidden = false, order = 18
 	)
-	private Boolean showSystemInfo = Boolean.TRUE;
-	// Auto-Login Settings
-	@Column (name = "auto_login_enabled", nullable = false)
+	private Boolean enableDatabaseLogging = Boolean.FALSE;
+	@Column (name = "enable_file_versioning", nullable = false)
 	@AMetaData (
-			displayName = "Auto Login Enabled", required = true, readOnly = false, defaultValue = "false",
-			description = "Enable automatic login after 2 seconds", hidden = false, order = 30
+			displayName = "Enable File Versioning", required = true, readOnly = false, defaultValue = "true",
+			description = "Enable file version tracking", hidden = false, order = 13
 	)
-	private Boolean autoLoginEnabled = Boolean.FALSE;
-	@Column (name = "default_login_view", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
-	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	private Boolean enableFileVersioning = Boolean.TRUE;
+	@Column (name = "file_storage_path", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
+	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
 	@AMetaData (
-			displayName = "Default Login View", required = false, readOnly = false, defaultValue = "home",
-			description = "Default view to navigate to after login", hidden = false, order = 31, maxLength = CEntityConstants.MAX_LENGTH_NAME
+			displayName = "File Storage Path", required = false, readOnly = false, defaultValue = "./uploads",
+			description = "Base path for file storage", hidden = false, order = 12, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
 	)
-	private String defaultLoginView = "home";
+	private String fileStoragePath = "./uploads";
 	@Column (name = "last_visited_view", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
@@ -263,6 +170,101 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 			description = "Last visited view route for quick access", hidden = false, order = 32, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String lastVisitedView = "home";
+	@Column (name = "maintenance_message", nullable = true, length = CEntityConstants.MAX_LENGTH_DESCRIPTION)
+	@Size (max = CEntityConstants.MAX_LENGTH_DESCRIPTION)
+	@AMetaData (
+			displayName = "Maintenance Message", required = false, readOnly = false,
+			defaultValue = "System is under maintenance. Please try again later.", description = "Message displayed during maintenance",
+			hidden = false, order = 26, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
+	)
+	private String maintenanceMessage = "System is under maintenance. Please try again later.";
+	@Column (name = "maintenance_mode_enabled", nullable = false)
+	@AMetaData (
+			displayName = "Maintenance Mode", required = true, readOnly = false, defaultValue = "false", description = "Enable maintenance mode",
+			hidden = false, order = 25
+	)
+	private Boolean maintenanceModeEnabled = Boolean.FALSE;
+	// File Management Settings
+	@Column (name = "max_file_upload_size_mb", nullable = false, precision = 8, scale = 2)
+	@DecimalMin (value = "0.1", message = "Max file size must be at least 0.1 MB")
+	@AMetaData (
+			displayName = "Max File Upload Size (MB)", required = true, readOnly = false, defaultValue = "50.0",
+			description = "Maximum file upload size in megabytes", hidden = false, order = 10
+	)
+	private BigDecimal maxFileUploadSizeMb = new BigDecimal("50.0");
+	@Column (name = "max_login_attempts", nullable = false)
+	@Min (value = 1, message = "Max login attempts must be at least 1")
+	@Max (value = 10, message = "Max login attempts cannot exceed 10")
+	@AMetaData (
+			displayName = "Max Login Attempts", required = true, readOnly = false, defaultValue = "3",
+			description = "Maximum failed login attempts before lockout", hidden = false, order = 6
+	)
+	private Integer maxLoginAttempts = 3;
+	@Column (name = "password_expiry_days", nullable = true)
+	@Min (value = 1, message = "Password expiry must be at least 1 day")
+	@Max (value = 365, message = "Password expiry cannot exceed 365 days")
+	@AMetaData (
+			displayName = "Password Expiry (Days)", required = false, readOnly = false, defaultValue = "90",
+			description = "Password expiration in days (null for no expiry)", hidden = false, order = 9
+	)
+	private Integer passwordExpiryDays = 90;
+	@Column (name = "require_strong_passwords", nullable = false)
+	@AMetaData (
+			displayName = "Require Strong Passwords", required = true, readOnly = false, defaultValue = "true",
+			description = "Enforce strong password requirements", hidden = false, order = 8
+	)
+	private Boolean requireStrongPasswords = Boolean.TRUE;
+	// Security and Session Settings
+	@Column (name = "session_timeout_minutes", nullable = false)
+	@Min (value = 5, message = "Session timeout must be at least 5 minutes")
+	@Max (value = 1440, message = "Session timeout cannot exceed 1440 minutes (24 hours)")
+	@AMetaData (
+			displayName = "Session Timeout (Minutes)", required = true, readOnly = false, defaultValue = "60",
+			description = "User session timeout in minutes", hidden = false, order = 5
+	)
+	private Integer sessionTimeoutMinutes = 60;
+	@Column (name = "show_system_info", nullable = false)
+	@AMetaData (
+			displayName = "Show System Info", required = true, readOnly = false, defaultValue = "true",
+			description = "Display system information to administrators", hidden = false, order = 29
+	)
+	private Boolean showSystemInfo = Boolean.TRUE;
+	@Column (name = "smtp_port", nullable = false)
+	@Min (value = 1, message = "SMTP port must be positive")
+	@Max (value = 65535, message = "SMTP port must be valid")
+	@AMetaData (
+			displayName = "SMTP Port", required = true, readOnly = false, defaultValue = "587", description = "SMTP server port", hidden = false,
+			order = 15
+	)
+	private Integer smtpPort = 587;
+	// Email Configuration
+	@Column (name = "smtp_server", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@AMetaData (
+			displayName = "SMTP Server", required = false, readOnly = false, defaultValue = "localhost", description = "SMTP server hostname",
+			hidden = false, order = 14, maxLength = CEntityConstants.MAX_LENGTH_NAME
+	)
+	private String smtpServer = "localhost";
+	@Column (name = "smtp_use_tls", nullable = false)
+	@AMetaData (
+			displayName = "SMTP Use TLS", required = true, readOnly = false, defaultValue = "true", description = "Use TLS for SMTP connection",
+			hidden = false, order = 16
+	)
+	private Boolean smtpUseTls = Boolean.TRUE;
+	@Column (name = "support_email", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@AMetaData (
+			displayName = "Support Email", required = false, readOnly = false, defaultValue = "support@derbent.tech",
+			description = "Support contact email", hidden = false, order = 4, maxLength = CEntityConstants.MAX_LENGTH_NAME
+	)
+	private String supportEmail = "support@derbent.tech";
+	@Column (name = "system_email_from", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
+	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
+	@AMetaData (
+			displayName = "System Email From", required = false, readOnly = false, defaultValue = "noreply@derbent.tech",
+			description = "Default from email address", hidden = false, order = 17, maxLength = CEntityConstants.MAX_LENGTH_NAME
+	)
+	private String systemEmailFrom = "noreply@derbent.tech";
 
 	/** Default constructor required by JPA. Initializes entity with default values. */
 	public CSystemSettings() {
@@ -281,6 +283,8 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 
 	public String getApplicationVersion() { return applicationVersion; }
 
+	public Boolean getAutoLoginEnabled() { return autoLoginEnabled; }
+
 	public Integer getBackupRetentionDays() { return backupRetentionDays; }
 
 	public String getBackupScheduleCron() { return backupScheduleCron; }
@@ -291,12 +295,9 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 
 	public String getDatabaseName() { return databaseName; }
 
-	public String getDefaultSystemTheme() { return defaultSystemTheme; }
+	public String getDefaultLoginView() { return defaultLoginView; }
 
-	@Override
-	public String getDisplayName() { // TODO Auto-generated method stub
-		return null;
-	}
+	public String getDefaultSystemTheme() { return defaultSystemTheme; }
 
 	public Boolean getEnableAutomaticBackups() { return enableAutomaticBackups; }
 
@@ -309,6 +310,8 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	public Boolean getEnableFileVersioning() { return enableFileVersioning; }
 
 	public String getFileStoragePath() { return fileStoragePath; }
+
+	public String getLastVisitedView() { return lastVisitedView; }
 
 	public String getMaintenanceMessage() { return maintenanceMessage; }
 
@@ -336,19 +339,6 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 
 	public String getSystemEmailFrom() { return systemEmailFrom; }
 
-	public Boolean getAutoLoginEnabled() { return autoLoginEnabled; }
-
-	public String getDefaultLoginView() { return defaultLoginView; }
-
-	public String getLastVisitedView() { return lastVisitedView; }
-
-	@Override
-	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
-		return CSystemSettings.getViewClassStatic();
-	}
-
-	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return null; }
-
 	@Override
 	protected void initializeDefaults() {
 		if (maxFileUploadSizeMb == null) {
@@ -358,6 +348,8 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 			databaseName = "derbent";
 		}
 	}
+
+	public Boolean isAutoLoginEnabled() { return autoLoginEnabled; }
 
 	public Boolean isEnableAutomaticBackups() { return enableAutomaticBackups; }
 
@@ -377,8 +369,6 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 
 	public Boolean isSmtpUseTls() { return smtpUseTls; }
 
-	public Boolean isAutoLoginEnabled() { return autoLoginEnabled; }
-
 	public void setAccountLockoutDurationMinutes(final Integer accountLockoutDurationMinutes) {
 		this.accountLockoutDurationMinutes = accountLockoutDurationMinutes;
 	}
@@ -391,6 +381,8 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 
 	public void setApplicationVersion(final String applicationVersion) { this.applicationVersion = applicationVersion; }
 
+	public void setAutoLoginEnabled(final Boolean autoLoginEnabled) { this.autoLoginEnabled = autoLoginEnabled; }
+
 	public void setBackupRetentionDays(final Integer backupRetentionDays) { this.backupRetentionDays = backupRetentionDays; }
 
 	public void setBackupScheduleCron(final String backupScheduleCron) { this.backupScheduleCron = backupScheduleCron; }
@@ -402,6 +394,8 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	}
 
 	public void setDatabaseName(final String databaseName) { this.databaseName = databaseName; }
+
+	public void setDefaultLoginView(final String defaultLoginView) { this.defaultLoginView = defaultLoginView; }
 
 	public void setDefaultSystemTheme(final String defaultSystemTheme) { this.defaultSystemTheme = defaultSystemTheme; }
 
@@ -416,6 +410,8 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	public void setEnableFileVersioning(final Boolean enableFileVersioning) { this.enableFileVersioning = enableFileVersioning; }
 
 	public void setFileStoragePath(final String fileStoragePath) { this.fileStoragePath = fileStoragePath; }
+
+	public void setLastVisitedView(final String lastVisitedView) { this.lastVisitedView = lastVisitedView; }
 
 	public void setMaintenanceMessage(final String maintenanceMessage) { this.maintenanceMessage = maintenanceMessage; }
 
@@ -442,12 +438,6 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	public void setSupportEmail(final String supportEmail) { this.supportEmail = supportEmail; }
 
 	public void setSystemEmailFrom(final String systemEmailFrom) { this.systemEmailFrom = systemEmailFrom; }
-
-	public void setAutoLoginEnabled(final Boolean autoLoginEnabled) { this.autoLoginEnabled = autoLoginEnabled; }
-
-	public void setDefaultLoginView(final String defaultLoginView) { this.defaultLoginView = defaultLoginView; }
-
-	public void setLastVisitedView(final String lastVisitedView) { this.lastVisitedView = lastVisitedView; }
 
 	@Override
 	public String toString() {

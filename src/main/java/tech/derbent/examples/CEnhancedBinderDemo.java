@@ -8,11 +8,11 @@ import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.binder.ValidationException;
-import tech.derbent.abstracts.annotations.CEntityFormBuilder;
-import tech.derbent.abstracts.components.CBinderFactory;
-import tech.derbent.abstracts.components.CEnhancedBinder;
-import tech.derbent.abstracts.utils.CValidationUtils;
-import tech.derbent.abstracts.views.components.CVerticalLayout;
+import tech.derbent.api.annotations.CFormBuilder;
+import tech.derbent.api.components.CBinderFactory;
+import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.utils.CValidationUtils;
+import tech.derbent.api.views.components.CVerticalLayout;
 import tech.derbent.meetings.domain.CMeetingStatus;
 
 /** Demo class showing the usage of enhanced binder with better error logging. This example demonstrates: - Creating enhanced binders - Detailed
@@ -52,14 +52,14 @@ public class CEnhancedBinderDemo extends VerticalLayout {
 			logToOutput("=== Building Enhanced Form ===");
 			try {
 				// Create enhanced binder
-				enhancedBinder = CEntityFormBuilder.createEnhancedBinder(CMeetingStatus.class);
+				enhancedBinder = CFormBuilder.createEnhancedBinder(CMeetingStatus.class);
 				logToOutput("Enhanced binder created for: " + CMeetingStatus.class.getSimpleName());
 				// Build form using enhanced binder
-				final CVerticalLayout formLayout = CEntityFormBuilder.buildForm(CMeetingStatus.class, enhancedBinder);
+				final CVerticalLayout formLayout = CFormBuilder.buildForm(CMeetingStatus.class, enhancedBinder);
 				logToOutput("Form built with enhanced binder");
 				logToOutput("Form components created: " + formLayout.getChildren().count());
 				// Alternative: Build form directly with enhanced features
-				final CVerticalLayout formLayout2 = CEntityFormBuilder.buildEnhancedForm(CMeetingStatus.class);
+				final CVerticalLayout formLayout2 = CFormBuilder.buildEnhancedForm(CMeetingStatus.class);
 				logToOutput("Direct enhanced form created with components: " + formLayout2.getChildren().count());
 			} catch (final Exception ex) {
 				logToOutput("Error building enhanced form: " + ex.getMessage());
@@ -144,7 +144,7 @@ public class CEnhancedBinderDemo extends VerticalLayout {
 	public void demonstrateIntegrationInSaveOperation() {
 		logToOutput("=== Integration Example: Save Operation ===");
 		if (enhancedBinder == null) {
-			enhancedBinder = CEntityFormBuilder.createEnhancedBinder(CMeetingStatus.class);
+			enhancedBinder = CFormBuilder.createEnhancedBinder(CMeetingStatus.class);
 		}
 		final CMeetingStatus entity = new CMeetingStatus();
 		try {

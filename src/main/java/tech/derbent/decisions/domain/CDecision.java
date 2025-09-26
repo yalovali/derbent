@@ -12,10 +12,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
-import tech.derbent.abstracts.annotations.AMetaData;
-import tech.derbent.abstracts.domains.CEntityOfProject;
-import tech.derbent.abstracts.views.CAbstractEntityDBPage;
-import tech.derbent.decisions.view.CDecisionsView;
+import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.domains.CEntityOfProject;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
 
@@ -27,18 +25,26 @@ import tech.derbent.users.domain.CUser;
 @AttributeOverride (name = "id", column = @Column (name = "decision_id"))
 public class CDecision extends CEntityOfProject<CDecision> {
 
+	public static final String DEFAULT_COLOR = "#e83e8c";
+	public static final String DEFAULT_ICON = "vaadin:gavel";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDecision.class);
-
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() {
-		return "#dc3545"; // Red color for decision entities
-	}
-
-	public static String getStaticIconFilename() { return "vaadin:gavel"; }
-
-	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CDecisionsView.class; }
-
+	public static final String VIEW_NAME = "Decisions View";
+	// Accountable Personnel
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "accountable_user_id", nullable = true)
+	@AMetaData (
+			displayName = "Accountable Personnel", required = false, readOnly = false, description = "User accountable for this decision",
+			hidden = false, order = 5, dataProviderBean = "CUserService"
+	)
+	private CUser accountableUser;
+	// Status Management
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "decision_status_id", nullable = true)
+	@AMetaData (
+			displayName = "Decision Status", required = false, readOnly = false, description = "Current status of the decision", hidden = false,
+			order = 4, dataProviderBean = "CDecisionStatusService"
+	)
+	private CDecisionStatus decisionStatus;
 	// Decision Type Classification
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "decisiontype_id", nullable = true)
@@ -55,22 +61,6 @@ public class CDecision extends CEntityOfProject<CDecision> {
 			order = 3, min = 0.0
 	)
 	private BigDecimal estimatedCost;
-	// Status Management
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "decision_status_id", nullable = true)
-	@AMetaData (
-			displayName = "Decision Status", required = false, readOnly = false, description = "Current status of the decision", hidden = false,
-			order = 4, dataProviderBean = "CDecisionStatusService"
-	)
-	private CDecisionStatus decisionStatus;
-	// Accountable Personnel
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "accountable_user_id", nullable = true)
-	@AMetaData (
-			displayName = "Accountable Personnel", required = false, readOnly = false, description = "User accountable for this decision",
-			hidden = false, order = 5, dataProviderBean = "CUserService"
-	)
-	private CUser accountableUser;
 	// Decision Implementation Date
 	@Column (name = "implementation_date", nullable = true)
 	@AMetaData (
@@ -111,11 +101,6 @@ public class CDecision extends CEntityOfProject<CDecision> {
 	public CDecisionStatus getDecisionStatus() { return decisionStatus; }
 
 	public CDecisionType getDecisionType() { return decisionType; }
-
-	@Override
-	public String getDisplayName() { // TODO Auto-generated method stub
-		return null;
-	}
 
 	public BigDecimal getEstimatedCost() { return estimatedCost; }
 
@@ -164,10 +149,5 @@ public class CDecision extends CEntityOfProject<CDecision> {
 	@Override
 	public String toString() {
 		return getName() != null ? getName() : super.toString();
-	}
-
-	@Override
-	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
-		return CDecision.getViewClassStatic();
 	}
 }

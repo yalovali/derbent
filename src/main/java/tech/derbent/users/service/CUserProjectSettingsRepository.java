@@ -5,7 +5,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import tech.derbent.abstracts.services.CAbstractRepository;
+import tech.derbent.api.services.CAbstractRepository;
 import tech.derbent.users.domain.CUserProjectSettings;
 
 /** Repository interface for CUserProjectSettings entity. Provides data access methods for user-project relationships. */

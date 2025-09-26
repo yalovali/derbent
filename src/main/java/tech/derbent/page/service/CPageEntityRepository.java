@@ -1,7 +1,13 @@
 package tech.derbent.page.service;
 
-import tech.derbent.abstracts.services.CProjectItemRespository;
+import java.util.List;
+import org.springframework.data.jpa.repository.Query;
+import tech.derbent.api.services.CProjectItemRespository;
 import tech.derbent.page.domain.CPageEntity;
+import tech.derbent.projects.domain.CProject;
 
 public interface CPageEntityRepository extends CProjectItemRespository<CPageEntity> {
+
+	@Query ("SELECT p FROM CPageEntity p WHERE p.project = ?1 AND p.attributeShowInQuickToolbar = true ORDER BY p.menuOrder ASC")
+	List<CPageEntity> listQuickAccess(CProject project);
 }

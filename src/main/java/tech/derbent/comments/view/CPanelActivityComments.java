@@ -12,12 +12,13 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
-import tech.derbent.abstracts.components.CEnhancedBinder;
-import tech.derbent.abstracts.utils.Check;
-import tech.derbent.abstracts.views.components.CButton;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.service.CActivityService;
 import tech.derbent.activities.view.CPanelActivityBase;
+import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.interfaces.IContentOwner;
+import tech.derbent.api.utils.Check;
+import tech.derbent.api.views.components.CButton;
 import tech.derbent.comments.domain.CComment;
 import tech.derbent.comments.service.CCommentService;
 import tech.derbent.session.service.CSessionService;
@@ -29,12 +30,12 @@ public class CPanelActivityComments extends CPanelActivityBase {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPanelActivityComments.class);
 	private static final long serialVersionUID = 1L;
-	private final CCommentService commentService;
-	private final CSessionService sessionService;
-	private VerticalLayout commentsContainer;
-	private TextArea newCommentArea;
 	private CButton addCommentButton;
+	private VerticalLayout commentsContainer;
+	private final CCommentService commentService;
 	private H3 commentsTitle;
+	private TextArea newCommentArea;
+	private final CSessionService sessionService;
 
 	/** Constructor for CPanelActivityComments.
 	 * @param currentEntity   the current activity entity
@@ -43,9 +44,9 @@ public class CPanelActivityComments extends CPanelActivityBase {
 	 * @param commentService  the comment service
 	 * @param sessionService  the session service
 	 * @throws Exception */
-	public CPanelActivityComments(final CActivity currentEntity, final CEnhancedBinder<CActivity> binder, final CActivityService activityService,
-			final CCommentService commentService, final CSessionService sessionService) throws Exception {
-		super("Comments", currentEntity, binder, activityService);
+	public CPanelActivityComments(IContentOwner parentContent, final CActivity currentEntity, final CEnhancedBinder<CActivity> binder,
+			final CActivityService activityService, final CCommentService commentService, final CSessionService sessionService) throws Exception {
+		super("Comments", parentContent, binder, activityService);
 		this.commentService = commentService;
 		this.sessionService = sessionService;
 		initPanel();
@@ -93,10 +94,10 @@ public class CPanelActivityComments extends CPanelActivityBase {
 	@Override
 	protected void createPanelContent() {
 		// Initialize UI components
-		this.commentsContainer = new VerticalLayout();
-		this.newCommentArea = new TextArea();
-		this.addCommentButton = CButton.createPrimary("Add Comment", null, event -> addComment());
-		this.commentsTitle = new H3("H3 Comments");
+		commentsContainer = new VerticalLayout();
+		newCommentArea = new TextArea();
+		addCommentButton = CButton.createPrimary("Add Comment", null, event -> addComment());
+		commentsTitle = new H3("H3 Comments");
 		setupComponents();
 		// New comment section
 		addToContent(createNewCommentSection(), commentsTitle);
@@ -213,20 +214,14 @@ public class CPanelActivityComments extends CPanelActivityBase {
 
 	/** Updates the comments title with count. */
 	private void updateCommentsTitle() {
-		if (commentsTitle == null) {
-			LOGGER.warn("Comments title is null, cannot update");
-			return;
-		}
-		if (getCurrentEntity() == null) {
-			commentsTitle.setText("Comments");
-			return;
-		}
+		Check.notNull(commentsTitle, "Comments title is null, cannot update");
+		Check.notNull(getCurrentEntity(), "Entity is required to update comments title");
 		try {
 			final long commentCount = commentService.countByActivity(getCurrentEntity());
 			commentsTitle.setText(String.format("Comments (%d)", commentCount));
 		} catch (final Exception e) {
-			LOGGER.warn("Error getting comment count", e);
-			commentsTitle.setText("Comments");
+			LOGGER.error("Error getting comment count", e);
+			throw e;
 		}
 	}
 

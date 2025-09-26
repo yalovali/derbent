@@ -10,8 +10,8 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.service.CActivityService;
-import tech.derbent.base.ui.CBaseKanbanBoardView;
-import tech.derbent.base.ui.CBaseKanbanColumn;
+import tech.derbent.api.ui.CBaseKanbanBoardView;
+import tech.derbent.api.ui.CBaseKanbanColumn;
 import tech.derbent.session.service.CSessionService;
 
 /** CGenericActivityKanbanBoardView - Generic Kanban board view for activities using the base kanban classes. Layer: View (MVC) This implementation
@@ -22,16 +22,11 @@ import tech.derbent.session.service.CSessionService;
 @PermitAll
 public class CGenericActivityKanbanBoardView extends CBaseKanbanBoardView<CActivity, CActivityStatus> {
 
-	private static final long serialVersionUID = 1L;
+	public static final String DEFAULT_COLOR = "#007bff";
+	public static final String DEFAULT_ICON = "vaadin:kanban";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CGenericActivityKanbanBoardView.class);
-
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() {
-		return "#fd7e14"; // Orange color for Kanban boards
-	}
-
-	public static String getStaticIconFilename() { return "vaadin:grid-big"; }
+	private static final long serialVersionUID = 1L;
+	public static final String VIEW_NAME = "Kanban View";
 
 	/** Constructor for CGenericActivityKanbanBoardView.
 	 * @param activityService the activity service for data operations

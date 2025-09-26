@@ -1,7 +1,7 @@
 package tech.derbent.meetings.service;
 
 import org.springframework.stereotype.Repository;
-import tech.derbent.abstracts.services.CEntityOfProjectRepository;
+import tech.derbent.api.services.CEntityOfProjectRepository;
 import tech.derbent.meetings.domain.CMeetingStatus;
 
 /** CMeetingStatusRepository - Repository interface for CMeetingStatus entities. Layer: Data Access (MVC) Provides data access operations for meeting

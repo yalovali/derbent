@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.VaadinSession;
-import tech.derbent.abstracts.interfaces.CLayoutChangeListener;
+import tech.derbent.api.interfaces.CLayoutChangeListener;
 
 /** Service to manage layout state (horizontal vs vertical) for views. Uses Vaadin session to store layout preference. */
 @Service
@@ -18,8 +18,8 @@ public class CLayoutService {
 		HORIZONTAL, VERTICAL
 	}
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CLayoutService.class);
 	private static final String LAYOUT_MODE_KEY = "layoutMode";
+	private static final Logger LOGGER = LoggerFactory.getLogger(CLayoutService.class);
 	// Thread-safe set to store layout change listeners
 	private final Set<CLayoutChangeListener> layoutChangeListeners = ConcurrentHashMap.newKeySet();
 
@@ -75,10 +75,10 @@ public class CLayoutService {
 					if (e.getMessage() != null && e.getMessage().contains("Push not enabled")) {
 						LOGGER.debug("Push not enabled, layout change will be reflected on next user interaction");
 					} else {
-						LOGGER.warn("Error during UI push: {}", e.getMessage());
+						LOGGER.error("Error during UI push: {}", e.getMessage());
 					}
 				} catch (final Exception e) {
-					LOGGER.warn("Error during UI push: {}", e.getMessage());
+					LOGGER.error("Error during UI push: {}", e.getMessage());
 				}
 			});
 		} else {

@@ -7,7 +7,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.TestPropertySource;
 import com.microsoft.playwright.Locator;
-import tech.derbent.abstracts.utils.Check;
 
 /** CPageViewSelectorsTest - Validates CPage master view and detail view selector functionality Tests the new entity type, master view class, and
  * detail view class fields in CPageEntity */
@@ -105,6 +104,7 @@ public class CPageViewSelectorsTest extends CBaseUITest {
 		}
 	}
 
+	@Override
 	protected void takeScreenshot(String name) {
 		try {
 			String screenshotPath = "target/screenshots/" + name + ".png";

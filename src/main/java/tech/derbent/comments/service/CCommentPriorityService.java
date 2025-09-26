@@ -3,7 +3,7 @@ package tech.derbent.comments.service;
 import java.time.Clock;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import tech.derbent.abstracts.services.CEntityOfProjectService;
+import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.comments.domain.CCommentPriority;
 import tech.derbent.session.service.CSessionService;
 

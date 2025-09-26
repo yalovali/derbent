@@ -5,25 +5,18 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
-import tech.derbent.abstracts.annotations.AMetaData;
-import tech.derbent.abstracts.domains.CEntityOfProject;
-import tech.derbent.abstracts.views.CAbstractEntityDBPage;
+import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.domains.CEntityOfProject;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.screens.view.CMasterSectionView;
 
 @Entity
 @Table (name = "cmastersection")
 @AttributeOverride (name = "id", column = @Column (name = "master_section_id"))
 public class CMasterSection extends CEntityOfProject<CMasterSection> {
 
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() { return "#6f42c1"; }
-
-	public static String getStaticIconFilename() { return "vaadin:viewport"; }
-
-	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CMasterSectionView.class; }
-
+	public static final String DEFAULT_COLOR = "#000a0e";
+	public static final String DEFAULT_ICON = "vaadin:cloud";
+	public static final String VIEW_NAME = "Master Section View";
 	@Column (name = "section_db_name", nullable = true, length = 200)
 	@Size (max = 200)
 	@AMetaData (
@@ -47,21 +40,11 @@ public class CMasterSection extends CEntityOfProject<CMasterSection> {
 		super(CMasterSection.class, name, project);
 	}
 
-	@Override
-	public String getDisplayName() { // TODO Auto-generated method stub
-		return "Master Section: " + getName();
-	}
-
 	public String getSectionDBName() { return sectionDBName; }
-
-	public void setSectionDBName(final String sectionDBName) { this.sectionDBName = sectionDBName; }
 
 	public String getSectionType() { return sectionType; }
 
-	public void setSectionType(final String sectionType) { this.sectionType = sectionType; }
+	public void setSectionDBName(final String sectionDBName) { this.sectionDBName = sectionDBName; }
 
-	@Override
-	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
-		return CMasterSection.getViewClassStatic();
-	}
+	public void setSectionType(final String sectionType) { this.sectionType = sectionType; }
 }

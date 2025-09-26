@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import tech.derbent.abstracts.views.dialogs.CDBEditDialog;
+import tech.derbent.api.views.dialogs.CDBEditDialog;
 import tech.derbent.screens.domain.CGridEntity.FieldSelection;
 
 /** Dialog for selecting and ordering grid column fields. Uses CFieldSelectionComponent for the selection interface. */

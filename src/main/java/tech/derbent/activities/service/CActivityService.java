@@ -7,10 +7,9 @@ import java.util.stream.Collectors;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.abstracts.domains.CProjectItemService;
-import tech.derbent.abstracts.interfaces.CKanbanService;
-import tech.derbent.abstracts.services.CEntityOfProjectRepository;
-import tech.derbent.abstracts.utils.Check;
+import tech.derbent.api.domains.CProjectItemService;
+import tech.derbent.api.interfaces.CKanbanService;
+import tech.derbent.api.services.CEntityOfProjectRepository;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.domain.CActivityType;
@@ -66,14 +65,14 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 	public Map<CActivityStatus, List<CActivity>> getEntitiesGroupedByStatus(final Long projectId) {
 		// For now, returning empty as per the original minimal implementation
 		// This would need proper implementation based on project requirements
-		return tech.derbent.abstracts.utils.CKanbanUtils.getEmptyGroupedStatus(this.getClass());
+		return tech.derbent.api.utils.CKanbanUtils.getEmptyGroupedStatus(this.getClass());
 	}
 
 	@Override
 	public List<CActivityStatus> getAllStatuses() {
 		// This would need to be implemented by calling the status service
 		// For minimal changes, using the utility method
-		return tech.derbent.abstracts.utils.CKanbanUtils.getEmptyStatusList(this.getClass());
+		return tech.derbent.api.utils.CKanbanUtils.getEmptyStatusList(this.getClass());
 	}
 
 	@Override
@@ -81,7 +80,7 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 
 	@Override
 	public CActivity updateEntityStatus(final CActivity entity, final CActivityStatus newStatus) {
-		tech.derbent.abstracts.utils.CKanbanUtils.updateEntityStatusSimple(entity, newStatus, CActivity::setStatus);
+		tech.derbent.api.utils.CKanbanUtils.updateEntityStatusSimple(entity, newStatus, CActivity::setStatus);
 		return save(entity);
 	}
 }

@@ -4,7 +4,7 @@ import java.time.Clock;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.abstracts.services.CEntityOfProjectService;
+import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.orders.domain.COrderStatus;
 import tech.derbent.session.service.CSessionService;
 

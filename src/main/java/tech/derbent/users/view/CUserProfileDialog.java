@@ -19,10 +19,10 @@ import com.vaadin.flow.data.validator.StringLengthValidator;
 import com.vaadin.flow.server.streams.InMemoryUploadCallback;
 import com.vaadin.flow.server.streams.InMemoryUploadHandler;
 import com.vaadin.flow.server.streams.UploadMetadata;
-import tech.derbent.abstracts.views.components.CButton;
-import tech.derbent.abstracts.views.dialogs.CDBEditDialog;
-import tech.derbent.base.ui.dialogs.CWarningDialog;
-import tech.derbent.base.utils.CImageUtils;
+import tech.derbent.api.views.components.CButton;
+import tech.derbent.api.views.dialogs.CDBEditDialog;
+import tech.derbent.api.ui.dialogs.CWarningDialog;
+import tech.derbent.api.utils.CImageUtils;
 import tech.derbent.users.domain.CUser;
 
 /** User profile dialog for editing user profile information. Extends CDBEditDialog to provide consistent dialog behavior. Allows users to: - Edit

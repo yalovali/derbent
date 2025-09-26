@@ -5,32 +5,25 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import tech.derbent.abstracts.annotations.AMetaData;
-import tech.derbent.abstracts.annotations.StatusEntity;
-import tech.derbent.abstracts.interfaces.CKanbanStatus;
-import tech.derbent.abstracts.views.CAbstractEntityDBPage;
-import tech.derbent.activities.view.CActivityStatusView;
-import tech.derbent.base.domain.CStatus;
+import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.annotations.StatusEntity;
+import tech.derbent.api.domains.CStatus;
+import tech.derbent.api.interfaces.CKanbanStatus;
 import tech.derbent.projects.domain.CProject;
 
 /** CActivityStatus - Domain entity representing activity status types. Layer: Domain (MVC) Inherits from CStatus to provide status functionality for
  * activities. This entity defines the possible statuses an activity can have (e.g., TODO, IN_PROGRESS, DONE). */
 @StatusEntity (category = "activity", colorField = "color", nameField = "name")
 @Entity
-@Table (name = "cactivitystatus")
+@Table (name = "cactivitystatus", uniqueConstraints = @jakarta.persistence.UniqueConstraint (columnNames = {
+		"name", "project_id"
+}))
 @AttributeOverride (name = "id", column = @Column (name = "cactivitystatus_id"))
 public class CActivityStatus extends CStatus<CActivityStatus> implements CKanbanStatus {
 
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() {
-		return "#007bff"; // Blue color for activity status entities
-	}
-
-	public static String getStaticIconFilename() { return "vaadin:flag"; }
-
-	public static Class<? extends CAbstractEntityDBPage<?>> getViewClassStatic() { return CActivityStatusView.class; }
-
+	public static final String DEFAULT_COLOR = "#28a745";
+	public static final String DEFAULT_ICON = "vaadin:flag";
+	public static final String VIEW_NAME = "Activity Statuses View";
 	@Column (name = "is_final", nullable = false)
 	@AMetaData (
 			displayName = "Is Final Status", required = true, readOnly = false, defaultValue = "false",
@@ -41,19 +34,14 @@ public class CActivityStatus extends CStatus<CActivityStatus> implements CKanban
 	/** Default constructor for JPA. */
 	public CActivityStatus() {
 		super();
+		setColor(DEFAULT_COLOR);
 		// Initialize with default values for JPA
-		this.finalStatus = Boolean.FALSE;
+		finalStatus = Boolean.FALSE;
 	}
 
 	public CActivityStatus(final String name, final CProject project) {
 		super(CActivityStatus.class, name, project);
-	}
-
-	public CActivityStatus(final String name, final CProject project, final String description, final String color, final Boolean finalStatus) {
-		super(CActivityStatus.class, name, project);
-		setDescription(description);
-		setColor(color);
-		this.finalStatus = finalStatus;
+		setColor(DEFAULT_COLOR);
 	}
 
 	@Override
@@ -65,11 +53,6 @@ public class CActivityStatus extends CStatus<CActivityStatus> implements CKanban
 			return false;
 		}
 		return super.equals(o);
-	}
-
-	@Override
-	public String getDisplayName() { // TODO Auto-generated method stub
-		return null;
 	}
 
 	public Boolean getFinalStatus() { return finalStatus; }
@@ -84,10 +67,5 @@ public class CActivityStatus extends CStatus<CActivityStatus> implements CKanban
 	@Override
 	public String toString() {
 		return getName() != null ? getName() : super.toString();
-	}
-
-	@Override
-	public Class<? extends CAbstractEntityDBPage<?>> getViewClass() { // TODO Auto-generated method stub
-		return CActivityStatus.getViewClassStatic();
 	}
 }

@@ -1,6 +1,6 @@
 package tech.derbent.decisions.service;
 
-import tech.derbent.abstracts.services.CEntityOfProjectRepository;
+import tech.derbent.api.services.CEntityOfProjectRepository;
 import tech.derbent.decisions.domain.CDecisionStatus;
 
 /** CDecisionStatusRepository - Repository interface for CDecisionStatus entities. Layer: Data Access (MVC) Provides data access methods for decision

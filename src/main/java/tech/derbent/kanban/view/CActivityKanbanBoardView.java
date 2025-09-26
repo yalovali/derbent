@@ -15,12 +15,11 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.abstracts.domains.IDisplayView;
-import tech.derbent.abstracts.interfaces.CProjectChangeListener;
-import tech.derbent.abstracts.utils.Check;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.service.CActivityService;
+import tech.derbent.api.interfaces.CProjectChangeListener;
+import tech.derbent.api.utils.Check;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 
@@ -31,24 +30,18 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Activity Kanban Board")
 @Menu (order = 1.2, icon = "class:tech.derbent.kanban.view.CActivityKanbanBoardView", title = "Project.Kanban")
 @PermitAll
-public class CActivityKanbanBoardView extends VerticalLayout implements CProjectChangeListener, IDisplayView {
+public class CActivityKanbanBoardView extends VerticalLayout implements CProjectChangeListener {
 
-	private static final long serialVersionUID = 1L;
+	public static final String DEFAULT_COLOR = "#007bff";
+	public static final String DEFAULT_ICON = "vaadin:kanban";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityKanbanBoardView.class);
-
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() {
-		return "#fd7e14"; // Orange color for Kanban boards
-	}
-
-	public static String getStaticIconFilename() { return "vaadin:dashboard"; }
-
+	private static final long serialVersionUID = 1L;
+	public static final String VIEW_NAME = "GanntEntity View";
 	private final CActivityService activityService;
+	private Div emptyStateContainer;
+	private HorizontalLayout kanbanContainer;
 	private final CSessionService sessionService;
 	private H2 titleElement;
-	private HorizontalLayout kanbanContainer;
-	private Div emptyStateContainer;
 
 	/** Constructor for CActivityKanbanBoardView.
 	 * @param activityService the activity service for data operations

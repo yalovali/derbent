@@ -7,8 +7,8 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.base.ui.CBaseKanbanBoardView;
-import tech.derbent.base.ui.CBaseKanbanColumn;
+import tech.derbent.api.ui.CBaseKanbanBoardView;
+import tech.derbent.api.ui.CBaseKanbanColumn;
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.domain.CMeetingStatus;
 import tech.derbent.meetings.service.CMeetingService;
@@ -18,20 +18,15 @@ import tech.derbent.session.service.CSessionService;
  * the generic kanban system can be used for different entity types like meetings. */
 @Route ("meetings-kanban")
 @PageTitle ("Meeting Kanban Board")
-@Menu (order = 3.1, icon = "class:tech.derbent.kanban.view.CMeetingKanbanBoardView", title = "Projects.MeetingsKanban")
+@Menu (order = 3.1, icon = "class:tech.derbent.kanban.view.CMeetingKanbanBoardView", title = "Management.MeetingsKanban")
 @PermitAll
 public class CMeetingKanbanBoardView extends CBaseKanbanBoardView<CMeeting, CMeetingStatus> {
 
-	private static final long serialVersionUID = 1L;
+	public static final String DEFAULT_COLOR = "#fd7e14";
+	public static final String DEFAULT_ICON = "vaadin:kanban";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingKanbanBoardView.class);
-
-	public static String getStaticEntityColorCode() { return getStaticIconColorCode(); }
-
-	public static String getStaticIconColorCode() {
-		return "#28a745"; // Green color for meetings
-	}
-
-	public static String getStaticIconFilename() { return "vaadin:calendar"; }
+	private static final long serialVersionUID = 1L;
+	public static final String VIEW_NAME = "Kanban View";
 
 	/** Constructor for CMeetingKanbanBoardView.
 	 * @param meetingService the meeting service for data operations

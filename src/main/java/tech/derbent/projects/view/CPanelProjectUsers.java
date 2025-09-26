@@ -3,9 +3,10 @@ package tech.derbent.projects.view;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.function.Supplier;
-import tech.derbent.abstracts.components.CEnhancedBinder;
-import tech.derbent.abstracts.views.CPanelUserProjectBase;
-import tech.derbent.base.ui.dialogs.CWarningDialog;
+import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.interfaces.IContentOwner;
+import tech.derbent.api.ui.dialogs.CWarningDialog;
+import tech.derbent.api.views.CPanelUserProjectBase;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUserProjectSettings;
@@ -23,9 +24,10 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject, CUserPro
 	private final CUserService userService;
 	private final CUserProjectSettingsService userProjectSettingsService;
 
-	public CPanelProjectUsers(final CProject currentEntity, final CEnhancedBinder<CProject> beanValidationBinder, final CProjectService entityService,
-			final CUserService userService, final CUserProjectSettingsService userProjectSettingsService) throws Exception {
-		super("Project Users", currentEntity, beanValidationBinder, CProject.class, entityService, userProjectSettingsService);
+	public CPanelProjectUsers(IContentOwner parentContent, final CProject currentEntity, final CEnhancedBinder<CProject> beanValidationBinder,
+			final CProjectService entityService, final CUserService userService, final CUserProjectSettingsService userProjectSettingsService)
+			throws Exception {
+		super("Project Users", parentContent, beanValidationBinder, CProject.class, entityService, userProjectSettingsService);
 		this.userService = userService;
 		this.userProjectSettingsService = userProjectSettingsService;
 		initPanel();
@@ -99,8 +101,8 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject, CUserPro
 		if (!validateProjectSelection() || !validateServiceAvailability("Project")) {
 			return;
 		}
-		final CProjectUserSettingsDialog dialog =
-				new CProjectUserSettingsDialog((CProjectService) entityService, userService, null, currentProject, this::onSettingsSaved);
+		final CProjectUserSettingsDialog dialog = new CProjectUserSettingsDialog(parentContent, (CProjectService) entityService, userService, 
+				userProjectSettingsService, null, currentProject, this::onSettingsSaved);
 		dialog.open();
 	}
 
@@ -112,8 +114,8 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject, CUserPro
 			return;
 		}
 		final CUserProjectSettings selected = grid.asSingleSelect().getValue();
-		final CProjectUserSettingsDialog dialog =
-				new CProjectUserSettingsDialog((CProjectService) entityService, userService, selected, currentProject, this::onSettingsSaved);
+		final CProjectUserSettingsDialog dialog = new CProjectUserSettingsDialog(parentContent, (CProjectService) entityService, userService,
+				userProjectSettingsService, selected, currentProject, this::onSettingsSaved);
 		dialog.open();
 	}
 
@@ -129,7 +131,6 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject, CUserPro
 		// Add columns for user name with avatar, roles, and permissions
 		grid.addColumn(CUserProjectSettings::getId).setHeader("ID").setAutoWidth(true);
 		grid.addComponentColumn(this::getUserWithAvatar).setHeader("User").setAutoWidth(true).setSortable(false);
-		grid.addColumn(this::getRoleAsString).setHeader("Role").setAutoWidth(true);
 		grid.addColumn(this::getPermissionAsString).setHeader("Permission").setAutoWidth(true);
 		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
 		addToContent(grid);

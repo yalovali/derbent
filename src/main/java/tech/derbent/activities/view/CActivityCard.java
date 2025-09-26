@@ -8,7 +8,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
-import tech.derbent.abstracts.utils.Check;
+import tech.derbent.api.utils.Check;
 import tech.derbent.activities.domain.CActivity;
 
 /** CActivityCard - UI component representing a single activity card in the Kanban board. Layer: View (MVC) Displays activity information including
