@@ -1,9 +1,5 @@
 package tech.derbent.api.exceptions;
-
-/**
- * Exception thrown when image processing operations fail.
- * Provides specific error handling for image-related operations.
- */
+/** Exception thrown when image processing operations fail. Provides specific error handling for image-related operations. */
 public class CImageProcessingException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;

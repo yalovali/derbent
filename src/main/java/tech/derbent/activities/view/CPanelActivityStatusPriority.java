@@ -14,7 +14,7 @@ public class CPanelActivityStatusPriority extends CPanelActivityBase {
 
 	public CPanelActivityStatusPriority(IContentOwner parentContent, final CActivity currentEntity,
 			final CEnhancedBinder<CActivity> beanValidationBinder, final CActivityService entityService) throws Exception {
-		super("Status & Priority", parentContent,beanValidationBinder, entityService);
+		super("Status & Priority", parentContent, beanValidationBinder, entityService);
 		initPanel();
 	}
 

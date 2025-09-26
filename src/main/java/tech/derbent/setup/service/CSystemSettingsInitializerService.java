@@ -94,7 +94,6 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, "System.Settings",
 				"System Settings Management", "System Settings", showInQuickToolbar);
-		
 		// Create a single system settings page (like company single view)
 		CGridEntity singleGrid = createGridEntity(project, true);
 		singleGrid.setName("System Settings Single View");

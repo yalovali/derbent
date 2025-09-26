@@ -29,7 +29,7 @@ public abstract class CPanelUserBase extends CAccordionDBEntity<CUser> {
 	public CPanelUserBase(final String title, IContentOwner parentContent, final CUser currentEntity,
 			final CEnhancedBinder<CUser> beanValidationBinder, final CUserService entityService, final CUserTypeService userTypeService,
 			final CCompanyService companyService) {
-		super(title, parentContent,beanValidationBinder, CUser.class, entityService);
+		super(title, parentContent, beanValidationBinder, CUser.class, entityService);
 		this.userTypeService = userTypeService;
 		this.companyService = companyService;
 	}

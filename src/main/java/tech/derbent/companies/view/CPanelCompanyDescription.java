@@ -13,7 +13,7 @@ public class CPanelCompanyDescription extends CPanelCompanyBase {
 
 	public CPanelCompanyDescription(IContentOwner parentContent, final CCompany currentEntity, final CEnhancedBinder<CCompany> beanValidationBinder,
 			final CCompanyService entityService) {
-		super("Basic Information", parentContent,beanValidationBinder, entityService);
+		super("Basic Information", parentContent, beanValidationBinder, entityService);
 		// only open this panel
 		openPanel();
 	}

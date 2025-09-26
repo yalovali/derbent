@@ -32,7 +32,7 @@ public abstract class CProjectAwareAccordionDescription<EntityClass extends CEnt
 	public CProjectAwareAccordionDescription(final String title, IContentOwner parentContent, final EntityClass currentEntity,
 			final CEnhancedBinder<EntityClass> beanValidationBinder, final Class<EntityClass> entityClass,
 			final CAbstractService<EntityClass> entityService, final CSessionService sessionService) {
-		super(title, parentContent,beanValidationBinder, entityClass, entityService);
+		super(title, parentContent, beanValidationBinder, entityClass, entityService);
 		this.sessionService = sessionService;
 		LOGGER.debug("Created project-aware accordion panel with title '{}': {}", title, getClass().getSimpleName());
 	}

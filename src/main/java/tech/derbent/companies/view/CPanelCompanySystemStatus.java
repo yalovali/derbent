@@ -14,7 +14,7 @@ public class CPanelCompanySystemStatus extends CPanelCompanyBase {
 
 	public CPanelCompanySystemStatus(IContentOwner parentContent, final CCompany currentEntity, final CEnhancedBinder<CCompany> beanValidationBinder,
 			final CCompanyService entityService) {
-		super("System Status", parentContent,beanValidationBinder, entityService);
+		super("System Status", parentContent, beanValidationBinder, entityService);
 	}
 
 	@Override

@@ -43,16 +43,13 @@ public class Check {
 		checkRange(number, min, max, null);
 	}
 
-	/**
-	 * Validates that a number falls within specified inclusive bounds.
-	 * Performs null validation on all parameters and range validation on the numeric value.
-	 * 
-	 * @param number the number to validate
-	 * @param min the minimum allowed value (inclusive)
-	 * @param max the maximum allowed value (inclusive) 
+	/** Validates that a number falls within specified inclusive bounds. Performs null validation on all parameters and range validation on the
+	 * numeric value.
+	 * @param number  the number to validate
+	 * @param min     the minimum allowed value (inclusive)
+	 * @param max     the maximum allowed value (inclusive)
 	 * @param message custom error message, or null for default
-	 * @throws IllegalArgumentException if any parameter is null or number is outside range
-	 */
+	 * @throws IllegalArgumentException if any parameter is null or number is outside range */
 	public static void checkRange(final Number number, final Number min, final Number max, final String message) {
 		notNull(number, message);
 		notNull(min, message);
@@ -93,15 +90,11 @@ public class Check {
 		contains(string, substring, null);
 	}
 
-	/**
-	 * Validates that a string contains a specified substring.
-	 * Performs null validation on both parameters before checking containment.
-	 * 
-	 * @param string the string to search within
+	/** Validates that a string contains a specified substring. Performs null validation on both parameters before checking containment.
+	 * @param string    the string to search within
 	 * @param substring the substring to search for
-	 * @param message custom error message, or null for default
-	 * @throws IllegalArgumentException if either parameter is null or substring not found
-	 */
+	 * @param message   custom error message, or null for default
+	 * @throws IllegalArgumentException if either parameter is null or substring not found */
 	public static void contains(final String string, final String substring, final String message) {
 		notNull(string, message);
 		notNull(substring, message);
@@ -117,15 +110,11 @@ public class Check {
 		equals(obj1, obj2, null);
 	}
 
-	/**
-	 * Validates that two objects are equal using the equals() method.
-	 * Handles null cases properly - two null objects are considered equal.
-	 * 
-	 * @param obj1 the first object to compare
-	 * @param obj2 the second object to compare  
+	/** Validates that two objects are equal using the equals() method. Handles null cases properly - two null objects are considered equal.
+	 * @param obj1    the first object to compare
+	 * @param obj2    the second object to compare
 	 * @param message custom error message, or null for default
-	 * @throws IllegalArgumentException if objects are not equal
-	 */
+	 * @throws IllegalArgumentException if objects are not equal */
 	public static void equals(final Object obj1, final Object obj2, final String message) {
 		if ((obj1 == null) && (obj2 == null)) {
 			return; // Both null is considered equal
@@ -174,15 +163,12 @@ public class Check {
 		instanceOf(object, expectedClass, null);
 	}
 
-	/**
-	 * Validates that an object is an instance of the specified class.
-	 * Performs null validation on both object and expected class before type checking.
-	 * 
-	 * @param object the object to validate
+	/** Validates that an object is an instance of the specified class. Performs null validation on both object and expected class before type
+	 * checking.
+	 * @param object        the object to validate
 	 * @param expectedClass the expected class type
-	 * @param message custom error message, or null for default  
-	 * @throws IllegalArgumentException if object is null, expectedClass is null, or object is not an instance
-	 */
+	 * @param message       custom error message, or null for default
+	 * @throws IllegalArgumentException if object is null, expectedClass is null, or object is not an instance */
 	public static void instanceOf(final Object object, final Class<?> expectedClass, final String message) {
 		notNull(object, message);
 		notNull(expectedClass, message);
@@ -231,16 +217,13 @@ public class Check {
 		lengthRange(string, minLength, maxLength, null);
 	}
 
-	/**
-	 * Validates that a string length falls within specified bounds.
-	 * Performs validation on string, length parameters, and logical consistency before checking length.
-	 * 
-	 * @param string the string to validate
+	/** Validates that a string length falls within specified bounds. Performs validation on string, length parameters, and logical consistency before
+	 * checking length.
+	 * @param string    the string to validate
 	 * @param minLength minimum allowed length (inclusive)
 	 * @param maxLength maximum allowed length (inclusive)
-	 * @param message custom error message, or null for default
-	 * @throws IllegalArgumentException if string is null, lengths are negative, min > max, or length out of range
-	 */
+	 * @param message   custom error message, or null for default
+	 * @throws IllegalArgumentException if string is null, lengths are negative, min > max, or length out of range */
 	public static void lengthRange(final String string, final int minLength, final int maxLength, final String message) {
 		notNull(string, message);
 		nonNegative(minLength, message);
@@ -264,15 +247,11 @@ public class Check {
 		matches(string, regex, null);
 	}
 
-	/**
-	 * Validates that a string matches a regular expression pattern.
-	 * Performs null/blank validation on both parameters before pattern matching.
-	 * 
-	 * @param string the string to validate against the pattern
-	 * @param regex the regular expression pattern to match
+	/** Validates that a string matches a regular expression pattern. Performs null/blank validation on both parameters before pattern matching.
+	 * @param string  the string to validate against the pattern
+	 * @param regex   the regular expression pattern to match
 	 * @param message custom error message, or null for default
-	 * @throws IllegalArgumentException if string is null, regex is null/blank, or pattern doesn't match
-	 */
+	 * @throws IllegalArgumentException if string is null, regex is null/blank, or pattern doesn't match */
 	public static void matches(final String string, final String regex, final String message) {
 		notNull(string, message);
 		notBlank(regex, message);
@@ -288,15 +267,11 @@ public class Check {
 		maxLength(string, maxLength, null);
 	}
 
-	/**
-	 * Validates that a string does not exceed a maximum length.
-	 * Performs null validation on string and non-negative validation on maxLength.
-	 * 
-	 * @param string the string to validate
+	/** Validates that a string does not exceed a maximum length. Performs null validation on string and non-negative validation on maxLength.
+	 * @param string    the string to validate
 	 * @param maxLength maximum allowed length (must be non-negative)
-	 * @param message custom error message, or null for default
-	 * @throws IllegalArgumentException if string is null, maxLength is negative, or string exceeds length
-	 */
+	 * @param message   custom error message, or null for default
+	 * @throws IllegalArgumentException if string is null, maxLength is negative, or string exceeds length */
 	public static void maxLength(final String string, final int maxLength, final String message) {
 		notNull(string, message);
 		nonNegative(maxLength, message);
@@ -312,15 +287,11 @@ public class Check {
 		maxSize(collection, maxSize, null);
 	}
 
-	/**
-	 * Validates that a collection does not exceed a maximum size.
-	 * Performs null validation on collection and non-negative validation on maxSize.
-	 * 
+	/** Validates that a collection does not exceed a maximum size. Performs null validation on collection and non-negative validation on maxSize.
 	 * @param collection the collection to validate
-	 * @param maxSize maximum allowed size (must be non-negative)
-	 * @param message custom error message, or null for default
-	 * @throws IllegalArgumentException if collection is null, maxSize is negative, or collection exceeds size
-	 */
+	 * @param maxSize    maximum allowed size (must be non-negative)
+	 * @param message    custom error message, or null for default
+	 * @throws IllegalArgumentException if collection is null, maxSize is negative, or collection exceeds size */
 	public static void maxSize(final Collection<?> collection, final int maxSize, final String message) {
 		notNull(collection, message);
 		nonNegative(maxSize, message);
@@ -336,15 +307,11 @@ public class Check {
 		minLength(string, minLength, null);
 	}
 
-	/**
-	 * Validates that a string meets a minimum length requirement.
-	 * Performs null validation on string and non-negative validation on minLength.
-	 * 
-	 * @param string the string to validate
+	/** Validates that a string meets a minimum length requirement. Performs null validation on string and non-negative validation on minLength.
+	 * @param string    the string to validate
 	 * @param minLength minimum required length (must be non-negative)
-	 * @param message custom error message, or null for default
-	 * @throws IllegalArgumentException if string is null, minLength is negative, or string is too short
-	 */
+	 * @param message   custom error message, or null for default
+	 * @throws IllegalArgumentException if string is null, minLength is negative, or string is too short */
 	public static void minLength(final String string, final int minLength, final String message) {
 		notNull(string, message);
 		nonNegative(minLength, message);
@@ -360,15 +327,11 @@ public class Check {
 		minSize(collection, minSize, null);
 	}
 
-	/**
-	 * Validates that a collection meets a minimum size requirement.
-	 * Performs null validation on collection and non-negative validation on minSize.
-	 * 
+	/** Validates that a collection meets a minimum size requirement. Performs null validation on collection and non-negative validation on minSize.
 	 * @param collection the collection to validate
-	 * @param minSize minimum required size (must be non-negative)
-	 * @param message custom error message, or null for default
-	 * @throws IllegalArgumentException if collection is null, minSize is negative, or collection is too small
-	 */
+	 * @param minSize    minimum required size (must be non-negative)
+	 * @param message    custom error message, or null for default
+	 * @throws IllegalArgumentException if collection is null, minSize is negative, or collection is too small */
 	public static void minSize(final Collection<?> collection, final int minSize, final String message) {
 		notNull(collection, message);
 		nonNegative(minSize, message);
@@ -485,16 +448,13 @@ public class Check {
 		sizeRange(collection, minSize, maxSize, null);
 	}
 
-	/**
-	 * Validates that a collection size falls within specified bounds.
-	 * Performs validation on collection, size parameters, and logical consistency before checking size.
-	 * 
+	/** Validates that a collection size falls within specified bounds. Performs validation on collection, size parameters, and logical consistency
+	 * before checking size.
 	 * @param collection the collection to validate
-	 * @param minSize minimum allowed size (inclusive, must be non-negative)
-	 * @param maxSize maximum allowed size (inclusive, must be non-negative)
-	 * @param message custom error message, or null for default
-	 * @throws IllegalArgumentException if collection is null, sizes are negative, min > max, or size out of range
-	 */
+	 * @param minSize    minimum allowed size (inclusive, must be non-negative)
+	 * @param maxSize    maximum allowed size (inclusive, must be non-negative)
+	 * @param message    custom error message, or null for default
+	 * @throws IllegalArgumentException if collection is null, sizes are negative, min > max, or size out of range */
 	public static void sizeRange(final Collection<?> collection, final int minSize, final int maxSize, final String message) {
 		notNull(collection, message);
 		nonNegative(minSize, message);

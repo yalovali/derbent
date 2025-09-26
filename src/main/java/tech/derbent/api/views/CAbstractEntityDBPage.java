@@ -46,7 +46,8 @@ import tech.derbent.api.views.grids.CMasterViewSectionGrid;
 import tech.derbent.session.service.CLayoutService;
 import tech.derbent.session.service.ISessionService;
 
-public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<EntityClass>> extends CAbstractPage implements CLayoutChangeListener, IContentOwner {
+public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<EntityClass>> extends CAbstractPage
+		implements CLayoutChangeListener, IContentOwner {
 
 	private static final long serialVersionUID = 1L;
 	ArrayList<CAccordionDBEntity<EntityClass>> AccordionList = new ArrayList<CAccordionDBEntity<EntityClass>>(); // List of accordions
@@ -594,7 +595,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 			throw new IllegalArgumentException("Entity cannot be null");
 		}
 	}
-
 	// IContentOwner implementation
 	// getCurrentEntity() is already implemented above
 

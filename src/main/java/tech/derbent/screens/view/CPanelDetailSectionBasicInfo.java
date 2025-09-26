@@ -12,7 +12,7 @@ public class CPanelDetailSectionBasicInfo extends CPanelDetailSectionBase {
 
 	public CPanelDetailSectionBasicInfo(IContentOwner parentContent, final CDetailSection currentEntity,
 			final CEnhancedBinder<CDetailSection> beanValidationBinder, final CDetailSectionService entityService) throws Exception {
-		super("Basic Information", parentContent,beanValidationBinder, entityService);
+		super("Basic Information", parentContent, beanValidationBinder, entityService);
 		initPanel();
 	}
 

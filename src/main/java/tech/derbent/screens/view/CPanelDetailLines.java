@@ -29,7 +29,7 @@ public class CPanelDetailLines extends CPanelDetailSectionBase {
 			final CEnhancedBinder<CDetailSection> beanValidationBinder, final CDetailSectionService entityService,
 			final CDetailLinesService screenLinesService, final CEntityFieldService entityFieldService, final CViewsService viewsService)
 			throws Exception {
-		super("Screen Lines", parentContent,beanValidationBinder, entityService);
+		super("Screen Lines", parentContent, beanValidationBinder, entityService);
 		this.detailLinesService = screenLinesService;
 		initPanel();
 		createScreenLinesLayout();

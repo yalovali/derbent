@@ -14,7 +14,7 @@ public class CPanelActivityTimeTracking extends CPanelActivityBase {
 
 	public CPanelActivityTimeTracking(IContentOwner parentContent, final CActivity currentEntity,
 			final CEnhancedBinder<CActivity> beanValidationBinder, final CActivityService entityService) throws Exception {
-		super("Time Tracking", parentContent,beanValidationBinder, entityService);
+		super("Time Tracking", parentContent, beanValidationBinder, entityService);
 		initPanel();
 	}
 
