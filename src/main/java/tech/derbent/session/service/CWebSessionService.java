@@ -28,19 +28,19 @@ import tech.derbent.users.service.CUserRepository;
 @Profile ("!reset-db")
 public class CWebSessionService implements ISessionService {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CWebSessionService.class);
+	private static final String ACTIVE_ID_KEY = "activeId";
 	private static final String ACTIVE_PROJECT_KEY = "activeProject";
 	private static final String ACTIVE_USER_KEY = "activeUser";
-	private static final String ACTIVE_ID_KEY = "activeId";
+	private static final Logger LOGGER = LoggerFactory.getLogger(CWebSessionService.class);
+	private final AuthenticationContext authenticationContext;
 	private final Set<String> idAttributes = ConcurrentHashMap.newKeySet();
+	private CLayoutService layoutService;
 	// Thread-safe set to store project change listeners
 	private final Set<CProjectChangeListener> projectChangeListeners = ConcurrentHashMap.newKeySet();
 	// Thread-safe set to store project list change listeners
 	private final Set<CProjectListChangeListener> projectListChangeListeners = ConcurrentHashMap.newKeySet();
-	private final AuthenticationContext authenticationContext;
-	private final CUserRepository userRepository;
 	private final CProjectRepository projectRepository;
-	private CLayoutService layoutService;
+	private final CUserRepository userRepository;
 
 	public CWebSessionService(final AuthenticationContext authenticationContext, final CUserRepository userRepository,
 			final CProjectRepository projectRepository) {
@@ -52,6 +52,7 @@ public class CWebSessionService implements ISessionService {
 	/** Registers a component to receive notifications when the active project changes. Components should call this method when they are attached to
 	 * the UI.
 	 * @param listener The component that wants to be notified of project changes */
+	@Override
 	public void addProjectChangeListener(final CProjectChangeListener listener) {
 		if (listener != null) {
 			projectChangeListeners.add(listener);
@@ -61,6 +62,7 @@ public class CWebSessionService implements ISessionService {
 	/** Registers a component to receive notifications when the project list changes. Components should call this method when they are attached to the
 	 * UI.
 	 * @param listener The component that wants to be notified of project list changes */
+	@Override
 	public void addProjectListChangeListener(final CProjectListChangeListener listener) {
 		if (listener != null) {
 			projectListChangeListeners.add(listener);
@@ -68,6 +70,7 @@ public class CWebSessionService implements ISessionService {
 	}
 
 	/** Clears session data on logout. */
+	@Override
 	public void clearSession() {
 		final VaadinSession session = VaadinSession.getCurrent();
 		if (session != null) {
@@ -82,6 +85,7 @@ public class CWebSessionService implements ISessionService {
 		}
 	}
 
+	@Override
 	public void deleteAllActiveIds() {
 		final VaadinSession session = VaadinSession.getCurrent();
 		if (session == null) {
@@ -95,6 +99,7 @@ public class CWebSessionService implements ISessionService {
 		}
 	}
 
+	@Override
 	public Long getActiveId(final String entityType) {
 		final VaadinSession session = VaadinSession.getCurrent();
 		if (session != null) {
@@ -104,6 +109,7 @@ public class CWebSessionService implements ISessionService {
 	}
 
 	/** Gets the currently active project from the session. If no project is set, returns the first available project. */
+	@Override
 	public Optional<CProject> getActiveProject() {
 		final VaadinSession session = VaadinSession.getCurrent();
 		if (session == null) {
@@ -123,6 +129,7 @@ public class CWebSessionService implements ISessionService {
 
 	/** Gets the currently active user from the session. If no user is set, attempts to load the user from the authentication context. optinal means
 	 * that it may return an empty value if no user is found. */
+	@Override
 	public Optional<CUser> getActiveUser() {
 		final VaadinSession session = VaadinSession.getCurrent();
 		if (session == null) {
@@ -143,13 +150,13 @@ public class CWebSessionService implements ISessionService {
 	}
 
 	/** Gets all available projects for the current user. For now, returns all projects. Can be enhanced to filter by user permissions. */
-	public List<CProject> getAvailableProjects() {
-		return projectRepository.findAll();
-	}
+	@Override
+	public List<CProject> getAvailableProjects() { return projectRepository.findAll(); }
 
 	/** Event listener for project list changes. This method is called when projects are created, updated, or deleted to notify all registered
 	 * listeners.
 	 * @param event The project list change event */
+	@Override
 	@EventListener
 	public void handleProjectListChange(final ProjectListChangeEvent event) {
 		notifyProjectListChanged();
@@ -176,6 +183,7 @@ public class CWebSessionService implements ISessionService {
 
 	/** Notifies all registered project list change listeners about changes to the project list. This method safely handles UI access for components
 	 * that may be in different UIs. */
+	@Override
 	public void notifyProjectListChanged() {
 		// Use UI.access to safely notify listeners that may be in different UI contexts
 		final UI ui = UI.getCurrent();
@@ -195,6 +203,7 @@ public class CWebSessionService implements ISessionService {
 
 	/** Unregisters a component from receiving project change notifications. Components should call this method when they are detached from the UI.
 	 * @param listener The component to unregister */
+	@Override
 	public void removeProjectChangeListener(final CProjectChangeListener listener) {
 		if (listener != null) {
 			projectChangeListeners.remove(listener);
@@ -206,6 +215,7 @@ public class CWebSessionService implements ISessionService {
 	/** Unregisters a component from receiving project list change notifications. Components should call this method when they are detached from the
 	 * UI.
 	 * @param listener The component to unregister */
+	@Override
 	public void removeProjectListChangeListener(final CProjectListChangeListener listener) {
 		if (listener != null) {
 			projectListChangeListeners.remove(listener);
@@ -214,6 +224,7 @@ public class CWebSessionService implements ISessionService {
 		}
 	}
 
+	@Override
 	public void setActiveId(final String entityType, final Long id) {
 		final VaadinSession session = VaadinSession.getCurrent();
 		if (session == null) {
@@ -221,11 +232,12 @@ public class CWebSessionService implements ISessionService {
 		}
 		final String key = ACTIVE_ID_KEY + "_" + entityType;
 		session.setAttribute(key, id);
-		LOGGER.info("Active ID set to: {}", id);
+		LOGGER.debug("Active ID set to: {}", id);
 		idAttributes.add(key);
 	}
 
 	/** Sets the active project in the session and triggers UI refresh. */
+	@Override
 	public void setActiveProject(final CProject project) {
 		// reset active entity ID when changing project
 		final VaadinSession session = VaadinSession.getCurrent();
@@ -239,6 +251,7 @@ public class CWebSessionService implements ISessionService {
 	}
 
 	/** Sets the active user in the session. */
+	@Override
 	public void setActiveUser(final CUser user) {
 		clearSession(); // Clear session data before setting new user
 		final VaadinSession session = VaadinSession.getCurrent();
@@ -249,7 +262,6 @@ public class CWebSessionService implements ISessionService {
 	}
 
 	/** Sets the layout service. This is called after bean creation to avoid circular dependency. */
-	public void setLayoutService(final CLayoutService layoutService) {
-		this.layoutService = layoutService;
-	}
+	@Override
+	public void setLayoutService(final CLayoutService layoutService) { this.layoutService = layoutService; }
 }

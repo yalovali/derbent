@@ -108,20 +108,16 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 	@Transactional
 	public void removeUserFromProject(final CUser user, final CProject project) {
 		LOGGER.debug("Removing user {} from project {}", user, project);
-		if ((user == null) || (project == null)) {
-			throw new IllegalArgumentException("User and project cannot be null");
-		}
-		if ((user.getId() == null) || (project.getId() == null)) {
-			throw new IllegalArgumentException("User and project must have valid IDs");
-		}
+		Check.notNull(user, "User cannot be null");
+		Check.notNull(project, "Project cannot be null");
+		Check.notNull(user.getId(), "User must have a valid ID");
+		Check.notNull(project.getId(), "Project must have a valid ID");
 		// Find the relationship first to maintain bidirectional collections
-		final Optional<CUserProjectSettings> settingsOpt = findRelationship(user.getId(), project.getId());
-		if (settingsOpt.isPresent()) {
-			final CUserProjectSettings settings = settingsOpt.get();
-			// Remove from bidirectional collections
-			user.removeProjectSettings(settings);
-			project.removeUserSettings(settings);
-		}
+		// final Optional<CUserProjectSettings> settingsOpt = findRelationship(user.getId(), project.getId());
+		// final CUserProjectSettings settings = settingsOpt.orElseThrow(() -> new IllegalArgumentException("User is not assigned to this project"));
+		// Remove from bidirectional collections
+		// user.removeProjectSettings(settings);
+		// project.removeUserSettings(settings);
 		// Delete the relationship using the parent method that handles ID checking
 		deleteRelationship(user.getId(), project.getId());
 	}
