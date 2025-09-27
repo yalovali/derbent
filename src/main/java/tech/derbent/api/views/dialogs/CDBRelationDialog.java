@@ -12,6 +12,7 @@ import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.services.CAbstractEntityRelationService;
 import tech.derbent.api.services.CAbstractService;
+import tech.derbent.api.ui.notifications.CNotifications;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 
@@ -96,10 +97,10 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 			// Delegate to service-specific or callback-based saving
 			performSave();
 			close();
-			Notification.show(isNew ? getSuccessCreateMessage() : getSuccessUpdateMessage());
+			CNotifications.showSuccess(isNew ? getSuccessCreateMessage() : getSuccessUpdateMessage());
 		} catch (final Exception e) {
 			LOGGER.error("Error saving relationship", e);
-			Notification.show("Error: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
+			CNotifications.showError("Error: " + e.getMessage());
 		}
 	}
 

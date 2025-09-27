@@ -10,6 +10,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.interfaces.IContentOwner;
+import tech.derbent.api.ui.notifications.CNotifications;
 import tech.derbent.api.views.grids.CGrid;
 import tech.derbent.screens.domain.CDetailLines;
 import tech.derbent.screens.domain.CDetailSection;
@@ -87,7 +88,7 @@ public class CPanelDetailLines extends CPanelDetailSectionBase {
 					selectedLine = null;
 				}
 			} catch (final Exception ex) {
-				Notification.show("Error processing selection: " + ex.getMessage(), 5000, Notification.Position.MIDDLE);
+				CNotifications.showError("Error processing selection: " + ex.getMessage());
 			}
 		});
 		grid.addItemDoubleClickListener(e -> {
@@ -105,7 +106,7 @@ public class CPanelDetailLines extends CPanelDetailSectionBase {
 					selectedLine = null;
 				}
 			} catch (final Exception ex) {
-				Notification.show("Error processing selection: " + ex.getMessage(), 5000, Notification.Position.MIDDLE);
+				CNotifications.showError("Error processing selection: " + ex.getMessage());
 			}
 		});
 		toolbar.add(addButton, deleteButton, moveUpButton, moveDownButton);
@@ -127,9 +128,9 @@ public class CPanelDetailLines extends CPanelDetailSectionBase {
 				refreshLinesGrid();
 				// Clear selection
 				grid.asSingleSelect().clear();
-				Notification.show("Line deleted successfully", 3000, Notification.Position.BOTTOM_START);
+				CNotifications.showDeleteSuccess();
 			} catch (final Exception e) {
-				Notification.show("Error deleting line: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
+				CNotifications.showDeleteError();
 			}
 		}
 	}
@@ -139,9 +140,9 @@ public class CPanelDetailLines extends CPanelDetailSectionBase {
 			try {
 				detailLinesService.moveLineDown(selectedLine);
 				refreshLinesGrid();
-				Notification.show("Line moved down", 2000, Notification.Position.BOTTOM_START);
+				CNotifications.showSuccess("Line moved down");
 			} catch (final Exception e) {
-				Notification.show("Error moving line: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
+				CNotifications.showError("Error moving line: " + e.getMessage());
 			}
 		}
 	}
@@ -151,9 +152,9 @@ public class CPanelDetailLines extends CPanelDetailSectionBase {
 			try {
 				detailLinesService.moveLineUp(selectedLine);
 				refreshLinesGrid();
-				Notification.show("Line moved up", 2000, Notification.Position.BOTTOM_START);
+				CNotifications.showSuccess("Line moved up");
 			} catch (final Exception e) {
-				Notification.show("Error moving line: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
+				CNotifications.showError("Error moving line: " + e.getMessage());
 			}
 		}
 	}
@@ -162,7 +163,7 @@ public class CPanelDetailLines extends CPanelDetailSectionBase {
 	 * @throws Exception */
 	private void openAddFieldDialog() throws Exception {
 		if ((getCurrentEntity() == null) || (getCurrentEntity().getId() == null)) {
-			Notification.show("Please save the screen first before adding fields", 3000, Notification.Position.MIDDLE);
+			CNotifications.showWarning("Please save the screen first before adding fields");
 			return;
 		}
 		final CDetailLines newLine = detailLinesService.newEntity(getCurrentEntity(), CEntityFieldService.THIS_CLASS, "name");
@@ -204,7 +205,7 @@ public class CPanelDetailLines extends CPanelDetailSectionBase {
 			// Clear selection to avoid confusion
 			grid.asSingleSelect().clear();
 		} catch (final Exception e) {
-			Notification.show("Error saving field: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
+			CNotifications.showError("Error saving field: " + e.getMessage());
 		}
 	}
 

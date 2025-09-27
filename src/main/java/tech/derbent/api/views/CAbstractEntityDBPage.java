@@ -35,6 +35,7 @@ import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.ui.dialogs.CConfirmationDialog;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CButton;
@@ -62,6 +63,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	protected final CAbstractService<EntityClass> entityService;
 	protected CLayoutService layoutService; // Optional injection
 	protected CMasterViewSectionBase<EntityClass> masterViewSection;
+	protected CNotificationService notificationService; // Optional injection
 	// Search functionality
 	protected CSearchToolbar searchToolbar;
 	protected ISessionService sessionService;
@@ -155,7 +157,11 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 					LOGGER.info("Deleting entity: {} with ID: {}", entityClass.getSimpleName(), currentEntity.getId());
 					entityService.delete(currentEntity);
 					masterViewSection.selectLastOrFirst(null);
-					showNotification("Item deleted successfully");
+					if (notificationService != null) {
+						notificationService.showDeleteSuccess();
+					} else {
+						showNotification("Item deleted successfully");
+					}
 				} catch (final Exception exception) {
 					LOGGER.error("Error deleting entity", exception);
 					new CWarningDialog("Failed to delete the item. Please try again.").open();
@@ -317,12 +323,20 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				// Clear form and refresh grid
 				refreshGrid();
 				// Show success notification
-				showNotification("Data saved successfully");
+				if (notificationService != null) {
+					notificationService.showSaveSuccess();
+				} else {
+					showNotification("Data saved successfully");
+				}
 				// Navigate back to the current view (list mode)
 				navigateToClass();
 			} catch (final ObjectOptimisticLockingFailureException exception) {
 				LOGGER.error("Optimistic locking failure during save", exception);
-				showErrorNotification("Error updating the data. Somebody else has updated the record while you were making changes.");
+				if (notificationService != null) {
+					notificationService.showOptimisticLockingError();
+				} else {
+					showErrorNotification("Error updating the data. Somebody else has updated the record while you were making changes.");
+				}
 				throw new RuntimeException("Optimistic locking failure during save", exception);
 			} catch (final ValidationException validationException) {
 				LOGGER.error("Validation error during save", validationException);
@@ -491,19 +505,29 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		}
 	}
 
-	/** Shows an error notification. Throws exception if notification cannot be shown. */
+	/** Shows an error notification. Uses CNotificationService if available, falls back to direct Vaadin call. */
 	protected void showErrorNotification(final String message) {
-		final Notification notification = Notification.show(message);
-		notification.setPosition(Position.MIDDLE);
-		notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-		LOGGER.debug("Shown error notification: {}", message);
+		if (notificationService != null) {
+			notificationService.showError(message);
+		} else {
+			// Fallback to direct Vaadin call if service not injected
+			final Notification notification = Notification.show(message);
+			notification.setPosition(Position.MIDDLE);
+			notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+			LOGGER.debug("Shown error notification (fallback): {}", message);
+		}
 	}
 
-	/** Shows a success notification. Throws exception if notification cannot be shown. */
+	/** Shows a success notification. Uses CNotificationService if available, falls back to direct Vaadin call. */
 	protected void showNotification(final String message) {
-		final Notification notification = Notification.show(message);
-		notification.setPosition(Position.BOTTOM_START);
-		LOGGER.debug("Shown notification: {}", message);
+		if (notificationService != null) {
+			notificationService.showSuccess(message);
+		} else {
+			// Fallback to direct Vaadin call if service not injected
+			final Notification notification = Notification.show(message);
+			notification.setPosition(Position.BOTTOM_START);
+			LOGGER.debug("Shown notification (fallback): {}", message);
+		}
 	}
 
 	public void setCurrentEntity(final EntityClass currentEntity) {
@@ -521,6 +545,11 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		this.layoutService = layoutService;
 		// Update layout based on current mode
 		updateLayoutOrientation();
+	}
+
+	/** Sets the notification service. This is typically called via dependency injection or manually after construction. */
+	public void setNotificationService(final CNotificationService notificationService) {
+		this.notificationService = notificationService;
 	}
 
 	@Override

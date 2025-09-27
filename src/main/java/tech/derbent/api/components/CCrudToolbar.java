@@ -15,6 +15,7 @@ import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.CEntityUpdateListener;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.ui.dialogs.CConfirmationDialog;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CButton;
 
@@ -33,6 +34,7 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	private final Class<EntityClass> entityClass;
 	private final CAbstractService<EntityClass> entityService;
 	private Supplier<EntityClass> newEntitySupplier;
+	private CNotificationService notificationService; // Optional injection
 	private CButton refreshButton;
 	private Consumer<EntityClass> refreshCallback;
 	private CButton saveButton;
@@ -112,7 +114,11 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 			LOGGER.info("New entity created successfully: {}", entityClass.getSimpleName());
 		} catch (Exception exception) {
 			LOGGER.error("Error during create operation for entity: {}", entityClass.getSimpleName(), exception);
-			showErrorNotification("An error occurred while creating new entity. Please try again.");
+			if (notificationService != null) {
+				notificationService.showCreateError();
+			} else {
+				showErrorNotification("An error occurred while creating new entity. Please try again.");
+			}
 		}
 	}
 
@@ -230,7 +236,11 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 			notifyListenersDeleted(entityToDelete);
 		} catch (final Exception e) {
 			LOGGER.error("Error during delete operation for entity: {}", entityClass.getSimpleName(), e);
-			showErrorNotification("An error occurred while deleting the entity. Please try again.");
+			if (notificationService != null) {
+				notificationService.showDeleteError();
+			} else {
+				showErrorNotification("An error occurred while deleting the entity. Please try again.");
+			}
 			throw e;
 		}
 	}
@@ -276,17 +286,32 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		updateButtonStates();
 	}
 
-	/** Shows an error notification. */
-	private void showErrorNotification(final String message) {
-		final Notification notification = Notification.show(message);
-		notification.setPosition(Notification.Position.MIDDLE);
-		notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+	/** Sets the notification service. This is typically called via dependency injection or manually after construction. */
+	public void setNotificationService(final CNotificationService notificationService) {
+		this.notificationService = notificationService;
 	}
 
-	/** Shows a success notification. */
+	/** Shows an error notification. Uses CNotificationService if available, falls back to direct Vaadin call. */
+	private void showErrorNotification(final String message) {
+		if (notificationService != null) {
+			notificationService.showError(message);
+		} else {
+			// Fallback to direct Vaadin call if service not injected
+			final Notification notification = Notification.show(message);
+			notification.setPosition(Notification.Position.MIDDLE);
+			notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+		}
+	}
+
+	/** Shows a success notification. Uses CNotificationService if available, falls back to direct Vaadin call. */
 	private void showSuccessNotification(final String message) {
-		final Notification notification = Notification.show(message);
-		notification.setPosition(Notification.Position.BOTTOM_START);
+		if (notificationService != null) {
+			notificationService.showSuccess(message);
+		} else {
+			// Fallback to direct Vaadin call if service not injected
+			final Notification notification = Notification.show(message);
+			notification.setPosition(Notification.Position.BOTTOM_START);
+		}
 	}
 
 	/** Updates button enabled/disabled states based on current context. */

@@ -18,6 +18,7 @@ import com.vaadin.flow.server.streams.InMemoryUploadHandler;
 import com.vaadin.flow.server.streams.UploadMetadata;
 import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
+import tech.derbent.api.ui.notifications.CNotifications;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CImageUtils;
 import tech.derbent.api.views.components.CButton;
@@ -143,10 +144,10 @@ public class CPictureSelector extends Composite<CVerticalLayout>
 			final byte[] resizedImageData = CImageUtils.resizeToProfilePicture(data);
 			// Update the value
 			setValue(resizedImageData);
-			Notification.show("Image uploaded and resized successfully", 3000, Notification.Position.TOP_CENTER);
+			CNotifications.showSuccess("Image uploaded and resized successfully");
 		} catch (final Exception e) {
 			LOGGER.error("Unexpected error during image upload", e);
-			new CWarningDialog("Failed to upload image: " + e.getMessage()).open();
+			CNotifications.showWarningDialog("Failed to upload image: " + e.getMessage());
 		}
 	}
 
@@ -154,7 +155,7 @@ public class CPictureSelector extends Composite<CVerticalLayout>
 	 * @param event Click event */
 	private void handleDelete(final ClickEvent<Button> event) {
 		setValue(null);
-		Notification.show("Image deleted", 2000, Notification.Position.TOP_CENTER);
+		CNotifications.showSuccess("Image deleted");
 	}
 
 	/** Handles click on image preview. In icon mode, opens a dialog with full picture selector functionality. In full mode, does nothing special
