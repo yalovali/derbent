@@ -21,6 +21,7 @@ import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.ui.dialogs.CConfirmationDialog;
 import tech.derbent.api.ui.dialogs.CInformationDialog;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
+import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.views.CAbstractPage;
 import tech.derbent.api.views.components.CButton;
 import tech.derbent.config.CDataInitializer;
@@ -44,6 +45,8 @@ public class CSystemSettingsView extends CAbstractPage {
 	private CSystemSettings currentSettings;
 	private Div formContainer;
 	private VerticalLayout mainLayout;
+	@Autowired (required = false)
+	private CNotificationService notificationService; // Optional injection
 	private final CSystemSettingsService systemSettingsService;
 
 	@Autowired
@@ -320,14 +323,18 @@ public class CSystemSettingsView extends CAbstractPage {
 			final var savedSettings = systemSettingsService.updateSystemSettings(currentSettings);
 			currentSettings = savedSettings;
 			// Show success notification
-			Notification.show("System settings saved successfully", 3000, Notification.Position.TOP_CENTER);
+			showSuccessNotification("System settings saved successfully");
 			LOGGER.info("System settings saved successfully with ID: {}", savedSettings.getId());
 		} catch (final ValidationException e) {
 			LOGGER.warn("Validation failed when saving system settings", e);
-			Notification.show("Please fix validation errors and try again", 3000, Notification.Position.MIDDLE);
+			if (notificationService != null) {
+				notificationService.showWarning("Please fix validation errors and try again");
+			} else {
+				Notification.show("Please fix validation errors and try again", 3000, Notification.Position.MIDDLE);
+			}
 		} catch (final Exception e) {
 			LOGGER.error("Error saving system settings", e);
-			Notification.show("Error saving settings: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
+			showErrorNotification("Error saving settings: " + e.getMessage());
 		}
 	}
 
@@ -383,7 +390,34 @@ public class CSystemSettingsView extends CAbstractPage {
 			LOGGER.info("Configuration test completed successfully");
 		} catch (final Exception e) {
 			LOGGER.error("Error testing configuration", e);
-			Notification.show("Error testing configuration: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
+			showErrorNotification("Error testing configuration: " + e.getMessage());
+		}
+	}
+
+	/** Shows an error notification using the service if available, falls back to direct call */
+	private void showErrorNotification(final String message) {
+		if (notificationService != null) {
+			notificationService.showError(message);
+		} else {
+			Notification.show(message, 5000, Notification.Position.MIDDLE);
+		}
+	}
+
+	/** Shows a success notification using the service if available, falls back to direct call */
+	private void showSuccessNotification(final String message) {
+		if (notificationService != null) {
+			notificationService.showSuccess(message);
+		} else {
+			Notification.show(message, 3000, Notification.Position.TOP_CENTER);
+		}
+	}
+
+	/** Shows an info notification using the service if available, falls back to direct call */
+	private void showInfoNotification(final String message) {
+		if (notificationService != null) {
+			notificationService.showInfo(message);
+		} else {
+			Notification.show(message, 2000, Notification.Position.TOP_CENTER);
 		}
 	}
 }
