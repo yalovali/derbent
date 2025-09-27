@@ -92,7 +92,7 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable, CFieldInf
 	@OneToMany (mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	@AMetaData (
 			displayName = "Company Settings", required = false, readOnly = true, description = "User's company memberships and roles", hidden = false,
-			order = 21
+			order = 21, createComponentMethod = "createUserCompanySettingsComponent"
 	)
 	private List<CUserCompanySettings> companySettings = new ArrayList<>();
 	@ManyToOne (fetch = FetchType.EAGER)

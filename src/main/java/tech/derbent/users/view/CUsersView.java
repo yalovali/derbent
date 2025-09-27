@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.router.Menu;
@@ -21,6 +22,7 @@ import tech.derbent.projects.service.CProjectService;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
+import tech.derbent.users.domain.CUserCompanySettings;
 import tech.derbent.users.domain.CUserProjectSettings;
 import tech.derbent.users.service.CUserInitializerService;
 import tech.derbent.users.service.CUserProjectSettingsService;
@@ -163,5 +165,63 @@ public class CUsersView extends CGridViewBaseNamed<CUser> {
 		// For demonstration, return all projects
 		// In a real scenario, you might filter based on user's company, permissions, etc.
 		return allProjects;
+	}
+
+	/** Creates a custom component for managing user project settings. This method is referenced in the @AMetaData annotation on the projectSettings
+	 * field.
+	 * @return a component for managing project settings */
+	public Component createUserProjectSettingsComponent() {
+		try {
+			LOGGER.debug("Creating custom project settings component for user: {}",
+					getCurrentEntity() != null ? getCurrentEntity().getName() : "null");
+			// Create a simple panel that shows existing project settings with basic CRUD operations
+			final CPanelUserProjectSettings panel = new CPanelUserProjectSettings(this, getCurrentEntity(), getBinder(), (CUserService) entityService,
+					userTypeService, companyService, projectService, userProjectSettingsService);
+			return panel;
+		} catch (Exception e) {
+			LOGGER.error("Failed to create user project settings component: {}", e.getMessage(), e);
+			// Fallback to a simple div with error message
+			final Div errorDiv = new Div();
+			errorDiv.setText("Error loading project settings: " + e.getMessage());
+			errorDiv.addClassName("error-message");
+			return errorDiv;
+		}
+	}
+
+	/** Creates a custom component for managing user company settings. This method is referenced in the @AMetaData annotation on the companySettings
+	 * field.
+	 * @return a component for managing company settings */
+	public Component createUserCompanySettingsComponent() {
+		try {
+			LOGGER.debug("Creating custom company settings component for user: {}",
+					getCurrentEntity() != null ? getCurrentEntity().getName() : "null");
+			// Create a simple display of company settings
+			// For now, create a basic component - can be enhanced later
+			final Div companyDiv = new Div();
+			companyDiv.addClassName("user-company-settings");
+			final CUser currentUser = getCurrentEntity();
+			if (currentUser != null && currentUser.getCompanySettings() != null) {
+				companyDiv.add(new Div("Company Settings (" + currentUser.getCompanySettings().size() + " companies)"));
+				// Add basic information about each company
+				for (CUserCompanySettings companySetting : currentUser.getCompanySettings()) {
+					final Div companyItem = new Div();
+					companyItem.addClassName("company-item");
+					companyItem.setText(String.format("Company: %s, Role: %s, Department: %s", companySetting.getCompanyName(),
+							companySetting.getRole() != null ? companySetting.getRole() : "N/A",
+							companySetting.getDepartment() != null ? companySetting.getDepartment() : "N/A"));
+					companyDiv.add(companyItem);
+				}
+			} else {
+				companyDiv.add(new Div("No company settings available"));
+			}
+			return companyDiv;
+		} catch (Exception e) {
+			LOGGER.error("Failed to create user company settings component: {}", e.getMessage(), e);
+			// Fallback to a simple div with error message
+			final Div errorDiv = new Div();
+			errorDiv.setText("Error loading company settings: " + e.getMessage());
+			errorDiv.addClassName("error-message");
+			return errorDiv;
+		}
 	}
 }

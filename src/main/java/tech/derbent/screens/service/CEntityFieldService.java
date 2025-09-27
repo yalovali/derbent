@@ -31,6 +31,7 @@ public class CEntityFieldService {
 		private boolean clearOnEmptyData = false;
 		private boolean colorField = false;
 		private boolean comboboxReadOnly = false;
+		private String createComponentMethod = "";
 		private String dataProviderBean = "";
 		private String dataProviderMethod = "";
 		private String dataProviderParamMethod = "";
@@ -100,6 +101,8 @@ public class CEntityFieldService {
 
 		public boolean isComboboxReadOnly() { return comboboxReadOnly; }
 
+		public String getCreateComponentMethod() { return createComponentMethod; }
+
 		public boolean isHidden() { return hidden; }
 
 		public boolean isImageData() { return imageData; }
@@ -127,6 +130,8 @@ public class CEntityFieldService {
 		public void setColorField(final boolean colorField) { this.colorField = colorField; }
 
 		public void setComboboxReadOnly(final boolean comboboxReadOnly) { this.comboboxReadOnly = comboboxReadOnly; }
+
+		public void setCreateComponentMethod(final String createComponentMethod) { this.createComponentMethod = createComponentMethod; }
 
 		public void setDataProviderBean(final String dataProviderBean) { this.dataProviderBean = dataProviderBean; }
 
@@ -216,6 +221,7 @@ public class CEntityFieldService {
 			info.setComboboxReadOnly(metaData.comboboxReadOnly());
 			info.setClearOnEmptyData(metaData.clearOnEmptyData());
 			info.setColorField(metaData.colorField());
+			info.setCreateComponentMethod(metaData.createComponentMethod());
 			info.setSetBackgroundFromColor(metaData.setBackgroundFromColor());
 			info.setWidth(metaData.width());
 			info.setPasswordField(metaData.passwordField());
