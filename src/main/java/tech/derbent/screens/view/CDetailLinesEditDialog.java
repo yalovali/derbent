@@ -167,13 +167,10 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 	@SuppressWarnings ("unchecked")
 	private void updateEntityPropertyBasedOnClass() {
 		final String relationFieldName = getEntity().getRelationFieldName();
+		Check.notBlank(relationFieldName, "Relation field name must not be blank");
 		LOGGER.debug("Selected field class: {}", relationFieldName);
-		if ((relationFieldName == null) || relationFieldName.isEmpty()) {
-			return;
-		}
 		List<EntityFieldInfo> fieldProperties = null;
 		// this class is a special case, we need to get all fields of the screen's entity
-		// type
 		if (relationFieldName.equals(CEntityFieldService.SECTION)) {
 			cmbFieldProperties.setItems(List.of(CEntityFieldService.SECTION));
 			getEntity().setProperty(CEntityFieldService.SECTION);

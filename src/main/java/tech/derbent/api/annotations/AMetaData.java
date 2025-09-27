@@ -43,6 +43,8 @@ public @interface AMetaData {
 
 	String filterMethod() default "";
 
+	String createComponentMethod() default "";
+
 	boolean hidden() default false;
 
 	boolean imageData() default false;

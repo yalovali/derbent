@@ -207,6 +207,8 @@ public class CEntityFieldService {
 			info.setDefaultValue(metaData.defaultValue());
 			info.setDataProviderBean(metaData.dataProviderBean());
 			info.setDataProviderOwner(metaData.dataProviderOwner());
+			info.setDataProviderMethod(metaData.dataProviderMethod());
+			info.setDataProviderParamMethod(metaData.dataProviderParamMethod());
 			info.setAutoSelectFirst(metaData.autoSelectFirst());
 			info.setPlaceholder(metaData.placeholder());
 			info.setAllowCustomValue(metaData.allowCustomValue());
@@ -216,8 +218,6 @@ public class CEntityFieldService {
 			info.setColorField(metaData.colorField());
 			info.setSetBackgroundFromColor(metaData.setBackgroundFromColor());
 			info.setWidth(metaData.width());
-			info.setDataProviderMethod(metaData.dataProviderMethod());
-			info.setDataProviderParamMethod(metaData.dataProviderParamMethod());
 			info.setPasswordField(metaData.passwordField());
 			info.setDataUpdateMethod(metaData.dataUpdateMethod());
 			info.setPasswordRevealButton(metaData.passwordRevealButton());

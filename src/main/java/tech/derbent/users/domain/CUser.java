@@ -83,6 +83,10 @@ public class CUser extends CEntityNamed<CUser> implements CSearchable, CFieldInf
 	private byte[] profilePictureData;
 	// load it eagerly because there a few projects that use this field
 	@OneToMany (mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+	@AMetaData (
+			displayName = "Project Settings", required = false, readOnly = true, description = "User's project memberships and roles", hidden = false,
+			order = 20, createComponentMethod = "createUserProjectSettingsComponent"
+	)
 	private List<CUserProjectSettings> projectSettings = new ArrayList<>();
 	// User-Company relationship settings
 	@OneToMany (mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
