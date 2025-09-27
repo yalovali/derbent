@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -32,7 +34,6 @@ import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.service.CUserProjectSettingsService;
 import tech.derbent.users.view.CUserProjectSettingsComponent;
-import tech.derbent.users.view.CUserProjectSettingsDialog;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -42,11 +43,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserService.class);
 	private final PasswordEncoder passwordEncoder;
 	@Autowired
-	private CProjectService projectService;
-	@Autowired
-	private CUserProjectRoleService roleService;
-	@Autowired
-	private CUserProjectSettingsService userProjectSettingsService;
+	private ApplicationContext applicationContext;
 
 	public CUserService(final CUserRepository repository, final Clock clock) {
 		super(repository, clock);
@@ -228,6 +225,10 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	public Component createUserProjectSettingsComponent() {
 		LOGGER.debug("Creating enhanced user project settings component");
 		try {
+			// Get services from ApplicationContext to avoid circular dependency
+			CProjectService projectService = applicationContext.getBean(CProjectService.class);
+			CUserProjectRoleService roleService = applicationContext.getBean(CUserProjectRoleService.class);
+			CUserProjectSettingsService userProjectSettingsService = applicationContext.getBean(CUserProjectSettingsService.class);
 			// Create the enhanced component with proper service dependencies
 			CUserProjectSettingsComponent component =
 					new CUserProjectSettingsComponent(this, projectService, roleService, userProjectSettingsService);
