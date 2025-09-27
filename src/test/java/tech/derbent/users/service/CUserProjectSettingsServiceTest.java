@@ -69,7 +69,7 @@ public class CUserProjectSettingsServiceTest {
 	@Test
 	void testRemoveUserFromProject_NullIds() {
 		// When & Then - user and project with null IDs should fail
-		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.deleteByUserProject(user, project));
+		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.deleteByUserIdProjectId(user, project));
 		assertTrue(exception.getMessage().contains("User must have a valid ID") || exception.getMessage().contains("Project must have a valid ID"));
 		verify(repository, never()).findByUserIdAndProjectId(any(), any());
 	}
@@ -100,8 +100,8 @@ public class CUserProjectSettingsServiceTest {
 	@Test
 	void testRemoveUserFromProject_NullArguments() {
 		// When & Then - null arguments should fail
-		IllegalArgumentException exception1 = assertThrows(IllegalArgumentException.class, () -> service.deleteByUserProject(null, project));
-		IllegalArgumentException exception2 = assertThrows(IllegalArgumentException.class, () -> service.deleteByUserProject(user, null));
+		IllegalArgumentException exception1 = assertThrows(IllegalArgumentException.class, () -> service.deleteByUserIdProjectId(null, project));
+		IllegalArgumentException exception2 = assertThrows(IllegalArgumentException.class, () -> service.deleteByUserIdProjectId(user, null));
 		assertTrue(exception1.getMessage().contains("User cannot be null"));
 		assertTrue(exception2.getMessage().contains("Project cannot be null"));
 	}

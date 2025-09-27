@@ -3,8 +3,6 @@ package tech.derbent.api.views;
 import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.avatar.Avatar;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.api.components.CEnhancedBinder;
@@ -45,19 +43,6 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 		return String.format("Are you sure you want to delete the project setting for '%s'? This action cannot be undone.", projectName);
 	}
 
-	/** Creates a user avatar with profile picture if available */
-	protected Avatar createUserAvatar(final CUser user) {
-		final Avatar avatar = new Avatar();
-		Check.notNull(user, "User cannot be null when creating avatar");
-		avatar.setName(user.getName() + " " + (user.getLastname() != null ? user.getLastname() : ""));
-		if ((user.getProfilePictureData() != null) && (user.getProfilePictureData().length > 0)) {
-			// TODO: Convert byte array to StreamResource for avatar For now, just use
-			// initials
-		}
-		avatar.setAbbreviation(getInitials(user));
-		return avatar;
-	}
-
 	/** Deletes the selected user-project relationship */
 	protected void deleteSelected() {
 		final CUserProjectSettings selected = grid.asSingleSelect().getValue();
@@ -75,7 +60,7 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 			final CProject project = selected.getProject();
 			final CUser user = selected.getUser();
 			try {
-				userProjectSettingsService.deleteByUserProject(user, project);
+				userProjectSettingsService.deleteByUserIdProjectId(user, project);
 				LOGGER.debug("Successfully removed user {} from project {}", user, project);
 			} catch (Exception e) {
 				LOGGER.error("Error removing user from project: {}", e.getMessage(), e);
@@ -90,19 +75,6 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 		}).open();
 	}
 
-	/** Gets user initials for avatar */
-	private String getInitials(final CUser user) {
-		Check.notNull(user, "User cannot be null when generating initials");
-		final StringBuilder initials = new StringBuilder();
-		if ((user.getName() != null) && !user.getName().isEmpty()) {
-			initials.append(user.getName().charAt(0));
-		}
-		if ((user.getLastname() != null) && !user.getLastname().isEmpty()) {
-			initials.append(user.getLastname().charAt(0));
-		}
-		return initials.length() > 0 ? initials.toString().toUpperCase() : "?";
-	}
-
 	/** Gets the permission as a formatted string */
 	protected String getPermissionAsString(final CUserProjectSettings settings) {
 		Check.notNull(settings, "Settings cannot be null when getting permission string");
@@ -110,25 +82,6 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 			return "";
 		}
 		return settings.getPermission();
-	}
-
-	/** Gets the user name with avatar from a settings object */
-	protected HorizontalLayout getUserWithAvatar(final CUserProjectSettings settings) {
-		Check.notNull(settings, "Settings cannot be null when getting user with avatar");
-		final HorizontalLayout layout = new HorizontalLayout();
-		layout.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
-		layout.setSpacing(true);
-		if (settings.getUser() != null) {
-			final Avatar avatar = createUserAvatar(settings.getUser());
-			avatar.setWidth("24px");
-			avatar.setHeight("24px");
-			final Span userName =
-					new Span(settings.getUser().getName() + " " + (settings.getUser().getLastname() != null ? settings.getUser().getLastname() : ""));
-			layout.add(avatar, userName);
-		} else {
-			layout.add(new Span("Unknown User"));
-		}
-		return layout;
 	}
 
 	/** Abstract method to handle settings save events */
@@ -176,7 +129,7 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 	protected void setupGrid() {
 		// Add columns for project name, roles, and permissions
 		grid.addColumn(CUserProjectSettings::getId).setHeader("ID").setAutoWidth(true);
-		grid.addComponentColumn(this::getUserWithAvatar).setHeader("User").setAutoWidth(true);
+		// grid.addComponentColumn(this::getUserWithAvatar).setHeader("User").setAutoWidth(true);
 		grid.addColumn(CUserProjectSettings::getProjectName).setHeader("Project Name").setAutoWidth(true).setSortable(true);
 		grid.addColumn(this::getPermissionAsString).setHeader("Permission").setAutoWidth(true);
 		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);

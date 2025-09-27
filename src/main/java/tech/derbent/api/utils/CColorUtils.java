@@ -5,7 +5,10 @@ import java.lang.reflect.Method;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.avatar.Avatar;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility.IconSize;
@@ -14,6 +17,7 @@ import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CStatus;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.views.CAbstractNamedEntityPage;
+import tech.derbent.users.domain.CUser;
 
 /** CColorUtils - Utility class for color operations and status entity color management.
  * <p>
@@ -300,6 +304,46 @@ public final class CColorUtils {
 			LOGGER.error("Error checking if entity type {} is a status entity: {}", entityType.getSimpleName(), e.getMessage());
 			return false;
 		}
+	}
+
+	/** Gets user initials for avatar */
+	private String getInitials(final CUser user) {
+		Check.notNull(user, "User cannot be null when generating initials");
+		final StringBuilder initials = new StringBuilder();
+		if ((user.getName() != null) && !user.getName().isEmpty()) {
+			initials.append(user.getName().charAt(0));
+		}
+		if ((user.getLastname() != null) && !user.getLastname().isEmpty()) {
+			initials.append(user.getLastname().charAt(0));
+		}
+		return initials.length() > 0 ? initials.toString().toUpperCase() : "?";
+	}
+
+	/** Creates a user avatar with profile picture if available */
+	protected Avatar createUserAvatar(final CUser user) {
+		final Avatar avatar = new Avatar();
+		Check.notNull(user, "User cannot be null when creating avatar");
+		avatar.setName(user.getName() + " " + (user.getLastname() != null ? user.getLastname() : ""));
+		if ((user.getProfilePictureData() != null) && (user.getProfilePictureData().length > 0)) {
+			// TODO: Convert byte array to StreamResource for avatar For now, just use
+			// initials
+		}
+		avatar.setAbbreviation(getInitials(user));
+		return avatar;
+	}
+
+	/** Gets the user name with avatar from a settings object */
+	protected HorizontalLayout getUserWithAvatar(CUser user) {
+		Check.notNull(user, "User cannot be null when creating avatar");
+		final HorizontalLayout layout = new HorizontalLayout();
+		layout.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
+		layout.setSpacing(true);
+		final Avatar avatar = createUserAvatar(user);
+		avatar.setWidth("24px");
+		avatar.setHeight("24px");
+		final Span userName = new Span(user.getName() + " " + (user.getLastname() != null ? user.getLastname() : ""));
+		layout.add(avatar, userName);
+		return layout;
 	}
 
 	/** Private constructor to prevent instantiation. */

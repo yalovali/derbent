@@ -4,13 +4,15 @@ import java.util.List;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.notification.Notification;
 import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
-import tech.derbent.api.roles.domain.CRole;
+import tech.derbent.api.services.CAbstractEntityRelationService;
 import tech.derbent.api.services.CAbstractService;
+import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 
 /** Abstract base class for relationship dialogs. This class provides common functionality for dialogs that manage relationships between two entity
@@ -31,23 +33,29 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 	protected CEnhancedBinder<RelationshipClass> binder;
 	protected CFormBuilder<RelationshipClass> formBuilder;
 	private IContentOwner parentContent;
+	private CAbstractEntityRelationService<RelationshipClass> relationService;
+
+	@Override
+	protected Icon getFormIcon() throws Exception { return CColorUtils.getIconForEntity(mainEntity); }
 
 	/** Constructor for relationship dialogs.
-	 * @param parentContent The parent content owner for context access
-	 * @param relationship  The relationship entity to edit, or null for new
-	 * @param mainEntity    The main entity that owns the relationship
-	 * @param masterService Service for the main entity
-	 * @param detailService Service for the related entity
-	 * @param onSave        Callback executed when relationship is saved
-	 * @param isNew         True for new relationships, false for editing existing ones */
+	 * @param parentContent   The parent content owner for context access
+	 * @param relationship    The relationship entity to edit, or null for new
+	 * @param mainEntity      The main entity that owns the relationship
+	 * @param masterService   Service for the main entity
+	 * @param detailService   Service for the related entity
+	 * @param relationService
+	 * @param onSave          Callback executed when relationship is saved
+	 * @param isNew           True for new relationships, false for editing existing ones */
 	public CDBRelationDialog(IContentOwner parentContent, final RelationshipClass relationship, final MainEntityClass mainEntity,
 			final CAbstractService<MainEntityClass> masterService, final CAbstractService<RelatedEntityClass> detailService,
-			final Consumer<RelationshipClass> onSave, final boolean isNew) {
+			CAbstractEntityRelationService<RelationshipClass> relationService, final Consumer<RelationshipClass> onSave, final boolean isNew) {
 		super(relationship, onSave, isNew);
 		this.parentContent = parentContent;
 		this.mainEntity = mainEntity;
 		this.detailService = detailService;
 		this.masterService = masterService;
+		this.relationService = relationService;
 		// Create a binder specific to the relationship entity - child classes can override
 		initializeBinder();
 		// Child classes must call setupDialog() and populateForm() in their constructor
@@ -95,19 +103,16 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 		}
 	}
 
-	/** Perform the actual save operation. Default implementation uses callback pattern. Child classes can override. */
 	protected void performSave() {
+		// If onSave callback is provided, use it (callback pattern)
+		Check.notNull(getEntity(), "Entity must not be null when performing save");
 		if (onSave != null) {
 			onSave.accept(getEntity());
-		} else {
-			LOGGER.warn("No onSave callback available for saving");
 		}
+		Check.notNull(relationService, "Relation service must not be null when performing save without callback");
+		relationService.save(getEntity());
+		LOGGER.info("Entity saved successfully using service: {}", getEntity().getId());
 	}
-
-	/** Sets the related entity in the relationship object. Child classes must implement this to set the related entity. */
-	protected abstract void setRelatedEntityInRelationship(RelationshipClass relationship, RelatedEntityClass relatedEntity);
-	/** Sets the role in the relationship object. Child classes must implement this to set the role. */
-	protected abstract void setRoleInRelationship(RelationshipClass relationship, CRole<?> role);
 
 	/** Default implementation of setupDialog that creates the form using CFormBuilder. Child classes can override. */
 	@Override

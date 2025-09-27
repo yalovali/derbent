@@ -130,7 +130,7 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject, CUserPro
 	protected void setupGrid() {
 		// Add columns for user name with avatar, roles, and permissions
 		grid.addColumn(CUserProjectSettings::getId).setHeader("ID").setAutoWidth(true);
-		grid.addComponentColumn(this::getUserWithAvatar).setHeader("User").setAutoWidth(true).setSortable(false);
+		// grid.addComponentColumn(this::getUserWithAvatar).setHeader("User").setAutoWidth(true).setSortable(false);
 		grid.addColumn(this::getPermissionAsString).setHeader("Permission").setAutoWidth(true);
 		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
 		addToContent(grid);

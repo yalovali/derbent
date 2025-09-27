@@ -36,9 +36,8 @@ public class CPanelUserProjectSettings extends CPanelUserProjectBase<CUser, CUse
 	}
 
 	public List<CProject> getAvailableProjects() {
-		Long userId = (currentUser != null) ? currentUser.getId() : null;
-		Check.notNull(userId, "Current user must be selected to get available projects");
-		return projectService.getAvailableProjectsForUser(userId);
+		Check.notNull(currentUser, "Current user must be selected to get available projects");
+		return projectService.getAvailableProjectsForUser(getCurrentEntity().getId());
 	}
 
 	@Override

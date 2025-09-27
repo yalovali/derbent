@@ -9,6 +9,7 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
+import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CAccordionDBEntity;
 import tech.derbent.api.views.grids.CGrid;
 import tech.derbent.api.views.grids.CGridViewBaseNamed;
@@ -16,6 +17,7 @@ import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CSessionService;
+import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserProjectSettings;
 import tech.derbent.users.service.CUserProjectSettingsService;
 import tech.derbent.users.service.CUserService;
@@ -35,6 +37,11 @@ public class CProjectsView extends CGridViewBaseNamed<CProject> {
 	private CPanelProjectUsers projectUsersPanel;
 	private final CUserService userService;
 	private final CUserProjectSettingsService userProjectSettingsService;
+
+	public List<CUser> getAvailableUsers() {
+		Check.notNull(getCurrentEntity(), "Current project must be selected to get available users");
+		return userService.getAvailableUsersForProject(getCurrentEntity().getId());
+	}
 
 	@Autowired
 	public CProjectsView(final CProjectService entityService, final CSessionService sessionService, final CUserService userService,

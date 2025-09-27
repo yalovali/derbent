@@ -30,10 +30,10 @@ public abstract class CDBEditDialog<EntityClass> extends CDialog {
 	public CVerticalLayout getDialogLayout() { return dialogLayout; }
 
 	/** Child can override: success message for create. */
-	protected String getSuccessCreateMessage() { return "Created successfully"; }
+	protected String getSuccessCreateMessage() { return "Entity created successfully"; }
 
 	/** Child can override: success message for update. */
-	protected String getSuccessUpdateMessage() { return "Updated successfully"; }
+	protected String getSuccessUpdateMessage() { return "Entity updated successfully"; }
 
 	/** Child must implement: populate form fields from data. */
 	protected abstract void populateForm();

@@ -43,7 +43,7 @@ public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 	@JoinColumn (name = "user_id", nullable = false)
 	@AMetaData (
 			displayName = "User", required = false, readOnly = false, description = "Project user", hidden = false, order = 3,
-			setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CUserService", dataProviderMethod = "findAll"
+			setBackgroundFromColor = true, useIcon = true, dataProviderOwner = "content", dataProviderMethod = "getAvailableUsers"
 	)
 	private CUser user;
 

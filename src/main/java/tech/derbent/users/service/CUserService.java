@@ -99,18 +99,6 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	 * @return the PasswordEncoder instance */
 	public PasswordEncoder getPasswordEncoder() { return passwordEncoder; }
 
-	/** Gets users available for assignment to a specific project (excluding users already assigned to the project).
-	 * @param projectId the ID of the project
-	 * @return list of available users for the project */
-	@Transactional (readOnly = true)
-	@PreAuthorize ("permitAll()")
-	public List<CUser> getAvailableUsersForProject(final Long projectId) {
-		if (projectId == null) {
-			return findAll(); // Return all users if no project specified
-		}
-		return ((CUserRepository) repository).findUsersNotAssignedToProject(projectId);
-	}
-
 	@Override
 	public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
 		LOGGER.debug("Attempting to load user by username: {}", username);
@@ -214,5 +202,12 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 		super.validateEntity(user);
 		Check.notBlank(user.getLogin(), "User login cannot be null or empty");
 		Check.notBlank(user.getName(), "User name cannot be null or empty");
+	}
+
+	@Transactional (readOnly = true)
+	@PreAuthorize ("permitAll()")
+	public List<CUser> getAvailableUsersForProject(final Long projectId) {
+		Check.notNull(projectId, "User ID must not be null");
+		return ((CUserRepository) repository).findUsersNotAssignedToProject(projectId);
 	}
 }

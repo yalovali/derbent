@@ -71,7 +71,6 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 	@Override
 	@Transactional (readOnly = true)
 	public List<CUserProjectSettings> findByChildEntityId(final Long projectId) {
-		LOGGER.debug("Finding user project settings for project ID: {}", projectId);
 		return repository.findByProjectId(projectId);
 	}
 
@@ -112,7 +111,7 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 
 	/** Remove user from project */
 	@Transactional
-	public void deleteByUserProject(final CUser user, final CProject project) {
+	public void deleteByUserIdProjectId(final CUser user, final CProject project) {
 		Check.notNull(user, "User cannot be null");
 		Check.notNull(project, "Project cannot be null");
 		Check.notNull(user.getId(), "User must have a valid ID");
@@ -142,9 +141,5 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 		Check.notNull(relationship, "Relationship cannot be null");
 		Check.notNull(relationship.getUser(), "User cannot be null");
 		Check.notNull(relationship.getProject(), "Project cannot be null");
-		// Role can be null according to entity definition (nullable = true)
-		// Check.notNull(relationship.getRole(), "User role cannot be null");
-		// Permission can also be null according to entity definition
-		// Check.notNull(relationship.getPermission(), "Permission cannot be null");
 	}
 }
