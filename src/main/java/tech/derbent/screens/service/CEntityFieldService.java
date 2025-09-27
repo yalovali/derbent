@@ -299,6 +299,37 @@ public class CEntityFieldService {
 				"CProjectService", "CUserService", "CUserTypeService", "CCompanyService", "CDetailSectionService", "CDetailLinesService");
 	}
 
+	/** Get available custom component methods for a given entity type.
+	 * @param entityType the entity type to analyze
+	 * @return list of available custom component method names */
+	public static List<String> getCustomComponentMethods(final String entityType) {
+		Check.notBlank(entityType, "Entity type must not be empty");
+		final Class<?> entityClass = CAuxillaries.getEntityClass(entityType);
+		if (entityClass == null) {
+			return List.of();
+		}
+		final List<String> customMethods = new ArrayList<>();
+		final List<Field> allFields = getAllFields(entityClass);
+		for (final Field field : allFields) {
+			if (Modifier.isStatic(field.getModifiers()) || field.getName().equals("serialVersionUID") || field.getName().equals("LOGGER")) {
+				continue;
+			}
+			final AMetaData metaData = field.getAnnotation(AMetaData.class);
+			if (metaData != null && metaData.createComponentMethod() != null && !metaData.createComponentMethod().trim().isEmpty()) {
+				final String methodNames = metaData.createComponentMethod().trim();
+				// Split by comma and add each method
+				final String[] methods = methodNames.split(",");
+				for (String methodName : methods) {
+					methodName = methodName.trim();
+					if (!methodName.isEmpty() && !customMethods.contains(methodName)) {
+						customMethods.add(methodName);
+					}
+				}
+			}
+		}
+		return customMethods;
+	}
+
 	public static Field getEntityField(Class<?> type, final String fieldName) throws NoSuchFieldException {
 		Check.notNull(type, "Entity class must not be null");
 		Check.notBlank(fieldName, "Field name must not be empty");
