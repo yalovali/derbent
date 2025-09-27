@@ -11,23 +11,16 @@ import tech.derbent.companies.domain.CCompany;
  * standard CRUD operations */
 public interface CCompanyRepository extends CAbstractNamedRepository<CCompany> {
 
-	/** Finds all enabled companies. Useful for filtering active companies only.
-	 * @param enabled true to find enabled companies, false for disabled companies
-	 * @return List of CCompany entities matching the enabled status */
-	@Query ("SELECT c FROM CCompany c WHERE c.enabled = :enabled ORDER BY c.name")
+	/** Finds all enabled companies using generic pattern */
+	@Query ("SELECT c FROM #{#entityName} c WHERE c.enabled = :enabled ORDER BY c.name")
 	List<CCompany> findByEnabled(@Param ("enabled") boolean enabled);
-	/** Finds companies by name containing the search term (case-insensitive).
-	 * @param name the name search term
-	 * @return List of CCompany entities containing the search term in their name */
-	@Query ("SELECT c FROM CCompany c WHERE LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%')) ORDER BY c.name")
+	/** Finds companies by name containing the search term (case-insensitive) using generic pattern */
+	@Query ("SELECT c FROM #{#entityName} c WHERE LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%')) ORDER BY c.name")
 	List<CCompany> findByNameContainingIgnoreCase(@Param ("name") String name);
-	/** Finds companies by tax number.
-	 * @param taxNumber the tax identification number
-	 * @return Optional containing the CCompany if found, empty otherwise */
-	@Query ("SELECT c FROM CCompany c WHERE c.taxNumber = :taxNumber")
+	/** Finds companies by tax number using generic pattern */
+	@Query ("SELECT c FROM #{#entityName} c WHERE c.taxNumber = :taxNumber")
 	Optional<CCompany> findByTaxNumber(@Param ("taxNumber") String taxNumber);
-	/** Finds all companies ordered by name for listing purposes.
-	 * @return List of all CCompany entities ordered by name */
-	@Query ("SELECT c FROM CCompany c ORDER BY c.name")
+	/** Finds all companies ordered by name using generic pattern */
+	@Query ("SELECT c FROM #{#entityName} c ORDER BY c.name")
 	List<CCompany> findAllOrderByName();
 }

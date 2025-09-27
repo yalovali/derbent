@@ -7,49 +7,52 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.services.CAbstractRepository;
+import tech.derbent.api.services.CUserRelationshipRepository;
 import tech.derbent.users.domain.CUserProjectSettings;
 
 /** Repository interface for CUserProjectSettings entity. Provides data access methods for user-project relationships. */
 @Repository
-public interface CUserProjectSettingsRepository extends CAbstractRepository<CUserProjectSettings> {
+public interface CUserProjectSettingsRepository extends CUserRelationshipRepository<CUserProjectSettings> {
 
-	/** Find all user project settings for a specific user */
-	@Query ("SELECT ups FROM CUserProjectSettings ups LEFT JOIN FETCH ups.project LEFT JOIN FETCH ups.user WHERE ups.user.id = :userId")
-	List<CUserProjectSettings> findByUserId(@Param ("userId") Long userId);
-	/** Find all user project settings for a specific project */
-	@Query ("SELECT ups FROM CUserProjectSettings ups LEFT JOIN FETCH ups.project LEFT JOIN FETCH ups.user WHERE ups.project.id = :projectId")
+	/** Find all user project settings for a specific project with eager loading */
+	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.user WHERE r.project.id = :projectId")
 	List<CUserProjectSettings> findByProjectId(@Param ("projectId") Long projectId);
-	/** Find a specific user project setting by user and project */
-	@Query (
-		"SELECT ups FROM CUserProjectSettings ups LEFT JOIN FETCH ups.project LEFT JOIN FETCH ups.user WHERE ups.user.id = :userId AND ups.project.id = :projectId"
-	)
+	/** Find a specific user project setting by user and project using generic pattern */
+	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.user WHERE r.user.id = :userId AND r.project.id = :projectId")
 	Optional<CUserProjectSettings> findByUserIdAndProjectId(@Param ("userId") Long userId, @Param ("projectId") Long projectId);
+
 	/** Check if a relationship exists between user and project */
+	@Override
+	default boolean existsByUserIdAndEntityId(Long userId, Long entityId) {
+		return existsByUserIdAndProjectId(userId, entityId);
+	}
+
+	/** Check if a relationship exists between user and project - concrete implementation */
 	boolean existsByUserIdAndProjectId(Long userId, Long projectId);
-	/** Find all settings by role */
-	@Query ("SELECT ups FROM CUserProjectSettings ups LEFT JOIN FETCH ups.project LEFT JOIN FETCH ups.user WHERE ups.role = :role")
+
+	/** Find relationship by user and entity IDs - concrete implementation */
+	@Override
+	default Optional<CUserProjectSettings> findByUserIdAndEntityId(Long userId, Long entityId) {
+		return findByUserIdAndProjectId(userId, entityId);
+	}
+
+	/** Find all settings by role using generic pattern */
+	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.user WHERE r.role = :role")
 	List<CUserProjectSettings> findByRole(@Param ("role") String role);
-	/** Find all settings by permission */
-	@Query ("SELECT ups FROM CUserProjectSettings ups LEFT JOIN FETCH ups.project LEFT JOIN FETCH ups.user WHERE ups.permission = :permission")
+	/** Find all settings by permission using generic pattern */
+	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.user WHERE r.permission = :permission")
 	List<CUserProjectSettings> findByPermission(@Param ("permission") String permission);
-	/** Count users for a specific project */
-	long countByProjectId(Long projectId);
-	/** Count projects for a specific user */
-	long countByUserId(Long userId);
-	/** Delete a specific user-project relationship by user and project IDs. */
+	/** Count users for a specific project using generic pattern */
+	@Query ("SELECT COUNT(r) FROM #{#entityName} r WHERE r.project.id = :projectId")
+	long countByProjectId(@Param ("projectId") Long projectId);
+	/** Delete a specific user-project relationship by user and project IDs using generic pattern */
 	@Modifying
 	@Transactional
-	@Query ("DELETE FROM CUserProjectSettings ups WHERE ups.user.id = :userId AND ups.project.id = :projectId")
+	@Query ("DELETE FROM #{#entityName} r WHERE r.user.id = :userId AND r.project.id = :projectId")
 	void deleteByUserIdProjectId(@Param ("userId") Long userId, @Param ("projectId") Long projectId);
-	/** Delete all user-project relationships for a specific user. */
+	/** Delete all user-project relationships for a specific project using generic pattern */
 	@Modifying
 	@Transactional
-	@Query ("DELETE FROM CUserProjectSettings ups WHERE ups.user.id = :userId")
-	void deleteByUserId(@Param ("userId") Long userId);
-	/** Delete all user-project relationships for a specific project. */
-	@Modifying
-	@Transactional
-	@Query ("DELETE FROM CUserProjectSettings ups WHERE ups.project.id = :projectId")
+	@Query ("DELETE FROM #{#entityName} r WHERE r.project.id = :projectId")
 	void deleteByProjectId(@Param ("projectId") Long projectId);
 }

@@ -13,8 +13,7 @@ public interface CMeetingRepository extends CEntityOfProjectRepository<CMeeting>
 
 	@Override
 	@Query ("""
-			   SELECT DISTINCT m
-			   FROM CMeeting m
+			   SELECT DISTINCT m FROM #{#entityName} m
 			   LEFT JOIN FETCH m.project
 			   LEFT JOIN FETCH m.meetingType
 			   LEFT JOIN FETCH m.status
@@ -27,8 +26,7 @@ public interface CMeetingRepository extends CEntityOfProjectRepository<CMeeting>
 	Optional<CMeeting> findById(@Param ("id") Long id);
 	@Override
 	@Query ("""
-			   SELECT m
-			   FROM CMeeting m
+			   SELECT m FROM #{#entityName} m
 			   LEFT JOIN FETCH m.project
 			   LEFT JOIN FETCH m.meetingType
 			   LEFT JOIN FETCH m.status
