@@ -19,7 +19,6 @@ import tech.derbent.users.domain.CUserProjectSettings;
 @Service
 @Transactional (readOnly = true)
 public class CUserProjectSettingsService extends CAbstractEntityRelationService<CUserProjectSettings> {
-
 	private final CUserProjectSettingsRepository repository;
 	private final CUserRepository userRepository;
 	private final CProjectRepository projectRepository;
@@ -68,6 +67,17 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 		throw new UnsupportedOperationException("Use addUserToProject(CUser, CProject, String, String) method instead");
 	}
 
+	/** Remove user from project */
+	@Transactional
+	public void deleteByUserIdProjectId(final CUser user, final CProject project) {
+		Check.notNull(user, "User cannot be null");
+		Check.notNull(project, "Project cannot be null");
+		Check.notNull(user.getId(), "User must have a valid ID");
+		Check.notNull(project.getId(), "Project must have a valid ID");
+		repository.deleteByUserIdProjectId(user.getId(), project.getId());
+		LOGGER.debug("Successfully removed user {} from project {}", user.getId(), project.getId());
+	}
+
 	@Override
 	@Transactional (readOnly = true)
 	public List<CUserProjectSettings> findByChildEntityId(final Long projectId) {
@@ -107,17 +117,6 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 	@Transactional (readOnly = true)
 	public boolean relationshipExists(final Long userId, final Long projectId) {
 		return repository.existsByUserIdAndProjectId(userId, projectId);
-	}
-
-	/** Remove user from project */
-	@Transactional
-	public void deleteByUserIdProjectId(final CUser user, final CProject project) {
-		Check.notNull(user, "User cannot be null");
-		Check.notNull(project, "Project cannot be null");
-		Check.notNull(user.getId(), "User must have a valid ID");
-		Check.notNull(project.getId(), "Project must have a valid ID");
-		repository.deleteByUserIdProjectId(user.getId(), project.getId());
-		LOGGER.debug("Successfully removed user {} from project {}", user.getId(), project.getId());
 	}
 
 	/** Update user role and permissions for a project */

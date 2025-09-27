@@ -21,10 +21,8 @@ import tech.derbent.screens.domain.CDetailLines;
  * entities. */
 @Service
 public class CEntityFieldService {
-
 	/** Data class to hold entity field information. */
 	public static class EntityFieldInfo {
-
 		private boolean allowCustomValue = false;
 		// Additional AMetaData properties
 		private boolean autoSelectFirst = false;
@@ -58,13 +56,15 @@ public class CEntityFieldService {
 		private boolean useRadioButtons = false;
 		private String width = "";
 
+		public String getCreateComponentMethod() { return createComponentMethod; }
+
 		public String getDataProviderBean() { return dataProviderBean; }
 
 		public String getDataProviderMethod() { return dataProviderMethod; }
 
-		public String getDataProviderParamMethod() { return dataProviderParamMethod; }
-
 		public String getDataProviderOwner() { return dataProviderOwner; }
+
+		public String getDataProviderParamMethod() { return dataProviderParamMethod; }
 
 		public String getDataUpdateMethod() { return dataUpdateMethod; }
 
@@ -101,8 +101,6 @@ public class CEntityFieldService {
 
 		public boolean isComboboxReadOnly() { return comboboxReadOnly; }
 
-		public String getCreateComponentMethod() { return createComponentMethod; }
-
 		public boolean isHidden() { return hidden; }
 
 		public boolean isImageData() { return imageData; }
@@ -117,9 +115,9 @@ public class CEntityFieldService {
 
 		public boolean isSetBackgroundFromColor() { return setBackgroundFromColor; }
 
-		public boolean isUseRadioButtons() { return useRadioButtons; }
-
 		public boolean isUseIcon() { return useIcon; }
+
+		public boolean isUseRadioButtons() { return useRadioButtons; }
 
 		public void setAllowCustomValue(final boolean allowCustomValue) { this.allowCustomValue = allowCustomValue; }
 
@@ -137,9 +135,9 @@ public class CEntityFieldService {
 
 		public void setDataProviderMethod(final String dataProviderMethod) { this.dataProviderMethod = dataProviderMethod; }
 
-		public void setDataProviderParamMethod(final String dataProviderParamMethod) { this.dataProviderParamMethod = dataProviderParamMethod; }
-
 		public void setDataProviderOwner(final String dataProviderOwner) { this.dataProviderOwner = dataProviderOwner; }
+
+		public void setDataProviderParamMethod(final String dataProviderParamMethod) { this.dataProviderParamMethod = dataProviderParamMethod; }
 
 		public void setDataUpdateMethod(final String dataUpdateMethod) { this.dataUpdateMethod = dataUpdateMethod; }
 
@@ -177,9 +175,9 @@ public class CEntityFieldService {
 
 		public void setSetBackgroundFromColor(final boolean setBackgroundFromColor) { this.setBackgroundFromColor = setBackgroundFromColor; }
 
-		public void setUseRadioButtons(final boolean useRadioButtons) { this.useRadioButtons = useRadioButtons; }
-
 		public void setUseIcon(final boolean useIcon) { this.useIcon = useIcon; }
+
+		public void setUseRadioButtons(final boolean useRadioButtons) { this.useRadioButtons = useRadioButtons; }
 
 		public void setWidth(final String width) { this.width = width; }
 
@@ -264,6 +262,8 @@ public class CEntityFieldService {
 				sectionInfo.setDescription(line.getSectionName());
 				sectionInfo.setFieldTypeClass(CEntityFieldService.class);
 				return sectionInfo;
+			} else if (line.getRelationFieldName().startsWith("component:")) {
+				// this is a component field. read info values speacially!!!
 			} else {
 				field = getEntityField(screenClassName, relationFieldName);
 				Check.notNull(field, "Relation field not found: " + relationFieldName + " in class " + screenClassName);
@@ -291,14 +291,6 @@ public class CEntityFieldService {
 		return fields;
 	}
 
-	/** Get data provider beans for reference fields.
-	 * @return list of available data provider bean names */
-	public static List<String> getDataProviderBeans() {
-		return List.of("CActivityService", "CActivityTypeService", "CActivityStatusService", "CActivityPriorityService", "CMeetingService",
-				"CMeetingTypeService", "CMeetingStatusService", "CRiskService", "CRiskTypeService", "CRiskStatusService", "CRiskPriorityService",
-				"CProjectService", "CUserService", "CUserTypeService", "CCompanyService", "CDetailSectionService", "CDetailLinesService");
-	}
-
 	/** Get available custom component methods for a given entity type.
 	 * @param entityType the entity type to analyze
 	 * @return list of available custom component method names */
@@ -315,7 +307,7 @@ public class CEntityFieldService {
 				continue;
 			}
 			final AMetaData metaData = field.getAnnotation(AMetaData.class);
-			if (metaData != null && metaData.createComponentMethod() != null && !metaData.createComponentMethod().trim().isEmpty()) {
+			if ((metaData != null) && (metaData.createComponentMethod() != null) && !metaData.createComponentMethod().trim().isEmpty()) {
 				final String methodNames = metaData.createComponentMethod().trim();
 				// Split by comma and add each method
 				final String[] methods = methodNames.split(",");
@@ -328,6 +320,14 @@ public class CEntityFieldService {
 			}
 		}
 		return customMethods;
+	}
+
+	/** Get data provider beans for reference fields.
+	 * @return list of available data provider bean names */
+	public static List<String> getDataProviderBeans() {
+		return List.of("CActivityService", "CActivityTypeService", "CActivityStatusService", "CActivityPriorityService", "CMeetingService",
+				"CMeetingTypeService", "CMeetingStatusService", "CRiskService", "CRiskTypeService", "CRiskStatusService", "CRiskPriorityService",
+				"CProjectService", "CUserService", "CUserTypeService", "CCompanyService", "CDetailSectionService", "CDetailLinesService");
 	}
 
 	public static Field getEntityField(Class<?> type, final String fieldName) throws NoSuchFieldException {

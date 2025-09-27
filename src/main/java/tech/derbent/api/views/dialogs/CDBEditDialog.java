@@ -1,7 +1,6 @@
 package tech.derbent.api.views.dialogs;
 
 import java.util.function.Consumer;
-import com.vaadin.flow.component.notification.Notification;
 import tech.derbent.api.ui.notifications.CNotifications;
 import tech.derbent.api.views.components.CButton;
 import tech.derbent.api.views.components.CVerticalLayout;

@@ -3,7 +3,6 @@ package tech.derbent.api.components;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import tech.derbent.api.ui.notifications.CNotifications;
@@ -14,14 +13,13 @@ import tech.derbent.screens.view.CComponentGridEntity;
 import tech.derbent.screens.view.CFieldSelectionDialog;
 
 public class CComponentDetailsMasterToolbar extends HorizontalLayout {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentDetailsMasterToolbar.class);
 	private static final long serialVersionUID = 1L;
 	private CButton btnEditGrid;
 	private TextField searchField;
-	private CComponentGridEntity grid;
+	private final CComponentGridEntity grid;
 
-	public CComponentDetailsMasterToolbar(CComponentGridEntity grid) {
+	public CComponentDetailsMasterToolbar(final CComponentGridEntity grid) {
 		this.grid = grid;
 		setSpacing(true);
 		setPadding(true);
@@ -46,57 +44,14 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 		updateButtonStates();
 	}
 
-	private void updateButtonStates() {
-		// Enable edit button only if grid is available
-		btnEditGrid.setEnabled(grid != null);
-	}
-
-	/** Handles search field value changes */
-	private void handleSearch(String searchValue) {
-		Check.notNull(searchValue, "Search value is null");
-		Check.notNull(grid, "Grid component is not set");
-		// Apply search filter to grid
-		grid.setSearchFilter(searchValue);
-	}
-
-	private void handleEditGridEntity() {
-		try {
-			Check.notNull(grid, "Grid component is not set");
-			// Get current grid entity information
-			CGridEntity gridEntity = getCurrentGridEntity();
-			Check.notNull(gridEntity, "No grid entity found for the current grid");
-			String entityType = extractEntityTypeFromService(gridEntity.getDataServiceBeanName());
-			String currentSelections = gridEntity.getSelectedFields();
-			// Open field selection dialog
-			CFieldSelectionDialog dialog = new CFieldSelectionDialog(entityType, currentSelections, selectedFields -> {
-				// Update grid entity with new field selection
-				String newSelectionString = selectedFields.stream().map(fs -> fs.getFieldInfo().getFieldName() + ":" + fs.getOrder())
-						.reduce((a, b) -> a + "," + b).orElse("");
-				gridEntity.setSelectedFields(newSelectionString);
-				// Refresh grid
-				grid.refreshGrid();
-				CNotifications.showSuccess("Grid columns updated successfully");
-			});
-			dialog.open();
-		} catch (Exception e) {
-			LOGGER.error("Error opening grid editor", e);
-			CNotifications.showError("Error opening grid editor: " + e.getMessage());
-		}
-	}
-
-	/** Gets the current grid entity being displayed */
-	private CGridEntity getCurrentGridEntity() {
-		return grid != null ? grid.getGridEntity() : null;
-	}
-
 	/** Extracts entity type from service bean name */
-	private String extractEntityTypeFromService(String serviceBeanName) {
+	private String extractEntityTypeFromService(final String serviceBeanName) {
 		Check.notNull(serviceBeanName, "Service bean name is null");
 		Check.isTrue(serviceBeanName.endsWith("Service"), "Service bean name does not end with 'Service'");
 		// Convert activityService -> CActivity or CActivityService -> CActivity
-		String baseName = serviceBeanName.substring(0, serviceBeanName.length() - "Service".length());
+		final String baseName = serviceBeanName.substring(0, serviceBeanName.length() - "Service".length());
 		// If it's already in the format "CActivity", return as is
-		if (baseName.startsWith("C") && baseName.length() > 1 && Character.isUpperCase(baseName.charAt(1))) {
+		if (baseName.startsWith("C") && (baseName.length() > 1) && Character.isUpperCase(baseName.charAt(1))) {
 			return baseName;
 		}
 		// Convert from camelCase bean name to proper class name
@@ -105,5 +60,48 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 			return "C" + Character.toUpperCase(baseName.charAt(0)) + baseName.substring(1);
 		}
 		return null;
+	}
+
+	/** Gets the current grid entity being displayed */
+	private CGridEntity getCurrentGridEntity() {
+		return grid != null ? grid.getGridEntity() : null;
+	}
+
+	private void handleEditGridEntity() {
+		try {
+			Check.notNull(grid, "Grid component is not set");
+			// Get current grid entity information
+			final CGridEntity gridEntity = getCurrentGridEntity();
+			Check.notNull(gridEntity, "No grid entity found for the current grid");
+			final String entityType = extractEntityTypeFromService(gridEntity.getDataServiceBeanName());
+			final String currentSelections = gridEntity.getSelectedFields();
+			// Open field selection dialog
+			final CFieldSelectionDialog dialog = new CFieldSelectionDialog(entityType, currentSelections, selectedFields -> {
+				// Update grid entity with new field selection
+				final String newSelectionString = selectedFields.stream().map(fs -> fs.getFieldInfo().getFieldName() + ":" + fs.getOrder())
+						.reduce((a, b) -> a + "," + b).orElse("");
+				gridEntity.setSelectedFields(newSelectionString);
+				// Refresh grid
+				grid.refreshGrid();
+				CNotifications.showSuccess("Grid columns updated successfully");
+			});
+			dialog.open();
+		} catch (final Exception e) {
+			LOGGER.error("Error opening grid editor", e);
+			CNotifications.showError("Error opening grid editor: " + e.getMessage());
+		}
+	}
+
+	/** Handles search field value changes */
+	private void handleSearch(final String searchValue) {
+		Check.notNull(searchValue, "Search value is null");
+		Check.notNull(grid, "Grid component is not set");
+		// Apply search filter to grid
+		grid.setSearchFilter(searchValue);
+	}
+
+	private void updateButtonStates() {
+		// Enable edit button only if grid is available
+		btnEditGrid.setEnabled(grid != null);
 	}
 }

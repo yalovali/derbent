@@ -24,7 +24,6 @@ import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
 /** Dialog for editing screen field descriptions (detailSection entities). Extends CDBEditDialog to provide a consistent dialog experience. */
 public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
-
 	private static final long serialVersionUID = 1L;
 	private final CEnhancedBinder<CDetailLines> binder;
 	private final CDetailSection screen;
@@ -184,7 +183,7 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 			Check.notNull(info, "Field info must not be null for field class: " + relationFieldName);
 			// if the field is a collection, we cannot reference any item, so skip fields all...
 			// no item can be referenced it is a collection, skip fields all...
-			if (info.getFieldTypeClass().isAssignableFrom(Collection.class)) {
+			if (Collection.class.isAssignableFrom(info.getFieldTypeClass())) {
 				// Initialize empty list for collections since no fields can be referenced
 				fieldProperties = new ArrayList<>();
 			} else {
@@ -192,22 +191,24 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 				fieldProperties = CEntityFieldService.getEntitySimpleFields(info.getJavaType(), null);
 			}
 		}
-		// Ensure fieldProperties is not null before proceeding
-		Check.notNull(fieldProperties, "Field properties list must not be null");
-		final EntityFieldInfo info_data = CEntityFieldService.getEntityFieldInfo(screen.getEntityType().toString(), relationFieldName);
-		Check.notNull(info_data, "Entity field info must not be null for relation field: " + relationFieldName);
-		final String createComponentMethod = info_data.getCreateComponentMethod();
-		if ((createComponentMethod != null) && !createComponentMethod.trim().isEmpty()) {
-			// if the components methods are not empty add them to list
-			final String[] methods = createComponentMethod.split(",");
-			for (final String method : methods) {
-				if ((method != null) && !method.trim().isEmpty()) {
-					final String trimmedMethod = method.trim();
-					// create a fake EntityFieldInfo to hold the method name
-					final EntityFieldInfo componentField = new EntityFieldInfo();
-					componentField.setFieldName(trimmedMethod);
-					// add to list
-					fieldProperties.add(componentField);
+		if (!relationFieldName.equals(CEntityFieldService.SECTION) && !relationFieldName.equals(CEntityFieldService.THIS_CLASS)) {
+			// Ensure fieldProperties is not null before proceeding
+			Check.notNull(fieldProperties, "Field properties list must not be null");
+			final EntityFieldInfo info_data = CEntityFieldService.getEntityFieldInfo(screen.getEntityType().toString(), relationFieldName);
+			Check.notNull(info_data, "Entity field info must not be null for relation field: " + relationFieldName);
+			final String createComponentMethod = info_data.getCreateComponentMethod();
+			if ((createComponentMethod != null) && !createComponentMethod.trim().isEmpty()) {
+				// if the components methods are not empty add them to list
+				final String[] methods = createComponentMethod.split(",");
+				for (final String method : methods) {
+					if ((method != null) && !method.trim().isEmpty()) {
+						final String trimmedMethod = method.trim();
+						// create a fake EntityFieldInfo to hold the method name
+						final EntityFieldInfo componentField = new EntityFieldInfo();
+						componentField.setFieldName("component:" + trimmedMethod);
+						// add to list
+						fieldProperties.add(componentField);
+					}
 				}
 			}
 		}
@@ -232,6 +233,8 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 			return;
 		} else if (relationFieldName.equals(CEntityFieldService.THIS_CLASS)) {
 			info = CEntityFieldService.getEntityFieldInfo(screen.getEntityType().toString(), selectedProperty);
+		} else if (selectedProperty.startsWith("component:")) {
+			return;
 		} else {
 			info = CEntityFieldService.getEntityFieldInfo(screen.getEntityType().toString(), relationFieldName);
 			info = CEntityFieldService.getEntityFieldInfo(info.getJavaType(), selectedProperty);

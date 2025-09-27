@@ -5,7 +5,6 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.notification.Notification;
 import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
@@ -25,7 +24,6 @@ import tech.derbent.api.utils.Check;
  * @param <RelatedEntityClass> The related entity type being selected */
 public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<RelationshipClass>, MainEntityClass extends CEntityDB<MainEntityClass>,
 		RelatedEntityClass extends CEntityDB<RelatedEntityClass>> extends CDBEditDialog<RelationshipClass> {
-
 	private static final long serialVersionUID = 1L;
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CDBRelationDialog.class);
 	protected CAbstractService<RelatedEntityClass> detailService;
@@ -33,11 +31,8 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 	protected CAbstractService<MainEntityClass> masterService;
 	protected CEnhancedBinder<RelationshipClass> binder;
 	protected CFormBuilder<RelationshipClass> formBuilder;
-	private IContentOwner parentContent;
-	private CAbstractEntityRelationService<RelationshipClass> relationService;
-
-	@Override
-	protected Icon getFormIcon() throws Exception { return CColorUtils.getIconForEntity(mainEntity); }
+	private final IContentOwner parentContent;
+	private final CAbstractEntityRelationService<RelationshipClass> relationService;
 
 	/** Constructor for relationship dialogs.
 	 * @param parentContent   The parent content owner for context access
@@ -48,9 +43,9 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 	 * @param relationService
 	 * @param onSave          Callback executed when relationship is saved
 	 * @param isNew           True for new relationships, false for editing existing ones */
-	public CDBRelationDialog(IContentOwner parentContent, final RelationshipClass relationship, final MainEntityClass mainEntity,
+	public CDBRelationDialog(final IContentOwner parentContent, final RelationshipClass relationship, final MainEntityClass mainEntity,
 			final CAbstractService<MainEntityClass> masterService, final CAbstractService<RelatedEntityClass> detailService,
-			CAbstractEntityRelationService<RelationshipClass> relationService, final Consumer<RelationshipClass> onSave, final boolean isNew) {
+			final CAbstractEntityRelationService<RelationshipClass> relationService, final Consumer<RelationshipClass> onSave, final boolean isNew) {
 		super(relationship, onSave, isNew);
 		this.parentContent = parentContent;
 		this.mainEntity = mainEntity;
@@ -62,19 +57,33 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 		// Child classes must call setupDialog() and populateForm() in their constructor
 	}
 
+	/** Returns the list of fields to include in the form. Child classes can override this. */
+	protected List<String> getFormFields() {
+		return List.of("project", "role", "permission");
+	}
+
+	@Override
+	protected Icon getFormIcon() throws Exception { return CColorUtils.getIconForEntity(mainEntity); }
+
 	/** Gets the parent content owner for accessing context data. This allows dialogs to access data from the parent page/container.
 	 * @return the parent content owner */
 	protected IContentOwner getParentContent() { return parentContent; }
 
 	protected void initializeBinder() {
 		@SuppressWarnings ("unchecked")
-		Class<RelationshipClass> entityClass = (Class<RelationshipClass>) getEntity().getClass();
+		final Class<RelationshipClass> entityClass = (Class<RelationshipClass>) getEntity().getClass();
 		this.binder = new CEnhancedBinder<>(entityClass);
 	}
 
-	/** Returns the list of fields to include in the form. Child classes can override this. */
-	protected List<String> getFormFields() {
-		return List.of("project", "role", "permission");
+	protected void performSave() {
+		// If onSave callback is provided, use it (callback pattern)
+		Check.notNull(getEntity(), "Entity must not be null when performing save");
+		if (onSave != null) {
+			onSave.accept(getEntity());
+		}
+		Check.notNull(relationService, "Relation service must not be null when performing save without callback");
+		relationService.save(getEntity());
+		LOGGER.info("Entity saved successfully using service: {}", getEntity().getId());
 	}
 
 	/** Default implementation of populateForm using the binder. Child classes can override. */
@@ -104,23 +113,12 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 		}
 	}
 
-	protected void performSave() {
-		// If onSave callback is provided, use it (callback pattern)
-		Check.notNull(getEntity(), "Entity must not be null when performing save");
-		if (onSave != null) {
-			onSave.accept(getEntity());
-		}
-		Check.notNull(relationService, "Relation service must not be null when performing save without callback");
-		relationService.save(getEntity());
-		LOGGER.info("Entity saved successfully using service: {}", getEntity().getId());
-	}
-
 	/** Default implementation of setupDialog that creates the form using CFormBuilder. Child classes can override. */
 	@Override
 	public void setupDialog() throws Exception {
 		super.setupDialog();
 		@SuppressWarnings ("unchecked")
-		Class<RelationshipClass> entityClass = (Class<RelationshipClass>) getEntity().getClass();
+		final Class<RelationshipClass> entityClass = (Class<RelationshipClass>) getEntity().getClass();
 		formBuilder = new CFormBuilder<>(parentContent, entityClass, binder, getFormFields());
 		getDialogLayout().add(formBuilder.getFormLayout());
 	}

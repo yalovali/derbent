@@ -4,12 +4,9 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.data.binder.ValidationException;
 import tech.derbent.api.components.CBinderFactory;
 import tech.derbent.api.components.CEnhancedBinder;
-import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.api.ui.notifications.CNotifications;
 
 /** Utility class for handling enhanced validation errors and providing detailed error reporting for form binding operations. */
