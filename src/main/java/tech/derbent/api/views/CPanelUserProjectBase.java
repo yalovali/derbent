@@ -13,6 +13,7 @@ import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.ui.dialogs.CConfirmationDialog;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.views.components.CButton;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
@@ -129,7 +130,7 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 	protected void setupGrid() {
 		// Add columns for project name, roles, and permissions
 		grid.addColumn(CUserProjectSettings::getId).setHeader("ID").setAutoWidth(true);
-		// grid.addComponentColumn(this::getUserWithAvatar).setHeader("User").setAutoWidth(true);
+		grid.addComponentColumn(settings -> CColorUtils.getEntityWithIcon(settings.getUser())).setHeader("User").setAutoWidth(true);
 		grid.addColumn(CUserProjectSettings::getProjectName).setHeader("Project Name").setAutoWidth(true).setSortable(true);
 		grid.addColumn(this::getPermissionAsString).setHeader("Permission").setAutoWidth(true);
 		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);

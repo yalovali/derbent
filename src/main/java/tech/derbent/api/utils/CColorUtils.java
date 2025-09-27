@@ -14,6 +14,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility.IconSize;
 import tech.derbent.api.domains.CEntity;
 import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.domains.CStatus;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.views.CAbstractNamedEntityPage;
@@ -332,17 +333,43 @@ public final class CColorUtils {
 		return avatar;
 	}
 
-	/** Gets the user name with avatar from a settings object */
-	protected HorizontalLayout getUserWithAvatar(CUser user) {
-		Check.notNull(user, "User cannot be null when creating avatar");
+	/** Gets the user name with avatar from a settings object
+	 * @deprecated Use {@link #getEntityWithIcon(CEntityNamed)} instead */
+	@Deprecated
+	protected HorizontalLayout getUserWithAvatar(final CUser user) {
+		// For backward compatibility, use the generic implementation
+		return getEntityWithIcon(user);
+	}
+
+	/** Gets a generic entity display with icon - works for any named entity with icon support. This method creates a horizontal layout containing an
+	 * entity's icon and name.
+	 * @param entity the named entity to display (must not be null)
+	 * @return a HorizontalLayout containing the entity's icon and name
+	 * @throws IllegalArgumentException if entity is null */
+	public static HorizontalLayout getEntityWithIcon(final CEntityNamed<?> entity) {
+		Check.notNull(entity, "Entity cannot be null when creating entity with icon display");
 		final HorizontalLayout layout = new HorizontalLayout();
 		layout.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
 		layout.setSpacing(true);
-		final Avatar avatar = createUserAvatar(user);
-		avatar.setWidth("24px");
-		avatar.setHeight("24px");
-		final Span userName = new Span(user.getName() + " " + (user.getLastname() != null ? user.getLastname() : ""));
-		layout.add(avatar, userName);
+		try {
+			// Get the entity's icon using the existing infrastructure
+			final Icon icon = getIconForEntity(entity);
+			if (icon != null) {
+				icon.setSize("24px");
+				layout.add(icon);
+			}
+		} catch (final Exception e) {
+			LOGGER.warn("Could not create icon for entity {}: {}", entity.getClass().getSimpleName(), e.getMessage());
+			// Continue without icon rather than failing completely
+		}
+		// Add entity name - for Users, include lastname if available
+		String displayName = entity.getName();
+		if (entity instanceof CUser) {
+			final CUser user = (CUser) entity;
+			displayName = user.getName() + " " + (user.getLastname() != null ? user.getLastname() : "");
+		}
+		final Span entityName = new Span(displayName);
+		layout.add(entityName);
 		return layout;
 	}
 
