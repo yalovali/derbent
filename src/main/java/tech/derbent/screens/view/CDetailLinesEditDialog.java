@@ -24,6 +24,7 @@ import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
 /** Dialog for editing screen field descriptions (detailSection entities). Extends CDBEditDialog to provide a consistent dialog experience. */
 public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
+
 	private static final long serialVersionUID = 1L;
 	private final CEnhancedBinder<CDetailLines> binder;
 	private final CDetailSection screen;
