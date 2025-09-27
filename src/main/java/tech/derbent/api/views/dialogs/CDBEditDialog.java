@@ -2,6 +2,7 @@ package tech.derbent.api.views.dialogs;
 
 import java.util.function.Consumer;
 import com.vaadin.flow.component.notification.Notification;
+import tech.derbent.api.ui.notifications.CNotifications;
 import tech.derbent.api.views.components.CButton;
 import tech.derbent.api.views.components.CVerticalLayout;
 
@@ -47,9 +48,9 @@ public abstract class CDBEditDialog<EntityClass> extends CDialog {
 				onSave.accept(getEntity());
 			}
 			close();
-			Notification.show(isNew ? getSuccessCreateMessage() : getSuccessUpdateMessage());
+			CNotifications.showSuccess(isNew ? getSuccessCreateMessage() : getSuccessUpdateMessage());
 		} catch (final Exception e) {
-			Notification.show("Error: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
+			CNotifications.showError("Error: " + e.getMessage());
 		}
 	}
 

@@ -10,6 +10,7 @@ import com.vaadin.flow.data.binder.ValidationException;
 import tech.derbent.api.components.CBinderFactory;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
+import tech.derbent.api.ui.notifications.CNotifications;
 
 /** Utility class for handling enhanced validation errors and providing detailed error reporting for form binding operations. */
 public class CValidationUtils {
@@ -100,7 +101,7 @@ public class CValidationUtils {
 			message.append("• ").append(formatFieldName(field)).append(": ").append(error).append("\n");
 		});
 		message.append("\nPlease correct the errors and try again.");
-		new CWarningDialog(message.toString()).open();
+		CNotifications.showWarningDialog(message.toString());
 	}
 
 	/** Shows enhanced validation errors as a notification.
@@ -113,13 +114,12 @@ public class CValidationUtils {
 		final List<String> fieldsWithErrors = enhancedBinder.getFieldsWithErrors();
 		final String message = String.format("Validation failed for %s in %d field(s): %s", entityTypeName, fieldsWithErrors.size(),
 				String.join(", ", fieldsWithErrors));
-		final Notification notification = Notification.show(message, 5000, Notification.Position.MIDDLE);
-		notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+		CNotifications.showError(message);
 	}
 
 	/** Shows the standard validation error dialog. */
 	public static void showStandardValidationDialog() {
-		new CWarningDialog("Failed to save the data. Please check that all required fields are filled and values are valid.").open();
+		CNotifications.showWarningDialog("Failed to save the data. Please check that all required fields are filled and values are valid.");
 	}
 
 	/** Validates a bean using an enhanced binder and returns detailed error information.

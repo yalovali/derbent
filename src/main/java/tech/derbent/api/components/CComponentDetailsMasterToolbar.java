@@ -6,6 +6,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import tech.derbent.api.ui.notifications.CNotifications;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CButton;
 import tech.derbent.screens.domain.CGridEntity;
@@ -74,12 +75,12 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 				gridEntity.setSelectedFields(newSelectionString);
 				// Refresh grid
 				grid.refreshGrid();
-				Notification.show("Grid columns updated successfully");
+				CNotifications.showSuccess("Grid columns updated successfully");
 			});
 			dialog.open();
 		} catch (Exception e) {
 			LOGGER.error("Error opening grid editor", e);
-			Notification.show("Error opening grid editor: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
+			CNotifications.showError("Error opening grid editor: " + e.getMessage());
 		}
 	}
 

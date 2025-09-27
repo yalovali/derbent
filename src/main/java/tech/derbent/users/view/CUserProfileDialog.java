@@ -22,6 +22,7 @@ import com.vaadin.flow.server.streams.UploadMetadata;
 import tech.derbent.api.views.components.CButton;
 import tech.derbent.api.views.dialogs.CDBEditDialog;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
+import tech.derbent.api.ui.notifications.CNotifications;
 import tech.derbent.api.utils.CImageUtils;
 import tech.derbent.users.domain.CUser;
 
@@ -181,7 +182,7 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 		temporaryImageData = null;
 		// Update preview to default
 		setDefaultProfilePicture();
-		Notification.show("Profile picture removed", 3000, Notification.Position.TOP_CENTER);
+		CNotifications.showSuccess("Profile picture removed");
 	}
 
 	@Override
@@ -229,7 +230,7 @@ public class CUserProfileDialog extends CDBEditDialog<CUser> {
 		final String dataUrl = CImageUtils.createDataUrl(resizedImageData);
 		profilePicturePreview.setSrc(dataUrl);
 		deleteProfilePictureButton.setEnabled(true);
-		Notification.show("Profile picture uploaded and resized successfully", 3000, Notification.Position.TOP_CENTER);
+		CNotifications.showSuccess("Profile picture uploaded and resized successfully");
 	}
 
 	@Override

@@ -4,18 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.utils.Check;
 
-/**
- * CNotifications - Static utility class for accessing notification services.
- * 
- * Provides static methods to access CNotificationService functionality
- * when dependency injection is not available or convenient.
- * 
- * Note: This is a simplified implementation that focuses on backwards compatibility.
- * For full functionality, inject CNotificationService directly in your classes.
- * 
- * Layer: Utility (MVC)
- * Usage: Use static methods when you cannot inject CNotificationService
- */
+/** CNotifications - Static utility class for accessing notification services. Provides static methods to access CNotificationService functionality
+ * when dependency injection is not available or convenient. Note: This is a simplified implementation that focuses on backwards compatibility. For
+ * full functionality, inject CNotificationService directly in your classes. Layer: Utility (MVC) Usage: Use static methods when you cannot inject
+ * CNotificationService */
 public final class CNotifications {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CNotifications.class);
@@ -95,7 +87,6 @@ public final class CNotifications {
 		// For now, just log. In future versions, this could use other approaches.
 		// Users should inject CNotificationService directly for full functionality.
 	}
-
 	// Convenience methods
 
 	/** Shows success message for save operations */

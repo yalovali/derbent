@@ -18,6 +18,7 @@ import com.vaadin.flow.server.streams.InMemoryUploadCallback;
 import com.vaadin.flow.server.streams.InMemoryUploadHandler;
 import com.vaadin.flow.server.streams.UploadMetadata;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
+import tech.derbent.api.ui.notifications.CNotifications;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CImageUtils;
 import tech.derbent.api.views.components.CButton;
@@ -135,17 +136,17 @@ public class CPictureSelectorDialog extends Dialog {
 			// Update the current value
 			this.currentValue = resizedImageData;
 			updateImagePreview();
-			Notification.show("Image uploaded and resized successfully", 3000, Notification.Position.TOP_CENTER);
+			CNotifications.showSuccess("Image uploaded and resized successfully");
 		} catch (final Exception e) {
 			LOGGER.error("Unexpected error during image upload", e);
-			new CWarningDialog("Failed to upload image: " + e.getMessage()).open();
+			CNotifications.showWarningDialog("Failed to upload image: " + e.getMessage());
 		}
 	}
 
 	private void handleDelete(final ClickEvent<Button> event) {
 		this.currentValue = null;
 		updateImagePreview();
-		Notification.show("Image deleted", 2000, Notification.Position.TOP_CENTER);
+		CNotifications.showSuccess("Image deleted");
 	}
 
 	private void handleSave(final ClickEvent<Button> event) {
