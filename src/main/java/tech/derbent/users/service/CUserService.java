@@ -23,10 +23,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
+import org.springframework.beans.factory.annotation.Autowired;
 import tech.derbent.api.services.CAbstractNamedEntityService;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.roles.service.CUserProjectRoleService;
 import tech.derbent.projects.domain.CProject;
+import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
+import tech.derbent.users.view.CUserProjectSettingsComponent;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -35,6 +39,10 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserService.class);
 	private final PasswordEncoder passwordEncoder;
+	@Autowired
+	private CProjectService projectService;
+	@Autowired
+	private CUserProjectRoleService roleService;
 
 	public CUserService(final CUserRepository repository, final Clock clock) {
 		super(repository, clock);
@@ -214,10 +222,19 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	}
 
 	public Component createUserProjectSettingsComponent() {
-		LOGGER.debug("Creating user project settings component");
-		final Div errorDiv = new Div();
-		errorDiv.setText("Just testing");
-		errorDiv.addClassName("error-message");
-		return errorDiv;
+		LOGGER.debug("Creating enhanced user project settings component");
+		try {
+			// Create the enhanced component with proper service dependencies
+			CUserProjectSettingsComponent component = new CUserProjectSettingsComponent(projectService, roleService);
+			LOGGER.debug("Successfully created CUserProjectSettingsComponent");
+			return component;
+		} catch (Exception e) {
+			LOGGER.error("Failed to create user project settings component: {}", e.getMessage(), e);
+			// Fallback to simple div with error message
+			final Div errorDiv = new Div();
+			errorDiv.setText("Error loading user project settings component: " + e.getMessage());
+			errorDiv.addClassName("error-message");
+			return errorDiv;
+		}
 	}
 }
