@@ -17,9 +17,9 @@ import tech.derbent.activities.domain.CActivity;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.domains.CEntityOfProject;
-import tech.derbent.api.interfaces.CKanbanEntity;
-import tech.derbent.api.interfaces.CKanbanStatus;
-import tech.derbent.api.interfaces.CKanbanType;
+import tech.derbent.api.interfaces.IKanbanEntity;
+import tech.derbent.api.interfaces.IKanbanStatus;
+import tech.derbent.api.interfaces.IKanbanType;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
 
@@ -28,7 +28,7 @@ import tech.derbent.users.domain.CUser;
 @Table (name = "cmeeting") // table name for the entity as the default is the class name
 // in lowercase
 @AttributeOverride (name = "id", column = @Column (name = "meeting_id"))
-public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntity {
+public class CMeeting extends CEntityOfProject<CMeeting> implements IKanbanEntity {
 
 	public static final String DEFAULT_COLOR = "#fd7e14";
 	public static final String DEFAULT_ICON = "vaadin:calendar";
@@ -179,7 +179,7 @@ public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntit
 	public CMeetingStatus getStatus() { return status; }
 
 	@Override
-	public CKanbanType getType() { return meetingType; }
+	public IKanbanType getType() { return meetingType; }
 
 	/** Check if a user is an attendee of this meeting.
 	 * @param user the user to check
@@ -235,7 +235,7 @@ public class CMeeting extends CEntityOfProject<CMeeting> implements CKanbanEntit
 
 	// CKanbanEntity implementation methods
 	@Override
-	public void setStatus(final CKanbanStatus status) {
+	public void setStatus(final IKanbanStatus status) {
 		if (status instanceof CMeetingStatus) {
 			setStatus((CMeetingStatus) status);
 		}

@@ -29,8 +29,8 @@ import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.components.CSearchToolbar;
 import tech.derbent.api.domains.CEntity;
 import tech.derbent.api.domains.CEntityDB;
-import tech.derbent.api.interfaces.CLayoutChangeListener;
-import tech.derbent.api.interfaces.CSearchable;
+import tech.derbent.api.interfaces.ILayoutChangeListener;
+import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.ui.dialogs.CConfirmationDialog;
@@ -49,7 +49,7 @@ import tech.derbent.session.service.CLayoutService;
 import tech.derbent.session.service.ISessionService;
 
 public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<EntityClass>> extends CAbstractPage
-		implements CLayoutChangeListener, IContentOwner {
+		implements ILayoutChangeListener, IContentOwner {
 
 	private static final long serialVersionUID = 1L;
 	ArrayList<CAccordionDBEntity<EntityClass>> AccordionList = new ArrayList<CAccordionDBEntity<EntityClass>>(); // List of accordions
@@ -242,7 +242,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		masterViewSection = new CMasterViewSectionGrid<EntityClass>(entityClass, this);
 		masterViewSection.addSelectionChangeListener(this::onSelectionChanged);
 		// Create search toolbar if entity supports searching
-		if (CSearchable.class.isAssignableFrom(entityClass)) {
+		if (ISearchable.class.isAssignableFrom(entityClass)) {
 			searchToolbar = new CSearchToolbar("Search " + entityClass.getSimpleName().replace("C", "").toLowerCase() + "...");
 			searchToolbar.addSearchListener(event -> {
 				currentSearchText = event.getSearchText();
@@ -596,7 +596,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		}
 		masterViewSection.addSelectionChangeListener(this::onSelectionChanged);
 		// Create search toolbar if entity supports searching
-		if (CSearchable.class.isAssignableFrom(entityClass)) {
+		if (ISearchable.class.isAssignableFrom(entityClass)) {
 			searchToolbar = new CSearchToolbar("Search " + entityClass.getSimpleName().replace("C", "").toLowerCase() + "...");
 			searchToolbar.addSearchListener(event -> {
 				currentSearchText = event.getSearchText();

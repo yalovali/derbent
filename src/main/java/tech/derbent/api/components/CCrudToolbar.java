@@ -12,7 +12,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.api.domains.CEntityDB;
-import tech.derbent.api.interfaces.CEntityUpdateListener;
+import tech.derbent.api.interfaces.IEntityUpdateListener;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.ui.dialogs.CConfirmationDialog;
 import tech.derbent.api.ui.notifications.CNotificationService;
@@ -38,7 +38,7 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	private CButton refreshButton;
 	private Consumer<EntityClass> refreshCallback;
 	private CButton saveButton;
-	private final List<CEntityUpdateListener> updateListeners = new ArrayList<>();
+	private final List<IEntityUpdateListener> updateListeners = new ArrayList<>();
 
 	/** Creates a comprehensive CRUD toolbar.
 	 * @param binder        the binder for form validation and data binding
@@ -59,7 +59,7 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 
 	/** Adds an update listener to be notified of CRUD operations.
 	 * @param listener the listener to add */
-	public void addUpdateListener(final CEntityUpdateListener listener) {
+	public void addUpdateListener(final IEntityUpdateListener listener) {
 		if (listener != null && !updateListeners.contains(listener)) {
 			updateListeners.add(listener);
 		}
@@ -247,7 +247,7 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 
 	/** Removes an update listener.
 	 * @param listener the listener to remove */
-	public void removeUpdateListener(final CEntityUpdateListener listener) {
+	public void removeUpdateListener(final IEntityUpdateListener listener) {
 		updateListeners.remove(listener);
 	}
 

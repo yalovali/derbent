@@ -9,7 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.derbent.session.service.CSessionService;
-import tech.derbent.users.service.CUserRepository;
+import tech.derbent.users.service.IUserRepository;
 import tech.derbent.users.service.CUserService;
 
 @ExtendWith (MockitoExtension.class)
@@ -20,7 +20,7 @@ class UserServiceConfigurationTest {
 	@Mock
 	private CSessionService sessionService;
 	@Mock
-	private CUserRepository userRepository;
+	private IUserRepository userRepository;
 	@Mock
 	private Clock clock;
 	private UserServiceConfiguration configuration;

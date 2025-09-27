@@ -18,7 +18,7 @@ import tech.derbent.session.service.CSessionService;
 @PreAuthorize ("isAuthenticated()")
 public class CDecisionTypeService extends CEntityOfProjectService<CDecisionType> {
 
-	public CDecisionTypeService(final CDecisionTypeRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CDecisionTypeService(final IDecisionTypeRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 
@@ -28,7 +28,7 @@ public class CDecisionTypeService extends CEntityOfProjectService<CDecisionType>
 	@Transactional (readOnly = true)
 	public List<CDecisionType> findAllActiveByProject(final CProject project) {
 		Optional.ofNullable(project).orElse(null);
-		return ((CDecisionTypeRepository) repository).findByProjectAndIsActiveTrue(project);
+		return ((IDecisionTypeRepository) repository).findByProjectAndIsActiveTrue(project);
 	}
 
 	/** Finds decision types that require approval for a project.
@@ -37,7 +37,7 @@ public class CDecisionTypeService extends CEntityOfProjectService<CDecisionType>
 	@Transactional (readOnly = true)
 	public List<CDecisionType> findRequiringApprovalByProject(final CProject project) {
 		Optional.ofNullable(project).orElse(null);
-		return ((CDecisionTypeRepository) repository).findByProjectAndRequiresApprovalTrue(project);
+		return ((IDecisionTypeRepository) repository).findByProjectAndRequiresApprovalTrue(project);
 	}
 
 	@Override

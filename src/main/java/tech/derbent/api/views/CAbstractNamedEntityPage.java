@@ -3,7 +3,7 @@ package tech.derbent.api.views;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.domains.CEntityNamed;
-import tech.derbent.api.interfaces.CLayoutChangeListener;
+import tech.derbent.api.interfaces.ILayoutChangeListener;
 import tech.derbent.api.services.CAbstractNamedEntityService;
 import tech.derbent.api.services.CDetailsBuilder;
 import tech.derbent.api.utils.Check;
@@ -12,7 +12,7 @@ import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.ISessionService;
 
 public abstract class CAbstractNamedEntityPage<EntityClass extends CEntityNamed<EntityClass>> extends CAbstractEntityDBPage<EntityClass>
-		implements CLayoutChangeListener {
+		implements ILayoutChangeListener {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CAbstractNamedEntityPage.class);
 	private static final long serialVersionUID = 1L;

@@ -8,14 +8,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
-import tech.derbent.api.interfaces.CProjectChangeListener;
-import tech.derbent.api.interfaces.CProjectListChangeListener;
+import tech.derbent.api.interfaces.IProjectChangeListener;
+import tech.derbent.api.interfaces.IProjectListChangeListener;
 import tech.derbent.api.utils.Check;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.events.ProjectListChangeEvent;
-import tech.derbent.projects.service.CProjectRepository;
+import tech.derbent.projects.service.IProjectRepository;
 import tech.derbent.users.domain.CUser;
-import tech.derbent.users.service.CUserRepository;
+import tech.derbent.users.service.IUserRepository;
 
 /** Simple session service implementation for non-web applications like database reset. This provides basic functionality without Vaadin
  * dependencies. */
@@ -24,16 +24,16 @@ import tech.derbent.users.service.CUserRepository;
 public class CSessionService implements ISessionService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSessionService.class);
-	private final CUserRepository userRepository;
-	private final CProjectRepository projectRepository;
-	private final Set<CProjectChangeListener> projectChangeListeners = ConcurrentHashMap.newKeySet();
-	private final Set<CProjectListChangeListener> projectListChangeListeners = ConcurrentHashMap.newKeySet();
+	private final IUserRepository userRepository;
+	private final IProjectRepository projectRepository;
+	private final Set<IProjectChangeListener> projectChangeListeners = ConcurrentHashMap.newKeySet();
+	private final Set<IProjectListChangeListener> projectListChangeListeners = ConcurrentHashMap.newKeySet();
 	// Simple in-memory storage for reset operations
 	private CUser activeUser;
 	private CProject activeProject;
 	private tech.derbent.companies.domain.CCompany activeCompany;
 
-	public CSessionService(final CUserRepository userRepository, final CProjectRepository projectRepository) {
+	public CSessionService(final IUserRepository userRepository, final IProjectRepository projectRepository) {
 		this.userRepository = userRepository;
 		this.projectRepository = projectRepository;
 		LOGGER.info("Using CSessionService (reset-db) for database reset application");
@@ -108,25 +108,25 @@ public class CSessionService implements ISessionService {
 
 	// No-op implementations for methods that require Vaadin UI
 	@Override
-	public void addProjectChangeListener(final CProjectChangeListener listener) {
+	public void addProjectChangeListener(final IProjectChangeListener listener) {
 		Check.notNull(listener, "Listener must not be null");
 		projectChangeListeners.add(listener);
 	}
 
 	@Override
-	public void removeProjectChangeListener(final CProjectChangeListener listener) {
+	public void removeProjectChangeListener(final IProjectChangeListener listener) {
 		Check.notNull(listener, "Listener must not be null");
 		projectChangeListeners.remove(listener);
 	}
 
 	@Override
-	public void addProjectListChangeListener(final CProjectListChangeListener listener) {
+	public void addProjectListChangeListener(final IProjectListChangeListener listener) {
 		Check.notNull(listener, "Listener must not be null");
 		projectListChangeListeners.add(listener);
 	}
 
 	@Override
-	public void removeProjectListChangeListener(final CProjectListChangeListener listener) {
+	public void removeProjectListChangeListener(final IProjectListChangeListener listener) {
 		Check.notNull(listener, "Listener must not be null");
 		projectListChangeListeners.remove(listener);
 	}

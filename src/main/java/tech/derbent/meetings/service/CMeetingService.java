@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import tech.derbent.api.interfaces.CKanbanService;
+import tech.derbent.api.interfaces.IKanbanService;
 import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.domain.CMeetingStatus;
@@ -13,9 +13,9 @@ import tech.derbent.session.service.CSessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CMeetingService extends CEntityOfProjectService<CMeeting> implements CKanbanService<CMeeting, CMeetingStatus> {
+public class CMeetingService extends CEntityOfProjectService<CMeeting> implements IKanbanService<CMeeting, CMeetingStatus> {
 
-	CMeetingService(final CMeetingRepository repository, final Clock clock, final CSessionService sessionService) {
+	CMeetingService(final IMeetingRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

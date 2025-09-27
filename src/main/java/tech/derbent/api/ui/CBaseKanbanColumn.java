@@ -15,9 +15,9 @@ import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.H5;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import tech.derbent.api.interfaces.CKanbanEntity;
-import tech.derbent.api.interfaces.CKanbanStatus;
-import tech.derbent.api.interfaces.CKanbanType;
+import tech.derbent.api.interfaces.IKanbanEntity;
+import tech.derbent.api.interfaces.IKanbanStatus;
+import tech.derbent.api.interfaces.IKanbanType;
 import tech.derbent.api.utils.Check;
 
 /** CBaseKanbanColumn - Abstract base class for Kanban columns with drag-and-drop functionality. Layer: Base View (MVC) Provides common functionality
@@ -25,7 +25,7 @@ import tech.derbent.api.utils.Check;
  * columns - Status update handling
  * @param <T> the type of entity displayed in this column
  * @param <S> the type of status this column represents */
-public abstract class CBaseKanbanColumn<T extends CKanbanEntity, S extends CKanbanStatus> extends Div {
+public abstract class CBaseKanbanColumn<T extends IKanbanEntity, S extends IKanbanStatus> extends Div {
 
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBaseKanbanColumn.class);
@@ -127,7 +127,7 @@ public abstract class CBaseKanbanColumn<T extends CKanbanEntity, S extends CKanb
 	 * @return the type name, or "No Type" if no type is set */
 	protected String getEntityTypeName(final T entity) {
 		Check.notNull(entity, "Entity cannot be null");
-		final CKanbanType type = entity.getType();
+		final IKanbanType type = entity.getType();
 		Check.notNull(type, "Entity type cannot be null");
 		final String typeName = type.getName();
 		return typeName != null ? typeName : "No Type";
@@ -202,7 +202,7 @@ public abstract class CBaseKanbanColumn<T extends CKanbanEntity, S extends CKanb
 			final var dragData = event.getDragData();
 			if (dragData.isPresent()) {
 				final Object data = dragData.get();
-				if (data instanceof CKanbanEntity) {
+				if (data instanceof IKanbanEntity) {
 					@SuppressWarnings ("unchecked")
 					final T entity = (T) data;
 					LOGGER.debug("Entity dropped on column {}: {}", status.getName(), entity.getName());

@@ -8,7 +8,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.domains.CEntityOfProject;
-import tech.derbent.api.interfaces.CSearchable;
+import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.projects.domain.CProject;
@@ -16,7 +16,7 @@ import tech.derbent.session.service.ISessionService;
 
 public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProject<EntityClass>> extends CAbstractNamedEntityService<EntityClass> {
 
-	public CEntityOfProjectService(final CEntityOfProjectRepository<EntityClass> repository, final Clock clock,
+	public CEntityOfProjectService(final IEntityOfProjectRepository<EntityClass> repository, final Clock clock,
 			final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
@@ -43,7 +43,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	public long countByProject(final CProject project) {
 		Check.notNull(project, "Project cannot be null");
 		try {
-			return ((CEntityOfProjectRepository<EntityClass>) repository).countByProject(project);
+			return ((IEntityOfProjectRepository<EntityClass>) repository).countByProject(project);
 		} catch (final Exception e) {
 			LOGGER.error("Error counting entities by project '{}' in {}: {}", project.getName(), getClass().getSimpleName(), e.getMessage(), e);
 			throw new RuntimeException("Failed to count entities by project", e);
@@ -74,7 +74,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		Check.notNull(project, "Project cannot be null");
 		Check.notBlank(name, "Entity name cannot be null or empty");
 		try {
-			final Optional<EntityClass> entities = ((CEntityOfProjectRepository<EntityClass>) repository).findByNameAndProject(name, project);
+			final Optional<EntityClass> entities = ((IEntityOfProjectRepository<EntityClass>) repository).findByNameAndProject(name, project);
 			return entities;
 		} catch (final Exception e) {
 			LOGGER.error("Error finding entities by project '{}' in {}: {}", project.getName(), getClass().getSimpleName(), e.getMessage(), e);
@@ -112,7 +112,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	public List<EntityClass> listByProject(final CProject project) {
 		Check.notNull(project, "Project cannot be null");
 		try {
-			final List<EntityClass> entities = ((CEntityOfProjectRepository<EntityClass>) repository).listByProject(project);
+			final List<EntityClass> entities = ((IEntityOfProjectRepository<EntityClass>) repository).listByProject(project);
 			return entities;
 		} catch (final RuntimeException ex) {
 			LOGGER.error("findByProject failed (project: {}): {}", Optional.ofNullable(project.getName()).orElse("<no-name>"), ex.toString(), ex);
@@ -125,7 +125,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		Check.notNull(project, "Project cannot be null");
 		final Pageable safe = CPageableUtils.validateAndFix(pageable);
 		try {
-			return ((CEntityOfProjectRepository<EntityClass>) repository).listByProject(project, safe);
+			return ((IEntityOfProjectRepository<EntityClass>) repository).listByProject(project, safe);
 		} catch (final RuntimeException ex) {
 			LOGGER.error("findByProject failed (project: {}, page: {}): {}", Optional.ofNullable(project.getName()).orElse("<no-name>"), safe,
 					ex.toString(), ex);
@@ -140,9 +140,9 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		final String term = (searchText == null) ? "" : searchText.trim();
 		// Pull all for project (ensure repo method DOES NOT fetch to-many relations!)
-		final List<EntityClass> all = ((CEntityOfProjectRepository<EntityClass>) repository).listByProject(project, Pageable.unpaged()).getContent();
-		final boolean searchable = CSearchable.class.isAssignableFrom(getEntityClass());
-		final List<EntityClass> filtered = (term.isEmpty() || !searchable) ? all : all.stream().filter(e -> ((CSearchable) e).matches(term)).toList();
+		final List<EntityClass> all = ((IEntityOfProjectRepository<EntityClass>) repository).listByProject(project, Pageable.unpaged()).getContent();
+		final boolean searchable = ISearchable.class.isAssignableFrom(getEntityClass());
+		final List<EntityClass> filtered = (term.isEmpty() || !searchable) ? all : all.stream().filter(e -> ((ISearchable) e).matches(term)).toList();
 		// --- apply sort from Pageable (name/id supported here; override to extend)
 		final List<EntityClass> sorted = applySort(filtered, safePage.getSort());
 		// --- slice
@@ -189,7 +189,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		Check.notNull(entity, "Entity cannot be null");
 		final String trimmedName = entity.getName().trim();
 		// search with same name and same project exclude self if updating
-		final Optional<EntityClass> existing = ((CEntityOfProjectRepository<EntityClass>) repository)
+		final Optional<EntityClass> existing = ((IEntityOfProjectRepository<EntityClass>) repository)
 				.findByNameAndProject(trimmedName, entity.getProject()).filter(existingStatus -> {
 					// Exclude self if updating
 					return (entity.getId() == null) || !existingStatus.getId().equals(entity.getId());

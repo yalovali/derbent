@@ -1,7 +1,7 @@
 package tech.derbent.users.view;
 
 import tech.derbent.api.annotations.CFormBuilder;
-import tech.derbent.api.annotations.CFormBuilder.ComboBoxDataProvider;
+import tech.derbent.api.annotations.CFormBuilder.IComboBoxDataProvider;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
@@ -35,8 +35,8 @@ public abstract class CPanelUserBase extends CAccordionDBEntity<CUser> {
 	}
 
 	@Override
-	protected ComboBoxDataProvider createComboBoxDataProvider() {
-		final CFormBuilder.ComboBoxDataProvider dataProvider = new CFormBuilder.ComboBoxDataProvider() {
+	protected IComboBoxDataProvider createComboBoxDataProvider() {
+		final CFormBuilder.IComboBoxDataProvider dataProvider = new CFormBuilder.IComboBoxDataProvider() {
 
 			@Override
 			@SuppressWarnings ("unchecked")

@@ -15,7 +15,7 @@ import tech.derbent.session.service.CSessionService;
 @Transactional (readOnly = true)
 public class COrderApprovalService extends CAbstractNamedEntityService<COrderApproval> {
 
-	COrderApprovalService(final COrderApprovalRepository repository, final Clock clock, final CSessionService sessionService) {
+	COrderApprovalService(final IOrderApprovalRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

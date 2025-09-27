@@ -8,7 +8,7 @@ import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.annotations.StatusEntity;
 import tech.derbent.api.domains.CStatus;
-import tech.derbent.api.interfaces.CKanbanStatus;
+import tech.derbent.api.interfaces.IKanbanStatus;
 import tech.derbent.projects.domain.CProject;
 
 /** CActivityStatus - Domain entity representing activity status types. Layer: Domain (MVC) Inherits from CStatus to provide status functionality for
@@ -19,7 +19,7 @@ import tech.derbent.projects.domain.CProject;
 		"name", "project_id"
 }))
 @AttributeOverride (name = "id", column = @Column (name = "cactivitystatus_id"))
-public class CActivityStatus extends CStatus<CActivityStatus> implements CKanbanStatus {
+public class CActivityStatus extends CStatus<CActivityStatus> implements IKanbanStatus {
 
 	public static final String DEFAULT_COLOR = "#28a745";
 	public static final String DEFAULT_ICON = "vaadin:flag";

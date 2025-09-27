@@ -10,7 +10,7 @@ import tech.derbent.api.roles.domain.CUserProjectRole;
 import tech.derbent.api.services.CAbstractEntityRelationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.projects.service.CProjectRepository;
+import tech.derbent.projects.service.IProjectRepository;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserProjectSettings;
@@ -20,17 +20,13 @@ import tech.derbent.users.domain.CUserProjectSettings;
 @Transactional (readOnly = true)
 public class CUserProjectSettingsService extends CAbstractEntityRelationService<CUserProjectSettings> {
 
-	private final CUserProjectSettingsRepository repository;
-	private final CUserRepository userRepository;
-	private final CProjectRepository projectRepository;
+	private final IUserProjectSettingsRepository repository;
 
 	@Autowired
-	public CUserProjectSettingsService(final CUserProjectSettingsRepository repository, final Clock clock, final CSessionService sessionService,
-			final CUserRepository userRepository, final CProjectRepository projectRepository) {
+	public CUserProjectSettingsService(final IUserProjectSettingsRepository repository, final Clock clock, final CSessionService sessionService,
+			final IUserRepository userRepository, final IProjectRepository projectRepository) {
 		super(repository, clock, sessionService);
 		this.repository = repository;
-		this.userRepository = userRepository;
-		this.projectRepository = projectRepository;
 	}
 
 	/** Add user to project with specific role and permissions */

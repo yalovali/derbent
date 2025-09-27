@@ -20,10 +20,10 @@ public class CActivityTypeService extends CEntityOfProjectService<CActivityType>
 
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityTypeService.class);
-	private final CActivityRepository activityRepository;
+	private final IActivityRepository activityRepository;
 
-	public CActivityTypeService(final CActivityTypeRepository repository, final Clock clock, final CSessionService sessionService,
-			final CActivityRepository activityRepository) {
+	public CActivityTypeService(final IActivityTypeRepository repository, final Clock clock, final CSessionService sessionService,
+			final IActivityRepository activityRepository) {
 		super(repository, clock, sessionService);
 		this.activityRepository = activityRepository;
 	}

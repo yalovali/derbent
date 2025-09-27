@@ -19,10 +19,10 @@ import tech.derbent.users.domain.CUserCompanySettings;
 @Transactional (readOnly = true)
 public class CUserCompanySettingsService extends CAbstractEntityRelationService<CUserCompanySettings> {
 
-	private final CUserCompanySettingsRepository repository;
+	private final IUserCompanySettingsRepository repository;
 
 	@Autowired
-	public CUserCompanySettingsService(final CUserCompanySettingsRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CUserCompanySettingsService(final IUserCompanySettingsRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 		this.repository = repository;
 	}

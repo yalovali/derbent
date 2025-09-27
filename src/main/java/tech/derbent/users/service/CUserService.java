@@ -30,9 +30,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
-import tech.derbent.users.service.CUserProjectSettingsService;
 import tech.derbent.users.view.CUserProjectSettingsComponent;
-import tech.derbent.users.view.CUserProjectSettingsDialog;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -48,7 +46,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	@Autowired
 	private CUserProjectSettingsService userProjectSettingsService;
 
-	public CUserService(final CUserRepository repository, final Clock clock) {
+	public CUserService(final IUserRepository repository, final Clock clock) {
 		super(repository, clock);
 		this.passwordEncoder = new BCryptPasswordEncoder(); // BCrypt for secure password
 															// hashing
@@ -62,13 +60,13 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	 * @return count of users assigned to the project */
 	@PreAuthorize ("permitAll()")
 	public long countUsersByProjectId(final Long projectId) {
-		return ((CUserRepository) repository).countByProjectId(projectId);
+		return ((IUserRepository) repository).countByProjectId(projectId);
 	}
 
 	@Transactional // Write operation requires writable transaction
 	public CUser createLoginUser(final String username, final String plainPassword, final String name, final String email, final String roles) {
 		// Check if username already exists
-		if (((CUserRepository) repository).findByUsername(username).isPresent()) {
+		if (((IUserRepository) repository).findByUsername(username).isPresent()) {
 			LOGGER.warn("Username already exists: {}", username);
 			throw new IllegalArgumentException("Username already exists: " + username);
 		}
@@ -86,7 +84,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	 * @param login the login username
 	 * @return the CUser if found, null otherwise */
 	public CUser findByLogin(final String login) {
-		return ((CUserRepository) repository).findByUsername(login).orElse(null);
+		return ((IUserRepository) repository).findByUsername(login).orElse(null);
 	}
 
 	/** Converts comma-separated role string to Spring Security authorities. Roles are prefixed with "ROLE_" as per Spring Security convention.
@@ -117,7 +115,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
 		LOGGER.debug("Attempting to load user by username: {}", username);
 		// Step 1: Query database for user by username
-		final CUser loginUser = ((CUserRepository) repository).findByUsername(username).orElseThrow(() -> {
+		final CUser loginUser = ((IUserRepository) repository).findByUsername(username).orElseThrow(() -> {
 			LOGGER.warn("User not found with username: {}", username);
 			return new UsernameNotFoundException("User not found with username: " + username);
 		});
@@ -204,7 +202,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 
 	@Transactional
 	public void updatePassword(final String username, final String newPlainPassword) {
-		final CUser loginUser = ((CUserRepository) repository).findByUsername(username)
+		final CUser loginUser = ((IUserRepository) repository).findByUsername(username)
 				.orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 		final String encodedPassword = passwordEncoder.encode(newPlainPassword);
 		loginUser.setPassword(encodedPassword);
@@ -222,7 +220,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	@PreAuthorize ("permitAll()")
 	public List<CUser> getAvailableUsersForProject(final Long projectId) {
 		Check.notNull(projectId, "User ID must not be null");
-		return ((CUserRepository) repository).findUsersNotAssignedToProject(projectId);
+		return ((IUserRepository) repository).findUsersNotAssignedToProject(projectId);
 	}
 
 	public Component createUserProjectSettingsComponent() {

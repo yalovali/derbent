@@ -60,7 +60,7 @@ import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 @org.springframework.stereotype.Component
 public final class CFormBuilder<EntityClass> implements ApplicationContextAware {
 
-	public interface ComboBoxDataProvider {
+	public interface IComboBoxDataProvider {
 
 		<T extends CEntityDB<T>> List<T> getItems(Class<T> entityType);
 	}

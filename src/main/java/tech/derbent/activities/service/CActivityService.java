@@ -8,8 +8,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.domains.CProjectItemService;
-import tech.derbent.api.interfaces.CKanbanService;
-import tech.derbent.api.services.CEntityOfProjectRepository;
+import tech.derbent.api.interfaces.IKanbanService;
+import tech.derbent.api.services.IEntityOfProjectRepository;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.domain.CActivityType;
@@ -18,9 +18,9 @@ import tech.derbent.session.service.CSessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CActivityService extends CProjectItemService<CActivity> implements CKanbanService<CActivity, CActivityStatus> {
+public class CActivityService extends CProjectItemService<CActivity> implements IKanbanService<CActivity, CActivityStatus> {
 
-	public CActivityService(final CActivityRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CActivityService(final IActivityRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 
@@ -44,7 +44,7 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 	@Transactional (readOnly = true)
 	public Map<CActivityStatus, List<CActivity>> getActivitiesGroupedByStatus(final CProject project) {
 		// Get all activities for the project with type and status loaded
-		final List<CActivity> activities = ((CEntityOfProjectRepository<CActivity>) repository).listByProject(project);
+		final List<CActivity> activities = ((IEntityOfProjectRepository<CActivity>) repository).listByProject(project);
 		// Group by activity status, handling null statuses
 		return activities.stream().collect(Collectors
 				.groupingBy(activity -> activity.getStatus() != null ? activity.getStatus() : createNoStatusInstance(project), Collectors.toList()));
@@ -54,7 +54,7 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 	public Map<CActivityType, List<CActivity>> getActivitiesGroupedByType(final CProject project) {
 		LOGGER.debug("Getting activities grouped by type for project: {}", project.getName());
 		// Get all activities for the project with type and status loaded
-		final List<CActivity> activities = ((CEntityOfProjectRepository<CActivity>) repository).listByProject(project);
+		final List<CActivity> activities = ((IEntityOfProjectRepository<CActivity>) repository).listByProject(project);
 		// Group by activity type, handling null types
 		return activities.stream().collect(Collectors.groupingBy(
 				activity -> activity.getActivityType() != null ? activity.getActivityType() : createNoTypeInstance(project), Collectors.toList()));

@@ -2,7 +2,7 @@ package tech.derbent.api.views;
 
 import java.util.List;
 import tech.derbent.api.annotations.CFormBuilder;
-import tech.derbent.api.annotations.CFormBuilder.ComboBoxDataProvider;
+import tech.derbent.api.annotations.CFormBuilder.IComboBoxDataProvider;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
@@ -32,7 +32,7 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 		binder.readBean(null);
 	}
 
-	protected ComboBoxDataProvider createComboBoxDataProvider() {
+	protected IComboBoxDataProvider createComboBoxDataProvider() {
 		return null;
 	}
 
@@ -43,6 +43,7 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 
 	public CEnhancedBinder<EntityClass> getBinder() { return binder; }
 
+	@SuppressWarnings ("unchecked")
 	@Override
 	public EntityClass getCurrentEntity() { return (EntityClass) parentContent.getCurrentEntity(); }
 

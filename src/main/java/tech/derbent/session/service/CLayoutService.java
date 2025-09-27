@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.VaadinSession;
-import tech.derbent.api.interfaces.CLayoutChangeListener;
+import tech.derbent.api.interfaces.ILayoutChangeListener;
 
 /** Service to manage layout state (horizontal vs vertical) for views. Uses Vaadin session to store layout preference. */
 @Service
@@ -21,10 +21,10 @@ public class CLayoutService {
 	private static final String LAYOUT_MODE_KEY = "layoutMode";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CLayoutService.class);
 	// Thread-safe set to store layout change listeners
-	private final Set<CLayoutChangeListener> layoutChangeListeners = ConcurrentHashMap.newKeySet();
+	private final Set<ILayoutChangeListener> layoutChangeListeners = ConcurrentHashMap.newKeySet();
 
 	/** Registers a component to receive notifications when the layout mode changes. */
-	public void addLayoutChangeListener(final CLayoutChangeListener listener) {
+	public void addLayoutChangeListener(final ILayoutChangeListener listener) {
 		Assert.notNull(listener, "Listener cannot be null");
 		layoutChangeListeners.add(listener);
 	}
@@ -100,7 +100,7 @@ public class CLayoutService {
 	}
 
 	/** Unregisters a component from receiving layout change notifications. */
-	public void removeLayoutChangeListener(final CLayoutChangeListener listener) {
+	public void removeLayoutChangeListener(final ILayoutChangeListener listener) {
 		assert listener != null : "Listener cannot be null";
 		layoutChangeListeners.remove(listener);
 	}

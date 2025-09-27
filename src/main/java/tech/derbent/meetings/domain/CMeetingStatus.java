@@ -8,7 +8,7 @@ import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.annotations.StatusEntity;
 import tech.derbent.api.domains.CStatus;
-import tech.derbent.api.interfaces.CKanbanStatus;
+import tech.derbent.api.interfaces.IKanbanStatus;
 import tech.derbent.projects.domain.CProject;
 
 /** CMeetingStatus - Domain entity representing meeting status types. Layer: Domain (MVC) Inherits from CStatus to provide status functionality for
@@ -19,7 +19,7 @@ import tech.derbent.projects.domain.CProject;
 		"name", "project_id"
 }))
 @AttributeOverride (name = "id", column = @Column (name = "cmeetingstatus_id"))
-public class CMeetingStatus extends CStatus<CMeetingStatus> implements CKanbanStatus {
+public class CMeetingStatus extends CStatus<CMeetingStatus> implements IKanbanStatus {
 
 	public static final String DEFAULT_COLOR = "#28a745";
 	public static final String DEFAULT_ICON = "vaadin:flag";

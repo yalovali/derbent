@@ -26,7 +26,7 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 	/** Constructor for CSystemSettingsService.
 	 * @param repository the CSystemSettingsRepository instance
 	 * @param clock      the Clock instance for time-related operations */
-	public CSystemSettingsService(final CSystemSettingsRepository repository, final Clock clock, @Lazy final CSessionService sessionService) {
+	public CSystemSettingsService(final ISystemSettingsRepository repository, final Clock clock, @Lazy final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 
@@ -35,7 +35,7 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 	@Transactional
 	public CSystemSettings createDefaultSystemSettings() {
 		// Check if settings already exist
-		if (((CSystemSettingsRepository) repository).existsSystemSettings()) {
+		if (((ISystemSettingsRepository) repository).existsSystemSettings()) {
 			LOGGER.warn("Attempt to create default settings when settings already exist");
 			throw new IllegalStateException("System settings already exist. Use getOrCreateSystemSettings() instead.");
 		}
@@ -114,7 +114,7 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 	 * @return the current CSystemSettings */
 	@Transactional
 	public CSystemSettings getOrCreateSystemSettings() {
-		final Optional<CSystemSettings> existingSettings = ((CSystemSettingsRepository) repository).findSystemSettings();
+		final Optional<CSystemSettings> existingSettings = ((ISystemSettingsRepository) repository).findSystemSettings();
 		if (existingSettings.isPresent()) {
 			return existingSettings.get();
 		} else {
@@ -138,7 +138,7 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 	 * @return Optional containing the CSystemSettings if found, empty otherwise */
 	public Optional<CSystemSettings> getSystemSettings() {
 		try {
-			final Optional<CSystemSettings> result = ((CSystemSettingsRepository) repository).findSystemSettings();
+			final Optional<CSystemSettings> result = ((ISystemSettingsRepository) repository).findSystemSettings();
 			return result;
 		} catch (final Exception e) {
 			LOGGER.error("Error retrieving system settings", e);
@@ -178,7 +178,7 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 	 * @return true if system settings exist, false otherwise */
 	public boolean isSystemInitialized() {
 		try {
-			final boolean initialized = ((CSystemSettingsRepository) repository).existsSystemSettings();
+			final boolean initialized = ((ISystemSettingsRepository) repository).existsSystemSettings();
 			return initialized;
 		} catch (final Exception e) {
 			LOGGER.error("Error checking system initialization status", e);

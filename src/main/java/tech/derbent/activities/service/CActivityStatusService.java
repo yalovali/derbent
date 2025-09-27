@@ -22,7 +22,7 @@ public class CActivityStatusService extends CEntityOfProjectService<CActivitySta
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityStatusService.class);
 
 	@Autowired
-	public CActivityStatusService(final CActivityStatusRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CActivityStatusService(final IActivityStatusRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

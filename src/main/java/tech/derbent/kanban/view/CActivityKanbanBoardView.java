@@ -18,7 +18,7 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.service.CActivityService;
-import tech.derbent.api.interfaces.CProjectChangeListener;
+import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.utils.Check;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
@@ -30,7 +30,7 @@ import tech.derbent.session.service.CSessionService;
 @PageTitle ("Activity Kanban Board")
 @Menu (order = 1.2, icon = "class:tech.derbent.kanban.view.CActivityKanbanBoardView", title = "Project.Kanban")
 @PermitAll
-public class CActivityKanbanBoardView extends VerticalLayout implements CProjectChangeListener {
+public class CActivityKanbanBoardView extends VerticalLayout implements IProjectChangeListener {
 
 	public static final String DEFAULT_COLOR = "#007bff";
 	public static final String DEFAULT_ICON = "vaadin:kanban";

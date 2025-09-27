@@ -12,7 +12,7 @@ import tech.derbent.session.service.CSessionService;
 @PreAuthorize ("isAuthenticated()")
 public class CMasterSectionService extends CEntityOfProjectService<CMasterSection> {
 
-	public CMasterSectionService(final CMasterSectionRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CMasterSectionService(final IMasterSectionRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

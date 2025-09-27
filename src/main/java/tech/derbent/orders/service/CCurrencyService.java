@@ -15,7 +15,7 @@ import tech.derbent.session.service.CSessionService;
 @Transactional (readOnly = true)
 public class CCurrencyService extends CEntityOfProjectService<CCurrency> {
 
-	CCurrencyService(final CCurrencyRepository repository, final Clock clock, final CSessionService sessionService) {
+	CCurrencyService(final ICurrencyRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

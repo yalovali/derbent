@@ -11,10 +11,10 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import tech.derbent.api.interfaces.CKanbanEntity;
-import tech.derbent.api.interfaces.CKanbanService;
-import tech.derbent.api.interfaces.CKanbanStatus;
-import tech.derbent.api.interfaces.CProjectChangeListener;
+import tech.derbent.api.interfaces.IKanbanEntity;
+import tech.derbent.api.interfaces.IKanbanService;
+import tech.derbent.api.interfaces.IKanbanStatus;
+import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.utils.Check;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.ISessionService;
@@ -23,21 +23,21 @@ import tech.derbent.session.service.ISessionService;
  * implementation. Handles project awareness, layout setup, and basic kanban operations.
  * @param <T> the type of entity displayed in this kanban board
  * @param <S> the type of status used for organizing entities */
-public abstract class CBaseKanbanBoardView<T extends CKanbanEntity, S extends CKanbanStatus> extends VerticalLayout
-		implements CProjectChangeListener {
+public abstract class CBaseKanbanBoardView<T extends IKanbanEntity, S extends IKanbanStatus> extends VerticalLayout
+		implements IProjectChangeListener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBaseKanbanBoardView.class);
 	private static final long serialVersionUID = 1L;
 	protected Div emptyStateContainer;
 	protected HorizontalLayout kanbanContainer;
-	protected final CKanbanService<T, S> kanbanService;
+	protected final IKanbanService<T, S> kanbanService;
 	protected final ISessionService sessionService;
 	protected H2 titleElement;
 
 	/** Constructor for CBaseKanbanBoardView.
 	 * @param kanbanService  the service for data operations
 	 * @param sessionService the session service for project context */
-	protected CBaseKanbanBoardView(final CKanbanService<T, S> kanbanService, final ISessionService sessionService) {
+	protected CBaseKanbanBoardView(final IKanbanService<T, S> kanbanService, final ISessionService sessionService) {
 		Check.notNull(kanbanService, "KanbanService cannot be null");
 		Check.notNull(sessionService, "SessionService cannot be null");
 		this.kanbanService = kanbanService;

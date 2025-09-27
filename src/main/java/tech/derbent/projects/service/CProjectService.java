@@ -18,7 +18,7 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 
 	private final ApplicationEventPublisher eventPublisher;
 
-	public CProjectService(final CProjectRepository repository, final Clock clock, final CSessionService sessionService,
+	public CProjectService(final IProjectRepository repository, final Clock clock, final CSessionService sessionService,
 			final ApplicationEventPublisher eventPublisher) {
 		super(repository, clock, sessionService);
 		this.eventPublisher = eventPublisher;
@@ -41,7 +41,7 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 	/** Gets a project with all its user settings loaded (to avoid lazy loading issues) */
 	@Transactional (readOnly = true)
 	public CProject findByIdWithUserSettings(final Long projectId) {
-		return ((CProjectRepository) repository).findByIdWithUserSettings(projectId).orElse(null);
+		return ((IProjectRepository) repository).findByIdWithUserSettings(projectId).orElse(null);
 	}
 
 	/** Gets projects available for assignment to a specific user (excluding projects the user is already assigned to).
@@ -51,7 +51,7 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 	@PreAuthorize ("permitAll()")
 	public List<CProject> getAvailableProjectsForUser(final Long userId) {
 		Check.notNull(userId, "User ID must not be null");
-		return ((CProjectRepository) repository).findProjectsNotAssignedToUser(userId);
+		return ((IProjectRepository) repository).findProjectsNotAssignedToUser(userId);
 	}
 
 	@Override

@@ -5,16 +5,12 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.interfaces.IBindableComponent;
 import tech.derbent.api.interfaces.IContentOwner;
@@ -41,8 +37,6 @@ public class CUserProjectSettingsComponent extends CVerticalLayout implements IB
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserProjectSettingsComponent.class);
 	private static final long serialVersionUID = 1L;
-	// Services
-	private final CUserService userService;
 	private final CProjectService projectService;
 	private final CUserProjectRoleService roleService;
 	private final CUserProjectSettingsService userProjectSettingsService;
@@ -60,8 +54,6 @@ public class CUserProjectSettingsComponent extends CVerticalLayout implements IB
 	private CEnhancedBinder<CUserProjectSettings> binder;
 	private CUser currentUser;
 	private CUserProjectSettings currentSettings;
-	private IContentOwner parentContent;
-	private Consumer<CUserProjectSettings> onSave;
 
 	/** Constructor for standalone component use.
 	 * @param userService                the user service
@@ -75,7 +67,6 @@ public class CUserProjectSettingsComponent extends CVerticalLayout implements IB
 		Check.notNull(projectService, "Project service cannot be null");
 		Check.notNull(roleService, "Role service cannot be null");
 		Check.notNull(userProjectSettingsService, "User project settings service cannot be null");
-		this.userService = userService;
 		this.projectService = projectService;
 		this.roleService = roleService;
 		this.userProjectSettingsService = userProjectSettingsService;
@@ -97,9 +88,7 @@ public class CUserProjectSettingsComponent extends CVerticalLayout implements IB
 	public CUserProjectSettingsComponent(IContentOwner parentContent, CUser currentUser, CUserService userService, CProjectService projectService,
 			CUserProjectRoleService roleService, CUserProjectSettingsService userProjectSettingsService, Consumer<CUserProjectSettings> onSave) {
 		this(userService, projectService, roleService, userProjectSettingsService);
-		this.parentContent = parentContent;
 		this.currentUser = currentUser;
-		this.onSave = onSave;
 		try {
 			if (currentUser != null) {
 				loadUserProjectSettings(currentUser);
@@ -179,14 +168,18 @@ public class CUserProjectSettingsComponent extends CVerticalLayout implements IB
 
 	@Override
 	public void clearData() {
-		if (projectComboBox != null)
+		if (projectComboBox != null) {
 			projectComboBox.clear();
-		if (roleComboBox != null)
+		}
+		if (roleComboBox != null) {
 			roleComboBox.clear();
-		if (permissionField != null)
+		}
+		if (permissionField != null) {
 			permissionField.clear();
-		if (grid != null)
+		}
+		if (grid != null) {
 			grid.getDataProvider().refreshAll();
+		}
 		currentSettings = null;
 		LOGGER.debug("Component data cleared");
 	}
