@@ -26,14 +26,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
+import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.roles.service.CUserProjectRoleService;
 import tech.derbent.api.services.CAbstractNamedEntityService;
 import tech.derbent.api.utils.Check;
+import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.service.CUserProjectSettingsService;
-import tech.derbent.users.view.CUserProjectSettingsComponent;
+import tech.derbent.users.service.CUserTypeService;
+import tech.derbent.users.view.CComponentUserProjectSettings;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -229,10 +232,15 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 			CProjectService projectService = applicationContext.getBean(CProjectService.class);
 			CUserProjectRoleService roleService = applicationContext.getBean(CUserProjectRoleService.class);
 			CUserProjectSettingsService userProjectSettingsService = applicationContext.getBean(CUserProjectSettingsService.class);
+			CUserTypeService userTypeService = applicationContext.getBean(CUserTypeService.class);
+			CCompanyService companyService = applicationContext.getBean(CCompanyService.class);
+			// Create a minimal binder for the component
+			CEnhancedBinder<CUser> binder = new CEnhancedBinder<>(CUser.class);
 			// Create the enhanced component with proper service dependencies
-			CUserProjectSettingsComponent component =
-					new CUserProjectSettingsComponent(this, projectService, roleService, userProjectSettingsService);
-			LOGGER.debug("Successfully created CUserProjectSettingsComponent");
+			CComponentUserProjectSettings component = new CComponentUserProjectSettings(null, // parentContent - will be set by caller
+					null, // currentEntity - will be set by caller
+					binder, this, userTypeService, companyService, projectService, userProjectSettingsService);
+			LOGGER.debug("Successfully created CComponentUserProjectSettings");
 			return component;
 		} catch (Exception e) {
 			LOGGER.error("Failed to create user project settings component: {}", e.getMessage(), e);
