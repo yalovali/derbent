@@ -38,7 +38,8 @@ public class CPanelDetailLines extends CPanelDetailSectionBase {
 	private void createLinesGrid() {
 		grid = new CGrid<CDetailLines>(CDetailLines.class);
 		grid.setHeightFull();
-		grid.addColumn(CDetailLines::getLineOrder).setHeader("Order").setWidth("80px");
+		grid.addColumn(CDetailLines::getId).setHeader("Id").setWidth("50px");
+		grid.addColumn(CDetailLines::getLineOrder).setHeader("Order").setWidth("50px");
 		grid.addColumn(CDetailLines::getFieldCaption).setHeader("Caption").setAutoWidth(true);
 		grid.addColumn(CDetailLines::getEntityProperty).setHeader("Field Name").setAutoWidth(true);
 		grid.addColumn(line -> line.getIsRequired() ? "Yes" : "No").setHeader("Required").setWidth("80px");

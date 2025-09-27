@@ -7,6 +7,7 @@ import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.services.CDetailsBuilder;
 import tech.derbent.api.utils.CAuxillaries;
+import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CButton;
 import tech.derbent.api.views.components.CDiv;
 import tech.derbent.screens.domain.CDetailSection;
@@ -40,40 +41,37 @@ public class CPanelDetailSectionPreview extends CPanelDetailSectionBase {
 	public void populateForm(final CDetailSection screen) {
 		super.populateForm(screen);
 		try {
-			if (screen == null) {
-				if (divPreview != null) {
-					divPreview.removeAll();
-				}
+			Check.notNull(divPreview, "Preview div is not initialized");
+			if (screen == null || screen.getEntityType() == null) {
+				divPreview.removeAll();
 				return;
 			}
-			if (divPreview != null) {
-				final CDetailsBuilder builder = new CDetailsBuilder();
-				divPreview.removeAll();
-				// get service for the class
-				final Class<?> screenClass = CAuxillaries.getEntityClass(screen.getEntityType());
-				// Instead of creating a new binder, reuse the existing one from the base class
-				// This fixes the issue of multiple binders being created unnecessarily
-				CEnhancedBinder<?> sharedBinder = getBinder();
-				if (sharedBinder == null || !sharedBinder.getBeanType().equals(screenClass)) {
-					// Only create new binder if current one doesn't match the type
-					@SuppressWarnings ("unchecked")
-					final CEnhancedBinder<CEntityDB<?>> binder = new CEnhancedBinder<CEntityDB<?>>((Class<CEntityDB<?>>) screenClass);
-					sharedBinder = binder;
-				}
-				builder.buildDetails(screen, sharedBinder, divPreview);
-				// Get related service class for the given class type
-				/** ADD SAMPLE DATA ************************************/
-				final String serviceClassName =
-						screenClass.getPackage().getName().replace("domain", "service") + ".C" + screenClass.getSimpleName().substring(1) + "Service";
-				final Class<?> serviceClass = Class.forName(serviceClassName);
-				final CAbstractService<?> serviceBean = (CAbstractService<?>) CDetailsBuilder.getApplicationContext().getBean(serviceClass);
-				final CEntityDB<?> item = serviceBean.findAll().stream().findFirst().orElse(null);
-				if (item != null) {
-					// Safe casting for readBean - the binder type should match the item type
-					@SuppressWarnings ("unchecked")
-					CEnhancedBinder<Object> objectBinder = (CEnhancedBinder<Object>) sharedBinder;
-					objectBinder.readBean(item);
-				}
+			final CDetailsBuilder builder = new CDetailsBuilder();
+			divPreview.removeAll();
+			// get service for the class
+			final Class<?> screenClass = CAuxillaries.getEntityClass(screen.getEntityType());
+			// Instead of creating a new binder, reuse the existing one from the base class
+			// This fixes the issue of multiple binders being created unnecessarily
+			CEnhancedBinder<?> sharedBinder = getBinder();
+			if (sharedBinder == null || !sharedBinder.getBeanType().equals(screenClass)) {
+				// Only create new binder if current one doesn't match the type
+				@SuppressWarnings ("unchecked")
+				final CEnhancedBinder<CEntityDB<?>> binder = new CEnhancedBinder<CEntityDB<?>>((Class<CEntityDB<?>>) screenClass);
+				sharedBinder = binder;
+			}
+			builder.buildDetails(screen, sharedBinder, divPreview);
+			// Get related service class for the given class type
+			/** ADD SAMPLE DATA ************************************/
+			final String serviceClassName =
+					screenClass.getPackage().getName().replace("domain", "service") + ".C" + screenClass.getSimpleName().substring(1) + "Service";
+			final Class<?> serviceClass = Class.forName(serviceClassName);
+			final CAbstractService<?> serviceBean = (CAbstractService<?>) CDetailsBuilder.getApplicationContext().getBean(serviceClass);
+			final CEntityDB<?> item = serviceBean.findAll().stream().findFirst().orElse(null);
+			if (item != null) {
+				// Safe casting for readBean - the binder type should match the item type
+				@SuppressWarnings ("unchecked")
+				CEnhancedBinder<Object> objectBinder = (CEnhancedBinder<Object>) sharedBinder;
+				objectBinder.readBean(item);
 			}
 		} catch (final Exception e) {
 			// TODO Auto-generated catch block

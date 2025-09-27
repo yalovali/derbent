@@ -21,6 +21,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.services.CAbstractNamedEntityService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.projects.domain.CProject;
@@ -209,5 +211,13 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	public List<CUser> getAvailableUsersForProject(final Long projectId) {
 		Check.notNull(projectId, "User ID must not be null");
 		return ((CUserRepository) repository).findUsersNotAssignedToProject(projectId);
+	}
+
+	public Component createUserProjectSettingsComponent() {
+		LOGGER.debug("Creating user project settings component");
+		final Div errorDiv = new Div();
+		errorDiv.setText("Just testing");
+		errorDiv.addClassName("error-message");
+		return errorDiv;
 	}
 }

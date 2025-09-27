@@ -89,6 +89,8 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 				formLayout.add(component);
 				currentSection = (CPanelDetails) component;
 				mapSectionPanels.put(currentSection.getName(), currentSection);
+			} else {
+				LOGGER.debug("First create a section!");
 			}
 		}
 		return formLayout;

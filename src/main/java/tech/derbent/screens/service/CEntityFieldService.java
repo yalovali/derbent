@@ -21,8 +21,10 @@ import tech.derbent.screens.domain.CDetailLines;
  * entities. */
 @Service
 public class CEntityFieldService {
+
 	/** Data class to hold entity field information. */
 	public static class EntityFieldInfo {
+
 		private boolean allowCustomValue = false;
 		// Additional AMetaData properties
 		private boolean autoSelectFirst = false;
@@ -191,6 +193,7 @@ public class CEntityFieldService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityFieldService.class);
 	public static final String SECTION = "Section";
 	public static final String THIS_CLASS = "This Class";
+	public static final String COMPONENT = "Component";
 
 	public static EntityFieldInfo createFieldInfo(final AMetaData metaData) {
 		try {
@@ -262,8 +265,17 @@ public class CEntityFieldService {
 				sectionInfo.setDescription(line.getSectionName());
 				sectionInfo.setFieldTypeClass(CEntityFieldService.class);
 				return sectionInfo;
-			} else if (line.getRelationFieldName().startsWith("component:")) {
-				// this is a component field. read info values speacially!!!
+			} else if (line.getEntityProperty().startsWith(CEntityFieldService.COMPONENT + ":")) {
+				final EntityFieldInfo sectionInfo = new EntityFieldInfo();
+				sectionInfo.setDataProviderBean(line.getDataProviderBean());
+				sectionInfo.setCreateComponentMethod(line.getEntityProperty().split(CEntityFieldService.COMPONENT + ":")[1]);
+				sectionInfo.setFieldName(line.getRelationFieldName());
+				sectionInfo.setFieldType(CEntityFieldService.COMPONENT);
+				sectionInfo.setJavaType(CEntityFieldService.COMPONENT);
+				sectionInfo.setDisplayName(CEntityFieldService.COMPONENT);
+				sectionInfo.setDescription(CEntityFieldService.COMPONENT);
+				sectionInfo.setFieldTypeClass(CEntityFieldService.class);
+				return sectionInfo;
 			} else {
 				field = getEntityField(screenClassName, relationFieldName);
 				Check.notNull(field, "Relation field not found: " + relationFieldName + " in class " + screenClassName);

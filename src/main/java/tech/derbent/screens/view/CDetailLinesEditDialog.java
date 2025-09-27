@@ -14,6 +14,7 @@ import com.vaadin.flow.component.tabs.TabSheet;
 import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.components.CBinderFactory;
 import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CDiv;
 import tech.derbent.api.views.dialogs.CDBEditDialog;
@@ -24,6 +25,7 @@ import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
 /** Dialog for editing screen field descriptions (detailSection entities). Extends CDBEditDialog to provide a consistent dialog experience. */
 public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
+
 	private static final long serialVersionUID = 1L;
 	private final CEnhancedBinder<CDetailLines> binder;
 	private final CDetailSection screen;
@@ -205,8 +207,9 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 						final String trimmedMethod = method.trim();
 						// create a fake EntityFieldInfo to hold the method name
 						final EntityFieldInfo componentField = new EntityFieldInfo();
-						componentField.setFieldName("component:" + trimmedMethod);
-						// add to list
+						componentField.setDisplayName(relationFieldName);
+						componentField.setFieldName(CEntityFieldService.COMPONENT + ":" + trimmedMethod);
+						componentField.setJavaType(CEntityFieldService.COMPONENT);
 						fieldProperties.add(componentField);
 					}
 				}
@@ -233,7 +236,21 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 			return;
 		} else if (relationFieldName.equals(CEntityFieldService.THIS_CLASS)) {
 			info = CEntityFieldService.getEntityFieldInfo(screen.getEntityType().toString(), selectedProperty);
-		} else if (selectedProperty.startsWith("component:")) {
+		} else if (selectedProperty.startsWith(CEntityFieldService.COMPONENT + ":")) {
+			getEntity().setProperty(selectedProperty);
+			getEntity().setDefaultValue(null);
+			getEntity().setMaxLength(null);
+			getEntity().setDataProviderBean(null);
+			getEntity().setDescription(selectedProperty);
+			getEntity().setRelatedEntityType(null);
+			getEntity().setFieldCaption(selectedProperty);
+			getEntity().setIsReadonly(false);
+			getEntity().setIsRequired(false);
+			getEntity().setIsHidden(false);
+			getEntity().setIsActive(true);
+			getEntity().setFieldCaption(relationFieldName);
+			getEntity().setDataProviderBean(CAuxillaries.getEntityServiceClasses(screen.getEntityType()).getSimpleName());
+			binder.readBean(getEntity());
 			return;
 		} else {
 			info = CEntityFieldService.getEntityFieldInfo(screen.getEntityType().toString(), relationFieldName);
