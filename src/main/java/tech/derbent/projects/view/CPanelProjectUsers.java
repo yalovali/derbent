@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
+import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.views.CPanelUserProjectBase;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
@@ -130,7 +131,8 @@ public class CPanelProjectUsers extends CPanelUserProjectBase<CProject, CUserPro
 	protected void setupGrid() {
 		// Add columns for user name with avatar, roles, and permissions
 		grid.addColumn(CUserProjectSettings::getId).setHeader("ID").setAutoWidth(true);
-		// grid.addComponentColumn(this::getUserWithAvatar).setHeader("User").setAutoWidth(true).setSortable(false);
+		grid.addComponentColumn(settings -> CColorUtils.getEntityWithIcon(settings.getUser())).setHeader("User").setAutoWidth(true)
+				.setSortable(false);
 		grid.addColumn(this::getPermissionAsString).setHeader("Permission").setAutoWidth(true);
 		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
 		addToContent(grid);
