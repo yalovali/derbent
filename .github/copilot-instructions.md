@@ -175,6 +175,70 @@ docs/                   # Essential documentation
 - **Always use CAbstractService** as base for service classes
 - **Entity classes extend CEntityDB<T>** for database entities
 - **Views extend appropriate CAbstract*Page** base classes
+
+### Notification Standards (CRITICAL - ALWAYS Follow)
+**NEVER use direct Vaadin Notification.show() calls or manual dialog instantiation. ALWAYS use the unified notification system:**
+
+#### For Components with Dependency Injection:
+```java
+@Autowired
+private CNotificationService notificationService;
+
+// Toast notifications - use appropriate method for context
+notificationService.showSuccess("Data saved successfully");    // Green, bottom-start, 2s
+notificationService.showError("Save failed");                  // Red, middle, 8s  
+notificationService.showWarning("Check your input");           // Orange, top-center, 5s
+notificationService.showInfo("Process completed");             // Blue, bottom-start, 5s
+
+// Modal dialogs for important messages
+notificationService.showErrorDialog(exception);
+notificationService.showWarningDialog("Important warning message");
+notificationService.showConfirmationDialog("Delete item?", () -> deleteItem());
+
+// Convenience methods for common operations
+notificationService.showSaveSuccess();
+notificationService.showDeleteSuccess();
+notificationService.showCreateSuccess();
+notificationService.showSaveError();
+notificationService.showDeleteError();
+notificationService.showOptimisticLockingError();
+```
+
+#### For Utility Classes or Static Contexts:
+```java
+import tech.derbent.api.ui.notifications.CNotifications;
+
+// Use static methods when dependency injection not available
+CNotifications.showSuccess("Operation completed");
+CNotifications.showError("Something went wrong");
+CNotifications.showSaveSuccess();
+CNotifications.showDeleteError();
+CNotifications.showWarningDialog("Important warning");
+```
+
+#### FORBIDDEN Patterns (Do NOT Use):
+```java
+// ❌ NEVER use direct Vaadin calls
+Notification.show("message");
+Notification.show("message", 3000, Notification.Position.TOP_CENTER);
+
+// ❌ NEVER instantiate dialogs directly  
+new CWarningDialog("message").open();
+new CInformationDialog("message").open();
+new CExceptionDialog(exception).open();
+
+// ❌ NEVER use inconsistent positioning/styling
+notification.setPosition(Position.MIDDLE);
+notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+```
+
+#### Integration Patterns:
+- **CAbstractEntityDBPage descendants**: Service auto-injected, use `notificationService` field
+- **Components**: Add `@Autowired CNotificationService notificationService` field and setter
+- **Utility classes**: Use `CNotifications` static methods
+- **Dialogs extending CDBEditDialog**: Service available if injected in parent
+
+**Rule: Every notification/message to users MUST go through CNotificationService or CNotifications**
 - **Use CEnhancedBinder** for form binding instead of vanilla Vaadin Binder
 
 ### Database Configuration
@@ -221,6 +285,9 @@ mvn spring-boot:run -Dspring.profiles.active=h2 | grep -E "(ERROR|WARN|DEBUG)"
 mvn spotless:apply      # Fix formatting
 mvn spotless:check      # Verify formatting
 mvn clean compile      # Full build verification (NEVER CANCEL: 12-15 seconds)
+
+# Check for forbidden notification patterns (should return empty):
+grep -r "Notification\.show\|new.*Dialog.*\.open()" src/main/java --include="*.java" | grep -v "CNotificationService.java"
 
 # Optional quality checks:
 ./run-playwright-tests.sh mock  # UI validation (37-40 seconds)
