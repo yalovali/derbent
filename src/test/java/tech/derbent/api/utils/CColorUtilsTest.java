@@ -51,7 +51,6 @@ class CColorUtilsTest {
 		// Test the new generic function with a user entity
 		final CUser user = new CUser("Test User");
 		final HorizontalLayout layout = CColorUtils.getEntityWithIcon(user);
-		
 		assertNotNull(layout, "Layout should not be null");
 		assertTrue(layout.getComponentCount() >= 1, "Layout should contain at least one component");
 		// The layout should have proper alignment and spacing
@@ -64,7 +63,6 @@ class CColorUtilsTest {
 		final CActivityType activityType = new CActivityType();
 		activityType.setName("Development");
 		final HorizontalLayout layout = CColorUtils.getEntityWithIcon(activityType);
-		
 		assertNotNull(layout, "Layout should not be null");
 		assertTrue(layout.getComponentCount() >= 1, "Layout should contain at least one component");
 		assertTrue(layout.isSpacing(), "Layout should have spacing enabled");
