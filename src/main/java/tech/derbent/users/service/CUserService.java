@@ -30,6 +30,8 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
+import tech.derbent.users.service.CUserProjectSettingsService;
+import tech.derbent.users.view.CUserProjectSettingsComponent;
 import tech.derbent.users.view.CUserProjectSettingsDialog;
 
 @Service
@@ -43,6 +45,8 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	private CProjectService projectService;
 	@Autowired
 	private CUserProjectRoleService roleService;
+	@Autowired
+	private CUserProjectSettingsService userProjectSettingsService;
 
 	public CUserService(final CUserRepository repository, final Clock clock) {
 		super(repository, clock);
@@ -225,7 +229,9 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 		LOGGER.debug("Creating enhanced user project settings component");
 		try {
 			// Create the enhanced component with proper service dependencies
-			CUserProjectSettingsDialog component = new CUserProjectSettingsDialog();
+			CUserProjectSettingsComponent component =
+					new CUserProjectSettingsComponent(this, projectService, roleService, userProjectSettingsService);
+			LOGGER.debug("Successfully created CUserProjectSettingsComponent");
 			return component;
 		} catch (Exception e) {
 			LOGGER.error("Failed to create user project settings component: {}", e.getMessage(), e);
