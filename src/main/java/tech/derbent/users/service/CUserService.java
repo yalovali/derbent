@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -23,14 +24,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
-import org.springframework.beans.factory.annotation.Autowired;
+import tech.derbent.api.roles.service.CUserProjectRoleService;
 import tech.derbent.api.services.CAbstractNamedEntityService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.roles.service.CUserProjectRoleService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
-import tech.derbent.users.view.CUserProjectSettingsComponent;
+import tech.derbent.users.view.CUserProjectSettingsDialog;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -225,8 +225,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 		LOGGER.debug("Creating enhanced user project settings component");
 		try {
 			// Create the enhanced component with proper service dependencies
-			CUserProjectSettingsComponent component = new CUserProjectSettingsComponent(projectService, roleService);
-			LOGGER.debug("Successfully created CUserProjectSettingsComponent");
+			CUserProjectSettingsDialog component = new CUserProjectSettingsDialog();
 			return component;
 		} catch (Exception e) {
 			LOGGER.error("Failed to create user project settings component: {}", e.getMessage(), e);
