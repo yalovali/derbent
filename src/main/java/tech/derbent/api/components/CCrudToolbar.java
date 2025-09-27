@@ -7,18 +7,14 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.data.binder.ValidationException;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.CEntityUpdateListener;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.ui.dialogs.CConfirmationDialog;
-import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CButton;
 
@@ -73,7 +69,14 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		createButton = CButton.createPrimary("New", VaadinIcon.PLUS.create(), e -> handleCreate());
 		createButton.getElement().setAttribute("title", "Create new " + entityClass.getSimpleName());
 		// Save (Update) Button
-		saveButton = CButton.createPrimary("Save", VaadinIcon.CHECK.create(), e -> handleSave());
+		saveButton = CButton.createPrimary("Save", VaadinIcon.CHECK.create(), e -> {
+			try {
+				handleSave();
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		});
 		saveButton.getElement().setAttribute("title", "Save current " + entityClass.getSimpleName());
 		// Delete Button
 		deleteButton = CButton.createError("Delete", VaadinIcon.TRASH.create(), e -> handleDelete());
@@ -155,28 +158,18 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		}
 	}
 
-	/** Handles the save (update) operation with proper validation, error handling, and notifications. */
-	private void handleSave() {
+	/** Handles the save (update) operation with proper validation, error handling, and notifications.
+	 * @throws Exception */
+	private void handleSave() throws Exception {
 		if (currentEntity == null) {
 			showErrorNotification("Cannot save: No entity selected.");
 			return;
 		}
 		try {
 			LOGGER.debug("Save button clicked for entity: {} ID: {}", entityClass.getSimpleName(), currentEntity.getId());
-			// Debug: Log current entity state before binding
-			LOGGER.debug("Entity state before writeBean: {}", currentEntity.toString());
-			// Write form data to entity (this will validate)
-			LOGGER.debug("Bean name: {} currentEntity name:{}", binder.getBean().toString(), currentEntity.toString());
 			binder.writeBean(currentEntity);
-			LOGGER.debug("writeBean completed successfully for entity: {}", entityClass.getSimpleName());
-			// Debug: Log entity state after binding
-			LOGGER.debug("Entity state after writeBean: {}", currentEntity.toString());
 			// Save entity
 			final EntityClass savedEntity = entityService.save(currentEntity);
-			LOGGER.info("Entity saved successfully: {} with ID: {}", entityClass.getSimpleName(), savedEntity.getId());
-			// Debug: Log saved entity state
-			LOGGER.debug("Saved entity state: {}", savedEntity.toString());
-			// Update current entity reference
 			currentEntity = savedEntity;
 			// Re-bind the saved entity to refresh the form with updated data (like generated IDs, timestamps)
 			try {
@@ -190,30 +183,9 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 			showSuccessNotification("Data saved successfully");
 			// Notify listeners
 			notifyListenersSaved(savedEntity);
-		} catch (final ObjectOptimisticLockingFailureException exception) {
-			LOGGER.error("Optimistic locking failure during save", exception);
-			throw exception; // Rethrow to let higher-level handlers manage it
-		} catch (final ValidationException validationException) {
-			LOGGER.error("Validation error during save", validationException);
-			handleValidationError(validationException);
-		} catch (final Exception exception) {
-			LOGGER.error("Unexpected error during save operation for entity: {}", entityClass.getSimpleName(), exception);
-			throw exception; // Rethrow to let higher-level handlers manage it
-		}
-	}
-
-	/** Handles validation errors with enhanced error reporting. */
-	private void handleValidationError(final ValidationException validationException) {
-		if (binder.hasValidationErrors()) {
-			LOGGER.error("Detailed validation errors:");
-			LOGGER.error(binder.getFormattedErrorSummary());
-			// Show detailed error information
-			final StringBuilder errorMessage = new StringBuilder("Failed to save the data. Please check:\n");
-			binder.getFieldsWithErrors()
-					.forEach(field -> errorMessage.append("• ").append(field).append(": ").append(binder.getFieldError(field)).append("\n"));
-			new CWarningDialog(errorMessage.toString()).open();
-		} else {
-			new CWarningDialog("Failed to save the data. Please check that all required fields are filled and values are valid.").open();
+		} catch (Exception e) {
+			LOGGER.error("Unexpected error during save operation for entity: {}", entityClass.getSimpleName(), e);
+			throw e;
 		}
 	}
 
@@ -244,7 +216,6 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	/** Performs the actual delete operation after confirmation. */
 	private void performDelete() {
 		try {
-			LOGGER.debug("Performing delete for entity: {} with ID: {}", entityClass.getSimpleName(), currentEntity.getId());
 			EntityClass entityToDelete = currentEntity;
 			entityService.delete(currentEntity);
 			LOGGER.info("Entity deleted successfully: {} with ID: {}", entityClass.getSimpleName(), entityToDelete.getId());
@@ -257,27 +228,10 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 			showSuccessNotification("Entity deleted successfully");
 			// Notify listeners
 			notifyListenersDeleted(entityToDelete);
-		} catch (final DataIntegrityViolationException exception) {
-			LOGGER.error("Data integrity violation during delete", exception);
-			// Check if it's a foreign key constraint violation
-			String errorMessage = exception.getMessage();
-			if (errorMessage != null && errorMessage.contains("foreign key constraint")) {
-				showErrorNotification("Cannot delete this " + entityClass.getSimpleName()
-						+ " because it is referenced by other data. Please remove related records first.");
-			} else {
-				showErrorNotification("Cannot delete this " + entityClass.getSimpleName() + " due to data integrity constraints.");
-			}
-		} catch (final Exception exception) {
-			LOGGER.error("Error during delete operation for entity: {}", entityClass.getSimpleName(), exception);
-			// Check if it's a constraint violation in the exception message
-			String errorMessage = exception.getMessage();
-			if (errorMessage != null && (errorMessage.contains("foreign key constraint") || errorMessage.contains("violates"))) {
-				showErrorNotification("Cannot delete this " + entityClass.getSimpleName()
-						+ " because it has related data. Please remove comments or other associated records first.");
-			} else {
-				showErrorNotification("An error occurred while deleting. Please try again.");
-			}
-			throw exception; // Rethrow to let higher-level handlers manage it
+		} catch (final Exception e) {
+			LOGGER.error("Error during delete operation for entity: {}", entityClass.getSimpleName(), e);
+			showErrorNotification("An error occurred while deleting the entity. Please try again.");
+			throw e;
 		}
 	}
 

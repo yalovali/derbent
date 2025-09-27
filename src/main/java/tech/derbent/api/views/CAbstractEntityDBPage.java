@@ -36,6 +36,7 @@ import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.ui.dialogs.CConfirmationDialog;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.api.utils.CPageableUtils;
+import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CButton;
 import tech.derbent.api.views.components.CFlexLayout;
 import tech.derbent.api.views.components.CVerticalLayout;
@@ -340,6 +341,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	public CEnhancedBinder<EntityClass> getBinder() { return binder; }
 
+	@Override
 	public EntityClass getCurrentEntity() { return currentEntity; }
 
 	public Div getDetailsTabLayout() { return detailsTabLayout; }
@@ -591,19 +593,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	 * @param entity the entity to validate
 	 * @throws IllegalArgumentException if validation fails */
 	protected void validateEntityForSave(final EntityClass entity) {
-		if (entity == null) {
-			throw new IllegalArgumentException("Entity cannot be null");
-		}
-	}
-	// IContentOwner implementation
-	// getCurrentEntity() is already implemented above
-
-	@Override
-	public Object getContextValue(String contextName) {
-		// Default implementation - subclasses can override for specific context values
-		if ("currentEntity".equals(contextName)) {
-			return currentEntity;
-		}
-		return null;
+		Check.notNull(entity, "Entity cannot be null for validation");
 	}
 }

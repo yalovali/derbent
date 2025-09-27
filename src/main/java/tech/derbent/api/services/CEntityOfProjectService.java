@@ -170,8 +170,6 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	public EntityClass newEntity(final String name, final CProject project) {
 		Check.notNull(project, "Project cannot be null");
 		Check.notBlank(name, "Entity name cannot be null or empty");
-		// Validate inputs
-		validateEntityName(name);
 		try {
 			final Object instance = getEntityClass().getDeclaredConstructor(String.class, CProject.class).newInstance(name, project);
 			if (!getEntityClass().isInstance(instance)) {

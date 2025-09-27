@@ -13,13 +13,6 @@ import tech.derbent.session.service.ISessionService;
  * operations for named entities including validation, creation, and name-based queries with consistent error handling and logging. */
 public abstract class CAbstractNamedEntityService<EntityClass extends CEntityNamed<EntityClass>> extends CAbstractService<EntityClass> {
 
-	/** Validates an entity name.
-	 * @param name the name to validate
-	 * @throws IllegalArgumentException if the name is null or empty */
-	protected static void validateEntityName(final String name) {
-		Check.notBlank(name, "Entity name cannot be null or empty");
-	}
-
 	public CAbstractNamedEntityService(final CAbstractNamedRepository<EntityClass> repository, final Clock clock) {
 		super(repository, clock);
 	}
@@ -82,14 +75,12 @@ public abstract class CAbstractNamedEntityService<EntityClass extends CEntityNam
 		if ("fail".equals(name)) {
 			throw new RuntimeException("This is for testing the error handler");
 		}
-		// Validate inputs
-		validateEntityName(name);
+		Check.notBlank(name, "Name cannot be null or empty");
 		try {
 			// Get constructor that takes a String parameter and invoke it with the name
 			final Object instance = getEntityClass().getDeclaredConstructor(String.class).newInstance(name.trim());
-			if (!getEntityClass().isInstance(instance)) {
-				throw new IllegalStateException("Created object is not instance of T");
-			}
+			Check.notNull(instance, "Failed to create instance of " + getEntityClass().getName());
+			Check.isTrue(getEntityClass().isInstance(instance), "Created object is not instance of T");
 			return ((EntityClass) instance);
 		} catch (final Exception e) {
 			throw new RuntimeException("Failed to create instance of " + getEntityClass().getName(), e);

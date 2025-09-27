@@ -5,10 +5,10 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import tech.derbent.api.utils.CAuxillaries;
+import tech.derbent.api.utils.Check;
 
 public abstract class CDialog extends Dialog {
 
@@ -60,10 +60,9 @@ public abstract class CDialog extends Dialog {
 		headerLayout.setAlignItems(HorizontalLayout.Alignment.CENTER);
 		headerLayout.setSpacing(true);
 		final Icon icon = getFormIcon();
-		if (icon != null) {
-			icon.setSize("24px");
-			headerLayout.add(icon);
-		}
+		Check.notNull(icon, "Form icon cannot be null");
+		icon.setSize("24px");
+		headerLayout.add(icon);
 		formTitle = new H3(getFormTitleString());
 		headerLayout.add(formTitle);
 		mainLayout.add(headerLayout);
@@ -72,12 +71,7 @@ public abstract class CDialog extends Dialog {
 		buttonLayout.setJustifyContentMode(HorizontalLayout.JustifyContentMode.CENTER);
 		buttonLayout.getStyle().set("margin-top", "16px");
 		getFooter().add(buttonLayout);
-		try {
-			setupContent();
-		} catch (final Exception e) {
-			LOGGER.error("Error setting up dialog content: {}", e.getMessage(), e);
-			Notification.show("Error setting up dialog: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
-		}
+		setupContent();
 		setupButtons();
 		setupDone = true;
 	}

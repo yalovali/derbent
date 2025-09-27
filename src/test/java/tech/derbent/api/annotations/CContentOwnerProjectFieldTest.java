@@ -87,14 +87,6 @@ public class CContentOwnerProjectFieldTest {
 		@Override
 		public Object getCurrentEntity() { return currentUser; }
 
-		@Override
-		public Object getContextValue(String contextName) {
-			if ("currentEntity".equals(contextName)) {
-				return currentUser;
-			}
-			return null;
-		}
-
 		/** This method simulates CUsersView.getAvailableProjects(). It should be called by the data provider resolver when processing the project
 		 * field in CUserProjectSettingsDialog. */
 		public List<CProject> getAvailableProjects() {

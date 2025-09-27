@@ -46,23 +46,6 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 	@Override
 	public EntityClass getCurrentEntity() { return (EntityClass) parentContent.getCurrentEntity(); }
 
-	@Override
-	public Object getContextValue(String contextName) {
-		// First check our local context
-		Object localValue = getLocalContextValue(contextName);
-		if (localValue != null) {
-			return localValue;
-		}
-		// Then delegate to parent content owner
-		if (parentContent != null) {
-			return parentContent.getContextValue(contextName);
-		}
-		return null;
-	}
-
-	@Override
-	public IContentOwner getParentContentOwner() { return parentContent; }
-
 	/** Override this method in subclasses to provide local context values specific to this accordion panel.
 	 * @param contextName the context name to resolve
 	 * @return the local context value, or null if not found locally */
