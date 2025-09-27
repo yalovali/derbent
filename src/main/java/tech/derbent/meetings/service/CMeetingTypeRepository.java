@@ -10,12 +10,9 @@ import tech.derbent.meetings.domain.CMeetingType;
  * meeting types with eager loading support. */
 public interface CMeetingTypeRepository extends CEntityOfProjectRepository<CMeetingType> {
 
-	/** Finds a meeting type by ID with eagerly loaded relationships.
-	 * @param id the meeting type ID
-	 * @return Optional containing the meeting type with loaded relationships */
+	/** Finds a meeting type by ID with eagerly loaded relationships using generic pattern */
 	@Query (
-		"SELECT mt FROM CMeetingType mt " + "LEFT JOIN FETCH mt.project " + "LEFT JOIN FETCH mt.assignedTo " + "LEFT JOIN FETCH mt.createdBy "
-				+ "WHERE mt.id = :id"
+		"SELECT mt FROM #{#entityName} mt LEFT JOIN FETCH mt.project LEFT JOIN FETCH mt.assignedTo LEFT JOIN FETCH mt.createdBy WHERE mt.id = :id"
 	)
 	Optional<CMeetingType> findByIdWithRelationships(@Param ("id") Long id);
 }
