@@ -93,7 +93,6 @@ import tech.derbent.users.service.CUserTypeService;
 import tech.derbent.users.view.CUsersView;
 
 public class CAuxillaries {
-
 	public static final Logger LOGGER = LoggerFactory.getLogger(CAuxillaries.class);
 
 	public static String generateId(final Component component) {
@@ -231,7 +230,7 @@ public class CAuxillaries {
 			return CUserProjectRole.class;
 		// ... add
 		default:
-			LOGGER.error("Unknown entity type: " + simpleName + " dont forget to update CFieldServiceBase and CAuxillaries");
+			LOGGER.error("Unknown entity type: " + simpleName + " dont forget to update (CAuxillaries:234)");
 			throw new IllegalArgumentException("Unknown entity type: " + simpleName);
 		}
 	}
@@ -446,7 +445,7 @@ public class CAuxillaries {
 
 	public static List<String> getWebColors() {
 		// Common hex color constants for color picker
-		List<String> colors = new ArrayList<>();
+		final List<String> colors = new ArrayList<>();
 		colors.add("#F0F8FF"); // AliceBlue
 		colors.add("#FAEBD7"); // AntiqueWhite
 		colors.add("#00FFFF"); // Aqua
@@ -480,7 +479,7 @@ public class CAuxillaries {
 		return colors;
 	}
 
-	public static String invokeMethodOfString(Object entity, final String methodName) throws Exception {
+	public static String invokeMethodOfString(final Object entity, final String methodName) throws Exception {
 		try {
 			Check.notBlank(methodName, "methodName is blank");
 			Check.notNull(entity, "clazz is null");

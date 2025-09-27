@@ -2,6 +2,7 @@ package tech.derbent.screens.view;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -23,7 +24,6 @@ import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
 /** Dialog for editing screen field descriptions (detailSection entities). Extends CDBEditDialog to provide a consistent dialog experience. */
 public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
-
 	private static final long serialVersionUID = 1L;
 	private final CEnhancedBinder<CDetailLines> binder;
 	private final CDetailSection screen;
@@ -181,7 +181,34 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 			// Get field properties for the selected class of relation
 			final EntityFieldInfo info = CEntityFieldService.getEntityFieldInfo(screen.getEntityType().toString(), relationFieldName);
 			Check.notNull(info, "Field info must not be null for field class: " + relationFieldName);
-			fieldProperties = CEntityFieldService.getEntitySimpleFields(info.getJavaType(), null);
+			// if the field is a collection, we cannot reference any item, so skip fields all...
+			// no item can be referenced it is a collection, skip fields all...
+			if (info.getFieldTypeClass().isAssignableFrom(Collection.class)) {
+				// Initialize empty list for collections since no fields can be referenced
+				fieldProperties = new ArrayList<>();
+			} else {
+				// single object types
+				fieldProperties = CEntityFieldService.getEntitySimpleFields(info.getJavaType(), null);
+			}
+		}
+		// Ensure fieldProperties is not null before proceeding
+		Check.notNull(fieldProperties, "Field properties list must not be null");
+		final EntityFieldInfo info_data = CEntityFieldService.getEntityFieldInfo(screen.getEntityType().toString(), relationFieldName);
+		Check.notNull(info_data, "Entity field info must not be null for relation field: " + relationFieldName);
+		final String createComponentMethod = info_data.getCreateComponentMethod();
+		if ((createComponentMethod != null) && !createComponentMethod.trim().isEmpty()) {
+			// if the components methods are not empty add them to list
+			final String[] methods = createComponentMethod.split(",");
+			for (final String method : methods) {
+				if ((method != null) && !method.trim().isEmpty()) {
+					final String trimmedMethod = method.trim();
+					// create a fake EntityFieldInfo to hold the method name
+					final EntityFieldInfo componentField = new EntityFieldInfo();
+					componentField.setFieldName(trimmedMethod);
+					// add to list
+					fieldProperties.add(componentField);
+				}
+			}
 		}
 		final ComboBox<String> cmbFieldProperties = ((ComboBox<String>) formEntity.getComponent("entityProperty"));
 		Check.notNull(cmbFieldProperties, "Entity property combobox must not be null");

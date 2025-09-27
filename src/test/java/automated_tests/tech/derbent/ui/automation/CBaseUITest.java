@@ -7,16 +7,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
-import com.microsoft.playwright.Browser;
+import org.xml.sax.Locator;
 import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.BrowserType;
-import com.microsoft.playwright.Locator;
-import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.vaadin.flow.router.Route;
+import com.vaadin.uitest.browser.Browser;
+import io.vertx.ext.web.common.WebEnvironment;
 import tech.derbent.api.utils.Check;
 import tech.derbent.projects.view.CProjectsView;
 import tech.derbent.users.view.CUsersView;
@@ -29,7 +28,6 @@ import tech.derbent.users.view.CUsersView;
 @SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT)
 @ActiveProfiles ("test")
 public abstract class CBaseUITest {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBaseUITest.class);
 	/** Admin view classes */
 	protected Class<?>[] adminViewClasses = {};
@@ -146,7 +144,7 @@ public abstract class CBaseUITest {
 	}
 
 	/** Checks if browser is available */
-	protected boolean isBrowserAvailable() { return page != null && !page.isClosed(); }
+	protected boolean isBrowserAvailable() { return (page != null) && !page.isClosed(); }
 
 	/** Performs complete login workflow with username and password. This method handles the entire authentication process including form submission
 	 * and redirection verification. */
@@ -255,6 +253,58 @@ public abstract class CBaseUITest {
 		clickDelete();
 		takeScreenshot("crud-delete-" + entityName.toLowerCase(), false);
 		LOGGER.info("✅ CRUD workflow complete for: {}", entityName);
+	}
+
+	/** Enhanced CRUD workflow with better error handling and validation */
+	protected void performEnhancedCRUDWorkflow(String entityName) {
+		Check.notBlank(entityName, "Entity name cannot be blank");
+		LOGGER.info("🔄 Performing enhanced CRUD workflow for: {}", entityName);
+		try {
+			// CREATE operation
+			LOGGER.info("➕ Testing CREATE operation for: {}", entityName);
+			clickNew();
+			wait_1000();
+			String testData = "Test " + entityName + " " + System.currentTimeMillis();
+			fillFirstTextField(testData);
+			// Try to fill other fields if present
+			Locator textAreas = page.locator("vaadin-text-area");
+			if (textAreas.count() > 0) {
+				fillFirstTextArea("Description for " + testData);
+			}
+			// Select combobox options if present
+			Locator comboBoxes = page.locator("vaadin-combo-box");
+			if (comboBoxes.count() > 0) {
+				selectFirstComboBoxOption();
+			}
+			clickSave();
+			wait_1000();
+			takeScreenshot("crud-create-" + entityName.toLowerCase(), false);
+			// READ operation - verify data was created
+			LOGGER.info("👁️ Testing READ operation for: {}", entityName);
+			boolean hasData = verifyGridHasData();
+			Check.isTrue(hasData, "Data should be present after CREATE operation");
+			// UPDATE operation
+			LOGGER.info("✏️ Testing UPDATE operation for: {}", entityName);
+			clickFirstGridRow();
+			wait_500();
+			clickEdit();
+			wait_1000();
+			String updatedData = "Updated " + entityName + " " + System.currentTimeMillis();
+			fillFirstTextField(updatedData);
+			clickSave();
+			wait_1000();
+			takeScreenshot("crud-update-" + entityName.toLowerCase(), false);
+			// DELETE operation
+			LOGGER.info("🗑️ Testing DELETE operation for: {}", entityName);
+			clickFirstGridRow();
+			wait_500();
+			clickDelete();
+			wait_1000();
+			takeScreenshot("crud-delete-" + entityName.toLowerCase(), false);
+			LOGGER.info("✅ Enhanced CRUD workflow completed successfully for: {}", entityName);
+		} catch (Exception e) {
+			throw new AssertionError("Enhanced CRUD workflow failed for " + entityName + ": " + e.getMessage(), e);
+		}
 	}
 
 	/** Performs logout functionality */
@@ -395,6 +445,184 @@ public abstract class CBaseUITest {
 		LOGGER.info("✅ ComboBox testing complete");
 	}
 
+	/** Tests all menu item openings to ensure navigation works */
+	protected void testAllMenuItemOpenings() {
+		LOGGER.info("🧭 Testing all menu item openings...");
+		try {
+			// Test main navigation menu items
+			String[] commonMenuItems = {
+					"Projects", "Users", "Activities", "Meetings", "Decisions"
+			};
+			for (String menuItem : commonMenuItems) {
+				LOGGER.info("🔍 Testing menu item: {}", menuItem);
+				boolean navigationSuccess = navigateToViewByText(menuItem);
+				if (navigationSuccess) {
+					wait_1000();
+					takeScreenshot("menu-" + menuItem.toLowerCase(), false);
+					LOGGER.info("✅ Successfully opened menu item: {}", menuItem);
+				} else {
+					LOGGER.warn("⚠️ Could not navigate to menu item: {}", menuItem);
+				}
+			}
+			LOGGER.info("✅ Menu item testing completed");
+		} catch (Exception e) {
+			throw new AssertionError("Menu item testing failed: " + e.getMessage(), e);
+		}
+	}
+
+	/** Tests breadcrumb navigation if present */
+	protected void testBreadcrumbNavigation() {
+		LOGGER.info("🍞 Testing breadcrumb navigation...");
+		try {
+			Locator breadcrumbs = page.locator(".breadcrumb, vaadin-breadcrumb, nav[aria-label*='breadcrumb']");
+			if (breadcrumbs.count() > 0) {
+				LOGGER.info("📋 Found breadcrumb navigation");
+				Locator breadcrumbItems = breadcrumbs.locator("a, button, span");
+				int itemCount = breadcrumbItems.count();
+				LOGGER.info("📊 Found {} breadcrumb items", itemCount);
+				// Test clicking breadcrumb items (except last one which is current)
+				for (int i = 0; i < (itemCount - 1); i++) {
+					try {
+						Locator item = breadcrumbItems.nth(i);
+						String itemText = item.textContent();
+						LOGGER.info("🔍 Testing breadcrumb item: {}", itemText);
+						item.click();
+						wait_1000();
+						takeScreenshot("breadcrumb-" + i, false);
+					} catch (Exception e) {
+						LOGGER.warn("⚠️ Failed to test breadcrumb item {}: {}", i, e.getMessage());
+					}
+				}
+			} else {
+				LOGGER.info("ℹ️ No breadcrumb navigation found");
+			}
+			LOGGER.info("✅ Breadcrumb navigation testing completed");
+		} catch (Exception e) {
+			throw new AssertionError("Breadcrumb navigation test failed: " + e.getMessage(), e);
+		}
+	}
+	// ===========================================
+	// ENHANCED CRUD TESTING METHODS
+	// ===========================================
+
+	/** Tests database initialization by verifying that essential data is present */
+	protected void testDatabaseInitialization() {
+		LOGGER.info("🗄️ Testing database initialization...");
+		try {
+			// Navigate to Users view to check if default users exist
+			navigateToUsers();
+			wait_1000();
+			boolean usersExist = verifyGridHasData();
+			Check.isTrue(usersExist, "Database should contain initial user data");
+			// Navigate to Projects view to check if data structure is ready
+			navigateToProjects();
+			wait_1000();
+			// Projects may be empty initially, just verify grid is present
+			Locator projectGrid = getLocatorWithCheck("vaadin-grid", "Projects grid");
+			Check.notNull(projectGrid, "Projects grid should be present");
+			LOGGER.info("✅ Database initialization test completed successfully");
+		} catch (Exception e) {
+			throw new AssertionError("Database initialization test failed: " + e.getMessage(), e);
+		}
+	}
+
+	/** Tests grid column functionality including sorting and filtering */
+	protected void testGridColumnFunctionality(String entityName) {
+		Check.notBlank(entityName, "Entity name cannot be blank");
+		LOGGER.info("📊 Testing grid column functionality for: {}", entityName);
+		try {
+			Locator grid = getLocatorWithCheck("vaadin-grid", "Grid for " + entityName);
+			Locator headers = grid.locator("vaadin-grid-sorter, th, .grid-header");
+			int headerCount = headers.count();
+			LOGGER.info("📋 Found {} grid columns for {}", headerCount, entityName);
+			// Test sorting on first few columns
+			for (int i = 0; i < Math.min(headerCount, 3); i++) {
+				try {
+					Locator header = headers.nth(i);
+					String headerText = header.textContent();
+					LOGGER.info("🔄 Testing sort on column: {}", headerText);
+					header.click();
+					wait_1000();
+					takeScreenshot("grid-sort-" + entityName.toLowerCase() + "-col" + i, false);
+				} catch (Exception e) {
+					LOGGER.warn("⚠️ Failed to test sorting on column {}: {}", i, e.getMessage());
+				}
+			}
+			LOGGER.info("✅ Grid column functionality testing completed for: {}", entityName);
+		} catch (Exception e) {
+			throw new AssertionError("Grid column functionality test failed for " + entityName + ": " + e.getMessage(), e);
+		}
+	}
+
+	/** Tests project activation/deactivation functionality */
+	protected void testProjectActivation() {
+		LOGGER.info("🔄 Testing project activation functionality...");
+		try {
+			navigateToProjects();
+			wait_1000();
+			// Check if there are any projects to work with
+			if (verifyGridHasData()) {
+				clickFirstGridRow();
+				wait_500();
+				// Look for activation-related buttons or controls
+				Locator activateButton = page.locator("vaadin-button:has-text('Activate'), vaadin-button:has-text('Enable')");
+				Locator deactivateButton = page.locator("vaadin-button:has-text('Deactivate'), vaadin-button:has-text('Disable')");
+				if (activateButton.count() > 0) {
+					LOGGER.info("🟢 Found activation controls");
+					activateButton.first().click();
+					wait_1000();
+					takeScreenshot("project-activation", false);
+				} else if (deactivateButton.count() > 0) {
+					LOGGER.info("🔴 Found deactivation controls");
+					deactivateButton.first().click();
+					wait_1000();
+					takeScreenshot("project-deactivation", false);
+				} else {
+					LOGGER.info("ℹ️ No activation controls found - checking status field");
+					// Check if there's a status field that might indicate activation state
+					Locator statusField = page.locator("vaadin-text-field[label*='Status'], vaadin-combo-box[label*='Status']");
+					if (statusField.count() > 0) {
+						LOGGER.info("📊 Found status field for project state");
+					}
+				}
+			} else {
+				LOGGER.info("ℹ️ No projects found to test activation");
+			}
+			LOGGER.info("✅ Project activation test completed");
+		} catch (Exception e) {
+			throw new AssertionError("Project activation test failed: " + e.getMessage(), e);
+		}
+	}
+
+	/** Tests project change tracking and notifications */
+	protected void testProjectChangeTracking() {
+		LOGGER.info("📝 Testing project change tracking...");
+		try {
+			navigateToProjects();
+			wait_1000();
+			if (verifyGridHasData()) {
+				// Test editing a project to see if changes are tracked
+				clickFirstGridRow();
+				wait_500();
+				clickEdit();
+				wait_1000();
+				// Make a change to test tracking
+				fillFirstTextField("Test Change " + System.currentTimeMillis());
+				clickSave();
+				wait_1000();
+				takeScreenshot("project-change-tracking", false);
+				LOGGER.info("✅ Project change tracking test completed");
+			} else {
+				LOGGER.info("ℹ️ No projects found to test change tracking");
+			}
+		} catch (Exception e) {
+			throw new AssertionError("Project change tracking test failed: " + e.getMessage(), e);
+		}
+	}
+	// ===========================================
+	// MENU NAVIGATION TESTING METHODS
+	// ===========================================
+
 	/** Tests responsive design by checking layout at different viewport sizes. */
 	protected void testResponsiveDesign() {
 		LOGGER.info("📱 Testing responsive design across viewport sizes");
@@ -417,6 +645,46 @@ public abstract class CBaseUITest {
 		LOGGER.info("✅ Responsive design testing complete");
 	}
 
+	/** Tests sidebar navigation menu functionality */
+	protected void testSidebarNavigation() {
+		LOGGER.info("📱 Testing sidebar navigation...");
+		try {
+			// Look for navigation elements
+			Locator sideNav = page.locator("vaadin-side-nav, nav, .navigation");
+			if (sideNav.count() > 0) {
+				LOGGER.info("📋 Found navigation sidebar");
+				// Test expanding/collapsing if applicable
+				Locator toggleButton = page.locator("vaadin-button[aria-label*='menu'], button[aria-label*='toggle']");
+				if (toggleButton.count() > 0) {
+					toggleButton.first().click();
+					wait_500();
+					takeScreenshot("sidebar-toggle", false);
+				}
+				// Test navigation items
+				Locator navItems = page.locator("vaadin-side-nav-item, .nav-item, a[href]");
+				int itemCount = navItems.count();
+				LOGGER.info("📊 Found {} navigation items", itemCount);
+				for (int i = 0; i < Math.min(itemCount, 5); i++) { // Test first 5 items
+					try {
+						Locator navItem = navItems.nth(i);
+						String itemText = navItem.textContent();
+						LOGGER.info("🔍 Testing navigation item {}: {}", i + 1, itemText);
+						navItem.click();
+						wait_1000();
+						takeScreenshot("nav-item-" + i, false);
+					} catch (Exception e) {
+						LOGGER.warn("⚠️ Failed to test navigation item {}: {}", i + 1, e.getMessage());
+					}
+				}
+			} else {
+				LOGGER.warn("⚠️ No sidebar navigation found");
+			}
+			LOGGER.info("✅ Sidebar navigation testing completed");
+		} catch (Exception e) {
+			throw new AssertionError("Sidebar navigation test failed: " + e.getMessage(), e);
+		}
+	}
+
 	/** Verifies accessibility by checking for proper ARIA labels and keyboard navigation support. */
 	protected void verifyAccessibility() {
 		LOGGER.info("♿ Verifying accessibility compliance");
@@ -433,6 +701,29 @@ public abstract class CBaseUITest {
 	}
 	// ===========================================
 	// VIEW-SPECIFIC NAVIGATION HELPERS
+	// ===========================================
+
+	/** Verifies that database tables are properly initialized */
+	protected void verifyDatabaseStructure() {
+		LOGGER.info("🔍 Verifying database structure...");
+		try {
+			// Test each main view to ensure tables are accessible
+			for (Class<?> viewClass : mainViewClasses) {
+				LOGGER.info("📋 Checking database structure for: {}", viewClass.getSimpleName());
+				boolean navigationSuccess = navigateToViewByClass(viewClass);
+				Check.isTrue(navigationSuccess, "Should be able to navigate to " + viewClass.getSimpleName());
+				wait_1000();
+				// Verify that grid is present (indicates table exists)
+				Locator grid = page.locator("vaadin-grid").first();
+				Check.isTrue(grid.count() > 0, "Grid should be present for " + viewClass.getSimpleName());
+			}
+			LOGGER.info("✅ Database structure verification completed");
+		} catch (Exception e) {
+			throw new AssertionError("Database structure verification failed: " + e.getMessage(), e);
+		}
+	}
+	// ===========================================
+	// PROJECT ACTIVATION TESTING METHODS
 	// ===========================================
 
 	/** Verifies that the grid contains data by checking for the presence of grid cells. */
@@ -509,297 +800,4 @@ public abstract class CBaseUITest {
 	// ===========================================
 	// DATABASE INITIALIZATION TESTING METHODS
 	// ===========================================
-
-	/** Tests database initialization by verifying that essential data is present */
-	protected void testDatabaseInitialization() {
-		LOGGER.info("🗄️ Testing database initialization...");
-		try {
-			// Navigate to Users view to check if default users exist
-			navigateToUsers();
-			wait_1000();
-			boolean usersExist = verifyGridHasData();
-			Check.isTrue(usersExist, "Database should contain initial user data");
-			// Navigate to Projects view to check if data structure is ready
-			navigateToProjects();
-			wait_1000();
-			// Projects may be empty initially, just verify grid is present
-			Locator projectGrid = getLocatorWithCheck("vaadin-grid", "Projects grid");
-			Check.notNull(projectGrid, "Projects grid should be present");
-			LOGGER.info("✅ Database initialization test completed successfully");
-		} catch (Exception e) {
-			throw new AssertionError("Database initialization test failed: " + e.getMessage(), e);
-		}
-	}
-
-	/** Verifies that database tables are properly initialized */
-	protected void verifyDatabaseStructure() {
-		LOGGER.info("🔍 Verifying database structure...");
-		try {
-			// Test each main view to ensure tables are accessible
-			for (Class<?> viewClass : mainViewClasses) {
-				LOGGER.info("📋 Checking database structure for: {}", viewClass.getSimpleName());
-				boolean navigationSuccess = navigateToViewByClass(viewClass);
-				Check.isTrue(navigationSuccess, "Should be able to navigate to " + viewClass.getSimpleName());
-				wait_1000();
-				// Verify that grid is present (indicates table exists)
-				Locator grid = page.locator("vaadin-grid").first();
-				Check.isTrue(grid.count() > 0, "Grid should be present for " + viewClass.getSimpleName());
-			}
-			LOGGER.info("✅ Database structure verification completed");
-		} catch (Exception e) {
-			throw new AssertionError("Database structure verification failed: " + e.getMessage(), e);
-		}
-	}
-	// ===========================================
-	// PROJECT ACTIVATION TESTING METHODS
-	// ===========================================
-
-	/** Tests project activation/deactivation functionality */
-	protected void testProjectActivation() {
-		LOGGER.info("🔄 Testing project activation functionality...");
-		try {
-			navigateToProjects();
-			wait_1000();
-			// Check if there are any projects to work with
-			if (verifyGridHasData()) {
-				clickFirstGridRow();
-				wait_500();
-				// Look for activation-related buttons or controls
-				Locator activateButton = page.locator("vaadin-button:has-text('Activate'), vaadin-button:has-text('Enable')");
-				Locator deactivateButton = page.locator("vaadin-button:has-text('Deactivate'), vaadin-button:has-text('Disable')");
-				if (activateButton.count() > 0) {
-					LOGGER.info("🟢 Found activation controls");
-					activateButton.first().click();
-					wait_1000();
-					takeScreenshot("project-activation", false);
-				} else if (deactivateButton.count() > 0) {
-					LOGGER.info("🔴 Found deactivation controls");
-					deactivateButton.first().click();
-					wait_1000();
-					takeScreenshot("project-deactivation", false);
-				} else {
-					LOGGER.info("ℹ️ No activation controls found - checking status field");
-					// Check if there's a status field that might indicate activation state
-					Locator statusField = page.locator("vaadin-text-field[label*='Status'], vaadin-combo-box[label*='Status']");
-					if (statusField.count() > 0) {
-						LOGGER.info("📊 Found status field for project state");
-					}
-				}
-			} else {
-				LOGGER.info("ℹ️ No projects found to test activation");
-			}
-			LOGGER.info("✅ Project activation test completed");
-		} catch (Exception e) {
-			throw new AssertionError("Project activation test failed: " + e.getMessage(), e);
-		}
-	}
-
-	/** Tests project change tracking and notifications */
-	protected void testProjectChangeTracking() {
-		LOGGER.info("📝 Testing project change tracking...");
-		try {
-			navigateToProjects();
-			wait_1000();
-			if (verifyGridHasData()) {
-				// Test editing a project to see if changes are tracked
-				clickFirstGridRow();
-				wait_500();
-				clickEdit();
-				wait_1000();
-				// Make a change to test tracking
-				fillFirstTextField("Test Change " + System.currentTimeMillis());
-				clickSave();
-				wait_1000();
-				takeScreenshot("project-change-tracking", false);
-				LOGGER.info("✅ Project change tracking test completed");
-			} else {
-				LOGGER.info("ℹ️ No projects found to test change tracking");
-			}
-		} catch (Exception e) {
-			throw new AssertionError("Project change tracking test failed: " + e.getMessage(), e);
-		}
-	}
-	// ===========================================
-	// MENU NAVIGATION TESTING METHODS
-	// ===========================================
-
-	/** Tests all menu item openings to ensure navigation works */
-	protected void testAllMenuItemOpenings() {
-		LOGGER.info("🧭 Testing all menu item openings...");
-		try {
-			// Test main navigation menu items
-			String[] commonMenuItems = {
-					"Projects", "Users", "Activities", "Meetings", "Decisions"
-			};
-			for (String menuItem : commonMenuItems) {
-				LOGGER.info("🔍 Testing menu item: {}", menuItem);
-				boolean navigationSuccess = navigateToViewByText(menuItem);
-				if (navigationSuccess) {
-					wait_1000();
-					takeScreenshot("menu-" + menuItem.toLowerCase(), false);
-					LOGGER.info("✅ Successfully opened menu item: {}", menuItem);
-				} else {
-					LOGGER.warn("⚠️ Could not navigate to menu item: {}", menuItem);
-				}
-			}
-			LOGGER.info("✅ Menu item testing completed");
-		} catch (Exception e) {
-			throw new AssertionError("Menu item testing failed: " + e.getMessage(), e);
-		}
-	}
-
-	/** Tests sidebar navigation menu functionality */
-	protected void testSidebarNavigation() {
-		LOGGER.info("📱 Testing sidebar navigation...");
-		try {
-			// Look for navigation elements
-			Locator sideNav = page.locator("vaadin-side-nav, nav, .navigation");
-			if (sideNav.count() > 0) {
-				LOGGER.info("📋 Found navigation sidebar");
-				// Test expanding/collapsing if applicable
-				Locator toggleButton = page.locator("vaadin-button[aria-label*='menu'], button[aria-label*='toggle']");
-				if (toggleButton.count() > 0) {
-					toggleButton.first().click();
-					wait_500();
-					takeScreenshot("sidebar-toggle", false);
-				}
-				// Test navigation items
-				Locator navItems = page.locator("vaadin-side-nav-item, .nav-item, a[href]");
-				int itemCount = navItems.count();
-				LOGGER.info("📊 Found {} navigation items", itemCount);
-				for (int i = 0; i < Math.min(itemCount, 5); i++) { // Test first 5 items
-					try {
-						Locator navItem = navItems.nth(i);
-						String itemText = navItem.textContent();
-						LOGGER.info("🔍 Testing navigation item {}: {}", i + 1, itemText);
-						navItem.click();
-						wait_1000();
-						takeScreenshot("nav-item-" + i, false);
-					} catch (Exception e) {
-						LOGGER.warn("⚠️ Failed to test navigation item {}: {}", i + 1, e.getMessage());
-					}
-				}
-			} else {
-				LOGGER.warn("⚠️ No sidebar navigation found");
-			}
-			LOGGER.info("✅ Sidebar navigation testing completed");
-		} catch (Exception e) {
-			throw new AssertionError("Sidebar navigation test failed: " + e.getMessage(), e);
-		}
-	}
-
-	/** Tests breadcrumb navigation if present */
-	protected void testBreadcrumbNavigation() {
-		LOGGER.info("🍞 Testing breadcrumb navigation...");
-		try {
-			Locator breadcrumbs = page.locator(".breadcrumb, vaadin-breadcrumb, nav[aria-label*='breadcrumb']");
-			if (breadcrumbs.count() > 0) {
-				LOGGER.info("📋 Found breadcrumb navigation");
-				Locator breadcrumbItems = breadcrumbs.locator("a, button, span");
-				int itemCount = breadcrumbItems.count();
-				LOGGER.info("📊 Found {} breadcrumb items", itemCount);
-				// Test clicking breadcrumb items (except last one which is current)
-				for (int i = 0; i < itemCount - 1; i++) {
-					try {
-						Locator item = breadcrumbItems.nth(i);
-						String itemText = item.textContent();
-						LOGGER.info("🔍 Testing breadcrumb item: {}", itemText);
-						item.click();
-						wait_1000();
-						takeScreenshot("breadcrumb-" + i, false);
-					} catch (Exception e) {
-						LOGGER.warn("⚠️ Failed to test breadcrumb item {}: {}", i, e.getMessage());
-					}
-				}
-			} else {
-				LOGGER.info("ℹ️ No breadcrumb navigation found");
-			}
-			LOGGER.info("✅ Breadcrumb navigation testing completed");
-		} catch (Exception e) {
-			throw new AssertionError("Breadcrumb navigation test failed: " + e.getMessage(), e);
-		}
-	}
-	// ===========================================
-	// ENHANCED CRUD TESTING METHODS
-	// ===========================================
-
-	/** Enhanced CRUD workflow with better error handling and validation */
-	protected void performEnhancedCRUDWorkflow(String entityName) {
-		Check.notBlank(entityName, "Entity name cannot be blank");
-		LOGGER.info("🔄 Performing enhanced CRUD workflow for: {}", entityName);
-		try {
-			// CREATE operation
-			LOGGER.info("➕ Testing CREATE operation for: {}", entityName);
-			clickNew();
-			wait_1000();
-			String testData = "Test " + entityName + " " + System.currentTimeMillis();
-			fillFirstTextField(testData);
-			// Try to fill other fields if present
-			Locator textAreas = page.locator("vaadin-text-area");
-			if (textAreas.count() > 0) {
-				fillFirstTextArea("Description for " + testData);
-			}
-			// Select combobox options if present
-			Locator comboBoxes = page.locator("vaadin-combo-box");
-			if (comboBoxes.count() > 0) {
-				selectFirstComboBoxOption();
-			}
-			clickSave();
-			wait_1000();
-			takeScreenshot("crud-create-" + entityName.toLowerCase(), false);
-			// READ operation - verify data was created
-			LOGGER.info("👁️ Testing READ operation for: {}", entityName);
-			boolean hasData = verifyGridHasData();
-			Check.isTrue(hasData, "Data should be present after CREATE operation");
-			// UPDATE operation
-			LOGGER.info("✏️ Testing UPDATE operation for: {}", entityName);
-			clickFirstGridRow();
-			wait_500();
-			clickEdit();
-			wait_1000();
-			String updatedData = "Updated " + entityName + " " + System.currentTimeMillis();
-			fillFirstTextField(updatedData);
-			clickSave();
-			wait_1000();
-			takeScreenshot("crud-update-" + entityName.toLowerCase(), false);
-			// DELETE operation
-			LOGGER.info("🗑️ Testing DELETE operation for: {}", entityName);
-			clickFirstGridRow();
-			wait_500();
-			clickDelete();
-			wait_1000();
-			takeScreenshot("crud-delete-" + entityName.toLowerCase(), false);
-			LOGGER.info("✅ Enhanced CRUD workflow completed successfully for: {}", entityName);
-		} catch (Exception e) {
-			throw new AssertionError("Enhanced CRUD workflow failed for " + entityName + ": " + e.getMessage(), e);
-		}
-	}
-
-	/** Tests grid column functionality including sorting and filtering */
-	protected void testGridColumnFunctionality(String entityName) {
-		Check.notBlank(entityName, "Entity name cannot be blank");
-		LOGGER.info("📊 Testing grid column functionality for: {}", entityName);
-		try {
-			Locator grid = getLocatorWithCheck("vaadin-grid", "Grid for " + entityName);
-			Locator headers = grid.locator("vaadin-grid-sorter, th, .grid-header");
-			int headerCount = headers.count();
-			LOGGER.info("📋 Found {} grid columns for {}", headerCount, entityName);
-			// Test sorting on first few columns
-			for (int i = 0; i < Math.min(headerCount, 3); i++) {
-				try {
-					Locator header = headers.nth(i);
-					String headerText = header.textContent();
-					LOGGER.info("🔄 Testing sort on column: {}", headerText);
-					header.click();
-					wait_1000();
-					takeScreenshot("grid-sort-" + entityName.toLowerCase() + "-col" + i, false);
-				} catch (Exception e) {
-					LOGGER.warn("⚠️ Failed to test sorting on column {}: {}", i, e.getMessage());
-				}
-			}
-			LOGGER.info("✅ Grid column functionality testing completed for: {}", entityName);
-		} catch (Exception e) {
-			throw new AssertionError("Grid column functionality test failed for " + entityName + ": " + e.getMessage(), e);
-		}
-	}
 }
