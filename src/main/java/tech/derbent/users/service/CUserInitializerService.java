@@ -35,6 +35,9 @@ public class CUserInitializerService extends CInitializerServiceBase {
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "password"));
 			scr.addScreenLine(CDetailLinesService.createSection("Organization"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
+			scr.addScreenLine(CDetailLinesService.createSection("Project & Company Relations"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "projectSettings"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "companySettings"));
 			scr.addScreenLine(CDetailLinesService.createSection("Profile"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "profilePictureData"));
 			scr.addScreenLine(CDetailLinesService.createSection("Additional Information"));
@@ -53,7 +56,8 @@ public class CUserInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setSelectedFields("name,lastname,login,email,phone,userType,company,enabled,createdDate,lastModifiedDate");
+		grid.setSelectedFields(
+				"name,lastname,login,email,phone,userType,company,projectSettings,companySettings,enabled,createdDate,lastModifiedDate");
 		return grid;
 	}
 

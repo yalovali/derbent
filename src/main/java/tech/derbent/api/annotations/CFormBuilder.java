@@ -325,6 +325,13 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		Check.notNull(fieldInfo, "Field");
 		final Class<?> fieldType = fieldInfo.getFieldTypeClass();
 		Check.notNull(fieldType, "Field type for field " + fieldInfo.getDisplayName());
+		// Check for custom component creation method first (highest priority)
+		if (fieldInfo.getCreateComponentMethod() != null && !fieldInfo.getCreateComponentMethod().trim().isEmpty()) {
+			component = createCustomComponent(contentOwner, fieldInfo, binder);
+			if (component != null) {
+				return component;
+			}
+		}
 		if (fieldInfo.getFieldName().equals("approvals") || fieldInfo.getFieldName().equals("status")) {
 			LOGGER.info("Skipping field 'approvals' as it is handled separately");
 		}
@@ -897,6 +904,105 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		final CHorizontalLayout layout = horizontalLayoutMap.get(fieldName);
 		Check.notNull(layout, "HorizontalLayout for field " + fieldName + " not found in form builder map");
 		return layout;
+	}
+
+	/** Creates a custom component by invoking the method specified in createComponentMethod. Supports comma-separated method names and will try each
+	 * method until one succeeds.
+	 * @param contentOwner the content owner (page) for context
+	 * @param fieldInfo    field information containing the method name(s)
+	 * @param binder       the enhanced binder for form binding
+	 * @return the custom component or null if creation fails */
+	private static Component createCustomComponent(IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
+		try {
+			final String methodNames = fieldInfo.getCreateComponentMethod().trim();
+			if (methodNames.isEmpty()) {
+				return null;
+			}
+			// Split by comma and try each method
+			final String[] methods = methodNames.split(",");
+			for (String methodName : methods) {
+				methodName = methodName.trim();
+				if (methodName.isEmpty()) {
+					continue;
+				}
+				LOGGER.debug("Trying to create custom component using method: {}", methodName);
+				final Component component = invokeCustomComponentMethod(contentOwner, methodName, fieldInfo, binder);
+				if (component != null) {
+					LOGGER.debug("Successfully created custom component using method: {}", methodName);
+					return component;
+				}
+			}
+			LOGGER.warn("No custom component method succeeded for field: {} with methods: {}", fieldInfo.getFieldName(), methodNames);
+			return null;
+		} catch (final Exception e) {
+			LOGGER.error("Error creating custom component for field {}: {}", fieldInfo.getFieldName(), e.getMessage(), e);
+			return null;
+		}
+	}
+
+	/** Invokes a single custom component method.
+	 * @param contentOwner the content owner (page) for context
+	 * @param methodName   the method name to invoke
+	 * @param fieldInfo    field information
+	 * @param binder       the enhanced binder
+	 * @return the custom component or null if method fails */
+	private static Component invokeCustomComponentMethod(IContentOwner contentOwner, final String methodName, final EntityFieldInfo fieldInfo,
+			final CEnhancedBinder<?> binder) {
+		try {
+			if (contentOwner == null) {
+				LOGGER.warn("ContentOwner is null - cannot invoke method: {}", methodName);
+				return null;
+			}
+			final Class<?> ownerClass = contentOwner.getClass();
+			LOGGER.debug("Looking for method {} in class {}", methodName, ownerClass.getName());
+			// Try different method signatures
+			Method method = null;
+			try {
+				// First try: method(EntityFieldInfo, CEnhancedBinder)
+				method = ownerClass.getMethod(methodName, EntityFieldInfo.class, CEnhancedBinder.class);
+			} catch (NoSuchMethodException e1) {
+				try {
+					// Second try: method(EntityFieldInfo)
+					method = ownerClass.getMethod(methodName, EntityFieldInfo.class);
+				} catch (NoSuchMethodException e2) {
+					try {
+						// Third try: method()
+						method = ownerClass.getMethod(methodName);
+					} catch (NoSuchMethodException e3) {
+						LOGGER.warn("Method {} not found in class {} with any supported signature", methodName, ownerClass.getName());
+						return null;
+					}
+				}
+			}
+			// Invoke the method with appropriate parameters
+			Object result;
+			final int paramCount = method.getParameterCount();
+			if (paramCount == 2) {
+				result = method.invoke(contentOwner, fieldInfo, binder);
+			} else if (paramCount == 1) {
+				result = method.invoke(contentOwner, fieldInfo);
+			} else {
+				result = method.invoke(contentOwner);
+			}
+			if (result instanceof Component) {
+				final Component component = (Component) result;
+				// Try to bind the component if it's a HasValue component and we have a binder
+				if (component instanceof HasValueAndElement && binder != null) {
+					try {
+						safeBindComponent(binder, (HasValueAndElement<?, ?>) component, fieldInfo.getFieldName(), "CustomComponent");
+					} catch (Exception e) {
+						LOGGER.warn("Could not bind custom component for field {}: {}", fieldInfo.getFieldName(), e.getMessage());
+					}
+				}
+				return component;
+			} else {
+				LOGGER.warn("Method {} did not return a Component, returned: {}", methodName, result);
+				return null;
+			}
+		} catch (final Exception e) {
+			LOGGER.warn("Failed to invoke custom component method {}: {}", methodName, e.getMessage());
+			return null;
+		}
 	}
 
 	/** Sets the application context and initializes the data provider resolver. This method is called automatically by Spring.
