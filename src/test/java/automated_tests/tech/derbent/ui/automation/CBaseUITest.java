@@ -9,13 +9,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
-import org.xml.sax.Locator;
+import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.BrowserType;
+import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.vaadin.flow.router.Route;
-import com.vaadin.uitest.browser.Browser;
-import io.vertx.ext.web.common.WebEnvironment;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import tech.derbent.api.utils.Check;
 import tech.derbent.projects.view.CProjectsView;
 import tech.derbent.users.view.CUsersView;
@@ -28,6 +29,7 @@ import tech.derbent.users.view.CUsersView;
 @SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT)
 @ActiveProfiles ("test")
 public abstract class CBaseUITest {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBaseUITest.class);
 	/** Admin view classes */
 	protected Class<?>[] adminViewClasses = {};

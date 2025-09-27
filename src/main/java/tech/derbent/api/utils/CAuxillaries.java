@@ -93,6 +93,7 @@ import tech.derbent.users.service.CUserTypeService;
 import tech.derbent.users.view.CUsersView;
 
 public class CAuxillaries {
+
 	public static final Logger LOGGER = LoggerFactory.getLogger(CAuxillaries.class);
 
 	public static String generateId(final Component component) {
