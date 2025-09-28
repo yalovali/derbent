@@ -29,7 +29,7 @@ public abstract class CAbstractNamedEntityPage<EntityClass extends CEntityNamed<
 		try {
 			final CDetailSection screen = screenService.findByNameAndProject(sessionService.getActiveProject().orElse(null), baseViewName);
 			Check.notNull(screenService, "Screen service cannot be null");
-			detailsBuilder.buildDetails(screen, getBinder(), getBaseDetailsLayout());
+			detailsBuilder.buildDetails(this, screen, getBinder(), getBaseDetailsLayout());
 		} catch (final Exception e) {
 			final String errorMsg = "Error building details layout for screen: " + baseViewName;
 			LOGGER.error("Error building details layout for screen '{}': {}", baseViewName, e.getMessage(), e);

@@ -90,10 +90,10 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 				detailsLayout.add(contentScroller);
 				detailsLayout.setFlexGrow(1, contentScroller);
 				// Build details in the scrollable content area
-				detailsBuilder.buildDetails(screen, currentBinder, scrollableContent);
+				detailsBuilder.buildDetails(this, screen, currentBinder, scrollableContent);
 			} else {
 				// No toolbar - build details directly
-				detailsBuilder.buildDetails(screen, currentBinder, detailsLayout);
+				detailsBuilder.buildDetails(this, screen, currentBinder, detailsLayout);
 			}
 		} catch (final Exception e) {
 			final String errorMsg = "Error building details layout for screen: " + baseViewName;

@@ -7,11 +7,13 @@ import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
+import tech.derbent.api.interfaces.IHasContentOwner;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CVerticalLayout;
 
-public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityClass>> extends CVerticalLayout implements IContentOwner {
+public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityClass>> extends CVerticalLayout
+		implements IContentOwner, IHasContentOwner {
 
 	private static final long serialVersionUID = 1L;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
@@ -20,7 +22,13 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 	protected CAbstractService<EntityClass> entityService;
 	private List<String> EntityFields = null;
 	private boolean isPanelInitialized = false;
-	protected IContentOwner parentContent;
+	protected IContentOwner contentOwner = null;
+
+	@Override
+	public IContentOwner getContentOwner() { return contentOwner; }
+
+	@Override
+	public void setContentOwner(IContentOwner parentContent) { this.contentOwner = parentContent; }
 
 	public CComponentDBEntity(final String title, IContentOwner parentContent, final CEnhancedBinder<EntityClass> beanValidationBinder,
 			final Class<EntityClass> entityClass, final CAbstractService<EntityClass> entityService) {
@@ -30,7 +38,7 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 		this.entityClass = entityClass;
 		this.binder = beanValidationBinder;
 		this.entityService = entityService;
-		this.parentContent = parentContent;
+		this.contentOwner = parentContent;
 		addClassName("c-component-db-entity");
 		setWidthFull();
 	}
@@ -58,7 +66,7 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 	public CEnhancedBinder<EntityClass> getBinder() { return binder; }
 
 	@Override
-	public EntityClass getCurrentEntity() { return parentContent != null ? (EntityClass) parentContent.getCurrentEntity() : null; }
+	public EntityClass getCurrentEntity() { return contentOwner != null ? (EntityClass) contentOwner.getCurrentEntity() : null; }
 
 	public Object getLocalContextValue(final String contextName) {
 		return null;

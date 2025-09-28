@@ -33,8 +33,6 @@ import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
-import tech.derbent.users.service.CUserProjectSettingsService;
-import tech.derbent.users.service.CUserTypeService;
 import tech.derbent.users.view.CComponentUserProjectSettings;
 
 @Service

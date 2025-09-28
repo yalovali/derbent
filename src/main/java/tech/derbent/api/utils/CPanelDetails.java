@@ -6,10 +6,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import tech.derbent.api.annotations.CFormBuilder;
+import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.views.components.CAccordion;
 import tech.derbent.api.views.components.CHorizontalLayout;
-import tech.derbent.screens.domain.CDetailSection;
 import tech.derbent.screens.domain.CDetailLines;
+import tech.derbent.screens.domain.CDetailSection;
 
 public class CPanelDetails extends CAccordion {
 
@@ -35,10 +36,10 @@ public class CPanelDetails extends CAccordion {
 
 	public String getName() { return name; }
 
-	public void processLine(final int counter, final CDetailSection screen, final CDetailLines line, final CFormBuilder<?> formBuilder)
-			throws Exception {
+	public void processLine(IContentOwner contentOwner, final int counter, final CDetailSection screen, final CDetailLines line,
+			final CFormBuilder<?> formBuilder) throws Exception {
 		try {
-			formBuilder.addFieldLine(screen.getEntityType(), line, getBaseLayout(), componentMap, horizontalLayoutMap);
+			formBuilder.addFieldLine(contentOwner, screen.getEntityType(), line, getBaseLayout(), componentMap, horizontalLayoutMap);
 		} catch (final Exception e) {
 			LOGGER.error("Error processing detail line for field '{}': {}", line.getFieldCaption(), e.getMessage(), e);
 			throw new Exception("Error processing line: " + line.getFieldCaption(), e);

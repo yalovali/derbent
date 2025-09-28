@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityNotFoundException;
 import tech.derbent.api.services.CAbstractService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.setup.domain.CSystemSettings;
 
@@ -35,10 +36,10 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 	@Transactional
 	public CSystemSettings createDefaultSystemSettings() {
 		// Check if settings already exist
-		if (((ISystemSettingsRepository) repository).existsSystemSettings()) {
-			LOGGER.warn("Attempt to create default settings when settings already exist");
-			throw new IllegalStateException("System settings already exist. Use getOrCreateSystemSettings() instead.");
-		}
+		Check.notNull(repository, "Repository cannot be null");
+		Check.isTrue(repository instanceof ISystemSettingsRepository, "Repository must implement ISystemSettingsRepository");
+		Check.isTrue(!((ISystemSettingsRepository) repository).existsSystemSettings(),
+				"System settings already exist. Use getOrCreateSystemSettings() instead.");
 		try {
 			final CSystemSettings newSettings = new CSystemSettings();
 			final CSystemSettings savedSettings = repository.saveAndFlush(newSettings);
@@ -52,21 +53,14 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 	/** Gets the allowed file extensions.
 	 * @return array of allowed file extensions */
 	public String[] getAllowedFileExtensions() {
-		try {
-			final Optional<String> result = Optional.ofNullable(((CSystemSettings) repository).getAllowedFileExtensions());
-			final String extensions = result.orElse(".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.txt,.zip");
-			final String[] extensionArray = extensions.split(",");
-			// Trim whitespace from each extension
-			for (int i = 0; i < extensionArray.length; i++) {
-				extensionArray[i] = extensionArray[i].trim();
-			}
-			return extensionArray;
-		} catch (final Exception e) {
-			LOGGER.error("Error retrieving allowed file extensions", e);
-			return new String[] {
-					".pdf", ".doc", ".docx", ".xls", ".xlsx", ".png", ".jpg", ".jpeg", ".txt", ".zip"
-			};
+		final Optional<String> result = Optional.ofNullable(((CSystemSettings) repository).getAllowedFileExtensions());
+		final String extensions = result.orElse(".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.txt,.zip");
+		final String[] extensionArray = extensions.split(",");
+		// Trim whitespace from each extension
+		for (int i = 0; i < extensionArray.length; i++) {
+			extensionArray[i] = extensionArray[i].trim();
 		}
+		return extensionArray;
 	}
 
 	@Override
@@ -75,39 +69,24 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 	/** Gets the current maintenance message if maintenance mode is enabled.
 	 * @return Optional containing the maintenance message if available */
 	public Optional<String> getMaintenanceMessage() {
-		try {
-			final Optional<String> result = Optional.ofNullable(((CSystemSettings) repository).getMaintenanceMessage());
-			return result;
-		} catch (final Exception e) {
-			LOGGER.error("Error retrieving maintenance message", e);
-			return Optional.empty();
-		}
+		final Optional<String> result = Optional.ofNullable(((CSystemSettings) repository).getMaintenanceMessage());
+		return result;
 	}
 
 	/** Gets the maximum file upload size in MB.
 	 * @return the max file upload size, or default value if not found */
 	public double getMaxFileUploadSizeMb() {
-		try {
-			final Optional<java.math.BigDecimal> result = Optional.ofNullable(((CSystemSettings) repository).getMaxFileUploadSizeMb());
-			final double size = result.orElse(new java.math.BigDecimal("50.0")).doubleValue();
-			return size;
-		} catch (final Exception e) {
-			LOGGER.error("Error retrieving max file upload size", e);
-			return 50.0; // Default fallback
-		}
+		final Optional<java.math.BigDecimal> result = Optional.ofNullable(((CSystemSettings) repository).getMaxFileUploadSizeMb());
+		final double size = result.orElse(new java.math.BigDecimal("50.0")).doubleValue();
+		return size;
 	}
 
 	/** Gets the maximum number of login attempts allowed.
 	 * @return the max login attempts, or default value if not found */
 	public int getMaxLoginAttempts() {
-		try {
-			final Integer result = ((CSystemSettings) repository).getMaxLoginAttempts();
-			final int maxAttempts = (result != null) ? result : 3; // Default to 3
-			return maxAttempts;// attemptsret
-		} catch (final Exception e) {
-			LOGGER.error("Error retrieving max login attempts", e);
-			return 3; // Default fallback
-		}
+		final Integer result = ((CSystemSettings) repository).getMaxLoginAttempts();
+		final int maxAttempts = (result != null) ? result : 3; // Default to 3
+		return maxAttempts;// attemptsret
 	}
 
 	/** Gets the current system settings. If no settings exist, creates default system settings.
@@ -125,13 +104,9 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 	/** Gets the session timeout in minutes.
 	 * @return the session timeout value, or default value if not found */
 	public int getSessionTimeoutMinutes() {
-		try {
-			final Optional<Integer> result = Optional.ofNullable(((CSystemSettings) repository).getSessionTimeoutMinutes());
-			final int timeout = result.orElse(60); // Default to 60 minutes
-			return timeout;
-		} catch (final Exception e) {
-			return 60; // Default fallback
-		}
+		final Optional<Integer> result = Optional.ofNullable(((CSystemSettings) repository).getSessionTimeoutMinutes());
+		final int timeout = result.orElse(60); // Default to 60 minutes
+		return timeout;
 	}
 
 	/** Gets the current system settings without creating if they don't exist.
@@ -149,41 +124,24 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 	/** Checks if maintenance mode is currently enabled.
 	 * @return true if maintenance mode is enabled, false otherwise */
 	public boolean isMaintenanceModeEnabled() {
-		LOGGER.debug("isMaintenanceModeEnabled called");
-		try {
-			final Optional<Boolean> result = Optional.ofNullable(((CSystemSettings) repository).isMaintenanceModeEnabled());
-			final boolean maintenanceMode = result.orElse(false);
-			return maintenanceMode;
-		} catch (final Exception e) {
-			LOGGER.error("Error checking maintenance mode status", e);
-			return false; // Default to false for safety
-		}
+		final Optional<Boolean> result = Optional.ofNullable(((CSystemSettings) repository).isMaintenanceModeEnabled());
+		final boolean maintenanceMode = result.orElse(false);
+		return maintenanceMode;
 	}
 
 	/** Checks if strong passwords are required.
 	 * @return true if strong passwords are required, false otherwise */
 	public boolean isStrongPasswordsRequired() {
-		LOGGER.debug("isStrongPasswordsRequired called");
-		try {
-			final Optional<Boolean> result = Optional.of(((CSystemSettingsService) repository).isStrongPasswordsRequired());
-			final boolean required = result.orElse(true); // Default to true for security
-			return required;
-		} catch (final Exception e) {
-			LOGGER.error("Error checking strong password requirement", e);
-			return true; // Default to true for security
-		}
+		final Optional<Boolean> result = Optional.of(((CSystemSettingsService) repository).isStrongPasswordsRequired());
+		final boolean required = result.orElse(true); // Default to true for security
+		return required;
 	}
 
 	/** Checks if system settings have been initialized. Used to determine if initial setup is needed.
 	 * @return true if system settings exist, false otherwise */
 	public boolean isSystemInitialized() {
-		try {
-			final boolean initialized = ((ISystemSettingsRepository) repository).existsSystemSettings();
-			return initialized;
-		} catch (final Exception e) {
-			LOGGER.error("Error checking system initialization status", e);
-			return false;
-		}
+		final boolean initialized = ((ISystemSettingsRepository) repository).existsSystemSettings();
+		return initialized;
 	}
 
 	/** Enables or disables maintenance mode.
@@ -208,26 +166,17 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 	 * @throws EntityNotFoundException  if settings don't exist in database */
 	@Transactional
 	public CSystemSettings updateSystemSettings(final CSystemSettings settings) {
-		if (settings == null) {
-			LOGGER.warn("Attempt to update null system settings");
-			throw new IllegalArgumentException("System settings cannot be null");
-		}
-		if (settings.getId() == null) {
-			LOGGER.warn("Attempt to update system settings without ID");
-			throw new IllegalArgumentException("System settings must have an ID for update operation");
-		}
+		Check.notNull(repository, "Repository cannot be null");
+		Check.isTrue(repository instanceof ISystemSettingsRepository, "Repository must implement ISystemSettingsRepository");
+		Check.notNull(settings, "System settings cannot be null");
+		Check.notNull(settings.getId(), "System settings must have an ID for update operation");
 		// Validate business rules
 		validateSystemSettingsBusinessRules(settings);
 		try {
 			// Check if entity exists
-			if (!repository.existsById(settings.getId())) {
-				LOGGER.warn("Attempt to update non-existent system settings with ID: {}", settings.getId());
-				throw new EntityNotFoundException("System settings not found with ID: " + settings.getId());
-			}
+			Check.isTrue(repository.existsById(settings.getId()), "System settings do not exist. Use createDefaultSystemSettings() to create.");
 			final CSystemSettings updatedSettings = repository.saveAndFlush(settings);
 			return updatedSettings;
-		} catch (final EntityNotFoundException e) {
-			throw e; // Re-throw EntityNotFoundException as-is
 		} catch (final Exception e) {
 			LOGGER.error("Failed to update system settings", e);
 			throw new RuntimeException("Failed to update system settings: " + e.getMessage(), e);
@@ -237,25 +186,15 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 	/** Gets the auto-login enabled setting.
 	 * @return true if auto-login is enabled, false otherwise */
 	public boolean isAutoLoginEnabled() {
-		try {
-			final CSystemSettings settings = getOrCreateSystemSettings();
-			return settings.getAutoLoginEnabled() != null ? settings.getAutoLoginEnabled() : false;
-		} catch (final Exception e) {
-			LOGGER.error("Error retrieving auto-login enabled setting", e);
-			return false; // Default to false for security
-		}
+		final CSystemSettings settings = getOrCreateSystemSettings();
+		return settings.getAutoLoginEnabled() != null ? settings.getAutoLoginEnabled() : false;
 	}
 
 	/** Gets the default login view setting.
 	 * @return the default view to navigate to after login */
 	public String getDefaultLoginView() {
-		try {
-			final CSystemSettings settings = getOrCreateSystemSettings();
-			return settings.getDefaultLoginView() != null ? settings.getDefaultLoginView() : "home";
-		} catch (final Exception e) {
-			LOGGER.error("Error retrieving default login view setting", e);
-			return "home"; // Default fallback
-		}
+		final CSystemSettings settings = getOrCreateSystemSettings();
+		return settings.getDefaultLoginView() != null ? settings.getDefaultLoginView() : "home";
 	}
 
 	/** Updates the auto-login settings.

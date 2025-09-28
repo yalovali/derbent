@@ -47,6 +47,7 @@ import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.interfaces.IContentOwner;
+import tech.derbent.api.interfaces.IHasContentOwner;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
@@ -328,9 +329,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		// Check for custom component creation method first (highest priority)
 		if (fieldInfo.getCreateComponentMethod() != null && !fieldInfo.getCreateComponentMethod().trim().isEmpty()) {
 			component = createCustomComponent(contentOwner, fieldInfo, binder);
-			if (component != null) {
-				return component;
-			}
+			Check.notNull(component, "Custom component for field " + fieldInfo.getFieldName());
+			return component;
 		}
 		if (fieldInfo.getFieldName().equals("approvals") || fieldInfo.getFieldName().equals("status")) {
 			LOGGER.info("Skipping field 'approvals' as it is handled separately");
@@ -874,15 +874,10 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		return CFormBuilder.processField(null, binder, formLayout, horizontalLayoutMap, fieldInfo, componentMap);
 	}
 
-	public Component addFieldLine(final String screenClassType, final CDetailLines line, final VerticalLayout layout) throws Exception {
+	public Component addFieldLine(IContentOwner contentOwner, final String screenClassType, final CDetailLines line, final VerticalLayout layout,
+			Map<String, Component> componentMap2, Map<String, CHorizontalLayout> horizontalLayoutMap2) throws Exception {
 		final EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(screenClassType, line);
-		return CFormBuilder.processField(null, binder, layout, horizontalLayoutMap, fieldInfo, componentMap);
-	}
-
-	public Component addFieldLine(final String screenClassType, final CDetailLines line, final VerticalLayout layout,
-			final Map<String, Component> componentMap, final Map<String, CHorizontalLayout> horizontalLayoutMap) throws Exception {
-		final EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(screenClassType, line);
-		return CFormBuilder.processField(null, binder, layout, horizontalLayoutMap, fieldInfo, componentMap);
+		return CFormBuilder.processField(contentOwner, binder, layout, horizontalLayoutMap, fieldInfo, componentMap);
 	}
 
 	public CVerticalLayout build(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder, final List<String> entityFields)
@@ -951,9 +946,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			Check.notNull(result, "Result of custom component method " + methodName + " for field " + fieldInfo.getFieldName());
 			Check.isTrue(result instanceof Component, "Result of method " + methodName + " is not a Component");
 			final Component component = (Component) result;
-			// Try to bind the component if it's a HasValue component and we have a binder
-			if (component instanceof HasValueAndElement && binder != null) {
-				safeBindComponent(binder, (HasValueAndElement<?, ?>) component, fieldInfo.getFieldName(), "CustomComponent");
+			if (component instanceof IHasContentOwner) {
+				((IHasContentOwner) component).setContentOwner(contentOwner);
 			}
 			return component;
 		} catch (final Exception e) {
