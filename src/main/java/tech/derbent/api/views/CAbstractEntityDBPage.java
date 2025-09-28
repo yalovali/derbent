@@ -279,7 +279,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				// Empty the bound fields by creating new entity and binding it
 				final EntityClass newEntityInstance = createNewEntity();
 				setCurrentEntity(newEntityInstance);
-				populateForm(newEntityInstance);
+				populateFormInternal(newEntityInstance);
 				LOGGER.debug("Bound fields emptied for new entity: {}", newEntityInstance.getClass().getSimpleName());
 			} catch (final Exception exception) {
 				LOGGER.error("Error emptying bound fields", exception);
@@ -306,7 +306,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				if (currentEntity == null) {
 					LOGGER.warn("No current entity for save operation, creating new entity");
 					currentEntity = createNewEntity();
-					populateForm(currentEntity);
+					populateFormInternal(currentEntity);
 				}
 				if (!onBeforeSaveEvent()) {
 					return;
@@ -451,7 +451,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	protected void onSelectionChanged(final CMasterViewSectionGrid.SelectionChangeEvent<EntityClass> event) {
 		final EntityClass value = (event.getSelectedItem());
 		LOGGER.debug("Grid selection changed: {}", Optional.ofNullable(value).map(Object::toString).orElse("NULL"));
-		populateForm(value);
+		populateFormInternal(value);
 		if (value == null) {
 			sessionService.setActiveId(entityClass.getClass().getSimpleName(), null);
 		} else {
@@ -467,7 +467,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		});
 	}
 
-	protected void populateForm(final EntityClass value) {
+	protected void populateFormInternal(final EntityClass value) {
 		LOGGER.debug("Populating form for entity: {}", value != null ? value.getId() : "null");
 		currentEntity = value;
 		// not needed anymore, handled in onSelectionChanged
@@ -538,6 +538,18 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	}
 
 	@Override
+	public void populateForm(final Object entity) {
+		setCurrentEntity(entity);
+		populateForm();
+	}
+
+	@Override
+	public void populateForm() {
+		// Call the existing protected populateFormInternal method
+		populateFormInternal(getCurrentEntity());
+	}
+
+	@Override
 	public void setId(final String id) {
 		throw new UnsupportedOperationException("Use initPageId instead to set page ID for testing purposes");
 	}
@@ -560,7 +572,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	/** Populates the form with entity data - public wrapper for testing.
 	 * @param entity the entity to populate the form with */
 	public void testPopulateForm(final EntityClass entity) {
-		populateForm(entity);
+		populateFormInternal(entity);
 	}
 
 	protected abstract void updateDetailsComponent()

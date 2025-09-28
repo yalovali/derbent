@@ -38,6 +38,29 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 	@Override
 	public EntityClass getCurrentEntity() { return currentEntity; }
 
+	@Override
+	public void populateForm(Object entity) {
+		setCurrentEntity(entity);
+		populateForm();
+	}
+
+	@Override
+	public void populateForm() {
+		// Default implementation - subclasses should override if they need specific behavior
+		if (getCurrentEntity() != null) {
+			LOGGER.debug("Populating form for entity: {}", getCurrentEntity());
+			// If there's a binder, set the bean
+			if (binder != null) {
+				binder.setBean(getCurrentEntity());
+			}
+		} else {
+			LOGGER.debug("Clearing form - no current entity");
+			if (binder != null) {
+				binder.setBean(null);
+			}
+		}
+	}
+
 	public CComponentDBEntity(final String title, IContentOwner parentContent, final CEnhancedBinder<EntityClass> beanValidationBinder,
 			final Class<EntityClass> entityClass, final CAbstractService<EntityClass> entityService) {
 		super(false, true, false); // no padding, with spacing, no margin

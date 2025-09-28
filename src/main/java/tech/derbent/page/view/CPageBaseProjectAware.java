@@ -32,12 +32,37 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 	protected final CSessionService sessionService;
 	protected SplitLayout splitLayout = new SplitLayout();
 	private IContentOwner parentContent;
+	private Object currentEntity; // Field to store current entity
 
 	@Override
 	public void setContentOwner(IContentOwner owner) { this.parentContent = owner; }
 
 	@Override
 	public IContentOwner getContentOwner() { return parentContent; }
+
+	@Override
+	public Object getCurrentEntity() { return currentEntity; }
+
+	@Override
+	public void setCurrentEntity(Object entity) { this.currentEntity = entity; }
+
+	@Override
+	public void populateForm(Object entity) {
+		setCurrentEntity(entity);
+		populateForm();
+	}
+
+	@Override
+	public void populateForm() {
+		// Default implementation - populate current binder if available
+		if (currentBinder != null && getCurrentEntity() != null) {
+			LOGGER.debug("Populating form for entity: {}", getCurrentEntity());
+			currentBinder.setBean((CEntityDB<?>) getCurrentEntity());
+		} else if (currentBinder != null) {
+			LOGGER.debug("Clearing form - no current entity");
+			currentBinder.setBean(null);
+		}
+	}
 
 	protected CPageBaseProjectAware(final CSessionService sessionService, CDetailSectionService screenService) {
 		super();

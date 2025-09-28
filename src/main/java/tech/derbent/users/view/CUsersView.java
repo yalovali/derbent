@@ -113,12 +113,11 @@ public class CUsersView extends CGridViewBaseNamed<CUser> {
 
 	/** Simplified form population with clear separation of concerns. Updates both the main form and project settings panel when user selection
 	 * changes. Handles lazy loading and data synchronization properly. */
-	@Override
 	protected void populateForm(final CUser value) {
 		if (value == null) {
 			LOGGER.warn("User with ID {} not found, cannot populate form");
 		}
-		super.populateForm(value);
+		super.populateFormInternal(value);
 		if (value != null) {
 			final CUser user = entityService.getById(value.getId()).orElse(null);
 			// Load project with user settings to avoid lazy initialization issues
