@@ -137,7 +137,7 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewWithSections {
 			CEntityDB<?> firstEntity = entities.get(0);
 			LOGGER.debug("Displaying single entity: {} with ID: {}", firstEntity.getClass().getSimpleName(), firstEntity.getId());
 			// Populate the details with the first entity
-			populateEntityDetails(firstEntity);
+			populateForm(firstEntity);
 		} catch (Exception e) {
 			LOGGER.error("Error loading single entity for page: {}", getPageEntity().getPageTitle(), e);
 		}

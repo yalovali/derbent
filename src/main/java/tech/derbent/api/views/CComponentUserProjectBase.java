@@ -20,6 +20,21 @@ import tech.derbent.users.service.CUserProjectSettingsService;
 public abstract class CComponentUserProjectBase<MasterClass extends CEntityNamed<MasterClass>, RelationalClass extends CEntityDB<RelationalClass>>
 		extends CComponentRelationBase<MasterClass, CUserProjectSettings> {
 
+	@Override
+	public void populateForm(final Object entity) {
+		setCurrentEntity(entity);
+		populateForm();
+	}
+
+	@Override
+	public void populateForm() {
+		if (getCurrentEntity() != null) {
+			refresh();
+		} else {
+			grid.setItems();
+		}
+	}
+
 	private static final long serialVersionUID = 1L;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected CUserProjectSettingsService userProjectSettingsService;

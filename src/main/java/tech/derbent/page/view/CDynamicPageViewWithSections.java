@@ -112,7 +112,7 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 				try {
 					CEntityDB<?> reloadedEntity = entityService.getById(((CEntityDB<?>) currentEntity).getId()).orElse(null);
 					if (reloadedEntity != null) {
-						populateEntityDetails(reloadedEntity);
+						populateForm(reloadedEntity);
 					}
 				} catch (Exception e) {
 					LOGGER.error("Error reloading entity: {}", e.getMessage());
@@ -303,12 +303,12 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 		CEntityDB<?> selectedEntity = event.getSelectedItem();
 		LOGGER.debug("Entity selected: {}",
 				selectedEntity != null ? selectedEntity.getClass().getSimpleName() + " ID: " + selectedEntity.getId() : "null");
-		populateEntityDetails(selectedEntity);
+		populateForm(selectedEntity);
 		setCurrentEntity(selectedEntity);
 	}
 
 	/** Populate the entity details section with information from the selected entity. */
-	protected void populateEntityDetails(CEntityDB<?> entity) throws Exception {
+	protected void populateForm(CEntityDB<?> entity) throws Exception {
 		LOGGER.debug("Populating entity details for: {}", entity != null ? entity.getClass().getSimpleName() : "null");
 		Check.notNull(baseDetailsLayout, "Base details layout is not initialized");
 		Check.notNull(pageEntity.getDetailSection(), "Detail section cannot be null");
