@@ -47,13 +47,7 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 	public void setCurrentEntity(Object entity) { this.currentEntity = entity; }
 
 	@Override
-	public void populateForm(Object entity) {
-		setCurrentEntity(entity);
-		populateForm();
-	}
-
-	@Override
-	public void populateForm() {
+	public void populateForm() throws Exception {
 		// Default implementation - populate current binder if available
 		if (currentBinder != null && getCurrentEntity() != null) {
 			LOGGER.debug("Populating form for entity: {}", getCurrentEntity());
@@ -64,11 +58,7 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 		}
 		// Also populate details builder if available
 		if (detailsBuilder != null) {
-			if (getCurrentEntity() != null) {
-				detailsBuilder.populateForm(getCurrentEntity());
-			} else {
-				detailsBuilder.populateForm();
-			}
+			detailsBuilder.populateForm();
 		}
 	}
 

@@ -3,6 +3,5 @@ public interface IHasContentOwner {
 
 	IContentOwner getContentOwner();
 	void setContentOwner(IContentOwner parentContent);
-	void populateForm(Object entity);
-	void populateForm();
+	void populateForm() throws Exception;
 }

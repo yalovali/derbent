@@ -8,5 +8,5 @@ public interface IContentOwner {
 
 	Object getCurrentEntity();
 	void setCurrentEntity(Object entity);
-	void populateForm();
+	void populateForm() throws Exception;
 }

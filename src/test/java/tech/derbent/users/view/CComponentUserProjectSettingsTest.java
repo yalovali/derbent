@@ -1,12 +1,11 @@
 package tech.derbent.users.view;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -69,26 +68,5 @@ public class CComponentUserProjectSettingsTest {
 		// Create component
 		component = new CComponentUserProjectSettings(mockContentOwner, testUser, testBinder, mockUserService, mockUserTypeService,
 				mockCompanyService, mockProjectService, mockUserProjectSettingsService);
-	}
-
-	@Test
-	void testPopulateFormWithEntity() {
-		LOGGER.info("🧪 Testing populateForm with entity");
-		// Test populateForm(Object entity)
-		assertDoesNotThrow(() -> {
-			component.populateForm(testUser);
-		}, "populateForm(entity) should not throw exception");
-		// Verify the entity was set
-		assertEquals(testUser, component.getCurrentEntity(), "Current entity should be set correctly");
-	}
-
-	@Test
-	void testPopulateFormPattern() {
-		LOGGER.info("🧪 Testing complete populateForm pattern");
-		// Test the pattern works correctly
-		assertDoesNotThrow(() -> {
-			component.populateForm(testUser);
-			component.populateForm();
-		}, "populateForm pattern should work without issues");
 	}
 }

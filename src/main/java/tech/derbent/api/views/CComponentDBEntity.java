@@ -39,21 +39,6 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 	public EntityClass getCurrentEntity() { return currentEntity; }
 
 	@Override
-	public void populateForm(Object entity) {
-		// Only set current entity if we don't have a content owner or if the entity differs from parent's
-		if (contentOwner == null) {
-			setCurrentEntity(entity);
-		} else {
-			// If we have a content owner, only set entity if it differs from parent's
-			Object parentEntity = contentOwner.getCurrentEntity();
-			if (parentEntity != entity) {
-				setCurrentEntity(entity);
-			}
-		}
-		populateForm();
-	}
-
-	@Override
 	public void populateForm() {
 		// Use current entity from content owner if available, otherwise use our own
 		EntityClass entityToUse = getCurrentEntity();

@@ -111,9 +111,8 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 			if (currentEntity != null && ((CEntityDB<?>) currentEntity).getId() != null) {
 				try {
 					CEntityDB<?> reloadedEntity = entityService.getById(((CEntityDB<?>) currentEntity).getId()).orElse(null);
-					if (reloadedEntity != null) {
-						populateForm(reloadedEntity);
-					}
+					setCurrentEntity(reloadedEntity);
+					populateForm();
 				} catch (Exception e) {
 					LOGGER.error("Error reloading entity: {}", e.getMessage());
 				}
@@ -159,7 +158,7 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 		// Listen for selection changes from the grid
 		grid.addSelectionChangeListener(event -> {
 			try {
-				LOGGER.debug("Grid selection changed: {}", event.getSelectedItem().getClass().getSimpleName());
+				LOGGER.debug("Grid selection changed: {}", event.getSelectedItem().toString());
 				onEntitySelected(event);
 			} catch (Exception e) {
 				LOGGER.error("Error handling entity selection", e);
@@ -301,14 +300,17 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 	/** Handle entity selection events from the grid. */
 	private void onEntitySelected(CComponentGridEntity.SelectionChangeEvent event) throws Exception {
 		CEntityDB<?> selectedEntity = event.getSelectedItem();
-		LOGGER.debug("Entity selected: {}",
-				selectedEntity != null ? selectedEntity.getClass().getSimpleName() + " ID: " + selectedEntity.getId() : "null");
-		populateForm(selectedEntity);
+		LOGGER.debug("Entity selected: {}", selectedEntity != null ? selectedEntity.toString() + " ID: " + selectedEntity.getId() : "null");
 		setCurrentEntity(selectedEntity);
+		populateForm();
 	}
 
-	/** Populate the entity details section with information from the selected entity. */
-	protected void populateForm(CEntityDB<?> entity) throws Exception {
+	/** Populate the entity details section with information from the selected entity.
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException */
+	@Override
+	public void populateForm() throws Exception {
+		CEntityDB<?> entity = (CEntityDB<?>) getCurrentEntity();
 		LOGGER.debug("Populating entity details for: {}", entity != null ? entity.getClass().getSimpleName() : "null");
 		Check.notNull(baseDetailsLayout, "Base details layout is not initialized");
 		Check.notNull(pageEntity.getDetailSection(), "Detail section cannot be null");
@@ -324,7 +326,7 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 		if (canReuseExistingComponents(entityViewName, entity.getClass())) {
 			// LOGGER.debug("Reusing existing components for entity type: {} view: {}", entity.getClass().getSimpleName(), entityViewName);
 			reloadEntityValues(entity);
-			populateForm();
+			detailsBuilder.populateForm();
 			return;
 		}
 		LOGGER.debug("Rebuilding components for entity type: {} view: {}", entity.getClass().getSimpleName(), entityViewName);

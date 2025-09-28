@@ -53,7 +53,7 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 	}
 
 	@Override
-	public void populateForm() {
+	public void populateForm() throws Exception {
 		// Delegate to parent content owner
 		if (parentContent != null) {
 			parentContent.populateForm();
