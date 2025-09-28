@@ -14,7 +14,7 @@ import tech.derbent.session.service.CSessionService;
 @PreAuthorize ("isAuthenticated()")
 public class CCommentPriorityService extends CEntityOfProjectService<CCommentPriority> {
 
-	CCommentPriorityService(final CCommentPriorityRepository repository, final Clock clock, final CSessionService sessionService) {
+	CCommentPriorityService(final ICommentPriorityRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

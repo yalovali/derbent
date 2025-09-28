@@ -15,7 +15,7 @@ import tech.derbent.session.service.CSessionService;
 @PreAuthorize ("isAuthenticated()")
 public class CPageEntityService extends CProjectItemService<CPageEntity> {
 
-	public CPageEntityService(final CPageEntityRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CPageEntityService(final IPageEntityRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 		Check.notNull(repository, "CPageEntityRepository cannot be null");
 		Check.notNull(clock, "Clock cannot be null");
@@ -58,6 +58,6 @@ public class CPageEntityService extends CProjectItemService<CPageEntity> {
 
 	public List<CPageEntity> listQuickAccess(CProject project) {
 		Check.notNull(project, "Project cannot be null");
-		return ((CPageEntityRepository) getRepository()).listQuickAccess(project);
+		return ((IPageEntityRepository) getRepository()).listQuickAccess(project);
 	}
 }

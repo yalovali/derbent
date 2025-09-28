@@ -24,7 +24,7 @@ public class CMeetingStatusService extends CEntityOfProjectService<CMeetingStatu
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingStatusService.class);
 
 	@Autowired
-	public CMeetingStatusService(final CMeetingStatusRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CMeetingStatusService(final IMeetingStatusRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

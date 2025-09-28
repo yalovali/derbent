@@ -10,7 +10,7 @@ import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import tech.derbent.activities.service.CActivityService;
 import tech.derbent.api.domains.CEntityDB;
-import tech.derbent.api.interfaces.CProjectChangeListener;
+import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.views.CAbstractEntityDBPage;
 import tech.derbent.api.views.grids.CMasterViewSectionBase;
 import tech.derbent.gannt.view.components.CGanntGrid;
@@ -19,7 +19,7 @@ import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 
 public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>> extends CMasterViewSectionBase<EntityClass>
-		implements CProjectChangeListener {
+		implements IProjectChangeListener {
 
 	// --- Custom Event Definition ---
 	public static class SelectionChangeEvent<T extends CEntityDB<T>> extends ComponentEvent<CMasterViewSectionGannt<T>> {

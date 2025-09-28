@@ -25,7 +25,7 @@ public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 	/** Constructor for CCompanyService
 	 * @param repository the CCompanyRepository instance
 	 * @param clock      the Clock instance for time-related operations */
-	public CCompanyService(final CCompanyRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CCompanyService(final ICompanyRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 
@@ -69,7 +69,7 @@ public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 	public Optional<CCompany> findByTaxNumber(final String taxNumber) {
 		Check.notBlank(taxNumber, "Tax number cannot be null or empty");
 		try {
-			final Optional<CCompany> company = ((CCompanyRepository) repository).findByTaxNumber(taxNumber.trim());
+			final Optional<CCompany> company = ((ICompanyRepository) repository).findByTaxNumber(taxNumber.trim());
 			return company;
 		} catch (final Exception e) {
 			LOGGER.error("Error finding company by tax number: {}", taxNumber, e);
@@ -82,7 +82,7 @@ public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 	public List<CCompany> findEnabledCompanies() {
 		LOGGER.debug("findEnabledCompanies called");
 		try {
-			final List<CCompany> companies = ((CCompanyRepository) repository).findByEnabled(true);
+			final List<CCompany> companies = ((ICompanyRepository) repository).findByEnabled(true);
 			LOGGER.debug("Found {} enabled companies", companies.size());
 			return companies;
 		} catch (final Exception e) {
@@ -101,10 +101,10 @@ public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 		LOGGER.debug("searchCompaniesByName called with searchTerm: {}", searchTerm);
 		if ((searchTerm == null) || searchTerm.trim().isEmpty()) {
 			LOGGER.debug("Empty search term, returning all companies");
-			return ((CCompanyRepository) repository).findAllOrderByName();
+			return ((ICompanyRepository) repository).findAllOrderByName();
 		}
 		try {
-			final List<CCompany> companies = ((CCompanyRepository) repository).findByNameContainingIgnoreCase(searchTerm.trim());
+			final List<CCompany> companies = ((ICompanyRepository) repository).findByNameContainingIgnoreCase(searchTerm.trim());
 			LOGGER.debug("Found {} companies matching search term: {}", companies.size(), searchTerm);
 			return companies;
 		} catch (final Exception e) {

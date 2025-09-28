@@ -15,7 +15,7 @@ import tech.derbent.api.components.CCrudToolbar;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityOfProject;
-import tech.derbent.api.interfaces.CEntityUpdateListener;
+import tech.derbent.api.interfaces.IEntityUpdateListener;
 import tech.derbent.api.interfaces.IPageTitleProvider;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.utils.CAuxillaries;
@@ -35,7 +35,7 @@ import tech.derbent.users.domain.CUser;
 /** Enhanced dynamic page view that supports grid and detail sections for database-defined pages. This view displays content stored in CPageEntity
  * instances with configurable grid and detail sections. */
 @PermitAll
-public class CDynamicPageViewWithSections extends CPageBaseProjectAware implements BeforeEnterObserver, CEntityUpdateListener, IPageTitleProvider {
+public class CDynamicPageViewWithSections extends CPageBaseProjectAware implements BeforeEnterObserver, IEntityUpdateListener, IPageTitleProvider {
 
 	public static final String DEFAULT_COLOR = "#341b00";
 	public static final String DEFAULT_ICON = "vaadin:database";

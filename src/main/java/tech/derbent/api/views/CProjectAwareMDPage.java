@@ -5,7 +5,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.domains.CEntityOfProject;
-import tech.derbent.api.interfaces.CProjectChangeListener;
+import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.services.CAbstractNamedEntityService;
 import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.api.views.components.CVerticalLayout;
@@ -16,7 +16,7 @@ import tech.derbent.session.service.CSessionService;
 /** Abstract project-aware MD page that filters entities by the currently active project. Implements CProjectChangeListener to receive immediate
  * notifications when the active project changes. */
 public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<EntityClass>> extends CAbstractNamedEntityPage<EntityClass>
-		implements CProjectChangeListener {
+		implements IProjectChangeListener {
 
 	private static final long serialVersionUID = 1L;
 	protected final CSessionService sessionService;

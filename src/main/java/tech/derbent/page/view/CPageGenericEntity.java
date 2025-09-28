@@ -10,8 +10,8 @@ import tech.derbent.api.components.CComponentDetailsMasterToolbar;
 import tech.derbent.api.components.CCrudToolbar;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
-import tech.derbent.api.interfaces.CEntityUpdateListener;
-import tech.derbent.api.interfaces.CLayoutChangeListener;
+import tech.derbent.api.interfaces.IEntityUpdateListener;
+import tech.derbent.api.interfaces.ILayoutChangeListener;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
@@ -28,7 +28,7 @@ import tech.derbent.session.service.CSessionService;
  * reflection and generic patterns.
  * @param <EntityClass> The entity type this page manages */
 public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityClass>> extends CPageBaseProjectAware
-		implements CEntityUpdateListener, CLayoutChangeListener {
+		implements IEntityUpdateListener, ILayoutChangeListener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageGenericEntity.class);
 	private static final long serialVersionUID = 1L;

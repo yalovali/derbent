@@ -12,7 +12,7 @@ import tech.derbent.session.service.CSessionService;
  * @param <RelationEntity> The relationship entity type */
 public abstract class CAbstractEntityRelationService<RelationEntity extends CEntityDB<RelationEntity>> extends CAbstractService<RelationEntity> {
 
-	public CAbstractEntityRelationService(final CAbstractRepository<RelationEntity> repository, final Clock clock,
+	public CAbstractEntityRelationService(final IAbstractRepository<RelationEntity> repository, final Clock clock,
 			final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}

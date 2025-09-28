@@ -22,7 +22,7 @@ import tech.derbent.users.domain.CUser;
 @Transactional (readOnly = true)
 public class CCommentService extends CAbstractService<CComment> {
 
-	public CCommentService(final CCommentRepository repository, final CCommentPriorityService commentPriorityService, final Clock clock,
+	public CCommentService(final ICommentRepository repository, final CCommentPriorityService commentPriorityService, final Clock clock,
 			final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
@@ -30,7 +30,7 @@ public class CCommentService extends CAbstractService<CComment> {
 	@PreAuthorize ("permitAll()")
 	public long countByActivity(final CActivity activity) {
 		Check.notNull(activity, "Activity cannot be null");
-		return ((CCommentRepository) repository).countByActivity(activity);
+		return ((ICommentRepository) repository).countByActivity(activity);
 	}
 
 	@Transactional
@@ -52,7 +52,7 @@ public class CCommentService extends CAbstractService<CComment> {
 			// new instance, no lines yet
 			return List.of();
 		}
-		return ((CCommentRepository) repository).findByActivity(master);
+		return ((ICommentRepository) repository).findByActivity(master);
 	}
 
 	/** Finds all comments for a specific activity with pagination.
@@ -66,7 +66,7 @@ public class CCommentService extends CAbstractService<CComment> {
 			// new instance, no lines yet
 			return Page.empty();
 		}
-		return ((CCommentRepository) repository).findByActivity(master, pageable);
+		return ((ICommentRepository) repository).findByActivity(master, pageable);
 	}
 
 	@Override

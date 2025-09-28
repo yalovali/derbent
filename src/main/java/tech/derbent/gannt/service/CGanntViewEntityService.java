@@ -17,7 +17,7 @@ public class CGanntViewEntityService extends CEntityOfProjectService<CGanntViewE
 	}
 
 	@Autowired
-	public CGanntViewEntityService(final CGanntViewEntityRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CGanntViewEntityService(final IGanntViewEntityRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

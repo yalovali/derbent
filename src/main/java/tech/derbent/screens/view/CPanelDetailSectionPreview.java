@@ -59,7 +59,7 @@ public class CPanelDetailSectionPreview extends CPanelDetailSectionBase {
 				final CEnhancedBinder<CEntityDB<?>> binder = new CEnhancedBinder<CEntityDB<?>>((Class<CEntityDB<?>>) screenClass);
 				sharedBinder = binder;
 			}
-			builder.buildDetails(screen, sharedBinder, divPreview);
+			builder.buildDetails(this, screen, sharedBinder, divPreview);
 			// Get related service class for the given class type
 			/** ADD SAMPLE DATA ************************************/
 			final String serviceClassName =

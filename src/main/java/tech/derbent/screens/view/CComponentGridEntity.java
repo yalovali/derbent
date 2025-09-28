@@ -25,7 +25,7 @@ import com.vaadin.hilla.ApplicationContextProvider;
 import tech.derbent.api.components.CGridCell;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityNamed;
-import tech.derbent.api.interfaces.CProjectChangeListener;
+import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.api.utils.CColorUtils;
@@ -39,7 +39,7 @@ import tech.derbent.screens.service.CEntityFieldService;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.session.service.CSessionService;
 
-public class CComponentGridEntity extends CDiv implements CProjectChangeListener {
+public class CComponentGridEntity extends CDiv implements IProjectChangeListener {
 
 	// --- Custom Event Definition ---
 	public static class SelectionChangeEvent extends ComponentEvent<CComponentGridEntity> {

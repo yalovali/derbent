@@ -13,13 +13,13 @@ import tech.derbent.session.service.ISessionService;
 @Transactional
 public class CActivityPriorityService extends CEntityOfProjectService<CActivityPriority> {
 
-	public CActivityPriorityService(final CActivityPriorityRepository repository, final Clock clock, final ISessionService sessionService) {
+	public CActivityPriorityService(final IActivityPriorityRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 
 	@Transactional (readOnly = true)
 	public Optional<CActivityPriority> findDefaultPriority(final CProject project) {
-		return ((CActivityPriorityRepository) repository).findByIsDefaultTrue(project);
+		return ((IActivityPriorityRepository) repository).findByIsDefaultTrue(project);
 	}
 
 	@Override

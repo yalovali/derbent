@@ -15,13 +15,13 @@ import tech.derbent.session.service.CSessionService;
 @PreAuthorize ("isAuthenticated()")
 public class CDetailSectionService extends CEntityOfProjectService<CDetailSection> {
 
-	public CDetailSectionService(final CDetailSectionRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CDetailSectionService(final IDetailSectionRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 
 	@Transactional (readOnly = true)
 	public List<CDetailSection> findActiveByProject(final CProject project) {
-		return ((CDetailSectionRepository) repository).findActiveByProject(project);
+		return ((IDetailSectionRepository) repository).findActiveByProject(project);
 	}
 
 	@Transactional (readOnly = true)
@@ -31,13 +31,13 @@ public class CDetailSectionService extends CEntityOfProjectService<CDetailSectio
 		if ((project == null) || (entityType == null) || entityType.isBlank()) {
 			return null;
 		}
-		return ((CDetailSectionRepository) repository).findByEntityTypeAndProject(project, entityType).orElse(null);
+		return ((IDetailSectionRepository) repository).findByEntityTypeAndProject(project, entityType).orElse(null);
 	}
 
 	@Transactional (readOnly = true)
 	public CDetailSection findByIdWithScreenLines(final Long id) {
 		Check.notNull(id, "ID must not be null");
-		return ((CDetailSectionRepository) repository).findByIdWithScreenLines(id).orElse(null);
+		return ((IDetailSectionRepository) repository).findByIdWithScreenLines(id).orElse(null);
 	}
 
 	@Transactional (readOnly = true)
@@ -47,7 +47,7 @@ public class CDetailSectionService extends CEntityOfProjectService<CDetailSectio
 		if ((project == null) || (name == null) || name.isBlank()) {
 			return null;
 		}
-		return ((CDetailSectionRepository) repository).findByNameAndProject(project, name).orElse(null);
+		return ((IDetailSectionRepository) repository).findByNameAndProject(project, name).orElse(null);
 	}
 
 	@Override

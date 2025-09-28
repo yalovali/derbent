@@ -31,7 +31,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 import com.vaadin.flow.theme.lumo.LumoUtility.IconSize;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
-import tech.derbent.api.interfaces.CProjectListChangeListener;
+import tech.derbent.api.interfaces.IProjectListChangeListener;
 import tech.derbent.api.services.CRouteDiscoveryService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
@@ -52,7 +52,7 @@ import tech.derbent.users.view.CUsersView;
 
 /* CViewToolbar.java This class defines a toolbar for views in the application, providing a consistent header with a title and optional action
  * components. It extends Composite to allow for easy composition of the toolbar's content. */
-public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>> extends Composite<Header> implements CProjectListChangeListener {
+public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>> extends Composite<Header> implements IProjectListChangeListener {
 
 	private static final long serialVersionUID = 1L;
 

@@ -48,9 +48,9 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> {
 		return line;
 	}
 
-	private final CDetailLinesRepository detailLinesRepository;
+	private final IDetailLinesRepository detailLinesRepository;
 
-	public CDetailLinesService(final CDetailLinesRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CDetailLinesService(final IDetailLinesRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 		this.detailLinesRepository = repository;
 	}

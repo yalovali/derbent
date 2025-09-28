@@ -22,9 +22,9 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CProjectItem;
-import tech.derbent.api.interfaces.CKanbanEntity;
-import tech.derbent.api.interfaces.CKanbanStatus;
-import tech.derbent.api.interfaces.CKanbanType;
+import tech.derbent.api.interfaces.IKanbanEntity;
+import tech.derbent.api.interfaces.IKanbanStatus;
+import tech.derbent.api.interfaces.IKanbanType;
 import tech.derbent.comments.domain.CComment;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
@@ -32,7 +32,7 @@ import tech.derbent.users.domain.CUser;
 @Entity
 @Table (name = "cactivity")
 @AttributeOverride (name = "id", column = @Column (name = "activity_id"))
-public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity {
+public class CActivity extends CProjectItem<CActivity> implements IKanbanEntity {
 
 	public static final String DEFAULT_COLOR = "#DC143C";
 	public static final String DEFAULT_ICON = "vaadin:tasks";
@@ -245,7 +245,7 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 	public CActivityStatus getStatus() { return status; }
 
 	@Override
-	public CKanbanType getType() { return activityType; }
+	public IKanbanType getType() { return activityType; }
 
 	/** Initialize default values for the activity. */
 	@Override
@@ -431,7 +431,7 @@ public class CActivity extends CProjectItem<CActivity> implements CKanbanEntity 
 
 	// CKanbanEntity implementation methods
 	@Override
-	public void setStatus(final CKanbanStatus status) {
+	public void setStatus(final IKanbanStatus status) {
 		if (status instanceof CActivityStatus) {
 			setStatus((CActivityStatus) status);
 		}

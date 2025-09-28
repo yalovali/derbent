@@ -13,7 +13,7 @@ import tech.derbent.session.service.CSessionService;
 @Transactional (readOnly = true)
 public class COrderTypeService extends CEntityOfProjectService<COrderType> {
 
-	COrderTypeService(final COrderTypeRepository repository, final Clock clock, final CSessionService sessionService) {
+	COrderTypeService(final IOrderTypeRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

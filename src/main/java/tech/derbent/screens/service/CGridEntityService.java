@@ -16,7 +16,7 @@ import tech.derbent.session.service.CSessionService;
 @PreAuthorize ("isAuthenticated()")
 public class CGridEntityService extends CEntityOfProjectService<CGridEntity> {
 
-	public CGridEntityService(final CGridEntityRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CGridEntityService(final IGridEntityRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 
@@ -28,7 +28,7 @@ public class CGridEntityService extends CEntityOfProjectService<CGridEntity> {
 		if ((project == null) || (name == null) || name.isBlank()) {
 			return Optional.empty();
 		}
-		return ((CGridEntityRepository) repository).findByNameAndProject(project, name);
+		return ((IGridEntityRepository) repository).findByNameAndProject(project, name);
 	}
 
 	public List<String> getAvailableTypes() {
@@ -41,6 +41,6 @@ public class CGridEntityService extends CEntityOfProjectService<CGridEntity> {
 	public List<CGridEntity> listForComboboxSelectorByProjectId(final String projectId) {
 		Check.notBlank(projectId, "Project must not be null");
 		Long id = Long.valueOf(projectId);
-		return ((CGridEntityRepository) repository).listByProjectId(id);
+		return ((IGridEntityRepository) repository).listByProjectId(id);
 	}
 }

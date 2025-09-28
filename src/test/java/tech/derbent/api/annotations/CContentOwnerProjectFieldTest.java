@@ -2,7 +2,6 @@ package tech.derbent.api.annotations;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -86,17 +85,5 @@ public class CContentOwnerProjectFieldTest {
 
 		@Override
 		public Object getCurrentEntity() { return currentUser; }
-
-		/** This method simulates CUsersView.getAvailableProjects(). It should be called by the data provider resolver when processing the project
-		 * field in CUserProjectSettingsDialog. */
-		public List<CProject> getAvailableProjects() {
-			CProject project1 = new CProject();
-			project1.setName("Test Project 1");
-			project1.setDescription("First test project");
-			CProject project2 = new CProject();
-			project2.setName("Test Project 2");
-			project2.setDescription("Second test project");
-			return Arrays.asList(project1, project2);
-		}
 	}
 }

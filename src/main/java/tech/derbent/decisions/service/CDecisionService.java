@@ -13,7 +13,7 @@ import tech.derbent.session.service.CSessionService;
 @PreAuthorize ("isAuthenticated()")
 public class CDecisionService extends CEntityOfProjectService<CDecision> {
 
-	public CDecisionService(final CDecisionRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CDecisionService(final IDecisionRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

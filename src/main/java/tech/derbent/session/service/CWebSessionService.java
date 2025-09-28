@@ -14,13 +14,13 @@ import org.springframework.stereotype.Service;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.security.AuthenticationContext;
-import tech.derbent.api.interfaces.CProjectChangeListener;
-import tech.derbent.api.interfaces.CProjectListChangeListener;
+import tech.derbent.api.interfaces.IProjectChangeListener;
+import tech.derbent.api.interfaces.IProjectListChangeListener;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.events.ProjectListChangeEvent;
-import tech.derbent.projects.service.CProjectRepository;
+import tech.derbent.projects.service.IProjectRepository;
 import tech.derbent.users.domain.CUser;
-import tech.derbent.users.service.CUserRepository;
+import tech.derbent.users.service.IUserRepository;
 
 /** Service to manage user session state including active user and active project. Uses Vaadin session to store session-specific information. */
 @Service ("CSessionService")
@@ -36,14 +36,14 @@ public class CWebSessionService implements ISessionService {
 	private final Set<String> idAttributes = ConcurrentHashMap.newKeySet();
 	private CLayoutService layoutService;
 	// Thread-safe set to store project change listeners
-	private final Set<CProjectChangeListener> projectChangeListeners = ConcurrentHashMap.newKeySet();
+	private final Set<IProjectChangeListener> projectChangeListeners = ConcurrentHashMap.newKeySet();
 	// Thread-safe set to store project list change listeners
-	private final Set<CProjectListChangeListener> projectListChangeListeners = ConcurrentHashMap.newKeySet();
-	private final CProjectRepository projectRepository;
-	private final CUserRepository userRepository;
+	private final Set<IProjectListChangeListener> projectListChangeListeners = ConcurrentHashMap.newKeySet();
+	private final IProjectRepository projectRepository;
+	private final IUserRepository userRepository;
 
-	public CWebSessionService(final AuthenticationContext authenticationContext, final CUserRepository userRepository,
-			final CProjectRepository projectRepository) {
+	public CWebSessionService(final AuthenticationContext authenticationContext, final IUserRepository userRepository,
+			final IProjectRepository projectRepository) {
 		this.authenticationContext = authenticationContext;
 		this.userRepository = userRepository;
 		this.projectRepository = projectRepository;
@@ -53,7 +53,7 @@ public class CWebSessionService implements ISessionService {
 	 * the UI.
 	 * @param listener The component that wants to be notified of project changes */
 	@Override
-	public void addProjectChangeListener(final CProjectChangeListener listener) {
+	public void addProjectChangeListener(final IProjectChangeListener listener) {
 		if (listener != null) {
 			projectChangeListeners.add(listener);
 		}
@@ -63,7 +63,7 @@ public class CWebSessionService implements ISessionService {
 	 * UI.
 	 * @param listener The component that wants to be notified of project list changes */
 	@Override
-	public void addProjectListChangeListener(final CProjectListChangeListener listener) {
+	public void addProjectListChangeListener(final IProjectListChangeListener listener) {
 		if (listener != null) {
 			projectListChangeListeners.add(listener);
 		}
@@ -204,7 +204,7 @@ public class CWebSessionService implements ISessionService {
 	/** Unregisters a component from receiving project change notifications. Components should call this method when they are detached from the UI.
 	 * @param listener The component to unregister */
 	@Override
-	public void removeProjectChangeListener(final CProjectChangeListener listener) {
+	public void removeProjectChangeListener(final IProjectChangeListener listener) {
 		if (listener != null) {
 			projectChangeListeners.remove(listener);
 			// LOGGER.debug("Project change listener unregistered: {}",
@@ -216,7 +216,7 @@ public class CWebSessionService implements ISessionService {
 	 * UI.
 	 * @param listener The component to unregister */
 	@Override
-	public void removeProjectListChangeListener(final CProjectListChangeListener listener) {
+	public void removeProjectListChangeListener(final IProjectListChangeListener listener) {
 		if (listener != null) {
 			projectListChangeListeners.remove(listener);
 			// LOGGER.debug("Project list change listener unregistered: {}",

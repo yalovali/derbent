@@ -20,7 +20,7 @@ public class CMeetingTypeService extends CEntityOfProjectService<CMeetingType> {
 	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingTypeService.class);
 
-	CMeetingTypeService(final CMeetingTypeRepository repository, final Clock clock, final CSessionService sessionService) {
+	CMeetingTypeService(final IMeetingTypeRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

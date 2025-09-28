@@ -22,8 +22,8 @@ public class CSessionServiceConfig {
 	@ConditionalOnWebApplication
 	@Profile ("!reset-db")
 	public CSessionService sessionServiceDelegate(final CWebSessionService webSessionService,
-			final tech.derbent.users.service.CUserRepository userRepository,
-			final tech.derbent.projects.service.CProjectRepository projectRepository) {
+			final tech.derbent.users.service.IUserRepository userRepository,
+			final tech.derbent.projects.service.IProjectRepository projectRepository) {
 		// Create an anonymous subclass that delegates to the web session service
 		return new CSessionService(userRepository, projectRepository) {
 
@@ -67,22 +67,22 @@ public class CSessionServiceConfig {
 			}
 
 			@Override
-			public void addProjectChangeListener(final tech.derbent.api.interfaces.CProjectChangeListener listener) {
+			public void addProjectChangeListener(final tech.derbent.api.interfaces.IProjectChangeListener listener) {
 				webSessionService.addProjectChangeListener(listener);
 			}
 
 			@Override
-			public void removeProjectChangeListener(final tech.derbent.api.interfaces.CProjectChangeListener listener) {
+			public void removeProjectChangeListener(final tech.derbent.api.interfaces.IProjectChangeListener listener) {
 				webSessionService.removeProjectChangeListener(listener);
 			}
 
 			@Override
-			public void addProjectListChangeListener(final tech.derbent.api.interfaces.CProjectListChangeListener listener) {
+			public void addProjectListChangeListener(final tech.derbent.api.interfaces.IProjectListChangeListener listener) {
 				webSessionService.addProjectListChangeListener(listener);
 			}
 
 			@Override
-			public void removeProjectListChangeListener(final tech.derbent.api.interfaces.CProjectListChangeListener listener) {
+			public void removeProjectListChangeListener(final tech.derbent.api.interfaces.IProjectListChangeListener listener) {
 				webSessionService.removeProjectListChangeListener(listener);
 			}
 

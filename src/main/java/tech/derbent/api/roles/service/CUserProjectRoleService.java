@@ -23,7 +23,7 @@ public class CUserProjectRoleService extends CEntityOfProjectService<CUserProjec
 	 * @param repository     the CUserProjectRoleRepository to use for data access
 	 * @param clock          the Clock instance for time-related operations
 	 * @param sessionService the session service for user context */
-	public CUserProjectRoleService(final CUserProjectRoleRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CUserProjectRoleService(final IUserProjectRoleRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

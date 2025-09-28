@@ -14,6 +14,7 @@ import jakarta.persistence.Persistence;
 import jakarta.persistence.PersistenceUtil;
 import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CPanelDetails;
 import tech.derbent.api.utils.Check;
@@ -47,7 +48,8 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		mapSectionPanels = new HashMap<>();
 	}
 
-	public HasComponents buildDetails(CDetailSection screen, final CEnhancedBinder<?> binder, final HasComponents layout) throws Exception {
+	public HasComponents buildDetails(IContentOwner contentOwner, CDetailSection screen, final CEnhancedBinder<?> binder, final HasComponents layout)
+			throws Exception {
 		Check.notNull(screen, "Screen cannot be null");
 		Check.notNull(binder, "Binder cannot be null");
 		Check.notNull(applicationContext, "Details name cannot be null");
@@ -81,7 +83,7 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 				currentSection = null;
 			}
 			if (currentSection != null) {
-				currentSection.processLine(counter, screen, line, formBuilder);
+				currentSection.processLine(contentOwner, counter, screen, line, formBuilder);
 				continue;
 			}
 			final Component component = processLine(counter, screen, line);

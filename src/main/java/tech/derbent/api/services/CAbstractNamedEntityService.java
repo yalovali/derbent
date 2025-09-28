@@ -13,7 +13,7 @@ import tech.derbent.session.service.ISessionService;
  * operations for named entities including validation, creation, and name-based queries with consistent error handling and logging. */
 public abstract class CAbstractNamedEntityService<EntityClass extends CEntityNamed<EntityClass>> extends CAbstractService<EntityClass> {
 
-	public CAbstractNamedEntityService(final CAbstractNamedRepository<EntityClass> repository, final Clock clock) {
+	public CAbstractNamedEntityService(final IAbstractNamedRepository<EntityClass> repository, final Clock clock) {
 		super(repository, clock);
 	}
 
@@ -21,7 +21,7 @@ public abstract class CAbstractNamedEntityService<EntityClass extends CEntityNam
 	 * @param repository     the repository for data access operations
 	 * @param clock          the Clock instance for time-related operations
 	 * @param sessionService */
-	public CAbstractNamedEntityService(final CAbstractNamedRepository<EntityClass> repository, final Clock clock,
+	public CAbstractNamedEntityService(final IAbstractNamedRepository<EntityClass> repository, final Clock clock,
 			final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
@@ -36,13 +36,13 @@ public abstract class CAbstractNamedEntityService<EntityClass extends CEntityNam
 	@Transactional (readOnly = true)
 	public boolean existsByName(final String name) {
 		Check.notBlank(name, "Name cannot be null or empty");
-		return ((CAbstractNamedRepository<EntityClass>) repository).existsByName(name.trim());
+		return ((IAbstractNamedRepository<EntityClass>) repository).existsByName(name.trim());
 	}
 
 	@Transactional (readOnly = true)
 	public Optional<EntityClass> findByName(final String name) {
 		Check.notBlank(name, "Name cannot be null or empty");
-		return ((CAbstractNamedRepository<EntityClass>) repository).findByName(name.trim());
+		return ((IAbstractNamedRepository<EntityClass>) repository).findByName(name.trim());
 	}
 
 	/** Varsayılan sıralama anahtarları. İstediğiniz entity servisinde override edebilirsiniz. */
@@ -52,7 +52,7 @@ public abstract class CAbstractNamedEntityService<EntityClass extends CEntityNam
 	@Transactional (readOnly = true)
 	public boolean isNameUnique(final String name, final Long currentId) {
 		Check.notBlank(name, "Name cannot be null or empty");
-		final Optional<EntityClass> existingEntity = ((CAbstractNamedRepository<EntityClass>) repository).findByName(name.trim());
+		final Optional<EntityClass> existingEntity = ((IAbstractNamedRepository<EntityClass>) repository).findByName(name.trim());
 		if (existingEntity.isEmpty()) {
 			return true;
 		}

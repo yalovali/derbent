@@ -6,7 +6,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
-import tech.derbent.api.interfaces.CProjectChangeListener;
+import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.projects.domain.CProject;
@@ -16,7 +16,7 @@ import tech.derbent.session.service.CSessionService;
  * handle project switching scenarios where panels need to update their content based on the new project context. Layer: View (MVC) Purpose: Extends
  * CAccordionDescription with project change awareness for proper panel refresh */
 public abstract class CProjectAwareAccordionDescription<EntityClass extends CEntityDB<EntityClass>> extends CAccordionDBEntity<EntityClass>
-		implements CProjectChangeListener {
+		implements IProjectChangeListener {
 
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectAwareAccordionDescription.class);

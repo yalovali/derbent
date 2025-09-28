@@ -48,8 +48,8 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	 * @return The end date or null */
 	private LocalDate extractEndDate(final CEntityOfProject<?> entity) {
 		// First try the interface approach
-		if (entity instanceof tech.derbent.api.interfaces.CGanttDisplayable) {
-			return ((tech.derbent.api.interfaces.CGanttDisplayable) entity).getGanttEndDate();
+		if (entity instanceof tech.derbent.api.interfaces.IGanttDisplayable) {
+			return ((tech.derbent.api.interfaces.IGanttDisplayable) entity).getGanttEndDate();
 		}
 		// Fallback to cached reflection for backward compatibility
 		try {
@@ -76,8 +76,8 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	 * @return The parent ID or null */
 	private Long extractParentId(final CEntityOfProject<?> entity) {
 		// First try the interface approach
-		if (entity instanceof tech.derbent.api.interfaces.CGanttDisplayable) {
-			return ((tech.derbent.api.interfaces.CGanttDisplayable) entity).getGanttParentId();
+		if (entity instanceof tech.derbent.api.interfaces.IGanttDisplayable) {
+			return ((tech.derbent.api.interfaces.IGanttDisplayable) entity).getGanttParentId();
 		}
 		// Fallback to cached reflection for backward compatibility
 		Object result = tech.derbent.api.utils.CReflectionCache.safeInvoke(entity, "getParentId");
@@ -89,8 +89,8 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	 * @return The parent type or null */
 	private String extractParentType(final CEntityOfProject<?> entity) {
 		// First try the interface approach
-		if (entity instanceof tech.derbent.api.interfaces.CGanttDisplayable) {
-			return ((tech.derbent.api.interfaces.CGanttDisplayable) entity).getGanttParentType();
+		if (entity instanceof tech.derbent.api.interfaces.IGanttDisplayable) {
+			return ((tech.derbent.api.interfaces.IGanttDisplayable) entity).getGanttParentType();
 		}
 		// Fallback to cached reflection for backward compatibility
 		Object result = tech.derbent.api.utils.CReflectionCache.safeInvoke(entity, "getParentType");
@@ -102,8 +102,8 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	 * @return The start date or null */
 	private LocalDate extractStartDate(final CEntityOfProject<?> entity) {
 		// First try the interface approach
-		if (entity instanceof tech.derbent.api.interfaces.CGanttDisplayable) {
-			return ((tech.derbent.api.interfaces.CGanttDisplayable) entity).getGanttStartDate();
+		if (entity instanceof tech.derbent.api.interfaces.IGanttDisplayable) {
+			return ((tech.derbent.api.interfaces.IGanttDisplayable) entity).getGanttStartDate();
 		}
 		// Fallback to cached reflection for backward compatibility
 		try {
@@ -129,8 +129,8 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	 * @return The color code string */
 	public String getColorCode() {
 		// First try the interface approach
-		if (entity instanceof tech.derbent.api.interfaces.CGanttDisplayable) {
-			return ((tech.derbent.api.interfaces.CGanttDisplayable) entity).getGanttColorCode();
+		if (entity instanceof tech.derbent.api.interfaces.IGanttDisplayable) {
+			return ((tech.derbent.api.interfaces.IGanttDisplayable) entity).getGanttColorCode();
 		}
 		// Fallback to cached reflection for backward compatibility
 		try {

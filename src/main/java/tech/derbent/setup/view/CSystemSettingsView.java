@@ -411,13 +411,4 @@ public class CSystemSettingsView extends CAbstractPage {
 			Notification.show(message, 3000, Notification.Position.TOP_CENTER);
 		}
 	}
-
-	/** Shows an info notification using the service if available, falls back to direct call */
-	private void showInfoNotification(final String message) {
-		if (notificationService != null) {
-			notificationService.showInfo(message);
-		} else {
-			Notification.show(message, 2000, Notification.Position.TOP_CENTER);
-		}
-	}
 }

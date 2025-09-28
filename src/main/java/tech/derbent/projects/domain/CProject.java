@@ -10,7 +10,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import tech.derbent.api.domains.CEntityNamed;
-import tech.derbent.api.interfaces.CSearchable;
+import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.Check;
 import tech.derbent.users.domain.CUserProjectSettings;
 
@@ -18,7 +18,7 @@ import tech.derbent.users.domain.CUserProjectSettings;
 @Entity
 @Table (name = "cproject")
 @AttributeOverride (name = "id", column = @Column (name = "project_id"))
-public class CProject extends CEntityNamed<CProject> implements CSearchable {
+public class CProject extends CEntityNamed<CProject> implements ISearchable {
 
 	public static final String DEFAULT_COLOR = "#905300";
 	public static final String DEFAULT_ICON = "vaadin:credit-card";

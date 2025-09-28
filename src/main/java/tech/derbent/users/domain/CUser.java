@@ -15,8 +15,8 @@ import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.domains.CEntityNamed;
-import tech.derbent.api.interfaces.CFieldInfoGenerator;
-import tech.derbent.api.interfaces.CSearchable;
+import tech.derbent.api.interfaces.IFieldInfoGenerator;
+import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.Check;
 import tech.derbent.companies.domain.CCompany;
 
@@ -24,7 +24,7 @@ import tech.derbent.companies.domain.CCompany;
 @Table (name = "cuser") // Using quoted identifier to ensure exact case matching in
 // PostgreSQL
 @AttributeOverride (name = "id", column = @Column (name = "user_id"))
-public class CUser extends CEntityNamed<CUser> implements CSearchable, CFieldInfoGenerator {
+public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInfoGenerator {
 
 	public static final String DEFAULT_COLOR = "#00546d";
 	public static final String DEFAULT_ICON = "vaadin:book";

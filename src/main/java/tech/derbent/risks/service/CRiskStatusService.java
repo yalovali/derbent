@@ -19,7 +19,7 @@ public class CRiskStatusService extends CEntityOfProjectService<CRiskStatus> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskStatusService.class);
 
 	@Autowired
-	public CRiskStatusService(final CRiskStatusRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CRiskStatusService(final IRiskStatusRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

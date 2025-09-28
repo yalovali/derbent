@@ -15,7 +15,7 @@ import tech.derbent.session.service.CSessionService;
 @PermitAll // When security is enabled, allow all authenticated users
 public class CRiskService extends CEntityOfProjectService<CRisk> {
 
-	CRiskService(final CRiskRepository repository, final Clock clock, final CSessionService sessionService) {
+	CRiskService(final IRiskRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -23,10 +25,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
+import tech.derbent.api.components.CEnhancedBinder;
+import tech.derbent.api.roles.service.CUserProjectRoleService;
 import tech.derbent.api.services.CAbstractNamedEntityService;
 import tech.derbent.api.utils.Check;
+import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.domain.CProject;
+import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
+import tech.derbent.users.view.CComponentUserProjectSettings;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -35,8 +42,10 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserService.class);
 	private final PasswordEncoder passwordEncoder;
+	@Autowired
+	private ApplicationContext applicationContext;
 
-	public CUserService(final CUserRepository repository, final Clock clock) {
+	public CUserService(final IUserRepository repository, final Clock clock) {
 		super(repository, clock);
 		this.passwordEncoder = new BCryptPasswordEncoder(); // BCrypt for secure password
 															// hashing
@@ -50,13 +59,13 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	 * @return count of users assigned to the project */
 	@PreAuthorize ("permitAll()")
 	public long countUsersByProjectId(final Long projectId) {
-		return ((CUserRepository) repository).countByProjectId(projectId);
+		return ((IUserRepository) repository).countByProjectId(projectId);
 	}
 
 	@Transactional // Write operation requires writable transaction
 	public CUser createLoginUser(final String username, final String plainPassword, final String name, final String email, final String roles) {
 		// Check if username already exists
-		if (((CUserRepository) repository).findByUsername(username).isPresent()) {
+		if (((IUserRepository) repository).findByUsername(username).isPresent()) {
 			LOGGER.warn("Username already exists: {}", username);
 			throw new IllegalArgumentException("Username already exists: " + username);
 		}
@@ -74,7 +83,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	 * @param login the login username
 	 * @return the CUser if found, null otherwise */
 	public CUser findByLogin(final String login) {
-		return ((CUserRepository) repository).findByUsername(login).orElse(null);
+		return ((IUserRepository) repository).findByUsername(login).orElse(null);
 	}
 
 	/** Converts comma-separated role string to Spring Security authorities. Roles are prefixed with "ROLE_" as per Spring Security convention.
@@ -105,7 +114,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
 		LOGGER.debug("Attempting to load user by username: {}", username);
 		// Step 1: Query database for user by username
-		final CUser loginUser = ((CUserRepository) repository).findByUsername(username).orElseThrow(() -> {
+		final CUser loginUser = ((IUserRepository) repository).findByUsername(username).orElseThrow(() -> {
 			LOGGER.warn("User not found with username: {}", username);
 			return new UsernameNotFoundException("User not found with username: " + username);
 		});
@@ -192,7 +201,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 
 	@Transactional
 	public void updatePassword(final String username, final String newPlainPassword) {
-		final CUser loginUser = ((CUserRepository) repository).findByUsername(username)
+		final CUser loginUser = ((IUserRepository) repository).findByUsername(username)
 				.orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 		final String encodedPassword = passwordEncoder.encode(newPlainPassword);
 		loginUser.setPassword(encodedPassword);
@@ -210,14 +219,33 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	@PreAuthorize ("permitAll()")
 	public List<CUser> getAvailableUsersForProject(final Long projectId) {
 		Check.notNull(projectId, "User ID must not be null");
-		return ((CUserRepository) repository).findUsersNotAssignedToProject(projectId);
+		return ((IUserRepository) repository).findUsersNotAssignedToProject(projectId);
 	}
 
 	public Component createUserProjectSettingsComponent() {
-		LOGGER.debug("Creating user project settings component");
-		final Div errorDiv = new Div();
-		errorDiv.setText("Just testing");
-		errorDiv.addClassName("error-message");
-		return errorDiv;
+		LOGGER.debug("Creating enhanced user project settings component");
+		try {
+			// Get services from ApplicationContext to avoid circular dependency
+			CProjectService projectService = applicationContext.getBean(CProjectService.class);
+			CUserProjectRoleService roleService = applicationContext.getBean(CUserProjectRoleService.class);
+			CUserProjectSettingsService userProjectSettingsService = applicationContext.getBean(CUserProjectSettingsService.class);
+			CUserTypeService userTypeService = applicationContext.getBean(CUserTypeService.class);
+			CCompanyService companyService = applicationContext.getBean(CCompanyService.class);
+			// Create a minimal binder for the component
+			CEnhancedBinder<CUser> binder = new CEnhancedBinder<>(CUser.class);
+			// Create the enhanced component with proper service dependencies
+			CComponentUserProjectSettings component = new CComponentUserProjectSettings(null, // parentContent - will be set by caller
+					null, // currentEntity - will be set by caller
+					binder, this, userTypeService, companyService, projectService, userProjectSettingsService);
+			LOGGER.debug("Successfully created CComponentUserProjectSettings");
+			return component;
+		} catch (Exception e) {
+			LOGGER.error("Failed to create user project settings component: {}", e.getMessage(), e);
+			// Fallback to simple div with error message
+			final Div errorDiv = new Div();
+			errorDiv.setText("Error loading user project settings component: " + e.getMessage());
+			errorDiv.addClassName("error-message");
+			return errorDiv;
+		}
 	}
 }

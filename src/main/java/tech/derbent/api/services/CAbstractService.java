@@ -19,7 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.annotations.CSpringAuxillaries;
 import tech.derbent.api.domains.CEntityDB;
-import tech.derbent.api.interfaces.CSearchable;
+import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.session.service.ISessionService;
@@ -30,10 +30,10 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 
 	protected final Clock clock;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
-	protected final CAbstractRepository<EntityClass> repository;
+	protected final IAbstractRepository<EntityClass> repository;
 	protected @Nullable ISessionService sessionService;
 
-	public CAbstractService(final CAbstractRepository<EntityClass> repository, final Clock clock) {
+	public CAbstractService(final IAbstractRepository<EntityClass> repository, final Clock clock) {
 		LOGGER.debug("Initializing service for entity: {}", getEntityClass() != null ? getEntityClass().getSimpleName() : "Unknown");
 		this.clock = clock;
 		this.repository = repository;
@@ -41,7 +41,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		Check.notNull(repository, "repository cannot be null");
 	}
 
-	public CAbstractService(final CAbstractRepository<EntityClass> repository, final Clock clock, final ISessionService sessionService) {
+	public CAbstractService(final IAbstractRepository<EntityClass> repository, final Clock clock, final ISessionService sessionService) {
 		LOGGER.debug("Initializing service for entity: {}", getEntityClass() != null ? getEntityClass().getSimpleName() : "Unknown");
 		this.clock = clock;
 		this.repository = repository;
@@ -182,7 +182,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		return null;
 	}
 
-	public CAbstractRepository<EntityClass> getRepository() { return repository; }
+	public IAbstractRepository<EntityClass> getRepository() { return repository; }
 
 	/** Varsayılan sıralama anahtarları. İstediğiniz entity servisinde override edebilirsiniz. */
 	protected Map<String, Function<EntityClass, ?>> getSortKeyExtractors() {
@@ -230,8 +230,8 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		final String term = (searchText == null) ? "" : searchText.trim();
 		// Pull all for project (ensure repo method DOES NOT fetch to-many relations!)
 		final List<EntityClass> all = repository.findAll(Pageable.unpaged()).getContent();
-		final boolean searchable = CSearchable.class.isAssignableFrom(getEntityClass());
-		final List<EntityClass> filtered = (term.isEmpty() || !searchable) ? all : all.stream().filter(e -> ((CSearchable) e).matches(term)).toList();
+		final boolean searchable = ISearchable.class.isAssignableFrom(getEntityClass());
+		final List<EntityClass> filtered = (term.isEmpty() || !searchable) ? all : all.stream().filter(e -> ((ISearchable) e).matches(term)).toList();
 		// --- apply sort from Pageable (name/id supported here; override to extend)
 		final List<EntityClass> sorted = applySort(filtered, safePage.getSort());
 		// --- slice

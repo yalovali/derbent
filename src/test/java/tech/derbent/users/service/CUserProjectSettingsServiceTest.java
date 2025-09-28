@@ -24,7 +24,7 @@ import tech.derbent.users.domain.CUserProjectSettings;
 public class CUserProjectSettingsServiceTest {
 
 	@Mock
-	private CUserProjectSettingsRepository repository;
+	private IUserProjectSettingsRepository repository;
 	@Mock
 	private Clock clock;
 	@Mock

@@ -22,7 +22,7 @@ public class CUserTypeService extends CEntityOfProjectService<CUserType> {
 	/** Constructor for CUserTypeService.
 	 * @param repository the CUserTypeRepository to use for data access
 	 * @param clock      the Clock instance for time-related operations */
-	public CUserTypeService(final CUserTypeRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CUserTypeService(final IUserTypeRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 
