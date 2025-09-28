@@ -26,4 +26,7 @@ public interface IUserRepository extends IAbstractNamedRepository<CUser> {
 	/** Find all users that are not assigned to a specific project using generic pattern */
 	@Query ("SELECT u FROM #{#entityName} u WHERE u.id NOT IN (SELECT ups.user.id FROM CUserProjectSettings ups WHERE ups.project.id = :projectId)")
 	List<CUser> findUsersNotAssignedToProject(@Param ("projectId") Long projectId);
+	/** Find all users that are not assigned to a specific company using generic pattern */
+	@Query ("SELECT u FROM #{#entityName} u WHERE u.id NOT IN (SELECT ucs.user.id FROM CUserCompanySettings ucs WHERE ucs.company.id = :companyId)")
+	List<CUser> findUsersNotAssignedToCompany(@Param ("companyId") Long companyId);
 }

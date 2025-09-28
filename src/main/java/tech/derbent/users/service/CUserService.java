@@ -221,6 +221,13 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 		return ((IUserRepository) repository).findUsersNotAssignedToProject(projectId);
 	}
 
+	@Transactional (readOnly = true)
+	@PreAuthorize ("permitAll()")
+	public List<CUser> getAvailableUsersForCompany(final Long companyId) {
+		Check.notNull(companyId, "Company ID must not be null");
+		return ((IUserRepository) repository).findUsersNotAssignedToCompany(companyId);
+	}
+
 	public Component createUserProjectSettingsComponent() {
 		LOGGER.debug("Creating enhanced user project settings component");
 		try {

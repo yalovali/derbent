@@ -9,6 +9,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.Check;
@@ -25,6 +26,11 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 	public static final String VIEW_NAME = "Projects View";
 	// lets keep it layzily loaded to avoid loading all user settings at once
 	@OneToMany (mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@AMetaData (
+			displayName = "User Settings", required = false, readOnly = false, 
+			description = "User project settings for this project", hidden = false, order = 10,
+			createComponentMethod = "createProjectUserSettingsComponent"
+	)
 	private final List<CUserProjectSettings> userSettings = new ArrayList<>();
 
 	/** Default constructor for JPA. */
