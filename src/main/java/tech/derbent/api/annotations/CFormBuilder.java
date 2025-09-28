@@ -870,6 +870,29 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		CFormBuilder.buildForm(entityClass, binder, entityFields, componentMap, horizontalLayoutMap, formLayout, contentOwner);
 	}
 
+	/** Populates the form with entity data using the internal binder.
+	 * @param entity the entity to populate the form with */
+	@SuppressWarnings ("unchecked")
+	public void populateForm(Object entity) {
+		if (binder != null) {
+			LOGGER.debug("Populating form with entity: {}", entity);
+			((CEnhancedBinder<Object>) binder).setBean(entity);
+		}
+	}
+
+	/** Clears the form by setting the binder bean to null. */
+	@SuppressWarnings ("unchecked")
+	public void populateForm() {
+		if (binder != null) {
+			LOGGER.debug("Clearing form - setting bean to null");
+			((CEnhancedBinder<Object>) binder).setBean(null);
+		}
+	}
+
+	/** Gets the internal binder for this form builder.
+	 * @return the enhanced binder */
+	public CEnhancedBinder<?> getBinder() { return binder; }
+
 	public Component addFieldLine(final EntityFieldInfo fieldInfo) throws Exception {
 		return CFormBuilder.processField(null, binder, formLayout, horizontalLayoutMap, fieldInfo, componentMap);
 	}

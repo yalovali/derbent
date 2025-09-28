@@ -40,18 +40,36 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 
 	@Override
 	public void populateForm(Object entity) {
-		setCurrentEntity(entity);
+		// Only set current entity if we don't have a content owner or if the entity differs from parent's
+		if (contentOwner == null) {
+			setCurrentEntity(entity);
+		} else {
+			// If we have a content owner, only set entity if it differs from parent's
+			Object parentEntity = contentOwner.getCurrentEntity();
+			if (parentEntity != entity) {
+				setCurrentEntity(entity);
+			}
+		}
 		populateForm();
 	}
 
 	@Override
 	public void populateForm() {
-		// Default implementation - subclasses should override if they need specific behavior
-		if (getCurrentEntity() != null) {
-			LOGGER.debug("Populating form for entity: {}", getCurrentEntity());
+		// Use current entity from content owner if available, otherwise use our own
+		EntityClass entityToUse = getCurrentEntity();
+		if (entityToUse == null && contentOwner != null) {
+			// Try to get entity from parent content owner
+			Object parentEntity = contentOwner.getCurrentEntity();
+			if (parentEntity != null && entityClass.isInstance(parentEntity)) {
+				entityToUse = entityClass.cast(parentEntity);
+			}
+		}
+		// Default implementation - populate binder if available
+		if (entityToUse != null) {
+			LOGGER.debug("Populating form for entity: {}", entityToUse);
 			// If there's a binder, set the bean
 			if (binder != null) {
-				binder.setBean(getCurrentEntity());
+				binder.setBean(entityToUse);
 			}
 		} else {
 			LOGGER.debug("Clearing form - no current entity");

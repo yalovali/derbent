@@ -62,6 +62,14 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 			LOGGER.debug("Clearing form - no current entity");
 			currentBinder.setBean(null);
 		}
+		// Also populate details builder if available
+		if (detailsBuilder != null) {
+			if (getCurrentEntity() != null) {
+				detailsBuilder.populateForm(getCurrentEntity());
+			} else {
+				detailsBuilder.populateForm();
+			}
+		}
 	}
 
 	protected CPageBaseProjectAware(final CSessionService sessionService, CDetailSectionService screenService) {

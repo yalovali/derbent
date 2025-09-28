@@ -89,6 +89,17 @@ public class CContentOwnerProjectFieldTest {
 		@Override
 		public void setCurrentEntity(Object entity) { this.currentUser = (CUser) entity; }
 
+		@Override
+		public void populateForm(Object entity) {
+			setCurrentEntity(entity);
+			populateForm();
+		}
+
+		@Override
+		public void populateForm() {
+			// Mock implementation - do nothing
+		}
+
 		/** Implementation of getAvailableProjects method that should be called by the data provider resolver. This method simulates the behavior
 		 * expected from CUsersView.getAvailableProjects(). */
 		public List<CProject> getAvailableProjects() {

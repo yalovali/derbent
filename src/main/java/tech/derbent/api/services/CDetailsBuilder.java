@@ -98,6 +98,23 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		return formLayout;
 	}
 
+	/** Populates the details form with entity data using the internal form builder.
+	 * @param entity the entity to populate the form with */
+	public void populateForm(Object entity) {
+		if (formBuilder != null) {
+			LOGGER.debug("Populating details form with entity: {}", entity);
+			formBuilder.populateForm(entity);
+		}
+	}
+
+	/** Clears the details form by setting the form builder bean to null. */
+	public void populateForm() {
+		if (formBuilder != null) {
+			LOGGER.debug("Clearing details form");
+			formBuilder.populateForm();
+		}
+	}
+
 	public Component getComponentByName(final String panelName, final String componentName) {
 		final CPanelDetails panel = getSectionPanel(panelName);
 		Check.notNull(panel, "Panel cannot be null");
