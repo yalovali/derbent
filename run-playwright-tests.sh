@@ -110,6 +110,7 @@ show_usage() {
     echo ""
     echo "🎯 FOCUSED TESTS (Recommended - Refactored & Optimized):"
     echo "  focused       Run all new focused tests (CRUD, Menu, Project Activation, DB Init, User Profile)"
+    echo "  dynamic-pages Run dynamic entity pages tests (NEW - tests CUser, CProject, CActivity, etc.)"
     echo "  crud          Run CRUD operation tests using enhanced base classes"
     echo "  menu          Run menu navigation tests using enhanced base classes"
     echo "  project-activation  Run project activation and change tracking tests"
@@ -223,6 +224,11 @@ main() {
             run_playwright_tests "tech.derbent.ui.automation.PlaywrightUIAutomationTest#testLoginFunctionality,tech.derbent.ui.automation.PlaywrightUIAutomationTest#testLogoutFunctionality,tech.derbent.ui.automation.PlaywrightUIAutomationTest#testInvalidLoginHandling" "Login/Logout Tests"
             ;;
             
+        "dynamic-pages")
+            echo "🔄 Running dynamic entity pages tests..."
+            run_playwright_tests "automated_tests.tech.derbent.ui.automation.CDynamicEntityPagesPlaywrightTest" "Dynamic Entity Pages Tests"
+            ;;
+            
         "crud")
             echo "📝 Running CRUD operation tests..."
             run_playwright_tests "automated_tests.tech.derbent.ui.automation.CCrudFunctionsTest" "CRUD Operation Tests"
@@ -244,8 +250,8 @@ main() {
             ;;
             
         "focused")
-            echo "🎯 Running all focused tests (CRUD, Menu, Project Activation, DB Init, User Profile)..."
-            run_playwright_tests "automated_tests.tech.derbent.ui.automation.CCrudFunctionsTest,automated_tests.tech.derbent.ui.automation.CMenuNavigationTest,automated_tests.tech.derbent.ui.automation.CProjectActivationTest,automated_tests.tech.derbent.ui.automation.CDbInitializationTest,automated_tests.tech.derbent.ui.automation.CUserProfileImageTest" "Focused Tests Suite"
+            echo "🎯 Running all focused tests (CRUD, Menu, Project Activation, DB Init, User Profile, Dynamic Pages)..."
+            run_playwright_tests "automated_tests.tech.derbent.ui.automation.CCrudFunctionsTest,automated_tests.tech.derbent.ui.automation.CMenuNavigationTest,automated_tests.tech.derbent.ui.automation.CProjectActivationTest,automated_tests.tech.derbent.ui.automation.CDbInitializationTest,automated_tests.tech.derbent.ui.automation.CUserProfileImageTest,automated_tests.tech.derbent.ui.automation.CDynamicEntityPagesPlaywrightTest" "Focused Tests Suite"
             ;;
             
         "user-profile")
