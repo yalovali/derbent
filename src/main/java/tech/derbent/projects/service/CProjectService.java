@@ -13,14 +13,12 @@ import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.services.CAbstractNamedEntityService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.events.ProjectListChangeEvent;
+import tech.derbent.projects.view.CComponentProjectUserSettings;
 import tech.derbent.session.service.CSessionService;
-import tech.derbent.users.domain.CUser;
 import tech.derbent.users.service.CUserProjectSettingsService;
-import tech.derbent.users.service.CUserTypeService;
-import tech.derbent.users.view.CComponentUserProjectSettings;
+import tech.derbent.users.service.CUserService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -88,22 +86,20 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 	public Component createProjectUserSettingsComponent() {
 		try {
 			// Get services from ApplicationContext to avoid circular dependency
-			CProjectService projectService = applicationContext.getBean(CProjectService.class);
+			CUserService userService = applicationContext.getBean(CUserService.class);
 			CUserProjectSettingsService userProjectSettingsService = applicationContext.getBean(CUserProjectSettingsService.class);
-			CUserTypeService userTypeService = applicationContext.getBean(CUserTypeService.class);
-			CCompanyService companyService = applicationContext.getBean(CCompanyService.class);
 			// Create a minimal binder for the component
-			CEnhancedBinder<CUser> binder = new CEnhancedBinder<>(CUser.class);
+			CEnhancedBinder<CProject> binder = new CEnhancedBinder<>(CProject.class);
 			// Create the enhanced component with proper service dependencies
-			CComponentUserProjectSettings component = new CComponentUserProjectSettings(null, null, binder, this, userTypeService, companyService,
-					projectService, userProjectSettingsService);
-			LOGGER.debug("Successfully created CComponentUserProjectSettings");
+			CComponentProjectUserSettings component =
+					new CComponentProjectUserSettings(null, null, binder, this, userService, userProjectSettingsService);
+			LOGGER.debug("Successfully created CComponentProjectUserSettings");
 			return component;
 		} catch (Exception e) {
-			LOGGER.error("Failed to create user project settings component: {}", e.getMessage(), e);
+			LOGGER.error("Failed to create project user settings component: {}", e.getMessage(), e);
 			// Fallback to simple div with error message
 			final Div errorDiv = new Div();
-			errorDiv.setText("Error loading user project settings component: " + e.getMessage());
+			errorDiv.setText("Error loading project user settings component: " + e.getMessage());
 			errorDiv.addClassName("error-message");
 			return errorDiv;
 		}

@@ -1472,55 +1472,56 @@ public class CDataInitializer {
 		projectService.save(project);
 	}
 
-	/** Initialize sample user project settings to demonstrate the CComponentProjectUserSettings pattern.
-	 * This creates realistic user-project relationships following the established pattern. */
+	/** Initialize sample user project settings to demonstrate the CComponentProjectUserSettings pattern. This creates realistic user-project
+	 * relationships following the established pattern. */
 	private void initializeSampleUserProjectSettings() {
 		try {
 			LOGGER.info("Initializing sample user project settings");
 			final List<CProject> projects = projectService.list(Pageable.unpaged()).getContent();
-			
 			// Get sample users by login for consistent assignment
 			final CUser admin = userService.findByLogin(USER_ADMIN);
 			final CUser manager = userService.findByLogin(USER_MANAGER);
 			final CUser mary = userService.findByLogin("mary");
 			final CUser bob = userService.findByLogin("bob");
 			final CUser alice = userService.findByLogin("alice");
-			
 			for (final CProject project : projects) {
 				// Admin gets full access to all projects
 				if (admin != null) {
 					createUserProjectSetting(admin, project, "Admin", "FULL_ACCESS");
 				}
-				
 				// Manager gets management access to all projects
 				if (manager != null) {
 					createUserProjectSetting(manager, project, "Project Manager", "WRITE_ACCESS");
 				}
-				
 				// Assign team members to different projects for variety
 				if ("Digital Transformation Initiative".equals(project.getName())) {
-					if (mary != null) createUserProjectSetting(mary, project, "Developer", "WRITE_ACCESS");
-					if (alice != null) createUserProjectSetting(alice, project, "Analyst", "READ_ACCESS");
+					if (mary != null)
+						createUserProjectSetting(mary, project, "Developer", "WRITE_ACCESS");
+					if (alice != null)
+						createUserProjectSetting(alice, project, "Analyst", "READ_ACCESS");
 				} else if ("Infrastructure Upgrade Project".equals(project.getName())) {
-					if (bob != null) createUserProjectSetting(bob, project, "DevOps Engineer", "WRITE_ACCESS");
-					if (mary != null) createUserProjectSetting(mary, project, "Technical Lead", "WRITE_ACCESS");
+					if (bob != null)
+						createUserProjectSetting(bob, project, "DevOps Engineer", "WRITE_ACCESS");
+					if (mary != null)
+						createUserProjectSetting(mary, project, "Technical Lead", "WRITE_ACCESS");
 				} else if ("New Product Development".equals(project.getName())) {
-					if (alice != null) createUserProjectSetting(alice, project, "Product Owner", "WRITE_ACCESS");
-					if (bob != null) createUserProjectSetting(bob, project, "Developer", "WRITE_ACCESS");
+					if (alice != null)
+						createUserProjectSetting(alice, project, "Product Owner", "WRITE_ACCESS");
+					if (bob != null)
+						createUserProjectSetting(bob, project, "Developer", "WRITE_ACCESS");
 				}
 			}
-			
 			LOGGER.info("Successfully initialized sample user project settings for {} projects", projects.size());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample user project settings: {}", e.getMessage(), e);
 			throw new RuntimeException("Failed to initialize sample user project settings", e);
 		}
 	}
-	
+
 	/** Helper method to create user project settings safely.
-	 * @param user the user to assign
-	 * @param project the project to assign to  
-	 * @param role the role name
+	 * @param user       the user to assign
+	 * @param project    the project to assign to
+	 * @param role       the role name
 	 * @param permission the permission level */
 	private void createUserProjectSetting(final CUser user, final CProject project, final String role, final String permission) {
 		try {

@@ -27,9 +27,8 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 	// lets keep it layzily loaded to avoid loading all user settings at once
 	@OneToMany (mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@AMetaData (
-			displayName = "User Settings", required = false, readOnly = false, 
-			description = "User project settings for this project", hidden = false, order = 10,
-			createComponentMethod = "createProjectUserSettingsComponent"
+			displayName = "User Settings", required = false, readOnly = false, description = "User project settings for this project", hidden = false,
+			order = 10, createComponentMethod = "createProjectUserSettingsComponent"
 	)
 	private final List<CUserProjectSettings> userSettings = new ArrayList<>();
 

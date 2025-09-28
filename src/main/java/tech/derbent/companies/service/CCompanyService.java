@@ -128,12 +128,10 @@ public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 			// Get services from ApplicationContext to avoid circular dependency
 			CUserService userService = applicationContext.getBean(CUserService.class);
 			CUserCompanySettingsService userCompanySettingsService = applicationContext.getBean(CUserCompanySettingsService.class);
-			
 			// Create wrapper div for the component - this will be replaced by actual component during binding
 			Div wrapper = new Div();
 			wrapper.addClassName("component-company-user-settings-wrapper");
 			wrapper.getElement().setAttribute("data-component-type", "CComponentCompanyUserSettings");
-			
 			LOGGER.debug("Successfully created company user settings component wrapper");
 			return wrapper;
 		} catch (Exception e) {

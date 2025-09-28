@@ -1,12 +1,11 @@
 package tech.derbent.projects.view;
 
 import java.util.List;
-import java.util.function.Supplier;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.CComponentUserProjectBase;
+import tech.derbent.api.views.CComponentUserProjectRelationBase;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
@@ -14,22 +13,20 @@ import tech.derbent.users.domain.CUserProjectSettings;
 import tech.derbent.users.service.CUserProjectSettingsService;
 import tech.derbent.users.service.CUserService;
 
-/** Simplified component for managing users within a project. This component displays all users assigned to a specific project and allows: -
- * Adding new user assignments - Editing existing user roles/permissions - Removing user assignments The component automatically updates when
- * the current project changes and maintains data consistency through proper accessor patterns. */
-public class CComponentProjectUserSettings extends CComponentUserProjectBase<CProject, CUserProjectSettings> {
+/** Component for managing users within a project (Project->User direction). This component displays all users assigned to a specific project and
+ * allows: - Adding new user assignments - Editing existing user roles/permissions - Removing user assignments The component automatically updates
+ * when the current project changes. */
+public class CComponentProjectUserSettings extends CComponentUserProjectRelationBase<CProject, CUserProjectSettings> {
 
 	private static final long serialVersionUID = 1L;
 	private CProject currentProject;
 	private final CUserService userService;
-	private final CUserProjectSettingsService userProjectSettingsService;
 
-	public CComponentProjectUserSettings(IContentOwner parentContent, final CProject currentEntity, final CEnhancedBinder<CProject> beanValidationBinder,
-			final CProjectService entityService, final CUserService userService, final CUserProjectSettingsService userProjectSettingsService) throws Exception {
+	public CComponentProjectUserSettings(IContentOwner parentContent, final CProject currentEntity,
+			final CEnhancedBinder<CProject> beanValidationBinder, final CProjectService entityService, final CUserService userService,
+			final CUserProjectSettingsService userProjectSettingsService) throws Exception {
 		super("User Settings", parentContent, beanValidationBinder, CProject.class, entityService, userProjectSettingsService);
 		Check.notNull(userService, "User service cannot be null");
-		Check.notNull(userProjectSettingsService, "User project settings service cannot be null");
-		this.userProjectSettingsService = userProjectSettingsService;
 		this.userService = userService;
 		initPanel();
 	}
@@ -96,48 +93,7 @@ public class CComponentProjectUserSettings extends CComponentUserProjectBase<CPr
 	}
 
 	@Override
-	public void initPanel() throws Exception {
-		try {
-			super.initPanel();
-			setupDataAccessors();
-			openPanel();
-		} catch (Exception e) {
-			LOGGER.error("Failed to initialize panel: {}", e.getMessage(), e);
-			throw new RuntimeException("Failed to initialize panel", e);
-		}
-	}
-
-	private void setupDataAccessors() {
-		try {
-			final Supplier<List<CUserProjectSettings>> getterFunction = () -> {
-				final CProject entity = getCurrentEntity();
-				if (entity == null) {
-					LOGGER.debug("No current entity available, returning empty list");
-					return List.of();
-				}
-				try {
-					final List<CUserProjectSettings> settings = userProjectSettingsService.findByProject(entity);
-					LOGGER.debug("Retrieved {} user settings for project: {}", settings.size(), entity.getName());
-					return settings;
-				} catch (final Exception e) {
-					LOGGER.error("Error retrieving user settings for project: {}", e.getMessage(), e);
-					return List.of();
-				}
-			};
-			final Runnable saveEntityFunction = () -> {
-				try {
-					final CProject entity = getCurrentEntity();
-					Check.notNull(entity, "Current entity cannot be null when saving");
-					entityService.save(entity);
-				} catch (final Exception e) {
-					LOGGER.error("Error saving entity: {}", e.getMessage(), e);
-					throw new RuntimeException("Failed to save entity", e);
-				}
-			};
-			setSettingsAccessors(getterFunction, saveEntityFunction);
-		} catch (Exception e) {
-			LOGGER.error("Failed to setup data accessors: {}", e.getMessage(), e);
-			throw new RuntimeException("Failed to setup data accessors", e);
-		}
+	protected void setupDataAccessors() {
+		createStandardDataAccessors(() -> userProjectSettingsService.findByProject(getCurrentEntity()), () -> entityService.save(getCurrentEntity()));
 	}
 }
