@@ -14,9 +14,9 @@ import tech.derbent.users.domain.CUserProjectSettings;
 import tech.derbent.users.service.CUserProjectSettingsService;
 import tech.derbent.users.service.CUserService;
 
-/** Simplified component for managing users within a project. This component displays all users assigned to a specific project and allows: -
- * Adding new user assignments - Editing existing user roles/permissions - Removing user assignments The component automatically updates when
- * the current project changes and maintains data consistency through proper accessor patterns. */
+/** Simplified component for managing users within a project. This component displays all users assigned to a specific project and allows: - Adding
+ * new user assignments - Editing existing user roles/permissions - Removing user assignments The component automatically updates when the current
+ * project changes and maintains data consistency through proper accessor patterns. */
 public class CComponentProjectUserSettings extends CComponentUserProjectBase<CProject, CUserProjectSettings> {
 
 	private static final long serialVersionUID = 1L;
@@ -24,8 +24,9 @@ public class CComponentProjectUserSettings extends CComponentUserProjectBase<CPr
 	private final CUserService userService;
 	private final CUserProjectSettingsService userProjectSettingsService;
 
-	public CComponentProjectUserSettings(IContentOwner parentContent, final CProject currentEntity, final CEnhancedBinder<CProject> beanValidationBinder,
-			final CProjectService entityService, final CUserService userService, final CUserProjectSettingsService userProjectSettingsService) throws Exception {
+	public CComponentProjectUserSettings(IContentOwner parentContent, final CProject currentEntity,
+			final CEnhancedBinder<CProject> beanValidationBinder, final CProjectService entityService, final CUserService userService,
+			final CUserProjectSettingsService userProjectSettingsService) throws Exception {
 		super("User Settings", parentContent, beanValidationBinder, CProject.class, entityService, userProjectSettingsService);
 		Check.notNull(userService, "User service cannot be null");
 		Check.notNull(userProjectSettingsService, "User project settings service cannot be null");

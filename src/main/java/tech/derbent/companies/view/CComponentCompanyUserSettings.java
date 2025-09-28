@@ -14,9 +14,9 @@ import tech.derbent.users.domain.CUserCompanySettings;
 import tech.derbent.users.service.CUserCompanySettingsService;
 import tech.derbent.users.service.CUserService;
 
-/** Simplified component for managing users within a company. This component displays all users assigned to a specific company and allows: -
- * Adding new user assignments - Editing existing user roles/departments/ownership - Removing user assignments The component automatically updates when
- * the current company changes and maintains data consistency through proper accessor patterns. */
+/** Simplified component for managing users within a company. This component displays all users assigned to a specific company and allows: - Adding
+ * new user assignments - Editing existing user roles/departments/ownership - Removing user assignments The component automatically updates when the
+ * current company changes and maintains data consistency through proper accessor patterns. */
 public class CComponentCompanyUserSettings extends CComponentUserCompanyBase<CCompany, CUserCompanySettings> {
 
 	private static final long serialVersionUID = 1L;
@@ -24,8 +24,9 @@ public class CComponentCompanyUserSettings extends CComponentUserCompanyBase<CCo
 	private final CUserService userService;
 	private final CUserCompanySettingsService userCompanySettingsService;
 
-	public CComponentCompanyUserSettings(IContentOwner parentContent, final CCompany currentEntity, final CEnhancedBinder<CCompany> beanValidationBinder,
-			final CCompanyService entityService, final CUserService userService, final CUserCompanySettingsService userCompanySettingsService) throws Exception {
+	public CComponentCompanyUserSettings(IContentOwner parentContent, final CCompany currentEntity,
+			final CEnhancedBinder<CCompany> beanValidationBinder, final CCompanyService entityService, final CUserService userService,
+			final CUserCompanySettingsService userCompanySettingsService) throws Exception {
 		super("User Settings", parentContent, beanValidationBinder, CCompany.class, entityService, userCompanySettingsService);
 		Check.notNull(userService, "User service cannot be null");
 		Check.notNull(userCompanySettingsService, "User company settings service cannot be null");
@@ -50,10 +51,11 @@ public class CComponentCompanyUserSettings extends CComponentUserCompanyBase<CCo
 		Check.notNull(settings, "Settings cannot be null when saving");
 		LOGGER.debug("Saving user company settings: {}", settings);
 		try {
-			final CUserCompanySettings savedSettings = settings.getId() == null ? 
-				userCompanySettingsService.addUserToCompany(settings.getUser(), settings.getCompany(), 
-					settings.getOwnershipLevel(), settings.getRole(), settings.getDepartment(), settings.isPrimaryCompany()) : 
-				userCompanySettingsService.save(settings);
+			final CUserCompanySettings savedSettings =
+					settings.getId() == null
+							? userCompanySettingsService.addUserToCompany(settings.getUser(), settings.getCompany(), settings.getOwnershipLevel(),
+									settings.getRole(), settings.getDepartment(), settings.isPrimaryCompany())
+							: userCompanySettingsService.save(settings);
 			LOGGER.info("Successfully saved user company settings: {}", savedSettings);
 			populateForm();
 		} catch (final Exception e) {

@@ -12,8 +12,8 @@ import tech.derbent.users.service.CUserCompanySettingsService;
 import tech.derbent.users.service.CUserService;
 
 /** Dialog for adding users to a company (reverse direction). This dialog manages the relationship between companies and users by creating and editing
- * CUserCompanySettings entities. It allows company managers to: - Add new users to a company with specific roles, departments, and ownership levels - Edit existing user
- * assignments for the company Inherits common relationship management logic from CDBRelationDialog. */
+ * CUserCompanySettings entities. It allows company managers to: - Add new users to a company with specific roles, departments, and ownership levels -
+ * Edit existing user assignments for the company Inherits common relationship management logic from CDBRelationDialog. */
 public class CCompanyUserSettingsDialog extends CDBRelationDialog<CUserCompanySettings, CCompany, CUser> {
 
 	private static final long serialVersionUID = 1L;
