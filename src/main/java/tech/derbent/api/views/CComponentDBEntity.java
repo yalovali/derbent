@@ -4,11 +4,11 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.annotations.CFormBuilder;
-import tech.derbent.api.annotations.CFormBuilder.ComboBoxDataProvider;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.services.CAbstractService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CVerticalLayout;
 
 public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityClass>> extends CVerticalLayout implements IContentOwner {
@@ -25,6 +25,8 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 	public CComponentDBEntity(final String title, IContentOwner parentContent, final CEnhancedBinder<EntityClass> beanValidationBinder,
 			final Class<EntityClass> entityClass, final CAbstractService<EntityClass> entityService) {
 		super(false, true, false); // no padding, with spacing, no margin
+		Check.notNull(entityClass, "Entity class cannot be null");
+		Check.notNull(beanValidationBinder, "Binder cannot be null");
 		this.entityClass = entityClass;
 		this.binder = beanValidationBinder;
 		this.entityService = entityService;
@@ -34,31 +36,30 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 	}
 
 	public void clearForm() {
-		binder.readBean(null);
-	}
-
-	protected ComboBoxDataProvider createComboBoxDataProvider() {
-		return null;
+		try {
+			Check.notNull(binder, "Binder cannot be null when clearing form");
+			binder.readBean(null);
+		} catch (Exception e) {
+			LOGGER.error("Failed to clear form: {}", e.getMessage(), e);
+			throw new RuntimeException("Failed to clear form", e);
+		}
 	}
 
 	// Override if you need to customize the panel content creation
 	protected void createPanelContent() throws Exception {
-		add(CFormBuilder.buildForm(entityClass, getBinder(), getEntityFields()));
+		try {
+			add(CFormBuilder.buildForm(entityClass, getBinder(), getEntityFields()));
+		} catch (Exception e) {
+			LOGGER.error("Failed to create panel content for entity {}: {}", entityClass.getSimpleName(), e.getMessage(), e);
+			throw new RuntimeException("Failed to create panel content", e);
+		}
 	}
 
 	public CEnhancedBinder<EntityClass> getBinder() { return binder; }
 
 	@Override
-	public EntityClass getCurrentEntity() {
-		if (parentContent != null) {
-			return (EntityClass) parentContent.getCurrentEntity();
-		}
-		return null;
-	}
+	public EntityClass getCurrentEntity() { return parentContent != null ? (EntityClass) parentContent.getCurrentEntity() : null; }
 
-	/** Override this method in subclasses to provide local context values specific to this component.
-	 * @param contextName the context name to resolve
-	 * @return the local context value or null if not found */
 	public Object getLocalContextValue(final String contextName) {
 		return null;
 	}
@@ -70,60 +71,64 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 		return EntityFields;
 	}
 
-	/** Gets the default help text for the panel */
 	protected String getHelpText() { return "Configure settings for this entity."; }
 
-	/** Sets the entity fields list */
-	protected void setEntityFields(final List<String> fields) { EntityFields = fields; }
+	protected void setEntityFields(final List<String> fields) {
+		Check.notNull(fields, "Entity fields list cannot be null");
+		EntityFields = fields;
+	}
 
-	/** Abstract method for subclasses to set their specific entity fields */
 	protected abstract void updatePanelEntityFields();
 
-	/** Initializes the panel by creating its content and setting up data bindings. This method is called automatically when the panel is first
-	 * displayed. Subclasses can override this to customize initialization. */
 	public void initPanel() throws Exception {
 		if (!isPanelInitialized) {
-			LOGGER.debug("Initializing component panel for entity class: {}", entityClass.getSimpleName());
-			createPanelContent();
-			isPanelInitialized = true;
+			try {
+				LOGGER.debug("Initializing component panel for entity class: {}", entityClass.getSimpleName());
+				createPanelContent();
+				isPanelInitialized = true;
+			} catch (Exception e) {
+				LOGGER.error("Failed to initialize panel for entity {}: {}", entityClass.getSimpleName(), e.getMessage(), e);
+				throw new RuntimeException("Failed to initialize panel", e);
+			}
 		}
 	}
 
-	/** Override to check panel visibility based on business logic */
 	public boolean isPanelVisible() { return true; }
 
 	public void openPanel() {
 		setVisible(true);
 	}
 
-	/** Closes the panel by making it not visible */
 	public void closePanel() {
 		setVisible(false);
 	}
 
-	/** Override to perform actions when the panel is opened */
 	protected void onPanelOpened() {
 		LOGGER.debug("Component panel opened for entity class: {}", entityClass.getSimpleName());
 	}
 
-	/** Gets the default title for this panel */
 	protected String getPanelTitle() { return entityClass.getSimpleName() + " Settings"; }
 
-	/** Saves the current form data to the entity */
 	protected void saveFormData() throws Exception {
-		EntityClass entity = getCurrentEntity();
-		if (entity != null && binder != null) {
+		try {
+			EntityClass entity = getCurrentEntity();
+			Check.notNull(entity, "Current entity cannot be null when saving form data");
+			Check.notNull(binder, "Binder cannot be null when saving form data");
 			binder.writeBean(entity);
 			entityService.save(entity);
 			LOGGER.debug("Form data saved for entity: {}", entity);
+		} catch (Exception e) {
+			LOGGER.error("Failed to save form data for entity {}: {}", entityClass.getSimpleName(), e.getMessage(), e);
+			throw new RuntimeException("Failed to save form data", e);
 		}
 	}
 
-	/** Validates the current form data */
 	public boolean validateForm() {
-		if (binder != null) {
-			return binder.validate().isOk();
+		try {
+			return binder != null && binder.validate().isOk();
+		} catch (Exception e) {
+			LOGGER.error("Failed to validate form for entity {}: {}", entityClass.getSimpleName(), e.getMessage(), e);
+			return false;
 		}
-		return true;
 	}
 }
