@@ -42,7 +42,6 @@ import tech.derbent.gannt.view.CProjectGanntView;
 import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.page.service.CPageMenuIntegrationService;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.projects.view.CProjectsView;
 import tech.derbent.screens.view.CDetailSectionView;
 import tech.derbent.session.service.CLayoutService;
 import tech.derbent.session.service.ISessionService;
@@ -343,7 +342,6 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 		buttons.add(createLastVisitedButton());
 		// Add static buttons (these will be deprecated in favor of dynamic pages)
 		buttons.add(createNavigateButtonForView(CProjectGanntView.class));
-		buttons.add(createNavigateButtonForView(CProjectsView.class));
 		buttons.add(createNavigateButtonForView(CDetailSectionView.class));
 		// Add dynamic page buttons if pageMenuIntegrationService is available
 		if (pageMenuIntegrationService != null && pageMenuIntegrationService.isReady()) {

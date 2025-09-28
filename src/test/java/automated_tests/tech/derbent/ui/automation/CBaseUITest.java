@@ -18,7 +18,6 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.vaadin.flow.router.Route;
 import tech.derbent.api.utils.Check;
-import tech.derbent.projects.view.CProjectsView;
 
 /** Enhanced base UI test class that provides common functionality for Playwright tests. This class includes 25+ auxiliary methods for testing all
  * views and business functions. The base class follows strict coding guidelines and provides comprehensive testing utilities for: - Login and
@@ -32,18 +31,14 @@ public abstract class CBaseUITest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBaseUITest.class);
 	/** Admin view classes */
 	protected Class<?>[] adminViewClasses = {};
-	protected Class<?>[] allViewClasses = {
-			CProjectsView.class
-	};
+	protected Class<?>[] allViewClasses = {};
 	/** All view classes */
 	private Browser browser;
 	private BrowserContext context;
 	/** Kanban view classes */
 	protected Class<?>[] kanbanViewClasses = {};
 	/** Array of main view classes for testing */
-	protected Class<?>[] mainViewClasses = {
-			CProjectsView.class
-	};
+	protected Class<?>[] mainViewClasses = {};
 	protected Page page;
 	private Playwright playwright;
 	@LocalServerPort
@@ -162,14 +157,6 @@ public abstract class CBaseUITest {
 		page.waitForURL("**/projects");
 		LOGGER.info("✅ Login successful - redirected to projects view");
 		takeScreenshot("post-login", false);
-	}
-	// ===========================================
-	// NAVIGATION METHODS
-	// ===========================================
-
-	/** Navigates to the Projects view using the navigation menu. */
-	protected void navigateToProjects() {
-		navigateToViewByClass(CProjectsView.class);
 	}
 	// ===========================================
 	// MISSING METHODS FOR COMPATIBILITY
@@ -520,6 +507,10 @@ public abstract class CBaseUITest {
 		} catch (Exception e) {
 			throw new AssertionError("Database initialization test failed: " + e.getMessage(), e);
 		}
+	}
+
+	protected void navigateToProjects() {
+		// TODO Auto-generated method stub
 	}
 
 	protected void navigateToUsers() {

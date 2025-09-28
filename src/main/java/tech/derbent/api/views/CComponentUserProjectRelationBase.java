@@ -16,6 +16,7 @@ import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CButton;
+import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserProjectSettings;
 import tech.derbent.users.service.CUserProjectSettingsService;
 
@@ -45,7 +46,8 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 		super(title, parentContent, beanValidationBinder, entityClass, entityService, CUserProjectSettings.class);
 		// Enforce strict parameter validation - terminate with exceptions on any missing parameter
 		Check.notBlank(title, "Panel title cannot be null or blank - relational component requires a valid title");
-		Check.notNull(parentContent, "Parent content cannot be null - relational component requires a parent content owner");
+		// can be null, it will set later
+		// Check.notNull(parentContent, "Parent content cannot be null - relational component requires a parent content owner");
 		Check.notNull(beanValidationBinder, "Bean validation binder cannot be null - relational component requires a valid binder");
 		Check.notNull(entityClass, "Entity class cannot be null - relational component requires a valid entity class");
 		Check.notNull(entityService, "Entity service cannot be null - relational component requires a valid entity service");
@@ -168,27 +170,36 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 		}
 	}
 
+	protected boolean isUserMaster() {
+		// return true is MasterClass is CUser
+		return CUser.class.equals(getEntityClass());
+	}
+
 	/** Sets up the grid with enhanced visual styling including colors, avatars and consistent headers. Uses entity decorations with colors and icons
 	 * for better visual representation. */
 	protected void setupGrid() {
 		try {
-			// Use component columns with colors and icons for better visual appeal
-			grid.addComponentColumn(settings -> {
-				try {
-					return CColorUtils.getEntityWithIcon(settings.getProject());
-				} catch (Exception e) {
-					LOGGER.error("Failed to create project component: {}", e.getMessage(), e);
-					return new com.vaadin.flow.component.html.Span(getDisplayText(settings, "project"));
-				}
-			}).setHeader(createStyledHeader("Project", "#2E7D32")).setAutoWidth(true).setSortable(true);
-			grid.addComponentColumn(settings -> {
-				try {
-					return CColorUtils.getEntityWithIcon(settings.getUser());
-				} catch (Exception e) {
-					LOGGER.error("Failed to create user component: {}", e.getMessage(), e);
-					return new com.vaadin.flow.component.html.Span(getDisplayText(settings, "user"));
-				}
-			}).setHeader(createStyledHeader("User", "#1565C0")).setAutoWidth(true).setSortable(true);
+			if (isUserMaster()) {
+				// User-centric: User->Project
+				grid.addComponentColumn(settings -> {
+					try {
+						return CColorUtils.getEntityWithIcon(settings.getProject());
+					} catch (Exception e) {
+						LOGGER.error("Failed to create project component: {}", e.getMessage(), e);
+						return new com.vaadin.flow.component.html.Span(getDisplayText(settings, "project"));
+					}
+				}).setHeader(createStyledHeader("Project", "#2E7D32")).setAutoWidth(true).setSortable(true);
+			} else {
+				// Project-centric: Project->User
+				grid.addComponentColumn(settings -> {
+					try {
+						return CColorUtils.getEntityWithIcon(settings.getUser());
+					} catch (Exception e) {
+						LOGGER.error("Failed to create user component: {}", e.getMessage(), e);
+						return new com.vaadin.flow.component.html.Span(getDisplayText(settings, "user"));
+					}
+				}).setHeader(createStyledHeader("User", "#1565C0")).setAutoWidth(true).setSortable(true);
+			}
 			grid.addColumn(settings -> getDisplayText(settings, "role")).setHeader(createStyledHeader("Role", "#F57F17")).setAutoWidth(true)
 					.setSortable(true);
 			grid.addColumn(settings -> getDisplayText(settings, "permission")).setHeader(createStyledHeader("Permissions", "#8E24AA"))

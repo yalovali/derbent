@@ -69,7 +69,6 @@ import tech.derbent.page.service.CPageEntityService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectInitializerService;
 import tech.derbent.projects.service.CProjectService;
-import tech.derbent.projects.view.CProjectsView;
 import tech.derbent.risks.domain.CRisk;
 import tech.derbent.risks.domain.CRiskStatus;
 import tech.derbent.risks.service.CRiskInitializerService;
@@ -431,8 +430,6 @@ public class CAuxillaries {
 		switch (simpleName) {
 		case "CCompany":
 			return CCompanyView.class;
-		case "CProject":
-			return CProjectsView.class;
 		case "CProjectGanntView":
 			return CProjectGanntView.class;
 		default:

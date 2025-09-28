@@ -52,14 +52,7 @@ public class CCompanyView extends CGridViewBaseNamed<CCompany> {
 	@Override
 	protected void updateDetailsComponent() throws Exception {
 		CAccordionDBEntity<CCompany> panel;
-		panel = new CPanelCompanyDescription(this, getCurrentEntity(), getBinder(), (CCompanyService) entityService);
-		addAccordionPanel(panel);
-		panel = new CPanelCompanySystemStatus(this, getCurrentEntity(), getBinder(), (CCompanyService) entityService);
-		addAccordionPanel(panel);
 		panel = new CPanelCompanyUsers(this, getCurrentEntity(), getBinder(), (CCompanyService) entityService);
 		addAccordionPanel(panel);
-		panel = new CPanelCompanyContactDetails(this, getCurrentEntity(), getBinder(), (CCompanyService) entityService);
-		// final var formLayout = CEntityFormBuilder.buildForm(CCompany.class,
-		// getBinder()); getBaseDetailsLayout().add(formLayout);
 	}
 }

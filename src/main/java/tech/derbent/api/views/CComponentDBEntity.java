@@ -18,6 +18,9 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 	private static final long serialVersionUID = 1L;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected final Class<EntityClass> entityClass;
+
+	public Class<EntityClass> getEntityClass() { return entityClass; }
+
 	private final CEnhancedBinder<EntityClass> binder;
 	protected CAbstractService<EntityClass> entityService;
 	private List<String> EntityFields = null;

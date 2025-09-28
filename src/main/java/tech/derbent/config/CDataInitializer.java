@@ -1387,6 +1387,12 @@ public class CDataInitializer {
 			LOGGER.error("Error creating user types for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize user types for project: " + project.getName(), e);
 		}
+		// for each user distribute random user types
+		final List<CUser> users = userService.list(Pageable.unpaged()).getContent();
+		for (final CUser user : users) {
+			user.setUserType(userTypeService.getRandom());
+			userService.save(user);
+		}
 	}
 
 	private void initializeSampleProjectRoles(final CProject project) {
@@ -1495,20 +1501,26 @@ public class CDataInitializer {
 				}
 				// Assign team members to different projects for variety
 				if ("Digital Transformation Initiative".equals(project.getName())) {
-					if (mary != null)
+					if (mary != null) {
 						createUserProjectSetting(mary, project, "Developer", "WRITE_ACCESS");
-					if (alice != null)
+					}
+					if (alice != null) {
 						createUserProjectSetting(alice, project, "Analyst", "READ_ACCESS");
+					}
 				} else if ("Infrastructure Upgrade Project".equals(project.getName())) {
-					if (bob != null)
+					if (bob != null) {
 						createUserProjectSetting(bob, project, "DevOps Engineer", "WRITE_ACCESS");
-					if (mary != null)
+					}
+					if (mary != null) {
 						createUserProjectSetting(mary, project, "Technical Lead", "WRITE_ACCESS");
+					}
 				} else if ("New Product Development".equals(project.getName())) {
-					if (alice != null)
+					if (alice != null) {
 						createUserProjectSetting(alice, project, "Product Owner", "WRITE_ACCESS");
-					if (bob != null)
+					}
+					if (bob != null) {
 						createUserProjectSetting(bob, project, "Developer", "WRITE_ACCESS");
+					}
 				}
 			}
 			LOGGER.info("Successfully initialized sample user project settings for {} projects", projects.size());
