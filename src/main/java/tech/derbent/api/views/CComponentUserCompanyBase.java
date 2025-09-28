@@ -29,11 +29,27 @@ public abstract class CComponentUserCompanyBase<MasterClass extends CEntityNamed
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected CUserCompanySettingsService userCompanySettingsService;
 
+	/** Constructor with enforced parameter validation using Check.XXX functions. Ensures all required dependencies are provided and terminates with
+	 * exceptions otherwise.
+	 * @param title                      Panel title - must not be null or blank
+	 * @param parentContent              Parent content owner - must not be null
+	 * @param beanValidationBinder       Entity binder - must not be null
+	 * @param entityClass                Entity class - must not be null
+	 * @param entityService              Entity service - must not be null
+	 * @param userCompanySettingsService Relationship service - must not be null
+	 * @throws IllegalArgumentException if any required parameter is null or invalid */
 	public CComponentUserCompanyBase(final String title, IContentOwner parentContent, final CEnhancedBinder<MasterClass> beanValidationBinder,
 			final Class<MasterClass> entityClass, final CAbstractService<MasterClass> entityService,
 			final CUserCompanySettingsService userCompanySettingsService) {
 		super(title, parentContent, beanValidationBinder, entityClass, entityService, CUserCompanySettings.class);
-		Check.notNull(userCompanySettingsService, "User company settings service cannot be null");
+		// Enforce strict parameter validation - terminate with exceptions on any missing parameter
+		Check.notBlank(title, "Panel title cannot be null or blank - relational component requires a valid title");
+		Check.notNull(parentContent, "Parent content cannot be null - relational component requires a parent content owner");
+		Check.notNull(beanValidationBinder, "Bean validation binder cannot be null - relational component requires a valid binder");
+		Check.notNull(entityClass, "Entity class cannot be null - relational component requires a valid entity class");
+		Check.notNull(entityService, "Entity service cannot be null - relational component requires a valid entity service");
+		Check.notNull(userCompanySettingsService,
+				"User company settings service cannot be null - relational component requires a relationship service");
 		this.userCompanySettingsService = userCompanySettingsService;
 		setupGrid();
 		setupButtons();
@@ -145,16 +161,48 @@ public abstract class CComponentUserCompanyBase<MasterClass extends CEntityNamed
 		addToContent(buttonLayout);
 	}
 
+	/** Sets up the grid with enhanced visual styling including colors, avatars and consistent headers. Uses entity decorations with colors and icons
+	 * for better visual representation. */
 	protected void setupGrid() {
-		// Add columns for company name, roles, departments, and ownership
-		grid.addColumn(CUserCompanySettings::getId).setHeader("ID").setAutoWidth(true);
-		grid.addComponentColumn(settings -> CColorUtils.getEntityWithIcon(settings.getUser())).setHeader("User").setAutoWidth(true);
-		grid.addColumn(settings -> getDisplayText(settings, "company")).setHeader("Company").setAutoWidth(true).setSortable(true);
-		grid.addColumn(settings -> getDisplayText(settings, "role")).setHeader("Role").setAutoWidth(true);
-		grid.addColumn(settings -> getDisplayText(settings, "department")).setHeader("Department").setAutoWidth(true);
-		grid.addColumn(settings -> getDisplayText(settings, "ownership")).setHeader("Ownership").setAutoWidth(true);
+		// Add columns with enhanced styling and colors
+		grid.addColumn(CUserCompanySettings::getId).setHeader(createStyledHeader("ID", "#424242")).setAutoWidth(true);
+		grid.addComponentColumn(settings -> {
+			try {
+				return CColorUtils.getEntityWithIcon(settings.getUser());
+			} catch (Exception e) {
+				LOGGER.error("Failed to create user component: {}", e.getMessage(), e);
+				return new com.vaadin.flow.component.html.Span(getDisplayText(settings, "user"));
+			}
+		}).setHeader(createStyledHeader("User", "#1565C0")).setAutoWidth(true);
+		grid.addComponentColumn(settings -> {
+			try {
+				return CColorUtils.getEntityWithIcon(settings.getCompany());
+			} catch (Exception e) {
+				LOGGER.error("Failed to create company component: {}", e.getMessage(), e);
+				return new com.vaadin.flow.component.html.Span(getDisplayText(settings, "company"));
+			}
+		}).setHeader(createStyledHeader("Company", "#D32F2F")).setAutoWidth(true).setSortable(true);
+		grid.addColumn(settings -> getDisplayText(settings, "role")).setHeader(createStyledHeader("Role", "#F57F17")).setAutoWidth(true);
+		grid.addColumn(settings -> getDisplayText(settings, "department")).setHeader(createStyledHeader("Department", "#388E3C")).setAutoWidth(true);
+		grid.addColumn(settings -> getDisplayText(settings, "ownership")).setHeader(createStyledHeader("Ownership", "#8E24AA")).setAutoWidth(true);
+		// Apply consistent grid styling
 		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
+		grid.getStyle().set("border-radius", "8px");
+		grid.getStyle().set("border", "1px solid #E0E0E0");
 		addToContent(grid);
+	}
+
+	/** Creates a consistently styled header with simple color coding.
+	 * @param text  Header text
+	 * @param color Header color in hex format
+	 * @return Styled header component */
+	private com.vaadin.flow.component.html.Span createStyledHeader(String text, String color) {
+		com.vaadin.flow.component.html.Span header = new com.vaadin.flow.component.html.Span(text);
+		header.getStyle().set("color", color);
+		header.getStyle().set("font-weight", "bold");
+		header.getStyle().set("font-size", "14px");
+		header.getStyle().set("text-transform", "uppercase");
+		return header;
 	}
 
 	@Override
