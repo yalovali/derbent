@@ -38,8 +38,9 @@ public abstract class CDBEditDialog<EntityClass> extends CDialog {
 	/** Child must implement: populate form fields from data. */
 	protected abstract void populateForm();
 
-	/** Called when Save is pressed. Handles validation and callback. */
-	protected void save() {
+	/** Called when Save is pressed. Handles validation and callback.
+	 * @throws Exception */
+	protected void save() throws Exception {
 		try {
 			LOGGER.debug("Saving data: {}", getEntity());
 			validateForm();
@@ -56,7 +57,13 @@ public abstract class CDBEditDialog<EntityClass> extends CDialog {
 	/** Sets up Save and Cancel buttons. */
 	@Override
 	protected void setupButtons() {
-		final CButton saveButton = CButton.createSaveButton("Save", e -> save());
+		final CButton saveButton = CButton.createSaveButton("Save", e -> {
+			try {
+				save();
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+		});
 		final CButton cancelButton = CButton.createCancelButton("Cancel", e -> close());
 		buttonLayout.add(saveButton, cancelButton);
 	}

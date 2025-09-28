@@ -66,7 +66,7 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 
 	/** Remove user from project */
 	@Transactional
-	public void deleteByUserIdProjectId(final CUser user, final CProject project) {
+	public void deleteByUserProject(final CUser user, final CProject project) {
 		Check.notNull(user, "User cannot be null");
 		Check.notNull(project, "Project cannot be null");
 		Check.notNull(user.getId(), "User must have a valid ID");

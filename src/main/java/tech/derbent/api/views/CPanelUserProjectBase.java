@@ -12,8 +12,8 @@ import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.ui.dialogs.CConfirmationDialog;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.utils.CColorUtils;
+import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CButton;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
@@ -61,7 +61,7 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 			final CProject project = selected.getProject();
 			final CUser user = selected.getUser();
 			try {
-				userProjectSettingsService.deleteByUserIdProjectId(user, project);
+				userProjectSettingsService.deleteByUserProject(user, project);
 				LOGGER.debug("Successfully removed user {} from project {}", user, project);
 			} catch (Exception e) {
 				LOGGER.error("Error removing user from project: {}", e.getMessage(), e);

@@ -29,7 +29,9 @@ public abstract class CComponentRelationBase<MasterClass extends CEntityDB<Maste
 		this.getSettings = () -> List.of();
 	}
 
-	public void refresh() {
+	@Override
+	public void populateForm() {
+		super.populateForm();
 		LOGGER.debug("Refreshing grid data");
 		if (getSettings != null) {
 			grid.setItems(getSettings.get());
@@ -41,7 +43,8 @@ public abstract class CComponentRelationBase<MasterClass extends CEntityDB<Maste
 		LOGGER.debug("Setting settings accessors");
 		this.getSettings = getSettings;
 		this.saveEntity = saveEntity;
-		refresh();
+		// why do you call them??
+		// populateForm();
 	}
 
 	@Override

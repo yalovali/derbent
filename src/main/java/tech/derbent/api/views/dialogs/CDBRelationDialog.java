@@ -77,14 +77,19 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 	}
 
 	protected void performSave() {
-		// If onSave callback is provided, use it (callback pattern)
-		Check.notNull(getEntity(), "Entity must not be null when performing save");
-		if (onSave != null) {
-			onSave.accept(getEntity());
+		try {
+			// If onSave callback is provided, use it (callback pattern)
+			Check.notNull(getEntity(), "Entity must not be null when performing save");
+			Check.notNull(relationService, "Relation service must not be null when performing save without callback");
+			relationService.save(getEntity());
+			if (onSave != null) {
+				onSave.accept(getEntity());
+			}
+			LOGGER.info("Entity saved successfully using service: {}", getEntity().getId());
+		} catch (final Exception e) {
+			LOGGER.error("Error during save operation: {}", e.getMessage(), e);
+			throw e;
 		}
-		Check.notNull(relationService, "Relation service must not be null when performing save without callback");
-		relationService.save(getEntity());
-		LOGGER.info("Entity saved successfully using service: {}", getEntity().getId());
 	}
 
 	/** Default implementation of populateForm using the binder. Child classes can override. */
@@ -94,9 +99,10 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 		binder.readBean(getEntity());
 	}
 
-	/** Override the save method to use unified relationship save functionality with binder support. */
+	/** Override the save method to use unified relationship save functionality with binder support.
+	 * @throws Exception */
 	@Override
-	protected void save() {
+	protected void save() throws Exception {
 		try {
 			LOGGER.debug("Saving relationship data: {}", getEntity());
 			validateForm();
@@ -111,6 +117,7 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 		} catch (final Exception e) {
 			LOGGER.error("Error saving relationship", e);
 			CNotifications.showError("Error: " + e.getMessage());
+			throw e;
 		}
 	}
 

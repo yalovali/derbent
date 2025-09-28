@@ -22,11 +22,7 @@ public abstract class CComponentUserProjectBase<MasterClass extends CEntityNamed
 
 	@Override
 	public void populateForm() {
-		if (getCurrentEntity() != null) {
-			refresh();
-		} else {
-			grid.setItems();
-		}
+		super.populateForm();
 	}
 
 	private static final long serialVersionUID = 1L;
@@ -58,8 +54,8 @@ public abstract class CComponentUserProjectBase<MasterClass extends CEntityNamed
 			final String confirmationMessage = createDeleteConfirmationMessage(selected);
 			new CConfirmationDialog(confirmationMessage, () -> {
 				try {
-					userProjectSettingsService.delete(selected);
-					refresh();
+					userProjectSettingsService.deleteByUserProject(selected.getUser(), selected.getProject());
+					populateForm();
 					LOGGER.info("Deleted user project setting: {}", selected);
 				} catch (final Exception e) {
 					LOGGER.error("Error deleting user project setting: {}", e.getMessage(), e);

@@ -55,7 +55,7 @@ public class CComponentUserProjectSettings extends CComponentUserProjectBase<CUs
 			final CUserProjectSettings savedSettings = settings.getId() == null ? userProjectSettingsService.addUserToProject(settings.getUser(),
 					settings.getProject(), settings.getRole(), settings.getPermission()) : userProjectSettingsService.save(settings);
 			LOGGER.info("Successfully saved user project settings: {}", savedSettings);
-			refresh();
+			populateForm();
 		} catch (final Exception e) {
 			LOGGER.error("Error saving user project settings: {}", e.getMessage(), e);
 			throw new RuntimeException("Failed to save user project settings: " + e.getMessage(), e);

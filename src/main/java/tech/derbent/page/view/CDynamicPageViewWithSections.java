@@ -53,7 +53,6 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 	private final CPageEntity pageEntity;
 	// Layout components
 	protected SplitLayout splitLayout;
-	private Object currentEntity;
 
 	@Autowired
 	public CDynamicPageViewWithSections(final CPageEntity pageEntity, final CSessionService sessionService,
@@ -316,6 +315,7 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 	 * @throws NoSuchFieldException */
 	@Override
 	public void populateForm() throws Exception {
+		super.populateForm();
 		Check.notNull(baseDetailsLayout, "Base details layout is not initialized");
 		Check.notNull(pageEntity.getDetailSection(), "Detail section cannot be null");
 		getCurrentBinder().setBean((CEntityDB<?>) getCurrentEntity());
@@ -327,10 +327,10 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 	private void rebuildEntityDetails(String entityViewName) throws Exception {
 		clearEntityDetails();
 		currentBinder = new CEnhancedBinder(entityClass);
-		CCrudToolbar<?> toolbar = createCrudToolbar(currentBinder);
-		crudToolbar = toolbar;
+		crudToolbar = createCrudToolbar(currentBinder);
+		// = toolbar;
 		currentEntityViewName = entityViewName;
-		buildScreen(entityViewName, (Class) entityClass, toolbar);
+		buildScreen(entityViewName, (Class) entityClass, crudToolbar);
 	}
 
 	/** Refresh the grid to show updated data. */
@@ -343,15 +343,9 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 			"rawtypes"
 	})
 	@Override
-	public Object getCurrentEntity() { // TODO Auto-generated method stub
-		return currentEntity;
-	}
-
-	@Override
 	public void setCurrentEntity(Object entity) {
 		super.setCurrentEntity(entity);
 		currentEntityType = entity.getClass();
-		currentEntity = entity;
 		crudToolbar.setCurrentEntity(entity);
 	}
 }
