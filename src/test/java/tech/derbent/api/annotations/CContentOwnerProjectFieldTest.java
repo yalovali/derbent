@@ -87,8 +87,19 @@ public class CContentOwnerProjectFieldTest {
 		public Object getCurrentEntity() { return currentUser; }
 
 		@Override
-		public void setCurrentEntity(Object entity) {
-			// TODO Auto-generated method stub
+		public void setCurrentEntity(Object entity) { this.currentUser = (CUser) entity; }
+
+		/** Implementation of getAvailableProjects method that should be called by the data provider resolver. This method simulates the behavior
+		 * expected from CUsersView.getAvailableProjects(). */
+		public List<CProject> getAvailableProjects() {
+			// Create test projects
+			CProject project1 = new CProject();
+			project1.setName("Test Project 1");
+			project1.setDescription("Description for Test Project 1");
+			CProject project2 = new CProject();
+			project2.setName("Test Project 2");
+			project2.setDescription("Description for Test Project 2");
+			return List.of(project1, project2);
 		}
 	}
 }
