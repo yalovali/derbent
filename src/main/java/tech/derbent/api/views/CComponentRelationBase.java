@@ -43,8 +43,6 @@ public abstract class CComponentRelationBase<MasterClass extends CEntityDB<Maste
 		LOGGER.debug("Setting settings accessors");
 		this.getSettings = getSettings;
 		this.saveEntity = saveEntity;
-		// why do you call them??
-		// populateForm();
 	}
 
 	@Override

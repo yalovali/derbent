@@ -239,9 +239,8 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 			// Create a minimal binder for the component
 			CEnhancedBinder<CUser> binder = new CEnhancedBinder<>(CUser.class);
 			// Create the enhanced component with proper service dependencies
-			CComponentUserProjectSettings component = new CComponentUserProjectSettings(null, // parentContent - will be set by caller
-					null, // currentEntity - will be set by caller
-					binder, this, userTypeService, companyService, projectService, userProjectSettingsService);
+			CComponentUserProjectSettings component = new CComponentUserProjectSettings(null, null, binder, this, userTypeService, companyService,
+					projectService, userProjectSettingsService);
 			LOGGER.debug("Successfully created CComponentUserProjectSettings");
 			return component;
 		} catch (Exception e) {
