@@ -107,7 +107,10 @@ public class CCompany extends CEntityNamed<CCompany> {
 	)
 	private String taxNumber;
 	@OneToMany (mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@AMetaData (displayName = "Users", required = false, readOnly = true, description = "Users belonging to this company", hidden = false, order = 9)
+	@AMetaData (
+			displayName = "Users", required = false, readOnly = false, description = "Users belonging to this company", hidden = false, order = 9,
+			createComponentMethod = "createCompanyUserSettingsComponent"
+	)
 	private List<tech.derbent.users.domain.CUser> users;
 	@Column (name = "website", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
