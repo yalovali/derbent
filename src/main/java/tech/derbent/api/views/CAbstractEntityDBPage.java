@@ -29,9 +29,9 @@ import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.components.CSearchToolbar;
 import tech.derbent.api.domains.CEntity;
 import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.ILayoutChangeListener;
 import tech.derbent.api.interfaces.ISearchable;
-import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.ui.dialogs.CConfirmationDialog;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
@@ -530,9 +530,11 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		}
 	}
 
-	public void setCurrentEntity(final EntityClass currentEntity) {
+	@SuppressWarnings ("unchecked")
+	@Override
+	public void setCurrentEntity(final Object currentEntity) {
 		LOGGER.debug("Setting current entity: {}", currentEntity);
-		this.currentEntity = currentEntity;
+		this.currentEntity = (EntityClass) currentEntity;
 	}
 
 	@Override

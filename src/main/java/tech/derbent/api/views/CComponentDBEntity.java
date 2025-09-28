@@ -23,12 +23,20 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 	private List<String> EntityFields = null;
 	private boolean isPanelInitialized = false;
 	protected IContentOwner contentOwner = null;
+	private EntityClass currentEntity;
 
 	@Override
 	public IContentOwner getContentOwner() { return contentOwner; }
 
 	@Override
 	public void setContentOwner(IContentOwner parentContent) { this.contentOwner = parentContent; }
+
+	@SuppressWarnings ("unchecked")
+	@Override
+	public void setCurrentEntity(Object entity) { currentEntity = (EntityClass) entity; }
+
+	@Override
+	public EntityClass getCurrentEntity() { return currentEntity; }
 
 	public CComponentDBEntity(final String title, IContentOwner parentContent, final CEnhancedBinder<EntityClass> beanValidationBinder,
 			final Class<EntityClass> entityClass, final CAbstractService<EntityClass> entityService) {
@@ -64,9 +72,6 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 	}
 
 	public CEnhancedBinder<EntityClass> getBinder() { return binder; }
-
-	@Override
-	public EntityClass getCurrentEntity() { return contentOwner != null ? (EntityClass) contentOwner.getCurrentEntity() : null; }
 
 	public Object getLocalContextValue(final String contextName) {
 		return null;

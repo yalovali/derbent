@@ -8,6 +8,8 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import tech.derbent.api.components.CCrudToolbar;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.interfaces.IContentOwner;
+import tech.derbent.api.interfaces.IHasContentOwner;
 import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.services.CDetailsBuilder;
 import tech.derbent.api.utils.Check;
@@ -19,7 +21,7 @@ import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CLayoutService;
 import tech.derbent.session.service.CSessionService;
 
-public abstract class CPageBaseProjectAware extends CPageBase implements IProjectChangeListener {
+public abstract class CPageBaseProjectAware extends CPageBase implements IProjectChangeListener, IContentOwner, IHasContentOwner {
 
 	private static final long serialVersionUID = 1L;
 	protected CFlexLayout baseDetailsLayout;
@@ -29,6 +31,13 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 	private CDetailSectionService screenService;
 	protected final CSessionService sessionService;
 	protected SplitLayout splitLayout = new SplitLayout();
+	private IContentOwner parentContent;
+
+	@Override
+	public void setContentOwner(IContentOwner owner) { this.parentContent = owner; }
+
+	@Override
+	public IContentOwner getContentOwner() { return parentContent; }
 
 	protected CPageBaseProjectAware(final CSessionService sessionService, CDetailSectionService screenService) {
 		super();

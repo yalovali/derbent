@@ -85,5 +85,10 @@ public class CContentOwnerProjectFieldTest {
 
 		@Override
 		public Object getCurrentEntity() { return currentUser; }
+
+		@Override
+		public void setCurrentEntity(Object entity) {
+			// TODO Auto-generated method stub
+		}
 	}
 }

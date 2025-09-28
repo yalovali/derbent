@@ -53,6 +53,7 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 	private final CPageEntity pageEntity;
 	// Layout components
 	protected SplitLayout splitLayout;
+	private Object currentEntity;
 
 	@Autowired
 	public CDynamicPageViewWithSections(final CPageEntity pageEntity, final CSessionService sessionService,
@@ -303,6 +304,7 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 		LOGGER.debug("Entity selected: {}",
 				selectedEntity != null ? selectedEntity.getClass().getSimpleName() + " ID: " + selectedEntity.getId() : "null");
 		populateEntityDetails(selectedEntity);
+		setCurrentEntity(selectedEntity);
 	}
 
 	/** Populate the entity details section with information from the selected entity. */
@@ -381,4 +383,12 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 			}
 		}
 	}
+
+	@Override
+	public Object getCurrentEntity() { // TODO Auto-generated method stub
+		return currentEntity;
+	}
+
+	@Override
+	public void setCurrentEntity(Object entity) { currentEntity = entity; }
 }

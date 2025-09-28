@@ -47,6 +47,11 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 	@Override
 	public EntityClass getCurrentEntity() { return (EntityClass) parentContent.getCurrentEntity(); }
 
+	@Override
+	public void setCurrentEntity(Object entity) {
+		// NOT USED
+	}
+
 	/** Override this method in subclasses to provide local context values specific to this accordion panel.
 	 * @param contextName the context name to resolve
 	 * @return the local context value, or null if not found locally */
