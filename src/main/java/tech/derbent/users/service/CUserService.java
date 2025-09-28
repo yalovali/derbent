@@ -26,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.components.CEnhancedBinder;
-import tech.derbent.api.roles.service.CUserProjectRoleService;
 import tech.derbent.api.services.CAbstractNamedEntityService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.companies.service.CCompanyService;
@@ -227,7 +226,6 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 		try {
 			// Get services from ApplicationContext to avoid circular dependency
 			CProjectService projectService = applicationContext.getBean(CProjectService.class);
-			CUserProjectRoleService roleService = applicationContext.getBean(CUserProjectRoleService.class);
 			CUserProjectSettingsService userProjectSettingsService = applicationContext.getBean(CUserProjectSettingsService.class);
 			CUserTypeService userTypeService = applicationContext.getBean(CUserTypeService.class);
 			CCompanyService companyService = applicationContext.getBean(CCompanyService.class);

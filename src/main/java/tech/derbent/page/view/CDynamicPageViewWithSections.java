@@ -101,10 +101,10 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 	@SuppressWarnings ({
 			"unchecked", "rawtypes"
 	})
-	protected CCrudToolbar<?> createCrudToolbar(final CEnhancedBinder<?> typedBinder, final CEntityDB<?> typedEntity) {
+	protected CCrudToolbar<?> createCrudToolbar(final CEnhancedBinder<?> typedBinder) {
 		// Use static factory method to create toolbar
 		CCrudToolbar toolbar = new CCrudToolbar(typedBinder, entityService, entityClass);
-		toolbar.setCurrentEntity(typedEntity);
+		toolbar.setCurrentEntity(null);
 		toolbar.setNewEntitySupplier(() -> createNewEntityInstance());
 		toolbar.setRefreshCallback((currentEntity) -> {
 			refreshGrid();
@@ -301,6 +301,12 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 	private void onEntitySelected(CComponentGridEntity.SelectionChangeEvent event) throws Exception {
 		CEntityDB<?> selectedEntity = event.getSelectedItem();
 		LOGGER.debug("Entity selected: {}", selectedEntity != null ? selectedEntity.toString() + " ID: " + selectedEntity.getId() : "null");
+		Field viewNameField = selectedEntity.getClass().getField("VIEW_NAME");
+		String entityViewName = (String) viewNameField.get(null);
+		// Performance optimization: check if we can reuse existing components
+		if (!canReuseExistingComponents(entityViewName, selectedEntity.getClass())) {
+			rebuildEntityDetails(entityViewName);
+		}
 		setCurrentEntity(selectedEntity);
 		populateForm();
 	}
@@ -310,50 +316,21 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 	 * @throws NoSuchFieldException */
 	@Override
 	public void populateForm() throws Exception {
-		CEntityDB<?> entity = (CEntityDB<?>) getCurrentEntity();
-		LOGGER.debug("Populating entity details for: {}", entity != null ? entity.getClass().getSimpleName() : "null");
 		Check.notNull(baseDetailsLayout, "Base details layout is not initialized");
 		Check.notNull(pageEntity.getDetailSection(), "Detail section cannot be null");
-		// Clear existing content
-		if (entity == null) {
-			// setEmptyEntityDetailsMessage();
-			getCurrentBinder().setBean(null);
-			return;
-		}
-		Field viewNameField = entity.getClass().getField("VIEW_NAME");
-		String entityViewName = (String) viewNameField.get(null);
-		// Performance optimization: check if we can reuse existing components
-		if (canReuseExistingComponents(entityViewName, entity.getClass())) {
-			// LOGGER.debug("Reusing existing components for entity type: {} view: {}", entity.getClass().getSimpleName(), entityViewName);
-			reloadEntityValues(entity);
-			detailsBuilder.populateForm();
-			return;
-		}
-		LOGGER.debug("Rebuilding components for entity type: {} view: {}", entity.getClass().getSimpleName(), entityViewName);
-		rebuildEntityDetails(entity, entityViewName);
+		getCurrentBinder().setBean((CEntityDB<?>) getCurrentEntity());
 	}
 
 	@SuppressWarnings ({
 			"unchecked", "rawtypes"
 	})
-	private void rebuildEntityDetails(CEntityDB<?> typedEntity, String entityViewName) throws Exception {
-		LOGGER.debug("Rebuilding entity details for type: {} view: {}", typedEntity.getClass().getSimpleName(), entityViewName);
-		// Clear existing state
+	private void rebuildEntityDetails(String entityViewName) throws Exception {
 		clearEntityDetails();
-		// Create a properly typed binder for this specific entity type
-		CEnhancedBinder typedBinder = new CEnhancedBinder(entityClass);
-		// Create and configure toolbar using the factory method
-		CCrudToolbar<?> toolbar = createCrudToolbar(typedBinder, typedEntity);
+		currentBinder = new CEnhancedBinder(entityClass);
+		CCrudToolbar<?> toolbar = createCrudToolbar(currentBinder);
 		crudToolbar = toolbar;
-		// Update the current binder to be the properly typed one
-		currentBinder = typedBinder;
-		// Update state tracking
 		currentEntityViewName = entityViewName;
-		currentEntityType = typedEntity.getClass();
-		// Build screen with toolbar - cast to appropriate type to bypass generic constraints
 		buildScreen(entityViewName, (Class) entityClass, toolbar);
-		typedBinder.setBean(typedEntity);
-		populateForm();
 	}
 
 	/** Refresh the grid to show updated data. */
@@ -363,36 +340,18 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 
 	/** Reloads entity values into existing components without rebuilding the UI */
 	@SuppressWarnings ({
-			"unchecked", "rawtypes"
+			"rawtypes"
 	})
-	private void reloadEntityValues(CEntityDB<?> typedEntity) {
-		try {
-			// Update the toolbar's current entity
-			if (crudToolbar != null) {
-				((CCrudToolbar) crudToolbar).setCurrentEntity(typedEntity);
-			}
-			// Update the binder with new entity values
-			if (currentBinder != null) {
-				currentBinder.setBean(typedEntity);
-			}
-			LOGGER.debug("Successfully reloaded entity values for: {}", typedEntity.getClass().getSimpleName());
-		} catch (Exception e) {
-			LOGGER.error("Error reloading entity values, falling back to rebuild: {}", e.getMessage());
-			// If reloading fails, fall back to rebuilding
-			try {
-				rebuildEntityDetails(typedEntity, currentEntityViewName);
-			} catch (Exception rebuildException) {
-				LOGGER.error("Error rebuilding entity details: {}", rebuildException.getMessage());
-				clearEntityDetails();
-			}
-		}
-	}
-
 	@Override
 	public Object getCurrentEntity() { // TODO Auto-generated method stub
 		return currentEntity;
 	}
 
 	@Override
-	public void setCurrentEntity(Object entity) { currentEntity = entity; }
+	public void setCurrentEntity(Object entity) {
+		super.setCurrentEntity(entity);
+		currentEntityType = entity.getClass();
+		currentEntity = entity;
+		crudToolbar.setCurrentEntity(entity);
+	}
 }

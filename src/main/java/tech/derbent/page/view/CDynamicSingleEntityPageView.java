@@ -67,9 +67,9 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewWithSections {
 	}
 
 	@Override
-	protected CCrudToolbar<?> createCrudToolbar(final CEnhancedBinder<?> typedBinder, final CEntityDB<?> typedEntity) {
+	protected CCrudToolbar<?> createCrudToolbar(final CEnhancedBinder<?> typedBinder) {
 		// Create the base toolbar using parent implementation
-		CCrudToolbar<?> toolbar = super.createCrudToolbar(typedBinder, typedEntity);
+		CCrudToolbar<?> toolbar = super.createCrudToolbar(typedBinder);
 		// Configure button visibility based on our settings
 		if (toolbar != null) {
 			try {

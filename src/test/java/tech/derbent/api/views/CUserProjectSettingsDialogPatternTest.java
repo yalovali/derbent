@@ -180,13 +180,5 @@ public class CUserProjectSettingsDialogPatternTest {
 			// - User's existing assignments
 			return availableProjects;
 		}
-
-		/** Provides context information about the current user for logging/debugging. */
-		public String getUserContext() {
-			if (currentUser != null) {
-				return "User: " + currentUser.getName() + " (" + currentUser.getLogin() + ")";
-			}
-			return "No current user";
-		}
 	}
 }

@@ -9,8 +9,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.companies.service.CCompanyService;
@@ -26,7 +24,6 @@ import tech.derbent.users.service.CUserTypeService;
 @ExtendWith (MockitoExtension.class)
 public class CComponentUserProjectSettingsTest {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentUserProjectSettingsTest.class);
 	@Mock
 	private IContentOwner mockContentOwner;
 	@Mock
@@ -39,7 +36,6 @@ public class CComponentUserProjectSettingsTest {
 	private CProjectService mockProjectService;
 	@Mock
 	private CUserProjectSettingsService mockUserProjectSettingsService;
-	private CComponentUserProjectSettings component;
 	private CUser testUser;
 	private CEnhancedBinder<CUser> testBinder;
 
@@ -65,8 +61,7 @@ public class CComponentUserProjectSettingsTest {
 		lenient().when(mockProjectService.getAvailableProjectsForUser(any())).thenReturn(new ArrayList<>());
 		// Create binder
 		testBinder = new CEnhancedBinder<>(CUser.class);
-		// Create component
-		component = new CComponentUserProjectSettings(mockContentOwner, testUser, testBinder, mockUserService, mockUserTypeService,
-				mockCompanyService, mockProjectService, mockUserProjectSettingsService);
+		new CComponentUserProjectSettings(mockContentOwner, testUser, testBinder, mockUserService, mockUserTypeService, mockCompanyService,
+				mockProjectService, mockUserProjectSettingsService);
 	}
 }

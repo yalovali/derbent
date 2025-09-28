@@ -44,7 +44,10 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 	public Object getCurrentEntity() { return currentEntity; }
 
 	@Override
-	public void setCurrentEntity(Object entity) { this.currentEntity = entity; }
+	public void setCurrentEntity(Object entity) {
+		this.currentEntity = entity;
+		detailsBuilder.setCurrentEntity(entity);
+	}
 
 	@Override
 	public void populateForm() throws Exception {

@@ -1007,4 +1007,16 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			CFormBuilder.dataProviderResolver = null;
 		}
 	}
+
+	public void setCurrentEntity(Object entity) {
+		componentMap.values().forEach(component -> {
+			if (component instanceof IContentOwner) {
+				try {
+					((IContentOwner) component).setCurrentEntity(entity);
+				} catch (final Exception e) {
+					LOGGER.error("Error populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage(), e);
+				}
+			}
+		});
+	}
 }

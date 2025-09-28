@@ -253,13 +253,14 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 
 	/** Updates the current entity and refreshes button states.
 	 * @param entity the current entity */
-	public void setCurrentEntity(final EntityClass entity) {
-		currentEntity = entity;
+	@SuppressWarnings ("unchecked")
+	public void setCurrentEntity(final Object entity) {
+		currentEntity = (EntityClass) entity;
 		updateButtonStates();
 		// Bind the entity to the form if available
 		Check.notNull(entityClass, "Entity class is not set");
 		try {
-			binder.setBean(entity);
+			binder.setBean((EntityClass) entity);
 		} catch (Exception e) {
 			LOGGER.error("Error binding entity to form: {}", e.getMessage());
 			throw e;

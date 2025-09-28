@@ -124,4 +124,12 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		// Store the application context for String data provider resolution
 		CDetailsBuilder.applicationContext = context;
 	}
+
+	public void setCurrentEntity(Object entity) {
+		if (formBuilder == null) {
+			LOGGER.warn("Form builder is not initialized. Cannot set current entity.");
+			return;
+		}
+		formBuilder.setCurrentEntity(entity);
+	}
 }

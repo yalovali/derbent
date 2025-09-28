@@ -800,41 +800,30 @@ public abstract class CBaseUITest {
 	// ===========================================
 	// DATABASE INITIALIZATION TESTING METHODS
 	// ===========================================
-
 	// ===========================================
 	// DYNAMIC PAGE NAVIGATION METHODS
 	// ===========================================
 
-	/**
-	 * Navigate to a dynamic page by entity type and ensure it loads successfully.
-	 * This method will fail fast if the page cannot be found or loaded.
-	 * 
+	/** Navigate to a dynamic page by entity type and ensure it loads successfully. This method will fail fast if the page cannot be found or loaded.
 	 * @param entityType The entity type (e.g., "CUser", "CActivity", "CProject")
-	 * @return true if navigation was successful
-	 */
+	 * @return true if navigation was successful */
 	protected boolean navigateToDynamicPageByEntityType(String entityType) {
 		Check.notBlank(entityType, "Entity type cannot be blank");
 		LOGGER.info("🧭 Navigating to dynamic page for entity type: {}", entityType);
-		
 		try {
 			if (!isBrowserAvailable()) {
 				LOGGER.warn("⚠️ Browser not available, cannot navigate to dynamic page");
 				return false;
 			}
-			
-			String baseUrl = "http://localhost:" + port;
-			
 			// First try to navigate by looking for the page in the side navigation
 			if (navigateByMenuSearch(entityType)) {
 				LOGGER.info("✅ Successfully navigated to {} via menu", entityType);
 				return true;
 			}
-			
 			// If menu navigation fails, try direct URL navigation using page entity lookup
 			// This would require access to the page entity service, which we'll implement later
 			LOGGER.warn("⚠️ Menu navigation failed for entity type: {}, page may not be available", entityType);
 			return false;
-			
 		} catch (Exception e) {
 			String message = "Failed to navigate to dynamic page for entity type: " + entityType + " - " + e.getMessage();
 			LOGGER.error("❌ {}", message);
@@ -842,27 +831,20 @@ public abstract class CBaseUITest {
 		}
 	}
 
-	/**
-	 * Navigate by searching menu items for text containing the entity type.
-	 * 
+	/** Navigate by searching menu items for text containing the entity type.
 	 * @param entityType The entity type to search for
-	 * @return true if navigation was successful
-	 */
+	 * @return true if navigation was successful */
 	protected boolean navigateByMenuSearch(String entityType) {
 		try {
 			// Look for menu items that might contain the entity name
 			// Common patterns: "Users", "Activities", "Projects", "Meetings", etc.
 			String[] searchTerms = generateSearchTermsForEntity(entityType);
-			
 			for (String searchTerm : searchTerms) {
-				Locator navItem = page.locator("vaadin-side-nav-item")
-					.filter(new Locator.FilterOptions().setHasText(searchTerm));
-				
+				Locator navItem = page.locator("vaadin-side-nav-item").filter(new Locator.FilterOptions().setHasText(searchTerm));
 				if (navItem.count() > 0) {
 					LOGGER.info("🎯 Found menu item for search term: {}", searchTerm);
 					navItem.first().click();
 					wait_2000(); // Wait for page to load
-					
 					// Verify the page loaded successfully
 					if (isDynamicPageLoaded()) {
 						LOGGER.info("✅ Dynamic page loaded successfully via search term: {}", searchTerm);
@@ -870,66 +852,52 @@ public abstract class CBaseUITest {
 					}
 				}
 			}
-			
 			return false;
 		} catch (Exception e) {
 			throw new RuntimeException("Menu search navigation failed for entity type: " + entityType, e);
 		}
 	}
 
-	/**
-	 * Generate search terms for a given entity type.
-	 * 
+	/** Generate search terms for a given entity type.
 	 * @param entityType The entity type (e.g., "CUser")
-	 * @return Array of possible search terms
-	 */
+	 * @return Array of possible search terms */
 	protected String[] generateSearchTermsForEntity(String entityType) {
 		// Remove 'C' prefix if present
 		String baseName = entityType.startsWith("C") ? entityType.substring(1) : entityType;
-		
 		return new String[] {
-			baseName + "s",        // Users, Activities, Projects
-			baseName,              // User, Activity, Project  
-			baseName.toLowerCase() + "s", // users, activities, projects
-			baseName.toLowerCase(),       // user, activity, project
-			entityType,            // CUser, CActivity, CProject
-			entityType.toLowerCase() // cuser, cactivity, cproject
+				baseName + "s", // Users, Activities, Projects
+				baseName, // User, Activity, Project
+				baseName.toLowerCase() + "s", // users, activities, projects
+				baseName.toLowerCase(), // user, activity, project
+				entityType, // CUser, CActivity, CProject
+				entityType.toLowerCase() // cuser, cactivity, cproject
 		};
 	}
 
-	/**
-	 * Check if a dynamic page has loaded successfully.
-	 * 
-	 * @return true if the page appears to be a loaded dynamic page
-	 */
+	/** Check if a dynamic page has loaded successfully.
+	 * @return true if the page appears to be a loaded dynamic page */
 	protected boolean isDynamicPageLoaded() {
 		try {
 			wait_1000(); // Give page time to render
-			
 			// Check for common dynamic page elements
 			if (page.locator("vaadin-grid").count() > 0) {
 				LOGGER.debug("✅ Dynamic page has grid element");
 				return true;
 			}
-			
 			if (page.locator("vaadin-form-layout, vaadin-vertical-layout").count() > 0) {
 				LOGGER.debug("✅ Dynamic page has form layout");
 				return true;
 			}
-			
 			// Check for CRUD buttons which are common in dynamic pages
-			if (page.locator("vaadin-button").filter(
-				new Locator.FilterOptions().setHasText("New")).count() > 0) {
+			if (page.locator("vaadin-button").filter(new Locator.FilterOptions().setHasText("New")).count() > 0) {
 				LOGGER.debug("✅ Dynamic page has New button");
 				return true;
 			}
-			
 			// Check that we're not on an error page
 			if (page.locator("text=Error, text=Exception, text=Not Found").count() > 0) {
 				LOGGER.warn("⚠️ Page shows error content");
 				return false;
 			}
-			
 			return false;
 		} catch (Exception e) {
 			LOGGER.error("❌ Error checking if dynamic page loaded: {}", e.getMessage());
@@ -937,31 +905,22 @@ public abstract class CBaseUITest {
 		}
 	}
 
-	/**
-	 * Wait for a dynamic page to fully load and verify no exceptions occurred.
-	 * This method will fail fast if any error indicators are found.
-	 */
+	/** Wait for a dynamic page to fully load and verify no exceptions occurred. This method will fail fast if any error indicators are found. */
 	protected void waitForDynamicPageLoad() {
 		try {
 			wait_2000(); // Initial wait for page rendering
-			
 			// Check for any error indicators that would indicate page failure
 			if (page.locator("text=Exception").count() > 0) {
 				throw new AssertionError("Dynamic page shows exception content");
 			}
-			
 			if (page.locator("text=Error").count() > 0) {
 				throw new AssertionError("Dynamic page shows error content");
 			}
-			
 			if (page.locator("text=Not Found").count() > 0) {
 				throw new AssertionError("Dynamic page shows not found error");
 			}
-			
 			// Wait for interactive elements to be ready
-			page.waitForSelector("vaadin-grid, vaadin-form-layout, vaadin-button", 
-				new Page.WaitForSelectorOptions().setTimeout(10000));
-			
+			page.waitForSelector("vaadin-grid, vaadin-form-layout, vaadin-button", new Page.WaitForSelectorOptions().setTimeout(10000));
 			LOGGER.info("✅ Dynamic page loaded successfully without errors");
 		} catch (Exception e) {
 			String message = "Dynamic page failed to load properly: " + e.getMessage();
@@ -970,35 +929,24 @@ public abstract class CBaseUITest {
 		}
 	}
 
-	/**
-	 * Test CRUD operations on a dynamic page for a specific entity type.
-	 * This method will fail fast on any errors during CRUD operations.
-	 * 
-	 * @param entityType The entity type being tested
-	 */
+	/** Test CRUD operations on a dynamic page for a specific entity type. This method will fail fast on any errors during CRUD operations.
+	 * @param entityType The entity type being tested */
 	protected void testDynamicPageCrudOperations(String entityType) {
 		Check.notBlank(entityType, "Entity type cannot be blank");
 		LOGGER.info("🔄 Testing CRUD operations for dynamic page: {}", entityType);
-		
 		try {
 			// Ensure we're on the correct dynamic page
 			waitForDynamicPageLoad();
 			takeScreenshot("dynamic-crud-" + entityType.toLowerCase() + "-initial", false);
-			
 			// Test CREATE operation
 			testDynamicPageCreate(entityType);
-			
 			// Test READ operation (verify data in grid)
 			testDynamicPageRead(entityType);
-			
 			// Test UPDATE operation
 			testDynamicPageUpdate(entityType);
-			
 			// Test DELETE operation
 			testDynamicPageDelete(entityType);
-			
 			LOGGER.info("✅ CRUD operations completed successfully for: {}", entityType);
-			
 		} catch (Exception e) {
 			String message = "CRUD operations failed for dynamic page: " + entityType + " - " + e.getMessage();
 			LOGGER.error("❌ {}", message);
@@ -1006,119 +954,90 @@ public abstract class CBaseUITest {
 		}
 	}
 
-	/**
-	 * Test CREATE operation on dynamic page.
-	 */
+	/** Test CREATE operation on dynamic page. */
 	protected void testDynamicPageCreate(String entityType) {
 		try {
 			LOGGER.info("➕ Testing CREATE operation for: {}", entityType);
-			
 			// Click New button
 			Locator newButton = waitForSelectorWithCheck("vaadin-button:has-text('New')", "New button");
 			newButton.click();
 			wait_1000();
-			
 			// Fill in form fields
 			String testName = "Test " + entityType + " " + System.currentTimeMillis();
 			fillFormFieldsForEntity(entityType, testName);
-			
 			// Save the entity
 			clickSave();
 			wait_1000();
-			
 			takeScreenshot("dynamic-crud-" + entityType.toLowerCase() + "-create", false);
 			LOGGER.info("✅ CREATE operation completed for: {}", entityType);
-			
 		} catch (Exception e) {
 			throw new AssertionError("CREATE operation failed for " + entityType + ": " + e.getMessage(), e);
 		}
 	}
 
-	/**
-	 * Test READ operation by verifying data exists in grid.
-	 */
+	/** Test READ operation by verifying data exists in grid. */
 	protected void testDynamicPageRead(String entityType) {
 		try {
 			LOGGER.info("👁️ Testing READ operation for: {}", entityType);
-			
 			// Verify grid has data
 			Check.isTrue(verifyGridHasData(), "Grid should contain data after CREATE operation");
-			
 			takeScreenshot("dynamic-crud-" + entityType.toLowerCase() + "-read", false);
 			LOGGER.info("✅ READ operation completed for: {}", entityType);
-			
 		} catch (Exception e) {
 			throw new AssertionError("READ operation failed for " + entityType + ": " + e.getMessage(), e);
 		}
 	}
 
-	/**
-	 * Test UPDATE operation on dynamic page.
-	 */
+	/** Test UPDATE operation on dynamic page. */
 	protected void testDynamicPageUpdate(String entityType) {
 		try {
 			LOGGER.info("✏️ Testing UPDATE operation for: {}", entityType);
-			
 			// Select first row and edit
 			clickFirstGridRow();
 			wait_500();
 			clickEdit();
 			wait_1000();
-			
 			// Update fields
 			String updatedName = "Updated " + entityType + " " + System.currentTimeMillis();
 			fillFormFieldsForEntity(entityType, updatedName);
-			
 			// Save changes
 			clickSave();
 			wait_1000();
-			
 			takeScreenshot("dynamic-crud-" + entityType.toLowerCase() + "-update", false);
 			LOGGER.info("✅ UPDATE operation completed for: {}", entityType);
-			
 		} catch (Exception e) {
 			throw new AssertionError("UPDATE operation failed for " + entityType + ": " + e.getMessage(), e);
 		}
 	}
 
-	/**
-	 * Test DELETE operation on dynamic page.
-	 */
+	/** Test DELETE operation on dynamic page. */
 	protected void testDynamicPageDelete(String entityType) {
 		try {
 			LOGGER.info("🗑️ Testing DELETE operation for: {}", entityType);
-			
 			// Select first row and delete
 			clickFirstGridRow();
 			wait_500();
 			clickDelete();
 			wait_1000();
-			
 			takeScreenshot("dynamic-crud-" + entityType.toLowerCase() + "-delete", false);
 			LOGGER.info("✅ DELETE operation completed for: {}", entityType);
-			
 		} catch (Exception e) {
 			throw new AssertionError("DELETE operation failed for " + entityType + ": " + e.getMessage(), e);
 		}
 	}
 
-	/**
-	 * Fill form fields specific to an entity type.
-	 * 
+	/** Fill form fields specific to an entity type.
 	 * @param entityType The entity type
-	 * @param name The name/title to use
-	 */
+	 * @param name       The name/title to use */
 	protected void fillFormFieldsForEntity(String entityType, String name) {
 		try {
 			// Fill first text field (usually name/title)
 			fillFirstTextField(name);
-			
 			// Fill description if present
 			Locator textAreas = page.locator("vaadin-text-area");
 			if (textAreas.count() > 0) {
 				textAreas.first().fill("Description for " + name);
 			}
-			
 			// Select combo box options if present
 			Locator comboBoxes = page.locator("vaadin-combo-box");
 			if (comboBoxes.count() > 0) {
@@ -1136,7 +1055,6 @@ public abstract class CBaseUITest {
 					}
 				}
 			}
-			
 		} catch (Exception e) {
 			throw new RuntimeException("Failed to fill form fields for " + entityType + ": " + e.getMessage(), e);
 		}
