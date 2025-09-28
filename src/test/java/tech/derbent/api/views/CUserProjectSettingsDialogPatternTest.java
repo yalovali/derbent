@@ -164,6 +164,11 @@ public class CUserProjectSettingsDialogPatternTest {
 		@Override
 		public void setCurrentEntity(Object entity) { this.currentUser = (CUser) entity; }
 
+		@Override
+		public void populateForm() {
+			// Mock implementation - do nothing
+		}
+
 		/** Content owner method that provides available projects for the user project settings dialog. This method demonstrates how the IContentOwner
 		 * pattern enables context-aware data resolution.
 		 * @return list of projects available for assignment to the current user */

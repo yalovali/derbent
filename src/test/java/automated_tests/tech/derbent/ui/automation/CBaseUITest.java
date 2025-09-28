@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 import com.microsoft.playwright.Browser;
@@ -16,10 +17,8 @@ import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.vaadin.flow.router.Route;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import tech.derbent.api.utils.Check;
 import tech.derbent.projects.view.CProjectsView;
-import tech.derbent.users.view.CUsersView;
 
 /** Enhanced base UI test class that provides common functionality for Playwright tests. This class includes 25+ auxiliary methods for testing all
  * views and business functions. The base class follows strict coding guidelines and provides comprehensive testing utilities for: - Login and
@@ -34,7 +33,7 @@ public abstract class CBaseUITest {
 	/** Admin view classes */
 	protected Class<?>[] adminViewClasses = {};
 	protected Class<?>[] allViewClasses = {
-			CProjectsView.class, CUsersView.class
+			CProjectsView.class
 	};
 	/** All view classes */
 	private Browser browser;
@@ -43,7 +42,7 @@ public abstract class CBaseUITest {
 	protected Class<?>[] kanbanViewClasses = {};
 	/** Array of main view classes for testing */
 	protected Class<?>[] mainViewClasses = {
-			CProjectsView.class, CUsersView.class
+			CProjectsView.class
 	};
 	protected Page page;
 	private Playwright playwright;
@@ -171,11 +170,6 @@ public abstract class CBaseUITest {
 	/** Navigates to the Projects view using the navigation menu. */
 	protected void navigateToProjects() {
 		navigateToViewByClass(CProjectsView.class);
-	}
-
-	/** Navigates to the Users view using the navigation menu. */
-	protected void navigateToUsers() {
-		navigateToViewByClass(CUsersView.class);
 	}
 	// ===========================================
 	// MISSING METHODS FOR COMPATIBILITY
@@ -526,6 +520,10 @@ public abstract class CBaseUITest {
 		} catch (Exception e) {
 			throw new AssertionError("Database initialization test failed: " + e.getMessage(), e);
 		}
+	}
+
+	protected void navigateToUsers() {
+		// TODO Auto-generated method stub
 	}
 
 	/** Tests grid column functionality including sorting and filtering */

@@ -90,7 +90,6 @@ import tech.derbent.users.service.CUserProjectRoleInitializerService;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.CUserTypeInitializerService;
 import tech.derbent.users.service.CUserTypeService;
-import tech.derbent.users.view.CUsersView;
 
 public class CAuxillaries {
 
@@ -434,8 +433,6 @@ public class CAuxillaries {
 			return CCompanyView.class;
 		case "CProject":
 			return CProjectsView.class;
-		case "CUser":
-			return CUsersView.class;
 		case "CProjectGanntView":
 			return CProjectGanntView.class;
 		default:

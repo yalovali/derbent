@@ -21,12 +21,6 @@ public abstract class CComponentUserProjectBase<MasterClass extends CEntityNamed
 		extends CComponentRelationBase<MasterClass, CUserProjectSettings> {
 
 	@Override
-	public void populateForm(final Object entity) {
-		setCurrentEntity(entity);
-		populateForm();
-	}
-
-	@Override
 	public void populateForm() {
 		if (getCurrentEntity() != null) {
 			refresh();

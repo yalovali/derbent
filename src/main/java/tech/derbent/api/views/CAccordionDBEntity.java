@@ -52,6 +52,14 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 		// NOT USED
 	}
 
+	@Override
+	public void populateForm() throws Exception {
+		// Delegate to parent content owner
+		if (parentContent != null) {
+			parentContent.populateForm();
+		}
+	}
+
 	/** Override this method in subclasses to provide local context values specific to this accordion panel.
 	 * @param contextName the context name to resolve
 	 * @return the local context value, or null if not found locally */

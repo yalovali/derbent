@@ -870,6 +870,44 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		CFormBuilder.buildForm(entityClass, binder, entityFields, componentMap, horizontalLayoutMap, formLayout, contentOwner);
 	}
 
+	/** Populates the form with entity data using the internal binder.
+	 * @param entity the entity to populate the form with */
+	@SuppressWarnings ("unchecked")
+	public void populateForm(Object entity) {
+		if (binder != null) {
+			LOGGER.debug("Populating form with entity: {}", entity);
+			((CEnhancedBinder<Object>) binder).setBean(entity);
+		}
+		componentMap.values().forEach(component -> {
+			if (component instanceof IContentOwner) {
+				try {
+					((IContentOwner) component).setCurrentEntity(entity);
+					((IContentOwner) component).populateForm();
+				} catch (final Exception e) {
+					LOGGER.error("Error populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage(), e);
+				}
+			}
+		});
+	}
+
+	/** Clears the form by setting the binder bean to null. */
+	public void populateForm() {
+		// go through all components and call populate if available
+		componentMap.values().forEach(component -> {
+			if (component instanceof IContentOwner) {
+				try {
+					((IContentOwner) component).populateForm();
+				} catch (final Exception e) {
+					LOGGER.error("Error populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage(), e);
+				}
+			}
+		});
+	}
+
+	/** Gets the internal binder for this form builder.
+	 * @return the enhanced binder */
+	public CEnhancedBinder<?> getBinder() { return binder; }
+
 	public Component addFieldLine(final EntityFieldInfo fieldInfo) throws Exception {
 		return CFormBuilder.processField(null, binder, formLayout, horizontalLayoutMap, fieldInfo, componentMap);
 	}

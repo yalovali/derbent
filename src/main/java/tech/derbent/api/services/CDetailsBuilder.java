@@ -98,6 +98,14 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		return formLayout;
 	}
 
+	/** Clears the details form by setting the form builder bean to null. */
+	public void populateForm() {
+		if (formBuilder != null) {
+			LOGGER.debug("Clearing details form");
+			formBuilder.populateForm();
+		}
+	}
+
 	public Component getComponentByName(final String panelName, final String componentName) {
 		final CPanelDetails panel = getSectionPanel(panelName);
 		Check.notNull(panel, "Panel cannot be null");

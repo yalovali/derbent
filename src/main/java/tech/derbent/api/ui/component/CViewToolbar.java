@@ -48,7 +48,6 @@ import tech.derbent.session.service.CLayoutService;
 import tech.derbent.session.service.ISessionService;
 import tech.derbent.setup.service.CSystemSettingsService;
 import tech.derbent.users.domain.CUser;
-import tech.derbent.users.view.CUsersView;
 
 /* CViewToolbar.java This class defines a toolbar for views in the application, providing a consistent header with a title and optional action
  * components. It extends Composite to allow for easy composition of the toolbar's content. */
@@ -345,7 +344,6 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 		// Add static buttons (these will be deprecated in favor of dynamic pages)
 		buttons.add(createNavigateButtonForView(CProjectGanntView.class));
 		buttons.add(createNavigateButtonForView(CProjectsView.class));
-		buttons.add(createNavigateButtonForView(CUsersView.class));
 		buttons.add(createNavigateButtonForView(CDetailSectionView.class));
 		// Add dynamic page buttons if pageMenuIntegrationService is available
 		if (pageMenuIntegrationService != null && pageMenuIntegrationService.isReady()) {
