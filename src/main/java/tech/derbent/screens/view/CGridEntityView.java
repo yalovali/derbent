@@ -83,7 +83,8 @@ public class CGridEntityView extends CGridViewBaseProject<CGridEntity> {
 	}
 
 	protected void populateForm(CGridEntity entity) {
-		super.populateFormInternal(entity);
+		setCurrentEntity(entity);
+		super.populateForm();
 		updateFieldSelectionComponent();
 	}
 

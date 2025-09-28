@@ -90,12 +90,6 @@ public class CContentOwnerProjectFieldTest {
 		public void setCurrentEntity(Object entity) { this.currentUser = (CUser) entity; }
 
 		@Override
-		public void populateForm(Object entity) {
-			setCurrentEntity(entity);
-			populateForm();
-		}
-
-		@Override
 		public void populateForm() {
 			// Mock implementation - do nothing
 		}

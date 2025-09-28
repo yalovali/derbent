@@ -324,6 +324,7 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 		if (canReuseExistingComponents(entityViewName, entity.getClass())) {
 			// LOGGER.debug("Reusing existing components for entity type: {} view: {}", entity.getClass().getSimpleName(), entityViewName);
 			reloadEntityValues(entity);
+			populateForm();
 			return;
 		}
 		LOGGER.debug("Rebuilding components for entity type: {} view: {}", entity.getClass().getSimpleName(), entityViewName);
@@ -350,6 +351,7 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 		// Build screen with toolbar - cast to appropriate type to bypass generic constraints
 		buildScreen(entityViewName, (Class) entityClass, toolbar);
 		typedBinder.setBean(typedEntity);
+		populateForm();
 	}
 
 	/** Refresh the grid to show updated data. */

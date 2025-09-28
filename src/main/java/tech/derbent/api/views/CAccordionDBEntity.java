@@ -53,14 +53,6 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 	}
 
 	@Override
-	public void populateForm(Object entity) {
-		// Delegate to parent content owner
-		if (parentContent != null) {
-			parentContent.populateForm(entity);
-		}
-	}
-
-	@Override
 	public void populateForm() {
 		// Delegate to parent content owner
 		if (parentContent != null) {

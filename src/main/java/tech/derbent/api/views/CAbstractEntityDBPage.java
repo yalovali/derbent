@@ -279,7 +279,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				// Empty the bound fields by creating new entity and binding it
 				final EntityClass newEntityInstance = createNewEntity();
 				setCurrentEntity(newEntityInstance);
-				populateFormInternal(newEntityInstance);
+				populateForm();
 				LOGGER.debug("Bound fields emptied for new entity: {}", newEntityInstance.getClass().getSimpleName());
 			} catch (final Exception exception) {
 				LOGGER.error("Error emptying bound fields", exception);
@@ -306,7 +306,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				if (currentEntity == null) {
 					LOGGER.warn("No current entity for save operation, creating new entity");
 					currentEntity = createNewEntity();
-					populateFormInternal(currentEntity);
+					populateForm();
 				}
 				if (!onBeforeSaveEvent()) {
 					return;
@@ -451,7 +451,8 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	protected void onSelectionChanged(final CMasterViewSectionGrid.SelectionChangeEvent<EntityClass> event) {
 		final EntityClass value = (event.getSelectedItem());
 		LOGGER.debug("Grid selection changed: {}", Optional.ofNullable(value).map(Object::toString).orElse("NULL"));
-		populateFormInternal(value);
+		setCurrentEntity(value);
+		populateForm();
 		if (value == null) {
 			sessionService.setActiveId(entityClass.getClass().getSimpleName(), null);
 		} else {
@@ -465,19 +466,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		AccordionList.forEach(accordion -> {
 			accordion.populateForm(entity);
 		});
-	}
-
-	protected void populateFormInternal(final EntityClass value) {
-		LOGGER.debug("Populating form for entity: {}", value != null ? value.getId() : "null");
-		currentEntity = value;
-		// not needed anymore, handled in onSelectionChanged
-		// sessionService.setActiveId(entityClass.getSimpleName(), value == null ? null : value.getId());
-		populateAccordionPanels(value);
-		// getBinder().readBean(value);
-		getBinder().setBean(value);
-		if ((value == null) && (masterViewSection != null)) {
-			masterViewSection.select(null);
-		}
 	}
 
 	protected void refreshGrid() {
@@ -538,15 +526,14 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	}
 
 	@Override
-	public void populateForm(final Object entity) {
-		setCurrentEntity(entity);
-		populateForm();
-	}
-
-	@Override
 	public void populateForm() {
-		// Call the existing protected populateFormInternal method
-		populateFormInternal(getCurrentEntity());
+		EntityClass value = getCurrentEntity();
+		LOGGER.debug("Populating form for entity: {}", value != null ? value.getId() : "null");
+		populateAccordionPanels(value);
+		getBinder().setBean(value);
+		if ((value == null) && (masterViewSection != null)) {
+			masterViewSection.select(null);
+		}
 	}
 
 	@Override
@@ -568,12 +555,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	@Override
 	protected void setupToolbar() {}
-
-	/** Populates the form with entity data - public wrapper for testing.
-	 * @param entity the entity to populate the form with */
-	public void testPopulateForm(final EntityClass entity) {
-		populateFormInternal(entity);
-	}
 
 	protected abstract void updateDetailsComponent()
 			throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException, Exception;

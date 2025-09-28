@@ -70,8 +70,10 @@ public class CProjectsView extends CGridViewBaseNamed<CProject> {
 	@Override
 	protected String getEntityRouteIdField() { return ENTITY_ID_FIELD; }
 
-	protected void populateForm(final CProject value) {
-		super.populateFormInternal(value);
+	@Override
+	public void populateForm() {
+		CProject value = getCurrentEntity();
+		super.populateForm();
 		LOGGER.info("Populating form with project data: {}", value != null ? value.getName() : "null");
 		if (value != null) {
 			// Load project with user settings to avoid lazy initialization issues
@@ -81,7 +83,8 @@ public class CProjectsView extends CGridViewBaseNamed<CProject> {
 			final Supplier<List<CUserProjectSettings>> supplier = () -> projectWithUsers.getUserSettings();
 			final Runnable runnable = () -> {
 				final CProject refreshedProject = ((CProjectService) entityService).findByIdWithUserSettings(projectWithUsers.getId());
-				populateForm(refreshedProject);
+				setCurrentEntity(refreshedProject);
+				populateForm();
 			};
 			//
 			projectUsersPanel.setAccessors(supplier, runnable);
