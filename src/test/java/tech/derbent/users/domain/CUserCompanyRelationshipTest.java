@@ -10,7 +10,7 @@ import tech.derbent.companies.domain.CCompany;
 public class CUserCompanyRelationshipTest {
 
 	private CCompany company;
-	private CUserCompanySettings settings;
+	private CUserCompanySetting settings;
 	private CUser user;
 
 	@BeforeEach
@@ -19,7 +19,7 @@ public class CUserCompanyRelationshipTest {
 		user.setLogin("testuser");
 		user.setEmail("test@example.com");
 		company = new CCompany("Test Company");
-		settings = new CUserCompanySettings();
+		settings = new CUserCompanySetting();
 		settings.setOwnershipLevel("MEMBER");
 		settings.setRole("DEVELOPER");
 		settings.setPrivileges("READ,WRITE");

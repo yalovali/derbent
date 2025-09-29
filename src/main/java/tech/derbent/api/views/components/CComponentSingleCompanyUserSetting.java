@@ -1,7 +1,9 @@
-package tech.derbent.users.view;
+package tech.derbent.api.views.components;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -11,7 +13,6 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import org.springframework.beans.factory.annotation.Autowired;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.ui.notifications.CNotificationService;
@@ -20,7 +21,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.users.domain.CUser;
-import tech.derbent.users.domain.CUserCompanySettings;
+import tech.derbent.users.domain.CUserCompanySetting;
 import tech.derbent.users.service.CUserCompanySettingsService;
 import tech.derbent.users.service.CUserService;
 
@@ -37,20 +38,22 @@ public class CComponentSingleCompanyUserSetting extends VerticalLayout {
 	private final CUserCompanySettingsService userCompanySettingsService;
 	private CUser currentUser;
 	private Div contentDiv;
+	private ApplicationContext applicationContext;
 	@Autowired
 	private CNotificationService notificationService;
 
 	public CComponentSingleCompanyUserSetting(IContentOwner parentContent, CUser currentEntity, CEnhancedBinder<CUser> beanValidationBinder,
-			CUserService userService, CCompanyService companyService, CUserCompanySettingsService userCompanySettingsService) {
+			CUserService userService, ApplicationContext applicationContext) {
 		Check.notNull(userService, "User service cannot be null");
+		userCompanySettingsService = applicationContext.getBean(CUserCompanySettingsService.class);
+		companyService = applicationContext.getBean(CCompanyService.class);
 		Check.notNull(companyService, "Company service cannot be null");
 		Check.notNull(userCompanySettingsService, "User company settings service cannot be null");
 		this.parentContent = parentContent;
 		this.binder = beanValidationBinder;
 		this.userService = userService;
-		this.companyService = companyService;
-		this.userCompanySettingsService = userCompanySettingsService;
 		this.currentUser = currentEntity;
+		this.applicationContext = applicationContext;
 		initComponent();
 		setupBindings();
 	}
@@ -68,7 +71,7 @@ public class CComponentSingleCompanyUserSetting extends VerticalLayout {
 
 	private void setupBindings() {
 		if (binder != null) {
-			// Bind to the companySettings field
+			// Bind to the companySetting field
 			binder.addValueChangeListener(event -> {
 				currentUser = binder.getBean();
 				updateDisplay();
@@ -83,11 +86,11 @@ public class CComponentSingleCompanyUserSetting extends VerticalLayout {
 				showEmptyState("No user selected");
 				return;
 			}
-			CUserCompanySettings companySettings = currentUser.getCompanySettings();
-			if (companySettings == null || companySettings.getCompany() == null) {
+			CUserCompanySetting companySetting = currentUser.getCompanySettings();
+			if (companySetting == null || companySetting.getCompany() == null) {
 				showEmptyState("No company assigned");
 			} else {
-				showCompanySettings(companySettings);
+				showCompanySettings(companySetting);
 			}
 		} catch (Exception e) {
 			LOGGER.error("Error updating company settings display: {}", e.getMessage(), e);
@@ -114,7 +117,7 @@ public class CComponentSingleCompanyUserSetting extends VerticalLayout {
 		contentDiv.add(layout);
 	}
 
-	private void showCompanySettings(CUserCompanySettings settings) {
+	private void showCompanySettings(CUserCompanySetting settings) {
 		HorizontalLayout layout = new HorizontalLayout();
 		layout.setWidthFull();
 		layout.setDefaultVerticalComponentAlignment(Alignment.CENTER);
@@ -164,9 +167,9 @@ public class CComponentSingleCompanyUserSetting extends VerticalLayout {
 		try {
 			LOGGER.debug("Opening company settings dialog for user");
 			// Create or get existing settings
-			CUserCompanySettings settings = currentUser.getCompanySettings();
+			CUserCompanySetting settings = currentUser.getCompanySettings();
 			if (settings == null) {
-				settings = new CUserCompanySettings();
+				settings = new CUserCompanySetting();
 				settings.setUser(currentUser);
 			}
 			// Create a simple company selection dialog
@@ -179,7 +182,7 @@ public class CComponentSingleCompanyUserSetting extends VerticalLayout {
 		}
 	}
 
-	private void createCompanySelectionDialog(CUserCompanySettings settings) {
+	private void createCompanySelectionDialog(CUserCompanySetting settings) {
 		// Create the dialog
 		com.vaadin.flow.component.dialog.Dialog dialog = new com.vaadin.flow.component.dialog.Dialog();
 		dialog.setHeaderTitle("Select Company and Role");
@@ -242,7 +245,7 @@ public class CComponentSingleCompanyUserSetting extends VerticalLayout {
 				settings.setDepartment(departmentField.getValue());
 				settings.setUser(currentUser);
 				// Save the settings
-				CUserCompanySettings savedSettings = userCompanySettingsService.save(settings);
+				CUserCompanySetting savedSettings = userCompanySettingsService.save(settings);
 				// Update the user
 				currentUser.setCompanySettings(savedSettings);
 				CUser savedUser = userService.save(currentUser);

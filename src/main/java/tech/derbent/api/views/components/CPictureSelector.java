@@ -1,4 +1,4 @@
-package tech.derbent.api.components;
+package tech.derbent.api.views.components;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,8 +19,6 @@ import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.ui.notifications.CNotifications;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CImageUtils;
-import tech.derbent.api.views.components.CButton;
-import tech.derbent.api.views.components.CVerticalLayout;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
 /** Custom picture selector component that handles byte[] image data fields. Provides functionality to display, upload, and delete image data. This

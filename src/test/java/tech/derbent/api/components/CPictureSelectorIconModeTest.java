@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import static org.junit.jupiter.api.Assertions.*;
 import com.vaadin.flow.component.html.Image;
+import tech.derbent.api.views.components.CPictureSelector;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
 /** Unit tests for CPictureSelector icon mode functionality. */

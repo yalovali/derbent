@@ -1,4 +1,4 @@
-package tech.derbent.api.views;
+package tech.derbent.api.views.components;
 
 import java.util.ArrayList;
 import java.util.List;

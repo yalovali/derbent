@@ -14,13 +14,13 @@ import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.function.ValueProvider;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.components.CGridCell;
-import tech.derbent.api.components.CPictureSelector;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CImageUtils;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.views.components.CGridCell;
+import tech.derbent.api.views.components.CPictureSelector;
 import tech.derbent.screens.service.CEntityFieldService;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 

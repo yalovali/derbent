@@ -1,19 +1,17 @@
-package tech.derbent.users.view;
+package tech.derbent.api.views.components;
 
 import java.util.List;
+import org.springframework.context.ApplicationContext;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.CComponentUserProjectRelationBase;
-import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserProjectSettings;
-import tech.derbent.users.service.CUserProjectSettingsService;
 import tech.derbent.users.service.CUserService;
-import tech.derbent.users.service.CUserTypeService;
+import tech.derbent.users.view.CUserProjectSettingsDialog;
 
 /** Component for managing a user's project assignments (User->Project direction). This component displays all projects assigned to a specific user
  * and allows: - Adding new project assignments - Editing existing project roles/permissions - Removing project assignments The component
@@ -25,11 +23,9 @@ public class CComponentUserProjectSettings extends CComponentUserProjectRelation
 	private final CProjectService projectService;
 
 	public CComponentUserProjectSettings(IContentOwner parentContent, final CUser currentEntity, final CEnhancedBinder<CUser> beanValidationBinder,
-			final CUserService entityService, final CUserTypeService userTypeService, final CCompanyService companyService,
-			final CProjectService projectService, final CUserProjectSettingsService userProjectSettingsService) throws Exception {
-		super("Project Settings", parentContent, beanValidationBinder, CUser.class, entityService, userProjectSettingsService);
-		Check.notNull(projectService, "Project service cannot be null");
-		this.projectService = projectService;
+			final CUserService entityService, ApplicationContext applicationContext) throws Exception {
+		super("Project Settings", parentContent, beanValidationBinder, CUser.class, entityService, applicationContext);
+		this.projectService = applicationContext.getBean(CProjectService.class);
 		initPanel();
 	}
 

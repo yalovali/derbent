@@ -3,6 +3,7 @@ package tech.derbent.api.components;
 import org.junit.jupiter.api.Test;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.views.components.CPictureSelector;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
 /** Demo showing how CPictureSelector can be used in icon mode for displaying user profiles in grids with small icons. */

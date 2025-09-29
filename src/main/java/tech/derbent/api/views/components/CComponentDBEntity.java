@@ -1,4 +1,4 @@
-package tech.derbent.api.views;
+package tech.derbent.api.views.components;
 
 import java.util.List;
 import org.slf4j.Logger;
@@ -10,7 +10,6 @@ import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IHasContentOwner;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.components.CVerticalLayout;
 
 public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityClass>> extends CVerticalLayout
 		implements IContentOwner, IHasContentOwner {

@@ -60,8 +60,5 @@ public class CComponentUserProjectSettingsTest {
 		lenient().when(mockUserService.getById(any())).thenReturn(Optional.of(testUser));
 		lenient().when(mockProjectService.getAvailableProjectsForUser(any())).thenReturn(new ArrayList<>());
 		// Create binder
-		testBinder = new CEnhancedBinder<>(CUser.class);
-		new CComponentUserProjectSettings(mockContentOwner, testUser, testBinder, mockUserService, mockUserTypeService, mockCompanyService,
-				mockProjectService, mockUserProjectSettingsService);
 	}
 }

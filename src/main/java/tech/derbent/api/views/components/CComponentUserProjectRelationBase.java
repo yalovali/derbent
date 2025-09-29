@@ -1,9 +1,10 @@
-package tech.derbent.api.views;
+package tech.derbent.api.views.components;
 
 import java.util.List;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.api.components.CEnhancedBinder;
@@ -15,10 +16,12 @@ import tech.derbent.api.ui.dialogs.CConfirmationDialog;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.components.CButton;
+import tech.derbent.companies.service.CCompanyService;
+import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserProjectSettings;
 import tech.derbent.users.service.CUserProjectSettingsService;
+import tech.derbent.users.service.CUserTypeService;
 
 /** Generic base class for User-Project relationship components. This class provides common functionality for both User->Project and Project->User
  * relationship components, reducing code duplication while maintaining flexibility for specific implementations.
@@ -30,30 +33,25 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 	private static final long serialVersionUID = 1L;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected CUserProjectSettingsService userProjectSettingsService;
+	protected final ApplicationContext applicationContext;
+	protected CProjectService projectService;
+	protected CUserTypeService userTypeService;
+	protected CCompanyService companyService;
 
-	/** Constructor with enforced parameter validation using Check.XXX functions. Ensures all required dependencies are provided and terminates with
-	 * exceptions otherwise.
-	 * @param title                      Panel title - must not be null or blank
-	 * @param parentContent              Parent content owner - must not be null
-	 * @param beanValidationBinder       Entity binder - must not be null
-	 * @param entityClass                Entity class - must not be null
-	 * @param entityService              Entity service - must not be null
-	 * @param userProjectSettingsService Relationship service - must not be null
-	 * @throws IllegalArgumentException if any required parameter is null or invalid */
 	public CComponentUserProjectRelationBase(final String title, IContentOwner parentContent, final CEnhancedBinder<MasterClass> beanValidationBinder,
-			final Class<MasterClass> entityClass, final CAbstractService<MasterClass> entityService,
-			final CUserProjectSettingsService userProjectSettingsService) {
+			final Class<MasterClass> entityClass, final CAbstractService<MasterClass> entityService, final ApplicationContext applicationContext) {
 		super(title, parentContent, beanValidationBinder, entityClass, entityService, CUserProjectSettings.class);
-		// Enforce strict parameter validation - terminate with exceptions on any missing parameter
 		Check.notBlank(title, "Panel title cannot be null or blank - relational component requires a valid title");
-		// can be null, it will set later
-		// Check.notNull(parentContent, "Parent content cannot be null - relational component requires a parent content owner");
 		Check.notNull(beanValidationBinder, "Bean validation binder cannot be null - relational component requires a valid binder");
 		Check.notNull(entityClass, "Entity class cannot be null - relational component requires a valid entity class");
 		Check.notNull(entityService, "Entity service cannot be null - relational component requires a valid entity service");
-		Check.notNull(userProjectSettingsService,
-				"User project settings service cannot be null - relational component requires a relationship service");
-		this.userProjectSettingsService = userProjectSettingsService;
+		Check.notNull(applicationContext, "User project settings service cannot be null - relational component requires a relationship service");
+		this.applicationContext = applicationContext;
+		this.userProjectSettingsService = applicationContext.getBean(CUserProjectSettingsService.class);
+		this.projectService = applicationContext.getBean(CProjectService.class);
+		this.userTypeService = applicationContext.getBean(CUserTypeService.class);
+		this.companyService = applicationContext.getBean(CCompanyService.class);
+		// Class<?> masterService = CAuxillaries.getEntityServiceClasses(entityClass.getSimpleName());
 		setupGrid();
 		setupButtons();
 		closePanel();

@@ -13,12 +13,10 @@ import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.services.CAbstractNamedEntityService;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.views.components.CComponentProjectUserSettings;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.events.ProjectListChangeEvent;
-import tech.derbent.projects.view.CComponentProjectUserSettings;
 import tech.derbent.session.service.CSessionService;
-import tech.derbent.users.service.CUserProjectSettingsService;
-import tech.derbent.users.service.CUserService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -85,15 +83,8 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 
 	public Component createProjectUserSettingsComponent() {
 		try {
-			// Get services from ApplicationContext to avoid circular dependency
-			CUserService userService = applicationContext.getBean(CUserService.class);
-			CUserProjectSettingsService userProjectSettingsService = applicationContext.getBean(CUserProjectSettingsService.class);
-			// Create a minimal binder for the component
 			CEnhancedBinder<CProject> binder = new CEnhancedBinder<>(CProject.class);
-			// Create the enhanced component with proper service dependencies
-			CComponentProjectUserSettings component =
-					new CComponentProjectUserSettings(null, null, binder, this, userService, userProjectSettingsService);
-			LOGGER.debug("Successfully created CComponentProjectUserSettings");
+			CComponentProjectUserSettings component = new CComponentProjectUserSettings(null, null, binder, this, applicationContext);
 			return component;
 		} catch (Exception e) {
 			LOGGER.error("Failed to create project user settings component: {}", e.getMessage(), e);

@@ -6,18 +6,18 @@ import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.CComponentUserCompanyBase;
+import tech.derbent.api.views.components.CComponentUserCompanyBase;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.users.domain.CUser;
-import tech.derbent.users.domain.CUserCompanySettings;
+import tech.derbent.users.domain.CUserCompanySetting;
 import tech.derbent.users.service.CUserCompanySettingsService;
 import tech.derbent.users.service.CUserService;
 
 /** Simplified component for managing users within a company. This component displays all users assigned to a specific company and allows: - Adding
  * new user assignments - Editing existing user roles/departments/ownership - Removing user assignments The component automatically updates when the
  * current company changes and maintains data consistency through proper accessor patterns. */
-public class CComponentCompanyUserSettings extends CComponentUserCompanyBase<CCompany, CUserCompanySettings> {
+public class CComponentCompanyUserSettings extends CComponentUserCompanyBase<CCompany, CUserCompanySetting> {
 
 	private static final long serialVersionUID = 1L;
 	private CCompany currentCompany;
@@ -47,11 +47,11 @@ public class CComponentCompanyUserSettings extends CComponentUserCompanyBase<CCo
 	}
 
 	@Override
-	protected void onSettingsSaved(final CUserCompanySettings settings) {
+	protected void onSettingsSaved(final CUserCompanySetting settings) {
 		Check.notNull(settings, "Settings cannot be null when saving");
 		LOGGER.debug("Saving user company settings: {}", settings);
 		try {
-			final CUserCompanySettings savedSettings =
+			final CUserCompanySetting savedSettings =
 					settings.getId() == null
 							? userCompanySettingsService.addUserToCompany(settings.getUser(), settings.getCompany(), settings.getOwnershipLevel(),
 									settings.getRole(), settings.getDepartment(), settings.isPrimaryCompany())
@@ -85,7 +85,7 @@ public class CComponentCompanyUserSettings extends CComponentUserCompanyBase<CCo
 	protected void openEditDialog() throws Exception {
 		try {
 			LOGGER.debug("Opening edit dialog for company user settings");
-			final CUserCompanySettings selected = grid.asSingleSelect().getValue();
+			final CUserCompanySetting selected = grid.asSingleSelect().getValue();
 			Check.notNull(selected, "Please select a user setting to edit.");
 			final CCompany company = getCurrentEntity();
 			Check.notNull(company, "Current company is not available.");
@@ -114,14 +114,14 @@ public class CComponentCompanyUserSettings extends CComponentUserCompanyBase<CCo
 
 	private void setupDataAccessors() {
 		try {
-			final Supplier<List<CUserCompanySettings>> getterFunction = () -> {
+			final Supplier<List<CUserCompanySetting>> getterFunction = () -> {
 				final CCompany entity = getCurrentEntity();
 				if (entity == null) {
 					LOGGER.debug("No current entity available, returning empty list");
 					return List.of();
 				}
 				try {
-					final List<CUserCompanySettings> settings = userCompanySettingsService.findByCompany(entity);
+					final List<CUserCompanySetting> settings = userCompanySettingsService.findByCompany(entity);
 					LOGGER.debug("Retrieved {} user settings for company: {}", settings.size(), entity.getName());
 					return settings;
 				} catch (final Exception e) {

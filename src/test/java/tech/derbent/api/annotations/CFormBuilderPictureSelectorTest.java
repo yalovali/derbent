@@ -7,8 +7,8 @@ import java.lang.reflect.Method;
 import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.Component;
 import tech.derbent.api.components.CEnhancedBinder;
-import tech.derbent.api.components.CPictureSelector;
 import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.views.components.CPictureSelector;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
 /** Unit tests for CFormBuilder picture selector functionality. */

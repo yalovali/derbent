@@ -16,26 +16,26 @@ import tech.derbent.companies.domain.CCompany;
 /** Entity representing the relationship between a user and a company with ownership privileges. This entity manages company membership, roles, and
  * ownership levels for users. */
 @Entity
-@Table (name = "cusercompanysettings", uniqueConstraints = @UniqueConstraint (columnNames = {
+@Table (name = "cusercompanysetting", uniqueConstraints = @UniqueConstraint (columnNames = {
 		"user_id", "company_id"
 }))
-@AttributeOverride (name = "id", column = @Column (name = "cusercompanysettings_id"))
+@AttributeOverride (name = "id", column = @Column (name = "cusercompanysetting_id"))
 @ARelationshipMetadata (
-		parentEntityClass = CCompany.class, childEntityClass = CUser.class, relationshipEntityClass = CUserCompanySettings.class,
+		parentEntityClass = CCompany.class, childEntityClass = CUser.class, relationshipEntityClass = CUserCompanySetting.class,
 		displayName = "User Company Membership", description = "Manages user membership and ownership in companies", supportsOwnership = true,
 		defaultOwnership = "MEMBER", ownershipLevels = {
 				"OWNER", "ADMIN", "MEMBER", "VIEWER"
-		}, parentCollectionField = "users", childCollectionField = "companySettings"
+		}, parentCollectionField = "users", childCollectionField = "companySetting"
 )
-public class CUserCompanySettings extends CAbstractEntityRelationship<CUserCompanySettings> {
+public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompanySetting> {
 
 	public static final String VIEW_NAME = "User Company Settings View";
 
 	// Static helper methods for bidirectional relationship management
-	public static void addUserToCompany(CCompany company, CUser user, CUserCompanySettings settings) {
+	public static void addUserToCompany(CCompany company, CUser user, CUserCompanySetting settings) {
 		Check.notNull(company, "Company must not be null");
 		Check.notNull(user, "User must not be null");
-		Check.notNull(settings, "UserCompanySettings must not be null");
+		Check.notNull(settings, "UserCompanySetting must not be null");
 		// Set the relationships in the settings object
 		settings.setCompany(company);
 		settings.setUser(user);
@@ -83,17 +83,17 @@ public class CUserCompanySettings extends CAbstractEntityRelationship<CUserCompa
 	@AMetaData (displayName = "User", required = true, readOnly = false, description = "User in this company relationship", hidden = false, order = 1)
 	private CUser user;
 
-	public CUserCompanySettings() {
-		super(CUserCompanySettings.class);
+	public CUserCompanySetting() {
+		super(CUserCompanySetting.class);
 	}
 
-	public CUserCompanySettings(CUser user, CCompany company) {
-		super(CUserCompanySettings.class);
+	public CUserCompanySetting(CUser user, CCompany company) {
+		super(CUserCompanySetting.class);
 		this.user = user;
 		this.company = company;
 	}
 
-	public CUserCompanySettings(CUser user, CCompany company, String ownershipLevel) {
+	public CUserCompanySetting(CUser user, CCompany company, String ownershipLevel) {
 		this(user, company);
 		setOwnershipLevel(ownershipLevel);
 	}

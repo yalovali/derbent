@@ -1,4 +1,4 @@
-package tech.derbent.api.components;
+package tech.derbent.api.views.components;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,6 @@ import com.vaadin.flow.server.streams.UploadMetadata;
 import tech.derbent.api.ui.notifications.CNotifications;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CImageUtils;
-import tech.derbent.api.views.components.CButton;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
 /** Dialog that contains the full picture selector functionality. Used when CPictureSelector is in icon mode and user clicks on the icon. */

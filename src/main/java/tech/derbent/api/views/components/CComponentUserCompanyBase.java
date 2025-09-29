@@ -1,4 +1,4 @@
-package tech.derbent.api.views;
+package tech.derbent.api.views.components;
 
 import java.util.List;
 import org.slf4j.Logger;
@@ -14,16 +14,16 @@ import tech.derbent.api.ui.dialogs.CConfirmationDialog;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.components.CButton;
+import tech.derbent.api.views.CPanelRelationalBase;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.users.domain.CUser;
-import tech.derbent.users.domain.CUserCompanySettings;
+import tech.derbent.users.domain.CUserCompanySetting;
 import tech.derbent.users.service.CUserCompanySettingsService;
 
 /** Base class for managing user-company relationships in both directions. This class provides common functionality for both user->company and
  * company->user panels. */
 public abstract class CComponentUserCompanyBase<MasterClass extends CEntityNamed<MasterClass>, RelationalClass extends CEntityDB<RelationalClass>>
-		extends CPanelRelationalBase<MasterClass, CUserCompanySettings> {
+		extends CPanelRelationalBase<MasterClass, CUserCompanySetting> {
 
 	private static final long serialVersionUID = 1L;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
@@ -41,7 +41,7 @@ public abstract class CComponentUserCompanyBase<MasterClass extends CEntityNamed
 	public CComponentUserCompanyBase(final String title, IContentOwner parentContent, final CEnhancedBinder<MasterClass> beanValidationBinder,
 			final Class<MasterClass> entityClass, final CAbstractService<MasterClass> entityService,
 			final CUserCompanySettingsService userCompanySettingsService) {
-		super(title, parentContent, beanValidationBinder, entityClass, entityService, CUserCompanySettings.class);
+		super(title, parentContent, beanValidationBinder, entityClass, entityService, CUserCompanySetting.class);
 		// Enforce strict parameter validation - terminate with exceptions on any missing parameter
 		Check.notBlank(title, "Panel title cannot be null or blank - relational component requires a valid title");
 		Check.notNull(parentContent, "Parent content cannot be null - relational component requires a parent content owner");
@@ -56,7 +56,7 @@ public abstract class CComponentUserCompanyBase<MasterClass extends CEntityNamed
 		closePanel();
 	}
 
-	protected String createDeleteConfirmationMessage(final CUserCompanySettings selected) {
+	protected String createDeleteConfirmationMessage(final CUserCompanySetting selected) {
 		Check.notNull(selected, "Selected settings cannot be null");
 		Check.notNull(selected.getCompany(), "Company cannot be null");
 		final String companyName = selected.getCompany().getName();
@@ -65,7 +65,7 @@ public abstract class CComponentUserCompanyBase<MasterClass extends CEntityNamed
 
 	/** Deletes the selected user-company relationship */
 	protected void deleteSelected() {
-		final CUserCompanySettings selected = grid.asSingleSelect().getValue();
+		final CUserCompanySetting selected = grid.asSingleSelect().getValue();
 		if (selected == null) {
 			new CWarningDialog("Please select a relationship to delete.").open();
 			return;
@@ -95,7 +95,7 @@ public abstract class CComponentUserCompanyBase<MasterClass extends CEntityNamed
 		}).open();
 	}
 
-	protected String getDisplayText(final CUserCompanySettings settings, final String type) {
+	protected String getDisplayText(final CUserCompanySetting settings, final String type) {
 		Check.notNull(settings, "Settings cannot be null when getting display text");
 		try {
 			switch (type) {
@@ -121,7 +121,7 @@ public abstract class CComponentUserCompanyBase<MasterClass extends CEntityNamed
 	}
 
 	/** Abstract method to handle settings save events */
-	protected abstract void onSettingsSaved(final CUserCompanySettings settings);
+	protected abstract void onSettingsSaved(final CUserCompanySetting settings);
 	/** Abstract method to open the add dialog
 	 * @throws Exception */
 	protected abstract void openAddDialog() throws Exception;
@@ -165,7 +165,7 @@ public abstract class CComponentUserCompanyBase<MasterClass extends CEntityNamed
 	 * for better visual representation. */
 	protected void setupGrid() {
 		// Add columns with enhanced styling and colors
-		grid.addColumn(CUserCompanySettings::getId).setHeader(createStyledHeader("ID", "#424242")).setAutoWidth(true);
+		grid.addColumn(CUserCompanySetting::getId).setHeader(createStyledHeader("ID", "#424242")).setAutoWidth(true);
 		grid.addComponentColumn(settings -> {
 			try {
 				return CColorUtils.getEntityWithIcon(settings.getUser());
@@ -215,7 +215,7 @@ public abstract class CComponentUserCompanyBase<MasterClass extends CEntityNamed
 	 * @param actionName Name of the action for error message (e.g., "edit", "delete")
 	 * @return true if an item is selected, false otherwise */
 	protected boolean validateGridSelection(final String actionName) {
-		final CUserCompanySettings selected = grid.asSingleSelect().getValue();
+		final CUserCompanySetting selected = grid.asSingleSelect().getValue();
 		if (selected == null) {
 			final String message = String.format("Please select an item to %s.", actionName);
 			new CWarningDialog(message).open();

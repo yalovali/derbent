@@ -87,10 +87,10 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 	@OneToOne (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "single_company_settings_id", nullable = true)
 	@AMetaData (
-			displayName = "Company Settings", required = false, readOnly = false, description = "User's company membership and role", hidden = false,
+			displayName = "Company Setting", required = false, readOnly = false, description = "User's company membership and role", hidden = false,
 			order = 15, createComponentMethod = "createSingleCompanyUserSettingComponent"
 	)
-	private CUserCompanySettings companySettings;
+	private CUserCompanySetting companySetting;
 	@OneToMany (mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	@AMetaData (
 			displayName = "Project Settings", required = false, readOnly = true, description = "User's project memberships and roles", hidden = false,
@@ -155,7 +155,7 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 
 	public CCompany getCompany() { return company; }
 
-	public CUserCompanySettings getCompanySettings() { return companySettings; }
+	public CUserCompanySetting getCompanySettings() { return companySetting; }
 
 	public String getEmail() { return email; }
 
@@ -236,11 +236,11 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 
 	public void setCompany(final CCompany company) { this.company = company; }
 
-	public void setCompanySettings(final CUserCompanySettings companySettings) {
-		this.companySettings = companySettings;
+	public void setCompanySettings(final CUserCompanySetting companySetting) {
+		this.companySetting = companySetting;
 		// Maintain bidirectional relationship
-		if (companySettings != null) {
-			companySettings.setUser(this);
+		if (companySetting != null) {
+			companySetting.setUser(this);
 		}
 	}
 

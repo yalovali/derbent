@@ -28,11 +28,10 @@ import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.services.CAbstractNamedEntityService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.companies.service.CCompanyService;
+import tech.derbent.api.views.components.CComponentSingleCompanyUserSetting;
+import tech.derbent.api.views.components.CComponentUserProjectSettings;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUser;
-import tech.derbent.users.view.CComponentUserProjectSettings;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -232,15 +231,10 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 		LOGGER.debug("Creating enhanced user project settings component");
 		try {
 			// Get services from ApplicationContext to avoid circular dependency
-			CProjectService projectService = applicationContext.getBean(CProjectService.class);
-			CUserProjectSettingsService userProjectSettingsService = applicationContext.getBean(CUserProjectSettingsService.class);
-			CUserTypeService userTypeService = applicationContext.getBean(CUserTypeService.class);
-			CCompanyService companyService = applicationContext.getBean(CCompanyService.class);
 			// Create a minimal binder for the component
 			CEnhancedBinder<CUser> binder = new CEnhancedBinder<>(CUser.class);
 			// Create the enhanced component with proper service dependencies
-			CComponentUserProjectSettings component = new CComponentUserProjectSettings(null, null, binder, this, userTypeService, companyService,
-					projectService, userProjectSettingsService);
+			CComponentUserProjectSettings component = new CComponentUserProjectSettings(null, null, binder, this, applicationContext);
 			LOGGER.debug("Successfully created CComponentUserProjectSettings");
 			return component;
 		} catch (Exception e) {
@@ -256,15 +250,9 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	public Component createSingleCompanyUserSettingComponent() {
 		LOGGER.debug("Creating single company user setting component");
 		try {
-			// Get services from ApplicationContext to avoid circular dependency
-			CCompanyService companyService = applicationContext.getBean(CCompanyService.class);
-			CUserCompanySettingsService userCompanySettingsService = applicationContext.getBean(CUserCompanySettingsService.class);
-			// Create wrapper div for the component - this will be replaced by actual component during binding
-			Div wrapper = new Div();
-			wrapper.addClassName("component-single-company-user-setting-wrapper");
-			wrapper.getElement().setAttribute("data-component-type", "CComponentSingleCompanyUserSetting");
-			LOGGER.debug("Successfully created single company user setting component wrapper");
-			return wrapper;
+			CEnhancedBinder<CUser> binder = new CEnhancedBinder<>(CUser.class);
+			CComponentSingleCompanyUserSetting component = new CComponentSingleCompanyUserSetting(null, null, binder, this, applicationContext);
+			return component;
 		} catch (Exception e) {
 			LOGGER.error("Failed to create single company user setting component: {}", e.getMessage(), e);
 			// Fallback to simple div with error message

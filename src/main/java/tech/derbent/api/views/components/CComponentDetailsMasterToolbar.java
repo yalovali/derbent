@@ -1,4 +1,4 @@
-package tech.derbent.api.components;
+package tech.derbent.api.views.components;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,7 +7,6 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import tech.derbent.api.ui.notifications.CNotifications;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.components.CButton;
 import tech.derbent.screens.domain.CGridEntity;
 import tech.derbent.screens.view.CComponentGridEntity;
 import tech.derbent.screens.view.CFieldSelectionDialog;

@@ -43,10 +43,10 @@ public class CUserInitializerService extends CInitializerServiceBase {
 			line.setProperty("Component:createUserProjectSettingsComponent");
 			line.setDataProviderBean("CUserService");
 			scr.addScreenLine(line);
-			line = CDetailLinesService.createLineFromDefaults(clazz, "companySettings");
-			line.setRelationFieldName("companySettings");
-			line.setFieldCaption("companySettings");
-			line.setProperty("createUserCompanySettingsComponent");
+			line = CDetailLinesService.createLineFromDefaults(clazz, "companySetting");
+			line.setRelationFieldName("companySetting");
+			line.setFieldCaption("companySetting");
+			line.setProperty("Component:createSingleCompanyUserSettingComponent");
 			line.setDataProviderBean("CUserService");
 			scr.addScreenLine(line);
 			scr.addScreenLine(CDetailLinesService.createSection("Profile"));
@@ -68,7 +68,7 @@ public class CUserInitializerService extends CInitializerServiceBase {
 	public static CGridEntity createGridEntity(final CProject project) {
 		CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setSelectedFields(
-				"name,lastname,login,email,phone,userType,company,projectSettings,companySettings,enabled,createdDate,lastModifiedDate");
+				"name,lastname,login,email,phone,userType,company,projectSettings,companySetting,enabled,createdDate,lastModifiedDate");
 		return grid;
 	}
 

@@ -1,4 +1,4 @@
-package tech.derbent.api.components;
+package tech.derbent.api.views.components;
 
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.textfield.TextField;

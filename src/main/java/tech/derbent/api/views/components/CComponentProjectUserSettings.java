@@ -1,16 +1,16 @@
-package tech.derbent.projects.view;
+package tech.derbent.api.views.components;
 
 import java.util.List;
+import org.springframework.context.ApplicationContext;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.CComponentUserProjectRelationBase;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
+import tech.derbent.projects.view.CProjectUserSettingsDialog;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserProjectSettings;
-import tech.derbent.users.service.CUserProjectSettingsService;
 import tech.derbent.users.service.CUserService;
 
 /** Component for managing users within a project (Project->User direction). This component displays all users assigned to a specific project and
@@ -23,11 +23,10 @@ public class CComponentProjectUserSettings extends CComponentUserProjectRelation
 	private final CUserService userService;
 
 	public CComponentProjectUserSettings(IContentOwner parentContent, final CProject currentEntity,
-			final CEnhancedBinder<CProject> beanValidationBinder, final CProjectService entityService, final CUserService userService,
-			final CUserProjectSettingsService userProjectSettingsService) throws Exception {
-		super("User Settings", parentContent, beanValidationBinder, CProject.class, entityService, userProjectSettingsService);
-		Check.notNull(userService, "User service cannot be null");
-		this.userService = userService;
+			final CEnhancedBinder<CProject> beanValidationBinder, final CProjectService entityService, ApplicationContext applicationContext)
+			throws Exception {
+		super("User Settings", parentContent, beanValidationBinder, CProject.class, entityService, applicationContext);
+		this.userService = applicationContext.getBean(CUserService.class);
 		initPanel();
 	}
 
