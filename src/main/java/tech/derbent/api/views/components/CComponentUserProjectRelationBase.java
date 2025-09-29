@@ -40,7 +40,7 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 
 	public CComponentUserProjectRelationBase(final String title, IContentOwner parentContent, final CEnhancedBinder<MasterClass> beanValidationBinder,
 			final Class<MasterClass> entityClass, final CAbstractService<MasterClass> entityService, final ApplicationContext applicationContext) {
-		super(title, parentContent, beanValidationBinder, entityClass, entityService, CUserProjectSettings.class);
+		super(title, parentContent, beanValidationBinder, entityClass, CUserProjectSettings.class, applicationContext);
 		Check.notBlank(title, "Panel title cannot be null or blank - relational component requires a valid title");
 		Check.notNull(beanValidationBinder, "Bean validation binder cannot be null - relational component requires a valid binder");
 		Check.notNull(entityClass, "Entity class cannot be null - relational component requires a valid entity class");

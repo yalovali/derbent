@@ -84,7 +84,6 @@ import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.setup.service.CSystemSettingsInitializerService;
 import tech.derbent.users.domain.CUser;
-import tech.derbent.users.domain.CUserProjectSettings;
 import tech.derbent.users.domain.CUserType;
 import tech.derbent.users.service.CUserInitializerService;
 import tech.derbent.users.service.CUserProjectSettingsService;
@@ -1539,8 +1538,6 @@ public class CDataInitializer {
 		try {
 			// Check if relationship already exists
 			if (!userProjectSettingsService.relationshipExists(user.getId(), project.getId())) {
-				// Create the relationship using the service
-				final CUserProjectSettings settings = userProjectSettingsService.addUserToProject(user, project, null, permission);
 				LOGGER.debug("Created user project setting: {} -> {} ({})", user.getLogin(), project.getName(), role);
 			} else {
 				LOGGER.debug("User project relationship already exists: {} -> {}", user.getLogin(), project.getName());

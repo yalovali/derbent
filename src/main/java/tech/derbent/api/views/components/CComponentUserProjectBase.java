@@ -2,13 +2,13 @@ package tech.derbent.api.views.components;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.interfaces.IContentOwner;
-import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.ui.dialogs.CConfirmationDialog;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.api.utils.CColorUtils;
@@ -29,9 +29,9 @@ public abstract class CComponentUserProjectBase<MasterClass extends CEntityNamed
 	protected CUserProjectSettingsService userProjectSettingsService;
 
 	public CComponentUserProjectBase(final String title, IContentOwner parentContent, final CEnhancedBinder<MasterClass> beanValidationBinder,
-			final Class<MasterClass> entityClass, final CAbstractService<MasterClass> entityService,
-			final CUserProjectSettingsService userProjectSettingsService) {
-		super(title, parentContent, beanValidationBinder, entityClass, entityService, CUserProjectSettings.class);
+			final Class<MasterClass> entityClass, final CUserProjectSettingsService userProjectSettingsService,
+			ApplicationContext applicationContext) {
+		super(title, parentContent, beanValidationBinder, entityClass, CUserProjectSettings.class, applicationContext);
 		Check.notNull(userProjectSettingsService, "User project settings service cannot be null");
 		this.userProjectSettingsService = userProjectSettingsService;
 		setupGrid();

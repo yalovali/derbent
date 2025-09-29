@@ -230,10 +230,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	public Component createUserProjectSettingsComponent() {
 		LOGGER.debug("Creating enhanced user project settings component");
 		try {
-			// Get services from ApplicationContext to avoid circular dependency
-			// Create a minimal binder for the component
 			CEnhancedBinder<CUser> binder = new CEnhancedBinder<>(CUser.class);
-			// Create the enhanced component with proper service dependencies
 			CComponentUserProjectSettings component = new CComponentUserProjectSettings(null, null, binder, this, applicationContext);
 			LOGGER.debug("Successfully created CComponentUserProjectSettings");
 			return component;
@@ -251,7 +248,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 		LOGGER.debug("Creating single company user setting component");
 		try {
 			CEnhancedBinder<CUser> binder = new CEnhancedBinder<>(CUser.class);
-			CComponentSingleCompanyUserSetting component = new CComponentSingleCompanyUserSetting(null, null, binder, this, applicationContext);
+			CComponentSingleCompanyUserSetting component = new CComponentSingleCompanyUserSetting(null, binder, applicationContext);
 			return component;
 		} catch (Exception e) {
 			LOGGER.error("Failed to create single company user setting component: {}", e.getMessage(), e);

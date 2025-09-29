@@ -2,7 +2,6 @@ package tech.derbent.api.views.components;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
@@ -15,47 +14,27 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.interfaces.IContentOwner;
-import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserCompanySetting;
-import tech.derbent.users.service.CUserCompanySettingsService;
-import tech.derbent.users.service.CUserService;
 
 /** Component for displaying and editing a user's single company setting. This component provides a nice visual layout with icons and colors for the
  * CUserCompanySettings field, allowing users to view and edit their company membership and role through an attractive interface. */
-public class CComponentSingleCompanyUserSetting extends VerticalLayout {
+public class CComponentSingleCompanyUserSetting extends CComponentDBEntity<CUser> {
 
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentSingleCompanyUserSetting.class);
-	private final IContentOwner parentContent;
-	private final CEnhancedBinder<CUser> binder;
-	private final CUserService userService;
 	private final CCompanyService companyService;
-	private final CUserCompanySettingsService userCompanySettingsService;
-	private CUser currentUser;
 	private Div contentDiv;
-	private ApplicationContext applicationContext;
-	@Autowired
-	private CNotificationService notificationService;
 
-	public CComponentSingleCompanyUserSetting(IContentOwner parentContent, CUser currentEntity, CEnhancedBinder<CUser> beanValidationBinder,
-			CUserService userService, ApplicationContext applicationContext) {
-		Check.notNull(userService, "User service cannot be null");
-		userCompanySettingsService = applicationContext.getBean(CUserCompanySettingsService.class);
+	public CComponentSingleCompanyUserSetting(IContentOwner parentContent, CEnhancedBinder<CUser> beanValidationBinder,
+			ApplicationContext applicationContext) {
+		super("Company Setting", parentContent, beanValidationBinder, CUser.class, applicationContext);
 		companyService = applicationContext.getBean(CCompanyService.class);
 		Check.notNull(companyService, "Company service cannot be null");
-		Check.notNull(userCompanySettingsService, "User company settings service cannot be null");
-		this.parentContent = parentContent;
-		this.binder = beanValidationBinder;
-		this.userService = userService;
-		this.currentUser = currentEntity;
-		this.applicationContext = applicationContext;
 		initComponent();
-		setupBindings();
 	}
 
 	private void initComponent() {
@@ -66,21 +45,13 @@ public class CComponentSingleCompanyUserSetting extends VerticalLayout {
 		contentDiv = new Div();
 		contentDiv.setWidthFull();
 		add(contentDiv);
-		updateDisplay();
 	}
 
-	private void setupBindings() {
-		if (binder != null) {
-			// Bind to the companySetting field
-			binder.addValueChangeListener(event -> {
-				currentUser = binder.getBean();
-				updateDisplay();
-			});
-		}
-	}
-
-	private void updateDisplay() {
+	@Override
+	public void populateForm() {
+		super.populateForm();
 		contentDiv.removeAll();
+		CUser currentUser = getCurrentEntity();
 		try {
 			if (currentUser == null) {
 				showEmptyState("No user selected");
@@ -163,115 +134,10 @@ public class CComponentSingleCompanyUserSetting extends VerticalLayout {
 		contentDiv.add(layout);
 	}
 
-	private void openEditDialog() {
-		try {
-			LOGGER.debug("Opening company settings dialog for user");
-			// Create or get existing settings
-			CUserCompanySetting settings = currentUser.getCompanySettings();
-			if (settings == null) {
-				settings = new CUserCompanySetting();
-				settings.setUser(currentUser);
-			}
-			// Create a simple company selection dialog
-			createCompanySelectionDialog(settings);
-		} catch (Exception e) {
-			LOGGER.error("Failed to open company settings dialog: {}", e.getMessage(), e);
-			if (notificationService != null) {
-				notificationService.showError("Failed to open company settings dialog: " + e.getMessage());
-			}
-		}
-	}
+	private void openEditDialog() {}
 
-	private void createCompanySelectionDialog(CUserCompanySetting settings) {
-		// Create the dialog
-		com.vaadin.flow.component.dialog.Dialog dialog = new com.vaadin.flow.component.dialog.Dialog();
-		dialog.setHeaderTitle("Select Company and Role");
-		dialog.setWidth("500px");
-		dialog.setModal(true);
-		// Create form layout
-		com.vaadin.flow.component.formlayout.FormLayout formLayout = new com.vaadin.flow.component.formlayout.FormLayout();
-		// Company selection
-		com.vaadin.flow.component.combobox.ComboBox<CCompany> companyComboBox = new com.vaadin.flow.component.combobox.ComboBox<>("Company");
-		companyComboBox.setItemLabelGenerator(CCompany::getName);
-		companyComboBox.setWidthFull();
-		// Load companies
-		try {
-			java.util.List<CCompany> companies = companyService.findAll();
-			companyComboBox.setItems(companies);
-			if (settings.getCompany() != null) {
-				companyComboBox.setValue(settings.getCompany());
-			}
-		} catch (Exception e) {
-			LOGGER.error("Failed to load companies: {}", e.getMessage(), e);
-		}
-		// Role field
-		com.vaadin.flow.component.textfield.TextField roleField = new com.vaadin.flow.component.textfield.TextField("Role");
-		roleField.setWidthFull();
-		if (settings.getRole() != null) {
-			roleField.setValue(settings.getRole());
-		}
-		// Ownership level selection
-		com.vaadin.flow.component.combobox.ComboBox<String> ownershipComboBox = new com.vaadin.flow.component.combobox.ComboBox<>("Ownership Level");
-		ownershipComboBox.setItems("OWNER", "ADMIN", "MEMBER", "VIEWER");
-		ownershipComboBox.setWidthFull();
-		if (settings.getOwnershipLevel() != null) {
-			ownershipComboBox.setValue(settings.getOwnershipLevel());
-		} else {
-			ownershipComboBox.setValue("MEMBER");
-		}
-		// Department field
-		com.vaadin.flow.component.textfield.TextField departmentField = new com.vaadin.flow.component.textfield.TextField("Department");
-		departmentField.setWidthFull();
-		if (settings.getDepartment() != null) {
-			departmentField.setValue(settings.getDepartment());
-		}
-		formLayout.add(companyComboBox, roleField, ownershipComboBox, departmentField);
-		// Buttons
-		Button saveButton = new Button("Save", VaadinIcon.CHECK.create());
-		saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		saveButton.addClickListener(e -> {
-			try {
-				CCompany selectedCompany = companyComboBox.getValue();
-				if (selectedCompany == null) {
-					if (notificationService != null) {
-						notificationService.showWarning("Please select a company");
-					}
-					return;
-				}
-				// Update settings
-				settings.setCompany(selectedCompany);
-				settings.setRole(roleField.getValue());
-				settings.setOwnershipLevel(ownershipComboBox.getValue());
-				settings.setDepartment(departmentField.getValue());
-				settings.setUser(currentUser);
-				// Save the settings
-				CUserCompanySetting savedSettings = userCompanySettingsService.save(settings);
-				// Update the user
-				currentUser.setCompanySettings(savedSettings);
-				CUser savedUser = userService.save(currentUser);
-				currentUser = savedUser;
-				dialog.close();
-				updateDisplay();
-				if (notificationService != null) {
-					notificationService.showSaveSuccess();
-				}
-			} catch (Exception ex) {
-				LOGGER.error("Error saving company settings: {}", ex.getMessage(), ex);
-				if (notificationService != null) {
-					notificationService.showSaveError();
-				}
-			}
-		});
-		Button cancelButton = new Button("Cancel", e -> dialog.close());
-		dialog.getFooter().add(cancelButton, saveButton);
-		dialog.add(formLayout);
-		dialog.open();
+	@Override
+	protected void updatePanelEntityFields() {
+		// TODO Auto-generated method stub
 	}
-
-	public void setCurrentUser(CUser user) {
-		this.currentUser = user;
-		updateDisplay();
-	}
-
-	public CUser getCurrentUser() { return currentUser; }
 }

@@ -300,71 +300,76 @@ public class CAuxillaries {
 
 	public static Class<?> getInitializerService(final String entityType) {
 		Check.notBlank(entityType, "Entity type must not be empty");
-		switch (entityType) {
-		case "CActivity":
+		Class<?> clazz = getEntityClass(entityType);
+		return getInitializerService(clazz);
+	}
+
+	public static Class<?> getInitializerService(final Class<?> entityClass) {
+		if (entityClass == CActivity.class) {
 			return CActivityInitializerService.class;
-		case "CMeeting":
+		} else if (entityClass == CMeeting.class) {
 			return CMeetingInitializerService.class;
-		case "COrder":
+		} else if (entityClass == COrder.class) {
 			return COrderInitializerService.class;
-		case "CRisk":
+		} else if (entityClass == CRisk.class) {
 			return CRiskInitializerService.class;
-		case "CCompany":
+		} else if (entityClass == CCompany.class) {
 			return CCompanyInitializerService.class;
-		case "CProject":
+		} else if (entityClass == CProject.class) {
 			return CProjectInitializerService.class;
-		case "CDecision":
+		} else if (entityClass == CDecision.class) {
 			return CDecisionInitializerService.class;
-		case "CUser":
+		} else if (entityClass == CUser.class) {
 			return CUserInitializerService.class;
-		case "CUserType":
+		} else if (entityClass == CUserType.class) {
 			return CUserTypeInitializerService.class;
-		case "CActivityType":
+		} else if (entityClass == CActivityType.class) {
 			return CActivityTypeInitializerService.class;
-		case "CActivityStatus":
+		} else if (entityClass == CActivityStatus.class) {
 			return CActivityStatusInitializerService.class;
-		case "CActivityPriority":
+		} else if (entityClass == CActivityPriority.class) {
 			return CActivityPriorityInitializerService.class;
-		case "CMeetingType":
+		} else if (entityClass == CMeetingType.class) {
 			return CMeetingTypeInitializerService.class;
-		case "CMeetingStatus":
+		} else if (entityClass == CMeetingStatus.class) {
 			return CMeetingStatusInitializerService.class;
-		case "CRiskStatus":
+		} else if (entityClass == CRiskStatus.class) {
 			return CRiskStatusInitializerService.class;
-		case "CPageEntity":
+		} else if (entityClass == CPageEntity.class) {
 			return CPageEntityInitializerService.class;
-		case "CCommentPriority":
+		} else if (entityClass == CCommentPriority.class) {
 			return CCommentPriorityInitializerService.class;
-		case "CCurrency":
+		} else if (entityClass == CCurrency.class) {
 			return CCurrencyInitializerService.class;
-		case "CDecisionStatus":
+		} else if (entityClass == CDecisionStatus.class) {
 			return CDecisionStatusInitializerService.class;
-		case "CDecisionType":
+		} else if (entityClass == CDecisionType.class) {
 			return CDecisionTypeInitializerService.class;
-		case "COrderStatus":
+		} else if (entityClass == COrderStatus.class) {
 			return COrderStatusInitializerService.class;
-		case "COrderType":
+		} else if (entityClass == COrderType.class) {
 			return COrderTypeInitializerService.class;
-		case "CApprovalStatus":
+		} else if (entityClass == CApprovalStatus.class) {
 			return CApprovalStatusInitializerService.class;
-		case "CDetailSection":
+		} else if (entityClass == CDetailSection.class) {
 			return CDetailSectionService.class;
-		case "CGridEntity":
+		} else if (entityClass == CGridEntity.class) {
 			return CGridEntityService.class;
-		case "CSystemSettings":
+		} else if (entityClass == CSystemSettings.class) {
 			return CSystemSettingsInitializerService.class;
-		case "CUserProjectRole":
+		} else if (entityClass == CUserProjectRole.class) {
 			return CUserProjectRoleInitializerService.class;
-		// ... add more as needed ...
-		default:
-			LOGGER.error("Unknown entity type: " + entityType + " dont forget to update CAuxillaries");
-			throw new IllegalArgumentException("Unknown entity type: " + entityType);
+		} else {
+			LOGGER.error("Unknown entity type: " + entityClass.getSimpleName() + " dont forget to update CAuxillaries");
+			throw new IllegalArgumentException("Unknown entity type: " + entityClass.getSimpleName());
 		}
 	}
 
 	public static Class<?> getServiceClass(final String simpleName) {
 		Check.notBlank(simpleName, "Entity type must not be empty");
 		switch (simpleName) {
+		case "CUser":
+			return CUserService.class;
 		case "CActivityService":
 			return CActivityService.class;
 		case "CMeetingService":

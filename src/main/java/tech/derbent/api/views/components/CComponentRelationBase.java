@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.component.grid.Grid;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
-import tech.derbent.api.services.CAbstractService;
 
 public abstract class CComponentRelationBase<MasterClass extends CEntityDB<MasterClass>, RelationalClass extends CEntityDB<RelationalClass>>
 		extends CComponentDBEntity<MasterClass> {
@@ -22,8 +22,8 @@ public abstract class CComponentRelationBase<MasterClass extends CEntityDB<Maste
 	protected Runnable saveEntity;
 
 	public CComponentRelationBase(final String title, IContentOwner parentContent, final CEnhancedBinder<MasterClass> beanValidationBinder,
-			final Class<MasterClass> entityClass, final CAbstractService<MasterClass> masterService, final Class<RelationalClass> relationalClass) {
-		super(title, parentContent, beanValidationBinder, entityClass, masterService);
+			final Class<MasterClass> entityClass, final Class<RelationalClass> relationalClass, ApplicationContext applicationContext) {
+		super(title, parentContent, beanValidationBinder, entityClass, applicationContext);
 		this.relationalClass = relationalClass;
 		this.grid = new Grid<>(relationalClass, false);
 		this.getSettings = () -> List.of();

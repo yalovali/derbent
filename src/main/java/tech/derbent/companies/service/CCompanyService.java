@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,31 +13,19 @@ import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.services.CAbstractNamedEntityService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.companies.domain.CCompany;
-import tech.derbent.companies.view.CComponentCompanyUserSettings;
 import tech.derbent.session.service.CSessionService;
-import tech.derbent.users.service.CUserCompanySettingsService;
-import tech.derbent.users.service.CUserService;
 
-/** CCompanyService - Business logic layer for CCompany entities Layer: Service (MVC) Extends CAbstractService to provide standard CRUD operations
- * with additional business logic */
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCompanyService.class);
-	@Autowired
-	private ApplicationContext applicationContext;
 
-	/** Constructor for CCompanyService
-	 * @param repository the CCompanyRepository instance
-	 * @param clock      the Clock instance for time-related operations */
 	public CCompanyService(final ICompanyRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 
-	/** Soft delete - disables the company instead of deleting it
-	 * @param id the company ID to disable */
 	@Transactional
 	public void disableCompany(final Long id) {
 		Check.notNull(id, "Company ID cannot be null");
@@ -55,8 +41,6 @@ public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 		}
 	}
 
-	/** Re-enables a disabled company
-	 * @param id the company ID to enable */
 	@Transactional
 	public void enableCompany(final Long id) {
 		Check.notNull(id, "Company ID cannot be null");
@@ -72,9 +56,6 @@ public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 		}
 	}
 
-	/** Finds a company by tax number
-	 * @param taxNumber the tax identification number
-	 * @return Optional containing the company if found */
 	public Optional<CCompany> findByTaxNumber(final String taxNumber) {
 		Check.notBlank(taxNumber, "Tax number cannot be null or empty");
 		try {
@@ -86,8 +67,6 @@ public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 		}
 	}
 
-	/** Finds all enabled companies
-	 * @return List of enabled companies */
 	public List<CCompany> findEnabledCompanies() {
 		LOGGER.debug("findEnabledCompanies called");
 		try {
@@ -103,9 +82,6 @@ public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 	@Override
 	protected Class<CCompany> getEntityClass() { return CCompany.class; }
 
-	/** Finds companies by name containing the search term (case-insensitive)
-	 * @param searchTerm the search term
-	 * @return List of companies matching the search term */
 	public List<CCompany> searchCompaniesByName(final String searchTerm) {
 		LOGGER.debug("searchCompaniesByName called with searchTerm: {}", searchTerm);
 		if ((searchTerm == null) || searchTerm.trim().isEmpty()) {
@@ -125,9 +101,6 @@ public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 	public Component createCompanyUserSettingsComponent() {
 		LOGGER.debug("Creating enhanced company user settings component");
 		try {
-			// Get services from ApplicationContext to avoid circular dependency
-			CUserService userService = applicationContext.getBean(CUserService.class);
-			CUserCompanySettingsService userCompanySettingsService = applicationContext.getBean(CUserCompanySettingsService.class);
 			// Create wrapper div for the component - this will be replaced by actual component during binding
 			Div wrapper = new Div();
 			wrapper.addClassName("component-company-user-settings-wrapper");

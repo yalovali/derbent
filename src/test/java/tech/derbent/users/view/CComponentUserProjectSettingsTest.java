@@ -9,7 +9,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.domain.CProject;
@@ -37,7 +36,6 @@ public class CComponentUserProjectSettingsTest {
 	@Mock
 	private CUserProjectSettingsService mockUserProjectSettingsService;
 	private CUser testUser;
-	private CEnhancedBinder<CUser> testBinder;
 
 	@BeforeEach
 	void setUp() throws Exception {

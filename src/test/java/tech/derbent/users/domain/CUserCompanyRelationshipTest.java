@@ -9,7 +9,6 @@ import tech.derbent.companies.domain.CCompany;
 /** Unit tests for user-company relationship management and enhanced access control. */
 public class CUserCompanyRelationshipTest {
 
-	private CCompany company;
 	private CUserCompanySetting settings;
 	private CUser user;
 
@@ -18,7 +17,7 @@ public class CUserCompanyRelationshipTest {
 		user = new CUser("Test User");
 		user.setLogin("testuser");
 		user.setEmail("test@example.com");
-		company = new CCompany("Test Company");
+		new CCompany("Test Company");
 		settings = new CUserCompanySetting();
 		settings.setOwnershipLevel("MEMBER");
 		settings.setRole("DEVELOPER");

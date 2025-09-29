@@ -3,12 +3,14 @@ package tech.derbent.api.views.components;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IHasContentOwner;
 import tech.derbent.api.services.CAbstractService;
+import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
 
 public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityClass>> extends CVerticalLayout
@@ -17,6 +19,7 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 	private static final long serialVersionUID = 1L;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected final Class<EntityClass> entityClass;
+	protected final ApplicationContext applicationContext;
 
 	public Class<EntityClass> getEntityClass() { return entityClass; }
 
@@ -66,14 +69,16 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 		}
 	}
 
+	@SuppressWarnings ("unchecked")
 	public CComponentDBEntity(final String title, IContentOwner parentContent, final CEnhancedBinder<EntityClass> beanValidationBinder,
-			final Class<EntityClass> entityClass, final CAbstractService<EntityClass> entityService) {
+			final Class<EntityClass> entityClass, ApplicationContext applicationContext) {
 		super(false, true, false); // no padding, with spacing, no margin
+		this.applicationContext = applicationContext;
 		Check.notNull(entityClass, "Entity class cannot be null");
 		Check.notNull(beanValidationBinder, "Binder cannot be null");
 		this.entityClass = entityClass;
 		this.binder = beanValidationBinder;
-		this.entityService = entityService;
+		this.entityService = (CAbstractService<EntityClass>) applicationContext.getBean(CAuxillaries.getServiceClass(entityClass.getSimpleName()));
 		this.contentOwner = parentContent;
 		addClassName("c-component-db-entity");
 		setWidthFull();

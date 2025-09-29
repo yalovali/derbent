@@ -141,7 +141,6 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 		// Find the relationship first to maintain bidirectional collections
 		final Optional<CUserCompanySetting> settingsOpt = findRelationship(user.getId(), company.getId());
 		if (settingsOpt.isPresent()) {
-			final CUserCompanySetting settings = settingsOpt.get();
 			// Remove from bidirectional collections
 			if (company.getUsers() != null) {
 				company.getUsers().remove(user);
