@@ -18,6 +18,7 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.vaadin.flow.router.Route;
 import tech.derbent.api.utils.Check;
+import tech.derbent.projects.domain.CProject;
 
 /** Enhanced base UI test class that provides common functionality for Playwright tests. This class includes 25+ auxiliary methods for testing all
  * views and business functions. The base class follows strict coding guidelines and provides comprehensive testing utilities for: - Login and
@@ -892,6 +893,133 @@ public abstract class CBaseUITest {
 			return false;
 		} catch (Exception e) {
 			LOGGER.error("❌ Error checking if dynamic page loaded: {}", e.getMessage());
+			return false;
+		}
+	}
+
+	/** Navigate to the first page entity of a specific project and entity class. This method mimics the menu generator behavior to dynamically get
+	 * page links.
+	 * @param project     The project to search in (can be null for all projects)
+	 * @param entityClass The entity class to find a page for (e.g., CUser.class, CCompany.class)
+	 * @return true if navigation was successful */
+	protected boolean navigateToFirstPage(CProject project, Class<?> entityClass) {
+		Check.notNull(entityClass, "Entity class cannot be null");
+		LOGGER.info("🧭 Navigating to first page for entity class: {} in project: {}", entityClass.getSimpleName(),
+				project != null ? project.getName() : "All Projects");
+		try {
+			if (!isBrowserAvailable()) {
+				LOGGER.warn("⚠️ Browser not available, cannot navigate to first page");
+				return false;
+			}
+			// Generate dynamic page link based on entity class
+			String entityName = entityClass.getSimpleName();
+			String[] possibleRoutes = generateDynamicPageRoutes(entityName);
+			// Try to navigate to each possible route
+			for (String route : possibleRoutes) {
+				try {
+					LOGGER.debug("🔗 Trying route: {}", route);
+					page.navigate("http://localhost:" + port + "/" + route);
+					wait_2000(); // Wait for page to load
+					if (isDynamicPageLoaded()) {
+						LOGGER.info("✅ Successfully navigated to first page via route: {}", route);
+						return true;
+					}
+				} catch (Exception e) {
+					LOGGER.debug("⚠️ Route {} failed: {}", route, e.getMessage());
+				}
+			}
+			// Fallback: try navigation via menu system
+			return navigateToDynamicPageByEntityType(entityName);
+		} catch (Exception e) {
+			String message = "Failed to navigate to first page for entity class: " + entityClass.getSimpleName() + " - " + e.getMessage();
+			LOGGER.error("❌ {}", message);
+			return false;
+		}
+	}
+
+	/** Generate possible dynamic page routes for an entity type.
+	 * @param entityName The entity name (e.g., "CUser", "CCompany")
+	 * @return Array of possible routes to try */
+	protected String[] generateDynamicPageRoutes(String entityName) {
+		String baseName = entityName.startsWith("C") ? entityName.substring(1) : entityName;
+		return new String[] {
+				baseName.toLowerCase() + "s", // users, companies
+				baseName.toLowerCase(), // user, company
+				entityName.toLowerCase() + "s", // cusers, ccompanies
+				entityName.toLowerCase(), // cuser, ccompany
+				"page/" + baseName.toLowerCase(), // page/user, page/company
+				"entity/" + baseName.toLowerCase(), // entity/user, entity/company
+				"view/" + baseName.toLowerCase(), // view/user, view/company
+				"dynamic/" + baseName.toLowerCase() // dynamic/user, dynamic/company
+		};
+	}
+
+	/** Test navigation to user page that was created by samples and initializers.
+	 * @return true if user page was found and loaded successfully */
+	protected boolean testNavigationToUserPage() {
+		LOGGER.info("👤 Testing navigation to User page created by initializers");
+		try {
+			// Try multiple approaches to find the user page
+			String[] userPageSelectors = {
+					"vaadin-side-nav-item:has-text('Users')", "vaadin-side-nav-item:has-text('User')", "a:has-text('Users')",
+					"a:has-text('User Management')", "[href*='user']", "text='System.Users'"
+			};
+			for (String selector : userPageSelectors) {
+				try {
+					Locator navItem = page.locator(selector);
+					if (navItem.count() > 0) {
+						LOGGER.info("🎯 Found user page with selector: {}", selector);
+						navItem.first().click();
+						wait_2000(); // Wait for page to load
+						if (isDynamicPageLoaded()) {
+							LOGGER.info("✅ User page loaded successfully");
+							takeScreenshot("user-page-loaded");
+							return true;
+						}
+					}
+				} catch (Exception e) {
+					LOGGER.debug("⚠️ Selector {} failed: {}", selector, e.getMessage());
+				}
+			}
+			// Fallback: try direct navigation using navigateToFirstPage
+			return navigateToFirstPage(null, tech.derbent.users.domain.CUser.class);
+		} catch (Exception e) {
+			LOGGER.error("❌ Failed to test navigation to user page: {}", e.getMessage());
+			return false;
+		}
+	}
+
+	/** Test navigation to company page that was created by samples and initializers.
+	 * @return true if company page was found and loaded successfully */
+	protected boolean testNavigationToCompanyPage() {
+		LOGGER.info("🏢 Testing navigation to Company page created by initializers");
+		try {
+			// Try multiple approaches to find the company page
+			String[] companyPageSelectors = {
+					"vaadin-side-nav-item:has-text('Companies')", "vaadin-side-nav-item:has-text('Company')", "a:has-text('Companies')",
+					"a:has-text('Company Management')", "[href*='company']", "[href*='companies']", "text='System.Companies'"
+			};
+			for (String selector : companyPageSelectors) {
+				try {
+					Locator navItem = page.locator(selector);
+					if (navItem.count() > 0) {
+						LOGGER.info("🎯 Found company page with selector: {}", selector);
+						navItem.first().click();
+						wait_2000(); // Wait for page to load
+						if (isDynamicPageLoaded()) {
+							LOGGER.info("✅ Company page loaded successfully");
+							takeScreenshot("company-page-loaded");
+							return true;
+						}
+					}
+				} catch (Exception e) {
+					LOGGER.debug("⚠️ Selector {} failed: {}", selector, e.getMessage());
+				}
+			}
+			// Fallback: try direct navigation using navigateToFirstPage
+			return navigateToFirstPage(null, tech.derbent.companies.domain.CCompany.class);
+		} catch (Exception e) {
+			LOGGER.error("❌ Failed to test navigation to company page: {}", e.getMessage());
 			return false;
 		}
 	}
