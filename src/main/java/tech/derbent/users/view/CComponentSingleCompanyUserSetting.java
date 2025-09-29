@@ -1,6 +1,5 @@
 package tech.derbent.users.view;
 
-import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
@@ -20,7 +19,6 @@ import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
-import tech.derbent.companies.view.CCompanyUserSettingsDialog;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserCompanySettings;
 import tech.derbent.users.service.CUserCompanySettingsService;
@@ -171,18 +169,8 @@ public class CComponentSingleCompanyUserSetting extends VerticalLayout {
 				settings = new CUserCompanySettings();
 				settings.setUser(currentUser);
 			}
-			// Use a dummy company for the dialog (the dialog will handle company selection)
-			CCompany dummyCompany = new CCompany();
-			Consumer<CUserCompanySettings> onSave = this::onSettingsSaved;
-			CCompanyUserSettingsDialog dialog =
-					new CCompanyUserSettingsDialog(parentContent, companyService, userService, userCompanySettingsService, settings, dummyCompany, // The
-																																					// dialog
-																																					// will
-																																					// handle
-																																					// company
-																																					// selection
-							onSave);
-			dialog.open();
+			// Create a simple company selection dialog
+			createCompanySelectionDialog(settings);
 		} catch (Exception e) {
 			LOGGER.error("Failed to open company settings dialog: {}", e.getMessage(), e);
 			if (notificationService != null) {
@@ -191,26 +179,90 @@ public class CComponentSingleCompanyUserSetting extends VerticalLayout {
 		}
 	}
 
-	private void onSettingsSaved(CUserCompanySettings savedSettings) {
+	private void createCompanySelectionDialog(CUserCompanySettings settings) {
+		// Create the dialog
+		com.vaadin.flow.component.dialog.Dialog dialog = new com.vaadin.flow.component.dialog.Dialog();
+		dialog.setHeaderTitle("Select Company and Role");
+		dialog.setWidth("500px");
+		dialog.setModal(true);
+		// Create form layout
+		com.vaadin.flow.component.formlayout.FormLayout formLayout = new com.vaadin.flow.component.formlayout.FormLayout();
+		// Company selection
+		com.vaadin.flow.component.combobox.ComboBox<CCompany> companyComboBox = new com.vaadin.flow.component.combobox.ComboBox<>("Company");
+		companyComboBox.setItemLabelGenerator(CCompany::getName);
+		companyComboBox.setWidthFull();
+		// Load companies
 		try {
-			LOGGER.debug("Saving company settings for user: {}", savedSettings);
-			// Update the user's company settings
-			currentUser.setCompanySettings(savedSettings);
-			// Save the user
-			CUser savedUser = userService.save(currentUser);
-			// Update the display
-			currentUser = savedUser;
-			updateDisplay();
-			if (notificationService != null) {
-				notificationService.showSaveSuccess();
+			java.util.List<CCompany> companies = companyService.findAll();
+			companyComboBox.setItems(companies);
+			if (settings.getCompany() != null) {
+				companyComboBox.setValue(settings.getCompany());
 			}
-			LOGGER.info("Successfully saved company settings for user: {}", savedUser.getName());
 		} catch (Exception e) {
-			LOGGER.error("Error saving company settings: {}", e.getMessage(), e);
-			if (notificationService != null) {
-				notificationService.showSaveError();
-			}
+			LOGGER.error("Failed to load companies: {}", e.getMessage(), e);
 		}
+		// Role field
+		com.vaadin.flow.component.textfield.TextField roleField = new com.vaadin.flow.component.textfield.TextField("Role");
+		roleField.setWidthFull();
+		if (settings.getRole() != null) {
+			roleField.setValue(settings.getRole());
+		}
+		// Ownership level selection
+		com.vaadin.flow.component.combobox.ComboBox<String> ownershipComboBox = new com.vaadin.flow.component.combobox.ComboBox<>("Ownership Level");
+		ownershipComboBox.setItems("OWNER", "ADMIN", "MEMBER", "VIEWER");
+		ownershipComboBox.setWidthFull();
+		if (settings.getOwnershipLevel() != null) {
+			ownershipComboBox.setValue(settings.getOwnershipLevel());
+		} else {
+			ownershipComboBox.setValue("MEMBER");
+		}
+		// Department field
+		com.vaadin.flow.component.textfield.TextField departmentField = new com.vaadin.flow.component.textfield.TextField("Department");
+		departmentField.setWidthFull();
+		if (settings.getDepartment() != null) {
+			departmentField.setValue(settings.getDepartment());
+		}
+		formLayout.add(companyComboBox, roleField, ownershipComboBox, departmentField);
+		// Buttons
+		Button saveButton = new Button("Save", VaadinIcon.CHECK.create());
+		saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		saveButton.addClickListener(e -> {
+			try {
+				CCompany selectedCompany = companyComboBox.getValue();
+				if (selectedCompany == null) {
+					if (notificationService != null) {
+						notificationService.showWarning("Please select a company");
+					}
+					return;
+				}
+				// Update settings
+				settings.setCompany(selectedCompany);
+				settings.setRole(roleField.getValue());
+				settings.setOwnershipLevel(ownershipComboBox.getValue());
+				settings.setDepartment(departmentField.getValue());
+				settings.setUser(currentUser);
+				// Save the settings
+				CUserCompanySettings savedSettings = userCompanySettingsService.save(settings);
+				// Update the user
+				currentUser.setCompanySettings(savedSettings);
+				CUser savedUser = userService.save(currentUser);
+				currentUser = savedUser;
+				dialog.close();
+				updateDisplay();
+				if (notificationService != null) {
+					notificationService.showSaveSuccess();
+				}
+			} catch (Exception ex) {
+				LOGGER.error("Error saving company settings: {}", ex.getMessage(), ex);
+				if (notificationService != null) {
+					notificationService.showSaveError();
+				}
+			}
+		});
+		Button cancelButton = new Button("Cancel", e -> dialog.close());
+		dialog.getFooter().add(cancelButton, saveButton);
+		dialog.add(formLayout);
+		dialog.open();
 	}
 
 	public void setCurrentUser(CUser user) {
