@@ -252,4 +252,26 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 			return errorDiv;
 		}
 	}
+
+	public Component createSingleCompanyUserSettingComponent() {
+		LOGGER.debug("Creating single company user setting component");
+		try {
+			// Get services from ApplicationContext to avoid circular dependency
+			CCompanyService companyService = applicationContext.getBean(CCompanyService.class);
+			CUserCompanySettingsService userCompanySettingsService = applicationContext.getBean(CUserCompanySettingsService.class);
+			// Create wrapper div for the component - this will be replaced by actual component during binding
+			Div wrapper = new Div();
+			wrapper.addClassName("component-single-company-user-setting-wrapper");
+			wrapper.getElement().setAttribute("data-component-type", "CComponentSingleCompanyUserSetting");
+			LOGGER.debug("Successfully created single company user setting component wrapper");
+			return wrapper;
+		} catch (Exception e) {
+			LOGGER.error("Failed to create single company user setting component: {}", e.getMessage(), e);
+			// Fallback to simple div with error message
+			final Div errorDiv = new Div();
+			errorDiv.setText("Error loading single company user setting component: " + e.getMessage());
+			errorDiv.addClassName("error-message");
+			return errorDiv;
+		}
+	}
 }

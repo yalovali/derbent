@@ -10,6 +10,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
@@ -82,6 +83,14 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 	@Column (name = "profile_picture_data", nullable = true, length = 10000, columnDefinition = "bytea")
 	private byte[] profilePictureData;
 	// load it eagerly because there a few projects that use this field
+	// Single company settings - one user can have access to one company only
+	@OneToOne (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+	@JoinColumn (name = "single_company_settings_id", nullable = true)
+	@AMetaData (
+			displayName = "Company Settings", required = false, readOnly = false, description = "User's company membership and role", hidden = false,
+			order = 15, createComponentMethod = "createSingleCompanyUserSettingComponent"
+	)
+	private CUserCompanySettings companySettings;
 	@OneToMany (mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	@AMetaData (
 			displayName = "Project Settings", required = false, readOnly = true, description = "User's project memberships and roles", hidden = false,
@@ -145,6 +154,8 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 	}
 
 	public CCompany getCompany() { return company; }
+
+	public CUserCompanySettings getCompanySettings() { return companySettings; }
 
 	public String getEmail() { return email; }
 
@@ -224,6 +235,14 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 	}
 
 	public void setCompany(final CCompany company) { this.company = company; }
+
+	public void setCompanySettings(final CUserCompanySettings companySettings) {
+		this.companySettings = companySettings;
+		// Maintain bidirectional relationship
+		if (companySettings != null) {
+			companySettings.setUser(this);
+		}
+	}
 
 	public void setEmail(final String email) { this.email = email; }
 
