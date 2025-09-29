@@ -148,6 +148,11 @@ public class COrder extends CEntityOfProject<COrder> {
 	)
 	private COrderStatus status;
 
+	public COrder() {
+		super();
+		orderDate = LocalDate.now();
+	}
+
 	/** Constructor with name and project.
 	 * @param name    the name/description of the order
 	 * @param project the project this order belongs to */

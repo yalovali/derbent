@@ -88,13 +88,6 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 			order = 20, createComponentMethod = "createUserProjectSettingsComponent"
 	)
 	private List<CUserProjectSettings> projectSettings = new ArrayList<>();
-	// User-Company relationship settings
-	@OneToMany (mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-	@AMetaData (
-			displayName = "Company Settings", required = false, readOnly = true, description = "User's company memberships and roles", hidden = false,
-			order = 21, createComponentMethod = "createUserCompanySettingsComponent"
-	)
-	private List<CUserCompanySettings> companySettings = new ArrayList<>();
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "cusertype_id", nullable = true)
 	@AMetaData (displayName = "User Type", required = false, readOnly = false, description = "Type category of the user", hidden = false, order = 9)
@@ -124,6 +117,21 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 		super.setName(name);
 		this.email = email;
 		setPassword(password);
+	}
+
+	/** Add a project setting to this user and maintain bidirectional relationship.
+	 * @param projectSettings the project settings to add */
+	public void addProjectSettings(final CUserProjectSettings projectSettings) {
+		if (projectSettings == null) {
+			return;
+		}
+		if (this.projectSettings == null) {
+			this.projectSettings = new ArrayList<>();
+		}
+		if (!this.projectSettings.contains(projectSettings)) {
+			this.projectSettings.add(projectSettings);
+			projectSettings.setUser(this);
+		}
 	}
 
 	@Override
@@ -205,6 +213,16 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 		return false;
 	}
 
+	/** Remove a project setting from this user and maintain bidirectional relationship.
+	 * @param projectSettings the project settings to remove */
+	public void removeProjectSettings(final CUserProjectSettings projectSettings) {
+		Check.notNull(projectSettings, "Project settings cannot be null");
+		Check.notNull(this.projectSettings, "User's project settings collection cannot be null");
+		if (this.projectSettings.remove(projectSettings)) {
+			projectSettings.setUser(null);
+		}
+	}
+
 	public void setCompany(final CCompany company) { this.company = company; }
 
 	public void setEmail(final String email) { this.email = email; }
@@ -236,97 +254,6 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 	}
 
 	public void setUserType(final CUserType userType) { this.userType = userType; }
-
-	/** Add a project setting to this user and maintain bidirectional relationship.
-	 * @param projectSettings the project settings to add */
-	public void addProjectSettings(final CUserProjectSettings projectSettings) {
-		if (projectSettings == null) {
-			return;
-		}
-		if (this.projectSettings == null) {
-			this.projectSettings = new ArrayList<>();
-		}
-		if (!this.projectSettings.contains(projectSettings)) {
-			this.projectSettings.add(projectSettings);
-			projectSettings.setUser(this);
-		}
-	}
-
-	/** Remove a project setting from this user and maintain bidirectional relationship.
-	 * @param projectSettings the project settings to remove */
-	public void removeProjectSettings(final CUserProjectSettings projectSettings) {
-		Check.notNull(projectSettings, "Project settings cannot be null");
-		Check.notNull(this.projectSettings, "User's project settings collection cannot be null");
-		if (this.projectSettings.remove(projectSettings)) {
-			projectSettings.setUser(null);
-		}
-	}
-
-	// Getter and setter for company settings with safe initialization
-	public List<CUserCompanySettings> getCompanySettings() {
-		if (companySettings == null) {
-			companySettings = new ArrayList<>();
-		}
-		return companySettings;
-	}
-
-	public void setCompanySettings(final List<CUserCompanySettings> companySettings) {
-		this.companySettings = companySettings != null ? companySettings : new ArrayList<>();
-	}
-
-	/** Add a company setting to this user and maintain bidirectional relationship.
-	 * @param companySettings the company settings to add */
-	public void addCompanySettings(final CUserCompanySettings companySettings) {
-		if (companySettings == null) {
-			return;
-		}
-		if (this.companySettings == null) {
-			this.companySettings = new ArrayList<>();
-		}
-		if (!this.companySettings.contains(companySettings)) {
-			this.companySettings.add(companySettings);
-			companySettings.setUser(this);
-		}
-	}
-
-	/** Remove a company setting from this user and maintain bidirectional relationship.
-	 * @param companySettings the company settings to remove */
-	public void removeCompanySettings(final CUserCompanySettings companySettings) {
-		if (companySettings == null || this.companySettings == null) {
-			return;
-		}
-		if (this.companySettings.remove(companySettings)) {
-			companySettings.setUser(null);
-		}
-	}
-
-	/** Get the user's primary company.
-	 * @return the primary company or null if not set */
-	public CCompany getPrimaryCompany() {
-		if (companySettings == null) {
-			return null;
-		}
-		return companySettings.stream().filter(CUserCompanySettings::isPrimaryCompany).map(CUserCompanySettings::getCompany).findFirst().orElse(null);
-	}
-
-	/** Check if user has admin privileges in any company.
-	 * @return true if user is admin in at least one company */
-	public boolean isCompanyAdmin() {
-		if (companySettings == null) {
-			return false;
-		}
-		return companySettings.stream().anyMatch(CUserCompanySettings::isCompanyAdmin);
-	}
-
-	/** Check if user has admin privileges in a specific company.
-	 * @param company the company to check
-	 * @return true if user is admin in the specified company */
-	public boolean isCompanyAdmin(final CCompany company) {
-		if (companySettings == null || company == null) {
-			return false;
-		}
-		return companySettings.stream().filter(settings -> settings.getCompany().equals(company)).anyMatch(CUserCompanySettings::isCompanyAdmin);
-	}
 
 	/** Returns a comprehensive string representation of the user including all key fields. Note: This method is used for debugging and logging
 	 * purposes. For ComboBox display in the UI, the CEntityFormBuilder now uses getName() method automatically to show only the user's name instead
