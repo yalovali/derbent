@@ -84,7 +84,7 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 	private byte[] profilePictureData;
 	// load it eagerly because there a few projects that use this field
 	// Single company settings - one user can have access to one company only
-	@OneToOne (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+	@OneToOne (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "single_company_settings_id", nullable = true)
 	@AMetaData (
 			displayName = "Company Settings", required = false, readOnly = false, description = "User's company membership and role", hidden = false,
