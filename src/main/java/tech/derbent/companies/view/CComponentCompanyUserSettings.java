@@ -57,9 +57,11 @@ public class CComponentCompanyUserSettings extends CComponentUserCompanyBase<CCo
 		Check.notNull(settings, "Settings cannot be null when saving");
 		LOGGER.debug("Saving user company settings: {}", settings);
 		try {
-			final CUserCompanySetting savedSettings = settings.getId() == null ? relationService.addUserToCompany(settings.getUser(),
-					settings.getCompany(), settings.getOwnershipLevel(), settings.getRole(), settings.getDepartment(), settings.isPrimaryCompany())
-					: relationService.save(settings);
+			final CUserCompanySetting savedSettings =
+					settings.getId() == null
+							? userCompanySettingsService.addUserToCompany(settings.getUser(), settings.getCompany(), settings.getOwnershipLevel(),
+									settings.getRole(), settings.getDepartment(), settings.isPrimaryCompany())
+							: userCompanySettingsService.save(settings);
 			LOGGER.info("Successfully saved user company settings: {}", savedSettings);
 			populateForm();
 		} catch (final Exception e) {
@@ -75,7 +77,7 @@ public class CComponentCompanyUserSettings extends CComponentUserCompanyBase<CCo
 			final CCompany company = getCurrentEntity();
 			Check.notNull(company, "Please select a company first.");
 			final CCompanyUserSettingsDialog dialog = new CCompanyUserSettingsDialog(this, (CCompanyService) entityService, userService,
-					relationService, null, null, company, this::onSettingsSaved);
+					userCompanySettingsService, null, company, this::onSettingsSaved);
 			dialog.open();
 		} catch (Exception e) {
 			LOGGER.error("Failed to open add dialog: {}", e.getMessage(), e);
@@ -93,7 +95,7 @@ public class CComponentCompanyUserSettings extends CComponentUserCompanyBase<CCo
 			final CCompany company = getCurrentEntity();
 			Check.notNull(company, "Current company is not available.");
 			final CCompanyUserSettingsDialog dialog = new CCompanyUserSettingsDialog(this, (CCompanyService) entityService, userService,
-					relationService, selected, selected.getUser(), company, this::onSettingsSaved);
+					userCompanySettingsService, selected, company, this::onSettingsSaved);
 			dialog.open();
 		} catch (Exception e) {
 			LOGGER.error("Failed to open edit dialog: {}", e.getMessage(), e);
@@ -102,37 +104,8 @@ public class CComponentCompanyUserSettings extends CComponentUserCompanyBase<CCo
 		}
 	}
 
-	private void setupDataAccessors() {
-		try {
-			final Supplier<List<CUserCompanySetting>> getterFunction = () -> {
-				final CCompany entity = getCurrentEntity();
-				if (entity == null) {
-					LOGGER.debug("No current entity available, returning empty list");
-					return List.of();
-				}
-				try {
-					final List<CUserCompanySetting> settings = relationService.findByCompany(entity);
-					LOGGER.debug("Retrieved {} user settings for company: {}", settings.size(), entity.getName());
-					return settings;
-				} catch (final Exception e) {
-					LOGGER.error("Error retrieving user settings for company: {}", e.getMessage(), e);
-					return List.of();
-				}
-			};
-			final Runnable saveEntityFunction = () -> {
-				try {
-					final CCompany entity = getCurrentEntity();
-					Check.notNull(entity, "Current entity cannot be null when saving");
-					entityService.save(entity);
-				} catch (final Exception e) {
-					LOGGER.error("Error saving entity: {}", e.getMessage(), e);
-					throw new RuntimeException("Failed to save entity", e);
-				}
-			};
-			setSettingsAccessors(getterFunction, saveEntityFunction);
-		} catch (Exception e) {
-			LOGGER.error("Failed to setup data accessors: {}", e.getMessage(), e);
-			throw new RuntimeException("Failed to setup data accessors", e);
-		}
+	@Override
+	protected void setupDataAccessors() {
+		createStandardDataAccessors(() -> userCompanySettingsService.findByCompany(getCurrentEntity()), () -> entityService.save(getCurrentEntity()));
 	}
 }
