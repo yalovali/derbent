@@ -623,4 +623,51 @@ public class CAuxillaries {
 		final String id = generateId(component);
 		component.setId(id);
 	}
+
+	/** Get a method from a class without caching.
+	 * @param clazz          the class containing the method
+	 * @param methodName     the method name
+	 * @param parameterTypes the parameter types (if any)
+	 * @return the Method object or null if not found */
+	public static Method getMethod(final Class<?> clazz, final String methodName, final Class<?>... parameterTypes) {
+		try {
+			Check.notNull(clazz, "clazz is null");
+			Check.notBlank(methodName, "methodName is blank");
+			final Method method = clazz.getMethod(methodName, parameterTypes);
+			method.setAccessible(true);
+			return method;
+		} catch (final NoSuchMethodException e) {
+			LOGGER.debug("Method not found: {}.{}", clazz.getSimpleName(), methodName);
+			return null;
+		}
+	}
+
+	/** Safely invokes a method on an object.
+	 * @param target     the target object
+	 * @param methodName the method name
+	 * @param args       the method arguments
+	 * @return the method result or null if invocation failed */
+	public static Object invokeMethod(final Object target, final String methodName, final Object... args) {
+		if (target == null) {
+			return null;
+		}
+		try {
+			Check.notBlank(methodName, "methodName is blank");
+			Class<?>[] paramTypes = new Class<?>[args.length];
+			for (int i = 0; i < args.length; i++) {
+				paramTypes[i] = args[i] != null ? args[i].getClass() : Object.class;
+			}
+			Method method = getMethod(target.getClass(), methodName, paramTypes);
+			if (method == null) {
+				// Try with no parameters if parameter matching failed
+				method = getMethod(target.getClass(), methodName);
+			}
+			if (method != null) {
+				return method.invoke(target, args);
+			}
+		} catch (final Exception e) {
+			LOGGER.debug("Failed to invoke method {}.{}: {}", target.getClass().getSimpleName(), methodName, e.getMessage());
+		}
+		return null;
+	}
 }
