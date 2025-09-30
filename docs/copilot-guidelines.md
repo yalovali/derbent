@@ -145,6 +145,54 @@ public class CActivityStatus extends CStatus {
 public class CActivity extends CProjectItem<CActivity> {
 ```
 
+### JPA Fetch Type Best Practices ⚠️
+
+**CRITICAL RULE**: Always use `FetchType.LAZY` for `@OneToMany` relationships to prevent circular EAGER fetch issues.
+
+```java
+// ✅ CORRECT - Always use LAZY for OneToMany collections
+@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+private List<CUserProjectSettings> projectSettings = new ArrayList<>();
+
+// ✅ CORRECT - Always use LAZY for OneToMany collections
+@OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+private List<CUserProjectSettings> userSettings = new ArrayList<>();
+
+// ❌ WRONG - NEVER use EAGER for OneToMany collections
+@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+private List<CUserProjectSettings> projectSettings = new ArrayList<>();
+```
+
+**Why This Matters**:
+1. **Circular EAGER fetches cause PostgreSQL errors**: When entities have bidirectional relationships with EAGER fetch, Hibernate generates massive JOIN queries that can exceed PostgreSQL's 1664 column limit
+2. **Performance issues**: EAGER loading collections loads all data unnecessarily, even when not needed
+3. **N+1 query problems**: Can lead to multiple database queries in loops
+4. **Memory consumption**: Loading entire collections upfront consumes excessive memory
+
+**When to Use Each Fetch Type**:
+- `@OneToMany`: **ALWAYS** use `FetchType.LAZY` (collections should be loaded on-demand)
+- `@ManyToOne`: Use `FetchType.EAGER` for frequently accessed single entities (acceptable)
+- `@OneToOne`: Use `FetchType.LAZY` for optional relationships, `EAGER` for required ones
+- `@ManyToMany`: **ALWAYS** use `FetchType.LAZY` (collections should be loaded on-demand)
+
+**Accessing Lazy Collections Safely**:
+```java
+// ✅ Correct - Access within transaction or use JOIN FETCH
+@Transactional
+public List<CUserProjectSettings> getUserProjectSettings(Long userId) {
+    CUser user = userRepository.findById(userId).orElseThrow();
+    return user.getProjectSettings(); // Collection loaded within transaction
+}
+
+// ✅ Correct - Use JOIN FETCH query for eager loading when needed
+@Query("SELECT u FROM CUser u JOIN FETCH u.projectSettings WHERE u.id = :userId")
+CUser findByIdWithProjectSettings(@Param("userId") Long userId);
+
+// ❌ Wrong - Accessing lazy collection outside transaction
+CUser user = userRepository.findById(userId).orElseThrow();
+return user.getProjectSettings(); // May throw LazyInitializationException
+```
+
 ### Repository Patterns
 ```java
 // Prompt: "Create repository interface for CActivity with project-aware queries"
@@ -240,6 +288,10 @@ public static String getStaticIconColorCode() {
 private int count;           // Wrong
 private Integer count;       // Correct
 
+// ❌ NEVER use EAGER fetch for OneToMany or ManyToMany collections
+@OneToMany(mappedBy = "user", fetch = FetchType.EAGER) // WRONG - causes circular fetch issues
+private List<CUserProjectSettings> projectSettings;
+
 // ❌ Don't use standard Vaadin components directly
 Button button = new Button(); // Wrong
 CButton button = new CButton(); // Correct
@@ -258,10 +310,14 @@ private Integer count;
 private Boolean active;
 private BigDecimal amount;
 
+// ✅ Always use LAZY fetch for OneToMany collections
+@OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
+private List<CChildEntity> children = new ArrayList<>();
+
 // ✅ Use enhanced binder for forms
 CEnhancedBinder<CActivity> binder = new CEnhancedBinder<>(CActivity.class);
 
-// ✅ Use JOIN FETCH for eager loading
+// ✅ Use JOIN FETCH for eager loading when needed
 @Query("SELECT a FROM CActivity a JOIN FETCH a.activityType WHERE a.project = :project")
 
 // ✅ Always validate parameters
