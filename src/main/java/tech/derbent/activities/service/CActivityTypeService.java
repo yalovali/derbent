@@ -28,15 +28,6 @@ public class CActivityTypeService extends CEntityOfProjectService<CActivityType>
 		this.activityRepository = activityRepository;
 	}
 
-	/** Counts the number of activities that use this activity type.
-	 * @param activityType the activity type to check
-	 * @return the number of activities using this type */
-	public long countActivitiesUsingType(final CActivityType activityType) {
-		Check.notNull(activityRepository, "Activity repository cannot be null");
-		Check.notNull(activityType, "Activity type cannot be null");
-		return activityRepository.countByActivityType(activityType);
-	}
-
 	@Override
 	protected Class<CActivityType> getEntityClass() { return CActivityType.class; }
 }

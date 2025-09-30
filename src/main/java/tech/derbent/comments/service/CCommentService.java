@@ -72,16 +72,6 @@ public class CCommentService extends CAbstractService<CComment> {
 	@Override
 	protected Class<CComment> getEntityClass() { return CComment.class; }
 
-	/** Toggles the important flag of a comment.
-	 * @param comment the comment to toggle
-	 * @return the updated comment */
-	@Transactional
-	public CComment toggleImportant(final CComment comment) {
-		Check.notNull(comment, "Comment cannot be null");
-		comment.setImportant(!comment.isImportant());
-		return save(comment);
-	}
-
 	/** Updates comment text.
 	 * @param comment the comment to update
 	 * @param newText the new comment text

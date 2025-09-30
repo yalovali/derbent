@@ -50,29 +50,12 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 				.groupingBy(activity -> activity.getStatus() != null ? activity.getStatus() : createNoStatusInstance(project), Collectors.toList()));
 	}
 
-	@Transactional (readOnly = true)
-	public Map<CActivityType, List<CActivity>> getActivitiesGroupedByType(final CProject project) {
-		LOGGER.debug("Getting activities grouped by type for project: {}", project.getName());
-		// Get all activities for the project with type and status loaded
-		final List<CActivity> activities = ((IEntityOfProjectRepository<CActivity>) repository).listByProject(project);
-		// Group by activity type, handling null types
-		return activities.stream().collect(Collectors.groupingBy(
-				activity -> activity.getActivityType() != null ? activity.getActivityType() : createNoTypeInstance(project), Collectors.toList()));
-	}
-
 	// CKanbanService implementation methods
 	@Override
 	public Map<CActivityStatus, List<CActivity>> getEntitiesGroupedByStatus(final Long projectId) {
 		// For now, returning empty as per the original minimal implementation
 		// This would need proper implementation based on project requirements
 		return tech.derbent.api.utils.CKanbanUtils.getEmptyGroupedStatus(this.getClass());
-	}
-
-	@Override
-	public List<CActivityStatus> getAllStatuses() {
-		// This would need to be implemented by calling the status service
-		// For minimal changes, using the utility method
-		return tech.derbent.api.utils.CKanbanUtils.getEmptyStatusList(this.getClass());
 	}
 
 	@Override

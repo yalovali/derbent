@@ -147,10 +147,6 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	@Override
 	protected Class<CUser> getEntityClass() { return CUser.class; }
 
-	/** Gets the password encoder used by this service. Useful for external password operations.
-	 * @return the PasswordEncoder instance */
-	public PasswordEncoder getPasswordEncoder() { return passwordEncoder; }
-
 	/** Override the default list method to filter users by active project when used in dynamic pages. This allows CUserService to work with dynamic
 	 * pages without needing to implement CEntityOfProjectService. If no active project is available, returns all users (preserves existing
 	 * behavior). */
@@ -238,15 +234,6 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 		}
 		// If IDs are null, compare by name as fallback
 		return project1.getName() != null && project1.getName().equals(project2.getName());
-	}
-
-	@Transactional
-	public void updatePassword(final String username, final String newPlainPassword) {
-		final CUser loginUser = ((IUserRepository) repository).findByUsername(username)
-				.orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
-		final String encodedPassword = passwordEncoder.encode(newPlainPassword);
-		loginUser.setPassword(encodedPassword);
-		repository.saveAndFlush(loginUser);
 	}
 
 	@Override
