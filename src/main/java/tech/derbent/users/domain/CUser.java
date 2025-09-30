@@ -91,7 +91,7 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 			order = 15, createComponentMethod = "createSingleCompanyUserSettingComponent"
 	)
 	private CUserCompanySetting companySetting;
-	@OneToMany (mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+	@OneToMany (mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@AMetaData (
 			displayName = "Project Settings", required = false, readOnly = true, description = "User's project memberships and roles", hidden = false,
 			order = 20, createComponentMethod = "createUserProjectSettingsComponent"
