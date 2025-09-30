@@ -153,11 +153,11 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 		return "%s{id=%s}".formatted(getClass().getSimpleName(), getId());
 	}
 
-	/** Helper method to update audit fields using cached reflection. Looks for common audit fields like 'lastModifiedDate', 'updatedAt'. */
+	/** Helper method to update audit fields using reflection. Looks for common audit fields like 'lastModifiedDate', 'updatedAt'. */
 	private void updateAuditFields() {
 		try {
 			final Class<?> entityClass = ProxyUtils.getUserClass(this.getClass());
-			final Method updateMethod = tech.derbent.api.utils.CReflectionCache.getCachedMethod(entityClass, "updateLastModified");
+			final Method updateMethod = tech.derbent.api.utils.CAuxillaries.getMethod(entityClass, "updateLastModified");
 			if (updateMethod != null) {
 				updateMethod.invoke(this);
 				LOGGER.debug("Updated audit fields for: {}", this.getClass().getSimpleName());
