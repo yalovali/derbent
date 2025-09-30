@@ -59,12 +59,6 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 		return repository.findAll();
 	}
 
-	/** Gets a project with all its user settings loaded (to avoid lazy loading issues) */
-	@Transactional (readOnly = true)
-	public CProject findByIdWithUserSettings(final Long projectId) {
-		return ((IProjectRepository) repository).findByIdWithUserSettings(projectId).orElse(null);
-	}
-
 	/** Gets projects available for assignment to a specific user (excluding projects the user is already assigned to).
 	 * @param userId the ID of the user
 	 * @return list of available projects for the user */
