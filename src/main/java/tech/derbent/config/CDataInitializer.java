@@ -85,6 +85,7 @@ import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.setup.service.CSystemSettingsInitializerService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserType;
+import tech.derbent.users.service.CUserCompanySettingsService;
 import tech.derbent.users.service.CUserInitializerService;
 import tech.derbent.users.service.CUserProjectSettingsService;
 import tech.derbent.users.service.CUserService;
@@ -161,6 +162,7 @@ public class CDataInitializer {
 	private final CDetailSectionService screenService;
 	private final CUserService userService;
 	private final CUserProjectSettingsService userProjectSettingsService;
+	private final CUserCompanySettingsService userCompanySettingsService;
 	private final CUserTypeService userTypeService;
 	private final CUserProjectRoleService userProjectRoleService;
 
@@ -169,6 +171,7 @@ public class CDataInitializer {
 		projectService = CSpringContext.getBean(CProjectService.class);
 		userService = CSpringContext.getBean(CUserService.class);
 		userProjectSettingsService = CSpringContext.getBean(CUserProjectSettingsService.class);
+		userCompanySettingsService = CSpringContext.getBean(CUserCompanySettingsService.class);
 		activityService = CSpringContext.getBean(CActivityService.class);
 		userTypeService = CSpringContext.getBean(CUserTypeService.class);
 		activityTypeService = CSpringContext.getBean(CActivityTypeService.class);
@@ -1529,6 +1532,60 @@ public class CDataInitializer {
 		}
 	}
 
+	/** Initialize sample user company settings to demonstrate the CComponentCompanyUserSettings pattern. This creates realistic user-company
+	 * relationships following the established pattern. */
+	private void initializeSampleUserCompanySettings() {
+		try {
+			LOGGER.info("Initializing sample user company settings");
+			final List<CCompany> companies = companyService.list(Pageable.unpaged()).getContent();
+			// Get sample users by login for consistent assignment
+			final CUser admin = userService.findByLogin(USER_ADMIN);
+			final CUser manager = userService.findByLogin(USER_MANAGER);
+			final CUser mary = userService.findByLogin("mary");
+			final CUser bob = userService.findByLogin("bob");
+			final CUser alice = userService.findByLogin("alice");
+			for (final CCompany company : companies) {
+				// Assign users to different companies with different roles
+				if ("Tech Solutions Inc.".equals(company.getName())) {
+					if (admin != null) {
+						createUserCompanySetting(admin, company, "CEO", "Executive", "Owner", true);
+					}
+					if (manager != null) {
+						createUserCompanySetting(manager, company, "CTO", "Technology", "Partner", true);
+					}
+					if (mary != null) {
+						createUserCompanySetting(mary, company, "Senior Developer", "Engineering", "Employee", false);
+					}
+				} else if ("Global Consulting Partners".equals(company.getName())) {
+					if (manager != null) {
+						createUserCompanySetting(manager, company, "Senior Consultant", "Consulting", "Employee", false);
+					}
+					if (alice != null) {
+						createUserCompanySetting(alice, company, "Business Analyst", "Consulting", "Employee", true);
+					}
+					if (bob != null) {
+						createUserCompanySetting(bob, company, "Technical Consultant", "Technology", "Contractor", false);
+					}
+				} else if ("HealthCare Systems".equals(company.getName())) {
+					if (alice != null) {
+						createUserCompanySetting(alice, company, "Product Manager", "Product", "Employee", false);
+					}
+					if (mary != null) {
+						createUserCompanySetting(mary, company, "Lead Developer", "Engineering", "Employee", false);
+					}
+				} else if ("Manufacturing Corp".equals(company.getName())) {
+					if (bob != null) {
+						createUserCompanySetting(bob, company, "Systems Engineer", "IT", "Employee", true);
+					}
+				}
+			}
+			LOGGER.info("Successfully initialized sample user company settings for {} companies", companies.size());
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing sample user company settings: {}", e.getMessage(), e);
+			throw new RuntimeException("Failed to initialize sample user company settings", e);
+		}
+	}
+
 	/** Helper method to create user project settings safely.
 	 * @param user       the user to assign
 	 * @param project    the project to assign to
@@ -1544,6 +1601,28 @@ public class CDataInitializer {
 			}
 		} catch (final Exception e) {
 			LOGGER.warn("Failed to create user project setting for {} -> {}: {}", user.getLogin(), project.getName(), e.getMessage());
+		}
+	}
+
+	/** Helper method to create user company settings safely.
+	 * @param user           the user to assign
+	 * @param company        the company to assign to
+	 * @param role           the role name
+	 * @param department     the department name
+	 * @param ownershipLevel the ownership level
+	 * @param primaryCompany whether this is the primary company */
+	private void createUserCompanySetting(final CUser user, final CCompany company, final String role, final String department,
+			final String ownershipLevel, final boolean primaryCompany) {
+		try {
+			// Check if relationship already exists
+			if (!userCompanySettingsService.relationshipExists(user.getId(), company.getId())) {
+				userCompanySettingsService.addUserToCompany(user, company, ownershipLevel, role, department, primaryCompany);
+				LOGGER.debug("Created user company setting: {} -> {} ({})", user.getLogin(), company.getName(), role);
+			} else {
+				LOGGER.debug("User company relationship already exists: {} -> {}", user.getLogin(), company.getName());
+			}
+		} catch (final Exception e) {
+			LOGGER.warn("Failed to create user company setting for {} -> {}: {}", user.getLogin(), company.getName(), e.getMessage());
 		}
 	}
 
@@ -1565,6 +1644,8 @@ public class CDataInitializer {
 			createProjectProductDevelopment();
 			/* create sample user project relationships */
 			initializeSampleUserProjectSettings();
+			/* create sample user company relationships */
+			initializeSampleUserCompanySettings();
 			// ========== PROJECT-SPECIFIC INITIALIZATION PHASE ==========
 			final List<CProject> projects = projectService.list(Pageable.unpaged()).getContent();
 			for (final CProject project : projects) {
