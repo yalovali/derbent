@@ -20,9 +20,6 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting> implement
 	}
 
 	@Override
-	public List<CMeetingStatus> getAllStatuses() { return tech.derbent.api.utils.CKanbanUtils.getEmptyStatusList(this.getClass()); }
-
-	@Override
 	public Map<CMeetingStatus, List<CMeeting>> getEntitiesGroupedByStatus(final Long projectId) {
 		return tech.derbent.api.utils.CKanbanUtils.getEmptyGroupedStatus(this.getClass());
 	}

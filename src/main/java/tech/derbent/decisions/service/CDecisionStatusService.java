@@ -19,18 +19,4 @@ public class CDecisionStatusService extends CEntityOfProjectService<CDecisionSta
 
 	@Override
 	protected Class<CDecisionStatus> getEntityClass() { return CDecisionStatus.class; }
-
-	@Transactional
-	public CDecisionStatus updateSortOrder(final CDecisionStatus decisionStatus, final Integer sortOrder) {
-		Check.notNull(decisionStatus, "Decision status cannot be null");
-		decisionStatus.setSortOrder(sortOrder);
-		return repository.saveAndFlush(decisionStatus);
-	}
-
-	@Transactional
-	public CDecisionStatus updateStatusProperties(final CDecisionStatus decisionStatus, final boolean requiresApproval) {
-		Check.notNull(decisionStatus, "Decision status cannot be null");
-		decisionStatus.setRequiresApproval(requiresApproval);
-		return repository.saveAndFlush(decisionStatus);
-	}
 }
