@@ -51,8 +51,6 @@ public abstract class CComponentUserCompanyBase<MasterClass extends CEntityNamed
 				return CColorUtils.getDisplayTextFromEntity(settings.getUser());
 			case "role":
 				return settings.getRole() != null ? settings.getRole() : "";
-			case "department":
-				return settings.getDepartment() != null ? settings.getDepartment() : "";
 			case "ownership":
 				return settings.getOwnershipLevel() != null ? settings.getOwnershipLevel() : "";
 			default:
@@ -65,14 +63,18 @@ public abstract class CComponentUserCompanyBase<MasterClass extends CEntityNamed
 	}
 
 	/** Abstract method to handle settings save events */
+	@Override
 	protected abstract void onSettingsSaved(final CUserCompanySetting settings);
 	/** Abstract method to open the add dialog
 	 * @throws Exception */
+	@Override
 	protected abstract void openAddDialog() throws Exception;
 	/** Abstract method to open the edit dialog
 	 * @throws Exception */
+	@Override
 	protected abstract void openEditDialog() throws Exception;
 	/** Abstract method for setting up data accessors - subclasses provide specific implementations */
+	@Override
 	protected abstract void setupDataAccessors();
 
 	/** Sets up the grid with enhanced visual styling including colors, avatars and consistent headers. Uses entity decorations with colors and icons
@@ -98,7 +100,6 @@ public abstract class CComponentUserCompanyBase<MasterClass extends CEntityNamed
 			}
 		}).setHeader(createStyledHeader("Company", "#D32F2F")).setAutoWidth(true).setSortable(true);
 		grid.addColumn(settings -> getDisplayText(settings, "role")).setHeader(createStyledHeader("Role", "#F57F17")).setAutoWidth(true);
-		grid.addColumn(settings -> getDisplayText(settings, "department")).setHeader(createStyledHeader("Department", "#388E3C")).setAutoWidth(true);
 		grid.addColumn(settings -> getDisplayText(settings, "ownership")).setHeader(createStyledHeader("Ownership", "#8E24AA")).setAutoWidth(true);
 		// Apply consistent grid styling
 		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);

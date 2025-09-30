@@ -34,9 +34,6 @@ public interface IUserCompanySettingsRepository extends IUserRelationshipReposit
 	/** Find all user company settings for a specific company with eager loading */
 	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.company LEFT JOIN FETCH r.user WHERE r.company.id = :companyId")
 	List<CUserCompanySetting> findByCompanyId(@Param ("companyId") Long companyId);
-	/** Find users by role in a company using generic pattern */
-	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.user WHERE r.company.id = :companyId AND r.role = :role AND r.isActive = true")
-	List<CUserCompanySetting> findByCompanyIdAndRole(@Param ("companyId") Long companyId, @Param ("role") String role);
 	/** Find all settings by ownership level using generic pattern */
 	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.company LEFT JOIN FETCH r.user WHERE r.ownershipLevel = :ownershipLevel")
 	List<CUserCompanySetting> findByOwnershipLevel(@Param ("ownershipLevel") String ownershipLevel);
@@ -49,13 +46,4 @@ public interface IUserCompanySettingsRepository extends IUserRelationshipReposit
 	default Optional<CUserCompanySetting> findByUserIdAndEntityId(Long userId, Long entityId) {
 		return findByUserIdAndCompanyId(userId, entityId);
 	}
-
-	/** Find all company admins for a company using generic pattern */
-	@Query (
-		"SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.user WHERE r.company.id = :companyId AND (r.ownershipLevel = 'OWNER' OR r.ownershipLevel = 'ADMIN') AND r.isActive = true"
-	)
-	List<CUserCompanySetting> findCompanyAdminsByCompanyId(@Param ("companyId") Long companyId);
-	/** Find primary company for a user using generic pattern */
-	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.company WHERE r.user.id = :userId AND r.isPrimaryCompany = true")
-	Optional<CUserCompanySetting> findPrimaryCompanyByUserId(@Param ("userId") Long userId);
 }

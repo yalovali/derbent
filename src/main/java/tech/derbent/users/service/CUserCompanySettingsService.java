@@ -27,16 +27,9 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 		this.repository = repository;
 	}
 
-	/** Add user to company with specific ownership level and role */
-	@Transactional
-	public CUserCompanySetting addUserToCompany(final CUser user, final CCompany company, final String ownershipLevel, final String role) {
-		return addUserToCompany(user, company, ownershipLevel, role, null, false);
-	}
-
 	/** Add user to company with full configuration */
 	@Transactional
-	public CUserCompanySetting addUserToCompany(final CUser user, final CCompany company, final String ownershipLevel, final String role,
-			final String department, final boolean isPrimary) {
+	public CUserCompanySetting addUserToCompany(final CUser user, final CCompany company, final String ownershipLevel, final String role) {
 		LOGGER.debug("Adding user {} to company {} with ownership level {} and role {}", user, company, ownershipLevel, role);
 		Check.notNull(user, "User must not be null");
 		Check.notNull(company, "Company must not be null");
@@ -49,8 +42,6 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 		final CUserCompanySetting settings = new CUserCompanySetting(user, company);
 		settings.setOwnershipLevel(ownershipLevel != null ? ownershipLevel : "MEMBER");
 		settings.setRole(role);
-		settings.setDepartment(department);
-		settings.setIsPrimaryCompany(isPrimary);
 		validateRelationship(settings);
 		// Save the entity first
 		final CUserCompanySetting savedSettings = save(settings);
@@ -119,17 +110,6 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 	@Override
 	protected Class<CUserCompanySetting> getEntityClass() { return CUserCompanySetting.class; }
 
-	/** Get user's primary company */
-	@Transactional (readOnly = true)
-	public Optional<CCompany> getPrimaryCompany(final CUser user) {
-		Check.notNull(user, "User cannot be null");
-		if (user.getId() == null) {
-			return Optional.empty();
-		}
-		Optional<CUserCompanySetting> primarySettings = repository.findPrimaryCompanyByUserId(user.getId());
-		return primarySettings.map(CUserCompanySetting::getCompany);
-	}
-
 	@Override
 	@Transactional (readOnly = true)
 	public boolean relationshipExists(final Long userId, final Long companyId) {
@@ -167,26 +147,13 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 		// First, remove primary status from all other companies
 		List<CUserCompanySetting> userCompanies = findByUser(user);
 		for (CUserCompanySetting settings : userCompanies) {
-			if (settings.isPrimaryCompany()) {
-				settings.setIsPrimaryCompany(false);
-				save(settings);
-			}
-		}
-		// Set the specified company as primary
-		Optional<CUserCompanySetting> targetSettings = findRelationship(user.getId(), company.getId());
-		if (targetSettings.isPresent()) {
-			CUserCompanySetting settings = targetSettings.get();
-			settings.setIsPrimaryCompany(true);
 			save(settings);
-		} else {
-			throw new IllegalArgumentException("User is not a member of this company");
 		}
 	}
 
 	/** Update user's role and ownership in a company */
 	@Transactional
-	public CUserCompanySetting updateUserCompanyRole(final CUser user, final CCompany company, final String ownershipLevel, final String role,
-			final String department) {
+	public CUserCompanySetting updateUserCompanyRole(final CUser user, final CCompany company, final String ownershipLevel, final String role) {
 		LOGGER.debug("Updating user {} company {} ownership to {} and role to {}", user, company, ownershipLevel, role);
 		final Optional<CUserCompanySetting> settingsOpt = findRelationship(user.getId(), company.getId());
 		if (settingsOpt.isEmpty()) {
@@ -198,9 +165,6 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 		}
 		if (role != null) {
 			settings.setRole(role);
-		}
-		if (department != null) {
-			settings.setDepartment(department);
 		}
 		return updateRelationship(settings);
 	}

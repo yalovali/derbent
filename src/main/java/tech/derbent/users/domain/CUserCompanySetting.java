@@ -58,20 +58,11 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 
 	@ManyToOne
 	@JoinColumn (name = "company_id", nullable = false)
-	@AMetaData (displayName = "Company", required = true, readOnly = false, description = "Company in this relationship", hidden = false, order = 2)
+	@AMetaData (
+			displayName = "Company", required = true, readOnly = false, description = "Company in this relationship", hidden = false, order = 2,
+			dataProviderOwner = "content", dataProviderMethod = "getAvailableCompaniesForUser"
+	)
 	private CCompany company;
-	@Column (name = "department", nullable = true, length = 100)
-	@AMetaData (
-			displayName = "Department", required = false, readOnly = false, defaultValue = "", description = "Department the user belongs to",
-			hidden = false, order = 4, maxLength = 100
-	)
-	private String department;
-	@Column (name = "is_primary_company", nullable = false)
-	@AMetaData (
-			displayName = "Primary Company", required = true, readOnly = false, defaultValue = "false",
-			description = "Whether this is the user's primary company", hidden = false, order = 5
-	)
-	private Boolean isPrimaryCompany = Boolean.FALSE;
 	@Column (name = "role", nullable = true, length = 100)
 	@AMetaData (
 			displayName = "Role", required = false, readOnly = false, defaultValue = "", description = "User's role within the company",
@@ -80,7 +71,10 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 	private String role;
 	@ManyToOne
 	@JoinColumn (name = "user_id", nullable = false)
-	@AMetaData (displayName = "User", required = true, readOnly = false, description = "User in this company relationship", hidden = false, order = 1)
+	@AMetaData (
+			displayName = "User", required = true, readOnly = false, description = "User in this company relationship", hidden = false, order = 1,
+			dataProviderOwner = "content", dataProviderMethod = "getAvailableUsersForCompany"
+	)
 	private CUser user;
 
 	public CUserCompanySetting() {
@@ -114,10 +108,6 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 
 	public String getCompanyName() { return company != null ? company.getName() : "Unknown Company"; }
 
-	public String getDepartment() { return department; }
-
-	public Boolean getIsPrimaryCompany() { return isPrimaryCompany; }
-
 	public String getRole() { return role; }
 
 	// Getters and Setters
@@ -129,13 +119,7 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 	 * @return true if user is company owner or admin */
 	public boolean isCompanyAdmin() { return isOwner() || isAdmin(); }
 
-	public Boolean isPrimaryCompany() { return isPrimaryCompany; }
-
 	public void setCompany(CCompany company) { this.company = company; }
-
-	public void setDepartment(String department) { this.department = department; }
-
-	public void setIsPrimaryCompany(Boolean isPrimaryCompany) { this.isPrimaryCompany = isPrimaryCompany != null ? isPrimaryCompany : Boolean.FALSE; }
 
 	public void setRole(String role) { this.role = role; }
 

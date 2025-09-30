@@ -13,10 +13,6 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.users.domain.CUser;
 
-/** COrderApproval - Domain entity representing individual approval records for orders. Layer: Domain (MVC) Tracks individual approval steps for
- * orders, including the approver, status, date, and any comments. Each order can have multiple approvals representing different approval levels or
- * departments. This entity extends CEntityNamed to provide approval step naming and description capabilities, with additional approval-specific
- * metadata. */
 @Entity
 @Table (name = "corderapproval")
 @AttributeOverride (name = "id", column = @Column (name = "order_approval_id"))

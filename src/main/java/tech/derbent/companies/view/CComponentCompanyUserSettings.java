@@ -1,7 +1,6 @@
 package tech.derbent.companies.view;
 
 import java.util.List;
-import java.util.function.Supplier;
 import org.springframework.context.ApplicationContext;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
@@ -13,9 +12,6 @@ import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserCompanySetting;
 import tech.derbent.users.service.CUserService;
 
-/** Simplified component for managing users within a company. This component displays all users assigned to a specific company and allows: - Adding
- * new user assignments - Editing existing user roles/departments/ownership - Removing user assignments The component automatically updates when the
- * current company changes and maintains data consistency through proper accessor patterns. */
 public class CComponentCompanyUserSettings extends CComponentUserCompanyBase<CCompany, CUserCompanySetting> {
 
 	private static final long serialVersionUID = 1L;
@@ -57,11 +53,8 @@ public class CComponentCompanyUserSettings extends CComponentUserCompanyBase<CCo
 		Check.notNull(settings, "Settings cannot be null when saving");
 		LOGGER.debug("Saving user company settings: {}", settings);
 		try {
-			final CUserCompanySetting savedSettings =
-					settings.getId() == null
-							? userCompanySettingsService.addUserToCompany(settings.getUser(), settings.getCompany(), settings.getOwnershipLevel(),
-									settings.getRole(), settings.getDepartment(), settings.isPrimaryCompany())
-							: userCompanySettingsService.save(settings);
+			final CUserCompanySetting savedSettings = settings.getId() == null ? userCompanySettingsService.addUserToCompany(settings.getUser(),
+					settings.getCompany(), settings.getOwnershipLevel(), settings.getRole()) : userCompanySettingsService.save(settings);
 			LOGGER.info("Successfully saved user company settings: {}", savedSettings);
 			populateForm();
 		} catch (final Exception e) {

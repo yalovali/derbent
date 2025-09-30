@@ -14,7 +14,6 @@ import tech.derbent.api.services.CAbstractEntityRelationService;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.ui.dialogs.CConfirmationDialog;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
-import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 
 /** Generic base class for relationship panel components. This class provides common functionality for managing bidirectional entity relationships
@@ -82,6 +81,9 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 		return header;
 	}
 
+	/** Delete the relation - subclasses must implement this. */
+	protected abstract void deleteRelation(RelationalClass selected) throws Exception;
+
 	/** Deletes the selected relationship. */
 	protected void deleteSelected() {
 		final RelationalClass selected = grid.asSingleSelect().getValue();
@@ -104,8 +106,6 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 		}
 	}
 
-	/** Delete the relation - subclasses must implement this. */
-	protected abstract void deleteRelation(RelationalClass selected) throws Exception;
 	/** Get delete confirmation message - subclasses can override. */
 	protected abstract String getDeleteConfirmationMessage(RelationalClass selected);
 	/** Gets display text for various field types - subclasses must implement. */

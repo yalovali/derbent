@@ -150,9 +150,9 @@ public class CDataInitializer {
 	private final CMeetingService meetingService;
 	private final CMeetingStatusService meetingStatusService;
 	private final CMeetingTypeService meetingTypeService;
+	private final COrderService orderService;
 	private final COrderStatusService orderStatusService;
 	private final COrderTypeService orderTypeService;
-	private final COrderService orderService;
 	private final CPageEntityService pageEntityService;
 	// Service dependencies - injected via constructor
 	private final CProjectService projectService;
@@ -160,11 +160,11 @@ public class CDataInitializer {
 	private final CRiskStatusService riskStatusService;
 	private final CDetailLinesService screenLinesService;
 	private final CDetailSectionService screenService;
-	private final CUserService userService;
-	private final CUserProjectSettingsService userProjectSettingsService;
 	private final CUserCompanySettingsService userCompanySettingsService;
-	private final CUserTypeService userTypeService;
 	private final CUserProjectRoleService userProjectRoleService;
+	private final CUserProjectSettingsService userProjectSettingsService;
+	private final CUserService userService;
+	private final CUserTypeService userTypeService;
 
 	public CDataInitializer() {
 		gridEntityService = CSpringContext.getBean(CGridEntityService.class);
@@ -661,6 +661,19 @@ public class CDataInitializer {
 		}
 	}
 
+	private void createProjectDigitalTransformation() {
+		final CProject project = new CProject("Digital Transformation Initiative");
+		project.setDescription("Comprehensive digital transformation for enhanced customer experience");
+		project.setIsActive(true);
+		projectService.save(project);
+	}
+
+	private void createProjectInfrastructureUpgrade() {
+		final CProject project = new CProject("Infrastructure Upgrade Project");
+		project.setDescription("Upgrading IT infrastructure for improved performance and scalability");
+		projectService.save(project);
+	}
+
 	/** Creates project manager user. */
 	private void createProjectManagerUser() {
 		LOGGER.info("createProjectManagerUser called - creating project manager");
@@ -677,6 +690,12 @@ public class CDataInitializer {
 		final CCompany company = companyService.findByName(COMPANY_OF_TEKNOLOJI).orElseThrow();
 		manager.setCompany(company);
 		userService.save(manager);
+	}
+
+	private void createProjectProductDevelopment() {
+		final CProject project = new CProject("New Product Development");
+		project.setDescription("Development of innovative products to expand market reach");
+		projectService.save(project);
 	}
 
 	private void createRiskStatus(final String name, final CProject project, final String description, final String color, final boolean isFinal,
@@ -700,6 +719,30 @@ public class CDataInitializer {
 		// Set missing fields
 		decision.setCreatedBy(userService.getRandom());
 		decisionService.save(decision);
+	}
+
+	private void createSampleHardwareOrder(CProject project) {
+		final COrder order = new COrder("Laptop Procurement", project);
+		order.setDescription("Procurement of high-performance laptops for development team");
+		// Set order type
+		final COrderType hardwareType = orderTypeService.getRandom(project);
+		order.setOrderType(hardwareType);
+		// Set order status
+		final COrderStatus processingStatus = orderStatusService.getRandom(project);
+		order.setStatus(processingStatus);
+		// Set assigned user
+		order.setCreatedBy(userService.getRandom());
+		order.setAssignedTo(userService.getRandom());
+		order.setRequestor(userService.getRandom());
+		// Set financial details
+		final CCurrency tryCurrency = currencyService.getRandom(project);
+		order.setCurrency(tryCurrency);
+		// Set date information
+		order.setOrderDate(LocalDate.now().minusDays(10));
+		order.setDeliveryDate(LocalDate.now().plusDays(5));
+		order.setProviderCompanyName("asfdsafsaf");
+		orderService.save(order);
+		LOGGER.info("Sample hardware order created successfully for project: {}", project.getName());
 	}
 
 	/** Create a sample operational decision. */
@@ -823,6 +866,30 @@ public class CDataInitializer {
 		meeting.setResponsible(userService.getRandom());
 		meeting.setCreatedBy(userService.getRandom());
 		meetingService.save(meeting);
+	}
+
+	private void createSampleSoftwareOrder(CProject project) {
+		final COrder order = new COrder("Cloud Service Subscription", project);
+		order.setDescription("Subscription to cloud services for hosting and scalability");
+		// Set order type
+		final COrderType softwareType = orderTypeService.getRandom(project);
+		order.setOrderType(softwareType);
+		// Set order status
+		final COrderStatus submittedStatus = orderStatusService.getRandom(project);
+		order.setStatus(submittedStatus);
+		// Set assigned user
+		order.setCreatedBy(userService.getRandom());
+		order.setAssignedTo(userService.getRandom());
+		order.setRequestor(userService.getRandom());
+		// Set financial details
+		final CCurrency usdCurrency = currencyService.getRandom(project);
+		order.setCurrency(usdCurrency);
+		// Set date information
+		order.setOrderDate(LocalDate.now().minusDays(3));
+		order.setDeliveryDate(LocalDate.now().plusDays(7));
+		order.setProviderCompanyName("poiopiopoipiopi");
+		orderService.save(order);
+		LOGGER.info("Sample software order created successfully for project: {}", project.getName());
 	}
 
 	/** Creates sample standup meeting. */
@@ -1048,6 +1115,38 @@ public class CDataInitializer {
 		commentService.createComment("Working on accessibility testing and user experience validation", uiTesting, userService.getRandom());
 	}
 
+	private void createUserCompanySetting(final CUser user, final CCompany company, final String role, final String ownershipLevel) {
+		try {
+			// Check if relationship already exists
+			if (!userCompanySettingsService.relationshipExists(user.getId(), company.getId())) {
+				userCompanySettingsService.addUserToCompany(user, company, ownershipLevel, role);
+				LOGGER.debug("Created user company setting: {} -> {} ({})", user.getLogin(), company.getName(), role);
+			} else {
+				LOGGER.debug("User company relationship already exists: {} -> {}", user.getLogin(), company.getName());
+			}
+		} catch (final Exception e) {
+			LOGGER.warn("Failed to create user company setting for {} -> {}: {}", user.getLogin(), company.getName(), e.getMessage());
+		}
+	}
+
+	/** Helper method to create user project settings safely.
+	 * @param user       the user to assign
+	 * @param project    the project to assign to
+	 * @param role       the role name
+	 * @param permission the permission level */
+	private void createUserProjectSetting(final CUser user, final CProject project, final String role, final String permission) {
+		try {
+			// Check if relationship already exists
+			if (!userProjectSettingsService.relationshipExists(user.getId(), project.getId())) {
+				LOGGER.debug("Created user project setting: {} -> {} ({})", user.getLogin(), project.getName(), role);
+			} else {
+				LOGGER.debug("User project relationship already exists: {} -> {}", user.getLogin(), project.getName());
+			}
+		} catch (final Exception e) {
+			LOGGER.warn("Failed to create user project setting for {} -> {}: {}", user.getLogin(), project.getName(), e.getMessage());
+		}
+	}
+
 	/** Initializes comprehensive activity data with available fields populated. */
 	private void initializeSampleActivities(final CProject project) {
 		try {
@@ -1268,6 +1367,16 @@ public class CDataInitializer {
 		}
 	}
 
+	private void initializeSampleOrders(CProject project) {
+		try {
+			createSampleHardwareOrder(project);
+			createSampleSoftwareOrder(project);
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing sample orders for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize sample orders for project: " + project.getName(), e);
+		}
+	}
+
 	private void initializeSampleOrderStatuses(final CProject project) {
 		try {
 			createOrderStatus("Draft", project, "Order is in draft state", "#95a5a6", false, 1);
@@ -1317,86 +1426,6 @@ public class CDataInitializer {
 		}
 	}
 
-	/** Creates high priority technical risk. */
-	private void initializeSampleRisks(CProject project) {
-		CRisk risk = new CRisk("Legacy System Integration Challenges", project);
-		risk.setRiskSeverity(ERiskSeverity.HIGH);
-		risk.setDescription("Integration with legacy systems may cause compatibility issues and performance bottlenecks");
-		risk.setStatus(riskStatusService.getRandom(project));
-		// Set missing fields
-		risk.setCreatedBy(userService.getRandom());
-		risk.setAssignedTo(userService.getRandom());
-		riskService.save(risk);
-		risk = new CRisk("Team Member Vacation Scheduling Conflicts", project);
-		risk.setRiskSeverity(ERiskSeverity.LOW);
-		risk.setDescription("Overlapping vacation schedules may temporarily reduce team capacity");
-		// Set missing fields
-		risk.setStatus(riskStatusService.getRandom(project));
-		risk.setCreatedBy(userService.getRandom());
-		risk.setAssignedTo(userService.getRandom());
-		riskService.save(risk);
-		risk = new CRisk("Minor Delays in Third-Party Integrations", project);
-		risk.setRiskSeverity(ERiskSeverity.LOW);
-		risk.setDescription("External vendor may experience minor delays in API delivery");
-		// Set missing fields
-		risk.setStatus(riskStatusService.getRandom(project));
-		risk.setCreatedBy(userService.getRandom());
-		risk.setAssignedTo(userService.getRandom());
-		riskService.save(risk);
-	}
-
-	private void initializeSampleRiskStatuses(final CProject project) {
-		try {
-			createRiskStatus("Identified", project, "Risk has been identified", CColorUtils.getRandomColor(true), false, 1);
-			createRiskStatus("Assessed", project, "Risk has been assessed", CColorUtils.getRandomColor(true), false, 2);
-			createRiskStatus("Mitigated", project, "Risk mitigation actions taken", CColorUtils.getRandomColor(true), false, 3);
-			createRiskStatus("Closed", project, "Risk is closed", CColorUtils.getRandomColor(true), true, 4);
-			LOGGER.info("Risk statuses initialized successfully for project: {}", project.getName());
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing risk statuses for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize risk statuses for project: " + project.getName(), e);
-		}
-	}
-
-	private void initializeSampleUserTypes(final CProject project) {
-		try {
-			final String[][] userTypes = {
-					{
-							"Administrator", "System administrators with full access"
-					}, {
-							"Project Manager", "Project managers responsible for project coordination"
-					}, {
-							"Team Lead", "Team leaders responsible for team management"
-					}, {
-							"Developer", "Software developers and engineers"
-					}, {
-							"Analyst", "Business and system analysts"
-					}, {
-							"Tester", "Quality assurance and testing specialists"
-					}, {
-							"Designer", "UI/UX designers and architects"
-					}, {
-							"Stakeholder", "Project stakeholders and decision makers"
-					}
-			};
-			for (final String[] typeData : userTypes) {
-				final CUserType userType = userTypeService.createEntity(typeData[0], project);
-				userType.setDescription(typeData[1]);
-				userType.setColor(CColorUtils.getRandomColor(true));
-				userTypeService.save(userType);
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error creating user types for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize user types for project: " + project.getName(), e);
-		}
-		// for each user distribute random user types
-		final List<CUser> users = userService.list(Pageable.unpaged()).getContent();
-		for (final CUser user : users) {
-			user.setUserType(userTypeService.getRandom());
-			userService.save(user);
-		}
-	}
-
 	private void initializeSampleProjectRoles(final CProject project) {
 		try {
 			final String[][] projectRoles = {
@@ -1440,44 +1469,99 @@ public class CDataInitializer {
 		}
 	}
 
-	/** Loads profile picture data from the profile-pictures directory.
-	 * @param filename The SVG filename to load
-	 * @return byte array of the SVG content, or null if not found */
-	private byte[] loadProfilePictureData(final String filename) {
+	/** Creates high priority technical risk. */
+	private void initializeSampleRisks(CProject project) {
+		CRisk risk = new CRisk("Legacy System Integration Challenges", project);
+		risk.setRiskSeverity(ERiskSeverity.HIGH);
+		risk.setDescription("Integration with legacy systems may cause compatibility issues and performance bottlenecks");
+		risk.setStatus(riskStatusService.getRandom(project));
+		// Set missing fields
+		risk.setCreatedBy(userService.getRandom());
+		risk.setAssignedTo(userService.getRandom());
+		riskService.save(risk);
+		risk = new CRisk("Team Member Vacation Scheduling Conflicts", project);
+		risk.setRiskSeverity(ERiskSeverity.LOW);
+		risk.setDescription("Overlapping vacation schedules may temporarily reduce team capacity");
+		// Set missing fields
+		risk.setStatus(riskStatusService.getRandom(project));
+		risk.setCreatedBy(userService.getRandom());
+		risk.setAssignedTo(userService.getRandom());
+		riskService.save(risk);
+		risk = new CRisk("Minor Delays in Third-Party Integrations", project);
+		risk.setRiskSeverity(ERiskSeverity.LOW);
+		risk.setDescription("External vendor may experience minor delays in API delivery");
+		// Set missing fields
+		risk.setStatus(riskStatusService.getRandom(project));
+		risk.setCreatedBy(userService.getRandom());
+		risk.setAssignedTo(userService.getRandom());
+		riskService.save(risk);
+	}
+
+	private void initializeSampleRiskStatuses(final CProject project) {
 		try {
-			// Try direct file path first (since profile-pictures is in project root)
-			final Path filePath = java.nio.file.Paths.get("profile-pictures", filename);
-			Check.isTrue(!filename.contains(".."), "Invalid filename: " + filename); // Prevent path traversal
-			if (Files.exists(filePath)) {
-				return Files.readAllBytes(filePath);
-			}
-			// Fallback: Load from classpath resources
-			final var resource = getClass().getClassLoader().getResourceAsStream("profile-pictures/" + filename);
-			Check.notNull(resource, "Profile picture resource not found in classpath: " + filename);
-			return resource.readAllBytes();
+			createRiskStatus("Identified", project, "Risk has been identified", CColorUtils.getRandomColor(true), false, 1);
+			createRiskStatus("Assessed", project, "Risk has been assessed", CColorUtils.getRandomColor(true), false, 2);
+			createRiskStatus("Mitigated", project, "Risk mitigation actions taken", CColorUtils.getRandomColor(true), false, 3);
+			createRiskStatus("Closed", project, "Risk is closed", CColorUtils.getRandomColor(true), true, 4);
+			LOGGER.info("Risk statuses initialized successfully for project: {}", project.getName());
 		} catch (final Exception e) {
-			LOGGER.error("Error loading profile picture: {}", filename, e);
-			return null;
+			LOGGER.error("Error initializing risk statuses for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize risk statuses for project: " + project.getName(), e);
 		}
 	}
 
-	private void createProjectDigitalTransformation() {
-		final CProject project = new CProject("Digital Transformation Initiative");
-		project.setDescription("Comprehensive digital transformation for enhanced customer experience");
-		project.setIsActive(true);
-		projectService.save(project);
-	}
-
-	private void createProjectInfrastructureUpgrade() {
-		final CProject project = new CProject("Infrastructure Upgrade Project");
-		project.setDescription("Upgrading IT infrastructure for improved performance and scalability");
-		projectService.save(project);
-	}
-
-	private void createProjectProductDevelopment() {
-		final CProject project = new CProject("New Product Development");
-		project.setDescription("Development of innovative products to expand market reach");
-		projectService.save(project);
+	/** Initialize sample user company settings to demonstrate the CComponentCompanyUserSettings pattern. This creates realistic user-company
+	 * relationships following the established pattern. */
+	private void initializeSampleUserCompanySettings() {
+		try {
+			LOGGER.info("Initializing sample user company settings");
+			final List<CCompany> companies = companyService.list(Pageable.unpaged()).getContent();
+			// Get sample users by login for consistent assignment
+			final CUser admin = userService.findByLogin(USER_ADMIN);
+			final CUser manager = userService.findByLogin(USER_MANAGER);
+			final CUser mary = userService.findByLogin("mary");
+			final CUser bob = userService.findByLogin("bob");
+			final CUser alice = userService.findByLogin("alice");
+			for (final CCompany company : companies) {
+				// Assign users to different companies with different roles
+				if ("Tech Solutions Inc.".equals(company.getName())) {
+					if (admin != null) {
+						createUserCompanySetting(admin, company, "CEO", "Owner");
+					}
+					if (manager != null) {
+						createUserCompanySetting(manager, company, "CTO", "Technology");
+					}
+					if (mary != null) {
+						createUserCompanySetting(mary, company, "Senior Developer", "Employee");
+					}
+				} else if ("Global Consulting Partners".equals(company.getName())) {
+					if (manager != null) {
+						createUserCompanySetting(manager, company, "Senior Consultant", "Employee");
+					}
+					if (alice != null) {
+						createUserCompanySetting(alice, company, "Business Analyst", "Employee");
+					}
+					if (bob != null) {
+						createUserCompanySetting(bob, company, "Technical Consultant", "Contractor");
+					}
+				} else if ("HealthCare Systems".equals(company.getName())) {
+					if (alice != null) {
+						createUserCompanySetting(alice, company, "Product Manager", "Employee");
+					}
+					if (mary != null) {
+						createUserCompanySetting(mary, company, "Lead Developer", "Employee");
+					}
+				} else if ("Manufacturing Corp".equals(company.getName())) {
+					if (bob != null) {
+						createUserCompanySetting(bob, company, "Systems Engineer", "Employee");
+					}
+				}
+			}
+			LOGGER.info("Successfully initialized sample user company settings for {} companies", companies.size());
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing sample user company settings: {}", e.getMessage(), e);
+			throw new RuntimeException("Failed to initialize sample user company settings", e);
+		}
 	}
 
 	/** Initialize sample user project settings to demonstrate the CComponentProjectUserSettings pattern. This creates realistic user-project
@@ -1532,97 +1616,69 @@ public class CDataInitializer {
 		}
 	}
 
-	/** Initialize sample user company settings to demonstrate the CComponentCompanyUserSettings pattern. This creates realistic user-company
-	 * relationships following the established pattern. */
-	private void initializeSampleUserCompanySettings() {
+	private void initializeSampleUserTypes(final CProject project) {
 		try {
-			LOGGER.info("Initializing sample user company settings");
-			final List<CCompany> companies = companyService.list(Pageable.unpaged()).getContent();
-			// Get sample users by login for consistent assignment
-			final CUser admin = userService.findByLogin(USER_ADMIN);
-			final CUser manager = userService.findByLogin(USER_MANAGER);
-			final CUser mary = userService.findByLogin("mary");
-			final CUser bob = userService.findByLogin("bob");
-			final CUser alice = userService.findByLogin("alice");
-			for (final CCompany company : companies) {
-				// Assign users to different companies with different roles
-				if ("Tech Solutions Inc.".equals(company.getName())) {
-					if (admin != null) {
-						createUserCompanySetting(admin, company, "CEO", "Executive", "Owner", true);
+			final String[][] userTypes = {
+					{
+							"Administrator", "System administrators with full access"
+					}, {
+							"Project Manager", "Project managers responsible for project coordination"
+					}, {
+							"Team Lead", "Team leaders responsible for team management"
+					}, {
+							"Developer", "Software developers and engineers"
+					}, {
+							"Analyst", "Business and system analysts"
+					}, {
+							"Tester", "Quality assurance and testing specialists"
+					}, {
+							"Designer", "UI/UX designers and architects"
+					}, {
+							"Stakeholder", "Project stakeholders and decision makers"
 					}
-					if (manager != null) {
-						createUserCompanySetting(manager, company, "CTO", "Technology", "Partner", true);
-					}
-					if (mary != null) {
-						createUserCompanySetting(mary, company, "Senior Developer", "Engineering", "Employee", false);
-					}
-				} else if ("Global Consulting Partners".equals(company.getName())) {
-					if (manager != null) {
-						createUserCompanySetting(manager, company, "Senior Consultant", "Consulting", "Employee", false);
-					}
-					if (alice != null) {
-						createUserCompanySetting(alice, company, "Business Analyst", "Consulting", "Employee", true);
-					}
-					if (bob != null) {
-						createUserCompanySetting(bob, company, "Technical Consultant", "Technology", "Contractor", false);
-					}
-				} else if ("HealthCare Systems".equals(company.getName())) {
-					if (alice != null) {
-						createUserCompanySetting(alice, company, "Product Manager", "Product", "Employee", false);
-					}
-					if (mary != null) {
-						createUserCompanySetting(mary, company, "Lead Developer", "Engineering", "Employee", false);
-					}
-				} else if ("Manufacturing Corp".equals(company.getName())) {
-					if (bob != null) {
-						createUserCompanySetting(bob, company, "Systems Engineer", "IT", "Employee", true);
-					}
-				}
+			};
+			for (final String[] typeData : userTypes) {
+				final CUserType userType = userTypeService.createEntity(typeData[0], project);
+				userType.setDescription(typeData[1]);
+				userType.setColor(CColorUtils.getRandomColor(true));
+				userTypeService.save(userType);
 			}
-			LOGGER.info("Successfully initialized sample user company settings for {} companies", companies.size());
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample user company settings: {}", e.getMessage(), e);
-			throw new RuntimeException("Failed to initialize sample user company settings", e);
+			LOGGER.error("Error creating user types for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize user types for project: " + project.getName(), e);
+		}
+		// for each user distribute random user types
+		final List<CUser> users = userService.list(Pageable.unpaged()).getContent();
+		for (final CUser user : users) {
+			user.setUserType(userTypeService.getRandom());
+			userService.save(user);
 		}
 	}
 
-	/** Helper method to create user project settings safely.
-	 * @param user       the user to assign
-	 * @param project    the project to assign to
-	 * @param role       the role name
-	 * @param permission the permission level */
-	private void createUserProjectSetting(final CUser user, final CProject project, final String role, final String permission) {
-		try {
-			// Check if relationship already exists
-			if (!userProjectSettingsService.relationshipExists(user.getId(), project.getId())) {
-				LOGGER.debug("Created user project setting: {} -> {} ({})", user.getLogin(), project.getName(), role);
-			} else {
-				LOGGER.debug("User project relationship already exists: {} -> {}", user.getLogin(), project.getName());
-			}
-		} catch (final Exception e) {
-			LOGGER.warn("Failed to create user project setting for {} -> {}: {}", user.getLogin(), project.getName(), e.getMessage());
-		}
+	public boolean isDatabaseEmpty() {
+		final long cnt = userService.count();
+		LOGGER.info("User count = {}", cnt);
+		return cnt == 0;
 	}
 
-	/** Helper method to create user company settings safely.
-	 * @param user           the user to assign
-	 * @param company        the company to assign to
-	 * @param role           the role name
-	 * @param department     the department name
-	 * @param ownershipLevel the ownership level
-	 * @param primaryCompany whether this is the primary company */
-	private void createUserCompanySetting(final CUser user, final CCompany company, final String role, final String department,
-			final String ownershipLevel, final boolean primaryCompany) {
+	/** Loads profile picture data from the profile-pictures directory.
+	 * @param filename The SVG filename to load
+	 * @return byte array of the SVG content, or null if not found */
+	private byte[] loadProfilePictureData(final String filename) {
 		try {
-			// Check if relationship already exists
-			if (!userCompanySettingsService.relationshipExists(user.getId(), company.getId())) {
-				userCompanySettingsService.addUserToCompany(user, company, ownershipLevel, role, department, primaryCompany);
-				LOGGER.debug("Created user company setting: {} -> {} ({})", user.getLogin(), company.getName(), role);
-			} else {
-				LOGGER.debug("User company relationship already exists: {} -> {}", user.getLogin(), company.getName());
+			// Try direct file path first (since profile-pictures is in project root)
+			final Path filePath = java.nio.file.Paths.get("profile-pictures", filename);
+			Check.isTrue(!filename.contains(".."), "Invalid filename: " + filename); // Prevent path traversal
+			if (Files.exists(filePath)) {
+				return Files.readAllBytes(filePath);
 			}
+			// Fallback: Load from classpath resources
+			final var resource = getClass().getClassLoader().getResourceAsStream("profile-pictures/" + filename);
+			Check.notNull(resource, "Profile picture resource not found in classpath: " + filename);
+			return resource.readAllBytes();
 		} catch (final Exception e) {
-			LOGGER.warn("Failed to create user company setting for {} -> {}: {}", user.getLogin(), company.getName(), e.getMessage());
+			LOGGER.error("Error loading profile picture: {}", filename, e);
+			return null;
 		}
 	}
 
@@ -1706,64 +1762,6 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleOrders(CProject project) {
-		try {
-			createSampleHardwareOrder(project);
-			createSampleSoftwareOrder(project);
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample orders for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize sample orders for project: " + project.getName(), e);
-		}
-	}
-
-	private void createSampleHardwareOrder(CProject project) {
-		final COrder order = new COrder("Laptop Procurement", project);
-		order.setDescription("Procurement of high-performance laptops for development team");
-		// Set order type
-		final COrderType hardwareType = orderTypeService.getRandom(project);
-		order.setOrderType(hardwareType);
-		// Set order status
-		final COrderStatus processingStatus = orderStatusService.getRandom(project);
-		order.setStatus(processingStatus);
-		// Set assigned user
-		order.setCreatedBy(userService.getRandom());
-		order.setAssignedTo(userService.getRandom());
-		order.setRequestor(userService.getRandom());
-		// Set financial details
-		final CCurrency tryCurrency = currencyService.getRandom(project);
-		order.setCurrency(tryCurrency);
-		// Set date information
-		order.setOrderDate(LocalDate.now().minusDays(10));
-		order.setDeliveryDate(LocalDate.now().plusDays(5));
-		order.setProviderCompanyName("asfdsafsaf");
-		orderService.save(order);
-		LOGGER.info("Sample hardware order created successfully for project: {}", project.getName());
-	}
-
-	private void createSampleSoftwareOrder(CProject project) {
-		final COrder order = new COrder("Cloud Service Subscription", project);
-		order.setDescription("Subscription to cloud services for hosting and scalability");
-		// Set order type
-		final COrderType softwareType = orderTypeService.getRandom(project);
-		order.setOrderType(softwareType);
-		// Set order status
-		final COrderStatus submittedStatus = orderStatusService.getRandom(project);
-		order.setStatus(submittedStatus);
-		// Set assigned user
-		order.setCreatedBy(userService.getRandom());
-		order.setAssignedTo(userService.getRandom());
-		order.setRequestor(userService.getRandom());
-		// Set financial details
-		final CCurrency usdCurrency = currencyService.getRandom(project);
-		order.setCurrency(usdCurrency);
-		// Set date information
-		order.setOrderDate(LocalDate.now().minusDays(3));
-		order.setDeliveryDate(LocalDate.now().plusDays(7));
-		order.setProviderCompanyName("poiopiopoipiopi");
-		orderService.save(order);
-		LOGGER.info("Sample software order created successfully for project: {}", project.getName());
-	}
-
 	public void reloadForced() {
 		LOGGER.info("Sample data reload (forced) started");
 		clearSampleData(); // <<<<< ÖNCE TEMİZLE
@@ -1773,10 +1771,4 @@ public class CDataInitializer {
 	// ========================================================================
 	// SYSTEM INITIALIZATION METHODS - Base entities required for operation
 	// ========================================================================
-
-	public boolean isDatabaseEmpty() {
-		final long cnt = userService.count();
-		LOGGER.info("User count = {}", cnt);
-		return cnt == 0;
-	}
 }
