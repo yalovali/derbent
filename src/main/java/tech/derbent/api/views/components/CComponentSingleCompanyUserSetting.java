@@ -12,12 +12,12 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserCompanySetting;
+import tech.derbent.users.service.CUserService;
 
 /** Component for displaying and editing a user's single company setting. This component provides a nice visual layout with icons and colors for the
  * CUserCompanySettings field, allowing users to view and edit their company membership and role through an attractive interface. */
@@ -28,8 +28,8 @@ public class CComponentSingleCompanyUserSetting extends CComponentDBEntity<CUser
 	private final CCompanyService companyService;
 	private Div contentDiv;
 
-	public CComponentSingleCompanyUserSetting(IContentOwner parentContent, ApplicationContext applicationContext) {
-		super("Company Setting", parentContent, CUser.class, applicationContext);
+	public CComponentSingleCompanyUserSetting(CUserService cUserService, ApplicationContext applicationContext) {
+		super("Company Setting", CUser.class, applicationContext);
 		companyService = applicationContext.getBean(CCompanyService.class);
 		Check.notNull(companyService, "Company service cannot be null");
 		initComponent();

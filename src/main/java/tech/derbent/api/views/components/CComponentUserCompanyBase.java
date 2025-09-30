@@ -3,7 +3,6 @@ package tech.derbent.api.views.components;
 import org.springframework.context.ApplicationContext;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityNamed;
-import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
@@ -18,10 +17,10 @@ public abstract class CComponentUserCompanyBase<MasterClass extends CEntityNamed
 	private static final long serialVersionUID = 1L;
 	protected CUserCompanySettingsService userCompanySettingsService;
 
-	public CComponentUserCompanyBase(final String title, IContentOwner parentContent, final Class<MasterClass> entityClass,
-			final CAbstractService<MasterClass> entityService, final ApplicationContext applicationContext) {
-		super(title, parentContent, entityClass, CUserCompanySetting.class, entityService,
-				applicationContext.getBean(CUserCompanySettingsService.class), applicationContext);
+	public CComponentUserCompanyBase(final String title, final Class<MasterClass> entityClass, final CAbstractService<MasterClass> entityService,
+			final ApplicationContext applicationContext) {
+		super(title, entityClass, CUserCompanySetting.class, entityService, applicationContext.getBean(CUserCompanySettingsService.class),
+				applicationContext);
 		userCompanySettingsService = (CUserCompanySettingsService) relationService;
 	}
 

@@ -51,9 +51,6 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 		// final String encodedPassword = passwordEncoder.encode(newPlainPassword);
 	}
 
-	/** Counts the number of users assigned to a specific project.
-	 * @param projectId the project ID
-	 * @return count of users assigned to the project */
 	@PreAuthorize ("permitAll()")
 	public long countUsersByProjectId(final Long projectId) {
 		return ((IUserRepository) repository).countByProjectId(projectId);
@@ -79,7 +76,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	public Component createSingleCompanyUserSettingComponent() {
 		LOGGER.debug("Creating single company user setting component");
 		try {
-			CComponentSingleCompanyUserSetting component = new CComponentSingleCompanyUserSetting(null, applicationContext);
+			CComponentSingleCompanyUserSetting component = new CComponentSingleCompanyUserSetting(this, applicationContext);
 			return component;
 		} catch (Exception e) {
 			LOGGER.error("Failed to create single company user setting component: {}", e.getMessage(), e);
@@ -94,7 +91,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	public Component createUserProjectSettingsComponent() {
 		LOGGER.debug("Creating enhanced user project settings component");
 		try {
-			CComponentUserProjectSettings component = new CComponentUserProjectSettings(null, null, applicationContext);
+			CComponentUserProjectSettings component = new CComponentUserProjectSettings(this, applicationContext);
 			return component;
 		} catch (Exception e) {
 			LOGGER.error("Failed to create user project settings component: {}", e.getMessage(), e);
@@ -153,7 +150,8 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	@Override
 	@Transactional (readOnly = true)
 	public Page<CUser> list(final Pageable pageable) {
-		return super.list(pageable);
+		return ((IUserRepository) repository).list(pageable);
+		// return super.list(pageable);
 	}
 
 	/** Lists users by project using the CUserProjectSettings relationship. This method allows CUserService to work with dynamic pages that expect
@@ -165,10 +163,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 		Check.notNull(project, "Project cannot be null");
 		try {
 			// Find users through the project settings relationship
-			return repository.findAll().stream()
-					.filter(user -> user.getProjectSettings() != null && user.getProjectSettings().stream()
-							.anyMatch(settings -> settings.getProject() != null && projectsMatch(settings.getProject(), project)))
-					.collect(Collectors.toList());
+			return ((IUserRepository) repository).findByProject(project.getId());
 		} catch (final Exception e) {
 			LOGGER.error("Error listing users by project '{}': {}", project.getName(), e.getMessage(), e);
 			throw new RuntimeException("Failed to list users by project", e);
@@ -221,19 +216,6 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 			return false;
 		}
 		return true;
-	}
-
-	/** Helper method to safely compare projects, handling cases where IDs might be null */
-	private boolean projectsMatch(CProject project1, CProject project2) {
-		if (project1 == null || project2 == null) {
-			return false;
-		}
-		// If both have IDs, compare by ID
-		if (project1.getId() != null && project2.getId() != null) {
-			return project1.getId().equals(project2.getId());
-		}
-		// If IDs are null, compare by name as fallback
-		return project1.getName() != null && project1.getName().equals(project2.getName());
 	}
 
 	@Override

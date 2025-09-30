@@ -2,7 +2,6 @@ package tech.derbent.api.views.components;
 
 import java.util.List;
 import org.springframework.context.ApplicationContext;
-import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.api.utils.Check;
 import tech.derbent.projects.domain.CProject;
@@ -21,9 +20,9 @@ public class CComponentProjectUserSettings extends CComponentUserProjectRelation
 	private CProject currentProject;
 	private final CUserService userService;
 
-	public CComponentProjectUserSettings(IContentOwner parentContent, final CProject currentEntity, final CProjectService entityService,
-			ApplicationContext applicationContext) throws Exception {
-		super("User Settings", parentContent, CProject.class, entityService, applicationContext);
+	public CComponentProjectUserSettings(final CProject currentEntity, final CProjectService entityService, ApplicationContext applicationContext)
+			throws Exception {
+		super("User Settings", CProject.class, entityService, applicationContext);
 		userService = applicationContext.getBean(CUserService.class);
 		initPanel();
 	}

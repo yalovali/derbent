@@ -2,7 +2,6 @@ package tech.derbent.companies.view;
 
 import java.util.List;
 import org.springframework.context.ApplicationContext;
-import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CComponentUserCompanyBase;
@@ -17,9 +16,8 @@ public class CComponentCompanyUserSettings extends CComponentUserCompanyBase<CCo
 	private static final long serialVersionUID = 1L;
 	private final CUserService userService;
 
-	public CComponentCompanyUserSettings(IContentOwner parentContent, final CCompanyService entityService, ApplicationContext applicationContext)
-			throws Exception {
-		super("User Settings", parentContent, CCompany.class, entityService, applicationContext);
+	public CComponentCompanyUserSettings(final CCompanyService entityService, ApplicationContext applicationContext) throws Exception {
+		super("User Settings", CCompany.class, entityService, applicationContext);
 		Check.notNull(relationService, "User company settings service cannot be null");
 		userService = applicationContext.getBean(CUserService.class);
 		Check.notNull(userService, "User service cannot be null");

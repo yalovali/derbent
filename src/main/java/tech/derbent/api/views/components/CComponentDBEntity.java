@@ -28,8 +28,7 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	@SuppressWarnings ("unchecked")
-	public CComponentDBEntity(final String title, IContentOwner parentContent, final Class<EntityClass> entityClass,
-			ApplicationContext applicationContext) {
+	public CComponentDBEntity(final String title, final Class<EntityClass> entityClass, ApplicationContext applicationContext) {
 		super(false, true, false); // no padding, with spacing, no margin
 		this.applicationContext = applicationContext;
 		Check.notNull(applicationContext, "Application context cannot be null");
@@ -39,7 +38,6 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 		Check.notNull(binder, "Binder cannot be null");
 		entityService = (CAbstractService<EntityClass>) applicationContext.getBean(CAuxillaries.getServiceClassForEntity(entityClass));
 		Check.notNull(entityService, "Entity service cannot be null for entity: " + entityClass.getSimpleName());
-		contentOwner = parentContent;
 		addClassName("c-component-db-entity");
 		setWidthFull();
 	}

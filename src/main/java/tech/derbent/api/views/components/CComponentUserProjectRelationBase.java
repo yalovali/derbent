@@ -3,7 +3,6 @@ package tech.derbent.api.views.components;
 import org.springframework.context.ApplicationContext;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityNamed;
-import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
@@ -28,10 +27,10 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 	protected CUserProjectSettingsService userProjectSettingsService;
 	protected CUserTypeService userTypeService;
 
-	public CComponentUserProjectRelationBase(final String title, IContentOwner parentContent, final Class<MasterClass> entityClass,
+	public CComponentUserProjectRelationBase(final String title, final Class<MasterClass> entityClass,
 			final CAbstractService<MasterClass> entityService, final ApplicationContext applicationContext) {
-		super(title, parentContent, entityClass, CUserProjectSettings.class, entityService,
-				applicationContext.getBean(CUserProjectSettingsService.class), applicationContext);
+		super(title, entityClass, CUserProjectSettings.class, entityService, applicationContext.getBean(CUserProjectSettingsService.class),
+				applicationContext);
 		this.applicationContext = applicationContext;
 		userProjectSettingsService = applicationContext.getBean(CUserProjectSettingsService.class);
 		projectService = applicationContext.getBean(CProjectService.class);
@@ -82,10 +81,14 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 	}
 
 	/** Abstract methods that subclasses must implement */
+	@Override
 	protected abstract void onSettingsSaved(final CUserProjectSettings settings);
+	@Override
 	protected abstract void openAddDialog() throws Exception;
+	@Override
 	protected abstract void openEditDialog() throws Exception;
 	/** Abstract method for setting up data accessors - subclasses provide specific implementations */
+	@Override
 	protected abstract void setupDataAccessors();
 
 	/** Sets up the grid with enhanced visual styling including colors, avatars and consistent headers. Uses entity decorations with colors and icons

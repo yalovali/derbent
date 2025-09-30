@@ -7,7 +7,6 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityNamed;
-import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.ui.dialogs.CConfirmationDialog;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.api.utils.CColorUtils;
@@ -22,9 +21,9 @@ public abstract class CComponentUserProjectBase<MasterClass extends CEntityNamed
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected CUserProjectSettingsService userProjectSettingsService;
 
-	public CComponentUserProjectBase(final String title, IContentOwner parentContent, final Class<MasterClass> entityClass,
+	public CComponentUserProjectBase(final String title, final Class<MasterClass> entityClass,
 			final CUserProjectSettingsService userProjectSettingsService, ApplicationContext applicationContext) {
-		super(title, parentContent, entityClass, CUserProjectSettings.class, applicationContext);
+		super(title, entityClass, CUserProjectSettings.class, applicationContext);
 		Check.notNull(userProjectSettingsService, "User project settings service cannot be null");
 		this.userProjectSettingsService = userProjectSettingsService;
 		setupGrid();

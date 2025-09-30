@@ -34,7 +34,7 @@ public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 	public Component createCompanyUserSettingsComponent() {
 		LOGGER.debug("Creating enhanced company user settings component");
 		try {
-			CComponentCompanyUserSettings component = new CComponentCompanyUserSettings(null, this, applicationContext);
+			CComponentCompanyUserSettings component = new CComponentCompanyUserSettings(this, applicationContext);
 			return component;
 		} catch (Exception e) {
 			LOGGER.error("Failed to create company user settings component: {}", e.getMessage(), e);

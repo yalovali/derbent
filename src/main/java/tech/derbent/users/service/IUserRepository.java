@@ -2,6 +2,8 @@ package tech.derbent.users.service;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.api.services.IAbstractNamedRepository;
@@ -14,10 +16,17 @@ public interface IUserRepository extends IAbstractNamedRepository<CUser> {
 	long countByProjectId(@Param ("projectId") Long projectId);
 	/** Find user by ID with eager loading using generic pattern */
 	@Override
-	@Query (
-		"SELECT u FROM #{#entityName} u LEFT JOIN FETCH u.userType LEFT JOIN FETCH u.company LEFT JOIN FETCH u.projectSettings ps LEFT JOIN FETCH ps.project WHERE u.id = :userId"
+	@Query ("SELECT u " + /**/
+			"FROM #{#entityName} u LEFT JOIN FETCH u.userType " + /* */
+			"LEFT JOIN FETCH u.company " + /**/
+			"WHERE u.id = :userId"
 	)
 	Optional<CUser> findById(@Param ("userId") Long id);
+	/** Find all users by project ID with eager loading using generic pattern */
+	@Query ("SELECT u FROM #{#entityName} u " + /* */
+			"WHERE u.id IN (SELECT ups.user.id FROM CUserProjectSettings ups WHERE ups.project.id = :projectId)"
+	)
+	List<CUser> findByProject(Long projectId);
 	/** Find user by username with eager loading using generic pattern */
 	@Query (
 		"SELECT u FROM #{#entityName} u LEFT JOIN FETCH u.userType LEFT JOIN FETCH u.company LEFT JOIN FETCH u.projectSettings ps LEFT JOIN FETCH ps.project WHERE u.login = :username"
@@ -29,4 +38,9 @@ public interface IUserRepository extends IAbstractNamedRepository<CUser> {
 	/** Find all users that are not assigned to a specific company using generic pattern */
 	@Query ("SELECT u FROM #{#entityName} u WHERE u.id NOT IN (SELECT ucs.user.id FROM CUserCompanySetting ucs WHERE ucs.company.id = :companyId)")
 	List<CUser> findUsersNotAssignedToCompany(@Param ("companyId") Long companyId);
+	@Query ("SELECT u " + /**/
+			"FROM #{#entityName} u LEFT JOIN FETCH u.userType " + /* */
+			"LEFT JOIN FETCH u.company "
+	)
+	Page<CUser> list(Pageable pageable);
 }

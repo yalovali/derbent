@@ -9,7 +9,6 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityNamed;
-import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.services.CAbstractEntityRelationService;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.ui.dialogs.CConfirmationDialog;
@@ -27,10 +26,10 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected CAbstractEntityRelationService<RelationalClass> relationService;
 
-	public CComponentRelationPanelBase(final String title, IContentOwner parentContent, final Class<MasterClass> entityClass,
-			final Class<RelationalClass> relationalClass, final CAbstractService<MasterClass> entityService,
-			final CAbstractEntityRelationService<RelationalClass> relationService, final ApplicationContext applicationContext) {
-		super(title, parentContent, entityClass, relationalClass, applicationContext);
+	public CComponentRelationPanelBase(final String title, final Class<MasterClass> entityClass, final Class<RelationalClass> relationalClass,
+			final CAbstractService<MasterClass> entityService, final CAbstractEntityRelationService<RelationalClass> relationService,
+			final ApplicationContext applicationContext) {
+		super(title, entityClass, relationalClass, applicationContext);
 		Check.notNull(entityService, "Entity service cannot be null - relational component requires a valid entity service");
 		Check.notNull(relationService, "Relation service cannot be null - relational component requires a valid relation service");
 		this.relationService = relationService;
