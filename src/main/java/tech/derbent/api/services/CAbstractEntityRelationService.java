@@ -17,18 +17,6 @@ public abstract class CAbstractEntityRelationService<RelationEntity extends CEnt
 		super(repository, clock, sessionService);
 	}
 
-	/** Count relationships for a child entity */
-	@Transactional (readOnly = true)
-	public long countByChildEntity(final Long childEntityId) {
-		return findByChildEntityId(childEntityId).size();
-	}
-
-	/** Count relationships for a parent entity */
-	@Transactional (readOnly = true)
-	public long countByParentEntity(final Long parentEntityId) {
-		return findByParentEntityId(parentEntityId).size();
-	}
-
 	/** Create a new relationship between two entities */
 	@Transactional
 	public RelationEntity createRelationship(final Long parentEntityId, final Long childEntityId) {

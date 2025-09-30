@@ -66,14 +66,6 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 		repository.deleteByUserIdAndCompanyId(user.getId(), company.getId());
 	}
 
-	/** Find all companies where user has admin privileges */
-	@Transactional (readOnly = true)
-	public List<CUserCompanySetting> findAdminCompanies(final CUser user) {
-		Check.notNull(user, "User cannot be null");
-		List<CUserCompanySetting> allSettings = findByUser(user);
-		return allSettings.stream().filter(CUserCompanySetting::isCompanyAdmin).toList();
-	}
-
 	@Override
 	@Transactional (readOnly = true)
 	public List<CUserCompanySetting> findByChildEntityId(final Long companyId) {
@@ -114,59 +106,6 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 	@Transactional (readOnly = true)
 	public boolean relationshipExists(final Long userId, final Long companyId) {
 		return repository.existsByUserIdAndCompanyId(userId, companyId);
-	}
-
-	/** Remove user from company */
-	@Transactional
-	public void removeUserFromCompany(final CUser user, final CCompany company) {
-		LOGGER.debug("Removing user {} from company {}", user, company);
-		if ((user == null) || (company == null)) {
-			throw new IllegalArgumentException("User and company cannot be null");
-		}
-		if ((user.getId() == null) || (company.getId() == null)) {
-			throw new IllegalArgumentException("User and company must have valid IDs");
-		}
-		// Find the relationship first to maintain bidirectional collections
-		final Optional<CUserCompanySetting> settingsOpt = findRelationship(user.getId(), company.getId());
-		if (settingsOpt.isPresent()) {
-			// Remove from bidirectional collections
-			if (company.getUsers() != null) {
-				company.getUsers().remove(user);
-			}
-		}
-		// Delete the relationship using the parent method
-		deleteRelationship(user.getId(), company.getId());
-	}
-
-	/** Set a company as the user's primary company */
-	@Transactional
-	public void setPrimaryCompany(final CUser user, final CCompany company) {
-		LOGGER.debug("Setting company {} as primary for user {}", company, user);
-		Check.notNull(user, "User cannot be null");
-		Check.notNull(company, "Company cannot be null");
-		// First, remove primary status from all other companies
-		List<CUserCompanySetting> userCompanies = findByUser(user);
-		for (CUserCompanySetting settings : userCompanies) {
-			save(settings);
-		}
-	}
-
-	/** Update user's role and ownership in a company */
-	@Transactional
-	public CUserCompanySetting updateUserCompanyRole(final CUser user, final CCompany company, final String ownershipLevel, final String role) {
-		LOGGER.debug("Updating user {} company {} ownership to {} and role to {}", user, company, ownershipLevel, role);
-		final Optional<CUserCompanySetting> settingsOpt = findRelationship(user.getId(), company.getId());
-		if (settingsOpt.isEmpty()) {
-			throw new IllegalArgumentException("User is not a member of this company");
-		}
-		final CUserCompanySetting settings = settingsOpt.get();
-		if (ownershipLevel != null) {
-			settings.setOwnershipLevel(ownershipLevel);
-		}
-		if (role != null) {
-			settings.setRole(role);
-		}
-		return updateRelationship(settings);
 	}
 
 	@Override

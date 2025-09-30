@@ -26,7 +26,7 @@ public class CComponentCompanyUserSettings extends CComponentUserCompanyBase<CCo
 		initPanel();
 	}
 
-	public List<CUser> getAvailableUsers() {
+	public List<CUser> getAvailableUsersForCompany() {
 		try {
 			// Get all users that are not yet members of this company
 			return userService.getAvailableUsersForCompany(getCurrentEntity().getId());
