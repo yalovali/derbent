@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.grid.Grid;
@@ -116,8 +117,13 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 		// compute display string from the collection
 		final ValueProvider<EntityClass, String> namesProvider = entity -> {
 			final Collection<? extends CEntityDB<?>> refs = valueProvider.apply(entity);
-			if ((refs == null) || refs.isEmpty()) {
+			// Check if collection is null or not initialized (lazy loading)
+			if (refs == null || !Hibernate.isInitialized(refs)) {
 				return "No " + header.toLowerCase(); // e.g. "No participants"
+			}
+			// Safe to call isEmpty() now since collection is initialized
+			if (refs.isEmpty()) {
+				return "No " + header.toLowerCase();
 			}
 			return refs.stream().map(ref -> {
 				final String name = entityName(ref);
