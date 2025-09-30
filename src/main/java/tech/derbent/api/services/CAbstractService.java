@@ -204,7 +204,6 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 
 	@Transactional (readOnly = true)
 	public Page<EntityClass> list(final Pageable pageable) {
-		LOGGER.debug("Listing entities with pageable");
 		// Validate and fix pageable to prevent "max-results cannot be negative" error
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		// LOGGER.debug("Listing entities with pageable: {}", safePage);

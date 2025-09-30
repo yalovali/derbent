@@ -742,7 +742,6 @@ public class CDataInitializer {
 		order.setDeliveryDate(LocalDate.now().plusDays(5));
 		order.setProviderCompanyName("asfdsafsaf");
 		orderService.save(order);
-		LOGGER.info("Sample hardware order created successfully for project: {}", project.getName());
 	}
 
 	/** Create a sample operational decision. */
@@ -975,7 +974,6 @@ public class CDataInitializer {
 		commentService.createComment("Completed high-level architecture diagrams and component definitions", archDesign, userService.getRandom());
 		commentService.createComment("Reviewed architecture with team and incorporated feedback", archDesign, userService.getRandom());
 		commentService.createComment("Activity on hold pending stakeholder approval of design changes", archDesign, userService.getRandom());
-		LOGGER.info("System architecture activity created successfully");
 	}
 
 	/** Creates team member Alice Davis. */
@@ -1174,7 +1172,6 @@ public class CDataInitializer {
 			createActivityStatus(STATUS_ON_HOLD, project, "Activity is temporarily on hold", "#f39c12", false, 3);
 			createActivityStatus(STATUS_COMPLETED, project, "Activity has been completed", "#27ae60", true, 4);
 			createActivityStatus(STATUS_CANCELLED, project, "Activity has been cancelled", "#e74c3c", true, 5);
-			LOGGER.info("Activity statuses initialized successfully for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing activity statuses for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize activity statuses for project: " + project.getName(), e);
@@ -1214,7 +1211,6 @@ public class CDataInitializer {
 			createApprovalStatus("Submitted", project, "Approval has been submitted", CColorUtils.getRandomColor(true), false, 2);
 			createApprovalStatus("Approved", project, "Approval has been approved", CColorUtils.getRandomColor(true), true, 3);
 			createApprovalStatus("Rejected", project, "Approval has been rejected", CColorUtils.getRandomColor(true), true, 4);
-			LOGGER.info("Approval statuses initialized successfully for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing approval statuses for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize approval statuses for project: " + project.getName(), e);
@@ -1265,7 +1261,6 @@ public class CDataInitializer {
 			createDecisionStatus("Approved", project, "Decision has been approved", CColorUtils.getRandomColor(true), true, 3);
 			createDecisionStatus("Implemented", project, "Decision has been implemented", CColorUtils.getRandomColor(true), true, 4);
 			createDecisionStatus("Rejected", project, "Decision has been rejected", CColorUtils.getRandomColor(true), true, 5);
-			LOGGER.info("Sample decision statuses initialized for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample decision statuses for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample decision statuses for project: " + project.getName(), e);
@@ -1298,7 +1293,6 @@ public class CDataInitializer {
 				item.setDescription(typeData[1]);
 				item.setColor(CColorUtils.getRandomColor(true));
 			}
-			LOGGER.info("Successfully created decision types for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error creating decision types for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize decision types for project: " + project.getName(), e);
@@ -1312,7 +1306,6 @@ public class CDataInitializer {
 			createSampleRetrospectiveMeeting(project);
 			createSampleReviewMeeting(project);
 			createSampleStandupMeeting(project);
-			LOGGER.info("Sample meetings initialized for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample meetings for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample meetings for project: " + project.getName(), e);
@@ -1326,7 +1319,6 @@ public class CDataInitializer {
 			createMeetingStatus("Completed", project, "Meeting has been completed successfully", "#27ae60", true, 3);
 			createMeetingStatus("Cancelled", project, "Meeting has been cancelled", "#e74c3c", true, 4);
 			createMeetingStatus("Postponed", project, "Meeting has been postponed to a later date", "#9b59b6", false, 5);
-			LOGGER.info("Meeting statuses initialized successfully for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing meeting statuses for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize meeting statuses for project: " + project.getName(), e);
@@ -1360,7 +1352,6 @@ public class CDataInitializer {
 				meetingType.setColor(CColorUtils.getRandomColor(true));
 				meetingTypeService.save(meetingType);
 			}
-			LOGGER.info("Successfully created meeting types for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error creating meeting types for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize meeting types for project: " + project.getName(), e);
@@ -1385,7 +1376,6 @@ public class CDataInitializer {
 			createOrderStatus("Processing", project, "Order is being processed", "#f39c12", false, 4);
 			createOrderStatus("Delivered", project, "Order has been delivered", "#2ecc71", true, 5);
 			createOrderStatus("Cancelled", project, "Order has been cancelled", "#e74c3c", true, 6);
-			LOGGER.info("Order statuses initialized successfully for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing order statuses for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize order statuses for project: " + project.getName(), e);
@@ -1419,7 +1409,6 @@ public class CDataInitializer {
 				orderType.setColor(CColorUtils.getRandomColor(true));
 				orderTypeService.save(orderType);
 			}
-			LOGGER.info("Successfully created order types for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error creating order types for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize order types for project: " + project.getName(), e);

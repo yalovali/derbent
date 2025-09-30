@@ -32,4 +32,10 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting> implement
 		tech.derbent.api.utils.CKanbanUtils.updateEntityStatusSimple(entity, newStatus, CMeeting::setStatus);
 		return save(entity);
 	}
+
+	@Override
+	public List<CMeetingStatus> getAllStatuses(Long projectId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

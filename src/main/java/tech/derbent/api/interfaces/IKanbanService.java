@@ -9,16 +9,7 @@ import java.util.Map;
  * @param <S> the type of status this service works with */
 public interface IKanbanService<T extends IKanbanEntity, S extends IKanbanStatus> {
 
-	/** Gets all entities grouped by their status for the given project.
-	 * @param projectId the ID of the project to get entities for
-	 * @return a map of status to list of entities */
 	Map<S, List<T>> getEntitiesGroupedByStatus(Long projectId);
-	/** Updates the status of an entity and saves it.
-	 * @param entity    the entity to update
-	 * @param newStatus the new status to set
-	 * @return the updated entity */
 	T updateEntityStatus(T entity, S newStatus);
-	/** Gets all available statuses for this entity type.
-	 * @return list of available statuses, sorted by sort order */
-	List<S> getAllStatuses();
+	List<S> getAllStatuses(Long projectId);
 }

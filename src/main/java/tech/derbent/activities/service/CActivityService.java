@@ -7,12 +7,11 @@ import java.util.stream.Collectors;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.activities.domain.CActivity;
+import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.api.domains.CProjectItemService;
 import tech.derbent.api.interfaces.IKanbanService;
 import tech.derbent.api.services.IEntityOfProjectRepository;
-import tech.derbent.activities.domain.CActivity;
-import tech.derbent.activities.domain.CActivityStatus;
-import tech.derbent.activities.domain.CActivityType;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 
@@ -31,14 +30,6 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 		final CActivityStatus noStatus = new CActivityStatus("No Status", project);
 		noStatus.setDescription("Activities without an assigned status");
 		return noStatus;
-	}
-
-	/** Helper method to create a placeholder CActivityType for activities without a type.
-	 * @return a CActivityType instance representing "No Type" */
-	private CActivityType createNoTypeInstance(final CProject project) {
-		final CActivityType noType = new CActivityType("No Type", project);
-		noType.setDescription("Activities without an assigned type");
-		return noType;
 	}
 
 	@Transactional (readOnly = true)
@@ -65,5 +56,11 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 	public CActivity updateEntityStatus(final CActivity entity, final CActivityStatus newStatus) {
 		tech.derbent.api.utils.CKanbanUtils.updateEntityStatusSimple(entity, newStatus, CActivity::setStatus);
 		return save(entity);
+	}
+
+	@Override
+	public List<CActivityStatus> getAllStatuses(Long projectId) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
