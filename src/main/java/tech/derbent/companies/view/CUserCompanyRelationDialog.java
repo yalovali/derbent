@@ -6,7 +6,7 @@ import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.dialogs.CDBRelationDialog;
-import tech.derbent.projects.service.CProjectService;
+import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.users.domain.CUserCompanySetting;
 import tech.derbent.users.service.CUserCompanySettingsService;
 import tech.derbent.users.service.CUserService;
@@ -15,7 +15,7 @@ public abstract class CUserCompanyRelationDialog<MasterEntity extends CEntityDB<
 		extends CDBRelationDialog<CUserCompanySetting, MasterEntity, DetailEntity> {
 
 	private static final long serialVersionUID = 1L;
-	protected final CProjectService projectService;
+	protected final CCompanyService companyService;
 	protected final CUserCompanySettingsService settingsService;
 	protected final CUserService userService;
 
@@ -30,12 +30,12 @@ public abstract class CUserCompanyRelationDialog<MasterEntity extends CEntityDB<
 		Check.notNull(parentContent, "Parent content cannot be null - relation dialog requires a parent content owner");
 		Check.notNull(masterService, "Master service cannot be null - relation dialog requires a master entity service");
 		Check.notNull(detailService, "Detail service cannot be null - relation dialog requires a detail entity service");
-		Check.notNull(settingService, "User project settings service cannot be null - relation dialog requires a relationship service");
+		Check.notNull(settingService, "User company settings service cannot be null - relation dialog requires a relationship service");
 		Check.notNull(masterEntity, "Master entity cannot be null - relation dialog requires a master entity instance");
 		Check.notNull(onSave, "OnSave callback cannot be null - relation dialog requires a save callback");
 		// Store services for easy access
 		userService = masterService instanceof CUserService ? (CUserService) masterService : (CUserService) detailService;
-		projectService = masterService instanceof CProjectService ? (CProjectService) masterService : (CProjectService) detailService;
+		companyService = masterService instanceof CCompanyService ? (CCompanyService) masterService : (CCompanyService) detailService;
 		settingsService = settingService;
 		// Set the appropriate entity reference
 		setupEntityRelation(masterEntity);

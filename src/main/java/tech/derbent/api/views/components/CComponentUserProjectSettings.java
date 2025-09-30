@@ -41,8 +41,8 @@ public class CComponentUserProjectSettings extends CComponentUserProjectRelation
 		Check.notNull(settings, "Settings cannot be null when saving");
 		LOGGER.debug("Saving user project settings: {}", settings);
 		try {
-			final CUserProjectSettings savedSettings = settings.getId() == null ? relationService.addUserToProject(settings.getUser(),
-					settings.getProject(), settings.getRole(), settings.getPermission()) : relationService.save(settings);
+			final CUserProjectSettings savedSettings = settings.getId() == null ? userProjectSettingsService.addUserToProject(settings.getUser(),
+					settings.getProject(), settings.getRole(), settings.getPermission()) : userProjectSettingsService.save(settings);
 			LOGGER.info("Successfully saved user project settings: {}", savedSettings);
 			populateForm();
 		} catch (final Exception e) {
@@ -58,7 +58,7 @@ public class CComponentUserProjectSettings extends CComponentUserProjectRelation
 			final CUser user = getCurrentEntity();
 			Check.notNull(user, "Please select a user first.");
 			final CUserProjectSettingsDialog dialog = new CUserProjectSettingsDialog(this, (CUserService) entityService, projectService,
-					relationService, null, user, this::onSettingsSaved);
+					userProjectSettingsService, null, user, this::onSettingsSaved);
 			dialog.open();
 		} catch (Exception e) {
 			LOGGER.error("Failed to open add dialog: {}", e.getMessage(), e);
@@ -76,7 +76,7 @@ public class CComponentUserProjectSettings extends CComponentUserProjectRelation
 			final CUser user = getCurrentEntity();
 			Check.notNull(user, "Current user is not available.");
 			final CUserProjectSettingsDialog dialog = new CUserProjectSettingsDialog(this, (CUserService) entityService, projectService,
-					relationService, selected, user, this::onSettingsSaved);
+					userProjectSettingsService, selected, user, this::onSettingsSaved);
 			dialog.open();
 		} catch (Exception e) {
 			LOGGER.error("Failed to open edit dialog: {}", e.getMessage(), e);
@@ -87,6 +87,6 @@ public class CComponentUserProjectSettings extends CComponentUserProjectRelation
 
 	@Override
 	protected void setupDataAccessors() {
-		createStandardDataAccessors(() -> relationService.findByUser(getCurrentEntity()), () -> entityService.save(getCurrentEntity()));
+		createStandardDataAccessors(() -> userProjectSettingsService.findByUser(getCurrentEntity()), () -> entityService.save(getCurrentEntity()));
 	}
 }
