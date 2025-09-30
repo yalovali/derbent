@@ -526,7 +526,6 @@ When using CAuxillaries and utility patterns:
 - [ ] Provide fallback values for failed operations
 
 ### Best Practices
-- [ ] Cache reflection results when possible
 - [ ] Use consistent icon naming conventions
 - [ ] Follow color standards for consistency
 - [ ] Document any custom utility methods
