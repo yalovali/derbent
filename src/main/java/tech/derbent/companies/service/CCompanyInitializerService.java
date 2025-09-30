@@ -7,6 +7,7 @@ import tech.derbent.companies.domain.CCompany;
 import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.page.service.CPageEntityService;
 import tech.derbent.projects.domain.CProject;
+import tech.derbent.screens.domain.CDetailLines;
 import tech.derbent.screens.domain.CDetailSection;
 import tech.derbent.screens.domain.CGridEntity;
 import tech.derbent.screens.service.CDetailLinesService;
@@ -16,9 +17,9 @@ import tech.derbent.screens.service.CInitializerServiceBase;
 
 public class CCompanyInitializerService extends CInitializerServiceBase {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CCompanyInitializerService.class);
 	public static final String BASE_PANEL_NAME = "Company Information";
 	static final Class<?> clazz = CCompany.class;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CCompanyInitializerService.class);
 
 	public static CDetailSection createBasicView(final CProject project) {
 		try {
@@ -26,29 +27,36 @@ public class CCompanyInitializerService extends CInitializerServiceBase {
 			// Basic Company Information
 			scr.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "address"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "phone"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "email"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "website"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "taxNumber"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "enabled"));
-			// Company Branding & UI Settings
-			scr.addScreenLine(CDetailLinesService.createSection("Company Branding & UI"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "companyTheme"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "companyLogoUrl"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "primaryColor"));
-			// Business Operations
-			scr.addScreenLine(CDetailLinesService.createSection("Business Operations"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workingHoursStart"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workingHoursEnd"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "companyTimezone"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "defaultLanguage"));
-			// Notification Settings
-			scr.addScreenLine(CDetailLinesService.createSection("Notification Settings"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "enableNotifications"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "notificationEmail"));
-			scr.debug_printScreenInformation();
+			CDetailLines line = CDetailLinesService.createLineFromDefaults(clazz, "companySetting");
+			line.setRelationFieldName("companySetting");
+			line.setFieldCaption("companySetting");
+			line.setProperty("Component:createCompanyUserSettingsComponent");
+			line.setDataProviderBean("CCompanyService");
+			scr.addScreenLine(line);
+			//
+			// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
+			// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "address"));
+			// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "phone"));
+			// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "email"));
+			// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "website"));
+			// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "taxNumber"));
+			// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "enabled"));
+			// // Company Branding & UI Settings
+			// scr.addScreenLine(CDetailLinesService.createSection("Company Branding & UI"));
+			// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "companyTheme"));
+			// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "companyLogoUrl"));
+			// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "primaryColor"));
+			// // Business Operations
+			// scr.addScreenLine(CDetailLinesService.createSection("Business Operations"));
+			// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workingHoursStart"));
+			// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "workingHoursEnd"));
+			// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "companyTimezone"));
+			// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "defaultLanguage"));
+			// // Notification Settings
+			// scr.addScreenLine(CDetailLinesService.createSection("Notification Settings"));
+			// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "enableNotifications"));
+			// scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "notificationEmail"));
+			// scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating company view: {}", e.getMessage(), e);

@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
-import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.services.CAbstractNamedEntityService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CComponentSingleCompanyUserSetting;
@@ -39,14 +38,14 @@ import tech.derbent.users.domain.CUser;
 public class CUserService extends CAbstractNamedEntityService<CUser> implements UserDetailsService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserService.class);
-	private final PasswordEncoder passwordEncoder;
 	@Autowired
 	private ApplicationContext applicationContext;
+	private final PasswordEncoder passwordEncoder;
 
 	public CUserService(final IUserRepository repository, final Clock clock) {
 		super(repository, clock);
-		this.passwordEncoder = new BCryptPasswordEncoder(); // BCrypt for secure password
-															// hashing
+		passwordEncoder = new BCryptPasswordEncoder(); // BCrypt for secure password
+														// hashing
 		@SuppressWarnings ("unused")
 		final CharSequence newPlainPassword = "test123";
 		// final String encodedPassword = passwordEncoder.encode(newPlainPassword);
@@ -77,6 +76,36 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 		return savedUser;
 	}
 
+	public Component createSingleCompanyUserSettingComponent() {
+		LOGGER.debug("Creating single company user setting component");
+		try {
+			CComponentSingleCompanyUserSetting component = new CComponentSingleCompanyUserSetting(null, applicationContext);
+			return component;
+		} catch (Exception e) {
+			LOGGER.error("Failed to create single company user setting component: {}", e.getMessage(), e);
+			// Fallback to simple div with error message
+			final Div errorDiv = new Div();
+			errorDiv.setText("Error loading single company user setting component: " + e.getMessage());
+			errorDiv.addClassName("error-message");
+			return errorDiv;
+		}
+	}
+
+	public Component createUserProjectSettingsComponent() {
+		LOGGER.debug("Creating enhanced user project settings component");
+		try {
+			CComponentUserProjectSettings component = new CComponentUserProjectSettings(null, null, applicationContext);
+			return component;
+		} catch (Exception e) {
+			LOGGER.error("Failed to create user project settings component: {}", e.getMessage(), e);
+			// Fallback to simple div with error message
+			final Div errorDiv = new Div();
+			errorDiv.setText("Error loading user project settings component: " + e.getMessage());
+			errorDiv.addClassName("error-message");
+			return errorDiv;
+		}
+	}
+
 	/** Finds a user by login username.
 	 * @param login the login username
 	 * @return the CUser if found, null otherwise */
@@ -101,6 +130,20 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 		return authorities;
 	}
 
+	@Transactional (readOnly = true)
+	@PreAuthorize ("permitAll()")
+	public List<CUser> getAvailableUsersForCompany(final Long companyId) {
+		Check.notNull(companyId, "Company ID must not be null");
+		return ((IUserRepository) repository).findUsersNotAssignedToCompany(companyId);
+	}
+
+	@Transactional (readOnly = true)
+	@PreAuthorize ("permitAll()")
+	public List<CUser> getAvailableUsersForProject(final Long projectId) {
+		Check.notNull(projectId, "User ID must not be null");
+		return ((IUserRepository) repository).findUsersNotAssignedToProject(projectId);
+	}
+
 	@Override
 	protected Class<CUser> getEntityClass() { return CUser.class; }
 
@@ -108,23 +151,13 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	 * @return the PasswordEncoder instance */
 	public PasswordEncoder getPasswordEncoder() { return passwordEncoder; }
 
+	/** Override the default list method to filter users by active project when used in dynamic pages. This allows CUserService to work with dynamic
+	 * pages without needing to implement CEntityOfProjectService. If no active project is available, returns all users (preserves existing
+	 * behavior). */
 	@Override
-	public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
-		LOGGER.debug("Attempting to load user by username: {}", username);
-		// Step 1: Query database for user by username
-		final CUser loginUser = ((IUserRepository) repository).findByUsername(username).orElseThrow(() -> {
-			LOGGER.warn("User not found with username: {}", username);
-			return new UsernameNotFoundException("User not found with username: " + username);
-		});
-		// Step 2: Convert user roles to Spring Security authorities
-		// fix this next line!!!!!
-		final Collection<GrantedAuthority> authorities = getAuthorities("ADMIN,USER"); // Example roles, replace with actual user roles if available
-		// Step 3: Create and return Spring Security UserDetails
-		return User.builder().username(loginUser.getUsername()).password(loginUser.getPassword()) // Already encoded password from database
-				.authorities(authorities).accountExpired(false).accountLocked(false).credentialsExpired(false).disabled(!loginUser.isEnabled()) // Convert
-																																				// enabled
-				// flag to disabled flag
-				.build();
+	@Transactional (readOnly = true)
+	public Page<CUser> list(final Pageable pageable) {
+		return super.list(pageable);
 	}
 
 	/** Lists users by project using the CUserProjectSettings relationship. This method allows CUserService to work with dynamic pages that expect
@@ -144,19 +177,6 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 			LOGGER.error("Error listing users by project '{}': {}", project.getName(), e.getMessage(), e);
 			throw new RuntimeException("Failed to list users by project", e);
 		}
-	}
-
-	/** Helper method to safely compare projects, handling cases where IDs might be null */
-	private boolean projectsMatch(CProject project1, CProject project2) {
-		if (project1 == null || project2 == null) {
-			return false;
-		}
-		// If both have IDs, compare by ID
-		if (project1.getId() != null && project2.getId() != null) {
-			return project1.getId().equals(project2.getId());
-		}
-		// If IDs are null, compare by name as fallback
-		return project1.getName() != null && project1.getName().equals(project2.getName());
 	}
 
 	/** Lists users by project with pagination. This method allows CUserService to work with dynamic pages that expect project filtering.
@@ -180,13 +200,23 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 		}
 	}
 
-	/** Override the default list method to filter users by active project when used in dynamic pages. This allows CUserService to work with dynamic
-	 * pages without needing to implement CEntityOfProjectService. If no active project is available, returns all users (preserves existing
-	 * behavior). */
 	@Override
-	@Transactional (readOnly = true)
-	public Page<CUser> list(final Pageable pageable) {
-		return super.list(pageable);
+	public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
+		LOGGER.debug("Attempting to load user by username: {}", username);
+		// Step 1: Query database for user by username
+		final CUser loginUser = ((IUserRepository) repository).findByUsername(username).orElseThrow(() -> {
+			LOGGER.warn("User not found with username: {}", username);
+			return new UsernameNotFoundException("User not found with username: " + username);
+		});
+		// Step 2: Convert user roles to Spring Security authorities
+		// fix this next line!!!!!
+		final Collection<GrantedAuthority> authorities = getAuthorities("ADMIN,USER"); // Example roles, replace with actual user roles if available
+		// Step 3: Create and return Spring Security UserDetails
+		return User.builder().username(loginUser.getUsername()).password(loginUser.getPassword()) // Already encoded password from database
+				.authorities(authorities).accountExpired(false).accountLocked(false).credentialsExpired(false).disabled(!loginUser.isEnabled()) // Convert
+																																				// enabled
+				// flag to disabled flag
+				.build();
 	}
 
 	@Override
@@ -195,6 +225,19 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 			return false;
 		}
 		return true;
+	}
+
+	/** Helper method to safely compare projects, handling cases where IDs might be null */
+	private boolean projectsMatch(CProject project1, CProject project2) {
+		if (project1 == null || project2 == null) {
+			return false;
+		}
+		// If both have IDs, compare by ID
+		if (project1.getId() != null && project2.getId() != null) {
+			return project1.getId().equals(project2.getId());
+		}
+		// If IDs are null, compare by name as fallback
+		return project1.getName() != null && project1.getName().equals(project2.getName());
 	}
 
 	@Transactional
@@ -211,52 +254,5 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 		super.validateEntity(user);
 		Check.notBlank(user.getLogin(), "User login cannot be null or empty");
 		Check.notBlank(user.getName(), "User name cannot be null or empty");
-	}
-
-	@Transactional (readOnly = true)
-	@PreAuthorize ("permitAll()")
-	public List<CUser> getAvailableUsersForProject(final Long projectId) {
-		Check.notNull(projectId, "User ID must not be null");
-		return ((IUserRepository) repository).findUsersNotAssignedToProject(projectId);
-	}
-
-	@Transactional (readOnly = true)
-	@PreAuthorize ("permitAll()")
-	public List<CUser> getAvailableUsersForCompany(final Long companyId) {
-		Check.notNull(companyId, "Company ID must not be null");
-		return ((IUserRepository) repository).findUsersNotAssignedToCompany(companyId);
-	}
-
-	public Component createUserProjectSettingsComponent() {
-		LOGGER.debug("Creating enhanced user project settings component");
-		try {
-			CEnhancedBinder<CUser> binder = new CEnhancedBinder<>(CUser.class);
-			CComponentUserProjectSettings component = new CComponentUserProjectSettings(null, null, binder, this, applicationContext);
-			LOGGER.debug("Successfully created CComponentUserProjectSettings");
-			return component;
-		} catch (Exception e) {
-			LOGGER.error("Failed to create user project settings component: {}", e.getMessage(), e);
-			// Fallback to simple div with error message
-			final Div errorDiv = new Div();
-			errorDiv.setText("Error loading user project settings component: " + e.getMessage());
-			errorDiv.addClassName("error-message");
-			return errorDiv;
-		}
-	}
-
-	public Component createSingleCompanyUserSettingComponent() {
-		LOGGER.debug("Creating single company user setting component");
-		try {
-			CEnhancedBinder<CUser> binder = new CEnhancedBinder<>(CUser.class);
-			CComponentSingleCompanyUserSetting component = new CComponentSingleCompanyUserSetting(null, binder, applicationContext);
-			return component;
-		} catch (Exception e) {
-			LOGGER.error("Failed to create single company user setting component: {}", e.getMessage(), e);
-			// Fallback to simple div with error message
-			final Div errorDiv = new Div();
-			errorDiv.setText("Error loading single company user setting component: " + e.getMessage());
-			errorDiv.addClassName("error-message");
-			return errorDiv;
-		}
 	}
 }

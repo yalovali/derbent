@@ -339,9 +339,6 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 	}
 
 	/** Reloads entity values into existing components without rebuilding the UI */
-	@SuppressWarnings ({
-			"rawtypes"
-	})
 	@Override
 	public void setCurrentEntity(Object entity) {
 		super.setCurrentEntity(entity);

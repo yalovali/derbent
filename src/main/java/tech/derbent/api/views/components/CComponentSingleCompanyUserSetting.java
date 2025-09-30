@@ -12,7 +12,6 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
@@ -24,14 +23,13 @@ import tech.derbent.users.domain.CUserCompanySetting;
  * CUserCompanySettings field, allowing users to view and edit their company membership and role through an attractive interface. */
 public class CComponentSingleCompanyUserSetting extends CComponentDBEntity<CUser> {
 
-	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentSingleCompanyUserSetting.class);
+	private static final long serialVersionUID = 1L;
 	private final CCompanyService companyService;
 	private Div contentDiv;
 
-	public CComponentSingleCompanyUserSetting(IContentOwner parentContent, CEnhancedBinder<CUser> beanValidationBinder,
-			ApplicationContext applicationContext) {
-		super("Company Setting", parentContent, beanValidationBinder, CUser.class, applicationContext);
+	public CComponentSingleCompanyUserSetting(IContentOwner parentContent, ApplicationContext applicationContext) {
+		super("Company Setting", parentContent, CUser.class, applicationContext);
 		companyService = applicationContext.getBean(CCompanyService.class);
 		Check.notNull(companyService, "Company service cannot be null");
 		initComponent();
@@ -46,6 +44,8 @@ public class CComponentSingleCompanyUserSetting extends CComponentDBEntity<CUser
 		contentDiv.setWidthFull();
 		add(contentDiv);
 	}
+
+	private void openEditDialog() {}
 
 	@Override
 	public void populateForm() {
@@ -67,25 +67,6 @@ public class CComponentSingleCompanyUserSetting extends CComponentDBEntity<CUser
 			LOGGER.error("Error updating company settings display: {}", e.getMessage(), e);
 			showErrorState("Error loading company settings");
 		}
-	}
-
-	private void showEmptyState(String message) {
-		HorizontalLayout layout = new HorizontalLayout();
-		layout.setWidthFull();
-		layout.setDefaultVerticalComponentAlignment(Alignment.CENTER);
-		Icon icon = VaadinIcon.BUILDING.create();
-		icon.setColor("#9E9E9E");
-		icon.setSize("24px");
-		Span messageSpan = new Span(message);
-		messageSpan.getStyle().set("color", "#9E9E9E");
-		messageSpan.getStyle().set("font-style", "italic");
-		Button assignButton = new Button("Assign Company", VaadinIcon.PLUS.create());
-		assignButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
-		assignButton.addClickListener(e -> openEditDialog());
-		layout.add(icon, messageSpan);
-		layout.setFlexGrow(1, messageSpan);
-		layout.add(assignButton);
-		contentDiv.add(layout);
 	}
 
 	private void showCompanySettings(CUserCompanySetting settings) {
@@ -121,6 +102,25 @@ public class CComponentSingleCompanyUserSetting extends CComponentDBEntity<CUser
 		contentDiv.add(layout);
 	}
 
+	private void showEmptyState(String message) {
+		HorizontalLayout layout = new HorizontalLayout();
+		layout.setWidthFull();
+		layout.setDefaultVerticalComponentAlignment(Alignment.CENTER);
+		Icon icon = VaadinIcon.BUILDING.create();
+		icon.setColor("#9E9E9E");
+		icon.setSize("24px");
+		Span messageSpan = new Span(message);
+		messageSpan.getStyle().set("color", "#9E9E9E");
+		messageSpan.getStyle().set("font-style", "italic");
+		Button assignButton = new Button("Assign Company", VaadinIcon.PLUS.create());
+		assignButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
+		assignButton.addClickListener(e -> openEditDialog());
+		layout.add(icon, messageSpan);
+		layout.setFlexGrow(1, messageSpan);
+		layout.add(assignButton);
+		contentDiv.add(layout);
+	}
+
 	private void showErrorState(String message) {
 		HorizontalLayout layout = new HorizontalLayout();
 		layout.setWidthFull();
@@ -133,8 +133,6 @@ public class CComponentSingleCompanyUserSetting extends CComponentDBEntity<CUser
 		layout.add(icon, messageSpan);
 		contentDiv.add(layout);
 	}
-
-	private void openEditDialog() {}
 
 	@Override
 	protected void updatePanelEntityFields() {

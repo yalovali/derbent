@@ -6,12 +6,16 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.domains.CEntityNamed;
+import tech.derbent.users.domain.CUser;
+import tech.derbent.users.domain.CUserCompanySetting;
 
 /** CCompany - Domain entity representing companies within the organization. Layer: Domain (MVC) Inherits from CEntityDB to provide database
  * functionality. */
@@ -37,6 +41,13 @@ public class CCompany extends CEntityNamed<CCompany> {
 			hidden = false, order = 11, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
 	)
 	private String companyLogoUrl;
+	@OneToOne (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "single_company_settings_id", nullable = true)
+	@AMetaData (
+			displayName = "User Setting", required = false, readOnly = false, description = "User's company membership and role", hidden = false,
+			order = 15, createComponentMethod = "createCompanyUserSettingsComponent"
+	)
+	private CUserCompanySetting companySetting;
 	// Company Configuration Settings
 	@Column (name = "company_theme", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
@@ -107,11 +118,8 @@ public class CCompany extends CEntityNamed<CCompany> {
 	)
 	private String taxNumber;
 	@OneToMany (mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@AMetaData (
-			displayName = "Users", required = false, readOnly = false, description = "Users belonging to this company", hidden = false, order = 9,
-			createComponentMethod = "createCompanyUserSettingsComponent"
-	)
-	private List<tech.derbent.users.domain.CUser> users;
+	@AMetaData (displayName = "Users", required = false, readOnly = false, description = "Users belonging to this company", hidden = false, order = 9)
+	private List<CUser> users;
 	@Column (name = "website", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (

@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +15,7 @@ import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.services.CAbstractNamedEntityService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.companies.domain.CCompany;
+import tech.derbent.companies.view.CComponentCompanyUserSettings;
 import tech.derbent.session.service.CSessionService;
 
 @Service
@@ -21,9 +24,25 @@ import tech.derbent.session.service.CSessionService;
 public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCompanyService.class);
+	@Autowired
+	private ApplicationContext applicationContext;
 
 	public CCompanyService(final ICompanyRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
+	}
+
+	public Component createCompanyUserSettingsComponent() {
+		LOGGER.debug("Creating enhanced company user settings component");
+		try {
+			CComponentCompanyUserSettings component = new CComponentCompanyUserSettings(null, this, applicationContext);
+			return component;
+		} catch (Exception e) {
+			LOGGER.error("Failed to create company user settings component: {}", e.getMessage(), e);
+			Div errorDiv = new Div();
+			errorDiv.setText("Error loading company user settings component");
+			errorDiv.addClassName("error-component");
+			return errorDiv;
+		}
 	}
 
 	@Transactional
@@ -95,24 +114,6 @@ public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 		} catch (final Exception e) {
 			LOGGER.error("Error searching companies by name: {}", searchTerm, e);
 			throw new RuntimeException("Failed to search companies by name", e);
-		}
-	}
-
-	public Component createCompanyUserSettingsComponent() {
-		LOGGER.debug("Creating enhanced company user settings component");
-		try {
-			// Create wrapper div for the component - this will be replaced by actual component during binding
-			Div wrapper = new Div();
-			wrapper.addClassName("component-company-user-settings-wrapper");
-			wrapper.getElement().setAttribute("data-component-type", "CComponentCompanyUserSettings");
-			LOGGER.debug("Successfully created company user settings component wrapper");
-			return wrapper;
-		} catch (Exception e) {
-			LOGGER.error("Failed to create company user settings component: {}", e.getMessage(), e);
-			Div errorDiv = new Div();
-			errorDiv.setText("Error loading company user settings component");
-			errorDiv.addClassName("error-component");
-			return errorDiv;
 		}
 	}
 }

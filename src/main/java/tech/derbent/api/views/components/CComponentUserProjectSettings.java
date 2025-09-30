@@ -2,7 +2,6 @@ package tech.derbent.api.views.components;
 
 import java.util.List;
 import org.springframework.context.ApplicationContext;
-import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.api.utils.Check;
@@ -19,18 +18,16 @@ import tech.derbent.users.view.CUserProjectSettingsDialog;
 public class CComponentUserProjectSettings extends CComponentUserProjectRelationBase<CUser, CUserProjectSettings> {
 
 	private static final long serialVersionUID = 1L;
-	private CUser currentUser;
 	private final CProjectService projectService;
 
-	public CComponentUserProjectSettings(IContentOwner parentContent, final CUser currentEntity, final CEnhancedBinder<CUser> beanValidationBinder,
-			final CUserService entityService, ApplicationContext applicationContext) throws Exception {
-		super("Project Settings", parentContent, beanValidationBinder, CUser.class, entityService, applicationContext);
-		this.projectService = applicationContext.getBean(CProjectService.class);
+	public CComponentUserProjectSettings(IContentOwner parentContent, final CUserService entityService, ApplicationContext applicationContext)
+			throws Exception {
+		super("Project Settings", parentContent, CUser.class, entityService, applicationContext);
+		projectService = applicationContext.getBean(CProjectService.class);
 		initPanel();
 	}
 
 	public List<CProject> getAvailableProjects() {
-		Check.notNull(currentUser, "Current user must be selected to get available projects");
 		try {
 			return projectService.getAvailableProjectsForUser(getCurrentEntity().getId());
 		} catch (Exception e) {
@@ -44,8 +41,8 @@ public class CComponentUserProjectSettings extends CComponentUserProjectRelation
 		Check.notNull(settings, "Settings cannot be null when saving");
 		LOGGER.debug("Saving user project settings: {}", settings);
 		try {
-			final CUserProjectSettings savedSettings = settings.getId() == null ? userProjectSettingsService.addUserToProject(settings.getUser(),
-					settings.getProject(), settings.getRole(), settings.getPermission()) : userProjectSettingsService.save(settings);
+			final CUserProjectSettings savedSettings = settings.getId() == null ? relationService.addUserToProject(settings.getUser(),
+					settings.getProject(), settings.getRole(), settings.getPermission()) : relationService.save(settings);
 			LOGGER.info("Successfully saved user project settings: {}", savedSettings);
 			populateForm();
 		} catch (final Exception e) {
@@ -60,9 +57,8 @@ public class CComponentUserProjectSettings extends CComponentUserProjectRelation
 			LOGGER.debug("Opening add dialog for user project settings");
 			final CUser user = getCurrentEntity();
 			Check.notNull(user, "Please select a user first.");
-			currentUser = user;
 			final CUserProjectSettingsDialog dialog = new CUserProjectSettingsDialog(this, (CUserService) entityService, projectService,
-					userProjectSettingsService, null, user, this::onSettingsSaved);
+					relationService, null, user, this::onSettingsSaved);
 			dialog.open();
 		} catch (Exception e) {
 			LOGGER.error("Failed to open add dialog: {}", e.getMessage(), e);
@@ -79,9 +75,8 @@ public class CComponentUserProjectSettings extends CComponentUserProjectRelation
 			Check.notNull(selected, "Please select a project setting to edit.");
 			final CUser user = getCurrentEntity();
 			Check.notNull(user, "Current user is not available.");
-			currentUser = user;
 			final CUserProjectSettingsDialog dialog = new CUserProjectSettingsDialog(this, (CUserService) entityService, projectService,
-					userProjectSettingsService, selected, user, this::onSettingsSaved);
+					relationService, selected, user, this::onSettingsSaved);
 			dialog.open();
 		} catch (Exception e) {
 			LOGGER.error("Failed to open edit dialog: {}", e.getMessage(), e);
@@ -92,6 +87,6 @@ public class CComponentUserProjectSettings extends CComponentUserProjectRelation
 
 	@Override
 	protected void setupDataAccessors() {
-		createStandardDataAccessors(() -> userProjectSettingsService.findByUser(getCurrentEntity()), () -> entityService.save(getCurrentEntity()));
+		createStandardDataAccessors(() -> relationService.findByUser(getCurrentEntity()), () -> entityService.save(getCurrentEntity()));
 	}
 }

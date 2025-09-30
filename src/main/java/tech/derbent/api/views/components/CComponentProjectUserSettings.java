@@ -2,7 +2,6 @@ package tech.derbent.api.views.components;
 
 import java.util.List;
 import org.springframework.context.ApplicationContext;
-import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.api.utils.Check;
@@ -22,11 +21,10 @@ public class CComponentProjectUserSettings extends CComponentUserProjectRelation
 	private CProject currentProject;
 	private final CUserService userService;
 
-	public CComponentProjectUserSettings(IContentOwner parentContent, final CProject currentEntity,
-			final CEnhancedBinder<CProject> beanValidationBinder, final CProjectService entityService, ApplicationContext applicationContext)
-			throws Exception {
-		super("User Settings", parentContent, beanValidationBinder, CProject.class, entityService, applicationContext);
-		this.userService = applicationContext.getBean(CUserService.class);
+	public CComponentProjectUserSettings(IContentOwner parentContent, final CProject currentEntity, final CProjectService entityService,
+			ApplicationContext applicationContext) throws Exception {
+		super("User Settings", parentContent, CProject.class, entityService, applicationContext);
+		userService = applicationContext.getBean(CUserService.class);
 		initPanel();
 	}
 
@@ -45,8 +43,8 @@ public class CComponentProjectUserSettings extends CComponentUserProjectRelation
 		Check.notNull(settings, "Settings cannot be null when saving");
 		LOGGER.debug("Saving user project settings: {}", settings);
 		try {
-			final CUserProjectSettings savedSettings = settings.getId() == null ? userProjectSettingsService.addUserToProject(settings.getUser(),
-					settings.getProject(), settings.getRole(), settings.getPermission()) : userProjectSettingsService.save(settings);
+			final CUserProjectSettings savedSettings = settings.getId() == null ? relationService.addUserToProject(settings.getUser(),
+					settings.getProject(), settings.getRole(), settings.getPermission()) : relationService.save(settings);
 			LOGGER.info("Successfully saved user project settings: {}", savedSettings);
 			populateForm();
 		} catch (final Exception e) {
@@ -63,7 +61,7 @@ public class CComponentProjectUserSettings extends CComponentUserProjectRelation
 			Check.notNull(project, "Please select a project first.");
 			currentProject = project;
 			final CProjectUserSettingsDialog dialog = new CProjectUserSettingsDialog(this, (CProjectService) entityService, userService,
-					userProjectSettingsService, null, project, this::onSettingsSaved);
+					relationService, null, project, this::onSettingsSaved);
 			dialog.open();
 		} catch (Exception e) {
 			LOGGER.error("Failed to open add dialog: {}", e.getMessage(), e);
@@ -82,7 +80,7 @@ public class CComponentProjectUserSettings extends CComponentUserProjectRelation
 			Check.notNull(project, "Current project is not available.");
 			currentProject = project;
 			final CProjectUserSettingsDialog dialog = new CProjectUserSettingsDialog(this, (CProjectService) entityService, userService,
-					userProjectSettingsService, selected, project, this::onSettingsSaved);
+					relationService, selected, project, this::onSettingsSaved);
 			dialog.open();
 		} catch (Exception e) {
 			LOGGER.error("Failed to open edit dialog: {}", e.getMessage(), e);
@@ -93,6 +91,6 @@ public class CComponentProjectUserSettings extends CComponentUserProjectRelation
 
 	@Override
 	protected void setupDataAccessors() {
-		createStandardDataAccessors(() -> userProjectSettingsService.findByProject(getCurrentEntity()), () -> entityService.save(getCurrentEntity()));
+		createStandardDataAccessors(() -> relationService.findByProject(getCurrentEntity()), () -> entityService.save(getCurrentEntity()));
 	}
 }

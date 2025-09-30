@@ -67,6 +67,14 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 		throw new UnsupportedOperationException("Use addUserToCompany(CUser, CCompany, String, String) method instead");
 	}
 
+	public void deleteByUserCompany(CUser user, CCompany company) {
+		Check.notNull(user, "User cannot be null");
+		Check.notNull(company, "Company cannot be null");
+		Check.notNull(user.getId(), "User must have a valid ID");
+		Check.notNull(company.getId(), "Company must have a valid ID");
+		repository.deleteByUserIdAndCompanyId(user.getId(), company.getId());
+	}
+
 	/** Find all companies where user has admin privileges */
 	@Transactional (readOnly = true)
 	public List<CUserCompanySetting> findAdminCompanies(final CUser user) {

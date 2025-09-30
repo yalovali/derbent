@@ -3,9 +3,9 @@ package tech.derbent.api.views.components;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.interfaces.IContentOwner;
@@ -14,43 +14,24 @@ import tech.derbent.api.ui.dialogs.CConfirmationDialog;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.CPanelRelationalBase;
-import tech.derbent.companies.domain.CCompany;
-import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserCompanySetting;
 import tech.derbent.users.service.CUserCompanySettingsService;
 
 /** Base class for managing user-company relationships in both directions. This class provides common functionality for both user->company and
  * company->user panels. */
 public abstract class CComponentUserCompanyBase<MasterClass extends CEntityNamed<MasterClass>, RelationalClass extends CEntityDB<RelationalClass>>
-		extends CPanelRelationalBase<MasterClass, CUserCompanySetting> {
+		extends CComponentRelationBase<MasterClass, CUserCompanySetting> {
 
 	private static final long serialVersionUID = 1L;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
-	protected CUserCompanySettingsService userCompanySettingsService;
+	protected CUserCompanySettingsService relationService;
 
-	/** Constructor with enforced parameter validation using Check.XXX functions. Ensures all required dependencies are provided and terminates with
-	 * exceptions otherwise.
-	 * @param title                      Panel title - must not be null or blank
-	 * @param parentContent              Parent content owner - must not be null
-	 * @param beanValidationBinder       Entity binder - must not be null
-	 * @param entityClass                Entity class - must not be null
-	 * @param entityService              Entity service - must not be null
-	 * @param userCompanySettingsService Relationship service - must not be null
-	 * @throws IllegalArgumentException if any required parameter is null or invalid */
-	public CComponentUserCompanyBase(final String title, IContentOwner parentContent, final CEnhancedBinder<MasterClass> beanValidationBinder,
-			final Class<MasterClass> entityClass, final CAbstractService<MasterClass> entityService,
-			final CUserCompanySettingsService userCompanySettingsService) {
-		super(title, parentContent, beanValidationBinder, entityClass, entityService, CUserCompanySetting.class);
+	public CComponentUserCompanyBase(final String title, IContentOwner parentContent, final Class<MasterClass> entityClass,
+			final CAbstractService<MasterClass> entityService, final ApplicationContext applicationContext) {
+		super(title, parentContent, entityClass, CUserCompanySetting.class, applicationContext);
 		// Enforce strict parameter validation - terminate with exceptions on any missing parameter
-		Check.notBlank(title, "Panel title cannot be null or blank - relational component requires a valid title");
-		Check.notNull(parentContent, "Parent content cannot be null - relational component requires a parent content owner");
-		Check.notNull(beanValidationBinder, "Bean validation binder cannot be null - relational component requires a valid binder");
-		Check.notNull(entityClass, "Entity class cannot be null - relational component requires a valid entity class");
 		Check.notNull(entityService, "Entity service cannot be null - relational component requires a valid entity service");
-		Check.notNull(userCompanySettingsService,
-				"User company settings service cannot be null - relational component requires a relationship service");
-		this.userCompanySettingsService = userCompanySettingsService;
+		relationService = applicationContext.getBean(CUserCompanySettingsService.class);
 		setupGrid();
 		setupButtons();
 		closePanel();
@@ -63,36 +44,39 @@ public abstract class CComponentUserCompanyBase<MasterClass extends CEntityNamed
 		return String.format("Are you sure you want to delete the company setting for '%s'? This action cannot be undone.", companyName);
 	}
 
+	/** Creates a consistently styled header with simple color coding.
+	 * @param text  Header text
+	 * @param color Header color in hex format
+	 * @return Styled header component */
+	private com.vaadin.flow.component.html.Span createStyledHeader(String text, String color) {
+		com.vaadin.flow.component.html.Span header = new com.vaadin.flow.component.html.Span(text);
+		header.getStyle().set("color", color);
+		header.getStyle().set("font-weight", "bold");
+		header.getStyle().set("font-size", "14px");
+		header.getStyle().set("text-transform", "uppercase");
+		return header;
+	}
+
 	/** Deletes the selected user-company relationship */
 	protected void deleteSelected() {
 		final CUserCompanySetting selected = grid.asSingleSelect().getValue();
-		if (selected == null) {
-			new CWarningDialog("Please select a relationship to delete.").open();
-			return;
+		Check.notNull(selected, "Please select a project setting to delete.");
+		try {
+			final String confirmationMessage = createDeleteConfirmationMessage(selected);
+			new CConfirmationDialog(confirmationMessage, () -> {
+				try {
+					relationService.deleteByUserCompany(selected.getUser(), selected.getCompany());
+					populateForm();
+					LOGGER.info("Deleted user project setting: {}", selected);
+				} catch (final Exception e) {
+					LOGGER.error("Error deleting user project setting: {}", e.getMessage(), e);
+					new CWarningDialog("Failed to delete project setting: " + e.getMessage()).open();
+				}
+			}).open();
+		} catch (Exception e) {
+			LOGGER.error("Failed to show delete confirmation: {}", e.getMessage(), e);
+			new CWarningDialog("Failed to delete project setting").open();
 		}
-		if ((getSettings == null)) {
-			new CWarningDialog("Settings handlers are not available. Please refresh the page.").open();
-			return;
-		}
-		final String confirmMessage = createDeleteConfirmationMessage(selected);
-		new CConfirmationDialog(confirmMessage, () -> {
-			// Use service layer to properly handle lazy-loaded collections and transactions
-			final CCompany company = selected.getCompany();
-			final CUser user = selected.getUser();
-			try {
-				userCompanySettingsService.removeUserFromCompany(user, company);
-				LOGGER.debug("Successfully removed user {} from company {}", user, company);
-			} catch (Exception e) {
-				LOGGER.error("Error removing user from company: {}", e.getMessage(), e);
-				new CWarningDialog("Failed to remove user from company: " + e.getMessage()).open();
-				return;
-			}
-			// Refresh the view after successful deletion
-			if (saveEntity != null) {
-				saveEntity.run();
-			}
-			refresh();
-		}).open();
 	}
 
 	protected String getDisplayText(final CUserCompanySetting settings, final String type) {
@@ -131,34 +115,38 @@ public abstract class CComponentUserCompanyBase<MasterClass extends CEntityNamed
 
 	/** Sets up the action buttons (Add, Edit, Delete) */
 	private void setupButtons() {
-		final CButton addButton = CButton.createPrimary("Add", VaadinIcon.PLUS.create(), e -> {
-			try {
-				openAddDialog();
-			} catch (final Exception e1) {
-				LOGGER.error("Error opening add dialog: {}", e1.getMessage(), e1);
-				throw new RuntimeException("Failed to open add dialog", e1);
-			}
-		});
-		final CButton editButton = new CButton("Edit", VaadinIcon.EDIT.create(), e -> {
-			try {
-				openEditDialog();
-			} catch (final Exception e1) {
-				LOGGER.error("Error opening edit dialog: {}", e1.getMessage(), e1);
-				throw new RuntimeException("Failed to open edit dialog", e1);
-			}
-		});
-		editButton.setEnabled(false);
-		final CButton deleteButton = CButton.createError("Delete", VaadinIcon.TRASH.create(), e -> deleteSelected());
-		deleteButton.setEnabled(false);
-		// Enable/disable edit and delete buttons based on selection
-		grid.addSelectionListener(selection -> {
-			final boolean hasSelection = !selection.getAllSelectedItems().isEmpty();
-			editButton.setEnabled(hasSelection);
-			deleteButton.setEnabled(hasSelection);
-		});
-		final HorizontalLayout buttonLayout = new HorizontalLayout(addButton, editButton, deleteButton);
-		buttonLayout.setSpacing(true);
-		addToContent(buttonLayout);
+		try {
+			final CButton addButton = CButton.createPrimary("Add", VaadinIcon.PLUS.create(), e -> {
+				try {
+					openAddDialog();
+				} catch (final Exception ex) {
+					LOGGER.error("Error opening add dialog: {}", ex.getMessage(), ex);
+					new CWarningDialog("Failed to open add dialog: " + ex.getMessage()).open();
+				}
+			});
+			final CButton editButton = new CButton("Edit", VaadinIcon.EDIT.create(), e -> {
+				try {
+					openEditDialog();
+				} catch (final Exception ex) {
+					LOGGER.error("Error opening edit dialog: {}", ex.getMessage(), ex);
+					new CWarningDialog("Failed to open edit dialog: " + ex.getMessage()).open();
+				}
+			});
+			editButton.setEnabled(false);
+			final CButton deleteButton = CButton.createError("Delete", VaadinIcon.TRASH.create(), e -> deleteSelected());
+			deleteButton.setEnabled(false);
+			grid.addSelectionListener(selection -> {
+				final boolean hasSelection = !selection.getAllSelectedItems().isEmpty();
+				editButton.setEnabled(hasSelection);
+				deleteButton.setEnabled(hasSelection);
+			});
+			final HorizontalLayout buttonLayout = new HorizontalLayout(addButton, editButton, deleteButton);
+			buttonLayout.setSpacing(true);
+			add(buttonLayout);
+		} catch (Exception e) {
+			LOGGER.error("Failed to setup buttons: {}", e.getMessage(), e);
+			throw new RuntimeException("Failed to setup buttons", e);
+		}
 	}
 
 	/** Sets up the grid with enhanced visual styling including colors, avatars and consistent headers. Uses entity decorations with colors and icons
@@ -189,20 +177,7 @@ public abstract class CComponentUserCompanyBase<MasterClass extends CEntityNamed
 		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
 		grid.getStyle().set("border-radius", "8px");
 		grid.getStyle().set("border", "1px solid #E0E0E0");
-		addToContent(grid);
-	}
-
-	/** Creates a consistently styled header with simple color coding.
-	 * @param text  Header text
-	 * @param color Header color in hex format
-	 * @return Styled header component */
-	private com.vaadin.flow.component.html.Span createStyledHeader(String text, String color) {
-		com.vaadin.flow.component.html.Span header = new com.vaadin.flow.component.html.Span(text);
-		header.getStyle().set("color", color);
-		header.getStyle().set("font-weight", "bold");
-		header.getStyle().set("font-size", "14px");
-		header.getStyle().set("text-transform", "uppercase");
-		return header;
+		add(grid);
 	}
 
 	@Override

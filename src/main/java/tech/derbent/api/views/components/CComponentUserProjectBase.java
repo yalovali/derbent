@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.interfaces.IContentOwner;
@@ -19,19 +18,13 @@ import tech.derbent.users.service.CUserProjectSettingsService;
 public abstract class CComponentUserProjectBase<MasterClass extends CEntityNamed<MasterClass>, RelationalClass extends CEntityDB<RelationalClass>>
 		extends CComponentRelationBase<MasterClass, CUserProjectSettings> {
 
-	@Override
-	public void populateForm() {
-		super.populateForm();
-	}
-
 	private static final long serialVersionUID = 1L;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected CUserProjectSettingsService userProjectSettingsService;
 
-	public CComponentUserProjectBase(final String title, IContentOwner parentContent, final CEnhancedBinder<MasterClass> beanValidationBinder,
-			final Class<MasterClass> entityClass, final CUserProjectSettingsService userProjectSettingsService,
-			ApplicationContext applicationContext) {
-		super(title, parentContent, beanValidationBinder, entityClass, CUserProjectSettings.class, applicationContext);
+	public CComponentUserProjectBase(final String title, IContentOwner parentContent, final Class<MasterClass> entityClass,
+			final CUserProjectSettingsService userProjectSettingsService, ApplicationContext applicationContext) {
+		super(title, parentContent, entityClass, CUserProjectSettings.class, applicationContext);
 		Check.notNull(userProjectSettingsService, "User project settings service cannot be null");
 		this.userProjectSettingsService = userProjectSettingsService;
 		setupGrid();
@@ -93,6 +86,11 @@ public abstract class CComponentUserProjectBase<MasterClass extends CEntityNamed
 	protected abstract void onSettingsSaved(final CUserProjectSettings settings);
 	protected abstract void openAddDialog() throws Exception;
 	protected abstract void openEditDialog() throws Exception;
+
+	@Override
+	public void populateForm() {
+		super.populateForm();
+	}
 
 	private void setupButtons() {
 		try {

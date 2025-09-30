@@ -28,7 +28,6 @@ import tech.derbent.comments.view.CCommentPriorityInitializerService;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyInitializerService;
 import tech.derbent.companies.service.CCompanyService;
-import tech.derbent.companies.view.CCompanyView;
 import tech.derbent.decisions.domain.CDecision;
 import tech.derbent.decisions.domain.CDecisionStatus;
 import tech.derbent.decisions.domain.CDecisionType;
@@ -298,12 +297,6 @@ public class CAuxillaries {
 		}
 	}
 
-	public static Class<?> getInitializerService(final String entityType) {
-		Check.notBlank(entityType, "Entity type must not be empty");
-		Class<?> clazz = getEntityClass(entityType);
-		return getInitializerService(clazz);
-	}
-
 	public static Class<?> getInitializerService(final Class<?> entityClass) {
 		if (entityClass == CActivity.class) {
 			return CActivityInitializerService.class;
@@ -365,10 +358,77 @@ public class CAuxillaries {
 		}
 	}
 
-	public static Class<?> getServiceClass(final String simpleName) {
+	public static Class<?> getInitializerService(final String entityType) {
+		Check.notBlank(entityType, "Entity type must not be empty");
+		Class<?> clazz = getEntityClass(entityType);
+		return getInitializerService(clazz);
+	}
+
+	public static Class<?> getServiceClassForEntity(final Class<?> entityClass) {
+		if (entityClass == CActivity.class) {
+			return CActivityService.class;
+		} else if (entityClass == CMeeting.class) {
+			return CMeetingService.class;
+		} else if (entityClass == COrder.class) {
+			return COrderService.class;
+		} else if (entityClass == CRisk.class) {
+			return CRiskService.class;
+		} else if (entityClass == CCompany.class) {
+			return CCompanyService.class;
+		} else if (entityClass == CProject.class) {
+			return CProjectService.class;
+		} else if (entityClass == CDecision.class) {
+			return CDecisionService.class;
+		} else if (entityClass == CUser.class) {
+			return CUserService.class;
+		} else if (entityClass == CUserType.class) {
+			return CUserTypeService.class;
+		} else if (entityClass == CActivityType.class) {
+			return CActivityTypeService.class;
+		} else if (entityClass == CActivityStatus.class) {
+			return CActivityStatusService.class;
+		} else if (entityClass == CActivityPriority.class) {
+			return CActivityPriorityService.class;
+		} else if (entityClass == CMeetingType.class) {
+			return CMeetingTypeService.class;
+		} else if (entityClass == CMeetingStatus.class) {
+			return CMeetingStatusService.class;
+		} else if (entityClass == CRiskStatus.class) {
+			return CRiskStatusService.class;
+		} else if (entityClass == CPageEntity.class) {
+			return CPageEntityService.class;
+		} else if (entityClass == CCommentPriority.class) {
+			return CCommentPriorityService.class;
+		} else if (entityClass == CCurrency.class) {
+			return CCurrencyService.class;
+		} else if (entityClass == CDecisionStatus.class) {
+			return CDecisionStatusService.class;
+		} else if (entityClass == CDecisionType.class) {
+			return CDecisionTypeService.class;
+		} else if (entityClass == COrderStatus.class) {
+			return COrderStatusService.class;
+		} else if (entityClass == COrderType.class) {
+			return COrderTypeService.class;
+		} else if (entityClass == CApprovalStatus.class) {
+			return CApprovalStatusService.class;
+		} else if (entityClass == CDetailSection.class) {
+			return CDetailSectionService.class;
+		} else if (entityClass == CGridEntity.class) {
+			return CGridEntityService.class;
+		} else if (entityClass == CSystemSettings.class) {
+			return CSystemSettingsInitializerService.class;
+		} else if (entityClass == CUserProjectRole.class) {
+			return CUserProjectRoleInitializerService.class;
+		} else {
+			LOGGER.error("Unknown entity type: " + entityClass.getSimpleName() + " dont forget to update CAuxillaries");
+			throw new IllegalArgumentException("Unknown entity type: " + entityClass.getSimpleName());
+		}
+	}
+
+	public static Class<?> getServiceClassFromName(final String simpleName) {
 		Check.notBlank(simpleName, "Entity type must not be empty");
 		switch (simpleName) {
-		case "CUser":
+		case "CUserService":
 			return CUserService.class;
 		case "CActivityService":
 			return CActivityService.class;
@@ -384,8 +444,6 @@ public class CAuxillaries {
 			return CProjectService.class;
 		case "CDecisionService":
 			return CDecisionService.class;
-		case "CUserService":
-			return CUserService.class;
 		case "CUserTypeService":
 			return CUserTypeService.class;
 		case "CActivityTypeService":
@@ -433,8 +491,6 @@ public class CAuxillaries {
 	public static Class<?> getViewClassForEntity(final String simpleName) {
 		Check.notBlank(simpleName, "Entity type must not be empty");
 		switch (simpleName) {
-		case "CCompany":
-			return CCompanyView.class;
 		case "CProjectGanntView":
 			return CProjectGanntView.class;
 		default:

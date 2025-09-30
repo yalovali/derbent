@@ -2,7 +2,7 @@ package tech.derbent.companies.view;
 
 import java.util.List;
 import java.util.function.Supplier;
-import tech.derbent.api.components.CEnhancedBinder;
+import org.springframework.context.ApplicationContext;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.api.utils.Check;
@@ -11,7 +11,6 @@ import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserCompanySetting;
-import tech.derbent.users.service.CUserCompanySettingsService;
 import tech.derbent.users.service.CUserService;
 
 /** Simplified component for managing users within a company. This component displays all users assigned to a specific company and allows: - Adding
@@ -20,23 +19,18 @@ import tech.derbent.users.service.CUserService;
 public class CComponentCompanyUserSettings extends CComponentUserCompanyBase<CCompany, CUserCompanySetting> {
 
 	private static final long serialVersionUID = 1L;
-	private CCompany currentCompany;
 	private final CUserService userService;
-	private final CUserCompanySettingsService userCompanySettingsService;
 
-	public CComponentCompanyUserSettings(IContentOwner parentContent, final CCompany currentEntity,
-			final CEnhancedBinder<CCompany> beanValidationBinder, final CCompanyService entityService, final CUserService userService,
-			final CUserCompanySettingsService userCompanySettingsService) throws Exception {
-		super("User Settings", parentContent, beanValidationBinder, CCompany.class, entityService, userCompanySettingsService);
+	public CComponentCompanyUserSettings(IContentOwner parentContent, final CCompanyService entityService, ApplicationContext applicationContext)
+			throws Exception {
+		super("User Settings", parentContent, CCompany.class, entityService, applicationContext);
+		Check.notNull(relationService, "User company settings service cannot be null");
+		userService = applicationContext.getBean(CUserService.class);
 		Check.notNull(userService, "User service cannot be null");
-		Check.notNull(userCompanySettingsService, "User company settings service cannot be null");
-		this.userCompanySettingsService = userCompanySettingsService;
-		this.userService = userService;
 		initPanel();
 	}
 
 	public List<CUser> getAvailableUsers() {
-		Check.notNull(currentCompany, "Current company must be selected to get available users");
 		try {
 			// Get all users that are not yet members of this company
 			return userService.getAvailableUsersForCompany(getCurrentEntity().getId());
@@ -47,15 +41,25 @@ public class CComponentCompanyUserSettings extends CComponentUserCompanyBase<CCo
 	}
 
 	@Override
+	public void initPanel() throws Exception {
+		try {
+			super.initPanel();
+			setupDataAccessors();
+			openPanel();
+		} catch (Exception e) {
+			LOGGER.error("Failed to initialize panel: {}", e.getMessage(), e);
+			throw new RuntimeException("Failed to initialize panel", e);
+		}
+	}
+
+	@Override
 	protected void onSettingsSaved(final CUserCompanySetting settings) {
 		Check.notNull(settings, "Settings cannot be null when saving");
 		LOGGER.debug("Saving user company settings: {}", settings);
 		try {
-			final CUserCompanySetting savedSettings =
-					settings.getId() == null
-							? userCompanySettingsService.addUserToCompany(settings.getUser(), settings.getCompany(), settings.getOwnershipLevel(),
-									settings.getRole(), settings.getDepartment(), settings.isPrimaryCompany())
-							: userCompanySettingsService.save(settings);
+			final CUserCompanySetting savedSettings = settings.getId() == null ? relationService.addUserToCompany(settings.getUser(),
+					settings.getCompany(), settings.getOwnershipLevel(), settings.getRole(), settings.getDepartment(), settings.isPrimaryCompany())
+					: relationService.save(settings);
 			LOGGER.info("Successfully saved user company settings: {}", savedSettings);
 			populateForm();
 		} catch (final Exception e) {
@@ -70,9 +74,8 @@ public class CComponentCompanyUserSettings extends CComponentUserCompanyBase<CCo
 			LOGGER.debug("Opening add dialog for company user settings");
 			final CCompany company = getCurrentEntity();
 			Check.notNull(company, "Please select a company first.");
-			currentCompany = company;
 			final CCompanyUserSettingsDialog dialog = new CCompanyUserSettingsDialog(this, (CCompanyService) entityService, userService,
-					userCompanySettingsService, null, company, this::onSettingsSaved);
+					relationService, null, null, company, this::onSettingsSaved);
 			dialog.open();
 		} catch (Exception e) {
 			LOGGER.error("Failed to open add dialog: {}", e.getMessage(), e);
@@ -89,26 +92,13 @@ public class CComponentCompanyUserSettings extends CComponentUserCompanyBase<CCo
 			Check.notNull(selected, "Please select a user setting to edit.");
 			final CCompany company = getCurrentEntity();
 			Check.notNull(company, "Current company is not available.");
-			currentCompany = company;
 			final CCompanyUserSettingsDialog dialog = new CCompanyUserSettingsDialog(this, (CCompanyService) entityService, userService,
-					userCompanySettingsService, selected, company, this::onSettingsSaved);
+					relationService, selected, selected.getUser(), company, this::onSettingsSaved);
 			dialog.open();
 		} catch (Exception e) {
 			LOGGER.error("Failed to open edit dialog: {}", e.getMessage(), e);
 			new CWarningDialog("Failed to open edit dialog: " + e.getMessage()).open();
 			throw e;
-		}
-	}
-
-	@Override
-	public void initPanel() throws Exception {
-		try {
-			super.initPanel();
-			setupDataAccessors();
-			openPanel();
-		} catch (Exception e) {
-			LOGGER.error("Failed to initialize panel: {}", e.getMessage(), e);
-			throw new RuntimeException("Failed to initialize panel", e);
 		}
 	}
 
@@ -121,7 +111,7 @@ public class CComponentCompanyUserSettings extends CComponentUserCompanyBase<CCo
 					return List.of();
 				}
 				try {
-					final List<CUserCompanySetting> settings = userCompanySettingsService.findByCompany(entity);
+					final List<CUserCompanySetting> settings = relationService.findByCompany(entity);
 					LOGGER.debug("Retrieved {} user settings for company: {}", settings.size(), entity.getName());
 					return settings;
 				} catch (final Exception e) {

@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.component.grid.Grid;
-import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
 
@@ -15,18 +14,18 @@ public abstract class CComponentRelationBase<MasterClass extends CEntityDB<Maste
 		extends CComponentDBEntity<MasterClass> {
 
 	private static final long serialVersionUID = 1L;
-	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected Supplier<List<RelationalClass>> getSettings;
 	protected final Grid<RelationalClass> grid;
+	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected final Class<RelationalClass> relationalClass;
 	protected Runnable saveEntity;
 
-	public CComponentRelationBase(final String title, IContentOwner parentContent, final CEnhancedBinder<MasterClass> beanValidationBinder,
-			final Class<MasterClass> entityClass, final Class<RelationalClass> relationalClass, ApplicationContext applicationContext) {
-		super(title, parentContent, beanValidationBinder, entityClass, applicationContext);
+	public CComponentRelationBase(final String title, IContentOwner parentContent, final Class<MasterClass> entityClass,
+			final Class<RelationalClass> relationalClass, ApplicationContext applicationContext) {
+		super(title, parentContent, entityClass, applicationContext);
 		this.relationalClass = relationalClass;
-		this.grid = new Grid<>(relationalClass, false);
-		this.getSettings = () -> List.of();
+		grid = new Grid<>(relationalClass, false);
+		getSettings = () -> List.of();
 	}
 
 	@Override

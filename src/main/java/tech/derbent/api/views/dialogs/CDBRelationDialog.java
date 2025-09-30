@@ -25,13 +25,13 @@ import tech.derbent.api.utils.Check;
 public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<RelationshipClass>, MainEntityClass extends CEntityDB<MainEntityClass>,
 		RelatedEntityClass extends CEntityDB<RelatedEntityClass>> extends CDBEditDialog<RelationshipClass> {
 
-	private static final long serialVersionUID = 1L;
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CDBRelationDialog.class);
+	private static final long serialVersionUID = 1L;
+	protected CEnhancedBinder<RelationshipClass> binder;
 	protected CAbstractService<RelatedEntityClass> detailService;
+	protected CFormBuilder<RelationshipClass> formBuilder;
 	protected final MainEntityClass mainEntity;
 	protected CAbstractService<MainEntityClass> masterService;
-	protected CEnhancedBinder<RelationshipClass> binder;
-	protected CFormBuilder<RelationshipClass> formBuilder;
 	private final IContentOwner parentContent;
 	private final CAbstractEntityRelationService<RelationshipClass> relationService;
 
@@ -56,7 +56,29 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 		// Create a binder specific to the relationship entity - child classes can override
 		initializeBinder();
 		// Child classes must call setupDialog() and populateForm() in their constructor
+		enhanceDialogStyling();
 	}
+
+	/** Enhances dialog styling with colors and visual improvements. Makes the dialog more colorful and visually appealing. */
+	private void enhanceDialogStyling() {
+		try {
+			// Add colorful border and background to make dialog more appealing
+			getElement().getStyle().set("border", "2px solid #1976D2");
+			getElement().getStyle().set("border-radius", "12px");
+			getElement().getStyle().set("box-shadow", "0 4px 20px rgba(25, 118, 210, 0.3)");
+			// Set a subtle gradient background
+			getElement().getStyle().set("background", "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)");
+		} catch (Exception e) {
+			LOGGER.error("Failed to apply dialog styling: {}", e.getMessage(), e);
+		}
+	}
+
+	/** Returns the dialog title based on whether this is a new or edit operation. */
+	@Override
+	public String getDialogTitleString() { return isNew ? getNewDialogTitle() : getEditDialogTitle(); }
+
+	protected abstract String getEditDialogTitle();
+	protected abstract String getEditFormTitle();
 
 	/** Returns the list of fields to include in the form. Child classes can override this. */
 	protected List<String> getFormFields() {
@@ -66,6 +88,13 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 	@Override
 	protected Icon getFormIcon() throws Exception { return CColorUtils.getIconForEntity(mainEntity); }
 
+	/** Returns the form title based on whether this is a new or edit operation. */
+	@Override
+	protected String getFormTitleString() { return isNew ? getNewFormTitle() : getEditFormTitle(); }
+
+	protected abstract String getNewDialogTitle();
+	protected abstract String getNewFormTitle();
+
 	/** Gets the parent content owner for accessing context data. This allows dialogs to access data from the parent page/container.
 	 * @return the parent content owner */
 	protected IContentOwner getParentContent() { return parentContent; }
@@ -73,7 +102,7 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 	protected void initializeBinder() {
 		@SuppressWarnings ("unchecked")
 		final Class<RelationshipClass> entityClass = (Class<RelationshipClass>) getEntity().getClass();
-		this.binder = new CEnhancedBinder<>(entityClass);
+		binder = new CEnhancedBinder<>(entityClass);
 	}
 
 	protected void performSave() {
