@@ -33,7 +33,7 @@ public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 			setBackgroundFromColor = true, useIcon = true, dataProviderOwner = "content", dataProviderMethod = "getAvailableProjects"
 	)
 	private CProject project;
-	@ManyToOne
+	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "role_id", nullable = true)
 	@AMetaData (
 			displayName = "Project Role", required = false, readOnly = false, description = "User's role in this project", hidden = false, order = 5,
