@@ -174,9 +174,34 @@ protected void onSettingsSaved(final RelationshipType settings) {
 }
 ```
 
+## Important Notes
+
+### FetchType Configuration ⚠️
+The `CUserProjectSettings` entity has a critical FetchType configuration to prevent PostgreSQL errors:
+
+```java
+@ManyToOne (fetch = FetchType.LAZY)  // ✅ MUST be LAZY
+@JoinColumn (name = "role_id", nullable = true)
+private CUserProjectRole role;
+```
+
+**Why LAZY is required:**
+- `CUserProjectRole` has two `@ElementCollection` fields with `FetchType.EAGER` (readAccessPages, writeAccessPages)
+- Without explicit `FetchType.LAZY`, the default EAGER fetch creates circular eager loading
+- This generates massive JOIN queries that exceed PostgreSQL's 1664 column limit
+- Error: `ERROR: target lists can have at most 1664 entries`
+
+**All `@ManyToOne` relationships in `CUserProjectSettings` use `FetchType.LAZY`:**
+- `user` → `CUser`
+- `project` → `CProject`
+- `role` → `CUserProjectRole`
+
+See `CUserProjectSettingsFetchTypeTest` for validation tests.
+
 ## Testing Strategy
 - Unit tests focusing on populate form pattern and lazy loading
 - Integration tests for CRUD operations
+- FetchType validation tests to prevent PostgreSQL column limit errors
 - UI tests via Playwright for full component workflows
 
 ## Benefits of This Pattern
