@@ -146,6 +146,5 @@ public class CComment extends CEvent<CComment> {
 	@Override
 	public void initializeAllFields() {
 		// TODO Auto-generated method stub
-		
 	}
 }

@@ -58,6 +58,5 @@ public class CRisk extends CEntityOfProject<CRisk> {
 	@Override
 	public void initializeAllFields() {
 		// TODO Auto-generated method stub
-		
 	}
 }

@@ -33,6 +33,5 @@ public class CMeetingType extends CTypeEntity<CMeetingType> implements IKanbanTy
 	@Override
 	public void initializeAllFields() {
 		// TODO Auto-generated method stub
-		
 	}
 }

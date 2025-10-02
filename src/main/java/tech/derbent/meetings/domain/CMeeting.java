@@ -246,6 +246,5 @@ public class CMeeting extends CEntityOfProject<CMeeting> implements IKanbanEntit
 	@Override
 	public void initializeAllFields() {
 		// TODO Auto-generated method stub
-		
 	}
 }

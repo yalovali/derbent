@@ -69,6 +69,5 @@ public class CRiskStatus extends CStatus<CRiskStatus> {
 	@Override
 	public void initializeAllFields() {
 		// TODO Auto-generated method stub
-		
 	}
 }

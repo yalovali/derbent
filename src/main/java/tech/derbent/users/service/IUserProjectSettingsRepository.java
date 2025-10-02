@@ -14,11 +14,18 @@ import tech.derbent.users.domain.CUserProjectSettings;
 @Repository
 public interface IUserProjectSettingsRepository extends IUserRelationshipRepository<CUserProjectSettings> {
 
+	/** Find all user project settings for a specific user with eager loading of project, user, and role. Overrides the base method to include role
+	 * fetching which is specific to project settings. */
+	@Override
+	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.user LEFT JOIN FETCH r.project LEFT JOIN FETCH r.role WHERE r.user.id = :userId")
+	List<CUserProjectSettings> findByUserId(@Param ("userId") Long userId);
 	/** Find all user project settings for a specific project with eager loading */
-	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.user WHERE r.project.id = :projectId")
+	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.user LEFT JOIN FETCH r.role WHERE r.project.id = :projectId")
 	List<CUserProjectSettings> findByProjectId(@Param ("projectId") Long projectId);
 	/** Find a specific user project setting by user and project using generic pattern */
-	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.user WHERE r.user.id = :userId AND r.project.id = :projectId")
+	@Query (
+		"SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.user LEFT JOIN FETCH r.role WHERE r.user.id = :userId AND r.project.id = :projectId"
+	)
 	Optional<CUserProjectSettings> findByUserIdAndProjectId(@Param ("userId") Long userId, @Param ("projectId") Long projectId);
 
 	/** Check if a relationship exists between user and project */
@@ -37,10 +44,10 @@ public interface IUserProjectSettingsRepository extends IUserRelationshipReposit
 	}
 
 	/** Find all settings by role using generic pattern */
-	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.user WHERE r.role = :role")
+	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.user LEFT JOIN FETCH r.role WHERE r.role = :role")
 	List<CUserProjectSettings> findByRole(@Param ("role") String role);
 	/** Find all settings by permission using generic pattern */
-	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.user WHERE r.permission = :permission")
+	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.project LEFT JOIN FETCH r.user LEFT JOIN FETCH r.role WHERE r.permission = :permission")
 	List<CUserProjectSettings> findByPermission(@Param ("permission") String permission);
 	/** Count users for a specific project using generic pattern */
 	@Query ("SELECT COUNT(r) FROM #{#entityName} r WHERE r.project.id = :projectId")

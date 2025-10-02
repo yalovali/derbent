@@ -202,6 +202,24 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		}
 	}
 
+	/** Initialize all lazy fields of an entity within a transaction context. This method should be used when you need to access lazy-loaded fields
+	 * outside of the original Hibernate session. Call this from a @Transactional method in your service.
+	 * @param entity the entity to initialize
+	 * @return the initialized entity */
+	@Transactional (readOnly = true)
+	public EntityClass initializeLazyFields(final EntityClass entity) {
+		Check.notNull(entity, "Entity cannot be null");
+		if (entity.getId() == null) {
+			LOGGER.warn("Cannot initialize lazy fields for unsaved entity");
+			return entity;
+		}
+		// Fetch the entity from database to ensure it's managed and lazy fields are available
+		final EntityClass managed = repository.findById(entity.getId()).orElse(entity);
+		// Access lazy fields to trigger loading within transaction
+		managed.initializeAllFields();
+		return managed;
+	}
+
 	@Transactional (readOnly = true)
 	public Page<EntityClass> list(final Pageable pageable) {
 		// Validate and fix pageable to prevent "max-results cannot be negative" error

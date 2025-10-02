@@ -15,6 +15,11 @@ import tech.derbent.users.domain.CUserCompanySetting;
 @Repository
 public interface IUserCompanySettingsRepository extends IUserRelationshipRepository<CUserCompanySetting> {
 
+	/** Find all user company settings for a specific user with eager loading of company and user. Overrides the base method to include company
+	 * fetching. */
+	@Override
+	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.user LEFT JOIN FETCH r.company WHERE r.user.id = :userId")
+	List<CUserCompanySetting> findByUserId(@Param ("userId") Long userId);
 	/** Count users for a specific company using generic pattern */
 	@Query ("SELECT COUNT(r) FROM #{#entityName} r WHERE r.company.id = :companyId")
 	long countByCompanyId(@Param ("companyId") Long companyId);

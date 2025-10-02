@@ -31,6 +31,5 @@ public class COrderStatus extends CStatus<COrderStatus> {
 	@Override
 	public void initializeAllFields() {
 		// TODO Auto-generated method stub
-		
 	}
 }

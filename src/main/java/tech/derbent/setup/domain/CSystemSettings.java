@@ -450,6 +450,5 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 	@Override
 	public void initializeAllFields() {
 		// TODO Auto-generated method stub
-		
 	}
 }

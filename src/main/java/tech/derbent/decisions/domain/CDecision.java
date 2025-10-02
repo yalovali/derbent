@@ -154,6 +154,5 @@ public class CDecision extends CEntityOfProject<CDecision> {
 	@Override
 	public void initializeAllFields() {
 		// TODO Auto-generated method stub
-		
 	}
 }
