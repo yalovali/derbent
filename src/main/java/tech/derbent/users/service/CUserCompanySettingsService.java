@@ -152,4 +152,22 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 		// Create the new setting
 		return addUserToCompany(user, company, ownershipLevel, role);
 	}
+
+	/** Delete all company settings for a user. Used for cleanup operations.
+	 * @param userId the user ID */
+	@Transactional
+	public void deleteAllByUserId(final Long userId) {
+		Check.notNull(userId, "User ID cannot be null");
+		LOGGER.debug("Deleting all company settings for user {}", userId);
+		repository.deleteByUserId(userId);
+	}
+
+	/** Delete all company settings for a company. Used for cleanup operations.
+	 * @param companyId the company ID */
+	@Transactional
+	public void deleteAllByCompanyId(final Long companyId) {
+		Check.notNull(companyId, "Company ID cannot be null");
+		LOGGER.debug("Deleting all company settings for company {}", companyId);
+		repository.deleteByCompanyId(companyId);
+	}
 }
