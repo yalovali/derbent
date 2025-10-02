@@ -52,15 +52,6 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 	public void closePanel() {
 		setVisible(false);
 	}
-	// Override if you need to customize the panel content creation
-	// protected void createPanelContent() throws Exception {
-	// try {
-	// add(CFormBuilder.buildForm(entityClass, getBinder(), getEntityFields()), this);
-	// } catch (Exception e) {
-	// LOGGER.error("Failed to create panel content for entity {}: {}", entityClass.getSimpleName(), e.getMessage(), e);
-	// throw new RuntimeException("Failed to create panel content", e);
-	// }
-	// }
 
 	public CEnhancedBinder<EntityClass> getBinder() { return binder; }
 

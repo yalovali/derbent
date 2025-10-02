@@ -40,7 +40,7 @@ public abstract class CComponentRelationBase<MasterClass extends CEntityDB<Maste
 	@Override
 	public void populateForm() {
 		super.populateForm();
-		LOGGER.debug("Refreshing grid data");
+		// LOGGER.debug("Refreshing grid data");
 		if (getSettings != null) {
 			grid.setItems(getSettings.get());
 		}
@@ -48,7 +48,6 @@ public abstract class CComponentRelationBase<MasterClass extends CEntityDB<Maste
 
 	/** Sets the settings accessors (getters, setters, save callback) */
 	public void setSettingsAccessors(final Supplier<List<RelationalClass>> getSettings, final Runnable saveEntity) {
-		LOGGER.debug("Setting settings accessors");
 		this.getSettings = getSettings;
 		this.saveEntity = saveEntity;
 	}

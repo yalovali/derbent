@@ -438,12 +438,16 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		Check.notNull(fieldInfo, "AMetaData for field layout");
 		Check.notNull(component, "Component for field layout" + fieldInfo.getFieldName());
 		final CHorizontalLayout horizontalLayout = CHorizontalLayout.forForm();
-		final CDiv labelDiv = new CDiv(fieldInfo.getDisplayName());
-		labelDiv.setClassName("form-field-label");
-		if (fieldInfo.isRequired()) {
-			labelDiv.getStyle().set("font-weight", "bold");
+		if (!fieldInfo.getDisplayName().isBlank()) {
+			// if label is empty, we do not show it
+			final CDiv labelDiv = new CDiv(fieldInfo.getDisplayName());
+			labelDiv.setClassName("form-field-label");
+			if (fieldInfo.isRequired()) {
+				labelDiv.getStyle().set("font-weight", "bold");
+			}
+			horizontalLayout.add(labelDiv);
 		}
-		horizontalLayout.add(labelDiv, component);
+		horizontalLayout.add(component);
 		return horizontalLayout;
 	}
 

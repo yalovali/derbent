@@ -272,8 +272,8 @@ public class CEntityFieldService {
 				sectionInfo.setFieldName(line.getRelationFieldName());
 				sectionInfo.setFieldType(CEntityFieldService.COMPONENT);
 				sectionInfo.setJavaType(CEntityFieldService.COMPONENT);
-				sectionInfo.setDisplayName(CEntityFieldService.COMPONENT);
-				sectionInfo.setDescription(CEntityFieldService.COMPONENT);
+				sectionInfo.setDisplayName("");
+				sectionInfo.setDescription("");
 				sectionInfo.setFieldTypeClass(CEntityFieldService.class);
 				return sectionInfo;
 			} else {

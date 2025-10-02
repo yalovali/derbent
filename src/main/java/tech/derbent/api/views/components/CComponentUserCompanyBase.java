@@ -7,6 +7,7 @@ import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
+import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserCompanySetting;
 import tech.derbent.users.service.CUserCompanySettingsService;
 
@@ -77,6 +78,11 @@ public abstract class CComponentUserCompanyBase<MasterClass extends CEntityNamed
 		}
 	}
 
+	protected boolean isUserMaster() {
+		// return true is MasterClass is CUser
+		return CUser.class.equals(getEntityClass());
+	}
+
 	/** Abstract method to open the add dialog
 	 * @throws Exception */
 	@Override
@@ -95,23 +101,26 @@ public abstract class CComponentUserCompanyBase<MasterClass extends CEntityNamed
 	protected void setupGrid(final Grid<CUserCompanySetting> grid) {
 		super.setupGrid(grid);
 		// Add columns with enhanced styling and colors
-		grid.addColumn(CUserCompanySetting::getId).setHeader(createStyledHeader("ID", "#424242")).setAutoWidth(true);
-		grid.addComponentColumn(settings -> {
-			try {
-				return CColorUtils.getEntityWithIcon(settings.getUser());
-			} catch (Exception e) {
-				LOGGER.error("Failed to create user component: {}", e.getMessage(), e);
-				return new com.vaadin.flow.component.html.Span(getDisplayText(settings, "user"));
-			}
-		}).setHeader(createStyledHeader("User", "#1565C0")).setAutoWidth(true);
-		grid.addComponentColumn(settings -> {
-			try {
-				return CColorUtils.getEntityWithIcon(settings.getCompany());
-			} catch (Exception e) {
-				LOGGER.error("Failed to create company component: {}", e.getMessage(), e);
-				return new com.vaadin.flow.component.html.Span(getDisplayText(settings, "company"));
-			}
-		}).setHeader(createStyledHeader("Company", "#D32F2F")).setAutoWidth(true).setSortable(true);
+		// grid.addColumn(CUserCompanySetting::getId).setHeader(createStyledHeader("ID", "#424242")).setAutoWidth(true);
+		if (isUserMaster()) {
+			grid.addComponentColumn(settings -> {
+				try {
+					return CColorUtils.getEntityWithIcon(settings.getCompany());
+				} catch (Exception e) {
+					LOGGER.error("Failed to create company component: {}", e.getMessage(), e);
+					return new com.vaadin.flow.component.html.Span(getDisplayText(settings, "company"));
+				}
+			}).setHeader(createStyledHeader("Company", "#D32F2F")).setAutoWidth(true).setSortable(true);
+		} else {
+			grid.addComponentColumn(settings -> {
+				try {
+					return CColorUtils.getEntityWithIcon(settings.getUser());
+				} catch (Exception e) {
+					LOGGER.error("Failed to create user component: {}", e.getMessage(), e);
+					return new com.vaadin.flow.component.html.Span(getDisplayText(settings, "user"));
+				}
+			}).setHeader(createStyledHeader("User", "#1565C0")).setAutoWidth(true);
+		}
 		grid.addColumn(settings -> getDisplayText(settings, "role")).setHeader(createStyledHeader("Role", "#F57F17")).setAutoWidth(true);
 		grid.addColumn(settings -> getDisplayText(settings, "ownership")).setHeader(createStyledHeader("Ownership", "#8E24AA")).setAutoWidth(true);
 		// Apply consistent grid styling

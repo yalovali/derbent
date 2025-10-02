@@ -1,19 +1,24 @@
-package tech.derbent.api.domains;
+package tech.derbent.api.roles.domain;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.projects.domain.CProject;
+import tech.derbent.api.domains.CEntityNamed;
+import tech.derbent.companies.domain.CCompany;
 
-/** CTypeEntity - Abstract base class for all type entities in the system. Provides common fields for type management including color, sort order, and
- * active status. Layer: Domain (MVC)
- * @author Derbent Team
- * @since 1.0 */
 @MappedSuperclass
-public abstract class CTypeEntity<EntityClass> extends CEntityOfProject<EntityClass> {
+public abstract class CNonProjectType<EntityClass> extends CEntityNamed<EntityClass> {
 
+	// Many risks belong to one project
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "company_id", nullable = false)
+	@AMetaData (displayName = "Company", required = true, readOnly = true, description = "Company of this entity", hidden = false, order = 10)
+	private CCompany company;
 	@Column (nullable = false)
 	@AMetaData (
 			displayName = "Non Deletable", required = false, readOnly = false, defaultValue = "true",
@@ -36,7 +41,7 @@ public abstract class CTypeEntity<EntityClass> extends CEntityOfProject<EntityCl
 	private Integer sortOrder = 100;
 
 	/** Default constructor for JPA. */
-	protected CTypeEntity() {
+	protected CNonProjectType() {
 		super();
 		// Initialize with default values for JPA
 		color = "#4A90E2";
@@ -46,9 +51,10 @@ public abstract class CTypeEntity<EntityClass> extends CEntityOfProject<EntityCl
 
 	/** Constructor with required fields.
 	 * @param name    the name of the type entity
-	 * @param project the project this type belongs to */
-	public CTypeEntity(final Class<EntityClass> clazz, final String name, final CProject project) {
-		super(clazz, name, project);
+	 * @param company the project this type belongs to */
+	public CNonProjectType(final Class<EntityClass> clazz, final String name, final CCompany company) {
+		super(clazz, name);
+		this.company = company;
 		color = "#4A90E2";
 		sortOrder = 100;
 		attributeNonDeletable = false;
@@ -90,10 +96,4 @@ public abstract class CTypeEntity<EntityClass> extends CEntityOfProject<EntityCl
 	/** Sets the sort order for this type.
 	 * @param sortOrder the sort order to set */
 	public void setSortOrder(final Integer sortOrder) { this.sortOrder = sortOrder; }
-
-	@Override
-	public String toString() {
-		return String.format("%s{id=%d, name='%s', color='%s', sortOrder=%d, nonDeletable=%s, project=%s}", getClass().getSimpleName(), getId(),
-				getName(), color, sortOrder, attributeNonDeletable, getProject() != null ? getProject().getName() : "null");
-	}
 }
