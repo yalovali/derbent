@@ -440,6 +440,5 @@ public class CActivity extends CProjectItem<CActivity> implements IKanbanEntity 
 	@Override
 	public void initializeAllFields() {
 		// TODO Auto-generated method stub
-		
 	}
 }

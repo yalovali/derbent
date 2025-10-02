@@ -112,6 +112,5 @@ public class CGridEntity extends CEntityOfProject<CGridEntity> {
 	@Override
 	public void initializeAllFields() {
 		// TODO Auto-generated method stub
-		
 	}
 }

@@ -148,6 +148,5 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 	@Override
 	public void initializeAllFields() {
 		// TODO Auto-generated method stub
-		
 	}
 }

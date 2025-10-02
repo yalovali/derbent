@@ -31,6 +31,5 @@ public class CActivityType extends CTypeEntity<CActivityType> implements IKanban
 	@Override
 	public void initializeAllFields() {
 		// TODO Auto-generated method stub
-		
 	}
 }

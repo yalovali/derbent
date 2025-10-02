@@ -190,6 +190,5 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 	@Override
 	public void initializeAllFields() {
 		// TODO Auto-generated method stub
-		
 	}
 }

@@ -30,6 +30,5 @@ public class CApprovalStatus extends CStatus<CApprovalStatus> {
 	@Override
 	public void initializeAllFields() {
 		// TODO Auto-generated method stub
-		
 	}
 }

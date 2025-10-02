@@ -115,6 +115,5 @@ public class COrderApproval extends CEntityNamed<COrderApproval> {
 	@Override
 	public void initializeAllFields() {
 		// TODO Auto-generated method stub
-		
 	}
 }

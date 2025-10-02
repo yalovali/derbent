@@ -33,6 +33,5 @@ public class COrderType extends CTypeEntity<COrderType> {
 	@Override
 	public void initializeAllFields() {
 		// TODO Auto-generated method stub
-		
 	}
 }

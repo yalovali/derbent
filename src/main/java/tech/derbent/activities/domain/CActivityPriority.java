@@ -84,6 +84,5 @@ public class CActivityPriority extends CTypeEntity<CActivityPriority> {
 	@Override
 	public void initializeAllFields() {
 		// TODO Auto-generated method stub
-		
 	}
 }

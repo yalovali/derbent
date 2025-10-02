@@ -101,6 +101,25 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 		return findByParentEntityId(user.getId());
 	}
 
+	/** Initialize lazy fields for a CUserProjectSettings entity within a transaction context. This method should be called when you need to access
+	 * lazy-loaded fields outside of the original Hibernate session. The repository queries already eagerly fetch common fields (user, project, role),
+	 * but this method can be used for additional fields if needed.
+	 * @param settings the settings entity to initialize
+	 * @return the initialized settings entity */
+	@Transactional (readOnly = true)
+	public CUserProjectSettings initializeLazyFields(final CUserProjectSettings settings) {
+		Check.notNull(settings, "Settings cannot be null");
+		if (settings.getId() == null) {
+			LOGGER.warn("Cannot initialize lazy fields for unsaved entity");
+			return settings;
+		}
+		// Fetch the entity from database to ensure all lazy fields are available
+		final CUserProjectSettings managed = repository.findById(settings.getId()).orElse(settings);
+		// Access lazy fields to trigger loading within transaction
+		managed.initializeAllFields();
+		return managed;
+	}
+
 	@Override
 	@Transactional (readOnly = true)
 	public Optional<CUserProjectSettings> findRelationship(final Long userId, final Long projectId) {

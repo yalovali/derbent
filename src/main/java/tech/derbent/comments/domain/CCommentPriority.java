@@ -71,6 +71,5 @@ public class CCommentPriority extends CTypeEntity<CCommentPriority> {
 	@Override
 	public void initializeAllFields() {
 		// TODO Auto-generated method stub
-		
 	}
 }

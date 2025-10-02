@@ -239,6 +239,5 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	@Override
 	public void initializeAllFields() {
 		// TODO Auto-generated method stub
-		
 	}
 }

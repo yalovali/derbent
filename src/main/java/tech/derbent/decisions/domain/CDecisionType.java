@@ -51,6 +51,5 @@ public class CDecisionType extends CTypeEntity<CDecisionType> {
 	@Override
 	public void initializeAllFields() {
 		// TODO Auto-generated method stub
-		
 	}
 }

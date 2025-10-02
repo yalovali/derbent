@@ -260,6 +260,5 @@ public class CCompany extends CEntityNamed<CCompany> {
 	@Override
 	public void initializeAllFields() {
 		// TODO Auto-generated method stub
-		
 	}
 }

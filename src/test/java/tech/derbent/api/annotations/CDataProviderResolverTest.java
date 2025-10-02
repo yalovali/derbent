@@ -32,7 +32,6 @@ class CDataProviderResolverTest {
 		@Override
 		public void initializeAllFields() {
 			// TODO Auto-generated method stub
-			
 		}
 	}
 

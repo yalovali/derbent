@@ -72,6 +72,5 @@ public class CActivityStatus extends CStatus<CActivityStatus> implements IKanban
 	@Override
 	public void initializeAllFields() {
 		// TODO Auto-generated method stub
-		
 	}
 }

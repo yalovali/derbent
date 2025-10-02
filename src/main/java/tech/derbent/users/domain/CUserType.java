@@ -31,6 +31,5 @@ public class CUserType extends CTypeEntity<CUserType> {
 	@Override
 	public void initializeAllFields() {
 		// TODO Auto-generated method stub
-		
 	}
 }

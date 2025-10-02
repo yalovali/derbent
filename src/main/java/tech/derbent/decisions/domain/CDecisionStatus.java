@@ -89,6 +89,5 @@ public class CDecisionStatus extends CStatus<CDecisionStatus> {
 	@Override
 	public void initializeAllFields() {
 		// TODO Auto-generated method stub
-		
 	}
 }

@@ -73,6 +73,5 @@ public class CMeetingStatus extends CStatus<CMeetingStatus> implements IKanbanSt
 	@Override
 	public void initializeAllFields() {
 		// TODO Auto-generated method stub
-		
 	}
 }

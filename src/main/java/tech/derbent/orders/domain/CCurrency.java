@@ -65,6 +65,5 @@ public class CCurrency extends CEntityOfProject<CCurrency> {
 	@Override
 	public void initializeAllFields() {
 		// TODO Auto-generated method stub
-		
 	}
 }

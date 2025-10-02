@@ -27,6 +27,5 @@ public class CGanntViewEntity extends CEntityOfProject<CGanntViewEntity> {
 	@Override
 	public void initializeAllFields() {
 		// TODO Auto-generated method stub
-		
 	}
 }

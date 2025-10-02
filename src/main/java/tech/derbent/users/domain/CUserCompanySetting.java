@@ -134,6 +134,5 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 	@Override
 	public void initializeAllFields() {
 		// TODO Auto-generated method stub
-		
 	}
 }
