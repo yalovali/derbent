@@ -21,9 +21,6 @@ public class CCompanyUserSettingsDialog extends CUserCompanyRelationDialog<CComp
 	}
 
 	@Override
-	protected List<String> getDefaultFormFields() { return List.of("user", "role", "ownershipLevel"); }
-
-	@Override
 	protected String getEditDialogTitle() { return "Edit User Assignment"; }
 
 	@Override
@@ -38,5 +35,10 @@ public class CCompanyUserSettingsDialog extends CUserCompanyRelationDialog<CComp
 	@Override
 	protected void setupEntityRelation(CCompany company) {
 		getEntity().setCompany(company);
+	}
+
+	@Override
+	protected List<String> getFormFields() { // TODO Auto-generated method stub
+		return List.of("user", "role", "ownershipLevel");
 	}
 }

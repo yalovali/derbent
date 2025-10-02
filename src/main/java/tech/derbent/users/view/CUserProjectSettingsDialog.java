@@ -24,7 +24,7 @@ public class CUserProjectSettingsDialog extends CUserProjectRelationDialog<CUser
 	}
 
 	@Override
-	protected List<String> getDefaultFormFields() { return List.of("company", "role", "permission"); }
+	protected List<String> getFormFields() { return List.of("project", "role", "permission"); }
 
 	@Override
 	protected String getEditDialogTitle() { return "Edit Project Assignment"; }

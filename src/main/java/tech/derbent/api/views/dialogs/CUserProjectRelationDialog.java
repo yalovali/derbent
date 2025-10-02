@@ -1,10 +1,8 @@
 package tech.derbent.api.views.dialogs;
 
-import java.util.List;
 import java.util.function.Consumer;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
-import tech.derbent.api.utils.Check;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.users.domain.CUserProjectSettings;
 import tech.derbent.users.service.CUserProjectSettingsService;
@@ -29,13 +27,6 @@ public abstract class CUserProjectRelationDialog<MasterEntity extends CEntityDB<
 		super(parentContent, settings != null ? settings : new CUserProjectSettings(), masterEntity,
 				(tech.derbent.api.services.CAbstractService<MasterEntity>) masterService,
 				(tech.derbent.api.services.CAbstractService<DetailEntity>) detailService, userProjectSettingsService, onSave, settings == null);
-		// Enforce strict parameter validation - terminate with exceptions on any missing parameter
-		Check.notNull(parentContent, "Parent content cannot be null - relation dialog requires a parent content owner");
-		Check.notNull(masterService, "Master service cannot be null - relation dialog requires a master entity service");
-		Check.notNull(detailService, "Detail service cannot be null - relation dialog requires a detail entity service");
-		Check.notNull(userProjectSettingsService, "User project settings service cannot be null - relation dialog requires a relationship service");
-		Check.notNull(masterEntity, "Master entity cannot be null - relation dialog requires a master entity instance");
-		Check.notNull(onSave, "OnSave callback cannot be null - relation dialog requires a save callback");
 		// Store services for easy access
 		userService = masterService instanceof CUserService ? (CUserService) masterService : (CUserService) detailService;
 		projectService = masterService instanceof CProjectService ? (CProjectService) masterService : (CProjectService) detailService;
@@ -43,46 +34,27 @@ public abstract class CUserProjectRelationDialog<MasterEntity extends CEntityDB<
 		// Set the appropriate entity reference
 		setupEntityRelation(masterEntity);
 		// Apply colorful styling to make the dialog more visually appealing
-		enhanceDialogStyling();
 		setupDialog();
 		populateForm();
 	}
-
-	/** Enhances dialog styling with colors and visual improvements. Makes the dialog more colorful and visually appealing. */
-	private void enhanceDialogStyling() {
-		try {
-			// Add colorful border and background to make dialog more appealing
-			getElement().getStyle().set("border", "2px solid #1976D2");
-			getElement().getStyle().set("border-radius", "12px");
-			getElement().getStyle().set("box-shadow", "0 4px 20px rgba(25, 118, 210, 0.3)");
-			// Set a subtle gradient background
-			getElement().getStyle().set("background", "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)");
-		} catch (Exception e) {
-			LOGGER.error("Failed to apply dialog styling: {}", e.getMessage(), e);
-		}
-	}
-
-	/** Returns the default form fields based on the direction of the relationship. User-centric dialogs show project selection, Project-centric
-	 * dialogs show user selection. */
-	protected abstract List<String> getDefaultFormFields();
 
 	/** Returns the dialog title based on whether this is a new or edit operation. */
 	@Override
 	public String getDialogTitleString() { return isNew ? getNewDialogTitle() : getEditDialogTitle(); }
 
-	protected abstract String getEditDialogTitle();
-	protected abstract String getEditFormTitle();
-
-	/** Returns the form fields for this dialog. Default implementation includes the basic fields, subclasses can override. */
 	@Override
-	protected List<String> getFormFields() { return getDefaultFormFields(); }
+	protected abstract String getEditDialogTitle();
+	@Override
+	protected abstract String getEditFormTitle();
 
 	/** Returns the form title based on whether this is a new or edit operation. */
 	@Override
 	protected String getFormTitleString() { return isNew ? getNewFormTitle() : getEditFormTitle(); }
 
 	/** Abstract methods for subclasses to provide specific titles */
+	@Override
 	protected abstract String getNewDialogTitle();
+	@Override
 	protected abstract String getNewFormTitle();
 	/** Sets up the entity relation based on the master entity type. Subclasses can override this for custom behavior. */
 	protected abstract void setupEntityRelation(MasterEntity masterEntity);

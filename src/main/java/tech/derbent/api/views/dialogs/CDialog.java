@@ -73,6 +73,12 @@ public abstract class CDialog extends Dialog {
 		getFooter().add(buttonLayout);
 		setupContent();
 		setupButtons();
+		// Add colorful border and background to make dialog more appealing
+		getElement().getStyle().set("border", "2px solid #1976D2");
+		getElement().getStyle().set("border-radius", "12px");
+		getElement().getStyle().set("box-shadow", "0 4px 20px rgba(25, 118, 210, 0.3)");
+		// Set a subtle gradient background
+		getElement().getStyle().set("background", "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)");
 		setupDone = true;
 	}
 }

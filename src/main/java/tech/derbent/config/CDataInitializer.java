@@ -1197,7 +1197,6 @@ public class CDataInitializer {
 				item.setDescription(typeData[1]);
 				item.setColor(CColorUtils.getRandomColor(true));
 			}
-			LOGGER.info("Successfully created activity types for all projects");
 		} catch (final Exception e) {
 			LOGGER.error("Error creating activity types", e);
 			throw new RuntimeException("Failed to initialize activity types", e);
@@ -1232,7 +1231,6 @@ public class CDataInitializer {
 			createCurrency(project, "USD", "US Dollar", "$ ");
 			createCurrency(project, "EUR", "Euro", "€");
 			createCurrency(project, "TRY", "Turkish Lira", "₺");
-			LOGGER.info("Sample currencies initialized for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample currencies for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample currencies for project: " + project.getName(), e);
@@ -1245,7 +1243,6 @@ public class CDataInitializer {
 			createSampleTechnicalDecision(project);
 			createSampleBudgetDecision(project);
 			createSampleOperationalDecision(project);
-			LOGGER.info("Sample decisions initialized for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample decisions for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample decisions for project: " + project.getName(), e);

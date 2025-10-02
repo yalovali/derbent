@@ -55,22 +55,6 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 		this.relationService = relationService;
 		// Create a binder specific to the relationship entity - child classes can override
 		initializeBinder();
-		// Child classes must call setupDialog() and populateForm() in their constructor
-		enhanceDialogStyling();
-	}
-
-	/** Enhances dialog styling with colors and visual improvements. Makes the dialog more colorful and visually appealing. */
-	private void enhanceDialogStyling() {
-		try {
-			// Add colorful border and background to make dialog more appealing
-			getElement().getStyle().set("border", "2px solid #1976D2");
-			getElement().getStyle().set("border-radius", "12px");
-			getElement().getStyle().set("box-shadow", "0 4px 20px rgba(25, 118, 210, 0.3)");
-			// Set a subtle gradient background
-			getElement().getStyle().set("background", "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)");
-		} catch (Exception e) {
-			LOGGER.error("Failed to apply dialog styling: {}", e.getMessage(), e);
-		}
 	}
 
 	/** Returns the dialog title based on whether this is a new or edit operation. */
@@ -79,11 +63,7 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 
 	protected abstract String getEditDialogTitle();
 	protected abstract String getEditFormTitle();
-
-	/** Returns the list of fields to include in the form. Child classes can override this. */
-	protected List<String> getFormFields() {
-		return List.of("project", "role", "permission");
-	}
+	protected abstract List<String> getFormFields();
 
 	@Override
 	protected Icon getFormIcon() throws Exception { return CColorUtils.getIconForEntity(mainEntity); }

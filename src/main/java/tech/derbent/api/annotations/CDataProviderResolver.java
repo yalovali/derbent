@@ -108,7 +108,7 @@ public final class CDataProviderResolver {
 		}
 		// Try with Pageable parameter first
 		final List<T> result = tryMethodWithPageable(serviceBean, methodName, entityType, param);
-		Check.notNull(result, "Result from method with Pageable cannot be null");
+		Check.notNull(result, "Result returned null for method: " + methodName + " in bean: " + beanClassName);
 		return result;
 	}
 
@@ -333,10 +333,11 @@ public final class CDataProviderResolver {
 	 * @param methodName  the method name to call
 	 * @param entityType  the entity type for caching
 	 * @param param       optional parameter to pass to the method
-	 * @return list of entities or null if method not found/failed */
+	 * @return list of entities or null if method not found/failed
+	 * @throws Exception */
 	@SuppressWarnings ("unchecked")
 	private <T extends CEntityDB<T>> List<T> tryMethodWithPageable(final Object serviceBean, final String methodName, final Class<T> entityType,
-			final String param) {
+			final String param) throws Exception {
 		final String cacheKey = serviceBean.getClass().getName() + ":" + methodName + ":pageable:" + entityType.getSimpleName();
 		// If param is available, try method with param and Pageable first
 		if (param != null && !param.trim().isEmpty()) {
@@ -419,6 +420,7 @@ public final class CDataProviderResolver {
 			}
 		} catch (final Exception e) {
 			LOGGER.debug("Failed to call method '{}' with no parameters: {}", methodName, e.getMessage());
+			throw e;
 		}
 		return null;
 	}

@@ -1,6 +1,5 @@
 package tech.derbent.companies.view;
 
-import java.util.List;
 import java.util.function.Consumer;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
@@ -43,14 +42,6 @@ public abstract class CUserCompanyRelationDialog<MasterEntity extends CEntityDB<
 		setupDialog();
 		populateForm();
 	}
-
-	/** Returns the default form fields based on the direction of the relationship. User-centric dialogs show project selection, Project-centric
-	 * dialogs show user selection. */
-	protected abstract List<String> getDefaultFormFields();
-
-	/** Returns the form fields for this dialog. Default implementation includes the basic fields, subclasses can override. */
-	@Override
-	protected List<String> getFormFields() { return getDefaultFormFields(); }
 
 	/** Abstract methods for subclasses to provide specific titles */
 	/** Sets up the entity relation based on the master entity type. Subclasses can override this for custom behavior. */

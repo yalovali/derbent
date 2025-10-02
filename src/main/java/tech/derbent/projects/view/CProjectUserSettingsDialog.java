@@ -29,10 +29,7 @@ public class CProjectUserSettingsDialog extends CUserProjectRelationDialog<CProj
 	}
 
 	@Override
-	protected List<String> getDefaultFormFields() {
-		// Project-centric: select user, role, permission
-		return List.of("user", "role", "permission");
-	}
+	protected List<String> getFormFields() { return List.of("user", "role", "permission"); }
 
 	@Override
 	protected String getNewDialogTitle() { return "Add User to Project"; }
