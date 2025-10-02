@@ -20,7 +20,10 @@ import tech.derbent.activities.service.CActivityStatusService;
 import tech.derbent.activities.service.CActivityTypeInitializerService;
 import tech.derbent.activities.service.CActivityTypeService;
 import tech.derbent.api.domains.CEntity;
+import tech.derbent.api.roles.domain.CUserCompanyRole;
 import tech.derbent.api.roles.domain.CUserProjectRole;
+import tech.derbent.api.roles.service.CUserCompanyRoleInitializerService;
+import tech.derbent.api.roles.service.CUserCompanyRoleService;
 import tech.derbent.api.roles.service.CUserProjectRoleService;
 import tech.derbent.comments.domain.CCommentPriority;
 import tech.derbent.comments.service.CCommentPriorityService;
@@ -226,9 +229,11 @@ public class CAuxillaries {
 			return CSystemSettings.class;
 		case "CUserProjectRole":
 			return CUserProjectRole.class;
+		case "CUserCompanyRole":
+			return CUserCompanyRole.class;
 		// ... add
 		default:
-			LOGGER.error("Unknown entity type: " + simpleName + " dont forget to update (CAuxillaries:234)");
+			LOGGER.error("Unknown entity type: " + simpleName + " dont forget to update (CAuxillaries.java:234)");
 			throw new IllegalArgumentException("Unknown entity type: " + simpleName);
 		}
 	}
@@ -290,6 +295,8 @@ public class CAuxillaries {
 			return CSystemSettingsService.class;
 		case "CUserProjectRole":
 			return CUserProjectRoleService.class;
+		case "CUserCompanyRole":
+			return CUserCompanyRoleService.class;
 		// ... add more as needed ...
 		default:
 			LOGGER.error("Unknown entity type: " + simpleName + " dont forget to update CAuxillaries");
@@ -352,6 +359,8 @@ public class CAuxillaries {
 			return CSystemSettingsInitializerService.class;
 		} else if (entityClass == CUserProjectRole.class) {
 			return CUserProjectRoleInitializerService.class;
+		} else if (entityClass == CUserCompanyRole.class) {
+			return CUserCompanyRoleInitializerService.class;
 		} else {
 			LOGGER.error("Unknown entity type: " + entityClass.getSimpleName() + " dont forget to update CAuxillaries");
 			throw new IllegalArgumentException("Unknown entity type: " + entityClass.getSimpleName());
@@ -419,6 +428,8 @@ public class CAuxillaries {
 			return CSystemSettingsInitializerService.class;
 		} else if (entityClass == CUserProjectRole.class) {
 			return CUserProjectRoleInitializerService.class;
+		} else if (entityClass == CUserCompanyRole.class) {
+			return CUserCompanyRoleInitializerService.class;
 		} else {
 			LOGGER.error("Unknown entity type: " + entityClass.getSimpleName() + " dont forget to update CAuxillaries");
 			throw new IllegalArgumentException("Unknown entity type: " + entityClass.getSimpleName());
@@ -482,6 +493,8 @@ public class CAuxillaries {
 			return CSystemSettingsService.class;
 		case "CUserProjectRoleService":
 			return CUserProjectRoleService.class;
+		case "CUserCompanyRoleService":
+			return CUserCompanyRoleService.class;
 		default:
 			LOGGER.error("Unknown service type: " + simpleName + " dont forget to update CAuxillaries");
 			throw new IllegalArgumentException("Unknown service type: " + simpleName);

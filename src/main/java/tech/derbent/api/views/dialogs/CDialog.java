@@ -40,7 +40,7 @@ public abstract class CDialog extends Dialog {
 	/** Common initialization for all CDialog instances. */
 	protected final void initializeDialog() {
 		CAuxillaries.setId(this);
-		LOGGER.debug("CDialog initialized with ID: {}", getId().orElse("none"));
+		// LOGGER.debug("CDialog initialized with ID: {}", getId().orElse("none"));
 	}
 
 	protected abstract void setupButtons();
