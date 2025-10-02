@@ -15,10 +15,7 @@ public interface IUserCompanyRoleRepository extends IAbstractNamedRepository<CUs
 	/** Find role by ID with all relationships eagerly loaded.
 	 * @param id the role ID
 	 * @return optional role with relationships */
-	@Query (
-		"SELECT ucr FROM CUserCompanyRole ucr " + "LEFT JOIN FETCH ucr.company " + "LEFT JOIN FETCH ucr.assignedTo "
-				+ "LEFT JOIN FETCH ucr.createdBy " + "WHERE ucr.id = :id"
-	)
+	@Query ("SELECT ucr FROM CUserCompanyRole ucr " + "LEFT JOIN FETCH ucr.company " + "WHERE ucr.id = :id")
 	Optional<CUserCompanyRole> findByIdWithRelationships(@Param ("id") Long id);
 	/** Find roles by company.
 	 * @param company the company
