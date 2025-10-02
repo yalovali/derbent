@@ -130,7 +130,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	@Transactional (readOnly = true)
 	@PreAuthorize ("permitAll()")
 	public List<CUser> getAvailableUsersForCompany(final Long companyId) {
-		Check.notNull(companyId, "Company ID must not be null");
+		Check.notNull(companyId, "ID must not be null");
 		return ((IUserRepository) repository).findUsersNotAssignedToCompany(companyId);
 	}
 

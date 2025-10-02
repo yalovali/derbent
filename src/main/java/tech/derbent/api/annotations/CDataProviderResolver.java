@@ -312,10 +312,11 @@ public final class CDataProviderResolver {
 	private <T extends CEntityDB<T>> List<T> resolveDataFromContentOwner(IContentOwner contentOwner, final Class<T> entityType,
 			final String methodName, final String paramMethodName) throws Exception {
 		Check.notNull(entityType, "Entity type cannot be null");
-		LOGGER.debug("Resolving data from content owner using method '{}' for entity type: {}", methodName, entityType.getSimpleName());
+		LOGGER.debug("Resolving data from content owner {} using method '{}' for entity type: {}", contentOwner, methodName,
+				entityType.getSimpleName());
 		// Handle null content owner gracefully by returning empty list
 		if (contentOwner == null) {
-			LOGGER.debug("Content owner is null, returning empty list for entity type: {}", entityType.getSimpleName());
+			LOGGER.error("Content owner is null, returning empty list for entity type: {}", entityType.getSimpleName());
 			return Collections.emptyList();
 		}
 		try {

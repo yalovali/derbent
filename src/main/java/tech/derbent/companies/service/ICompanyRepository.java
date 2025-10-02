@@ -11,6 +11,9 @@ import tech.derbent.companies.domain.CCompany;
  * standard CRUD operations */
 public interface ICompanyRepository extends IAbstractNamedRepository<CCompany> {
 
+	/** Finds all companies ordered by name using generic pattern */
+	@Query ("SELECT c FROM #{#entityName} c ORDER BY c.name")
+	List<CCompany> findAllOrderByName();
 	/** Finds all enabled companies using generic pattern */
 	@Query ("SELECT c FROM #{#entityName} c WHERE c.enabled = :enabled ORDER BY c.name")
 	List<CCompany> findByEnabled(@Param ("enabled") boolean enabled);
@@ -20,7 +23,11 @@ public interface ICompanyRepository extends IAbstractNamedRepository<CCompany> {
 	/** Finds companies by tax number using generic pattern */
 	@Query ("SELECT c FROM #{#entityName} c WHERE c.taxNumber = :taxNumber")
 	Optional<CCompany> findByTaxNumber(@Param ("taxNumber") String taxNumber);
-	/** Finds all companies ordered by name using generic pattern */
-	@Query ("SELECT c FROM #{#entityName} c ORDER BY c.name")
-	List<CCompany> findAllOrderByName();
+	// @Query ("SELECT u FROM #{#entityName} u WHERE u.id NOT IN (SELECT ucs.user.id FROM CUserCompanySetting ucs WHERE ucs.company.id = :companyId)")
+	// find companies not assigned to user in CUserCompanySetting entity
+	@Query (
+		"SELECT c FROM #{#entityName} c WHERE c.id NOT IN ("
+				+ "SELECT ucs.company.id FROM tech.derbent.users.domain.CUserCompanySetting ucs WHERE ucs.user.id = :userId)"
+	)
+	List<CCompany> findCompaniesNotAssignedToUser(Long id);
 }

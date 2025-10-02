@@ -60,7 +60,7 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 	@JoinColumn (name = "company_id", nullable = false)
 	@AMetaData (
 			displayName = "Company", required = true, readOnly = false, description = "Company in this relationship", hidden = false, order = 2,
-			dataProviderOwner = "content", dataProviderMethod = "getAvailableCompaniesForUser"
+			dataProviderOwner = "content", dataProviderMethod = "getAvailableCompanyForUser"
 	)
 	private CCompany company;
 	@Column (name = "role", nullable = true, length = 100)
@@ -115,6 +115,11 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 
 	public String getUserName() { return user != null ? user.getName() : "Unknown User"; }
 
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+	}
+
 	/** Check if this user has company admin privileges.
 	 * @return true if user is company owner or admin */
 	public boolean isCompanyAdmin() { return isOwner() || isAdmin(); }
@@ -129,10 +134,5 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 	public String toString() {
 		return String.format("UserCompanySettings[user=%s, company=%s, ownership=%s, role=%s, active=%s]", user != null ? user.getLogin() : "null",
 				company != null ? company.getName() : "null", getOwnershipLevel(), role, isActive());
-	}
-
-	@Override
-	public void initializeAllFields() {
-		// TODO Auto-generated method stub
 	}
 }

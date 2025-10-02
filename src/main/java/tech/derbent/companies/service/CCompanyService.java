@@ -98,6 +98,14 @@ public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 		}
 	}
 
+	@Transactional (readOnly = true)
+	@PreAuthorize ("permitAll()")
+	public List<CCompany> getAvailableCompanyForUser(Long id) {
+		// TODO Auto-generated method stub
+		Check.notNull(id, "ID must not be null");
+		return ((ICompanyRepository) repository).findCompaniesNotAssignedToUser(id);
+	}
+
 	@Override
 	protected Class<CCompany> getEntityClass() { return CCompany.class; }
 

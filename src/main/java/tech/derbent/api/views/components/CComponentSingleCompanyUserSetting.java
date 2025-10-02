@@ -1,7 +1,9 @@
 package tech.derbent.api.views.components;
 
+import java.util.List;
 import org.springframework.context.ApplicationContext;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
+import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserCompanySetting;
@@ -19,6 +21,8 @@ public class CComponentSingleCompanyUserSetting extends CComponentUserCompanyBas
 		companyService = applicationContext.getBean(CCompanyService.class);
 		initComponent();
 	}
+
+	public List<CCompany> getAvailableCompanyForUser() { return companyService.getAvailableCompanyForUser(getCurrentEntity().getId()); }
 
 	@Override
 	protected void openAddDialog() throws Exception {
