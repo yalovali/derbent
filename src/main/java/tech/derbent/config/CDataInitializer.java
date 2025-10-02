@@ -26,6 +26,8 @@ import tech.derbent.activities.service.CActivityStatusService;
 import tech.derbent.activities.service.CActivityTypeInitializerService;
 import tech.derbent.activities.service.CActivityTypeService;
 import tech.derbent.api.roles.domain.CUserProjectRole;
+import tech.derbent.api.roles.service.CUserCompanyRoleInitializerService;
+import tech.derbent.api.roles.service.CUserCompanyRoleService;
 import tech.derbent.api.roles.service.CUserProjectRoleInitizerService;
 import tech.derbent.api.roles.service.CUserProjectRoleService;
 import tech.derbent.api.utils.CColorUtils;
@@ -161,6 +163,7 @@ public class CDataInitializer {
 	private final CDetailLinesService screenLinesService;
 	private final CDetailSectionService screenService;
 	private final CUserCompanySettingsService userCompanySettingsService;
+	private final CUserCompanyRoleService userCompanyRoleService;
 	private final CUserProjectRoleService userProjectRoleService;
 	private final CUserProjectSettingsService userProjectSettingsService;
 	private final CUserService userService;
@@ -196,6 +199,7 @@ public class CDataInitializer {
 		ganntViewEntityService = CSpringContext.getBean(CGanntViewEntityService.class);
 		riskStatusService = CSpringContext.getBean(CRiskStatusService.class);
 		userProjectRoleService = CSpringContext.getBean(CUserProjectRoleService.class);
+		userCompanyRoleService = CSpringContext.getBean(CUserCompanyRoleService.class);
 		final DataSource ds = CSpringContext.getBean(DataSource.class);
 		jdbcTemplate = new JdbcTemplate(ds);
 	}
@@ -256,6 +260,7 @@ public class CDataInitializer {
 			ganntViewEntityService.deleteAllInBatch();
 			riskStatusService.deleteAllInBatch();
 			userProjectRoleService.deleteAllInBatch();
+			userCompanyRoleService.deleteAllInBatch();
 			LOGGER.info("Fallback JPA deleteAllInBatch completed.");
 		} catch (final Exception e) {
 			LOGGER.error("Error during sample data cleanup", e);
@@ -1453,6 +1458,53 @@ public class CDataInitializer {
 		}
 	}
 
+	private void initializeSampleCompanyRoles() {
+		try {
+			final List<CCompany> companies = companyService.findAll();
+			final String[][] companyRoles = {
+					{
+							"Company Admin", "Administrative role with full company access", "true", "true", "false"
+					}, {
+							"Company Manager", "Company management role with write access", "false", "true", "false"
+					}, {
+							"Employee", "Standard employee role", "false", "true", "false"
+					}, {
+							"Company Guest", "Guest role with limited access", "false", "false", "true"
+					}
+			};
+			for (final CCompany company : companies) {
+				for (final String[] roleData : companyRoles) {
+					final tech.derbent.api.roles.domain.CUserCompanyRole role =
+							new tech.derbent.api.roles.domain.CUserCompanyRole(roleData[0], company);
+					role.setDescription(roleData[1]);
+					role.setIsAdmin(Boolean.parseBoolean(roleData[2]));
+					role.setIsUser(Boolean.parseBoolean(roleData[3]));
+					role.setIsGuest(Boolean.parseBoolean(roleData[4]));
+					role.setColor(CColorUtils.getRandomColor(true));
+					// Add appropriate page access based on role type
+					if (role.isAdmin()) {
+						role.addWriteAccess("CompanySettings");
+						role.addWriteAccess("UserManagement");
+						role.addWriteAccess("CompanyReports");
+					}
+					if (role.isUser()) {
+						role.addReadAccess("Dashboard");
+						role.addReadAccess("Tasks");
+						role.addWriteAccess("Profile");
+					}
+					if (role.isGuest()) {
+						role.addReadAccess("Dashboard");
+						role.addReadAccess("PublicInfo");
+					}
+					userCompanyRoleService.save(role);
+				}
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error creating company roles: {}", e.getMessage(), e);
+			throw new RuntimeException("Failed to initialize company roles", e);
+		}
+	}
+
 	/** Creates high priority technical risk. */
 	private void initializeSampleRisks(CProject project) {
 		CRisk risk = new CRisk("Legacy System Integration Challenges", project);
@@ -1697,6 +1749,7 @@ public class CDataInitializer {
 				CProjectInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, true);
 				CRiskInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
 				CUserProjectRoleInitizerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+				CUserCompanyRoleInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
 				// Type/Status InitializerServices
 				CActivityStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
 				CActivityTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
@@ -1735,6 +1788,8 @@ public class CDataInitializer {
 				initializeSampleDecisions(project);
 				initializeSampleOrders(project);
 			}
+			// Initialize company roles (non-project specific)
+			initializeSampleCompanyRoles();
 			// createSampleOrders(); // Temporarily disabled due to missing dependencies
 			LOGGER.info("Sample data initialization completed successfully");
 		} catch (final Exception e) {
