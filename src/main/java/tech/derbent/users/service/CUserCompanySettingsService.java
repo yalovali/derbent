@@ -116,4 +116,40 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 		Check.notNull(relationship.getCompany(), "Company cannot be null");
 		Check.notNull(relationship.getOwnershipLevel(), "Ownership level cannot be null");
 	}
+
+	/** Find the single company setting for a user. Returns the first setting if multiple exist. This is used for single company setting scenarios.
+	 * @param userId the user ID
+	 * @return Optional containing the single company setting, or empty if none exists */
+	@Transactional (readOnly = true)
+	public Optional<CUserCompanySetting> findSingleByUserId(final Long userId) {
+		Check.notNull(userId, "User ID cannot be null");
+		List<CUserCompanySetting> settings = repository.findSingleByUserId(userId);
+		return settings.isEmpty() ? Optional.empty() : Optional.of(settings.get(0));
+	}
+
+	/** Set or replace the single company setting for a user. Removes any existing settings first.
+	 * @param user           the user
+	 * @param company        the company
+	 * @param ownershipLevel the ownership level
+	 * @param role           the role
+	 * @return the saved setting */
+	@Transactional
+	public CUserCompanySetting setOrReplaceSingleSetting(final CUser user, final CCompany company, final String ownershipLevel, final String role) {
+		LOGGER.debug("Setting/replacing single company setting for user {} with company {}", user, company);
+		Check.notNull(user, "User must not be null");
+		Check.notNull(company, "Company must not be null");
+		Check.notNull(user.getId(), "User must have a valid ID");
+		Check.notNull(company.getId(), "Company must have a valid ID");
+		// Remove any existing settings for this user
+		List<CUserCompanySetting> existingSettings = repository.findByUserId(user.getId());
+		if (!existingSettings.isEmpty()) {
+			LOGGER.debug("Removing {} existing company settings for user {}", existingSettings.size(), user.getId());
+			for (CUserCompanySetting existing : existingSettings) {
+				repository.delete(existing);
+			}
+			repository.flush(); // Ensure deletion is executed before creating new one
+		}
+		// Create the new setting
+		return addUserToCompany(user, company, ownershipLevel, role);
+	}
 }

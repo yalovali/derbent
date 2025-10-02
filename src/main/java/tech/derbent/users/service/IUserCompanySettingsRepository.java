@@ -51,4 +51,9 @@ public interface IUserCompanySettingsRepository extends IUserRelationshipReposit
 	default Optional<CUserCompanySetting> findByUserIdAndEntityId(Long userId, Long entityId) {
 		return findByUserIdAndCompanyId(userId, entityId);
 	}
+
+	/** Find the single company setting for a user (returns the first one if multiple exist). This is used for single company setting scenarios where
+	 * a user should only have one company setting. */
+	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.user LEFT JOIN FETCH r.company WHERE r.user.id = :userId ORDER BY r.id ASC")
+	List<CUserCompanySetting> findSingleByUserId(@Param ("userId") Long userId);
 }
