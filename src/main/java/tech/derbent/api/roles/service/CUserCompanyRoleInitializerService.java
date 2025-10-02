@@ -17,29 +17,40 @@ import tech.derbent.screens.service.CInitializerServiceBase;
 public class CUserCompanyRoleInitializerService extends CInitializerServiceBase {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserCompanyRoleInitializerService.class);
-	public static final String BASE_PANEL_NAME = "Company Information";
+	public static final String BASE_PANEL_NAME = "Company Role Information";
 	static final Class<?> clazz = CUserCompanyRole.class;
 
 	public static CDetailSection createBasicView(final CProject project) {
 		try {
 			CDetailSection scr = createBaseScreenEntity(project, clazz);
-			// Basic Company Information
+			// Basic Company Role Information
 			scr.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
+			// Role Type Attributes
+			scr.addScreenLine(CDetailLinesService.createSection("Role Type"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isAdmin"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isUser"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isGuest"));
+			// Page Access Permissions
+			scr.addScreenLine(CDetailLinesService.createSection("Page Access Permissions"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "readAccessPages"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "writeAccessPages"));
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating company view: {}", e.getMessage(), e);
-			throw new RuntimeException("Failed to create company view", e);
+			LOGGER.error("Error creating company role view: {}", e.getMessage(), e);
+			throw new RuntimeException("Failed to create company role view", e);
 		}
 	}
 
 	public static CGridEntity createGridEntity(final CProject project, boolean attributeNone) {
 		CGridEntity grid = createBaseGridEntity(project, clazz);
-		// hide grid actions for companies
+		// hide grid actions for company roles
 		grid.setAttributeNone(attributeNone);
-		grid.setSelectedFields("id,name,description");
+		grid.setSelectedFields("id,name,description,isAdmin,isUser,isGuest,color,sortOrder");
 		return grid;
 	}
 
@@ -53,8 +64,8 @@ public class CUserCompanyRoleInitializerService extends CInitializerServiceBase 
 		detailSectionService.save(detailSection);
 		CGridEntity grid = createGridEntity(project, false);
 		gridEntityService.save(grid);
-		CPageEntity page = createPageEntity(clazz, project, grid, detailSection, "Setup.Roles", "User Project Roles Management",
-				"User Projet Roles management with contact details");
+		CPageEntity page = createPageEntity(clazz, project, grid, detailSection, "Setup.Roles", "User Company Roles Management",
+				"User Company Roles management with role types and page access control");
 		page.setAttributeShowInQuickToolbar(showInQuickToolbar);
 		pageEntityService.save(page);
 	}
