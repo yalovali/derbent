@@ -85,4 +85,10 @@ public class CDecisionStatus extends CStatus<CDecisionStatus> {
 	public String toString() {
 		return getName() != null ? getName() : super.toString();
 	}
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

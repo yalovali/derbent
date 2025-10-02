@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.api.domains.CEntityDB;
@@ -23,6 +24,9 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 		extends CComponentRelationBase<MasterClass, RelationalClass> {
 
 	private static final long serialVersionUID = 1L;
+	private CButton addButton;
+	private CButton deleteButton;
+	private CButton editButton;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected CAbstractEntityRelationService<RelationalClass> relationService;
 
@@ -33,7 +37,6 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 		Check.notNull(entityService, "Entity service cannot be null - relational component requires a valid entity service");
 		Check.notNull(relationService, "Relation service cannot be null - relational component requires a valid relation service");
 		this.relationService = relationService;
-		setupGrid();
 		setupButtons();
 		closePanel();
 	}
@@ -50,6 +53,9 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 			}
 			try {
 				final List<RelationalClass> settings = settingsSupplier.get();
+				settings.forEach(setting -> {
+					setting.initializeAllFields();
+				});
 				LOGGER.debug("Retrieved {} settings for entity: {}", settings.size(), entity.getName());
 				return settings;
 			} catch (final Exception e) {
@@ -85,7 +91,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 
 	/** Deletes the selected relationship. */
 	protected void deleteSelected() {
-		final RelationalClass selected = grid.asSingleSelect().getValue();
+		final RelationalClass selected = getSelectedSetting();
 		Check.notNull(selected, "Please select a setting to delete.");
 		try {
 			final String confirmationMessage = getDeleteConfirmationMessage(selected);
@@ -130,7 +136,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 	/** Sets up the action buttons (Add, Edit, Delete) with common behavior. */
 	private void setupButtons() {
 		try {
-			final CButton addButton = CButton.createPrimary("Add", VaadinIcon.PLUS.create(), e -> {
+			addButton = CButton.createPrimary("Add", VaadinIcon.PLUS.create(), e -> {
 				try {
 					openAddDialog();
 				} catch (final Exception ex) {
@@ -138,7 +144,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 					new CWarningDialog("Failed to open add dialog: " + ex.getMessage()).open();
 				}
 			});
-			final CButton editButton = new CButton("Edit", VaadinIcon.EDIT.create(), e -> {
+			editButton = new CButton("Edit", VaadinIcon.EDIT.create(), e -> {
 				try {
 					openEditDialog();
 				} catch (final Exception ex) {
@@ -147,13 +153,8 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 				}
 			});
 			editButton.setEnabled(false);
-			final CButton deleteButton = CButton.createError("Delete", VaadinIcon.TRASH.create(), e -> deleteSelected());
+			deleteButton = CButton.createError("Delete", VaadinIcon.TRASH.create(), e -> deleteSelected());
 			deleteButton.setEnabled(false);
-			grid.addSelectionListener(selection -> {
-				final boolean hasSelection = !selection.getAllSelectedItems().isEmpty();
-				editButton.setEnabled(hasSelection);
-				deleteButton.setEnabled(hasSelection);
-			});
 			final HorizontalLayout buttonLayout = new HorizontalLayout(addButton, editButton, deleteButton);
 			buttonLayout.setSpacing(true);
 			add(buttonLayout);
@@ -165,8 +166,16 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 
 	/** Abstract method for setting up data accessors - subclasses provide specific implementations */
 	protected abstract void setupDataAccessors();
-	/** Sets up the grid - subclasses must implement to add appropriate columns */
-	protected abstract void setupGrid();
+
+	@Override
+	protected void setupGrid(final Grid<RelationalClass> grid) {
+		super.setupGrid(grid);
+		grid.addSelectionListener(selection -> {
+			final boolean hasSelection = !selection.getAllSelectedItems().isEmpty();
+			editButton.setEnabled(hasSelection);
+			deleteButton.setEnabled(hasSelection);
+		});
+	}
 
 	@Override
 	protected void updatePanelEntityFields() {

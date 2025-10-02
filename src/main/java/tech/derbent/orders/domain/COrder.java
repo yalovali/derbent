@@ -291,4 +291,10 @@ public class COrder extends CEntityOfProject<COrder> {
 		this.status = status;
 		updateLastModified();
 	}
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

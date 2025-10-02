@@ -29,4 +29,10 @@ public class COrderType extends CTypeEntity<COrderType> {
 	public COrderType(final String name, final CProject project) {
 		super(COrderType.class, name, project);
 	}
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

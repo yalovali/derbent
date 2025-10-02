@@ -150,4 +150,10 @@ public class CDecision extends CEntityOfProject<CDecision> {
 	public String toString() {
 		return getName() != null ? getName() : super.toString();
 	}
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

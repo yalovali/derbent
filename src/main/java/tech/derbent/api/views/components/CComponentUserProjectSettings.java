@@ -69,7 +69,7 @@ public class CComponentUserProjectSettings extends CComponentUserProjectRelation
 	protected void openEditDialog() throws Exception {
 		try {
 			LOGGER.debug("Opening edit dialog for user project settings");
-			final CUserProjectSettings selected = grid.asSingleSelect().getValue();
+			final CUserProjectSettings selected = getSelectedSetting();
 			Check.notNull(selected, "Please select a project setting to edit.");
 			final CUser user = getCurrentEntity();
 			Check.notNull(user, "Current user is not available.");

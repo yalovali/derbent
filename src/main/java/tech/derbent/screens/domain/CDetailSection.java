@@ -144,4 +144,10 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 	public String toString() {
 		return String.format("CScreen{id=%d, name='%s', entityType='%s', screenTitle='%s'}", getId(), getName(), entityType, screenTitle);
 	}
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

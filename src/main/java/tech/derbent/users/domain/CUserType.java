@@ -27,4 +27,10 @@ public class CUserType extends CTypeEntity<CUserType> {
 	public CUserType(final String name, final CProject project) {
 		super(CUserType.class, name, project);
 	}
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

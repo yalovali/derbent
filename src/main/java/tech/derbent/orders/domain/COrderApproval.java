@@ -111,4 +111,10 @@ public class COrderApproval extends CEntityNamed<COrderApproval> {
 		this.order = order;
 		updateLastModified();
 	}
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

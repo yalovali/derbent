@@ -81,7 +81,7 @@ public class CComponentCompanyUserSettings extends CComponentUserCompanyBase<CCo
 	protected void openEditDialog() throws Exception {
 		try {
 			LOGGER.debug("Opening edit dialog for company user settings");
-			final CUserCompanySetting selected = grid.asSingleSelect().getValue();
+			final CUserCompanySetting selected = getSelectedSetting();
 			Check.notNull(selected, "Please select a user setting to edit.");
 			final CCompany company = getCurrentEntity();
 			Check.notNull(company, "Current company is not available.");

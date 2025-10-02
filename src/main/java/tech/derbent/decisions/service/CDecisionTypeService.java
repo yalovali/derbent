@@ -7,7 +7,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.services.CEntityOfProjectService;
-import tech.derbent.api.utils.Check;
 import tech.derbent.decisions.domain.CDecisionType;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;

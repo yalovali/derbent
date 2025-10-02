@@ -211,4 +211,10 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 		return String.format("CDetailLines{id=%d, lineOrder=%d, fieldCaption='%s', entityProperty='%s'}", getId(), lineOrder, fieldCaption,
 				entityProperty);
 	}
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

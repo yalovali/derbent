@@ -150,4 +150,10 @@ public class CUserProjectRole extends CRole<CUserProjectRole> {
 		return String.format("%s{id=%d, name='%s', isAdmin=%s, isUser=%s, isGuest=%s, readPages=%d, writePages=%d}", getClass().getSimpleName(),
 				getId(), getName(), isAdmin, isUser, isGuest, getReadAccessPages().size(), getWriteAccessPages().size());
 	}
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

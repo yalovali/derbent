@@ -54,4 +54,10 @@ public class CRisk extends CEntityOfProject<CRisk> {
 	public void setRiskSeverity(final ERiskSeverity riskSeverity) { this.riskSeverity = riskSeverity; }
 
 	public void setStatus(final CRiskStatus status) { this.status = status; }
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

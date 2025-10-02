@@ -242,4 +242,10 @@ public class CMeeting extends CEntityOfProject<CMeeting> implements IKanbanEntit
 	}
 
 	public void setStatus(final CMeetingStatus status) { this.status = status; }
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

@@ -4,6 +4,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
+import jakarta.annotation.PostConstruct;
 import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
@@ -38,8 +39,6 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 		Check.notNull(binder, "Binder cannot be null");
 		entityService = (CAbstractService<EntityClass>) applicationContext.getBean(CAuxillaries.getServiceClassForEntity(entityClass));
 		Check.notNull(entityService, "Entity service cannot be null for entity: " + entityClass.getSimpleName());
-		addClassName("c-component-db-entity");
-		setWidthFull();
 	}
 
 	public void clearForm() {
@@ -90,6 +89,14 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 	}
 
 	protected String getPanelTitle() { return entityClass.getSimpleName() + " Settings"; }
+
+	@PostConstruct
+	protected void initComponent() {
+		addClassName("c-component-db-entity");
+		setSpacing(true);
+		setPadding(true);
+		setWidthFull();
+	}
 
 	public void initPanel() throws Exception {
 		if (!isPanelInitialized) {

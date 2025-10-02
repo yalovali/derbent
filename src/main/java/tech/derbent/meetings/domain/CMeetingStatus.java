@@ -69,4 +69,10 @@ public class CMeetingStatus extends CStatus<CMeetingStatus> implements IKanbanSt
 	public String toString() {
 		return getName() != null ? getName() : super.toString();
 	}
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

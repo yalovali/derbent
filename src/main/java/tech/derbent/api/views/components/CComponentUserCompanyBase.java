@@ -1,6 +1,7 @@
 package tech.derbent.api.views.components;
 
 import org.springframework.context.ApplicationContext;
+import com.vaadin.flow.component.grid.Grid;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.services.CAbstractService;
@@ -79,7 +80,8 @@ public abstract class CComponentUserCompanyBase<MasterClass extends CEntityNamed
 	/** Sets up the grid with enhanced visual styling including colors, avatars and consistent headers. Uses entity decorations with colors and icons
 	 * for better visual representation. */
 	@Override
-	protected void setupGrid() {
+	protected void setupGrid(final Grid<CUserCompanySetting> grid) {
+		super.setupGrid(grid);
 		// Add columns with enhanced styling and colors
 		grid.addColumn(CUserCompanySetting::getId).setHeader(createStyledHeader("ID", "#424242")).setAutoWidth(true);
 		grid.addComponentColumn(settings -> {
@@ -101,9 +103,5 @@ public abstract class CComponentUserCompanyBase<MasterClass extends CEntityNamed
 		grid.addColumn(settings -> getDisplayText(settings, "role")).setHeader(createStyledHeader("Role", "#F57F17")).setAutoWidth(true);
 		grid.addColumn(settings -> getDisplayText(settings, "ownership")).setHeader(createStyledHeader("Ownership", "#8E24AA")).setAutoWidth(true);
 		// Apply consistent grid styling
-		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
-		grid.getStyle().set("border-radius", "8px");
-		grid.getStyle().set("border", "1px solid #E0E0E0");
-		add(grid);
 	}
 }

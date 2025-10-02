@@ -32,13 +32,11 @@ public class CComponentSingleCompanyUserSetting extends CComponentDBEntity<CUser
 		super("Company Setting", CUser.class, applicationContext);
 		companyService = applicationContext.getBean(CCompanyService.class);
 		Check.notNull(companyService, "Company service cannot be null");
-		initComponent();
 	}
 
-	private void initComponent() {
-		setSpacing(true);
-		setPadding(true);
-		setWidthFull();
+	@Override
+	protected void initComponent() {
+		super.initComponent();
 		// Create content div that will be updated when data changes
 		contentDiv = new Div();
 		contentDiv.setWidthFull();

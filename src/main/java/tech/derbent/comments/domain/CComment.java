@@ -142,4 +142,10 @@ public class CComment extends CEvent<CComment> {
 	public String toString() {
 		return String.format("CComment{id=%d, activity=%s, author=%s, preview=%s}", getId(), getActivityName(), getAuthorName(), getCommentPreview());
 	}
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

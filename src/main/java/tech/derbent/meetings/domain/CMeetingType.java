@@ -29,4 +29,10 @@ public class CMeetingType extends CTypeEntity<CMeetingType> implements IKanbanTy
 	public CMeetingType(final String name, final CProject project) {
 		super(CMeetingType.class, name, project);
 	}
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

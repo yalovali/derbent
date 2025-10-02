@@ -30,6 +30,12 @@ class CFormBuilderPictureSelectorTest {
 		public byte[] getTestImage() { return testImage; }
 
 		public void setTestImage(byte[] testImage) { this.testImage = testImage; }
+
+		@Override
+		public void initializeAllFields() {
+			// TODO Auto-generated method stub
+			
+		}
 	}
 
 	@Test

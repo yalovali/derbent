@@ -61,4 +61,10 @@ public class CCurrency extends CEntityOfProject<CCurrency> {
 	public String toString() {
 		return currencyCode != null ? currencyCode + " (" + getName() + ")" : super.toString();
 	}
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

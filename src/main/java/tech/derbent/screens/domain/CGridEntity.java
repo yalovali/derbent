@@ -108,4 +108,10 @@ public class CGridEntity extends CEntityOfProject<CGridEntity> {
 	public void setDataServiceBeanName(final String dataServiceBeanName) { this.dataServiceBeanName = dataServiceBeanName; }
 
 	public void setSelectedFields(final String selectedFields) { this.selectedFields = selectedFields; }
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

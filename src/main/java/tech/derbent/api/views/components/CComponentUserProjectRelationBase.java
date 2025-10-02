@@ -1,6 +1,7 @@
 package tech.derbent.api.views.components;
 
 import org.springframework.context.ApplicationContext;
+import com.vaadin.flow.component.grid.Grid;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.services.CAbstractService;
@@ -94,8 +95,9 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 	/** Sets up the grid with enhanced visual styling including colors, avatars and consistent headers. Uses entity decorations with colors and icons
 	 * for better visual representation. */
 	@Override
-	protected void setupGrid() {
+	protected void setupGrid(final Grid<CUserProjectSettings> grid) {
 		try {
+			super.setupGrid(grid);
 			if (isUserMaster()) {
 				// User-centric: User->Project
 				grid.addComponentColumn(settings -> {
@@ -121,12 +123,6 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 					.setSortable(true);
 			grid.addColumn(settings -> getDisplayText(settings, "permission")).setHeader(createStyledHeader("Permissions", "#8E24AA"))
 					.setAutoWidth(true).setSortable(true);
-			// Apply consistent grid styling
-			grid.setWidthFull();
-			grid.setHeight("300px");
-			grid.getStyle().set("border-radius", "8px");
-			grid.getStyle().set("border", "1px solid #E0E0E0");
-			add(grid);
 		} catch (Exception e) {
 			LOGGER.error("Failed to setup grid: {}", e.getMessage(), e);
 			throw new RuntimeException("Failed to setup grid", e);

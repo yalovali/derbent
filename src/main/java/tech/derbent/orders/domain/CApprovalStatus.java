@@ -26,4 +26,10 @@ public class CApprovalStatus extends CStatus<CApprovalStatus> {
 		super(CApprovalStatus.class, name, project);
 		setColor(DEFAULT_COLOR);
 	}
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

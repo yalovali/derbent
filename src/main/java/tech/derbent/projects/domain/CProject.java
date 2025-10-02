@@ -85,4 +85,10 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 		}
 		return false;
 	}
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

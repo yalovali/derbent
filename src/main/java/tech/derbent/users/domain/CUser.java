@@ -35,6 +35,15 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 	@JoinColumn (name = "company_id", nullable = true)
 	@AMetaData (displayName = "Company", required = false, readOnly = false, description = "Company the user belongs to", hidden = false, order = 10)
 	private CCompany company;
+	// load it eagerly because there a few projects that use this field
+	// Single company settings - one user can have access to one company only
+	@OneToOne (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn (name = "single_company_settings_id", nullable = true)
+	@AMetaData (
+			displayName = "Company Setting", required = false, readOnly = false, description = "User's company membership and role", hidden = false,
+			order = 15, createComponentMethod = "createSingleCompanyUserSettingComponent"
+	)
+	private CUserCompanySetting companySetting;
 	@AMetaData (
 			displayName = "Email", required = true, readOnly = false, defaultValue = "", description = "User's email address", hidden = false,
 			order = 4, maxLength = CEntityConstants.MAX_LENGTH_NAME
@@ -82,15 +91,6 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 	)
 	@Column (name = "profile_picture_data", nullable = true, length = 10000, columnDefinition = "bytea")
 	private byte[] profilePictureData;
-	// load it eagerly because there a few projects that use this field
-	// Single company settings - one user can have access to one company only
-	@OneToOne (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn (name = "single_company_settings_id", nullable = true)
-	@AMetaData (
-			displayName = "Company Setting", required = false, readOnly = false, description = "User's company membership and role", hidden = false,
-			order = 15, createComponentMethod = "createSingleCompanyUserSettingComponent"
-	)
-	private CUserCompanySetting companySetting;
 	@OneToMany (mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@AMetaData (
 			displayName = "Project Settings", required = false, readOnly = true, description = "User's project memberships and roles", hidden = false,
@@ -186,6 +186,11 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 	}
 
 	public CUserType getUserType() { return userType; }
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+	}
 
 	public Boolean isEnabled() {
 		return enabled; // Return the enabled status

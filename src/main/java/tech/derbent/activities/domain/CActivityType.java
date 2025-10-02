@@ -27,4 +27,10 @@ public class CActivityType extends CTypeEntity<CActivityType> implements IKanban
 	public CActivityType(final String name, final CProject project) {
 		super(CActivityType.class, name, project);
 	}
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

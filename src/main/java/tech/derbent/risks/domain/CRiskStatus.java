@@ -65,4 +65,10 @@ public class CRiskStatus extends CStatus<CRiskStatus> {
 	public String toString() {
 		return getName() != null ? getName() : super.toString();
 	}
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

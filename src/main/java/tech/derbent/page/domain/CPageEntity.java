@@ -186,4 +186,10 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 	public void setPageTitle(String pageTitle) { this.pageTitle = pageTitle; }
 
 	public void setRequiresAuthentication(boolean requiresAuthentication) { this.requiresAuthentication = requiresAuthentication; }
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

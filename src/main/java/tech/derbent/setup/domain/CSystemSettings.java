@@ -446,4 +446,10 @@ public class CSystemSettings extends CEntityDB<CSystemSettings> {
 				+ maxFileUploadSizeMb + ", databaseName='" + databaseName + '\'' + ", enableDatabaseLogging=" + enableDatabaseLogging
 				+ ", maintenanceModeEnabled=" + maintenanceModeEnabled + '}';
 	}
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

@@ -62,6 +62,20 @@ public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 
 	public CUser getUser() { return user; }
 
+	@Override
+	public void initializeAllFields() {
+		// initialize layzily loaded fields
+		if (user != null) {
+			user.getLogin();
+		}
+		if (project != null) {
+			project.getName();
+		}
+		if (role != null) {
+			role.getName();
+		}
+	}
+
 	public void setPermission(final String permission) { this.permission = permission; }
 
 	public void setProject(final CProject project) { this.project = project; }

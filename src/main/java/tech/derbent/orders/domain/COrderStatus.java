@@ -27,4 +27,10 @@ public class COrderStatus extends CStatus<COrderStatus> {
 		super();
 		this.setColor(DEFAULT_COLOR);
 	}
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

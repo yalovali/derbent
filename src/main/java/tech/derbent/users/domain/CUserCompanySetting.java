@@ -130,4 +130,10 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 		return String.format("UserCompanySettings[user=%s, company=%s, ownership=%s, role=%s, active=%s]", user != null ? user.getLogin() : "null",
 				company != null ? company.getName() : "null", getOwnershipLevel(), role, isActive());
 	}
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

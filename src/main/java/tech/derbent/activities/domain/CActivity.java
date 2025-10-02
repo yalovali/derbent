@@ -436,4 +436,10 @@ public class CActivity extends CProjectItem<CActivity> implements IKanbanEntity 
 			setStatus((CActivityStatus) status);
 		}
 	}
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

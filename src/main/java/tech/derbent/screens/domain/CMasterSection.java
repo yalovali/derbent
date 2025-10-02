@@ -47,4 +47,10 @@ public class CMasterSection extends CEntityOfProject<CMasterSection> {
 	public void setSectionDBName(final String sectionDBName) { this.sectionDBName = sectionDBName; }
 
 	public void setSectionType(final String sectionType) { this.sectionType = sectionType; }
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

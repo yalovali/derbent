@@ -888,7 +888,6 @@ public class CDataInitializer {
 		order.setDeliveryDate(LocalDate.now().plusDays(7));
 		order.setProviderCompanyName("poiopiopoipiopi");
 		orderService.save(order);
-		LOGGER.info("Sample software order created successfully for project: {}", project.getName());
 	}
 
 	/** Creates sample standup meeting. */
@@ -1222,7 +1221,6 @@ public class CDataInitializer {
 			createCommentPriority(project, "Low", "Low priority comment", CColorUtils.getRandomColor(true), 1, false, 1);
 			createCommentPriority(project, "Medium", "Medium priority comment", CColorUtils.getRandomColor(true), 2, true, 2);
 			createCommentPriority(project, "High", "High priority comment", CColorUtils.getRandomColor(true), 3, false, 3);
-			LOGGER.info("Sample comment priorities initialized for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample comment priorities for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample comment priorities for project: " + project.getName(), e);
@@ -1492,7 +1490,6 @@ public class CDataInitializer {
 			createRiskStatus("Assessed", project, "Risk has been assessed", CColorUtils.getRandomColor(true), false, 2);
 			createRiskStatus("Mitigated", project, "Risk mitigation actions taken", CColorUtils.getRandomColor(true), false, 3);
 			createRiskStatus("Closed", project, "Risk is closed", CColorUtils.getRandomColor(true), true, 4);
-			LOGGER.info("Risk statuses initialized successfully for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing risk statuses for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize risk statuses for project: " + project.getName(), e);
@@ -1503,7 +1500,6 @@ public class CDataInitializer {
 	 * relationships following the established pattern. */
 	private void initializeSampleUserCompanySettings() {
 		try {
-			LOGGER.info("Initializing sample user company settings");
 			final List<CCompany> companies = companyService.list(Pageable.unpaged()).getContent();
 			// Get sample users by login for consistent assignment
 			final CUser admin = userService.findByLogin(USER_ADMIN);
@@ -1546,7 +1542,6 @@ public class CDataInitializer {
 					}
 				}
 			}
-			LOGGER.info("Successfully initialized sample user company settings for {} companies", companies.size());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample user company settings: {}", e.getMessage(), e);
 			throw new RuntimeException("Failed to initialize sample user company settings", e);

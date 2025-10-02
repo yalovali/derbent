@@ -68,4 +68,10 @@ public class CActivityStatus extends CStatus<CActivityStatus> implements IKanban
 	public String toString() {
 		return getName() != null ? getName() : super.toString();
 	}
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

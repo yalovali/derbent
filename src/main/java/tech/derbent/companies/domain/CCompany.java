@@ -256,4 +256,10 @@ public class CCompany extends CEntityNamed<CCompany> {
 				+ workingHoursStart + '\'' + ", workingHoursEnd='" + workingHoursEnd + '\'' + ", companyTimezone='" + companyTimezone + '\''
 				+ ", defaultLanguage='" + defaultLanguage + '\'' + ", enableNotifications=" + enableNotifications + '}';
 	}
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

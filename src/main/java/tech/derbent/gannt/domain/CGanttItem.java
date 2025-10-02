@@ -235,4 +235,10 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	public boolean hasParent() {
 		return (parentId != null) && (parentType != null);
 	}
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

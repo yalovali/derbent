@@ -28,6 +28,12 @@ class CDataProviderResolverTest {
 		public TestEntity() {
 			super();
 		}
+
+		@Override
+		public void initializeAllFields() {
+			// TODO Auto-generated method stub
+			
+		}
 	}
 
 	// Mock service for testing parameter methods

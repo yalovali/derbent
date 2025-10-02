@@ -47,4 +47,10 @@ public class CDecisionType extends CTypeEntity<CDecisionType> {
 	}
 
 	public void setRequiresApproval(final Boolean requiresApproval) { this.requiresApproval = requiresApproval; }
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

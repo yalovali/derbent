@@ -28,6 +28,12 @@ class CGridEditableImageColumnTest {
 		public String getName() { return name; }
 
 		public void setName(String name) { this.name = name; }
+
+		@Override
+		public void initializeAllFields() {
+			// TODO Auto-generated method stub
+			
+		}
 	}
 
 	private CGrid<TestUser> grid;

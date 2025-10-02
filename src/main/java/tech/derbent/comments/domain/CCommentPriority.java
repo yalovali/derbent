@@ -67,4 +67,10 @@ public class CCommentPriority extends CTypeEntity<CCommentPriority> {
 				getId(), getName(), getColor(), getSortOrder(), getIsActive(), getProject() != null ? getProject().getName() : "null", priorityLevel,
 				isDefault);
 	}
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }

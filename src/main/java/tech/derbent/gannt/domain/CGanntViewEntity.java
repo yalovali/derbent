@@ -23,4 +23,10 @@ public class CGanntViewEntity extends CEntityOfProject<CGanntViewEntity> {
 	public CGanntViewEntity(final String name, final CProject project) {
 		super(CGanntViewEntity.class, name, project);
 	}
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+		
+	}
 }
