@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.component.grid.Grid;
-import jakarta.annotation.PostConstruct;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.utils.Check;
 
@@ -32,17 +31,19 @@ public abstract class CComponentRelationBase<MasterClass extends CEntityDB<Maste
 	protected RelationalClass getSelectedSetting() { return grid.asSingleSelect().getValue(); }
 
 	@Override
+	protected void initPanel() throws Exception {
+		// super is abstract, stop here
+		// super.initPanel();
+		setupGrid(grid);
+	}
+
+	@Override
 	public void populateForm() {
 		super.populateForm();
 		LOGGER.debug("Refreshing grid data");
 		if (getSettings != null) {
 			grid.setItems(getSettings.get());
 		}
-	}
-
-	@PostConstruct
-	public void postConstruct() {
-		setupGrid(grid);
 	}
 
 	/** Sets the settings accessors (getters, setters, save callback) */

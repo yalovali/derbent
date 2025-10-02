@@ -24,22 +24,22 @@ public class CUserProjectSettingsDialog extends CUserProjectRelationDialog<CUser
 	}
 
 	@Override
-	protected void setupEntityRelation(CUser user) {
-		getEntity().setUser(user);
-	}
-
-	@Override
-	protected List<String> getDefaultFormFields() { return List.of("project", "role", "permission"); }
-
-	@Override
-	protected String getNewDialogTitle() { return "Add Project Assignment"; }
+	protected List<String> getDefaultFormFields() { return List.of("company", "role", "permission"); }
 
 	@Override
 	protected String getEditDialogTitle() { return "Edit Project Assignment"; }
 
 	@Override
+	protected String getEditFormTitle() { return "Edit Project Assignment"; }
+
+	@Override
+	protected String getNewDialogTitle() { return "Add Project Assignment"; }
+
+	@Override
 	protected String getNewFormTitle() { return "Assign User to Project"; }
 
 	@Override
-	protected String getEditFormTitle() { return "Edit Project Assignment"; }
+	protected void setupEntityRelation(CUser user) {
+		getEntity().setUser(user);
+	}
 }

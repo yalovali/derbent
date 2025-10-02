@@ -176,10 +176,4 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 			deleteButton.setEnabled(hasSelection);
 		});
 	}
-
-	@Override
-	protected void updatePanelEntityFields() {
-		// No specific entity fields to update for relationship components
-		setEntityFields(List.of());
-	}
 }

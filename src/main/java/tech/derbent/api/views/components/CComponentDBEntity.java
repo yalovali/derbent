@@ -4,8 +4,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
-import jakarta.annotation.PostConstruct;
-import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
@@ -54,16 +52,15 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 	public void closePanel() {
 		setVisible(false);
 	}
-
 	// Override if you need to customize the panel content creation
-	protected void createPanelContent() throws Exception {
-		try {
-			add(CFormBuilder.buildForm(entityClass, getBinder(), getEntityFields()));
-		} catch (Exception e) {
-			LOGGER.error("Failed to create panel content for entity {}: {}", entityClass.getSimpleName(), e.getMessage(), e);
-			throw new RuntimeException("Failed to create panel content", e);
-		}
-	}
+	// protected void createPanelContent() throws Exception {
+	// try {
+	// add(CFormBuilder.buildForm(entityClass, getBinder(), getEntityFields()), this);
+	// } catch (Exception e) {
+	// LOGGER.error("Failed to create panel content for entity {}: {}", entityClass.getSimpleName(), e.getMessage(), e);
+	// throw new RuntimeException("Failed to create panel content", e);
+	// }
+	// }
 
 	public CEnhancedBinder<EntityClass> getBinder() { return binder; }
 
@@ -90,26 +87,17 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 
 	protected String getPanelTitle() { return entityClass.getSimpleName() + " Settings"; }
 
-	@PostConstruct
-	protected void initComponent() {
+	protected final void initComponent() throws Exception {
+		Check.isTrue(!isPanelInitialized, "Panel is already initialized");
 		addClassName("c-component-db-entity");
 		setSpacing(true);
 		setPadding(true);
 		setWidthFull();
+		initPanel();
+		isPanelInitialized = true;
 	}
 
-	public void initPanel() throws Exception {
-		if (!isPanelInitialized) {
-			try {
-				LOGGER.debug("Initializing component panel for entity class: {}", entityClass.getSimpleName());
-				createPanelContent();
-				isPanelInitialized = true;
-			} catch (Exception e) {
-				LOGGER.error("Failed to initialize panel for entity {}: {}", entityClass.getSimpleName(), e.getMessage(), e);
-				throw new RuntimeException("Failed to initialize panel", e);
-			}
-		}
-	}
+	protected abstract void initPanel() throws Exception;
 
 	public boolean isPanelVisible() { return true; }
 
@@ -123,6 +111,7 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 
 	@Override
 	public void populateForm() {
+		Check.isTrue(isPanelInitialized, "Panel must be initialized before populating form");
 		// Use current entity from content owner if available, otherwise use our own
 		EntityClass entityToUse = getCurrentEntity();
 		if (entityToUse == null && contentOwner != null) {

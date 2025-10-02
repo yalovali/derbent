@@ -33,7 +33,7 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 
 	public Component createProjectUserSettingsComponent() {
 		try {
-			CComponentProjectUserSettings component = new CComponentProjectUserSettings(null, this, applicationContext);
+			CComponentProjectUserSettings component = new CComponentProjectUserSettings(this, applicationContext);
 			return component;
 		} catch (Exception e) {
 			LOGGER.error("Failed to create project user settings component: {}", e.getMessage(), e);

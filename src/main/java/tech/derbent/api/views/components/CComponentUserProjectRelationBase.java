@@ -83,7 +83,20 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 
 	/** Abstract methods that subclasses must implement */
 	@Override
-	protected abstract void onSettingsSaved(final CUserProjectSettings settings);
+	protected void onSettingsSaved(final CUserProjectSettings settings) {
+		Check.notNull(settings, "Settings cannot be null when saving");
+		LOGGER.debug("Saving user project settings: {}", settings);
+		try {
+			final CUserProjectSettings savedSettings = settings.getId() == null ? userProjectSettingsService.addUserToProject(settings.getUser(),
+					settings.getProject(), settings.getRole(), settings.getPermission()) : userProjectSettingsService.save(settings);
+			LOGGER.info("Successfully saved user project settings: {}", savedSettings);
+			populateForm();
+		} catch (final Exception e) {
+			LOGGER.error("Error saving user project settings: {}", e.getMessage(), e);
+			throw new RuntimeException("Failed to save user project settings: " + e.getMessage(), e);
+		}
+	}
+
 	@Override
 	protected abstract void openAddDialog() throws Exception;
 	@Override

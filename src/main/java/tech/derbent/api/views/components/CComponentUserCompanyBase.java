@@ -62,9 +62,21 @@ public abstract class CComponentUserCompanyBase<MasterClass extends CEntityNamed
 		}
 	}
 
-	/** Abstract method to handle settings save events */
 	@Override
-	protected abstract void onSettingsSaved(final CUserCompanySetting settings);
+	protected void onSettingsSaved(final CUserCompanySetting settings) {
+		Check.notNull(settings, "Settings cannot be null when saving");
+		LOGGER.debug("Saving user company settings: {}", settings);
+		try {
+			final CUserCompanySetting savedSettings = settings.getId() == null ? userCompanySettingsService.addUserToCompany(settings.getUser(),
+					settings.getCompany(), settings.getOwnershipLevel(), settings.getRole()) : userCompanySettingsService.save(settings);
+			LOGGER.info("Successfully saved user company settings: {}", savedSettings);
+			populateForm();
+		} catch (final Exception e) {
+			LOGGER.error("Error saving user company settings: {}", e.getMessage(), e);
+			throw new RuntimeException("Failed to save user company settings: " + e.getMessage(), e);
+		}
+	}
+
 	/** Abstract method to open the add dialog
 	 * @throws Exception */
 	@Override
