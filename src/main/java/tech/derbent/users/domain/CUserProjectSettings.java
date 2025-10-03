@@ -9,6 +9,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.annotations.CSpringAuxillaries;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.roles.domain.CUserProjectRole;
 import tech.derbent.projects.domain.CProject;
@@ -86,7 +87,8 @@ public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 
 	@Override
 	public String toString() {
-		return String.format("UserProjectSettings[user id=%s, project id=%s, role=%s, permission=%s]", user != null ? user.getId() : "null",
-				project != null ? project.getId() : "null", role, permission);
+		return String.format("UserProjectSettings[user id=%s, project id=%s, role=%s, permission=%s]",
+				user != null ? CSpringAuxillaries.safeGetId(user) : null, project != null ? CSpringAuxillaries.safeGetId(project) : null,
+				CSpringAuxillaries.safeToString(role), permission);
 	}
 }
