@@ -15,8 +15,9 @@ import tech.derbent.users.domain.CUserCompanySetting;
 @Repository
 public interface IUserCompanySettingsRepository extends IUserRelationshipRepository<CUserCompanySetting> {
 
-	/** Find all user company settings for a specific user with eager loading of company and user. Overrides the base method to include company
-	 * fetching. */
+	@Override
+	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.user LEFT JOIN FETCH r.company LEFT JOIN FETCH r.role WHERE r.id = :id")
+	Optional<CUserCompanySetting> findById(Long id);
 	@Override
 	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.user LEFT JOIN FETCH r.company LEFT JOIN FETCH r.role WHERE r.user.id = :userId")
 	List<CUserCompanySetting> findByUserId(@Param ("userId") Long userId);

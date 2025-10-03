@@ -147,7 +147,8 @@ public class CComponentSingleCompanyUserSetting extends CComponentDBEntity<CUser
 			return;
 		}
 		changeButton.setEnabled(true);
-		CUserCompanySetting setting = user.getCompanySettings();
+		CUserCompanySetting setting = userCompanySettingsService.getById(user.getCompanySettings().getId())
+				.orElseThrow(() -> new IllegalStateException("Failed to load user company setting for user: " + user.getName()));
 		if (setting == null) {
 			displayContainer.add(new Span("No company assigned. Click 'Change' to assign a company."));
 			return;
