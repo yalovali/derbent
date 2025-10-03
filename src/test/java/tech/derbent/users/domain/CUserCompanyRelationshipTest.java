@@ -20,7 +20,7 @@ public class CUserCompanyRelationshipTest {
 		new CCompany("Test Company");
 		settings = new CUserCompanySetting();
 		settings.setOwnershipLevel("MEMBER");
-		settings.setRole("DEVELOPER");
+		settings.setRole(null); // Role is now an entity, not a string
 		settings.setPrivileges("READ,WRITE");
 	}
 

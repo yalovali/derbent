@@ -1106,12 +1106,26 @@ public class CDataInitializer {
 		commentService.createComment("Working on accessibility testing and user experience validation", uiTesting, userService.getRandom());
 	}
 
-	private void createUserCompanySetting(final CUser user, final CCompany company, final String role, final String ownershipLevel) {
+	private void createUserCompanySetting(final CUser user, final CCompany company, final String roleName, final String ownershipLevel) {
 		try {
 			// Check if relationship already exists
 			if (!userCompanySettingsService.relationshipExists(user.getId(), company.getId())) {
-				userCompanySettingsService.addUserToCompany(user, company, ownershipLevel, role);
-				LOGGER.debug("Created user company setting: {} -> {} ({})", user.getLogin(), company.getName(), role);
+				// Find a non-guest role for the company - prefer a role with matching name or use first available
+				List<tech.derbent.api.roles.domain.CUserCompanyRole> companyRoles = userCompanyRoleService.findAll().stream()
+						.filter(role -> role.getCompany() != null && role.getCompany().getId().equals(company.getId()))
+						.filter(role -> !role.isGuest()) // Exclude guest roles
+						.collect(java.util.stream.Collectors.toList());
+				tech.derbent.api.roles.domain.CUserCompanyRole roleToAssign = null;
+				if (!companyRoles.isEmpty()) {
+					// Try to find a role with matching name (case insensitive)
+					roleToAssign = companyRoles.stream().filter(role -> role.getName().toLowerCase().contains(roleName.toLowerCase())
+							|| roleName.toLowerCase().contains(role.getName().toLowerCase())).findFirst().orElse(companyRoles.get(0)); // Use first
+																																		// available
+																																		// if no match
+				}
+				userCompanySettingsService.addUserToCompany(user, company, ownershipLevel, roleToAssign);
+				LOGGER.debug("Created user company setting: {} -> {} (role: {})", user.getLogin(), company.getName(),
+						roleToAssign != null ? roleToAssign.getName() : "none");
 			} else {
 				LOGGER.debug("User company relationship already exists: {} -> {}", user.getLogin(), company.getName());
 			}

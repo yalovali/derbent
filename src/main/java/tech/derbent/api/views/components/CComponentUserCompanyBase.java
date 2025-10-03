@@ -51,7 +51,7 @@ public abstract class CComponentUserCompanyBase<MasterClass extends CEntityNamed
 				Check.notNull(settings.getUser(), "User cannot be null");
 				return CColorUtils.getDisplayTextFromEntity(settings.getUser());
 			case "role":
-				return settings.getRole() != null ? settings.getRole() : "";
+				return settings.getRole() != null ? CColorUtils.getDisplayTextFromEntity(settings.getRole()) : "";
 			case "ownership":
 				return settings.getOwnershipLevel() != null ? settings.getOwnershipLevel() : "";
 			default:
@@ -121,7 +121,14 @@ public abstract class CComponentUserCompanyBase<MasterClass extends CEntityNamed
 				}
 			}).setHeader(createStyledHeader("User", "#1565C0")).setAutoWidth(true);
 		}
-		grid.addColumn(settings -> getDisplayText(settings, "role")).setHeader(createStyledHeader("Role", "#F57F17")).setAutoWidth(true);
+		grid.addComponentColumn(settings -> {
+			try {
+				return settings.getRole() != null ? CColorUtils.getEntityWithIcon(settings.getRole()) : new com.vaadin.flow.component.html.Span("");
+			} catch (Exception e) {
+				LOGGER.error("Failed to create role component: {}", e.getMessage(), e);
+				return new com.vaadin.flow.component.html.Span(getDisplayText(settings, "role"));
+			}
+		}).setHeader(createStyledHeader("Role", "#F57F17")).setAutoWidth(true);
 		grid.addColumn(settings -> getDisplayText(settings, "ownership")).setHeader(createStyledHeader("Ownership", "#8E24AA")).setAutoWidth(true);
 		// Apply consistent grid styling
 	}

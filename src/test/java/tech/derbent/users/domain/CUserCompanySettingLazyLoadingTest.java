@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.roles.domain.CUserCompanyRole;
+import tech.derbent.api.roles.service.CUserCompanyRoleService;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.users.service.CUserCompanySettingsService;
@@ -31,6 +33,9 @@ public class CUserCompanySettingLazyLoadingTest {
 	private CCompanyService companyService;
 	private CCompany testCompany;
 	private CUser testUser;
+	private CUserCompanyRole testRole;
+	@Autowired
+	private CUserCompanyRoleService userCompanyRoleService;
 	@Autowired
 	private CUserCompanySettingsService userCompanySettingsService;
 	@Autowired
@@ -50,8 +55,13 @@ public class CUserCompanySettingLazyLoadingTest {
 		testUser.setLogin("testuser_lazy_" + System.currentTimeMillis());
 		testUser.setEmail("testuser_lazy_" + System.currentTimeMillis() + "@example.com");
 		testUser = userService.save(testUser);
+		// Create test role
+		testRole = new CUserCompanyRole("Developer", testCompany);
+		testRole.setIsAdmin(false);
+		testRole.setIsUser(true);
+		testRole = userCompanyRoleService.save(testRole);
 		// Create and save user company setting
-		CUserCompanySetting setting = userCompanySettingsService.addUserToCompany(testUser, testCompany, "MEMBER", "Developer");
+		CUserCompanySetting setting = userCompanySettingsService.addUserToCompany(testUser, testCompany, "MEMBER", testRole);
 		testUser.setCompanySettings(setting);
 		testUser = userService.save(testUser);
 	}

@@ -73,6 +73,10 @@ public abstract class CNonProjectType<EntityClass> extends CEntityNamed<EntityCl
 	 * @return the hex color code */
 	public String getColor() { return color; }
 
+	/** Gets the company this type belongs to.
+	 * @return the company */
+	public CCompany getCompany() { return company; }
+
 	/** Gets the sort order for this type.
 	 * @return the sort order */
 	public Integer getSortOrder() { return sortOrder; }
@@ -92,6 +96,10 @@ public abstract class CNonProjectType<EntityClass> extends CEntityNamed<EntityCl
 	/** Sets the color code for this type.
 	 * @param color the hex color code to set */
 	public void setColor(final String color) { this.color = color; }
+
+	/** Sets the company this type belongs to.
+	 * @param company the company to set */
+	public void setCompany(final CCompany company) { this.company = company; }
 
 	/** Sets the sort order for this type.
 	 * @param sortOrder the sort order to set */

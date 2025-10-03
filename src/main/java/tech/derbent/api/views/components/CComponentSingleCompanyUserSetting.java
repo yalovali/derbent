@@ -2,10 +2,13 @@ package tech.derbent.api.views.components;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import tech.derbent.api.roles.domain.CUserCompanyRole;
+import tech.derbent.api.roles.service.CUserCompanyRoleService;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
@@ -24,17 +27,38 @@ public class CComponentSingleCompanyUserSetting extends CComponentDBEntity<CUser
 	private Button changeButton;
 	private final CCompanyService companyService;
 	private CHorizontalLayout displayContainer;
+	private final CUserCompanyRoleService userCompanyRoleService;
 	private final CUserCompanySettingsService userCompanySettingsService;
 
 	public CComponentSingleCompanyUserSetting(CUserService entityService, ApplicationContext applicationContext) throws Exception {
 		super("Company Setting", CUser.class, applicationContext);
 		companyService = applicationContext.getBean(CCompanyService.class);
 		userCompanySettingsService = applicationContext.getBean(CUserCompanySettingsService.class);
+		userCompanyRoleService = applicationContext.getBean(CUserCompanyRoleService.class);
 		initComponent();
 	}
 
 	public List<CCompany> getAvailableCompanyForUser() {
 		return companyService.getAvailableCompanyForUser(getCurrentEntity() != null ? getCurrentEntity().getId() : null);
+	}
+
+	/** Get available company roles for the user's company. Only returns member roles (non-guest roles).
+	 * @return list of available company roles */
+	public List<CUserCompanyRole> getAvailableCompanyRolesForUser() {
+		CUser user = getCurrentEntity();
+		if (user == null || user.getCompanySettings() == null) {
+			return List.of();
+		}
+		CCompany company = user.getCompanySettings().getCompany();
+		if (company == null) {
+			return List.of();
+		}
+		// Get all roles for the company and filter out guest roles
+		return userCompanyRoleService.findAll().stream()
+				.filter(role -> role.getCompany() != null && role.getCompany().getId().equals(company.getId())).filter(role -> !role.isGuest()) // Exclude
+																																				// guest
+																																				// roles
+				.collect(Collectors.toList());
 	}
 
 	@Override
@@ -141,13 +165,13 @@ public class CComponentSingleCompanyUserSetting extends CComponentDBEntity<CUser
 			}
 			// Add separator
 			layout.add(new Span(" | "));
-			// Display role with label
-			String role = setting.getRole();
-			if (role != null && !role.trim().isEmpty()) {
+			// Display role with icon and color if available
+			CUserCompanyRole role = setting.getRole();
+			if (role != null) {
 				Span roleLabel = new Span("Role: ");
 				roleLabel.getStyle().set("font-weight", "bold");
-				Span roleValue = new Span(role);
-				layout.add(roleLabel, roleValue);
+				HorizontalLayout roleDisplay = CColorUtils.getEntityWithIcon(role);
+				layout.add(roleLabel, roleDisplay);
 			} else {
 				layout.add(new Span("Role: (not set)"));
 			}

@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.roles.domain.CUserCompanyRole;
 import tech.derbent.api.services.CAbstractEntityRelationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.companies.domain.CCompany;
@@ -29,7 +30,7 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 
 	/** Add user to company with full configuration */
 	@Transactional
-	public CUserCompanySetting addUserToCompany(final CUser user, final CCompany company, final String ownershipLevel, final String role) {
+	public CUserCompanySetting addUserToCompany(final CUser user, final CCompany company, final String ownershipLevel, final CUserCompanyRole role) {
 		LOGGER.debug("Adding user {} to company {} with ownership level {} and role {}", user, company, ownershipLevel, role);
 		Check.notNull(user, "User must not be null");
 		Check.notNull(company, "Company must not be null");
@@ -137,7 +138,8 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 	 * @param role           the role
 	 * @return the saved setting */
 	@Transactional
-	public CUserCompanySetting setOrReplaceSingleSetting(final CUser user, final CCompany company, final String ownershipLevel, final String role) {
+	public CUserCompanySetting setOrReplaceSingleSetting(final CUser user, final CCompany company, final String ownershipLevel,
+			final CUserCompanyRole role) {
 		Check.notNull(user, "User must not be null");
 		Check.notNull(company, "Company must not be null");
 		Check.notNull(user.getId(), "User must have a valid ID");
