@@ -19,11 +19,9 @@ import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.interfaces.IFieldInfoGenerator;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.Check;
-import tech.derbent.companies.domain.CCompany;
 
 @Entity
 @Table (name = "cuser") // Using quoted identifier to ensure exact case matching in
-// PostgreSQL
 @AttributeOverride (name = "id", column = @Column (name = "user_id"))
 public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInfoGenerator {
 
@@ -31,12 +29,6 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 	public static final String DEFAULT_ICON = "vaadin:book";
 	public static final int MAX_LENGTH_NAME = 255;
 	public static final String VIEW_NAME = "Users View";
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "company_id", nullable = true)
-	@AMetaData (displayName = "Company", required = false, readOnly = false, description = "Company the user belongs to", hidden = false, order = 10)
-	private CCompany company;
-	// load it eagerly because there a few projects that use this field
-	// Single company settings - one user can have access to one company only
 	@OneToOne (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn (name = "single_company_settings_id", nullable = true)
 	@AMetaData (
@@ -153,8 +145,6 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 		return CUser.class;
 	}
 
-	public CCompany getCompany() { return company; }
-
 	public CUserCompanySetting getCompanySettings() { return companySetting; }
 
 	public String getEmail() { return email; }
@@ -238,8 +228,6 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 			projectSettings.setUser(null);
 		}
 	}
-
-	public void setCompany(final CCompany company) { this.company = company; }
 
 	public void setCompanySettings(final CUserCompanySetting companySetting) {
 		this.companySetting = companySetting;

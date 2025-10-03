@@ -45,10 +45,6 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 		validateRelationship(settings);
 		// Save the entity first
 		final CUserCompanySetting savedSettings = save(settings);
-		// Maintain bidirectional relationships
-		if (company.getUsers() != null && !company.getUsers().contains(user)) {
-			company.getUsers().add(user);
-		}
 		return savedSettings;
 	}
 
@@ -56,6 +52,24 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 	@Override
 	protected CUserCompanySetting createRelationshipInstance(final Long userId, final Long companyId) {
 		throw new UnsupportedOperationException("Use addUserToCompany(CUser, CCompany, String, String) method instead");
+	}
+
+	/** Delete all company settings for a company. Used for cleanup operations.
+	 * @param companyId the company ID */
+	@Transactional
+	public void deleteAllByCompanyId(final Long companyId) {
+		Check.notNull(companyId, "Company ID cannot be null");
+		LOGGER.debug("Deleting all company settings for company {}", companyId);
+		repository.deleteByCompanyId(companyId);
+	}
+
+	/** Delete all company settings for a user. Used for cleanup operations.
+	 * @param userId the user ID */
+	@Transactional
+	public void deleteAllByUserId(final Long userId) {
+		Check.notNull(userId, "User ID cannot be null");
+		LOGGER.debug("Deleting all company settings for user {}", userId);
+		repository.deleteByUserId(userId);
 	}
 
 	public void deleteByUserCompany(CUser user, CCompany company) {
@@ -99,24 +113,6 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 		return repository.findByUserIdAndCompanyId(userId, companyId);
 	}
 
-	@Override
-	protected Class<CUserCompanySetting> getEntityClass() { return CUserCompanySetting.class; }
-
-	@Override
-	@Transactional (readOnly = true)
-	public boolean relationshipExists(final Long userId, final Long companyId) {
-		return repository.existsByUserIdAndCompanyId(userId, companyId);
-	}
-
-	@Override
-	protected void validateRelationship(final CUserCompanySetting relationship) {
-		super.validateRelationship(relationship);
-		Check.notNull(relationship, "Relationship cannot be null");
-		Check.notNull(relationship.getUser(), "User cannot be null");
-		Check.notNull(relationship.getCompany(), "Company cannot be null");
-		Check.notNull(relationship.getOwnershipLevel(), "Ownership level cannot be null");
-	}
-
 	/** Find the single company setting for a user. Returns the first setting if multiple exist. This is used for single company setting scenarios.
 	 * @param userId the user ID
 	 * @return Optional containing the single company setting, or empty if none exists */
@@ -125,6 +121,15 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 		Check.notNull(userId, "User ID cannot be null");
 		List<CUserCompanySetting> settings = repository.findSingleByUserId(userId);
 		return settings.isEmpty() ? Optional.empty() : Optional.of(settings.get(0));
+	}
+
+	@Override
+	protected Class<CUserCompanySetting> getEntityClass() { return CUserCompanySetting.class; }
+
+	@Override
+	@Transactional (readOnly = true)
+	public boolean relationshipExists(final Long userId, final Long companyId) {
+		return repository.existsByUserIdAndCompanyId(userId, companyId);
 	}
 
 	/** Set or replace the single company setting for a user. Removes any existing settings first.
@@ -153,21 +158,12 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 		return addUserToCompany(user, company, ownershipLevel, role);
 	}
 
-	/** Delete all company settings for a user. Used for cleanup operations.
-	 * @param userId the user ID */
-	@Transactional
-	public void deleteAllByUserId(final Long userId) {
-		Check.notNull(userId, "User ID cannot be null");
-		LOGGER.debug("Deleting all company settings for user {}", userId);
-		repository.deleteByUserId(userId);
-	}
-
-	/** Delete all company settings for a company. Used for cleanup operations.
-	 * @param companyId the company ID */
-	@Transactional
-	public void deleteAllByCompanyId(final Long companyId) {
-		Check.notNull(companyId, "Company ID cannot be null");
-		LOGGER.debug("Deleting all company settings for company {}", companyId);
-		repository.deleteByCompanyId(companyId);
+	@Override
+	protected void validateRelationship(final CUserCompanySetting relationship) {
+		super.validateRelationship(relationship);
+		Check.notNull(relationship, "Relationship cannot be null");
+		Check.notNull(relationship.getUser(), "User cannot be null");
+		Check.notNull(relationship.getCompany(), "Company cannot be null");
+		Check.notNull(relationship.getOwnershipLevel(), "Ownership level cannot be null");
 	}
 }

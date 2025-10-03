@@ -18,7 +18,6 @@ public interface IUserRepository extends IAbstractNamedRepository<CUser> {
 	@Override
 	@Query ("SELECT u " + /**/
 			"FROM #{#entityName} u LEFT JOIN FETCH u.userType " + /* */
-			"LEFT JOIN FETCH u.company " + /**/
 			"WHERE u.id = :userId"
 	)
 	Optional<CUser> findById(@Param ("userId") Long id);
@@ -29,18 +28,17 @@ public interface IUserRepository extends IAbstractNamedRepository<CUser> {
 	List<CUser> findByProject(Long projectId);
 	/** Find user by username with eager loading using generic pattern */
 	@Query (
-		"SELECT u FROM #{#entityName} u LEFT JOIN FETCH u.userType LEFT JOIN FETCH u.company LEFT JOIN FETCH u.projectSettings ps LEFT JOIN FETCH ps.project WHERE u.login = :username"
+		"SELECT u FROM #{#entityName} u LEFT JOIN FETCH u.userType LEFT JOIN FETCH u.projectSettings ps LEFT JOIN FETCH ps.project WHERE u.login = :username"
 	)
 	Optional<CUser> findByUsername(@Param ("username") String username);
-	/** Find all users that are not assigned to a specific project using generic pattern */
-	@Query ("SELECT u FROM #{#entityName} u WHERE u.id NOT IN (SELECT ups.user.id FROM CUserProjectSettings ups WHERE ups.project.id = :projectId)")
-	List<CUser> findUsersNotAssignedToProject(@Param ("projectId") Long projectId);
 	/** Find all users that are not assigned to a specific company using generic pattern */
 	@Query ("SELECT u FROM #{#entityName} u WHERE u.id NOT IN (SELECT ucs.user.id FROM CUserCompanySetting ucs WHERE ucs.company.id = :companyId)")
 	List<CUser> findUsersNotAssignedToCompany(@Param ("companyId") Long companyId);
+	/** Find all users that are not assigned to a specific project using generic pattern */
+	@Query ("SELECT u FROM #{#entityName} u WHERE u.id NOT IN (SELECT ups.user.id FROM CUserProjectSettings ups WHERE ups.project.id = :projectId)")
+	List<CUser> findUsersNotAssignedToProject(@Param ("projectId") Long projectId);
 	@Query ("SELECT u " + /**/
-			"FROM #{#entityName} u LEFT JOIN FETCH u.userType " + /* */
-			"LEFT JOIN FETCH u.company "
+			"FROM #{#entityName} u LEFT JOIN FETCH u.userType "
 	)
 	Page<CUser> list(Pageable pageable);
 }

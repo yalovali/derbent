@@ -1,20 +1,17 @@
 package tech.derbent.companies.domain;
 
-import java.util.List;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.domains.CEntityNamed;
-import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserCompanySetting;
 
 /** CCompany - Domain entity representing companies within the organization. Layer: Domain (MVC) Inherits from CEntityDB to provide database
@@ -117,9 +114,6 @@ public class CCompany extends CEntityNamed<CCompany> {
 			hidden = false, order = 7, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String taxNumber;
-	@OneToMany (mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@AMetaData (displayName = "Users", required = false, readOnly = false, description = "Users belonging to this company", hidden = false, order = 9)
-	private List<CUser> users;
 	@Column (name = "website", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	@AMetaData (
@@ -178,13 +172,16 @@ public class CCompany extends CEntityNamed<CCompany> {
 
 	public String getTaxNumber() { return taxNumber; }
 
-	public List<tech.derbent.users.domain.CUser> getUsers() { return users; }
-
 	public String getWebsite() { return website; }
 
 	public String getWorkingHoursEnd() { return workingHoursEnd; }
 
 	public String getWorkingHoursStart() { return workingHoursStart; }
+
+	@Override
+	public void initializeAllFields() {
+		// TODO Auto-generated method stub
+	}
 
 	/** Initialize default configuration values. */
 	@Override
@@ -240,8 +237,6 @@ public class CCompany extends CEntityNamed<CCompany> {
 
 	public void setTaxNumber(final String taxNumber) { this.taxNumber = taxNumber; }
 
-	public void setUsers(final List<tech.derbent.users.domain.CUser> users) { this.users = users; }
-
 	public void setWebsite(final String website) { this.website = website; }
 
 	public void setWorkingHoursEnd(final String workingHoursEnd) { this.workingHoursEnd = workingHoursEnd; }
@@ -255,10 +250,5 @@ public class CCompany extends CEntityNamed<CCompany> {
 				+ enabled + ", companyTheme='" + companyTheme + '\'' + ", primaryColor='" + primaryColor + '\'' + ", workingHoursStart='"
 				+ workingHoursStart + '\'' + ", workingHoursEnd='" + workingHoursEnd + '\'' + ", companyTimezone='" + companyTimezone + '\''
 				+ ", defaultLanguage='" + defaultLanguage + '\'' + ", enableNotifications=" + enableNotifications + '}';
-	}
-
-	@Override
-	public void initializeAllFields() {
-		// TODO Auto-generated method stub
 	}
 }

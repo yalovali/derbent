@@ -162,8 +162,8 @@ public class CDataInitializer {
 	private final CRiskStatusService riskStatusService;
 	private final CDetailLinesService screenLinesService;
 	private final CDetailSectionService screenService;
-	private final CUserCompanySettingsService userCompanySettingsService;
 	private final CUserCompanyRoleService userCompanyRoleService;
+	private final CUserCompanySettingsService userCompanySettingsService;
 	private final CUserProjectRoleService userProjectRoleService;
 	private final CUserProjectSettingsService userProjectSettingsService;
 	private final CUserService userService;
@@ -489,7 +489,6 @@ public class CDataInitializer {
 		final var companies = companyService.findAll();
 		final CCompany company = companies.isEmpty() ? null : companies.get(0);
 		Check.notNull(company, "At least one company must exist to assign to admin user");
-		admin.setCompany(company);
 		userService.save(admin);
 	}
 
@@ -690,10 +689,6 @@ public class CDataInitializer {
 		manager.setLastname("Karadeniz");
 		manager.setPhone("+90-462-751-1002");
 		manager.setProfilePictureData(profilePictureBytes);
-		// Set user role directly on entity
-		// Set company association directly on entity
-		final CCompany company = companyService.findByName(COMPANY_OF_TEKNOLOJI).orElseThrow();
-		manager.setCompany(company);
 		userService.save(manager);
 	}
 
@@ -991,7 +986,6 @@ public class CDataInitializer {
 		analyst.setProfilePictureData(profilePictureBytes);
 		// Set user role directly on entity
 		// Set company association directly on entity
-		analyst.setCompany(companyService.getRandom());
 		userService.save(analyst);
 	}
 
@@ -1005,9 +999,6 @@ public class CDataInitializer {
 		developer.setLastname("Özkan");
 		developer.setPhone("+90-462-751-0404");
 		developer.setProfilePictureData(profilePictureBytes);
-		// Set user role directly on entity
-		// Set company association directly on entity
-		developer.setCompany(companyService.getRandom());
 		userService.save(developer);
 	}
 
@@ -1020,8 +1011,6 @@ public class CDataInitializer {
 		teamMember.setLastname("Şahin");
 		teamMember.setPhone("+90-462-751-1003");
 		teamMember.setProfilePictureData(profilePictureBytes);
-		// Set user role directly on entity
-		teamMember.setCompany(companyService.getRandom());
 		userService.save(teamMember);
 	}
 
@@ -1228,6 +1217,53 @@ public class CDataInitializer {
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample comment priorities for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample comment priorities for project: " + project.getName(), e);
+		}
+	}
+
+	private void initializeSampleCompanyRoles() {
+		try {
+			final List<CCompany> companies = companyService.findAll();
+			final String[][] companyRoles = {
+					{
+							"Company Admin", "Administrative role with full company access", "true", "true", "false"
+					}, {
+							"Company Manager", "Company management role with write access", "false", "true", "false"
+					}, {
+							"Employee", "Standard employee role", "false", "true", "false"
+					}, {
+							"Company Guest", "Guest role with limited access", "false", "false", "true"
+					}
+			};
+			for (final CCompany company : companies) {
+				for (final String[] roleData : companyRoles) {
+					final tech.derbent.api.roles.domain.CUserCompanyRole role =
+							new tech.derbent.api.roles.domain.CUserCompanyRole(roleData[0], company);
+					role.setDescription(roleData[1]);
+					role.setIsAdmin(Boolean.parseBoolean(roleData[2]));
+					role.setIsUser(Boolean.parseBoolean(roleData[3]));
+					role.setIsGuest(Boolean.parseBoolean(roleData[4]));
+					role.setColor(CColorUtils.getRandomColor(true));
+					// Add appropriate page access based on role type
+					if (role.isAdmin()) {
+						role.addWriteAccess("CompanySettings");
+						role.addWriteAccess("UserManagement");
+						role.addWriteAccess("CompanyReports");
+					}
+					if (role.isUser()) {
+						role.addReadAccess("Dashboard");
+						role.addReadAccess("Tasks");
+						role.addWriteAccess("Profile");
+					}
+					if (role.isGuest()) {
+						role.addReadAccess("Dashboard");
+						role.addReadAccess("PublicInfo");
+					}
+					userCompanyRoleService.save(role);
+				}
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error creating company roles: {}", e.getMessage(), e);
+			throw new RuntimeException("Failed to initialize company roles", e);
 		}
 	}
 
@@ -1455,53 +1491,6 @@ public class CDataInitializer {
 		} catch (final Exception e) {
 			LOGGER.error("Error creating project roles for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize project roles for project: " + project.getName(), e);
-		}
-	}
-
-	private void initializeSampleCompanyRoles() {
-		try {
-			final List<CCompany> companies = companyService.findAll();
-			final String[][] companyRoles = {
-					{
-							"Company Admin", "Administrative role with full company access", "true", "true", "false"
-					}, {
-							"Company Manager", "Company management role with write access", "false", "true", "false"
-					}, {
-							"Employee", "Standard employee role", "false", "true", "false"
-					}, {
-							"Company Guest", "Guest role with limited access", "false", "false", "true"
-					}
-			};
-			for (final CCompany company : companies) {
-				for (final String[] roleData : companyRoles) {
-					final tech.derbent.api.roles.domain.CUserCompanyRole role =
-							new tech.derbent.api.roles.domain.CUserCompanyRole(roleData[0], company);
-					role.setDescription(roleData[1]);
-					role.setIsAdmin(Boolean.parseBoolean(roleData[2]));
-					role.setIsUser(Boolean.parseBoolean(roleData[3]));
-					role.setIsGuest(Boolean.parseBoolean(roleData[4]));
-					role.setColor(CColorUtils.getRandomColor(true));
-					// Add appropriate page access based on role type
-					if (role.isAdmin()) {
-						role.addWriteAccess("CompanySettings");
-						role.addWriteAccess("UserManagement");
-						role.addWriteAccess("CompanyReports");
-					}
-					if (role.isUser()) {
-						role.addReadAccess("Dashboard");
-						role.addReadAccess("Tasks");
-						role.addWriteAccess("Profile");
-					}
-					if (role.isGuest()) {
-						role.addReadAccess("Dashboard");
-						role.addReadAccess("PublicInfo");
-					}
-					userCompanyRoleService.save(role);
-				}
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error creating company roles: {}", e.getMessage(), e);
-			throw new RuntimeException("Failed to initialize company roles", e);
 		}
 	}
 

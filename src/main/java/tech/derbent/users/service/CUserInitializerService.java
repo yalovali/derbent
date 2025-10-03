@@ -34,8 +34,6 @@ public class CUserInitializerService extends CInitializerServiceBase {
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "userType"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "enabled"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "password"));
-			scr.addScreenLine(CDetailLinesService.createSection("Organization"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
 			scr.addScreenLine(CDetailLinesService.createSection("Project & Company Relations"));
 			CDetailLines line = CDetailLinesService.createLineFromDefaults(clazz, "projectSettings");
 			line.setRelationFieldName("projectSettings");
@@ -43,6 +41,7 @@ public class CUserInitializerService extends CInitializerServiceBase {
 			line.setProperty("Component:createUserProjectSettingsComponent");
 			line.setDataProviderBean("CUserService");
 			scr.addScreenLine(line);
+			scr.addScreenLine(CDetailLinesService.createSection("Organization"));
 			line = CDetailLinesService.createLineFromDefaults(clazz, "companySetting");
 			line.setRelationFieldName("companySetting");
 			line.setFieldCaption("companySetting");
@@ -67,7 +66,7 @@ public class CUserInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setSelectedFields("name,lastname,login,email,phone,userType,company,projectSettings,enabled,createdDate,lastModifiedDate");
+		grid.setSelectedFields("name,lastname,login,email,phone,userType,projectSettings,enabled,createdDate,lastModifiedDate");
 		return grid;
 	}
 

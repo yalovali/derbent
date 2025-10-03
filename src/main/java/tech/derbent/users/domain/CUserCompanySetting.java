@@ -8,7 +8,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.annotations.ARelationshipMetadata;
 import tech.derbent.api.domains.CAbstractEntityRelationship;
 import tech.derbent.api.utils.Check;
 import tech.derbent.companies.domain.CCompany;
@@ -20,13 +19,6 @@ import tech.derbent.companies.domain.CCompany;
 		"user_id", "company_id"
 }))
 @AttributeOverride (name = "id", column = @Column (name = "cusercompanysetting_id"))
-@ARelationshipMetadata (
-		parentEntityClass = CCompany.class, childEntityClass = CUser.class, relationshipEntityClass = CUserCompanySetting.class,
-		displayName = "User Company Membership", description = "Manages user membership and ownership in companies", supportsOwnership = true,
-		defaultOwnership = "MEMBER", ownershipLevels = {
-				"OWNER", "ADMIN", "MEMBER", "VIEWER"
-		}, parentCollectionField = "users", childCollectionField = "companySetting"
-)
 public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompanySetting> {
 
 	public static final String VIEW_NAME = "User Company Settings View";
@@ -40,20 +32,7 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 		settings.setCompany(company);
 		settings.setUser(user);
 		// Remove any existing relationship to avoid duplicates
-		removeUserFromCompany(company, user);
 		// Add to both sides of the bidirectional relationship
-		if (company.getUsers() != null) {
-			company.getUsers().add(user);
-		}
-	}
-
-	public static void removeUserFromCompany(CCompany company, CUser user) {
-		Check.notNull(company, "Company must not be null");
-		Check.notNull(user, "User must not be null");
-		// Remove from company's users list
-		if (company.getUsers() != null) {
-			company.getUsers().removeIf(u -> u.equals(user));
-		}
 	}
 
 	@ManyToOne
