@@ -8,6 +8,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.annotations.CSpringAuxillaries;
 import tech.derbent.api.domains.CAbstractEntityRelationship;
 import tech.derbent.api.utils.Check;
 import tech.derbent.companies.domain.CCompany;
@@ -117,7 +118,8 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 
 	@Override
 	public String toString() {
-		return String.format("UserCompanySettings[user=%s, company=%s, ownership=%s, role=%s, active=%s]", user != null ? user.getLogin() : "null",
-				company != null ? company.getName() : "null", getOwnershipLevel(), role, isActive());
+		return String.format("UserCompanySettings[user=%s, company=%s, ownership=%s, role=%s, active=%s]",
+				user != null ? CSpringAuxillaries.safeToString(user) : "null", company != null ? CSpringAuxillaries.safeToString(company) : "null",
+				getOwnershipLevel(), role, isActive());
 	}
 }
