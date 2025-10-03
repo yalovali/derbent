@@ -41,20 +41,20 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 	}
 
 	CFormBuilder<?> formBuilder = null;
-	private HasComponents formLayout;
+	private HasComponents formLayout = null;
 	private final Map<String, CPanelDetails> mapSectionPanels;
 
 	public CDetailsBuilder() {
 		mapSectionPanels = new HashMap<>();
 	}
 
-	public HasComponents buildDetails(IContentOwner contentOwner, CDetailSection screen, final CEnhancedBinder<?> binder, final HasComponents layout)
-			throws Exception {
+	public HasComponents buildDetails(IContentOwner contentOwner, CDetailSection screen, final CEnhancedBinder<?> binder,
+			final HasComponents detailsLayout) throws Exception {
 		Check.notNull(screen, "Screen cannot be null");
 		Check.notNull(binder, "Binder cannot be null");
 		Check.notNull(applicationContext, "Details name cannot be null");
-		if (layout != null) {
-			formLayout = layout;
+		if (detailsLayout != null) {
+			formLayout = detailsLayout;
 		} else {
 			formLayout = new FormLayout();
 		}
@@ -98,14 +98,6 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 		return formLayout;
 	}
 
-	/** Clears the details form by setting the form builder bean to null. */
-	public void populateForm() {
-		if (formBuilder != null) {
-			LOGGER.debug("Clearing details form");
-			formBuilder.populateForm();
-		}
-	}
-
 	public Component getComponentByName(final String panelName, final String componentName) {
 		final CPanelDetails panel = getSectionPanel(panelName);
 		Check.notNull(panel, "Panel cannot be null");
@@ -115,6 +107,14 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 	public CPanelDetails getSectionPanel(final String sectionName) {
 		Check.notNull(sectionName, "Section name cannot be null");
 		return mapSectionPanels.get(sectionName);
+	}
+
+	/** Clears the details form by setting the form builder bean to null. */
+	public void populateForm() {
+		if (formBuilder != null) {
+			LOGGER.debug("Clearing details form");
+			formBuilder.populateForm();
+		}
 	}
 
 	/** Sets the application context and initializes the data provider resolver. This method is called automatically by Spring.

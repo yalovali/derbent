@@ -59,7 +59,6 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 	@Transactional
 	public void deleteAllByCompanyId(final Long companyId) {
 		Check.notNull(companyId, "Company ID cannot be null");
-		LOGGER.debug("Deleting all company settings for company {}", companyId);
 		repository.deleteByCompanyId(companyId);
 	}
 
@@ -83,7 +82,6 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 	@Override
 	@Transactional (readOnly = true)
 	public List<CUserCompanySetting> findByChildEntityId(final Long companyId) {
-		LOGGER.debug("Finding user company settings for company ID: {}", companyId);
 		return repository.findByCompanyId(companyId);
 	}
 
@@ -140,7 +138,6 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 	 * @return the saved setting */
 	@Transactional
 	public CUserCompanySetting setOrReplaceSingleSetting(final CUser user, final CCompany company, final String ownershipLevel, final String role) {
-		LOGGER.debug("Setting/replacing single company setting for user {} with company {}", user, company);
 		Check.notNull(user, "User must not be null");
 		Check.notNull(company, "Company must not be null");
 		Check.notNull(user.getId(), "User must have a valid ID");

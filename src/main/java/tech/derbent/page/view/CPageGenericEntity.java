@@ -250,19 +250,15 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 	private void rebuildEntityDetails(EntityClass typedEntity, String entityViewName) throws Exception {
 		// Clear existing state
 		clearEntityDetails();
-		// Create a properly typed binder for this specific entity type
 		CEnhancedBinder<EntityClass> typedBinder = new CEnhancedBinder<>(entityClass);
-		// Create and configure toolbar using the factory method
-		CCrudToolbar<EntityClass> toolbar = createCrudToolbar(typedBinder, typedEntity);
-		crudToolbar = toolbar;
+		crudToolbar = createCrudToolbar(typedBinder, typedEntity);
+		getBaseDetailsLayout().add(crudToolbar);
 		// Update the current binder to be the properly typed one
 		CEnhancedBinder<CEntityDB<?>> genericBinder = (CEnhancedBinder<CEntityDB<?>>) (CEnhancedBinder<?>) typedBinder;
 		currentBinder = genericBinder;
-		// Update state tracking
 		currentEntityViewName = entityViewName;
 		currentEntityType = typedEntity.getClass();
-		// Build screen with toolbar
-		buildScreen(entityViewName, typedEntity.getClass(), toolbar, getBaseDetailsLayout());
+		buildScreen(entityViewName, typedEntity.getClass(), getBaseDetailsLayout());
 		typedBinder.setBean(typedEntity);
 	}
 

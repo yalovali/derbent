@@ -51,8 +51,9 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 	protected CAbstractService<?> entityService;
 	protected CComponentGridEntity grid;
 	private final CPageEntity pageEntity;
+	private final CVerticalLayout splitBottomLayout = new CVerticalLayout(false, false, false);;
 	// Layout components
-	protected SplitLayout splitLayout;
+	protected final SplitLayout splitLayout = new SplitLayout();
 
 	@Autowired
 	public CDynamicPageViewWithSections(final CPageEntity pageEntity, final CSessionService sessionService,
@@ -91,6 +92,9 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 		if (baseDetailsLayout != null) {
 			baseDetailsLayout.removeAll();
 		}
+		if (crudToolbar != null) {
+			splitBottomLayout.remove(crudToolbar);
+		}
 		currentBinder = null;
 		crudToolbar = null;
 		currentEntityViewName = null;
@@ -123,30 +127,13 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 
 	/** Create the details section. */
 	private void createDetailsSection() {
-		baseDetailsLayout = CFlexLayout.forEntityPage();
-		baseDetailsLayout.setSizeFull();
+		splitLayout.addToSecondary(splitBottomLayout);
 		final Scroller detailsScroller = new Scroller();
+		splitBottomLayout.add(detailsScroller);
 		detailsScroller.setContent(baseDetailsLayout);
+		baseDetailsLayout.setSizeFull();
 		detailsScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
 		detailsScroller.setSizeFull();
-		final CVerticalLayout detailsBase = new CVerticalLayout(false, false, false);
-		detailsBase.add(detailsScroller);
-		splitLayout.addToSecondary(detailsBase);
-		LOGGER.debug("Created details section with detail section: {}", pageEntity.getDetailSection().getName());
-	}
-
-	/** Create grid and detail sections similar to CPageGenericEntity. */
-	private void createGridAndDetailSections() {
-		try {
-			// Initialize the entity service for the configured entity type
-			initializeEntityService();
-			initSplitLayout();
-			createMasterSection();
-			createDetailsSection();
-		} catch (Exception e) {
-			LOGGER.error("Failed to create grid and detail sections for page: {}", pageEntity.getPageTitle(), e);
-			throw e;
-		}
 	}
 
 	/** Create the master (grid) section. */
@@ -254,25 +241,16 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 	/** Initialize the page layout and content. */
 	protected void initializePage() {
 		setSizeFull();
-		// setPadding(true);
-		// setSpacing(true);
-		// Set page title for browser tab only if pageTitle is not empty
 		if (pageEntity.getPageTitle() != null && !pageEntity.getPageTitle().trim().isEmpty()) {
 			getElement().executeJs("document.title = $0", pageEntity.getPageTitle());
 		}
-		createGridAndDetailSections();
-		LOGGER.debug("Dynamic page view with sections initialized for: {}", pageEntity.getPageTitle());
-	}
-
-	private void initSplitLayout() {
-		splitLayout = new SplitLayout();
+		initializeEntityService();
 		splitLayout.setSizeFull();
 		splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
-		// splitLayout.setSplitterPosition(30.0); // 30% for grid, 70% for details
-		// Remove height constraints to allow primary section to expand
-		// splitLayout.getStyle().remove("max-height");
-		// splitLayout.getPrimaryComponent().getElement().getStyle().remove("max-height");
 		add(splitLayout);
+		createMasterSection();
+		createDetailsSection();
+		LOGGER.debug("Dynamic page view with sections initialized for: {}", pageEntity.getPageTitle());
 	}
 
 	// Implementation of CEntityUpdateListener
@@ -328,9 +306,9 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 		clearEntityDetails();
 		currentBinder = new CEnhancedBinder(entityClass);
 		crudToolbar = createCrudToolbar(currentBinder);
-		// = toolbar;
 		currentEntityViewName = entityViewName;
-		buildScreen(entityViewName, (Class) entityClass, crudToolbar);
+		splitBottomLayout.addComponentAsFirst(crudToolbar);
+		buildScreen(entityViewName, (Class) entityClass, baseDetailsLayout);
 	}
 
 	/** Refresh the grid to show updated data. */

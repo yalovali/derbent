@@ -2,7 +2,6 @@ package tech.derbent.page.view;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
-import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import tech.derbent.api.components.CEnhancedBinder;
@@ -24,46 +23,15 @@ import tech.derbent.session.service.CSessionService;
 public abstract class CPageBaseProjectAware extends CPageBase implements IProjectChangeListener, IContentOwner, IHasContentOwner {
 
 	private static final long serialVersionUID = 1L;
-	protected CFlexLayout baseDetailsLayout;
+	protected CFlexLayout baseDetailsLayout = CFlexLayout.forEntityPage();
 	protected CEnhancedBinder<CEntityDB<?>> currentBinder; // Store current binder for data binding
+	private Object currentEntity; // Field to store current entity
 	protected final CDetailsBuilder detailsBuilder = new CDetailsBuilder();
 	protected CLayoutService layoutService;
+	private IContentOwner parentContent;
 	private CDetailSectionService screenService;
 	protected final CSessionService sessionService;
 	protected SplitLayout splitLayout = new SplitLayout();
-	private IContentOwner parentContent;
-	private Object currentEntity; // Field to store current entity
-
-	@Override
-	public void setContentOwner(IContentOwner owner) { this.parentContent = owner; }
-
-	@Override
-	public IContentOwner getContentOwner() { return parentContent; }
-
-	@Override
-	public Object getCurrentEntity() { return currentEntity; }
-
-	@Override
-	public void setCurrentEntity(Object entity) {
-		this.currentEntity = entity;
-		detailsBuilder.setCurrentEntity(entity);
-	}
-
-	@Override
-	public void populateForm() throws Exception {
-		// Default implementation - populate current binder if available
-		if (currentBinder != null && getCurrentEntity() != null) {
-			LOGGER.debug("Populating form for entity: {}", getCurrentEntity());
-			currentBinder.setBean((CEntityDB<?>) getCurrentEntity());
-		} else if (currentBinder != null) {
-			LOGGER.debug("Clearing form - no current entity");
-			currentBinder.setBean(null);
-		}
-		// Also populate details builder if available
-		if (detailsBuilder != null) {
-			detailsBuilder.populateForm();
-		}
-	}
 
 	protected CPageBaseProjectAware(final CSessionService sessionService, CDetailSectionService screenService) {
 		super();
@@ -77,19 +45,11 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 	}
 
 	protected void buildScreen(final String baseViewName) {
-		buildScreen(baseViewName, CEntityDB.class, null, getBaseDetailsLayout());
+		buildScreen(baseViewName, CEntityDB.class, getBaseDetailsLayout());
 	}
 
 	protected <T extends CEntityDB<?>> void buildScreen(final String baseViewName, final Class<T> entityClass) {
-		buildScreen(baseViewName, entityClass, null, getBaseDetailsLayout());
-	}
-
-	/** Build screen with optional toolbar integration. Creates its own binder to use for both form and toolbar components.
-	 * @param baseViewName the view name to build
-	 * @param entityClass  the entity class type
-	 * @param toolbar      optional toolbar that will use the same binder (can be null) */
-	protected <T extends CEntityDB<?>> void buildScreen(final String baseViewName, final Class<T> entityClass, final CCrudToolbar<?> toolbar) {
-		buildScreen(baseViewName, entityClass, toolbar, getBaseDetailsLayout());
+		buildScreen(baseViewName, entityClass, getBaseDetailsLayout());
 	}
 
 	/** Build screen with optional toolbar integration and parameterized details layout.
@@ -97,8 +57,7 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 	 * @param entityClass   the entity class type
 	 * @param toolbar       optional toolbar that will use the same binder (can be null)
 	 * @param detailsLayout the layout to build the screen into */
-	protected <T extends CEntityDB<?>> void buildScreen(final String baseViewName, final Class<T> entityClass, final CCrudToolbar<?> toolbar,
-			final CFlexLayout detailsLayout) {
+	protected <T extends CEntityDB<?>> void buildScreen(final String baseViewName, final Class<T> entityClass, final CFlexLayout detailsLayout) {
 		try {
 			detailsLayout.removeAll();
 			final CDetailSection screen = screenService.findByNameAndProject(
@@ -111,25 +70,7 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 				final CEnhancedBinder<CEntityDB<?>> localBinder = new CEnhancedBinder<>((Class<CEntityDB<?>>) (Class<?>) entityClass);
 				currentBinder = localBinder;
 			}
-			// Add toolbar and scrollable content directly to base layout (similar to CAbstractEntityDBPage pattern)
-			if (toolbar != null) {
-				// Add toolbar first (stays at top, not scrollable)
-				toolbar.addClassName("crud-toolbar");
-				detailsLayout.add(toolbar);
-				// Create scrollable content area
-				CFlexLayout scrollableContent = CFlexLayout.forEntityPage();
-				final Scroller contentScroller = new Scroller();
-				contentScroller.setContent(scrollableContent);
-				contentScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
-				// Add scrollable content below toolbar
-				detailsLayout.add(contentScroller);
-				detailsLayout.setFlexGrow(1, contentScroller);
-				// Build details in the scrollable content area
-				detailsBuilder.buildDetails(this, screen, currentBinder, scrollableContent);
-			} else {
-				// No toolbar - build details directly
-				detailsBuilder.buildDetails(this, screen, currentBinder, detailsLayout);
-			}
+			detailsBuilder.buildDetails(this, screen, currentBinder, detailsLayout);
 		} catch (final Exception e) {
 			final String errorMsg = "Error building details layout for screen: " + baseViewName;
 			LOGGER.error("Error building details layout for screen '{}': {}", baseViewName, e.getMessage(), e);
@@ -148,8 +89,14 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 
 	public CFlexLayout getBaseDetailsLayout() { return baseDetailsLayout; }
 
+	@Override
+	public IContentOwner getContentOwner() { return parentContent; }
+
 	/** Get the current binder for data binding operations */
 	protected CEnhancedBinder<CEntityDB<?>> getCurrentBinder() { return currentBinder; }
+
+	@Override
+	public Object getCurrentEntity() { return currentEntity; }
 
 	@Override
 	protected void onAttach(final AttachEvent attachEvent) {
@@ -171,6 +118,31 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 	@Override
 	public void onProjectChanged(final CProject newProject) {
 		LOGGER.debug("Project change notification received: {}", newProject != null ? newProject.getName() : "null");
+	}
+
+	@Override
+	public void populateForm() throws Exception {
+		// Default implementation - populate current binder if available
+		if (currentBinder != null && getCurrentEntity() != null) {
+			LOGGER.debug("Populating form for entity: {}", getCurrentEntity());
+			currentBinder.setBean((CEntityDB<?>) getCurrentEntity());
+		} else if (currentBinder != null) {
+			LOGGER.debug("Clearing form - no current entity");
+			currentBinder.setBean(null);
+		}
+		// Also populate details builder if available
+		if (detailsBuilder != null) {
+			detailsBuilder.populateForm();
+		}
+	}
+
+	@Override
+	public void setContentOwner(IContentOwner owner) { parentContent = owner; }
+
+	@Override
+	public void setCurrentEntity(Object entity) {
+		currentEntity = entity;
+		detailsBuilder.setCurrentEntity(entity);
 	}
 
 	@Override
