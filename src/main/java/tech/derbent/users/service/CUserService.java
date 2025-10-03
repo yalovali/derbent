@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -139,6 +140,17 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	public List<CUser> getAvailableUsersForProject(final Long projectId) {
 		Check.notNull(projectId, "User ID must not be null");
 		return ((IUserRepository) repository).findUsersNotAssignedToProject(projectId);
+	}
+
+	/** Find user by ID with company setting eagerly loaded to avoid LazyInitializationException in UI. This method should be used when the UI needs
+	 * to access user's company settings and company data.
+	 * @param userId the user ID
+	 * @return Optional containing the user with company setting loaded, or empty if not found */
+	@Transactional (readOnly = true)
+	@PreAuthorize ("permitAll()")
+	public Optional<CUser> findByIdWithCompanySetting(final Long userId) {
+		Check.notNull(userId, "User ID must not be null");
+		return ((IUserRepository) repository).findByIdWithCompanySetting(userId);
 	}
 
 	@Override

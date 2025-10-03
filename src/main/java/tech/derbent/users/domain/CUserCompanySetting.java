@@ -96,7 +96,13 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 
 	@Override
 	public void initializeAllFields() {
-		// TODO Auto-generated method stub
+		// Access lazy fields to trigger loading within transaction
+		if (user != null) {
+			user.getLogin(); // Trigger user loading
+		}
+		if (company != null) {
+			company.getName(); // Trigger company loading
+		}
 	}
 
 	/** Check if this user has company admin privileges.
