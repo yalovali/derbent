@@ -70,12 +70,6 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 		return EntityFields;
 	}
 
-	protected String getHelpText() { return "Configure settings for this entity."; }
-
-	public Object getLocalContextValue(final String contextName) {
-		return null;
-	}
-
 	protected String getPanelTitle() { return entityClass.getSimpleName() + " Settings"; }
 
 	protected final void initComponent() throws Exception {

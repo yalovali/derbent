@@ -3,7 +3,6 @@ package tech.derbent.api.views.components;
 import java.util.List;
 import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
@@ -21,10 +20,10 @@ import tech.derbent.users.service.CUserService;
 public class CComponentSingleCompanyUserSetting extends CComponentDBEntity<CUser> {
 
 	private static final long serialVersionUID = 1L;
-	private final CCompanyService companyService;
-	private final CUserCompanySettingsService userCompanySettingsService;
-	private Div displayContainer;
 	private Button changeButton;
+	private final CCompanyService companyService;
+	private CHorizontalLayout displayContainer;
+	private final CUserCompanySettingsService userCompanySettingsService;
 
 	public CComponentSingleCompanyUserSetting(CUserService entityService, ApplicationContext applicationContext) throws Exception {
 		super("Company Setting", CUser.class, applicationContext);
@@ -35,6 +34,54 @@ public class CComponentSingleCompanyUserSetting extends CComponentDBEntity<CUser
 
 	public List<CCompany> getAvailableCompanyForUser() {
 		return companyService.getAvailableCompanyForUser(getCurrentEntity() != null ? getCurrentEntity().getId() : null);
+	}
+
+	@Override
+	protected void initPanel() throws Exception {
+		CHorizontalLayout mainLayout = new CHorizontalLayout();
+		displayContainer = new CHorizontalLayout();
+		displayContainer.addClassName("single-company-setting-display");
+		displayContainer.setWidthFull();
+		// Create change button
+		changeButton = CButton.createPrimary("Change", com.vaadin.flow.component.icon.VaadinIcon.EDIT.create(), e -> {
+			try {
+				openChangeDialog();
+			} catch (Exception ex) {
+				LOGGER.error("Error opening change dialog: {}", ex.getMessage(), ex);
+			}
+		});
+		mainLayout.add(displayContainer, changeButton);
+		add(mainLayout);
+	}
+
+	/** Callback when settings are saved from the dialog */
+	protected void onSettingsSaved(final CUserCompanySetting settings) {
+		Check.notNull(settings, "Settings cannot be null when saving");
+		LOGGER.debug("Saving user company settings: {}", settings);
+		try {
+			CUser user = getCurrentEntity();
+			Check.notNull(user, "User cannot be null when saving settings");
+			// Save or update the setting
+			CUserCompanySetting savedSettings;
+			if (settings.getId() == null) {
+				// New setting
+				savedSettings = userCompanySettingsService.addUserToCompany(settings.getUser(), settings.getCompany(), settings.getOwnershipLevel(),
+						settings.getRole());
+			} else {
+				// Update existing setting
+				savedSettings = userCompanySettingsService.save(settings);
+			}
+			// Update the user's company setting reference
+			user.setCompanySettings(savedSettings);
+			entityService.save(user);
+			LOGGER.info("Successfully saved user company settings: {}", savedSettings);
+			// Refresh display
+			updateDisplay();
+		} catch (final Exception e) {
+			LOGGER.error("Error saving user company settings: {}", e.getMessage(), e);
+			new CWarningDialog("Failed to save company settings: " + e.getMessage()).open();
+			throw new RuntimeException("Failed to save user company settings: " + e.getMessage(), e);
+		}
 	}
 
 	protected void openChangeDialog() throws Exception {
@@ -50,24 +97,6 @@ public class CComponentSingleCompanyUserSetting extends CComponentDBEntity<CUser
 			new CWarningDialog("Failed to open change dialog: " + e.getMessage()).open();
 			throw e;
 		}
-	}
-
-	@Override
-	protected void initPanel() throws Exception {
-		// Create display container for the single company setting
-		displayContainer = new Div();
-		displayContainer.addClassName("single-company-setting-display");
-		displayContainer.setWidthFull();
-		// Create change button
-		changeButton = CButton.createPrimary("Change", com.vaadin.flow.component.icon.VaadinIcon.EDIT.create(), e -> {
-			try {
-				openChangeDialog();
-			} catch (Exception ex) {
-				LOGGER.error("Error opening change dialog: {}", ex.getMessage(), ex);
-			}
-		});
-		// Add components to layout
-		add(displayContainer, changeButton);
 	}
 
 	@Override
@@ -133,35 +162,5 @@ public class CComponentSingleCompanyUserSetting extends CComponentDBEntity<CUser
 	@Override
 	protected void updatePanelEntityFields() {
 		// No fields needed for this component - it's display only with change button
-	}
-
-	/** Callback when settings are saved from the dialog */
-	protected void onSettingsSaved(final CUserCompanySetting settings) {
-		Check.notNull(settings, "Settings cannot be null when saving");
-		LOGGER.debug("Saving user company settings: {}", settings);
-		try {
-			CUser user = getCurrentEntity();
-			Check.notNull(user, "User cannot be null when saving settings");
-			// Save or update the setting
-			CUserCompanySetting savedSettings;
-			if (settings.getId() == null) {
-				// New setting
-				savedSettings = userCompanySettingsService.addUserToCompany(settings.getUser(), settings.getCompany(), settings.getOwnershipLevel(),
-						settings.getRole());
-			} else {
-				// Update existing setting
-				savedSettings = userCompanySettingsService.save(settings);
-			}
-			// Update the user's company setting reference
-			user.setCompanySettings(savedSettings);
-			entityService.save(user);
-			LOGGER.info("Successfully saved user company settings: {}", savedSettings);
-			// Refresh display
-			updateDisplay();
-		} catch (final Exception e) {
-			LOGGER.error("Error saving user company settings: {}", e.getMessage(), e);
-			new CWarningDialog("Failed to save company settings: " + e.getMessage()).open();
-			throw new RuntimeException("Failed to save user company settings: " + e.getMessage(), e);
-		}
 	}
 }

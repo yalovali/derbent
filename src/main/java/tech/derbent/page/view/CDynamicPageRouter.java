@@ -119,7 +119,7 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 	@Override
 	public void setParameter(com.vaadin.flow.router.BeforeEvent event, Long parameter) {
 		pageEntityId = parameter;
-		LOGGER.debug("Dynamic page router called with page entity ID: {}", parameter);
+		// LOGGER.debug("Dynamic page router called with page entity ID: {}", parameter);
 	}
 
 	@Override
