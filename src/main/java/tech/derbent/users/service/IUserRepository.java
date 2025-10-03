@@ -27,6 +27,7 @@ public interface IUserRepository extends IAbstractNamedRepository<CUser> {
 			"LEFT JOIN FETCH u.userType " + /* */
 			"LEFT JOIN FETCH u.companySetting cs " + /* */
 			"LEFT JOIN FETCH cs.company " + /* */
+			"LEFT JOIN FETCH cs.role " + /* */
 			"WHERE u.id = :userId"
 	)
 	Optional<CUser> findByIdWithCompanySetting(@Param ("userId") Long userId);

@@ -82,6 +82,11 @@ public class CUserCompanySettingLazyLoadingTest {
 		assertNotNull(company, "Company should not be null");
 		assertNotNull(company.getName(), "Company name should not be null");
 		assertEquals("Test Company for Lazy Loading", company.getName(), "Company name should match");
+		// Access role outside transaction - should NOT throw LazyInitializationException
+		CUserCompanyRole role = setting.getRole();
+		assertNotNull(role, "Role should not be null");
+		assertNotNull(role.getName(), "Role name should not be null");
+		assertEquals("Developer", role.getName(), "Role name should match");
 	}
 
 	@Test
@@ -105,6 +110,11 @@ public class CUserCompanySettingLazyLoadingTest {
 		CUser settingUser = setting.getUser();
 		assertNotNull(settingUser, "User should not be null");
 		assertNotNull(settingUser.getLogin(), "User login should not be null");
+		// Access role - should work within transaction
+		CUserCompanyRole role = setting.getRole();
+		assertNotNull(role, "Role should not be null");
+		assertNotNull(role.getName(), "Role name should not be null");
+		assertEquals("Developer", role.getName(), "Role name should match");
 	}
 
 	@Test
@@ -123,5 +133,11 @@ public class CUserCompanySettingLazyLoadingTest {
 		String companyName = company.getName();
 		assertNotNull(companyName, "Company name should be accessible");
 		assertEquals("Test Company for Lazy Loading", companyName);
+		// Access role outside transaction - should work because eagerly fetched
+		CUserCompanyRole role = setting.getRole();
+		assertNotNull(role, "Role should be eagerly loaded");
+		String roleName = role.getName();
+		assertNotNull(roleName, "Role name should be accessible");
+		assertEquals("Developer", roleName);
 	}
 }

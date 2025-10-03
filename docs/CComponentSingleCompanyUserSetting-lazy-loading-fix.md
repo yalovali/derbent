@@ -3,14 +3,16 @@
 ## Issue Description
 
 **File:** `src/main/java/tech/derbent/api/views/components/CComponentSingleCompanyUserSetting.java`  
-**Line:** 128  
-**Error:** `LazyInitializationException` when accessing `setting.getCompany()`
+**Line:** 169  
+**Error:** `LazyInitializationException` when accessing `setting.getRole()`
 
 ### Symptom
 ```java
-CCompany company = setting.getCompany();
+CUserCompanyRole role = setting.getRole();
 ```
-Throws `org.hibernate.LazyInitializationException: could not initialize proxy - no Session` when the UI component tries to access company data.
+Throws `org.hibernate.LazyInitializationException: could not initialize proxy - no Session` when the UI component tries to access role data.
+
+The same issue also affects line 161 when accessing `setting.getCompany()`.
 
 ### Root Cause
 
@@ -30,7 +32,14 @@ The issue occurs due to a chain of lazy-loaded relationships:
    private CCompany company;
    ```
 
-3. **UI Layer Access**: When `CComponentSingleCompanyUserSetting` calls `setting.getCompany()` in the `updateDisplay()` method, it's outside any Hibernate session/transaction, causing the LazyInitializationException.
+3. **CUserCompanySetting.role** (line 48-54 in CUserCompanySetting.java)
+   ```java
+   @ManyToOne(fetch = FetchType.LAZY)
+   @JoinColumn(name = "role_id", nullable = true)
+   private CUserCompanyRole role;
+   ```
+
+4. **UI Layer Access**: When `CComponentSingleCompanyUserSetting` calls `setting.getCompany()` and `setting.getRole()` in the `updateDisplay()` method (lines 161 and 169), it's outside any Hibernate session/transaction, causing the LazyInitializationException.
 
 ## Solution
 
@@ -69,6 +78,7 @@ This method can be called within a transaction to manually initialize lazy field
        "LEFT JOIN FETCH u.userType " +
        "LEFT JOIN FETCH u.companySetting cs " +
        "LEFT JOIN FETCH cs.company " +
+       "LEFT JOIN FETCH cs.role " +
        "WHERE u.id = :userId")
 Optional<CUser> findByIdWithCompanySetting(@Param("userId") Long userId);
 ```
@@ -77,6 +87,7 @@ This query uses `LEFT JOIN FETCH` to eagerly load:
 - User type
 - Company setting
 - Company (nested within company setting)
+- Role (nested within company setting)
 
 #### 3. Service: Expose Repository Method
 
@@ -200,6 +211,6 @@ mvn spring-boot:run -Dspring.profiles.active=h2
 
 ## Summary
 
-The fix ensures that when `CComponentSingleCompanyUserSetting` displays user company settings, all required data (user, company setting, and company) is eagerly fetched from the database within a transaction. This prevents `LazyInitializationException` when the UI component tries to access company details outside the transaction boundary.
+The fix ensures that when `CComponentSingleCompanyUserSetting` displays user company settings, all required data (user, company setting, company, and role) is eagerly fetched from the database within a transaction. This prevents `LazyInitializationException` when the UI component tries to access company and role details outside the transaction boundary.
 
 The solution follows the repository-level eager fetching pattern, which is the preferred approach for data that is always needed in the UI.
