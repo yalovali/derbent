@@ -99,7 +99,7 @@ public class CComponentSingleCompanyUserSetting extends CComponentDBEntity<CUser
 			// Update the user's company setting reference
 			user.setCompanySettings(savedSettings);
 			entityService.save(user);
-			LOGGER.info("Successfully saved user company settings: {}", savedSettings);
+			// LOGGER.info("Successfully saved user company settings: {}", savedSettings);
 			// Refresh display
 			updateDisplay();
 		} catch (final Exception e) {
