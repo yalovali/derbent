@@ -86,7 +86,7 @@ public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 
 	@Override
 	public String toString() {
-		return String.format("UserProjectSettings[user=%s, project=%s, role=%s, permission=%s]", user != null ? user.getLogin() : "null",
-				project != null ? project.getName() : "null", role, permission);
+		return String.format("UserProjectSettings[user id=%s, project id=%s, role=%s, permission=%s]", user != null ? user.getId() : "null",
+				project != null ? project.getId() : "null", role, permission);
 	}
 }
