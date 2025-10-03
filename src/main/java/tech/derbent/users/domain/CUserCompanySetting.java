@@ -3,6 +3,7 @@ package tech.derbent.users.domain;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -10,6 +11,7 @@ import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.annotations.CSpringAuxillaries;
 import tech.derbent.api.domains.CAbstractEntityRelationship;
+import tech.derbent.api.roles.domain.CUserCompanyRole;
 import tech.derbent.api.utils.Check;
 import tech.derbent.companies.domain.CCompany;
 
@@ -43,12 +45,13 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 			dataProviderOwner = "content", dataProviderMethod = "getAvailableCompanyForUser"
 	)
 	private CCompany company;
-	@Column (name = "role", nullable = true, length = 100)
+	@ManyToOne (fetch = FetchType.LAZY)
+	@JoinColumn (name = "role_id", nullable = true)
 	@AMetaData (
-			displayName = "Role", required = false, readOnly = false, defaultValue = "", description = "User's role within the company",
-			hidden = false, order = 3, maxLength = 100
+			displayName = "Role", required = false, readOnly = false, description = "User's role within the company", hidden = false, order = 3,
+			dataProviderOwner = "content", dataProviderMethod = "getAvailableCompanyRolesForUser", setBackgroundFromColor = true, useIcon = true
 	)
-	private String role;
+	private CUserCompanyRole role;
 	@ManyToOne
 	@JoinColumn (name = "user_id", nullable = false)
 	@AMetaData (
@@ -72,6 +75,11 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 		setOwnershipLevel(ownershipLevel);
 	}
 
+	public CUserCompanySetting(CUser user, CCompany company, String ownershipLevel, CUserCompanyRole role) {
+		this(user, company, ownershipLevel);
+		this.role = role;
+	}
+
 	/** Check if this user can manage company settings.
 	 * @return true if user has MANAGE_COMPANY privilege or is owner */
 	public boolean canManageCompany() {
@@ -88,7 +96,7 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 
 	public String getCompanyName() { return company != null ? company.getName() : "Unknown Company"; }
 
-	public String getRole() { return role; }
+	public CUserCompanyRole getRole() { return role; }
 
 	// Getters and Setters
 	public CUser getUser() { return user; }
@@ -104,6 +112,9 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 		if (company != null) {
 			company.getName(); // Trigger company loading
 		}
+		if (role != null) {
+			role.getName(); // Trigger role loading
+		}
 	}
 
 	/** Check if this user has company admin privileges.
@@ -112,7 +123,7 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 
 	public void setCompany(CCompany company) { this.company = company; }
 
-	public void setRole(String role) { this.role = role; }
+	public void setRole(CUserCompanyRole role) { this.role = role; }
 
 	public void setUser(CUser user) { this.user = user; }
 
@@ -120,6 +131,6 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 	public String toString() {
 		return String.format("UserCompanySettings[user=%s, company=%s, ownership=%s, role=%s, active=%s]",
 				user != null ? CSpringAuxillaries.safeToString(user) : "null", company != null ? CSpringAuxillaries.safeToString(company) : "null",
-				getOwnershipLevel(), role, isActive());
+				getOwnershipLevel(), role != null ? CSpringAuxillaries.safeToString(role) : "null", isActive());
 	}
 }
