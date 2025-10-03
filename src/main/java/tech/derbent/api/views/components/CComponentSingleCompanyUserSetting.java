@@ -1,6 +1,7 @@
 package tech.derbent.api.views.components;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
@@ -102,6 +103,14 @@ public class CComponentSingleCompanyUserSetting extends CComponentDBEntity<CUser
 	@Override
 	public void populateForm() {
 		super.populateForm();
+		// Reload user with company setting eagerly loaded to avoid LazyInitializationException
+		CUser currentUser = getCurrentEntity();
+		if (currentUser != null && currentUser.getId() != null) {
+			Optional<CUser> userWithCompanySetting = ((CUserService) entityService).findByIdWithCompanySetting(currentUser.getId());
+			if (userWithCompanySetting.isPresent()) {
+				setCurrentEntity(userWithCompanySetting.get());
+			}
+		}
 		updateDisplay();
 	}
 

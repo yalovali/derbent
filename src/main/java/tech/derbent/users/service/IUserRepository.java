@@ -21,6 +21,15 @@ public interface IUserRepository extends IAbstractNamedRepository<CUser> {
 			"WHERE u.id = :userId"
 	)
 	Optional<CUser> findById(@Param ("userId") Long id);
+	/** Find user by ID with company setting eagerly loaded. This is used when the UI needs to access company data to avoid
+	 * LazyInitializationException. */
+	@Query ("SELECT u FROM #{#entityName} u " + /* */
+			"LEFT JOIN FETCH u.userType " + /* */
+			"LEFT JOIN FETCH u.companySetting cs " + /* */
+			"LEFT JOIN FETCH cs.company " + /* */
+			"WHERE u.id = :userId"
+	)
+	Optional<CUser> findByIdWithCompanySetting(@Param ("userId") Long userId);
 	/** Find all users by project ID with eager loading using generic pattern */
 	@Query ("SELECT u FROM #{#entityName} u " + /* */
 			"WHERE u.id IN (SELECT ups.user.id FROM CUserProjectSettings ups WHERE ups.project.id = :projectId)"
