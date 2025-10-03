@@ -18,7 +18,7 @@ public interface IUserCompanySettingsRepository extends IUserRelationshipReposit
 	/** Find all user company settings for a specific user with eager loading of company and user. Overrides the base method to include company
 	 * fetching. */
 	@Override
-	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.user LEFT JOIN FETCH r.company WHERE r.user.id = :userId")
+	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.user LEFT JOIN FETCH r.company LEFT JOIN FETCH r.role WHERE r.user.id = :userId")
 	List<CUserCompanySetting> findByUserId(@Param ("userId") Long userId);
 	/** Count users for a specific company using generic pattern */
 	@Query ("SELECT COUNT(r) FROM #{#entityName} r WHERE r.company.id = :companyId")
@@ -37,13 +37,12 @@ public interface IUserCompanySettingsRepository extends IUserRelationshipReposit
 	}
 
 	/** Find all user company settings for a specific company with eager loading */
-	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.company LEFT JOIN FETCH r.user WHERE r.company.id = :companyId")
+	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.company LEFT JOIN FETCH r.user LEFT JOIN FETCH r.role WHERE r.company.id = :companyId")
 	List<CUserCompanySetting> findByCompanyId(@Param ("companyId") Long companyId);
-	/** Find all settings by ownership level using generic pattern */
-	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.company LEFT JOIN FETCH r.user WHERE r.ownershipLevel = :ownershipLevel")
-	List<CUserCompanySetting> findByOwnershipLevel(@Param ("ownershipLevel") String ownershipLevel);
 	/** Find a specific user company setting by user and company using generic pattern */
-	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.company LEFT JOIN FETCH r.user WHERE r.user.id = :userId AND r.company.id = :companyId")
+	@Query (
+		"SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.company LEFT JOIN FETCH r.user LEFT JOIN FETCH r.role WHERE r.user.id = :userId AND r.company.id = :companyId"
+	)
 	Optional<CUserCompanySetting> findByUserIdAndCompanyId(@Param ("userId") Long userId, @Param ("companyId") Long companyId);
 
 	/** Find relationship by user and entity IDs - concrete implementation */
@@ -54,7 +53,9 @@ public interface IUserCompanySettingsRepository extends IUserRelationshipReposit
 
 	/** Find the single company setting for a user (returns the first one if multiple exist). This is used for single company setting scenarios where
 	 * a user should only have one company setting. */
-	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.user LEFT JOIN FETCH r.company WHERE r.user.id = :userId ORDER BY r.id ASC")
+	@Query (
+		"SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.user LEFT JOIN FETCH r.company LEFT JOIN FETCH r.role WHERE r.user.id = :userId ORDER BY r.id ASC"
+	)
 	List<CUserCompanySetting> findSingleByUserId(@Param ("userId") Long userId);
 	/** Delete all settings for a specific company. Used for cleanup when a company is deleted. */
 	@Modifying
@@ -62,6 +63,7 @@ public interface IUserCompanySettingsRepository extends IUserRelationshipReposit
 	@Query ("DELETE FROM #{#entityName} r WHERE r.company.id = :companyId")
 	void deleteByCompanyId(@Param ("companyId") Long companyId);
 	/** Delete all settings for a specific user. Used for cleanup when a user is deleted. */
+	@Override
 	@Modifying
 	@Transactional
 	@Query ("DELETE FROM #{#entityName} r WHERE r.user.id = :userId")

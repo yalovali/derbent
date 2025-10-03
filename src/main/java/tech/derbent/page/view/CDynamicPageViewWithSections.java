@@ -247,6 +247,7 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 		initializeEntityService();
 		splitLayout.setSizeFull();
 		splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
+		splitLayout.setSplitterPosition(30.0); // 50% for grid, 50% for details
 		add(splitLayout);
 		createMasterSection();
 		createDetailsSection();
