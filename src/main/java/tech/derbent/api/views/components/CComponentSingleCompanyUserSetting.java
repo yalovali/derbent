@@ -110,7 +110,11 @@ public class CComponentSingleCompanyUserSetting extends CComponentDBEntity<CUser
 			CUser user = getCurrentEntity();
 			Check.notNull(user, "User cannot be null when opening change dialog");
 			// Get the current setting (may be null if none exists yet)
-			CUserCompanySetting currentSetting = user.getCompanySettings();
+			// Eagerly load the setting to avoid LazyInitializationException in dialog
+			CUserCompanySetting currentSetting = null;
+			if (user.getCompanySettings() != null && user.getCompanySettings().getId() != null) {
+				currentSetting = userCompanySettingsService.getById(user.getCompanySettings().getId()).orElse(null);
+			}
 			new CUserCompanySettingsDialog(this, (CUserService) entityService, companyService, userCompanySettingsService, currentSetting, user,
 					this::onSettingsSaved).open();
 		} catch (Exception e) {
