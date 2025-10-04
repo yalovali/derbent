@@ -95,10 +95,10 @@ public final class CColorUtils {
 			icon.getStyle().set("width", "24px").set("height", "24px");
 			break;
 		case IconSize.LARGE:
-			// what is large?
+			icon.getStyle().set("width", "32px").set("height", "32px");
 			break;
 		case IconSize.SMALL:
-			// what is small?
+			icon.getStyle().set("width", "16px").set("height", "16px");
 			break;
 		}
 		icon.addClassNames(iconSizeClass);
