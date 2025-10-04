@@ -108,16 +108,19 @@ public class CUserCompanySettingsDialog extends CUserCompanyRelationDialog<CUser
 			ComboBox<CUserCompanyRole> roleComboBox = (ComboBox<CUserCompanyRole>) roleComponent;
 			Check.notNull(companyComboBox, "Company ComboBox cannot be null");
 			Check.notNull(roleComboBox, "Role ComboBox cannot be null");
-			// Initially disable role ComboBox if no company is selected
-			if (companyComboBox.getValue() == null) {
+			// Set initial state based on whether a company is selected
+			CCompany initialCompany = companyComboBox.getValue();
+			if (initialCompany == null) {
 				roleComboBox.setEnabled(false);
 				roleComboBox.clear();
+				roleComboBox.setItems(List.of());
 				updateSaveButtonState(false);
-				return;
+			} else {
+				roleComboBox.setEnabled(true);
+				updateRoleComboBox(roleComboBox, initialCompany);
+				updateSaveButtonState(true);
 			}
-			updateRoleComboBox(roleComboBox, companyComboBox.getValue());
-			updateSaveButtonState(true);
-			// Add listener to company ComboBox to update role ComboBox
+			// Add listener to company ComboBox to update role ComboBox dynamically
 			companyComboBox.addValueChangeListener(event -> {
 				CCompany selectedCompany = event.getValue();
 				if (selectedCompany != null) {
@@ -126,14 +129,14 @@ public class CUserCompanySettingsDialog extends CUserCompanyRelationDialog<CUser
 					updateRoleComboBox(roleComboBox, selectedCompany);
 					updateSaveButtonState(true);
 					LOGGER.debug("Company selected: {}. Updated role list for company.", selectedCompany.getName());
-					return;
+				} else {
+					// No company selected: disable role ComboBox and clear selection
+					roleComboBox.setEnabled(false);
+					roleComboBox.clear();
+					roleComboBox.setItems(List.of());
+					updateSaveButtonState(false);
+					LOGGER.debug("Company deselected. Role ComboBox disabled.");
 				}
-				// No company selected: disable role ComboBox and clear selection
-				roleComboBox.setEnabled(false);
-				roleComboBox.clear();
-				roleComboBox.setItems(List.of());
-				updateSaveButtonState(false);
-				LOGGER.debug("Company deselected. Role ComboBox disabled.");
 			});
 		} catch (Exception e) {
 			LOGGER.error("Error setting up dynamic role filtering: {}", e.getMessage(), e);
