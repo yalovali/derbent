@@ -421,7 +421,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		levelTitle.addClassNames(FontWeight.SEMIBOLD, FontSize.LARGE);
 		headerLayout.add(levelTitle);
 		// Add spacer to push content to the left
-		final Div spacer = CDiv.withFullSize();
+		final Div spacer = new CDiv();
 		headerLayout.add(spacer);
 		headerLayout.setFlexGrow(1, spacer);
 	}
