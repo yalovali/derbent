@@ -409,7 +409,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			final CButton backButton = new CButton("", levelIcon, this::handleBackButtonClick);
 			backButton.addClassNames(BACK_BUTTON_CLASS);
 			backButton.addThemeVariants(com.vaadin.flow.component.button.ButtonVariant.LUMO_TERTIARY_INLINE);
-			backButton.getStyle().set("min-width", "40px").set("min-height", "40px");
+			// backButton.getStyle().set("min-width", "40px").set("min-height", "40px");
 			headerLayout.add(backButton);
 		} else {
 			levelIcon = createMenuIcon(VaadinIcon.CUBES.create(), "var(--lumo-primary-color)");
