@@ -12,6 +12,7 @@ import com.vaadin.flow.component.avatar.AvatarVariant;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
@@ -36,6 +37,7 @@ import tech.derbent.api.services.CRouteDiscoveryService;
 import tech.derbent.api.ui.component.CHierarchicalSideMenu;
 import tech.derbent.api.ui.component.CViewToolbar;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
+import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.views.CAbstractNamedEntityPage;
 import tech.derbent.page.service.CPageMenuIntegrationService;
 import tech.derbent.session.service.CLayoutService;
@@ -120,11 +122,9 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		slidingHeader.addClassNames(Display.FLEX, AlignItems.CENTER, Margin.Horizontal.MEDIUM, Gap.SMALL);
 		slidingHeader.getStyle().set("flex-wrap", "nowrap"); // Ensure single line
 		// Original header content (logo and app name) - version removed
-		final var appLogo = VaadinIcon.CUBES.create();
-		appLogo.addClassNames(IconSize.LARGE);
-		// Apply colorful styling
-		appLogo.getStyle().set("color", "var(--lumo-primary-color)");
-		slidingHeader.add(appLogo);
+		final Icon icon = CColorUtils.setIconClassSize(VaadinIcon.CUBES.create(), IconSize.LARGE);
+		icon.getStyle().set("color", "var(--lumo-primary-color)");
+		slidingHeader.add(icon);
 		final var appName = new Span("Derbent");
 		appName.addClassNames(FontWeight.SEMIBOLD, FontSize.LARGE);
 		appName.getStyle().set("white-space", "nowrap"); // Prevent text wrapping
@@ -134,13 +134,11 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 
 	private Div createHeader() {
 		// Application logo and branding
-		final var appLogo = VaadinIcon.HOME.create();
-		appLogo.addClassNames(IconSize.LARGE);
-		// Apply colorful styling to match navigation theme
-		appLogo.getStyle().set("color", "var(--lumo-primary-color)");
+		final Icon icon = CColorUtils.setIconClassSize(VaadinIcon.HOME.create(), IconSize.LARGE);
+		icon.getStyle().set("color", "var(--lumo-primary-color)");
 		final var appName = new Span("Derbent");
 		appName.addClassNames(FontWeight.SEMIBOLD, FontSize.LARGE);
-		final var header = new Div(appLogo, appName);
+		final var header = new Div(icon, appName);
 		header.addClassNames(Display.FLEX, Padding.MEDIUM, Gap.MEDIUM, AlignItems.CENTER);
 		// Make the header clickable to navigate to dashboard
 		header.getStyle().set("cursor", "pointer");

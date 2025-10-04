@@ -493,8 +493,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				// Parse the icon name (remove "vaadin:" prefix if present)
 				String cleanIconName = iconName.startsWith("vaadin:") ? iconName.substring(7) : iconName;
 				VaadinIcon vaadinIcon = VaadinIcon.valueOf(cleanIconName.toUpperCase().replace("-", "_"));
-				Icon icon = vaadinIcon.create();
-				icon.setSize("16px");
+				Icon icon = CColorUtils.styleIcon(vaadinIcon.create());
 				layout.add(icon);
 			} catch (Exception e) {
 				// If icon cannot be created, show a placeholder

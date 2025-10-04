@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import tech.derbent.api.roles.domain.CUserCompanyRole;
 import tech.derbent.api.roles.service.CUserCompanyRoleService;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
@@ -65,10 +65,8 @@ public class CComponentSingleCompanyUserSetting extends CComponentDBEntity<CUser
 	protected void initPanel() throws Exception {
 		CHorizontalLayout mainLayout = new CHorizontalLayout();
 		displayContainer = new CHorizontalLayout();
-		displayContainer.addClassName("single-company-setting-display");
-		displayContainer.setWidthFull();
 		// Create change button
-		changeButton = CButton.createPrimary("Change", com.vaadin.flow.component.icon.VaadinIcon.EDIT.create(), e -> {
+		changeButton = CButton.createPrimary("Change", VaadinIcon.EDIT.create(), e -> {
 			try {
 				openChangeDialog();
 			} catch (Exception ex) {
@@ -99,9 +97,7 @@ public class CComponentSingleCompanyUserSetting extends CComponentDBEntity<CUser
 			// Update the user's company setting reference
 			user.setCompanySettings(savedSettings);
 			entityService.save(user);
-			// LOGGER.info("Successfully saved user company settings: {}", savedSettings);
-			// Refresh display
-			updateDisplay();
+			populateForm();
 		} catch (final Exception e) {
 			LOGGER.error("Error saving user company settings: {}", e.getMessage(), e);
 			new CWarningDialog("Failed to save company settings: " + e.getMessage()).open();
@@ -127,26 +123,18 @@ public class CComponentSingleCompanyUserSetting extends CComponentDBEntity<CUser
 	@Override
 	public void populateForm() {
 		super.populateForm();
-		// Reload user with company setting eagerly loaded to avoid LazyInitializationException
-		CUser currentUser = getCurrentEntity();
-		if (currentUser != null && currentUser.getId() != null) {
-			Optional<CUser> userWithCompanySetting = ((CUserService) entityService).findByIdWithCompanySetting(currentUser.getId());
-			if (userWithCompanySetting.isPresent()) {
-				setCurrentEntity(userWithCompanySetting.get());
-			}
-		}
-		updateDisplay();
-	}
-
-	private void updateDisplay() {
 		displayContainer.removeAll();
-		CUser user = getCurrentEntity();
-		if (user == null) {
+		// Reload user with company setting eagerly loaded to avoid LazyInitializationException
+		if (getCurrentEntity() == null) {
 			displayContainer.add(new Span("No user selected"));
 			changeButton.setEnabled(false);
 			return;
 		}
 		changeButton.setEnabled(true);
+		Optional<CUser> userWithCompanySetting = ((CUserService) entityService).findByIdWithCompanySetting(getCurrentEntity().getId());
+		CUser user = userWithCompanySetting
+				.orElseThrow(() -> new IllegalStateException("Failed to load user with company setting for user id: " + getCurrentEntity().getId()));
+		// get settings for eager loading by id
 		CUserCompanySetting setting = userCompanySettingsService.getById(user.getCompanySettings().getId())
 				.orElseThrow(() -> new IllegalStateException("Failed to load user company setting for user: " + user.getName()));
 		if (setting == null) {
@@ -154,43 +142,19 @@ public class CComponentSingleCompanyUserSetting extends CComponentDBEntity<CUser
 			return;
 		}
 		// Create visual display with company and role
-		HorizontalLayout layout = new HorizontalLayout();
-		layout.setSpacing(true);
-		layout.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
-		try {
-			// Display company with icon and color
-			CCompany company = setting.getCompany();
-			if (company != null) {
-				HorizontalLayout companyDisplay = CColorUtils.getEntityWithIcon(company);
-				layout.add(companyDisplay);
-			}
-			// Add separator
-			layout.add(new Span(" | "));
-			// Display role with icon and color if available
-			CUserCompanyRole role = setting.getRole();
-			if (role != null) {
-				Span roleLabel = new Span("Role: ");
-				roleLabel.getStyle().set("font-weight", "bold");
-				HorizontalLayout roleDisplay = CColorUtils.getEntityWithIcon(role);
-				layout.add(roleLabel, roleDisplay);
-			} else {
-				layout.add(new Span("Role: (not set)"));
-			}
-			// Add separator
-			layout.add(new Span(" | "));
-			// Display ownership level
-			String ownershipLevel = setting.getOwnershipLevel();
-			if (ownershipLevel != null && !ownershipLevel.trim().isEmpty()) {
-				Span ownershipLabel = new Span("Level: ");
-				ownershipLabel.getStyle().set("font-weight", "bold");
-				Span ownershipValue = new Span(ownershipLevel);
-				layout.add(ownershipLabel, ownershipValue);
-			}
-		} catch (Exception e) {
-			LOGGER.error("Error creating display: {}", e.getMessage(), e);
-			layout.add(new Span("Error displaying company setting"));
-		}
-		displayContainer.add(layout);
+		// Display company with icon and color
+		CCompany company = setting.getCompany();
+		Check.notNull(company, "Company in user company setting cannot be null");
+		CUserCompanyRole role = setting.getRole();
+		Check.notNull(role, "Role in user company setting cannot be null");
+		/**/
+		CHorizontalLayout layoutRoleRelation = new CHorizontalLayout();
+		layoutRoleRelation.add(CColorUtils.getEntityWithIcon(company));
+		layoutRoleRelation.add(new CSpan("|", 40));
+		layoutRoleRelation.add(CColorUtils.getEntityWithIcon(role));
+		layoutRoleRelation.add(new CSpan("|", 40));
+		layoutRoleRelation.add(new Span(setting.getOwnershipLevel()));
+		displayContainer.add(layoutRoleRelation);
 	}
 
 	@Override

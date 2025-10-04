@@ -84,20 +84,12 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			// Check if this item represents the current page
 			final boolean isCurrentPage = (path != null) && !path.trim().isEmpty() && (currentRoute != null) && currentRoute.equals(path.trim());
 			// Add icon with consistent sizing and colorful styling
-			Icon icon;
-			if ((iconName != null) && !iconName.trim().isEmpty()) {
-				icon = new Icon(iconName);
-			} else {
-				// Use a transparent placeholder icon to maintain consistent spacing
+			Icon icon = CColorUtils.setIconClassSize(CColorUtils.createStyledIcon(iconName, iconColor), IconSize.MEDIUM);
+			if (icon == null) {
+				// space holder icon to keep alignment
 				icon = VaadinIcon.CIRCLE.create();
 				icon.getStyle().set("visibility", "hidden");
 			}
-			// set color from iconColor if available
-			if ((iconColor != null) && !iconColor.trim().isEmpty()) {
-				icon.getStyle().set("color", iconColor);
-			}
-			icon.addClassNames(IconSize.MEDIUM);
-			icon.getStyle().set("min-width", "24px").set("min-height", "24px");
 			itemLayout.add(icon);
 			// Add text with highlighting
 			final Span itemText = new Span(name);
@@ -112,10 +104,8 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 				spacer.setWidthFull();
 				itemLayout.add(spacer);
 				itemLayout.setFlexGrow(1, spacer);
-				final Icon navIcon = VaadinIcon.ANGLE_RIGHT.create();
-				navIcon.addClassNames(IconSize.MEDIUM);
+				final Icon navIcon = CColorUtils.setIconClassSize(VaadinIcon.ANGLE_RIGHT.create(), IconSize.MEDIUM);
 				navIcon.getStyle().set("color", "var(--lumo-primary-color)");
-				navIcon.getStyle().set("min-width", "24px").set("min-height", "24px");
 				itemLayout.add(navIcon);
 			}
 			// Apply current page highlighting styles
@@ -341,7 +331,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		Check.notNull(menuEntry, "Menu entry must not be null");
 		String title = menuEntry.title();
 		final String path = menuEntry.path();
-		final String icon = menuEntry.icon();
+		final String iconName = menuEntry.icon();
 		boolean isDynamic = title.startsWith("dynamic/");
 		if (isDynamic) {
 			// remove dynamic/ from path
@@ -363,7 +353,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 				final CMenuLevel newLevel = new CMenuLevel(childLevelKey, levelName, parentLevel);
 				menuLevels.put(childLevelKey, newLevel);
 				// Add navigation item to parent level
-				parentLevel.addNavigationItem(menuEntry.menuClass(), levelName, icon, childLevelKey);
+				parentLevel.addNavigationItem(menuEntry.menuClass(), levelName, iconName, childLevelKey);
 			}
 			currentLevelKey = childLevelKey;
 		}
@@ -372,7 +362,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			final String itemName = titleParts[levelCount - 1].trim();
 			final CMenuLevel targetLevel = menuLevels.get(currentLevelKey);
 			if (targetLevel != null) {
-				targetLevel.addMenuItem(menuEntry.menuClass(), itemName, icon, path);
+				targetLevel.addMenuItem(menuEntry.menuClass(), itemName, iconName, path);
 			}
 		}
 	}
@@ -426,10 +416,9 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			headerLayout.add(backButton);
 		} else {
 			// Add app icon for root level to prevent label jumping
-			levelIcon = VaadinIcon.CUBES.create();
-			levelIcon.addClassNames(IconSize.MEDIUM, Margin.Right.MEDIUM);
+			levelIcon = CColorUtils.setIconClassSize(VaadinIcon.CUBES.create(), IconSize.MEDIUM);
+			levelIcon.addClassNames(Margin.Right.MEDIUM);
 			levelIcon.getStyle().set("color", "var(--lumo-primary-color)");
-			levelIcon.getStyle().set("min-width", "24px").set("min-height", "24px");
 			headerLayout.add(levelIcon);
 		}
 		// Add level title with consistent font size

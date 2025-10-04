@@ -81,10 +81,6 @@ public class CGridCell extends Div {
 		if (Boolean.TRUE.equals(showIcon)) {
 			final Icon icon = CColorUtils.getIconForEntity(entity);
 			if (icon != null) {
-				// Configure icon styling
-				icon.setSize("16px");
-				icon.getStyle().set("margin-right", "6px");
-				icon.getStyle().set("flex-shrink", "0");
 				add(icon);
 			}
 		}

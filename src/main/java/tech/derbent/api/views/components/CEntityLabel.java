@@ -1,7 +1,5 @@
 package tech.derbent.api.views.components;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -36,11 +34,8 @@ import tech.derbent.api.utils.CColorUtils;
 public class CEntityLabel extends HorizontalLayout {
 
 	private static final String DEFAULT_BORDER_RADIUS = "4px";
-	private static final String DEFAULT_ICON_MARGIN = "6px";
-	private static final String DEFAULT_ICON_SIZE = "16px";
 	// Default styling configuration
 	private static final String DEFAULT_PADDING = "4px 8px";
-	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityLabel.class);
 	private static final long serialVersionUID = 1L;
 	private final boolean autoContrast;
 	private final CEntityNamed<?> entity;
@@ -123,11 +118,10 @@ public class CEntityLabel extends HorizontalLayout {
 		// Add components based on icon availability
 		if (icon != null) {
 			// Style the icon
-			styleIcon(icon);
+			CColorUtils.styleIcon(icon);
 			add(icon, textSpan);
 		} else {
 			add(textSpan);
-			LOGGER.debug("Created entity label without icon for: {}", displayText);
 		}
 		// Apply color styling
 		applyColorStyling();
@@ -138,14 +132,5 @@ public class CEntityLabel extends HorizontalLayout {
 	public void refresh() throws Exception {
 		removeAll();
 		initializeLabel();
-	}
-
-	/** Applies icon styling with consistent sizing and spacing.
-	 * @param icon the icon to style */
-	private void styleIcon(final Icon icon) {
-		icon.getStyle().set("margin-right", DEFAULT_ICON_MARGIN);
-		icon.getStyle().set("width", DEFAULT_ICON_SIZE);
-		icon.getStyle().set("height", DEFAULT_ICON_SIZE);
-		icon.getStyle().set("flex-shrink", "0"); // Prevent icon from shrinking
 	}
 }

@@ -683,4 +683,11 @@ public class CAuxillaries {
 		}
 		return null;
 	}
+
+	public static String formatWidthPx(int i) {
+		if (i <= 0) {
+			return null;
+		}
+		return i + "px";
+	}
 }

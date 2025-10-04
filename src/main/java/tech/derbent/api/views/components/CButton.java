@@ -7,6 +7,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.theme.lumo.LumoUtility.IconSize;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
 
@@ -97,7 +98,7 @@ public class CButton extends Button {
 	 * @param icon          the button icon
 	 * @param clickListener the click event listener */
 	public CButton(final String text, final Icon icon) {
-		super(text, icon);
+		super(text, CColorUtils.setIconClassSize(icon, IconSize.MEDIUM));
 		initializeButton();
 	}
 
@@ -106,7 +107,7 @@ public class CButton extends Button {
 	 * @param icon          the button icon
 	 * @param clickListener the click event listener */
 	public CButton(final String text, final Icon icon, final ComponentEventListener<ClickEvent<Button>> clickListener) {
-		super(text, icon, clickListener == null ? e -> {} : clickListener);
+		super(text, CColorUtils.setIconClassSize(icon, IconSize.MEDIUM), clickListener == null ? e -> {} : clickListener);
 		initializeButton();
 	}
 

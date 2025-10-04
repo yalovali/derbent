@@ -160,7 +160,8 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 		Check.notNull(tooltip, "Tooltip must not be null");
 		Check.notNull(iconColor, "Icon color must not be null");
 		Check.notNull(route, "Route must not be null");
-		icon.addClassNames(IconSize.MEDIUM); // Use same size as menu icons
+		// Style the icon
+		CColorUtils.setIconClassSize(icon, IconSize.MEDIUM); // Use same size as menu icons
 		icon.getStyle().set("color", iconColor);
 		final CButton button = new CButton("", icon, null);
 		button.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ICON);
@@ -195,6 +196,7 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 				} else {
 					icon = CColorUtils.createStyledIcon("vaadin:file-text-o"); // Default fallback
 				}
+				icon.setSize("32px");
 			} catch (Exception e) {
 				LOGGER.warn("Could not parse icon '{}' for page '{}', using default", page.getIcon(), page.getPageTitle());
 				icon = CColorUtils.createStyledIcon("vaadin:file-text-o");

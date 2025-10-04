@@ -1,6 +1,7 @@
 package tech.derbent.api.roles.service;
 
 import java.time.Clock;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.roles.domain.CUserCompanyRole;
 import tech.derbent.api.services.CAbstractNamedEntityService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.session.service.CSessionService;
 
@@ -20,17 +22,10 @@ public class CUserCompanyRoleService extends CAbstractNamedEntityService<CUserCo
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserCompanyRoleService.class);
 
-	/** Constructor for CUserCompanyRoleService.
-	 * @param repository     the IUserCompanyRoleRepository to use for data access
-	 * @param clock          the Clock instance for time-related operations
-	 * @param sessionService the session service for user context */
 	public CUserCompanyRoleService(final IUserCompanyRoleRepository repository, final Clock clock, final CSessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 
-	/** Create a default admin role for a company.
-	 * @param company the company
-	 * @return the created admin role */
 	@Transactional
 	public CUserCompanyRole createAdminRole(CCompany company) {
 		CUserCompanyRole adminRole = new CUserCompanyRole("Company Admin", company);
@@ -45,9 +40,6 @@ public class CUserCompanyRoleService extends CAbstractNamedEntityService<CUserCo
 		return save(adminRole);
 	}
 
-	/** Create a default guest role for a company.
-	 * @param company the company
-	 * @return the created guest role */
 	@Transactional
 	public CUserCompanyRole createGuestRole(CCompany company) {
 		CUserCompanyRole guestRole = new CUserCompanyRole("Company Guest", company);
@@ -60,9 +52,6 @@ public class CUserCompanyRoleService extends CAbstractNamedEntityService<CUserCo
 		return save(guestRole);
 	}
 
-	/** Create a default user role for a company.
-	 * @param company the company
-	 * @return the created user role */
 	@Transactional
 	public CUserCompanyRole createUserRole(CCompany company) {
 		CUserCompanyRole userRole = new CUserCompanyRole("Company User", company);
@@ -79,17 +68,21 @@ public class CUserCompanyRoleService extends CAbstractNamedEntityService<CUserCo
 	@Override
 	protected Class<CUserCompanyRole> getEntityClass() { return CUserCompanyRole.class; }
 
-	/** Initialize default roles for a company if they don't exist.
-	 * @param company the company to initialize roles for */
 	@Transactional
 	public void initializeDefaultRoles(CCompany company) {
 		// Check if roles already exist for this company
-		java.util.List<CUserCompanyRole> existingRoles = ((IUserCompanyRoleRepository) repository).findByCompany(company);
+		List<CUserCompanyRole> existingRoles = ((IUserCompanyRoleRepository) repository).findByCompany(company);
 		if (existingRoles.isEmpty()) {
 			createAdminRole(company);
 			createUserRole(company);
 			createGuestRole(company);
 			LOGGER.info("Initialized default company roles for: {}", company.getName());
 		}
+	}
+
+	@Transactional (readOnly = true)
+	public List<CUserCompanyRole> findByCompany(CCompany selectedCompany) {
+		Check.notNull(selectedCompany, "Company cannot be null");
+		return ((IUserCompanyRoleRepository) repository).findByCompany(selectedCompany);
 	}
 }

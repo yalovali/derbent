@@ -20,18 +20,10 @@ import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.views.CAbstractNamedEntityPage;
 import tech.derbent.users.domain.CUser;
 
-/** CColorUtils - Utility class for color operations and status entity color management.
- * <p>
- * This utility class provides common methods for extracting colors from status entities, calculating contrast text colors, and applying color styling
- * to UI components.
- * </p>
- * <p>
- * The class follows the project's coding guidelines by centralizing color-related logic and providing reusable methods for color-aware components.
- * </p>
- * @author Derbent Framework
- * @since 1.0 */
 public final class CColorUtils {
 
+	private static final String DEFAULT_ICON_MARGIN = "6px";
+	private static final String DEFAULT_ICON_SIZE = "16px";
 	/** Color for Cancel buttons */
 	public static final String CRUD_CANCEL_COLOR = "#6c757d";
 	/** Icon for Cancel buttons */
@@ -74,65 +66,42 @@ public final class CColorUtils {
 	public static final String DEFAULT_LIGHT_TEXT = "white";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CColorUtils.class);
 
-	/** Applies comprehensive color styling to UI components using CSS styles and reflection. Dynamically accesses component style methods and applies
-	 * background color, contrast text, and layout properties. Uses reflection to work with any component that has a getStyle() method.
-	 * @param component       UI component to style (must have getStyle() method)
-	 * @param backgroundColor background color in CSS format (e.g., "#FF0000" or "red")
-	 * @param autoContrast    whether to automatically calculate contrasting text color
-	 * @param padding         CSS padding value to apply, or null to skip
-	 * @param borderRadius    CSS border-radius value to apply, or null to skip
-	 * @param minWidth        CSS min-width value to apply, or null to skip
-	 * @throws Exception
-	 * @throws IllegalArgumentException if component is null or backgroundColor is null/blank */
-	public static void applyColorStyling(final Object component, final String backgroundColor, final boolean autoContrast, final String padding,
-			final String borderRadius, final String minWidth) throws Exception {
-		Check.notNull(component, "Component cannot be null");
-		Check.notBlank(backgroundColor, "Background color cannot be null or blank");
-		try {
-			// Use reflection to get the style property
-			final Method getStyleMethod = component.getClass().getMethod("getStyle");
-			final Object style = getStyleMethod.invoke(component);
-			final Method setMethod = style.getClass().getMethod("set", String.class, String.class);
-			setMethod.invoke(style, "background-color", backgroundColor);
-			if (autoContrast) {
-				setMethod.invoke(style, "color", getContrastTextColor(backgroundColor));
-			}
-			if ((padding != null) && !padding.trim().isEmpty()) {
-				setMethod.invoke(style, "padding", padding);
-			}
-			if ((borderRadius != null) && !borderRadius.trim().isEmpty()) {
-				setMethod.invoke(style, "border-radius", borderRadius);
-			}
-			if ((minWidth != null) && !minWidth.trim().isEmpty()) {
-				setMethod.invoke(style, "min-width", minWidth);
-			}
-			setMethod.invoke(style, "display", "inline-block");
-		} catch (final Exception e) {
-			LOGGER.error("Error applying color styling to component: {}", e.getMessage());
-			throw e;
-		}
-	}
-
-	/** Creates an icon from an icon string, ensuring consistent styling.
-	 * @param iconString the icon string (e.g., "vaadin:plus")
-	 * @return the configured icon
-	 * @throws CColorOperationException if iconString is null or blank */
 	public static Icon createStyledIcon(final String iconString) {
 		Check.notBlank(iconString, "Icon string cannot be null or blank");
-		final Icon icon = new Icon(iconString);
+		final Icon icon = styleIcon(new Icon(iconString));
 		icon.addClassNames(IconSize.MEDIUM);
 		return icon;
 	}
 
-	/** Creates an icon with a specific color, ensuring consistent styling.
-	 * @param iconString the icon string (e.g., "vaadin:plus")
-	 * @param color      the color to apply to the icon
-	 * @return the configured icon */
 	public static Icon createStyledIcon(final String iconString, final String color) {
 		final Icon icon = createStyledIcon(iconString);
 		Check.notNull(icon, "Icon cannot be null");
 		Check.notBlank(color, "Color cannot be null or blank");
 		icon.getStyle().set("color", color);
+		return icon;
+	}
+
+	public static Icon setIconClassSize(Icon icon, String iconSizeClass) {
+		if (icon == null) {
+			return null;
+		}
+		// clear old styles
+		icon.getStyle().remove("width");
+		icon.getStyle().remove("height");
+		icon.getStyle().remove("min-width");
+		icon.getStyle().remove("min-height");
+		switch (iconSizeClass) {
+		case IconSize.MEDIUM:
+			icon.getStyle().set("width", "24px").set("height", "24px");
+			break;
+		case IconSize.LARGE:
+			// what is large?
+			break;
+		case IconSize.SMALL:
+			// what is small?
+			break;
+		}
+		icon.addClassNames(iconSizeClass);
 		return icon;
 	}
 
@@ -197,15 +166,18 @@ public final class CColorUtils {
 	}
 
 	public static Icon getIconForEntity(final CEntityDB<?> entity) throws Exception {
-		return new Icon(getStaticIconFilename(entity.getClass().getName()));
+		Icon icon = new Icon(getStaticIconFilename(entity.getClass().getName()));
+		return styleIcon(icon);
 	}
 
 	public static Icon getIconForViewClass(final CAbstractNamedEntityPage<?> view) throws Exception {
-		return new Icon(getStaticIconFilename(view.getClass().getName()));
+		Icon icon = new Icon(getStaticIconFilename(view.getClass().getName()));
+		return styleIcon(icon);
 	}
 
 	public static Icon getIconForViewClass(final Class<? extends CAbstractNamedEntityPage<?>> clazz) throws Exception {
-		return new Icon(getStaticIconFilename(clazz));
+		Icon icon = new Icon(getStaticIconFilename(clazz));
+		return styleIcon(icon);
 	}
 
 	public static String getRandomColor(boolean dark) { // TODO Auto-generated method stub
@@ -333,14 +305,6 @@ public final class CColorUtils {
 		return avatar;
 	}
 
-	/** Gets the user name with avatar from a settings object
-	 * @deprecated Use {@link #getEntityWithIcon(CEntityNamed)} instead */
-	@Deprecated
-	protected HorizontalLayout getUserWithAvatar(final CUser user) {
-		// For backward compatibility, use the generic implementation
-		return getEntityWithIcon(user);
-	}
-
 	/** Gets a generic entity display with icon - works for any named entity with icon support. This method creates a horizontal layout containing an
 	 * entity's icon and name.
 	 * @param entity the named entity to display (must not be null)
@@ -376,5 +340,18 @@ public final class CColorUtils {
 	/** Private constructor to prevent instantiation. */
 	private CColorUtils() {
 		// Utility class - no instantiation
+	}
+
+	/** Applies icon styling with consistent sizing and spacing.
+	 * @param icon the icon to style */
+	public static Icon styleIcon(final Icon icon) {
+		if (icon == null) {
+			return null;
+		}
+		icon.getStyle().set("margin-right", DEFAULT_ICON_MARGIN);
+		icon.getStyle().set("width", DEFAULT_ICON_SIZE);
+		icon.getStyle().set("height", DEFAULT_ICON_SIZE);
+		icon.getStyle().set("flex-shrink", "0"); // Prevent icon from shrinking
+		return icon;
 	}
 }

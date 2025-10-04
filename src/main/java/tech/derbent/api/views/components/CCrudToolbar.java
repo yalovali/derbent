@@ -96,22 +96,14 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 
 	/** Handles the create (new entity) operation. */
 	private void handleCreate() {
-		if (newEntitySupplier == null) {
-			showErrorNotification("Cannot create new entity: No entity supplier configured.");
-			return;
-		}
+		Check.notNull(newEntitySupplier, "New entity supplier is not set");
 		try {
-			LOGGER.debug("Create button clicked for entity type: {}", entityClass.getSimpleName());
 			// Create new entity
 			EntityClass newEntity = newEntitySupplier.get();
-			if (newEntity == null) {
-				showErrorNotification("Failed to create new entity instance.");
-				return;
-			}
+			Check.notNull(newEntity, "New entity supplier returned null");
 			// Set as current entity and bind to form
 			setCurrentEntity(newEntity);
 			showSuccessNotification("New " + entityClass.getSimpleName() + " created. Fill in the details and click Save.");
-			LOGGER.info("New entity created successfully: {}", entityClass.getSimpleName());
 		} catch (Exception exception) {
 			LOGGER.error("Error during create operation for entity: {}", entityClass.getSimpleName(), exception);
 			if (notificationService != null) {
@@ -124,74 +116,72 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 
 	/** Handles the delete operation with confirmation dialog and proper error handling. */
 	private void handleDelete() {
-		if (currentEntity == null || currentEntity.getId() == null) {
-			showErrorNotification("Cannot delete: No entity selected or entity not saved yet.");
-			return;
-		}
-		// Check for dependencies before showing confirmation dialog
-		if (dependencyChecker != null) {
-			try {
-				String dependencyError = dependencyChecker.apply(currentEntity);
-				if (dependencyError != null) {
-					showErrorNotification(dependencyError);
-					return;
-				}
-			} catch (Exception e) {
-				LOGGER.error("Error checking dependencies for deletion: {}", e.getMessage());
-				throw e;
+		try {
+			if (currentEntity == null || currentEntity.getId() == null) {
+				showErrorNotification("Cannot delete: No entity selected or entity not saved yet.");
+				return;
+			}
+			Check.notNull(dependencyChecker, "Dependency checker function is not set");
+			String dependencyError = dependencyChecker.apply(currentEntity);
+			if (dependencyError != null) {
+				showErrorNotification(dependencyError);
+				return;
+			}
+			// Show confirmation dialog
+			CConfirmationDialog confirmDialog =
+					new CConfirmationDialog("Are you sure you want to delete this " + entityClass.getSimpleName() + "?", this::performDelete);
+			confirmDialog.open();
+		} catch (Exception exception) {
+			LOGGER.error("Error during delete operation for entity: {}", entityClass.getSimpleName(), exception);
+			if (notificationService != null) {
+				notificationService.showDeleteError();
+			} else {
+				showErrorNotification("An error occurred while attempting to delete the entity. Please try again.");
 			}
 		}
-		// Show confirmation dialog
-		CConfirmationDialog confirmDialog =
-				new CConfirmationDialog("Are you sure you want to delete this " + entityClass.getSimpleName() + "?", this::performDelete);
-		confirmDialog.open();
 	}
 
 	/** Handles the refresh operation. */
 	private void handleRefresh() {
-		if (refreshCallback == null) {
-			showErrorNotification("Cannot refresh: No refresh callback configured.");
-			return;
-		}
+		Check.notNull(refreshCallback, "Refresh callback is not set");
 		try {
-			LOGGER.debug("Refresh button clicked for entity type: {}", entityClass.getSimpleName());
 			refreshCallback.accept(currentEntity);
 			showSuccessNotification("Data refreshed successfully");
-			LOGGER.info("Refresh operation completed for entity type: {}", entityClass.getSimpleName());
 		} catch (Exception exception) {
-			LOGGER.error("Error during refresh operation for entity: {}", entityClass.getSimpleName(), exception);
-			throw exception;
+			LOGGER.error("Error during delete operation for entity: {}", entityClass.getSimpleName(), exception);
+			if (notificationService != null) {
+				notificationService.showDeleteError();
+			} else {
+				showErrorNotification("An error occurred while attempting to delete the entity. Please try again.");
+			}
 		}
 	}
 
 	/** Handles the save (update) operation with proper validation, error handling, and notifications.
 	 * @throws Exception */
 	private void handleSave() throws Exception {
-		if (currentEntity == null) {
-			showErrorNotification("Cannot save: No entity selected.");
-			return;
-		}
 		try {
-			LOGGER.debug("Save button clicked for entity: {} ID: {}", entityClass.getSimpleName(), currentEntity.getId());
+			if (currentEntity == null) {
+				showErrorNotification("Cannot save: No entity selected.");
+				return;
+			}
 			binder.writeBean(currentEntity);
 			// Save entity
 			final EntityClass savedEntity = entityService.save(currentEntity);
 			currentEntity = savedEntity;
 			// Re-bind the saved entity to refresh the form with updated data (like generated IDs, timestamps)
-			try {
-				binder.setBean(savedEntity);
-				LOGGER.debug("Form refreshed with saved entity data: {} ID: {}", entityClass.getSimpleName(), savedEntity.getId());
-			} catch (Exception bindingException) {
-				LOGGER.error("Error refreshing form after save: {}", bindingException.getMessage());
-				throw bindingException;
-			}
+			binder.setBean(savedEntity);
 			updateButtonStates();
 			showSuccessNotification("Data saved successfully");
 			// Notify listeners
 			notifyListenersSaved(savedEntity);
 		} catch (Exception e) {
-			LOGGER.error("Unexpected error during save operation for entity: {}", entityClass.getSimpleName(), e);
-			throw e;
+			LOGGER.error("Error during save operation for entity: {}", entityClass.getSimpleName(), e);
+			if (notificationService != null) {
+				notificationService.showDeleteError();
+			} else {
+				showErrorNotification("An error occurred while attempting to delete the entity. Please try again.");
+			}
 		}
 	}
 
