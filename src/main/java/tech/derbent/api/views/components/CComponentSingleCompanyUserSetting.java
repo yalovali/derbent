@@ -113,7 +113,9 @@ public class CComponentSingleCompanyUserSetting extends CComponentDBEntity<CUser
 			// Eagerly load the setting to avoid LazyInitializationException in dialog
 			CUserCompanySetting currentSetting = null;
 			if (user.getCompanySettings() != null && user.getCompanySettings().getId() != null) {
-				currentSetting = userCompanySettingsService.getById(user.getCompanySettings().getId()).orElse(null);
+				currentSetting = userCompanySettingsService.getById(user.getCompanySettings().getId())
+						.orElseThrow(() -> new IllegalStateException("Failed to load user company setting for user: " + user.getName()
+								+ " with setting id: " + user.getCompanySettings().getId()));
 			}
 			new CUserCompanySettingsDialog(this, (CUserService) entityService, companyService, userCompanySettingsService, currentSetting, user,
 					this::onSettingsSaved).open();

@@ -15,7 +15,11 @@ public abstract class CAbstractPage extends Main implements BeforeEnterObserver,
 	public CAbstractPage() {
 		super();
 		setSizeFull();
-		addClassNames(LumoUtility.BoxSizing.BORDER, LumoUtility.Display.FLEX, LumoUtility.FlexDirection.COLUMN, LumoUtility.Gap.SMALL);
+		addClassNames(LumoUtility.BoxSizing.BORDER, LumoUtility.Display.FLEX, /* */
+				LumoUtility.FlexDirection.COLUMN, /* */
+				LumoUtility.Gap.SMALL, /* */
+				LumoUtility.Margin.SMALL, /* */
+				LumoUtility.Width.FULL);
 		initPage();
 		setupToolbar();
 	};
