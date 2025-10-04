@@ -1,19 +1,31 @@
 package tech.derbent.config;
 // package tech.derbent.config;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
+import tech.derbent.api.utils.Check;
 
 @Component
 public class CSpringContext implements ApplicationContextAware {
 
-	private static ApplicationContext ctx;
+	private static ApplicationContext applicationContext;
 
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) { ctx = applicationContext; }
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		/***/
+		Check.notNull(applicationContext, "Application context cannot be null");
+		CSpringContext.applicationContext = applicationContext;
+	}
 
 	public static <T> T getBean(Class<T> type) {
-		return ctx.getBean(type);
+		Check.notNull(CSpringContext.applicationContext, "Application context is not initialized");
+		T result = CSpringContext.applicationContext.getBean(type);
+		if (result == null) {
+			LoggerFactory.getLogger(CSpringContext.class).error("Bean of type {} not found in application context", type.getName());
+		}
+		Check.notNull(result, "Bean of type " + type.getName() + " not found in application context");
+		return result;
 	}
 }

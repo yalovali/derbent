@@ -70,8 +70,7 @@ public class CDynamicPageView extends CDynamicPageViewWithSections {
 			// Get the service bean from the application context
 			Object serviceBean = applicationContext.getBean(gridEntity.getDataServiceBeanName());
 			Check.notNull(serviceBean, "Service bean not found: " + gridEntity.getDataServiceBeanName());
-			Check.isTrue(serviceBean instanceof CAbstractService<?>,
-					"Service bean is not an instance of CAbstractService: " + serviceBean.getClass());
+			Check.instanceOf(serviceBean, CAbstractService.class, "Service bean is not an instance of CAbstractService: " + serviceBean.getClass());
 			entityService = (CAbstractService<?>) serviceBean;
 			// Get the entity class from the detail section
 			CDetailSection detailSection = pageEntity.getDetailSection();

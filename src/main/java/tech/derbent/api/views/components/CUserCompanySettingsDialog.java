@@ -33,6 +33,8 @@ public class CUserCompanySettingsDialog extends CUserCompanyRelationDialog<CUser
 		// Get the role service from the application context
 		this.roleService = CSpringContext.getBean(CUserCompanyRoleService.class);
 		Check.notNull(roleService, "Role service cannot be null");
+		setupDialog();
+		populateForm();
 	}
 
 	@Override
@@ -69,29 +71,27 @@ public class CUserCompanySettingsDialog extends CUserCompanyRelationDialog<CUser
 		super.populateForm();
 	}
 
-	/** Prepares the role ComboBox by populating its items based on the current entity's company. This must be called before binder.readBean() to
-	 * avoid BindingException when the entity has a role value that isn't in the ComboBox's (empty) items list. */
 	@SuppressWarnings ("unchecked")
 	private void prepareRoleComboBoxForPopulation() {
 		try {
 			// Get the company from the entity being edited
 			CUserCompanySetting entity = getEntity();
-			if (entity == null || entity.getCompany() == null) {
+			Check.notNull(entity, "Entity cannot be null");
+			if (entity.getCompany() == null) {
 				// No company set yet, role ComboBox will remain empty
 				LOGGER.debug("No company set in entity, role ComboBox will remain empty");
 				return;
 			}
 			// Get the role ComboBox from the form builder
 			Component roleComponent = formBuilder.getComponent("role");
-			if (roleComponent instanceof ComboBox) {
-				ComboBox<CUserCompanyRole> roleComboBox = (ComboBox<CUserCompanyRole>) roleComponent;
-				// Populate the role ComboBox with items for the entity's company
-				updateRoleComboBox(roleComboBox, entity.getCompany());
-				LOGGER.debug("Pre-populated role ComboBox with items for company: {}", entity.getCompany().getName());
-			}
+			Check.instanceOf(roleComponent, ComboBox.class, "Role component is not a ComboBox");
+			ComboBox<CUserCompanyRole> roleComboBox = (ComboBox<CUserCompanyRole>) roleComponent;
+			// Populate the role ComboBox with items for the entity's company
+			updateRoleComboBox(roleComboBox, entity.getCompany());
+			// LOGGER.debug("Pre-populated role ComboBox with items for company: {}", entity.getCompany().getName());
 		} catch (Exception e) {
 			LOGGER.error("Error preparing role ComboBox for population: {}", e.getMessage(), e);
-			// Don't throw - let populateForm() proceed, it may still work or provide better error info
+			throw e;
 		}
 	}
 
@@ -137,12 +137,10 @@ public class CUserCompanySettingsDialog extends CUserCompanyRelationDialog<CUser
 			});
 		} catch (Exception e) {
 			LOGGER.error("Error setting up dynamic role filtering: {}", e.getMessage(), e);
+			throw e;
 		}
 	}
 
-	/** Update the role ComboBox with roles for the selected company.
-	 * @param roleComboBox    the role ComboBox to update
-	 * @param selectedCompany the selected company */
 	private void updateRoleComboBox(ComboBox<CUserCompanyRole> roleComboBox, CCompany selectedCompany) {
 		try {
 			Check.notNull(roleComboBox, "Role ComboBox cannot be null");
@@ -162,11 +160,10 @@ public class CUserCompanySettingsDialog extends CUserCompanyRelationDialog<CUser
 			}
 		} catch (Exception e) {
 			LOGGER.error("Error updating role ComboBox: {}", e.getMessage(), e);
+			throw e;
 		}
 	}
 
-	/** Update the save button enabled state based on whether a company is selected.
-	 * @param enabled true to enable the save button, false to disable */
 	private void updateSaveButtonState(boolean enabled) {
 		try {
 			// Get the save button from the button layout
@@ -183,6 +180,7 @@ public class CUserCompanySettingsDialog extends CUserCompanyRelationDialog<CUser
 			});
 		} catch (Exception e) {
 			LOGGER.error("Error updating save button state: {}", e.getMessage(), e);
+			throw e;
 		}
 	}
 }

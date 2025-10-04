@@ -415,7 +415,7 @@ public final class CDataProviderResolver {
 			if (methodNoParams != null) {
 				final Object result = methodNoParams.invoke(serviceBean);
 				Check.notNull(result, "Result from method with no parameters cannot be null");
-				Check.isTrue(result instanceof List, "Result from method with no parameters must be a List");
+				Check.instanceOf(result, List.class, "Result from method with no parameters must be a List");
 				return (List<T>) result;
 			}
 		} catch (final Exception e) {

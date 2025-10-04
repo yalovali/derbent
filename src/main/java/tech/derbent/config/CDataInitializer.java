@@ -63,6 +63,7 @@ import tech.derbent.orders.domain.COrder;
 import tech.derbent.orders.domain.COrderStatus;
 import tech.derbent.orders.domain.COrderType;
 import tech.derbent.orders.service.CApprovalStatusInitializerService;
+import tech.derbent.orders.service.CApprovalStatusService;
 import tech.derbent.orders.service.CCurrencyInitializerService;
 import tech.derbent.orders.service.CCurrencyService;
 import tech.derbent.orders.service.COrderInitializerService;
@@ -170,6 +171,7 @@ public class CDataInitializer {
 	private final CUserTypeService userTypeService;
 
 	public CDataInitializer() {
+		LOGGER.info("DataInitializer starting - obtaining service beans from application context");
 		gridEntityService = CSpringContext.getBean(CGridEntityService.class);
 		projectService = CSpringContext.getBean(CProjectService.class);
 		userService = CSpringContext.getBean(CUserService.class);
@@ -200,6 +202,35 @@ public class CDataInitializer {
 		riskStatusService = CSpringContext.getBean(CRiskStatusService.class);
 		userProjectRoleService = CSpringContext.getBean(CUserProjectRoleService.class);
 		userCompanyRoleService = CSpringContext.getBean(CUserCompanyRoleService.class);
+		Check.notNull(activityService, "ActivityService bean not found");
+		Check.notNull(activityStatusService, "ActivityStatusService bean not found");
+		Check.notNull(activityTypeService, "ActivityTypeService bean not found");
+		Check.notNull(commentService, "CommentService bean not found");
+		Check.notNull(commentPriorityService, "CommentPriorityService bean not found");
+		Check.notNull(companyService, "CompanyService bean not found");
+		Check.notNull(currencyService, "CurrencyService bean not found");
+		Check.notNull(decisionService, "DecisionService bean not found");
+		Check.notNull(decisionStatusService, "DecisionStatusService bean not found");
+		Check.notNull(decisionTypeService, "DecisionTypeService bean not found");
+		Check.notNull(meetingService, "MeetingService bean not found");
+		Check.notNull(meetingStatusService, "MeetingStatusService bean not found");
+		Check.notNull(meetingTypeService, "MeetingTypeService bean not found");
+		Check.notNull(orderService, "OrderService bean not found");
+		Check.notNull(orderStatusService, "OrderStatusService bean not found");
+		Check.notNull(orderTypeService, "OrderTypeService bean not found");
+		Check.notNull(pageEntityService, "PageEntityService bean not found");
+		Check.notNull(projectService, "ProjectService bean not found");
+		Check.notNull(riskService, "RiskService bean not found");
+		Check.notNull(riskStatusService, "RiskStatusService bean not found");
+		Check.notNull(screenService, "ScreenService bean not found");
+		Check.notNull(screenLinesService, "ScreenLinesService bean not found");
+		Check.notNull(userService, "UserService bean not found");
+		Check.notNull(userTypeService, "UserTypeService bean not found");
+		Check.notNull(userProjectRoleService, "UserProjectRoleService bean not found");
+		Check.notNull(userCompanyRoleService, "UserCompanyRoleService bean not found");
+		Check.notNull(userProjectSettingsService, "UserProjectSettingsService bean not found");
+		Check.notNull(userCompanySettingsService, "UserCompanySettingsService bean not found");
+		LOGGER.info("All service beans obtained successfully");
 		final DataSource ds = CSpringContext.getBean(DataSource.class);
 		jdbcTemplate = new JdbcTemplate(ds);
 	}
@@ -498,7 +529,7 @@ public class CDataInitializer {
 		status.setDescription(description);
 		status.setColor(color);
 		status.setSortOrder(sortOrder);
-		CSpringContext.getBean(tech.derbent.orders.service.CApprovalStatusService.class).save(status);
+		CSpringContext.getBean(CApprovalStatusService.class).save(status);
 	}
 
 	/** Creates backend development activity. */

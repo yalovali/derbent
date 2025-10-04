@@ -46,10 +46,12 @@ public class CComponentSingleCompanyUserSetting extends CComponentDBEntity<CUser
 	 * @return list of available company roles */
 	public List<CUserCompanyRole> getAvailableCompanyRolesForUser() {
 		CUser user = getCurrentEntity();
-		if (user == null || user.getCompanySettings() == null) {
+		Check.notNull(user, "User cannot be null when fetching available company roles");
+		CUserCompanySetting settings = user.getCompanySettingsInstance(userCompanySettingsService);
+		if (settings == null) {
 			return List.of();
 		}
-		CCompany company = user.getCompanySettings().getCompany();
+		CCompany company = settings.getCompany();
 		if (company == null) {
 			return List.of();
 		}
@@ -109,14 +111,8 @@ public class CComponentSingleCompanyUserSetting extends CComponentDBEntity<CUser
 		try {
 			CUser user = getCurrentEntity();
 			Check.notNull(user, "User cannot be null when opening change dialog");
-			// Get the current setting (may be null if none exists yet)
-			// Eagerly load the setting to avoid LazyInitializationException in dialog
-			CUserCompanySetting currentSetting = null;
-			if (user.getCompanySettings() != null && user.getCompanySettings().getId() != null) {
-				currentSetting = userCompanySettingsService.getById(user.getCompanySettings().getId())
-						.orElseThrow(() -> new IllegalStateException("Failed to load user company setting for user: " + user.getName()
-								+ " with setting id: " + user.getCompanySettings().getId()));
-			}
+			CUserCompanySetting currentSetting = user.getCompanySettingsInstance(userCompanySettingsService);
+			Check.notNull(currentSetting, "Current setting cannot be null when opening change dialog");
 			new CUserCompanySettingsDialog(this, (CUserService) entityService, companyService, userCompanySettingsService, currentSetting, user,
 					this::onSettingsSaved).open();
 		} catch (Exception e) {
@@ -141,8 +137,8 @@ public class CComponentSingleCompanyUserSetting extends CComponentDBEntity<CUser
 		CUser user = userWithCompanySetting
 				.orElseThrow(() -> new IllegalStateException("Failed to load user with company setting for user id: " + getCurrentEntity().getId()));
 		// get settings for eager loading by id
-		CUserCompanySetting setting = userCompanySettingsService.getById(user.getCompanySettings().getId())
-				.orElseThrow(() -> new IllegalStateException("Failed to load user company setting for user: " + user.getName()));
+		CUserCompanySetting setting = user.getCompanySettingsInstance(userCompanySettingsService);
+		Check.notNull(setting, "User company setting cannot be null when populating form");
 		if (setting == null) {
 			displayContainer.add(new Span("No company assigned. Click 'Change' to assign a company."));
 			return;

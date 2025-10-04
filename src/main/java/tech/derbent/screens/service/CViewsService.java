@@ -165,7 +165,7 @@ public class CViewsService {
 			// Get the service bean from Spring application context
 			Object serviceBean = ApplicationContextProvider.getApplicationContext().getBean(serviceBeanName);
 			Check.notNull(serviceBean, "Service bean not found: " + serviceBeanName);
-			Check.isTrue(serviceBean instanceof CAbstractService, "Service bean does not extend CAbstractService: " + serviceBeanName);
+			Check.instanceOf(serviceBean, CAbstractService.class, "Service bean is not an instance of CAbstractService: " + serviceBeanName);
 			// Cast to CAbstractService and get the entity class
 			CAbstractService<?> abstractService = (CAbstractService<?>) serviceBean;
 			Check.notNull(abstractService, "Abstract service instance is null for bean: " + serviceBeanName);

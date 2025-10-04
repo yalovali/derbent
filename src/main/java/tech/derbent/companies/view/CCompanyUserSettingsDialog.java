@@ -3,10 +3,10 @@ package tech.derbent.companies.view;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.combobox.ComboBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.combobox.ComboBox;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.roles.domain.CUserCompanyRole;
 import tech.derbent.api.roles.service.CUserCompanyRoleService;
@@ -32,6 +32,8 @@ public class CCompanyUserSettingsDialog extends CUserCompanyRelationDialog<CComp
 		this.masterCompany = company;
 		// Get the role service from the application context
 		this.roleService = CSpringContext.getBean(CUserCompanyRoleService.class);
+		setupDialog();
+		populateForm();
 	}
 
 	@Override

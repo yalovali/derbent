@@ -80,7 +80,7 @@ public abstract class CAbstractNamedEntityService<EntityClass extends CEntityNam
 			// Get constructor that takes a String parameter and invoke it with the name
 			final Object instance = getEntityClass().getDeclaredConstructor(String.class).newInstance(name.trim());
 			Check.notNull(instance, "Failed to create instance of " + getEntityClass().getName());
-			Check.isTrue(getEntityClass().isInstance(instance), "Created object is not instance of T");
+			Check.instanceOf(instance, getEntityClass(), "Created object is not instance of " + getEntityClass().getName());
 			return ((EntityClass) instance);
 		} catch (final Exception e) {
 			throw new RuntimeException("Failed to create instance of " + getEntityClass().getName(), e);

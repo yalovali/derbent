@@ -157,7 +157,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			Check.notNull(method, "Method '" + methodName + "' on service bean for field '" + fieldName + "'");
 			final Object result = method.invoke(serviceBean);
 			Check.notNull(result, "Result of method '" + methodName + "' on service bean for field '" + fieldName + "'");
-			Check.isTrue(result instanceof List, "Method '" + methodName + "' on service bean for field '" + fieldName + "' did not return a List");
+			Check.instanceOf(result, List.class, "Method '" + methodName + "' on service bean for field '" + fieldName + "' did not return a List");
 			final List<?> rawList = (List<?>) result;
 			// Convert to List<String> if possible
 			final List<String> stringList = rawList.stream().filter(item -> item instanceof String).map(item -> (String) item).toList();
@@ -177,7 +177,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			Check.notNull(method, "Method '" + methodName + "' on service bean for field '" + fieldName + "'");
 			final Object result = method.invoke(serviceBean, parameter);
 			Check.notNull(result, "Result of method '" + methodName + "' on service bean for field '" + fieldName + "'");
-			Check.isTrue(result instanceof List, "Method '" + methodName + "' on service bean for field '" + fieldName + "' did not return a List");
+			Check.instanceOf(result, List.class, "Method '" + methodName + "' on service bean for field '" + fieldName + "' did not return a List");
 			final List<?> rawList = (List<?>) result;
 			// Convert to List<String> if possible
 			final List<String> stringList = rawList.stream().filter(item -> item instanceof String).map(item -> (String) item).toList();
@@ -985,7 +985,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			Check.notNull(method, "Method '" + methodName + "' on service bean for field '" + fieldInfo.getFieldName() + "'");
 			Object result = method.invoke(serviceBean);
 			Check.notNull(result, "Result of custom component method " + methodName + " for field " + fieldInfo.getFieldName());
-			Check.isTrue(result instanceof Component, "Result of method " + methodName + " is not a Component");
+			Check.instanceOf(result, Component.class, "Result of method " + methodName + " is not a Component for field " + fieldInfo.getFieldName());
 			final Component component = (Component) result;
 			if (component instanceof IHasContentOwner) {
 				((IHasContentOwner) component).setContentOwner(contentOwner);

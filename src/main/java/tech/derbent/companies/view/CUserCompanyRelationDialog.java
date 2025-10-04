@@ -39,8 +39,6 @@ public abstract class CUserCompanyRelationDialog<MasterEntity extends CEntityDB<
 		// Set the appropriate entity reference
 		setupEntityRelation(masterEntity);
 		// Apply colorful styling to make the dialog more visually appealing
-		setupDialog();
-		populateForm();
 	}
 
 	/** Abstract methods for subclasses to provide specific titles */

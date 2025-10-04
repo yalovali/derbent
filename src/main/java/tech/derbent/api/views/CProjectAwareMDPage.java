@@ -8,6 +8,7 @@ import tech.derbent.api.domains.CEntityOfProject;
 import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.services.CAbstractNamedEntityService;
 import tech.derbent.api.services.CEntityOfProjectService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CVerticalLayout;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.service.CDetailSectionService;
@@ -73,11 +74,8 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
 	public void setProjectForEntity(final EntityClass entity, final CProject project) {
 		assert entity != null : "Entity must not be null";
 		assert project != null : "Project must not be null";
-		if (entity instanceof CEntityOfProject) {
-			entity.setProject(project);
-		} else {
-			throw new IllegalArgumentException("Entity must implement CEntityOfProject interface");
-		}
+		Check.instanceOf(entity, CEntityOfProject.class, "Entity must implement CEntityOfProject interface");
+		entity.setProject(project);
 	}
 
 	@Override

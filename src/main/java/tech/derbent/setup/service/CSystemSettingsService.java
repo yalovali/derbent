@@ -37,7 +37,7 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 	public CSystemSettings createDefaultSystemSettings() {
 		// Check if settings already exist
 		Check.notNull(repository, "Repository cannot be null");
-		Check.isTrue(repository instanceof ISystemSettingsRepository, "Repository must implement ISystemSettingsRepository");
+		Check.instanceOf(repository, ISystemSettingsRepository.class, "Repository must implement ISystemSettingsRepository");
 		Check.isTrue(!((ISystemSettingsRepository) repository).existsSystemSettings(),
 				"System settings already exist. Use getOrCreateSystemSettings() instead.");
 		try {
@@ -167,7 +167,7 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 	@Transactional
 	public CSystemSettings updateSystemSettings(final CSystemSettings settings) {
 		Check.notNull(repository, "Repository cannot be null");
-		Check.isTrue(repository instanceof ISystemSettingsRepository, "Repository must implement ISystemSettingsRepository");
+		Check.instanceOf(repository, ISystemSettingsRepository.class, "Repository must implement ISystemSettingsRepository");
 		Check.notNull(settings, "System settings cannot be null");
 		Check.notNull(settings.getId(), "System settings must have an ID for update operation");
 		// Validate business rules

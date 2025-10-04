@@ -172,9 +172,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		Check.notBlank(name, "Entity name cannot be null or empty");
 		try {
 			final Object instance = getEntityClass().getDeclaredConstructor(String.class, CProject.class).newInstance(name, project);
-			if (!getEntityClass().isInstance(instance)) {
-				throw new IllegalStateException("Created object is not instance of T");
-			}
+			Check.instanceOf(instance, getEntityClass(), "Created object is not instance of EntityClass");
 			@SuppressWarnings ("unchecked")
 			final EntityClass entity = ((EntityClass) instance);
 			return entity;

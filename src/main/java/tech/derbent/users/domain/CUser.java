@@ -19,6 +19,7 @@ import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.interfaces.IFieldInfoGenerator;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.Check;
+import tech.derbent.users.service.CUserCompanySettingsService;
 
 @Entity
 @Table (name = "cuser") // Using quoted identifier to ensure exact case matching in
@@ -145,7 +146,12 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 		return CUser.class;
 	}
 
-	public CUserCompanySetting getCompanySettings() { return companySetting; }
+	public Long getCompanySettingsId() { return companySetting != null ? companySetting.getId() : null; }
+
+	public CUserCompanySetting getCompanySettingsInstance(CUserCompanySettingsService service) {
+		Check.notNull(service, "Service cannot be null");
+		return service.getById(getCompanySettingsId()).orElse(null);
+	}
 
 	public String getEmail() { return email; }
 

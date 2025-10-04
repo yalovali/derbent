@@ -91,11 +91,11 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			// Get the service and entity class
 			Object serviceBean = ApplicationContextProvider.getApplicationContext().getBean(serviceBeanName);
 			Check.notNull(serviceBean, "Service bean not found: " + serviceBeanName);
-			Check.isTrue(serviceBean instanceof CAbstractService, "Service bean does not extend CAbstractService: " + serviceBeanName);
+			Check.instanceOf(serviceBean, CAbstractService.class, "Service bean does not extend CAbstractService: " + serviceBeanName);
 			CAbstractService<?> abstractService = (CAbstractService<?>) serviceBean;
 			Check.notNull(abstractService, "AbstractService is null for search filtering");
 			// Check if service supports project-based filtering
-			Check.isTrue(abstractService instanceof CEntityOfProjectService, "Service does not support project-based filtering: " + serviceBeanName);
+			Check.instanceOf(abstractService, CEntityOfProjectService.class, "Service does not support project-based filtering: " + serviceBeanName);
 			CEntityOfProjectService<?> projectService = (CEntityOfProjectService<?>) abstractService;
 			CProject currentProject = sessionService != null
 					? sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found.")) : null;
@@ -403,7 +403,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			Check.notNull(ApplicationContextProvider.getApplicationContext(), "ApplicationContext is not available");
 			Object serviceBean = ApplicationContextProvider.getApplicationContext().getBean(serviceBeanName);
 			Check.notNull(serviceBean, "Service bean not found: " + serviceBeanName);
-			Check.isTrue(serviceBean instanceof CAbstractService, "Service bean does not extend CAbstractService: " + serviceBeanName);
+			Check.instanceOf(serviceBean, CAbstractService.class, "Service bean does not extend CAbstractService: " + serviceBeanName);
 			CAbstractService<?> abstractService = (CAbstractService<?>) serviceBean;
 			return getEntityClassFromService(abstractService);
 		} catch (Exception e) {
@@ -465,7 +465,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			Check.notNull(ApplicationContextProvider.getApplicationContext(), "ApplicationContext is not available");
 			Object serviceBean = ApplicationContextProvider.getApplicationContext().getBean(serviceBeanName);
 			Check.notNull(serviceBean, "Service bean not found: " + serviceBeanName);
-			Check.isTrue(serviceBean instanceof CAbstractService, "Service bean does not extend CAbstractService: " + serviceBeanName);
+			Check.instanceOf(serviceBean, CAbstractService.class, "Service bean does not extend CAbstractService: " + serviceBeanName);
 			CAbstractService service = (CAbstractService) serviceBean;
 			// Use pageable to get data - limit to first 1000 records for performance
 			PageRequest pageRequest = PageRequest.of(0, 1000);

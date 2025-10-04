@@ -172,13 +172,8 @@ public class Check {
 	public static void instanceOf(final Object object, final Class<?> expectedClass, final String message) {
 		notNull(object, message);
 		notNull(expectedClass, message);
-		if (!expectedClass.isInstance(object)) {
-			final String def =
-					String.format("Object of type %s is not an instance of %s", object.getClass().getSimpleName(), expectedClass.getSimpleName());
-			final String m = msg(message, def);
-			logFail(m);
-			throw new IllegalArgumentException(m);
-		}
+		Check.isTrue(expectedClass.isInstance(object) || object.getClass().equals(expectedClass),
+				"Object of type " + object.getClass().getSimpleName() + " is not an instance of " + expectedClass.getSimpleName());
 	}
 
 	public static void isNull(final String string) {
