@@ -92,17 +92,35 @@ public final class CColorUtils {
 		icon.getStyle().remove("min-height");
 		switch (iconSizeClass) {
 		case IconSize.MEDIUM:
-			icon.getStyle().set("width", "24px").set("height", "24px");
+			icon.getStyle().set("min-width", "24px").set("min-height", "24px");
 			break;
 		case IconSize.LARGE:
-			icon.getStyle().set("width", "32px").set("height", "32px");
+			icon.getStyle().set("min-width", "32px").set("min-height", "32px");
 			break;
 		case IconSize.SMALL:
-			icon.getStyle().set("width", "16px").set("height", "16px");
+			icon.getStyle().set("min-width", "16px").set("min-height", "16px");
 			break;
+		default:
+			throw new IllegalArgumentException("Invalid icon size class: " + iconSizeClass);
 		}
 		icon.addClassNames(iconSizeClass);
 		return icon;
+	}
+
+	public static void debugStyleOfComponent(com.vaadin.flow.component.Component component) {
+		if (component == null) {
+			LOGGER.debug("Component is null, cannot debug style");
+			return;
+		}
+		LOGGER.debug("Debugging styles for component of type {}:", component.getClass().getSimpleName());
+		component.getElement().getAttributeNames().forEach(attr -> {
+			String value = component.getElement().getAttribute(attr);
+			LOGGER.debug("  Attribute: {} = {}", attr, value);
+		});
+		component.getElement().getStyle().getNames().forEach(style -> {
+			String value = component.getElement().getStyle().get(style);
+			LOGGER.debug("  Style: {} = {}", style, value);
+		});
 	}
 
 	public static String getColorFromEntity(final CEntity<?> entity) throws Exception {

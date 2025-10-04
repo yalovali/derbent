@@ -257,15 +257,12 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	/** Builds the menu hierarchy from route annotations. Parses menu entries in format: parentItem2.childItem1.childofchileitem1
 	 * @throws Exception */
 	private void buildMenuHierarchy() throws Exception {
+		Check.notNull(pageMenuService, "Page menu service must not be null");
 		final var rootLevel = new CMenuLevel("root", "Homepage", null);
 		menuLevels.put("root", rootLevel);
 		List<MenuEntry> allMenuEntries = new ArrayList<>();
-		// Get static menu entries from MenuConfiguration
-		final var staticMenuEntries = MenuConfiguration.getMenuEntries();
-		allMenuEntries.addAll(staticMenuEntries);
-		Check.notNull(pageMenuService, "Page menu service must not be null");
-		final var dynamicMenuEntries = pageMenuService.getDynamicMenuEntries();
-		allMenuEntries.addAll(dynamicMenuEntries);
+		allMenuEntries.addAll(MenuConfiguration.getMenuEntries());
+		allMenuEntries.addAll(pageMenuService.getDynamicMenuEntries());
 		// Process all menu entries (both static and dynamic)
 		for (final MenuEntry menuEntry : allMenuEntries) {
 			processMenuEntry(menuEntry);
@@ -334,11 +331,8 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		final String iconName = menuEntry.icon();
 		boolean isDynamic = title.startsWith("dynamic/");
 		if (isDynamic) {
-			// remove dynamic/ from path
 			title = title.replace("dynamic/", "");
 		}
-		// get menu view class color
-		// final String iconColor = CIconSetLoadergetStaticIconColorCode(menuEntry.menu);
 		Check.notBlank(title, "Menu entry title must not be blank");
 		// Split title by dots to get hierarchy levels (up to 4 levels)
 		final String[] titleParts = title.split("\\.");
@@ -397,6 +391,12 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		// LOGGER.debug("Menu level '{}' displayed successfully", levelKey);
 	}
 
+	Icon createMenuIcon(Icon icon, String iconColor) {
+		CColorUtils.setIconClassSize(icon, IconSize.MEDIUM);
+		icon.getStyle().set("color", iconColor);
+		return icon;
+	}
+
 	/** Updates the header with appropriate back button and title.
 	 * @param level The current menu level */
 	private void updateHeader(final CMenuLevel level) {
@@ -405,20 +405,15 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		Icon levelIcon;
 		if (level.getParent() != null) {
 			// Add back button with consistent sizing
-			levelIcon = VaadinIcon.ARROW_LEFT.create();
-			levelIcon.addClassNames(IconSize.MEDIUM);
-			levelIcon.getStyle().set("color", "var(--lumo-primary-color)");
-			levelIcon.getStyle().set("min-width", "24px").set("min-height", "24px");
+			levelIcon = createMenuIcon(VaadinIcon.ARROW_LEFT.create(), "var(--lumo-primary-color)");
 			final CButton backButton = new CButton("", levelIcon, this::handleBackButtonClick);
-			backButton.addClassNames(BACK_BUTTON_CLASS, Margin.Right.MEDIUM);
+			backButton.addClassNames(BACK_BUTTON_CLASS);
 			backButton.addThemeVariants(com.vaadin.flow.component.button.ButtonVariant.LUMO_TERTIARY_INLINE);
 			backButton.getStyle().set("min-width", "40px").set("min-height", "40px");
 			headerLayout.add(backButton);
 		} else {
-			// Add app icon for root level to prevent label jumping
-			levelIcon = CColorUtils.setIconClassSize(VaadinIcon.CUBES.create(), IconSize.MEDIUM);
-			levelIcon.addClassNames(Margin.Right.MEDIUM);
-			levelIcon.getStyle().set("color", "var(--lumo-primary-color)");
+			levelIcon = createMenuIcon(VaadinIcon.CUBES.create(), "var(--lumo-primary-color)");
+			levelIcon.addClassNames(Margin.Right.MEDIUM, Margin.Left.SMALL);
 			headerLayout.add(levelIcon);
 		}
 		// Add level title with consistent font size
