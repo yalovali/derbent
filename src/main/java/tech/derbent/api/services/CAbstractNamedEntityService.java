@@ -33,18 +33,6 @@ public abstract class CAbstractNamedEntityService<EntityClass extends CEntityNam
 		return entity;
 	}
 
-	@Transactional (readOnly = true)
-	public boolean existsByName(final String name) {
-		Check.notBlank(name, "Name cannot be null or empty");
-		return ((IAbstractNamedRepository<EntityClass>) repository).existsByName(name.trim());
-	}
-
-	@Transactional (readOnly = true)
-	public Optional<EntityClass> findByName(final String name) {
-		Check.notBlank(name, "Name cannot be null or empty");
-		return ((IAbstractNamedRepository<EntityClass>) repository).findByName(name.trim());
-	}
-
 	/** Varsayılan sıralama anahtarları. İstediğiniz entity servisinde override edebilirsiniz. */
 	@Override
 	protected Map<String, Function<EntityClass, ?>> getSortKeyExtractors() { return Map.of("name", e -> e.getName(), "id", e -> e.getId()); }

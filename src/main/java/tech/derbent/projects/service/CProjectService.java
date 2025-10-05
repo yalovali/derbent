@@ -5,14 +5,19 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.services.CAbstractNamedEntityService;
+import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CComponentProjectUserSettings;
+import tech.derbent.companies.domain.CCompany;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.events.ProjectListChangeEvent;
 import tech.derbent.session.service.CSessionService;
@@ -56,22 +61,40 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 	@Override
 	@PreAuthorize ("permitAll()")
 	public List<CProject> findAll() {
-		// Get current company from session if available
-		if (sessionService != null) {
-			tech.derbent.companies.domain.CCompany currentCompany = sessionService.getCurrentCompany();
-			if (currentCompany != null) {
-				LOGGER.debug("Filtering projects by company: {}", currentCompany.getName());
-				return ((IProjectRepository) repository).findByCompanyId(currentCompany.getId());
-			}
-		}
-		// Fallback to all projects if no company context
-		LOGGER.debug("No company context, returning all projects");
-		return repository.findAll();
+		Check.notNull(repository, "Repository must not be null");
+		return ((IProjectRepository) repository).findByCompanyId(getCurrentCompany().getId());
 	}
 
-	/** Gets projects available for assignment to a specific user (excluding projects the user is already assigned to).
-	 * @param userId the ID of the user
-	 * @return list of available projects for the user */
+	@PreAuthorize ("permitAll()")
+	public Page<CProject> findAll(Pageable pageable) {
+		Check.notNull(repository, "Repository must not be null");
+		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
+		return ((IProjectRepository) repository).findByCompanyId(getCurrentCompany().getId(), safePage).getContent();
+	}
+
+	CCompany getCurrentCompany() {
+		Check.notNull(sessionService, "Session service must not be null");
+		CCompany currentCompany = sessionService.getCurrentCompany();
+		return currentCompany;
+	}
+
+	@Override
+	@Transactional (readOnly = true)
+	public Page<CProject> list(final Pageable pageable) {
+		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
+		final Page<CProject> entities = repository.findAll(safePage);
+		return entities;
+	}
+
+	@Override
+	@Transactional (readOnly = true)
+	public Page<CProject> list(final Pageable pageable, final Specification<CProject> filter) {
+		LOGGER.debug("Listing entities with filter specification");
+		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
+		final Page<CProject> page = repository.findAll(filter, safePage);
+		return page;
+	}
+
 	@Transactional (readOnly = true)
 	@PreAuthorize ("permitAll()")
 	public List<CProject> getAvailableProjectsForUser(final Long userId) {
@@ -88,10 +111,8 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 	@Override
 	@Transactional
 	public CProject save(final CProject entity) {
-		LOGGER.debug("save called with entity: {}", entity);
 		final boolean isNew = entity.getId() == null;
 		final CProject savedEntity = super.save(entity);
-		// Publish project list change event after saving
 		final ProjectListChangeEvent.ChangeType changeType =
 				isNew ? ProjectListChangeEvent.ChangeType.CREATED : ProjectListChangeEvent.ChangeType.UPDATED;
 		eventPublisher.publishEvent(new ProjectListChangeEvent(this, savedEntity, changeType));

@@ -144,7 +144,6 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 		// Listen for selection changes from the grid
 		grid.addSelectionChangeListener(event -> {
 			try {
-				LOGGER.debug("Grid selection changed: {}", event.getSelectedItem().toString());
 				onEntitySelected(event);
 			} catch (Exception e) {
 				LOGGER.error("Error handling entity selection", e);
@@ -276,16 +275,24 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 
 	/** Handle entity selection events from the grid. */
 	private void onEntitySelected(CComponentGridEntity.SelectionChangeEvent event) throws Exception {
+		Check.notNull(event, "Selection change event cannot be null");
 		CEntityDB<?> selectedEntity = event.getSelectedItem();
-		LOGGER.debug("Entity selected: {}", selectedEntity != null ? selectedEntity.toString() + " ID: " + selectedEntity.getId() : "null");
-		Field viewNameField = selectedEntity.getClass().getField("VIEW_NAME");
-		String entityViewName = (String) viewNameField.get(null);
-		// Performance optimization: check if we can reuse existing components
-		if (!canReuseExistingComponents(entityViewName, selectedEntity.getClass())) {
-			rebuildEntityDetails(entityViewName);
+		if (selectedEntity == null) {
+			// No selection - clear details
+			clearEntityDetails();
+			setCurrentEntity(null);
+			populateForm();
+		} else {
+			LOGGER.debug("Entity selected: {}", selectedEntity != null ? selectedEntity.toString() + " ID: " + selectedEntity.getId() : "null");
+			Field viewNameField = selectedEntity.getClass().getField("VIEW_NAME");
+			String entityViewName = (String) viewNameField.get(null);
+			// Performance optimization: check if we can reuse existing components
+			if (!canReuseExistingComponents(entityViewName, selectedEntity.getClass())) {
+				rebuildEntityDetails(entityViewName);
+			}
+			setCurrentEntity(selectedEntity);
+			populateForm();
 		}
-		setCurrentEntity(selectedEntity);
-		populateForm();
 	}
 
 	/** Populate the entity details section with information from the selected entity.

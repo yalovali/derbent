@@ -222,22 +222,16 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 
 	@Transactional (readOnly = true)
 	public Page<EntityClass> list(final Pageable pageable) {
-		// Validate and fix pageable to prevent "max-results cannot be negative" error
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
-		// LOGGER.debug("Listing entities with pageable: {}", safePage);
 		final Page<EntityClass> entities = repository.findAll(safePage);
-		// Initialize lazy fields for all entities
 		return entities;
 	}
 
 	@Transactional (readOnly = true)
 	public Page<EntityClass> list(final Pageable pageable, final Specification<EntityClass> filter) {
 		LOGGER.debug("Listing entities with filter specification");
-		// Validate and fix pageable to prevent "max-results cannot be negative" error
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
-		// LOGGER.debug("Listing entities with filter and pageable");
 		final Page<EntityClass> page = repository.findAll(filter, safePage);
-		// Initialize lazy fields for all entities in the page
 		return page;
 	}
 
@@ -245,13 +239,10 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	public Page<EntityClass> list(final Pageable pageable, final String searchText) {
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		final String term = (searchText == null) ? "" : searchText.trim();
-		// Pull all for project (ensure repo method DOES NOT fetch to-many relations!)
 		final List<EntityClass> all = repository.findAll(Pageable.unpaged()).getContent();
 		final boolean searchable = ISearchable.class.isAssignableFrom(getEntityClass());
 		final List<EntityClass> filtered = (term.isEmpty() || !searchable) ? all : all.stream().filter(e -> ((ISearchable) e).matches(term)).toList();
-		// --- apply sort from Pageable (name/id supported here; override to extend)
 		final List<EntityClass> sorted = applySort(filtered, safePage.getSort());
-		// --- slice
 		final int start = (int) Math.min(safePage.getOffset(), sorted.size());
 		final int end = Math.min(start + safePage.getPageSize(), sorted.size());
 		final List<EntityClass> content = sorted.subList(start, end);

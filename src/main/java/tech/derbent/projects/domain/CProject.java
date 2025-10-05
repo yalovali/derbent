@@ -40,7 +40,7 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 			displayName = "Company", required = true, readOnly = false, description = "The company this project belongs to", hidden = false,
 			order = 20
 	)
-	@ManyToOne (fetch = FetchType.EAGER)
+	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "company_id", nullable = false)
 	private CCompany company;
 
@@ -51,7 +51,7 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 
 	public Long getCompanyId() { return company != null ? company.getId() : null; }
 
-	private CCompany getCompany() { return company; }
+	public CCompany getCompany() { return company; }
 
 	public CCompany getCompanyInstance(CCompanyService service) {
 		if (getCompanyId() == null) {

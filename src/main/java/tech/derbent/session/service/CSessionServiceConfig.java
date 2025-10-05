@@ -1,12 +1,18 @@
 package tech.derbent.session.service;
 
+import java.util.Optional;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
+import tech.derbent.api.interfaces.IProjectChangeListener;
+import tech.derbent.api.interfaces.IProjectListChangeListener;
+import tech.derbent.companies.domain.CCompany;
+import tech.derbent.projects.domain.CProject;
+import tech.derbent.projects.events.ProjectListChangeEvent;
 import tech.derbent.projects.service.IProjectRepository;
-import tech.derbent.users.service.CUserCompanySettingsService;
+import tech.derbent.users.domain.CUser;
 import tech.derbent.users.service.IUserRepository;
 
 /** Configuration to provide the correct session service bean for different environments. This ensures compatibility between the expected
@@ -31,12 +37,12 @@ public class CSessionServiceConfig {
 		return new CSessionService(userRepository, projectRepository, null) {
 
 			@Override
-			public void setActiveUser(final tech.derbent.users.domain.CUser user) {
+			public void setActiveUser(final CUser user) {
 				webSessionService.setActiveUser(user);
 			}
 
 			@Override
-			public java.util.Optional<tech.derbent.users.domain.CUser> getActiveUser() { return webSessionService.getActiveUser(); }
+			public Optional<CUser> getActiveUser() { return webSessionService.getActiveUser(); }
 
 			@Override
 			public void setActiveProject(final tech.derbent.projects.domain.CProject project) {
@@ -44,10 +50,10 @@ public class CSessionServiceConfig {
 			}
 
 			@Override
-			public java.util.Optional<tech.derbent.projects.domain.CProject> getActiveProject() { return webSessionService.getActiveProject(); }
+			public java.util.Optional<CProject> getActiveProject() { return webSessionService.getActiveProject(); }
 
 			@Override
-			public java.util.List<tech.derbent.projects.domain.CProject> getAvailableProjects() { return webSessionService.getAvailableProjects(); }
+			public java.util.List<CProject> getAvailableProjects() { return webSessionService.getAvailableProjects(); }
 
 			@Override
 			public Long getActiveId(final String entityType) {
@@ -70,22 +76,22 @@ public class CSessionServiceConfig {
 			}
 
 			@Override
-			public void addProjectChangeListener(final tech.derbent.api.interfaces.IProjectChangeListener listener) {
+			public void addProjectChangeListener(final IProjectChangeListener listener) {
 				webSessionService.addProjectChangeListener(listener);
 			}
 
 			@Override
-			public void removeProjectChangeListener(final tech.derbent.api.interfaces.IProjectChangeListener listener) {
+			public void removeProjectChangeListener(final IProjectChangeListener listener) {
 				webSessionService.removeProjectChangeListener(listener);
 			}
 
 			@Override
-			public void addProjectListChangeListener(final tech.derbent.api.interfaces.IProjectListChangeListener listener) {
+			public void addProjectListChangeListener(final IProjectListChangeListener listener) {
 				webSessionService.addProjectListChangeListener(listener);
 			}
 
 			@Override
-			public void removeProjectListChangeListener(final tech.derbent.api.interfaces.IProjectListChangeListener listener) {
+			public void removeProjectListChangeListener(final IProjectListChangeListener listener) {
 				webSessionService.removeProjectListChangeListener(listener);
 			}
 
@@ -100,15 +106,15 @@ public class CSessionServiceConfig {
 			}
 
 			@Override
-			public void handleProjectListChange(final tech.derbent.projects.events.ProjectListChangeEvent event) {
+			public void handleProjectListChange(final ProjectListChangeEvent event) {
 				webSessionService.handleProjectListChange(event);
 			}
 
 			@Override
-			public java.util.Optional<tech.derbent.companies.domain.CCompany> getActiveCompany() { return webSessionService.getActiveCompany(); }
+			public Optional<CCompany> getActiveCompany() { return webSessionService.getActiveCompany(); }
 
 			@Override
-			public tech.derbent.companies.domain.CCompany getCurrentCompany() { return webSessionService.getCurrentCompany(); }
+			public CCompany getCurrentCompany() { return webSessionService.getCurrentCompany(); }
 		};
 	}
 }

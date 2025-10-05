@@ -31,6 +31,7 @@ public class CProjectInitializerService extends CInitializerServiceBase {
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
 			scr.addScreenLine(CDetailLinesService.createSection("Audit"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
