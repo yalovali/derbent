@@ -159,7 +159,7 @@ public class CSessionService implements ISessionService {
 		activeUser = user;
 		if (user == null) {
 			setActiveCompany(null);
-		} else {
+		} else if (userCompanySettingsService != null) {
 			setActiveCompany(user.getCompanyInstance(userCompanySettingsService));
 		}
 	}

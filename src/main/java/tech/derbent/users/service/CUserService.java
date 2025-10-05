@@ -45,8 +45,8 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	private ApplicationContext applicationContext;
 	private final PasswordEncoder passwordEncoder;
 
-	public CUserService(final IUserRepository repository, final Clock clock, final CSessionService sessionService) {
-		super(repository, clock, sessionService);
+	public CUserService(final IUserRepository repository, final Clock clock) {
+		super(repository, clock);
 		passwordEncoder = new BCryptPasswordEncoder(); // BCrypt for secure password
 														// hashing
 		@SuppressWarnings ("unused")
@@ -163,11 +163,13 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	@Override
 	@Transactional (readOnly = true)
 	public Page<CUser> list(final Pageable pageable) {
-		// Get current company from session
-		CCompany currentCompany = sessionService.getCurrentCompany();
-		if (currentCompany != null) {
-			LOGGER.debug("Filtering users by company: {}", currentCompany.getName());
-			return ((IUserRepository) repository).findByCompanyId(currentCompany.getId(), pageable);
+		// Get current company from session if available
+		if (sessionService != null) {
+			CCompany currentCompany = sessionService.getCurrentCompany();
+			if (currentCompany != null) {
+				LOGGER.debug("Filtering users by company: {}", currentCompany.getName());
+				return ((IUserRepository) repository).findByCompanyId(currentCompany.getId(), pageable);
+			}
 		}
 		// Fallback to all users if no company context
 		LOGGER.debug("No company context, returning all users");

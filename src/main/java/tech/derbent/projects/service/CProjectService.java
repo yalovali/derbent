@@ -56,11 +56,13 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 	@Override
 	@PreAuthorize ("permitAll()")
 	public List<CProject> findAll() {
-		// Get current company from session
-		tech.derbent.companies.domain.CCompany currentCompany = sessionService.getCurrentCompany();
-		if (currentCompany != null) {
-			LOGGER.debug("Filtering projects by company: {}", currentCompany.getName());
-			return ((IProjectRepository) repository).findByCompanyId(currentCompany.getId());
+		// Get current company from session if available
+		if (sessionService != null) {
+			tech.derbent.companies.domain.CCompany currentCompany = sessionService.getCurrentCompany();
+			if (currentCompany != null) {
+				LOGGER.debug("Filtering projects by company: {}", currentCompany.getName());
+				return ((IProjectRepository) repository).findByCompanyId(currentCompany.getId());
+			}
 		}
 		// Fallback to all projects if no company context
 		LOGGER.debug("No company context, returning all projects");

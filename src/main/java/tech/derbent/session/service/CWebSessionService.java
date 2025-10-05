@@ -6,7 +6,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.core.userdetails.User;
@@ -44,14 +46,14 @@ public class CWebSessionService implements ISessionService {
 	private final Set<IProjectListChangeListener> projectListChangeListeners = ConcurrentHashMap.newKeySet();
 	private final IProjectRepository projectRepository;
 	private final IUserRepository userRepository;
-	private final CUserCompanySettingsService userCompanySettingsService;
+	@Autowired
+	private ApplicationContext applicationContext;
 
 	public CWebSessionService(final AuthenticationContext authenticationContext, final IUserRepository userRepository,
-			final IProjectRepository projectRepository, final CUserCompanySettingsService userCompanySettingsService) {
+			final IProjectRepository projectRepository) {
 		this.authenticationContext = authenticationContext;
 		this.userRepository = userRepository;
 		this.projectRepository = projectRepository;
-		this.userCompanySettingsService = userCompanySettingsService;
 	}
 
 	/** Registers a component to receive notifications when the active project changes. Components should call this method when they are attached to
@@ -276,6 +278,8 @@ public class CWebSessionService implements ISessionService {
 			LOGGER.info("Active user set to: {}", user != null ? user.getLogin() : "null");
 			// Set active company when user is set
 			if (user != null) {
+				// Lazy-load userCompanySettingsService to avoid circular dependency
+				CUserCompanySettingsService userCompanySettingsService = applicationContext.getBean(CUserCompanySettingsService.class);
 				CCompany company = user.getCompanyInstance(userCompanySettingsService);
 				if (company != null) {
 					session.setAttribute(ACTIVE_COMPANY_KEY, company);
