@@ -25,9 +25,10 @@ public class CSessionServiceConfig {
 	@ConditionalOnWebApplication
 	@Profile ("!reset-db")
 	public CSessionService sessionServiceDelegate(final CWebSessionService webSessionService, final IUserRepository userRepository,
-			final IProjectRepository projectRepository, final CUserCompanySettingsService userCompanySettingsService) {
+			final IProjectRepository projectRepository) {
 		// Create an anonymous subclass that delegates to the web session service
-		return new CSessionService(userRepository, projectRepository, userCompanySettingsService) {
+		// Pass null for userCompanySettingsService since web profile uses CWebSessionService which handles it differently
+		return new CSessionService(userRepository, projectRepository, null) {
 
 			@Override
 			public void setActiveUser(final tech.derbent.users.domain.CUser user) {
@@ -102,6 +103,12 @@ public class CSessionServiceConfig {
 			public void handleProjectListChange(final tech.derbent.projects.events.ProjectListChangeEvent event) {
 				webSessionService.handleProjectListChange(event);
 			}
+
+			@Override
+			public java.util.Optional<tech.derbent.companies.domain.CCompany> getActiveCompany() { return webSessionService.getActiveCompany(); }
+
+			@Override
+			public tech.derbent.companies.domain.CCompany getCurrentCompany() { return webSessionService.getCurrentCompany(); }
 		};
 	}
 }

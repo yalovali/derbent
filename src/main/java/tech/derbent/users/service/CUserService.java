@@ -30,7 +30,9 @@ import tech.derbent.api.services.CAbstractNamedEntityService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CComponentSingleCompanyUserSetting;
 import tech.derbent.api.views.components.CComponentUserProjectSettings;
+import tech.derbent.companies.domain.CCompany;
 import tech.derbent.projects.domain.CProject;
+import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
 
 @Service
@@ -156,14 +158,22 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	@Override
 	protected Class<CUser> getEntityClass() { return CUser.class; }
 
-	/** Override the default list method to filter users by active project when used in dynamic pages. This allows CUserService to work with dynamic
-	 * pages without needing to implement CEntityOfProjectService. If no active project is available, returns all users (preserves existing
-	 * behavior). */
+	/** Override the default list method to filter users by active company when available. This allows CUserService to work with dynamic pages without
+	 * needing to implement special filtering. If no active company is available, returns all users (preserves existing behavior). */
 	@Override
 	@Transactional (readOnly = true)
 	public Page<CUser> list(final Pageable pageable) {
+		// Get current company from session if available
+		if (sessionService != null) {
+			CCompany currentCompany = sessionService.getCurrentCompany();
+			if (currentCompany != null) {
+				LOGGER.debug("Filtering users by company: {}", currentCompany.getName());
+				return ((IUserRepository) repository).findByCompanyId(currentCompany.getId(), pageable);
+			}
+		}
+		// Fallback to all users if no company context
+		LOGGER.debug("No company context, returning all users");
 		return ((IUserRepository) repository).list(pageable);
-		// return super.list(pageable);
 	}
 
 	/** Lists users by project using the CUserProjectSettings relationship. This method allows CUserService to work with dynamic pages that expect

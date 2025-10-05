@@ -7,6 +7,8 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
@@ -38,7 +40,8 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 			displayName = "Company", required = true, readOnly = false, description = "The company this project belongs to", hidden = false,
 			order = 20
 	)
-	@Column (name = "company_id", nullable = false)
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "company_id", nullable = false)
 	private CCompany company;
 
 	/** Default constructor for JPA. */
@@ -87,6 +90,8 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 			userSettings.setProject(null);
 		}
 	}
+
+	public void setCompany(final CCompany company) { this.company = company; }
 
 	@Override
 	public boolean matches(final String searchText) {
