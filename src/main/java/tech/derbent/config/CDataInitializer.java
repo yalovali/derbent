@@ -510,17 +510,16 @@ public class CDataInitializer {
 
 	/** Creates system administrator user. */
 	private void createAdminUser() {
-		final CUser admin = userService.createLoginUser(USER_ADMIN, STANDARD_PASSWORD, "Ahmet", "admin@of.gov.tr", "ADMIN,USER");
+		final CUser user = userService.createLoginUser(USER_ADMIN, STANDARD_PASSWORD, "Ahmet", "admin@of.gov.tr", "ADMIN,USER");
 		// Set user profile directly on entity
 		final String profilePictureFile = PROFILE_PICTURE_MAPPING.get(USER_ADMIN);
 		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
-		admin.setLastname("Yılmaz");
-		admin.setPhone("+90-462-751-1001");
-		admin.setProfilePictureData(profilePictureBytes);
-		final var companies = companyService.findAll();
-		final CCompany company = companies.isEmpty() ? null : companies.get(0);
-		Check.notNull(company, "At least one company must exist to assign to admin user");
-		userService.save(admin);
+		user.setLastname("Yılmaz");
+		user.setPhone("+90-462-751-1001");
+		user.setProfilePictureData(profilePictureBytes);
+		CCompany company = companyService.getRandom();
+		userService.setCompany(user, company, userCompanyRoleService.getRandom(company));
+		userService.save(user);
 	}
 
 	private void createApprovalStatus(final String name, final CProject project, final String description, final String color, final boolean isFinal,
@@ -712,15 +711,17 @@ public class CDataInitializer {
 	/** Creates project manager user. */
 	private void createProjectManagerUser() {
 		LOGGER.info("createProjectManagerUser called - creating project manager");
-		final CUser manager =
+		final CUser user =
 				userService.createLoginUser(USER_MANAGER, STANDARD_PASSWORD, "Mehmet Emin", "mehmet.karadeniz@ofteknoloji.com.tr", "MANAGER,USER");
 		// Set user profile directly on entity
 		final String profilePictureFile = PROFILE_PICTURE_MAPPING.get(USER_MANAGER);
 		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
-		manager.setLastname("Karadeniz");
-		manager.setPhone("+90-462-751-1002");
-		manager.setProfilePictureData(profilePictureBytes);
-		userService.save(manager);
+		user.setLastname("Karadeniz");
+		user.setPhone("+90-462-751-1002");
+		user.setProfilePictureData(profilePictureBytes);
+		CCompany company = companyService.getRandom();
+		userService.setCompany(user, company, userCompanyRoleService.getRandom(company));
+		userService.save(user);
 	}
 
 	private void createProjectProductDevelopment(CCompany company) {
@@ -1008,41 +1009,44 @@ public class CDataInitializer {
 
 	/** Creates team member Alice Davis. */
 	private void createTeamMemberAlice() {
-		final CUser analyst = userService.createLoginUser(USER_MEMBER_AYSE, STANDARD_PASSWORD, "Ayşe", "ayse.demir@ofsaglik.com.tr", "USER");
+		final CUser user = userService.createLoginUser(USER_MEMBER_AYSE, STANDARD_PASSWORD, "Ayşe", "ayse.demir@ofsaglik.com.tr", "USER");
 		// Set user profile directly on entity
 		final String profilePictureFile = PROFILE_PICTURE_MAPPING.get(USER_MEMBER_AYSE);
 		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
-		analyst.setLastname("Demir");
-		analyst.setPhone("+90-462-751-1005");
-		analyst.setProfilePictureData(profilePictureBytes);
-		// Set user role directly on entity
-		// Set company association directly on entity
-		userService.save(analyst);
+		user.setLastname("Demir");
+		user.setPhone("+90-462-751-1005");
+		user.setProfilePictureData(profilePictureBytes);
+		CCompany company = companyService.getRandom();
+		userService.setCompany(user, company, userCompanyRoleService.getRandom(company));
+		userService.save(user);
 	}
 
 	/** Creates team member Bob Wilson. */
 	private void createTeamMemberBob() {
-		final CUser developer =
-				userService.createLoginUser(USER_MEMBER_BURAK, STANDARD_PASSWORD, "Burak", "burak.ozkan@ofdanismanlik.com.tr", "USER");
+		final CUser user = userService.createLoginUser(USER_MEMBER_BURAK, STANDARD_PASSWORD, "Burak", "burak.ozkan@ofdanismanlik.com.tr", "USER");
 		// Set user profile directly on entity
 		final String profilePictureFile = PROFILE_PICTURE_MAPPING.get(USER_MEMBER_BURAK);
 		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
-		developer.setLastname("Özkan");
-		developer.setPhone("+90-462-751-0404");
-		developer.setProfilePictureData(profilePictureBytes);
-		userService.save(developer);
+		user.setLastname("Özkan");
+		user.setPhone("+90-462-751-0404");
+		user.setProfilePictureData(profilePictureBytes);
+		CCompany company = companyService.getRandom();
+		userService.setCompany(user, company, userCompanyRoleService.getRandom(company));
+		userService.save(user);
 	}
 
 	/** Creates team member Mary Johnson. */
 	private void createTeamMemberMary() {
-		final CUser teamMember = userService.createLoginUser(USER_MEMBER_MERVE, STANDARD_PASSWORD, "Merve", "merve.sahin@ofendüstri.com.tr", "USER");
+		final CUser user = userService.createLoginUser(USER_MEMBER_MERVE, STANDARD_PASSWORD, "Merve", "merve.sahin@ofendüstri.com.tr", "USER");
 		// Set user profile directly on entity
 		final String profilePictureFile = PROFILE_PICTURE_MAPPING.get(USER_MEMBER_MERVE);
 		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
-		teamMember.setLastname("Şahin");
-		teamMember.setPhone("+90-462-751-1003");
-		teamMember.setProfilePictureData(profilePictureBytes);
-		userService.save(teamMember);
+		user.setLastname("Şahin");
+		user.setPhone("+90-462-751-1003");
+		user.setProfilePictureData(profilePictureBytes);
+		CCompany company = companyService.getRandom();
+		userService.setCompany(user, company, userCompanyRoleService.getRandom(company));
+		userService.save(user);
 	}
 
 	/** Creates team member users across different companies. */
@@ -1154,7 +1158,7 @@ public class CDataInitializer {
 																																		// available
 																																		// if no match
 				}
-				userCompanySettingsService.addUserToCompany(user, company, ownershipLevel, roleToAssign);
+				userCompanySettingsService.addUserToCompany(user, company, roleToAssign, ownershipLevel);
 				LOGGER.debug("Created user company setting: {} -> {} (role: {})", user.getLogin(), company.getName(),
 						roleToAssign != null ? roleToAssign.getName() : "none");
 			} else {

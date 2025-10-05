@@ -69,7 +69,7 @@ public abstract class CComponentUserCompanyBase<MasterClass extends CEntityNamed
 		LOGGER.debug("Saving user company settings: {}", settings);
 		try {
 			final CUserCompanySetting savedSettings = settings.getId() == null ? userCompanySettingsService.addUserToCompany(settings.getUser(),
-					settings.getCompany(), settings.getOwnershipLevel(), settings.getRole()) : userCompanySettingsService.save(settings);
+					settings.getCompany(), settings.getRole(), settings.getOwnershipLevel()) : userCompanySettingsService.save(settings);
 			LOGGER.info("Successfully saved user company settings: {}", savedSettings);
 			populateForm();
 		} catch (final Exception e) {

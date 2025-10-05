@@ -18,6 +18,7 @@ import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.interfaces.IProjectListChangeListener;
+import tech.derbent.api.utils.Check;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.events.ProjectListChangeEvent;
@@ -273,19 +274,20 @@ public class CWebSessionService implements ISessionService {
 	public void setActiveUser(final CUser user) {
 		clearSession(); // Clear session data before setting new user
 		final VaadinSession session = VaadinSession.getCurrent();
-		if (session != null) {
-			session.setAttribute(ACTIVE_USER_KEY, user);
-			LOGGER.info("Active user set to: {}", user != null ? user.getLogin() : "null");
-			// Set active company when user is set
-			if (user != null) {
-				// Lazy-load userCompanySettingsService to avoid circular dependency
-				CUserCompanySettingsService userCompanySettingsService = applicationContext.getBean(CUserCompanySettingsService.class);
-				CCompany company = user.getCompanyInstance(userCompanySettingsService);
-				if (company != null) {
-					session.setAttribute(ACTIVE_COMPANY_KEY, company);
-					LOGGER.info("Active company set to: {}", company.getName());
-				}
-			}
+		Check.notNull(session, "Vaadin session must not be null");
+		session.setAttribute(ACTIVE_USER_KEY, user);
+		// Set active company when user is set
+		if (user != null) {
+			// Lazy-load userCompanySettingsService to avoid circular dependency
+			CUserCompanySettingsService userCompanySettingsService = applicationContext.getBean(CUserCompanySettingsService.class);
+			Check.notNull(userCompanySettingsService, "UserCompanySettingsService must not be null");
+			CCompany company = user.getCompanyInstance(userCompanySettingsService);
+			Check.notNull(company, "User must be associated with a company");
+			session.setAttribute(ACTIVE_COMPANY_KEY, company);
+			LOGGER.info("Active company set to: {}", company.getName());
+		} else {
+			session.setAttribute(ACTIVE_COMPANY_KEY, null);
+			LOGGER.info("Active user cleared, company set to null");
 		}
 	}
 
@@ -293,9 +295,7 @@ public class CWebSessionService implements ISessionService {
 	@Override
 	public Optional<CCompany> getActiveCompany() {
 		final VaadinSession session = VaadinSession.getCurrent();
-		if (session == null) {
-			return Optional.empty();
-		}
+		Check.notNull(session, "Vaadin session must not be null");
 		CCompany activeCompany = (CCompany) session.getAttribute(ACTIVE_COMPANY_KEY);
 		return Optional.ofNullable(activeCompany);
 	}

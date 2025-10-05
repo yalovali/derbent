@@ -70,7 +70,7 @@ public class CUserCompanySettingFetchTypeTest {
 		// "ERROR: target lists can have at most 1664 entries"
 		// This save operation would fail with the error if role was EAGER fetched
 		// because CUserCompanyRole has two @ElementCollection fields with EAGER fetch
-		CUserCompanySetting savedSettings = userCompanySettingsService.addUserToCompany(testUser, testCompany, "MEMBER", testRole);
+		CUserCompanySetting savedSettings = userCompanySettingsService.addUserToCompany(testUser, testCompany, testRole, "MEMBER");
 		// Verify save succeeded
 		assertNotNull(savedSettings, "Settings should be saved successfully");
 		assertNotNull(savedSettings.getId(), "Saved settings should have an ID");
@@ -85,7 +85,7 @@ public class CUserCompanySettingFetchTypeTest {
 	@DisplayName ("Test role can be accessed within transaction despite LAZY loading")
 	public void testRoleAccessibleWithinTransaction() {
 		// Create and save settings
-		CUserCompanySetting savedSettings = userCompanySettingsService.addUserToCompany(testUser, testCompany, "MEMBER", testRole);
+		CUserCompanySetting savedSettings = userCompanySettingsService.addUserToCompany(testUser, testCompany, testRole, "MEMBER");
 		// Retrieve settings and access lazy-loaded role within transaction
 		CUserCompanySetting retrievedSettings = userCompanySettingsService.getById(savedSettings.getId()).orElseThrow();
 		// Access role properties - this should work within transaction
@@ -111,8 +111,8 @@ public class CUserCompanySettingFetchTypeTest {
 		role2.setIsAdmin(true);
 		role2 = roleService.save(role2);
 		// Save multiple settings
-		CUserCompanySetting saved1 = userCompanySettingsService.addUserToCompany(testUser, testCompany, "MEMBER", testRole);
-		CUserCompanySetting saved2 = userCompanySettingsService.addUserToCompany(user2, testCompany, "ADMIN", role2);
+		CUserCompanySetting saved1 = userCompanySettingsService.addUserToCompany(testUser, testCompany, testRole, "MEMBER");
+		CUserCompanySetting saved2 = userCompanySettingsService.addUserToCompany(user2, testCompany, role2, "ADMIN");
 		// Verify both saves succeeded
 		assertNotNull(saved1.getId(), "First settings should be saved");
 		assertNotNull(saved2.getId(), "Second settings should be saved");
@@ -132,7 +132,7 @@ public class CUserCompanySettingFetchTypeTest {
 		guestRole.setIsGuest(true);
 		guestRole = roleService.save(guestRole);
 		// Guest roles CAN be assigned at the data layer
-		CUserCompanySetting savedSettings = userCompanySettingsService.addUserToCompany(testUser, testCompany, "GUEST", guestRole);
+		CUserCompanySetting savedSettings = userCompanySettingsService.addUserToCompany(testUser, testCompany, guestRole, "GUEST");
 		assertNotNull(savedSettings, "Settings with guest role should be saved");
 		assertNotNull(savedSettings.getId(), "Saved settings should have an ID");
 		assertEquals(guestRole.getId(), savedSettings.getRole().getId(), "Guest role should be assigned");
@@ -146,7 +146,7 @@ public class CUserCompanySettingFetchTypeTest {
 	@DisplayName ("Test initializeAllFields properly initializes role within transaction")
 	public void testInitializeAllFieldsWithinTransaction() {
 		// Create and save settings
-		CUserCompanySetting savedSettings = userCompanySettingsService.addUserToCompany(testUser, testCompany, "MEMBER", testRole);
+		CUserCompanySetting savedSettings = userCompanySettingsService.addUserToCompany(testUser, testCompany, testRole, "MEMBER");
 		// Retrieve settings
 		CUserCompanySetting retrievedSettings = userCompanySettingsService.getById(savedSettings.getId()).orElseThrow();
 		// Call initializeAllFields within transaction

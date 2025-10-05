@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
+import tech.derbent.api.roles.domain.CUserCompanyRole;
 import tech.derbent.api.services.CAbstractNamedEntityService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CComponentSingleCompanyUserSetting;
@@ -44,11 +45,17 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	@Autowired
 	private ApplicationContext applicationContext;
 	private final PasswordEncoder passwordEncoder;
+	private final CSessionService sessionService;
+	private final CUserCompanySettingsService userCompanySettingsService;
 
-	public CUserService(final IUserRepository repository, final Clock clock) {
+	public CUserService(final IUserRepository repository, CSessionService sessionService, CUserCompanySettingsService userCompanySettingsService,
+			final Clock clock) {
 		super(repository, clock);
 		passwordEncoder = new BCryptPasswordEncoder(); // BCrypt for secure password
-														// hashing
+		this.sessionService = sessionService;
+		this.userCompanySettingsService = userCompanySettingsService;
+		;
+		// hashing
 		@SuppressWarnings ("unused")
 		final CharSequence newPlainPassword = "test123";
 		// final String encodedPassword = passwordEncoder.encode(newPlainPassword);
@@ -261,5 +268,12 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 		super.validateEntity(user);
 		Check.notBlank(user.getLogin(), "User login cannot be null or empty");
 		Check.notBlank(user.getName(), "User name cannot be null or empty");
+	}
+
+	public void setCompany(CUser user, CCompany company, CUserCompanyRole role) {
+		Check.notNull(user, "User cannot be null");
+		Check.notNull(company, "Company cannot be null");
+		userCompanySettingsService.addUserToCompany(user, company, role, "Owner");
+		LOGGER.debug("Set company '{}' for user '{}'", company.getName(), user.getLogin());
 	}
 }

@@ -56,7 +56,7 @@ public class CUserCompanySettingLazyLoadingTest {
 		testRole.setIsUser(true);
 		testRole = userCompanyRoleService.save(testRole);
 		// Create and save user company setting
-		CUserCompanySetting setting = userCompanySettingsService.addUserToCompany(testUser, testCompany, "MEMBER", testRole);
+		CUserCompanySetting setting = userCompanySettingsService.addUserToCompany(testUser, testCompany, testRole, "MEMBER");
 		testUser.setCompanySettings(setting);
 		testUser = userService.save(testUser);
 	}

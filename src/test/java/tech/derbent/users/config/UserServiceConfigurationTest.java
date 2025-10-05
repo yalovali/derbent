@@ -1,7 +1,7 @@
 package tech.derbent.users.config;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.verify;
 import java.time.Clock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,8 +9,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.derbent.session.service.CSessionService;
-import tech.derbent.users.service.IUserRepository;
+import tech.derbent.users.service.CUserCompanySettingsService;
 import tech.derbent.users.service.CUserService;
+import tech.derbent.users.service.IUserRepository;
 
 @ExtendWith (MockitoExtension.class)
 class UserServiceConfigurationTest {
@@ -24,6 +25,8 @@ class UserServiceConfigurationTest {
 	@Mock
 	private Clock clock;
 	private UserServiceConfiguration configuration;
+	@Mock
+	private CUserCompanySettingsService userCompanySettingsService;
 
 	@BeforeEach
 	void setUp() {
@@ -41,7 +44,7 @@ class UserServiceConfigurationTest {
 	@Test
 	void testUserServiceCanBeCreatedWithoutSessionService() {
 		// Given - CUserService can be created without sessionService (setter injection)
-		CUserService realUserService = new CUserService(userRepository, clock);
+		CUserService realUserService = new CUserService(userRepository, sessionService, userCompanySettingsService, clock);
 		// When - This should not throw an exception
 		assertNotNull(realUserService);
 		// Then - SessionService can be set later

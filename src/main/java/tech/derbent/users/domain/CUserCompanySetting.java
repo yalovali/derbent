@@ -1,5 +1,7 @@
 package tech.derbent.users.domain;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,8 +10,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.annotations.CSpringAuxillaries;
 import tech.derbent.api.domains.CAbstractEntityRelationship;
@@ -67,20 +67,12 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 		super(CUserCompanySetting.class);
 	}
 
-	public CUserCompanySetting(CUser user, CCompany company) {
+	public CUserCompanySetting(CUser user, CCompany company, CUserCompanyRole role, String ownershipLevel) {
 		super(CUserCompanySetting.class);
 		this.user = user;
 		this.company = company;
-	}
-
-	public CUserCompanySetting(CUser user, CCompany company, String ownershipLevel) {
-		this(user, company);
-		setOwnershipLevel(ownershipLevel);
-	}
-
-	public CUserCompanySetting(CUser user, CCompany company, String ownershipLevel, CUserCompanyRole role) {
-		this(user, company, ownershipLevel);
 		this.role = role;
+		setOwnershipLevel(ownershipLevel);
 	}
 
 	/** Check if this user can manage company settings.

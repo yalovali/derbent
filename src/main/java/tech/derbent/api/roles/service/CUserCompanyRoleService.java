@@ -85,4 +85,19 @@ public class CUserCompanyRoleService extends CAbstractNamedEntityService<CUserCo
 		Check.notNull(selectedCompany, "Company cannot be null");
 		return ((IUserCompanyRoleRepository) repository).findByCompany(selectedCompany);
 	}
+
+	@Override
+	public CUserCompanyRole getRandom() {
+		Check.fail("Use getRandom(CCompany) instead to ensure company context");
+		return null;
+	}
+
+	public CUserCompanyRole getRandom(CCompany company) {
+		List<CUserCompanyRole> roles = ((IUserCompanyRoleRepository) repository).findByCompany(company);
+		if (roles.isEmpty()) {
+			throw new IllegalStateException("No roles found for company: " + company.getName());
+		}
+		int randomIndex = (int) (Math.random() * roles.size());
+		return roles.get(randomIndex);
+	}
 }

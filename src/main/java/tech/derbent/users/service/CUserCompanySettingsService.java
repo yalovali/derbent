@@ -30,21 +30,19 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 
 	/** Add user to company with full configuration */
 	@Transactional
-	public CUserCompanySetting addUserToCompany(final CUser user, final CCompany company, final String ownershipLevel, final CUserCompanyRole role) {
+	public CUserCompanySetting addUserToCompany(final CUser user, final CCompany company, final CUserCompanyRole role, final String ownershipLevel) {
 		LOGGER.debug("Adding user {} to company {} with ownership level {} and role {}", user, company, ownershipLevel, role);
 		Check.notNull(user, "User must not be null");
 		Check.notNull(company, "Company must not be null");
-		if ((user.getId() == null) || (company.getId() == null)) {
-			throw new IllegalArgumentException("User and company must have valid IDs");
+		if ((user.getId() == null) || (company.getId() == null) || (role.getId() == null)) {
+			throw new IllegalArgumentException("User,role and company must have valid IDs");
 		}
 		if (relationshipExists(user.getId(), company.getId())) {
-			throw new IllegalArgumentException("User is already a member of this company");
+			deleteByUserCompany(user, company);
+			// throw new IllegalArgumentException("User is already a member of this company");
 		}
-		final CUserCompanySetting settings = new CUserCompanySetting(user, company);
-		settings.setOwnershipLevel(ownershipLevel != null ? ownershipLevel : "MEMBER");
-		settings.setRole(role);
+		final CUserCompanySetting settings = new CUserCompanySetting(user, company, role, ownershipLevel);
 		validateRelationship(settings);
-		// Save the entity first
 		final CUserCompanySetting savedSettings = save(settings);
 		return savedSettings;
 	}
@@ -154,7 +152,7 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 			repository.flush(); // Ensure deletion is executed before creating new one
 		}
 		// Create the new setting
-		return addUserToCompany(user, company, ownershipLevel, role);
+		return addUserToCompany(user, company, role, ownershipLevel);
 	}
 
 	@Override

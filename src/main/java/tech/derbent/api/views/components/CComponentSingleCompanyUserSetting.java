@@ -90,8 +90,8 @@ public class CComponentSingleCompanyUserSetting extends CComponentDBEntity<CUser
 			CUserCompanySetting savedSettings;
 			if (settings.getId() == null) {
 				// New setting
-				savedSettings = userCompanySettingsService.addUserToCompany(settings.getUser(), settings.getCompany(), settings.getOwnershipLevel(),
-						settings.getRole());
+				savedSettings = userCompanySettingsService.addUserToCompany(settings.getUser(), settings.getCompany(), settings.getRole(),
+						settings.getOwnershipLevel());
 			} else {
 				// Update existing setting
 				savedSettings = userCompanySettingsService.save(settings);
