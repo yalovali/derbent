@@ -1,11 +1,13 @@
 package tech.derbent.page.view;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.context.ApplicationContext;
 import tech.derbent.activities.service.CActivityService;
+import tech.derbent.companies.domain.CCompany;
 import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CDetailSection;
@@ -33,7 +35,8 @@ class CDynamicPageViewWithSectionsCrudIntegrationTest {
 	void testCrudFunctionalityConfigurationIsValid() {
 		MockitoAnnotations.openMocks(this);
 		// Create test project
-		CProject testProject = new CProject("Test Project");
+		CCompany testCompany = new CCompany("Test Company");
+		CProject testProject = new CProject("Test Project", testCompany);
 		// Create a grid entity for activities
 		CGridEntity activityGridEntity = new CGridEntity("ActivityGrid", testProject);
 		activityGridEntity.setDataServiceBeanName("activityService");

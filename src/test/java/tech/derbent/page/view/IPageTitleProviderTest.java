@@ -1,11 +1,14 @@
 package tech.derbent.page.view;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.context.ApplicationContext;
 import tech.derbent.api.interfaces.IPageTitleProvider;
+import tech.derbent.companies.domain.CCompany;
 import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CDetailSection;
@@ -30,7 +33,8 @@ class IPageTitleProviderTest {
 	void testCDynamicPageViewImplementsIPageTitleProvider() {
 		MockitoAnnotations.openMocks(this);
 		// Create test page entity
-		CProject testProject = new CProject("Test Project");
+		CCompany testCompany = new CCompany("Test Company");
+		CProject testProject = new CProject("Test Project", testCompany);
 		CPageEntity pageEntity = new CPageEntity("TestPage", testProject);
 		pageEntity.setPageTitle("Dynamic Page Title");
 		// Create CDynamicPageView and test IPageTitleProvider implementation
@@ -38,7 +42,7 @@ class IPageTitleProviderTest {
 		// Verify it implements the interface
 		assertTrue(dynamicPageView instanceof IPageTitleProvider, "CDynamicPageView should implement IPageTitleProvider");
 		// Test the getPageTitle method
-		IPageTitleProvider titleProvider = (IPageTitleProvider) dynamicPageView;
+		IPageTitleProvider titleProvider = dynamicPageView;
 		assertEquals("Dynamic Page Title", titleProvider.getPageTitle(), "Should return the page title from CPageEntity");
 		System.out.println("✅ CDynamicPageView implements IPageTitleProvider correctly");
 		System.out.println("✅ Page title: " + titleProvider.getPageTitle());
@@ -48,7 +52,8 @@ class IPageTitleProviderTest {
 	void testCDynamicPageViewWithSectionsImplementsIPageTitleProvider() {
 		MockitoAnnotations.openMocks(this);
 		// Create test configuration
-		CProject testProject = new CProject("Test Project");
+		CCompany testCompany = new CCompany("Test Company");
+		CProject testProject = new CProject("Test Project", testCompany);
 		CGridEntity gridEntity = new CGridEntity("TestGrid", testProject);
 		gridEntity.setDataServiceBeanName("testService");
 		CDetailSection detailSection = new CDetailSection("TestDetails", testProject);

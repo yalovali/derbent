@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.context.ApplicationContext;
 import tech.derbent.activities.service.CActivityService;
+import tech.derbent.companies.domain.CCompany;
 import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CDetailSection;
@@ -37,12 +38,14 @@ class CDynamicPageRouterGridDetailSectionsPlaywrightTest {
 	@Mock
 	private CSessionService sessionService;
 	private CProject testProject;
+	private CCompany testCompany;
 
 	@BeforeEach
 	void setUp() {
 		MockitoAnnotations.openMocks(this);
 		// Create test project
-		testProject = new CProject("Demo Project");
+		testCompany = new CCompany("Demo Company");
+		testProject = new CProject("Demo Project", testCompany);
 		// Create grid entity for activities
 		activityGridEntity = new CGridEntity("ActivityGrid", testProject);
 		activityGridEntity.setDataServiceBeanName("activityService");

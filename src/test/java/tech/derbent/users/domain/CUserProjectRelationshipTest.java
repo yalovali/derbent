@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tech.derbent.companies.domain.CCompany;
 import tech.derbent.projects.domain.CProject;
 
 /** Unit tests for user-project relationship management in CUser and CProject entities. */
@@ -13,6 +14,7 @@ public class CUserProjectRelationshipTest {
 
 	private CUser user;
 	private CProject project;
+	private CCompany company;
 	private CUserProjectSettings settings;
 
 	@BeforeEach
@@ -20,7 +22,8 @@ public class CUserProjectRelationshipTest {
 		user = new CUser("Test User");
 		user.setLogin("testuser");
 		user.setEmail("test@example.com");
-		project = new CProject("Test Project");
+		company = new CCompany("Test Company");
+		project = new CProject("Test Project", company);
 		settings = new CUserProjectSettings();
 		settings.setPermission("READ,WRITE");
 	}

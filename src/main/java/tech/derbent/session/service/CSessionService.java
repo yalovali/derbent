@@ -11,10 +11,12 @@ import org.springframework.stereotype.Service;
 import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.interfaces.IProjectListChangeListener;
 import tech.derbent.api.utils.Check;
+import tech.derbent.companies.domain.CCompany;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.events.ProjectListChangeEvent;
 import tech.derbent.projects.service.IProjectRepository;
 import tech.derbent.users.domain.CUser;
+import tech.derbent.users.service.CUserCompanySettingsService;
 import tech.derbent.users.service.IUserRepository;
 
 /** Simple session service implementation for non-web applications like database reset. This provides basic functionality without Vaadin
@@ -32,10 +34,13 @@ public class CSessionService implements ISessionService {
 	private final Set<IProjectListChangeListener> projectListChangeListeners = ConcurrentHashMap.newKeySet();
 	private final IProjectRepository projectRepository;
 	private final IUserRepository userRepository;
+	private final CUserCompanySettingsService userCompanySettingsService;
 
-	public CSessionService(final IUserRepository userRepository, final IProjectRepository projectRepository) {
+	public CSessionService(final IUserRepository userRepository, final IProjectRepository projectRepository,
+			final CUserCompanySettingsService userCompanySettingsService) {
 		this.userRepository = userRepository;
 		this.projectRepository = projectRepository;
+		this.userCompanySettingsService = userCompanySettingsService;
 		LOGGER.info("Using CSessionService (reset-db) for database reset application");
 	}
 
@@ -100,7 +105,7 @@ public class CSessionService implements ISessionService {
 	@Override
 	public List<CProject> getAvailableProjects() { return projectRepository.findAll(); }
 
-	public tech.derbent.companies.domain.CCompany getCurrentCompany() { return getActiveCompany().orElse(null); }
+	public CCompany getCurrentCompany() { return getActiveCompany().orElse(null); }
 
 	// @EventListener method placeholder for compatibility
 	@Override
@@ -126,7 +131,7 @@ public class CSessionService implements ISessionService {
 	}
 
 	// Company management methods
-	public void setActiveCompany(final tech.derbent.companies.domain.CCompany company) {
+	public void setActiveCompany(final CCompany company) {
 		activeCompany = company;
 		LOGGER.debug("Active company set to: {}", company != null ? company.getName() : "null");
 	}
@@ -137,15 +142,16 @@ public class CSessionService implements ISessionService {
 	}
 
 	@Override
-	public void setActiveProject(final CProject project) {
-		activeProject = project;
-		LOGGER.debug("Active project set to: {}", project != null ? project.getName() : "null");
-	}
+	public void setActiveProject(final CProject project) { activeProject = project; }
 
 	@Override
 	public void setActiveUser(final CUser user) {
 		activeUser = user;
-		LOGGER.debug("Active user set to: {}", user != null ? user.getLogin() : "null");
+		if (user == null) {
+			setActiveCompany(null);
+		} else {
+			setActiveCompany(user.getCompanyInstance(userCompanySettingsService));
+		}
 	}
 
 	@Override

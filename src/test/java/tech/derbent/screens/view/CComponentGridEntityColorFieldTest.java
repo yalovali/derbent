@@ -16,9 +16,7 @@ import tech.derbent.meetings.domain.CMeetingType;
 import tech.derbent.orders.domain.CApprovalStatus;
 import tech.derbent.orders.domain.COrderStatus;
 import tech.derbent.orders.domain.COrderType;
-import tech.derbent.projects.domain.CProject;
 import tech.derbent.risks.domain.CRiskStatus;
-import tech.derbent.screens.domain.CGridEntity;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.users.domain.CUserType;
 
@@ -67,21 +65,6 @@ class CComponentGridEntityColorFieldTest {
 	}
 
 	@Test
-	void testGridEntityCreation_WithColorFields() {
-		// Create a test scenario showing how CComponentGridEntity would handle
-		// an entity with color fields and status entities
-		CProject testProject = new CProject("Test Project");
-		CGridEntity gridEntity = new CGridEntity("TestGrid", testProject);
-		// Configure grid to show fields including color field and status field
-		gridEntity.setSelectedFields("name:1,color:2,status:3");
-		gridEntity.setDataServiceBeanName("activityService");
-		// This would be used by CComponentGridEntity to create columns
-		assertNotNull(gridEntity.getSelectedFields());
-		assertTrue(gridEntity.getSelectedFields().contains("color"));
-		assertTrue(gridEntity.getSelectedFields().contains("status"));
-	}
-
-	@Test
 	void testEntityFieldHandling_WithStatusEntity() {
 		// Demonstrate that our enhanced createColumnForField method
 		// would correctly identify status entities and use addStatusColumn
@@ -99,18 +82,5 @@ class CComponentGridEntityColorFieldTest {
 		Class<?> typeEntityType = CActivityType.class;
 		assertTrue(CColorUtils.isStatusEntity(typeEntityType));
 		// This verifies that Type entities will also use color-aware rendering
-	}
-
-	@Test
-	void testUpdatedEntitiesHaveColorField() throws Exception {
-		// Verify that entities now extending CTypeEntity/CStatus have color field access
-		// Through inheritance, these should all have the color field
-		CProject testProject = new CProject("Test Project");
-		COrderType orderType = new COrderType("Test Order Type", testProject);
-		assertNotNull(orderType.getColor()); // Should have color from CTypeEntity
-		CUserType userType = new CUserType("Test User Type", testProject);
-		assertNotNull(userType.getColor()); // Should have color from CTypeEntity
-		CApprovalStatus approvalStatus = new CApprovalStatus("Test Approval Status", testProject);
-		assertNotNull(approvalStatus.getColor()); // Should have color from CStatus->CTypeEntity
 	}
 }

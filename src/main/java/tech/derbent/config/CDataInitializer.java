@@ -696,15 +696,15 @@ public class CDataInitializer {
 		}
 	}
 
-	private void createProjectDigitalTransformation() {
-		final CProject project = new CProject("Digital Transformation Initiative");
+	private void createProjectDigitalTransformation(CCompany company) {
+		final CProject project = new CProject("Digital Transformation Initiative", company);
 		project.setDescription("Comprehensive digital transformation for enhanced customer experience");
 		project.setIsActive(true);
 		projectService.save(project);
 	}
 
-	private void createProjectInfrastructureUpgrade() {
-		final CProject project = new CProject("Infrastructure Upgrade Project");
+	private void createProjectInfrastructureUpgrade(CCompany company) {
+		final CProject project = new CProject("Infrastructure Upgrade Project", company);
 		project.setDescription("Upgrading IT infrastructure for improved performance and scalability");
 		projectService.save(project);
 	}
@@ -723,8 +723,8 @@ public class CDataInitializer {
 		userService.save(manager);
 	}
 
-	private void createProjectProductDevelopment() {
-		final CProject project = new CProject("New Product Development");
+	private void createProjectProductDevelopment(CCompany company) {
+		final CProject project = new CProject("New Product Development", company);
 		project.setDescription("Development of innovative products to expand market reach");
 		projectService.save(project);
 	}
@@ -1762,9 +1762,11 @@ public class CDataInitializer {
 			createProjectManagerUser();
 			createTeamMemberUsers();
 			/* create sample projects */
-			createProjectDigitalTransformation();
-			createProjectInfrastructureUpgrade();
-			createProjectProductDevelopment();
+			for (CCompany company : companyService.list(Pageable.unpaged()).getContent()) {
+				createProjectDigitalTransformation(company);
+				createProjectInfrastructureUpgrade(company);
+				createProjectProductDevelopment(company);
+			}
 			/* create sample user project relationships */
 			initializeSampleUserProjectSettings();
 			/* create sample user company relationships */

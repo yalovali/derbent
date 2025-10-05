@@ -5,6 +5,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
+import tech.derbent.projects.service.IProjectRepository;
+import tech.derbent.users.service.CUserCompanySettingsService;
+import tech.derbent.users.service.IUserRepository;
 
 /** Configuration to provide the correct session service bean for different environments. This ensures compatibility between the expected
  * CSessionService concrete type and the actual implementation available in different profiles. */
@@ -21,11 +24,10 @@ public class CSessionServiceConfig {
 	@Primary
 	@ConditionalOnWebApplication
 	@Profile ("!reset-db")
-	public CSessionService sessionServiceDelegate(final CWebSessionService webSessionService,
-			final tech.derbent.users.service.IUserRepository userRepository,
-			final tech.derbent.projects.service.IProjectRepository projectRepository) {
+	public CSessionService sessionServiceDelegate(final CWebSessionService webSessionService, final IUserRepository userRepository,
+			final IProjectRepository projectRepository, final CUserCompanySettingsService userCompanySettingsService) {
 		// Create an anonymous subclass that delegates to the web session service
-		return new CSessionService(userRepository, projectRepository) {
+		return new CSessionService(userRepository, projectRepository, userCompanySettingsService) {
 
 			@Override
 			public void setActiveUser(final tech.derbent.users.domain.CUser user) {

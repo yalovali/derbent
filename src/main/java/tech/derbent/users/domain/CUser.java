@@ -19,6 +19,7 @@ import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.interfaces.IFieldInfoGenerator;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.Check;
+import tech.derbent.companies.domain.CCompany;
 import tech.derbent.users.service.CUserCompanySettingsService;
 
 @Entity
@@ -256,6 +257,12 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 	@Override
 	public void setName(final String name) {
 		super.setName(name);
+	}
+
+	public CCompany getCompanyInstance(final CUserCompanySettingsService service) {
+		Check.notNull(service, "Service cannot be null");
+		CUserCompanySetting setting = getCompanySettingsInstance(service);
+		return (setting != null) ? setting.getCompany() : null;
 	}
 
 	public void setPassword(final String password) {

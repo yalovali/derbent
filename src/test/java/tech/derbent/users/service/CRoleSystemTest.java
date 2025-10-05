@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.roles.domain.CUserProjectRole;
+import tech.derbent.companies.domain.CCompany;
 import tech.derbent.projects.domain.CProject;
 
 /** Test class for the new role system functionality. Validates that CUserProjectRole and CUserCompanyRole work as expected. */
@@ -19,7 +20,8 @@ public class CRoleSystemTest {
 	@Test
 	public void testProjectRoleCreation() {
 		// Create a test project
-		CProject project = new CProject("Test Project");
+		CCompany testCompany = new CCompany("Test Company");
+		CProject project = new CProject("Test Project", testCompany);
 		// Create project roles
 		CUserProjectRole adminRole = new CUserProjectRole("Admin", project);
 		adminRole.setIsAdmin(true);
@@ -47,7 +49,8 @@ public class CRoleSystemTest {
 
 	@Test
 	public void testProjectRolePageAccess() {
-		CProject project = new CProject("Test Project");
+		CCompany testCompany = new CCompany("Test Company");
+		CProject project = new CProject("Test Project", testCompany);
 		CUserProjectRole role = new CUserProjectRole("Test Role", project);
 		// Test page access
 		role.addReadAccess("Dashboard");
@@ -67,7 +70,8 @@ public class CRoleSystemTest {
 
 	@Test
 	public void testRoleToString() {
-		CProject project = new CProject("Test Project");
+		CCompany testCompany = new CCompany("Test Company");
+		CProject project = new CProject("Test Project", testCompany);
 		CUserProjectRole role = new CUserProjectRole("Test Role", project);
 		role.setIsAdmin(true);
 		role.addReadAccess("Page1");

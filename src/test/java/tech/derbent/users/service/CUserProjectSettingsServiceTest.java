@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tech.derbent.companies.domain.CCompany;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
@@ -32,6 +33,7 @@ public class CUserProjectSettingsServiceTest {
 	private CUserProjectSettingsService service;
 	private CUser user;
 	private CProject project;
+	private CCompany company;
 
 	@BeforeEach
 	void setUp() {
@@ -39,7 +41,8 @@ public class CUserProjectSettingsServiceTest {
 		user = new CUser("Test User");
 		user.setLogin("testuser");
 		user.setEmail("test@example.com");
-		project = new CProject("Test Project");
+		company = new CCompany("Test Company");
+		project = new CProject("Test Project", company);
 	}
 
 	@Test
@@ -112,7 +115,8 @@ public class CUserProjectSettingsServiceTest {
 		// This test simulates what the dialogs should do to prevent user_id constraint violations
 		// Given - Create a new settings instance like dialogs do
 		CUser testUser = new CUser("Dialog Test User");
-		CProject testProject = new CProject("Dialog Test Project");
+		CCompany testCompany = new CCompany("Test Company");
+		CProject testProject = new CProject("Dialog Test Project", testCompany);
 		// When - Create new settings and immediately set required relationships
 		CUserProjectSettings settings = new CUserProjectSettings();
 		settings.setUser(testUser);
@@ -132,7 +136,8 @@ public class CUserProjectSettingsServiceTest {
 	void testDeleteRelationshipFix_BidirectionalCollectionManagement() {
 		// Given - Create a user, project and their relationship
 		CUser testUser = new CUser("Test User");
-		CProject testProject = new CProject("Test Project");
+		CCompany testCompany = new CCompany("Test Company");
+		CProject testProject = new CProject("Test Project", testCompany);
 		CUserProjectSettings settings = new CUserProjectSettings();
 		settings.setUser(testUser);
 		settings.setProject(testProject);

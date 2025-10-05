@@ -13,6 +13,8 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.Check;
+import tech.derbent.companies.domain.CCompany;
+import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.users.domain.CUserProjectSettings;
 
 /** CProject - Domain entity representing projects. Layer: Domain (MVC) Inherits from CEntityDB to provide database functionality. */
@@ -31,14 +33,35 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 			order = 10, createComponentMethod = "createProjectUserSettingsComponent"
 	)
 	private final List<CUserProjectSettings> userSettings = new ArrayList<>();
+	// Many projects can belong to one company
+	@AMetaData (
+			displayName = "Company", required = true, readOnly = false, description = "The company this project belongs to", hidden = false,
+			order = 20
+	)
+	@Column (name = "company_id", nullable = false)
+	private CCompany company;
 
 	/** Default constructor for JPA. */
 	public CProject() {
 		super();
 	}
 
-	public CProject(final String name) {
+	public Long getCompanyId() { return company != null ? company.getId() : null; }
+
+	private CCompany getCompany() { return company; }
+
+	public CCompany getCompanyInstance(CCompanyService service) {
+		if (getCompanyId() == null) {
+			return null;
+		}
+		CCompany company =
+				service.getById(getCompanyId()).orElseThrow(() -> new IllegalStateException("Company with ID " + getCompanyId() + " not found"));
+		return company;
+	}
+
+	public CProject(final String name, CCompany company) {
 		super(CProject.class, name);
+		this.company = company;
 	}
 
 	/** Gets the list of user project settings for this project. */
