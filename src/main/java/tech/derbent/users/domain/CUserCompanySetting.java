@@ -8,6 +8,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.annotations.CSpringAuxillaries;
 import tech.derbent.api.domains.CAbstractEntityRelationship;
@@ -40,6 +42,7 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 
 	@ManyToOne
 	@JoinColumn (name = "company_id", nullable = false)
+	@OnDelete (action = OnDeleteAction.CASCADE)
 	@AMetaData (
 			displayName = "Company", required = true, readOnly = false, description = "Company in this relationship", hidden = false, order = 2,
 			dataProviderOwner = "content", dataProviderMethod = "getAvailableCompanyForUser"

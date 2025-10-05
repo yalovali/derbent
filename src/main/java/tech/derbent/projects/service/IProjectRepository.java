@@ -1,6 +1,8 @@
 package tech.derbent.projects.service;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.api.services.IAbstractNamedRepository;
@@ -15,4 +17,6 @@ public interface IProjectRepository extends IAbstractNamedRepository<CProject> {
 	List<CProject> findProjectsNotAssignedToUser(@Param ("userId") Long userId);
 	@Query ("SELECT p FROM CProject p WHERE p.company.id = :companyId")
 	List<CProject> findByCompanyId(@Param ("companyId") Long companyId);
+	@Query ("SELECT p FROM CProject p WHERE p.company.id = :companyId")
+	Page<CProject> findByCompanyId(@Param ("companyId") Long companyId, Pageable pageable);
 }
