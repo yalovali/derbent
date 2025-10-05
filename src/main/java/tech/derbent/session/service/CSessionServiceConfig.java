@@ -102,6 +102,12 @@ public class CSessionServiceConfig {
 			public void handleProjectListChange(final tech.derbent.projects.events.ProjectListChangeEvent event) {
 				webSessionService.handleProjectListChange(event);
 			}
+
+			@Override
+			public java.util.Optional<tech.derbent.companies.domain.CCompany> getActiveCompany() { return webSessionService.getActiveCompany(); }
+
+			@Override
+			public tech.derbent.companies.domain.CCompany getCurrentCompany() { return webSessionService.getCurrentCompany(); }
 		};
 	}
 }

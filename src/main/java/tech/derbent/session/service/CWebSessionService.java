@@ -16,10 +16,12 @@ import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.interfaces.IProjectListChangeListener;
+import tech.derbent.companies.domain.CCompany;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.events.ProjectListChangeEvent;
 import tech.derbent.projects.service.IProjectRepository;
 import tech.derbent.users.domain.CUser;
+import tech.derbent.users.service.CUserCompanySettingsService;
 import tech.derbent.users.service.IUserRepository;
 
 /** Service to manage user session state including active user and active project. Uses Vaadin session to store session-specific information. */
@@ -31,6 +33,7 @@ public class CWebSessionService implements ISessionService {
 	private static final String ACTIVE_ID_KEY = "activeId";
 	private static final String ACTIVE_PROJECT_KEY = "activeProject";
 	private static final String ACTIVE_USER_KEY = "activeUser";
+	private static final String ACTIVE_COMPANY_KEY = "activeCompany";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CWebSessionService.class);
 	private final AuthenticationContext authenticationContext;
 	private final Set<String> idAttributes = ConcurrentHashMap.newKeySet();
@@ -41,12 +44,14 @@ public class CWebSessionService implements ISessionService {
 	private final Set<IProjectListChangeListener> projectListChangeListeners = ConcurrentHashMap.newKeySet();
 	private final IProjectRepository projectRepository;
 	private final IUserRepository userRepository;
+	private final CUserCompanySettingsService userCompanySettingsService;
 
 	public CWebSessionService(final AuthenticationContext authenticationContext, final IUserRepository userRepository,
-			final IProjectRepository projectRepository) {
+			final IProjectRepository projectRepository, final CUserCompanySettingsService userCompanySettingsService) {
 		this.authenticationContext = authenticationContext;
 		this.userRepository = userRepository;
 		this.projectRepository = projectRepository;
+		this.userCompanySettingsService = userCompanySettingsService;
 	}
 
 	/** Registers a component to receive notifications when the active project changes. Components should call this method when they are attached to
@@ -76,6 +81,7 @@ public class CWebSessionService implements ISessionService {
 		if (session != null) {
 			session.setAttribute(ACTIVE_PROJECT_KEY, null);
 			session.setAttribute(ACTIVE_USER_KEY, null);
+			session.setAttribute(ACTIVE_COMPANY_KEY, null);
 			session.setAttribute(ACTIVE_ID_KEY, null);
 		}
 		projectChangeListeners.clear();
@@ -149,9 +155,19 @@ public class CWebSessionService implements ISessionService {
 		return Optional.ofNullable(activeUser);
 	}
 
-	/** Gets all available projects for the current user. For now, returns all projects. Can be enhanced to filter by user permissions. */
+	/** Gets all available projects for the current user. Filters by company if available. */
 	@Override
-	public List<CProject> getAvailableProjects() { return projectRepository.findAll(); }
+	public List<CProject> getAvailableProjects() {
+		// Get current company from session
+		CCompany currentCompany = getCurrentCompany();
+		if (currentCompany != null) {
+			LOGGER.debug("Filtering available projects by company: {}", currentCompany.getName());
+			return projectRepository.findByCompanyId(currentCompany.getId());
+		}
+		// Fallback to all projects if no company context
+		LOGGER.debug("No company context, returning all projects");
+		return projectRepository.findAll();
+	}
 
 	/** Event listener for project list changes. This method is called when projects are created, updated, or deleted to notify all registered
 	 * listeners.
@@ -258,8 +274,31 @@ public class CWebSessionService implements ISessionService {
 		if (session != null) {
 			session.setAttribute(ACTIVE_USER_KEY, user);
 			LOGGER.info("Active user set to: {}", user != null ? user.getLogin() : "null");
+			// Set active company when user is set
+			if (user != null) {
+				CCompany company = user.getCompanyInstance(userCompanySettingsService);
+				if (company != null) {
+					session.setAttribute(ACTIVE_COMPANY_KEY, company);
+					LOGGER.info("Active company set to: {}", company.getName());
+				}
+			}
 		}
 	}
+
+	/** Gets the currently active company from the session. */
+	@Override
+	public Optional<CCompany> getActiveCompany() {
+		final VaadinSession session = VaadinSession.getCurrent();
+		if (session == null) {
+			return Optional.empty();
+		}
+		CCompany activeCompany = (CCompany) session.getAttribute(ACTIVE_COMPANY_KEY);
+		return Optional.ofNullable(activeCompany);
+	}
+
+	/** Gets the current company (convenience method). */
+	@Override
+	public CCompany getCurrentCompany() { return getActiveCompany().orElse(null); }
 
 	/** Sets the layout service. This is called after bean creation to avoid circular dependency. */
 	@Override

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.interfaces.IProjectListChangeListener;
+import tech.derbent.companies.domain.CCompany;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.projects.events.ProjectListChangeEvent;
@@ -26,4 +27,7 @@ public interface ISessionService {
 	void notifyProjectListChanged();
 	void setLayoutService(CLayoutService layoutService);
 	void handleProjectListChange(ProjectListChangeEvent event);
+	// Company management methods
+	Optional<CCompany> getActiveCompany();
+	CCompany getCurrentCompany();
 }

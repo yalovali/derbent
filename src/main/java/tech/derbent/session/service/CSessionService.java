@@ -103,7 +103,17 @@ public class CSessionService implements ISessionService {
 	}
 
 	@Override
-	public List<CProject> getAvailableProjects() { return projectRepository.findAll(); }
+	public List<CProject> getAvailableProjects() {
+		// Get current company
+		CCompany currentCompany = getCurrentCompany();
+		if (currentCompany != null) {
+			LOGGER.debug("Filtering available projects by company: {}", currentCompany.getName());
+			return projectRepository.findAll().stream().filter(p -> p.getCompanyId() != null && p.getCompanyId().equals(currentCompany.getId()))
+					.toList();
+		}
+		// Fallback to all projects if no company context
+		return projectRepository.findAll();
+	}
 
 	public CCompany getCurrentCompany() { return getActiveCompany().orElse(null); }
 

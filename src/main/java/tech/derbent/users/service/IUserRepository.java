@@ -51,4 +51,16 @@ public interface IUserRepository extends IAbstractNamedRepository<CUser> {
 			"FROM #{#entityName} u LEFT JOIN FETCH u.userType "
 	)
 	Page<CUser> list(Pageable pageable);
+	/** Find all users by company ID with eager loading */
+	@Query (
+		"SELECT u FROM #{#entityName} u " + "LEFT JOIN FETCH u.userType "
+				+ "WHERE u.id IN (SELECT ucs.user.id FROM CUserCompanySetting ucs WHERE ucs.company.id = :companyId)"
+	)
+	List<CUser> findByCompanyId(@Param ("companyId") Long companyId);
+	/** Find users by company ID with pagination */
+	@Query (
+		"SELECT u FROM #{#entityName} u " + "LEFT JOIN FETCH u.userType "
+				+ "WHERE u.id IN (SELECT ucs.user.id FROM CUserCompanySetting ucs WHERE ucs.company.id = :companyId)"
+	)
+	Page<CUser> findByCompanyId(@Param ("companyId") Long companyId, Pageable pageable);
 }
