@@ -10,6 +10,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.roles.domain.CUserCompanyRole;
 import tech.derbent.api.roles.service.CUserCompanyRoleService;
+import tech.derbent.api.utils.Check;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.config.CSpringContext;
@@ -32,6 +33,7 @@ public class CCompanyUserSettingsDialog extends CUserCompanyRelationDialog<CComp
 		this.masterCompany = company;
 		// Get the role service from the application context
 		this.roleService = CSpringContext.getBean(CUserCompanyRoleService.class);
+		Check.notNull(roleService, "Role service cannot be null");
 		setupDialog();
 		populateForm();
 	}
