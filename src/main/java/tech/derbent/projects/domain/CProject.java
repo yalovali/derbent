@@ -11,6 +11,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.interfaces.ISearchable;
@@ -42,6 +44,7 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 	)
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "company_id", nullable = false)
+	@OnDelete (action = OnDeleteAction.CASCADE)
 	private CCompany company;
 
 	/** Default constructor for JPA. */

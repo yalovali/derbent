@@ -4,6 +4,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.users.domain.CUser;
@@ -16,6 +18,7 @@ public abstract class CEntityOfProject<EntityClass> extends CEntityNamed<EntityC
 	// Many risks belong to one project
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "project_id", nullable = false)
+	@OnDelete (action = OnDeleteAction.CASCADE)
 	@AMetaData (displayName = "Project", required = true, readOnly = true, description = "Project of this entity", hidden = false, order = 10)
 	private CProject project;
 	@ManyToOne (fetch = FetchType.EAGER)

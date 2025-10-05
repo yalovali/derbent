@@ -137,6 +137,15 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 		return ((IUserRepository) repository).findUsersNotAssignedToCompany(companyId);
 	}
 
+	@Override
+	@Transactional (readOnly = true)
+	public List<CUser> findAll() {
+		// Enforce company requirement
+		CCompany currentCompany = getCurrentCompany();
+		LOGGER.debug("Finding all users for company: {}", currentCompany.getName());
+		return ((IUserRepository) repository).findByCompanyId(currentCompany.getId());
+	}
+
 	@Transactional (readOnly = true)
 	@PreAuthorize ("permitAll()")
 	public List<CUser> getAvailableUsersForProject(final Long projectId) {
@@ -158,22 +167,29 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	@Override
 	protected Class<CUser> getEntityClass() { return CUser.class; }
 
+	/** Gets the current company from session, throwing exception if not available.
+	 * @return current company
+	 * @throws IllegalStateException if no company context is available */
+	private CCompany getCurrentCompany() {
+		if (sessionService == null) {
+			throw new IllegalStateException("Session service not available");
+		}
+		CCompany currentCompany = sessionService.getCurrentCompany();
+		if (currentCompany == null) {
+			throw new IllegalStateException("No company context available. User must be associated with a company.");
+		}
+		return currentCompany;
+	}
+
 	/** Override the default list method to filter users by active company when available. This allows CUserService to work with dynamic pages without
 	 * needing to implement special filtering. If no active company is available, returns all users (preserves existing behavior). */
 	@Override
 	@Transactional (readOnly = true)
 	public Page<CUser> list(final Pageable pageable) {
-		// Get current company from session if available
-		if (sessionService != null) {
-			CCompany currentCompany = sessionService.getCurrentCompany();
-			if (currentCompany != null) {
-				LOGGER.debug("Filtering users by company: {}", currentCompany.getName());
-				return ((IUserRepository) repository).findByCompanyId(currentCompany.getId(), pageable);
-			}
-		}
-		// Fallback to all users if no company context
-		LOGGER.debug("No company context, returning all users");
-		return ((IUserRepository) repository).list(pageable);
+		// Get current company from session - required
+		CCompany currentCompany = getCurrentCompany();
+		LOGGER.debug("Filtering users by company: {}", currentCompany.getName());
+		return ((IUserRepository) repository).findByCompanyId(currentCompany.getId(), pageable);
 	}
 
 	/** Lists users by project using the CUserProjectSettings relationship. This method allows CUserService to work with dynamic pages that expect

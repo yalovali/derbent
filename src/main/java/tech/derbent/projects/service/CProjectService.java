@@ -69,12 +69,16 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 	public Page<CProject> findAll(Pageable pageable) {
 		Check.notNull(repository, "Repository must not be null");
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
-		return ((IProjectRepository) repository).findByCompanyId(getCurrentCompany().getId(), safePage).getContent();
+		CCompany company = getCurrentCompany();
+		return ((IProjectRepository) repository).findByCompanyId(company.getId(), safePage);
 	}
 
 	CCompany getCurrentCompany() {
 		Check.notNull(sessionService, "Session service must not be null");
 		CCompany currentCompany = sessionService.getCurrentCompany();
+		if (currentCompany == null) {
+			throw new IllegalStateException("No company context available. User must be associated with a company.");
+		}
 		return currentCompany;
 	}
 
@@ -82,7 +86,8 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 	@Transactional (readOnly = true)
 	public Page<CProject> list(final Pageable pageable) {
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
-		final Page<CProject> entities = repository.findAll(safePage);
+		CCompany company = getCurrentCompany();
+		final Page<CProject> entities = ((IProjectRepository) repository).findByCompanyId(company.getId(), safePage);
 		return entities;
 	}
 
@@ -91,7 +96,11 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 	public Page<CProject> list(final Pageable pageable, final Specification<CProject> filter) {
 		LOGGER.debug("Listing entities with filter specification");
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
-		final Page<CProject> page = repository.findAll(filter, safePage);
+		// Apply company filter to the specification
+		CCompany company = getCurrentCompany();
+		Specification<CProject> companySpec = (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("company").get("id"), company.getId());
+		Specification<CProject> combinedSpec = filter != null ? companySpec.and(filter) : companySpec;
+		final Page<CProject> page = repository.findAll(combinedSpec, safePage);
 		return page;
 	}
 
@@ -111,6 +120,11 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 	@Override
 	@Transactional
 	public CProject save(final CProject entity) {
+		// Ensure company is set for new entities
+		if (entity.getCompany() == null) {
+			CCompany company = getCurrentCompany();
+			entity.setCompany(company);
+		}
 		final boolean isNew = entity.getId() == null;
 		final CProject savedEntity = super.save(entity);
 		final ProjectListChangeEvent.ChangeType changeType =
