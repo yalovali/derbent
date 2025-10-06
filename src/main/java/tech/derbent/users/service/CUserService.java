@@ -35,6 +35,7 @@ import tech.derbent.companies.domain.CCompany;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.CSessionService;
 import tech.derbent.users.domain.CUser;
+import tech.derbent.users.domain.CUserCompanySetting;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -273,7 +274,8 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	public void setCompany(CUser user, CCompany company, CUserCompanyRole role) {
 		Check.notNull(user, "User cannot be null");
 		Check.notNull(company, "Company cannot be null");
-		userCompanySettingsService.addUserToCompany(user, company, role, "Owner");
-		LOGGER.debug("Set company '{}' for user '{}'", company.getName(), user.getLogin());
+		CUserCompanySetting settings = userCompanySettingsService.addUserToCompany(user, company, role, "Owner");
+		user.setCompanySettings(settings);
+		LOGGER.debug("Set company '{}' for user '{}' with settings", company.getName(), user.getLogin());
 	}
 }
