@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -46,20 +47,32 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	@Autowired
 	private ApplicationContext applicationContext;
 	private final PasswordEncoder passwordEncoder;
-	private final CSessionService sessionService;
-	private final CUserCompanySettingsService userCompanySettingsService;
+	private CSessionService sessionService;
+	private CUserCompanySettingsService userCompanySettingsService;
 
-	public CUserService(final IUserRepository repository, CSessionService sessionService, CUserCompanySettingsService userCompanySettingsService,
-			final Clock clock) {
+	public CUserService(final IUserRepository repository, final Clock clock) {
 		super(repository, clock);
 		passwordEncoder = new BCryptPasswordEncoder(); // BCrypt for secure password
-		this.sessionService = sessionService;
-		this.userCompanySettingsService = userCompanySettingsService;
-		;
 		// hashing
 		@SuppressWarnings ("unused")
 		final CharSequence newPlainPassword = "test123";
 		// final String encodedPassword = passwordEncoder.encode(newPlainPassword);
+	}
+
+	/** Sets the session service. This is called after bean creation to avoid circular dependency.
+	 * @param sessionService the session service to set */
+	public void setSessionService(final CSessionService sessionService) {
+		this.sessionService = sessionService;
+		LOGGER.debug("SessionService injected into CUserService via setter");
+	}
+
+	/** Sets the user company settings service. This is called after bean creation to avoid circular dependency.
+	 * @param userCompanySettingsService the user company settings service to set */
+	@Autowired
+	@Lazy
+	public void setUserCompanySettingsService(final CUserCompanySettingsService userCompanySettingsService) {
+		this.userCompanySettingsService = userCompanySettingsService;
+		LOGGER.debug("UserCompanySettingsService injected into CUserService via setter");
 	}
 
 	@PreAuthorize ("permitAll()")
