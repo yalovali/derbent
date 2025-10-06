@@ -44,11 +44,12 @@ class UserServiceConfigurationTest {
 	@Test
 	void testUserServiceCanBeCreatedWithoutSessionService() {
 		// Given - CUserService can be created without sessionService (setter injection)
-		CUserService realUserService = new CUserService(userRepository, sessionService, userCompanySettingsService, clock);
+		CUserService realUserService = new CUserService(userRepository, clock);
 		// When - This should not throw an exception
 		assertNotNull(realUserService);
-		// Then - SessionService can be set later
+		// Then - SessionService and UserCompanySettingsService can be set later
 		realUserService.setSessionService(sessionService);
+		realUserService.setUserCompanySettingsService(userCompanySettingsService);
 		// No exception should be thrown
 	}
 }

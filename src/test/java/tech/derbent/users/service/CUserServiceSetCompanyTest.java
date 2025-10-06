@@ -30,7 +30,9 @@ public class CUserServiceSetCompanyTest {
 	@BeforeEach
 	void setUp() {
 		MockitoAnnotations.openMocks(this);
-		userService = new CUserService(userRepository, sessionService, userCompanySettingsService, Clock.systemDefaultZone());
+		userService = new CUserService(userRepository, Clock.systemDefaultZone());
+		userService.setSessionService(sessionService);
+		userService.setUserCompanySettingsService(userCompanySettingsService);
 	}
 
 	@Test
