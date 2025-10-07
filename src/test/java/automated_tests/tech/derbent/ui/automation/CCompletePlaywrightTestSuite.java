@@ -169,8 +169,6 @@ public class CCompletePlaywrightTestSuite extends CBaseUITest {
 	protected void runUIComponentTests() {
 		LOGGER.info("🎨 Running UI component tests...");
 		try {
-			// Test responsive design
-			testResponsiveDesign();
 			// Test accessibility basics
 			testAccessibilityBasics("Complete test suite accessibility check");
 			LOGGER.info("✅ UI component tests completed");

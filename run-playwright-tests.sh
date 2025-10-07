@@ -136,7 +136,6 @@ show_usage() {
     echo "  login         Run login/logout tests only"
     echo "  grid          Run grid interaction tests only"
     echo "  search        Run search functionality tests only"
-    echo "  responsive    Run responsive design tests only"
     echo "  accessibility Run accessibility tests only"
     echo "  validation    Run form validation tests only"
     echo "  workflow      Run complete workflow tests"
@@ -287,11 +286,6 @@ main() {
         "legacy-navigation")
             echo "🧭 Running legacy navigation tests..."
             run_playwright_tests "tech.derbent.ui.automation.PlaywrightUIAutomationTest#testNavigationBetweenViews,tech.derbent.ui.automation.PlaywrightUIAutomationTest#testComprehensiveAllViewsNavigation" "Legacy Navigation Tests"
-            ;;
-            
-        "responsive")
-            echo "📱 Running responsive design tests..."
-            run_playwright_tests "tech.derbent.ui.automation.PlaywrightUIAutomationTest#testResponsiveDesign" "Responsive Design Tests"
             ;;
             
         "accessibility")

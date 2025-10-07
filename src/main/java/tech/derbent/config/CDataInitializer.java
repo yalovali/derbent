@@ -25,6 +25,7 @@ import tech.derbent.activities.service.CActivityStatusInitializerService;
 import tech.derbent.activities.service.CActivityStatusService;
 import tech.derbent.activities.service.CActivityTypeInitializerService;
 import tech.derbent.activities.service.CActivityTypeService;
+import tech.derbent.api.roles.domain.CUserCompanyRole;
 import tech.derbent.api.roles.domain.CUserProjectRole;
 import tech.derbent.api.roles.service.CUserCompanyRoleInitializerService;
 import tech.derbent.api.roles.service.CUserCompanyRoleService;
@@ -510,7 +511,7 @@ public class CDataInitializer {
 
 	/** Creates system administrator user. */
 	private void createAdminUser() {
-		final CUser user = userService.createLoginUser(USER_ADMIN, STANDARD_PASSWORD, "Ahmet", "admin@of.gov.tr", "ADMIN,USER");
+		final CUser user = userService.createLoginUser(USER_ADMIN, STANDARD_PASSWORD, "Ahmet", "admin@of.gov.tr");
 		// Set user profile directly on entity
 		final String profilePictureFile = PROFILE_PICTURE_MAPPING.get(USER_ADMIN);
 		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
@@ -711,8 +712,7 @@ public class CDataInitializer {
 	/** Creates project manager user. */
 	private void createProjectManagerUser() {
 		LOGGER.info("createProjectManagerUser called - creating project manager");
-		final CUser user =
-				userService.createLoginUser(USER_MANAGER, STANDARD_PASSWORD, "Mehmet Emin", "mehmet.karadeniz@ofteknoloji.com.tr", "MANAGER,USER");
+		final CUser user = userService.createLoginUser(USER_MANAGER, STANDARD_PASSWORD, "Mehmet Emin", "mehmet.karadeniz@ofteknoloji.com.tr");
 		// Set user profile directly on entity
 		final String profilePictureFile = PROFILE_PICTURE_MAPPING.get(USER_MANAGER);
 		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
@@ -1009,7 +1009,7 @@ public class CDataInitializer {
 
 	/** Creates team member Alice Davis. */
 	private void createTeamMemberAlice() {
-		final CUser user = userService.createLoginUser(USER_MEMBER_AYSE, STANDARD_PASSWORD, "Ayşe", "ayse.demir@ofsaglik.com.tr", "USER");
+		final CUser user = userService.createLoginUser(USER_MEMBER_AYSE, STANDARD_PASSWORD, "Ayşe", "ayse.demir@ofsaglik.com.tr");
 		// Set user profile directly on entity
 		final String profilePictureFile = PROFILE_PICTURE_MAPPING.get(USER_MEMBER_AYSE);
 		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
@@ -1023,7 +1023,7 @@ public class CDataInitializer {
 
 	/** Creates team member Bob Wilson. */
 	private void createTeamMemberBob() {
-		final CUser user = userService.createLoginUser(USER_MEMBER_BURAK, STANDARD_PASSWORD, "Burak", "burak.ozkan@ofdanismanlik.com.tr", "USER");
+		final CUser user = userService.createLoginUser(USER_MEMBER_BURAK, STANDARD_PASSWORD, "Burak", "burak.ozkan@ofdanismanlik.com.tr");
 		// Set user profile directly on entity
 		final String profilePictureFile = PROFILE_PICTURE_MAPPING.get(USER_MEMBER_BURAK);
 		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
@@ -1037,7 +1037,7 @@ public class CDataInitializer {
 
 	/** Creates team member Mary Johnson. */
 	private void createTeamMemberMary() {
-		final CUser user = userService.createLoginUser(USER_MEMBER_MERVE, STANDARD_PASSWORD, "Merve", "merve.sahin@ofendüstri.com.tr", "USER");
+		final CUser user = userService.createLoginUser(USER_MEMBER_MERVE, STANDARD_PASSWORD, "Merve", "merve.sahin@ofendüstri.com.tr");
 		// Set user profile directly on entity
 		final String profilePictureFile = PROFILE_PICTURE_MAPPING.get(USER_MEMBER_MERVE);
 		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
@@ -1169,24 +1169,6 @@ public class CDataInitializer {
 		}
 	}
 
-	/** Helper method to create user project settings safely.
-	 * @param user       the user to assign
-	 * @param project    the project to assign to
-	 * @param role       the role name
-	 * @param permission the permission level */
-	private void createUserProjectSetting(final CUser user, final CProject project, final String role, final String permission) {
-		try {
-			// Check if relationship already exists
-			if (!userProjectSettingsService.relationshipExists(user.getId(), project.getId())) {
-				LOGGER.debug("Created user project setting: {} -> {} ({})", user.getLogin(), project.getName(), role);
-			} else {
-				LOGGER.debug("User project relationship already exists: {} -> {}", user.getLogin(), project.getName());
-			}
-		} catch (final Exception e) {
-			LOGGER.warn("Failed to create user project setting for {} -> {}: {}", user.getLogin(), project.getName(), e.getMessage());
-		}
-	}
-
 	/** Initializes comprehensive activity data with available fields populated. */
 	private void initializeSampleActivities(final CProject project) {
 		try {
@@ -1269,51 +1251,29 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleCompanyRoles() {
-		try {
-			final List<CCompany> companies = companyService.findAll();
-			final String[][] companyRoles = {
-					{
-							"Company Admin", "Administrative role with full company access", "true", "true", "false"
-					}, {
-							"Company Manager", "Company management role with write access", "false", "true", "false"
-					}, {
-							"Employee", "Standard employee role", "false", "true", "false"
-					}, {
-							"Company Guest", "Guest role with limited access", "false", "false", "true"
-					}
-			};
-			for (final CCompany company : companies) {
-				for (final String[] roleData : companyRoles) {
-					final tech.derbent.api.roles.domain.CUserCompanyRole role =
-							new tech.derbent.api.roles.domain.CUserCompanyRole(roleData[0], company);
-					role.setDescription(roleData[1]);
-					role.setIsAdmin(Boolean.parseBoolean(roleData[2]));
-					role.setIsUser(Boolean.parseBoolean(roleData[3]));
-					role.setIsGuest(Boolean.parseBoolean(roleData[4]));
-					role.setColor(CColorUtils.getRandomColor(true));
-					// Add appropriate page access based on role type
-					if (role.isAdmin()) {
-						role.addWriteAccess("CompanySettings");
-						role.addWriteAccess("UserManagement");
-						role.addWriteAccess("CompanyReports");
-					}
-					if (role.isUser()) {
-						role.addReadAccess("Dashboard");
-						role.addReadAccess("Tasks");
-						role.addWriteAccess("Profile");
-					}
-					if (role.isGuest()) {
-						role.addReadAccess("Dashboard");
-						role.addReadAccess("PublicInfo");
-					}
-					userCompanyRoleService.save(role);
-				}
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error creating company roles: {}", e.getMessage(), e);
-			throw new RuntimeException("Failed to initialize company roles", e);
+	private void initializeSampleCompanyRoles(CCompany company) {
+		final CUserCompanyRole role = new CUserCompanyRole("ADMIN", company);
+		role.setDescription("asdfasfd");
+		role.setIsAdmin(true);
+		role.setIsUser(true);
+		role.setIsGuest(true);
+		role.setColor(CColorUtils.getRandomColor(true));
+		// Add appropriate page access based on role type
+		if (role.isAdmin()) {
+			role.addWriteAccess("CompanySettings");
+			role.addWriteAccess("UserManagement");
+			role.addWriteAccess("CompanyReports");
 		}
+		if (role.isUser()) {
+			role.addReadAccess("Dashboard");
+			role.addReadAccess("Tasks");
+			role.addWriteAccess("Profile");
+		}
+		if (role.isGuest()) {
+			role.addReadAccess("Dashboard");
+			role.addReadAccess("PublicInfo");
+		}
+		userCompanyRoleService.save(role);
 	}
 
 	private void initializeSampleCurrencies(final CProject project) {
@@ -1635,58 +1595,6 @@ public class CDataInitializer {
 		}
 	}
 
-	/** Initialize sample user project settings to demonstrate the CComponentProjectUserSettings pattern. This creates realistic user-project
-	 * relationships following the established pattern. */
-	private void initializeSampleUserProjectSettings() {
-		try {
-			LOGGER.info("Initializing sample user project settings");
-			final List<CProject> projects = projectService.list(Pageable.unpaged()).getContent();
-			// Get sample users by login for consistent assignment
-			final CUser admin = userService.findByLogin(USER_ADMIN);
-			final CUser manager = userService.findByLogin(USER_MANAGER);
-			final CUser mary = userService.findByLogin("mary");
-			final CUser bob = userService.findByLogin("bob");
-			final CUser alice = userService.findByLogin("alice");
-			for (final CProject project : projects) {
-				// Admin gets full access to all projects
-				if (admin != null) {
-					createUserProjectSetting(admin, project, "Admin", "FULL_ACCESS");
-				}
-				// Manager gets management access to all projects
-				if (manager != null) {
-					createUserProjectSetting(manager, project, "Project Manager", "WRITE_ACCESS");
-				}
-				// Assign team members to different projects for variety
-				if ("Digital Transformation Initiative".equals(project.getName())) {
-					if (mary != null) {
-						createUserProjectSetting(mary, project, "Developer", "WRITE_ACCESS");
-					}
-					if (alice != null) {
-						createUserProjectSetting(alice, project, "Analyst", "READ_ACCESS");
-					}
-				} else if ("Infrastructure Upgrade Project".equals(project.getName())) {
-					if (bob != null) {
-						createUserProjectSetting(bob, project, "DevOps Engineer", "WRITE_ACCESS");
-					}
-					if (mary != null) {
-						createUserProjectSetting(mary, project, "Technical Lead", "WRITE_ACCESS");
-					}
-				} else if ("New Product Development".equals(project.getName())) {
-					if (alice != null) {
-						createUserProjectSetting(alice, project, "Product Owner", "WRITE_ACCESS");
-					}
-					if (bob != null) {
-						createUserProjectSetting(bob, project, "Developer", "WRITE_ACCESS");
-					}
-				}
-			}
-			LOGGER.info("Successfully initialized sample user project settings for {} projects", projects.size());
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample user project settings: {}", e.getMessage(), e);
-			throw new RuntimeException("Failed to initialize sample user project settings", e);
-		}
-	}
-
 	private void initializeSampleUserTypes(final CProject project) {
 		try {
 			final String[][] userTypes = {
@@ -1761,20 +1669,16 @@ public class CDataInitializer {
 			createConsultingCompany();
 			createHealthcareCompany();
 			createManufacturingCompany();
-			// Create sample users across different companies
-			createAdminUser();
-			createProjectManagerUser();
-			createTeamMemberUsers();
 			/* create sample projects */
 			for (CCompany company : companyService.list(Pageable.unpaged()).getContent()) {
+				initializeSampleCompanyRoles(company);
 				createProjectDigitalTransformation(company);
 				createProjectInfrastructureUpgrade(company);
 				createProjectProductDevelopment(company);
 			}
-			/* create sample user project relationships */
-			initializeSampleUserProjectSettings();
-			/* create sample user company relationships */
-			initializeSampleUserCompanySettings();
+			createAdminUser();
+			createProjectManagerUser();
+			createTeamMemberUsers();
 			// ========== PROJECT-SPECIFIC INITIALIZATION PHASE ==========
 			final List<CProject> projects = projectService.list(Pageable.unpaged()).getContent();
 			for (final CProject project : projects) {
@@ -1829,7 +1733,6 @@ public class CDataInitializer {
 				initializeSampleOrders(project);
 			}
 			// Initialize company roles (non-project specific)
-			initializeSampleCompanyRoles();
 			// createSampleOrders(); // Temporarily disabled due to missing dependencies
 			LOGGER.info("Sample data initialization completed successfully");
 		} catch (final Exception e) {

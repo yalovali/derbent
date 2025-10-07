@@ -65,7 +65,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	}
 
 	@Transactional // Write operation requires writable transaction
-	public CUser createLoginUser(final String username, final String plainPassword, final String name, final String email, final String roles) {
+	public CUser createLoginUser(final String username, final String plainPassword, final String name, final String email) {
 		// Check if username already exists
 		if (((IUserRepository) repository).findByUsername(username).isPresent()) {
 			LOGGER.warn("Username already exists: {}", username);
@@ -271,6 +271,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 
 	/** Sets the session service. This is called after bean creation to avoid circular dependency.
 	 * @param sessionService the session service to set */
+	@Override
 	public void setSessionService(final ISessionService sessionService) {
 		this.sessionService = sessionService;
 		LOGGER.debug("SessionService injected into CUserService via setter");
