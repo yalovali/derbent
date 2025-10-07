@@ -29,7 +29,7 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 	}
 
 	/** Add user to company with full configuration */
-	@Transactional
+	@Transactional (readOnly = false)
 	public CUserCompanySetting addUserToCompany(final CUser user, final CCompany company, final CUserCompanyRole role, final String ownershipLevel) {
 		LOGGER.debug("Adding user {} to company {} with ownership level {} and role {}", user, company, ownershipLevel, role);
 		Check.notNull(user, "User must not be null");
@@ -55,7 +55,7 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 
 	/** Delete all company settings for a company. Used for cleanup operations.
 	 * @param companyId the company ID */
-	@Transactional
+	@Transactional (readOnly = false)
 	public void deleteAllByCompanyId(final Long companyId) {
 		Check.notNull(companyId, "Company ID cannot be null");
 		repository.deleteByCompanyId(companyId);
@@ -63,13 +63,14 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 
 	/** Delete all company settings for a user. Used for cleanup operations.
 	 * @param userId the user ID */
-	@Transactional
+	@Transactional (readOnly = false)
 	public void deleteAllByUserId(final Long userId) {
 		Check.notNull(userId, "User ID cannot be null");
 		LOGGER.debug("Deleting all company settings for user {}", userId);
 		repository.deleteByUserId(userId);
 	}
 
+	@Transactional (readOnly = false)
 	public void deleteByUserCompany(CUser user, CCompany company) {
 		Check.notNull(user, "User cannot be null");
 		Check.notNull(company, "Company cannot be null");
@@ -135,7 +136,7 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 	 * @param ownershipLevel the ownership level
 	 * @param role           the role
 	 * @return the saved setting */
-	@Transactional
+	@Transactional (readOnly = false)
 	public CUserCompanySetting setOrReplaceSingleSetting(final CUser user, final CCompany company, final String ownershipLevel,
 			final CUserCompanyRole role) {
 		Check.notNull(user, "User must not be null");
