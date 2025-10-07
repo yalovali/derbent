@@ -154,7 +154,7 @@ public class CLayoutService {
 		return getOrCreateLayoutListeners(session);
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings ("unchecked")
 	private Set<ILayoutChangeListener> getOrCreateLayoutListeners(final VaadinSession session) {
 		Set<ILayoutChangeListener> listeners = (Set<ILayoutChangeListener>) session.getAttribute(LAYOUT_LISTENERS_KEY);
 		if (listeners == null) {
