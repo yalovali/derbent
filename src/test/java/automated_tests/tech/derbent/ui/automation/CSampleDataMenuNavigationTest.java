@@ -32,7 +32,6 @@ public class CSampleDataMenuNavigationTest extends CBaseUITest {
 			loginToApplication();
 			wait_afterlogin();
 			takeScreenshot("sample-journey-post-login", false);
-
 			// Verify that the sample data is accessible
 			try {
 				testDatabaseInitialization();
@@ -41,7 +40,6 @@ public class CSampleDataMenuNavigationTest extends CBaseUITest {
 				takeScreenshot("sample-journey-db-verification-failed", true);
 				throw verificationError;
 			}
-
 			// Visit every menu entry and capture screenshots
 			testAllMenuItemOpenings();
 			LOGGER.info("✅ Completed menu navigation journey with screenshots");
