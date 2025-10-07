@@ -516,8 +516,12 @@ public abstract class CBaseUITest {
 		LOGGER.info("🧪 Setting up Playwright test environment...");
 		try {
 			playwright = Playwright.create();
+			// Check system property for headless mode (defaults to true)
+			boolean headless = Boolean.parseBoolean(System.getProperty("playwright.headless", "true"));
+			LOGGER.info("🎭 Browser mode: {}", headless ? "HEADLESS" : "VISIBLE");
+			
 			// Use headless mode and try to handle browser installation gracefully
-			browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true)
+			browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(headless)
 					.setArgs(Arrays.asList("--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu")));
 			context = browser.newContext();
 			page = context.newPage();
