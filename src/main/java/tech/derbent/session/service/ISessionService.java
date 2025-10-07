@@ -6,8 +6,8 @@ import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.interfaces.IProjectListChangeListener;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.users.domain.CUser;
 import tech.derbent.projects.events.ProjectListChangeEvent;
+import tech.derbent.users.domain.CUser;
 
 public interface ISessionService {
 
@@ -21,6 +21,7 @@ public interface ISessionService {
 	void setActiveId(String entityType, Long id);
 	Optional<CUser> getActiveUser();
 	void setActiveUser(CUser user);
+	void setActiveCompany(CCompany company);
 	Optional<CProject> getActiveProject();
 	void setActiveProject(CProject project);
 	List<CProject> getAvailableProjects();

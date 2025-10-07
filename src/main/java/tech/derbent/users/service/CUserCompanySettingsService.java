@@ -130,32 +130,6 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 		return repository.existsByUserIdAndCompanyId(userId, companyId);
 	}
 
-	/** Set or replace the single company setting for a user. Removes any existing settings first.
-	 * @param user           the user
-	 * @param company        the company
-	 * @param ownershipLevel the ownership level
-	 * @param role           the role
-	 * @return the saved setting */
-	@Transactional (readOnly = false)
-	public CUserCompanySetting setOrReplaceSingleSetting(final CUser user, final CCompany company, final String ownershipLevel,
-			final CUserCompanyRole role) {
-		Check.notNull(user, "User must not be null");
-		Check.notNull(company, "Company must not be null");
-		Check.notNull(user.getId(), "User must have a valid ID");
-		Check.notNull(company.getId(), "Company must have a valid ID");
-		// Remove any existing settings for this user
-		List<CUserCompanySetting> existingSettings = repository.findByUserId(user.getId());
-		if (!existingSettings.isEmpty()) {
-			LOGGER.debug("Removing {} existing company settings for user {}", existingSettings.size(), user.getId());
-			for (CUserCompanySetting existing : existingSettings) {
-				repository.delete(existing);
-			}
-			repository.flush(); // Ensure deletion is executed before creating new one
-		}
-		// Create the new setting
-		return addUserToCompany(user, company, role, ownershipLevel);
-	}
-
 	@Override
 	protected void validateRelationship(final CUserCompanySetting relationship) {
 		super.validateRelationship(relationship);

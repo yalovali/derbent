@@ -268,7 +268,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		return true;
 	}
 
-	@Transactional
+	@Transactional (readOnly = false)
 	public EntityClass save(final EntityClass entity) {
 		Check.notNull(entity, "Entity cannot be null");
 		return repository.save(entity);

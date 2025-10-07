@@ -173,13 +173,9 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	 * @return current company
 	 * @throws IllegalStateException if no company context is available */
 	private CCompany getCurrentCompany() {
-		if (sessionService == null) {
-			throw new IllegalStateException("Session service not available");
-		}
+		Check.notNull(sessionService, "Session service must not be null");
 		CCompany currentCompany = sessionService.getCurrentCompany();
-		if (currentCompany == null) {
-			throw new IllegalStateException("No company context available. User must be associated with a company.");
-		}
+		Check.notNull(currentCompany, "No active company in session - company context is required");
 		return currentCompany;
 	}
 
@@ -261,6 +257,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 		return true;
 	}
 
+	@Transactional (readOnly = false)
 	public void setCompany(CUser user, CCompany company, CUserCompanyRole role) {
 		Check.notNull(user, "User cannot be null");
 		Check.notNull(company, "Company cannot be null");

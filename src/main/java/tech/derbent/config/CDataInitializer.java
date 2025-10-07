@@ -1,13 +1,8 @@
 package tech.derbent.config;
 
-import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +11,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.domain.CActivityType;
 import tech.derbent.activities.service.CActivityInitializerService;
@@ -40,7 +34,6 @@ import tech.derbent.comments.view.CCommentPriorityInitializerService;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyInitializerService;
 import tech.derbent.companies.service.CCompanyService;
-import tech.derbent.decisions.domain.CDecision;
 import tech.derbent.decisions.domain.CDecisionStatus;
 import tech.derbent.decisions.domain.CDecisionType;
 import tech.derbent.decisions.service.CDecisionInitializerService;
@@ -50,7 +43,6 @@ import tech.derbent.decisions.service.CDecisionStatusService;
 import tech.derbent.decisions.service.CDecisionTypeInitializerService;
 import tech.derbent.decisions.service.CDecisionTypeService;
 import tech.derbent.gannt.service.CGanntViewEntityService;
-import tech.derbent.meetings.domain.CMeeting;
 import tech.derbent.meetings.domain.CMeetingStatus;
 import tech.derbent.meetings.domain.CMeetingType;
 import tech.derbent.meetings.service.CMeetingInitializerService;
@@ -60,7 +52,6 @@ import tech.derbent.meetings.service.CMeetingStatusService;
 import tech.derbent.meetings.service.CMeetingTypeInitializerService;
 import tech.derbent.meetings.service.CMeetingTypeService;
 import tech.derbent.orders.domain.CCurrency;
-import tech.derbent.orders.domain.COrder;
 import tech.derbent.orders.domain.COrderStatus;
 import tech.derbent.orders.domain.COrderType;
 import tech.derbent.orders.service.CApprovalStatusInitializerService;
@@ -77,8 +68,6 @@ import tech.derbent.page.service.CPageEntityService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectInitializerService;
 import tech.derbent.projects.service.CProjectService;
-import tech.derbent.risks.domain.CRisk;
-import tech.derbent.risks.domain.ERiskSeverity;
 import tech.derbent.risks.service.CRiskInitializerService;
 import tech.derbent.risks.service.CRiskService;
 import tech.derbent.risks.service.CRiskStatusInitializerService;
@@ -86,6 +75,7 @@ import tech.derbent.risks.service.CRiskStatusService;
 import tech.derbent.screens.service.CDetailLinesService;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.screens.service.CGridEntityService;
+import tech.derbent.session.service.ISessionService;
 import tech.derbent.setup.service.CSystemSettingsInitializerService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserType;
@@ -170,8 +160,9 @@ public class CDataInitializer {
 	private final CUserProjectSettingsService userProjectSettingsService;
 	private final CUserService userService;
 	private final CUserTypeService userTypeService;
+	private final ISessionService sessionService;
 
-	public CDataInitializer() {
+	public CDataInitializer(ISessionService sessionService) {
 		LOGGER.info("DataInitializer starting - obtaining service beans from application context");
 		gridEntityService = CSpringContext.getBean(CGridEntityService.class);
 		projectService = CSpringContext.getBean(CProjectService.class);
@@ -234,6 +225,7 @@ public class CDataInitializer {
 		LOGGER.info("All service beans obtained successfully");
 		final DataSource ds = CSpringContext.getBean(DataSource.class);
 		jdbcTemplate = new JdbcTemplate(ds);
+		this.sessionService = sessionService;
 	}
 	// ========================================================================
 	// PUBLIC API METHODS - Main entry points for initialization
@@ -315,6 +307,7 @@ public class CDataInitializer {
 	/** Creates additional activities for Infrastructure Modernization project. */
 	/** Creates additional activities for Product Development Phase 2 project. */
 	/** Creates system administrator user. */
+	@Transactional (readOnly = false)
 	private void createAdminUser() {
 		final CUser user = userService.createLoginUser(USER_ADMIN, STANDARD_PASSWORD, "Ahmet", "admin@of.gov.tr");
 		// Set user profile directly on entity
@@ -1101,53 +1094,59 @@ public class CDataInitializer {
 			createProjectManagerUser();
 			createTeamMemberUsers();
 			// ========== PROJECT-SPECIFIC INITIALIZATION PHASE ==========
-			final List<CProject> projects = projectService.list(Pageable.unpaged()).getContent();
-			for (final CProject project : projects) {
-				CSystemSettingsInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, true);
-				// Core system entities required for project operation
-				CActivityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, true);
-				CUserInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, true);
-				CCompanyInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
-				CDecisionInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
-				CMeetingInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, true);
-				COrderInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
-				CProjectInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, true);
-				CRiskInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
-				CUserProjectRoleInitizerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
-				CUserCompanyRoleInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
-				// Type/Status InitializerServices
-				CActivityStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
-				CActivityTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
-				CApprovalStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
-				CCommentPriorityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
-				CCurrencyInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
-				CDecisionStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
-				CDecisionTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
-				CMeetingStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
-				CMeetingTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
-				COrderStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
-				COrderTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
-				CRiskStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
-				CUserTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
-				// TODO: Add similar calls for all other InitializerServices (user types, priorities, etc.)
-				// Project-specific type and configuration entities
-				initializeSampleMeetingStatuses(project);
-				initializeSampleActivityStatuses(project);
-				initializeSampleOrderStatuses(project);
-				initializeSampleApprovalStatuses(project);
-				initializeSampleRiskStatuses(project);
-				// types
-				initializeSampleUserTypes(project);
-				initializeSampleProjectRoles(project);
-				initializeSampleMeetingTypes(project);
-				initializeSampleDecisionTypes(project);
-				initializeSampleOrderTypes(project);
-				initializeSampleActivityTypes(project);
-				// Removed sample data entity creation methods (activities, meetings, decisions, orders, risks)
-				// to follow minimal sample data pattern
-				initializeSampleDecisionStatuses(project);
-				initializeSampleCommentPriorities(project);
-				initializeSampleCurrencies(project);
+			for (CCompany company : companyService.list(Pageable.unpaged()).getContent()) {
+				// sessionService.setActiveCompany(company);
+				// later implement better user randomization logic
+				CUser user = userService.getRandom();
+				sessionService.setActiveUser(user); // Set any user from the company as actives
+				final List<CProject> projects = projectService.list(Pageable.unpaged()).getContent();
+				for (final CProject project : projects) {
+					CSystemSettingsInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, true);
+					// Core system entities required for project operation
+					CActivityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, true);
+					CUserInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, true);
+					CCompanyInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+					CDecisionInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+					CMeetingInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, true);
+					COrderInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+					CProjectInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, true);
+					CRiskInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+					CUserProjectRoleInitizerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+					CUserCompanyRoleInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+					// Type/Status InitializerServices
+					CActivityStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+					CActivityTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+					CApprovalStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+					CCommentPriorityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+					CCurrencyInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+					CDecisionStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+					CDecisionTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+					CMeetingStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+					CMeetingTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+					COrderStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+					COrderTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+					CRiskStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+					CUserTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+					// TODO: Add similar calls for all other InitializerServices (user types, priorities, etc.)
+					// Project-specific type and configuration entities
+					initializeSampleMeetingStatuses(project);
+					initializeSampleActivityStatuses(project);
+					initializeSampleOrderStatuses(project);
+					initializeSampleApprovalStatuses(project);
+					initializeSampleRiskStatuses(project);
+					// types
+					initializeSampleUserTypes(project);
+					initializeSampleProjectRoles(project);
+					initializeSampleMeetingTypes(project);
+					initializeSampleDecisionTypes(project);
+					initializeSampleOrderTypes(project);
+					initializeSampleActivityTypes(project);
+					// Removed sample data entity creation methods (activities, meetings, decisions, orders, risks)
+					// to follow minimal sample data pattern
+					initializeSampleDecisionStatuses(project);
+					initializeSampleCommentPriorities(project);
+					initializeSampleCurrencies(project);
+				}
 			}
 			// Initialize user-company and user-project settings (after roles are created)
 			initializeSampleUserCompanySettings();

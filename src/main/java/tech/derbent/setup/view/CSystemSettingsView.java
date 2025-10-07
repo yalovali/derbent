@@ -25,6 +25,7 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.views.CAbstractPage;
 import tech.derbent.api.views.components.CButton;
 import tech.derbent.config.CDataInitializer;
+import tech.derbent.session.service.ISessionService;
 import tech.derbent.setup.domain.CSystemSettings;
 import tech.derbent.setup.service.CSystemSettingsService;
 
@@ -48,6 +49,7 @@ public class CSystemSettingsView extends CAbstractPage {
 	@Autowired (required = false)
 	private CNotificationService notificationService; // Optional injection
 	private final CSystemSettingsService systemSettingsService;
+	private ISessionService sessionService;
 
 	@Autowired
 	public CSystemSettingsView(final CSystemSettingsService systemSettingsService) {
@@ -281,7 +283,7 @@ public class CSystemSettingsView extends CAbstractPage {
 		final ConfirmDialog dialog =
 				new ConfirmDialog("Onay", "Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?", "Evet, sıfırla", ev -> {
 					try {
-						final CDataInitializer init = new CDataInitializer();
+						final CDataInitializer init = new CDataInitializer(sessionService);
 						init.reloadForced(); // veya empty check’li bir metod yaz
 						Notification.show("Sample data yeniden yüklendi.", 4000, Notification.Position.MIDDLE);
 						CInformationDialog info = new CInformationDialog("Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");

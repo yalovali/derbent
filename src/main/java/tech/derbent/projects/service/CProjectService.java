@@ -83,9 +83,7 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 	CCompany getCurrentCompany() {
 		Check.notNull(sessionService, "Session service must not be null");
 		CCompany currentCompany = sessionService.getCurrentCompany();
-		if (currentCompany == null) {
-			throw new IllegalStateException("No company context available. User must be associated with a company.");
-		}
+		Check.notNull(currentCompany, "Current company must not be null");
 		return currentCompany;
 	}
 

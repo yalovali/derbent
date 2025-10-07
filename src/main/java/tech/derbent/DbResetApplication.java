@@ -10,6 +10,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import tech.derbent.config.CDataInitializer;
+import tech.derbent.session.service.ISessionService;
 
 @SpringBootApplication (scanBasePackages = {
 		"tech.derbent.abstracts", "tech.derbent.activities", "tech.derbent.comments", "tech.derbent.companies", "tech.derbent.decisions",
@@ -19,6 +20,7 @@ import tech.derbent.config.CDataInitializer;
 public class DbResetApplication {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DbResetApplication.class);
+	private static ISessionService sessionService;
 
 	public static void main(String[] args) {
 		System.setProperty("spring.main.web-application-type", "none");
@@ -26,7 +28,7 @@ public class DbResetApplication {
 		if (Arrays.asList(context.getEnvironment().getActiveProfiles()).contains("reset-db")) {
 			try {
 				LOGGER.info("Resetting database with initial data...");
-				CDataInitializer initializer = new CDataInitializer();
+				CDataInitializer initializer = new CDataInitializer(sessionService);
 				// Check if database needs reset
 				if (initializer.isDatabaseEmpty()) {
 					LOGGER.info("Database is empty, loading sample data...");

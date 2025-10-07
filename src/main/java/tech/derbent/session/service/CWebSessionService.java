@@ -401,4 +401,13 @@ public class CWebSessionService implements ISessionService {
 	private Set<String> getActiveIdAttributesIfPresent(final VaadinSession session) {
 		return (Set<String>) session.getAttribute(ACTIVE_ID_ATTRIBUTES_KEY);
 	}
+
+	@Override
+	public void setActiveCompany(CCompany company) {
+		clearSession(); // Clear session data before setting new user
+		final VaadinSession session = VaadinSession.getCurrent();
+		Check.notNull(session, "Vaadin session must not be null");
+		Check.isTrue(getActiveUser().isEmpty(), "User must be null when setting company directly");
+		session.setAttribute(ACTIVE_COMPANY_KEY, company);
+	}
 }

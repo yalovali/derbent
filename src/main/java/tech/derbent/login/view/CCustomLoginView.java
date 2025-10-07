@@ -28,6 +28,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CButton;
 import tech.derbent.api.views.components.CHorizontalLayout;
 import tech.derbent.config.CDataInitializer;
+import tech.derbent.session.service.ISessionService;
 import tech.derbent.setup.service.CSystemSettingsService;
 
 /** Custom login view using basic Vaadin components instead of LoginOverlay. This provides an alternative login interface for testing purposes. */
@@ -42,6 +43,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	private final PasswordField passwordField = new PasswordField();
 	private final Button resetDbButton = new CButton("Reset Database", CColorUtils.createStyledIcon("vaadin:refresh", CColorUtils.CRUD_UPDATE_COLOR));
 	private final TextField usernameField = new TextField();
+	private ISessionService sessionService;
 
 	/** Constructor sets up the custom login form with basic Vaadin components. */
 	@Autowired
@@ -139,7 +141,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 			final ConfirmDialog dialog = new ConfirmDialog("Onay", "Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?",
 					"Evet, sıfırla", ev -> {
 						try {
-							final CDataInitializer init = new CDataInitializer();
+							final CDataInitializer init = new CDataInitializer(sessionService);
 							init.reloadForced(); // veya empty check’li bir metod yaz
 							Notification.show("Sample data yeniden yüklendi.", 4000, Notification.Position.MIDDLE);
 							CInformationDialog info = new CInformationDialog("Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
