@@ -1,5 +1,6 @@
 package tech.derbent.session.service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -37,14 +38,12 @@ public class CWebSessionService implements ISessionService {
 	private static final String ACTIVE_PROJECT_KEY = "activeProject";
 	private static final String ACTIVE_USER_KEY = "activeUser";
 	private static final String ACTIVE_COMPANY_KEY = "activeCompany";
+	private static final String ACTIVE_ID_ATTRIBUTES_KEY = CWebSessionService.class.getName() + ".activeIdAttributes";
+	private static final String PROJECT_CHANGE_LISTENERS_KEY = CWebSessionService.class.getName() + ".projectChangeListeners";
+	private static final String PROJECT_LIST_CHANGE_LISTENERS_KEY = CWebSessionService.class.getName() + ".projectListChangeListeners";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CWebSessionService.class);
 	private final AuthenticationContext authenticationContext;
-	private final Set<String> idAttributes = ConcurrentHashMap.newKeySet();
 	private CLayoutService layoutService;
-	// Thread-safe set to store project change listeners
-	private final Set<IProjectChangeListener> projectChangeListeners = ConcurrentHashMap.newKeySet();
-	// Thread-safe set to store project list change listeners
-	private final Set<IProjectListChangeListener> projectListChangeListeners = ConcurrentHashMap.newKeySet();
 	private final IProjectRepository projectRepository;
 	private final IUserRepository userRepository;
 	@Autowired
@@ -63,7 +62,12 @@ public class CWebSessionService implements ISessionService {
 	@Override
 	public void addProjectChangeListener(final IProjectChangeListener listener) {
 		if (listener != null) {
-			projectChangeListeners.add(listener);
+			final VaadinSession session = VaadinSession.getCurrent();
+			if (session == null) {
+				LOGGER.warn("VaadinSession is null, cannot add project change listener {}", listener.getClass().getSimpleName());
+				return;
+			}
+			getOrCreateProjectChangeListeners(session).add(listener);
 		}
 	}
 
@@ -73,7 +77,12 @@ public class CWebSessionService implements ISessionService {
 	@Override
 	public void addProjectListChangeListener(final IProjectListChangeListener listener) {
 		if (listener != null) {
-			projectListChangeListeners.add(listener);
+			final VaadinSession session = VaadinSession.getCurrent();
+			if (session == null) {
+				LOGGER.warn("VaadinSession is null, cannot add project list change listener {}", listener.getClass().getSimpleName());
+				return;
+			}
+			getOrCreateProjectListChangeListeners(session).add(listener);
 		}
 	}
 
@@ -86,9 +95,22 @@ public class CWebSessionService implements ISessionService {
 			session.setAttribute(ACTIVE_USER_KEY, null);
 			session.setAttribute(ACTIVE_COMPANY_KEY, null);
 			session.setAttribute(ACTIVE_ID_KEY, null);
+			final Set<String> activeIdKeys = getActiveIdAttributesIfPresent(session);
+			if (activeIdKeys != null) {
+				activeIdKeys.forEach(attributeName -> session.setAttribute(attributeName, null));
+				activeIdKeys.clear();
+			}
+			final Set<IProjectChangeListener> projectListeners = getProjectChangeListenersIfPresent(session);
+			if (projectListeners != null) {
+				projectListeners.clear();
+			}
+			final Set<IProjectListChangeListener> projectListListeners = getProjectListChangeListenersIfPresent(session);
+			if (projectListListeners != null) {
+				projectListListeners.clear();
+			}
+		} else {
+			LOGGER.debug("clearSession called without active VaadinSession");
 		}
-		projectChangeListeners.clear();
-		projectListChangeListeners.clear();
 		if (layoutService != null) {
 			layoutService.clearLayoutChangeListeners();
 		}
@@ -100,12 +122,13 @@ public class CWebSessionService implements ISessionService {
 		if (session == null) {
 			return;
 		}
-		// iterate over all attributes and remove those that start with ACTIVE_ID_KEY
-		for (final String attributeName : idAttributes) {
-			if (attributeName.startsWith(ACTIVE_ID_KEY)) {
-				session.setAttribute(attributeName, null);
-			}
+		final Set<String> attributeKeys = getActiveIdAttributesIfPresent(session);
+		if (attributeKeys == null) {
+			return;
 		}
+		attributeKeys.stream().filter(attributeName -> attributeName.startsWith(ACTIVE_ID_KEY))
+				.forEach(attributeName -> session.setAttribute(attributeName, null));
+		attributeKeys.removeIf(attributeName -> attributeName.startsWith(ACTIVE_ID_KEY));
 	}
 
 	@Override
@@ -189,7 +212,7 @@ public class CWebSessionService implements ISessionService {
 		final UI ui = UI.getCurrent();
 		if (ui != null) {
 			ui.access(() -> {
-				projectChangeListeners.forEach(listener -> {
+				getCurrentProjectChangeListeners().forEach(listener -> {
 					try {
 						listener.onProjectChanged(newProject);
 					} catch (final Exception e) {
@@ -208,7 +231,7 @@ public class CWebSessionService implements ISessionService {
 		final UI ui = UI.getCurrent();
 		if (ui != null) {
 			ui.access(() -> {
-				projectListChangeListeners.forEach(listener -> {
+				getCurrentProjectListChangeListeners().forEach(listener -> {
 					try {
 						listener.onProjectListChanged();
 						LOGGER.debug("Notified project list listener: {}", listener.getClass().getSimpleName());
@@ -225,9 +248,12 @@ public class CWebSessionService implements ISessionService {
 	@Override
 	public void removeProjectChangeListener(final IProjectChangeListener listener) {
 		if (listener != null) {
-			projectChangeListeners.remove(listener);
-			// LOGGER.debug("Project change listener unregistered: {}",
-			// listener.getClass().getSimpleName());
+			final VaadinSession session = VaadinSession.getCurrent();
+			if (session == null) {
+				LOGGER.warn("VaadinSession is null, cannot remove project change listener {}", listener.getClass().getSimpleName());
+				return;
+			}
+			getOrCreateProjectChangeListeners(session).remove(listener);
 		}
 	}
 
@@ -237,9 +263,12 @@ public class CWebSessionService implements ISessionService {
 	@Override
 	public void removeProjectListChangeListener(final IProjectListChangeListener listener) {
 		if (listener != null) {
-			projectListChangeListeners.remove(listener);
-			// LOGGER.debug("Project list change listener unregistered: {}",
-			// listener.getClass().getSimpleName());
+			final VaadinSession session = VaadinSession.getCurrent();
+			if (session == null) {
+				LOGGER.warn("VaadinSession is null, cannot remove project list change listener {}", listener.getClass().getSimpleName());
+				return;
+			}
+			getOrCreateProjectListChangeListeners(session).remove(listener);
 		}
 	}
 
@@ -252,7 +281,7 @@ public class CWebSessionService implements ISessionService {
 		final String key = ACTIVE_ID_KEY + "_" + entityType;
 		session.setAttribute(key, id);
 		LOGGER.debug("Active ID set to: {}", id);
-		idAttributes.add(key);
+		getOrCreateActiveIdAttributes(session).add(key);
 	}
 
 	/** Sets the active project in the session and triggers UI refresh. */
@@ -307,4 +336,70 @@ public class CWebSessionService implements ISessionService {
 	/** Sets the layout service. This is called after bean creation to avoid circular dependency. */
 	@Override
 	public void setLayoutService(final CLayoutService layoutService) { this.layoutService = layoutService; }
+
+	private Set<IProjectChangeListener> getCurrentProjectChangeListeners() {
+		final VaadinSession session = VaadinSession.getCurrent();
+		if (session == null) {
+			LOGGER.debug("No active VaadinSession; returning empty project change listener set");
+			return Collections.emptySet();
+		}
+		final Set<IProjectChangeListener> listeners = getProjectChangeListenersIfPresent(session);
+		return listeners != null ? listeners : Collections.emptySet();
+	}
+
+	private Set<IProjectListChangeListener> getCurrentProjectListChangeListeners() {
+		final VaadinSession session = VaadinSession.getCurrent();
+		if (session == null) {
+			LOGGER.debug("No active VaadinSession; returning empty project list change listener set");
+			return Collections.emptySet();
+		}
+		final Set<IProjectListChangeListener> listeners = getProjectListChangeListenersIfPresent(session);
+		return listeners != null ? listeners : Collections.emptySet();
+	}
+
+	@SuppressWarnings("unchecked")
+	private Set<IProjectChangeListener> getOrCreateProjectChangeListeners(final VaadinSession session) {
+		Set<IProjectChangeListener> listeners = (Set<IProjectChangeListener>) session.getAttribute(PROJECT_CHANGE_LISTENERS_KEY);
+		if (listeners == null) {
+			listeners = ConcurrentHashMap.newKeySet();
+			session.setAttribute(PROJECT_CHANGE_LISTENERS_KEY, listeners);
+		}
+		return listeners;
+	}
+
+	@SuppressWarnings("unchecked")
+	private Set<IProjectListChangeListener> getOrCreateProjectListChangeListeners(final VaadinSession session) {
+		Set<IProjectListChangeListener> listeners =
+				(Set<IProjectListChangeListener>) session.getAttribute(PROJECT_LIST_CHANGE_LISTENERS_KEY);
+		if (listeners == null) {
+			listeners = ConcurrentHashMap.newKeySet();
+			session.setAttribute(PROJECT_LIST_CHANGE_LISTENERS_KEY, listeners);
+		}
+		return listeners;
+	}
+
+	@SuppressWarnings("unchecked")
+	private Set<String> getOrCreateActiveIdAttributes(final VaadinSession session) {
+		Set<String> attributes = (Set<String>) session.getAttribute(ACTIVE_ID_ATTRIBUTES_KEY);
+		if (attributes == null) {
+			attributes = ConcurrentHashMap.newKeySet();
+			session.setAttribute(ACTIVE_ID_ATTRIBUTES_KEY, attributes);
+		}
+		return attributes;
+	}
+
+	@SuppressWarnings("unchecked")
+	private Set<IProjectChangeListener> getProjectChangeListenersIfPresent(final VaadinSession session) {
+		return (Set<IProjectChangeListener>) session.getAttribute(PROJECT_CHANGE_LISTENERS_KEY);
+	}
+
+	@SuppressWarnings("unchecked")
+	private Set<IProjectListChangeListener> getProjectListChangeListenersIfPresent(final VaadinSession session) {
+		return (Set<IProjectListChangeListener>) session.getAttribute(PROJECT_LIST_CHANGE_LISTENERS_KEY);
+	}
+
+	@SuppressWarnings("unchecked")
+	private Set<String> getActiveIdAttributesIfPresent(final VaadinSession session) {
+		return (Set<String>) session.getAttribute(ACTIVE_ID_ATTRIBUTES_KEY);
+	}
 }

@@ -1,5 +1,6 @@
 package tech.derbent.session.service;
 
+import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
@@ -19,19 +20,28 @@ public class CLayoutService {
 	}
 
 	private static final String LAYOUT_MODE_KEY = "layoutMode";
+	private static final String LAYOUT_LISTENERS_KEY = CLayoutService.class.getName() + ".layoutChangeListeners";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CLayoutService.class);
-	// Thread-safe set to store layout change listeners
-	private final Set<ILayoutChangeListener> layoutChangeListeners = ConcurrentHashMap.newKeySet();
 
 	/** Registers a component to receive notifications when the layout mode changes. */
 	public void addLayoutChangeListener(final ILayoutChangeListener listener) {
 		Assert.notNull(listener, "Listener cannot be null");
-		layoutChangeListeners.add(listener);
+		final VaadinSession session = VaadinSession.getCurrent();
+		if (session == null) {
+			LOGGER.warn("VaadinSession is null, cannot register layout listener {}", listener.getClass().getSimpleName());
+			return;
+		}
+		getOrCreateLayoutListeners(session).add(listener);
 	}
 
 	/** Clears all layout change listeners (typically called on session clear). */
 	public void clearLayoutChangeListeners() {
-		layoutChangeListeners.clear();
+		final VaadinSession session = VaadinSession.getCurrent();
+		if (session == null) {
+			LOGGER.debug("clearLayoutChangeListeners called without active VaadinSession");
+			return;
+		}
+		getOrCreateLayoutListeners(session).clear();
 	}
 
 	/** Gets the current layout mode from the session. Defaults to VERTICAL if not set. */
@@ -47,7 +57,8 @@ public class CLayoutService {
 
 	/** Notifies all registered layout change listeners about a layout mode change. */
 	private void notifyLayoutChangeListeners(final LayoutMode newMode) {
-		LOGGER.debug("Notifying {} layout change listeners of layout change to {}", layoutChangeListeners.size(), newMode);
+		final Set<ILayoutChangeListener> listeners = getCurrentLayoutListeners();
+		LOGGER.debug("Notifying {} layout change listeners of layout change to {}", listeners.size(), newMode);
 		if (newMode == null) {
 			LOGGER.warn("Cannot notify listeners - newMode is null");
 			return;
@@ -55,7 +66,7 @@ public class CLayoutService {
 		final UI ui = UI.getCurrent();
 		if (ui != null) {
 			ui.access(() -> {
-				layoutChangeListeners.forEach(listener -> {
+				listeners.forEach(listener -> {
 					if (listener != null) {
 						try {
 							listener.onLayoutModeChanged(newMode);
@@ -84,7 +95,7 @@ public class CLayoutService {
 		} else {
 			// If no UI context, try direct notification
 			LOGGER.warn("UI.getCurrent() is null, attempting direct notification");
-			layoutChangeListeners.forEach(listener -> {
+			listeners.forEach(listener -> {
 				if (listener != null) {
 					try {
 						listener.onLayoutModeChanged(newMode);
@@ -102,7 +113,12 @@ public class CLayoutService {
 	/** Unregisters a component from receiving layout change notifications. */
 	public void removeLayoutChangeListener(final ILayoutChangeListener listener) {
 		assert listener != null : "Listener cannot be null";
-		layoutChangeListeners.remove(listener);
+		final VaadinSession session = VaadinSession.getCurrent();
+		if (session == null) {
+			LOGGER.warn("VaadinSession is null, cannot remove layout listener {}", listener.getClass().getSimpleName());
+			return;
+		}
+		getOrCreateLayoutListeners(session).remove(listener);
 	}
 
 	/** Sets the layout mode and notifies all registered listeners. */
@@ -127,5 +143,24 @@ public class CLayoutService {
 		final LayoutMode newMode = currentMode == LayoutMode.HORIZONTAL ? LayoutMode.VERTICAL : LayoutMode.HORIZONTAL;
 		LOGGER.info("Toggling from {} to {}", currentMode, newMode);
 		setLayoutMode(newMode);
+	}
+
+	private Set<ILayoutChangeListener> getCurrentLayoutListeners() {
+		final VaadinSession session = VaadinSession.getCurrent();
+		if (session == null) {
+			LOGGER.debug("No active VaadinSession; returning empty layout listener set");
+			return Collections.emptySet();
+		}
+		return getOrCreateLayoutListeners(session);
+	}
+
+	@SuppressWarnings("unchecked")
+	private Set<ILayoutChangeListener> getOrCreateLayoutListeners(final VaadinSession session) {
+		Set<ILayoutChangeListener> listeners = (Set<ILayoutChangeListener>) session.getAttribute(LAYOUT_LISTENERS_KEY);
+		if (listeners == null) {
+			listeners = ConcurrentHashMap.newKeySet();
+			session.setAttribute(LAYOUT_LISTENERS_KEY, listeners);
+		}
+		return listeners;
 	}
 }
