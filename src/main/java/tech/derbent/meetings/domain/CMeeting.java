@@ -245,6 +245,29 @@ public class CMeeting extends CEntityOfProject<CMeeting> implements IKanbanEntit
 
 	@Override
 	public void initializeAllFields() {
-		// TODO Auto-generated method stub
+		// Initialize lazy-loaded entity relationships
+		if (meetingType != null) {
+			meetingType.getName(); // Trigger meeting type loading
+		}
+		if (relatedActivity != null) {
+			relatedActivity.getName(); // Trigger related activity loading
+		}
+		if (responsible != null) {
+			responsible.getLogin(); // Trigger responsible user loading
+		}
+		if (status != null) {
+			status.getName(); // Trigger status loading
+		}
+		// Parent class relationships (from CEntityOfProject)
+		if (getProject() != null) {
+			getProject().getName(); // Trigger project loading
+		}
+		if (getAssignedTo() != null) {
+			getAssignedTo().getLogin(); // Trigger assigned user loading
+		}
+		if (getCreatedBy() != null) {
+			getCreatedBy().getLogin(); // Trigger creator loading
+		}
+		// Note: attendees and participants collections will be initialized if accessed
 	}
 }

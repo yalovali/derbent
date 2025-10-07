@@ -119,6 +119,10 @@ public class CProject extends CEntityNamed<CProject> implements ISearchable {
 
 	@Override
 	public void initializeAllFields() {
-		// TODO Auto-generated method stub
+		// Initialize lazy-loaded entity relationships
+		if (company != null) {
+			company.getName(); // Trigger company loading
+		}
+		// Note: userSettings is a collection and will be initialized if accessed
 	}
 }

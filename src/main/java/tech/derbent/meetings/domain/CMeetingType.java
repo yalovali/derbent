@@ -32,6 +32,15 @@ public class CMeetingType extends CTypeEntity<CMeetingType> implements IKanbanTy
 
 	@Override
 	public void initializeAllFields() {
-		// TODO Auto-generated method stub
+		// Initialize lazy-loaded entity relationships from parent class (CEntityOfProject)
+		if (getProject() != null) {
+			getProject().getName(); // Trigger project loading
+		}
+		if (getAssignedTo() != null) {
+			getAssignedTo().getLogin(); // Trigger assigned user loading
+		}
+		if (getCreatedBy() != null) {
+			getCreatedBy().getLogin(); // Trigger creator loading
+		}
 	}
 }

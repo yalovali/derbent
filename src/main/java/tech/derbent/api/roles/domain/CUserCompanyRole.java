@@ -153,6 +153,9 @@ public class CUserCompanyRole extends CNonProjectType<CUserCompanyRole> {
 
 	@Override
 	public void initializeAllFields() {
-		// TODO Auto-generated method stub
+		// Initialize lazy-loaded entity relationships from parent class (CNonProjectType)
+		if (getCompany() != null) {
+			getCompany().getName(); // Trigger company loading
+		}
 	}
 }

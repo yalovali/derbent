@@ -294,6 +294,32 @@ public class COrder extends CEntityOfProject<COrder> {
 
 	@Override
 	public void initializeAllFields() {
-		// TODO Auto-generated method stub
+		// Initialize lazy-loaded entity relationships
+		if (currency != null) {
+			currency.getName(); // Trigger currency loading
+		}
+		if (orderType != null) {
+			orderType.getName(); // Trigger order type loading
+		}
+		if (requestor != null) {
+			requestor.getLogin(); // Trigger requestor loading
+		}
+		if (responsible != null) {
+			responsible.getLogin(); // Trigger responsible user loading
+		}
+		if (status != null) {
+			status.getName(); // Trigger status loading
+		}
+		// Parent class relationships (from CEntityOfProject)
+		if (getProject() != null) {
+			getProject().getName(); // Trigger project loading
+		}
+		if (getAssignedTo() != null) {
+			getAssignedTo().getLogin(); // Trigger assigned user loading
+		}
+		if (getCreatedBy() != null) {
+			getCreatedBy().getLogin(); // Trigger creator loading
+		}
+		// Note: approvals collection will be initialized if accessed
 	}
 }
