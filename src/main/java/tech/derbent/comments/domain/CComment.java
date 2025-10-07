@@ -145,6 +145,12 @@ public class CComment extends CEvent<CComment> {
 
 	@Override
 	public void initializeAllFields() {
-		// TODO Auto-generated method stub
+		// Initialize lazy-loaded entity relationships
+		if (activity != null) {
+			activity.getName(); // Trigger activity loading
+		}
+		if (priority != null) {
+			priority.getName(); // Trigger priority loading
+		}
 	}
 }

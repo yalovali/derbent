@@ -238,6 +238,6 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 
 	@Override
 	public void initializeAllFields() {
-		// TODO Auto-generated method stub
+		// No entity relationships to initialize in this entity
 	}
 }

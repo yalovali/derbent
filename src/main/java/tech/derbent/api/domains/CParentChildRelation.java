@@ -69,6 +69,6 @@ public class CParentChildRelation extends CEntityDB<CParentChildRelation> {
 
 	@Override
 	public void initializeAllFields() {
-		// TODO Auto-generated method stub
+		// No entity relationships to initialize in this entity
 	}
 }

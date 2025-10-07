@@ -214,6 +214,9 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 
 	@Override
 	public void initializeAllFields() {
-		// TODO Auto-generated method stub
+		// Initialize lazy-loaded entity relationships
+		if (detailSection != null) {
+			detailSection.getName(); // Trigger detail section loading
+		}
 	}
 }

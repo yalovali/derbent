@@ -180,7 +180,10 @@ public class CCompany extends CEntityNamed<CCompany> {
 
 	@Override
 	public void initializeAllFields() {
-		// TODO Auto-generated method stub
+		// Initialize lazy-loaded entity relationships
+		if (companySetting != null) {
+			companySetting.getCompany(); // Trigger company setting loading
+		}
 	}
 
 	/** Initialize default configuration values. */

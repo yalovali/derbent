@@ -186,7 +186,14 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 
 	@Override
 	public void initializeAllFields() {
-		// TODO Auto-generated method stub
+		// Initialize lazy-loaded entity relationships
+		if (companySetting != null) {
+			companySetting.getCompany(); // Trigger company setting loading
+		}
+		if (userType != null) {
+			userType.getName(); // Trigger user type loading
+		}
+		// Note: projectSettings collection will be initialized if accessed
 	}
 
 	public Boolean isEnabled() {

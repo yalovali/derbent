@@ -114,6 +114,15 @@ public class COrderApproval extends CEntityNamed<COrderApproval> {
 
 	@Override
 	public void initializeAllFields() {
-		// TODO Auto-generated method stub
+		// Initialize lazy-loaded entity relationships
+		if (approvalStatus != null) {
+			approvalStatus.getName(); // Trigger approval status loading
+		}
+		if (approver != null) {
+			approver.getLogin(); // Trigger approver loading
+		}
+		if (order != null) {
+			order.getName(); // Trigger order loading
+		}
 	}
 }

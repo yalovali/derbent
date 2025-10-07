@@ -189,6 +189,22 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 
 	@Override
 	public void initializeAllFields() {
-		// TODO Auto-generated method stub
+		// Initialize lazy-loaded entity relationships
+		if (detailSection != null) {
+			detailSection.getName(); // Trigger detail section loading
+		}
+		if (gridEntity != null) {
+			gridEntity.getName(); // Trigger grid entity loading
+		}
+		// Parent class relationships (from CEntityOfProject)
+		if (getProject() != null) {
+			getProject().getName(); // Trigger project loading
+		}
+		if (getAssignedTo() != null) {
+			getAssignedTo().getLogin(); // Trigger assigned user loading
+		}
+		if (getCreatedBy() != null) {
+			getCreatedBy().getLogin(); // Trigger creator loading
+		}
 	}
 }
