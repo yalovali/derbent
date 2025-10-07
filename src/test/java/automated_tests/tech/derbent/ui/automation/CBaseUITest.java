@@ -167,8 +167,8 @@ public abstract class CBaseUITest {
 			ensureLoginViewLoaded();
 			initializeSampleDataFromLoginPage();
 			ensureLoginViewLoaded();
-			boolean usernameFilled = fillLoginField("#custom-username-input", "input", "username", username,
-					"input[type='text'], input[type='email']");
+			boolean usernameFilled =
+					fillLoginField("#custom-username-input", "input", "username", username, "input[type='text'], input[type='email']");
 			if (!usernameFilled) {
 				throw new AssertionError("Username input field not found on login page");
 			}
@@ -236,8 +236,9 @@ public abstract class CBaseUITest {
 
 	/** Clicks the login button using tolerant selector logic. */
 	protected void clickLoginButton() {
-		final String[] selectors = { "vaadin-button:has-text('Login')", "button:has-text('Login')", "vaadin-button[theme~='primary']",
-				"vaadin-button" };
+		final String[] selectors = {
+				"vaadin-button:has-text('Login')", "button:has-text('Login')", "vaadin-button[theme~='primary']", "vaadin-button"
+		};
 		for (String selector : selectors) {
 			final Locator loginButton = page.locator(selector);
 			if (loginButton.count() > 0) {
@@ -257,8 +258,7 @@ public abstract class CBaseUITest {
 		}
 		try {
 			wait_loginscreen();
-			final Locator resetButton =
-					page.locator("vaadin-button:has-text('Reset Database'), button:has-text('Reset Database'), [id*='reset']");
+			final Locator resetButton = page.locator("vaadin-button:has-text('Reset Database'), button:has-text('Reset Database'), [id*='reset']");
 			if (resetButton.count() == 0) {
 				LOGGER.info("ℹ️ 'Reset Database' button not present on login view; skipping sample data initialization");
 				return;
@@ -280,8 +280,8 @@ public abstract class CBaseUITest {
 		for (int attempt = 0; attempt < 10; attempt++) {
 			final Locator overlay = page.locator("vaadin-confirm-dialog-overlay[opened]");
 			if (overlay.count() > 0) {
-				final Locator confirmButton = overlay
-						.locator("vaadin-button:has-text('Evet, sıfırla'), vaadin-button:has-text('Yes'), vaadin-button[theme*='primary']");
+				final Locator confirmButton =
+						overlay.locator("vaadin-button:has-text('Evet, sıfırla'), vaadin-button:has-text('Yes'), vaadin-button[theme*='primary']");
 				if (confirmButton.count() > 0) {
 					confirmButton.first().click();
 					waitForOverlayToClose("vaadin-confirm-dialog-overlay[opened]");
@@ -995,8 +995,7 @@ public abstract class CBaseUITest {
 	/** Waits for after login state */
 	protected void wait_afterlogin() {
 		try {
-			page.waitForSelector("vaadin-app-layout, vaadin-side-nav, vaadin-drawer-layout",
-					new Page.WaitForSelectorOptions().setTimeout(15000));
+			page.waitForSelector("vaadin-app-layout, vaadin-side-nav, vaadin-drawer-layout", new Page.WaitForSelectorOptions().setTimeout(15000));
 		} catch (Exception e) {
 			LOGGER.warn("⚠️ Post-login application shell not detected: {}", e.getMessage());
 		}
