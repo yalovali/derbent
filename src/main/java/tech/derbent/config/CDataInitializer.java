@@ -1252,28 +1252,45 @@ public class CDataInitializer {
 	}
 
 	private void initializeSampleCompanyRoles(CCompany company) {
-		final CUserCompanyRole role = new CUserCompanyRole("ADMIN", company);
-		role.setDescription("asdfasfd");
-		role.setIsAdmin(true);
-		role.setIsUser(true);
-		role.setIsGuest(true);
-		role.setColor(CColorUtils.getRandomColor(true));
-		// Add appropriate page access based on role type
-		if (role.isAdmin()) {
-			role.addWriteAccess("CompanySettings");
-			role.addWriteAccess("UserManagement");
-			role.addWriteAccess("CompanyReports");
+		try {
+			// Create three company roles: Admin, User, Guest (one for each role type)
+			final String[][] companyRoles = {
+					{
+							"Company Admin", "Administrative role with full company access", "true", "false", "false"
+					}, {
+							"Company User", "Standard user role with regular access", "false", "true", "false"
+					}, {
+							"Company Guest", "Guest role with limited access", "false", "false", "true"
+					}
+			};
+			for (final String[] roleData : companyRoles) {
+				final CUserCompanyRole role = new CUserCompanyRole(roleData[0], company);
+				role.setDescription(roleData[1]);
+				role.setIsAdmin(Boolean.parseBoolean(roleData[2]));
+				role.setIsUser(Boolean.parseBoolean(roleData[3]));
+				role.setIsGuest(Boolean.parseBoolean(roleData[4]));
+				role.setColor(CColorUtils.getRandomColor(true));
+				// Add appropriate page access based on role type
+				if (role.isAdmin()) {
+					role.addWriteAccess("CompanySettings");
+					role.addWriteAccess("UserManagement");
+					role.addWriteAccess("CompanyReports");
+				}
+				if (role.isUser()) {
+					role.addReadAccess("Dashboard");
+					role.addReadAccess("Tasks");
+					role.addWriteAccess("Profile");
+				}
+				if (role.isGuest()) {
+					role.addReadAccess("Dashboard");
+					role.addReadAccess("PublicInfo");
+				}
+				userCompanyRoleService.save(role);
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error creating company roles for company: {}", company.getName(), e);
+			throw new RuntimeException("Failed to initialize company roles for company: " + company.getName(), e);
 		}
-		if (role.isUser()) {
-			role.addReadAccess("Dashboard");
-			role.addReadAccess("Tasks");
-			role.addWriteAccess("Profile");
-		}
-		if (role.isGuest()) {
-			role.addReadAccess("Dashboard");
-			role.addReadAccess("PublicInfo");
-		}
-		userCompanyRoleService.save(role);
 	}
 
 	private void initializeSampleCurrencies(final CProject project) {
@@ -1462,13 +1479,12 @@ public class CDataInitializer {
 
 	private void initializeSampleProjectRoles(final CProject project) {
 		try {
+			// Create three project roles: Admin, User, Guest (one for each role type)
 			final String[][] projectRoles = {
 					{
-							"Project Admin", "Administrative role with full project access", "true", "true", "false"
+							"Project Admin", "Administrative role with full project access", "true", "false", "false"
 					}, {
-							"Project Manager", "Project management role with write access", "false", "true", "false"
-					}, {
-							"Team Member", "Standard team member role", "false", "true", "false"
+							"Project User", "Standard user role with regular access", "false", "true", "false"
 					}, {
 							"Project Guest", "Guest role with limited access", "false", "false", "true"
 					}
@@ -1544,54 +1560,87 @@ public class CDataInitializer {
 	}
 
 	/** Initialize sample user company settings to demonstrate the CComponentCompanyUserSettings pattern. This creates realistic user-company
-	 * relationships following the established pattern. */
+	 * relationships following the established pattern. One user per role type per company. */
 	private void initializeSampleUserCompanySettings() {
 		try {
 			final List<CCompany> companies = companyService.list(Pageable.unpaged()).getContent();
 			// Get sample users by login for consistent assignment
 			final CUser admin = userService.findByLogin(USER_ADMIN);
 			final CUser manager = userService.findByLogin(USER_MANAGER);
-			final CUser mary = userService.findByLogin("mary");
-			final CUser bob = userService.findByLogin("bob");
-			final CUser alice = userService.findByLogin("alice");
+			final CUser alice = userService.findByLogin(USER_MEMBER_AYSE);
 			for (final CCompany company : companies) {
-				// Assign users to different companies with different roles
-				if ("Tech Solutions Inc.".equals(company.getName())) {
+				// Assign one user per role type to each company
+				if (COMPANY_OF_TEKNOLOJI.equals(company.getName())) {
 					if (admin != null) {
-						createUserCompanySetting(admin, company, "CEO", "Owner");
+						createUserCompanySetting(admin, company, "Company Admin", "Owner");
 					}
 					if (manager != null) {
-						createUserCompanySetting(manager, company, "CTO", "Technology");
+						createUserCompanySetting(manager, company, "Company User", "Employee");
 					}
-					if (mary != null) {
-						createUserCompanySetting(mary, company, "Senior Developer", "Employee");
+					if (alice != null) {
+						createUserCompanySetting(alice, company, "Company Guest", "Guest");
 					}
-				} else if ("Global Consulting Partners".equals(company.getName())) {
+				} else if (COMPANY_OF_DANISMANLIK.equals(company.getName())) {
+					if (admin != null) {
+						createUserCompanySetting(admin, company, "Company Admin", "Partner");
+					}
 					if (manager != null) {
-						createUserCompanySetting(manager, company, "Senior Consultant", "Employee");
+						createUserCompanySetting(manager, company, "Company User", "Consultant");
 					}
+				} else if (COMPANY_OF_SAGLIK.equals(company.getName())) {
 					if (alice != null) {
-						createUserCompanySetting(alice, company, "Business Analyst", "Employee");
+						createUserCompanySetting(alice, company, "Company User", "Employee");
 					}
-					if (bob != null) {
-						createUserCompanySetting(bob, company, "Technical Consultant", "Contractor");
-					}
-				} else if ("HealthCare Systems".equals(company.getName())) {
-					if (alice != null) {
-						createUserCompanySetting(alice, company, "Product Manager", "Employee");
-					}
-					if (mary != null) {
-						createUserCompanySetting(mary, company, "Lead Developer", "Employee");
-					}
-				} else if ("Manufacturing Corp".equals(company.getName())) {
-					if (bob != null) {
-						createUserCompanySetting(bob, company, "Systems Engineer", "Employee");
+				} else if (COMPANY_OF_ENDUSTRI.equals(company.getName())) {
+					if (manager != null) {
+						createUserCompanySetting(manager, company, "Company User", "Engineer");
 					}
 				}
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample user company settings: {}", e.getMessage(), e);
 			throw new RuntimeException("Failed to initialize sample user company settings", e);
+		}
+	}
+
+	/** Initialize sample user project settings to demonstrate user-project relationships. This creates one user per role type per project. */
+	private void initializeSampleUserProjectSettings() {
+		try {
+			final List<CProject> projects = projectService.list(Pageable.unpaged()).getContent();
+			// Get sample users by login for consistent assignment
+			final CUser admin = userService.findByLogin(USER_ADMIN);
+			final CUser manager = userService.findByLogin(USER_MANAGER);
+			final CUser alice = userService.findByLogin(USER_MEMBER_AYSE);
+			for (final CProject project : projects) {
+				// Find roles for this project
+				final List<CUserProjectRole> projectRoles = userProjectRoleService.findAll().stream()
+						.filter(role -> role.getProject() != null && role.getProject().getId().equals(project.getId()))
+						.collect(java.util.stream.Collectors.toList());
+				if (projectRoles.isEmpty()) {
+					LOGGER.warn("No project roles found for project: {}", project.getName());
+					continue;
+				}
+				// Find admin, user, and guest roles
+				CUserProjectRole adminRole = projectRoles.stream().filter(role -> role.isAdmin()).findFirst().orElse(null);
+				CUserProjectRole userRole = projectRoles.stream().filter(role -> role.isUser() && !role.isAdmin()).findFirst().orElse(null);
+				CUserProjectRole guestRole = projectRoles.stream().filter(role -> role.isGuest()).findFirst().orElse(null);
+				// Assign one user per role type
+				if (adminRole != null && admin != null) {
+					userProjectSettingsService.addUserToProject(admin, project, adminRole, "write");
+					LOGGER.debug("Assigned user {} to project {} with role {}", admin.getLogin(), project.getName(), adminRole.getName());
+				}
+				if (userRole != null && manager != null) {
+					userProjectSettingsService.addUserToProject(manager, project, userRole, "write");
+					LOGGER.debug("Assigned user {} to project {} with role {}", manager.getLogin(), project.getName(), userRole.getName());
+				}
+				if (guestRole != null && alice != null) {
+					userProjectSettingsService.addUserToProject(alice, project, guestRole, "read");
+					LOGGER.debug("Assigned user {} to project {} with role {}", alice.getLogin(), project.getName(), guestRole.getName());
+				}
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing sample user project settings: {}", e.getMessage(), e);
+			throw new RuntimeException("Failed to initialize sample user project settings", e);
 		}
 	}
 
@@ -1732,6 +1781,9 @@ public class CDataInitializer {
 				initializeSampleDecisions(project);
 				initializeSampleOrders(project);
 			}
+			// Initialize user-company and user-project settings (after roles are created)
+			initializeSampleUserCompanySettings();
+			initializeSampleUserProjectSettings();
 			// Initialize company roles (non-project specific)
 			// createSampleOrders(); // Temporarily disabled due to missing dependencies
 			LOGGER.info("Sample data initialization completed successfully");
