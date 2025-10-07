@@ -37,7 +37,6 @@ import tech.derbent.screens.domain.CGridEntity;
 import tech.derbent.screens.domain.CGridEntity.FieldConfig;
 import tech.derbent.screens.service.CEntityFieldService;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
-import tech.derbent.session.service.CSessionService;
 import tech.derbent.session.service.ISessionService;
 
 public class CComponentGridEntity extends CDiv implements IProjectChangeListener {
@@ -69,7 +68,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		setSizeFull();
 		// Get session service for project change notifications
 		if (ApplicationContextProvider.getApplicationContext() != null) {
-			sessionService = ApplicationContextProvider.getApplicationContext().getBean(CSessionService.class);
+			sessionService = ApplicationContextProvider.getApplicationContext().getBean(ISessionService.class);
 		}
 		createContent();
 	}

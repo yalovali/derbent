@@ -357,7 +357,7 @@ public class CWebSessionService implements ISessionService {
 		return listeners != null ? listeners : Collections.emptySet();
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings ("unchecked")
 	private Set<IProjectChangeListener> getOrCreateProjectChangeListeners(final VaadinSession session) {
 		Set<IProjectChangeListener> listeners = (Set<IProjectChangeListener>) session.getAttribute(PROJECT_CHANGE_LISTENERS_KEY);
 		if (listeners == null) {
@@ -367,10 +367,9 @@ public class CWebSessionService implements ISessionService {
 		return listeners;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings ("unchecked")
 	private Set<IProjectListChangeListener> getOrCreateProjectListChangeListeners(final VaadinSession session) {
-		Set<IProjectListChangeListener> listeners =
-				(Set<IProjectListChangeListener>) session.getAttribute(PROJECT_LIST_CHANGE_LISTENERS_KEY);
+		Set<IProjectListChangeListener> listeners = (Set<IProjectListChangeListener>) session.getAttribute(PROJECT_LIST_CHANGE_LISTENERS_KEY);
 		if (listeners == null) {
 			listeners = ConcurrentHashMap.newKeySet();
 			session.setAttribute(PROJECT_LIST_CHANGE_LISTENERS_KEY, listeners);
@@ -378,7 +377,7 @@ public class CWebSessionService implements ISessionService {
 		return listeners;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings ("unchecked")
 	private Set<String> getOrCreateActiveIdAttributes(final VaadinSession session) {
 		Set<String> attributes = (Set<String>) session.getAttribute(ACTIVE_ID_ATTRIBUTES_KEY);
 		if (attributes == null) {
@@ -388,17 +387,17 @@ public class CWebSessionService implements ISessionService {
 		return attributes;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings ("unchecked")
 	private Set<IProjectChangeListener> getProjectChangeListenersIfPresent(final VaadinSession session) {
 		return (Set<IProjectChangeListener>) session.getAttribute(PROJECT_CHANGE_LISTENERS_KEY);
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings ("unchecked")
 	private Set<IProjectListChangeListener> getProjectListChangeListenersIfPresent(final VaadinSession session) {
 		return (Set<IProjectListChangeListener>) session.getAttribute(PROJECT_LIST_CHANGE_LISTENERS_KEY);
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings ("unchecked")
 	private Set<String> getActiveIdAttributesIfPresent(final VaadinSession session) {
 		return (Set<String>) session.getAttribute(ACTIVE_ID_ATTRIBUTES_KEY);
 	}
