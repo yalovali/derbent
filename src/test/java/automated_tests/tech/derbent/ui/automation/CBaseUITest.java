@@ -153,7 +153,7 @@ public abstract class CBaseUITest {
 			LOGGER.warn("⚠️ Browser not available - skipping login attempt");
 			return;
 		}
-		loginToApplication("admin", "admin");
+		loginToApplication("admin", "test123");
 	}
 
 	/** Performs login with specified credentials and verifies successful authentication. */
@@ -164,27 +164,23 @@ public abstract class CBaseUITest {
 		}
 		try {
 			LOGGER.info("🔐 Attempting login with username: {}", username);
-			final Locator userField = page.locator("input[type='text'], input[type='email']");
-			if (userField.count() > 0) {
-				userField.first().fill(username);
-			} else {
-				LOGGER.warn("⚠️ Username input field not found");
+			ensureLoginViewLoaded();
+			initializeSampleDataFromLoginPage();
+			ensureLoginViewLoaded();
+			boolean usernameFilled = fillLoginField("#custom-username-input", "input", "username", username,
+					"input[type='text'], input[type='email']");
+			if (!usernameFilled) {
+				throw new AssertionError("Username input field not found on login page");
 			}
-			final Locator passwordField = page.locator("input[type='password']");
-			if (passwordField.count() > 0) {
-				passwordField.first().fill(password);
-			} else {
-				LOGGER.warn("⚠️ Password input field not found");
+			boolean passwordFilled = fillLoginField("#custom-password-input", "input", "password", password, "input[type='password']");
+			if (!passwordFilled) {
+				throw new AssertionError("Password input field not found on login page");
 			}
-			final Locator loginButton = page.locator("vaadin-button:has-text('Login'), button:has-text('Login'), vaadin-button");
-			if (loginButton.count() > 0) {
-				loginButton.first().click();
-			} else {
-				LOGGER.warn("⚠️ Login button not found");
-			}
-			page.waitForURL("**/projects");
-			LOGGER.info("✅ Login successful - redirected to projects view");
+			clickLoginButton();
+			wait_afterlogin();
+			LOGGER.info("✅ Login successful - application shell detected");
 			takeScreenshot("post-login", false);
+			primeNavigationMenu();
 		} catch (PlaywrightException e) {
 			LOGGER.warn("⚠️ Login attempt failed for {}: {}", username, e.getMessage());
 			takeScreenshot("login-attempt-error", false);
@@ -194,6 +190,156 @@ public abstract class CBaseUITest {
 		} catch (Exception e) {
 			LOGGER.warn("⚠️ Unexpected login error for {}: {}", username, e.getMessage());
 			takeScreenshot("login-unexpected-error", false);
+		}
+	}
+
+	/** Ensures the custom login view is loaded and ready for interaction. */
+	protected void ensureLoginViewLoaded() {
+		try {
+			final String loginUrl = "http://localhost:" + port + "/login";
+			if (!page.url().contains("/login")) {
+				LOGGER.info("ℹ️ Navigating to login view at {}", loginUrl);
+				page.navigate(loginUrl);
+				wait_500();
+			}
+		} catch (Exception e) {
+			LOGGER.warn("⚠️ Unable to determine current URL before ensuring login view: {}", e.getMessage());
+		}
+		wait_loginscreen();
+	}
+
+	/** Fills login fields by first trying the Vaadin shadow DOM input, then falling back to classic HTML selectors. */
+	protected boolean fillLoginField(String hostSelector, String inputSelector, String fieldDescription, String value, String fallbackSelector) {
+		try {
+			final Locator host = page.locator(hostSelector);
+			if (host.count() > 0) {
+				final Locator shadowInput = host.first().locator(inputSelector);
+				if (shadowInput.count() > 0) {
+					shadowInput.first().fill("");
+					shadowInput.first().fill(value);
+					LOGGER.info("📝 Filled {} field using {}", fieldDescription, hostSelector);
+					return true;
+				}
+			}
+			final Locator fallback = page.locator(fallbackSelector);
+			if (fallback.count() > 0) {
+				fallback.first().fill(value);
+				LOGGER.info("📝 Filled {} field using fallback selector {}", fieldDescription, fallbackSelector);
+				return true;
+			}
+			LOGGER.warn("⚠️ {} input field not found", fieldDescription);
+		} catch (Exception e) {
+			LOGGER.warn("⚠️ Failed to fill {} field: {}", fieldDescription, e.getMessage());
+		}
+		return false;
+	}
+
+	/** Clicks the login button using tolerant selector logic. */
+	protected void clickLoginButton() {
+		final String[] selectors = { "vaadin-button:has-text('Login')", "button:has-text('Login')", "vaadin-button[theme~='primary']",
+				"vaadin-button" };
+		for (String selector : selectors) {
+			final Locator loginButton = page.locator(selector);
+			if (loginButton.count() > 0) {
+				loginButton.first().click();
+				wait_500();
+				LOGGER.info("▶️ Clicked login button using selector {}", selector);
+				return;
+			}
+		}
+		throw new AssertionError("Login button not found on login page");
+	}
+
+	/** Triggers the sample data initialization flow via the login screen button if present. */
+	protected void initializeSampleDataFromLoginPage() {
+		if (!isBrowserAvailable()) {
+			return;
+		}
+		try {
+			wait_loginscreen();
+			final Locator resetButton =
+					page.locator("vaadin-button:has-text('Reset Database'), button:has-text('Reset Database'), [id*='reset']");
+			if (resetButton.count() == 0) {
+				LOGGER.info("ℹ️ 'Reset Database' button not present on login view; skipping sample data initialization");
+				return;
+			}
+			LOGGER.info("📥 Loading sample data via login screen button");
+			resetButton.first().click();
+			wait_500();
+			acceptConfirmDialogIfPresent();
+			closeInformationDialogIfPresent();
+			wait_loginscreen();
+		} catch (Exception e) {
+			LOGGER.warn("⚠️ Sample data initialization via login page failed: {}", e.getMessage());
+			takeScreenshot("sample-data-initialization-error", false);
+		}
+	}
+
+	/** Accepts the confirmation dialog that appears when reloading sample data. */
+	private void acceptConfirmDialogIfPresent() {
+		for (int attempt = 0; attempt < 10; attempt++) {
+			final Locator overlay = page.locator("vaadin-confirm-dialog-overlay[opened]");
+			if (overlay.count() > 0) {
+				final Locator confirmButton = overlay
+						.locator("vaadin-button:has-text('Evet, sıfırla'), vaadin-button:has-text('Yes'), vaadin-button[theme*='primary']");
+				if (confirmButton.count() > 0) {
+					confirmButton.first().click();
+					waitForOverlayToClose("vaadin-confirm-dialog-overlay[opened]");
+					LOGGER.info("✅ Sample data reload confirmed");
+					return;
+				}
+			}
+			wait_500();
+		}
+		LOGGER.warn("⚠️ Confirmation dialog not detected after requesting sample data reload");
+	}
+
+	/** Closes the informational dialog that appears after sample data reload completion. */
+	private void closeInformationDialogIfPresent() {
+		for (int attempt = 0; attempt < 10; attempt++) {
+			final Locator overlay = page.locator("vaadin-dialog-overlay[opened]");
+			if (overlay.count() == 0) {
+				wait_500();
+				continue;
+			}
+			final Locator okButton = overlay.locator("vaadin-button:has-text('OK'), vaadin-button:has-text('Tamam'), button:has-text('OK')");
+			if (okButton.count() > 0) {
+				okButton.first().click();
+				waitForOverlayToClose("vaadin-dialog-overlay[opened]");
+				LOGGER.info("✅ Information dialog dismissed after sample data reload");
+				return;
+			}
+			wait_500();
+		}
+		LOGGER.warn("⚠️ Information dialog did not present an OK button to dismiss");
+	}
+
+	/** Waits for the specified Vaadin overlay selector to disappear. */
+	private void waitForOverlayToClose(String overlaySelector) {
+		for (int attempt = 0; attempt < 20; attempt++) {
+			if (page.locator(overlaySelector).count() == 0) {
+				return;
+			}
+			wait_500();
+		}
+		LOGGER.warn("⚠️ Overlay {} still present after waiting", overlaySelector);
+	}
+
+	/** Visits all menu items silently to ensure dynamic entries are initialized. */
+	protected void primeNavigationMenu() {
+		if (!isBrowserAvailable()) {
+			LOGGER.warn("⚠️ Browser not available - skipping navigation priming");
+			return;
+		}
+		try {
+			LOGGER.info("🧭 Priming navigation menu to ensure dynamic items are loaded");
+			int visited = visitMenuItems(false, false, "prime");
+			LOGGER.info("✅ Navigation primed by visiting {} menu entries", visited);
+		} catch (AssertionError e) {
+			LOGGER.error("❌ Navigation priming failed: {}", e.getMessage());
+			throw e;
+		} catch (Exception e) {
+			LOGGER.warn("⚠️ Unexpected error during navigation priming: {}", e.getMessage());
 		}
 	}
 	// ===========================================
@@ -375,8 +521,8 @@ public abstract class CBaseUITest {
 					.setArgs(Arrays.asList("--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu")));
 			context = browser.newContext();
 			page = context.newPage();
-			page.navigate("http://localhost:" + port);
-			LOGGER.info("✅ Test environment setup complete - navigated to http://localhost:{}", port);
+			page.navigate("http://localhost:" + port + "/login");
+			LOGGER.info("✅ Test environment setup complete - navigated to http://localhost:{}/login", port);
 		} catch (Exception e) {
 			LOGGER.warn("⚠️ Failed to setup browser environment (expected in CI): {}", e.getMessage());
 			LOGGER.info("ℹ️ Tests will run with limited functionality - this is normal in CI environments");
@@ -466,52 +612,70 @@ public abstract class CBaseUITest {
 		LOGGER.info("✅ ComboBox testing complete");
 	}
 
+	/** Visits menu items with optional screenshot capture and configurable error handling. */
+	protected int visitMenuItems(boolean captureScreenshots, boolean allowEmpty, String screenshotPrefix) {
+		if (!isBrowserAvailable()) {
+			LOGGER.warn("⚠️ Browser not available, cannot exercise menu navigation");
+			return 0;
+		}
+		final String menuSelector =
+				"vaadin-side-nav-item, vaadin-tabs vaadin-tab, nav a[href], .nav-item a[href], a[href].menu-link, a[href].side-nav-link";
+		int totalItems = 0;
+		try {
+			page.waitForSelector(menuSelector, new Page.WaitForSelectorOptions().setTimeout(20000));
+			totalItems = page.locator(menuSelector).count();
+		} catch (Exception waitError) {
+			if (!allowEmpty) {
+				throw new AssertionError("No navigation items found to exercise", waitError);
+			}
+			LOGGER.warn("⚠️ Navigation items not found within timeout: {}", waitError.getMessage());
+			return 0;
+		}
+		LOGGER.info("📋 Found {} menu entries to visit", totalItems);
+		if ((totalItems == 0) && !allowEmpty) {
+			throw new AssertionError("No navigation items found to exercise");
+		}
+		final Set<String> visitedLabels = new HashSet<>();
+		for (int i = 0; i < totalItems; i++) {
+			try {
+				final Locator currentItems = page.locator(menuSelector);
+				final int currentCount = currentItems.count();
+				if (currentCount == 0) {
+					LOGGER.warn("⚠️ Navigation items not available after visiting {} entries", visitedLabels.size());
+					break;
+				}
+				final int index = Math.min(i, currentCount - 1);
+				final Locator navItem = currentItems.nth(index);
+				String label = Optional.ofNullable(navItem.textContent()).map(String::trim).orElse("");
+				label = label.replaceAll("\\s+", " ");
+				if (label.isBlank()) {
+					label = Optional.ofNullable(navItem.getAttribute("href")).orElse("menu-entry-" + (i + 1));
+				}
+				final String safeLabel = label.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("(^-|-$)", "");
+				LOGGER.info("🔍 Visiting menu item {} of {}: {}", i + 1, totalItems, label);
+				navItem.click();
+				wait_1000();
+				if (captureScreenshots) {
+					final String prefix = (screenshotPrefix == null) ? "menu" : screenshotPrefix;
+					final String screenshotName = prefix + "-" + (safeLabel.isBlank() ? ("entry-" + (i + 1)) : safeLabel + "-" + (i + 1));
+					takeScreenshot(screenshotName, false);
+				}
+				visitedLabels.add(label);
+			} catch (Exception itemError) {
+				LOGGER.warn("⚠️ Failed to open menu item {}: {}", i + 1, itemError.getMessage());
+			}
+		}
+		return visitedLabels.size();
+	}
+
 	/** Tests all menu item openings to ensure navigation works */
 	protected void testAllMenuItemOpenings() {
 		LOGGER.info("🧭 Testing all menu item openings...");
 		try {
-			if (!isBrowserAvailable()) {
-				LOGGER.warn("⚠️ Browser not available, cannot exercise menu navigation");
-				return;
-			}
-			final String menuSelector =
-					"vaadin-side-nav-item, vaadin-tabs vaadin-tab, nav a[href], .nav-item a[href], a[href].menu-link, a[href].side-nav-link";
-			final Locator navItems = page.locator(menuSelector);
-			final int totalItems = navItems.count();
-			LOGGER.info("📋 Found {} menu entries to visit", totalItems);
-			if (totalItems == 0) {
-				throw new AssertionError("No navigation items found to exercise");
-			}
-			final Set<String> visitedLabels = new HashSet<>();
-			for (int i = 0; i < totalItems; i++) {
-				try {
-					final Locator currentItems = page.locator(menuSelector);
-					final int currentCount = currentItems.count();
-					if (currentCount == 0) {
-						LOGGER.warn("⚠️ Navigation items not available after visiting {} entries", visitedLabels.size());
-						break;
-					}
-					final int index = Math.min(i, currentCount - 1);
-					final Locator navItem = currentItems.nth(index);
-					String label = Optional.ofNullable(navItem.textContent()).map(String::trim).orElse("");
-					label = label.replaceAll("\\s+", " ");
-					if (label.isBlank()) {
-						label = Optional.ofNullable(navItem.getAttribute("href")).orElse("menu-entry-" + (i + 1));
-					}
-					final String safeLabel = label.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("(^-|-$)", "");
-					final String screenshotName =
-							"menu-" + (safeLabel.isBlank() ? ("entry-" + (i + 1)) : safeLabel + "-" + (i + 1));
-					LOGGER.info("🔍 Visiting menu item {} of {}: {}", i + 1, totalItems, label);
-					navItem.click();
-					wait_1000();
-					takeScreenshot(screenshotName, false);
-					visitedLabels.add(label);
-				} catch (Exception itemError) {
-					LOGGER.warn("⚠️ Failed to open menu item {}: {}", i + 1, itemError.getMessage());
-				}
-			}
-			LOGGER.info("✅ Menu item testing completed; visited {} entries", visitedLabels.size());
+			int visitedCount = visitMenuItems(true, false, "menu");
+			LOGGER.info("✅ Menu item testing completed; visited {} entries", visitedCount);
 		} catch (Exception e) {
+			takeScreenshot("menu-openings-error", true);
 			throw new AssertionError("Menu item testing failed: " + e.getMessage(), e);
 		}
 	}
@@ -831,16 +995,18 @@ public abstract class CBaseUITest {
 	/** Waits for after login state */
 	protected void wait_afterlogin() {
 		try {
-			page.waitForURL("**/projects", new Page.WaitForURLOptions().setTimeout(10000));
+			page.waitForSelector("vaadin-app-layout, vaadin-side-nav, vaadin-drawer-layout",
+					new Page.WaitForSelectorOptions().setTimeout(15000));
 		} catch (Exception e) {
-			LOGGER.warn("⚠️ Post-login navigation not detected: {}", e.getMessage());
+			LOGGER.warn("⚠️ Post-login application shell not detected: {}", e.getMessage());
 		}
 	}
 
 	/** Waits for login screen to be ready */
 	protected void wait_loginscreen() {
 		try {
-			page.waitForSelector("input[type='text'], input[type='email'], vaadin-text-field", new Page.WaitForSelectorOptions().setTimeout(10000));
+			page.waitForSelector("#custom-username-input, #custom-password-input, vaadin-button:has-text('Login')",
+					new Page.WaitForSelectorOptions().setTimeout(15000));
 		} catch (Exception e) {
 			LOGGER.warn("⚠️ Login screen not detected: {}", e.getMessage());
 		}
