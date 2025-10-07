@@ -2,16 +2,13 @@ package automated_tests.tech.derbent.ui.automation;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.TestPropertySource;
-import tech.derbent.config.CDataInitializer;
 
 /** Playwright journey test that explicitly reloads sample data, logs in, and captures screenshots while visiting every menu entity. Demonstrates the
  * full happy-path flow requested by product owners: initialize database samples, authenticate, and verify navigation coverage. */
@@ -24,24 +21,6 @@ import tech.derbent.config.CDataInitializer;
 public class CSampleDataMenuNavigationTest extends CBaseUITest {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSampleDataMenuNavigationTest.class);
-
-	@Autowired(required = false)
-	private CDataInitializer dataInitializer;
-
-	@BeforeEach
-	void reloadSampleData() {
-		if (dataInitializer == null) {
-			LOGGER.warn("⚠️ Sample data initializer not available; continuing with existing dataset");
-			return;
-		}
-		try {
-			LOGGER.info("♻️ Reloading sample dataset before Playwright journey");
-			dataInitializer.reloadForced();
-			LOGGER.info("✅ Sample dataset reloaded successfully");
-		} catch (Exception e) {
-			LOGGER.warn("⚠️ Failed to reload sample data: {}", e.getMessage());
-		}
-	}
 
 	@Test
 	@DisplayName ("✅ Initialize samples, login, and capture all menu screenshots")
