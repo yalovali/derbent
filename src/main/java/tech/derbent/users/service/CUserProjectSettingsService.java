@@ -11,7 +11,7 @@ import tech.derbent.api.services.CAbstractEntityRelationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.IProjectRepository;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserProjectSettings;
 
@@ -23,7 +23,7 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 	private final IUserProjectSettingsRepository repository;
 
 	@Autowired
-	public CUserProjectSettingsService(final IUserProjectSettingsRepository repository, final Clock clock, final CSessionService sessionService,
+	public CUserProjectSettingsService(final IUserProjectSettingsRepository repository, final Clock clock, final ISessionService sessionService,
 			final IUserRepository userRepository, final IProjectRepository projectRepository) {
 		super(repository, clock, sessionService);
 		this.repository = repository;
@@ -101,11 +101,21 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 		return findByParentEntityId(user.getId());
 	}
 
+	@Override
+	@Transactional (readOnly = true)
+	public Optional<CUserProjectSettings> findRelationship(final Long userId, final Long projectId) {
+		return repository.findByUserIdAndProjectId(userId, projectId);
+	}
+
+	@Override
+	protected Class<CUserProjectSettings> getEntityClass() { return CUserProjectSettings.class; }
+
 	/** Initialize lazy fields for a CUserProjectSettings entity within a transaction context. This method should be called when you need to access
 	 * lazy-loaded fields outside of the original Hibernate session. The repository queries already eagerly fetch common fields (user, project, role),
 	 * but this method can be used for additional fields if needed.
 	 * @param settings the settings entity to initialize
 	 * @return the initialized settings entity */
+	@Override
 	@Transactional (readOnly = true)
 	public CUserProjectSettings initializeLazyFields(final CUserProjectSettings settings) {
 		Check.notNull(settings, "Settings cannot be null");
@@ -119,15 +129,6 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 		managed.initializeAllFields();
 		return managed;
 	}
-
-	@Override
-	@Transactional (readOnly = true)
-	public Optional<CUserProjectSettings> findRelationship(final Long userId, final Long projectId) {
-		return repository.findByUserIdAndProjectId(userId, projectId);
-	}
-
-	@Override
-	protected Class<CUserProjectSettings> getEntityClass() { return CUserProjectSettings.class; }
 
 	@Override
 	@Transactional (readOnly = true)

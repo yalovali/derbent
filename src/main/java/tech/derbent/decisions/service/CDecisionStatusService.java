@@ -5,13 +5,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.decisions.domain.CDecisionStatus;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CDecisionStatusService extends CEntityOfProjectService<CDecisionStatus> {
 
-	public CDecisionStatusService(final IDecisionStatusRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CDecisionStatusService(final IDecisionStatusRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

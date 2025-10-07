@@ -14,7 +14,7 @@ import tech.derbent.screens.service.CDetailLinesService;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.screens.service.CEntityFieldService;
 import tech.derbent.screens.service.CViewsService;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 @Route ("cdetailsectionview")
 @PageTitle ("Detail Master View")
@@ -31,7 +31,7 @@ public final class CDetailSectionView extends CGridViewBaseProject<CDetailSectio
 	private final CDetailLinesService screenLinesService;
 	private final CViewsService viewsService;
 
-	public CDetailSectionView(final CDetailSectionService entityService, final CSessionService sessionService,
+	public CDetailSectionView(final CDetailSectionService entityService, final ISessionService sessionService,
 			final CDetailLinesService screenLinesService, final CEntityFieldService entityFieldService, final CViewsService viewsService,
 			final CDetailSectionService screenService) {
 		super(CDetailSection.class, entityService, sessionService, screenService);

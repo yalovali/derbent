@@ -12,7 +12,7 @@ import tech.derbent.api.views.grids.CGridViewBaseProject;
 import tech.derbent.screens.domain.CMasterSection;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.screens.service.CMasterSectionService;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 @Route ("cmastersectionview")
 @PageTitle ("Master Section Detail")
@@ -26,7 +26,7 @@ public class CMasterSectionView extends CGridViewBaseProject<CMasterSection> {
 	public static final String VIEW_NAME = "Master Section View";
 	private final String ENTITY_ID_FIELD = "master_section_id";
 
-	public CMasterSectionView(final CMasterSectionService entityService, final CSessionService sessionService,
+	public CMasterSectionView(final CMasterSectionService entityService, final ISessionService sessionService,
 			final CDetailSectionService screenService) {
 		super(CMasterSection.class, entityService, sessionService, screenService);
 	}

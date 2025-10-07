@@ -13,7 +13,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.page.service.CPageEntityService;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 /** Route for Project Overview dynamic page. */
 @Route (value = "project-overview", layout = tech.derbent.api.ui.view.MainLayout.class)
@@ -24,10 +24,10 @@ class CProjectOverviewPage extends Div implements BeforeEnterObserver {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectOverviewPage.class);
 	private static final long serialVersionUID = 1L;
 	private final CPageEntityService pageEntityService;
-	private final CSessionService sessionService;
+	private final ISessionService sessionService;
 
 	@Autowired
-	public CProjectOverviewPage(CPageEntityService pageEntityService, CSessionService sessionService) {
+	public CProjectOverviewPage(CPageEntityService pageEntityService, ISessionService sessionService) {
 		Check.notNull(pageEntityService, "CPageEntityService cannot be null");
 		Check.notNull(sessionService, "CSessionService cannot be null");
 		this.pageEntityService = pageEntityService;
@@ -58,10 +58,10 @@ class CResourceLibraryPage extends Div implements BeforeEnterObserver {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CResourceLibraryPage.class);
 	private static final long serialVersionUID = 1L;
 	private final CPageEntityService pageEntityService;
-	private final CSessionService sessionService;
+	private final ISessionService sessionService;
 
 	@Autowired
-	public CResourceLibraryPage(CPageEntityService pageEntityService, CSessionService sessionService) {
+	public CResourceLibraryPage(CPageEntityService pageEntityService, ISessionService sessionService) {
 		Check.notNull(pageEntityService, "CPageEntityService cannot be null");
 		Check.notNull(sessionService, "CSessionService cannot be null");
 		this.pageEntityService = pageEntityService;
@@ -92,10 +92,10 @@ class CTeamDirectoryPage extends Div implements BeforeEnterObserver {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CTeamDirectoryPage.class);
 	private static final long serialVersionUID = 1L;
 	private final CPageEntityService pageEntityService;
-	private final CSessionService sessionService;
+	private final ISessionService sessionService;
 
 	@Autowired
-	public CTeamDirectoryPage(CPageEntityService pageEntityService, CSessionService sessionService) {
+	public CTeamDirectoryPage(CPageEntityService pageEntityService, ISessionService sessionService) {
 		Check.notNull(pageEntityService, "CPageEntityService cannot be null");
 		Check.notNull(sessionService, "CSessionService cannot be null");
 		this.pageEntityService = pageEntityService;

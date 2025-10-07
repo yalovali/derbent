@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.roles.domain.CUserProjectRole;
 import tech.derbent.api.services.CEntityOfProjectService;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 /** CUserProjectRoleService - Service layer for CUserProjectRole entity. Layer: Service (MVC) Handles business logic for project-aware user project
  * role operations. Uses super class methods where available to maintain simplicity. */
@@ -23,7 +23,7 @@ public class CUserProjectRoleService extends CEntityOfProjectService<CUserProjec
 	 * @param repository     the CUserProjectRoleRepository to use for data access
 	 * @param clock          the Clock instance for time-related operations
 	 * @param sessionService the session service for user context */
-	public CUserProjectRoleService(final IUserProjectRoleRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CUserProjectRoleService(final IUserProjectRoleRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

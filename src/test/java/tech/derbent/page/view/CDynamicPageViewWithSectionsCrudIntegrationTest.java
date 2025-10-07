@@ -14,7 +14,7 @@ import tech.derbent.screens.domain.CDetailSection;
 import tech.derbent.screens.domain.CGridEntity;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.screens.service.CGridEntityService;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 /** Integration test to verify that CDynamicPageViewWithSections can be instantiated with the correct configuration and that all CRUD components are
  * properly initialized. */
@@ -29,7 +29,7 @@ class CDynamicPageViewWithSectionsCrudIntegrationTest {
 	@Mock
 	private CGridEntityService gridEntityService;
 	@Mock
-	private CSessionService sessionService;
+	private ISessionService sessionService;
 
 	@Test
 	void testCrudFunctionalityConfigurationIsValid() {

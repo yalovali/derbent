@@ -12,7 +12,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.page.service.CPageEntityService;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 /** Route handler for dynamic pages defined in the database. This component manages the routing for CPageEntity instances. */
 @SpringComponent
@@ -21,10 +21,10 @@ public class CDynamicRouteHandler {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicRouteHandler.class);
 	private final CPageEntityService pageEntityService;
-	private final CSessionService sessionService;
+	private final ISessionService sessionService;
 
 	@Autowired
-	public CDynamicRouteHandler(CPageEntityService pageEntityService, CSessionService sessionService) {
+	public CDynamicRouteHandler(CPageEntityService pageEntityService, ISessionService sessionService) {
 		Check.notNull(pageEntityService, "CPageEntityService cannot be null");
 		Check.notNull(sessionService, "CSessionService cannot be null");
 		this.pageEntityService = pageEntityService;

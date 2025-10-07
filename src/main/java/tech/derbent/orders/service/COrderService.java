@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.orders.domain.COrder;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 import tech.derbent.users.domain.CUser;
 
 @Service
@@ -16,7 +16,7 @@ import tech.derbent.users.domain.CUser;
 @Transactional (readOnly = true)
 public class COrderService extends CEntityOfProjectService<COrder> {
 
-	COrderService(final IOrderRepository repository, final Clock clock, final CSessionService sessionService) {
+	COrderService(final IOrderRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

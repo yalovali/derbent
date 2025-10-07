@@ -21,7 +21,7 @@ import tech.derbent.activities.service.CActivityService;
 import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.utils.Check;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 /** CActivityKanbanBoardView - Main Kanban board view for displaying activities. Layer: View (MVC) Displays all activities of the current project
  * grouped by activity status in a Kanban-style layout. Each activity status forms a column containing activity cards grouped by type. Implements
@@ -40,13 +40,13 @@ public class CActivityKanbanBoardView extends VerticalLayout implements IProject
 	private final CActivityService activityService;
 	private Div emptyStateContainer;
 	private HorizontalLayout kanbanContainer;
-	private final CSessionService sessionService;
+	private final ISessionService sessionService;
 	private H2 titleElement;
 
 	/** Constructor for CActivityKanbanBoardView.
 	 * @param activityService the activity service for data operations
 	 * @param sessionService  the session service for project context */
-	public CActivityKanbanBoardView(final CActivityService activityService, final CSessionService sessionService) {
+	public CActivityKanbanBoardView(final CActivityService activityService, final ISessionService sessionService) {
 		Check.notNull(activityService, "Activity service cannot be null");
 		Check.notNull(sessionService, "Session service cannot be null");
 		this.activityService = activityService;

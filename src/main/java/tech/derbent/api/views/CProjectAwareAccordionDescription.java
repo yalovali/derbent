@@ -6,11 +6,11 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
-import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.interfaces.IContentOwner;
+import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 /** Project-aware accordion description that refreshes content when the active project changes. This base class implements CProjectChangeListener to
  * handle project switching scenarios where panels need to update their content based on the new project context. Layer: View (MVC) Purpose: Extends
@@ -18,9 +18,9 @@ import tech.derbent.session.service.CSessionService;
 public abstract class CProjectAwareAccordionDescription<EntityClass extends CEntityDB<EntityClass>> extends CAccordionDBEntity<EntityClass>
 		implements IProjectChangeListener {
 
-	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectAwareAccordionDescription.class);
-	protected final CSessionService sessionService;
+	private static final long serialVersionUID = 1L;
+	protected final ISessionService sessionService;
 
 	/** Constructor with custom title for CProjectAwareAccordionDescription.
 	 * @param title                custom title for the accordion panel
@@ -31,15 +31,11 @@ public abstract class CProjectAwareAccordionDescription<EntityClass extends CEnt
 	 * @param sessionService       session service for project change notifications */
 	public CProjectAwareAccordionDescription(final String title, IContentOwner parentContent, final EntityClass currentEntity,
 			final CEnhancedBinder<EntityClass> beanValidationBinder, final Class<EntityClass> entityClass,
-			final CAbstractService<EntityClass> entityService, final CSessionService sessionService) {
+			final CAbstractService<EntityClass> entityService, final ISessionService sessionService) {
 		super(title, parentContent, beanValidationBinder, entityClass, entityService);
 		this.sessionService = sessionService;
 		LOGGER.debug("Created project-aware accordion panel with title '{}': {}", title, getClass().getSimpleName());
 	}
-
-	/** Gets the session service for subclasses to use.
-	 * @return the session service */
-	public CSessionService getSessionService() { return sessionService; }
 
 	@Override
 	protected void onAttach(final AttachEvent attachEvent) {

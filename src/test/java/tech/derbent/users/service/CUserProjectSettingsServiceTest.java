@@ -16,7 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserProjectSettings;
 
@@ -25,15 +25,15 @@ import tech.derbent.users.domain.CUserProjectSettings;
 public class CUserProjectSettingsServiceTest {
 
 	@Mock
-	private IUserProjectSettingsRepository repository;
-	@Mock
 	private Clock clock;
-	@Mock
-	private CSessionService sessionService;
-	private CUserProjectSettingsService service;
-	private CUser user;
-	private CProject project;
 	private CCompany company;
+	private CProject project;
+	@Mock
+	private IUserProjectSettingsRepository repository;
+	private CUserProjectSettingsService service;
+	@Mock
+	private ISessionService sessionService;
+	private CUser user;
 
 	@BeforeEach
 	void setUp() {
@@ -69,12 +69,33 @@ public class CUserProjectSettingsServiceTest {
 		assertTrue(project.getUserSettings().contains(settings), "Project should contain the added settings");
 	}
 
+	/** Test specifically for the delete relationship fix. This test validates that our bidirectional collection management works correctly. */
 	@Test
-	void testRemoveUserFromProject_NullIds() {
-		// When & Then - user and project with null IDs should fail
-		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.deleteByUserProject(user, project));
-		assertTrue(exception.getMessage().contains("User must have a valid ID") || exception.getMessage().contains("Project must have a valid ID"));
-		verify(repository, never()).findByUserIdAndProjectId(any(), any());
+	void testDeleteRelationshipFix_BidirectionalCollectionManagement() {
+		// Given - Create a user, project and their relationship
+		CUser testUser = new CUser("Test User");
+		CCompany testCompany = new CCompany("Test Company");
+		CProject testProject = new CProject("Test Project", testCompany);
+		CUserProjectSettings settings = new CUserProjectSettings();
+		settings.setUser(testUser);
+		settings.setProject(testProject);
+		settings.setPermission("READ_WRITE");
+		// Set up bidirectional relationships
+		testUser.addProjectSettings(settings);
+		testProject.addUserSettings(settings);
+		// Verify initial state
+		assertEquals(1, testUser.getProjectSettings().size(), "User should have one project setting");
+		assertEquals(1, testProject.getUserSettings().size(), "Project should have one user setting");
+		assertTrue(testUser.getProjectSettings().contains(settings), "User should contain the settings");
+		assertTrue(testProject.getUserSettings().contains(settings), "Project should contain the settings");
+		// When - Remove the relationship (simulating what our fixed service method does)
+		testUser.removeProjectSettings(settings);
+		testProject.removeUserSettings(settings);
+		// Then - Verify collections are properly cleared
+		assertTrue(testUser.getProjectSettings().isEmpty(), "User project settings should be empty after removal");
+		assertTrue(testProject.getUserSettings().isEmpty(), "Project user settings should be empty after removal");
+		assertNull(settings.getUser(), "Settings should not reference user after removal");
+		assertNull(settings.getProject(), "Settings should not reference project after removal");
 	}
 
 	@Test
@@ -110,6 +131,14 @@ public class CUserProjectSettingsServiceTest {
 	}
 
 	@Test
+	void testRemoveUserFromProject_NullIds() {
+		// When & Then - user and project with null IDs should fail
+		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.deleteByUserProject(user, project));
+		assertTrue(exception.getMessage().contains("User must have a valid ID") || exception.getMessage().contains("Project must have a valid ID"));
+		verify(repository, never()).findByUserIdAndProjectId(any(), any());
+	}
+
+	@Test
 	void testUserProjectSettingsInitialization_PreventConstraintViolation() {
 		// Test that new CUserProjectSettings instances can be created with proper initialization
 		// This test simulates what the dialogs should do to prevent user_id constraint violations
@@ -129,34 +158,5 @@ public class CUserProjectSettingsServiceTest {
 		// Verify that role and permission can be null (as per entity definition)
 		assertNull(settings.getRole(), "Role can be null as per entity definition");
 		assertNull(settings.getPermission(), "Permission can be null as per entity definition");
-	}
-
-	/** Test specifically for the delete relationship fix. This test validates that our bidirectional collection management works correctly. */
-	@Test
-	void testDeleteRelationshipFix_BidirectionalCollectionManagement() {
-		// Given - Create a user, project and their relationship
-		CUser testUser = new CUser("Test User");
-		CCompany testCompany = new CCompany("Test Company");
-		CProject testProject = new CProject("Test Project", testCompany);
-		CUserProjectSettings settings = new CUserProjectSettings();
-		settings.setUser(testUser);
-		settings.setProject(testProject);
-		settings.setPermission("READ_WRITE");
-		// Set up bidirectional relationships
-		testUser.addProjectSettings(settings);
-		testProject.addUserSettings(settings);
-		// Verify initial state
-		assertEquals(1, testUser.getProjectSettings().size(), "User should have one project setting");
-		assertEquals(1, testProject.getUserSettings().size(), "Project should have one user setting");
-		assertTrue(testUser.getProjectSettings().contains(settings), "User should contain the settings");
-		assertTrue(testProject.getUserSettings().contains(settings), "Project should contain the settings");
-		// When - Remove the relationship (simulating what our fixed service method does)
-		testUser.removeProjectSettings(settings);
-		testProject.removeUserSettings(settings);
-		// Then - Verify collections are properly cleared
-		assertTrue(testUser.getProjectSettings().isEmpty(), "User project settings should be empty after removal");
-		assertTrue(testProject.getUserSettings().isEmpty(), "Project user settings should be empty after removal");
-		assertNull(settings.getUser(), "Settings should not reference user after removal");
-		assertNull(settings.getProject(), "Settings should not reference project after removal");
 	}
 }

@@ -12,7 +12,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import tech.derbent.api.roles.domain.CUserCompanyRole;
 import tech.derbent.companies.domain.CCompany;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserCompanySetting;
 
@@ -20,11 +20,11 @@ import tech.derbent.users.domain.CUserCompanySetting;
 public class CUserServiceSetCompanyTest {
 
 	@Mock
-	private IUserRepository userRepository;
+	private ISessionService sessionService;
 	@Mock
 	private CUserCompanySettingsService userCompanySettingsService;
 	@Mock
-	private CSessionService sessionService;
+	private IUserRepository userRepository;
 	private CUserService userService;
 
 	@BeforeEach

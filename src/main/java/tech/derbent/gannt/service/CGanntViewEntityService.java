@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.gannt.domain.CGanntViewEntity;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 @Service
 public class CGanntViewEntityService extends CEntityOfProjectService<CGanntViewEntity> {
@@ -17,7 +17,7 @@ public class CGanntViewEntityService extends CEntityOfProjectService<CGanntViewE
 	}
 
 	@Autowired
-	public CGanntViewEntityService(final IGanntViewEntityRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CGanntViewEntityService(final IGanntViewEntityRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

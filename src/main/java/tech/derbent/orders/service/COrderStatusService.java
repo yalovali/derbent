@@ -6,14 +6,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.orders.domain.COrderStatus;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class COrderStatusService extends CEntityOfProjectService<COrderStatus> {
 
-	COrderStatusService(final IOrderStatusRepository repository, final Clock clock, final CSessionService sessionService) {
+	COrderStatusService(final IOrderStatusRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

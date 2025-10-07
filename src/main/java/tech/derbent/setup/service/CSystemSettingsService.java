@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityNotFoundException;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 import tech.derbent.setup.domain.CSystemSettings;
 
 /** CSystemSettingsService - Business logic layer for CSystemSettings entities. Layer: Service (MVC) Provides comprehensive business logic for
@@ -27,7 +27,7 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 	/** Constructor for CSystemSettingsService.
 	 * @param repository the CSystemSettingsRepository instance
 	 * @param clock      the Clock instance for time-related operations */
-	public CSystemSettingsService(final ISystemSettingsRepository repository, final Clock clock, @Lazy final CSessionService sessionService) {
+	public CSystemSettingsService(final ISystemSettingsRepository repository, final Clock clock, @Lazy final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 
@@ -63,8 +63,27 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 		return extensionArray;
 	}
 
+	/** Gets the default login view setting.
+	 * @return the default view to navigate to after login */
+	public String getDefaultLoginView() {
+		final CSystemSettings settings = getOrCreateSystemSettings();
+		return settings.getDefaultLoginView() != null ? settings.getDefaultLoginView() : "home";
+	}
+
 	@Override
 	protected Class<CSystemSettings> getEntityClass() { return CSystemSettings.class; }
+
+	/** Gets the last visited view setting.
+	 * @return the last visited view route */
+	public String getLastVisitedView() {
+		try {
+			final CSystemSettings settings = getOrCreateSystemSettings();
+			return settings.getLastVisitedView() != null ? settings.getLastVisitedView() : "home";
+		} catch (final Exception e) {
+			LOGGER.error("Error retrieving last visited view setting", e);
+			return "home"; // Default fallback
+		}
+	}
 
 	/** Gets the current maintenance message if maintenance mode is enabled.
 	 * @return Optional containing the maintenance message if available */
@@ -121,6 +140,13 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 		}
 	}
 
+	/** Gets the auto-login enabled setting.
+	 * @return true if auto-login is enabled, false otherwise */
+	public boolean isAutoLoginEnabled() {
+		final CSystemSettings settings = getOrCreateSystemSettings();
+		return settings.getAutoLoginEnabled() != null ? settings.getAutoLoginEnabled() : false;
+	}
+
 	/** Checks if maintenance mode is currently enabled.
 	 * @return true if maintenance mode is enabled, false otherwise */
 	public boolean isMaintenanceModeEnabled() {
@@ -159,6 +185,32 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 		return updatedSettings;
 	}
 
+	/** Updates the auto-login settings.
+	 * @param autoLoginEnabled true to enable auto-login, false to disable
+	 * @param defaultView      the default view to navigate to after login
+	 * @return the updated CSystemSettings */
+	@Transactional
+	public CSystemSettings updateAutoLoginSettings(final boolean autoLoginEnabled, final String defaultView) {
+		final CSystemSettings settings = getOrCreateSystemSettings();
+		settings.setAutoLoginEnabled(autoLoginEnabled);
+		if ((defaultView != null) && !defaultView.trim().isEmpty()) {
+			settings.setDefaultLoginView(defaultView.trim());
+		}
+		return updateSystemSettings(settings);
+	}
+
+	/** Updates the last visited view setting.
+	 * @param lastVisitedView the route of the last visited view
+	 * @return the updated CSystemSettings */
+	@Transactional
+	public CSystemSettings updateLastVisitedView(final String lastVisitedView) {
+		final CSystemSettings settings = getOrCreateSystemSettings();
+		if ((lastVisitedView != null) && !lastVisitedView.trim().isEmpty()) {
+			settings.setLastVisitedView(lastVisitedView.trim());
+		}
+		return updateSystemSettings(settings);
+	}
+
 	/** Updates system settings with validation.
 	 * @param settings the settings to update
 	 * @return the updated CSystemSettings
@@ -181,58 +233,6 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 			LOGGER.error("Failed to update system settings", e);
 			throw new RuntimeException("Failed to update system settings: " + e.getMessage(), e);
 		}
-	}
-
-	/** Gets the auto-login enabled setting.
-	 * @return true if auto-login is enabled, false otherwise */
-	public boolean isAutoLoginEnabled() {
-		final CSystemSettings settings = getOrCreateSystemSettings();
-		return settings.getAutoLoginEnabled() != null ? settings.getAutoLoginEnabled() : false;
-	}
-
-	/** Gets the default login view setting.
-	 * @return the default view to navigate to after login */
-	public String getDefaultLoginView() {
-		final CSystemSettings settings = getOrCreateSystemSettings();
-		return settings.getDefaultLoginView() != null ? settings.getDefaultLoginView() : "home";
-	}
-
-	/** Updates the auto-login settings.
-	 * @param autoLoginEnabled true to enable auto-login, false to disable
-	 * @param defaultView      the default view to navigate to after login
-	 * @return the updated CSystemSettings */
-	@Transactional
-	public CSystemSettings updateAutoLoginSettings(final boolean autoLoginEnabled, final String defaultView) {
-		final CSystemSettings settings = getOrCreateSystemSettings();
-		settings.setAutoLoginEnabled(autoLoginEnabled);
-		if ((defaultView != null) && !defaultView.trim().isEmpty()) {
-			settings.setDefaultLoginView(defaultView.trim());
-		}
-		return updateSystemSettings(settings);
-	}
-
-	/** Gets the last visited view setting.
-	 * @return the last visited view route */
-	public String getLastVisitedView() {
-		try {
-			final CSystemSettings settings = getOrCreateSystemSettings();
-			return settings.getLastVisitedView() != null ? settings.getLastVisitedView() : "home";
-		} catch (final Exception e) {
-			LOGGER.error("Error retrieving last visited view setting", e);
-			return "home"; // Default fallback
-		}
-	}
-
-	/** Updates the last visited view setting.
-	 * @param lastVisitedView the route of the last visited view
-	 * @return the updated CSystemSettings */
-	@Transactional
-	public CSystemSettings updateLastVisitedView(final String lastVisitedView) {
-		final CSystemSettings settings = getOrCreateSystemSettings();
-		if ((lastVisitedView != null) && !lastVisitedView.trim().isEmpty()) {
-			settings.setLastVisitedView(lastVisitedView.trim());
-		}
-		return updateSystemSettings(settings);
 	}
 
 	/** Validates business rules for system settings.

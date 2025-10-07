@@ -20,7 +20,7 @@ import tech.derbent.api.views.grids.CGridViewBaseProject;
 import tech.derbent.screens.domain.CGridEntity;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.screens.service.CGridEntityService;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 @Route ("cgridentityview")
 @PageTitle ("Grids Detail")
@@ -34,7 +34,7 @@ public class CGridEntityView extends CGridViewBaseProject<CGridEntity> {
 	private final String ENTITY_ID_FIELD = "grid_entity_id";
 	private CFieldSelectionComponent fieldSelectionComponent;
 
-	public CGridEntityView(final CGridEntityService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
+	public CGridEntityView(final CGridEntityService entityService, final ISessionService sessionService, final CDetailSectionService screenService) {
 		super(CGridEntity.class, entityService, sessionService, screenService);
 	}
 

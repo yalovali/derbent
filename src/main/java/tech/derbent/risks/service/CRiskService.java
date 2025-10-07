@@ -7,7 +7,7 @@ import com.vaadin.flow.router.Menu;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.risks.domain.CRisk;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -15,7 +15,7 @@ import tech.derbent.session.service.CSessionService;
 @PermitAll // When security is enabled, allow all authenticated users
 public class CRiskService extends CEntityOfProjectService<CRisk> {
 
-	CRiskService(final IRiskRepository repository, final Clock clock, final CSessionService sessionService) {
+	CRiskService(final IRiskRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

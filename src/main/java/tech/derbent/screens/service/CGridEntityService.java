@@ -10,13 +10,13 @@ import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CGridEntity;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CGridEntityService extends CEntityOfProjectService<CGridEntity> {
 
-	public CGridEntityService(final IGridEntityRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CGridEntityService(final IGridEntityRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

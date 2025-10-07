@@ -38,6 +38,7 @@ import tech.derbent.screens.domain.CGridEntity.FieldConfig;
 import tech.derbent.screens.service.CEntityFieldService;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 public class CComponentGridEntity extends CDiv implements IProjectChangeListener {
 
@@ -59,7 +60,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	private static final long serialVersionUID = 1L;
 	private CGrid<?> grid;
 	private CGridEntity gridEntity;
-	private CSessionService sessionService;
+	private ISessionService sessionService;
 
 	public CComponentGridEntity(CGridEntity gridEntity) {
 		super();

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.services.CAbstractNamedEntityService;
 import tech.derbent.orders.domain.COrderApproval;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 /** COrderApprovalService - Service layer for COrderApproval entity. Layer: Service (MVC) Handles business logic for order approval operations
  * including creation, validation, and management of order approval entities. */
@@ -15,7 +15,7 @@ import tech.derbent.session.service.CSessionService;
 @Transactional (readOnly = true)
 public class COrderApprovalService extends CAbstractNamedEntityService<COrderApproval> {
 
-	COrderApprovalService(final IOrderApprovalRepository repository, final Clock clock, final CSessionService sessionService) {
+	COrderApprovalService(final IOrderApprovalRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

@@ -16,7 +16,7 @@ import tech.derbent.api.services.CAbstractNamedEntityService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.view.CComponentCompanyUserSettings;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -27,7 +27,7 @@ public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 	@Autowired
 	private ApplicationContext applicationContext;
 
-	public CCompanyService(final ICompanyRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CCompanyService(final ICompanyRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

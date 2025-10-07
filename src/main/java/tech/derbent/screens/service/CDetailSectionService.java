@@ -9,13 +9,13 @@ import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CDetailSection;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CDetailSectionService extends CEntityOfProjectService<CDetailSection> {
 
-	public CDetailSectionService(final IDetailSectionRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CDetailSectionService(final IDetailSectionRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

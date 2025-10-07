@@ -12,7 +12,7 @@ import tech.derbent.api.views.grids.CGridViewBaseProject;
 import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.page.service.CPageEntityService;
 import tech.derbent.screens.service.CDetailSectionService;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 @Route ("cpageentityview")
 @PageTitle ("Page Master Detail")
@@ -20,13 +20,13 @@ import tech.derbent.session.service.CSessionService;
 @PermitAll // When security is enabled, allow all authenticated users
 public final class CPageEntityView extends CGridViewBaseProject<CPageEntity> {
 
-	private static final long serialVersionUID = 1L;
-	public static final String VIEW_NAME = "Pages View";
 	public static final String DEFAULT_COLOR = tech.derbent.page.domain.CPageEntity.DEFAULT_COLOR;
 	public static final String DEFAULT_ICON = tech.derbent.page.domain.CPageEntity.DEFAULT_ICON;
+	private static final long serialVersionUID = 1L;
+	public static final String VIEW_NAME = "Pages View";
 	private final String ENTITY_ID_FIELD = "pageentity_id";
 
-	public CPageEntityView(final CPageEntityService entityService, final CSessionService sessionService, final CDetailSectionService screenService) {
+	public CPageEntityView(final CPageEntityService entityService, final ISessionService sessionService, final CDetailSectionService screenService) {
 		super(CPageEntity.class, entityService, sessionService, screenService);
 	}
 

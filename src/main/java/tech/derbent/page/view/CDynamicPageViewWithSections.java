@@ -29,7 +29,7 @@ import tech.derbent.screens.domain.CGridEntity;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.screens.view.CComponentGridEntity;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 import tech.derbent.users.domain.CUser;
 
 /** Enhanced dynamic page view that supports grid and detail sections for database-defined pages. This view displays content stored in CPageEntity
@@ -56,7 +56,7 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 	protected final SplitLayout splitLayout = new SplitLayout();
 
 	@Autowired
-	public CDynamicPageViewWithSections(final CPageEntity pageEntity, final CSessionService sessionService,
+	public CDynamicPageViewWithSections(final CPageEntity pageEntity, final ISessionService sessionService,
 			final CDetailSectionService detailSectionService, final CGridEntityService gridEntityService,
 			final ApplicationContext applicationContext) {
 		super(sessionService, detailSectionService);

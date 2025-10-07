@@ -13,13 +13,13 @@ import tech.derbent.api.domains.CProjectItemService;
 import tech.derbent.api.interfaces.IKanbanService;
 import tech.derbent.api.services.IEntityOfProjectRepository;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CActivityService extends CProjectItemService<CActivity> implements IKanbanService<CActivity, CActivityStatus> {
 
-	public CActivityService(final IActivityRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CActivityService(final IActivityRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 
@@ -41,6 +41,12 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 				.groupingBy(activity -> activity.getStatus() != null ? activity.getStatus() : createNoStatusInstance(project), Collectors.toList()));
 	}
 
+	@Override
+	public List<CActivityStatus> getAllStatuses(Long projectId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	// CKanbanService implementation methods
 	@Override
 	public Map<CActivityStatus, List<CActivity>> getEntitiesGroupedByStatus(final Long projectId) {
@@ -56,11 +62,5 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 	public CActivity updateEntityStatus(final CActivity entity, final CActivityStatus newStatus) {
 		tech.derbent.api.utils.CKanbanUtils.updateEntityStatusSimple(entity, newStatus, CActivity::setStatus);
 		return save(entity);
-	}
-
-	@Override
-	public List<CActivityStatus> getAllStatuses(Long projectId) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 }

@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.decisions.domain.CDecisionType;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 /** CDecisionTypeService - Service class for CDecisionType entities. Layer: Service (MVC) Provides business logic operations for project-aware
  * decision type management including validation, creation, and status management. */
@@ -17,7 +17,7 @@ import tech.derbent.session.service.CSessionService;
 @PreAuthorize ("isAuthenticated()")
 public class CDecisionTypeService extends CEntityOfProjectService<CDecisionType> {
 
-	public CDecisionTypeService(final IDecisionTypeRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CDecisionTypeService(final IDecisionTypeRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.risks.domain.CRiskStatus;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 /** CRiskStatusService - Service class for managing CRiskStatus entities. Layer: Service (MVC) Provides business logic for risk status management
  * including CRUD operations, validation, and workflow management. */
@@ -19,7 +19,7 @@ public class CRiskStatusService extends CEntityOfProjectService<CRiskStatus> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskStatusService.class);
 
 	@Autowired
-	public CRiskStatusService(final IRiskStatusRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CRiskStatusService(final IRiskStatusRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 

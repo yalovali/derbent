@@ -12,7 +12,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CVerticalLayout;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.service.CDetailSectionService;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 /** Abstract project-aware MD page that filters entities by the currently active project. Implements CProjectChangeListener to receive immediate
  * notifications when the active project changes. */
@@ -20,10 +20,10 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
 		implements IProjectChangeListener {
 
 	private static final long serialVersionUID = 1L;
-	protected final CSessionService sessionService;
+	protected final ISessionService sessionService;
 
 	protected CProjectAwareMDPage(final Class<EntityClass> entityClass, final CAbstractNamedEntityService<EntityClass> entityService,
-			final CSessionService sessionService, final CDetailSectionService screenService) {
+			final ISessionService sessionService, final CDetailSectionService screenService) {
 		super(entityClass, entityService, sessionService, screenService);
 		this.sessionService = sessionService;
 		// Now that sessionService is set, we can populate the grid

@@ -18,7 +18,7 @@ import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CDetailSection;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.CLayoutService;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 public abstract class CPageBaseProjectAware extends CPageBase implements IProjectChangeListener, IContentOwner, IHasContentOwner {
 
@@ -30,10 +30,10 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 	protected CLayoutService layoutService;
 	private IContentOwner parentContent;
 	private CDetailSectionService screenService;
-	protected final CSessionService sessionService;
+	protected final ISessionService sessionService;
 	protected SplitLayout splitLayout = new SplitLayout();
 
-	protected CPageBaseProjectAware(final CSessionService sessionService, CDetailSectionService screenService) {
+	protected CPageBaseProjectAware(final ISessionService sessionService, CDetailSectionService screenService) {
 		super();
 		this.screenService = screenService;
 		this.sessionService = sessionService;

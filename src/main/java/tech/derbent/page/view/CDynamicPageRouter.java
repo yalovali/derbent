@@ -19,7 +19,7 @@ import tech.derbent.page.service.CPageEntityService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.screens.service.CGridEntityService;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 /** Router for dynamic pages that handles all database-defined page routes. This acts as a router for dynamic project pages. */
 @Route (value = "cdynamicpagerouter", layout = MainLayout.class)
@@ -38,10 +38,10 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 	private final CGridEntityService gridEntityService;
 	private Long pageEntityId = null;
 	private final CPageEntityService pageEntityService;
-	private final CSessionService sessionService;
+	private final ISessionService sessionService;
 
 	@Autowired
-	public CDynamicPageRouter(CPageEntityService pageEntityService, CSessionService sessionService, CDetailSectionService detailSectionService,
+	public CDynamicPageRouter(CPageEntityService pageEntityService, ISessionService sessionService, CDetailSectionService detailSectionService,
 			CGridEntityService gridEntityService, ApplicationContext applicationContext) {
 		Check.notNull(pageEntityService, "CPageEntityService cannot be null");
 		Check.notNull(sessionService, "CSessionService cannot be null");

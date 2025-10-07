@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 import tech.derbent.users.service.CUserCompanySettingsService;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.IUserRepository;
@@ -17,16 +17,16 @@ import tech.derbent.users.service.IUserRepository;
 class UserServiceConfigurationTest {
 
 	@Mock
-	private CUserService userService;
-	@Mock
-	private CSessionService sessionService;
-	@Mock
-	private IUserRepository userRepository;
-	@Mock
 	private Clock clock;
 	private UserServiceConfiguration configuration;
 	@Mock
+	private ISessionService sessionService;
+	@Mock
 	private CUserCompanySettingsService userCompanySettingsService;
+	@Mock
+	private IUserRepository userRepository;
+	@Mock
+	private CUserService userService;
 
 	@BeforeEach
 	void setUp() {

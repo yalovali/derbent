@@ -8,10 +8,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.screens.domain.CDetailSection;
 import tech.derbent.screens.domain.CDetailLines;
+import tech.derbent.screens.domain.CDetailSection;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -50,9 +50,9 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> {
 
 	private final IDetailLinesRepository detailLinesRepository;
 
-	public CDetailLinesService(final IDetailLinesRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CDetailLinesService(final IDetailLinesRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
-		this.detailLinesRepository = repository;
+		detailLinesRepository = repository;
 	}
 
 	/** Count the number of lines for a screen.

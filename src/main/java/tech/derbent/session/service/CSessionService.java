@@ -33,8 +33,8 @@ public class CSessionService implements ISessionService {
 	private final Set<IProjectChangeListener> projectChangeListeners = ConcurrentHashMap.newKeySet();
 	private final Set<IProjectListChangeListener> projectListChangeListeners = ConcurrentHashMap.newKeySet();
 	private final IProjectRepository projectRepository;
-	private final IUserRepository userRepository;
 	private final CUserCompanySettingsService userCompanySettingsService;
+	private final IUserRepository userRepository;
 
 	public CSessionService(final IUserRepository userRepository, final IProjectRepository projectRepository,
 			final CUserCompanySettingsService userCompanySettingsService) {
@@ -68,6 +68,7 @@ public class CSessionService implements ISessionService {
 		// No-op in reset mode
 	}
 
+	@Override
 	public Optional<tech.derbent.companies.domain.CCompany> getActiveCompany() { return Optional.ofNullable(activeCompany); }
 
 	@Override
@@ -115,6 +116,7 @@ public class CSessionService implements ISessionService {
 		return projectRepository.findAll();
 	}
 
+	@Override
 	public CCompany getCurrentCompany() { return getActiveCompany().orElse(null); }
 
 	// @EventListener method placeholder for compatibility

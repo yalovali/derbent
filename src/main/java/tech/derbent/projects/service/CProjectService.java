@@ -20,7 +20,7 @@ import tech.derbent.api.views.components.CComponentProjectUserSettings;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.events.ProjectListChangeEvent;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -30,7 +30,7 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 	private ApplicationContext applicationContext;
 	private final ApplicationEventPublisher eventPublisher;
 
-	public CProjectService(final IProjectRepository repository, final Clock clock, final CSessionService sessionService,
+	public CProjectService(final IProjectRepository repository, final Clock clock, final ISessionService sessionService,
 			final ApplicationEventPublisher eventPublisher) {
 		super(repository, clock, sessionService);
 		this.eventPublisher = eventPublisher;
@@ -73,6 +73,13 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 		return ((IProjectRepository) repository).findByCompanyId(company.getId(), safePage);
 	}
 
+	@Transactional (readOnly = true)
+	@PreAuthorize ("permitAll()")
+	public List<CProject> getAvailableProjectsForUser(final Long userId) {
+		Check.notNull(userId, "User ID must not be null");
+		return ((IProjectRepository) repository).findProjectsNotAssignedToUser(userId);
+	}
+
 	CCompany getCurrentCompany() {
 		Check.notNull(sessionService, "Session service must not be null");
 		CCompany currentCompany = sessionService.getCurrentCompany();
@@ -81,6 +88,12 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 		}
 		return currentCompany;
 	}
+
+	@Override
+	protected Class<CProject> getEntityClass() { return CProject.class; }
+
+	@PreAuthorize ("permitAll()")
+	public long getTotalProjectCount() { return repository.count(); }
 
 	@Override
 	@Transactional (readOnly = true)
@@ -103,19 +116,6 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 		final Page<CProject> page = repository.findAll(combinedSpec, safePage);
 		return page;
 	}
-
-	@Transactional (readOnly = true)
-	@PreAuthorize ("permitAll()")
-	public List<CProject> getAvailableProjectsForUser(final Long userId) {
-		Check.notNull(userId, "User ID must not be null");
-		return ((IProjectRepository) repository).findProjectsNotAssignedToUser(userId);
-	}
-
-	@Override
-	protected Class<CProject> getEntityClass() { return CProject.class; }
-
-	@PreAuthorize ("permitAll()")
-	public long getTotalProjectCount() { return repository.count(); }
 
 	@Override
 	@Transactional

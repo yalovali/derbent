@@ -16,7 +16,7 @@ import tech.derbent.screens.domain.CDetailSection;
 import tech.derbent.screens.domain.CGridEntity;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.screens.service.CGridEntityService;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 /** Unit tests for CDynamicPageViewWithSections demonstrating how to configure dynamic pages with grid and detail sections for activity management. */
 class CDynamicPageViewWithSectionsTest {
@@ -33,7 +33,7 @@ class CDynamicPageViewWithSectionsTest {
 	@Mock
 	private CGridEntityService gridEntityService;
 	@Mock
-	private CSessionService sessionService;
+	private ISessionService sessionService;
 	private CProject testProject;
 
 	@BeforeEach

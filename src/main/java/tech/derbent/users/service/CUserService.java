@@ -34,7 +34,7 @@ import tech.derbent.api.views.components.CComponentSingleCompanyUserSetting;
 import tech.derbent.api.views.components.CComponentUserProjectSettings;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserCompanySetting;
 
@@ -47,7 +47,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	@Autowired
 	private ApplicationContext applicationContext;
 	private final PasswordEncoder passwordEncoder;
-	private CSessionService sessionService;
+	private ISessionService sessionService;
 	private CUserCompanySettingsService userCompanySettingsService;
 
 	public CUserService(final IUserRepository repository, final Clock clock) {
@@ -57,22 +57,6 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 		@SuppressWarnings ("unused")
 		final CharSequence newPlainPassword = "test123";
 		// final String encodedPassword = passwordEncoder.encode(newPlainPassword);
-	}
-
-	/** Sets the session service. This is called after bean creation to avoid circular dependency.
-	 * @param sessionService the session service to set */
-	public void setSessionService(final CSessionService sessionService) {
-		this.sessionService = sessionService;
-		LOGGER.debug("SessionService injected into CUserService via setter");
-	}
-
-	/** Sets the user company settings service. This is called after bean creation to avoid circular dependency.
-	 * @param userCompanySettingsService the user company settings service to set */
-	@Autowired
-	@Lazy
-	public void setUserCompanySettingsService(final CUserCompanySettingsService userCompanySettingsService) {
-		this.userCompanySettingsService = userCompanySettingsService;
-		LOGGER.debug("UserCompanySettingsService injected into CUserService via setter");
 	}
 
 	@PreAuthorize ("permitAll()")
@@ -127,6 +111,26 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 		}
 	}
 
+	@Override
+	@Transactional (readOnly = true)
+	public List<CUser> findAll() {
+		// Enforce company requirement
+		CCompany currentCompany = getCurrentCompany();
+		LOGGER.debug("Finding all users for company: {}", currentCompany.getName());
+		return ((IUserRepository) repository).findByCompanyId(currentCompany.getId());
+	}
+
+	/** Find user by ID with company setting eagerly loaded to avoid LazyInitializationException in UI. This method should be used when the UI needs
+	 * to access user's company settings and company data.
+	 * @param userId the user ID
+	 * @return Optional containing the user with company setting loaded, or empty if not found */
+	@Transactional (readOnly = true)
+	@PreAuthorize ("permitAll()")
+	public Optional<CUser> findByIdWithCompanySetting(final Long userId) {
+		Check.notNull(userId, "User ID must not be null");
+		return ((IUserRepository) repository).findByIdWithCompanySetting(userId);
+	}
+
 	/** Finds a user by login username.
 	 * @param login the login username
 	 * @return the CUser if found, null otherwise */
@@ -158,35 +162,12 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 		return ((IUserRepository) repository).findUsersNotAssignedToCompany(companyId);
 	}
 
-	@Override
-	@Transactional (readOnly = true)
-	public List<CUser> findAll() {
-		// Enforce company requirement
-		CCompany currentCompany = getCurrentCompany();
-		LOGGER.debug("Finding all users for company: {}", currentCompany.getName());
-		return ((IUserRepository) repository).findByCompanyId(currentCompany.getId());
-	}
-
 	@Transactional (readOnly = true)
 	@PreAuthorize ("permitAll()")
 	public List<CUser> getAvailableUsersForProject(final Long projectId) {
 		Check.notNull(projectId, "User ID must not be null");
 		return ((IUserRepository) repository).findUsersNotAssignedToProject(projectId);
 	}
-
-	/** Find user by ID with company setting eagerly loaded to avoid LazyInitializationException in UI. This method should be used when the UI needs
-	 * to access user's company settings and company data.
-	 * @param userId the user ID
-	 * @return Optional containing the user with company setting loaded, or empty if not found */
-	@Transactional (readOnly = true)
-	@PreAuthorize ("permitAll()")
-	public Optional<CUser> findByIdWithCompanySetting(final Long userId) {
-		Check.notNull(userId, "User ID must not be null");
-		return ((IUserRepository) repository).findByIdWithCompanySetting(userId);
-	}
-
-	@Override
-	protected Class<CUser> getEntityClass() { return CUser.class; }
 
 	/** Gets the current company from session, throwing exception if not available.
 	 * @return current company
@@ -201,6 +182,9 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 		}
 		return currentCompany;
 	}
+
+	@Override
+	protected Class<CUser> getEntityClass() { return CUser.class; }
 
 	/** Override the default list method to filter users by active company when available. This allows CUserService to work with dynamic pages without
 	 * needing to implement special filtering. If no active company is available, returns all users (preserves existing behavior). */
@@ -277,18 +261,34 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 		return true;
 	}
 
-	@Override
-	protected void validateEntity(final CUser user) {
-		super.validateEntity(user);
-		Check.notBlank(user.getLogin(), "User login cannot be null or empty");
-		Check.notBlank(user.getName(), "User name cannot be null or empty");
-	}
-
 	public void setCompany(CUser user, CCompany company, CUserCompanyRole role) {
 		Check.notNull(user, "User cannot be null");
 		Check.notNull(company, "Company cannot be null");
 		CUserCompanySetting settings = userCompanySettingsService.addUserToCompany(user, company, role, "Owner");
 		user.setCompanySettings(settings);
 		LOGGER.debug("Set company '{}' for user '{}' with settings", company.getName(), user.getLogin());
+	}
+
+	/** Sets the session service. This is called after bean creation to avoid circular dependency.
+	 * @param sessionService the session service to set */
+	public void setSessionService(final ISessionService sessionService) {
+		this.sessionService = sessionService;
+		LOGGER.debug("SessionService injected into CUserService via setter");
+	}
+
+	/** Sets the user company settings service. This is called after bean creation to avoid circular dependency.
+	 * @param userCompanySettingsService the user company settings service to set */
+	@Autowired
+	@Lazy
+	public void setUserCompanySettingsService(final CUserCompanySettingsService userCompanySettingsService) {
+		this.userCompanySettingsService = userCompanySettingsService;
+		LOGGER.debug("UserCompanySettingsService injected into CUserService via setter");
+	}
+
+	@Override
+	protected void validateEntity(final CUser user) {
+		super.validateEntity(user);
+		Check.notBlank(user.getLogin(), "User login cannot be null or empty");
+		Check.notBlank(user.getName(), "User name cannot be null or empty");
 	}
 }

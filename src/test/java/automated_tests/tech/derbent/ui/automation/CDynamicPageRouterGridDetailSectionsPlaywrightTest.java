@@ -18,7 +18,7 @@ import tech.derbent.screens.domain.CDetailSection;
 import tech.derbent.screens.domain.CGridEntity;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.screens.service.CGridEntityService;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 /** Playwright test demonstrating CDynamicPageRouter with grid and detail sections. This test validates the enhanced functionality where CPageEntity
  * can reference grid and detail sections for dynamic entity management pages. */
@@ -36,9 +36,9 @@ class CDynamicPageRouterGridDetailSectionsPlaywrightTest {
 	@Mock
 	private CGridEntityService gridEntityService;
 	@Mock
-	private CSessionService sessionService;
-	private CProject testProject;
+	private ISessionService sessionService;
 	private CCompany testCompany;
+	private CProject testProject;
 
 	@BeforeEach
 	void setUp() {
@@ -189,6 +189,21 @@ class CDynamicPageRouterGridDetailSectionsPlaywrightTest {
 		System.out.println("📂 Screenshots saved to: " + screenshotsDir.getAbsolutePath());
 	}
 
+	private void testComponentReusePattern() {
+		System.out.println("\n🔄 COMPONENT REUSE TEST: Performance Optimization");
+		System.out.println("=================================================");
+		System.out.println("Testing component reuse pattern implementation:");
+		System.out.println("✅ canReuseExistingComponents() method checks entity type and view name");
+		System.out.println("✅ reloadEntityValues() updates data without UI rebuild");
+		System.out.println("✅ State tracking with currentEntityViewName and currentEntityType");
+		System.out.println("✅ Performance improvement: avoids unnecessary removeAll() calls");
+		System.out.println("🎭 Playwright: Simulating entity selection of same type");
+		System.out.println("✓ First entity selection triggers full UI build");
+		System.out.println("✓ Second entity selection (same type) reuses existing components");
+		System.out.println("✓ Third entity selection (different type) rebuilds UI");
+		System.out.println("✅ Component reuse pattern working correctly!");
+	}
+
 	@Test
 	void testDifferentEntityTypesConfiguration() {
 		System.out.println("\n🔄 ADDITIONAL TEST: Different Entity Types Configuration");
@@ -212,19 +227,36 @@ class CDynamicPageRouterGridDetailSectionsPlaywrightTest {
 		testGridEnhancements();
 	}
 
-	private void testComponentReusePattern() {
-		System.out.println("\n🔄 COMPONENT REUSE TEST: Performance Optimization");
-		System.out.println("=================================================");
-		System.out.println("Testing component reuse pattern implementation:");
-		System.out.println("✅ canReuseExistingComponents() method checks entity type and view name");
-		System.out.println("✅ reloadEntityValues() updates data without UI rebuild");
-		System.out.println("✅ State tracking with currentEntityViewName and currentEntityType");
-		System.out.println("✅ Performance improvement: avoids unnecessary removeAll() calls");
-		System.out.println("🎭 Playwright: Simulating entity selection of same type");
-		System.out.println("✓ First entity selection triggers full UI build");
-		System.out.println("✓ Second entity selection (same type) reuses existing components");
-		System.out.println("✓ Third entity selection (different type) rebuilds UI");
-		System.out.println("✅ Component reuse pattern working correctly!");
+	private void testEntityTypeConfiguration(String entityType, String serviceBeanName, String entityClassName, String pageTitle, String gridFields) {
+		System.out.println("\n📋 Testing " + entityType + " configuration:");
+		System.out.println("  Entity Type: " + entityType);
+		System.out.println("  Service Bean: " + serviceBeanName);
+		System.out.println("  Entity Class: " + entityClassName);
+		System.out.println("  Page Title: " + pageTitle);
+		System.out.println("  Grid Fields: " + gridFields);
+		// Create grid entity
+		CGridEntity gridEntity = new CGridEntity(entityType + "Grid", testProject);
+		gridEntity.setDataServiceBeanName(serviceBeanName);
+		gridEntity.setSelectedFields(gridFields);
+		// Create detail section
+		CDetailSection detailSection = new CDetailSection(entityType + "Details", testProject);
+		detailSection.setEntityType(entityClassName);
+		detailSection.setScreenTitle(pageTitle);
+		detailSection.setHeaderText("Manage " + entityType + " with comprehensive view and editing capabilities");
+		// Create page entity
+		CPageEntity pageEntity = new CPageEntity(entityType + "Page", testProject);
+		pageEntity.setPageTitle(pageTitle);
+		pageEntity.setGridEntity(gridEntity);
+		pageEntity.setDetailSection(detailSection);
+		// Validate configuration
+		assertNotNull(pageEntity.getGridEntity());
+		assertNotNull(pageEntity.getDetailSection());
+		assertEquals(serviceBeanName, pageEntity.getGridEntity().getDataServiceBeanName());
+		assertEquals(entityClassName, pageEntity.getDetailSection().getEntityType());
+		System.out.println("✓ " + entityType + " configuration valid for CDynamicPageViewWithSections");
+		// Simulate URL
+		String url = "/cdynamicpagerouter/" + pageEntity.getId();
+		System.out.println("🎭 Playwright URL: " + url);
 	}
 
 	private void testGridEnhancements() {
@@ -273,38 +305,6 @@ class CDynamicPageRouterGridDetailSectionsPlaywrightTest {
 		System.out.println("🎭 Playwright: page.navigate('/cpageusers')");
 		System.out.println("✓ Users page loads with purple user icons");
 		System.out.println("✅ All new dynamic page classes working correctly!");
-	}
-
-	private void testEntityTypeConfiguration(String entityType, String serviceBeanName, String entityClassName, String pageTitle, String gridFields) {
-		System.out.println("\n📋 Testing " + entityType + " configuration:");
-		System.out.println("  Entity Type: " + entityType);
-		System.out.println("  Service Bean: " + serviceBeanName);
-		System.out.println("  Entity Class: " + entityClassName);
-		System.out.println("  Page Title: " + pageTitle);
-		System.out.println("  Grid Fields: " + gridFields);
-		// Create grid entity
-		CGridEntity gridEntity = new CGridEntity(entityType + "Grid", testProject);
-		gridEntity.setDataServiceBeanName(serviceBeanName);
-		gridEntity.setSelectedFields(gridFields);
-		// Create detail section
-		CDetailSection detailSection = new CDetailSection(entityType + "Details", testProject);
-		detailSection.setEntityType(entityClassName);
-		detailSection.setScreenTitle(pageTitle);
-		detailSection.setHeaderText("Manage " + entityType + " with comprehensive view and editing capabilities");
-		// Create page entity
-		CPageEntity pageEntity = new CPageEntity(entityType + "Page", testProject);
-		pageEntity.setPageTitle(pageTitle);
-		pageEntity.setGridEntity(gridEntity);
-		pageEntity.setDetailSection(detailSection);
-		// Validate configuration
-		assertNotNull(pageEntity.getGridEntity());
-		assertNotNull(pageEntity.getDetailSection());
-		assertEquals(serviceBeanName, pageEntity.getGridEntity().getDataServiceBeanName());
-		assertEquals(entityClassName, pageEntity.getDetailSection().getEntityType());
-		System.out.println("✓ " + entityType + " configuration valid for CDynamicPageViewWithSections");
-		// Simulate URL
-		String url = "/cdynamicpagerouter/" + pageEntity.getId();
-		System.out.println("🎭 Playwright URL: " + url);
 	}
 
 	@Test

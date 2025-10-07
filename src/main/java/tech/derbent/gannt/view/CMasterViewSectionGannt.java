@@ -16,7 +16,7 @@ import tech.derbent.api.views.grids.CMasterViewSectionBase;
 import tech.derbent.gannt.view.components.CGanntGrid;
 import tech.derbent.meetings.service.CMeetingService;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>> extends CMasterViewSectionBase<EntityClass>
 		implements IProjectChangeListener {
@@ -40,10 +40,10 @@ public class CMasterViewSectionGannt<EntityClass extends CEntityDB<EntityClass>>
 	private final CActivityService activityService;
 	private CGanntGrid ganttGrid;
 	private final CMeetingService meetingService;
-	private final CSessionService sessionService;
+	private final ISessionService sessionService;
 
 	public CMasterViewSectionGannt(final Class<EntityClass> entityClass, final CAbstractEntityDBPage<EntityClass> page,
-			final CSessionService sessionService, final CActivityService activityService, final CMeetingService meetingService) {
+			final ISessionService sessionService, final CActivityService activityService, final CMeetingService meetingService) {
 		super(entityClass, page);
 		this.sessionService = sessionService;
 		this.activityService = activityService;

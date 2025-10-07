@@ -4,14 +4,14 @@ import tech.derbent.api.domains.CEntityOfProject;
 import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.api.views.CProjectAwareMDPage;
 import tech.derbent.screens.service.CDetailSectionService;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 public abstract class CGridViewBaseProject<EntityClass extends CEntityOfProject<EntityClass>> extends CProjectAwareMDPage<EntityClass> {
 
 	private static final long serialVersionUID = 1L;
 
 	protected CGridViewBaseProject(final Class<EntityClass> entityClass, final CEntityOfProjectService<EntityClass> entityService,
-			final CSessionService sessionService, final CDetailSectionService screenService) {
+			final ISessionService sessionService, final CDetailSectionService screenService) {
 		super(entityClass, entityService, sessionService, screenService);
 	}
 

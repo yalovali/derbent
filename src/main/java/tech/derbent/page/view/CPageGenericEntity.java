@@ -22,7 +22,7 @@ import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.screens.view.CComponentGridEntity;
 import tech.derbent.session.service.CLayoutService;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 /** Generic base class for entity management pages that provides common functionality for displaying and managing different entity types through
  * reflection and generic patterns.
@@ -45,7 +45,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 	protected final String viewName;
 
 	/** Constructor for generic entity page */
-	protected CPageGenericEntity(final CSessionService sessionService, final CDetailSectionService screenService,
+	protected CPageGenericEntity(final ISessionService sessionService, final CDetailSectionService screenService,
 			final CGridEntityService gridEntityService, final CAbstractService<EntityClass> entityService, final Class<EntityClass> entityClass,
 			final String viewName) {
 		super(sessionService, screenService);

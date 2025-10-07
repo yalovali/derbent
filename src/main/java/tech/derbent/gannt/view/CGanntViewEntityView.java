@@ -12,7 +12,7 @@ import tech.derbent.api.views.grids.CGridViewBaseProject;
 import tech.derbent.gannt.domain.CGanntViewEntity;
 import tech.derbent.gannt.service.CGanntViewEntityService;
 import tech.derbent.screens.service.CDetailSectionService;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 @Route ("cganntviewentityview")
 @PageTitle ("Gannt Views Master Detail")
@@ -26,7 +26,7 @@ public class CGanntViewEntityView extends CGridViewBaseProject<CGanntViewEntity>
 	public static final String VIEW_NAME = "Gannt View Entity Settings View";
 	private final String ENTITY_ID_FIELD = "screen_id";
 
-	protected CGanntViewEntityView(final CGanntViewEntityService entityService, final CSessionService sessionService,
+	protected CGanntViewEntityView(final CGanntViewEntityService entityService, final ISessionService sessionService,
 			final CDetailSectionService screenService) {
 		super(CGanntViewEntity.class, entityService, sessionService, screenService);
 		// TODO Auto-generated constructor stub

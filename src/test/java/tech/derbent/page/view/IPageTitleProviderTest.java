@@ -15,7 +15,7 @@ import tech.derbent.screens.domain.CDetailSection;
 import tech.derbent.screens.domain.CGridEntity;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.screens.service.CGridEntityService;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 /** Test to verify IPageTitleProvider functionality in dynamic pages */
 class IPageTitleProviderTest {
@@ -27,7 +27,7 @@ class IPageTitleProviderTest {
 	@Mock
 	private CGridEntityService gridEntityService;
 	@Mock
-	private CSessionService sessionService;
+	private ISessionService sessionService;
 
 	@Test
 	void testCDynamicPageViewImplementsIPageTitleProvider() {

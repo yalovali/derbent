@@ -11,7 +11,7 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.page.view.CDynamicPageRouter;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 /** Service for integrating database-defined pages with the Vaadin menu system. This service bridges CPageEntity data with MenuEntry objects for the
  * hierarchical menu. */
@@ -20,9 +20,9 @@ public class CPageMenuIntegrationService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CPageMenuIntegrationService.class);
 	private final CPageEntityService pageEntityService;
-	private final CSessionService sessionService;
+	private final ISessionService sessionService;
 
-	public CPageMenuIntegrationService(CPageEntityService pageEntityService, CSessionService sessionService) {
+	public CPageMenuIntegrationService(CPageEntityService pageEntityService, ISessionService sessionService) {
 		Check.notNull(pageEntityService, "CPageEntityService cannot be null");
 		Check.notNull(sessionService, "CSessionService cannot be null");
 		this.pageEntityService = pageEntityService;
@@ -80,6 +80,11 @@ public class CPageMenuIntegrationService {
 		return menuEntries;
 	}
 
+	/** Get a page entity by ID for icon color retrieval. */
+	public CPageEntity getPageEntityById(Long pageId) {
+		return pageEntityService.getById(pageId).orElse(null);
+	}
+
 	/** Get page hierarchy structure for building nested menus. */
 	public List<CPageEntity> getPageHierarchyForCurrentProject() {
 		CProject activeProject =
@@ -115,9 +120,4 @@ public class CPageMenuIntegrationService {
 
 	/** Check if the service is ready (has an active project). */
 	public boolean isReady() { return sessionService.getActiveProject().isPresent(); }
-
-	/** Get a page entity by ID for icon color retrieval. */
-	public CPageEntity getPageEntityById(Long pageId) {
-		return pageEntityService.getById(pageId).orElse(null);
-	}
 }

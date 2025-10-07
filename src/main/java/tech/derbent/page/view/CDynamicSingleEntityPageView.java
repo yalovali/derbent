@@ -15,7 +15,7 @@ import tech.derbent.api.views.components.CVerticalLayout;
 import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.screens.service.CGridEntityService;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 /** Single entity dynamic page view for displaying pageEntity without grid. This page is used for displaying settings, user's single company, etc.
  * where there is only one item per user or per project or per application wide. Only works with pageEntity.getGridEntity().getAttributeNone() ==
@@ -28,10 +28,10 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewWithSections {
 	// Configuration options for CRUD toolbar
 	private boolean enableDeleteButton = false;
 	private boolean enableNewButton = false;
-	private boolean enableSaveButton = true;
 	private boolean enableReloadButton = true;
+	private boolean enableSaveButton = true;
 
-	public CDynamicSingleEntityPageView(final CPageEntity pageEntity, final CSessionService sessionService,
+	public CDynamicSingleEntityPageView(final CPageEntity pageEntity, final ISessionService sessionService,
 			final CDetailSectionService detailSectionService, final CGridEntityService gridEntityService,
 			final ApplicationContext applicationContext) {
 		super(pageEntity, sessionService, detailSectionService, gridEntityService, applicationContext);
@@ -40,29 +40,16 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewWithSections {
 		LOGGER.debug("Creating single entity dynamic page view for: {}", pageEntity.getPageTitle());
 	}
 
-	/** Validates that the page entity is properly configured for single entity display. Throws exception if
-	 * pageEntity.getGridEntity().getAttributeNone() != true */
-	private void validateSingleEntityConfiguration() {
-		Check.notNull(getPageEntity(), "pageEntity cannot be null");
-		Check.notNull(getPageEntity().getGridEntity(), "pageEntity.getGridEntity() cannot be null");
-		if (!getPageEntity().getGridEntity().getAttributeNone()) {
-			throw new IllegalArgumentException(
-					"CDynamicSingleEntityPageView can only be used with pageEntity where gridEntity.attributeNone is true. " + "Current value: "
-							+ getPageEntity().getGridEntity().getAttributeNone() + " for page: " + getPageEntity().getPageTitle());
-		}
-		LOGGER.debug("Single entity configuration validated for page: {}", getPageEntity().getPageTitle());
-	}
-
 	/** Configure CRUD toolbar buttons.
 	 * @param enableDelete Enable/disable delete button
 	 * @param enableNew    Enable/disable new button
 	 * @param enableSave   Enable/disable save button
 	 * @param enableReload Enable/disable reload/cancel button */
 	public void configureCrudToolbar(boolean enableDelete, boolean enableNew, boolean enableSave, boolean enableReload) {
-		this.enableDeleteButton = enableDelete;
-		this.enableNewButton = enableNew;
-		this.enableSaveButton = enableSave;
-		this.enableReloadButton = enableReload;
+		enableDeleteButton = enableDelete;
+		enableNewButton = enableNew;
+		enableSaveButton = enableSave;
+		enableReloadButton = enableReload;
 		LOGGER.debug("CRUD toolbar configured - Delete: {}, New: {}, Save: {}, Reload: {}", enableDelete, enableNew, enableSave, enableReload);
 	}
 
@@ -87,19 +74,24 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewWithSections {
 		return toolbar;
 	}
 
-	/** Helper method to set button visibility using reflection */
-	private void setButtonVisibility(CCrudToolbar<?> toolbar, String buttonFieldName, boolean visible) {
-		try {
-			java.lang.reflect.Field field = CCrudToolbar.class.getDeclaredField(buttonFieldName);
-			field.setAccessible(true);
-			Object button = field.get(toolbar);
-			if (button != null && button instanceof com.vaadin.flow.component.Component) {
-				((com.vaadin.flow.component.Component) button).setVisible(visible);
-			}
-		} catch (Exception e) {
-			LOGGER.warn("Could not set visibility for button {}: {}", buttonFieldName, e.getMessage());
-		}
+	/** Create only the details section in full view (no grid) */
+	private void createDetailsSection() {
+		Check.notNull(getPageEntity().getDetailSection(), "Detail section cannot be null");
+		// Create details layout that takes full space
+		baseDetailsLayout = CFlexLayout.forEntityPage();
+		baseDetailsLayout.setSizeFull();
+		final Scroller detailsScroller = new Scroller();
+		detailsScroller.setContent(baseDetailsLayout);
+		detailsScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
+		detailsScroller.setSizeFull();
+		final CVerticalLayout detailsBase = new CVerticalLayout(false, false, false);
+		detailsBase.add(detailsScroller);
+		detailsBase.setSizeFull();
+		// Add details directly to this component (no split layout)
+		add(detailsBase);
+		LOGGER.debug("Created single entity details section with detail section: {}", getPageEntity().getDetailSection().getName());
 	}
+	// Helper methods are no longer needed since we can access protected fields/methods directly
 
 	/** Override to create only details section without grid/master section */
 	private void createSingleEntityLayout() {
@@ -114,6 +106,19 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewWithSections {
 			LOGGER.error("Failed to create single entity layout for page: {}", getPageEntity().getPageTitle(), e);
 			throw e;
 		}
+	}
+
+	/** Override the parent's createGridAndDetailSections to create only details section */
+	@Override
+	protected void initializePage() {
+		setSizeFull();
+		// Set page title for browser tab only if pageTitle is not empty
+		if (getPageEntity().getPageTitle() != null && !getPageEntity().getPageTitle().trim().isEmpty()) {
+			getElement().executeJs("document.title = $0", getPageEntity().getPageTitle());
+		}
+		// Create single entity layout instead of grid and details
+		createSingleEntityLayout();
+		LOGGER.debug("Single entity dynamic page view initialized for: {}", getPageEntity().getPageTitle());
 	}
 
 	/** Loads the single entity from the data source and displays it. Shows warning if more than 1 item is returned and displays the first item. */
@@ -144,35 +149,30 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewWithSections {
 		}
 	}
 
-	/** Override the parent's createGridAndDetailSections to create only details section */
-	@Override
-	protected void initializePage() {
-		setSizeFull();
-		// Set page title for browser tab only if pageTitle is not empty
-		if (getPageEntity().getPageTitle() != null && !getPageEntity().getPageTitle().trim().isEmpty()) {
-			getElement().executeJs("document.title = $0", getPageEntity().getPageTitle());
+	/** Helper method to set button visibility using reflection */
+	private void setButtonVisibility(CCrudToolbar<?> toolbar, String buttonFieldName, boolean visible) {
+		try {
+			java.lang.reflect.Field field = CCrudToolbar.class.getDeclaredField(buttonFieldName);
+			field.setAccessible(true);
+			Object button = field.get(toolbar);
+			if (button != null && button instanceof com.vaadin.flow.component.Component) {
+				((com.vaadin.flow.component.Component) button).setVisible(visible);
+			}
+		} catch (Exception e) {
+			LOGGER.warn("Could not set visibility for button {}: {}", buttonFieldName, e.getMessage());
 		}
-		// Create single entity layout instead of grid and details
-		createSingleEntityLayout();
-		LOGGER.debug("Single entity dynamic page view initialized for: {}", getPageEntity().getPageTitle());
 	}
 
-	/** Create only the details section in full view (no grid) */
-	private void createDetailsSection() {
-		Check.notNull(getPageEntity().getDetailSection(), "Detail section cannot be null");
-		// Create details layout that takes full space
-		baseDetailsLayout = CFlexLayout.forEntityPage();
-		baseDetailsLayout.setSizeFull();
-		final Scroller detailsScroller = new Scroller();
-		detailsScroller.setContent(baseDetailsLayout);
-		detailsScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
-		detailsScroller.setSizeFull();
-		final CVerticalLayout detailsBase = new CVerticalLayout(false, false, false);
-		detailsBase.add(detailsScroller);
-		detailsBase.setSizeFull();
-		// Add details directly to this component (no split layout)
-		add(detailsBase);
-		LOGGER.debug("Created single entity details section with detail section: {}", getPageEntity().getDetailSection().getName());
+	/** Validates that the page entity is properly configured for single entity display. Throws exception if
+	 * pageEntity.getGridEntity().getAttributeNone() != true */
+	private void validateSingleEntityConfiguration() {
+		Check.notNull(getPageEntity(), "pageEntity cannot be null");
+		Check.notNull(getPageEntity().getGridEntity(), "pageEntity.getGridEntity() cannot be null");
+		if (!getPageEntity().getGridEntity().getAttributeNone()) {
+			throw new IllegalArgumentException(
+					"CDynamicSingleEntityPageView can only be used with pageEntity where gridEntity.attributeNone is true. " + "Current value: "
+							+ getPageEntity().getGridEntity().getAttributeNone() + " for page: " + getPageEntity().getPageTitle());
+		}
+		LOGGER.debug("Single entity configuration validated for page: {}", getPageEntity().getPageTitle());
 	}
-	// Helper methods are no longer needed since we can access protected fields/methods directly
 }

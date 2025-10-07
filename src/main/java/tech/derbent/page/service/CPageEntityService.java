@@ -9,13 +9,13 @@ import tech.derbent.api.domains.CProjectItemService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CPageEntityService extends CProjectItemService<CPageEntity> {
 
-	public CPageEntityService(final IPageEntityRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CPageEntityService(final IPageEntityRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 		Check.notNull(repository, "CPageEntityRepository cannot be null");
 		Check.notNull(clock, "Clock cannot be null");

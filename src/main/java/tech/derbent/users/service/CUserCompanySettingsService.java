@@ -10,7 +10,7 @@ import tech.derbent.api.roles.domain.CUserCompanyRole;
 import tech.derbent.api.services.CAbstractEntityRelationService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.companies.domain.CCompany;
-import tech.derbent.session.service.CSessionService;
+import tech.derbent.session.service.ISessionService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserCompanySetting;
 
@@ -23,7 +23,7 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 	private final IUserCompanySettingsRepository repository;
 
 	@Autowired
-	public CUserCompanySettingsService(final IUserCompanySettingsRepository repository, final Clock clock, final CSessionService sessionService) {
+	public CUserCompanySettingsService(final IUserCompanySettingsRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 		this.repository = repository;
 	}
