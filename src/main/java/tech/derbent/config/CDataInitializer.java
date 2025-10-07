@@ -308,207 +308,12 @@ public class CDataInitializer {
 		status.setSortOrder(sortOrder);
 		activityStatusService.save(status);
 	}
-
 	/** Creates additional activities for Customer Experience Enhancement project. */
-	private void createAdditionalCustomerExperienceActivities(final CProject project) {
-		Check.notNull(project, "Project 'Customer Experience Enhancement' not found");
-		// User Research Activity
-		final CActivity userResearch = new CActivity("User Research & Analysis", project);
-		final CActivityType researchType = activityTypeService.findByNameAndProject("Research", project).orElse(null);
-		Check.notNull(researchType, "Research activity type not found for project");
-		userResearch.setActivityType(researchType);
-		userResearch.setDescription("Conduct user interviews and analyze customer feedback");
-		final CUser analyst = userService.findByLogin(USER_MEMBER_AYSE);
-		final CUser manager = userService.findByLogin(USER_MANAGER);
-		userResearch.setAssignedTo(analyst);
-		userResearch.setCreatedBy(manager);
-		userResearch.setEstimatedHours(new BigDecimal("22.00"));
-		userResearch.setActualHours(new BigDecimal("22.00"));
-		userResearch.setRemainingHours(new BigDecimal("0.00"));
-		userResearch.setStartDate(LocalDate.now().minusDays(20));
-		userResearch.setDueDate(LocalDate.now().minusDays(10));
-		userResearch.setCompletionDate(LocalDate.now().minusDays(10));
-		final CActivityStatus completedStatus = activityStatusService.findByNameAndProject("Completed", project).orElseThrow();
-		userResearch.setStatus(completedStatus);
-		userResearch.setProgressPercentage(100);
-		// Set missing fields
-		userResearch.setCreatedBy(userService.getRandom());
-		// UI/UX Design Activity
-		final CActivity uxDesign = new CActivity("UI/UX Design Improvements", project);
-		final CActivityType designType = activityTypeService.findByNameAndProject("Design", project).orElse(null);
-		uxDesign.setActivityType(designType);
-		uxDesign.setDescription("Design improved user interface based on research findings");
-		final CUser dev2 = userService.findByLogin("msahin");
-		uxDesign.setAssignedTo(dev2);
-		uxDesign.setCreatedBy(analyst);
-		uxDesign.setEstimatedHours(new BigDecimal("28.00"));
-		uxDesign.setActualHours(new BigDecimal("15.00"));
-		uxDesign.setRemainingHours(new BigDecimal("13.00"));
-		uxDesign.setStartDate(LocalDate.now().minusDays(8));
-		uxDesign.setDueDate(LocalDate.now().plusDays(5));
-		final CActivityStatus inProgressStatus = activityStatusService.findByNameAndProject("In Progress", project).orElseThrow();
-		uxDesign.setStatus(inProgressStatus);
-		uxDesign.setProgressPercentage(55);
-		// Set missing fields
-		uxDesign.setCreatedBy(userService.getRandom());
-		activityService.save(userResearch);
-		uxDesign.setParent(userResearch); // Set parent-child relationship)
-		activityService.save(uxDesign);
-		commentService.createComment("Design system updated with new patterns", uxDesign, dev2);
-		commentService.createComment("Wireframes created for key user journeys", uxDesign, dev2);
-		commentService.createComment("Prototypes ready for user testing", uxDesign, analyst);
-		commentService.createComment("User research methodology defined", userResearch, manager);
-		commentService.createComment("Conducted 15 user interviews", userResearch, analyst);
-		commentService.createComment("Analysis complete, insights documented", userResearch, analyst);
-		// UI/UX Design Activity
-	}
 	// Additional meeting creation methods
 
 	/** Creates additional activities for Digital Transformation Initiative project. */
-	private void createAdditionalDigitalTransformationActivities(final CProject project) {
-		// Frontend Development Activity
-		final CActivity frontendDev = new CActivity("Frontend Development", project);
-		final CActivityType developmentType = activityTypeService.findByNameAndProject("Development", project).orElse(null);
-		frontendDev.setActivityType(developmentType);
-		frontendDev.setDescription("Develop responsive user interface components using modern frameworks");
-		final CUser dev1 = userService.findByLogin("msahin");
-		final CUser manager = userService.findByLogin("mkaradeniz");
-		frontendDev.setAssignedTo(dev1);
-		frontendDev.setCreatedBy(manager);
-		frontendDev.setEstimatedHours(new BigDecimal("32.00"));
-		frontendDev.setActualHours(new BigDecimal("28.00"));
-		frontendDev.setRemainingHours(new BigDecimal("4.00"));
-		frontendDev.setStartDate(LocalDate.now().minusDays(12));
-		frontendDev.setDueDate(LocalDate.now().plusDays(8));
-		final CActivityStatus inProgressStatus = activityStatusService.findByNameAndProject("In Progress", project).orElseThrow();
-		frontendDev.setStatus(inProgressStatus);
-		frontendDev.setProgressPercentage(70);
-		// Set missing fields
-		frontendDev.setCreatedBy(userService.getRandom());
-		activityService.save(frontendDev);
-		commentService.createComment("Frontend development started with React components", frontendDev, dev1);
-		commentService.createComment("Implemented responsive design patterns", frontendDev, dev1);
-		commentService.createComment("Working on integration with backend APIs", frontendDev, manager);
-		// Database Migration Activity
-		final CActivity dbMigration = new CActivity("Database Migration", project);
-		dbMigration.setActivityType(developmentType);
-		dbMigration.setDescription("Migrate legacy data to new database schema");
-		final CUser admin = userService.findByLogin("admin");
-		dbMigration.setAssignedTo(admin);
-		dbMigration.setCreatedBy(manager);
-		dbMigration.setEstimatedHours(new BigDecimal("20.00"));
-		dbMigration.setActualHours(new BigDecimal("5.00"));
-		dbMigration.setRemainingHours(new BigDecimal("15.00"));
-		dbMigration.setStartDate(LocalDate.now().plusDays(5));
-		dbMigration.setDueDate(LocalDate.now().plusDays(15));
-		final CActivityStatus notStartedStatus = activityStatusService.findByNameAndProject("Not Started", project).orElseThrow();
-		dbMigration.setStatus(notStartedStatus);
-		dbMigration.setProgressPercentage(0);
-		// Set missing fields
-		dbMigration.setCreatedBy(userService.getRandom());
-		activityService.save(dbMigration);
-		commentService.createComment("Database migration plan prepared", dbMigration, admin);
-		commentService.createComment("Waiting for backend API completion", dbMigration, manager);
-	}
-
 	/** Creates additional activities for Infrastructure Modernization project. */
-	private void createAdditionalInfrastructureActivities(final CProject project) {
-		// Security Audit Activity
-		final CActivity securityAudit = new CActivity("Security Audit", project);
-		final CActivityType researchType = activityTypeService.findByNameAndProject("Research", project).orElseThrow();
-		securityAudit.setActivityType(researchType);
-		securityAudit.setDescription("Comprehensive security assessment and vulnerability analysis");
-		final CUser admin = userService.findByLogin("admin");
-		final CUser manager = userService.findByLogin("mkaradeniz");
-		securityAudit.setAssignedTo(admin);
-		securityAudit.setCreatedBy(manager);
-		securityAudit.setEstimatedHours(new BigDecimal("25.00"));
-		securityAudit.setActualHours(new BigDecimal("0.00"));
-		securityAudit.setRemainingHours(new BigDecimal("25.00"));
-		securityAudit.setStartDate(LocalDate.now().plusDays(10));
-		securityAudit.setDueDate(LocalDate.now().plusDays(18));
-		final CActivityStatus notStartedStatus = activityStatusService.findByNameAndProject("Not Started", project).orElseThrow();
-		securityAudit.setStatus(notStartedStatus);
-		securityAudit.setProgressPercentage(0);
-		// Set missing fields
-		securityAudit.setCreatedBy(userService.getRandom());
-		activityService.save(securityAudit);
-		commentService.createComment("Security audit requirements defined", securityAudit, admin);
-		commentService.createComment("External security firm selected for audit", securityAudit, manager);
-		// Server Migration Activity
-		final CActivity serverMigration = new CActivity("Server Migration", project);
-		final CActivityType developmentType = activityTypeService.findByNameAndProject("Development", project).orElseThrow();
-		serverMigration.setActivityType(developmentType);
-		serverMigration.setDescription("Migrate applications to new server infrastructure");
-		final CUser dev1 = userService.findByLogin("bozkan");
-		serverMigration.setAssignedTo(dev1);
-		serverMigration.setCreatedBy(admin);
-		serverMigration.setEstimatedHours(new BigDecimal("35.00"));
-		serverMigration.setActualHours(new BigDecimal("20.00"));
-		serverMigration.setRemainingHours(new BigDecimal("15.00"));
-		serverMigration.setStartDate(LocalDate.now().minusDays(8));
-		serverMigration.setDueDate(LocalDate.now().plusDays(12));
-		final CActivityStatus onHoldStatus = activityStatusService.findByNameAndProject("On Hold", project).orElseThrow();
-		serverMigration.setStatus(onHoldStatus);
-		serverMigration.setProgressPercentage(55);
-		serverMigration.setParent(securityAudit); // Set parent-child relationship
-		// Set missing fields
-		serverMigration.setCreatedBy(userService.getRandom());
-		activityService.save(serverMigration);
-		commentService.createComment("Server migration plan created", serverMigration, dev1);
-		commentService.createComment("Testing environment successfully migrated", serverMigration, dev1);
-		commentService.createComment("Production migration on hold pending approval", serverMigration, admin);
-	}
-
 	/** Creates additional activities for Product Development Phase 2 project. */
-	private void createAdditionalProductDevelopmentActivities(final CProject project) {
-		// Code Review Activity
-		final CActivity codeReview = new CActivity("Code Review Process", project);
-		final CActivityType testingType = activityTypeService.findByNameAndProject("Testing", project).orElseThrow();
-		codeReview.setActivityType(testingType);
-		codeReview.setDescription("Comprehensive code review and quality assurance");
-		final CUser analyst = userService.findByLogin("ademir");
-		final CUser manager = userService.findByLogin("mkaradeniz");
-		codeReview.setAssignedTo(analyst);
-		codeReview.setCreatedBy(manager);
-		codeReview.setEstimatedHours(new BigDecimal("12.00"));
-		codeReview.setActualHours(new BigDecimal("12.00"));
-		codeReview.setRemainingHours(new BigDecimal("0.00"));
-		codeReview.setStartDate(LocalDate.now().minusDays(3));
-		codeReview.setDueDate(LocalDate.now().minusDays(1));
-		codeReview.setCompletionDate(LocalDate.now().minusDays(1));
-		final CActivityStatus completedStatus = activityStatusService.findByNameAndProject("Completed", project).orElseThrow();
-		codeReview.setStatus(completedStatus);
-		codeReview.setProgressPercentage(100);
-		// Set missing fields
-		codeReview.setCreatedBy(userService.getRandom());
-		activityService.save(codeReview);
-		commentService.createComment("Code review process initiated", codeReview, manager);
-		commentService.createComment("Found minor issues, created fix recommendations", codeReview, analyst);
-		commentService.createComment("All issues resolved, code approved", codeReview, analyst);
-		// Performance Testing Activity
-		final CActivity perfTesting = new CActivity("Performance Testing", project);
-		perfTesting.setActivityType(testingType);
-		perfTesting.setDescription("Load testing and performance optimization");
-		final CUser dev2 = userService.findByLogin("bozkan");
-		perfTesting.setAssignedTo(dev2);
-		perfTesting.setCreatedBy(manager);
-		perfTesting.setEstimatedHours(new BigDecimal("18.00"));
-		perfTesting.setActualHours(new BigDecimal("10.00"));
-		perfTesting.setRemainingHours(new BigDecimal("8.00"));
-		perfTesting.setStartDate(LocalDate.now().minusDays(5));
-		perfTesting.setDueDate(LocalDate.now().plusDays(2));
-		final CActivityStatus inProgressStatus = activityStatusService.findByNameAndProject("In Progress", project).orElseThrow();
-		perfTesting.setStatus(inProgressStatus);
-		perfTesting.setProgressPercentage(60);
-		perfTesting.setParent(codeReview); // Set parent-child relationship
-		// Set missing fields
-		perfTesting.setCreatedBy(userService.getRandom());
-		activityService.save(perfTesting);
-		commentService.createComment("Performance testing framework setup", perfTesting, dev2);
-		commentService.createComment("Baseline performance metrics collected", perfTesting, dev2);
-	}
-
 	/** Creates system administrator user. */
 	private void createAdminUser() {
 		final CUser user = userService.createLoginUser(USER_ADMIN, STANDARD_PASSWORD, "Ahmet", "admin@of.gov.tr");
@@ -533,40 +338,6 @@ public class CDataInitializer {
 	}
 
 	/** Creates backend development activity. */
-	private void createBackendDevActivity(final CProject project) {
-		// Create the activity using new auxiliary methods
-		final CActivity backendDev = new CActivity("Backend API Development", project);
-		// Find and set the activity type
-		final CActivityType developmentType = activityTypeService.findByNameAndProject("Development", project).orElseThrow();
-		Check.notNull(developmentType, "Development activity type not found for project");
-		// Set activity type and description using auxiliary method
-		backendDev.setActivityType(developmentType);
-		backendDev.setDescription("Develop REST API endpoints for user management and authentication");
-		// Set assigned users using auxiliary method
-		final CUser manager = userService.findByLogin("mkaradeniz");
-		final CUser admin = userService.findByLogin("admin");
-		backendDev.setAssignedTo(manager);
-		backendDev.setCreatedBy(admin);
-		// Set time tracking using entity methods
-		backendDev.setEstimatedHours(new BigDecimal("40.00"));
-		backendDev.setActualHours(new BigDecimal("35.50"));
-		backendDev.setRemainingHours(new BigDecimal("4.50"));
-		// Set date information using auxiliary method
-		backendDev.setStartDate(LocalDate.now().minusDays(10));
-		backendDev.setDueDate(LocalDate.now().plusDays(5));
-		// Set status and priority using auxiliary method
-		final CActivityStatus inProgressStatus = activityStatusService.findByNameAndProject("In Progress", project).orElseThrow();
-		backendDev.setStatus(inProgressStatus);
-		backendDev.setProgressPercentage(75);
-		// Set missing fields
-		backendDev.setCreatedBy(userService.getRandom());
-		activityService.save(backendDev);
-		// Create comments
-		commentService.createComment("Initial backend API development started", backendDev, admin);
-		commentService.createComment("API endpoints for user registration and login implemented", backendDev, admin);
-		commentService.createComment("Working on authentication and authorization features", backendDev, manager);
-	}
-
 	private void createCommentPriority(CProject project, final String name, final String description, final String color, final Integer priorityLevel,
 			final boolean isDefault, final int sortOrder) {
 		final CCommentPriority priority = new CCommentPriority(name, project, color, sortOrder);
@@ -740,273 +511,15 @@ public class CDataInitializer {
 	}
 
 	/** Create a sample budget decision. */
-	private void createSampleBudgetDecision(final CProject project) {
-		final CDecision decision = new CDecision("Additional Development Resources", project);
-		decision.setDescription("Budget allocation for additional development resources to meet project deadlines");
-		decision.setDecisionType(decisionTypeService.getRandom(project));
-		decision.setDecisionStatus(decisionStatusService.getRandom(project));
-		decision.setReviewDate(LocalDateTime.now().plusDays(3).withHour(16).withMinute(0));
-		decision.setEstimatedCost(new BigDecimal("25000.00"));
-		decision.setAccountableUser(userService.getRandom());
-		// Set missing fields
-		decision.setCreatedBy(userService.getRandom());
-		decisionService.save(decision);
-	}
-
-	private void createSampleHardwareOrder(CProject project) {
-		final COrder order = new COrder("Laptop Procurement", project);
-		order.setDescription("Procurement of high-performance laptops for development team");
-		// Set order type
-		final COrderType hardwareType = orderTypeService.getRandom(project);
-		order.setOrderType(hardwareType);
-		// Set order status
-		final COrderStatus processingStatus = orderStatusService.getRandom(project);
-		order.setStatus(processingStatus);
-		// Set assigned user
-		order.setCreatedBy(userService.getRandom());
-		order.setAssignedTo(userService.getRandom());
-		order.setRequestor(userService.getRandom());
-		// Set financial details
-		final CCurrency tryCurrency = currencyService.getRandom(project);
-		order.setCurrency(tryCurrency);
-		// Set date information
-		order.setOrderDate(LocalDate.now().minusDays(10));
-		order.setDeliveryDate(LocalDate.now().plusDays(5));
-		order.setProviderCompanyName("asfdsafsaf");
-		orderService.save(order);
-	}
-
 	/** Create a sample operational decision. */
-	private void createSampleOperationalDecision(final CProject project) {
-		final CDecision decision = new CDecision("Daily Standup Meeting Time Change", project);
-		decision.setDescription("Change daily standup meeting time from 9:00 AM to 10:00 AM to accommodate remote team members");
-		decision.setDecisionType(decisionTypeService.getRandom(project));
-		decision.setDecisionStatus(decisionStatusService.getRandom(project));
-		decision.setImplementationDate(LocalDateTime.now().minusDays(2).withHour(10).withMinute(0));
-		decision.setAccountableUser(userService.getRandom());
-		// Set missing fields
-		decision.setCreatedBy(userService.getRandom());
-		decisionService.save(decision);
-	}
-
 	/** Creates sample planning meeting. */
-	private void createSamplePlanningMeeting(final CProject project) {
-		final CMeeting meeting = new CMeeting("Sprint Planning - Q1 2024", project);
-		meeting.setDescription("Planning for next sprint with story estimation and task assignment");
-		meeting.setMeetingDate(LocalDateTime.now().plusDays(3).withHour(14).withMinute(0));
-		meeting.setEndDate(LocalDateTime.now().plusDays(3).withHour(16).withMinute(0));
-		meeting.setLocation("Meeting Room B");
-		// Add participants
-		final Set<CUser> participants = new HashSet<>();
-		final CUser manager = userService.getRandom();
-		final CUser analyst = userService.getRandom();
-		if (manager != null) {
-			participants.add(manager);
-		}
-		if (analyst != null) {
-			participants.add(analyst);
-		}
-		meeting.setParticipants(participants);
-		// Set missing fields
-		meeting.setMeetingType(meetingTypeService.getRandom(project));
-		meeting.setStatus(meetingStatusService.getRandom(project));
-		meeting.setResponsible(userService.getRandom());
-		meeting.setCreatedBy(userService.getRandom());
-		meetingService.save(meeting);
-	}
-
 	/** Creates sample project meeting using auxiliary service methods. Demonstrates the use of auxiliary meeting service methods. */
-	private void createSampleProjectMeeting(final CProject project) {
-		// Create the meeting using new auxiliary methods
-		final CMeeting meeting = new CMeeting("Weekly Project Status Meeting", project);
-		meeting.setDescription("Weekly status update on project progress, blockers discussion, and next steps planning");
-		// Set meeting details using entity methods
-		meeting.setMeetingDate(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0));
-		meeting.setEndDate(LocalDateTime.now().plusDays(1).withHour(15).withMinute(0));
-		meeting.setLocation("Conference Room A");
-		// Set meeting content using entity methods
-		final CUser responsible = userService.findByLogin("mkaradeniz");
-		meeting.setAgenda("Weekly status update on project progress, blockers discussion, and next steps planning");
-		meeting.setResponsible(responsible);
-		// Set participants using auxiliary method
-		final Set<CUser> participants = new HashSet<>();
-		participants.add(userService.getRandom());
-		participants.add(userService.getRandom());
-		participants.add(userService.getRandom());
-		participants.add(userService.getRandom());
-		meeting.setParticipants(participants);
-		// Set meeting status using proper status entity
-		final CMeetingStatus scheduledStatus = meetingStatusService.findByNameAndProject("Scheduled", project).orElseThrow();
-		meeting.setStatus(scheduledStatus);
-		meeting.setMinutes("Meeting agenda prepared");
-		meeting.setLinkedElement("Project management system");
-		// Set missing fields
-		meeting.setMeetingType(meetingTypeService.getRandom(project));
-		meeting.setCreatedBy(userService.getRandom());
-		meetingService.save(meeting);
-	}
-
 	/** Creates sample retrospective meeting. */
-	private void createSampleRetrospectiveMeeting(final CProject project) {
-		final CMeeting meeting = new CMeeting("Sprint Retrospective", project);
-		meeting.setDescription("Team reflection on what went well, what could be improved, and action items");
-		meeting.setMeetingDate(LocalDateTime.now().minusDays(7).withHour(15).withMinute(0));
-		meeting.setEndDate(LocalDateTime.now().minusDays(7).withHour(16).withMinute(0));
-		meeting.setLocation("Conference Room C");
-		// Set proper status for completed meeting
-		final CMeetingStatus completedStatus = meetingStatusService.findByNameAndProject("Completed", project).orElseThrow();
-		meeting.setStatus(completedStatus);
-		// Add participants and attendees
-		final Set<CUser> participants = new HashSet<>();
-		final Set<CUser> attendees = new HashSet<>();
-		participants.add(userService.getRandom());
-		attendees.add(userService.getRandom());
-		participants.add(userService.getRandom());
-		attendees.add(userService.getRandom());
-		participants.add(userService.getRandom());
-		meeting.setParticipants(participants);
-		meeting.setAttendees(attendees);
-		// Set missing fields
-		meeting.setMeetingType(meetingTypeService.getRandom(project));
-		meeting.setResponsible(userService.getRandom());
-		meeting.setCreatedBy(userService.getRandom());
-		meetingService.save(meeting);
-	}
-
 	/** Creates sample review meeting. */
-	private void createSampleReviewMeeting(final CProject project) {
-		final CMeeting meeting = new CMeeting("Code Review Session", project);
-		meeting.setDescription("Review of architectural changes and code quality improvements");
-		meeting.setMeetingDate(LocalDateTime.now().minusDays(2).withHour(10).withMinute(0));
-		meeting.setEndDate(LocalDateTime.now().minusDays(2).withHour(11).withMinute(30));
-		meeting.setLocation("Virtual - Zoom");
-		// Add participants
-		final Set<CUser> participants = new HashSet<>();
-		final CUser manager = userService.getRandom();
-		final CUser dev = userService.getRandom();
-		if (manager != null) {
-			participants.add(manager);
-		}
-		if (dev != null) {
-			participants.add(dev);
-		}
-		meeting.setParticipants(participants);
-		// Set missing fields
-		meeting.setMeetingType(meetingTypeService.getRandom(project));
-		meeting.setStatus(meetingStatusService.getRandom(project));
-		meeting.setResponsible(userService.getRandom());
-		meeting.setCreatedBy(userService.getRandom());
-		meetingService.save(meeting);
-	}
-
-	private void createSampleSoftwareOrder(CProject project) {
-		final COrder order = new COrder("Cloud Service Subscription", project);
-		order.setDescription("Subscription to cloud services for hosting and scalability");
-		// Set order type
-		final COrderType softwareType = orderTypeService.getRandom(project);
-		order.setOrderType(softwareType);
-		// Set order status
-		final COrderStatus submittedStatus = orderStatusService.getRandom(project);
-		order.setStatus(submittedStatus);
-		// Set assigned user
-		order.setCreatedBy(userService.getRandom());
-		order.setAssignedTo(userService.getRandom());
-		order.setRequestor(userService.getRandom());
-		// Set financial details
-		final CCurrency usdCurrency = currencyService.getRandom(project);
-		order.setCurrency(usdCurrency);
-		// Set date information
-		order.setOrderDate(LocalDate.now().minusDays(3));
-		order.setDeliveryDate(LocalDate.now().plusDays(7));
-		order.setProviderCompanyName("poiopiopoipiopi");
-		orderService.save(order);
-	}
-
 	/** Creates sample standup meeting. */
-	private void createSampleStandupMeeting(final CProject project) {
-		final CMeeting meeting = new CMeeting("Daily Standup - Sprint 3", project);
-		meeting.setDescription("Daily progress sync and impediment discussion");
-		meeting.setMeetingDate(LocalDateTime.now().plusDays(1).withHour(9).withMinute(0));
-		meeting.setEndDate(LocalDateTime.now().plusDays(1).withHour(9).withMinute(30));
-		meeting.setLocation("Conference Room A");
-		// Set proper status
-		meeting.setStatus(meetingStatusService.getRandom(project));
-		// Add participants
-		final Set<CUser> participants = new HashSet<>();
-		final CUser manager = userService.getRandom();
-		final CUser dev1 = userService.getRandom();
-		final CUser dev2 = userService.getRandom();
-		if (manager != null) {
-			participants.add(manager);
-		}
-		if (dev1 != null) {
-			participants.add(dev1);
-		}
-		if (dev2 != null) {
-			participants.add(dev2);
-		}
-		meeting.setParticipants(participants);
-		// Set missing fields
-		meeting.setMeetingType(meetingTypeService.getRandom(project));
-		meeting.setResponsible(userService.getRandom());
-		meeting.setCreatedBy(userService.getRandom());
-		meetingService.save(meeting);
-	}
-
 	/** Create a sample strategic decision. */
-	private void createSampleStrategicDecision(final CProject project) {
-		// Create the decision
-		final CDecision decision = new CDecision("Technology Stack Selection", project);
-		decision.setDescription("Decision on the primary technology stack for the digital transformation initiative");
-		decision.setDecisionType(decisionTypeService.getRandom(project));
-		decision.setDecisionStatus(decisionStatusService.getRandom(project));
-		decision.setReviewDate(LocalDateTime.now().plusDays(7).withHour(14).withMinute(0));
-		// Set accountable user
-		decision.setAccountableUser(userService.getRandom());
-		// Set missing fields
-		decision.setCreatedBy(userService.getRandom());
-		decisionService.save(decision);
-	}
-
 	/** Create a sample technical decision. */
-	private void createSampleTechnicalDecision(final CProject project) {
-		final CDecision decision = new CDecision("Database Migration Strategy", project);
-		decision.setDescription("Technical approach for migrating legacy database to modern architecture");
-		decision.setDecisionType(decisionTypeService.getRandom(project));
-		decision.setDecisionStatus(decisionStatusService.getRandom(project));
-		decision.setImplementationDate(LocalDateTime.now().minusDays(5).withHour(10).withMinute(0));
-		decision.setAccountableUser(userService.getRandom());
-		// Set missing fields
-		decision.setCreatedBy(userService.getRandom());
-		decisionService.save(decision);
-	}
-
 	/** Creates system architecture design activity. */
-	private void createSystemArchitectureActivity(final CProject project) {
-		// Create the activity using new auxiliary methods
-		final CActivity archDesign = new CActivity("System Architecture Design", project);
-		archDesign.setActivityType(activityTypeService.getRandom(project));
-		archDesign.setDescription("Design scalable system architecture for infrastructure modernization");
-		archDesign.setAssignedTo(userService.getRandom());
-		archDesign.setCreatedBy(userService.getRandom());
-		// Set time tracking using entity methods
-		archDesign.setEstimatedHours(new BigDecimal("60.00"));
-		archDesign.setActualHours(new BigDecimal("45.00"));
-		archDesign.setRemainingHours(new BigDecimal("15.00"));
-		// Set date information using auxiliary method
-		archDesign.setStartDate(LocalDate.now().minusDays(15));
-		archDesign.setDueDate(LocalDate.now().plusDays(10));
-		// Set status and priority using auxiliary method
-		archDesign.setStatus(activityStatusService.getRandom(project));
-		archDesign.setProgressPercentage(65);
-		activityService.save(archDesign);
-		// Create comments
-		commentService.createComment("Initial system architecture design phase started", archDesign, userService.getRandom());
-		commentService.createComment("Completed high-level architecture diagrams and component definitions", archDesign, userService.getRandom());
-		commentService.createComment("Reviewed architecture with team and incorporated feedback", archDesign, userService.getRandom());
-		commentService.createComment("Activity on hold pending stakeholder approval of design changes", archDesign, userService.getRandom());
-	}
-
 	/** Creates team member Alice Davis. */
 	private void createTeamMemberAlice() {
 		final CUser user = userService.createLoginUser(USER_MEMBER_AYSE, STANDARD_PASSWORD, "Ayşe", "ayse.demir@ofsaglik.com.tr");
@@ -1080,67 +593,7 @@ public class CDataInitializer {
 	}
 
 	/** Creates technical documentation activity. */
-	private void createTechnicalDocumentationActivity(final CProject project) {
-		// Create the activity using new auxiliary methods
-		final CActivity techDoc = new CActivity("Technical Documentation Update", project);
-		techDoc.setActivityType(activityTypeService.getRandom(project));
-		techDoc.setDescription("Update and enhance technical documentation for customer experience features");
-		// Set assigned users using auxiliary method
-		techDoc.setAssignedTo(userService.getRandom());
-		techDoc.setCreatedBy(userService.getRandom());
-		// Set time tracking using entity methods (completed activity)
-		techDoc.setEstimatedHours(new BigDecimal("16.00"));
-		techDoc.setActualHours(new BigDecimal("16.00"));
-		techDoc.setRemainingHours(new BigDecimal("0.00"));
-		// Set date information using entity methods (completed activity)
-		techDoc.setStartDate(LocalDate.now().minusDays(5));
-		techDoc.setDueDate(LocalDate.now().minusDays(1));
-		techDoc.setCompletionDate(LocalDate.now().minusDays(1));
-		// Set status and priority using auxiliary method (completed activity)
-		techDoc.setStatus(activityStatusService.getRandom(project));
-		techDoc.setProgressPercentage(100);
-		activityService.save(techDoc);
-		// Create comments
-		commentService.createComment("Initial technical documentation review and updates started", techDoc, userService.getRandom());
-		commentService.createComment("Completed updates to user guides and API documentation", techDoc, userService.getRandom());
-		commentService.createComment("Reviewed documentation with team and incorporated feedback", techDoc, userService.getRandom());
-		commentService.createComment("Documentation successfully updated and approved by stakeholders", techDoc, userService.getRandom());
-	}
-
 	/** Creates UI testing activity. */
-	private void createUITestingActivity(final CProject project) {
-		// Create the activity using new auxiliary methods
-		final CActivity uiTesting = new CActivity("User Interface Testing", project);
-		// Find and set the activity type
-		final CActivityType testingType = activityTypeService.findByNameAndProject("Testing", project).orElseThrow();
-		if (testingType == null) {
-			LOGGER.warn("Testing activity type not found for project, using null");
-		}
-		// Set activity type and description using auxiliary method
-		uiTesting.setActivityType(testingType);
-		uiTesting.setDescription("Comprehensive testing of user interface components and workflows");
-		uiTesting.setAssignedTo(userService.getRandom());
-		uiTesting.setCreatedBy(userService.getRandom());
-		// Set time tracking using entity methods
-		uiTesting.setEstimatedHours(new BigDecimal("24.00"));
-		uiTesting.setActualHours(new BigDecimal("20.00"));
-		uiTesting.setRemainingHours(new BigDecimal("4.00"));
-		// Set date information using auxiliary method
-		uiTesting.setStartDate(LocalDate.now().minusDays(7));
-		uiTesting.setDueDate(LocalDate.now().plusDays(3));
-		// Set status and priority using auxiliary method
-		final CActivityStatus inProgressStatus = activityStatusService.findByNameAndProject("In Progress", project).orElseThrow();
-		uiTesting.setStatus(inProgressStatus);
-		uiTesting.setProgressPercentage(85);
-		// Set missing fields
-		uiTesting.setCreatedBy(userService.getRandom());
-		activityService.save(uiTesting);
-		// Create comments
-		commentService.createComment("UI testing activity initiated with comprehensive test plan", uiTesting, userService.getRandom());
-		commentService.createComment("Completed responsive design testing across multiple devices", uiTesting, userService.getRandom());
-		commentService.createComment("Working on accessibility testing and user experience validation", uiTesting, userService.getRandom());
-	}
-
 	private void createUserCompanySetting(final CUser user, final CCompany company, final String roleName, final String ownershipLevel) {
 		try {
 			// Check if relationship already exists
@@ -1170,25 +623,6 @@ public class CDataInitializer {
 	}
 
 	/** Initializes comprehensive activity data with available fields populated. */
-	private void initializeSampleActivities(final CProject project) {
-		try {
-			// Create at least 3 activities per project
-			createBackendDevActivity(project);
-			createUITestingActivity(project);
-			createSystemArchitectureActivity(project);
-			createTechnicalDocumentationActivity(project);
-			// Additional activities to meet 3+ per project requirement
-			createAdditionalInfrastructureActivities(project);
-			createAdditionalDigitalTransformationActivities(project);
-			createAdditionalProductDevelopmentActivities(project);
-			createAdditionalCustomerExperienceActivities(project);
-			// LOGGER.info("Successfully created comprehensive activity samples");
-		} catch (final Exception e) {
-			LOGGER.error("Error creating sample activities", e);
-			throw new RuntimeException("Failed to initialize activities", e);
-		}
-	}
-
 	private void initializeSampleActivityStatuses(final CProject project) {
 		try {
 			createActivityStatus(STATUS_NOT_STARTED, project, "Activity has not been started yet", "#95a5a6", false, 1);
@@ -1304,18 +738,6 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleDecisions(final CProject project) {
-		try {
-			createSampleStrategicDecision(project);
-			createSampleTechnicalDecision(project);
-			createSampleBudgetDecision(project);
-			createSampleOperationalDecision(project);
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample decisions for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize sample decisions for project: " + project.getName(), e);
-		}
-	}
-
 	private void initializeSampleDecisionStatuses(final CProject project) {
 		try {
 			createDecisionStatus("Draft", project, "Decision is in draft state", CColorUtils.getRandomColor(true), false, 1);
@@ -1358,19 +780,6 @@ public class CDataInitializer {
 		} catch (final Exception e) {
 			LOGGER.error("Error creating decision types for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize decision types for project: " + project.getName(), e);
-		}
-	}
-
-	private void initializeSampleMeetings(final CProject project) {
-		try {
-			createSamplePlanningMeeting(project);
-			createSampleProjectMeeting(project);
-			createSampleRetrospectiveMeeting(project);
-			createSampleReviewMeeting(project);
-			createSampleStandupMeeting(project);
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample meetings for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize sample meetings for project: " + project.getName(), e);
 		}
 	}
 
@@ -1417,16 +826,6 @@ public class CDataInitializer {
 		} catch (final Exception e) {
 			LOGGER.error("Error creating meeting types for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize meeting types for project: " + project.getName(), e);
-		}
-	}
-
-	private void initializeSampleOrders(CProject project) {
-		try {
-			createSampleHardwareOrder(project);
-			createSampleSoftwareOrder(project);
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample orders for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize sample orders for project: " + project.getName(), e);
 		}
 	}
 
@@ -1520,33 +919,6 @@ public class CDataInitializer {
 	}
 
 	/** Creates high priority technical risk. */
-	private void initializeSampleRisks(CProject project) {
-		CRisk risk = new CRisk("Legacy System Integration Challenges", project);
-		risk.setRiskSeverity(ERiskSeverity.HIGH);
-		risk.setDescription("Integration with legacy systems may cause compatibility issues and performance bottlenecks");
-		risk.setStatus(riskStatusService.getRandom(project));
-		// Set missing fields
-		risk.setCreatedBy(userService.getRandom());
-		risk.setAssignedTo(userService.getRandom());
-		riskService.save(risk);
-		risk = new CRisk("Team Member Vacation Scheduling Conflicts", project);
-		risk.setRiskSeverity(ERiskSeverity.LOW);
-		risk.setDescription("Overlapping vacation schedules may temporarily reduce team capacity");
-		// Set missing fields
-		risk.setStatus(riskStatusService.getRandom(project));
-		risk.setCreatedBy(userService.getRandom());
-		risk.setAssignedTo(userService.getRandom());
-		riskService.save(risk);
-		risk = new CRisk("Minor Delays in Third-Party Integrations", project);
-		risk.setRiskSeverity(ERiskSeverity.LOW);
-		risk.setDescription("External vendor may experience minor delays in API delivery");
-		// Set missing fields
-		risk.setStatus(riskStatusService.getRandom(project));
-		risk.setCreatedBy(userService.getRandom());
-		risk.setAssignedTo(userService.getRandom());
-		riskService.save(risk);
-	}
-
 	private void initializeSampleRiskStatuses(final CProject project) {
 		try {
 			createRiskStatus("Identified", project, "Risk has been identified", CColorUtils.getRandomColor(true), false, 1);
@@ -1771,15 +1143,11 @@ public class CDataInitializer {
 				initializeSampleDecisionTypes(project);
 				initializeSampleOrderTypes(project);
 				initializeSampleActivityTypes(project);
-				initializeSampleRisks(project);
-				// Sample data entities for demonstration
-				initializeSampleActivities(project);
+				// Removed sample data entity creation methods (activities, meetings, decisions, orders, risks)
+				// to follow minimal sample data pattern
 				initializeSampleDecisionStatuses(project);
 				initializeSampleCommentPriorities(project);
 				initializeSampleCurrencies(project);
-				initializeSampleMeetings(project);
-				initializeSampleDecisions(project);
-				initializeSampleOrders(project);
 			}
 			// Initialize user-company and user-project settings (after roles are created)
 			initializeSampleUserCompanySettings();
