@@ -23,7 +23,9 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.companies.domain.CCompany;
 
 @Entity
-@Table (name = "cuser") // Using quoted identifier to ensure exact case matching in
+@Table (name = "cuser", uniqueConstraints = @jakarta.persistence.UniqueConstraint (columnNames = {
+		"login", "company_id"
+})) // Using quoted identifier to ensure exact case matching in
 @AttributeOverride (name = "id", column = @Column (name = "user_id"))
 public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInfoGenerator {
 
@@ -31,14 +33,14 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 	public static final String DEFAULT_ICON = "vaadin:book";
 	public static final int MAX_LENGTH_NAME = 255;
 	public static final String VIEW_NAME = "Users View";
-	@ManyToOne (fetch = FetchType.EAGER)
+	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "company_id", nullable = true)
 	@AMetaData (
 			displayName = "Company", required = false, readOnly = false, description = "User's company", hidden = false, order = 15,
 			setBackgroundFromColor = true, useIcon = true
 	)
 	private CCompany company;
-	@ManyToOne (fetch = FetchType.EAGER)
+	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "company_role_id", nullable = true)
 	@AMetaData (
 			displayName = "Company Role", required = false, readOnly = false, description = "User's role within the company", hidden = false,
@@ -69,7 +71,7 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 			displayName = "Login", required = true, readOnly = false, defaultValue = "", description = "Login name for the system", hidden = false,
 			order = 3, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
-	@Column (name = "login", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = true)
+	@Column (name = "login", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	private String login;
 	@Column (name = "password", nullable = true, length = 255)

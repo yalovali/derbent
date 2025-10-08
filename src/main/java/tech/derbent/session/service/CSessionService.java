@@ -149,8 +149,30 @@ public class CSessionService implements ISessionService {
 		if (user == null) {
 			setActiveCompany(null);
 		} else {
+			if (user.getCompany() == null) {
+				LOGGER.warn("User {} has no company assigned", user.getUsername());
+			}
 			setActiveCompany(user.getCompany());
 		}
+	}
+
+	/** Sets both company and user in the session atomically. This ensures company is always set before user and validates that the user is a member
+	 * of the company.
+	 * @param company the company to set as active
+	 * @param user    the user to set as active (must be a member of the company) */
+	@Override
+	public void setCompanyAndUser(final CCompany company, final CUser user) {
+		Check.notNull(company, "Company must not be null");
+		Check.notNull(user, "User must not be null");
+		// Validate that user is a member of the company
+		if (user.getCompany() == null || !user.getCompany().getId().equals(company.getId())) {
+			throw new IllegalArgumentException(String.format("User %s is not a member of company %s", user.getUsername(), company.getName()));
+		}
+		LOGGER.info("Setting company {} and user {} atomically", company.getName(), user.getUsername());
+		// Set company first
+		setActiveCompany(company);
+		// Then set user
+		activeUser = user;
 	}
 
 	@Override
