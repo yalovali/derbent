@@ -389,10 +389,8 @@ public class CWebSessionService implements ISessionService {
 		}
 		if (user != null) {
 			LOGGER.info("Active user set to: {}:{}", user.getId(), user.getUsername());
-			// Lazy-load userCompanySettingsService to avoid circular dependency
-			CUserCompanySettingsService userCompanySettingsService = applicationContext.getBean(CUserCompanySettingsService.class);
-			Check.notNull(userCompanySettingsService, "UserCompanySettingsService must not be null");
-			CCompany company = user.getCompanyInstance(userCompanySettingsService);
+			// Get company directly from user
+			CCompany company = user.getCompany();
 			setActiveCompany(company);
 			session.setAttribute(ACTIVE_USER_KEY, user);
 			final List<CProject> availableProjects = getAvailableProjects();

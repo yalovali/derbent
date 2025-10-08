@@ -23,6 +23,6 @@ public interface ICompanyRepository extends IAbstractNamedRepository<CCompany> {
 	/** Finds companies by tax number using generic pattern */
 	@Query ("SELECT c FROM #{#entityName} c WHERE c.taxNumber = :taxNumber")
 	Optional<CCompany> findByTaxNumber(@Param ("taxNumber") String taxNumber);
-	@Query ("SELECT c FROM #{#entityName} c WHERE c.id NOT IN (" + "SELECT ucs.company.id FROM CUserCompanySetting ucs WHERE ucs.user.id = :userId)")
+	@Query ("SELECT c FROM #{#entityName} c WHERE c.id NOT IN (" + "SELECT u.company.id FROM CUser u WHERE u.id = :userId AND u.company IS NOT NULL)")
 	List<CCompany> findCompaniesNotAssignedToUser(Long userId);
 }

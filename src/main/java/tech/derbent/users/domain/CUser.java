@@ -18,9 +18,9 @@ import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.interfaces.IFieldInfoGenerator;
 import tech.derbent.api.interfaces.ISearchable;
+import tech.derbent.api.roles.domain.CUserCompanyRole;
 import tech.derbent.api.utils.Check;
 import tech.derbent.companies.domain.CCompany;
-import tech.derbent.users.service.CUserCompanySettingsService;
 
 @Entity
 @Table (name = "cuser") // Using quoted identifier to ensure exact case matching in
@@ -31,13 +31,20 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 	public static final String DEFAULT_ICON = "vaadin:book";
 	public static final int MAX_LENGTH_NAME = 255;
 	public static final String VIEW_NAME = "Users View";
-	@OneToOne (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn (name = "single_company_settings_id", nullable = true)
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "company_id", nullable = true)
 	@AMetaData (
-			displayName = "Company Setting", required = false, readOnly = false, description = "User's company membership and role", hidden = false,
-			order = 15, createComponentMethod = "createSingleCompanyUserSettingComponent"
+			displayName = "Company", required = false, readOnly = false, description = "User's company", hidden = false, order = 15,
+			setBackgroundFromColor = true, useIcon = true
 	)
-	private CUserCompanySetting companySetting;
+	private CCompany company;
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "company_role_id", nullable = true)
+	@AMetaData (
+			displayName = "Company Role", required = false, readOnly = false, description = "User's role within the company", hidden = false,
+			order = 16, setBackgroundFromColor = true, useIcon = true
+	)
+	private CUserCompanyRole companyRole;
 	@AMetaData (
 			displayName = "Email", required = true, readOnly = false, defaultValue = "", description = "User's email address", hidden = false,
 			order = 4, maxLength = CEntityConstants.MAX_LENGTH_NAME
@@ -147,12 +154,9 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 		return CUser.class;
 	}
 
-	public Long getCompanySettingsId() { return companySetting != null ? companySetting.getId() : null; }
+	public CCompany getCompany() { return company; }
 
-	public CUserCompanySetting getCompanySettingsInstance(CUserCompanySettingsService service) {
-		Check.notNull(service, "Service cannot be null");
-		return service.getById(getCompanySettingsId()).orElse(null);
-	}
+	public CUserCompanyRole getCompanyRole() { return companyRole; }
 
 	public String getEmail() { return email; }
 
@@ -187,8 +191,11 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 	@Override
 	public void initializeAllFields() {
 		// Initialize lazy-loaded entity relationships
-		if (companySetting != null) {
-			companySetting.getCompany(); // Trigger company setting loading
+		if (company != null) {
+			company.getName(); // Trigger company loading
+		}
+		if (companyRole != null) {
+			companyRole.getName(); // Trigger company role loading
 		}
 		if (userType != null) {
 			userType.getName(); // Trigger user type loading
@@ -243,13 +250,9 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 		}
 	}
 
-	public void setCompanySettings(final CUserCompanySetting companySetting) {
-		this.companySetting = companySetting;
-		// Maintain bidirectional relationship
-		if (companySetting != null) {
-			companySetting.setUser(this);
-		}
-	}
+	public void setCompany(final CCompany company) { this.company = company; }
+
+	public void setCompanyRole(final CUserCompanyRole companyRole) { this.companyRole = companyRole; }
 
 	public void setEmail(final String email) { this.email = email; }
 
@@ -264,12 +267,6 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 	@Override
 	public void setName(final String name) {
 		super.setName(name);
-	}
-
-	public CCompany getCompanyInstance(final CUserCompanySettingsService service) {
-		Check.notNull(service, "Service cannot be null");
-		CUserCompanySetting setting = getCompanySettingsInstance(service);
-		return (setting != null) ? setting.getCompany() : null;
 	}
 
 	public void setPassword(final String password) {

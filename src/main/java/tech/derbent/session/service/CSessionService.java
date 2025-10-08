@@ -152,8 +152,8 @@ public class CSessionService implements ISessionService {
 		activeUser = user;
 		if (user == null) {
 			setActiveCompany(null);
-		} else if (userCompanySettingsService != null) {
-			setActiveCompany(user.getCompanyInstance(userCompanySettingsService));
+		} else {
+			setActiveCompany(user.getCompany());
 		}
 	}
 

@@ -38,13 +38,6 @@ public class CCompany extends CEntityNamed<CCompany> {
 			hidden = false, order = 11, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
 	)
 	private String companyLogoUrl;
-	@OneToOne (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn (name = "single_company_settings_id", nullable = true)
-	@AMetaData (
-			displayName = "User Setting", required = false, readOnly = false, description = "User's company membership and role", hidden = false,
-			order = 15, createComponentMethod = "createCompanyUserSettingsComponent"
-	)
-	private CUserCompanySetting companySetting;
 	// Company Configuration Settings
 	@Column (name = "company_theme", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
@@ -180,10 +173,7 @@ public class CCompany extends CEntityNamed<CCompany> {
 
 	@Override
 	public void initializeAllFields() {
-		// Initialize lazy-loaded entity relationships
-		if (companySetting != null) {
-			companySetting.getCompany(); // Trigger company setting loading
-		}
+		// No lazy-loaded entity relationships to initialize
 	}
 
 	/** Initialize default configuration values. */

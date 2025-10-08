@@ -30,13 +30,11 @@ import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.roles.domain.CUserCompanyRole;
 import tech.derbent.api.services.CAbstractNamedEntityService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.views.components.CComponentSingleCompanyUserSetting;
 import tech.derbent.api.views.components.CComponentUserProjectSettings;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.ISessionService;
 import tech.derbent.users.domain.CUser;
-import tech.derbent.users.domain.CUserCompanySetting;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -79,21 +77,6 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 		// Save to database
 		final CUser savedUser = repository.saveAndFlush(loginUser);
 		return savedUser;
-	}
-
-	public Component createSingleCompanyUserSettingComponent() {
-		LOGGER.debug("Creating single company user setting component");
-		try {
-			CComponentSingleCompanyUserSetting component = new CComponentSingleCompanyUserSetting(this, applicationContext);
-			return component;
-		} catch (Exception e) {
-			LOGGER.error("Failed to create single company user setting component: {}", e.getMessage(), e);
-			// Fallback to simple div with error message
-			final Div errorDiv = new Div();
-			errorDiv.setText("Error loading single company user setting component: " + e.getMessage());
-			errorDiv.addClassName("error-message");
-			return errorDiv;
-		}
 	}
 
 	public Component createUserProjectSettingsComponent() {
@@ -272,9 +255,10 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	public void setCompany(CUser user, CCompany company, CUserCompanyRole role) {
 		Check.notNull(user, "User cannot be null");
 		Check.notNull(company, "Company cannot be null");
-		CUserCompanySetting settings = userCompanySettingsService.addUserToCompany(user, company, role, "Owner");
-		user.setCompanySettings(settings);
-		LOGGER.debug("Set company '{}' for user '{}' with settings", company.getName(), user.getLogin());
+		user.setCompany(company);
+		user.setCompanyRole(role);
+		save(user);
+		LOGGER.debug("Set company '{}' for user '{}' with role", company.getName(), user.getLogin());
 	}
 
 	/** Sets the session service. This is called after bean creation to avoid circular dependency.

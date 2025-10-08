@@ -1,6 +1,9 @@
 package tech.derbent.login.view;
 
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -28,6 +31,8 @@ import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CButton;
 import tech.derbent.api.views.components.CHorizontalLayout;
+import tech.derbent.companies.domain.CCompany;
+import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.config.CDataInitializer;
 import tech.derbent.session.service.ISessionService;
 import tech.derbent.setup.service.CSystemSettingsService;
@@ -39,19 +44,22 @@ import tech.derbent.setup.service.CSystemSettingsService;
 public class CCustomLoginView extends Main implements BeforeEnterObserver {
 
 	private static final long serialVersionUID = 1L;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CCustomLoginView.class);
 	private final Div errorMessage = new Div();
 	private final Button loginButton = new CButton("Login", CColorUtils.createStyledIcon("vaadin:sign-in", CColorUtils.CRUD_SAVE_COLOR));
 	private final PasswordField passwordField = new PasswordField();
 	private final Button resetDbButton = new CButton("Reset Database", CColorUtils.createStyledIcon("vaadin:refresh", CColorUtils.CRUD_UPDATE_COLOR));
-	private final ComboBox<String> companyField = new ComboBox<String>();
+	private final ComboBox<CCompany> companyField = new ComboBox<CCompany>();
 	private final TextField usernameField = new TextField();
 	private final ISessionService sessionService;
+	private final CCompanyService companyService;
 
 	/** Constructor sets up the custom login form with basic Vaadin components. */
 	@Autowired
 	public CCustomLoginView(CSystemSettingsService systemSettingsService, CRouteDiscoveryService routeDiscoveryService,
-			ISessionService sessionService) {
+			ISessionService sessionService, CCompanyService companyService) {
 		this.sessionService = sessionService;
+		this.companyService = companyService;
 		addClassNames("custom-login-view");
 		setSizeFull();
 		setupForm();
@@ -127,8 +135,19 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		companyField.setRequired(true);
 		companyField.setRequiredIndicatorVisible(true);
 		companyField.setId("custom-company-input");
-		// getCompanies from company service
-		companyField.setItems("Default Company"); // Placeholder, replace with actual company list
+		// Load enabled companies from service
+		try {
+			List<CCompany> enabledCompanies = companyService.findEnabledCompanies();
+			companyField.setItems(enabledCompanies);
+			companyField.setItemLabelGenerator(company -> company.getName());
+			// Auto-select first company as default
+			if (!enabledCompanies.isEmpty()) {
+				companyField.setValue(enabledCompanies.get(0));
+			}
+		} catch (Exception e) {
+			LOGGER.error("Error loading companies: {}", e.getMessage(), e);
+			showError("Error loading companies. Please contact administrator.");
+		}
 		// Username field setup
 		usernameField.setWidthFull();
 		usernameField.setRequired(true);
