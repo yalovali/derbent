@@ -20,7 +20,6 @@ import tech.derbent.session.service.ISessionService;
 public class DbResetApplication {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DbResetApplication.class);
-	private static ISessionService sessionService;
 
 	public static void main(String[] args) {
 		System.setProperty("spring.main.web-application-type", "none");
@@ -28,6 +27,9 @@ public class DbResetApplication {
 		if (Arrays.asList(context.getEnvironment().getActiveProfiles()).contains("reset-db")) {
 			try {
 				LOGGER.info("Resetting database with initial data...");
+				// Get session service bean from Spring context
+				ISessionService sessionService = context.getBean(ISessionService.class);
+				LOGGER.debug("Retrieved ISessionService bean from Spring context");
 				CDataInitializer initializer = new CDataInitializer(sessionService);
 				// Check if database needs reset
 				if (initializer.isDatabaseEmpty()) {

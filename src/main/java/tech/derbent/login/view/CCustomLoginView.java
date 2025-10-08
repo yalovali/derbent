@@ -43,11 +43,13 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	private final PasswordField passwordField = new PasswordField();
 	private final Button resetDbButton = new CButton("Reset Database", CColorUtils.createStyledIcon("vaadin:refresh", CColorUtils.CRUD_UPDATE_COLOR));
 	private final TextField usernameField = new TextField();
-	private ISessionService sessionService;
+	private final ISessionService sessionService;
 
 	/** Constructor sets up the custom login form with basic Vaadin components. */
 	@Autowired
-	public CCustomLoginView(CSystemSettingsService systemSettingsService, CRouteDiscoveryService routeDiscoveryService) {
+	public CCustomLoginView(CSystemSettingsService systemSettingsService, CRouteDiscoveryService routeDiscoveryService,
+			ISessionService sessionService) {
+		this.sessionService = sessionService;
 		addClassNames("custom-login-view");
 		setSizeFull();
 		setupForm();

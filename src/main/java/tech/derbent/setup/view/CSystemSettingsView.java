@@ -58,6 +58,13 @@ public class CSystemSettingsView extends CAbstractPage {
 		LOGGER.info("CSystemSettingsView constructor called with systemSettingsService: {}", systemSettingsService.getClass().getSimpleName());
 	}
 
+	/** Sets the session service. This is called after bean creation via configuration class.
+	 * @param sessionService the session service to set */
+	public void setSessionService(final ISessionService sessionService) {
+		this.sessionService = sessionService;
+		LOGGER.debug("SessionService injected into CSystemSettingsView via setter");
+	}
+
 	@Override
 	public void beforeEnter(final BeforeEnterEvent event) {
 		LOGGER.debug("beforeEnter called for CSystemSettingsView");
