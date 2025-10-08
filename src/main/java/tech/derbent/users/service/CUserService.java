@@ -46,7 +46,6 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	private ApplicationContext applicationContext;
 	private final PasswordEncoder passwordEncoder;
 	private ISessionService sessionService;
-	private CUserCompanySettingsService userCompanySettingsService;
 
 	public CUserService(final IUserRepository repository, final Clock clock) {
 		super(repository, clock);
@@ -267,15 +266,6 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	public void setSessionService(final ISessionService sessionService) {
 		this.sessionService = sessionService;
 		LOGGER.debug("SessionService injected into CUserService via setter");
-	}
-
-	/** Sets the user company settings service. This is called after bean creation to avoid circular dependency.
-	 * @param userCompanySettingsService the user company settings service to set */
-	@Autowired
-	@Lazy
-	public void setUserCompanySettingsService(final CUserCompanySettingsService userCompanySettingsService) {
-		this.userCompanySettingsService = userCompanySettingsService;
-		LOGGER.debug("UserCompanySettingsService injected into CUserService via setter");
 	}
 
 	@Override
