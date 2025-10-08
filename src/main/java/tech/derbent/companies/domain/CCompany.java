@@ -1,18 +1,13 @@
 package tech.derbent.companies.domain;
 
 import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.domains.CEntityNamed;
-import tech.derbent.users.domain.CUserCompanySetting;
 
 /** CCompany - Domain entity representing companies within the organization. Layer: Domain (MVC) Inherits from CEntityDB to provide database
  * functionality. */

@@ -25,7 +25,6 @@ import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.events.ProjectListChangeEvent;
 import tech.derbent.projects.service.IProjectRepository;
 import tech.derbent.users.domain.CUser;
-import tech.derbent.users.service.CUserCompanySettingsService;
 import tech.derbent.users.service.IUserRepository;
 
 /** Service to manage user session state including active user and active project. Uses Vaadin session to store session-specific information. */

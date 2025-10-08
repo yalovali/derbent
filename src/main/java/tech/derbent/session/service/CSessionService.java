@@ -16,7 +16,6 @@ import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.events.ProjectListChangeEvent;
 import tech.derbent.projects.service.IProjectRepository;
 import tech.derbent.users.domain.CUser;
-import tech.derbent.users.service.CUserCompanySettingsService;
 import tech.derbent.users.service.IUserRepository;
 
 /** Simple session service implementation for non-web applications like database reset. This provides basic functionality without Vaadin
@@ -33,14 +32,11 @@ public class CSessionService implements ISessionService {
 	private final Set<IProjectChangeListener> projectChangeListeners = ConcurrentHashMap.newKeySet();
 	private final Set<IProjectListChangeListener> projectListChangeListeners = ConcurrentHashMap.newKeySet();
 	private final IProjectRepository projectRepository;
-	private final CUserCompanySettingsService userCompanySettingsService;
 	private final IUserRepository userRepository;
 
-	public CSessionService(final IUserRepository userRepository, final IProjectRepository projectRepository,
-			final CUserCompanySettingsService userCompanySettingsService) {
+	public CSessionService(final IUserRepository userRepository, final IProjectRepository projectRepository) {
 		this.userRepository = userRepository;
 		this.projectRepository = projectRepository;
-		this.userCompanySettingsService = userCompanySettingsService;
 		LOGGER.info("Using CSessionService (reset-db) for database reset application");
 	}
 
