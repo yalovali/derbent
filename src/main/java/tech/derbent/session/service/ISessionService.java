@@ -12,23 +12,22 @@ import tech.derbent.users.domain.CUser;
 public interface ISessionService {
 
 	void addProjectChangeListener(IProjectChangeListener listener);
-	void removeProjectChangeListener(IProjectChangeListener listener);
 	void addProjectListChangeListener(IProjectListChangeListener listener);
-	void removeProjectListChangeListener(IProjectListChangeListener listener);
 	void clearSession();
-	void deleteAllActiveIds();
-	Long getActiveId(String entityType);
-	void setActiveId(String entityType, Long id);
-	Optional<CUser> getActiveUser();
-	void setActiveUser(CUser user);
-	void setActiveCompany(CCompany company);
-	Optional<CProject> getActiveProject();
-	void setActiveProject(CProject project);
-	List<CProject> getAvailableProjects();
-	void notifyProjectListChanged();
-	void setLayoutService(CLayoutService layoutService);
-	void handleProjectListChange(ProjectListChangeEvent event);
 	// Company management methods
 	Optional<CCompany> getActiveCompany();
+	Long getActiveId(String entityType);
+	Optional<CProject> getActiveProject();
+	Optional<CUser> getActiveUser();
+	List<CProject> getAvailableProjects();
 	CCompany getCurrentCompany();
+	void handleProjectListChange(ProjectListChangeEvent event);
+	void notifyProjectListChanged();
+	void removeProjectChangeListener(IProjectChangeListener listener);
+	void removeProjectListChangeListener(IProjectListChangeListener listener);
+	void setActiveCompany(CCompany company);
+	void setActiveId(String entityType, Long id);
+	void setActiveProject(CProject project);
+	void setActiveUser(CUser user);
+	void setLayoutService(CLayoutService layoutService);
 }

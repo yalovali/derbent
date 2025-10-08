@@ -34,20 +34,20 @@ import tech.derbent.users.service.IUserRepository;
 @Profile ("!reset-db")
 public class CWebSessionService implements ISessionService {
 
+	private static final String ACTIVE_COMPANY_KEY = "activeCompany";
+	private static final String ACTIVE_ID_ATTRIBUTES_KEY = CWebSessionService.class.getName() + ".activeIdAttributes";
 	private static final String ACTIVE_ID_KEY = "activeId";
 	private static final String ACTIVE_PROJECT_KEY = "activeProject";
 	private static final String ACTIVE_USER_KEY = "activeUser";
-	private static final String ACTIVE_COMPANY_KEY = "activeCompany";
-	private static final String ACTIVE_ID_ATTRIBUTES_KEY = CWebSessionService.class.getName() + ".activeIdAttributes";
+	private static final Logger LOGGER = LoggerFactory.getLogger(CWebSessionService.class);
 	private static final String PROJECT_CHANGE_LISTENERS_KEY = CWebSessionService.class.getName() + ".projectChangeListeners";
 	private static final String PROJECT_LIST_CHANGE_LISTENERS_KEY = CWebSessionService.class.getName() + ".projectListChangeListeners";
-	private static final Logger LOGGER = LoggerFactory.getLogger(CWebSessionService.class);
+	@Autowired
+	private ApplicationContext applicationContext;
 	private final AuthenticationContext authenticationContext;
 	private CLayoutService layoutService;
 	private final IProjectRepository projectRepository;
 	private final IUserRepository userRepository;
-	@Autowired
-	private ApplicationContext applicationContext;
 
 	public CWebSessionService(final AuthenticationContext authenticationContext, final IUserRepository userRepository,
 			final IProjectRepository projectRepository) {
@@ -116,19 +116,13 @@ public class CWebSessionService implements ISessionService {
 		}
 	}
 
+	/** Gets the currently active company from the session. */
 	@Override
-	public void deleteAllActiveIds() {
+	public Optional<CCompany> getActiveCompany() {
 		final VaadinSession session = VaadinSession.getCurrent();
-		if (session == null) {
-			return;
-		}
-		final Set<String> attributeKeys = getActiveIdAttributesIfPresent(session);
-		if (attributeKeys == null) {
-			return;
-		}
-		attributeKeys.stream().filter(attributeName -> attributeName.startsWith(ACTIVE_ID_KEY))
-				.forEach(attributeName -> session.setAttribute(attributeName, null));
-		attributeKeys.removeIf(attributeName -> attributeName.startsWith(ACTIVE_ID_KEY));
+		Check.notNull(session, "Vaadin session must not be null");
+		CCompany activeCompany = (CCompany) session.getAttribute(ACTIVE_COMPANY_KEY);
+		return Optional.ofNullable(activeCompany);
 	}
 
 	@Override
@@ -140,6 +134,11 @@ public class CWebSessionService implements ISessionService {
 		return null;
 	}
 
+	@SuppressWarnings ("unchecked")
+	private Set<String> getActiveIdAttributesIfPresent(final VaadinSession session) {
+		return (Set<String>) session.getAttribute(ACTIVE_ID_ATTRIBUTES_KEY);
+	}
+
 	/** Gets the currently active project from the session. If no project is set, returns the first available project. */
 	@Override
 	public Optional<CProject> getActiveProject() {
@@ -148,14 +147,6 @@ public class CWebSessionService implements ISessionService {
 			return Optional.empty();
 		}
 		CProject activeProject = (CProject) session.getAttribute(ACTIVE_PROJECT_KEY);
-		if (activeProject == null) {
-			// If no active project is set, try to set the first available project
-			final List<CProject> availableProjects = getAvailableProjects();
-			if (!availableProjects.isEmpty()) {
-				activeProject = availableProjects.get(0);
-				setActiveProject(activeProject);
-			}
-		}
 		return Optional.ofNullable(activeProject);
 	}
 
@@ -188,11 +179,76 @@ public class CWebSessionService implements ISessionService {
 		CCompany currentCompany = getCurrentCompany();
 		if (currentCompany != null) {
 			LOGGER.debug("Filtering available projects by company: {}", currentCompany.getName());
+			// change this to findByUserId if you want to filter by user as well
 			return projectRepository.findByCompanyId(currentCompany.getId());
 		}
 		// Fallback to all projects if no company context
 		LOGGER.debug("No company context, returning all projects");
 		return projectRepository.findAll();
+	}
+
+	/** Gets the current company (convenience method). */
+	@Override
+	public CCompany getCurrentCompany() { return getActiveCompany().orElse(null); }
+
+	private Set<IProjectChangeListener> getCurrentProjectChangeListeners() {
+		final VaadinSession session = VaadinSession.getCurrent();
+		if (session == null) {
+			LOGGER.debug("No active VaadinSession; returning empty project change listener set");
+			return Collections.emptySet();
+		}
+		final Set<IProjectChangeListener> listeners = getProjectChangeListenersIfPresent(session);
+		return listeners != null ? listeners : Collections.emptySet();
+	}
+
+	private Set<IProjectListChangeListener> getCurrentProjectListChangeListeners() {
+		final VaadinSession session = VaadinSession.getCurrent();
+		if (session == null) {
+			LOGGER.debug("No active VaadinSession; returning empty project list change listener set");
+			return Collections.emptySet();
+		}
+		final Set<IProjectListChangeListener> listeners = getProjectListChangeListenersIfPresent(session);
+		return listeners != null ? listeners : Collections.emptySet();
+	}
+
+	@SuppressWarnings ("unchecked")
+	private Set<String> getOrCreateActiveIdAttributes(final VaadinSession session) {
+		Set<String> attributes = (Set<String>) session.getAttribute(ACTIVE_ID_ATTRIBUTES_KEY);
+		if (attributes == null) {
+			attributes = ConcurrentHashMap.newKeySet();
+			session.setAttribute(ACTIVE_ID_ATTRIBUTES_KEY, attributes);
+		}
+		return attributes;
+	}
+
+	@SuppressWarnings ("unchecked")
+	private Set<IProjectChangeListener> getOrCreateProjectChangeListeners(final VaadinSession session) {
+		Set<IProjectChangeListener> listeners = (Set<IProjectChangeListener>) session.getAttribute(PROJECT_CHANGE_LISTENERS_KEY);
+		if (listeners == null) {
+			listeners = ConcurrentHashMap.newKeySet();
+			session.setAttribute(PROJECT_CHANGE_LISTENERS_KEY, listeners);
+		}
+		return listeners;
+	}
+
+	@SuppressWarnings ("unchecked")
+	private Set<IProjectListChangeListener> getOrCreateProjectListChangeListeners(final VaadinSession session) {
+		Set<IProjectListChangeListener> listeners = (Set<IProjectListChangeListener>) session.getAttribute(PROJECT_LIST_CHANGE_LISTENERS_KEY);
+		if (listeners == null) {
+			listeners = ConcurrentHashMap.newKeySet();
+			session.setAttribute(PROJECT_LIST_CHANGE_LISTENERS_KEY, listeners);
+		}
+		return listeners;
+	}
+
+	@SuppressWarnings ("unchecked")
+	private Set<IProjectChangeListener> getProjectChangeListenersIfPresent(final VaadinSession session) {
+		return (Set<IProjectChangeListener>) session.getAttribute(PROJECT_CHANGE_LISTENERS_KEY);
+	}
+
+	@SuppressWarnings ("unchecked")
+	private Set<IProjectListChangeListener> getProjectListChangeListenersIfPresent(final VaadinSession session) {
+		return (Set<IProjectListChangeListener>) session.getAttribute(PROJECT_LIST_CHANGE_LISTENERS_KEY);
 	}
 
 	/** Event listener for project list changes. This method is called when projects are created, updated, or deleted to notify all registered
@@ -273,6 +329,27 @@ public class CWebSessionService implements ISessionService {
 	}
 
 	@Override
+	public void setActiveCompany(CCompany company) {
+		// DONT CLEAR USER WHEN SETTING COMPANY, IT CAUSES PROBLEMS WITH AUTHENTICATION
+		// clearSession(); // Clear session data before setting new user
+		final VaadinSession session = VaadinSession.getCurrent();
+		Check.notNull(session, "Vaadin session must not be null");
+		Check.isTrue(getActiveUser().isEmpty(), "User must be null when setting company directly");
+		if (company == getActiveCompany().orElse(null)) {
+			LOGGER.debug("setActiveCompany called with same company, no action taken");
+			return;
+		}
+		session.setAttribute(ACTIVE_PROJECT_KEY, null); // Reset active project to force reload
+		// session.setAttribute(ACTIVE_USER_KEY, null); // Clear active user when setting company directly
+		session.setAttribute(ACTIVE_COMPANY_KEY, company);
+		if (company == null) {
+			LOGGER.info("Active company set to null");
+		} else {
+			LOGGER.info("Active company set to: {}:{}", company.getId(), company.getName());
+		}
+	}
+
+	@Override
 	public void setActiveId(final String entityType, final Long id) {
 		final VaadinSession session = VaadinSession.getCurrent();
 		if (session == null) {
@@ -289,13 +366,14 @@ public class CWebSessionService implements ISessionService {
 	public void setActiveProject(final CProject project) {
 		// reset active entity ID when changing project
 		final VaadinSession session = VaadinSession.getCurrent();
-		deleteAllActiveIds();
-		if (session != null) {
-			session.setAttribute(ACTIVE_PROJECT_KEY, project);
-			LOGGER.info("Active project set to: {}", project != null ? project.getName() : "null");
-			// Notify all registered project change listeners
-			notifyProjectChangeListeners(project);
+		Check.notNull(session, "Vaadin session must not be null");
+		if (project == getActiveProject().orElse(null)) {
+			LOGGER.debug("setActiveProject called with same project, no action taken");
+			return;
 		}
+		session.setAttribute(ACTIVE_PROJECT_KEY, project);
+		LOGGER.info("Active project set to: {}:{}", project.getId(), project.getName());
+		notifyProjectChangeListeners(project);
 	}
 
 	/** Sets the active user in the session. */
@@ -304,110 +382,31 @@ public class CWebSessionService implements ISessionService {
 		clearSession(); // Clear session data before setting new user
 		final VaadinSession session = VaadinSession.getCurrent();
 		Check.notNull(session, "Vaadin session must not be null");
-		session.setAttribute(ACTIVE_USER_KEY, user);
 		// Set active company when user is set
+		if (user == getActiveUser().orElse(null)) {
+			LOGGER.debug("setActiveUser called with same user, no action taken");
+			return;
+		}
 		if (user != null) {
+			LOGGER.info("Active user set to: {}:{}", user.getId(), user.getUsername());
 			// Lazy-load userCompanySettingsService to avoid circular dependency
 			CUserCompanySettingsService userCompanySettingsService = applicationContext.getBean(CUserCompanySettingsService.class);
 			Check.notNull(userCompanySettingsService, "UserCompanySettingsService must not be null");
 			CCompany company = user.getCompanyInstance(userCompanySettingsService);
-			Check.notNull(company, "User must be associated with a company");
-			session.setAttribute(ACTIVE_COMPANY_KEY, company);
-			LOGGER.info("Active company set to: {}", company.getName());
+			setActiveCompany(company);
+			session.setAttribute(ACTIVE_USER_KEY, user);
+			final List<CProject> availableProjects = getAvailableProjects();
+			if (!availableProjects.isEmpty()) {
+				CProject activeProject = availableProjects.get(0);
+				setActiveProject(activeProject);
+			}
 		} else {
-			session.setAttribute(ACTIVE_COMPANY_KEY, null);
-			LOGGER.info("Active user cleared, company set to null");
+			session.setAttribute(ACTIVE_USER_KEY, null);
+			LOGGER.info("Active user cleared");
 		}
 	}
-
-	/** Gets the currently active company from the session. */
-	@Override
-	public Optional<CCompany> getActiveCompany() {
-		final VaadinSession session = VaadinSession.getCurrent();
-		Check.notNull(session, "Vaadin session must not be null");
-		CCompany activeCompany = (CCompany) session.getAttribute(ACTIVE_COMPANY_KEY);
-		return Optional.ofNullable(activeCompany);
-	}
-
-	/** Gets the current company (convenience method). */
-	@Override
-	public CCompany getCurrentCompany() { return getActiveCompany().orElse(null); }
 
 	/** Sets the layout service. This is called after bean creation to avoid circular dependency. */
 	@Override
 	public void setLayoutService(final CLayoutService layoutService) { this.layoutService = layoutService; }
-
-	private Set<IProjectChangeListener> getCurrentProjectChangeListeners() {
-		final VaadinSession session = VaadinSession.getCurrent();
-		if (session == null) {
-			LOGGER.debug("No active VaadinSession; returning empty project change listener set");
-			return Collections.emptySet();
-		}
-		final Set<IProjectChangeListener> listeners = getProjectChangeListenersIfPresent(session);
-		return listeners != null ? listeners : Collections.emptySet();
-	}
-
-	private Set<IProjectListChangeListener> getCurrentProjectListChangeListeners() {
-		final VaadinSession session = VaadinSession.getCurrent();
-		if (session == null) {
-			LOGGER.debug("No active VaadinSession; returning empty project list change listener set");
-			return Collections.emptySet();
-		}
-		final Set<IProjectListChangeListener> listeners = getProjectListChangeListenersIfPresent(session);
-		return listeners != null ? listeners : Collections.emptySet();
-	}
-
-	@SuppressWarnings ("unchecked")
-	private Set<IProjectChangeListener> getOrCreateProjectChangeListeners(final VaadinSession session) {
-		Set<IProjectChangeListener> listeners = (Set<IProjectChangeListener>) session.getAttribute(PROJECT_CHANGE_LISTENERS_KEY);
-		if (listeners == null) {
-			listeners = ConcurrentHashMap.newKeySet();
-			session.setAttribute(PROJECT_CHANGE_LISTENERS_KEY, listeners);
-		}
-		return listeners;
-	}
-
-	@SuppressWarnings ("unchecked")
-	private Set<IProjectListChangeListener> getOrCreateProjectListChangeListeners(final VaadinSession session) {
-		Set<IProjectListChangeListener> listeners = (Set<IProjectListChangeListener>) session.getAttribute(PROJECT_LIST_CHANGE_LISTENERS_KEY);
-		if (listeners == null) {
-			listeners = ConcurrentHashMap.newKeySet();
-			session.setAttribute(PROJECT_LIST_CHANGE_LISTENERS_KEY, listeners);
-		}
-		return listeners;
-	}
-
-	@SuppressWarnings ("unchecked")
-	private Set<String> getOrCreateActiveIdAttributes(final VaadinSession session) {
-		Set<String> attributes = (Set<String>) session.getAttribute(ACTIVE_ID_ATTRIBUTES_KEY);
-		if (attributes == null) {
-			attributes = ConcurrentHashMap.newKeySet();
-			session.setAttribute(ACTIVE_ID_ATTRIBUTES_KEY, attributes);
-		}
-		return attributes;
-	}
-
-	@SuppressWarnings ("unchecked")
-	private Set<IProjectChangeListener> getProjectChangeListenersIfPresent(final VaadinSession session) {
-		return (Set<IProjectChangeListener>) session.getAttribute(PROJECT_CHANGE_LISTENERS_KEY);
-	}
-
-	@SuppressWarnings ("unchecked")
-	private Set<IProjectListChangeListener> getProjectListChangeListenersIfPresent(final VaadinSession session) {
-		return (Set<IProjectListChangeListener>) session.getAttribute(PROJECT_LIST_CHANGE_LISTENERS_KEY);
-	}
-
-	@SuppressWarnings ("unchecked")
-	private Set<String> getActiveIdAttributesIfPresent(final VaadinSession session) {
-		return (Set<String>) session.getAttribute(ACTIVE_ID_ATTRIBUTES_KEY);
-	}
-
-	@Override
-	public void setActiveCompany(CCompany company) {
-		clearSession(); // Clear session data before setting new user
-		final VaadinSession session = VaadinSession.getCurrent();
-		Check.notNull(session, "Vaadin session must not be null");
-		Check.isTrue(getActiveUser().isEmpty(), "User must be null when setting company directly");
-		session.setAttribute(ACTIVE_COMPANY_KEY, company);
-	}
 }

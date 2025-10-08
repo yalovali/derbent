@@ -154,13 +154,13 @@ public class CDataInitializer {
 	private final CRiskStatusService riskStatusService;
 	private final CDetailLinesService screenLinesService;
 	private final CDetailSectionService screenService;
+	private final ISessionService sessionService;
 	private final CUserCompanyRoleService userCompanyRoleService;
 	private final CUserCompanySettingsService userCompanySettingsService;
 	private final CUserProjectRoleService userProjectRoleService;
 	private final CUserProjectSettingsService userProjectSettingsService;
 	private final CUserService userService;
 	private final CUserTypeService userTypeService;
-	private final ISessionService sessionService;
 
 	public CDataInitializer(ISessionService sessionService) {
 		LOGGER.info("DataInitializer starting - obtaining service beans from application context");
@@ -1097,10 +1097,16 @@ public class CDataInitializer {
 			for (CCompany company : companyService.list(Pageable.unpaged()).getContent()) {
 				// sessionService.setActiveCompany(company);
 				// later implement better user randomization logic
-				CUser user = userService.getRandom();
+				LOGGER.info("Setting active company to: id:{}:{}", company.getId(), company.getName());
+				CUser user = userService.getRandomByCompany(company);
+				Check.notNull(user, "No user found for company: " + company.getName());
+				// sessionService.setActiveCompany(company);
 				sessionService.setActiveUser(user); // Set any user from the company as actives
 				final List<CProject> projects = projectService.list(Pageable.unpaged()).getContent();
 				for (final CProject project : projects) {
+					LOGGER.info("Initializing sample data for project: {}:{} (company: {}:{})", project.getId(), project.getName(), company.getId(),
+							company.getName());
+					sessionService.setActiveProject(project);
 					CSystemSettingsInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, true);
 					// Core system entities required for project operation
 					CActivityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, true);

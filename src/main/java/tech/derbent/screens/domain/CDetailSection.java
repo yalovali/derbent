@@ -15,8 +15,6 @@ import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityOfProject;
 import tech.derbent.api.utils.Check;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.screens.service.CEntityFieldService;
-import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
 /** CScreen - Domain entity representing screen views for entities. Layer: Domain (MVC) Inherits from CEntityOfProject to provide project association.
  * This entity allows creating custom view definitions for various project entities. */
@@ -94,24 +92,24 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 	}
 
 	public void debug_printScreenInformation() {
-		final String title = toString();
-		final List<EntityFieldInfo> fields = CEntityFieldService.getEntityFields(entityType);
-		if (detailLines != null) {
-			for (final CDetailLines line : detailLines) {
-				// line.printLine();
-				fields.removeIf(f -> f.getFieldName().equals(line.getEntityProperty()));
-			}
-		} else {
-			System.out.printf("No screen lines available for screen type %s.%n", title);
-		}
-		if (fields.isEmpty()) {
-			System.out.printf("All entity fields are represented on the screen type %s.%n", title);
-		} else {
-			System.out.printf("Not on screen lines for screen type %s.%n", title);
-			for (final EntityFieldInfo field : fields) {
-				System.out.printf("scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, \"%s\"));%n", field.getFieldName());
-			}
-		}
+		// final String title = toString();
+		// final List<EntityFieldInfo> fields = CEntityFieldService.getEntityFields(entityType);
+		// if (detailLines != null) {
+		// for (final CDetailLines line : detailLines) {
+		// // line.printLine();
+		// fields.removeIf(f -> f.getFieldName().equals(line.getEntityProperty()));
+		// }
+		// } else {
+		// System.out.printf("No screen lines available for screen type %s.%n", title);
+		// }
+		// if (fields.isEmpty()) {
+		// System.out.printf("All entity fields are represented on the screen type %s.%n", title);
+		// } else {
+		// System.out.printf("Not on screen lines for screen type %s.%n", title);
+		// for (final EntityFieldInfo field : fields) {
+		// System.out.printf("scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, \"%s\"));%n", field.getFieldName());
+		// }
+		// }
 	}
 
 	public boolean getAttributeNonDeletable() { return attributeNonDeletable; }
@@ -123,6 +121,20 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 	public List<CDetailLines> getScreenLines() { return detailLines; }
 
 	public String getScreenTitle() { return screenTitle; }
+
+	@Override
+	public void initializeAllFields() {
+		// Initialize lazy-loaded entity relationships from parent class (CEntityOfProject)
+		if (getProject() != null) {
+			getProject().getName(); // Trigger project loading
+		}
+		if (getAssignedTo() != null) {
+			getAssignedTo().getLogin(); // Trigger assigned user loading
+		}
+		if (getCreatedBy() != null) {
+			getCreatedBy().getLogin(); // Trigger creator loading
+		}
+	}
 
 	/** Helper method to remove a screen line */
 	public void removeScreenLine(final CDetailLines screenLine) {
@@ -143,19 +155,5 @@ public class CDetailSection extends CEntityOfProject<CDetailSection> {
 	@Override
 	public String toString() {
 		return String.format("CScreen{id=%d, name='%s', entityType='%s', screenTitle='%s'}", getId(), getName(), entityType, screenTitle);
-	}
-
-	@Override
-	public void initializeAllFields() {
-		// Initialize lazy-loaded entity relationships from parent class (CEntityOfProject)
-		if (getProject() != null) {
-			getProject().getName(); // Trigger project loading
-		}
-		if (getAssignedTo() != null) {
-			getAssignedTo().getLogin(); // Trigger assigned user loading
-		}
-		if (getCreatedBy() != null) {
-			getCreatedBy().getLogin(); // Trigger creator loading
-		}
 	}
 }

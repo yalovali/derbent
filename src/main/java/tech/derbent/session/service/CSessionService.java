@@ -64,11 +64,6 @@ public class CSessionService implements ISessionService {
 	}
 
 	@Override
-	public void deleteAllActiveIds() {
-		// No-op in reset mode
-	}
-
-	@Override
 	public Optional<tech.derbent.companies.domain.CCompany> getActiveCompany() { return Optional.ofNullable(activeCompany); }
 
 	@Override

@@ -21,18 +21,6 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		super(repository, clock, sessionService);
 	}
 
-	// CEntityOfProjectService içinde
-	public String getProjectName() {
-		// return active project from session
-		return sessionService.getActiveProject().map(CProject::getName).orElseThrow(() -> new IllegalStateException("No active project in session"));
-	}
-
-	public String getProjectId() {
-		// return active project from session
-		return sessionService.getActiveProject().map(CProject::getId).orElseThrow(() -> new IllegalStateException("No active project in session"))
-				.toString();
-	}
-
 	@Override
 	public long count() {
 		return countByProject(sessionService.getActiveProject()
@@ -80,6 +68,18 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 			LOGGER.error("Error finding entities by project '{}' in {}: {}", project.getName(), getClass().getSimpleName(), e.getMessage(), e);
 			throw new RuntimeException("Failed to find entities by project", e);
 		}
+	}
+
+	public String getProjectId() {
+		// return active project from session
+		return sessionService.getActiveProject().map(CProject::getId).orElseThrow(() -> new IllegalStateException("No active project in session"))
+				.toString();
+	}
+
+	// CEntityOfProjectService içinde
+	public String getProjectName() {
+		// return active project from session
+		return sessionService.getActiveProject().map(CProject::getName).orElseThrow(() -> new IllegalStateException("No active project in session"));
 	}
 
 	public EntityClass getRandom(final CProject project) {
@@ -185,6 +185,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	@Transactional
 	public EntityClass save(final EntityClass entity) {
 		Check.notNull(entity, "Entity cannot be null");
+		Check.notNull(entity.getProject(), "Entity's project cannot be null");
 		final String trimmedName = entity.getName().trim();
 		// search with same name and same project exclude self if updating
 		final Optional<EntityClass> existing = ((IEntityOfProjectRepository<EntityClass>) repository)

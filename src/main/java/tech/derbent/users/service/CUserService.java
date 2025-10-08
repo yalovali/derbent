@@ -182,6 +182,15 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	@Override
 	protected Class<CUser> getEntityClass() { return CUser.class; }
 
+	public CUser getRandomByCompany(CCompany company) {
+		List<CUser> users = ((IUserRepository) repository).findByCompanyId(company.getId());
+		if (!users.isEmpty()) {
+			int randomIndex = (int) (Math.random() * users.size());
+			return users.get(randomIndex);
+		}
+		return null;
+	}
+
 	/** Override the default list method to filter users by active company when available. This allows CUserService to work with dynamic pages without
 	 * needing to implement special filtering. If no active company is available, returns all users (preserves existing behavior). */
 	@Override
@@ -189,7 +198,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	public Page<CUser> list(final Pageable pageable) {
 		// Get current company from session - required
 		CCompany currentCompany = getCurrentCompany();
-		LOGGER.debug("Filtering users by company: {}", currentCompany.getName());
+		// LOGGER.debug("Filtering users by company: {}", currentCompany.getName());
 		return ((IUserRepository) repository).findByCompanyId(currentCompany.getId(), pageable);
 	}
 

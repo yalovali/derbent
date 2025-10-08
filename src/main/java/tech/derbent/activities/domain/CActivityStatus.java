@@ -5,6 +5,7 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.annotations.StatusEntity;
 import tech.derbent.api.domains.CStatus;
@@ -15,7 +16,7 @@ import tech.derbent.projects.domain.CProject;
  * activities. This entity defines the possible statuses an activity can have (e.g., TODO, IN_PROGRESS, DONE). */
 @StatusEntity (category = "activity", colorField = "color", nameField = "name")
 @Entity
-@Table (name = "cactivitystatus", uniqueConstraints = @jakarta.persistence.UniqueConstraint (columnNames = {
+@Table (name = "cactivitystatus", uniqueConstraints = @UniqueConstraint (columnNames = {
 		"name", "project_id"
 }))
 @AttributeOverride (name = "id", column = @Column (name = "cactivitystatus_id"))
@@ -62,13 +63,6 @@ public class CActivityStatus extends CStatus<CActivityStatus> implements IKanban
 		return Objects.hash(super.hashCode(), finalStatus);
 	}
 
-	public void setFinalStatus(final Boolean finalStatus) { this.finalStatus = finalStatus; }
-
-	@Override
-	public String toString() {
-		return getName() != null ? getName() : super.toString();
-	}
-
 	@Override
 	public void initializeAllFields() {
 		// Initialize lazy-loaded entity relationships from parent class (CEntityOfProject)
@@ -81,5 +75,12 @@ public class CActivityStatus extends CStatus<CActivityStatus> implements IKanban
 		if (getCreatedBy() != null) {
 			getCreatedBy().getLogin(); // Trigger creator loading
 		}
+	}
+
+	public void setFinalStatus(final Boolean finalStatus) { this.finalStatus = finalStatus; }
+
+	@Override
+	public String toString() {
+		return getName() != null ? getName() : super.toString();
 	}
 }
