@@ -42,12 +42,8 @@ public class CUserInitializerService extends CInitializerServiceBase {
 			line.setDataProviderBean("CUserService");
 			scr.addScreenLine(line);
 			scr.addScreenLine(CDetailLinesService.createSection("Organization"));
-			line = CDetailLinesService.createLineFromDefaults(clazz, "companySetting");
-			line.setRelationFieldName("companySetting");
-			line.setFieldCaption("companySetting");
-			line.setProperty("Component:createSingleCompanyUserSettingComponent");
-			line.setDataProviderBean("CUserService");
-			scr.addScreenLine(line);
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "companyRole"));
 			scr.addScreenLine(CDetailLinesService.createSection("Profile"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "profilePictureData"));
 			scr.addScreenLine(CDetailLinesService.createSection("Additional Information"));
