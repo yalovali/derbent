@@ -187,6 +187,8 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 		if (!users.isEmpty()) {
 			int randomIndex = (int) (Math.random() * users.size());
 			return users.get(randomIndex);
+		} else {
+			LOGGER.warn("No users found for company: {}", company.getName());
 		}
 		return null;
 	}

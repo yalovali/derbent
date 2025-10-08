@@ -308,7 +308,7 @@ public class CDataInitializer {
 	/** Creates additional activities for Product Development Phase 2 project. */
 	/** Creates system administrator user. */
 	@Transactional (readOnly = false)
-	private void createAdminUser() {
+	private void createUserForCompany(CCompany company) {
 		final CUser user = userService.createLoginUser(USER_ADMIN, STANDARD_PASSWORD, "Ahmet", "admin@of.gov.tr");
 		// Set user profile directly on entity
 		final String profilePictureFile = PROFILE_PICTURE_MAPPING.get(USER_ADMIN);
@@ -316,7 +316,6 @@ public class CDataInitializer {
 		user.setLastname("Yılmaz");
 		user.setPhone("+90-462-751-1001");
 		user.setProfilePictureData(profilePictureBytes);
-		CCompany company = companyService.getRandom();
 		userService.setCompany(user, company, userCompanyRoleService.getRandom(company));
 		userService.save(user);
 	}
@@ -474,7 +473,7 @@ public class CDataInitializer {
 	}
 
 	/** Creates project manager user. */
-	private void createProjectManagerUser() {
+	private void createProjectManagerUser(CCompany company) {
 		LOGGER.info("createProjectManagerUser called - creating project manager");
 		final CUser user = userService.createLoginUser(USER_MANAGER, STANDARD_PASSWORD, "Mehmet Emin", "mehmet.karadeniz@ofteknoloji.com.tr");
 		// Set user profile directly on entity
@@ -483,7 +482,6 @@ public class CDataInitializer {
 		user.setLastname("Karadeniz");
 		user.setPhone("+90-462-751-1002");
 		user.setProfilePictureData(profilePictureBytes);
-		CCompany company = companyService.getRandom();
 		userService.setCompany(user, company, userCompanyRoleService.getRandom(company));
 		userService.save(user);
 	}
@@ -553,13 +551,6 @@ public class CDataInitializer {
 		CCompany company = companyService.getRandom();
 		userService.setCompany(user, company, userCompanyRoleService.getRandom(company));
 		userService.save(user);
-	}
-
-	/** Creates team member users across different companies. */
-	private void createTeamMemberUsers() {
-		createTeamMemberMary();
-		createTeamMemberBob();
-		createTeamMemberAlice();
 	}
 
 	/** Creates technology startup company. */
@@ -1089,10 +1080,8 @@ public class CDataInitializer {
 				createProjectDigitalTransformation(company);
 				createProjectInfrastructureUpgrade(company);
 				createProjectProductDevelopment(company);
+				// createUserFor(company);
 			}
-			createAdminUser();
-			createProjectManagerUser();
-			createTeamMemberUsers();
 			// ========== PROJECT-SPECIFIC INITIALIZATION PHASE ==========
 			for (CCompany company : companyService.list(Pageable.unpaged()).getContent()) {
 				// sessionService.setActiveCompany(company);

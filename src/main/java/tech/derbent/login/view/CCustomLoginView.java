@@ -3,6 +3,7 @@ package tech.derbent.login.view;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
@@ -42,6 +43,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	private final Button loginButton = new CButton("Login", CColorUtils.createStyledIcon("vaadin:sign-in", CColorUtils.CRUD_SAVE_COLOR));
 	private final PasswordField passwordField = new PasswordField();
 	private final Button resetDbButton = new CButton("Reset Database", CColorUtils.createStyledIcon("vaadin:refresh", CColorUtils.CRUD_UPDATE_COLOR));
+	private final ComboBox<String> companyField = new ComboBox<String>();
 	private final TextField usernameField = new TextField();
 	private final ISessionService sessionService;
 
@@ -116,9 +118,17 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		title.addClassNames(LumoUtility.TextAlignment.CENTER, LumoUtility.Margin.Bottom.SMALL);
 		headerlayout.add(icon, title);
 		// Setup form fields horizontally
+		final HorizontalLayout companyLayout = createHorizontalField("Company:", companyField);
 		final HorizontalLayout usernameLayout = createHorizontalField("Username:", usernameField);
 		final HorizontalLayout passwordLayout = createHorizontalField("Password:", passwordField);
 		// Setup form fields
+		// Company field setup
+		companyField.setWidthFull();
+		companyField.setRequired(true);
+		companyField.setRequiredIndicatorVisible(true);
+		companyField.setId("custom-company-input");
+		// getCompanies from company service
+		companyField.setItems("Default Company"); // Placeholder, replace with actual company list
 		// Username field setup
 		usernameField.setWidthFull();
 		usernameField.setRequired(true);
@@ -129,16 +139,11 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		passwordField.setRequired(true);
 		passwordField.setRequiredIndicatorVisible(true);
 		passwordField.setId("custom-password-input");
-		// Login button setup
-		// loginButton.setWidthFull();
-		// loginButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		// loginButton.setWidth("120px"); // or any suitable value
 		// Add click listener to login button
 		loginButton.addClickListener(e -> handleLogin());
 		// Add enter key listener to password field
 		passwordField.addKeyPressListener(com.vaadin.flow.component.Key.ENTER, e -> handleLogin());
 		// Database reset button setup
-		// resetDbButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
 		resetDbButton.addClickListener(e -> {
 			final ConfirmDialog dialog = new ConfirmDialog("Onay", "Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?",
 					"Evet, sıfırla", ev -> {
