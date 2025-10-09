@@ -5,13 +5,9 @@ import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.services.CAbstractNamedEntityService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.companies.domain.CCompany;
@@ -23,8 +19,6 @@ import tech.derbent.session.service.ISessionService;
 public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCompanyService.class);
-	@Autowired
-	private ApplicationContext applicationContext;
 
 	public CCompanyService(final ICompanyRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);

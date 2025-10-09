@@ -7,9 +7,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.core.userdetails.User;
@@ -41,8 +39,6 @@ public class CWebSessionService implements ISessionService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CWebSessionService.class);
 	private static final String PROJECT_CHANGE_LISTENERS_KEY = CWebSessionService.class.getName() + ".projectChangeListeners";
 	private static final String PROJECT_LIST_CHANGE_LISTENERS_KEY = CWebSessionService.class.getName() + ".projectListChangeListeners";
-	@Autowired
-	private ApplicationContext applicationContext;
 	private final AuthenticationContext authenticationContext;
 	private CLayoutService layoutService;
 	private final IProjectRepository projectRepository;
@@ -164,7 +160,9 @@ public class CWebSessionService implements ISessionService {
 					authenticationContext.getAuthenticatedUser(org.springframework.security.core.userdetails.User.class);
 			if (authenticatedUser.isPresent()) {
 				final String username = authenticatedUser.get().getUsername();
-				activeUser = userRepository.findByUsername(username).orElse(null); // <-- service yerine repo
+				CCompany company = (CCompany) session.getAttribute(ACTIVE_COMPANY_KEY);
+				Check.notNull(company, "Active company must be set before loading user");
+				activeUser = userRepository.findByUsername(company.getId(), username).orElse(null); // <-- service yerine repo
 				setActiveUser(activeUser);
 			}
 		}

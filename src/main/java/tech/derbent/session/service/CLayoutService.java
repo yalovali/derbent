@@ -6,10 +6,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.VaadinSession;
 import tech.derbent.api.interfaces.ILayoutChangeListener;
+import tech.derbent.api.utils.Check;
 
 /** Service to manage layout state (horizontal vs vertical) for views. Uses Vaadin session to store layout preference. */
 @Service
@@ -25,22 +25,16 @@ public class CLayoutService {
 
 	/** Registers a component to receive notifications when the layout mode changes. */
 	public void addLayoutChangeListener(final ILayoutChangeListener listener) {
-		Assert.notNull(listener, "Listener cannot be null");
 		final VaadinSession session = VaadinSession.getCurrent();
-		if (session == null) {
-			LOGGER.warn("VaadinSession is null, cannot register layout listener {}", listener.getClass().getSimpleName());
-			return;
-		}
+		Check.notNull(listener, "Listener cannot be null");
+		Check.notNull(session, "VaadinSession must not be null");
 		getOrCreateLayoutListeners(session).add(listener);
 	}
 
 	/** Clears all layout change listeners (typically called on session clear). */
 	public void clearLayoutChangeListeners() {
 		final VaadinSession session = VaadinSession.getCurrent();
-		if (session == null) {
-			LOGGER.debug("clearLayoutChangeListeners called without active VaadinSession");
-			return;
-		}
+		Check.notNull(session, "VaadinSession must not be null");
 		getOrCreateLayoutListeners(session).clear();
 	}
 
@@ -96,15 +90,12 @@ public class CLayoutService {
 			// If no UI context, try direct notification
 			LOGGER.warn("UI.getCurrent() is null, attempting direct notification");
 			listeners.forEach(listener -> {
-				if (listener != null) {
-					try {
-						listener.onLayoutModeChanged(newMode);
-						LOGGER.debug("Directly notified layout listener: {}", listener.getClass().getSimpleName());
-					} catch (final Exception e) {
-						LOGGER.error("Error directly notifying layout change listener: {}", listener.getClass().getSimpleName(), e);
-					}
-				} else {
-					LOGGER.warn("Encountered null listener in the list");
+				Check.notNull(listener, "Listener in the list cannot be null");
+				try {
+					listener.onLayoutModeChanged(newMode);
+					LOGGER.debug("Directly notified layout listener: {}", listener.getClass().getSimpleName());
+				} catch (final Exception e) {
+					LOGGER.error("Error directly notifying layout change listener: {}", listener.getClass().getSimpleName(), e);
 				}
 			});
 		}
@@ -112,12 +103,9 @@ public class CLayoutService {
 
 	/** Unregisters a component from receiving layout change notifications. */
 	public void removeLayoutChangeListener(final ILayoutChangeListener listener) {
-		assert listener != null : "Listener cannot be null";
 		final VaadinSession session = VaadinSession.getCurrent();
-		if (session == null) {
-			LOGGER.warn("VaadinSession is null, cannot remove layout listener {}", listener.getClass().getSimpleName());
-			return;
-		}
+		Check.notNull(listener, "Listener must not be null");
+		Check.notNull(session, "VaadinSession must not be null");
 		getOrCreateLayoutListeners(session).remove(listener);
 	}
 
@@ -128,12 +116,9 @@ public class CLayoutService {
 			return;
 		}
 		final VaadinSession session = VaadinSession.getCurrent();
-		if (session != null) {
-			session.setAttribute(LAYOUT_MODE_KEY, layoutMode);
-			notifyLayoutChangeListeners(layoutMode);
-		} else {
-			LOGGER.warn("VaadinSession is null, cannot set layout mode");
-		}
+		Check.notNull(session, "VaadinSession must not be null");
+		session.setAttribute(LAYOUT_MODE_KEY, layoutMode);
+		notifyLayoutChangeListeners(layoutMode);
 	}
 
 	/** Toggles between horizontal and vertical layout modes. */

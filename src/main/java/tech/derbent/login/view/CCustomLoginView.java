@@ -1,9 +1,9 @@
 package tech.derbent.login.view;
 
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -198,7 +198,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		//
 		buttonsLayout.add(passwordHint, resetDbButton, loginButton);
 		// Add components to form card
-		formCard.add(headerlayout, usernameLayout, passwordLayout, errorMessage, buttonsLayout);
+		formCard.add(headerlayout, usernameLayout, passwordLayout, companyLayout, errorMessage, buttonsLayout);
 		container.add(formCard);
 		add(container);
 	}

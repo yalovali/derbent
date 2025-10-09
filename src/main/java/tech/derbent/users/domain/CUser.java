@@ -10,7 +10,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
@@ -112,23 +111,13 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 		enabled = true;
 	}
 
-	public CUser(final String name) {
-		super(CUser.class, name);
-	}
-
-	public CUser(final String username, final String password, final String name, final String email) {
+	public CUser(final String username, final String password, final String name, final String email, CCompany company,
+			CUserCompanyRole companyRole) {
 		super(CUser.class, name);
 		login = username;
 		this.email = email;
 		setPassword(password);
-	}
-
-	public CUser(final String username, final String password, final String name, final String email, final String roles) {
-		super(CUser.class, name);
-		login = username;
-		super.setName(name);
-		this.email = email;
-		setPassword(password);
+		setCompany(company, companyRole);
 	}
 
 	/** Add a project setting to this user and maintain bidirectional relationship.
@@ -252,9 +241,10 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 		}
 	}
 
-	public void setCompany(final CCompany company) { this.company = company; }
-
-	public void setCompanyRole(final CUserCompanyRole companyRole) { this.companyRole = companyRole; }
+	public void setCompany(final CCompany company, CUserCompanyRole companyRole) {
+		this.company = company;
+		this.companyRole = companyRole;
+	}
 
 	public void setEmail(final String email) { this.email = email; }
 

@@ -37,15 +37,17 @@ public interface IUserRepository extends IAbstractNamedRepository<CUser> {
 	List<CUser> findByProject(Long projectId);
 	/** Find user by username with eager loading using generic pattern */
 	@Query (
-		"SELECT u FROM #{#entityName} u LEFT JOIN FETCH u.userType LEFT JOIN FETCH u.projectSettings ps LEFT JOIN FETCH ps.project WHERE u.login = :username"
+		"SELECT u FROM #{#entityName} u LEFT JOIN FETCH u.userType LEFT JOIN FETCH u.projectSettings ps LEFT JOIN FETCH ps.project WHERE u.login = :username and u.company.id = :CompanyId"
 	)
-	Optional<CUser> findByUsername(@Param ("username") String username);
+	Optional<CUser> findByUsername(@Param ("CompanyId") Long companyId, @Param ("username") String username);
 	/** Find all users that are not assigned to a specific company using generic pattern */
 	@Query ("SELECT u FROM #{#entityName} u WHERE u.company.id != :companyId OR u.company IS NULL")
 	List<CUser> findUsersNotAssignedToCompany(@Param ("companyId") Long companyId);
 	/** Find all users that are not assigned to a specific project using generic pattern */
-	@Query ("SELECT u FROM #{#entityName} u WHERE u.id NOT IN (SELECT ups.user.id FROM CUserProjectSettings ups WHERE ups.project.id = :projectId)")
-	List<CUser> findUsersNotAssignedToProject(@Param ("projectId") Long projectId);
+	@Query (
+		"SELECT u FROM #{#entityName} u WHERE u.id NOT IN (SELECT ups.user.id FROM CUserProjectSettings ups WHERE ups.project.id = :projectId) and (u.company.id = :CompanyId)"
+	)
+	List<CUser> findUsersNotAssignedToProject(@Param ("projectId") Long projectId, @Param ("CompanyId") Long companyId);
 	@Query ("SELECT u " + /**/
 			"FROM #{#entityName} u LEFT JOIN FETCH u.userType "
 	)

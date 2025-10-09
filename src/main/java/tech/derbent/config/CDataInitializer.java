@@ -51,6 +51,7 @@ import tech.derbent.meetings.service.CMeetingStatusInitializerService;
 import tech.derbent.meetings.service.CMeetingStatusService;
 import tech.derbent.meetings.service.CMeetingTypeInitializerService;
 import tech.derbent.meetings.service.CMeetingTypeService;
+import tech.derbent.orders.domain.CApprovalStatus;
 import tech.derbent.orders.domain.CCurrency;
 import tech.derbent.orders.domain.COrderStatus;
 import tech.derbent.orders.domain.COrderType;
@@ -68,6 +69,7 @@ import tech.derbent.page.service.CPageEntityService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectInitializerService;
 import tech.derbent.projects.service.CProjectService;
+import tech.derbent.risks.domain.CRiskStatus;
 import tech.derbent.risks.service.CRiskInitializerService;
 import tech.derbent.risks.service.CRiskService;
 import tech.derbent.risks.service.CRiskStatusInitializerService;
@@ -123,8 +125,6 @@ public class CDataInitializer {
 	private static final String USER_ADMIN = "admin";
 	private static final String USER_MANAGER = "mkaradeniz";
 	private static final String USER_MEMBER_AYSE = "ademir";
-	private static final String USER_MEMBER_BURAK = "bozkan";
-	private static final String USER_MEMBER_MERVE = "msahin";
 	private final CActivityService activityService;
 	private final CActivityStatusService activityStatusService;
 	private final CActivityTypeService activityTypeService;
@@ -308,29 +308,23 @@ public class CDataInitializer {
 	private void createUserForCompany(CCompany company) {
 		// Create unique admin username per company (e.g., admin-ofteknoloji, admin-ofdanismanlik)
 		String companyShortName = company.getName().toLowerCase().replaceAll("[^a-z0-9]", "");
-		String uniqueAdminLogin = USER_ADMIN + "-" + companyShortName;
+		String uniqueAdminLogin = USER_ADMIN;
 		String adminEmail = USER_ADMIN + "@" + companyShortName + ".com.tr";
-		final CUser user = userService.createLoginUser(uniqueAdminLogin, STANDARD_PASSWORD, "Admin", adminEmail);
+		CUserCompanyRole companyRole = userCompanyRoleService.getRandom(company);
+		final CUser user = userService.createLoginUser(uniqueAdminLogin, STANDARD_PASSWORD, "Admin", adminEmail, company, companyRole);
 		// Set user profile directly on entity
 		final String profilePictureFile = PROFILE_PICTURE_MAPPING.getOrDefault(USER_ADMIN, "default.svg");
 		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
 		user.setLastname(company.getName() + " Yöneticisi");
 		user.setPhone("+90-462-751-1001");
 		user.setProfilePictureData(profilePictureBytes);
-		// Find admin role for the company
-		List<tech.derbent.api.roles.domain.CUserCompanyRole> companyRoles = userCompanyRoleService.findAll().stream()
-				.filter(role -> role.getCompany() != null && role.getCompany().getId().equals(company.getId())).filter(role -> role.isAdmin())
-				.collect(java.util.stream.Collectors.toList());
-		tech.derbent.api.roles.domain.CUserCompanyRole adminRole =
-				companyRoles.isEmpty() ? userCompanyRoleService.getRandom(company) : companyRoles.get(0);
-		userService.setCompany(user, company, adminRole);
 		userService.save(user);
 		LOGGER.info("Created admin user {} for company {}", uniqueAdminLogin, company.getName());
 	}
 
 	private void createApprovalStatus(final String name, final CProject project, final String description, final String color, final boolean isFinal,
 			final int sortOrder) {
-		final tech.derbent.orders.domain.CApprovalStatus status = new tech.derbent.orders.domain.CApprovalStatus(name, project);
+		final CApprovalStatus status = new CApprovalStatus(name, project);
 		status.setDescription(description);
 		status.setColor(color);
 		status.setSortOrder(sortOrder);
@@ -480,20 +474,6 @@ public class CDataInitializer {
 		projectService.save(project);
 	}
 
-	/** Creates project manager user. */
-	private void createProjectManagerUser(CCompany company) {
-		LOGGER.info("createProjectManagerUser called - creating project manager");
-		final CUser user = userService.createLoginUser(USER_MANAGER, STANDARD_PASSWORD, "Mehmet Emin", "mehmet.karadeniz@ofteknoloji.com.tr");
-		// Set user profile directly on entity
-		final String profilePictureFile = PROFILE_PICTURE_MAPPING.get(USER_MANAGER);
-		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
-		user.setLastname("Karadeniz");
-		user.setPhone("+90-462-751-1002");
-		user.setProfilePictureData(profilePictureBytes);
-		userService.setCompany(user, company, userCompanyRoleService.getRandom(company));
-		userService.save(user);
-	}
-
 	private void createProjectProductDevelopment(CCompany company) {
 		final CProject project = new CProject("New Product Development", company);
 		project.setDescription("Development of innovative products to expand market reach");
@@ -502,63 +482,11 @@ public class CDataInitializer {
 
 	private void createRiskStatus(final String name, final CProject project, final String description, final String color, final boolean isFinal,
 			final int sortOrder) {
-		final tech.derbent.risks.domain.CRiskStatus status = new tech.derbent.risks.domain.CRiskStatus(name, project);
+		final CRiskStatus status = new CRiskStatus(name, project);
 		status.setDescription(description);
 		status.setColor(color);
 		status.setSortOrder(sortOrder);
 		riskStatusService.save(status);
-	}
-
-	/** Create a sample budget decision. */
-	/** Create a sample operational decision. */
-	/** Creates sample planning meeting. */
-	/** Creates sample project meeting using auxiliary service methods. Demonstrates the use of auxiliary meeting service methods. */
-	/** Creates sample retrospective meeting. */
-	/** Creates sample review meeting. */
-	/** Creates sample standup meeting. */
-	/** Create a sample strategic decision. */
-	/** Create a sample technical decision. */
-	/** Creates system architecture design activity. */
-	/** Creates team member Alice Davis. */
-	private void createTeamMemberAlice() {
-		final CUser user = userService.createLoginUser(USER_MEMBER_AYSE, STANDARD_PASSWORD, "Ayşe", "ayse.demir@ofsaglik.com.tr");
-		// Set user profile directly on entity
-		final String profilePictureFile = PROFILE_PICTURE_MAPPING.get(USER_MEMBER_AYSE);
-		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
-		user.setLastname("Demir");
-		user.setPhone("+90-462-751-1005");
-		user.setProfilePictureData(profilePictureBytes);
-		CCompany company = companyService.getRandom();
-		userService.setCompany(user, company, userCompanyRoleService.getRandom(company));
-		userService.save(user);
-	}
-
-	/** Creates team member Bob Wilson. */
-	private void createTeamMemberBob() {
-		final CUser user = userService.createLoginUser(USER_MEMBER_BURAK, STANDARD_PASSWORD, "Burak", "burak.ozkan@ofdanismanlik.com.tr");
-		// Set user profile directly on entity
-		final String profilePictureFile = PROFILE_PICTURE_MAPPING.get(USER_MEMBER_BURAK);
-		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
-		user.setLastname("Özkan");
-		user.setPhone("+90-462-751-0404");
-		user.setProfilePictureData(profilePictureBytes);
-		CCompany company = companyService.getRandom();
-		userService.setCompany(user, company, userCompanyRoleService.getRandom(company));
-		userService.save(user);
-	}
-
-	/** Creates team member Mary Johnson. */
-	private void createTeamMemberMary() {
-		final CUser user = userService.createLoginUser(USER_MEMBER_MERVE, STANDARD_PASSWORD, "Merve", "merve.sahin@ofendüstri.com.tr");
-		// Set user profile directly on entity
-		final String profilePictureFile = PROFILE_PICTURE_MAPPING.get(USER_MEMBER_MERVE);
-		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
-		user.setLastname("Şahin");
-		user.setPhone("+90-462-751-1003");
-		user.setProfilePictureData(profilePictureBytes);
-		CCompany company = companyService.getRandom();
-		userService.setCompany(user, company, userCompanyRoleService.getRandom(company));
-		userService.save(user);
 	}
 
 	/** Creates technology startup company. */
@@ -582,36 +510,6 @@ public class CDataInitializer {
 		techStartup.setEnableNotifications(true);
 		techStartup.setNotificationEmail("bildirim@ofteknoloji.com.tr");
 		companyService.save(techStartup);
-	}
-
-	/** Creates technical documentation activity. */
-	/** Creates UI testing activity. */
-	private void createUserCompanySetting(final CUser user, final CCompany company, final String roleName, final String ownershipLevel) {
-		try {
-			// Check if user already has a company assigned
-			if (user.getCompany() == null || !user.getCompany().getId().equals(company.getId())) {
-				// Find a non-guest role for the company - prefer a role with matching name or use first available
-				List<tech.derbent.api.roles.domain.CUserCompanyRole> companyRoles = userCompanyRoleService.findAll().stream()
-						.filter(role -> role.getCompany() != null && role.getCompany().getId().equals(company.getId()))
-						.filter(role -> !role.isGuest()) // Exclude guest roles
-						.collect(java.util.stream.Collectors.toList());
-				tech.derbent.api.roles.domain.CUserCompanyRole roleToAssign = null;
-				if (!companyRoles.isEmpty()) {
-					// Try to find a role with matching name (case insensitive)
-					roleToAssign = companyRoles.stream().filter(role -> role.getName().toLowerCase().contains(roleName.toLowerCase())
-							|| roleName.toLowerCase().contains(role.getName().toLowerCase())).findFirst().orElse(companyRoles.get(0)); // Use first
-																																		// available
-																																		// if no match
-				}
-				userService.setCompany(user, company, roleToAssign);
-				LOGGER.debug("Set user company: {} -> {} (role: {})", user.getLogin(), company.getName(),
-						roleToAssign != null ? roleToAssign.getName() : "none");
-			} else {
-				LOGGER.debug("User already has company assigned: {} -> {}", user.getLogin(), user.getCompany().getName());
-			}
-		} catch (final Exception e) {
-			LOGGER.warn("Failed to set user company for {} -> {}: {}", user.getLogin(), company.getName(), e.getMessage());
-		}
 	}
 
 	/** Initializes comprehensive activity data with available fields populated. */
@@ -923,84 +821,12 @@ public class CDataInitializer {
 		}
 	}
 
-	/** Initialize sample user company settings to demonstrate the CComponentCompanyUserSettings pattern. This creates realistic user-company
-	 * relationships following the established pattern. One user per role type per company. */
-	private void initializeSampleUserCompanySettings() {
+	/** Initialize sample user project settings to demonstrate user-project relationships. This creates one user per role type per project.
+	 * @param project2 */
+	private void initializeSampleUserProjectSettings(CProject project) {
 		try {
-			final List<CCompany> companies = companyService.list(Pageable.unpaged()).getContent();
-			// Get sample users by login for consistent assignment
-			final CUser admin = userService.findByLogin(USER_ADMIN);
-			final CUser manager = userService.findByLogin(USER_MANAGER);
-			final CUser alice = userService.findByLogin(USER_MEMBER_AYSE);
-			for (final CCompany company : companies) {
-				// Assign one user per role type to each company
-				if (COMPANY_OF_TEKNOLOJI.equals(company.getName())) {
-					if (admin != null) {
-						createUserCompanySetting(admin, company, "Company Admin", "Owner");
-					}
-					if (manager != null) {
-						createUserCompanySetting(manager, company, "Company User", "Employee");
-					}
-					if (alice != null) {
-						createUserCompanySetting(alice, company, "Company Guest", "Guest");
-					}
-				} else if (COMPANY_OF_DANISMANLIK.equals(company.getName())) {
-					if (admin != null) {
-						createUserCompanySetting(admin, company, "Company Admin", "Partner");
-					}
-					if (manager != null) {
-						createUserCompanySetting(manager, company, "Company User", "Consultant");
-					}
-				} else if (COMPANY_OF_SAGLIK.equals(company.getName())) {
-					if (alice != null) {
-						createUserCompanySetting(alice, company, "Company User", "Employee");
-					}
-				} else if (COMPANY_OF_ENDUSTRI.equals(company.getName())) {
-					if (manager != null) {
-						createUserCompanySetting(manager, company, "Company User", "Engineer");
-					}
-				}
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample user company settings: {}", e.getMessage(), e);
-			throw new RuntimeException("Failed to initialize sample user company settings", e);
-		}
-	}
-
-	/** Initialize sample user project settings to demonstrate user-project relationships. This creates one user per role type per project. */
-	private void initializeSampleUserProjectSettings() {
-		try {
-			final List<CProject> projects = projectService.list(Pageable.unpaged()).getContent();
-			// Get sample users by login for consistent assignment
-			final CUser admin = userService.findByLogin(USER_ADMIN);
-			final CUser manager = userService.findByLogin(USER_MANAGER);
-			final CUser alice = userService.findByLogin(USER_MEMBER_AYSE);
-			for (final CProject project : projects) {
-				// Find roles for this project
-				final List<CUserProjectRole> projectRoles = userProjectRoleService.findAll().stream()
-						.filter(role -> role.getProject() != null && role.getProject().getId().equals(project.getId()))
-						.collect(java.util.stream.Collectors.toList());
-				if (projectRoles.isEmpty()) {
-					LOGGER.warn("No project roles found for project: {}", project.getName());
-					continue;
-				}
-				// Find admin, user, and guest roles
-				CUserProjectRole adminRole = projectRoles.stream().filter(role -> role.isAdmin()).findFirst().orElse(null);
-				CUserProjectRole userRole = projectRoles.stream().filter(role -> role.isUser() && !role.isAdmin()).findFirst().orElse(null);
-				CUserProjectRole guestRole = projectRoles.stream().filter(role -> role.isGuest()).findFirst().orElse(null);
-				// Assign one user per role type
-				if (adminRole != null && admin != null) {
-					userProjectSettingsService.addUserToProject(admin, project, adminRole, "write");
-					LOGGER.debug("Assigned user {} to project {} with role {}", admin.getLogin(), project.getName(), adminRole.getName());
-				}
-				if (userRole != null && manager != null) {
-					userProjectSettingsService.addUserToProject(manager, project, userRole, "write");
-					LOGGER.debug("Assigned user {} to project {} with role {}", manager.getLogin(), project.getName(), userRole.getName());
-				}
-				if (guestRole != null && alice != null) {
-					userProjectSettingsService.addUserToProject(alice, project, guestRole, "read");
-					LOGGER.debug("Assigned user {} to project {} with role {}", alice.getLogin(), project.getName(), guestRole.getName());
-				}
+			for (CUser user : userService.findAll()) {
+				userProjectSettingsService.addUserToProject(user, project, userProjectRoleService.getRandom(project), "write");
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample user project settings: {}", e.getMessage(), e);
@@ -1082,16 +908,13 @@ public class CDataInitializer {
 			createConsultingCompany();
 			createHealthcareCompany();
 			createManufacturingCompany();
-			/* create admin users for each company */
-			for (CCompany company : companyService.list(Pageable.unpaged()).getContent()) {
-				createUserForCompany(company);
-			}
 			/* create sample projects */
 			for (CCompany company : companyService.list(Pageable.unpaged()).getContent()) {
 				initializeSampleCompanyRoles(company);
 				createProjectDigitalTransformation(company);
 				createProjectInfrastructureUpgrade(company);
 				createProjectProductDevelopment(company);
+				createUserForCompany(company);
 				// createUserFor(company);
 			}
 			// ========== PROJECT-SPECIFIC INITIALIZATION PHASE ==========
@@ -1153,11 +976,9 @@ public class CDataInitializer {
 					initializeSampleDecisionStatuses(project);
 					initializeSampleCommentPriorities(project);
 					initializeSampleCurrencies(project);
+					initializeSampleUserProjectSettings(project);
 				}
 			}
-			// Initialize user-company and user-project settings (after roles are created)
-			initializeSampleUserCompanySettings();
-			initializeSampleUserProjectSettings();
 			// Initialize company roles (non-project specific)
 			// createSampleOrders(); // Temporarily disabled due to missing dependencies
 			LOGGER.info("Sample data initialization completed successfully");

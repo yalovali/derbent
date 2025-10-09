@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -62,16 +61,17 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	}
 
 	@Transactional // Write operation requires writable transaction
-	public CUser createLoginUser(final String username, final String plainPassword, final String name, final String email) {
+	public CUser createLoginUser(final String username, final String plainPassword, final String name, final String email, CCompany company,
+			CUserCompanyRole role) {
 		// Check if username already exists
-		if (((IUserRepository) repository).findByUsername(username).isPresent()) {
+		if (((IUserRepository) repository).findByUsername(company.getId(), username).isPresent()) {
 			LOGGER.warn("Username already exists: {}", username);
 			throw new IllegalArgumentException("Username already exists: " + username);
 		}
 		// Encode the password
 		final String encodedPassword = passwordEncoder.encode(plainPassword);
 		// Create new login user
-		final CUser loginUser = new CUser(username, encodedPassword, name, email);
+		final CUser loginUser = new CUser(username, encodedPassword, name, email, company, role);
 		loginUser.setEnabled(true);
 		// Save to database
 		final CUser savedUser = repository.saveAndFlush(loginUser);
@@ -116,8 +116,8 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	/** Finds a user by login username.
 	 * @param login the login username
 	 * @return the CUser if found, null otherwise */
-	public CUser findByLogin(final String login) {
-		return ((IUserRepository) repository).findByUsername(login).orElse(null);
+	public CUser findByLogin(final String login, final Long companyId) {
+		return ((IUserRepository) repository).findByUsername(companyId, login).orElse(null);
 	}
 
 	/** Converts comma-separated role string to Spring Security authorities. Roles are prefixed with "ROLE_" as per Spring Security convention.
@@ -146,9 +146,10 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 
 	@Transactional (readOnly = true)
 	@PreAuthorize ("permitAll()")
-	public List<CUser> getAvailableUsersForProject(final Long projectId) {
+	public List<CUser> getAvailableUsersForProject(final Long companyId, final Long projectId) {
 		Check.notNull(projectId, "User ID must not be null");
-		return ((IUserRepository) repository).findUsersNotAssignedToProject(projectId);
+		Check.notNull(companyId, "Company ID must not be null");
+		return ((IUserRepository) repository).findUsersNotAssignedToProject(companyId, projectId);
 	}
 
 	/** Gets the current company from session, throwing exception if not available.
@@ -224,10 +225,13 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	}
 
 	@Override
+	// overloaded for spring security
 	public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
 		LOGGER.debug("Attempting to load user by username: {}", username);
 		// Step 1: Query database for user by username
-		final CUser loginUser = ((IUserRepository) repository).findByUsername(username).orElseThrow(() -> {
+		CCompany company = getCurrentCompany();
+		Check.notNull(company, "No active company in session - company context is required");
+		final CUser loginUser = ((IUserRepository) repository).findByUsername(company.getId(), username).orElseThrow(() -> {
 			LOGGER.warn("User not found with username: {}", username);
 			return new UsernameNotFoundException("User not found with username: " + username);
 		});
@@ -250,23 +254,10 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 		return true;
 	}
 
-	@Transactional (readOnly = false)
-	public void setCompany(CUser user, CCompany company, CUserCompanyRole role) {
-		Check.notNull(user, "User cannot be null");
-		Check.notNull(company, "Company cannot be null");
-		user.setCompany(company);
-		user.setCompanyRole(role);
-		save(user);
-		LOGGER.debug("Set company '{}' for user '{}' with role", company.getName(), user.getLogin());
-	}
-
 	/** Sets the session service. This is called after bean creation to avoid circular dependency.
 	 * @param sessionService the session service to set */
 	@Override
-	public void setSessionService(final ISessionService sessionService) {
-		this.sessionService = sessionService;
-		LOGGER.debug("SessionService injected into CUserService via setter");
-	}
+	public void setSessionService(final ISessionService sessionService) { this.sessionService = sessionService; }
 
 	@Override
 	protected void validateEntity(final CUser user) {

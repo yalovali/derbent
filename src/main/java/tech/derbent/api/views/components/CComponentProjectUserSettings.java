@@ -24,9 +24,9 @@ public class CComponentProjectUserSettings extends CComponentUserProjectRelation
 		initComponent();
 	}
 
-	public List<CUser> getAvailableUsers() {
+	public List<CUser> getAvailableUsers(CProject project) {
 		// called from annotation
-		return userService.getAvailableUsersForProject(getCurrentEntity().getId());
+		return userService.getAvailableUsersForProject(project.getCompanyId(), getCurrentEntity().getId());
 	}
 
 	@Override
