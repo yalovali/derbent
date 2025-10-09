@@ -25,9 +25,8 @@ public interface IUserRepository extends IAbstractNamedRepository<CUser> {
 	 * LazyInitializationException. */
 	@Query ("SELECT u FROM #{#entityName} u " + /* */
 			"LEFT JOIN FETCH u.userType " + /* */
-			"LEFT JOIN FETCH u.companySetting cs " + /* */
-			"LEFT JOIN FETCH cs.company " + /* */
-			"LEFT JOIN FETCH cs.role " + /* */
+			"LEFT JOIN FETCH u.company " + /* */
+			"LEFT JOIN FETCH u.companyRole " + /* */
 			"WHERE u.id = :userId"
 	)
 	Optional<CUser> findByIdWithCompanySetting(@Param ("userId") Long userId);
@@ -42,7 +41,7 @@ public interface IUserRepository extends IAbstractNamedRepository<CUser> {
 	)
 	Optional<CUser> findByUsername(@Param ("username") String username);
 	/** Find all users that are not assigned to a specific company using generic pattern */
-	@Query ("SELECT u FROM #{#entityName} u WHERE u.id NOT IN (SELECT ucs.user.id FROM CUserCompanySetting ucs WHERE ucs.company.id = :companyId)")
+	@Query ("SELECT u FROM #{#entityName} u WHERE u.company.id != :companyId OR u.company IS NULL")
 	List<CUser> findUsersNotAssignedToCompany(@Param ("companyId") Long companyId);
 	/** Find all users that are not assigned to a specific project using generic pattern */
 	@Query ("SELECT u FROM #{#entityName} u WHERE u.id NOT IN (SELECT ups.user.id FROM CUserProjectSettings ups WHERE ups.project.id = :projectId)")
@@ -52,15 +51,9 @@ public interface IUserRepository extends IAbstractNamedRepository<CUser> {
 	)
 	Page<CUser> list(Pageable pageable);
 	/** Find all users by company ID with eager loading */
-	@Query (
-		"SELECT u FROM #{#entityName} u " + "LEFT JOIN FETCH u.userType "
-				+ "WHERE u.id IN (SELECT ucs.user.id FROM CUserCompanySetting ucs WHERE ucs.company.id = :companyId)"
-	)
+	@Query ("SELECT u FROM #{#entityName} u " + "LEFT JOIN FETCH u.userType " + "WHERE u.company.id = :companyId")
 	List<CUser> findByCompanyId(@Param ("companyId") Long companyId);
 	/** Find users by company ID with pagination */
-	@Query (
-		"SELECT u FROM #{#entityName} u " + "LEFT JOIN FETCH u.userType "
-				+ "WHERE u.id IN (SELECT ucs.user.id FROM CUserCompanySetting ucs WHERE ucs.company.id = :companyId)"
-	)
+	@Query ("SELECT u FROM #{#entityName} u " + "LEFT JOIN FETCH u.userType " + "WHERE u.company.id = :companyId")
 	Page<CUser> findByCompanyId(@Param ("companyId") Long companyId, Pageable pageable);
 }

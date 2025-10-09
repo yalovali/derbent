@@ -29,5 +29,9 @@ public interface ISessionService {
 	void setActiveId(String entityType, Long id);
 	void setActiveProject(CProject project);
 	void setActiveUser(CUser user);
+	/** Sets both company and user in the session atomically. The user must be a member of the provided company.
+	 * @param company the company to set as active
+	 * @param user    the user to set as active (must be a member of the company) */
+	void setCompanyAndUser(CCompany company, CUser user);
 	void setLayoutService(CLayoutService layoutService);
 }

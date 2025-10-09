@@ -79,7 +79,6 @@ import tech.derbent.session.service.ISessionService;
 import tech.derbent.setup.service.CSystemSettingsInitializerService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserType;
-import tech.derbent.users.service.CUserCompanySettingsService;
 import tech.derbent.users.service.CUserInitializerService;
 import tech.derbent.users.service.CUserProjectSettingsService;
 import tech.derbent.users.service.CUserService;
@@ -156,7 +155,6 @@ public class CDataInitializer {
 	private final CDetailSectionService screenService;
 	private final ISessionService sessionService;
 	private final CUserCompanyRoleService userCompanyRoleService;
-	private final CUserCompanySettingsService userCompanySettingsService;
 	private final CUserProjectRoleService userProjectRoleService;
 	private final CUserProjectSettingsService userProjectSettingsService;
 	private final CUserService userService;
@@ -168,7 +166,6 @@ public class CDataInitializer {
 		projectService = CSpringContext.getBean(CProjectService.class);
 		userService = CSpringContext.getBean(CUserService.class);
 		userProjectSettingsService = CSpringContext.getBean(CUserProjectSettingsService.class);
-		userCompanySettingsService = CSpringContext.getBean(CUserCompanySettingsService.class);
 		activityService = CSpringContext.getBean(CActivityService.class);
 		userTypeService = CSpringContext.getBean(CUserTypeService.class);
 		activityTypeService = CSpringContext.getBean(CActivityTypeService.class);
@@ -221,7 +218,6 @@ public class CDataInitializer {
 		Check.notNull(userProjectRoleService, "UserProjectRoleService bean not found");
 		Check.notNull(userCompanyRoleService, "UserCompanyRoleService bean not found");
 		Check.notNull(userProjectSettingsService, "UserProjectSettingsService bean not found");
-		Check.notNull(userCompanySettingsService, "UserCompanySettingsService bean not found");
 		LOGGER.info("All service beans obtained successfully");
 		final DataSource ds = CSpringContext.getBean(DataSource.class);
 		jdbcTemplate = new JdbcTemplate(ds);
@@ -306,18 +302,30 @@ public class CDataInitializer {
 	/** Creates additional activities for Digital Transformation Initiative project. */
 	/** Creates additional activities for Infrastructure Modernization project. */
 	/** Creates additional activities for Product Development Phase 2 project. */
-	/** Creates system administrator user. */
+	/** Creates system administrator user for a specific company. Each company gets its own admin user with company-specific username.
+	 * @param company the company to create admin user for */
 	@Transactional (readOnly = false)
 	private void createUserForCompany(CCompany company) {
-		final CUser user = userService.createLoginUser(USER_ADMIN, STANDARD_PASSWORD, "Ahmet", "admin@of.gov.tr");
+		// Create unique admin username per company (e.g., admin-ofteknoloji, admin-ofdanismanlik)
+		String companyShortName = company.getName().toLowerCase().replaceAll("[^a-z0-9]", "");
+		String uniqueAdminLogin = USER_ADMIN + "-" + companyShortName;
+		String adminEmail = USER_ADMIN + "@" + companyShortName + ".com.tr";
+		final CUser user = userService.createLoginUser(uniqueAdminLogin, STANDARD_PASSWORD, "Admin", adminEmail);
 		// Set user profile directly on entity
-		final String profilePictureFile = PROFILE_PICTURE_MAPPING.get(USER_ADMIN);
+		final String profilePictureFile = PROFILE_PICTURE_MAPPING.getOrDefault(USER_ADMIN, "default.svg");
 		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
-		user.setLastname("Yılmaz");
+		user.setLastname(company.getName() + " Yöneticisi");
 		user.setPhone("+90-462-751-1001");
 		user.setProfilePictureData(profilePictureBytes);
-		userService.setCompany(user, company, userCompanyRoleService.getRandom(company));
+		// Find admin role for the company
+		List<tech.derbent.api.roles.domain.CUserCompanyRole> companyRoles = userCompanyRoleService.findAll().stream()
+				.filter(role -> role.getCompany() != null && role.getCompany().getId().equals(company.getId())).filter(role -> role.isAdmin())
+				.collect(java.util.stream.Collectors.toList());
+		tech.derbent.api.roles.domain.CUserCompanyRole adminRole =
+				companyRoles.isEmpty() ? userCompanyRoleService.getRandom(company) : companyRoles.get(0);
+		userService.setCompany(user, company, adminRole);
 		userService.save(user);
+		LOGGER.info("Created admin user {} for company {}", uniqueAdminLogin, company.getName());
 	}
 
 	private void createApprovalStatus(final String name, final CProject project, final String description, final String color, final boolean isFinal,
@@ -580,8 +588,8 @@ public class CDataInitializer {
 	/** Creates UI testing activity. */
 	private void createUserCompanySetting(final CUser user, final CCompany company, final String roleName, final String ownershipLevel) {
 		try {
-			// Check if relationship already exists
-			if (!userCompanySettingsService.relationshipExists(user.getId(), company.getId())) {
+			// Check if user already has a company assigned
+			if (user.getCompany() == null || !user.getCompany().getId().equals(company.getId())) {
 				// Find a non-guest role for the company - prefer a role with matching name or use first available
 				List<tech.derbent.api.roles.domain.CUserCompanyRole> companyRoles = userCompanyRoleService.findAll().stream()
 						.filter(role -> role.getCompany() != null && role.getCompany().getId().equals(company.getId()))
@@ -595,14 +603,14 @@ public class CDataInitializer {
 																																		// available
 																																		// if no match
 				}
-				userCompanySettingsService.addUserToCompany(user, company, roleToAssign, ownershipLevel);
-				LOGGER.debug("Created user company setting: {} -> {} (role: {})", user.getLogin(), company.getName(),
+				userService.setCompany(user, company, roleToAssign);
+				LOGGER.debug("Set user company: {} -> {} (role: {})", user.getLogin(), company.getName(),
 						roleToAssign != null ? roleToAssign.getName() : "none");
 			} else {
-				LOGGER.debug("User company relationship already exists: {} -> {}", user.getLogin(), company.getName());
+				LOGGER.debug("User already has company assigned: {} -> {}", user.getLogin(), user.getCompany().getName());
 			}
 		} catch (final Exception e) {
-			LOGGER.warn("Failed to create user company setting for {} -> {}: {}", user.getLogin(), company.getName(), e.getMessage());
+			LOGGER.warn("Failed to set user company for {} -> {}: {}", user.getLogin(), company.getName(), e.getMessage());
 		}
 	}
 
@@ -1074,6 +1082,10 @@ public class CDataInitializer {
 			createConsultingCompany();
 			createHealthcareCompany();
 			createManufacturingCompany();
+			/* create admin users for each company */
+			for (CCompany company : companyService.list(Pageable.unpaged()).getContent()) {
+				createUserForCompany(company);
+			}
 			/* create sample projects */
 			for (CCompany company : companyService.list(Pageable.unpaged()).getContent()) {
 				initializeSampleCompanyRoles(company);
@@ -1089,8 +1101,8 @@ public class CDataInitializer {
 				LOGGER.info("Setting active company to: id:{}:{}", company.getId(), company.getName());
 				CUser user = userService.getRandomByCompany(company);
 				Check.notNull(user, "No user found for company: " + company.getName());
-				// sessionService.setActiveCompany(company);
-				sessionService.setActiveUser(user); // Set any user from the company as actives
+				// Use new atomic method to set both company and user
+				sessionService.setCompanyAndUser(company, user); // Set company first, then user who is member of that company
 				final List<CProject> projects = projectService.list(Pageable.unpaged()).getContent();
 				for (final CProject project : projects) {
 					LOGGER.info("Initializing sample data for project: {}:{} (company: {}:{})", project.getId(), project.getName(), company.getId(),

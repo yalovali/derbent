@@ -15,7 +15,6 @@ import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.services.CAbstractNamedEntityService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.companies.domain.CCompany;
-import tech.derbent.companies.view.CComponentCompanyUserSettings;
 import tech.derbent.session.service.ISessionService;
 
 @Service
@@ -29,20 +28,6 @@ public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 
 	public CCompanyService(final ICompanyRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
-	}
-
-	public Component createCompanyUserSettingsComponent() {
-		LOGGER.debug("Creating enhanced company user settings component");
-		try {
-			CComponentCompanyUserSettings component = new CComponentCompanyUserSettings(this, applicationContext);
-			return component;
-		} catch (Exception e) {
-			LOGGER.error("Failed to create company user settings component: {}", e.getMessage(), e);
-			Div errorDiv = new Div();
-			errorDiv.setText("Error loading company user settings component");
-			errorDiv.addClassName("error-component");
-			return errorDiv;
-		}
 	}
 
 	@Transactional

@@ -25,7 +25,6 @@ import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.events.ProjectListChangeEvent;
 import tech.derbent.projects.service.IProjectRepository;
 import tech.derbent.users.domain.CUser;
-import tech.derbent.users.service.CUserCompanySettingsService;
 import tech.derbent.users.service.IUserRepository;
 
 /** Service to manage user session state including active user and active project. Uses Vaadin session to store session-specific information. */
@@ -389,10 +388,11 @@ public class CWebSessionService implements ISessionService {
 		}
 		if (user != null) {
 			LOGGER.info("Active user set to: {}:{}", user.getId(), user.getUsername());
-			// Lazy-load userCompanySettingsService to avoid circular dependency
-			CUserCompanySettingsService userCompanySettingsService = applicationContext.getBean(CUserCompanySettingsService.class);
-			Check.notNull(userCompanySettingsService, "UserCompanySettingsService must not be null");
-			CCompany company = user.getCompanyInstance(userCompanySettingsService);
+			// Get company directly from user
+			CCompany company = user.getCompany();
+			if (company == null) {
+				LOGGER.warn("User {} has no company assigned", user.getUsername());
+			}
 			setActiveCompany(company);
 			session.setAttribute(ACTIVE_USER_KEY, user);
 			final List<CProject> availableProjects = getAvailableProjects();
@@ -403,6 +403,34 @@ public class CWebSessionService implements ISessionService {
 		} else {
 			session.setAttribute(ACTIVE_USER_KEY, null);
 			LOGGER.info("Active user cleared");
+		}
+	}
+
+	/** Sets both company and user in the session atomically. This ensures company is always set before user and validates that the user is a member
+	 * of the company.
+	 * @param company the company to set as active
+	 * @param user    the user to set as active (must be a member of the company) */
+	@Override
+	public void setCompanyAndUser(CCompany company, CUser user) {
+		Check.notNull(company, "Company must not be null");
+		Check.notNull(user, "User must not be null");
+		// Validate that user is a member of the company
+		if (user.getCompany() == null || !user.getCompany().getId().equals(company.getId())) {
+			throw new IllegalArgumentException(String.format("User %s is not a member of company %s", user.getUsername(), company.getName()));
+		}
+		clearSession(); // Clear session data before setting new user
+		final VaadinSession session = VaadinSession.getCurrent();
+		Check.notNull(session, "Vaadin session must not be null");
+		LOGGER.info("Setting company {} and user {}:{} atomically", company.getName(), user.getId(), user.getUsername());
+		// Set company first
+		setActiveCompany(company);
+		// Then set user
+		session.setAttribute(ACTIVE_USER_KEY, user);
+		// Set first available project
+		final List<CProject> availableProjects = getAvailableProjects();
+		if (!availableProjects.isEmpty()) {
+			CProject activeProject = availableProjects.get(0);
+			setActiveProject(activeProject);
 		}
 	}
 

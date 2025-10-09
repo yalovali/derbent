@@ -1,18 +1,13 @@
 package tech.derbent.companies.domain;
 
 import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.domains.CEntityNamed;
-import tech.derbent.users.domain.CUserCompanySetting;
 
 /** CCompany - Domain entity representing companies within the organization. Layer: Domain (MVC) Inherits from CEntityDB to provide database
  * functionality. */
@@ -38,13 +33,6 @@ public class CCompany extends CEntityNamed<CCompany> {
 			hidden = false, order = 11, maxLength = CEntityConstants.MAX_LENGTH_DESCRIPTION
 	)
 	private String companyLogoUrl;
-	@OneToOne (cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn (name = "single_company_settings_id", nullable = true)
-	@AMetaData (
-			displayName = "User Setting", required = false, readOnly = false, description = "User's company membership and role", hidden = false,
-			order = 15, createComponentMethod = "createCompanyUserSettingsComponent"
-	)
-	private CUserCompanySetting companySetting;
 	// Company Configuration Settings
 	@Column (name = "company_theme", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME)
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
@@ -180,10 +168,7 @@ public class CCompany extends CEntityNamed<CCompany> {
 
 	@Override
 	public void initializeAllFields() {
-		// Initialize lazy-loaded entity relationships
-		if (companySetting != null) {
-			companySetting.getCompany(); // Trigger company setting loading
-		}
+		// No lazy-loaded entity relationships to initialize
 	}
 
 	/** Initialize default configuration values. */
