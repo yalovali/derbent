@@ -2,6 +2,8 @@ package tech.derbent.login.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,12 +24,13 @@ import tech.derbent.users.service.CUserService;
 public class CCompanyAwareAuthenticationProvider implements AuthenticationProvider {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCompanyAwareAuthenticationProvider.class);
-	private final PasswordEncoder passwordEncoder;
+	@Autowired
+	@Lazy
+	private PasswordEncoder passwordEncoder;
 	private final CUserService userService;
 
-	public CCompanyAwareAuthenticationProvider(CUserService userService, PasswordEncoder passwordEncoder) {
+	public CCompanyAwareAuthenticationProvider(CUserService userService) {
 		this.userService = userService;
-		this.passwordEncoder = passwordEncoder;
 	}
 
 	@Override
