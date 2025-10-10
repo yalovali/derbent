@@ -52,22 +52,21 @@ class CSecurityConfig extends VaadinWebSecurity {
 	 * @throws Exception if configuration fails */
 	@Override
 	protected void configure(final HttpSecurity http) throws Exception {
+		// CRITICAL: Permit login URL BEFORE calling super.configure()
+		// Use AntPathRequestMatcher to avoid MVC dependency issues
+		http.authorizeHttpRequests(auth -> auth.requestMatchers(new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/login/**"))
+				.permitAll().requestMatchers(new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/login")).permitAll());
 		// Apply Vaadin's default security configuration This handles CSRF protection,
 		// session management, and other Vaadin-specific security
 		super.configure(http);
-		
-		// Set our custom login view - this configures the login page to be accessible
-		// The @AnonymousAllowed annotation on CCustomLoginView works with this
+		// Set our custom login view
 		setLoginView(http, CCustomLoginView.class);
-		
 		// Get the authentication manager
 		AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
-		
 		// Create and configure custom authentication filter
 		CCompanyAwareAuthenticationFilter authenticationFilter = new CCompanyAwareAuthenticationFilter(authenticationManager);
 		authenticationFilter.setAuthenticationSuccessHandler(authenticationSuccessHandler);
 		authenticationFilter.setFilterProcessesUrl("/login");
-		
 		// Replace the default authentication filter with our custom one
 		http.addFilterAt(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
 	}
