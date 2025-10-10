@@ -31,7 +31,7 @@ public class CCompanyAwareAuthenticationToken extends UsernamePasswordAuthentica
 			Collection<? extends GrantedAuthority> authorities) {
 		super(principal, credentials, authorities);
 		this.companyId = companyId;
-		setAuthenticated(true);
+		// Note: Do NOT call setAuthenticated(true) here - the super constructor with authorities already marks it as authenticated
 	}
 
 	/** Gets the company ID for tenant isolation.
