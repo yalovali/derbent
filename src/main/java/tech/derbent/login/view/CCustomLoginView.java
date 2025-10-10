@@ -101,6 +101,8 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		// Get company ID as String for JavaScript (Vaadin cannot encode Long to JSON)
 		String companyId = String.valueOf(selectedCompany.getId());
 		// Create form and submit to Spring Security endpoint with company ID and redirect parameter
+		// IMPORTANT: We use window.location.href to ensure the entire page reloads and follows the redirect
+		// This is necessary because Vaadin's SPA nature can interfere with form-based authentication redirects
 		getElement().executeJs("const form = document.createElement('form');" + "form.method = 'POST';" + "form.action = 'login';"
 				+ "const usernameInput = document.createElement('input');" + "usernameInput.type = 'hidden';" + "usernameInput.name = 'username';"
 				+ "usernameInput.value = $0;" + "form.appendChild(usernameInput);" + "const passwordInput = document.createElement('input');"
@@ -108,8 +110,10 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 				+ "form.appendChild(passwordInput);" + "const companyInput = document.createElement('input');" + "companyInput.type = 'hidden';"
 				+ "companyInput.name = 'companyId';" + "companyInput.value = $2;" + "form.appendChild(companyInput);"
 				+ "const redirectInput = document.createElement('input');" + "redirectInput.type = 'hidden';" + "redirectInput.name = 'redirect';"
-				+ "redirectInput.value = $3;" + "form.appendChild(redirectInput);" + "document.body.appendChild(form);" + "form.submit();", username,
-				password, companyId, redirectView);
+				+ "redirectInput.value = $3;" + "form.appendChild(redirectInput);" + "document.body.appendChild(form);" + "form.submit();" +
+				// Force page reload to follow redirect after a short delay
+				"setTimeout(function() { if (window.location.href.indexOf('/login') !== -1) window.location.reload(); }, 500);", username, password,
+				companyId, redirectView);
 	}
 
 	private void setupForm() {
