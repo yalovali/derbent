@@ -98,8 +98,8 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		Check.notNull(selectedCompany, "Please select a company");
 		// Get selected view for redirect
 		String redirectView = "home";
-		// Get company ID
-		Long companyId = selectedCompany.getId();
+		// Get company ID as String for JavaScript (Vaadin cannot encode Long to JSON)
+		String companyId = String.valueOf(selectedCompany.getId());
 		// Create form and submit to Spring Security endpoint with company ID and redirect parameter
 		getElement().executeJs("const form = document.createElement('form');" + "form.method = 'POST';" + "form.action = 'login';"
 				+ "const usernameInput = document.createElement('input');" + "usernameInput.type = 'hidden';" + "usernameInput.name = 'username';"
