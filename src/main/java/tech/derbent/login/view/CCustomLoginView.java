@@ -90,20 +90,26 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	private void handleLogin() {
 		final String username = usernameField.getValue();
 		final String password = passwordField.getValue();
+		final CCompany selectedCompany = companyField.getValue();
 		errorMessage.setText("");
 		// Basic validation
 		Check.notBlank(username, "Please enter both username and password");
 		Check.notBlank(password, "Please enter both username and password");
+		Check.notNull(selectedCompany, "Please select a company");
 		// Get selected view for redirect
 		String redirectView = "home";
-		// Create form and submit to Spring Security endpoint with redirect parameter
+		// Get company ID
+		Long companyId = selectedCompany.getId();
+		// Create form and submit to Spring Security endpoint with company ID and redirect parameter
 		getElement().executeJs("const form = document.createElement('form');" + "form.method = 'POST';" + "form.action = 'login';"
 				+ "const usernameInput = document.createElement('input');" + "usernameInput.type = 'hidden';" + "usernameInput.name = 'username';"
 				+ "usernameInput.value = $0;" + "form.appendChild(usernameInput);" + "const passwordInput = document.createElement('input');"
 				+ "passwordInput.type = 'hidden';" + "passwordInput.name = 'password';" + "passwordInput.value = $1;"
-				+ "form.appendChild(passwordInput);" + "const redirectInput = document.createElement('input');" + "redirectInput.type = 'hidden';"
-				+ "redirectInput.name = 'redirect';" + "redirectInput.value = $2;" + "form.appendChild(redirectInput);"
-				+ "document.body.appendChild(form);" + "form.submit();", username, password, redirectView);
+				+ "form.appendChild(passwordInput);" + "const companyInput = document.createElement('input');" + "companyInput.type = 'hidden';"
+				+ "companyInput.name = 'companyId';" + "companyInput.value = $2;" + "form.appendChild(companyInput);"
+				+ "const redirectInput = document.createElement('input');" + "redirectInput.type = 'hidden';" + "redirectInput.name = 'redirect';"
+				+ "redirectInput.value = $3;" + "form.appendChild(redirectInput);" + "document.body.appendChild(form);" + "form.submit();", username,
+				password, companyId, redirectView);
 	}
 
 	private void setupForm() {

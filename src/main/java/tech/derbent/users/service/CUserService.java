@@ -246,6 +246,33 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 				.build();
 	}
 
+	/** Loads user by username and company ID for authentication. This method is used by the custom authentication provider to support multi-tenant
+	 * authentication where users can have the same username across different companies.
+	 * @param username  the username to authenticate
+	 * @param companyId the company ID for tenant isolation (can be null for backward compatibility)
+	 * @return UserDetails for Spring Security authentication
+	 * @throws UsernameNotFoundException if user is not found */
+	@PreAuthorize ("permitAll()")
+	public UserDetails loadUserByUsernameAndCompany(final String username, final Long companyId) throws UsernameNotFoundException {
+		LOGGER.debug("Attempting to load user by username: {} and company ID: {}", username, companyId);
+		// If no company ID provided, fall back to session-based company lookup
+		if (companyId == null) {
+			LOGGER.warn("No company ID provided, attempting to use session company (may fail during login)");
+			return loadUserByUsername(username);
+		}
+		// Query database for user by username and company ID
+		final CUser loginUser = ((IUserRepository) repository).findByUsername(companyId, username).orElseThrow(() -> {
+			LOGGER.warn("User not found with username: {} and company ID: {}", username, companyId);
+			return new UsernameNotFoundException("User not found with username: " + username);
+		});
+		// Convert user roles to Spring Security authorities
+		final Collection<GrantedAuthority> authorities = getAuthorities("ADMIN,USER"); // Example roles, replace with actual user roles if available
+		// Create and return Spring Security UserDetails
+		return User.builder().username(loginUser.getUsername()).password(loginUser.getPassword()) // Already encoded password from database
+				.authorities(authorities).accountExpired(false).accountLocked(false).credentialsExpired(false).disabled(!loginUser.isEnabled())
+				.build();
+	}
+
 	@Override
 	public boolean onBeforeSaveEvent(final CUser entity) {
 		if (super.onBeforeSaveEvent(entity) == false) {
