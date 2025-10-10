@@ -20,6 +20,10 @@ public class CCompanyAwareAuthenticationFilter extends UsernamePasswordAuthentic
 	private static final String COMPANY_ID_PARAMETER = "companyId";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCompanyAwareAuthenticationFilter.class);
 
+	public CCompanyAwareAuthenticationFilter() {
+		super();
+	}
+
 	public CCompanyAwareAuthenticationFilter(AuthenticationManager authenticationManager) {
 		super(authenticationManager);
 	}

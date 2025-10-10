@@ -33,17 +33,20 @@ class CSecurityConfig extends VaadinWebSecurity {
 	private final CAuthenticationSuccessHandler authenticationSuccessHandler;
 	private final CCompanyAwareAuthenticationProvider companyAwareAuthenticationProvider;
 	private final CUserService userService;
+	private final org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration authenticationConfiguration;
 	private CWebSessionService webSessionService;
 
 	/** Constructor injection of CUserService, authentication success handler, entry point, and company-aware authentication provider. */
 	public CSecurityConfig(final CUserService loginUserService, final CAuthenticationSuccessHandler authenticationSuccessHandler,
-			final CAuthenticationEntryPoint authenticationEntryPoint, final CCompanyAwareAuthenticationProvider companyAwareAuthenticationProvider) {
+			final CAuthenticationEntryPoint authenticationEntryPoint, final CCompanyAwareAuthenticationProvider companyAwareAuthenticationProvider,
+			final org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration authenticationConfiguration) {
 		userService = loginUserService;
 		// access websession service
 		// userService.setSessionService(webSessionService);
 		this.authenticationSuccessHandler = authenticationSuccessHandler;
 		this.authenticationEntryPoint = authenticationEntryPoint;
 		this.companyAwareAuthenticationProvider = companyAwareAuthenticationProvider;
+		this.authenticationConfiguration = authenticationConfiguration;
 	}
 
 	/** Configures HTTP security settings. Sets up the login view, custom authentication provider, and delegates other security configuration to
@@ -59,8 +62,9 @@ class CSecurityConfig extends VaadinWebSecurity {
 		// redirected to CCustomLoginView
 		setLoginView(http, CCustomLoginView.class);
 		// Create and configure custom authentication filter for company-aware authentication
-		// Note: The AuthenticationManager will be set via setAuthenticationManager() method
-		CCompanyAwareAuthenticationFilter authenticationFilter = new CCompanyAwareAuthenticationFilter(authenticationManager(http));
+		// Get the authentication manager from the global configuration
+		CCompanyAwareAuthenticationFilter authenticationFilter = new CCompanyAwareAuthenticationFilter();
+		authenticationFilter.setAuthenticationManager(authenticationConfiguration.getAuthenticationManager());
 		authenticationFilter.setAuthenticationSuccessHandler(authenticationSuccessHandler);
 		authenticationFilter.setFilterProcessesUrl("/login");
 		// IMPORTANT: Configure the filter to only match POST requests to /login
@@ -70,15 +74,6 @@ class CSecurityConfig extends VaadinWebSecurity {
 		http.addFilterAt(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
 		// Note: We do NOT override the authentication entry point here because
 		// VaadinWebSecurity needs to control it to properly handle @AnonymousAllowed views
-	}
-
-	/** Exposes the authentication manager as a bean.
-	 * @param http HttpSecurity configuration object
-	 * @return AuthenticationManager instance
-	 * @throws Exception if configuration fails */
-	@Bean
-	public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-		return http.getSharedObject(AuthenticationManager.class);
 	}
 
 	/** Configures the authentication manager to use our custom authentication provider.
