@@ -55,19 +55,21 @@ class CSecurityConfig extends VaadinWebSecurity {
 		// Apply Vaadin's default security configuration This handles CSRF protection,
 		// session management, and other Vaadin-specific security
 		super.configure(http);
-		// Set our custom login view When users need to authenticate, they'll be
-		// redirected to CCustomLoginView
+		
+		// Set our custom login view - this configures the login page to be accessible
+		// The @AnonymousAllowed annotation on CCustomLoginView works with this
 		setLoginView(http, CCustomLoginView.class);
+		
 		// Get the authentication manager
 		AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
+		
 		// Create and configure custom authentication filter
 		CCompanyAwareAuthenticationFilter authenticationFilter = new CCompanyAwareAuthenticationFilter(authenticationManager);
 		authenticationFilter.setAuthenticationSuccessHandler(authenticationSuccessHandler);
 		authenticationFilter.setFilterProcessesUrl("/login");
+		
 		// Replace the default authentication filter with our custom one
 		http.addFilterAt(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
-		// Note: NOT overriding the authentication entry point to allow Vaadin's default handling
-		// which properly recognizes @AnonymousAllowed views like CCustomLoginView
 	}
 
 	/** Configures the authentication manager to use our custom authentication provider.
