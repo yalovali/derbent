@@ -69,6 +69,7 @@ public class CCompanyAwareAuthenticationProvider implements AuthenticationProvid
 
 	@Override
 	public boolean supports(Class<?> authentication) {
+		LOGGER.debug("Checking support for authentication type: {}", authentication.getName());
 		// Support both standard and company-aware authentication tokens
 		return UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication)
 				|| CCompanyAwareAuthenticationToken.class.isAssignableFrom(authentication);

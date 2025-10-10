@@ -1,9 +1,10 @@
 package tech.derbent.login.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -29,6 +30,7 @@ import tech.derbent.users.service.CUserService;
 @ConditionalOnWebApplication
 class CSecurityConfig extends VaadinWebSecurity {
 
+	private final Logger LOGGER = LoggerFactory.getLogger(CSecurityConfig.class);
 	private final CAuthenticationEntryPoint authenticationEntryPoint;
 	private final CAuthenticationSuccessHandler authenticationSuccessHandler;
 	private final CCompanyAwareAuthenticationProvider companyAwareAuthenticationProvider;
@@ -40,6 +42,7 @@ class CSecurityConfig extends VaadinWebSecurity {
 	public CSecurityConfig(final CUserService loginUserService, final CAuthenticationSuccessHandler authenticationSuccessHandler,
 			final CAuthenticationEntryPoint authenticationEntryPoint, final CCompanyAwareAuthenticationProvider companyAwareAuthenticationProvider,
 			final org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration authenticationConfiguration) {
+		LOGGER.info("Initializing security configuration");
 		userService = loginUserService;
 		// access websession service
 		// userService.setSessionService(webSessionService);
@@ -58,6 +61,7 @@ class CSecurityConfig extends VaadinWebSecurity {
 		// Apply Vaadin's default security configuration This handles CSRF protection,
 		// session management, and other Vaadin-specific security
 		super.configure(http);
+		LOGGER.info("Configuring HTTP security");
 		// Set our custom login view When users need to authenticate, they'll be
 		// redirected to CCustomLoginView
 		setLoginView(http, CCustomLoginView.class);
@@ -80,6 +84,7 @@ class CSecurityConfig extends VaadinWebSecurity {
 	 * @param auth AuthenticationManagerBuilder
 	 * @throws Exception if configuration fails */
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+		LOGGER.info("Configuring authentication manager with custom provider");
 		auth.authenticationProvider(companyAwareAuthenticationProvider);
 	}
 
@@ -89,6 +94,7 @@ class CSecurityConfig extends VaadinWebSecurity {
 	 * @return BCryptPasswordEncoder instance for password hashing */
 	@Bean
 	public PasswordEncoder passwordEncoder() {
+		LOGGER.info("Providing BCryptPasswordEncoder bean");
 		return new BCryptPasswordEncoder();
 	}
 
@@ -96,6 +102,7 @@ class CSecurityConfig extends VaadinWebSecurity {
 	 * @return CUserService instance configured as UserDetailsService */
 	@Bean
 	public UserDetailsService userDetailsService() {
+		LOGGER.info("Providing CUserService as UserDetailsService bean");
 		return userService;
 	}
 }

@@ -28,6 +28,7 @@ public class CAuthenticationSuccessHandler implements AuthenticationSuccessHandl
 		if (queryString != null) {
 			requestUrl += "?" + queryString;
 		}
+		LOGGER.debug("Constructed full request URL: {}", requestUrl);
 		return requestUrl;
 	}
 
@@ -66,6 +67,7 @@ public class CAuthenticationSuccessHandler implements AuthenticationSuccessHandl
 
 	public CAuthenticationSuccessHandler(CSystemSettingsService systemSettingsService) {
 		this.systemSettingsService = systemSettingsService;
+		LOGGER.debug("CAuthenticationSuccessHandler initialized with CSystemSettingsService");
 	}
 
 	/** Determines the target URL for post-login redirection. Priority order: 1. 'redirect' parameter from login form 2. Originally requested URL
@@ -106,6 +108,7 @@ public class CAuthenticationSuccessHandler implements AuthenticationSuccessHandl
 
 	/** Maps view names from the combobox to actual URLs. This should match the mapping used in CCustomLoginView. */
 	private String mapViewNameToUrl(String viewName) {
+		LOGGER.debug("Mapping view name to URL: {}", viewName);
 		switch (viewName.toLowerCase()) {
 		case "home":
 		case "cdashboardview":
