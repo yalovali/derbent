@@ -1,7 +1,6 @@
 package tech.derbent.login.service;
 
 import java.io.IOException;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -11,11 +10,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import tech.derbent.companies.domain.CCompany;
 import tech.derbent.setup.service.CSystemSettingsService;
-import tech.derbent.session.service.CWebSessionService;
-import tech.derbent.users.domain.CUser;
-import tech.derbent.users.service.CUserService;
 
 /** Custom authentication success handler that manages post-login navigation. This handler processes the redirect parameter from the login form or
  * retrieves the originally requested URL before login redirect, then navigates the user to the appropriate page after successful authentication. */
@@ -68,13 +63,9 @@ public class CAuthenticationSuccessHandler implements AuthenticationSuccessHandl
 	}
 
 	private final CSystemSettingsService systemSettingsService;
-	private final CWebSessionService webSessionService;
-	private final CUserService userService;
 
-	public CAuthenticationSuccessHandler(CSystemSettingsService systemSettingsService, CWebSessionService webSessionService, CUserService userService) {
+	public CAuthenticationSuccessHandler(CSystemSettingsService systemSettingsService) {
 		this.systemSettingsService = systemSettingsService;
-		this.webSessionService = webSessionService;
-		this.userService = userService;
 	}
 
 	/** Determines the target URL for post-login redirection. Priority order: 1. 'redirect' parameter from login form 2. Originally requested URL
@@ -141,19 +132,6 @@ public class CAuthenticationSuccessHandler implements AuthenticationSuccessHandl
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
 			throws IOException, ServletException {
 		LOGGER.debug("Authentication successful for user: {}", authentication.getName());
-
-		// Set active company in session after login
-		Optional<CUser> userOpt = userService.findByUsername(authentication.getName());
-		if (userOpt.isPresent()) {
-			CUser user = userOpt.get();
-			// Use your logic to select the company (default, last-used, etc.)
-			CCompany company = user.getDefaultCompany(); // Adjust as needed
-			if (company != null) {
-				webSessionService.setActiveCompany(company);
-				LOGGER.debug("Set active company in session: {}", company.getName());
-			}
-		}
-
 		// Get the target URL for redirection
 		String targetUrl = determineTargetUrl(request);
 		LOGGER.info("Redirecting user {} to: {}", authentication.getName(), targetUrl);
