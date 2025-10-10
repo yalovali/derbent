@@ -52,23 +52,25 @@ class CSecurityConfig extends VaadinWebSecurity {
 	 * @throws Exception if configuration fails */
 	@Override
 	protected void configure(final HttpSecurity http) throws Exception {
-		// CRITICAL: Permit login URL BEFORE calling super.configure()
-		// Use AntPathRequestMatcher to avoid MVC dependency issues
-		http.authorizeHttpRequests(auth -> auth.requestMatchers(new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/login/**"))
-				.permitAll().requestMatchers(new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/login")).permitAll());
 		// Apply Vaadin's default security configuration This handles CSRF protection,
 		// session management, and other Vaadin-specific security
 		super.configure(http);
-		// Set our custom login view
+		// Set our custom login view When users need to authenticate, they'll be
+		// redirected to CCustomLoginView
 		setLoginView(http, CCustomLoginView.class);
 		// Get the authentication manager
 		AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
-		// Create and configure custom authentication filter
+		// Create and configure custom authentication filter for company-aware authentication
 		CCompanyAwareAuthenticationFilter authenticationFilter = new CCompanyAwareAuthenticationFilter(authenticationManager);
 		authenticationFilter.setAuthenticationSuccessHandler(authenticationSuccessHandler);
 		authenticationFilter.setFilterProcessesUrl("/login");
+		// IMPORTANT: Configure the filter to only match POST requests to /login
+		authenticationFilter
+				.setRequiresAuthenticationRequestMatcher(new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/login", "POST"));
 		// Replace the default authentication filter with our custom one
 		http.addFilterAt(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
+		// Note: We do NOT override the authentication entry point here because
+		// VaadinWebSecurity needs to control it to properly handle @AnonymousAllowed views
 	}
 
 	/** Configures the authentication manager to use our custom authentication provider.
