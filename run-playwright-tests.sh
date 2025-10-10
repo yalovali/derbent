@@ -90,3 +90,32 @@ EXAMPLES:
     ./run-playwright-tests.sh clean        # Clean up test artifacts
     ./run-playwright-tests.sh install      # Install Playwright browsers
 
+EOF
+}
+
+# Main script logic
+case "${1:-}" in
+    menu|"")
+        run_menu_navigation_test
+        ;;
+    mock)
+        run_menu_navigation_test
+        ;;
+    clean)
+        echo "🧹 Cleaning test artifacts..."
+        rm -rf target/screenshots
+        rm -rf target/surefire-reports
+        echo "✅ Test artifacts cleaned!"
+        ;;
+    install)
+        install_playwright_browsers
+        ;;
+    help)
+        show_usage
+        ;;
+    *)
+        echo "❌ Unknown option: $1"
+        show_usage
+        exit 1
+        ;;
+esac

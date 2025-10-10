@@ -58,8 +58,6 @@ class CSecurityConfig extends VaadinWebSecurity {
 		// Set our custom login view When users need to authenticate, they'll be
 		// redirected to CCustomLoginView
 		setLoginView(http, CCustomLoginView.class);
-		// Configure the UserDetailsService for authentication (for backward compatibility)
-		http.userDetailsService(userService);
 		// Get the authentication manager
 		AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
 		// Create and configure custom authentication filter
@@ -68,8 +66,8 @@ class CSecurityConfig extends VaadinWebSecurity {
 		authenticationFilter.setFilterProcessesUrl("/login");
 		// Replace the default authentication filter with our custom one
 		http.addFilterAt(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
-		// Configure custom authentication entry point to save requested URLs
-		http.exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(authenticationEntryPoint));
+		// Note: NOT overriding the authentication entry point to allow Vaadin's default handling
+		// which properly recognizes @AnonymousAllowed views like CCustomLoginView
 	}
 
 	/** Configures the authentication manager to use our custom authentication provider.
