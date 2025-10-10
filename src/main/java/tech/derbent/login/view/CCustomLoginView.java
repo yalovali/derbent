@@ -43,16 +43,16 @@ import tech.derbent.setup.service.CSystemSettingsService;
 @AnonymousAllowed
 public class CCustomLoginView extends Main implements BeforeEnterObserver {
 
-	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCustomLoginView.class);
+	private static final long serialVersionUID = 1L;
+	private final ComboBox<CCompany> companyField = new ComboBox<CCompany>();
+	private final CCompanyService companyService;
 	private final Div errorMessage = new Div();
 	private final Button loginButton = new CButton("Login", CColorUtils.createStyledIcon("vaadin:sign-in", CColorUtils.CRUD_SAVE_COLOR));
 	private final PasswordField passwordField = new PasswordField();
 	private final Button resetDbButton = new CButton("Reset Database", CColorUtils.createStyledIcon("vaadin:refresh", CColorUtils.CRUD_UPDATE_COLOR));
-	private final ComboBox<CCompany> companyField = new ComboBox<CCompany>();
-	private final TextField usernameField = new TextField();
 	private final ISessionService sessionService;
-	private final CCompanyService companyService;
+	private final TextField usernameField = new TextField();
 
 	/** Constructor sets up the custom login form with basic Vaadin components. */
 	@Autowired

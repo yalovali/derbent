@@ -10,6 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.vaadin.flow.spring.security.VaadinWebSecurity;
 import tech.derbent.login.view.CCustomLoginView;
+import tech.derbent.session.service.CWebSessionService;
 import tech.derbent.users.service.CUserService;
 
 /** Spring Security configuration for the application. Configures database-based authentication using CUser entities. Security Flow: 1. User accesses
@@ -21,14 +22,17 @@ import tech.derbent.users.service.CUserService;
 @ConditionalOnWebApplication
 class CSecurityConfig extends VaadinWebSecurity {
 
-	private final CUserService loginUserService;
-	private final CAuthenticationSuccessHandler authenticationSuccessHandler;
 	private final CAuthenticationEntryPoint authenticationEntryPoint;
+	private final CAuthenticationSuccessHandler authenticationSuccessHandler;
+	private final CUserService userService;
+	private CWebSessionService webSessionService;
 
 	/** Constructor injection of CLoginUserService, authentication success handler, and entry point. */
 	public CSecurityConfig(final CUserService loginUserService, final CAuthenticationSuccessHandler authenticationSuccessHandler,
 			final CAuthenticationEntryPoint authenticationEntryPoint) {
-		this.loginUserService = loginUserService;
+		userService = loginUserService;
+		// access websession service
+		// userService.setSessionService(webSessionService);
 		this.authenticationSuccessHandler = authenticationSuccessHandler;
 		this.authenticationEntryPoint = authenticationEntryPoint;
 	}
@@ -45,7 +49,7 @@ class CSecurityConfig extends VaadinWebSecurity {
 		// redirected to CLoginView
 		setLoginView(http, CCustomLoginView.class);
 		// Configure the UserDetailsService for authentication
-		http.userDetailsService(loginUserService);
+		http.userDetailsService(userService);
 		// Configure custom authentication success handler for post-login redirection
 		http.formLogin(form -> form.successHandler(authenticationSuccessHandler));
 		// Configure custom authentication entry point to save requested URLs
@@ -65,6 +69,6 @@ class CSecurityConfig extends VaadinWebSecurity {
 	 * @return CUserService instance configured as UserDetailsService */
 	@Bean
 	public UserDetailsService userDetailsService() {
-		return loginUserService;
+		return userService;
 	}
 }

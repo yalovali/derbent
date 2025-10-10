@@ -14,6 +14,12 @@ public interface IUserRepository extends IAbstractNamedRepository<CUser> {
 	/** Count distinct users by project ID using generic pattern */
 	@Query ("SELECT COUNT(DISTINCT u) FROM #{#entityName} u LEFT JOIN u.projectSettings ps LEFT JOIN u.userType ut WHERE ps.project.id = :projectId")
 	long countByProjectId(@Param ("projectId") Long projectId);
+	/** Find all users by company ID with eager loading */
+	@Query ("SELECT u FROM #{#entityName} u LEFT JOIN u.projectSettings ps LEFT JOIN FETCH u.userType WHERE u.company.id = :companyId")
+	List<CUser> findByCompanyId(@Param ("companyId") Long companyId);
+	/** Find users by company ID with pagination */
+	@Query ("SELECT u FROM #{#entityName} u " + "LEFT JOIN FETCH u.userType " + "WHERE u.company.id = :companyId")
+	Page<CUser> findByCompanyId(@Param ("companyId") Long companyId, Pageable pageable);
 	/** Find user by ID with eager loading using generic pattern */
 	@Override
 	@Query ("SELECT u " + /**/
@@ -52,10 +58,4 @@ public interface IUserRepository extends IAbstractNamedRepository<CUser> {
 			"FROM #{#entityName} u LEFT JOIN FETCH u.userType "
 	)
 	Page<CUser> list(Pageable pageable);
-	/** Find all users by company ID with eager loading */
-	@Query ("SELECT u FROM #{#entityName} u " + "LEFT JOIN FETCH u.userType " + "WHERE u.company.id = :companyId")
-	List<CUser> findByCompanyId(@Param ("companyId") Long companyId);
-	/** Find users by company ID with pagination */
-	@Query ("SELECT u FROM #{#entityName} u " + "LEFT JOIN FETCH u.userType " + "WHERE u.company.id = :companyId")
-	Page<CUser> findByCompanyId(@Param ("companyId") Long companyId, Pageable pageable);
 }

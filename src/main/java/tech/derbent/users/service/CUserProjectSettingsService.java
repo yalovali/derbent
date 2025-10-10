@@ -3,6 +3,7 @@ package tech.derbent.users.service;
 import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,9 +51,13 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 		validateRelationship(settings);
 		// Save the entity first
 		final CUserProjectSettings savedSettings = save(settings);
-		// Maintain bidirectional relationships
-		user.addProjectSettings(savedSettings);
-		project.addUserSettings(savedSettings);
+		// dont need to save separately as cascade is set
+		if (Hibernate.isInitialized(user.getProjectSettings())) {
+			user.addProjectSettings(savedSettings);
+		}
+		if (Hibernate.isInitialized(project.getUserSettings())) {
+			project.addUserSettings(savedSettings);
+		}
 		return savedSettings;
 	}
 
