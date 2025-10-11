@@ -27,6 +27,8 @@ import tech.derbent.companies.domain.CCompany;
 public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompanySetting> {
 
 	public static final String VIEW_NAME = "User Company Settings View";
+	public static final String DEFAULT_ICON = "vaadin:group";
+	public static final String DEFAULT_COLOR = "#0ea5e9";
 
 	// Static helper methods for bidirectional relationship management
 	public static void addUserToCompany(CCompany company, CUser user, CUserCompanySetting settings) {

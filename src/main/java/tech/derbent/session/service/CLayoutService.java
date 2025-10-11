@@ -34,7 +34,10 @@ public class CLayoutService {
 	/** Clears all layout change listeners (typically called on session clear). */
 	public void clearLayoutChangeListeners() {
 		final VaadinSession session = VaadinSession.getCurrent();
-		Check.notNull(session, "VaadinSession must not be null");
+		if (session == null) {
+			LOGGER.debug("clearLayoutChangeListeners skipped - no active VaadinSession");
+			return;
+		}
 		getOrCreateLayoutListeners(session).clear();
 	}
 

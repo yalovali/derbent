@@ -26,6 +26,7 @@ public class CCompanyAwareAuthenticationFilter extends UsernamePasswordAuthentic
 
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+		LOGGER.info("Processing authentication request: {} {}", request.getMethod(), request.getRequestURI());
 		if (!request.getMethod().equals("POST")) {
 			throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
 		}

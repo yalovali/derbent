@@ -22,6 +22,8 @@ import tech.derbent.projects.domain.CProject;
 public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 
 	public static final String VIEW_NAME = "User Settings View";
+	public static final String DEFAULT_ICON = "vaadin:users";
+	public static final String DEFAULT_COLOR = "#4f46e5";
 	@Column
 	@AMetaData (
 			displayName = "Permissions", required = false, readOnly = false, description = "User's project permission", hidden = false, order = 13

@@ -2,6 +2,7 @@ package tech.derbent.session.service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,6 +44,21 @@ public class CWebSessionService implements ISessionService {
 	private CLayoutService layoutService;
 	private final IProjectRepository projectRepository;
 	private final IUserRepository userRepository;
+	private static final class SessionState {
+		private CCompany activeCompany;
+		private CProject activeProject;
+		private CUser activeUser;
+		private final ConcurrentHashMap<String, Long> activeIds = new ConcurrentHashMap<>();
+
+		private void clear() {
+			activeCompany = null;
+			activeProject = null;
+			activeUser = null;
+			activeIds.clear();
+		}
+	}
+
+	private final ThreadLocal<SessionState> fallbackSession = ThreadLocal.withInitial(SessionState::new);
 
 	public CWebSessionService(final AuthenticationContext authenticationContext, final IUserRepository userRepository,
 			final IProjectRepository projectRepository) {
@@ -105,9 +121,14 @@ public class CWebSessionService implements ISessionService {
 			}
 		} else {
 			LOGGER.debug("clearSession called without active VaadinSession");
+			fallbackSession.get().clear();
 		}
 		if (layoutService != null) {
-			layoutService.clearLayoutChangeListeners();
+			if (session != null) {
+				layoutService.clearLayoutChangeListeners();
+			} else {
+				LOGGER.debug("Skipping layout listener cleanup - no VaadinSession");
+			}
 		}
 	}
 
@@ -115,7 +136,9 @@ public class CWebSessionService implements ISessionService {
 	@Override
 	public Optional<CCompany> getActiveCompany() {
 		final VaadinSession session = VaadinSession.getCurrent();
-		Check.notNull(session, "Vaadin session must not be null");
+		if (session == null) {
+			return Optional.ofNullable(fallbackSession.get().activeCompany);
+		}
 		CCompany activeCompany = (CCompany) session.getAttribute(ACTIVE_COMPANY_KEY);
 		return Optional.ofNullable(activeCompany);
 	}
@@ -126,7 +149,7 @@ public class CWebSessionService implements ISessionService {
 		if (session != null) {
 			return (Long) session.getAttribute(ACTIVE_ID_KEY + "_" + entityType);
 		}
-		return null;
+		return fallbackSession.get().activeIds.get(ACTIVE_ID_KEY + "_" + entityType);
 	}
 
 	@SuppressWarnings ("unchecked")
@@ -139,7 +162,7 @@ public class CWebSessionService implements ISessionService {
 	public Optional<CProject> getActiveProject() {
 		final VaadinSession session = VaadinSession.getCurrent();
 		if (session == null) {
-			return Optional.empty();
+			return Optional.ofNullable(fallbackSession.get().activeProject);
 		}
 		CProject activeProject = (CProject) session.getAttribute(ACTIVE_PROJECT_KEY);
 		return Optional.ofNullable(activeProject);
@@ -151,7 +174,7 @@ public class CWebSessionService implements ISessionService {
 	public Optional<CUser> getActiveUser() {
 		final VaadinSession session = VaadinSession.getCurrent();
 		if (session == null) {
-			return Optional.empty();
+			return Optional.ofNullable(fallbackSession.get().activeUser);
 		}
 		CUser activeUser = (CUser) session.getAttribute(ACTIVE_USER_KEY);
 		if (activeUser == null) {
@@ -330,7 +353,22 @@ public class CWebSessionService implements ISessionService {
 		// DONT CLEAR USER WHEN SETTING COMPANY, IT CAUSES PROBLEMS WITH AUTHENTICATION
 		// clearSession(); // Clear session data before setting new user
 		final VaadinSession session = VaadinSession.getCurrent();
-		Check.notNull(session, "Vaadin session must not be null");
+		if (session == null) {
+			Check.isTrue(getActiveUser().isEmpty(), "User must be null when setting company directly");
+			final SessionState state = fallbackSession.get();
+			if (Objects.equals(state.activeCompany, company)) {
+				LOGGER.debug("setActiveCompany called with same company, no action taken");
+				return;
+			}
+			state.activeProject = null;
+			state.activeCompany = company;
+			if (company == null) {
+				LOGGER.info("Active company set to null");
+			} else {
+				LOGGER.info("Active company set to: {}:{}", company.getId(), company.getName());
+			}
+			return;
+		}
 		Check.isTrue(getActiveUser().isEmpty(), "User must be null when setting company directly");
 		if (company == getActiveCompany().orElse(null)) {
 			LOGGER.debug("setActiveCompany called with same company, no action taken");
@@ -350,6 +388,10 @@ public class CWebSessionService implements ISessionService {
 	public void setActiveId(final String entityType, final Long id) {
 		final VaadinSession session = VaadinSession.getCurrent();
 		if (session == null) {
+			final SessionState state = fallbackSession.get();
+			if (entityType != null) {
+				state.activeIds.put(ACTIVE_ID_KEY + "_" + entityType, id);
+			}
 			return;
 		}
 		final String key = ACTIVE_ID_KEY + "_" + entityType;
@@ -363,7 +405,20 @@ public class CWebSessionService implements ISessionService {
 	public void setActiveProject(final CProject project) {
 		// reset active entity ID when changing project
 		final VaadinSession session = VaadinSession.getCurrent();
-		Check.notNull(session, "Vaadin session must not be null");
+		if (session == null) {
+			final SessionState state = fallbackSession.get();
+			if (Objects.equals(state.activeProject, project)) {
+				LOGGER.debug("setActiveProject called with same project, no action taken");
+				return;
+			}
+			state.activeProject = project;
+			if (project != null) {
+				LOGGER.info("Active project set to: {}:{}", project.getId(), project.getName());
+			} else {
+				LOGGER.info("Active project cleared");
+			}
+			return;
+		}
 		if (project == getActiveProject().orElse(null)) {
 			LOGGER.debug("setActiveProject called with same project, no action taken");
 			return;
@@ -378,7 +433,31 @@ public class CWebSessionService implements ISessionService {
 	public void setActiveUser(final CUser user) {
 		clearSession(); // Clear session data before setting new user
 		final VaadinSession session = VaadinSession.getCurrent();
-		Check.notNull(session, "Vaadin session must not be null");
+		if (session == null) {
+			final SessionState state = fallbackSession.get();
+			if (Objects.equals(state.activeUser, user)) {
+				LOGGER.debug("setActiveUser called with same user, no action taken");
+				return;
+			}
+			if (user != null) {
+				LOGGER.info("Active user set to: {}:{}", user.getId(), user.getUsername());
+				state.activeUser = user;
+				state.activeCompany = user.getCompany();
+				if (state.activeCompany == null) {
+					LOGGER.warn("User {} has no company assigned", user.getUsername());
+				}
+				final List<CProject> availableProjects = getAvailableProjects();
+				if (!availableProjects.isEmpty()) {
+					state.activeProject = availableProjects.get(0);
+				} else {
+					state.activeProject = null;
+				}
+			} else {
+				state.clear();
+				LOGGER.info("Active user cleared");
+			}
+			return;
+		}
 		// Set active company when user is set
 		if (user == getActiveUser().orElse(null)) {
 			LOGGER.debug("setActiveUser called with same user, no action taken");
@@ -418,7 +497,19 @@ public class CWebSessionService implements ISessionService {
 		}
 		clearSession(); // Clear session data before setting new user
 		final VaadinSession session = VaadinSession.getCurrent();
-		Check.notNull(session, "Vaadin session must not be null");
+		if (session == null) {
+			LOGGER.info("Setting company {} and user {}:{} atomically (fallback session)", company.getName(), user.getId(), user.getUsername());
+			final SessionState state = fallbackSession.get();
+			state.activeCompany = company;
+			state.activeUser = user;
+			final List<CProject> availableProjects = getAvailableProjects();
+			if (!availableProjects.isEmpty()) {
+				state.activeProject = availableProjects.get(0);
+			} else {
+				state.activeProject = null;
+			}
+			return;
+		}
 		LOGGER.info("Setting company {} and user {}:{} atomically", company.getName(), user.getId(), user.getUsername());
 		// Set company first
 		setActiveCompany(company);

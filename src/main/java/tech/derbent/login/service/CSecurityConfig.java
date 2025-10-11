@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import com.vaadin.flow.spring.security.VaadinWebSecurity;
 import tech.derbent.login.view.CCustomLoginView;
 import tech.derbent.session.service.CWebSessionService;
@@ -66,6 +67,7 @@ class CSecurityConfig extends VaadinWebSecurity {
 		CCompanyAwareAuthenticationFilter authenticationFilter = new CCompanyAwareAuthenticationFilter(authenticationManager);
 		authenticationFilter.setAuthenticationSuccessHandler(authenticationSuccessHandler);
 		authenticationFilter.setFilterProcessesUrl("/login");
+		authenticationFilter.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher("/login", "POST"));
 		// Replace the default authentication filter with our custom one
 		http.addFilterAt(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
 		// Configure custom authentication entry point to save requested URLs

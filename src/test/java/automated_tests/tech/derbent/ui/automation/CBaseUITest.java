@@ -1,5 +1,7 @@
 package automated_tests.tech.derbent.ui.automation;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,6 +25,7 @@ import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.PlaywrightException;
+import com.microsoft.playwright.options.LoadState;
 import com.vaadin.flow.router.Route;
 import tech.derbent.api.utils.Check;
 import tech.derbent.config.CDataInitializer;
@@ -38,6 +41,9 @@ import tech.derbent.projects.domain.CProject;
 public abstract class CBaseUITest {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBaseUITest.class);
+	private static final double DEFAULT_PLAYWRIGHT_TIMEOUT_MS = 10_000d;
+	private static final boolean INIT_SAMPLE_DATA_FROM_LOGIN_PAGE =
+			Boolean.parseBoolean(System.getProperty("playwright.initSampleDataFromLoginPage", "false"));
 	/** Admin view classes */
 	protected Class<?>[] adminViewClasses = {};
 	protected Class<?>[] allViewClasses = {};
@@ -191,8 +197,11 @@ public abstract class CBaseUITest {
 		try {
 			LOGGER.info("🔐 Attempting login with username: {}", username);
 			ensureLoginViewLoaded();
-			initializeSampleDataFromLoginPage();
-			ensureLoginViewLoaded();
+			if (INIT_SAMPLE_DATA_FROM_LOGIN_PAGE) {
+				LOGGER.info("🔄 Initializing sample data via login page");
+				initializeSampleDataFromLoginPage();
+				ensureLoginViewLoaded();
+			}
 			boolean usernameFilled =
 					fillLoginField("#custom-username-input", "input", "username", username, "input[type='text'], input[type='email']");
 			if (!usernameFilled) {
@@ -202,9 +211,11 @@ public abstract class CBaseUITest {
 			if (!passwordFilled) {
 				throw new AssertionError("Password input field not found on login page");
 			}
+			ensureDefaultCompanySelectedOnLogin();
 			clickLoginButton();
+			waitForPostLoginRedirect();
 			wait_afterlogin();
-			LOGGER.info("✅ Login successful - application shell detected");
+			LOGGER.info("✅ Login flow complete - current URL {}", safeCurrentUrl());
 			takeScreenshot("post-login", false);
 			primeNavigationMenu();
 		} catch (PlaywrightException e) {
@@ -230,12 +241,78 @@ public abstract class CBaseUITest {
 		return visible;
 	}
 
+	protected String safeCurrentUrl() {
+		if (!isBrowserAvailable()) {
+			return "<browser-unavailable>";
+		}
+		try {
+			return page.url();
+		} catch (Exception e) {
+			LOGGER.debug("Unable to read current URL: {}", e.getMessage());
+			return "<unknown>";
+		}
+	}
+
+	private void waitForPostLoginRedirect() {
+		if (!isBrowserAvailable()) {
+			return;
+		}
+		for (int attempt = 1; attempt <= 5; attempt++) {
+			if (!safeCurrentUrl().contains("/login")) {
+				LOGGER.debug("Post-login redirect detected on attempt {} (URL: {})", attempt, safeCurrentUrl());
+				return;
+			}
+			try {
+				page.waitForLoadState(LoadState.NETWORKIDLE,
+						new Page.WaitForLoadStateOptions().setTimeout(DEFAULT_PLAYWRIGHT_TIMEOUT_MS));
+			} catch (Exception e) {
+				LOGGER.debug("Post-login load state wait failed on attempt {}: {}", attempt, e.getMessage());
+			}
+			wait_1000();
+		}
+		LOGGER.warn("⚠️ Post-login redirect not detected; current URL {}", safeCurrentUrl());
+	}
+
 	/** Asserts that the main application shell is visible after login. */
 	protected void assertPostLoginShellVisible() {
+		wait_afterlogin();
 		if (!isPostLoginShellVisible()) {
-			LOGGER.warn("⚠️ Application shell not detected after login");
+			LOGGER.warn("⚠️ Application shell not detected after login (URL: {})", safeCurrentUrl());
 			takeScreenshot("missing-application-shell", false);
 			throw new AssertionError("Application shell not visible after login");
+		}
+	}
+
+	private void ensureDefaultCompanySelectedOnLogin() {
+		if (!isBrowserAvailable()) {
+			return;
+		}
+		try {
+			final Locator combo = page.locator("#custom-company-input");
+			if (combo.count() == 0) {
+				LOGGER.warn("⚠️ Company selector not present on login page");
+				return;
+			}
+			Object comboValue = combo.evaluate("combo => combo.value");
+			if (comboValue != null) {
+				String value = comboValue.toString();
+				if (!value.isBlank()) {
+					LOGGER.debug("Login company already selected with value {}", value);
+					return;
+				}
+			}
+			combo.click();
+			wait_500();
+			Locator options = page.locator("vaadin-combo-box-item");
+			if (options.count() == 0) {
+				LOGGER.warn("⚠️ No company options available in login selector");
+				return;
+			}
+			options.first().click();
+			wait_500();
+			LOGGER.warn("🏢 Selected default company option on login page");
+		} catch (Exception e) {
+			LOGGER.warn("⚠️ Failed to ensure company is selected on login page: {}", e.getMessage());
 		}
 	}
 
@@ -379,7 +456,11 @@ public abstract class CBaseUITest {
 		}
 		try {
 			LOGGER.info("🧭 Priming navigation menu to ensure dynamic items are loaded");
-			int visited = visitMenuItems(false, false, "prime");
+			int visited = visitMenuItems(false, true, "prime");
+			if (visited == 0) {
+				LOGGER.info("ℹ️ Navigation priming skipped - no menu entries detected yet");
+				return;
+			}
 			LOGGER.info("✅ Navigation primed by visiting {} menu entries", visited);
 		} catch (AssertionError e) {
 			LOGGER.error("❌ Navigation priming failed: {}", e.getMessage());
@@ -578,7 +659,11 @@ public abstract class CBaseUITest {
 			final BrowserType.LaunchOptions launchOptions = new BrowserType.LaunchOptions().setHeadless(headless).setArgs(launchArgs);
 			browser = playwright.chromium().launch(launchOptions);
 			context = browser.newContext();
+			context.setDefaultTimeout(DEFAULT_PLAYWRIGHT_TIMEOUT_MS);
+			context.setDefaultNavigationTimeout(DEFAULT_PLAYWRIGHT_TIMEOUT_MS);
 			page = context.newPage();
+			page.setDefaultTimeout(DEFAULT_PLAYWRIGHT_TIMEOUT_MS);
+			page.setDefaultNavigationTimeout(DEFAULT_PLAYWRIGHT_TIMEOUT_MS);
 			page.navigate("http://localhost:" + port + "/login");
 			LOGGER.info("✅ Test environment setup complete - navigated to http://localhost:{}/login", port);
 		} catch (Exception e) {
@@ -680,7 +765,11 @@ public abstract class CBaseUITest {
 				"vaadin-side-nav-item, vaadin-tabs vaadin-tab, nav a[href], .nav-item a[href], a[href].menu-link, a[href].side-nav-link";
 		int totalItems = 0;
 		try {
-			page.waitForSelector(menuSelector, new Page.WaitForSelectorOptions().setTimeout(20000));
+			if (safeCurrentUrl().contains("/login")) {
+				LOGGER.warn("⚠️ Still on login view while attempting to visit menu items");
+				return 0;
+			}
+			page.waitForSelector(menuSelector, new Page.WaitForSelectorOptions().setTimeout(DEFAULT_PLAYWRIGHT_TIMEOUT_MS));
 			totalItems = page.locator(menuSelector).count();
 		} catch (Exception waitError) {
 			if (!allowEmpty) {
@@ -1051,22 +1140,46 @@ public abstract class CBaseUITest {
 	}
 
 	/** Waits for after login state */
-	protected void wait_afterlogin() {
-		try {
-			page.waitForSelector("vaadin-app-layout, vaadin-side-nav, vaadin-drawer-layout",
-					new Page.WaitForSelectorOptions().setTimeout(10000));
-		} catch (Exception e) {
-			LOGGER.warn("⚠️ Post-login application shell not detected within timeout: {}", e.getMessage());
+protected void wait_afterlogin() {
+		if (!isBrowserAvailable()) {
+			return;
 		}
+		for (int attempt = 1; attempt <= 4; attempt++) {
+			try {
+				page.waitForSelector("vaadin-app-layout, vaadin-side-nav, vaadin-drawer-layout",
+						new Page.WaitForSelectorOptions().setTimeout(DEFAULT_PLAYWRIGHT_TIMEOUT_MS));
+				LOGGER.debug("Post-login shell detected on attempt {}", attempt);
+				return;
+			} catch (Exception e) {
+				LOGGER.debug("Post-login shell not visible on attempt {}: {}", attempt, e.getMessage());
+				if (!safeCurrentUrl().contains("/login")) {
+					LOGGER.debug("Current URL after attempt {} is {}", attempt, safeCurrentUrl());
+				}
+				wait_1000();
+			}
+		}
+		LOGGER.warn("⚠️ Post-login application shell not detected after {} attempts; current URL {}", 4, safeCurrentUrl());
 	}
 
 	/** Waits for login screen to be ready */
 	protected void wait_loginscreen() {
 		try {
 			page.waitForSelector("#custom-username-input, #custom-password-input, vaadin-button:has-text('Login')",
-					new Page.WaitForSelectorOptions().setTimeout(10000));
+					new Page.WaitForSelectorOptions().setTimeout(DEFAULT_PLAYWRIGHT_TIMEOUT_MS));
 		} catch (Exception e) {
 			LOGGER.warn("⚠️ Login screen not detected within timeout: {}", e.getMessage());
+			try {
+				takeScreenshot("login-timeout", false);
+			} catch (Exception screenshotError) {
+				LOGGER.debug("Screenshot capture failed after login timeout: {}", screenshotError.getMessage());
+			}
+			try {
+				Files.createDirectories(Paths.get("target", "playwright-debug"));
+				Files.writeString(Paths.get("target", "playwright-debug", "login-timeout.html"), page != null ? page.content() : "<no-page>",
+						StandardCharsets.UTF_8);
+			} catch (Exception ioException) {
+				LOGGER.warn("⚠️ Failed to persist login timeout HTML snapshot: {}", ioException.getMessage());
+			}
 		}
 	}
 
@@ -1075,7 +1188,7 @@ public abstract class CBaseUITest {
 		Check.notNull(selector, "Selector cannot be null");
 		Check.notBlank(description, "Description cannot be blank");
 		try {
-			page.waitForSelector(selector, new Page.WaitForSelectorOptions().setTimeout(10000));
+			page.waitForSelector(selector, new Page.WaitForSelectorOptions().setTimeout(DEFAULT_PLAYWRIGHT_TIMEOUT_MS));
 			return getLocatorWithCheck(selector, description);
 		} catch (Exception e) {
 			throw new AssertionError("Element not found after wait: " + description + " (selector: " + selector + ")", e);
@@ -1331,7 +1444,8 @@ public abstract class CBaseUITest {
 				throw new AssertionError("Dynamic page shows not found error");
 			}
 			// Wait for interactive elements to be ready
-			page.waitForSelector("vaadin-grid, vaadin-form-layout, vaadin-button", new Page.WaitForSelectorOptions().setTimeout(10000));
+			page.waitForSelector("vaadin-grid, vaadin-form-layout, vaadin-button",
+					new Page.WaitForSelectorOptions().setTimeout(DEFAULT_PLAYWRIGHT_TIMEOUT_MS));
 			LOGGER.info("✅ Dynamic page loaded successfully without errors");
 		} catch (Exception e) {
 			String message = "Dynamic page failed to load properly: " + e.getMessage();

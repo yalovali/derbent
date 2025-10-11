@@ -36,11 +36,10 @@ public final class CUserCompanySettingInitializerService extends CInitializerSer
                         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "privileges"));
                         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "isActive"));
                         detailSection.addScreenLine(CDetailLinesService.createSection("Administration"));
-                        detailSection
-                                        .addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "grantedByUserId"));
+                        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "grantedByUserId"));
                         detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
-                        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "createdDate"));
-                        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "lastModifiedDate"));
+                        addOptionalField(detailSection, "createdDate");
+                        addOptionalField(detailSection, "lastModifiedDate");
                         detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "id"));
                         detailSection.debug_printScreenInformation();
                         return detailSection;
@@ -61,11 +60,18 @@ public final class CUserCompanySettingInitializerService extends CInitializerSer
                         final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService,
                         final boolean showInQuickToolbar) throws Exception {
                 Check.notNull(project, "project cannot be null");
-                final CDetailSection detailSection = createBasicView(project);
-                final CGridEntity grid = createGridEntity(project);
-                initBase(ENTITY_CLASS, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
+                        final CDetailSection detailSection = createBasicView(project);
+                        final CGridEntity grid = createGridEntity(project);
+                        initBase(ENTITY_CLASS, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
                                 "Relations.Company Memberships", "Company Membership Management",
                                 "Manage user memberships and roles within companies", showInQuickToolbar);
         }
-}
 
+        private static void addOptionalField(final CDetailSection detailSection, final String fieldName) {
+                try {
+                        detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, fieldName));
+                } catch (final NoSuchFieldException ex) {
+                        LOGGER.debug("Skipping optional field {} for {}", fieldName, ENTITY_CLASS.getSimpleName());
+                }
+        }
+}
