@@ -23,7 +23,7 @@ import tech.derbent.api.roles.domain.CUserCompanyRole;
 import tech.derbent.api.roles.domain.CUserProjectRole;
 import tech.derbent.api.roles.service.CUserCompanyRoleInitializerService;
 import tech.derbent.api.roles.service.CUserCompanyRoleService;
-import tech.derbent.api.roles.service.CUserProjectRoleInitizerService;
+import tech.derbent.api.roles.service.CUserProjectRoleInitializerService;
 import tech.derbent.api.roles.service.CUserProjectRoleService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
@@ -59,6 +59,7 @@ import tech.derbent.orders.service.CApprovalStatusInitializerService;
 import tech.derbent.orders.service.CApprovalStatusService;
 import tech.derbent.orders.service.CCurrencyInitializerService;
 import tech.derbent.orders.service.CCurrencyService;
+import tech.derbent.orders.service.COrderApprovalInitializerService;
 import tech.derbent.orders.service.COrderInitializerService;
 import tech.derbent.orders.service.COrderService;
 import tech.derbent.orders.service.COrderStatusInitializerService;
@@ -81,7 +82,9 @@ import tech.derbent.session.service.ISessionService;
 import tech.derbent.setup.service.CSystemSettingsInitializerService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserType;
+import tech.derbent.users.service.CUserCompanySettingInitializerService;
 import tech.derbent.users.service.CUserInitializerService;
+import tech.derbent.users.service.CUserProjectSettingsInitializerService;
 import tech.derbent.users.service.CUserProjectSettingsService;
 import tech.derbent.users.service.CUserService;
 import tech.derbent.users.service.CUserTypeInitializerService;
@@ -938,11 +941,14 @@ public class CDataInitializer {
 					CCompanyInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
 					CDecisionInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
 					CMeetingInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, true);
-					COrderInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+                                        COrderInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+                                        COrderApprovalInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
 					CProjectInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, true);
 					CRiskInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
-					CUserProjectRoleInitizerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
-					CUserCompanyRoleInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+                                        CUserProjectRoleInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+                                        CUserCompanyRoleInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+                                        CUserProjectSettingsInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+                                        CUserCompanySettingInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
 					// Type/Status InitializerServices
 					CActivityStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
 					CActivityTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
@@ -956,8 +962,7 @@ public class CDataInitializer {
 					COrderStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
 					COrderTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
 					CRiskStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
-					CUserTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
-					// TODO: Add similar calls for all other InitializerServices (user types, priorities, etc.)
+                                        CUserTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
 					// Project-specific type and configuration entities
 					initializeSampleMeetingStatuses(project);
 					initializeSampleActivityStatuses(project);
