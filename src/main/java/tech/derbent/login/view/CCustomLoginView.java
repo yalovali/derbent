@@ -100,24 +100,19 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		String redirectView = "home";
 		// Get company ID as String for JavaScript (Vaadin cannot encode Long to JSON)
 		String companyId = String.valueOf(selectedCompany.getId());
-		// Create form and submit to Spring Security endpoint
-		// CRITICAL: The form submission MUST cause a full page reload for the redirect to work
-		// We achieve this by ensuring the form targets the current window and submits traditionally
-		getElement().executeJs(
-				"const form = document.createElement('form');" + "form.method = 'POST';" + "form.action = window.location.origin + '/login';" + // Use
-																																				// absolute
-																																				// URL
-						"form.target = '_top';" + // Force full page navigation
-						"const usernameInput = document.createElement('input');" + "usernameInput.type = 'hidden';"
-						+ "usernameInput.name = 'username';" + "usernameInput.value = $0;" + "form.appendChild(usernameInput);"
-						+ "const passwordInput = document.createElement('input');" + "passwordInput.type = 'hidden';"
-						+ "passwordInput.name = 'password';" + "passwordInput.value = $1;" + "form.appendChild(passwordInput);"
-						+ "const companyInput = document.createElement('input');" + "companyInput.type = 'hidden';"
-						+ "companyInput.name = 'companyId';" + "companyInput.value = $2;" + "form.appendChild(companyInput);"
-						+ "const redirectInput = document.createElement('input');" + "redirectInput.type = 'hidden';"
-						+ "redirectInput.name = 'redirect';" + "redirectInput.value = $3;" + "form.appendChild(redirectInput);"
-						+ "document.body.appendChild(form);" + "form.submit();",
-				username, password, companyId, redirectView);
+		// CRITICAL FIX: In Vaadin, we need to ensure the form submission causes a REAL page navigation
+		// The issue is that Vaadin's client-side intercepts form submissions
+		// Solution: Add vaadin-router-ignore attribute to force traditional form submission
+		getElement().executeJs("const form = document.createElement('form');" + "form.method = 'POST';" + "form.action = '/login';"
+				+ "form.setAttribute('vaadin-router-ignore', '');" + // Tell Vaadin to NOT intercept this form
+				"const usernameInput = document.createElement('input');" + "usernameInput.type = 'hidden';" + "usernameInput.name = 'username';"
+				+ "usernameInput.value = $0;" + "form.appendChild(usernameInput);" + "const passwordInput = document.createElement('input');"
+				+ "passwordInput.type = 'hidden';" + "passwordInput.name = 'password';" + "passwordInput.value = $1;"
+				+ "form.appendChild(passwordInput);" + "const companyInput = document.createElement('input');" + "companyInput.type = 'hidden';"
+				+ "companyInput.name = 'companyId';" + "companyInput.value = $2;" + "form.appendChild(companyInput);"
+				+ "const redirectInput = document.createElement('input');" + "redirectInput.type = 'hidden';" + "redirectInput.name = 'redirect';"
+				+ "redirectInput.value = $3;" + "form.appendChild(redirectInput);" + "document.body.appendChild(form);" + "form.submit();", username,
+				password, companyId, redirectView);
 	}
 
 	private void setupForm() {
