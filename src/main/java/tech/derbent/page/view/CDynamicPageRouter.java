@@ -16,7 +16,6 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CAbstractPage;
 import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.page.service.CPageEntityService;
-import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.session.service.ISessionService;
@@ -80,18 +79,9 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 				pageEntityService.getById(pageEntityId).orElseThrow(() -> new IllegalStateException("No page found for ID: " + pageEntityId));
 		// Store the current page entity for title provider
 		currentPageEntity = pageEntity;
-		// Verify the page is active
-		Check.isTrue(pageEntity.getIsActive(), "Page entity must be active");
-		// Check authentication if required
 		if (pageEntity.getRequiresAuthentication()) {
 			sessionService.getActiveUser().orElseThrow(() -> new IllegalStateException("No active user found"));
 		}
-		// Check project context if needed
-		Check.notNull(pageEntity.getProject(), "Page entity project cannot be null");
-		CProject activeProjectOpt = sessionService.getActiveProject()
-				.orElseThrow(() -> new IllegalStateException("No active project found when loading page: " + pageEntity.getPageTitle()));
-		Check.isTrue(pageEntity.getProject().getId().equals(activeProjectOpt.getId()), "Page project mismatch.");
-		// Create and display the dynamic page
 		try {
 			// Check if this page has grid and detail sections configured
 			if (hasGridAndDetailConfiguration(pageEntity)) {
@@ -101,14 +91,12 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 				Check.notNull(dynamicPageViewWithSections, "Dynamic page view with sections cannot be null");
 				removeAll();
 				add(dynamicPageViewWithSections);
-				LOGGER.info("Successfully loaded dynamic page with sections: {} with ID: {}", pageEntity.getPageTitle(), pageEntityId);
 			} else {
 				LOGGER.debug("Creating standard dynamic page view for: {}", pageEntity.getPageTitle());
 				CDynamicPageView dynamicPageView = new CDynamicPageView(pageEntity, sessionService, detailSectionService);
 				Check.notNull(dynamicPageView, "Dynamic page view cannot be null");
 				removeAll();
 				add(dynamicPageView);
-				LOGGER.info("Successfully loaded dynamic page: {} with ID: {}", pageEntity.getPageTitle(), pageEntityId);
 			}
 		} catch (Exception e) {
 			LOGGER.error("Failed to create dynamic page view for: {}", pageEntity.getPageTitle(), e);
@@ -119,11 +107,8 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 	@Override
 	public void setParameter(com.vaadin.flow.router.BeforeEvent event, Long parameter) {
 		pageEntityId = parameter;
-		// LOGGER.debug("Dynamic page router called with page entity ID: {}", parameter);
 	}
 
 	@Override
-	protected void setupToolbar() {
-		// TODO Auto-generated method stub
-	}
+	protected void setupToolbar() {}
 }

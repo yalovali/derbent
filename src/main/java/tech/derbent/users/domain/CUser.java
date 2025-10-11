@@ -43,7 +43,7 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 	@JoinColumn (name = "company_role_id", nullable = true)
 	@AMetaData (
 			displayName = "Company Role", required = false, readOnly = false, description = "User's role within the company", hidden = false,
-			order = 16, setBackgroundFromColor = true, useIcon = true
+			order = 16, setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CUserCompanyRoleService"
 	)
 	private CUserCompanyRole companyRole;
 	@AMetaData (

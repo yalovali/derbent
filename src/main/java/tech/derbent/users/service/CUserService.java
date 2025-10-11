@@ -4,7 +4,6 @@ import java.time.Clock;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,17 +101,6 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 		return ((IUserRepository) repository).findByCompanyId(currentCompany.getId());
 	}
 
-	/** Find user by ID with company setting eagerly loaded to avoid LazyInitializationException in UI. This method should be used when the UI needs
-	 * to access user's company settings and company data.
-	 * @param userId the user ID
-	 * @return Optional containing the user with company setting loaded, or empty if not found */
-	@Transactional (readOnly = true)
-	@PreAuthorize ("permitAll()")
-	public Optional<CUser> findByIdWithCompanySetting(final Long userId) {
-		Check.notNull(userId, "User ID must not be null");
-		return ((IUserRepository) repository).findByIdWithCompanySetting(userId);
-	}
-
 	/** Finds a user by login username.
 	 * @param login the login username
 	 * @return the CUser if found, null otherwise */
@@ -181,9 +169,8 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	@Override
 	@Transactional (readOnly = true)
 	public Page<CUser> list(final Pageable pageable) {
-		// Get current company from session - required
 		CCompany currentCompany = getCurrentCompany();
-		// LOGGER.debug("Filtering users by company: {}", currentCompany.getName());
+		LOGGER.debug("Listing users for company: {}", currentCompany.getName());
 		return ((IUserRepository) repository).findByCompanyId(currentCompany.getId(), pageable);
 	}
 

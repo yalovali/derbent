@@ -123,8 +123,6 @@ public class CDataInitializer {
 	private static final String STATUS_ON_HOLD = "On Hold";
 	// User Login Names
 	private static final String USER_ADMIN = "admin";
-	private static final String USER_MANAGER = "mkaradeniz";
-	private static final String USER_MEMBER_AYSE = "ademir";
 	private final CActivityService activityService;
 	private final CActivityStatusService activityStatusService;
 	private final CActivityTypeService activityTypeService;

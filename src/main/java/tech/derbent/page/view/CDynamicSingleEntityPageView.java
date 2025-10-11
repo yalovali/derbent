@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CCrudToolbar;
@@ -54,9 +53,9 @@ public class CDynamicSingleEntityPageView extends CDynamicPageViewWithSections {
 	}
 
 	@Override
-	protected CCrudToolbar<?> createCrudToolbar(final CEnhancedBinder<?> typedBinder) {
+	protected CCrudToolbar<?> createCrudToolbar() {
 		// Create the base toolbar using parent implementation
-		CCrudToolbar<?> toolbar = super.createCrudToolbar(typedBinder);
+		CCrudToolbar<?> toolbar = super.createCrudToolbar();
 		// Configure button visibility based on our settings
 		if (toolbar != null) {
 			try {

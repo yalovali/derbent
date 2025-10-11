@@ -4,6 +4,8 @@ import java.time.Clock;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,6 +71,14 @@ public class CUserCompanyRoleService extends CAbstractNamedEntityService<CUserCo
 	public List<CUserCompanyRole> findByCompany(CCompany selectedCompany) {
 		Check.notNull(selectedCompany, "Company cannot be null");
 		return ((IUserCompanyRoleRepository) repository).findByCompany(selectedCompany);
+	}
+
+	@Override
+	@Transactional (readOnly = true)
+	public Page<CUserCompanyRole> list(final Pageable pageable) {
+		final CCompany company = sessionService.getActiveCompany()
+				.orElseThrow(() -> new IllegalStateException("No active company selected, cannot list entities without company context"));
+		return ((IUserCompanyRoleRepository) repository).listByCompany(company, pageable);
 	}
 
 	@Override

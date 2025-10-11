@@ -11,7 +11,6 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IEntityUpdateListener;
 import tech.derbent.api.services.CAbstractService;
@@ -26,7 +25,6 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCrudToolbar.class);
 	private static final long serialVersionUID = 1L;
-	private final CEnhancedBinder<EntityClass> binder;
 	private CButton createButton;
 	private EntityClass currentEntity;
 	private CButton deleteButton;
@@ -40,13 +38,7 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	private CButton saveButton;
 	private final List<IEntityUpdateListener> updateListeners = new ArrayList<>();
 
-	/** Creates a comprehensive CRUD toolbar.
-	 * @param binder        the binder for form validation and data binding
-	 * @param entityService the service for CRUD operations
-	 * @param entityClass   the entity class type */
-	public CCrudToolbar(final CEnhancedBinder<EntityClass> binder, final CAbstractService<EntityClass> entityService,
-			final Class<EntityClass> entityClass) {
-		this.binder = binder;
+	public CCrudToolbar(final CAbstractService<EntityClass> entityService, final Class<EntityClass> entityClass) {
 		this.entityService = entityService;
 		this.entityClass = entityClass;
 		setSpacing(true);
@@ -161,16 +153,17 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	 * @throws Exception */
 	private void handleSave() throws Exception {
 		try {
+			LOGGER.debug("Attempting to save entity: {}", entityClass.getSimpleName());
 			if (currentEntity == null) {
 				showErrorNotification("Cannot save: No entity selected.");
 				return;
 			}
-			binder.writeBean(currentEntity);
+			// binder.writeBean(currentEntity);
 			// Save entity
 			final EntityClass savedEntity = entityService.save(currentEntity);
 			currentEntity = savedEntity;
 			// Re-bind the saved entity to refresh the form with updated data (like generated IDs, timestamps)
-			binder.setBean(savedEntity);
+			// binder.setBean(savedEntity);
 			updateButtonStates();
 			showSuccessNotification("Data saved successfully");
 			// Notify listeners
@@ -187,6 +180,7 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 
 	/** Notifies all listeners that an entity was deleted. */
 	private void notifyListenersDeleted(final EntityClass entity) {
+		LOGGER.debug("Notifying listeners of entity deletion: {}", entityClass.getSimpleName());
 		updateListeners.forEach(listener -> {
 			try {
 				listener.onEntityDeleted(entity);
@@ -199,6 +193,7 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 
 	/** Notifies all listeners that an entity was saved. */
 	private void notifyListenersSaved(final EntityClass entity) {
+		LOGGER.debug("Notifying listeners of entity save: {}", entityClass.getSimpleName());
 		updateListeners.forEach(listener -> {
 			try {
 				listener.onEntitySaved(entity);
@@ -212,14 +207,15 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	/** Performs the actual delete operation after confirmation. */
 	private void performDelete() {
 		try {
+			LOGGER.debug("Performing delete operation for entity: {}", entityClass.getSimpleName());
 			EntityClass entityToDelete = currentEntity;
 			entityService.delete(currentEntity);
 			LOGGER.info("Entity deleted successfully: {} with ID: {}", entityClass.getSimpleName(), entityToDelete.getId());
 			// Clear current entity
 			currentEntity = null;
-			if (binder != null) {
-				binder.setBean(null);
-			}
+			// if (binder != null) {
+			// binder.setBean(null);
+			// }
 			updateButtonStates();
 			showSuccessNotification("Entity deleted successfully");
 			// Notify listeners
@@ -245,12 +241,13 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	 * @param entity the current entity */
 	@SuppressWarnings ("unchecked")
 	public void setCurrentEntity(final Object entity) {
+		LOGGER.debug("Setting current entity in toolbar: {}", entity != null ? entityClass.getSimpleName() : "null");
 		currentEntity = (EntityClass) entity;
 		updateButtonStates();
 		// Bind the entity to the form if available
 		Check.notNull(entityClass, "Entity class is not set");
 		try {
-			binder.setBean((EntityClass) entity);
+			// binder.setBean((EntityClass) entity);
 		} catch (Exception e) {
 			LOGGER.error("Error binding entity to form: {}", e.getMessage());
 			throw e;

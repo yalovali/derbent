@@ -84,7 +84,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 	})
 	protected CCrudToolbar<EntityClass> createCrudToolbar(final CEnhancedBinder<EntityClass> typedBinder, final EntityClass typedEntity) {
 		// Use static factory method to create toolbar
-		CCrudToolbar<EntityClass> toolbar = new CCrudToolbar(typedBinder, entityService, entityClass);
+		CCrudToolbar<EntityClass> toolbar = new CCrudToolbar(entityService, entityClass);
 		toolbar.setCurrentEntity(typedEntity);
 		toolbar.setNewEntitySupplier(this::createNewEntityInstance);
 		toolbar.setRefreshCallback((currentEntity) -> {

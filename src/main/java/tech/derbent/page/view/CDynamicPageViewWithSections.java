@@ -10,7 +10,6 @@ import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityOfProject;
 import tech.derbent.api.interfaces.IEntityUpdateListener;
@@ -104,9 +103,10 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 	@SuppressWarnings ({
 			"unchecked", "rawtypes"
 	})
-	protected CCrudToolbar<?> createCrudToolbar(final CEnhancedBinder<?> typedBinder) {
+	protected CCrudToolbar<?> createCrudToolbar() {
+		LOGGER.debug("Creating CRUD toolbar for entity type: {}", entityClass != null ? entityClass.getSimpleName() : "null");
 		// Use static factory method to create toolbar
-		CCrudToolbar toolbar = new CCrudToolbar(typedBinder, entityService, entityClass);
+		CCrudToolbar toolbar = new CCrudToolbar(entityService, entityClass);
 		toolbar.setCurrentEntity(null);
 		toolbar.setNewEntitySupplier(() -> createNewEntityInstance());
 		toolbar.setRefreshCallback((currentEntity) -> {
@@ -214,6 +214,7 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 	/** Initialize the entity service based on the configured entity type. */
 	protected void initializeEntityService() {
 		try {
+			LOGGER.debug("Initializing entity service for page: {}", pageEntity.getPageTitle());
 			// Try to get the service bean from the configured grid entity
 			CGridEntity gridEntity = pageEntity.getGridEntity();
 			Check.notNull(gridEntity, "Grid entity cannot be null");
@@ -238,6 +239,7 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 
 	/** Initialize the page layout and content. */
 	protected void initializePage() {
+		LOGGER.debug("Initializing dynamic page view with sections for: {}", pageEntity.getPageTitle());
 		setSizeFull();
 		if (pageEntity.getPageTitle() != null && !pageEntity.getPageTitle().trim().isEmpty()) {
 			getElement().executeJs("document.title = $0", pageEntity.getPageTitle());
@@ -275,23 +277,29 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 
 	/** Handle entity selection events from the grid. */
 	private void onEntitySelected(CComponentGridEntity.SelectionChangeEvent event) throws Exception {
-		Check.notNull(event, "Selection change event cannot be null");
-		CEntityDB<?> selectedEntity = event.getSelectedItem();
-		if (selectedEntity == null) {
-			// No selection - clear details
-			clearEntityDetails();
-			setCurrentEntity(null);
-			populateForm();
-		} else {
-			LOGGER.debug("Entity selected: {}", selectedEntity != null ? selectedEntity.toString() + " ID: " + selectedEntity.getId() : "null");
-			Field viewNameField = selectedEntity.getClass().getField("VIEW_NAME");
-			String entityViewName = (String) viewNameField.get(null);
-			// Performance optimization: check if we can reuse existing components
-			if (!canReuseExistingComponents(entityViewName, selectedEntity.getClass())) {
-				rebuildEntityDetails(entityViewName);
+		try {
+			LOGGER.debug("Handling entity selection event");
+			Check.notNull(event, "Selection change event cannot be null");
+			CEntityDB<?> selectedEntity = event.getSelectedItem();
+			if (selectedEntity == null) {
+				// No selection - clear details
+				clearEntityDetails();
+				setCurrentEntity(null);
+				populateForm();
+			} else {
+				LOGGER.debug("Entity selected: {}", selectedEntity != null ? selectedEntity.toString() + " ID: " + selectedEntity.getId() : "null");
+				Field viewNameField = selectedEntity.getClass().getField("VIEW_NAME");
+				String entityViewName = (String) viewNameField.get(null);
+				// Performance optimization: check if we can reuse existing components
+				if (!canReuseExistingComponents(entityViewName, selectedEntity.getClass())) {
+					rebuildEntityDetails(entityViewName);
+				}
+				setCurrentEntity(selectedEntity);
+				populateForm();
 			}
-			setCurrentEntity(selectedEntity);
-			populateForm();
+		} catch (Exception e) {
+			LOGGER.error("Error handling entity selection", e);
+			throw e;
 		}
 	}
 
@@ -300,6 +308,8 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 	 * @throws NoSuchFieldException */
 	@Override
 	public void populateForm() throws Exception {
+		LOGGER.debug("Populating form for entity: {}", getCurrentEntity() != null
+				? getCurrentEntity().getClass().getSimpleName() + " ID: " + ((CEntityDB<?>) getCurrentEntity()).getId() : "null");
 		super.populateForm();
 		Check.notNull(baseDetailsLayout, "Base details layout is not initialized");
 		Check.notNull(pageEntity.getDetailSection(), "Detail section cannot be null");
@@ -310,9 +320,9 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 			"unchecked", "rawtypes"
 	})
 	private void rebuildEntityDetails(String entityViewName) throws Exception {
+		LOGGER.debug("Rebuilding entity details for view: {}", entityViewName);
 		clearEntityDetails();
-		currentBinder = new CEnhancedBinder(entityClass);
-		crudToolbar = createCrudToolbar(currentBinder);
+		crudToolbar = createCrudToolbar();
 		currentEntityViewName = entityViewName;
 		splitBottomLayout.addComponentAsFirst(crudToolbar);
 		buildScreen(entityViewName, (Class) entityClass, baseDetailsLayout);
@@ -326,6 +336,8 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 	/** Reloads entity values into existing components without rebuilding the UI */
 	@Override
 	public void setCurrentEntity(Object entity) {
+		LOGGER.debug("Setting current entity: {}",
+				entity != null ? entity.getClass().getSimpleName() + " ID: " + ((CEntityDB<?>) entity).getId() : "null");
 		super.setCurrentEntity(entity);
 		currentEntityType = entity.getClass();
 		crudToolbar.setCurrentEntity(entity);

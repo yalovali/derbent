@@ -2,6 +2,8 @@ package tech.derbent.api.roles.service;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import tech.derbent.api.roles.domain.CUserCompanyRole;
@@ -16,6 +18,8 @@ public interface IUserCompanyRoleRepository extends IAbstractNamedRepository<CUs
 	List<CUserCompanyRole> findAdminRoles();
 	@Query ("SELECT ucr FROM CUserCompanyRole ucr LEFT JOIN company WHERE ucr.company = :company")
 	List<CUserCompanyRole> findByCompany(@Param ("company") CCompany company);
+	@Query ("SELECT ucr FROM CUserCompanyRole ucr LEFT JOIN company WHERE ucr.company = :company")
+	Page<CUserCompanyRole> listByCompany(@Param ("company") CCompany company, Pageable pageable);
 	@Query ("SELECT ucr FROM CUserCompanyRole ucr LEFT JOIN FETCH ucr.company WHERE ucr.id = :id")
 	Optional<CUserCompanyRole> findByIdWithRelationships(@Param ("id") Long id);
 	@Query ("SELECT ucr FROM CUserCompanyRole ucr JOIN ucr.readAccessPages rap WHERE rap = :pageName")

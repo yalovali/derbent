@@ -222,6 +222,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 
 	@Transactional (readOnly = true)
 	public Page<EntityClass> list(final Pageable pageable) {
+		LOGGER.debug("Listing entities without filter specification");
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		final Page<EntityClass> entities = repository.findAll(safePage);
 		return entities;
@@ -229,7 +230,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 
 	@Transactional (readOnly = true)
 	public Page<EntityClass> list(final Pageable pageable, final Specification<EntityClass> filter) {
-		LOGGER.debug("Listing entities with filter specification");
+		LOGGER.debug("Filter specification: {}", filter);
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		final Page<EntityClass> page = repository.findAll(filter, safePage);
 		return page;
@@ -237,6 +238,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 
 	@Transactional (readOnly = true)
 	public Page<EntityClass> list(final Pageable pageable, final String searchText) {
+		LOGGER.debug("Search text: {}", searchText);
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		final String term = (searchText == null) ? "" : searchText.trim();
 		final List<EntityClass> all = repository.findAll(Pageable.unpaged()).getContent();

@@ -38,15 +38,11 @@ public class CWebSessionService implements ISessionService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CWebSessionService.class);
 	private static final String PROJECT_CHANGE_LISTENERS_KEY = CWebSessionService.class.getName() + ".projectChangeListeners";
 	private static final String PROJECT_LIST_CHANGE_LISTENERS_KEY = CWebSessionService.class.getName() + ".projectListChangeListeners";
-	private final AuthenticationContext authenticationContext;
 	private CLayoutService layoutService;
 	private final IProjectRepository projectRepository;
-	private final IUserRepository userRepository;
 
 	public CWebSessionService(final AuthenticationContext authenticationContext, final IUserRepository userRepository,
 			final IProjectRepository projectRepository) {
-		this.authenticationContext = authenticationContext;
-		this.userRepository = userRepository;
 		this.projectRepository = projectRepository;
 	}
 

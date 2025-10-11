@@ -459,26 +459,26 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	})
 	private void loadDataFromService(String serviceBeanName, CProject project) {
 		try {
+			LOGGER.debug("Loading data from service: {} for project: {}", serviceBeanName, project != null ? project.getName() : "null");
 			Check.notNull(serviceBeanName, "Service bean name is null");
 			Check.notBlank(serviceBeanName, "Service bean name is blank");
 			Check.notNull(project, "Project is null");
 			Check.notNull(ApplicationContextProvider.getApplicationContext(), "ApplicationContext is not available");
-			Object serviceBean = ApplicationContextProvider.getApplicationContext().getBean(serviceBeanName);
+			CAbstractService serviceBean = (CAbstractService) ApplicationContextProvider.getApplicationContext().getBean(serviceBeanName);
 			Check.notNull(serviceBean, "Service bean not found: " + serviceBeanName);
 			Check.instanceOf(serviceBean, CAbstractService.class, "Service bean does not extend CAbstractService: " + serviceBeanName);
-			CAbstractService service = (CAbstractService) serviceBean;
 			// Use pageable to get data - limit to first 1000 records for performance
 			PageRequest pageRequest = PageRequest.of(0, 1000);
-			java.util.List data;
+			List data;
 			// Check if this is a project-specific service and filter by the gridEntity's project
-			if (service instanceof tech.derbent.api.services.CEntityOfProjectService) {
-				tech.derbent.api.services.CEntityOfProjectService projectService = (tech.derbent.api.services.CEntityOfProjectService) service;
+			if (serviceBean instanceof CEntityOfProjectService) {
+				CEntityOfProjectService projectService = (CEntityOfProjectService) serviceBean;
 				LOGGER.debug("Using project-specific service to load data for project: {}", project.getName());
 				data = projectService.listByProject(project, pageRequest).getContent();
 			} else {
 				// For non-project services, use regular list method
 				LOGGER.debug("Using regular service to load data (no project filtering)");
-				data = service.list(pageRequest).getContent();
+				data = serviceBean.list(pageRequest).getContent();
 			}
 			grid.setItems(data != null ? data : Collections.emptyList());
 		} catch (Exception e) {
