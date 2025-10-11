@@ -1,92 +1,141 @@
 #!/bin/bash
 
 # Playwright UI Test Automation Runner for Derbent Application
-# This script runs the sample data menu navigation test: login screen, login, navigate all generated menu items
+# Provides smoke and journey flows that can run in headless environments without an X server.
 
 set -e
 
+PLAYWRIGHT_HEADLESS="${PLAYWRIGHT_HEADLESS:-true}"
+DEFAULT_TEST="login"
+
 echo "🚀 Derbent Playwright UI Test Automation Runner"
 echo "==============================================="
+echo "🎯 Default test: ${DEFAULT_TEST}"
+echo "🎭 Headless mode: ${PLAYWRIGHT_HEADLESS}"
 
-# Function to install Playwright browsers
 install_playwright_browsers() {
-    echo "🔄 Installing Playwright browsers..."
-    mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install" > /dev/null 2>&1 || true
-    echo "⚠️ Browser installation completed (tests will run in headless mode if needed)"
+    echo "🔄 Ensuring Playwright browsers are installed..."
+    mvn exec:java -e -Dexec.mainClass=com.microsoft.playwright.CLI -Dexec.args="install" >/dev/null 2>&1 || true
+    echo "✅ Browser installation step completed"
 }
 
-# Function to run the menu navigation test
-run_menu_navigation_test() {
-    echo "🧪 Running Sample Data Menu Navigation Test..."
-    echo "=================================="
-    echo "This test will:"
-    echo "  1. Load sample data"
-    echo "  2. Display login screen"
-    echo "  3. Login to the application"
-    echo "  4. Navigate all generated menu items"
-    echo "  5. Generate screenshots for each step"
-    echo ""
-    
-    # Create screenshots directory
-    mkdir -p target/screenshots
-    
-    # Install Playwright browsers if needed
-    install_playwright_browsers
-    
-    # Run the test with Playwright-specific profile
-    if mvn test -Dtest="automated_tests.tech.derbent.ui.automation.CSampleDataMenuNavigationTest" -Dspring.profiles.active=test -Dplaywright.headless=true; then
-        echo "✅ Menu navigation test completed successfully!"
-        
-        # Show screenshot count
-        screenshot_count=$(find target/screenshots -name "*.png" 2>/dev/null | wc -l)
-        if [[ $screenshot_count -gt 0 ]]; then
-            echo "📸 Generated $screenshot_count Playwright screenshots in target/screenshots/"
-            echo ""
-            echo "Screenshots include:"
-            find target/screenshots -name "*.png" -type f -printf "  - %f\n" | sort
-        fi
-        
+clean_artifacts() {
+    echo "🧹 Cleaning Playwright artifacts..."
+    rm -rf target/screenshots test-results/playwright >/dev/null 2>&1 || true
+    echo "✅ Cleanup complete"
+}
+
+summarize_screenshots() {
+    local count
+    count=$(find target/screenshots -name "*.png" 2>/dev/null | wc -l | tr -d '[:space:]')
+    if [[ -n "${count}" && "${count}" != "0" ]]; then
+        echo "📸 Generated ${count} screenshots in target/screenshots/"
+        find target/screenshots -name "*.png" -type f -printf "  - %f\n" | sort
     else
-        echo "❌ Menu navigation test failed!"
-        
-        # Show any screenshots that were taken
-        screenshot_count=$(find target/screenshots -name "*.png" 2>/dev/null | wc -l)
-        if [[ $screenshot_count -gt 0 ]]; then
-            echo "📸 Debug screenshots available in target/screenshots/ ($screenshot_count files)"
-        fi
-        
+        echo "ℹ️ No screenshots were generated for this run"
+    fi
+}
+
+prepare_run() {
+    mkdir -p target/screenshots
+    install_playwright_browsers
+}
+
+run_login_smoke_test() {
+    echo ""
+    echo "🧪 Running Login Smoke Test..."
+    echo "------------------------------"
+    echo "This test will:"
+    echo "  1. Start the application with in-memory H2 database"
+    echo "  2. Load the login page"
+    echo "  3. Authenticate with default credentials"
+    echo "  4. Verify the main application shell appears"
+    echo ""
+
+    prepare_run
+
+    if mvn test -Dtest="automated_tests.tech.derbent.ui.automation.CSimpleLoginTest" \
+        -Dspring.profiles.active=test \
+        -Dplaywright.headless="${PLAYWRIGHT_HEADLESS}"; then
+        echo "✅ Login smoke test completed successfully!"
+        summarize_screenshots
+    else
+        echo "❌ Login smoke test failed"
+        summarize_screenshots
         return 1
     fi
 }
 
-# Show usage information
+run_menu_navigation_test() {
+    echo ""
+    echo "🧪 Running Sample Data Menu Navigation Test..."
+    echo "---------------------------------------------"
+    echo "This test will:"
+    echo "  1. Load sample data"
+    echo "  2. Authenticate with default credentials"
+    echo "  3. Navigate across all generated menu items"
+    echo "  4. Capture screenshots for each entity view"
+    echo ""
+
+    prepare_run
+
+    if mvn test -Dtest="automated_tests.tech.derbent.ui.automation.CSampleDataMenuNavigationTest" \
+        -Dspring.profiles.active=test \
+        -Dplaywright.headless="${PLAYWRIGHT_HEADLESS}"; then
+        echo "✅ Menu navigation test completed successfully!"
+        summarize_screenshots
+    else
+        echo "❌ Menu navigation test failed"
+        summarize_screenshots
+        return 1
+    fi
+}
+
 show_usage() {
-    cat << EOF
+    cat <<EOF
 
-Usage: ./run-playwright-tests.sh [OPTION]
+Usage: ./run-playwright-tests.sh [COMMAND]
 
-Run Playwright UI tests for the Derbent application.
+Run Playwright UI tests for the Derbent application. The default command is 'login'.
 
-OPTIONS:
-    (no args)       Run the sample data menu navigation test (default)
-    menu            Run the sample data menu navigation test
-    clean           Clean test artifacts (screenshots, reports)
-    install         Install Playwright browsers
+COMMANDS:
+    login           Run the headless login smoke test (default)
+    menu            Run the sample data menu navigation journey
+    clean           Remove Playwright screenshots and cached reports
+    install         Install or update Playwright browsers
     help            Show this help message
 
-DESCRIPTION:
-    The menu navigation test performs the following:
-    1. Initialize sample data in the database
-    2. Display the login screen
-    3. Login with test credentials
-    4. Navigate through all dynamically generated menu items
-    5. Capture screenshots at each step
-
-    Screenshots are saved to: target/screenshots/
+ENVIRONMENT VARIABLES:
+    PLAYWRIGHT_HEADLESS    Set to "false" to attempt a visible browser (requires X server)
 
 EXAMPLES:
-    ./run-playwright-tests.sh              # Run menu navigation test
-    ./run-playwright-tests.sh menu         # Run menu navigation test (explicit)
-    ./run-playwright-tests.sh clean        # Clean up test artifacts
-    ./run-playwright-tests.sh install      # Install Playwright browsers
+    ./run-playwright-tests.sh
+    ./run-playwright-tests.sh menu
+    PLAYWRIGHT_HEADLESS=false ./run-playwright-tests.sh login
 
+EOF
+}
+
+COMMAND="${1:-${DEFAULT_TEST}}"
+case "${COMMAND}" in
+    ""|login)
+        run_login_smoke_test
+        ;;
+    menu)
+        run_menu_navigation_test
+        ;;
+    clean)
+        clean_artifacts
+        ;;
+    install)
+        install_playwright_browsers
+        ;;
+    help|--help|-h)
+        show_usage
+        ;;
+    *)
+        echo "❌ Unknown command: ${COMMAND}"
+        show_usage
+        exit 1
+        ;;
+esac

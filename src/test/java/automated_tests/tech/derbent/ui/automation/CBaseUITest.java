@@ -1,14 +1,17 @@
 package automated_tests.tech.derbent.ui.automation;
 
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -22,6 +25,8 @@ import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.PlaywrightException;
 import com.vaadin.flow.router.Route;
 import tech.derbent.api.utils.Check;
+import tech.derbent.config.CDataInitializer;
+import tech.derbent.session.service.ISessionService;
 import tech.derbent.projects.domain.CProject;
 
 /** Enhanced base UI test class that provides common functionality for Playwright tests. This class includes 25+ auxiliary methods for testing all
@@ -51,6 +56,27 @@ public abstract class CBaseUITest {
 	protected Class<?>[] statusAndTypeViewClasses = {};
 	/** Legacy property for backward compatibility */
 	protected Class<?>[] viewClasses = mainViewClasses;
+	private CDataInitializer dataInitializer;
+	@Autowired
+	private ISessionService sessionService;
+
+	/** Reloads sample data to ensure the database is populated before each Playwright test. */
+	protected void initializeDatabaseBeforeTest() {
+		if ((dataInitializer == null) && (sessionService != null)) {
+			dataInitializer = new CDataInitializer(sessionService);
+		}
+		if (dataInitializer == null) {
+			LOGGER.warn("⚠️ Data initializer not available; skipping database bootstrap");
+			return;
+		}
+		try {
+			LOGGER.info("🗄️ Reloading database sample data before Playwright test");
+			dataInitializer.reloadForced();
+			LOGGER.info("✅ Database sample data reload complete");
+		} catch (Exception e) {
+			LOGGER.warn("⚠️ Database sample data reload failed: {}", e.getMessage());
+		}
+	}
 
 	/** Assert browser is available */
 	protected void assertBrowserAvailable() {
@@ -190,6 +216,26 @@ public abstract class CBaseUITest {
 		} catch (Exception e) {
 			LOGGER.warn("⚠️ Unexpected login error for {}: {}", username, e.getMessage());
 			takeScreenshot("login-unexpected-error", false);
+		}
+	}
+
+	/** Checks if the main application shell is visible after login. */
+	protected boolean isPostLoginShellVisible() {
+		if (!isBrowserAvailable()) {
+			return false;
+		}
+		final Locator shellLocator = page.locator("vaadin-app-layout, vaadin-side-nav, vaadin-drawer-layout");
+		final boolean visible = shellLocator.count() > 0;
+		LOGGER.info("🧭 Application shell detected after login: {}", visible);
+		return visible;
+	}
+
+	/** Asserts that the main application shell is visible after login. */
+	protected void assertPostLoginShellVisible() {
+		if (!isPostLoginShellVisible()) {
+			LOGGER.warn("⚠️ Application shell not detected after login");
+			takeScreenshot("missing-application-shell", false);
+			throw new AssertionError("Application shell not visible after login");
 		}
 	}
 
@@ -515,13 +561,22 @@ public abstract class CBaseUITest {
 	void setupTestEnvironment() {
 		LOGGER.info("🧪 Setting up Playwright test environment...");
 		try {
+			initializeDatabaseBeforeTest();
 			playwright = Playwright.create();
 			// Check system property for headless mode (defaults to true)
 			boolean headless = Boolean.parseBoolean(System.getProperty("playwright.headless", "true"));
+			final boolean displayAvailable = Optional.ofNullable(System.getenv("DISPLAY")).filter(value -> !value.isBlank()).isPresent();
+			if (!headless && !displayAvailable) {
+				LOGGER.info("ℹ️ DISPLAY environment variable not found; forcing headless browser launch");
+				headless = true;
+				System.setProperty("java.awt.headless", "true");
+			}
 			LOGGER.info("🎭 Browser mode: {}", headless ? "HEADLESS" : "VISIBLE");
 			// Use headless mode and try to handle browser installation gracefully
-			browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(headless)
-					.setArgs(Arrays.asList("--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu")));
+			final List<String> launchArgs = new ArrayList<>(Arrays.asList("--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu",
+					"--disable-setuid-sandbox"));
+			final BrowserType.LaunchOptions launchOptions = new BrowserType.LaunchOptions().setHeadless(headless).setArgs(launchArgs);
+			browser = playwright.chromium().launch(launchOptions);
 			context = browser.newContext();
 			page = context.newPage();
 			page.navigate("http://localhost:" + port + "/login");
@@ -998,9 +1053,10 @@ public abstract class CBaseUITest {
 	/** Waits for after login state */
 	protected void wait_afterlogin() {
 		try {
-			page.waitForSelector("vaadin-app-layout, vaadin-side-nav, vaadin-drawer-layout", new Page.WaitForSelectorOptions().setTimeout(15000));
+			page.waitForSelector("vaadin-app-layout, vaadin-side-nav, vaadin-drawer-layout",
+					new Page.WaitForSelectorOptions().setTimeout(10000));
 		} catch (Exception e) {
-			LOGGER.warn("⚠️ Post-login application shell not detected: {}", e.getMessage());
+			LOGGER.warn("⚠️ Post-login application shell not detected within timeout: {}", e.getMessage());
 		}
 	}
 
@@ -1008,9 +1064,9 @@ public abstract class CBaseUITest {
 	protected void wait_loginscreen() {
 		try {
 			page.waitForSelector("#custom-username-input, #custom-password-input, vaadin-button:has-text('Login')",
-					new Page.WaitForSelectorOptions().setTimeout(15000));
+					new Page.WaitForSelectorOptions().setTimeout(10000));
 		} catch (Exception e) {
-			LOGGER.warn("⚠️ Login screen not detected: {}", e.getMessage());
+			LOGGER.warn("⚠️ Login screen not detected within timeout: {}", e.getMessage());
 		}
 	}
 
