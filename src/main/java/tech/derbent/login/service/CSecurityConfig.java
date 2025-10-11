@@ -65,7 +65,8 @@ class CSecurityConfig extends VaadinWebSecurity {
 		CCompanyAwareAuthenticationFilter authenticationFilter = new CCompanyAwareAuthenticationFilter();
 		authenticationFilter.setAuthenticationManager(authenticationManager);
 		authenticationFilter.setAuthenticationSuccessHandler(authenticationSuccessHandler);
-		// CRITICAL: Only process POST requests to /login
+		authenticationFilter.setFilterProcessesUrl("/login");
+		// CRITICAL: Only process POST requests to /login to allow GET requests to reach the login view
 		authenticationFilter.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher("/login", "POST"));
 		// Replace the default authentication filter with our custom one
 		http.addFilterAt(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
