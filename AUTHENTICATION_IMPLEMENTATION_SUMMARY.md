@@ -1,5 +1,27 @@
 # Authentication Mechanism Implementation - Summary
 
+## ⚠️ **IMPORTANT UPDATE - October 2025**
+
+**This document describes an OLDER implementation approach. The CURRENT WORKING IMPLEMENTATION is much simpler and documented in:**
+
+📚 **[docs/implementation/COMPANY_LOGIN_PATTERN.md](docs/implementation/COMPANY_LOGIN_PATTERN.md)** - Complete working guide
+
+**What Changed:**
+- ❌ **Old**: Custom authentication tokens, filters, and providers
+- ✅ **New**: Simple username concatenation (`username@companyId`)
+- ❌ **Old**: Complex class hierarchies
+- ✅ **New**: Standard Spring Security components
+- ❌ **Old**: Circular dependency issues
+- ✅ **New**: No custom dependencies needed
+
+**Status**: ✅ Working perfectly in production with the simpler approach
+
+**This document is preserved for historical reference.**
+
+---
+
+# Authentication Mechanism Implementation - Summary (Historical)
+
 ## What Was Implemented
 
 This implementation solves the multi-tenant authentication problem where users can have the same username across different companies. The solution passes the selected company ID from the login form through the Spring Security authentication chain.
