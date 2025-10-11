@@ -53,6 +53,8 @@ class CSecurityConfig extends VaadinWebSecurity {
 	 * @throws Exception if configuration fails */
 	@Override
 	protected void configure(final HttpSecurity http) throws Exception {
+		// Configure authentication provider before building
+		http.authenticationProvider(companyAwareAuthenticationProvider);
 		// Apply Vaadin's default security configuration This handles CSRF protection,
 		// session management, and other Vaadin-specific security
 		super.configure(http);
@@ -61,7 +63,7 @@ class CSecurityConfig extends VaadinWebSecurity {
 		setLoginView(http, CCustomLoginView.class);
 		// Configure the UserDetailsService for authentication (for backward compatibility)
 		http.userDetailsService(userService);
-		// Get the authentication manager
+		// Get the authentication manager from the shared object (it should be available now)
 		AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
 		// Create and configure custom authentication filter
 		CCompanyAwareAuthenticationFilter authenticationFilter = new CCompanyAwareAuthenticationFilter(authenticationManager);
@@ -72,13 +74,6 @@ class CSecurityConfig extends VaadinWebSecurity {
 		http.addFilterAt(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
 		// Configure custom authentication entry point to save requested URLs
 		http.exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(authenticationEntryPoint));
-	}
-
-	/** Configures the authentication manager to use our custom authentication provider.
-	 * @param auth AuthenticationManagerBuilder
-	 * @throws Exception if configuration fails */
-	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		auth.authenticationProvider(companyAwareAuthenticationProvider);
 	}
 
 	/** Provides BCrypt password encoder bean. BCrypt is a secure hashing function designed for password storage. Password Encoding Flow: 1. When
