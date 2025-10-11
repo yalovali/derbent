@@ -59,6 +59,106 @@ run_menu_navigation_test() {
     fi
 }
 
+# Function to run the company login test
+run_company_login_test() {
+    echo "🔐 Running Company-Aware Login Test..."
+    echo "=================================="
+    echo "This test will:"
+    echo "  1. Validate company selection dropdown"
+    echo "  2. Test username@companyId pattern"
+    echo "  3. Verify multi-tenant isolation"
+    echo "  4. Test login with multiple companies"
+    echo ""
+    
+    mkdir -p target/screenshots
+    install_playwright_browsers
+    
+    if mvn test -Dtest="automated_tests.tech.derbent.ui.automation.CCompanyAwareLoginTest" -Dspring.profiles.active=test -Dplaywright.headless=true; then
+        echo "✅ Company login test completed successfully!"
+        show_screenshots
+    else
+        echo "❌ Company login test failed!"
+        show_screenshots
+        return 1
+    fi
+}
+
+# Function to run comprehensive dynamic views test
+run_comprehensive_test() {
+    echo "🚀 Running Comprehensive Dynamic Views Test..."
+    echo "=================================="
+    echo "This test will:"
+    echo "  1. Test complete navigation coverage"
+    echo "  2. Validate dynamic page loading"
+    echo "  3. Test CRUD operations on entities"
+    echo "  4. Test grid functionality"
+    echo "  5. Test form validation"
+    echo ""
+    
+    mkdir -p target/screenshots
+    install_playwright_browsers
+    
+    if mvn test -Dtest="automated_tests.tech.derbent.ui.automation.CComprehensiveDynamicViewsTest" -Dspring.profiles.active=test -Dplaywright.headless=true; then
+        echo "✅ Comprehensive test completed successfully!"
+        show_screenshots
+    else
+        echo "❌ Comprehensive test failed!"
+        show_screenshots
+        return 1
+    fi
+}
+
+# Function to run all tests
+run_all_tests() {
+    echo "🧪 Running All Playwright Tests..."
+    echo "=================================="
+    echo ""
+    
+    mkdir -p target/screenshots
+    install_playwright_browsers
+    
+    local failed=0
+    
+    echo "▶️ Test 1/3: Menu Navigation Test"
+    if ! run_menu_navigation_test; then
+        failed=$((failed + 1))
+    fi
+    echo ""
+    
+    echo "▶️ Test 2/3: Company Login Test"
+    if ! run_company_login_test; then
+        failed=$((failed + 1))
+    fi
+    echo ""
+    
+    echo "▶️ Test 3/3: Comprehensive Dynamic Views Test"
+    if ! run_comprehensive_test; then
+        failed=$((failed + 1))
+    fi
+    echo ""
+    
+    if [[ $failed -eq 0 ]]; then
+        echo "✅ All tests completed successfully!"
+        return 0
+    else
+        echo "❌ $failed test(s) failed"
+        return 1
+    fi
+}
+
+# Function to show screenshots
+show_screenshots() {
+    screenshot_count=$(find target/screenshots -name "*.png" 2>/dev/null | wc -l)
+    if [[ $screenshot_count -gt 0 ]]; then
+        echo "📸 Generated $screenshot_count screenshots in target/screenshots/"
+        if [[ $screenshot_count -le 20 ]]; then
+            echo ""
+            echo "Screenshots:"
+            find target/screenshots -name "*.png" -type f -printf "  - %f\n" | sort
+        fi
+    fi
+}
+
 # Show usage information
 show_usage() {
     cat << EOF
@@ -70,23 +170,83 @@ Run Playwright UI tests for the Derbent application.
 OPTIONS:
     (no args)       Run the sample data menu navigation test (default)
     menu            Run the sample data menu navigation test
+    login           Run the company-aware login pattern test
+    comprehensive   Run comprehensive dynamic views test
+    all             Run all Playwright tests
     clean           Clean test artifacts (screenshots, reports)
     install         Install Playwright browsers
     help            Show this help message
 
 DESCRIPTION:
-    The menu navigation test performs the following:
-    1. Initialize sample data in the database
-    2. Display the login screen
-    3. Login with test credentials
-    4. Navigate through all dynamically generated menu items
-    5. Capture screenshots at each step
+    Available test suites:
+    
+    1. Menu Navigation Test (default)
+       - Initialize sample data in the database
+       - Display the login screen
+       - Login with test credentials
+       - Navigate through all dynamically generated menu items
+       - Capture screenshots at each step
+    
+    2. Company Login Test
+       - Validate company selection dropdown
+       - Test username@companyId authentication pattern
+       - Verify multi-tenant login isolation
+       - Test login with multiple companies
+    
+    3. Comprehensive Dynamic Views Test
+       - Complete navigation coverage of all views
+       - Dynamic page loading validation
+       - CRUD operations testing on key entities
+       - Grid functionality across views
+       - Form validation testing
 
     Screenshots are saved to: target/screenshots/
 
 EXAMPLES:
     ./run-playwright-tests.sh              # Run menu navigation test
     ./run-playwright-tests.sh menu         # Run menu navigation test (explicit)
+    ./run-playwright-tests.sh login        # Run company login test
+    ./run-playwright-tests.sh comprehensive # Run comprehensive test
+    ./run-playwright-tests.sh all          # Run all tests
     ./run-playwright-tests.sh clean        # Clean up test artifacts
     ./run-playwright-tests.sh install      # Install Playwright browsers
+
+EOF
+}
+
+# Main script logic
+case "${1:-menu}" in
+    menu)
+        run_menu_navigation_test
+        ;;
+    login)
+        run_company_login_test
+        ;;
+    comprehensive)
+        run_comprehensive_test
+        ;;
+    all)
+        run_all_tests
+        ;;
+    clean)
+        echo "🧹 Cleaning test artifacts..."
+        rm -rf target/screenshots/*.png
+        rm -rf target/test-results/
+        echo "✅ Test artifacts cleaned"
+        ;;
+    install)
+        install_playwright_browsers
+        ;;
+    help|--help|-h)
+        show_usage
+        ;;
+    *)
+        echo "❌ Unknown option: $1"
+        echo ""
+        show_usage
+        exit 1
+        ;;
+esac
+
+
 

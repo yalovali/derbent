@@ -1,5 +1,25 @@
 # Authentication Call Hierarchy - Detailed Flow
 
+## ⚠️ **IMPORTANT UPDATE - October 2025**
+
+**The authentication flow described in this document represents an OLDER, MORE COMPLEX approach.**
+
+**The CURRENT WORKING IMPLEMENTATION uses a simpler pattern documented in:**
+
+📚 **[COMPANY_LOGIN_PATTERN.md](COMPANY_LOGIN_PATTERN.md)** - Simple, working implementation
+
+**Current Implementation:**
+- ✅ Username concatenation: `username@companyId`
+- ✅ Standard Spring Security filters
+- ✅ Simple split logic in `CUserService.loadUserByUsername()`
+- ✅ No custom tokens or authentication providers needed
+
+**This document is preserved for historical reference.**
+
+---
+
+# Authentication Call Hierarchy - Detailed Flow (Historical)
+
 ## Overview
 This document provides a detailed call hierarchy showing how the authentication mechanism works from user interaction to database query.
 

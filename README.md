@@ -121,6 +121,8 @@ mvn spring-boot:run -Dspring.profiles.active=h2
 | **[⚙️ Service Class Patterns](docs/service-patterns.md)** | Business logic and repository patterns | Backend Developers |
 | **[🎨 View Class Patterns](docs/view-patterns.md)** | UI component and page patterns | Frontend Developers |
 | **[🔧 Utility Patterns](docs/utility-patterns.md)** | Helper classes and common patterns | All Developers |
+| **[🔐 Company Login Pattern](docs/implementation/COMPANY_LOGIN_PATTERN.md)** | Multi-tenant authentication implementation | Backend/Security |
+| **[🎭 Playwright Test Guide](docs/implementation/PLAYWRIGHT_TEST_GUIDE.md)** | Comprehensive UI testing framework | QA/Test Engineers |
 
 <div align="center">
 

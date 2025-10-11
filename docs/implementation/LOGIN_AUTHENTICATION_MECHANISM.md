@@ -1,5 +1,26 @@
 # Login Authentication Mechanism with Company Context
 
+## ⚠️ **IMPORTANT UPDATE - October 2025**
+
+**The authentication mechanism described in this document represents an OLDER, MORE COMPLEX approach using custom authentication tokens and filters.**
+
+**The CURRENT WORKING IMPLEMENTATION uses a much simpler pattern that is documented in:**
+
+📚 **[COMPANY_LOGIN_PATTERN.md](COMPANY_LOGIN_PATTERN.md)** - Complete working implementation guide
+
+**Current Implementation:**
+- ✅ Simple username concatenation pattern (`username@companyId`)
+- ✅ Standard Spring Security components
+- ✅ No custom authentication tokens or filters
+- ✅ Working perfectly in production
+- ✅ Easier to understand and maintain
+
+**This document is preserved for historical reference and shows an alternative approach that could be used if more complex authentication requirements arise in the future.**
+
+---
+
+# Login Authentication Mechanism with Company Context (Historical)
+
 ## Overview
 
 The Derbent application implements a multi-tenant authentication system where users can have the same username across different companies. The unique constraint is on the combination of `login` + `company_id`. This document describes the authentication mechanism, class hierarchy, and call flow.
