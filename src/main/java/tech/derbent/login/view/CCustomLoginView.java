@@ -98,21 +98,13 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		Check.notNull(selectedCompany, "Please select a company");
 		// Get selected view for redirect
 		String redirectView = "home";
-		// Get company ID as String for JavaScript (Vaadin cannot encode Long to JSON)
+		// Get company ID - convert to String for JavaScript (Vaadin cannot encode Long)
 		String companyId = String.valueOf(selectedCompany.getId());
-		// CRITICAL FIX: In Vaadin, we need to ensure the form submission causes a REAL page navigation
-		// The issue is that Vaadin's client-side intercepts form submissions
-		// Solution: Add vaadin-router-ignore attribute to force traditional form submission
-		getElement().executeJs("const form = document.createElement('form');" + "form.method = 'POST';" + "form.action = '/login';"
-				+ "form.setAttribute('vaadin-router-ignore', '');" + // Tell Vaadin to NOT intercept this form
-				"const usernameInput = document.createElement('input');" + "usernameInput.type = 'hidden';" + "usernameInput.name = 'username';"
-				+ "usernameInput.value = $0;" + "form.appendChild(usernameInput);" + "const passwordInput = document.createElement('input');"
-				+ "passwordInput.type = 'hidden';" + "passwordInput.name = 'password';" + "passwordInput.value = $1;"
-				+ "form.appendChild(passwordInput);" + "const companyInput = document.createElement('input');" + "companyInput.type = 'hidden';"
-				+ "companyInput.name = 'companyId';" + "companyInput.value = $2;" + "form.appendChild(companyInput);"
-				+ "const redirectInput = document.createElement('input');" + "redirectInput.type = 'hidden';" + "redirectInput.name = 'redirect';"
-				+ "redirectInput.value = $3;" + "form.appendChild(redirectInput);" + "document.body.appendChild(form);" + "form.submit();", username,
-				password, companyId, redirectView);
+		// Simple POST form submission that forces full page navigation
+		getElement().executeJs("const form = document.createElement('form');" + "form.method = 'POST';" + "form.action = 'login';"
+				+ "['username', 'password', 'companyId', 'redirect'].forEach((name, i) => {" + "  const input = document.createElement('input');"
+				+ "  input.type = 'hidden';" + "  input.name = name;" + "  input.value = arguments[i];" + "  form.appendChild(input);" + "});"
+				+ "document.body.appendChild(form);" + "form.submit();", username, password, companyId, redirectView);
 	}
 
 	private void setupForm() {

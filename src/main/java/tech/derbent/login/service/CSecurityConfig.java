@@ -1,17 +1,18 @@
 package tech.derbent.login.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import com.vaadin.flow.spring.security.VaadinWebSecurity;
 import tech.derbent.login.view.CCustomLoginView;
 import tech.derbent.session.service.CWebSessionService;
@@ -30,24 +31,18 @@ import tech.derbent.users.service.CUserService;
 @ConditionalOnWebApplication
 class CSecurityConfig extends VaadinWebSecurity {
 
-	private final Logger LOGGER = LoggerFactory.getLogger(CSecurityConfig.class);
-	private final CAuthenticationEntryPoint authenticationEntryPoint;
+	private final AuthenticationConfiguration authenticationConfiguration;
 	private final CAuthenticationSuccessHandler authenticationSuccessHandler;
 	private final CCompanyAwareAuthenticationProvider companyAwareAuthenticationProvider;
 	private final CUserService userService;
-	private final org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration authenticationConfiguration;
 	private CWebSessionService webSessionService;
 
-	/** Constructor injection of CUserService, authentication success handler, entry point, and company-aware authentication provider. */
+	/** Constructor injection of dependencies */
 	public CSecurityConfig(final CUserService loginUserService, final CAuthenticationSuccessHandler authenticationSuccessHandler,
-			final CAuthenticationEntryPoint authenticationEntryPoint, final CCompanyAwareAuthenticationProvider companyAwareAuthenticationProvider,
-			final org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration authenticationConfiguration) {
-		LOGGER.info("Initializing security configuration");
+			final CCompanyAwareAuthenticationProvider companyAwareAuthenticationProvider,
+			final AuthenticationConfiguration authenticationConfiguration) {
 		userService = loginUserService;
-		// access websession service
-		// userService.setSessionService(webSessionService);
 		this.authenticationSuccessHandler = authenticationSuccessHandler;
-		this.authenticationEntryPoint = authenticationEntryPoint;
 		this.companyAwareAuthenticationProvider = companyAwareAuthenticationProvider;
 		this.authenticationConfiguration = authenticationConfiguration;
 	}
@@ -58,33 +53,28 @@ class CSecurityConfig extends VaadinWebSecurity {
 	 * @throws Exception if configuration fails */
 	@Override
 	protected void configure(final HttpSecurity http) throws Exception {
-		// Apply Vaadin's default security configuration This handles CSRF protection,
-		// session management, and other Vaadin-specific security
+		// Apply Vaadin's default security configuration
 		super.configure(http);
-		LOGGER.info("Configuring HTTP security");
-		// Set our custom login view When users need to authenticate, they'll be
-		// redirected to CCustomLoginView
+		// Set our custom login view
 		setLoginView(http, CCustomLoginView.class);
-		// Create and configure custom authentication filter for company-aware authentication
-		// Get the authentication manager from the global configuration
+		// Configure the UserDetailsService for authentication
+		http.userDetailsService(userService);
+		// Get the authentication manager properly
+		AuthenticationManager authenticationManager = authenticationConfiguration.getAuthenticationManager();
+		// Create and configure custom authentication filter
 		CCompanyAwareAuthenticationFilter authenticationFilter = new CCompanyAwareAuthenticationFilter();
-		authenticationFilter.setAuthenticationManager(authenticationConfiguration.getAuthenticationManager());
+		authenticationFilter.setAuthenticationManager(authenticationManager);
 		authenticationFilter.setAuthenticationSuccessHandler(authenticationSuccessHandler);
-		authenticationFilter.setFilterProcessesUrl("/login");
-		// IMPORTANT: Configure the filter to only match POST requests to /login
-		authenticationFilter
-				.setRequiresAuthenticationRequestMatcher(new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/login", "POST"));
+		// CRITICAL: Only process POST requests to /login
+		authenticationFilter.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher("/login", "POST"));
 		// Replace the default authentication filter with our custom one
 		http.addFilterAt(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
-		// Note: We do NOT override the authentication entry point here because
-		// VaadinWebSecurity needs to control it to properly handle @AnonymousAllowed views
 	}
 
 	/** Configures the authentication manager to use our custom authentication provider.
 	 * @param auth AuthenticationManagerBuilder
 	 * @throws Exception if configuration fails */
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		LOGGER.info("Configuring authentication manager with custom provider");
 		auth.authenticationProvider(companyAwareAuthenticationProvider);
 	}
 
@@ -94,7 +84,6 @@ class CSecurityConfig extends VaadinWebSecurity {
 	 * @return BCryptPasswordEncoder instance for password hashing */
 	@Bean
 	public PasswordEncoder passwordEncoder() {
-		LOGGER.info("Providing BCryptPasswordEncoder bean");
 		return new BCryptPasswordEncoder();
 	}
 
@@ -102,7 +91,6 @@ class CSecurityConfig extends VaadinWebSecurity {
 	 * @return CUserService instance configured as UserDetailsService */
 	@Bean
 	public UserDetailsService userDetailsService() {
-		LOGGER.info("Providing CUserService as UserDetailsService bean");
 		return userService;
 	}
 }
