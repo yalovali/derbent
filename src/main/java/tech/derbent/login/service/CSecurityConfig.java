@@ -35,16 +35,36 @@ class CSecurityConfig extends VaadinWebSecurity {
 	private final CCompanyAwareAuthenticationProvider companyAwareAuthenticationProvider;
 	private final CUserService userService;
 	private CWebSessionService webSessionService;
+	private final AuthenticationManager authenticationManager;
 
-	/** Constructor injection of CUserService, authentication success handler, entry point, and company-aware authentication provider. */
+	/** Constructor injection of CUserService, authentication success handler, entry point, company-aware authentication provider, and authentication
+	 * manager. The AuthenticationManager is injected lazily to avoid circular dependency issues.
+	 * @param loginUserService                   the user service
+	 * @param authenticationSuccessHandler       the authentication success handler
+	 * @param authenticationEntryPoint           the authentication entry point
+	 * @param companyAwareAuthenticationProvider the company-aware authentication provider
+	 * @param authenticationManager              the authentication manager (injected lazily) */
 	public CSecurityConfig(final CUserService loginUserService, final CAuthenticationSuccessHandler authenticationSuccessHandler,
-			final CAuthenticationEntryPoint authenticationEntryPoint, final CCompanyAwareAuthenticationProvider companyAwareAuthenticationProvider) {
+			final CAuthenticationEntryPoint authenticationEntryPoint, final CCompanyAwareAuthenticationProvider companyAwareAuthenticationProvider,
+			@org.springframework.context.annotation.Lazy final AuthenticationManager authenticationManager) {
 		userService = loginUserService;
 		// access websession service
 		// userService.setSessionService(webSessionService);
 		this.authenticationSuccessHandler = authenticationSuccessHandler;
 		this.authenticationEntryPoint = authenticationEntryPoint;
 		this.companyAwareAuthenticationProvider = companyAwareAuthenticationProvider;
+		this.authenticationManager = authenticationManager;
+	}
+
+	/** Provides the AuthenticationManager bean configured with the company-aware authentication provider. This bean is created using ProviderManager
+	 * directly to avoid conflicts with HttpSecurity building process.
+	 * @return configured AuthenticationManager
+	 * @throws Exception if configuration fails */
+	@Bean
+	public AuthenticationManager authenticationManager() throws Exception {
+		// Create a ProviderManager with our custom authentication provider
+		// ProviderManager is Spring Security's default implementation of AuthenticationManager
+		return new org.springframework.security.authentication.ProviderManager(companyAwareAuthenticationProvider);
 	}
 
 	/** Configures HTTP security settings. Sets up the login view, custom authentication provider, and delegates other security configuration to
@@ -53,8 +73,6 @@ class CSecurityConfig extends VaadinWebSecurity {
 	 * @throws Exception if configuration fails */
 	@Override
 	protected void configure(final HttpSecurity http) throws Exception {
-		// Configure authentication provider before building
-		http.authenticationProvider(companyAwareAuthenticationProvider);
 		// Apply Vaadin's default security configuration This handles CSRF protection,
 		// session management, and other Vaadin-specific security
 		super.configure(http);
@@ -63,9 +81,7 @@ class CSecurityConfig extends VaadinWebSecurity {
 		setLoginView(http, CCustomLoginView.class);
 		// Configure the UserDetailsService for authentication (for backward compatibility)
 		http.userDetailsService(userService);
-		// Get the authentication manager from the shared object (it should be available now)
-		AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
-		// Create and configure custom authentication filter
+		// Create and configure custom authentication filter using the injected authentication manager
 		CCompanyAwareAuthenticationFilter authenticationFilter = new CCompanyAwareAuthenticationFilter(authenticationManager);
 		authenticationFilter.setAuthenticationSuccessHandler(authenticationSuccessHandler);
 		authenticationFilter.setFilterProcessesUrl("/login");
