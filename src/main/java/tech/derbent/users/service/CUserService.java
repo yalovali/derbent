@@ -228,22 +228,30 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	// overloaded for spring security
 	public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
 		LOGGER.debug("Attempting to load user by username: {}", username);
-		// Step 1: Query database for user by username
-		CCompany company = getCurrentCompany();
-		Check.notNull(company, "No active company in session - company context is required");
-		final CUser loginUser = ((IUserRepository) repository).findByUsername(company.getId(), username).orElseThrow(() -> {
+		// username syntax is username@company_id
+		// split login and company id
+		String[] parts = username.split("@");
+		Check.isTrue(parts.length == 2, "Username must be in the format username@company_id");
+		String login = parts[0];
+		Long companyId;
+		try {
+			companyId = Long.parseLong(parts[1]);
+		} catch (NumberFormatException e) {
+			LOGGER.warn("Invalid company ID in username: {}", parts[1]);
+			throw new UsernameNotFoundException("Invalid company ID in username: " + parts[1]);
+		}
+		final CUser loginUser = ((IUserRepository) repository).findByUsername(companyId, login).orElseThrow(() -> {
 			LOGGER.warn("User not found with username: {}", username);
 			return new UsernameNotFoundException("User not found with username: " + username);
 		});
 		// Step 2: Convert user roles to Spring Security authorities
 		// fix this next line!!!!!
-		final Collection<GrantedAuthority> authorities = getAuthorities("ADMIN,USER"); // Example roles, replace with actual user roles if available
+		final Collection<GrantedAuthority> authorities = getAuthorities("ADMIN,USER");
 		// Step 3: Create and return Spring Security UserDetails
-		return User.builder().username(loginUser.getUsername()).password(loginUser.getPassword()) // Already encoded password from database
-				.authorities(authorities).accountExpired(false).accountLocked(false).credentialsExpired(false).disabled(!loginUser.isEnabled()) // Convert
-																																				// enabled
-				// flag to disabled flag
-				.build();
+		// return
+		// User.builder().username(loginUser.getUsername()).password(loginUser.getPassword()).authorities(authorities).accountExpired(false).accountLocked(false).credentialsExpired(false).disabled(!loginUser.isEnabled()).build();
+		return User.builder().username(username).password(loginUser.getPassword()).authorities(authorities).accountExpired(false).accountLocked(false)
+				.credentialsExpired(false).disabled(!loginUser.isEnabled()).build();
 	}
 
 	@Override

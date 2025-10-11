@@ -157,6 +157,8 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		private final CMenuLevel parent;
 
 		public CMenuLevel(final String levelKey, final String displayName, final CMenuLevel parent) {
+			LOGGER.debug("Creating menu level: {} (parent: {})", levelKey, parent != null ? parent.getLevelKey() : "none" + " with display name: {}",
+					displayName);
 			this.levelKey = levelKey;
 			this.displayName = displayName;
 			this.parent = parent;
@@ -217,6 +219,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	 * @param pageMenuService Service for dynamic page menu integration
 	 * @throws Exception */
 	public CHierarchicalSideMenu(CPageMenuIntegrationService pageMenuService) throws Exception {
+		LOGGER.info("Initializing CHierarchicalSideMenu");
 		this.pageMenuService = pageMenuService;
 		navigationPath = new ArrayList<>();
 		menuLevels = new HashMap<>();
@@ -257,6 +260,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 	/** Builds the menu hierarchy from route annotations. Parses menu entries in format: parentItem2.childItem1.childofchileitem1
 	 * @throws Exception */
 	private void buildMenuHierarchy() throws Exception {
+		LOGGER.debug("Building menu hierarchy from route annotations");
 		Check.notNull(pageMenuService, "Page menu service must not be null");
 		final var rootLevel = new CMenuLevel("root", "Homepage", null);
 		menuLevels.put("root", rootLevel);
@@ -310,6 +314,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 
 	/** Initializes CSS styles for the hierarchical menu. */
 	private void initializeStyles() {
+		LOGGER.debug("Applying CSS styles to CHierarchicalSideMenu");
 		getElement().getStyle().set("overflow", "hidden").set("transition", "all 0.3s ease-in-out");
 		addClassNames("hierarchical-side-menu");
 	}

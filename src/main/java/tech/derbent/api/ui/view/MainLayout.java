@@ -38,6 +38,7 @@ import tech.derbent.api.ui.component.CHierarchicalSideMenu;
 import tech.derbent.api.ui.component.CViewToolbar;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.api.utils.CColorUtils;
+import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CAbstractNamedEntityPage;
 import tech.derbent.page.service.CPageMenuIntegrationService;
 import tech.derbent.session.service.CLayoutService;
@@ -84,6 +85,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		this.routeDiscoveryService = routeDiscoveryService;
 		this.pageMenuService = pageMenuService;
 		currentUser = authenticationContext.getAuthenticatedUser(User.class).orElse(null);
+		setSessionUserFromContext();
 		setId("main-layout");
 		setPrimarySection(Section.DRAWER);
 		// this is the main layout, so we add the side navigation menu and the user menu
@@ -97,6 +99,23 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		// in a Scroller for better scrolling behavior addToDrawer(new
 		// Scroller(createSideNav()));
 		addToDrawer(createUserMenu()); // Add the user menu to the navbar
+	}
+
+	private void setSessionUserFromContext() {
+		LOGGER.info("Setting session user from authentication context");
+		Check.notNull(currentUser, "No authenticated user found in security context");
+		Check.notNull(currentUser.getUsername(), "Authenticated user must have a username");
+		Check.notNull(sessionService, "Session service cannot be null");
+		String loginname = currentUser.getUsername();
+		Check.notNull(loginname, "Authenticated user login name cannot be null");
+		Check.isTrue(loginname.contains("@"), "Login name must contain '@' with format 'login@companyID'");
+		// split loginname at @
+		String login = loginname.split("@")[0];
+		String companyIDStr = loginname.split("@")[1];
+		Long companyID = Long.parseLong(companyIDStr);
+		CUser user = userService.findByLogin(login, companyID);
+		Check.notNull(user, "No user found for login: " + login + " and company ID: " + companyID);
+		sessionService.setActiveUser(user);
 	}
 
 	@Override
@@ -245,7 +264,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 			// Save user using user service
 			final CUser savedUser = userService.save(user);
 			// Update session with saved user
-			sessionService.setActiveUser(savedUser);
+			// sessionService.reloadUser(savedUser);
 			LOGGER.info("User profile saved successfully for user: {}", savedUser.getLogin());
 		} catch (final Exception e) {
 			LOGGER.error("Error saving user profile", e);

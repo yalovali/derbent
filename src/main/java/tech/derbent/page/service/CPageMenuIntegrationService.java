@@ -64,20 +64,26 @@ public class CPageMenuIntegrationService {
 
 	/** Get menu entries for database-defined pages for the current project. These entries can be added to the existing menu system. */
 	public List<MenuEntry> getDynamicMenuEntries() {
-		CProject activeProject =
-				sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project found for dynamic menu entries"));
-		List<CPageEntity> pages = pageEntityService.findActivePagesByProject(activeProject);
-		List<MenuEntry> menuEntries = new ArrayList<>();
-		for (CPageEntity page : pages) {
-			try {
-				MenuEntry entry = createMenuEntryFromPage(page);
-				menuEntries.add(entry);
-			} catch (Exception e) {
-				LOGGER.error("Failed to create menu entry for page: {}", page.getPageTitle(), e);
-				throw new RuntimeException("Failed to create menu entry for page: " + page.getPageTitle(), e);
+		try {
+			Check.notNull(sessionService, "Session service cannot be null");
+			CProject activeProject = sessionService.getActiveProject()
+					.orElseThrow(() -> new IllegalStateException("No active project found for dynamic menu entries"));
+			List<CPageEntity> pages = pageEntityService.findActivePagesByProject(activeProject);
+			List<MenuEntry> menuEntries = new ArrayList<>();
+			for (CPageEntity page : pages) {
+				try {
+					MenuEntry entry = createMenuEntryFromPage(page);
+					menuEntries.add(entry);
+				} catch (Exception e) {
+					LOGGER.error("Failed to create menu entry for page: {}", page.getPageTitle(), e);
+					throw new RuntimeException("Failed to create menu entry for page: " + page.getPageTitle(), e);
+				}
 			}
+			return menuEntries;
+		} catch (Exception e) {
+			LOGGER.error("Error retrieving dynamic menu entries: {}", e.getMessage());
+			throw e;
 		}
-		return menuEntries;
 	}
 
 	/** Get a page entity by ID for icon color retrieval. */

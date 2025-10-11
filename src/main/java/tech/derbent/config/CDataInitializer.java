@@ -925,7 +925,7 @@ public class CDataInitializer {
 				CUser user = userService.getRandomByCompany(company);
 				Check.notNull(user, "No user found for company: " + company.getName());
 				// Use new atomic method to set both company and user
-				sessionService.setCompanyAndUser(company, user); // Set company first, then user who is member of that company
+				sessionService.setActiveUser(user); // Set company first, then user who is member of that company
 				final List<CProject> projects = projectService.list(Pageable.unpaged()).getContent();
 				for (final CProject project : projects) {
 					LOGGER.info("Initializing sample data for project: {}:{} (company: {}:{})", project.getId(), project.getName(), company.getId(),

@@ -88,8 +88,10 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	}
 
 	private void handleLogin() {
-		final String username = usernameField.getValue();
+		String username = usernameField.getValue();
 		final String password = passwordField.getValue();
+		final CCompany company = companyField.getValue();
+		username = username + "@" + company.getId();
 		errorMessage.setText("");
 		// Basic validation
 		Check.notBlank(username, "Please enter both username and password");

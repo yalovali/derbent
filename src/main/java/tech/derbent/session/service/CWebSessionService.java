@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.VaadinSession;
@@ -31,7 +30,7 @@ import tech.derbent.users.service.IUserRepository;
 @Profile ("!reset-db")
 public class CWebSessionService implements ISessionService {
 
-	private static final String ACTIVE_COMPANY_KEY = "activeCompany";
+	// private static final String ACTIVE_COMPANY_KEY = "activeCompany";
 	private static final String ACTIVE_ID_ATTRIBUTES_KEY = CWebSessionService.class.getName() + ".activeIdAttributes";
 	private static final String ACTIVE_ID_KEY = "activeId";
 	private static final String ACTIVE_PROJECT_KEY = "activeProject";
@@ -88,7 +87,7 @@ public class CWebSessionService implements ISessionService {
 		if (session != null) {
 			session.setAttribute(ACTIVE_PROJECT_KEY, null);
 			session.setAttribute(ACTIVE_USER_KEY, null);
-			session.setAttribute(ACTIVE_COMPANY_KEY, null);
+			// session.setAttribute(ACTIVE_COMPANY_KEY, null);
 			session.setAttribute(ACTIVE_ID_KEY, null);
 			final Set<String> activeIdKeys = getActiveIdAttributesIfPresent(session);
 			if (activeIdKeys != null) {
@@ -116,8 +115,10 @@ public class CWebSessionService implements ISessionService {
 	public Optional<CCompany> getActiveCompany() {
 		final VaadinSession session = VaadinSession.getCurrent();
 		Check.notNull(session, "Vaadin session must not be null");
-		CCompany activeCompany = (CCompany) session.getAttribute(ACTIVE_COMPANY_KEY);
-		return Optional.ofNullable(activeCompany);
+		CUser activeUser = (CUser) session.getAttribute(ACTIVE_USER_KEY);
+		Check.notNull(activeUser, "Active user must not be null to get company");
+		CCompany company = activeUser.getCompany();
+		return Optional.ofNullable(company);
 	}
 
 	@Override
@@ -154,18 +155,6 @@ public class CWebSessionService implements ISessionService {
 			return Optional.empty();
 		}
 		CUser activeUser = (CUser) session.getAttribute(ACTIVE_USER_KEY);
-		if (activeUser == null) {
-			// Try to load user from authentication context
-			final Optional<User> authenticatedUser =
-					authenticationContext.getAuthenticatedUser(org.springframework.security.core.userdetails.User.class);
-			if (authenticatedUser.isPresent()) {
-				final String username = authenticatedUser.get().getUsername();
-				CCompany company = (CCompany) session.getAttribute(ACTIVE_COMPANY_KEY);
-				Check.notNull(company, "Active company must be set before loading user");
-				activeUser = userRepository.findByUsername(company.getId(), username).orElse(null); // <-- service yerine repo
-				setActiveUser(activeUser);
-			}
-		}
 		return Optional.ofNullable(activeUser);
 	}
 
@@ -326,27 +315,6 @@ public class CWebSessionService implements ISessionService {
 	}
 
 	@Override
-	public void setActiveCompany(CCompany company) {
-		// DONT CLEAR USER WHEN SETTING COMPANY, IT CAUSES PROBLEMS WITH AUTHENTICATION
-		// clearSession(); // Clear session data before setting new user
-		final VaadinSession session = VaadinSession.getCurrent();
-		Check.notNull(session, "Vaadin session must not be null");
-		Check.isTrue(getActiveUser().isEmpty(), "User must be null when setting company directly");
-		if (company == getActiveCompany().orElse(null)) {
-			LOGGER.debug("setActiveCompany called with same company, no action taken");
-			return;
-		}
-		session.setAttribute(ACTIVE_PROJECT_KEY, null); // Reset active project to force reload
-		// session.setAttribute(ACTIVE_USER_KEY, null); // Clear active user when setting company directly
-		session.setAttribute(ACTIVE_COMPANY_KEY, company);
-		if (company == null) {
-			LOGGER.info("Active company set to null");
-		} else {
-			LOGGER.info("Active company set to: {}:{}", company.getId(), company.getName());
-		}
-	}
-
-	@Override
 	public void setActiveId(final String entityType, final Long id) {
 		final VaadinSession session = VaadinSession.getCurrent();
 		if (session == null) {
@@ -373,56 +341,17 @@ public class CWebSessionService implements ISessionService {
 		notifyProjectChangeListeners(project);
 	}
 
-	/** Sets the active user in the session. */
-	@Override
-	public void setActiveUser(final CUser user) {
-		clearSession(); // Clear session data before setting new user
-		final VaadinSession session = VaadinSession.getCurrent();
-		Check.notNull(session, "Vaadin session must not be null");
-		// Set active company when user is set
-		if (user == getActiveUser().orElse(null)) {
-			LOGGER.debug("setActiveUser called with same user, no action taken");
-			return;
-		}
-		if (user != null) {
-			LOGGER.info("Active user set to: {}:{}", user.getId(), user.getUsername());
-			// Get company directly from user
-			CCompany company = user.getCompany();
-			if (company == null) {
-				LOGGER.warn("User {} has no company assigned", user.getUsername());
-			}
-			setActiveCompany(company);
-			session.setAttribute(ACTIVE_USER_KEY, user);
-			final List<CProject> availableProjects = getAvailableProjects();
-			if (!availableProjects.isEmpty()) {
-				CProject activeProject = availableProjects.get(0);
-				setActiveProject(activeProject);
-			}
-		} else {
-			session.setAttribute(ACTIVE_USER_KEY, null);
-			LOGGER.info("Active user cleared");
-		}
-	}
-
 	/** Sets both company and user in the session atomically. This ensures company is always set before user and validates that the user is a member
 	 * of the company.
 	 * @param company the company to set as active
 	 * @param user    the user to set as active (must be a member of the company) */
 	@Override
-	public void setCompanyAndUser(CCompany company, CUser user) {
-		Check.notNull(company, "Company must not be null");
+	public void setActiveUser(CUser user) {
+		LOGGER.debug("setActiveUser called");
 		Check.notNull(user, "User must not be null");
-		// Validate that user is a member of the company
-		if (user.getCompany() == null || !user.getCompany().getId().equals(company.getId())) {
-			throw new IllegalArgumentException(String.format("User %s is not a member of company %s", user.getUsername(), company.getName()));
-		}
 		clearSession(); // Clear session data before setting new user
 		final VaadinSession session = VaadinSession.getCurrent();
 		Check.notNull(session, "Vaadin session must not be null");
-		LOGGER.info("Setting company {} and user {}:{} atomically", company.getName(), user.getId(), user.getUsername());
-		// Set company first
-		setActiveCompany(company);
-		// Then set user
 		session.setAttribute(ACTIVE_USER_KEY, user);
 		// Set first available project
 		final List<CProject> availableProjects = getAvailableProjects();
