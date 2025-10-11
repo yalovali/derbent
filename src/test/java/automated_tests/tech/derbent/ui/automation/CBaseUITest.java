@@ -162,13 +162,14 @@ public abstract class CBaseUITest {
 			LOGGER.warn("⚠️ Browser not available - skipping login attempt for {}", username);
 			return;
 		}
-		try {
-			LOGGER.info("🔐 Attempting login with username: {}", username);
-			ensureLoginViewLoaded();
-			initializeSampleDataFromLoginPage();
-			ensureLoginViewLoaded();
-			boolean usernameFilled =
-					fillLoginField("#custom-username-input", "input", "username", username, "input[type='text'], input[type='email']");
+                try {
+                        LOGGER.info("🔐 Attempting login with username: {}", username);
+                        ensureLoginViewLoaded();
+                        initializeSampleDataFromLoginPage();
+                        ensureLoginViewLoaded();
+                        selectCompanyForLogin();
+                        boolean usernameFilled =
+                                        fillLoginField("#custom-username-input", "input", "username", username, "input[type='text'], input[type='email']");
 			if (!usernameFilled) {
 				throw new AssertionError("Username input field not found on login page");
 			}
@@ -191,7 +192,47 @@ public abstract class CBaseUITest {
 			LOGGER.warn("⚠️ Unexpected login error for {}: {}", username, e.getMessage());
 			takeScreenshot("login-unexpected-error", false);
 		}
-	}
+        }
+
+        /** Selects the first available company option on the custom login form to ensure company-aware authentication. */
+        protected void selectCompanyForLogin() {
+                if (!isBrowserAvailable()) {
+                        LOGGER.warn("⚠️ Browser not available - skipping company selection");
+                        return;
+                }
+                try {
+                        final Locator combo = page.locator("#custom-company-input");
+                        if (combo.count() == 0) {
+                                LOGGER.info("ℹ️ Company selector not present on login view; skipping selection");
+                                return;
+                        }
+                        combo.first().click();
+                        wait_500();
+                        Locator overlay = page.locator("vaadin-combo-box-overlay[opened]");
+                        for (int attempt = 0; attempt < 10; attempt++) {
+                                if ((overlay.count() > 0)
+                                                && (overlay.locator("vaadin-item, vaadin-combo-box-item").count() > 0)) {
+                                        break;
+                                }
+                                wait_500();
+                        }
+                        if (overlay.count() == 0) {
+                                LOGGER.warn("⚠️ Company selection overlay did not open");
+                                return;
+                        }
+                        Locator items = overlay.locator("vaadin-item, vaadin-combo-box-item");
+                        if (items.count() == 0) {
+                                LOGGER.warn("⚠️ No company options available in the login combo box");
+                                return;
+                        }
+                        items.first().click();
+                        wait_500();
+                        LOGGER.info("🏢 Selected first available company option for login");
+                } catch (Exception e) {
+                        LOGGER.warn("⚠️ Failed to select company for login: {}", e.getMessage());
+                        takeScreenshot("company-selection-error", false);
+                }
+        }
 
 	/** Ensures the custom login view is loaded and ready for interaction. */
 	protected void ensureLoginViewLoaded() {
