@@ -44,7 +44,9 @@ public class CWebSessionService implements ISessionService {
 	private CLayoutService layoutService;
 	private final IProjectRepository projectRepository;
 	private final IUserRepository userRepository;
+
 	private static final class SessionState {
+
 		private CCompany activeCompany;
 		private CProject activeProject;
 		private CUser activeUser;

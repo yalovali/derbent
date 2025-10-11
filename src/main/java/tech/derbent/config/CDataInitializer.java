@@ -941,14 +941,14 @@ public class CDataInitializer {
 					CCompanyInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
 					CDecisionInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
 					CMeetingInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, true);
-                                        COrderInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
-                                        COrderApprovalInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+					COrderInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+					COrderApprovalInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
 					CProjectInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, true);
 					CRiskInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
-                                        CUserProjectRoleInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
-                                        CUserCompanyRoleInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
-                                        CUserProjectSettingsInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
-                                        CUserCompanySettingInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+					CUserProjectRoleInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+					CUserCompanyRoleInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+					CUserProjectSettingsInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+					CUserCompanySettingInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
 					// Type/Status InitializerServices
 					CActivityStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
 					CActivityTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
@@ -962,7 +962,7 @@ public class CDataInitializer {
 					COrderStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
 					COrderTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
 					CRiskStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
-                                        CUserTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+					CUserTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
 					// Project-specific type and configuration entities
 					initializeSampleMeetingStatuses(project);
 					initializeSampleActivityStatuses(project);

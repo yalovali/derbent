@@ -292,26 +292,26 @@ public class CAuxillaries {
 			return CDecisionTypeService.class;
 		case "COrderStatus":
 			return COrderStatusService.class;
-                case "COrderType":
-                        return COrderTypeService.class;
-                case "CApprovalStatus":
-                        return CApprovalStatusService.class;
-                case "COrderApproval":
-                        return COrderApprovalService.class;
-                case "CDetailSection":
-                        return CDetailSectionService.class;
-                case "CGridEntity":
-                        return CGridEntityService.class;
-                case "CSystemSettings":
-                        return CSystemSettingsService.class;
-                case "CUserProjectRole":
-                        return CUserProjectRoleService.class;
-                case "CUserCompanyRole":
-                        return CUserCompanyRoleService.class;
-                case "CUserProjectSettings":
-                        return CUserProjectSettingsService.class;
-                case "CUserCompanySetting":
-                        return CUserCompanySettingsService.class;
+		case "COrderType":
+			return COrderTypeService.class;
+		case "CApprovalStatus":
+			return CApprovalStatusService.class;
+		case "COrderApproval":
+			return COrderApprovalService.class;
+		case "CDetailSection":
+			return CDetailSectionService.class;
+		case "CGridEntity":
+			return CGridEntityService.class;
+		case "CSystemSettings":
+			return CSystemSettingsService.class;
+		case "CUserProjectRole":
+			return CUserProjectRoleService.class;
+		case "CUserCompanyRole":
+			return CUserCompanyRoleService.class;
+		case "CUserProjectSettings":
+			return CUserProjectSettingsService.class;
+		case "CUserCompanySetting":
+			return CUserCompanySettingsService.class;
 		// ... add more as needed ...
 		default:
 			LOGGER.error("Unknown entity type: " + simpleName + " dont forget to update CAuxillaries");
@@ -360,29 +360,29 @@ public class CAuxillaries {
 			return CDecisionStatusInitializerService.class;
 		} else if (entityClass == CDecisionType.class) {
 			return CDecisionTypeInitializerService.class;
-                } else if (entityClass == COrderStatus.class) {
-                        return COrderStatusInitializerService.class;
-                } else if (entityClass == COrderType.class) {
-                        return COrderTypeInitializerService.class;
-                } else if (entityClass == CApprovalStatus.class) {
-                        return CApprovalStatusInitializerService.class;
-                } else if (entityClass == COrderApproval.class) {
-                        return COrderApprovalInitializerService.class;
-                } else if (entityClass == CDetailSection.class) {
-                        return CDetailSectionService.class;
-                } else if (entityClass == CGridEntity.class) {
-                        return CGridEntityService.class;
-                } else if (entityClass == CSystemSettings.class) {
-                        return CSystemSettingsInitializerService.class;
-                } else if (entityClass == CUserProjectRole.class) {
-                        return CUserProjectRoleInitializerService.class;
-                } else if (entityClass == CUserCompanyRole.class) {
-                        return CUserCompanyRoleInitializerService.class;
-                } else if (entityClass == CUserProjectSettings.class) {
-                        return CUserProjectSettingsInitializerService.class;
-                } else if (entityClass == CUserCompanySetting.class) {
-                        return CUserCompanySettingInitializerService.class;
-                } else {
+		} else if (entityClass == COrderStatus.class) {
+			return COrderStatusInitializerService.class;
+		} else if (entityClass == COrderType.class) {
+			return COrderTypeInitializerService.class;
+		} else if (entityClass == CApprovalStatus.class) {
+			return CApprovalStatusInitializerService.class;
+		} else if (entityClass == COrderApproval.class) {
+			return COrderApprovalInitializerService.class;
+		} else if (entityClass == CDetailSection.class) {
+			return CDetailSectionService.class;
+		} else if (entityClass == CGridEntity.class) {
+			return CGridEntityService.class;
+		} else if (entityClass == CSystemSettings.class) {
+			return CSystemSettingsInitializerService.class;
+		} else if (entityClass == CUserProjectRole.class) {
+			return CUserProjectRoleInitializerService.class;
+		} else if (entityClass == CUserCompanyRole.class) {
+			return CUserCompanyRoleInitializerService.class;
+		} else if (entityClass == CUserProjectSettings.class) {
+			return CUserProjectSettingsInitializerService.class;
+		} else if (entityClass == CUserCompanySetting.class) {
+			return CUserCompanySettingInitializerService.class;
+		} else {
 			LOGGER.error("Unknown entity type: " + entityClass.getSimpleName() + " dont forget to update CAuxillaries");
 			throw new IllegalArgumentException("Unknown entity type: " + entityClass.getSimpleName());
 		}

@@ -263,8 +263,7 @@ public abstract class CBaseUITest {
 				return;
 			}
 			try {
-				page.waitForLoadState(LoadState.NETWORKIDLE,
-						new Page.WaitForLoadStateOptions().setTimeout(DEFAULT_PLAYWRIGHT_TIMEOUT_MS));
+				page.waitForLoadState(LoadState.NETWORKIDLE, new Page.WaitForLoadStateOptions().setTimeout(DEFAULT_PLAYWRIGHT_TIMEOUT_MS));
 			} catch (Exception e) {
 				LOGGER.debug("Post-login load state wait failed on attempt {}: {}", attempt, e.getMessage());
 			}
@@ -654,8 +653,8 @@ public abstract class CBaseUITest {
 			}
 			LOGGER.info("🎭 Browser mode: {}", headless ? "HEADLESS" : "VISIBLE");
 			// Use headless mode and try to handle browser installation gracefully
-			final List<String> launchArgs = new ArrayList<>(Arrays.asList("--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu",
-					"--disable-setuid-sandbox"));
+			final List<String> launchArgs =
+					new ArrayList<>(Arrays.asList("--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--disable-setuid-sandbox"));
 			final BrowserType.LaunchOptions launchOptions = new BrowserType.LaunchOptions().setHeadless(headless).setArgs(launchArgs);
 			browser = playwright.chromium().launch(launchOptions);
 			context = browser.newContext();
@@ -1140,7 +1139,7 @@ public abstract class CBaseUITest {
 	}
 
 	/** Waits for after login state */
-protected void wait_afterlogin() {
+	protected void wait_afterlogin() {
 		if (!isBrowserAvailable()) {
 			return;
 		}
