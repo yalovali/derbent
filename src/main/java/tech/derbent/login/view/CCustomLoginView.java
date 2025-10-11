@@ -98,8 +98,8 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		Check.notNull(selectedCompany, "Please select a company");
 		// Get selected view for redirect
 		String redirectView = "home";
-		// Get company ID
-		Long companyId = selectedCompany.getId();
+		// Get company ID and convert to string to avoid JSON serialization issues
+		String companyIdStr = String.valueOf(selectedCompany.getId());
 		// Create form and submit to Spring Security endpoint with company ID and redirect parameter
 		getElement().executeJs("const form = document.createElement('form');" + "form.method = 'POST';" + "form.action = 'login';"
 				+ "const usernameInput = document.createElement('input');" + "usernameInput.type = 'hidden';" + "usernameInput.name = 'username';"
@@ -109,7 +109,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 				+ "companyInput.name = 'companyId';" + "companyInput.value = $2;" + "form.appendChild(companyInput);"
 				+ "const redirectInput = document.createElement('input');" + "redirectInput.type = 'hidden';" + "redirectInput.name = 'redirect';"
 				+ "redirectInput.value = $3;" + "form.appendChild(redirectInput);" + "document.body.appendChild(form);" + "form.submit();", username,
-				password, companyId, redirectView);
+				password, companyIdStr, redirectView);
 	}
 
 	private void setupForm() {

@@ -179,8 +179,19 @@ public class CAuthenticationSuccessHandler implements AuthenticationSuccessHandl
 		if ((companyIdParam == null) || companyIdParam.trim().isEmpty()) {
 			return null;
 		}
+		// Remove any JSON-like wrapping (e.g., {"id":1} -> 1)
+		String cleanedParam = companyIdParam.trim();
+		if (cleanedParam.startsWith("{") || cleanedParam.startsWith("[")) {
+			LOGGER.warn("Company ID parameter appears to be JSON '{}', attempting to extract numeric value", companyIdParam);
+			// Try to extract numeric value from JSON-like string
+			cleanedParam = cleanedParam.replaceAll("[^0-9]", "");
+			if (cleanedParam.isEmpty()) {
+				LOGGER.warn("Unable to extract numeric value from company ID parameter '{}'", companyIdParam);
+				return null;
+			}
+		}
 		try {
-			return Long.parseLong(companyIdParam.trim());
+			return Long.parseLong(cleanedParam);
 		} catch (NumberFormatException e) {
 			LOGGER.warn("Invalid company ID value '{}' provided during login", companyIdParam);
 			return null;
