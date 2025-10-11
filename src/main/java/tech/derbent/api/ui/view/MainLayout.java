@@ -19,8 +19,12 @@ import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Layout;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.WrappedSession;
 import com.vaadin.flow.server.menu.MenuConfiguration;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
@@ -38,6 +42,7 @@ import tech.derbent.api.ui.component.CHierarchicalSideMenu;
 import tech.derbent.api.ui.component.CViewToolbar;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.api.utils.CColorUtils;
+import tech.derbent.login.service.CAuthenticationSuccessHandler;
 import tech.derbent.api.views.CAbstractNamedEntityPage;
 import tech.derbent.page.service.CPageMenuIntegrationService;
 import tech.derbent.session.service.CLayoutService;
@@ -57,7 +62,7 @@ import tech.derbent.users.view.CUserProfileDialog;
 // afterNavigationObserver to the layout to handle navigation events
 @Layout
 @PermitAll // When security is enabled, allow all authenticated users
-public final class MainLayout extends AppLayout implements AfterNavigationObserver {
+public final class MainLayout extends AppLayout implements AfterNavigationObserver, BeforeEnterObserver {
 
 	private static final long serialVersionUID = 1L;
 	private final AuthenticationContext authenticationContext;
@@ -79,11 +84,12 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		this.sessionService = sessionService;
 		this.layoutService = layoutService;
 		this.passwordEncoder = passwordEncoder;
-		this.userService = userService;
-		this.systemSettingsService = systemSettingsService;
-		this.routeDiscoveryService = routeDiscoveryService;
-		this.pageMenuService = pageMenuService;
-		currentUser = authenticationContext.getAuthenticatedUser(User.class).orElse(null);
+                this.userService = userService;
+                this.systemSettingsService = systemSettingsService;
+                this.routeDiscoveryService = routeDiscoveryService;
+                this.pageMenuService = pageMenuService;
+                synchronizeLoginContextWithSession();
+                currentUser = authenticationContext.getAuthenticatedUser(User.class).orElse(null);
 		setId("main-layout");
 		setPrimarySection(Section.DRAWER);
 		// this is the main layout, so we add the side navigation menu and the user menu
@@ -97,12 +103,17 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		// in a Scroller for better scrolling behavior addToDrawer(new
 		// Scroller(createSideNav()));
 		addToDrawer(createUserMenu()); // Add the user menu to the navbar
-	}
+        }
 
-	@Override
-	public void afterNavigation(final AfterNavigationEvent event) {
-		// Update the view title in the toolbar after navigation
-		String pageTitle = null;
+        @Override
+        public void beforeEnter(BeforeEnterEvent event) {
+                synchronizeLoginContextWithSession();
+        }
+
+        @Override
+        public void afterNavigation(final AfterNavigationEvent event) {
+                // Update the view title in the toolbar after navigation
+                String pageTitle = null;
 		// Check if the current content implements IPageTitleProvider (for dynamic pages)
 		Component content = getContent();
 		if (content instanceof IPageTitleProvider) {
@@ -113,8 +124,85 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 			pageTitle = MenuConfiguration.getPageHeader(content).orElse("Main Layout");
 			LOGGER.debug("Using page title from MenuConfiguration: {}", pageTitle);
 		}
-		mainToolbar.setPageTitle(pageTitle); // Set the page title in the toolbar
-	}
+                mainToolbar.setPageTitle(pageTitle); // Set the page title in the toolbar
+        }
+
+        private void synchronizeLoginContextWithSession() {
+                try {
+                        if (sessionService.getActiveUser().isPresent()) {
+                                return;
+                        }
+                        VaadinSession vaadinSession = VaadinSession.getCurrent();
+                        if (vaadinSession == null) {
+                                LOGGER.debug("Vaadin session not available yet; login context synchronization postponed");
+                                return;
+                        }
+                        WrappedSession httpSession = vaadinSession.getSession();
+                        if (httpSession == null) {
+                                LOGGER.debug("Wrapped HTTP session missing; skipping login context synchronization");
+                                return;
+                        }
+                        Object companyAttribute = httpSession.getAttribute(CAuthenticationSuccessHandler.SESSION_COMPANY_ID_ATTRIBUTE);
+                        Object usernameAttribute = httpSession.getAttribute(CAuthenticationSuccessHandler.SESSION_USERNAME_ATTRIBUTE);
+                        if ((companyAttribute == null) || (usernameAttribute == null)) {
+                                return;
+                        }
+                        Long companyId = toLong(companyAttribute);
+                        String username = String.valueOf(usernameAttribute);
+                        if ((companyId == null) || (username == null) || username.trim().isEmpty()) {
+                                LOGGER.warn("Incomplete login context detected (companyId={}, username={})", companyAttribute, usernameAttribute);
+                                clearLoginContextAttributes(httpSession);
+                                return;
+                        }
+                        LOGGER.debug("Initializing session context for user {} and company {}", username, companyId);
+                        CUser user = userService.findByLogin(username, companyId);
+                        if (user == null) {
+                                LOGGER.warn("Unable to find user {} for company {} during login context synchronization", username, companyId);
+                                clearLoginContextAttributes(httpSession);
+                                return;
+                        }
+                        if (user.getCompany() == null) {
+                                LOGGER.warn("User {} has no associated company while synchronizing login context", username);
+                                clearLoginContextAttributes(httpSession);
+                                return;
+                        }
+                        sessionService.setCompanyAndUser(user.getCompany(), user);
+                        LOGGER.info("Session context initialized for user {} in company {}", username, user.getCompany().getName());
+                        clearLoginContextAttributes(httpSession);
+                } catch (Exception ex) {
+                        LOGGER.error("Failed to synchronize login context from HTTP session", ex);
+                }
+        }
+
+        private void clearLoginContextAttributes(WrappedSession session) {
+                session.removeAttribute(CAuthenticationSuccessHandler.SESSION_COMPANY_ID_ATTRIBUTE);
+                session.removeAttribute(CAuthenticationSuccessHandler.SESSION_USERNAME_ATTRIBUTE);
+        }
+
+        private Long toLong(Object value) {
+                if (value instanceof Long) {
+                        return (Long) value;
+                }
+                if (value instanceof Number) {
+                        return ((Number) value).longValue();
+                }
+                if (value instanceof String) {
+                        String trimmed = ((String) value).trim();
+                        if (trimmed.isEmpty()) {
+                                return null;
+                        }
+                        try {
+                                return Long.parseLong(trimmed);
+                        } catch (NumberFormatException e) {
+                                LOGGER.warn("Unable to parse company ID value '{}' into a number", value);
+                                return null;
+                        }
+                }
+                if (value != null) {
+                        LOGGER.warn("Unsupported company ID value type: {}", value.getClass().getName());
+                }
+                return null;
+        }
 
 	@SuppressWarnings ("unused")
 	private Div createAppMarker() {

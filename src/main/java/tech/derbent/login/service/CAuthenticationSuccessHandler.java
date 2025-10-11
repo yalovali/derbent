@@ -17,9 +17,11 @@ import tech.derbent.setup.service.CSystemSettingsService;
 @Component
 public class CAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
-	private static final String DEFAULT_SUCCESS_URL = "/home";
-	private static final Logger LOGGER = LoggerFactory.getLogger(CAuthenticationSuccessHandler.class);
-	private static final String REQUESTED_URL_SESSION_KEY = "requestedUrl";
+        public static final String SESSION_COMPANY_ID_ATTRIBUTE = "LOGIN_SELECTED_COMPANY_ID";
+        public static final String SESSION_USERNAME_ATTRIBUTE = "LOGIN_SELECTED_USERNAME";
+        private static final String DEFAULT_SUCCESS_URL = "/home";
+        private static final Logger LOGGER = LoggerFactory.getLogger(CAuthenticationSuccessHandler.class);
+        private static final String REQUESTED_URL_SESSION_KEY = "requestedUrl";
 
 	/** Constructs the full request URL from the request. */
 	private static String getFullRequestUrl(HttpServletRequest request) {
@@ -129,18 +131,59 @@ public class CAuthenticationSuccessHandler implements AuthenticationSuccessHandl
 	}
 
 	@Override
-	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
-			throws IOException, ServletException {
-		LOGGER.debug("Authentication successful for user: {}", authentication.getName());
-		// Get the target URL for redirection
-		String targetUrl = determineTargetUrl(request);
-		LOGGER.info("Redirecting user {} to: {}", authentication.getName(), targetUrl);
-		// Clear the requested URL from session since we're about to redirect
-		HttpSession session = request.getSession(false);
-		if (session != null) {
-			session.removeAttribute(REQUESTED_URL_SESSION_KEY);
-		}
-		// Perform the redirect
-		response.sendRedirect(targetUrl);
-	}
+        public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
+                        throws IOException, ServletException {
+                LOGGER.debug("Authentication successful for user: {}", authentication.getName());
+                // Get the target URL for redirection
+                String targetUrl = determineTargetUrl(request);
+                LOGGER.info("Redirecting user {} to: {}", authentication.getName(), targetUrl);
+                storeLoginContext(authentication, request);
+                // Clear the requested URL from session since we're about to redirect
+                HttpSession session = request.getSession(false);
+                if (session != null) {
+                        session.removeAttribute(REQUESTED_URL_SESSION_KEY);
+                }
+                // Perform the redirect
+                response.sendRedirect(targetUrl);
+        }
+
+        /** Stores the authenticated user's login context (username and selected company) in the HTTP session.
+         * This information is later consumed by the Vaadin UI to initialize the session-scoped services.
+         * @param authentication the successful authentication token
+         * @param request        the current HTTP request */
+        private void storeLoginContext(Authentication authentication, HttpServletRequest request) {
+                HttpSession session = request.getSession(true);
+                if (session == null) {
+                        LOGGER.warn("Unable to access HTTP session to store login context for user {}", authentication.getName());
+                        return;
+                }
+                Long companyId = extractCompanyId(authentication, request);
+                if (companyId != null) {
+                        session.setAttribute(SESSION_COMPANY_ID_ATTRIBUTE, companyId);
+                        LOGGER.debug("Stored company ID {} in session for user {}", companyId, authentication.getName());
+                } else {
+                        LOGGER.warn("No company ID available while storing login context for user {}", authentication.getName());
+                }
+                session.setAttribute(SESSION_USERNAME_ATTRIBUTE, authentication.getName());
+        }
+
+        /** Extracts the company ID selected during login from the authentication token or request parameters.
+         * @param authentication the successful authentication token
+         * @param request        the current HTTP request
+         * @return the selected company ID or null if not available */
+        private Long extractCompanyId(Authentication authentication, HttpServletRequest request) {
+                if (authentication instanceof CCompanyAwareAuthenticationToken) {
+                        return ((CCompanyAwareAuthenticationToken) authentication).getCompanyId();
+                }
+                String companyIdParam = request.getParameter("companyId");
+                if ((companyIdParam == null) || companyIdParam.trim().isEmpty()) {
+                        return null;
+                }
+                try {
+                        return Long.parseLong(companyIdParam.trim());
+                } catch (NumberFormatException e) {
+                        LOGGER.warn("Invalid company ID value '{}' provided during login", companyIdParam);
+                        return null;
+                }
+        }
 }
