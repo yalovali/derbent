@@ -947,6 +947,9 @@ public class CDataInitializer {
 					initializeSampleCommentPriorities(project);
 					initializeSampleCurrencies(project);
 					initializeSampleUserProjectSettings(project);
+					// Create sample entities (decisions and meetings with comments)
+					initializeSampleDecisions(project);
+					initializeSampleMeetings(project);
 				}
 			}
 			// Initialize company roles (non-project specific)
@@ -967,4 +970,164 @@ public class CDataInitializer {
 	// ========================================================================
 	// SYSTEM INITIALIZATION METHODS - Base entities required for operation
 	// ========================================================================
+
+	/** Initialize 2 sample decisions per project with all fields populated.
+	 * @param project the project to create decisions for */
+	private void initializeSampleDecisions(final CProject project) {
+		try {
+			// Get random values from database for dependencies
+			final CDecisionType type1 = decisionTypeService.getRandom(project);
+			final CDecisionType type2 = decisionTypeService.getRandom(project);
+			final CDecisionStatus status1 = decisionStatusService.getRandom(project);
+			final CDecisionStatus status2 = decisionStatusService.getRandom(project);
+			final CUser user1 = userService.getRandom();
+			final CUser user2 = userService.getRandom();
+			// Create first decision
+			final tech.derbent.decisions.domain.CDecision decision1 =
+					new tech.derbent.decisions.domain.CDecision("Adopt Cloud-Native Architecture", project);
+			decision1.setDescription("Strategic decision to migrate to cloud-native architecture for improved scalability");
+			decision1.setDecisionType(type1);
+			decision1.setDecisionStatus(status1);
+			decision1.setAssignedTo(user1);
+			decision1.setAccountableUser(user2);
+			decision1.setEstimatedCost(new java.math.BigDecimal("50000.00"));
+			decision1.setImplementationDate(java.time.LocalDateTime.now().plusDays(30));
+			decision1.setReviewDate(java.time.LocalDateTime.now().plusDays(90));
+			decisionService.save(decision1);
+			// Create first decision comments
+			createSampleCommentsForDecision(decision1);
+			// Create second decision
+			final tech.derbent.decisions.domain.CDecision decision2 =
+					new tech.derbent.decisions.domain.CDecision("Implement Agile Methodology", project);
+			decision2.setDescription("Operational decision to transition from waterfall to agile development methodology");
+			decision2.setDecisionType(type2);
+			decision2.setDecisionStatus(status2);
+			decision2.setAssignedTo(user2);
+			decision2.setAccountableUser(user1);
+			decision2.setEstimatedCost(new java.math.BigDecimal("25000.00"));
+			decision2.setImplementationDate(java.time.LocalDateTime.now().plusDays(15));
+			decision2.setReviewDate(java.time.LocalDateTime.now().plusDays(60));
+			decisionService.save(decision2);
+			// Create second decision comments
+			createSampleCommentsForDecision(decision2);
+			LOGGER.info("Created 2 sample decisions with comments for project: {}", project.getName());
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing sample decisions for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize sample decisions for project: " + project.getName(), e);
+		}
+	}
+
+	/** Initialize 2 sample meetings per project with all fields populated.
+	 * @param project the project to create meetings for */
+	private void initializeSampleMeetings(final CProject project) {
+		try {
+			// Get random values from database for dependencies
+			final CMeetingType type1 = meetingTypeService.getRandom(project);
+			final CMeetingType type2 = meetingTypeService.getRandom(project);
+			final CMeetingStatus status1 = meetingStatusService.getRandom(project);
+			final CMeetingStatus status2 = meetingStatusService.getRandom(project);
+			final CUser user1 = userService.getRandom();
+			final CUser user2 = userService.getRandom();
+			// Create first meeting
+			final tech.derbent.meetings.domain.CMeeting meeting1 = new tech.derbent.meetings.domain.CMeeting("Q1 Planning Session", project, type1);
+			meeting1.setDescription("Quarterly planning session to review goals and set priorities");
+			meeting1.setStatus(status1);
+			meeting1.setAssignedTo(user1);
+			meeting1.setResponsible(user2);
+			meeting1.setMeetingDate(java.time.LocalDateTime.now().plusDays(7));
+			meeting1.setEndDate(java.time.LocalDateTime.now().plusDays(7).plusHours(2));
+			meeting1.setLocation("Conference Room A / Virtual");
+			meeting1.setAgenda("1. Review Q4 achievements\n2. Discuss Q1 objectives\n3. Resource allocation\n4. Budget planning");
+			meeting1.addParticipant(user1);
+			meeting1.addParticipant(user2);
+			meetingService.save(meeting1);
+			// Create first meeting comments
+			createSampleCommentsForMeeting(meeting1);
+			// Create second meeting
+			final tech.derbent.meetings.domain.CMeeting meeting2 =
+					new tech.derbent.meetings.domain.CMeeting("Technical Architecture Review", project, type2);
+			meeting2.setDescription("Review and discuss technical architecture decisions and implementation approach");
+			meeting2.setStatus(status2);
+			meeting2.setAssignedTo(user2);
+			meeting2.setResponsible(user1);
+			meeting2.setMeetingDate(java.time.LocalDateTime.now().plusDays(14));
+			meeting2.setEndDate(java.time.LocalDateTime.now().plusDays(14).plusHours(3));
+			meeting2.setLocation("Engineering Lab / Teams");
+			meeting2.setAgenda(
+					"1. Architecture proposal presentation\n2. Security considerations\n3. Scalability discussion\n4. Technology stack decisions");
+			meeting2.addParticipant(user1);
+			meeting2.addParticipant(user2);
+			meetingService.save(meeting2);
+			// Create second meeting comments
+			createSampleCommentsForMeeting(meeting2);
+			LOGGER.info("Created 2 sample meetings with comments for project: {}", project.getName());
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing sample meetings for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize sample meetings for project: " + project.getName(), e);
+		}
+	}
+
+	/** Create sample comments for a decision.
+	 * @param decision the decision to create comments for */
+	private void createSampleCommentsForDecision(final tech.derbent.decisions.domain.CDecision decision) {
+		try {
+			// Comments require an activity - create a simple activity related to this decision
+			final CActivityType activityType = activityTypeService.getRandom(decision.getProject());
+			final CActivityStatus activityStatus = activityStatusService.getRandom(decision.getProject());
+			final CUser user = userService.getRandom();
+			final tech.derbent.activities.domain.CActivity activity =
+					new tech.derbent.activities.domain.CActivity("Review Decision: " + decision.getName(), decision.getProject());
+			activity.setDescription("Activity to track review and implementation of decision");
+			activity.setActivityType(activityType);
+			activity.setStatus(activityStatus);
+			activity.setAssignedTo(user);
+			activityService.save(activity);
+			// Create 2 comments for this activity
+			final CCommentPriority priority1 = commentPriorityService.getRandom(decision.getProject());
+			final CCommentPriority priority2 = commentPriorityService.getRandom(decision.getProject());
+			final CUser commenter1 = userService.getRandom();
+			final CUser commenter2 = userService.getRandom();
+			final tech.derbent.comments.domain.CComment comment1 = new tech.derbent.comments.domain.CComment(
+					"This decision looks promising. We should prioritize implementation.", activity, commenter1, priority1);
+			commentService.save(comment1);
+			final tech.derbent.comments.domain.CComment comment2 = new tech.derbent.comments.domain.CComment(
+					"Agreed. Let's schedule a follow-up meeting to discuss resource allocation.", activity, commenter2, priority2);
+			commentService.save(comment2);
+			LOGGER.debug("Created sample activity and comments for decision ID: {}", decision.getId());
+		} catch (final Exception e) {
+			LOGGER.error("Error creating comments for decision: {}", decision.getName(), e);
+		}
+	}
+
+	/** Create sample comments for a meeting.
+	 * @param meeting the meeting to create comments for */
+	private void createSampleCommentsForMeeting(final tech.derbent.meetings.domain.CMeeting meeting) {
+		try {
+			// Comments require an activity - create a simple activity related to this meeting
+			final CActivityType activityType = activityTypeService.getRandom(meeting.getProject());
+			final CActivityStatus activityStatus = activityStatusService.getRandom(meeting.getProject());
+			final CUser user = userService.getRandom();
+			final tech.derbent.activities.domain.CActivity activity =
+					new tech.derbent.activities.domain.CActivity("Follow-up: " + meeting.getName(), meeting.getProject());
+			activity.setDescription("Activity to track action items from meeting");
+			activity.setActivityType(activityType);
+			activity.setStatus(activityStatus);
+			activity.setAssignedTo(user);
+			activityService.save(activity);
+			// Create 2 comments for this activity
+			final CCommentPriority priority1 = commentPriorityService.getRandom(meeting.getProject());
+			final CCommentPriority priority2 = commentPriorityService.getRandom(meeting.getProject());
+			final CUser commenter1 = userService.getRandom();
+			final CUser commenter2 = userService.getRandom();
+			final tech.derbent.comments.domain.CComment comment1 = new tech.derbent.comments.domain.CComment(
+					"Meeting was productive. Action items are clearly defined.", activity, commenter1, priority1);
+			commentService.save(comment1);
+			final tech.derbent.comments.domain.CComment comment2 = new tech.derbent.comments.domain.CComment(
+					"I'll take ownership of the first two action items. Expected completion in 2 weeks.", activity, commenter2, priority2);
+			commentService.save(comment2);
+			LOGGER.debug("Created sample activity and comments for meeting ID: {}", meeting.getId());
+		} catch (final Exception e) {
+			LOGGER.error("Error creating comments for meeting: {}", meeting.getName(), e);
+		}
+	}
 }
