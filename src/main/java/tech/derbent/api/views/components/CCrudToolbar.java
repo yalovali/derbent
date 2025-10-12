@@ -45,6 +45,8 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		setPadding(true);
 		addClassName("crud-toolbar");
 		setWidthFull(); // Make toolbar take full width
+		// Automatically set dependency checker from service if it implements IDependencyChecker
+		this.dependencyChecker = entityService::checkDependencies;
 		createToolbarButtons();
 		LOGGER.debug("Created CCrudToolbar for entity: {}", entityClass.getSimpleName());
 	}
@@ -94,6 +96,16 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 			// Create new entity
 			EntityClass newEntity = newEntitySupplier.get();
 			Check.notNull(newEntity, "New entity supplier returned null");
+			// Initialize the new entity with default values from session and available data
+			try {
+				entityService.initializeNewEntity(newEntity);
+				LOGGER.debug("Initialized new entity with default values");
+			} catch (IllegalStateException e) {
+				// If initialization fails due to missing required data, show specific error
+				LOGGER.error("Failed to initialize new entity: {}", e.getMessage());
+				showErrorNotification("Cannot create new entity: " + e.getMessage());
+				return;
+			}
 			// Set as current entity and bind to form
 			setCurrentEntity(newEntity);
 			showSuccessNotification("New " + entityClass.getSimpleName() + " created. Fill in the details and click Save.");
@@ -261,6 +273,10 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	public void setCurrentEntity(final Object entity) {
 		LOGGER.debug("Setting current entity in toolbar: {}", entity != null ? entityClass.getSimpleName() : "null");
 		currentEntity = (EntityClass) entity;
+		// Automatically set dependency checker from service when entity changes
+		if (entityService != null) {
+			this.dependencyChecker = entityService::checkDependencies;
+		}
 		updateButtonStates();
 	}
 

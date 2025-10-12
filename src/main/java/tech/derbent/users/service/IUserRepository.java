@@ -53,4 +53,7 @@ public interface IUserRepository extends IAbstractNamedRepository<CUser>, ICompa
 		"SELECT u FROM #{#entityName} u LEFT JOIN FETCH u.userType LEFT JOIN FETCH u.company LEFT JOIN FETCH u.companyRole WHERE u.company.id = :companyId"
 	)
 	Page<CUser> findByCompanyId(@Param ("companyId") Long companyId, Pageable pageable);
+	/** Counts the number of users that use the specified user type */
+	@Query ("SELECT COUNT(u) FROM #{#entityName} u WHERE u.userType = :userType")
+	long countByUserType(@Param ("userType") tech.derbent.users.domain.CUserType userType);
 }
