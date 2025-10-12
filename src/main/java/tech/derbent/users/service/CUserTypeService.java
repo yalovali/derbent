@@ -63,35 +63,36 @@ public class CUserTypeService extends CEntityOfProjectService<CUserType> {
 
 	/** Initializes a new user type with default values based on current session and available data. Sets: - Project from current session - User for
 	 * creation tracking - Auto-generated name - Default color - Default sort order - Not marked as non-deletable
-	 * @param userType the newly created user type to initialize
+	 * @param entity the newly created user type to initialize
 	 * @throws IllegalStateException if required fields cannot be initialized */
 	@Override
-	public void initializeNewEntity(final CUserType userType) {
-		Check.notNull(userType, "User type cannot be null");
+	public void initializeNewEntity(final CUserType entity) {
+		super.initializeNewEntity(entity);
+		Check.notNull(entity, "User type cannot be null");
 		Check.notNull(sessionService, "Session service is required for user type initialization");
 		try {
 			// Get current project from session
 			Optional<CProject> activeProject = sessionService.getActiveProject();
 			Check.isTrue(activeProject.isPresent(), "No active project in session - project context is required to create user types");
 			CProject currentProject = activeProject.get();
-			userType.setProject(currentProject);
+			entity.setProject(currentProject);
 			// Get current user from session for createdBy field
 			Optional<CUser> currentUser = sessionService.getActiveUser();
 			if (currentUser.isPresent()) {
-				userType.setCreatedBy(currentUser.get());
+				entity.setCreatedBy(currentUser.get());
 			}
 			// Auto-generate name based on count
 			long typeCount = ((IUserTypeRepository) repository).countByProject(currentProject);
 			String autoName = String.format("UserType%02d", typeCount + 1);
-			userType.setName(autoName);
+			entity.setName(autoName);
 			// Set default description
-			userType.setDescription("");
+			entity.setDescription("");
 			// Set default color
-			userType.setColor("#00546d");
+			entity.setColor("#00546d");
 			// Set default sort order
-			userType.setSortOrder(100);
+			entity.setSortOrder(100);
 			// Set deletable by default (not system type)
-			userType.setAttributeNonDeletable(false);
+			entity.setAttributeNonDeletable(false);
 			LOGGER.debug("Initialized new user type with auto-generated name: {}", autoName);
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing new user type", e);

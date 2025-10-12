@@ -207,4 +207,10 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 			throw new RuntimeException("Failed to save entity", e);
 		}
 	}
+
+	@Override
+	public void initializeNewEntity(final EntityClass entity) {
+		super.initializeNewEntity(entity);
+		Check.notNull(entity, "Entity cannot be null");
+	}
 }

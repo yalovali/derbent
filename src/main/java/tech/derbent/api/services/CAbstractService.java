@@ -298,19 +298,5 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		return null;
 	}
 
-	/** Initializes a new entity with default values based on current session context and available data. This method should be called after creating
-	 * a new entity instance to ensure all required fields have proper initial values. Subclasses should override this method to implement
-	 * entity-specific initialization logic.
-	 * @param entity the newly created entity to initialize
-	 * @throws IllegalStateException if required fields cannot be initialized (e.g., no available types, no session context) */
-	public void initializeNewEntity(final EntityClass entity) {
-		// Default implementation: no initialization
-		// Subclasses should override to implement specific initialization logic
-		// Example:
-		// - Set createdBy to current user
-		// - Set company/project from session
-		// - Select first available type/status
-		// - Auto-generate name
-		// - Initialize numeric fields to 0
-	}
+	public void initializeNewEntity(final EntityClass entity) {}
 }

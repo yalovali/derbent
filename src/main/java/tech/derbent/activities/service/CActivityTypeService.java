@@ -61,35 +61,32 @@ public class CActivityTypeService extends CEntityOfProjectService<CActivityType>
 
 	/** Initializes a new activity type with default values based on current session and available data. Sets: - Project from current session - User
 	 * for creation tracking - Auto-generated name - Default color and icon - Default sort order - Not marked as non-deletable
-	 * @param activityType the newly created activity type to initialize
+	 * @param entity the newly created activity type to initialize
 	 * @throws IllegalStateException if required fields cannot be initialized */
 	@Override
-	public void initializeNewEntity(final CActivityType activityType) {
-		Check.notNull(activityType, "Activity type cannot be null");
+	public void initializeNewEntity(final CActivityType entity) {
+		super.initializeNewEntity(entity);
+		Check.notNull(entity, "Activity type cannot be null");
 		Check.notNull(sessionService, "Session service is required for activity type initialization");
 		try {
 			// Get current project from session
 			Optional<CProject> activeProject = sessionService.getActiveProject();
 			Check.isTrue(activeProject.isPresent(), "No active project in session - project context is required to create activity types");
 			CProject currentProject = activeProject.get();
-			activityType.setProject(currentProject);
+			entity.setProject(currentProject);
 			// Get current user from session for createdBy field
 			Optional<CUser> currentUser = sessionService.getActiveUser();
 			if (currentUser.isPresent()) {
-				activityType.setCreatedBy(currentUser.get());
+				entity.setCreatedBy(currentUser.get());
 			}
 			// Auto-generate name based on count
 			long typeCount = ((IActivityTypeRepository) repository).countByProject(currentProject);
 			String autoName = String.format("ActivityType%02d", typeCount + 1);
-			activityType.setName(autoName);
-			// Set default description
-			activityType.setDescription("");
-			// Set default color from constant
-			activityType.setColor(CActivityType.DEFAULT_COLOR);
-			// Set default sort order
-			activityType.setSortOrder(100);
-			// Set deletable by default (not system type)
-			activityType.setAttributeNonDeletable(false);
+			entity.setName(autoName);
+			entity.setDescription("");
+			entity.setColor(CActivityType.DEFAULT_COLOR);
+			entity.setSortOrder(100);
+			entity.setAttributeNonDeletable(false);
 			LOGGER.debug("Initialized new activity type with auto-generated name: {}", autoName);
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing new activity type", e);

@@ -82,4 +82,10 @@ public abstract class CAbstractNamedEntityService<EntityClass extends CEntityNam
 		}
 		return true;
 	}
+
+	@Override
+	public void initializeNewEntity(final EntityClass entity) {
+		super.initializeNewEntity(entity);
+		Check.notNull(entity, "Entity cannot be null");
+	}
 }

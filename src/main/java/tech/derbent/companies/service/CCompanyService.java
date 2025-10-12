@@ -135,4 +135,10 @@ public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 			return "Error checking dependencies: " + e.getMessage();
 		}
 	}
+
+	@Override
+	public void initializeNewEntity(final CCompany entity) {
+		super.initializeNewEntity(entity);
+		Check.notNull(entity, "Entity cannot be null");
+	}
 }
