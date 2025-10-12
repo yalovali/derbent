@@ -13,12 +13,12 @@ public class CTextField extends TextField {
 
 	public CTextField() {
 		super();
-		initializeTextField();
+		initComponent();
 	}
 
 	public CTextField(final String label) {
 		super(label);
-		initializeTextField();
+		initComponent();
 	}
 
 	public static CTextField createEmail(final String label) {
@@ -47,7 +47,7 @@ public class CTextField extends TextField {
 	}
 
 	/** Common initialization for all CTextField instances. */
-	protected void initializeTextField() {
+	private final void initComponent() {
 		CAuxillaries.setId(this);
 	}
 }

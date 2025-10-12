@@ -21,7 +21,7 @@ public class CHorizontalLayout extends HorizontalLayout {
 	/** Default constructor with no padding, no spacing, and full size. */
 	public CHorizontalLayout() {
 		super();
-		initializeLayout();
+		initComponent();
 	}
 
 	/** Constructor with explicit padding, spacing, and margin settings. */
@@ -45,7 +45,7 @@ public class CHorizontalLayout extends HorizontalLayout {
 	}
 
 	/** Common initialization for all CHorizontalLayout instances. */
-	private void initializeLayout() {
+	final private void initComponent() {
 		CAuxillaries.setId(this);
 		setWidthFull();
 		setDefaultVerticalComponentAlignment(Alignment.CENTER);

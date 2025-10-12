@@ -13,7 +13,7 @@ public class CVerticalLayout extends VerticalLayout {
 	/** Default constructor with no padding, no spacing, and full size. */
 	public CVerticalLayout() {
 		super();
-		initializeLayout();
+		initLayout();
 	}
 
 	/** Constructor with explicit padding, spacing, and margin settings. */
@@ -36,7 +36,7 @@ public class CVerticalLayout extends VerticalLayout {
 		addClassName(style);
 	}
 
-	protected void initializeLayout() {
+	protected void initLayout() {
 		CAuxillaries.setId(this);
 		setSizeFull();
 		setPadding(false);

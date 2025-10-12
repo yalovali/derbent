@@ -126,11 +126,4 @@ public class CEntityLabel extends HorizontalLayout {
 		// Apply color styling
 		applyColorStyling();
 	}
-
-	/** Refreshes the label display (useful if entity properties have changed).
-	 * @throws Exception */
-	public void refresh() throws Exception {
-		removeAll();
-		initializeLabel();
-	}
 }

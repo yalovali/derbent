@@ -7,33 +7,6 @@ import com.vaadin.flow.component.icon.Icon;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.utils.CColorUtils;
 
-/** CGridCell - Enhanced grid cell component that supports both regular text and color-aware rendering.
- * <p>
- * This class provides a unified foundation for all grid cell components, supporting: - Regular text display - Color-aware status rendering with
- * background colors - Optional icon display for entities - Consistent styling and behavior
- * </p>
- * <p>
- * The class follows the project's coding guidelines by consolidating all cell functionality into a single, reusable component that uses Div for
- * proper layout control.
- * </p>
- * <p>
- * <strong>Usage Examples:</strong>
- * </p>
- *
- * <pre>{@code
- * // Basic text cell
- * CGridCell cell = new CGridCell("Sample Text");
- * // Color-aware status cell
- * CGridCell statusCell = new CGridCell();
- * statusCell.setStatusValue(statusEntity);
- * // Entity cell with color metadata
- * CGridCell entityCell = new CGridCell(entity);
- * }</pre>
- *
- * @author Derbent Framework
- * @since 1.0
- * @see tech.derbent.api.views.grids.CGrid
- * @see tech.derbent.api.utils.CColorUtils */
 public class CGridCell extends Div {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CGridCell.class);

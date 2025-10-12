@@ -1,9 +1,9 @@
 package tech.derbent.api.views.components;
 
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.utils.CAuxillaries;
@@ -18,11 +18,6 @@ public class CSearchToolbar extends HorizontalLayout {
 	private static final long serialVersionUID = 1L;
 	private final TextField searchField;
 	private static final int DEFAULT_DEBOUNCE_DELAY_MS = 300;
-
-	/** Creates a search toolbar with default settings. */
-	public CSearchToolbar() {
-		this("Search...", DEFAULT_DEBOUNCE_DELAY_MS);
-	}
 
 	/** Creates a search toolbar with custom placeholder text.
 	 * @param placeholder placeholder text for the search field */
@@ -83,6 +78,7 @@ public class CSearchToolbar extends HorizontalLayout {
 
 	/** Sets whether the search field is enabled.
 	 * @param enabled true to enable, false to disable */
+	@Override
 	public void setEnabled(final boolean enabled) {
 		searchField.setEnabled(enabled);
 	}

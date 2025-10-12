@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.api.domains.CEntityDB;
@@ -78,7 +79,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 	}
 
 	/** Creates a consistently styled header with simple color coding. */
-	protected com.vaadin.flow.component.html.Span createStyledHeader(String text, String color) {
+	protected Span createStyledHeader(String text, String color) {
 		com.vaadin.flow.component.html.Span header = new com.vaadin.flow.component.html.Span(text);
 		header.getStyle().set("color", color);
 		header.getStyle().set("font-weight", "bold");

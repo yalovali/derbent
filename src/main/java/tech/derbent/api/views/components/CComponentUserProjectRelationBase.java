@@ -83,9 +83,9 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 	/** Abstract methods that subclasses must implement */
 	@Override
 	protected void onSettingsSaved(final CUserProjectSettings settings) {
-		Check.notNull(settings, "Settings cannot be null when saving");
-		LOGGER.debug("Saving user project settings: {}", settings);
 		try {
+			Check.notNull(settings, "Settings cannot be null when saving");
+			LOGGER.debug("Saving user project settings: {}", settings);
 			final CUserProjectSettings savedSettings = settings.getId() == null ? userProjectSettingsService.addUserToProject(settings.getUser(),
 					settings.getProject(), settings.getRole(), settings.getPermission()) : userProjectSettingsService.save(settings);
 			LOGGER.info("Successfully saved user project settings: {}", savedSettings);
@@ -110,6 +110,7 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 	protected void setupGrid(final Grid<CUserProjectSettings> grid) {
 		try {
 			super.setupGrid(grid);
+			LOGGER.debug("Setting up grid for User-Project relationship component.");
 			if (isUserMaster()) {
 				// User-centric: User->Project
 				grid.addComponentColumn(settings -> {
@@ -137,7 +138,7 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 					.setAutoWidth(true).setSortable(true);
 		} catch (Exception e) {
 			LOGGER.error("Failed to setup grid.");
-			throw new RuntimeException("Failed to setup grid", e);
+			throw e;
 		}
 	}
 }

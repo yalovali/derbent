@@ -96,28 +96,34 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 
 	@Override
 	public void populateForm() {
-		Check.isTrue(isPanelInitialized, "Panel must be initialized before populating form");
-		// Use current entity from content owner if available, otherwise use our own
-		EntityClass entityToUse = getCurrentEntity();
-		if (entityToUse == null && contentOwner != null) {
-			// Try to get entity from parent content owner
-			Object parentEntity = contentOwner.getCurrentEntity();
-			if (parentEntity != null && entityClass.isInstance(parentEntity)) {
-				entityToUse = entityClass.cast(parentEntity);
+		try {
+			LOGGER.debug("Populating form for entity class: {}", entityClass.getSimpleName());
+			Check.isTrue(isPanelInitialized, "Panel must be initialized before populating form");
+			// Use current entity from content owner if available, otherwise use our own
+			EntityClass entityToUse = getCurrentEntity();
+			if (entityToUse == null && contentOwner != null) {
+				// Try to get entity from parent content owner
+				Object parentEntity = contentOwner.getCurrentEntity();
+				if (parentEntity != null && entityClass.isInstance(parentEntity)) {
+					entityToUse = entityClass.cast(parentEntity);
+				}
 			}
-		}
-		// Default implementation - populate binder if available
-		if (entityToUse != null) {
-			LOGGER.debug("Populating form for entity: {}", entityToUse);
-			// If there's a binder, set the bean
-			if (binder != null) {
-				binder.setBean(entityToUse);
+			// Default implementation - populate binder if available
+			if (entityToUse != null) {
+				LOGGER.debug("Populating form for entity: {}", entityToUse);
+				// If there's a binder, set the bean
+				if (binder != null) {
+					binder.setBean(entityToUse);
+				}
+			} else {
+				LOGGER.debug("Clearing form - no current entity");
+				if (binder != null) {
+					binder.setBean(null);
+				}
 			}
-		} else {
-			LOGGER.debug("Clearing form - no current entity");
-			if (binder != null) {
-				binder.setBean(null);
-			}
+		} catch (Exception e) {
+			LOGGER.error("Failed to populate form for entity {}: {}", entityClass.getSimpleName(), e.getMessage());
+			throw e;
 		}
 	}
 
