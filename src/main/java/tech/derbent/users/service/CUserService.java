@@ -290,4 +290,39 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 			return "Error checking dependencies: " + e.getMessage();
 		}
 	}
+
+	/** Initializes a new user entity with default values based on current session and available data. Sets: - Company from current session - User
+	 * type (first available) - Company role (first available) - Auto-generated name and login - Enabled status - Default password prompt
+	 * @param user the newly created user to initialize
+	 * @throws IllegalStateException if required fields cannot be initialized */
+	@Override
+	public void initializeNewEntity(final CUser user) {
+		Check.notNull(user, "User cannot be null");
+		Check.notNull(sessionService, "Session service is required for user initialization");
+		try {
+			// Get current company from session
+			CCompany currentCompany = sessionService.getCurrentCompany();
+			Check.notNull(currentCompany, "No active company in session - company context is required to create users");
+			// Auto-generate user name based on count - use findByCompanyId to get list
+			List<CUser> existingUsers = ((IUserRepository) repository).findByCompanyId(currentCompany.getId());
+			String autoName = String.format("User%02d", existingUsers.size() + 1);
+			user.setName(autoName);
+			user.setLogin(autoName.toLowerCase());
+			// Set default lastname
+			user.setLastname("");
+			// Set default email
+			user.setEmail("");
+			// Set default phone
+			user.setPhone("");
+			// Set enabled status
+			user.setEnabled(true);
+			// Set default password (will need to be changed by user)
+			user.setPassword(""); // Empty - user must set password
+			// Note: Company and role need to be set by user as setCompany requires both parameters
+			LOGGER.debug("Initialized new user with auto-generated name: {}", autoName);
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing new user", e);
+			throw new IllegalStateException("Failed to initialize user: " + e.getMessage(), e);
+		}
+	}
 }

@@ -12,6 +12,7 @@ import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.ISessionService;
+import tech.derbent.users.domain.CUser;
 
 /** CActivityStatusService - Service class for managing CActivityStatus entities. Layer: Service (MVC) Provides business logic for activity status
  * management including CRUD operations, validation, and workflow management. */
@@ -62,6 +63,44 @@ public class CActivityStatusService extends CEntityOfProjectService<CActivitySta
 		} catch (final Exception e) {
 			LOGGER.error("Error checking dependencies for activity status: {}", activityStatus.getName(), e);
 			return "Error checking dependencies: " + e.getMessage();
+		}
+	}
+
+	/** Initializes a new activity status with default values based on current session and available data. Sets: - Project from current session - User
+	 * for creation tracking - Auto-generated name - Default color - Default sort order - Not marked as non-deletable
+	 * @param activityStatus the newly created activity status to initialize
+	 * @throws IllegalStateException if required fields cannot be initialized */
+	@Override
+	public void initializeNewEntity(final CActivityStatus activityStatus) {
+		Check.notNull(activityStatus, "Activity status cannot be null");
+		Check.notNull(sessionService, "Session service is required for activity status initialization");
+		try {
+			// Get current project from session
+			Optional<CProject> activeProject = sessionService.getActiveProject();
+			Check.isTrue(activeProject.isPresent(), "No active project in session - project context is required to create activity statuses");
+			CProject currentProject = activeProject.get();
+			activityStatus.setProject(currentProject);
+			// Get current user from session for createdBy field
+			Optional<CUser> currentUser = sessionService.getActiveUser();
+			if (currentUser.isPresent()) {
+				activityStatus.setCreatedBy(currentUser.get());
+			}
+			// Auto-generate name based on count
+			long statusCount = ((IActivityStatusRepository) repository).countByProject(currentProject);
+			String autoName = String.format("ActivityStatus%02d", statusCount + 1);
+			activityStatus.setName(autoName);
+			// Set default description
+			activityStatus.setDescription("");
+			// Set default color
+			activityStatus.setColor("#4A90E2");
+			// Set default sort order
+			activityStatus.setSortOrder(100);
+			// Set deletable by default (not system status)
+			activityStatus.setAttributeNonDeletable(false);
+			LOGGER.debug("Initialized new activity status with auto-generated name: {}", autoName);
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing new activity status", e);
+			throw new IllegalStateException("Failed to initialize activity status: " + e.getMessage(), e);
 		}
 	}
 }
