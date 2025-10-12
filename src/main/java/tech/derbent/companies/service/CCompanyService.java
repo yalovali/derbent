@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,7 @@ import tech.derbent.api.services.CAbstractNamedEntityService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.session.service.ISessionService;
+import tech.derbent.users.service.IUserCompanySettingsRepository;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -19,6 +21,8 @@ import tech.derbent.session.service.ISessionService;
 public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCompanyService.class);
+	@Autowired
+	private IUserCompanySettingsRepository userCompanySettingsRepository;
 
 	public CCompanyService(final ICompanyRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
@@ -101,6 +105,34 @@ public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 		} catch (final Exception e) {
 			LOGGER.error("Error searching companies by name: {}", searchTerm, e);
 			throw new RuntimeException("Failed to search companies by name", e);
+		}
+	}
+
+	/** Checks dependencies before allowing company deletion. Prevents deletion if: 1. Current user belongs to the company (cannot delete own company)
+	 * 2. Company has associated users
+	 * @param company the company entity to check
+	 * @return null if company can be deleted, error message otherwise */
+	@Override
+	public String checkDependencies(final CCompany company) {
+		Check.notNull(company, "Company cannot be null");
+		Check.notNull(company.getId(), "Company ID cannot be null");
+		try {
+			// Rule 1: Check if current user belongs to this company (user cannot delete their own company)
+			if (sessionService != null && sessionService.getActiveUser().isPresent()) {
+				final CCompany currentUserCompany = sessionService.getCurrentCompany();
+				if (currentUserCompany != null && currentUserCompany.getId().equals(company.getId())) {
+					return "You cannot delete your own company. Please switch to another company first.";
+				}
+			}
+			// Rule 2: Check if company has any users
+			final long userCount = userCompanySettingsRepository.countByCompanyId(company.getId());
+			if (userCount > 0) {
+				return String.format("Cannot delete company. It is associated with %d user(s). Please remove all users first.", userCount);
+			}
+			return null; // Company can be deleted
+		} catch (final Exception e) {
+			LOGGER.error("Error checking dependencies for company: {}", company.getName(), e);
+			return "Error checking dependencies: " + e.getMessage();
 		}
 	}
 }
