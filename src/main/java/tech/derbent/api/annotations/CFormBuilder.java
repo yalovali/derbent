@@ -721,6 +721,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			final Map<String, Component> mapComponents) throws Exception {
 		Check.notNull(fieldInfo, "field");
 		final Component component = createComponentForField(contentOwner, fieldInfo, binder);
+		assignDeterministicComponentId(component, fieldInfo, binder);
 		final CHorizontalLayout horizontalLayout = createFieldLayout(fieldInfo, component);
 		formLayout.add(horizontalLayout);
 		if (mapHorizontalLayouts != null) {
@@ -730,6 +731,30 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			mapComponents.put(fieldInfo.getFieldName(), component);
 		}
 		return component;
+	}
+
+	private static void assignDeterministicComponentId(final Component component, final EntityFieldInfo fieldInfo,
+			final CEnhancedBinder<?> binder) {
+		if ((component == null) || (fieldInfo == null)) {
+			return;
+		}
+		String entityPart = "entity";
+		if (binder != null) {
+			try {
+				final Class<?> beanType = binder.getBeanType();
+				if (beanType != null) {
+					entityPart = beanType.getSimpleName();
+				}
+			} catch (final Exception e) {
+				LOGGER.debug("Could not resolve binder bean type for deterministic ID: {}", e.getMessage());
+			}
+		}
+		final String rawId = String.format("field-%s-%s", entityPart, fieldInfo.getFieldName());
+		final String normalized = rawId.replaceAll("([a-z])([A-Z])", "$1-$2").replaceAll("[^a-zA-Z0-9-]", "-").replaceAll("-{2,}", "-")
+				.replaceAll("(^-|-$)", "").toLowerCase();
+		if (!normalized.isEmpty()) {
+			component.setId(normalized);
+		}
 	}
 
 	/** Recursively searches for ComboBox components and resets them to their first item. */

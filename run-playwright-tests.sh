@@ -148,7 +148,7 @@ run_all_tests() {
         failed=$((failed + 1))
     fi
     echo ""
-    
+
     if [[ $failed -eq 0 ]]; then
         echo "✅ All tests completed successfully!"
         return 0
@@ -211,7 +211,7 @@ DESCRIPTION:
        - CRUD operations testing on key entities
        - Grid functionality across views
        - Form validation testing
-
+    
     Screenshots are saved to: target/screenshots/
 
 EXAMPLES:
@@ -259,6 +259,3 @@ case "${1:-menu}" in
         exit 1
         ;;
 esac
-
-
-
