@@ -377,7 +377,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			} else if ((fieldType == byte[].class) && fieldInfo.isImageData()) {
 				component = createPictureSelector(fieldInfo, binder);
 			} else {
-				Check.isTrue(false, "Unsupported field type: " + fieldType.getSimpleName() + " for field: " + fieldInfo.getDisplayName());
+				Check.isTrue(false, "Component field [" + fieldInfo.getFieldName() + "], unsupported field type [" + fieldType.getSimpleName()
+						+ "] for field [" + fieldInfo.getDisplayName() + "]");
 			}
 			Check.notNull(component, "Component for field " + fieldInfo.getFieldName() + " of type " + fieldType.getSimpleName());
 			setRequiredIndicatorVisible(fieldInfo, component);
@@ -733,8 +734,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		return component;
 	}
 
-	private static void assignDeterministicComponentId(final Component component, final EntityFieldInfo fieldInfo,
-			final CEnhancedBinder<?> binder) {
+	private static void assignDeterministicComponentId(final Component component, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
 		if ((component == null) || (fieldInfo == null)) {
 			return;
 		}

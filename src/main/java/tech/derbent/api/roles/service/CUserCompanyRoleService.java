@@ -34,11 +34,6 @@ public class CUserCompanyRoleService extends CAbstractNamedEntityService<CUserCo
 		adminRole.setIsAdmin(true);
 		adminRole.setIsUser(true);
 		adminRole.setIsGuest(false);
-		// Add common admin pages
-		adminRole.addWriteAccess("CompanySettings");
-		adminRole.addWriteAccess("UserManagement");
-		adminRole.addWriteAccess("CompanyReports");
-		adminRole.addReadAccess("Dashboard");
 		return save(adminRole);
 	}
 
@@ -48,9 +43,6 @@ public class CUserCompanyRoleService extends CAbstractNamedEntityService<CUserCo
 		guestRole.setIsAdmin(false);
 		guestRole.setIsUser(false);
 		guestRole.setIsGuest(true);
-		// Add basic guest pages
-		guestRole.addReadAccess("Dashboard");
-		guestRole.addReadAccess("PublicInfo");
 		return save(guestRole);
 	}
 
@@ -60,10 +52,6 @@ public class CUserCompanyRoleService extends CAbstractNamedEntityService<CUserCo
 		userRole.setIsAdmin(false);
 		userRole.setIsUser(true);
 		userRole.setIsGuest(false);
-		// Add common user pages
-		userRole.addReadAccess("Dashboard");
-		userRole.addReadAccess("Tasks");
-		userRole.addWriteAccess("Profile");
 		return save(userRole);
 	}
 

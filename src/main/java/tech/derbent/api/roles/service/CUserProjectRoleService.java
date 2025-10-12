@@ -37,11 +37,6 @@ public class CUserProjectRoleService extends CEntityOfProjectService<CUserProjec
 		adminRole.setIsAdmin(true);
 		adminRole.setIsUser(true);
 		adminRole.setIsGuest(false);
-		// Add common admin pages
-		adminRole.addWriteAccess("ProjectSettings");
-		adminRole.addWriteAccess("UserManagement");
-		adminRole.addWriteAccess("ProjectReports");
-		adminRole.addReadAccess("Dashboard");
 		return save(adminRole);
 	}
 
@@ -55,9 +50,6 @@ public class CUserProjectRoleService extends CEntityOfProjectService<CUserProjec
 		guestRole.setIsAdmin(false);
 		guestRole.setIsUser(false);
 		guestRole.setIsGuest(true);
-		// Add basic guest pages
-		guestRole.addReadAccess("Dashboard");
-		guestRole.addReadAccess("PublicInfo");
 		return save(guestRole);
 	}
 
@@ -71,10 +63,6 @@ public class CUserProjectRoleService extends CEntityOfProjectService<CUserProjec
 		userRole.setIsAdmin(false);
 		userRole.setIsUser(true);
 		userRole.setIsGuest(false);
-		// Add common user pages
-		userRole.addReadAccess("Dashboard");
-		userRole.addReadAccess("Tasks");
-		userRole.addWriteAccess("Profile");
 		return save(userRole);
 	}
 

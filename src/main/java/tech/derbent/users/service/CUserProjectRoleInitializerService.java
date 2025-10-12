@@ -35,9 +35,6 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isAdmin"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isUser"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isGuest"));
-			detailSection.addScreenLine(CDetailLinesService.createSection("Page Access Configuration"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "readAccessPages"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "writeAccessPages"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Display Configuration"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
@@ -64,12 +61,6 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 		}
 	}
 
-	/** Initialize project role entities for a project.
-	 * @param project           the project
-	 * @param gridEntityService the grid entity service
-	 * @param screenService     the screen service
-	 * @param pageEntityService the page entity service
-	 * @param createSampleData  whether to create sample data */
 	public static void initialize(final CProject project, final CGridEntityService gridEntityService, final CDetailSectionService screenService,
 			final CPageEntityService pageEntityService, final boolean createSampleData) {
 		Check.notNull(project, "Project must not be null");

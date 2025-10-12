@@ -34,10 +34,6 @@ public class CUserCompanyRoleInitializerService extends CInitializerServiceBase 
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isAdmin"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isUser"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isGuest"));
-			// Page Access Permissions
-			scr.addScreenLine(CDetailLinesService.createSection("Page Access Permissions"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "readAccessPages"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "writeAccessPages"));
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {

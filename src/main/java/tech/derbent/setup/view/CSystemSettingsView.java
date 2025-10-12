@@ -51,9 +51,9 @@ public class CSystemSettingsView extends CAbstractPage {
 	private final CSystemSettingsService systemSettingsService;
 	private ISessionService sessionService;
 
-	@Autowired
-	public CSystemSettingsView(final CSystemSettingsService systemSettingsService) {
+	public CSystemSettingsView(final CSystemSettingsService systemSettingsService, ISessionService sessionService) {
 		this.systemSettingsService = systemSettingsService;
+		this.sessionService = sessionService;
 		binder = CBinderFactory.createBinder(CSystemSettings.class);
 		LOGGER.info("CSystemSettingsView constructor called with systemSettingsService: {}", systemSettingsService.getClass().getSimpleName());
 	}

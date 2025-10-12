@@ -160,6 +160,7 @@ public class CDataInitializer {
 
 	public CDataInitializer(ISessionService sessionService) {
 		LOGGER.info("DataInitializer starting - obtaining service beans from application context");
+		Check.notNull(sessionService, "SessionService cannot be null");
 		gridEntityService = CSpringContext.getBean(CGridEntityService.class);
 		projectService = CSpringContext.getBean(CProjectService.class);
 		userService = CSpringContext.getBean(CUserService.class);
@@ -592,21 +593,6 @@ public class CDataInitializer {
 				role.setIsUser(Boolean.parseBoolean(roleData[3]));
 				role.setIsGuest(Boolean.parseBoolean(roleData[4]));
 				role.setColor(CColorUtils.getRandomColor(true));
-				// Add appropriate page access based on role type
-				if (role.isAdmin()) {
-					role.addWriteAccess("CompanySettings");
-					role.addWriteAccess("UserManagement");
-					role.addWriteAccess("CompanyReports");
-				}
-				if (role.isUser()) {
-					role.addReadAccess("Dashboard");
-					role.addReadAccess("Tasks");
-					role.addWriteAccess("Profile");
-				}
-				if (role.isGuest()) {
-					role.addReadAccess("Dashboard");
-					role.addReadAccess("PublicInfo");
-				}
 				userCompanyRoleService.save(role);
 			}
 		} catch (final Exception e) {
@@ -783,21 +769,6 @@ public class CDataInitializer {
 				role.setIsUser(Boolean.parseBoolean(roleData[3]));
 				role.setIsGuest(Boolean.parseBoolean(roleData[4]));
 				role.setColor(CColorUtils.getRandomColor(true));
-				// Add appropriate page access based on role type
-				if (role.isAdmin()) {
-					role.addWriteAccess("ProjectSettings");
-					role.addWriteAccess("UserManagement");
-					role.addWriteAccess("ProjectReports");
-				}
-				if (role.isUser()) {
-					role.addReadAccess("Dashboard");
-					role.addReadAccess("Tasks");
-					role.addWriteAccess("Profile");
-				}
-				if (role.isGuest()) {
-					role.addReadAccess("Dashboard");
-					role.addReadAccess("PublicInfo");
-				}
 				userProjectRoleService.save(role);
 			}
 		} catch (final Exception e) {
@@ -923,6 +894,7 @@ public class CDataInitializer {
 				CUser user = userService.getRandomByCompany(company);
 				Check.notNull(user, "No user found for company: " + company.getName());
 				// Use new atomic method to set both company and user
+				Check.notNull(sessionService, "SessionService is not initialized");
 				sessionService.setActiveUser(user); // Set company first, then user who is member of that company
 				final List<CProject> projects = projectService.list(Pageable.unpaged()).getContent();
 				for (final CProject project : projects) {

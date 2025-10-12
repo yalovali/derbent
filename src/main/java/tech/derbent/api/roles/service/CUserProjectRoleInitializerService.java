@@ -32,9 +32,6 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "isAdmin"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "isUser"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "isGuest"));
-			detailSection.addScreenLine(CDetailLinesService.createSection("Page Access Permissions"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "readAccessPages"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "writeAccessPages"));
 			// Display configuration
 			detailSection.addScreenLine(CDetailLinesService.createSection("Display Configuration"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "color"));

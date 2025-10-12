@@ -1,17 +1,10 @@
 package tech.derbent.api.roles.domain;
 
-import java.util.HashSet;
-import java.util.Set;
 import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.companies.domain.CCompany;
 
 /** CUserCompanyRole - Defines a user's role within a specific company context. Replaces enumeration-based role system with flexible, database-driven
@@ -46,23 +39,6 @@ public class CUserCompanyRole extends CNonProjectType<CUserCompanyRole> {
 			description = "Whether this role has guest-level privileges", hidden = false, order = 12
 	)
 	private Boolean isGuest = Boolean.FALSE;
-	// Page access permissions
-	@ElementCollection (fetch = FetchType.EAGER)
-	@CollectionTable (name = "cusercompanyrole_read_pages", joinColumns = @JoinColumn (name = "role_id"))
-	@Column (name = "page_name", length = CEntityConstants.MAX_LENGTH_NAME)
-	@AMetaData (
-			displayName = "Read Access Pages", required = false, readOnly = false, description = "Set of pages where user has read access",
-			hidden = false, order = 20
-	)
-	private Set<String> readAccessPages = new HashSet<>();
-	@ElementCollection (fetch = FetchType.EAGER)
-	@CollectionTable (name = "cusercompanyrole_write_pages", joinColumns = @JoinColumn (name = "role_id"))
-	@Column (name = "page_name", length = CEntityConstants.MAX_LENGTH_NAME)
-	@AMetaData (
-			displayName = "Write Access Pages", required = false, readOnly = false, description = "Set of pages where user has write access",
-			hidden = false, order = 21
-	)
-	private Set<String> writeAccessPages = new HashSet<>();
 
 	// Constructors
 	public CUserCompanyRole() {
@@ -93,62 +69,10 @@ public class CUserCompanyRole extends CNonProjectType<CUserCompanyRole> {
 
 	public boolean isGuest() { return Boolean.TRUE.equals(isGuest); }
 
-	// Page access getters and setters
-	public Set<String> getReadAccessPages() {
-		if (readAccessPages == null) {
-			readAccessPages = new HashSet<>();
-		}
-		return readAccessPages;
-	}
-
-	public void setReadAccessPages(Set<String> readAccessPages) {
-		this.readAccessPages = readAccessPages != null ? readAccessPages : new HashSet<>();
-	}
-
-	public Set<String> getWriteAccessPages() {
-		if (writeAccessPages == null) {
-			writeAccessPages = new HashSet<>();
-		}
-		return writeAccessPages;
-	}
-
-	public void setWriteAccessPages(Set<String> writeAccessPages) {
-		this.writeAccessPages = writeAccessPages != null ? writeAccessPages : new HashSet<>();
-	}
-
-	// Page access utility methods
-	public boolean hasReadAccess(String pageName) {
-		return getReadAccessPages().contains(pageName) || hasWriteAccess(pageName);
-	}
-
-	public boolean hasWriteAccess(String pageName) {
-		return getWriteAccessPages().contains(pageName);
-	}
-
-	public void addReadAccess(String pageName) {
-		getReadAccessPages().add(pageName);
-	}
-
-	public void addWriteAccess(String pageName) {
-		getWriteAccessPages().add(pageName);
-		// Write access implies read access
-		addReadAccess(pageName);
-	}
-
-	public void removeReadAccess(String pageName) {
-		getReadAccessPages().remove(pageName);
-		// If removing read access, also remove write access
-		removeWriteAccess(pageName);
-	}
-
-	public void removeWriteAccess(String pageName) {
-		getWriteAccessPages().remove(pageName);
-	}
-
 	@Override
 	public String toString() {
-		return String.format("%s{id=%d, name='%s', isAdmin=%s, isUser=%s, isGuest=%s, readPages=%d, writePages=%d}", getClass().getSimpleName(),
-				getId(), getName(), isAdmin, isUser, isGuest, getReadAccessPages().size(), getWriteAccessPages().size());
+		return String.format("%s{id=%d, name='%s', isAdmin=%s, isUser=%s, isGuest=%s}", getClass().getSimpleName(), getId(), getName(), isAdmin,
+				isUser, isGuest);
 	}
 
 	@Override

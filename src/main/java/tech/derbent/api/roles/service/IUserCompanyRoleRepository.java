@@ -22,15 +22,11 @@ public interface IUserCompanyRoleRepository extends IAbstractNamedRepository<CUs
 	Page<CUserCompanyRole> listByCompany(@Param ("company") CCompany company, Pageable pageable);
 	@Query ("SELECT ucr FROM CUserCompanyRole ucr LEFT JOIN FETCH ucr.company WHERE ucr.id = :id")
 	Optional<CUserCompanyRole> findByIdWithRelationships(@Param ("id") Long id);
-	@Query ("SELECT ucr FROM CUserCompanyRole ucr JOIN ucr.readAccessPages rap WHERE rap = :pageName")
-	List<CUserCompanyRole> findByReadAccessPage(@Param ("pageName") String pageName);
 	@Query (
 		"SELECT ucr FROM CUserCompanyRole ucr WHERE (:isAdmin IS NULL OR ucr.isAdmin = :isAdmin) "
 				+ "AND (:isUser IS NULL OR ucr.isUser = :isUser) AND (:isGuest IS NULL OR ucr.isGuest = :isGuest)"
 	)
 	List<CUserCompanyRole> findByRoleType(@Param ("isAdmin") Boolean isAdmin, @Param ("isUser") Boolean isUser, @Param ("isGuest") Boolean isGuest);
-	@Query ("SELECT ucr FROM CUserCompanyRole ucr JOIN ucr.writeAccessPages wap WHERE wap = :pageName")
-	List<CUserCompanyRole> findByWriteAccessPage(@Param ("pageName") String pageName);
 	@Query ("SELECT ucr FROM CUserCompanyRole ucr WHERE ucr.isGuest = true")
 	List<CUserCompanyRole> findGuestRoles();
 	@Query ("SELECT ucr FROM CUserCompanyRole ucr WHERE ucr.isUser = true")
