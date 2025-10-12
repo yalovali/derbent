@@ -25,4 +25,7 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 	/** Counts the number of activities that use the specified activity type using generic pattern */
 	@Query ("SELECT COUNT(a) FROM #{#entityName} a WHERE a.activityType = :activityType")
 	long countByActivityType(@Param ("activityType") CActivityType activityType);
+	/** Counts the number of activities that use the specified activity status using generic pattern */
+	@Query ("SELECT COUNT(a) FROM #{#entityName} a WHERE a.status = :status")
+	long countByActivityStatus(@Param ("status") tech.derbent.activities.domain.CActivityStatus status);
 }
