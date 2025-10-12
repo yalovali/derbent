@@ -12,5 +12,5 @@ public interface IEntityUpdateListener {
 
 	default void onEntityUpdated(CEntityDB<?> entity) {}
 
-	default void onEntityCreated(CEntityDB<?> entity) {}
+	default void onEntityCreated(CEntityDB<?> entity) throws Exception {}
 }

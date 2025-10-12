@@ -60,10 +60,10 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	/** Creates all the CRUD toolbar buttons. */
 	private void createToolbarButtons() {
 		// Create (New) Button
-		createButton = CButton.createPrimary("New", VaadinIcon.PLUS.create(), e -> handleCreate());
+		createButton = CButton.createNewButton("New", e -> handleCreate());
 		createButton.getElement().setAttribute("title", "Create new " + entityClass.getSimpleName());
 		// Save (Update) Button
-		saveButton = CButton.createPrimary("Save", VaadinIcon.CHECK.create(), e -> {
+		saveButton = CButton.createSaveButton("Save", e -> {
 			try {
 				handleSave();
 			} catch (Exception e1) {
@@ -73,7 +73,7 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		});
 		saveButton.getElement().setAttribute("title", "Save current " + entityClass.getSimpleName());
 		// Delete Button
-		deleteButton = CButton.createError("Delete", VaadinIcon.TRASH.create(), e -> handleDelete());
+		deleteButton = CButton.createDeleteButton("Delete", e -> handleDelete());
 		deleteButton.getElement().setAttribute("title", "Delete current " + entityClass.getSimpleName());
 		// Refresh Button
 		refreshButton = CButton.createTertiary("Refresh", VaadinIcon.REFRESH.create(), e -> handleRefresh());
@@ -97,6 +97,8 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 			// Set as current entity and bind to form
 			setCurrentEntity(newEntity);
 			showSuccessNotification("New " + entityClass.getSimpleName() + " created. Fill in the details and click Save.");
+			// Notify listeners that a new entity was created
+			notifyListenersCreated(newEntity);
 		} catch (Exception exception) {
 			LOGGER.error("Error during create operation for entity: {}", entityClass.getSimpleName(), exception);
 			if (notificationService != null) {
@@ -202,6 +204,19 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 				listener.onEntitySaved(entity);
 			} catch (final Exception e) {
 				LOGGER.error("Error notifying listener of entity save", e);
+				e.printStackTrace();
+			}
+		});
+	}
+
+	/** Notifies all listeners that an entity was created. */
+	private void notifyListenersCreated(final EntityClass entity) {
+		LOGGER.debug("Notifying listeners of entity creation: {}", entityClass.getSimpleName());
+		updateListeners.forEach(listener -> {
+			try {
+				listener.onEntityCreated(entity);
+			} catch (final Exception e) {
+				LOGGER.error("Error notifying listener of entity creation", e);
 				e.printStackTrace();
 			}
 		});
