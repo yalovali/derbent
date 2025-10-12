@@ -12,8 +12,8 @@ import org.springframework.test.context.TestPropertySource;
 import com.microsoft.playwright.Locator;
 
 /** Comprehensive test suite for all dynamic views and windows. This test validates: 1. Complete navigation coverage of all menu items 2. Dynamic page
- * loading for all views 3. CRUD operations on key entity types 4. Grid functionality across views 5. Form validation and interaction 6. Multi-view
- * data consistency */
+ * loading for all views 3. Critical dynamic entity routes (CProject, CUser, etc.) 4. CRUD operations on key entity types 5. Grid functionality across
+ * views 6. Form validation and interaction 7. Multi-view data consistency */
 @SpringBootTest (webEnvironment = WebEnvironment.DEFINED_PORT, classes = tech.derbent.Application.class)
 @TestPropertySource (properties = {
 		"spring.datasource.url=jdbc:h2:mem:testdb", "spring.datasource.username=sa", "spring.datasource.password=",
@@ -39,8 +39,11 @@ public class CComprehensiveDynamicViewsTest extends CBaseUITest {
 			// Phase 3: Test dynamic page loading
 			LOGGER.info("📋 Phase 3: Dynamic Page Loading Verification");
 			testDynamicPageLoading();
-			// Phase 4: Test key CRUD operations
-			LOGGER.info("📋 Phase 4: CRUD Operations Testing");
+			// Phase 4: Navigate to critical dynamic entity pages
+			LOGGER.info("📋 Phase 4: Critical Dynamic Entity Validation");
+			testCriticalDynamicEntityPages();
+			// Phase 5: Test key CRUD operations
+			LOGGER.info("📋 Phase 5: CRUD Operations Testing");
 			testKeyCrudOperations();
 			LOGGER.info("✅ Comprehensive dynamic views test completed successfully!");
 		} catch (Exception e) {
@@ -139,7 +142,31 @@ public class CComprehensiveDynamicViewsTest extends CBaseUITest {
 		}
 	}
 
-	/** Phase 4: Test CRUD operations on key entity types. */
+	/** Phase 4: Validate critical dynamic entity pages such as CProject and CUser. */
+	private void testCriticalDynamicEntityPages() {
+		LOGGER.info("🌐 Validating critical dynamic entity pages...");
+		final String[] criticalEntities = {
+				"CProject", "CUser"
+		};
+		for (String entityType : criticalEntities) {
+			LOGGER.info("🔎 Navigating to dynamic page for {}", entityType);
+			try {
+				boolean navigated = navigateToDynamicPageByEntityType(entityType);
+				if (!navigated) {
+					throw new AssertionError("Menu navigation did not locate dynamic page for entity type: " + entityType);
+				}
+				waitForDynamicPageLoad();
+				takeScreenshot("phase4-dynamic-" + entityType.toLowerCase(), false);
+				LOGGER.info("✅ Dynamic page validated for {}", entityType);
+			} catch (Exception e) {
+				takeScreenshot("phase4-dynamic-failure-" + entityType.toLowerCase(), true);
+				throw new AssertionError("Dynamic entity page validation failed for " + entityType + ": " + e.getMessage(), e);
+			}
+		}
+		LOGGER.info("✅ Phase 4 complete: Critical dynamic entity pages validated");
+	}
+
+	/** Phase 5: Test CRUD operations on key entity types. */
 	private void testKeyCrudOperations() {
 		LOGGER.info("🔄 Testing CRUD operations on key entities...");
 		try {
@@ -155,9 +182,9 @@ public class CComprehensiveDynamicViewsTest extends CBaseUITest {
 			if (testCrudForEntity("Users", "users", "cpageusers")) {
 				LOGGER.info("✅ CRUD operations tested for Users");
 			}
-			LOGGER.info("✅ Phase 4 complete: CRUD operations validated");
+			LOGGER.info("✅ Phase 5 complete: CRUD operations validated");
 		} catch (Exception e) {
-			takeScreenshot("phase4-crud-error", true);
+			takeScreenshot("phase5-crud-error", true);
 			LOGGER.warn("⚠️ CRUD operations test encountered errors: {}", e.getMessage());
 			// Don't fail the entire test if CRUD operations fail
 		}

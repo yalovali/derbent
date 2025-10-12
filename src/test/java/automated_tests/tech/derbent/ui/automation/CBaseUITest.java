@@ -3,8 +3,11 @@ package automated_tests.tech.derbent.ui.automation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
@@ -38,6 +41,9 @@ public abstract class CBaseUITest {
 	protected static final String SCREENSHOT_SUCCESS_SUFFIX = "success";
 	protected static final String SCREENSHOT_FAILURE_SUFFIX = "failure";
 	private static final String FIELD_ID_PREFIX = "field";
+	private static final String FORCE_SAMPLE_RELOAD_PROPERTY = "playwright.forceSampleReload";
+	private static final AtomicBoolean SAMPLE_DATA_INITIALIZED = new AtomicBoolean(false);
+	private static final Object SAMPLE_DATA_LOCK = new Object();
 	/** Admin view classes */
 	protected Class<?>[] adminViewClasses = {};
 	protected Class<?>[] allViewClasses = {};
@@ -139,7 +145,6 @@ public abstract class CBaseUITest {
 		input.fill(query);
 		wait_500();
 	}
-
 	// ===========================================
 	// FORM FIELD HELPERS
 	// ===========================================
@@ -387,22 +392,43 @@ public abstract class CBaseUITest {
 		if (!isBrowserAvailable()) {
 			return;
 		}
-		try {
-			wait_loginscreen();
-			final Locator resetButton = page.locator("vaadin-button:has-text('Reset Database'), button:has-text('Reset Database'), [id*='reset']");
-			if (resetButton.count() == 0) {
-				LOGGER.info("ℹ️ 'Reset Database' button not present on login view; skipping sample data initialization");
+		final boolean forceReload = Boolean.getBoolean(FORCE_SAMPLE_RELOAD_PROPERTY);
+		if (!forceReload && SAMPLE_DATA_INITIALIZED.get()) {
+			LOGGER.debug("ℹ️ Sample data already initialized for this test run; skipping reload");
+			return;
+		}
+		synchronized (SAMPLE_DATA_LOCK) {
+			if (!forceReload && SAMPLE_DATA_INITIALIZED.get()) {
+				LOGGER.debug("ℹ️ Sample data already initialized (post-lock); skipping reload");
 				return;
 			}
-			LOGGER.info("📥 Loading sample data via login screen button");
-			resetButton.first().click();
-			wait_500();
-			acceptConfirmDialogIfPresent();
-			closeInformationDialogIfPresent();
-			wait_loginscreen();
-		} catch (Exception e) {
-			LOGGER.warn("⚠️ Sample data initialization via login page failed: {}", e.getMessage());
-			takeScreenshot("sample-data-initialization-error", false);
+			if (forceReload) {
+				LOGGER.info("♻️ Forcing sample data reload due to system property '{}'", FORCE_SAMPLE_RELOAD_PROPERTY);
+			}
+			try {
+				wait_loginscreen();
+				final Locator resetButton =
+						page.locator("vaadin-button:has-text('Reset Database'), button:has-text('Reset Database'), [id*='reset']");
+				if (resetButton.count() == 0) {
+					LOGGER.info("ℹ️ 'Reset Database' button not present on login view; assuming sample data is available");
+					SAMPLE_DATA_INITIALIZED.compareAndSet(false, true);
+					return;
+				}
+				LOGGER.info("📥 Loading sample data via login screen button");
+				resetButton.first().click();
+				wait_500();
+				acceptConfirmDialogIfPresent();
+				closeInformationDialogIfPresent();
+				wait_loginscreen();
+				LOGGER.info("✅ Sample data initialization completed successfully");
+				SAMPLE_DATA_INITIALIZED.set(true);
+			} catch (Exception e) {
+				LOGGER.warn("⚠️ Sample data initialization via login page failed: {}", e.getMessage());
+				takeScreenshot("sample-data-initialization-error", false);
+				if (forceReload) {
+					SAMPLE_DATA_INITIALIZED.set(false);
+				}
+			}
 		}
 	}
 
@@ -649,14 +675,11 @@ public abstract class CBaseUITest {
 			// Determine headless mode setting first
 			boolean headless = Boolean.parseBoolean(System.getProperty("playwright.headless", "true"));
 			LOGGER.info("🎭 Browser mode: {}", headless ? "HEADLESS" : "VISIBLE");
-			
 			BrowserType.LaunchOptions launchOptions = new BrowserType.LaunchOptions().setHeadless(headless)
 					.setArgs(Arrays.asList("--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"));
-			
 			// Check if chromium is available in Playwright cache
 			String playwrightCache = System.getProperty("user.home") + "/.cache/ms-playwright/chromium-1091/chrome";
 			java.io.File cachedChromium = new java.io.File(playwrightCache);
-			
 			if (cachedChromium.exists() && cachedChromium.canExecute()) {
 				// Use cached Playwright Chromium directly to bypass download
 				LOGGER.info("📦 Using cached Playwright Chromium at: {}", playwrightCache);
@@ -671,7 +694,9 @@ public abstract class CBaseUITest {
 				} catch (Exception browserError) {
 					LOGGER.info("⚠️ Playwright-bundled Chromium not available, trying system Chromium...");
 					// Try to use system Chromium as fallback
-					String[] possiblePaths = {"/usr/bin/chromium-browser", "/usr/bin/chromium", "/usr/bin/google-chrome"};
+					String[] possiblePaths = {
+							"/usr/bin/chromium-browser", "/usr/bin/chromium", "/usr/bin/google-chrome"
+					};
 					for (String chromiumPath : possiblePaths) {
 						if (new java.io.File(chromiumPath).exists()) {
 							LOGGER.info("📦 Using system Chromium at: {}", chromiumPath);
@@ -688,7 +713,6 @@ public abstract class CBaseUITest {
 					}
 				}
 			}
-			
 			context = browser.newContext();
 			page = context.newPage();
 			page.navigate("http://localhost:" + port + "/login");
@@ -828,7 +852,7 @@ public abstract class CBaseUITest {
 			return 0;
 		}
 		final String menuSelector =
-				"vaadin-side-nav-item, vaadin-tabs vaadin-tab, nav a[href], .nav-item a[href], a[href].menu-link, a[href].side-nav-link";
+				".hierarchical-menu-item, vaadin-side-nav-item, vaadin-tabs vaadin-tab, nav a[href], .nav-item a[href], a[href].menu-link, a[href].side-nav-link";
 		int totalItems = 0;
 		try {
 			page.waitForSelector(menuSelector, new Page.WaitForSelectorOptions().setTimeout(20000));
@@ -928,14 +952,16 @@ public abstract class CBaseUITest {
 	protected void testDatabaseInitialization() {
 		LOGGER.info("🗄️ Testing database initialization...");
 		try {
-			// Navigate to Users view to check if default users exist
-			navigateToUsers();
-			wait_1000();
+			// Navigate to Users view via dynamic menu and check if default users exist
+			boolean navigatedToUsers = navigateToDynamicPageByEntityType("CUser");
+			Check.isTrue(navigatedToUsers, "Unable to navigate to Users dynamic page");
+			waitForDynamicPageLoad();
 			boolean usersExist = verifyGridHasData();
 			Check.isTrue(usersExist, "Database should contain initial user data");
 			// Navigate to Projects view to check if data structure is ready
-			navigateToProjects();
-			wait_1000();
+			boolean navigatedToProjects = navigateToDynamicPageByEntityType("CProject");
+			Check.isTrue(navigatedToProjects, "Unable to navigate to Projects dynamic page");
+			waitForDynamicPageLoad();
 			// Projects may be empty initially, just verify grid is present
 			Locator projectGrid = getLocatorWithCheck("vaadin-grid", "Projects grid");
 			Check.notNull(projectGrid, "Projects grid should be present");
@@ -960,24 +986,6 @@ public abstract class CBaseUITest {
 		} catch (Exception e) {
 			LOGGER.error("❌ Failed to navigate to Projects: {}", e.getMessage());
 			throw new AssertionError("Failed to navigate to Projects view", e);
-		}
-	}
-
-	/** Navigate to Users view. Uses dynamic page approach. */
-	protected void navigateToUsers() {
-		LOGGER.info("🧭 Navigating to Users view");
-		try {
-			if (!isBrowserAvailable()) {
-				LOGGER.warn("⚠️ Browser not available, cannot navigate to Users");
-				return;
-			}
-			// Navigate to Users page (assuming cpageusers or similar route exists)
-			page.navigate("http://localhost:" + port + "/cpageusers");
-			wait_1000();
-			LOGGER.info("✅ Navigated to Users view");
-		} catch (Exception e) {
-			LOGGER.warn("⚠️ Failed to navigate to Users: {}", e.getMessage());
-			// Don't throw - this is just a stub implementation
 		}
 	}
 
@@ -1161,11 +1169,24 @@ public abstract class CBaseUITest {
 
 	/** Verifies that the grid contains data by checking for the presence of grid cells. */
 	protected boolean verifyGridHasData() {
+		try {
+			page.waitForSelector("vaadin-grid", new Page.WaitForSelectorOptions().setTimeout(5000));
+		} catch (Exception e) {
+			LOGGER.warn("⚠️ Grid not found while waiting for data: {}", e.getMessage());
+			return false;
+		}
 		final Locator grid = page.locator("vaadin-grid").first();
-		final Locator cells = grid.locator("vaadin-grid-cell-content");
-		final boolean hasData = cells.count() > 0;
-		LOGGER.info("📊 Grid has data: {}", hasData);
-		return hasData;
+		for (int attempt = 0; attempt < 10; attempt++) {
+			final Locator cells = grid.locator("vaadin-grid-cell-content");
+			final int cellCount = cells.count();
+			if (cellCount > 0) {
+				LOGGER.info("📊 Grid has data: true (cells={})", cellCount);
+				return true;
+			}
+			wait_500();
+		}
+		LOGGER.info("📊 Grid has data: false");
+		return false;
 	}
 	// ===========================================
 	// TESTING UTILITY METHODS
@@ -1255,8 +1276,16 @@ public abstract class CBaseUITest {
 				return true;
 			}
 			// If menu navigation fails, try direct URL navigation using page entity lookup
-			// This would require access to the page entity service, which we'll implement later
-			LOGGER.warn("⚠️ Menu navigation failed for entity type: {}, page may not be available", entityType);
+			LOGGER.warn("⚠️ Menu navigation failed for entity type: {}, attempting fallback lookup", entityType);
+			Optional<Class<?>> entityClass = resolveEntityClass(entityType);
+			if (entityClass.isPresent()) {
+				boolean navigated = navigateToFirstPage(null, entityClass.get());
+				if (navigated) {
+					waitForDynamicPageLoad();
+					LOGGER.info("✅ Successfully navigated to {} via fallback direct route", entityType);
+					return true;
+				}
+			}
 			return false;
 		} catch (Exception e) {
 			String message = "Failed to navigate to dynamic page for entity type: " + entityType + " - " + e.getMessage();
@@ -1273,16 +1302,53 @@ public abstract class CBaseUITest {
 			// Look for menu items that might contain the entity name
 			// Common patterns: "Users", "Activities", "Projects", "Meetings", etc.
 			String[] searchTerms = generateSearchTermsForEntity(entityType);
+			String[] selectorCandidates = {
+					".hierarchical-menu-item", "vaadin-side-nav-item", "vaadin-tab", "nav a[href]", ".nav-item a[href]", "a[href].menu-link",
+					"a[href].side-nav-link"
+			};
+			logCurrentMenuStructure();
+			final Set<String> visitedCandidates = new HashSet<>();
 			for (String searchTerm : searchTerms) {
-				Locator navItem = page.locator("vaadin-side-nav-item").filter(new Locator.FilterOptions().setHasText(searchTerm));
-				if (navItem.count() > 0) {
-					LOGGER.info("🎯 Found menu item for search term: {}", searchTerm);
-					navItem.first().click();
-					wait_2000(); // Wait for page to load
-					// Verify the page loaded successfully
-					if (isDynamicPageLoaded()) {
-						LOGGER.info("✅ Dynamic page loaded successfully via search term: {}", searchTerm);
-						return true;
+				for (String selector : selectorCandidates) {
+					for (int attempt = 0; attempt < 5; attempt++) {
+						Locator candidates = page.locator(selector).filter(new Locator.FilterOptions().setHasText(searchTerm));
+						int count = candidates.count();
+						if (count == 0) {
+							wait_500();
+							continue;
+						}
+						for (int i = 0; i < count; i++) {
+							try {
+								Locator item = candidates.nth(i);
+								String label = "";
+								try {
+									label = Optional.ofNullable(item.textContent()).map(String::trim).orElse("");
+								} catch (Exception ignored) {}
+								final String candidateKey = selector + "|" + searchTerm + "|" + label + "|" + i;
+								if (!visitedCandidates.add(candidateKey)) {
+									continue;
+								}
+								LOGGER.info("🎯 Trying menu selector '{}' candidate {} with label '{}'", selector, i, label);
+								String beforeUrl = page.url();
+								item.scrollIntoViewIfNeeded();
+								item.click();
+								wait_1000();
+								if (!beforeUrl.equals(page.url())) {
+									LOGGER.info("🔗 Navigation triggered via selector {} ({} -> {})", selector, beforeUrl, page.url());
+								}
+								try {
+									waitForDynamicPageLoad();
+									LOGGER.info("✅ Dynamic page loaded successfully via selector {} and search term {}", selector, searchTerm);
+									return true;
+								} catch (AssertionError validationError) {
+									LOGGER.debug("⏳ Dynamic page validation still pending after selector {} / search term {}: {}", selector,
+											searchTerm, validationError.getMessage());
+								}
+							} catch (Exception clickError) {
+								LOGGER.debug("⚠️ Failed to activate menu item for selector {} / search term {}: {}", selector, searchTerm,
+										clickError.getMessage());
+							}
+						}
 					}
 				}
 			}
@@ -1306,6 +1372,46 @@ public abstract class CBaseUITest {
 				entityType, // CUser, CActivity, CProject
 				entityType.toLowerCase() // cuser, cactivity, cproject
 		};
+	}
+
+	/** Logs the current menu structure to help with debugging navigation issues. */
+	protected void logCurrentMenuStructure() {
+		try {
+			List<String> hierarchicalItems = page.locator(".hierarchical-menu-item").allTextContents();
+			LOGGER.info("📋 Hierarchical menu items: {}", hierarchicalItems);
+		} catch (Exception e) {
+			LOGGER.debug("⚠️ Unable to collect hierarchical menu items: {}", e.getMessage());
+		}
+		try {
+			List<String> sideNavItems = page.locator("vaadin-side-nav-item").allTextContents();
+			LOGGER.info("📋 Side nav items: {}", sideNavItems);
+		} catch (Exception e) {
+			LOGGER.debug("⚠️ Unable to collect side nav items: {}", e.getMessage());
+		}
+		try {
+			List<String> anchorTargets = page.locator("a[href]").allInnerTexts();
+			LOGGER.info("📋 Anchor items: {}", anchorTargets);
+		} catch (Exception e) {
+			LOGGER.debug("⚠️ Unable to collect anchor link texts: {}", e.getMessage());
+		}
+	}
+
+	/** Attempts to resolve the fully-qualified entity class for a given entity type string. */
+	protected Optional<Class<?>> resolveEntityClass(String entityType) {
+		String baseName = entityType.startsWith("C") ? entityType.substring(1) : entityType;
+		String[] candidateClasses = {
+				"tech.derbent." + baseName.toLowerCase() + "s.domain." + entityType,
+				"tech.derbent." + baseName.toLowerCase() + ".domain." + entityType, "tech.derbent.api.domain." + entityType
+		};
+		for (String fqcn : candidateClasses) {
+			try {
+				Class<?> clazz = Class.forName(fqcn);
+				LOGGER.debug("🔍 Resolved entity type {} to class {}", entityType, fqcn);
+				return Optional.of(clazz);
+			} catch (ClassNotFoundException ignored) {}
+		}
+		LOGGER.debug("⚠️ Unable to resolve entity class for {}", entityType);
+		return Optional.empty();
 	}
 
 	/** Check if a dynamic page has loaded successfully.
@@ -1384,16 +1490,24 @@ public abstract class CBaseUITest {
 	 * @return Array of possible routes to try */
 	protected String[] generateDynamicPageRoutes(String entityName) {
 		String baseName = entityName.startsWith("C") ? entityName.substring(1) : entityName;
-		return new String[] {
-				baseName.toLowerCase() + "s", // users, companies
+		List<String> routes = new ArrayList<>(Arrays.asList(baseName.toLowerCase() + "s", // users, companies
 				baseName.toLowerCase(), // user, company
 				entityName.toLowerCase() + "s", // cusers, ccompanies
 				entityName.toLowerCase(), // cuser, ccompany
+				baseName.toLowerCase() + "-directory", // user-directory, project-directory
 				"page/" + baseName.toLowerCase(), // page/user, page/company
 				"entity/" + baseName.toLowerCase(), // entity/user, entity/company
 				"view/" + baseName.toLowerCase(), // view/user, view/company
 				"dynamic/" + baseName.toLowerCase() // dynamic/user, dynamic/company
-		};
+		));
+		if ("cuser".equalsIgnoreCase(entityName) || "user".equalsIgnoreCase(baseName)) {
+			routes.add("team-directory");
+		}
+		if ("cproject".equalsIgnoreCase(entityName) || "project".equalsIgnoreCase(baseName)) {
+			routes.add("project-overview");
+			routes.add("resource-library");
+		}
+		return routes.toArray(new String[0]);
 	}
 
 	/** Test navigation to user page that was created by samples and initializers.
