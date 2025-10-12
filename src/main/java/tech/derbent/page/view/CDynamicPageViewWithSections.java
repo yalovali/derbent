@@ -282,13 +282,18 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 	}
 
 	@Override
-	public void onEntityCreated(CEntityDB<?> entity) {
+	public void onEntityCreated(CEntityDB<?> entity) throws Exception {
 		try {
 			LOGGER.debug("Entity created notification received: {}", entity != null ? entity.getClass().getSimpleName() : "null");
-			Check.notNull(grid, "Grid component is not initialized");
 			Check.notNull(entity, "Created entity cannot be null");
-			refreshGrid();
-			grid.selectEntity(entity);
+			// Rebuild details layout for the new entity if it doesn't exist yet
+			if (currentEntityViewName == null || currentEntityType == null) {
+				LOGGER.debug("Rebuilding details for newly created entity");
+				rebuildEntityDetails(entity.getClass());
+			}
+			// Set the current entity and populate form
+			setCurrentEntity(entity);
+			populateForm();
 		} catch (Exception e) {
 			LOGGER.error("Error handling entity created notification", e);
 			throw e;

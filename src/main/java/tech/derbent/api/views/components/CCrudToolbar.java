@@ -97,6 +97,8 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 			// Set as current entity and bind to form
 			setCurrentEntity(newEntity);
 			showSuccessNotification("New " + entityClass.getSimpleName() + " created. Fill in the details and click Save.");
+			// Notify listeners that a new entity was created
+			notifyListenersCreated(newEntity);
 		} catch (Exception exception) {
 			LOGGER.error("Error during create operation for entity: {}", entityClass.getSimpleName(), exception);
 			if (notificationService != null) {
@@ -202,6 +204,19 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 				listener.onEntitySaved(entity);
 			} catch (final Exception e) {
 				LOGGER.error("Error notifying listener of entity save", e);
+				e.printStackTrace();
+			}
+		});
+	}
+
+	/** Notifies all listeners that an entity was created. */
+	private void notifyListenersCreated(final EntityClass entity) {
+		LOGGER.debug("Notifying listeners of entity creation: {}", entityClass.getSimpleName());
+		updateListeners.forEach(listener -> {
+			try {
+				listener.onEntityCreated(entity);
+			} catch (final Exception e) {
+				LOGGER.error("Error notifying listener of entity creation", e);
 				e.printStackTrace();
 			}
 		});
