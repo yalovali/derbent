@@ -38,7 +38,7 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 
 	public Component createProjectUserSettingsComponent() {
 		try {
-			CComponentProjectUserSettings component = new CComponentProjectUserSettings(this, applicationContext);
+			CComponentProjectUserSettings component = new CComponentProjectUserSettings(this, sessionService, applicationContext);
 			return component;
 		} catch (Exception e) {
 			LOGGER.error("Failed to create project user settings component: {}", e.getMessage(), e);
@@ -77,7 +77,7 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 	@PreAuthorize ("permitAll()")
 	public List<CProject> getAvailableProjectsForUser(final Long userId) {
 		Check.notNull(userId, "User ID must not be null");
-		return ((IProjectRepository) repository).findProjectsNotAssignedToUser(userId);
+		return ((IProjectRepository) repository).findNotAssignedToUser(userId);
 	}
 
 	CCompany getCurrentCompany() {

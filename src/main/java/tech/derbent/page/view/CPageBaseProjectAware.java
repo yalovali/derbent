@@ -122,17 +122,22 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 
 	@Override
 	public void populateForm() throws Exception {
-		// Default implementation - populate current binder if available
-		if (currentBinder != null && getCurrentEntity() != null) {
-			LOGGER.debug("Populating form for entity: {}", getCurrentEntity());
-			currentBinder.setBean((CEntityDB<?>) getCurrentEntity());
-		} else if (currentBinder != null) {
-			LOGGER.debug("Clearing form - no current entity");
-			currentBinder.setBean(null);
-		}
-		// Also populate details builder if available
-		if (detailsBuilder != null) {
-			detailsBuilder.populateForm();
+		try {
+			// Default implementation - populate current binder if available
+			if (currentBinder != null && getCurrentEntity() != null) {
+				LOGGER.debug("Populating form for entity: {}", getCurrentEntity());
+				currentBinder.setBean((CEntityDB<?>) getCurrentEntity());
+			} else if (currentBinder != null) {
+				LOGGER.debug("Clearing form - no current entity");
+				currentBinder.setBean(null);
+			}
+			// Also populate details builder if available
+			if (detailsBuilder != null) {
+				detailsBuilder.populateForm();
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error populating form: {}", e.getMessage(), e);
+			throw e; // Rethrow to notify caller
 		}
 	}
 
@@ -141,8 +146,14 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 
 	@Override
 	public void setCurrentEntity(Object entity) {
-		currentEntity = entity;
-		detailsBuilder.setCurrentEntity(entity);
+		try {
+			LOGGER.debug("Setting current entity: {}", entity);
+			currentEntity = entity;
+			detailsBuilder.setCurrentEntity(entity);
+		} catch (final Exception e) {
+			LOGGER.error("Error setting current entity: {}", e.getMessage(), e);
+			throw e;
+		}
 	}
 
 	@Override

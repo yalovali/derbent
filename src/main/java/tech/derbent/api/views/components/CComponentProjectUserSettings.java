@@ -6,6 +6,7 @@ import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectService;
 import tech.derbent.projects.view.CProjectUserSettingsDialog;
+import tech.derbent.session.service.ISessionService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserProjectSettings;
 import tech.derbent.users.service.CUserService;
@@ -18,15 +19,21 @@ public class CComponentProjectUserSettings extends CComponentUserProjectRelation
 	private static final long serialVersionUID = 1L;
 	private final CUserService userService;
 
-	public CComponentProjectUserSettings(final CProjectService entityService, ApplicationContext applicationContext) throws Exception {
-		super("User Settings", CProject.class, entityService, applicationContext);
+	public CComponentProjectUserSettings(final CProjectService entityService, ISessionService sessionService, ApplicationContext applicationContext)
+			throws Exception {
+		super("User Settings", CProject.class, entityService, sessionService, applicationContext);
 		userService = applicationContext.getBean(CUserService.class);
 		initComponent();
 	}
 
-	public List<CUser> getAvailableUsers(CProject project) {
-		// called from annotation
-		return userService.getAvailableUsersForProject(project.getCompanyId(), getCurrentEntity().getId());
+	public List<CUser> getAvailableUsers() {
+		final CProject project = getCurrentEntity();
+		LOGGER.debug("Getting available users for project: {}", project != null ? project.getName() : "null");
+		if (project == null) {
+			LOGGER.warn("Current project is null, returning empty user list");
+			return List.of();
+		}
+		return userService.getAvailableUsersForProject(project.getCompanyId(), project.getId());
 	}
 
 	@Override

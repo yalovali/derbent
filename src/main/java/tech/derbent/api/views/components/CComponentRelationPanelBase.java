@@ -15,6 +15,7 @@ import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.ui.dialogs.CConfirmationDialog;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.api.utils.Check;
+import tech.derbent.session.service.ISessionService;
 
 /** Generic base class for relationship panel components. This class provides common functionality for managing bidirectional entity relationships
  * (e.g., User-Project, User-Company) in both directions. It eliminates code duplication between similar relationship management patterns.
@@ -32,8 +33,8 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 
 	public CComponentRelationPanelBase(final String title, final Class<MasterClass> entityClass, final Class<RelationalClass> relationalClass,
 			final CAbstractService<MasterClass> entityService, final CAbstractEntityRelationService<RelationalClass> relationService,
-			final ApplicationContext applicationContext) {
-		super(title, entityClass, relationalClass, applicationContext);
+			ISessionService sessionService, final ApplicationContext applicationContext) {
+		super(title, entityClass, relationalClass, sessionService, applicationContext);
 		Check.notNull(entityService, "Entity service cannot be null - relational component requires a valid entity service");
 		Check.notNull(relationService, "Relation service cannot be null - relational component requires a valid relation service");
 		this.relationService = relationService;

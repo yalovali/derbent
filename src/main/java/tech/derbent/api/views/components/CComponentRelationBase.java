@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.component.grid.Grid;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.utils.Check;
+import tech.derbent.session.service.ISessionService;
 
 public abstract class CComponentRelationBase<MasterClass extends CEntityDB<MasterClass>, RelationalClass extends CEntityDB<RelationalClass>>
 		extends CComponentDBEntity<MasterClass> {
@@ -19,11 +20,13 @@ public abstract class CComponentRelationBase<MasterClass extends CEntityDB<Maste
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected final Class<RelationalClass> relationalClass;
 	protected Runnable saveEntity;
+	protected ISessionService sessionService;
 
 	public CComponentRelationBase(final String title, final Class<MasterClass> entityClass, final Class<RelationalClass> relationalClass,
-			ApplicationContext applicationContext) {
+			ISessionService sessionService, ApplicationContext applicationContext) {
 		super(title, entityClass, applicationContext);
 		this.relationalClass = relationalClass;
+		this.sessionService = sessionService;
 		grid = new Grid<>(relationalClass, false);
 		getSettings = () -> List.of();
 	}

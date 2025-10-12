@@ -80,7 +80,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	public Component createUserProjectSettingsComponent() {
 		LOGGER.debug("Creating enhanced user project settings component");
 		try {
-			CComponentUserProjectSettings component = new CComponentUserProjectSettings(this, applicationContext);
+			CComponentUserProjectSettings component = new CComponentUserProjectSettings(this, sessionService, applicationContext);
 			return component;
 		} catch (Exception e) {
 			LOGGER.error("Failed to create user project settings component: {}", e.getMessage(), e);
@@ -129,7 +129,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	@PreAuthorize ("permitAll()")
 	public List<CUser> getAvailableUsersForCompany(final Long companyId) {
 		Check.notNull(companyId, "ID must not be null");
-		return ((IUserRepository) repository).findUsersNotAssignedToCompany(companyId);
+		return ((IUserRepository) repository).findNotAssignedToCompany(companyId);
 	}
 
 	@Transactional (readOnly = true)
@@ -137,7 +137,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	public List<CUser> getAvailableUsersForProject(final Long companyId, final Long projectId) {
 		Check.notNull(projectId, "User ID must not be null");
 		Check.notNull(companyId, "Company ID must not be null");
-		return ((IUserRepository) repository).findUsersNotAssignedToProject(companyId, projectId);
+		return ((IUserRepository) repository).findNotAssignedToProject(companyId, projectId);
 	}
 
 	/** Gets the current company from session, throwing exception if not available.

@@ -9,6 +9,7 @@ import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.projects.service.CProjectService;
+import tech.derbent.session.service.ISessionService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserProjectSettings;
 import tech.derbent.users.service.CUserProjectSettingsService;
@@ -22,21 +23,19 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 		RelationalClass extends CEntityDB<RelationalClass>> extends CComponentRelationPanelBase<MasterClass, CUserProjectSettings> {
 
 	private static final long serialVersionUID = 1L;
-	protected final ApplicationContext applicationContext;
-	protected CCompanyService companyService;
-	protected CProjectService projectService;
-	protected CUserProjectSettingsService userProjectSettingsService;
-	protected CUserTypeService userTypeService;
+	protected final CCompanyService companyService;
+	protected final CProjectService projectService;
+	protected final CUserProjectSettingsService userProjectSettingsService;
+	protected final CUserTypeService userTypeService;
 
 	public CComponentUserProjectRelationBase(final String title, final Class<MasterClass> entityClass,
-			final CAbstractService<MasterClass> entityService, final ApplicationContext applicationContext) {
+			final CAbstractService<MasterClass> entityService, ISessionService sessionService, final ApplicationContext applicationContext) {
 		super(title, entityClass, CUserProjectSettings.class, entityService, applicationContext.getBean(CUserProjectSettingsService.class),
-				applicationContext);
-		this.applicationContext = applicationContext;
-		userProjectSettingsService = applicationContext.getBean(CUserProjectSettingsService.class);
-		projectService = applicationContext.getBean(CProjectService.class);
-		userTypeService = applicationContext.getBean(CUserTypeService.class);
-		companyService = applicationContext.getBean(CCompanyService.class);
+				sessionService, applicationContext);
+		this.userProjectSettingsService = applicationContext.getBean(CUserProjectSettingsService.class);
+		this.projectService = applicationContext.getBean(CProjectService.class);
+		this.userTypeService = applicationContext.getBean(CUserTypeService.class);
+		this.companyService = applicationContext.getBean(CCompanyService.class);
 	}
 
 	@Override
