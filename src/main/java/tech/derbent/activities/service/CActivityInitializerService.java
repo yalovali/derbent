@@ -64,7 +64,7 @@ public class CActivityInitializerService extends CInitializerServiceBase {
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating activity view: {}", e.getMessage(), e);
+			LOGGER.error("Error creating activity view.");
 			throw new RuntimeException("Failed to create activity view", e);
 		}
 	}

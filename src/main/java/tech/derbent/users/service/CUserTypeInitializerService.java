@@ -40,7 +40,7 @@ public class CUserTypeInitializerService extends CInitializerServiceBase {
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating user type view: {}", e.getMessage(), e);
+			LOGGER.error("Error creating user type view.");
 			return null;
 		}
 	}

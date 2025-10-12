@@ -41,7 +41,7 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 			CComponentProjectUserSettings component = new CComponentProjectUserSettings(this, sessionService, applicationContext);
 			return component;
 		} catch (Exception e) {
-			LOGGER.error("Failed to create project user settings component: {}", e.getMessage(), e);
+			LOGGER.error("Failed to create project user settings component.");
 			// Fallback to simple div with error message
 			final Div errorDiv = new Div();
 			errorDiv.setText("Error loading project user settings component: " + e.getMessage());

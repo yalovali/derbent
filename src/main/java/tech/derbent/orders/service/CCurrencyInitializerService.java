@@ -36,7 +36,7 @@ public class CCurrencyInitializerService extends CInitializerServiceBase {
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating currency view: {}", e.getMessage(), e);
+			LOGGER.error("Error creating currency view.");
 			throw e;
 		}
 	}

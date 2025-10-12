@@ -271,7 +271,7 @@ public final class CDataProviderResolver {
 		try {
 			return callDataMethod(serviceBean, methodName, entityType, paramMethodName);
 		} catch (final Exception e) {
-			LOGGER.error("Error resolving data from bean '{}': {}", beanName, e.getMessage(), e);
+			LOGGER.error("Error resolving data from bean '{}': {}", beanName, e.getMessage());
 			return Collections.emptyList();
 		}
 	}
@@ -297,7 +297,7 @@ public final class CDataProviderResolver {
 			LOGGER.debug("Successfully retrieved bean of type: {}", serviceClass.getSimpleName());
 			return callDataMethod(serviceBean, methodName, entityType);
 		} catch (final Exception e) {
-			LOGGER.error("Error resolving data from bean class '{}': {}", serviceClass.getSimpleName(), e.getMessage(), e);
+			LOGGER.error("Error resolving data from bean class '{}': {}", serviceClass.getSimpleName(), e.getMessage());
 			throw e;
 		}
 	}
@@ -322,7 +322,7 @@ public final class CDataProviderResolver {
 		try {
 			return callDataMethod(contentOwner, methodName, entityType, paramMethodName);
 		} catch (final Exception e) {
-			LOGGER.error("Error resolving data from content owner: {}", e.getMessage(), e);
+			LOGGER.error("Error resolving data from content owner.");
 			throw e;
 		}
 	}

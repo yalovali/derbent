@@ -827,7 +827,7 @@ public class CDataInitializer {
 				userProjectSettingsService.addUserToProject(user, project, userProjectRoleService.getRandom(project), "write");
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing sample user project settings: {}", e.getMessage(), e);
+			LOGGER.error("Error initializing sample user project settings.");
 			throw new RuntimeException("Failed to initialize sample user project settings", e);
 		}
 	}

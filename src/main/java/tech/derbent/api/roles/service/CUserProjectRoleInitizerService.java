@@ -31,7 +31,7 @@ public class CUserProjectRoleInitizerService extends CInitializerServiceBase {
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating company view: {}", e.getMessage(), e);
+			LOGGER.error("Error creating company view.");
 			throw new RuntimeException("Failed to create company view", e);
 		}
 	}

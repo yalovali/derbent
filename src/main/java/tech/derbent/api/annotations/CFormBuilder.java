@@ -322,70 +322,75 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 
 	private static Component createComponentForField(IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder)
 			throws Exception {
-		Component component = null;
-		Check.notNull(fieldInfo, "Field");
-		final Class<?> fieldType = fieldInfo.getFieldTypeClass();
-		Check.notNull(fieldType, "Field type for field " + fieldInfo.getDisplayName());
-		// Check for custom component creation method first (highest priority)
-		if (fieldInfo.getCreateComponentMethod() != null && !fieldInfo.getCreateComponentMethod().trim().isEmpty()) {
-			component = createCustomComponent(contentOwner, fieldInfo, binder);
-			Check.notNull(component, "Custom component for field " + fieldInfo.getFieldName());
-			return component;
-		}
-		if (fieldInfo.getFieldName().equals("approvals") || fieldInfo.getFieldName().equals("status")) {
-			LOGGER.info("Skipping field 'approvals' as it is handled separately");
-		}
-		// Check if field should be rendered as ComboBox based on metadata
-		final boolean hasDataProvider = (fieldInfo.getDataProviderBean() != null) && !fieldInfo.getDataProviderBean().trim().isEmpty();
-		if (hasDataProvider && (fieldType == String.class)) {
-			// gets strings from a method in a spring bean
-			component = createStringComboBox(contentOwner, fieldInfo, binder);
-		} else if (hasDataProvider && fieldInfo.getJavaType().equals("Set")) {
-			component = createComboBoxMultiSelect(contentOwner, fieldInfo, binder);
-		} else if (hasDataProvider || CEntityDB.class.isAssignableFrom(fieldType)) {
-			// it has a dataprovider or entity type
-			component = createComboBox(contentOwner, fieldInfo, binder);
-		} else if ((fieldType == Boolean.class) || (fieldType == boolean.class)) {
-			component = createCheckbox(fieldInfo, binder);
-		} else if ((fieldType == String.class)) {
-			if (fieldInfo.isColorField()) {
-				component = createColorPicker(fieldInfo, binder);
-			} else if (fieldInfo.isUseIcon()) {
-				component = createIconComboBox(fieldInfo, binder);
-			} else if (fieldInfo.getMaxLength() >= CEntityConstants.MAX_LENGTH_DESCRIPTION) {
-				component = createTextArea(fieldInfo, binder);
-			} else if (fieldInfo.isPasswordField()) {
-				component = createTextPasswordField(fieldInfo);
-			} else {
-				component = createTextField(fieldInfo, binder);
+		try {
+			Component component = null;
+			Check.notNull(fieldInfo, "Field");
+			final Class<?> fieldType = fieldInfo.getFieldTypeClass();
+			Check.notNull(fieldType, "Field type for field " + fieldInfo.getDisplayName());
+			// Check for custom component creation method first (highest priority)
+			if (fieldInfo.getCreateComponentMethod() != null && !fieldInfo.getCreateComponentMethod().trim().isEmpty()) {
+				component = createCustomComponent(contentOwner, fieldInfo, binder);
+				Check.notNull(component, "Custom component for field " + fieldInfo.getFieldName());
+				return component;
 			}
-		} else if ((fieldType == Integer.class) || (fieldType == int.class) || (fieldType == Long.class) || (fieldType == long.class)) {
-			// Integer types
-			component = createIntegerField(fieldInfo, binder);
-		} else if (fieldType == BigDecimal.class) {
-			component = createBigDecimalField(fieldInfo, binder);
-		} else if ((fieldType == Double.class) || (fieldType == double.class) || (fieldType == Float.class) || (fieldType == float.class)) {
-			// Floating-point types
-			component = createFloatingPointField(fieldInfo, binder);
-		} else if (fieldType == LocalDate.class) {
-			component = createDatePicker(fieldInfo, binder);
-		} else if ((fieldType == LocalDateTime.class) || (fieldType == Instant.class)) {
-			component = createDateTimePicker(fieldInfo, binder);
-		} else if (fieldType.isEnum()) {
-			component = createEnumComponent(fieldInfo, binder);
-		} else if ((fieldType == byte[].class) && fieldInfo.isImageData()) {
-			component = createPictureSelector(fieldInfo, binder);
-		} else {
-			Check.isTrue(false, "Unsupported field type: " + fieldType.getSimpleName() + " for field: " + fieldInfo.getDisplayName());
+			if (fieldInfo.getFieldName().equals("approvals") || fieldInfo.getFieldName().equals("status")) {
+				LOGGER.info("Skipping field 'approvals' as it is handled separately");
+			}
+			// Check if field should be rendered as ComboBox based on metadata
+			final boolean hasDataProvider = (fieldInfo.getDataProviderBean() != null) && !fieldInfo.getDataProviderBean().trim().isEmpty();
+			if (hasDataProvider && (fieldType == String.class)) {
+				// gets strings from a method in a spring bean
+				component = createStringComboBox(contentOwner, fieldInfo, binder);
+			} else if (hasDataProvider && fieldInfo.getJavaType().equals("Set")) {
+				component = createComboBoxMultiSelect(contentOwner, fieldInfo, binder);
+			} else if (hasDataProvider || CEntityDB.class.isAssignableFrom(fieldType)) {
+				// it has a dataprovider or entity type
+				component = createComboBox(contentOwner, fieldInfo, binder);
+			} else if ((fieldType == Boolean.class) || (fieldType == boolean.class)) {
+				component = createCheckbox(fieldInfo, binder);
+			} else if ((fieldType == String.class)) {
+				if (fieldInfo.isColorField()) {
+					component = createColorPicker(fieldInfo, binder);
+				} else if (fieldInfo.isUseIcon()) {
+					component = createIconComboBox(fieldInfo, binder);
+				} else if (fieldInfo.getMaxLength() >= CEntityConstants.MAX_LENGTH_DESCRIPTION) {
+					component = createTextArea(fieldInfo, binder);
+				} else if (fieldInfo.isPasswordField()) {
+					component = createTextPasswordField(fieldInfo);
+				} else {
+					component = createTextField(fieldInfo, binder);
+				}
+			} else if ((fieldType == Integer.class) || (fieldType == int.class) || (fieldType == Long.class) || (fieldType == long.class)) {
+				// Integer types
+				component = createIntegerField(fieldInfo, binder);
+			} else if (fieldType == BigDecimal.class) {
+				component = createBigDecimalField(fieldInfo, binder);
+			} else if ((fieldType == Double.class) || (fieldType == double.class) || (fieldType == Float.class) || (fieldType == float.class)) {
+				// Floating-point types
+				component = createFloatingPointField(fieldInfo, binder);
+			} else if (fieldType == LocalDate.class) {
+				component = createDatePicker(fieldInfo, binder);
+			} else if ((fieldType == LocalDateTime.class) || (fieldType == Instant.class)) {
+				component = createDateTimePicker(fieldInfo, binder);
+			} else if (fieldType.isEnum()) {
+				component = createEnumComponent(fieldInfo, binder);
+			} else if ((fieldType == byte[].class) && fieldInfo.isImageData()) {
+				component = createPictureSelector(fieldInfo, binder);
+			} else {
+				Check.isTrue(false, "Unsupported field type: " + fieldType.getSimpleName() + " for field: " + fieldInfo.getDisplayName());
+			}
+			Check.notNull(component, "Component for field " + fieldInfo.getFieldName() + " of type " + fieldType.getSimpleName());
+			setRequiredIndicatorVisible(fieldInfo, component);
+			// dont use helper text for Checkbox components setHelperText(meta, component);
+			setComponentWidth(component, fieldInfo.getWidth());
+			// setclass name for styling in format of form-field{ComponentType}
+			component.setClassName("form-field-" + component.getClass().getSimpleName());
+			// Create field
+			return component;
+		} catch (Exception e) {
+			LOGGER.error("Error creating component for field '{}", fieldInfo.getFieldName());
+			throw e;
 		}
-		Check.notNull(component, "Component for field " + fieldInfo.getFieldName() + " of type " + fieldType.getSimpleName());
-		setRequiredIndicatorVisible(fieldInfo, component);
-		// dont use helper text for Checkbox components setHelperText(meta, component);
-		setComponentWidth(component, fieldInfo.getWidth());
-		// setclass name for styling in format of form-field{ComponentType}
-		component.setClassName("form-field-" + component.getClass().getSimpleName());
-		// Create field
-		return component;
 	}
 
 	private static DatePicker createDatePicker(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
@@ -808,7 +813,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		try {
 			binder.bind(component, fieldName);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to bind {} for field '{}': {} - this may cause incomplete bindings", componentType, fieldName, e.getMessage(), e);
+			LOGGER.error("Failed to bind {} for field '{}': {} - this may cause incomplete bindings", componentType, fieldName, e.getMessage());
 			// Don't throw - just log the error to prevent form generation failure
 			// The incomplete binding will be handled by CEnhancedBinder's validateBindingsComplete() method
 		}
@@ -887,7 +892,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 					((IContentOwner) component).setCurrentEntity(entity);
 					((IContentOwner) component).populateForm();
 				} catch (final Exception e) {
-					LOGGER.error("Error populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage(), e);
+					LOGGER.error("Error populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage());
 				}
 			}
 		});
@@ -901,7 +906,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				try {
 					((IContentOwner) component).populateForm();
 				} catch (final Exception e) {
-					LOGGER.error("Error populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage(), e);
+					LOGGER.error("Error populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage());
 				}
 			}
 		});
@@ -947,8 +952,10 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	 * @param contentOwner the content owner (page) for context
 	 * @param fieldInfo    field information containing the method name(s)
 	 * @param binder       the enhanced binder for form binding
-	 * @return the custom component or null if creation fails */
-	private static Component createCustomComponent(IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
+	 * @return the custom component or null if creation fails
+	 * @throws Exception */
+	private static Component createCustomComponent(IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder)
+			throws Exception {
 		try {
 			Check.notNull(fieldInfo, "FieldInfo for custom component creation");
 			Check.notNull(fieldInfo.getCreateComponentMethod(), "CreateComponentMethod for custom component creation");
@@ -960,8 +967,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			Check.notNull(component, "Custom component created by method " + methodName + " for field " + fieldInfo.getFieldName());
 			return component;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating custom component for field {}: {}", fieldInfo.getFieldName(), e.getMessage(), e);
-			return null;
+			LOGGER.error("Error creating custom component for field {}: {}", fieldInfo.getFieldName(), e.getMessage());
+			throw e;
 		}
 	}
 
@@ -1017,7 +1024,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				try {
 					((IContentOwner) component).setCurrentEntity(entity);
 				} catch (final Exception e) {
-					LOGGER.error("Error populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage(), e);
+					LOGGER.error("Error populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage());
 				}
 			}
 		});

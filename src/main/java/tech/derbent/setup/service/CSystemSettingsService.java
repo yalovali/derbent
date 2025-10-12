@@ -46,7 +46,7 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 			return savedSettings;
 		} catch (final Exception e) {
 			LOGGER.error("Failed to create default system settings", e);
-			throw new RuntimeException("Failed to create system settings: " + e.getMessage(), e);
+			throw e;
 		}
 	}
 
@@ -136,7 +136,7 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 			return result;
 		} catch (final Exception e) {
 			LOGGER.error("Error retrieving system settings", e);
-			throw new RuntimeException("Failed to retrieve system settings: " + e.getMessage(), e);
+			throw e;
 		}
 	}
 
@@ -231,7 +231,7 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 			return updatedSettings;
 		} catch (final Exception e) {
 			LOGGER.error("Failed to update system settings", e);
-			throw new RuntimeException("Failed to update system settings: " + e.getMessage(), e);
+			throw e;
 		}
 	}
 

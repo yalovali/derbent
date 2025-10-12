@@ -35,7 +35,7 @@ public class CGanntInitializerService extends CInitializerServiceBase {
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating Gantt view configuration: {}", e.getMessage(), e);
+			LOGGER.error("Error creating Gantt view configuration.");
 			return null;
 		}
 	}

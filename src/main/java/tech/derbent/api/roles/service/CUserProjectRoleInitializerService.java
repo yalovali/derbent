@@ -52,7 +52,7 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating user project role view: {}", e.getMessage(), e);
+			LOGGER.error("Error creating user project role view.");
 			throw new RuntimeException("Failed to create user project role view", e);
 		}
 	}

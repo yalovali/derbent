@@ -43,7 +43,7 @@ public final class CUserCompanySettingInitializerService extends CInitializerSer
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating user company setting view: {}", e.getMessage(), e);
+			LOGGER.error("Error creating user company setting view.");
 			throw new RuntimeException("Failed to create user company setting view", e);
 		}
 	}

@@ -65,7 +65,7 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating system settings view: {}", e.getMessage(), e);
+			LOGGER.error("Error creating system settings view.");
 			throw new RuntimeException("Failed to create system settings view", e);
 		}
 	}

@@ -41,7 +41,7 @@ public class CUserCompanyRoleInitializerService extends CInitializerServiceBase 
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating company role view: {}", e.getMessage(), e);
+			LOGGER.error("Error creating company role view.");
 			throw new RuntimeException("Failed to create company role view", e);
 		}
 	}

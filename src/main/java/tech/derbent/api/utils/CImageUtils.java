@@ -99,9 +99,10 @@ public final class CImageUtils {
 	 * @param targetWidth  Target width in pixels (must be positive)
 	 * @param targetHeight Target height in pixels (must be positive)
 	 * @return Resized image data as byte array in JPEG format
+	 * @throws IOException
 	 * @throws IllegalArgumentException  if imageData is null/empty or dimensions are not positive
 	 * @throws CImageProcessingException if image reading, processing, or writing fails */
-	public static byte[] resizeImage(final byte[] imageData, final int targetWidth, final int targetHeight) {
+	public static byte[] resizeImage(final byte[] imageData, final int targetWidth, final int targetHeight) throws IOException {
 		LOGGER.info("CImageUtils.resizeImage called with targetWidth={}, targetHeight={}", targetWidth, targetHeight);
 		Check.notNull(imageData, "Image data cannot be null");
 		Check.notEmpty(imageData, "Image data cannot be empty");
@@ -133,11 +134,11 @@ public final class CImageUtils {
 			return resizedImageData;
 		} catch (final IOException e) {
 			LOGGER.error("Failed to resize image", e);
-			throw new CImageProcessingException("Failed to resize image: " + e.getMessage(), e);
+			throw e;
 		}
 	}
 
-	public static byte[] resizeToProfilePicture(final byte[] imageData) {
+	public static byte[] resizeToProfilePicture(final byte[] imageData) throws IOException {
 		return resizeImage(imageData, PROFILE_PICTURE_WIDTH, PROFILE_PICTURE_HEIGHT);
 	}
 
@@ -145,9 +146,10 @@ public final class CImageUtils {
 	 * image readability testing. Supports multiple image formats and provides detailed error messages for validation failures.
 	 * @param imageData Image data to validate as byte array
 	 * @param fileName  Original file name for format validation (must include extension)
+	 * @throws IOException
 	 * @throws IllegalArgumentException  if imageData is null/empty or fileName is null/blank
 	 * @throws CImageProcessingException if size exceeds limit, format unsupported, or image invalid */
-	public static void validateImageData(final byte[] imageData, final String fileName) {
+	public static void validateImageData(final byte[] imageData, final String fileName) throws IOException {
 		LOGGER.info("CImageUtils.validateImageData called with fileName={}", fileName);
 		Check.notNull(imageData, "Image data cannot be null");
 		Check.notEmpty(imageData, "Image data cannot be empty");
@@ -177,7 +179,8 @@ public final class CImageUtils {
 				throw new CImageProcessingException("Invalid image data - cannot read image");
 			}
 		} catch (final IOException e) {
-			throw new CImageProcessingException("Invalid image data: " + e.getMessage(), e);
+			LOGGER.error("Failed to read image data for validation");
+			throw e;
 		}
 		LOGGER.debug("Image validation successful for file: {}", fileName);
 	}

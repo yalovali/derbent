@@ -87,7 +87,7 @@ public abstract class CProjectAwareAccordionDescription<EntityClass extends CEnt
 				createPanelContent();
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error refreshing panel content for project change in {}: {}", getClass().getSimpleName(), e.getMessage(), e);
+			LOGGER.error("Error refreshing panel content for project change in {}: {}", getClass().getSimpleName(), e.getMessage());
 		}
 	}
 

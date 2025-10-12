@@ -32,7 +32,7 @@ public abstract class CAbstractNamedEntityPage<EntityClass extends CEntityNamed<
 			detailsBuilder.buildDetails(this, screen, getBinder(), getBaseDetailsLayout());
 		} catch (final Exception e) {
 			final String errorMsg = "Error building details layout for screen: " + baseViewName;
-			LOGGER.error("Error building details layout for screen '{}': {}", baseViewName, e.getMessage(), e);
+			LOGGER.error("Error building details layout for screen '{}': {}", baseViewName, e.getMessage());
 			throw new RuntimeException(errorMsg, e);
 		}
 	}

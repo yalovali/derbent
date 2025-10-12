@@ -210,7 +210,7 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 			String route = page.getRoute(); // This returns "cdynamicpagerouter." + getId()
 			return createColorfulIconButton(icon, page.getPageTitle(), color, route);
 		} catch (Exception e) {
-			LOGGER.error("Error creating dynamic page button for page '{}': {}", page.getPageTitle(), e.getMessage(), e);
+			LOGGER.error("Error creating dynamic page button for page '{}': {}", page.getPageTitle(), e.getMessage());
 			throw new RuntimeException(e);
 		}
 	}

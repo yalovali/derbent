@@ -34,7 +34,7 @@ public class COrderStatusInitializerService extends CInitializerServiceBase {
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating order status view: {}", e.getMessage(), e);
+			LOGGER.error("Error creating order status view.");
 			throw new RuntimeException("Failed to create order status view", e);
 		}
 	}

@@ -64,7 +64,7 @@ public class CSimpleLoginScreenshotTest extends CBaseUITest {
 			
 			LOGGER.info("✅ Login screenshot test completed successfully");
 		} catch (Exception e) {
-			LOGGER.error("❌ Login screenshot test failed: {}", e.getMessage(), e);
+			LOGGER.error("❌ Login screenshot test failed.");
 			takeScreenshot("error-state", true);
 			throw new AssertionError("Login screenshot test failed", e);
 		}

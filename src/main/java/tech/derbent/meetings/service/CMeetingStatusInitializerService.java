@@ -37,7 +37,7 @@ public class CMeetingStatusInitializerService extends CInitializerServiceBase {
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating meeting status view: {}", e.getMessage(), e);
+			LOGGER.error("Error creating meeting status view.");
 			throw new RuntimeException("Failed to create meeting status view", e);
 		}
 	}

@@ -32,7 +32,7 @@ public abstract class CBaseInfoDialog extends CDialog {
 		try {
 			setupDialog();// call setupDialog() to initialize the dialog
 		} catch (final Exception e) {
-			LOGGER.error("Error setting up dialog: {}", e.getMessage(), e);
+			LOGGER.error("Error setting up dialog.");
 			throw new RuntimeException("Failed to setup dialog", e);
 		}
 	}

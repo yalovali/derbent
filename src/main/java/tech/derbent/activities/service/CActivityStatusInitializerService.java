@@ -19,7 +19,7 @@ public class CActivityStatusInitializerService extends CInitializerServiceBase {
 	private static final Class<?> clazz = CActivityStatus.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityStatusInitializerService.class);
 
-	public static CDetailSection createBasicView(final CProject project) {
+	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
@@ -36,8 +36,8 @@ public class CActivityStatusInitializerService extends CInitializerServiceBase {
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating activity status view: {}", e.getMessage(), e);
-			return null;
+			LOGGER.error("Error creating activity status view");
+			throw e;
 		}
 	}
 

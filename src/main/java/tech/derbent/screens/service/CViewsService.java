@@ -39,7 +39,7 @@ public class CViewsService {
 				}
 			}
 		} catch (Exception e) {
-			LOGGER.error("Error retrieving service beans: {}", e.getMessage(), e);
+			LOGGER.error("Error retrieving service beans.");
 		}
 		// Return the list of service beans
 		return serviceBeans;
@@ -184,7 +184,7 @@ public class CViewsService {
 			LOGGER.debug("Found {} fields for entity class {}", fieldNames.size(), entityClass.getSimpleName());
 			return fieldNames;
 		} catch (Exception e) {
-			LOGGER.error("Error getting entity fields for service {}: {}", serviceBeanName, e.getMessage(), e);
+			LOGGER.error("Error getting entity fields for service {}: {}", serviceBeanName, e.getMessage());
 			return List.of();
 		}
 	}

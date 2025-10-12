@@ -41,8 +41,8 @@ public class CPanelDetails extends CAccordion {
 		try {
 			formBuilder.addFieldLine(contentOwner, screen.getEntityType(), line, getBaseLayout(), componentMap, horizontalLayoutMap);
 		} catch (final Exception e) {
-			LOGGER.error("Error processing detail line for field '{}': {}", line.getFieldCaption(), e.getMessage(), e);
-			throw new Exception("Error processing line: " + line.getFieldCaption(), e);
+			LOGGER.error("Error processing detail line for field {}", line.getFieldCaption());
+			throw e;
 		}
 	}
 }

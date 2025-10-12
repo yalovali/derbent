@@ -33,7 +33,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		try {
 			return ((IEntityOfProjectRepository<EntityClass>) repository).countByProject(project);
 		} catch (final Exception e) {
-			LOGGER.error("Error counting entities by project '{}' in {}: {}", project.getName(), getClass().getSimpleName(), e.getMessage(), e);
+			LOGGER.error("Error counting entities by project '{}' in {}: {}", project.getName(), getClass().getSimpleName(), e.getMessage());
 			throw new RuntimeException("Failed to count entities by project", e);
 		}
 	}
@@ -65,7 +65,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 			final Optional<EntityClass> entities = ((IEntityOfProjectRepository<EntityClass>) repository).findByNameAndProject(name, project);
 			return entities;
 		} catch (final Exception e) {
-			LOGGER.error("Error finding entities by project '{}' in {}: {}", project.getName(), getClass().getSimpleName(), e.getMessage(), e);
+			LOGGER.error("Error finding entities by project '{}' in {}: {}", project.getName(), getClass().getSimpleName(), e.getMessage());
 			throw new RuntimeException("Failed to find entities by project", e);
 		}
 	}
@@ -203,7 +203,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 			final EntityClass savedStatus = repository.save(entity);
 			return savedStatus;
 		} catch (final Exception e) {
-			LOGGER.error("save(entity={}) - Error saving entity: {}", entity.getId(), e.getMessage(), e);
+			LOGGER.error("save(entity={}) - Error saving entity: {}", entity.getId(), e.getMessage());
 			throw new RuntimeException("Failed to save entity", e);
 		}
 	}

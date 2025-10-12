@@ -44,7 +44,7 @@ public class CProjectInitializerService extends CInitializerServiceBase {
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating project view: {}", e.getMessage(), e);
+			LOGGER.error("Error creating project view.");
 			throw new RuntimeException("Failed to create project view", e);
 		}
 	}

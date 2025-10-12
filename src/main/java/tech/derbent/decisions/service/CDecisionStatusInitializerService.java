@@ -37,7 +37,7 @@ public class CDecisionStatusInitializerService extends CInitializerServiceBase {
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating decision status view: {}", e.getMessage(), e);
+			LOGGER.error("Error creating decision status view.");
 			return null;
 		}
 	}

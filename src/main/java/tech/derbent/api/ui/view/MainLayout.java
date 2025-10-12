@@ -268,7 +268,7 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 			LOGGER.info("User profile saved successfully for user: {}", savedUser.getLogin());
 		} catch (final Exception e) {
 			LOGGER.error("Error saving user profile", e);
-			throw new RuntimeException("Failed to save user profile: " + e.getMessage(), e);
+			throw e;
 		}
 	}
 

@@ -150,7 +150,7 @@ public abstract class CBaseKanbanBoardView<T extends IKanbanEntity, S extends IK
 			// Refresh the board to reflect changes
 			loadKanbanData();
 		} catch (final Exception e) {
-			LOGGER.error("Error updating entity status: {}", e.getMessage(), e);
+			LOGGER.error("Error updating entity status.");
 			// You could show a notification here
 		}
 	}

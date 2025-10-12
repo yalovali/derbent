@@ -40,7 +40,7 @@ public final class CUserProjectSettingsInitializerService extends CInitializerSe
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating user project settings view: {}", e.getMessage(), e);
+			LOGGER.error("Error creating user project settings view.");
 			throw new RuntimeException("Failed to create user project settings view", e);
 		}
 	}

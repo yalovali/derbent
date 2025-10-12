@@ -73,7 +73,7 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 			detailsBuilder.buildDetails(this, screen, currentBinder, detailsLayout);
 		} catch (final Exception e) {
 			final String errorMsg = "Error building details layout for screen: " + baseViewName;
-			LOGGER.error("Error building details layout for screen '{}': {}", baseViewName, e.getMessage(), e);
+			LOGGER.error("Error building details layout for screen '{}': {}", baseViewName, e.getMessage());
 			detailsLayout.add(new CDiv(errorMsg));
 			currentBinder = null; // Clear binder on error
 		}
@@ -136,7 +136,7 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 				detailsBuilder.populateForm();
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error populating form: {}", e.getMessage(), e);
+			LOGGER.error("Error populating form.");
 			throw e; // Rethrow to notify caller
 		}
 	}
@@ -151,7 +151,7 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 			currentEntity = entity;
 			detailsBuilder.setCurrentEntity(entity);
 		} catch (final Exception e) {
-			LOGGER.error("Error setting current entity: {}", e.getMessage(), e);
+			LOGGER.error("Error setting current entity.");
 			throw e;
 		}
 	}

@@ -46,7 +46,7 @@ public class CPageEntityInitializerService extends CInitializerServiceBase {
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating page entity view: {}", e.getMessage(), e);
+			LOGGER.error("Error creating page entity view.");
 			return null;
 		}
 	}
@@ -170,7 +170,7 @@ public class CPageEntityInitializerService extends CInitializerServiceBase {
 			pageEntityService.save(quickActions);
 			LOGGER.info("Created {} sample dashboard pages for project: {}", 4, project.getName());
 		} catch (Exception e) {
-			LOGGER.error("Error creating sample dashboard pages: {}", e.getMessage(), e);
+			LOGGER.error("Error creating sample dashboard pages.");
 		}
 	}
 

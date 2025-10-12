@@ -33,7 +33,7 @@ public class CGridInitializerService extends CInitializerServiceBase {
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating grid entity view: {}", e.getMessage(), e);
+			LOGGER.error("Error creating grid entity view.");
 			return null;
 		}
 	}

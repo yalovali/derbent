@@ -35,7 +35,7 @@ public class CApprovalStatusInitializerService extends CInitializerServiceBase {
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating approval status view: {}", e.getMessage(), e);
+			LOGGER.error("Error creating approval status view.");
 			throw new RuntimeException("Failed to create approval status view", e);
 		}
 	}

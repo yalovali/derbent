@@ -30,7 +30,7 @@ public interface IFieldInfoGenerator {
 				}
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing field information for class '{}': {}", getClassName(), e.getMessage(), e);
+			LOGGER.error("Error initializing field information for class '{}': {}", getClassName(), e.getMessage());
 			throw new RuntimeException("Failed to initialize field information", e);
 		}
 	}

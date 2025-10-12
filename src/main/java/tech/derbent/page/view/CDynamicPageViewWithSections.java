@@ -329,7 +329,7 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 			splitBottomLayout.addComponentAsFirst(crudToolbar);
 			buildScreen(entityViewName, (Class) entityClass, baseDetailsLayout);
 		} catch (Exception e) {
-			LOGGER.error("Error rebuilding entity details for view '{}': {}", entityViewName, e.getMessage(), e);
+			LOGGER.error("Error rebuilding entity details for view '{}': {}", entityViewName, e.getMessage());
 			throw e;
 		}
 	}

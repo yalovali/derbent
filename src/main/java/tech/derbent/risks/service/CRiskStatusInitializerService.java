@@ -37,7 +37,7 @@ public class CRiskStatusInitializerService extends CInitializerServiceBase {
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating risk status view: {}", e.getMessage(), e);
+			LOGGER.error("Error creating risk status view.");
 			throw new RuntimeException("Failed to create risk status view", e);
 		}
 	}

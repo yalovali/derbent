@@ -38,7 +38,7 @@ public class COrderTypeInitializerService extends CInitializerServiceBase {
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating order type view: {}", e.getMessage(), e);
+			LOGGER.error("Error creating order type view.");
 			throw new RuntimeException("Failed to create order type view", e);
 		}
 	}

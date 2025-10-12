@@ -55,7 +55,7 @@ public class CUserInitializerService extends CInitializerServiceBase {
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating user view: {}", e.getMessage(), e);
+			LOGGER.error("Error creating user view.");
 			throw new RuntimeException("Failed to create user view", e);
 		}
 	}

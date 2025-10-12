@@ -96,7 +96,7 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 			}
 			LOGGER.info("Entity saved successfully using service: {}", getEntity().getId());
 		} catch (final Exception e) {
-			LOGGER.error("Error during save operation: {}", e.getMessage(), e);
+			LOGGER.error("Error during save operation.");
 			throw e;
 		}
 	}

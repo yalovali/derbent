@@ -70,7 +70,7 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 				return "";
 			}
 		} catch (Exception e) {
-			LOGGER.error("Failed to get display text for type {}: {}", type, e.getMessage(), e);
+			LOGGER.error("Failed to get display text for type {}: {}", type, e.getMessage());
 			return "";
 		}
 	}
@@ -91,8 +91,8 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 			LOGGER.info("Successfully saved user project settings: {}", savedSettings);
 			populateForm();
 		} catch (final Exception e) {
-			LOGGER.error("Error saving user project settings: {}", e.getMessage(), e);
-			throw new RuntimeException("Failed to save user project settings: " + e.getMessage(), e);
+			LOGGER.error("Error saving user project settings.");
+			throw e;
 		}
 	}
 
@@ -116,7 +116,7 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 					try {
 						return CColorUtils.getEntityWithIcon(settings.getProject());
 					} catch (Exception e) {
-						LOGGER.error("Failed to create project component: {}", e.getMessage(), e);
+						LOGGER.error("Failed to create project component.");
 						return new com.vaadin.flow.component.html.Span(getDisplayText(settings, "project"));
 					}
 				}).setHeader(createStyledHeader("Project", "#2E7D32")).setAutoWidth(true).setSortable(true);
@@ -126,7 +126,7 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 					try {
 						return CColorUtils.getEntityWithIcon(settings.getUser());
 					} catch (Exception e) {
-						LOGGER.error("Failed to create user component: {}", e.getMessage(), e);
+						LOGGER.error("Failed to create user component.");
 						return new com.vaadin.flow.component.html.Span(getDisplayText(settings, "user"));
 					}
 				}).setHeader(createStyledHeader("User", "#1565C0")).setAutoWidth(true).setSortable(true);
@@ -136,7 +136,7 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 			grid.addColumn(settings -> getDisplayText(settings, "permission")).setHeader(createStyledHeader("Permissions", "#8E24AA"))
 					.setAutoWidth(true).setSortable(true);
 		} catch (Exception e) {
-			LOGGER.error("Failed to setup grid: {}", e.getMessage(), e);
+			LOGGER.error("Failed to setup grid.");
 			throw new RuntimeException("Failed to setup grid", e);
 		}
 	}

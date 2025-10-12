@@ -115,7 +115,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			grid.setItems(filteredEntities);
 			LOGGER.debug("Applied search filter '{}' - {} results out of {} total", searchText, filteredEntities.size(), allEntities.size());
 		} catch (Exception e) {
-			LOGGER.error("Error applying search filter: {}", e.getMessage(), e);
+			LOGGER.error("Error applying search filter.");
 			// Fallback to refresh data on error
 			refreshGridData();
 		}
@@ -366,7 +366,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			loadDataFromService(serviceBeanName, gridEntity.getProject());
 			this.add(grid);
 		} catch (Exception e) {
-			LOGGER.error("Error creating grid content: {}", e.getMessage(), e);
+			LOGGER.error("Error creating grid content.");
 			add(new Div("Error creating grid: " + e.getMessage()));
 		}
 	}

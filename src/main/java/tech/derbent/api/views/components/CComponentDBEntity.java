@@ -44,7 +44,7 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 			Check.notNull(binder, "Binder cannot be null when clearing form");
 			binder.readBean(null);
 		} catch (Exception e) {
-			LOGGER.error("Failed to clear form: {}", e.getMessage(), e);
+			LOGGER.error("Failed to clear form.");
 			throw new RuntimeException("Failed to clear form", e);
 		}
 	}
@@ -130,8 +130,8 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 			entityService.save(entity);
 			LOGGER.debug("Form data saved for entity: {}", entity);
 		} catch (Exception e) {
-			LOGGER.error("Failed to save form data for entity {}: {}", entityClass.getSimpleName(), e.getMessage(), e);
-			throw new RuntimeException("Failed to save form data", e);
+			LOGGER.error("Failed to save form data for entity {}: {}", entityClass.getSimpleName(), e.getMessage());
+			throw e;
 		}
 	}
 
@@ -153,7 +153,7 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 		try {
 			return binder != null && binder.validate().isOk();
 		} catch (Exception e) {
-			LOGGER.error("Failed to validate form for entity {}: {}", entityClass.getSimpleName(), e.getMessage(), e);
+			LOGGER.error("Failed to validate form for entity {}: {}", entityClass.getSimpleName(), e.getMessage());
 			return false;
 		}
 	}

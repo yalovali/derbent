@@ -83,7 +83,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 			CComponentUserProjectSettings component = new CComponentUserProjectSettings(this, sessionService, applicationContext);
 			return component;
 		} catch (Exception e) {
-			LOGGER.error("Failed to create user project settings component: {}", e.getMessage(), e);
+			LOGGER.error("Failed to create user project settings component.");
 			// Fallback to simple div with error message
 			final Div errorDiv = new Div();
 			errorDiv.setText("Error loading user project settings component: " + e.getMessage());
@@ -185,7 +185,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 			// Find users through the project settings relationship
 			return ((IUserRepository) repository).findByProject(project.getId());
 		} catch (final Exception e) {
-			LOGGER.error("Error listing users by project '{}': {}", project.getName(), e.getMessage(), e);
+			LOGGER.error("Error listing users by project '{}': {}", project.getName(), e.getMessage());
 			throw new RuntimeException("Failed to list users by project", e);
 		}
 	}
@@ -206,7 +206,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 			List<CUser> content = allUsers.subList(start, end);
 			return new PageImpl<>(content, pageable, allUsers.size());
 		} catch (final Exception e) {
-			LOGGER.error("Error listing users by project '{}' with pagination: {}", project.getName(), e.getMessage(), e);
+			LOGGER.error("Error listing users by project '{}' with pagination: {}", project.getName(), e.getMessage());
 			throw new RuntimeException("Failed to list users by project with pagination", e);
 		}
 	}

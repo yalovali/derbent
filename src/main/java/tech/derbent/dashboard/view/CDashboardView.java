@@ -226,7 +226,7 @@ public final class CDashboardView extends CAbstractPage {
 				add(card);
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error creating fallback error card: {}", e.getMessage(), e);
+			LOGGER.error("Error creating fallback error card.");
 		}
 	}
 
@@ -267,7 +267,7 @@ public final class CDashboardView extends CAbstractPage {
 			}
 			return card;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating project breakdown card: {}", e.getMessage(), e);
+			LOGGER.error("Error creating project breakdown card.");
 			return null;
 		}
 	}
@@ -303,7 +303,7 @@ public final class CDashboardView extends CAbstractPage {
 			}
 			return card;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating projects card: {}", e.getMessage(), e);
+			LOGGER.error("Error creating projects card.");
 			return null;
 		}
 	}
@@ -341,7 +341,7 @@ public final class CDashboardView extends CAbstractPage {
 			}
 			return stats;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating project stats: {}", e.getMessage(), e);
+			LOGGER.error("Error creating project stats.");
 			return null;
 		}
 	}
@@ -359,7 +359,7 @@ public final class CDashboardView extends CAbstractPage {
 				return statsContainer;
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error creating stats container: {}", e.getMessage(), e);
+			LOGGER.error("Error creating stats container.");
 		}
 		return null;
 	}
@@ -400,7 +400,7 @@ public final class CDashboardView extends CAbstractPage {
 			}
 			return card;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating users card: {}", e.getMessage(), e);
+			LOGGER.error("Error creating users card.");
 			return null;
 		}
 	}
@@ -423,7 +423,7 @@ public final class CDashboardView extends CAbstractPage {
 				}
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error creating exception dialog: {}", e.getMessage(), e);
+			LOGGER.error("Error creating exception dialog.");
 			// Fallback: create a simple error card
 			createFallbackErrorCard(message);
 		}
@@ -452,7 +452,7 @@ public final class CDashboardView extends CAbstractPage {
 			loadDashboardData();
 			LOGGER.info("initPage completed successfully");
 		} catch (final Exception e) {
-			LOGGER.error("Error in initPage: {}", e.getMessage(), e);
+			LOGGER.error("Error in initPage.");
 			handleError("Failed to initialize dashboard page", e);
 		}
 	}
@@ -506,7 +506,7 @@ public final class CDashboardView extends CAbstractPage {
 			}
 			LOGGER.info("loadDashboardData completed successfully");
 		} catch (final Exception e) {
-			LOGGER.error("Error loading dashboard data: {}", e.getMessage(), e);
+			LOGGER.error("Error loading dashboard data.");
 			handleError("Error loading dashboard data", e);
 		}
 	}

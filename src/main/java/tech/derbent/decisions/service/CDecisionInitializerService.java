@@ -43,7 +43,7 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating decision view: {}", e.getMessage(), e);
+			LOGGER.error("Error creating decision view.");
 			throw new RuntimeException("Failed to create decision view", e);
 		}
 	}

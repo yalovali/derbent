@@ -88,24 +88,29 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	}
 
 	private void handleLogin() {
-		String username = usernameField.getValue();
-		final String password = passwordField.getValue();
-		final CCompany company = companyField.getValue();
-		username = username + "@" + company.getId();
-		errorMessage.setText("");
-		// Basic validation
-		Check.notBlank(username, "Please enter both username and password");
-		Check.notBlank(password, "Please enter both username and password");
-		// Get selected view for redirect
-		String redirectView = "home";
-		// Create form and submit to Spring Security endpoint with redirect parameter
-		getElement().executeJs("const form = document.createElement('form');" + "form.method = 'POST';" + "form.action = 'login';"
-				+ "const usernameInput = document.createElement('input');" + "usernameInput.type = 'hidden';" + "usernameInput.name = 'username';"
-				+ "usernameInput.value = $0;" + "form.appendChild(usernameInput);" + "const passwordInput = document.createElement('input');"
-				+ "passwordInput.type = 'hidden';" + "passwordInput.name = 'password';" + "passwordInput.value = $1;"
-				+ "form.appendChild(passwordInput);" + "const redirectInput = document.createElement('input');" + "redirectInput.type = 'hidden';"
-				+ "redirectInput.name = 'redirect';" + "redirectInput.value = $2;" + "form.appendChild(redirectInput);"
-				+ "document.body.appendChild(form);" + "form.submit();", username, password, redirectView);
+		try {
+			String username = usernameField.getValue();
+			final String password = passwordField.getValue();
+			final CCompany company = companyField.getValue();
+			username = username + "@" + company.getId();
+			errorMessage.setText("");
+			// Basic validation
+			Check.notBlank(username, "Please enter both username and password");
+			Check.notBlank(password, "Please enter both username and password");
+			// Get selected view for redirect
+			String redirectView = "home";
+			// Create form and submit to Spring Security endpoint with redirect parameter
+			getElement().executeJs("const form = document.createElement('form');" + "form.method = 'POST';" + "form.action = 'login';"
+					+ "const usernameInput = document.createElement('input');" + "usernameInput.type = 'hidden';" + "usernameInput.name = 'username';"
+					+ "usernameInput.value = $0;" + "form.appendChild(usernameInput);" + "const passwordInput = document.createElement('input');"
+					+ "passwordInput.type = 'hidden';" + "passwordInput.name = 'password';" + "passwordInput.value = $1;"
+					+ "form.appendChild(passwordInput);" + "const redirectInput = document.createElement('input');" + "redirectInput.type = 'hidden';"
+					+ "redirectInput.name = 'redirect';" + "redirectInput.value = $2;" + "form.appendChild(redirectInput);"
+					+ "document.body.appendChild(form);" + "form.submit();", username, password, redirectView);
+		} catch (final Exception e) {
+			LOGGER.error("Login error.");
+			showError(e.getMessage());
+		}
 	}
 
 	private void populateForm() {
@@ -117,7 +122,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 				companyField.setValue(enabledCompanies.get(0));
 			}
 		} catch (Exception e) {
-			LOGGER.error("Error loading companies: {}", e.getMessage(), e);
+			LOGGER.error("Error loading companies.");
 			showError("Error loading companies. Please contact administrator.");
 		}
 	}

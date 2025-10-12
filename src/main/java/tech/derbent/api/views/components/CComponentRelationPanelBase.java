@@ -60,7 +60,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 				LOGGER.debug("Retrieved {} settings for entity: {}", settings.size(), entity.getName());
 				return settings;
 			} catch (final Exception e) {
-				LOGGER.error("Error retrieving settings for entity: {}", e.getMessage(), e);
+				LOGGER.error("Error retrieving settings for entity.");
 				return List.of();
 			}
 		};
@@ -70,7 +70,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 				Check.notNull(entity, "Current entity cannot be null when saving");
 				entitySaver.run();
 			} catch (final Exception e) {
-				LOGGER.error("Error saving entity: {}", e.getMessage(), e);
+				LOGGER.error("Error saving entity.");
 				throw new RuntimeException("Failed to save entity", e);
 			}
 		};
@@ -102,12 +102,12 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 					populateForm();
 					LOGGER.info("Deleted relation: {}", selected);
 				} catch (final Exception e) {
-					LOGGER.error("Error deleting relation: {}", e.getMessage(), e);
+					LOGGER.error("Error deleting relation.");
 					new CWarningDialog("Failed to delete relation: " + e.getMessage()).open();
 				}
 			}).open();
 		} catch (Exception e) {
-			LOGGER.error("Failed to show delete confirmation: {}", e.getMessage(), e);
+			LOGGER.error("Failed to show delete confirmation.");
 			new CWarningDialog("Failed to delete relation").open();
 		}
 	}
@@ -124,7 +124,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 			setupDataAccessors();
 			openPanel();
 		} catch (Exception e) {
-			LOGGER.error("Failed to initialize panel: {}", e.getMessage(), e);
+			LOGGER.error("Failed to initialize panel.");
 			throw new RuntimeException("Failed to initialize panel", e);
 		}
 	}
@@ -160,7 +160,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 			buttonLayout.setSpacing(true);
 			add(buttonLayout);
 		} catch (Exception e) {
-			LOGGER.error("Failed to setup buttons: {}", e.getMessage(), e);
+			LOGGER.error("Failed to setup buttons.");
 			throw new RuntimeException("Failed to setup buttons", e);
 		}
 	}
