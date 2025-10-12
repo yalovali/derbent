@@ -88,8 +88,9 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 
 	/** Handles the create (new entity) operation. */
 	private void handleCreate() {
-		Check.notNull(newEntitySupplier, "New entity supplier is not set");
 		try {
+			LOGGER.debug("Handling create operation for entity: {}", entityClass.getSimpleName());
+			Check.notNull(newEntitySupplier, "New entity supplier is not set");
 			// Create new entity
 			EntityClass newEntity = newEntitySupplier.get();
 			Check.notNull(newEntity, "New entity supplier returned null");
@@ -109,6 +110,7 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	/** Handles the delete operation with confirmation dialog and proper error handling. */
 	private void handleDelete() {
 		try {
+			LOGGER.debug("Handling delete operation for entity: {}", entityClass.getSimpleName());
 			if (currentEntity == null || currentEntity.getId() == null) {
 				showErrorNotification("Cannot delete: No entity selected or entity not saved yet.");
 				return;
@@ -135,8 +137,9 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 
 	/** Handles the refresh operation. */
 	private void handleRefresh() {
-		Check.notNull(refreshCallback, "Refresh callback is not set");
 		try {
+			LOGGER.debug("Handling refresh operation for entity: {}", entityClass.getSimpleName());
+			Check.notNull(refreshCallback, "Refresh callback is not set");
 			refreshCallback.accept(currentEntity);
 			showSuccessNotification("Data refreshed successfully");
 		} catch (Exception exception) {
@@ -244,14 +247,6 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		LOGGER.debug("Setting current entity in toolbar: {}", entity != null ? entityClass.getSimpleName() : "null");
 		currentEntity = (EntityClass) entity;
 		updateButtonStates();
-		// Bind the entity to the form if available
-		Check.notNull(entityClass, "Entity class is not set");
-		try {
-			// binder.setBean((EntityClass) entity);
-		} catch (Exception e) {
-			LOGGER.error("Error binding entity to form: {}", e.getMessage());
-			throw e;
-		}
 	}
 
 	/** Sets the dependency checker function that returns error message if entity cannot be deleted.
@@ -304,6 +299,7 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 
 	/** Updates button enabled/disabled states based on current context. */
 	private void updateButtonStates() {
+		LOGGER.debug("Updating button states in toolbar for entity.");
 		boolean hasEntity = (currentEntity != null);
 		boolean hasEntityId = hasEntity && (currentEntity.getId() != null);
 		boolean canCreate = (newEntitySupplier != null);

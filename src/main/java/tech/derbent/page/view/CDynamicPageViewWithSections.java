@@ -80,22 +80,12 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 		LOGGER.debug("User accessing page: {}", pageEntity.getPageTitle());
 	}
 
-	/** Checks if existing components can be reused for the given entity view */
-	private boolean canReuseExistingComponents(String entityViewName, Class<?> entityType) {
-		return currentEntityViewName != null && currentEntityType != null && currentEntityViewName.equals(entityViewName)
-				&& currentEntityType.equals(entityType) && currentBinder != null && crudToolbar != null;
-	}
-
 	/** Clear entity details and reset state. */
 	private void clearEntityDetails() {
 		if (baseDetailsLayout != null) {
 			baseDetailsLayout.removeAll();
 		}
-		if (crudToolbar != null) {
-			splitBottomLayout.remove(crudToolbar);
-		}
 		currentBinder = null;
-		crudToolbar = null;
 		currentEntityViewName = null;
 		currentEntityType = null;
 	}
@@ -252,6 +242,9 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 			add(splitLayout);
 			createMasterSection();
 			createDetailsSection();
+			crudToolbar = createCrudToolbar();
+			splitBottomLayout.addComponentAsFirst(crudToolbar);
+			grid.selectNextItem();
 		} catch (Exception e) {
 			LOGGER.error("Error initializing dynamic page view", e);
 			throw e;
@@ -280,11 +273,24 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 			LOGGER.debug("Entity saved notification received: {}", entity != null ? entity.getClass().getSimpleName() : "null");
 			Check.notNull(grid, "Grid component is not initialized");
 			Check.notNull(entity, "Saved entity cannot be null");
-			// Refresh grid and re-select entity
 			refreshGrid();
 			grid.selectEntity(entity);
 		} catch (Exception e) {
 			LOGGER.error("Error handling entity saved notification", e);
+			throw e;
+		}
+	}
+
+	@Override
+	public void onEntityCreated(CEntityDB<?> entity) {
+		try {
+			LOGGER.debug("Entity created notification received: {}", entity != null ? entity.getClass().getSimpleName() : "null");
+			Check.notNull(grid, "Grid component is not initialized");
+			Check.notNull(entity, "Created entity cannot be null");
+			refreshGrid();
+			grid.selectEntity(entity);
+		} catch (Exception e) {
+			LOGGER.error("Error handling entity created notification", e);
 			throw e;
 		}
 	}
@@ -302,11 +308,9 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 				populateForm();
 			} else {
 				LOGGER.debug("Entity selected: {}", selectedEntity != null ? selectedEntity.toString() + " ID: " + selectedEntity.getId() : "null");
-				Field viewNameField = selectedEntity.getClass().getField("VIEW_NAME");
-				String entityViewName = (String) viewNameField.get(null);
 				// Performance optimization: check if we can reuse existing components
-				if (!canReuseExistingComponents(entityViewName, selectedEntity.getClass())) {
-					rebuildEntityDetails(entityViewName);
+				if (currentEntityViewName == null || !selectedEntity.getClass().getField("VIEW_NAME").equals(currentEntityViewName)) {
+					rebuildEntityDetails(selectedEntity.getClass());
 				}
 				setCurrentEntity(selectedEntity);
 				populateForm();
@@ -320,16 +324,16 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 	@SuppressWarnings ({
 			"unchecked", "rawtypes"
 	})
-	private void rebuildEntityDetails(String entityViewName) throws Exception {
+	private void rebuildEntityDetails(Class<?> clazz) throws Exception {
 		try {
+			Field viewNameField = clazz.getField("VIEW_NAME");
+			String entityViewName = (String) viewNameField.get(null);
 			LOGGER.debug("Rebuilding entity details for view: {}", entityViewName);
 			clearEntityDetails();
-			crudToolbar = createCrudToolbar();
 			currentEntityViewName = entityViewName;
-			splitBottomLayout.addComponentAsFirst(crudToolbar);
 			buildScreen(entityViewName, (Class) entityClass, baseDetailsLayout);
 		} catch (Exception e) {
-			LOGGER.error("Error rebuilding entity details for view '{}': {}", entityViewName, e.getMessage());
+			LOGGER.error("Error rebuilding entity details for view '{}': {}", clazz.getField("VIEW_NAME"), e.getMessage());
 			throw e;
 		}
 	}
@@ -346,7 +350,9 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 			super.setCurrentEntity(entity);
 			if (entity == null) {
 				currentEntityType = null;
-				crudToolbar.setCurrentEntity(null);
+				if (crudToolbar != null) {
+					crudToolbar.setCurrentEntity(null);
+				}
 			} else {
 				currentEntityType = entity.getClass();
 				crudToolbar.setCurrentEntity(entity);
