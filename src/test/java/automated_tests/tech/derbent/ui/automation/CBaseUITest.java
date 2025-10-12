@@ -515,13 +515,49 @@ public abstract class CBaseUITest {
 	void setupTestEnvironment() {
 		LOGGER.info("🧪 Setting up Playwright test environment...");
 		try {
-			playwright = Playwright.create();
-			// Check system property for headless mode (defaults to true)
+			// Determine headless mode setting first
 			boolean headless = Boolean.parseBoolean(System.getProperty("playwright.headless", "true"));
 			LOGGER.info("🎭 Browser mode: {}", headless ? "HEADLESS" : "VISIBLE");
-			// Use headless mode and try to handle browser installation gracefully
-			browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(headless)
-					.setArgs(Arrays.asList("--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu")));
+			
+			BrowserType.LaunchOptions launchOptions = new BrowserType.LaunchOptions().setHeadless(headless)
+					.setArgs(Arrays.asList("--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"));
+			
+			// Check if chromium is available in Playwright cache
+			String playwrightCache = System.getProperty("user.home") + "/.cache/ms-playwright/chromium-1091/chrome";
+			java.io.File cachedChromium = new java.io.File(playwrightCache);
+			
+			if (cachedChromium.exists() && cachedChromium.canExecute()) {
+				// Use cached Playwright Chromium directly to bypass download
+				LOGGER.info("📦 Using cached Playwright Chromium at: {}", playwrightCache);
+				playwright = Playwright.create();
+				launchOptions.setExecutablePath(java.nio.file.Paths.get(playwrightCache));
+				browser = playwright.chromium().launch(launchOptions);
+			} else {
+				// Try Playwright default download first
+				try {
+					playwright = Playwright.create();
+					browser = playwright.chromium().launch(launchOptions);
+				} catch (Exception browserError) {
+					LOGGER.info("⚠️ Playwright-bundled Chromium not available, trying system Chromium...");
+					// Try to use system Chromium as fallback
+					String[] possiblePaths = {"/usr/bin/chromium-browser", "/usr/bin/chromium", "/usr/bin/google-chrome"};
+					for (String chromiumPath : possiblePaths) {
+						if (new java.io.File(chromiumPath).exists()) {
+							LOGGER.info("📦 Using system Chromium at: {}", chromiumPath);
+							if (playwright == null) {
+								playwright = Playwright.create();
+							}
+							launchOptions.setExecutablePath(java.nio.file.Paths.get(chromiumPath));
+							browser = playwright.chromium().launch(launchOptions);
+							break;
+						}
+					}
+					if (browser == null) {
+						throw new RuntimeException("No Chromium browser found");
+					}
+				}
+			}
+			
 			context = browser.newContext();
 			page = context.newPage();
 			page.navigate("http://localhost:" + port + "/login");

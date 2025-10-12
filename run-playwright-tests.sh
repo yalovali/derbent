@@ -33,6 +33,10 @@ run_menu_navigation_test() {
     # Install Playwright browsers if needed
     install_playwright_browsers
     
+    # Set Playwright environment variables to use cached browser
+    export PLAYWRIGHT_BROWSERS_PATH="$HOME/.cache/ms-playwright"
+    export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=true
+    
     # Run the test with Playwright-specific profile
     if mvn test -Dtest="automated_tests.tech.derbent.ui.automation.CSampleDataMenuNavigationTest" -Dspring.profiles.active=test -Dplaywright.headless=true; then
         echo "✅ Menu navigation test completed successfully!"
@@ -73,6 +77,10 @@ run_company_login_test() {
     mkdir -p target/screenshots
     install_playwright_browsers
     
+    # Set Playwright environment variables to use cached browser
+    export PLAYWRIGHT_BROWSERS_PATH="$HOME/.cache/ms-playwright"
+    export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=true
+    
     if mvn test -Dtest="automated_tests.tech.derbent.ui.automation.CCompanyAwareLoginTest" -Dspring.profiles.active=test -Dplaywright.headless=true; then
         echo "✅ Company login test completed successfully!"
         show_screenshots
@@ -97,6 +105,10 @@ run_comprehensive_test() {
     
     mkdir -p target/screenshots
     install_playwright_browsers
+    
+    # Set Playwright environment variables to use cached browser
+    export PLAYWRIGHT_BROWSERS_PATH="$HOME/.cache/ms-playwright"
+    export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=true
     
     if mvn test -Dtest="automated_tests.tech.derbent.ui.automation.CComprehensiveDynamicViewsTest" -Dspring.profiles.active=test -Dplaywright.headless=true; then
         echo "✅ Comprehensive test completed successfully!"
