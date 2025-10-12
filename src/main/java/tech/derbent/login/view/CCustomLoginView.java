@@ -108,6 +108,20 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 				+ "document.body.appendChild(form);" + "form.submit();", username, password, redirectView);
 	}
 
+	private void populateForm() {
+		try {
+			List<CCompany> enabledCompanies = companyService.findEnabledCompanies();
+			companyField.setItems(enabledCompanies);
+			// Auto-select first company as default
+			if (!enabledCompanies.isEmpty()) {
+				companyField.setValue(enabledCompanies.get(0));
+			}
+		} catch (Exception e) {
+			LOGGER.error("Error loading companies: {}", e.getMessage(), e);
+			showError("Error loading companies. Please contact administrator.");
+		}
+	}
+
 	private void setupForm() {
 		// Create main container
 		final VerticalLayout container = new VerticalLayout();
@@ -137,19 +151,8 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		companyField.setRequired(true);
 		companyField.setRequiredIndicatorVisible(true);
 		companyField.setId("custom-company-input");
+		companyField.setItemLabelGenerator(company -> company.getName());
 		// Load enabled companies from service
-		try {
-			List<CCompany> enabledCompanies = companyService.findEnabledCompanies();
-			companyField.setItems(enabledCompanies);
-			companyField.setItemLabelGenerator(company -> company.getName());
-			// Auto-select first company as default
-			if (!enabledCompanies.isEmpty()) {
-				companyField.setValue(enabledCompanies.get(0));
-			}
-		} catch (Exception e) {
-			LOGGER.error("Error loading companies: {}", e.getMessage(), e);
-			showError("Error loading companies. Please contact administrator.");
-		}
 		// Username field setup
 		usernameField.setWidthFull();
 		usernameField.setRequired(true);
@@ -174,6 +177,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 							Notification.show("Sample data yeniden yüklendi.", 4000, Notification.Position.MIDDLE);
 							CInformationDialog info = new CInformationDialog("Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
 							info.open();
+							populateForm();
 							// UI.getCurrent().getPage().reload();
 						} catch (final Exception ex) {
 							Notification.show("Hata: " + ex.getMessage(), 6000, Notification.Position.MIDDLE);
@@ -203,6 +207,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		formCard.add(headerlayout, usernameLayout, passwordLayout, companyLayout, errorMessage, buttonsLayout);
 		container.add(formCard);
 		add(container);
+		populateForm();
 	}
 
 	private void showError(final String message) {
