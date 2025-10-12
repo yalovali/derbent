@@ -21,4 +21,20 @@ public class CCurrencyService extends CEntityOfProjectService<CCurrency> {
 
 	@Override
 	protected Class<CCurrency> getEntityClass() { return CCurrency.class; }
+
+	@Override
+	public String checkDependencies(final CCurrency entity) {
+		final String superCheck = super.checkDependencies(entity);
+		if (superCheck != null) {
+			return superCheck;
+		}
+		return null;
+	}
+
+	@Override
+	public void initializeNewEntity(final CCurrency entity) {
+		super.initializeNewEntity(entity);
+		tech.derbent.api.utils.Check.notNull(entity, "Entity cannot be null");
+		// Stub for future implementation
+	}
 }

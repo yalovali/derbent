@@ -21,4 +21,20 @@ public class COrderApprovalService extends CAbstractNamedEntityService<COrderApp
 
 	@Override
 	protected Class<COrderApproval> getEntityClass() { return COrderApproval.class; }
+
+	@Override
+	public String checkDependencies(final COrderApproval entity) {
+		final String superCheck = super.checkDependencies(entity);
+		if (superCheck != null) {
+			return superCheck;
+		}
+		return null;
+	}
+
+	@Override
+	public void initializeNewEntity(final COrderApproval entity) {
+		super.initializeNewEntity(entity);
+		tech.derbent.api.utils.Check.notNull(entity, "Entity cannot be null");
+		// Stub for future implementation
+	}
 }

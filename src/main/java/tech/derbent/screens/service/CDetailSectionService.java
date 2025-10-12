@@ -52,4 +52,20 @@ public class CDetailSectionService extends CEntityOfProjectService<CDetailSectio
 
 	@Override
 	protected Class<CDetailSection> getEntityClass() { return CDetailSection.class; }
+
+	@Override
+	public String checkDependencies(final CDetailSection entity) {
+		final String superCheck = super.checkDependencies(entity);
+		if (superCheck != null) {
+			return superCheck;
+		}
+		return null;
+	}
+
+	@Override
+	public void initializeNewEntity(final CDetailSection entity) {
+		super.initializeNewEntity(entity);
+		tech.derbent.api.utils.Check.notNull(entity, "Entity cannot be null");
+		// Stub for future implementation
+	}
 }

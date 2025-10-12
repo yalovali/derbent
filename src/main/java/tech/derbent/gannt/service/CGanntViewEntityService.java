@@ -23,4 +23,20 @@ public class CGanntViewEntityService extends CEntityOfProjectService<CGanntViewE
 
 	@Override
 	protected Class<CGanntViewEntity> getEntityClass() { return CGanntViewEntity.class; }
+
+	@Override
+	public String checkDependencies(final CGanntViewEntity entity) {
+		final String superCheck = super.checkDependencies(entity);
+		if (superCheck != null) {
+			return superCheck;
+		}
+		return null;
+	}
+
+	@Override
+	public void initializeNewEntity(final CGanntViewEntity entity) {
+		super.initializeNewEntity(entity);
+		tech.derbent.api.utils.Check.notNull(entity, "Entity cannot be null");
+		// Stub for future implementation
+	}
 }

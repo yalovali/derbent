@@ -22,4 +22,20 @@ public class CMasterSectionService extends CEntityOfProjectService<CMasterSectio
 
 	@Override
 	protected Class<CMasterSection> getEntityClass() { return CMasterSection.class; }
+
+	@Override
+	public String checkDependencies(final CMasterSection entity) {
+		final String superCheck = super.checkDependencies(entity);
+		if (superCheck != null) {
+			return superCheck;
+		}
+		return null;
+	}
+
+	@Override
+	public void initializeNewEntity(final CMasterSection entity) {
+		super.initializeNewEntity(entity);
+		tech.derbent.api.utils.Check.notNull(entity, "Entity cannot be null");
+		// Stub for future implementation
+	}
 }

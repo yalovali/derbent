@@ -125,6 +125,22 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 	protected Class<CUserCompanySetting> getEntityClass() { return CUserCompanySetting.class; }
 
 	@Override
+	public String checkDependencies(final CUserCompanySetting entity) {
+		final String superCheck = super.checkDependencies(entity);
+		if (superCheck != null) {
+			return superCheck;
+		}
+		return null;
+	}
+
+	@Override
+	public void initializeNewEntity(final CUserCompanySetting entity) {
+		super.initializeNewEntity(entity);
+		tech.derbent.api.utils.Check.notNull(entity, "Entity cannot be null");
+		// Stub for future implementation
+	}
+
+	@Override
 	@Transactional (readOnly = true)
 	public boolean relationshipExists(final Long userId, final Long companyId) {
 		return repository.existsByUserIdAndCompanyId(userId, companyId);

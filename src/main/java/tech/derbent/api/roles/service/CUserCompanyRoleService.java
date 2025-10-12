@@ -73,6 +73,22 @@ public class CUserCompanyRoleService extends CAbstractNamedEntityService<CUserCo
 	protected Class<CUserCompanyRole> getEntityClass() { return CUserCompanyRole.class; }
 
 	@Override
+	public String checkDependencies(final CUserCompanyRole entity) {
+		final String superCheck = super.checkDependencies(entity);
+		if (superCheck != null) {
+			return superCheck;
+		}
+		return null;
+	}
+
+	@Override
+	public void initializeNewEntity(final CUserCompanyRole entity) {
+		super.initializeNewEntity(entity);
+		tech.derbent.api.utils.Check.notNull(entity, "Entity cannot be null");
+		// Stub for future implementation
+	}
+
+	@Override
 	public CUserCompanyRole getRandom() {
 		Check.fail("Use getRandom(CCompany) instead to ensure company context");
 		return null;

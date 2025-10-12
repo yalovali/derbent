@@ -83,6 +83,22 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> {
 	@Override
 	protected Class<CDetailLines> getEntityClass() { return CDetailLines.class; }
 
+	@Override
+	public String checkDependencies(final CDetailLines entity) {
+		final String superCheck = super.checkDependencies(entity);
+		if (superCheck != null) {
+			return superCheck;
+		}
+		return null;
+	}
+
+	@Override
+	public void initializeNewEntity(final CDetailLines entity) {
+		super.initializeNewEntity(entity);
+		tech.derbent.api.utils.Check.notNull(entity, "Entity cannot be null");
+		// Stub for future implementation
+	}
+
 	public Integer getNextLineOrder(final CDetailSection screen) {
 		return detailLinesRepository.getNextLineOrder(screen);
 	}
