@@ -31,4 +31,43 @@ public class CRiskStatusService extends CEntityOfProjectService<CRiskStatus> {
 
 	@Override
 	protected Class<CRiskStatus> getEntityClass() { return CRiskStatus.class; }
+
+	@Override
+	public String checkDependencies(final CRiskStatus riskStatus) {
+		final String superCheck = super.checkDependencies(riskStatus);
+		if (superCheck != null) {
+			return superCheck;
+		}
+		return null;
+	}
+
+	@Override
+	public void initializeNewEntity(final CRiskStatus entity) {
+		super.initializeNewEntity(entity);
+		tech.derbent.api.utils.Check.notNull(entity, "Risk status cannot be null");
+		tech.derbent.api.utils.Check.notNull(sessionService, "Session service is required for risk status initialization");
+		try {
+			java.util.Optional<tech.derbent.projects.domain.CProject> activeProject = sessionService.getActiveProject();
+			tech.derbent.api.utils.Check.isTrue(activeProject.isPresent(),
+					"No active project in session - project context is required to create risk statuses");
+			tech.derbent.projects.domain.CProject currentProject = activeProject.get();
+			entity.setProject(currentProject);
+			java.util.Optional<tech.derbent.users.domain.CUser> currentUser = sessionService.getActiveUser();
+			if (currentUser.isPresent()) {
+				entity.setCreatedBy(currentUser.get());
+			}
+			long statusCount = ((IRiskStatusRepository) repository).countByProject(currentProject);
+			String autoName = String.format("RiskStatus%02d", statusCount + 1);
+			entity.setName(autoName);
+			entity.setDescription("");
+			entity.setColor(tech.derbent.risks.domain.CRiskStatus.DEFAULT_COLOR);
+			entity.setSortOrder(100);
+			entity.setAttributeNonDeletable(false);
+			entity.setIsFinal(false);
+			LOGGER.debug("Initialized new risk status with auto-generated name: {}", autoName);
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing new risk status", e);
+			throw new IllegalStateException("Failed to initialize risk status: " + e.getMessage(), e);
+		}
+	}
 }

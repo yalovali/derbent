@@ -53,4 +53,60 @@ public class CMeetingStatusService extends CEntityOfProjectService<CMeetingStatu
 
 	@Override
 	protected Class<CMeetingStatus> getEntityClass() { return CMeetingStatus.class; }
+
+	/** Checks dependencies before allowing meeting status deletion. Prevents deletion if the status is being used by any meetings.
+	 * @param meetingStatus the meeting status entity to check
+	 * @return null if status can be deleted, error message otherwise */
+	@Override
+	public String checkDependencies(final CMeetingStatus meetingStatus) {
+		// Call super class first to check common dependencies
+		final String superCheck = super.checkDependencies(meetingStatus);
+		if (superCheck != null) {
+			return superCheck;
+		}
+		// No specific dependencies to check yet - stub for future implementation
+		return null;
+	}
+
+	/** Initializes a new meeting status with default values based on current session and available data. Sets: - Project from current session - User
+	 * for creation tracking - Auto-generated name - Default color - Default sort order - Not marked as non-deletable
+	 * @param entity the newly created meeting status to initialize
+	 * @throws IllegalStateException if required fields cannot be initialized */
+	@Override
+	public void initializeNewEntity(final CMeetingStatus entity) {
+		super.initializeNewEntity(entity);
+		tech.derbent.api.utils.Check.notNull(entity, "Meeting status cannot be null");
+		tech.derbent.api.utils.Check.notNull(sessionService, "Session service is required for meeting status initialization");
+		try {
+			// Get current project from session
+			java.util.Optional<tech.derbent.projects.domain.CProject> activeProject = sessionService.getActiveProject();
+			tech.derbent.api.utils.Check.isTrue(activeProject.isPresent(),
+					"No active project in session - project context is required to create meeting statuses");
+			tech.derbent.projects.domain.CProject currentProject = activeProject.get();
+			entity.setProject(currentProject);
+			// Get current user from session for createdBy field
+			java.util.Optional<tech.derbent.users.domain.CUser> currentUser = sessionService.getActiveUser();
+			if (currentUser.isPresent()) {
+				entity.setCreatedBy(currentUser.get());
+			}
+			// Auto-generate name based on count
+			long statusCount = ((IMeetingStatusRepository) repository).countByProject(currentProject);
+			String autoName = String.format("MeetingStatus%02d", statusCount + 1);
+			entity.setName(autoName);
+			// Set default description
+			entity.setDescription("");
+			// Set default color
+			entity.setColor(tech.derbent.meetings.domain.CMeetingStatus.DEFAULT_COLOR);
+			// Set default sort order
+			entity.setSortOrder(100);
+			// Set deletable by default (not system status)
+			entity.setAttributeNonDeletable(false);
+			// Set final status to false by default
+			entity.setFinalStatus(false);
+			LOGGER.debug("Initialized new meeting status with auto-generated name: {}", autoName);
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing new meeting status", e);
+			throw new IllegalStateException("Failed to initialize meeting status: " + e.getMessage(), e);
+		}
+	}
 }
