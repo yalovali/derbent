@@ -13,10 +13,29 @@ import tech.derbent.session.service.ISessionService;
 @PreAuthorize ("isAuthenticated()")
 public class CDecisionService extends CEntityOfProjectService<CDecision> {
 
+	private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CDecisionService.class);
+
 	public CDecisionService(final IDecisionRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 
 	@Override
 	protected Class<CDecision> getEntityClass() { return CDecision.class; }
+
+	@Override
+	public String checkDependencies(final CDecision decision) {
+		final String superCheck = super.checkDependencies(decision);
+		if (superCheck != null) {
+			return superCheck;
+		}
+		return null;
+	}
+
+	@Override
+	public void initializeNewEntity(final CDecision entity) {
+		super.initializeNewEntity(entity);
+		tech.derbent.api.utils.Check.notNull(entity, "Decision cannot be null");
+		// CDecision initialization - stub for now as it's a complex entity with many fields
+		LOGGER.debug("Initialized new decision entity");
+	}
 }

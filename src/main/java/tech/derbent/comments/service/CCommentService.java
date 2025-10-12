@@ -72,6 +72,24 @@ public class CCommentService extends CAbstractService<CComment> {
 	@Override
 	protected Class<CComment> getEntityClass() { return CComment.class; }
 
+	@Override
+	public String checkDependencies(final CComment comment) {
+		final String superCheck = super.checkDependencies(comment);
+		if (superCheck != null) {
+			return superCheck;
+		}
+		// Comments don't have dependencies - they are leaf entities
+		return null;
+	}
+
+	@Override
+	public void initializeNewEntity(final CComment entity) {
+		super.initializeNewEntity(entity);
+		Check.notNull(entity, "Comment cannot be null");
+		// CComment initialization - stub for now as it's typically initialized with activity and author
+		LOGGER.debug("Initialized new comment entity");
+	}
+
 	/** Updates comment text.
 	 * @param comment the comment to update
 	 * @param newText the new comment text

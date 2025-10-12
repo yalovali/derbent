@@ -34,4 +34,21 @@ public class COrderService extends CEntityOfProjectService<COrder> {
 
 	@Override
 	protected Class<COrder> getEntityClass() { return COrder.class; }
+
+	@Override
+	public String checkDependencies(final COrder order) {
+		final String superCheck = super.checkDependencies(order);
+		if (superCheck != null) {
+			return superCheck;
+		}
+		return null;
+	}
+
+	@Override
+	public void initializeNewEntity(final COrder entity) {
+		super.initializeNewEntity(entity);
+		Check.notNull(entity, "Order cannot be null");
+		// COrder initialization - stub for now as it's a complex entity with many fields
+		LOGGER.debug("Initialized new order entity");
+	}
 }

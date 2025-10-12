@@ -15,10 +15,29 @@ import tech.derbent.session.service.ISessionService;
 @PermitAll // When security is enabled, allow all authenticated users
 public class CRiskService extends CEntityOfProjectService<CRisk> {
 
+	private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CRiskService.class);
+
 	CRiskService(final IRiskRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 
 	@Override
 	protected Class<CRisk> getEntityClass() { return CRisk.class; }
+
+	@Override
+	public String checkDependencies(final CRisk risk) {
+		final String superCheck = super.checkDependencies(risk);
+		if (superCheck != null) {
+			return superCheck;
+		}
+		return null;
+	}
+
+	@Override
+	public void initializeNewEntity(final CRisk entity) {
+		super.initializeNewEntity(entity);
+		tech.derbent.api.utils.Check.notNull(entity, "Risk cannot be null");
+		// CRisk initialization - stub for now as it's a complex entity with many fields
+		LOGGER.debug("Initialized new risk entity");
+	}
 }

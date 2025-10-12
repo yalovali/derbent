@@ -16,6 +16,8 @@ import tech.derbent.session.service.ISessionService;
 @PreAuthorize ("isAuthenticated()")
 public class CMeetingService extends CEntityOfProjectService<CMeeting> implements IKanbanService<CMeeting, CMeetingStatus> {
 
+	private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CMeetingService.class);
+
 	CMeetingService(final IMeetingRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
@@ -38,5 +40,22 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting> implement
 	public CMeeting updateEntityStatus(final CMeeting entity, final CMeetingStatus newStatus) {
 		CKanbanUtils.updateEntityStatusSimple(entity, newStatus, CMeeting::setStatus);
 		return save(entity);
+	}
+
+	@Override
+	public String checkDependencies(final CMeeting meeting) {
+		final String superCheck = super.checkDependencies(meeting);
+		if (superCheck != null) {
+			return superCheck;
+		}
+		return null;
+	}
+
+	@Override
+	public void initializeNewEntity(final CMeeting entity) {
+		super.initializeNewEntity(entity);
+		tech.derbent.api.utils.Check.notNull(entity, "Meeting cannot be null");
+		// CMeeting initialization - stub for now as it's a complex entity with many fields
+		LOGGER.debug("Initialized new meeting entity");
 	}
 }
