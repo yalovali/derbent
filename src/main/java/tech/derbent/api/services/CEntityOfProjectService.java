@@ -211,6 +211,27 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	@Override
 	public void initializeNewEntity(final EntityClass entity) {
 		super.initializeNewEntity(entity);
-		Check.notNull(entity, "Entity cannot be null");
+		Check.notNull(sessionService, "Session service is required for entity initialization");
+		// Initialize project from session
+		Optional<CProject> activeProject = sessionService.getActiveProject();
+		if (activeProject.isPresent()) {
+			entity.setProject(activeProject.get());
+		}
+		// Initialize createdBy from session
+		Optional<tech.derbent.users.domain.CUser> currentUser = sessionService.getActiveUser();
+		if (currentUser.isPresent()) {
+			entity.setCreatedBy(currentUser.get());
+		}
+		// If entity extends CTypeEntity, initialize common type fields
+		if (entity instanceof tech.derbent.api.domains.CTypeEntity) {
+			tech.derbent.api.domains.CTypeEntity<?> typeEntity = (tech.derbent.api.domains.CTypeEntity<?>) entity;
+			if (typeEntity.getColor() == null || typeEntity.getColor().isEmpty()) {
+				typeEntity.setColor("#4A90E2");
+			}
+			if (typeEntity.getSortOrder() == null) {
+				typeEntity.setSortOrder(100);
+			}
+			typeEntity.setAttributeNonDeletable(false);
+		}
 	}
 }

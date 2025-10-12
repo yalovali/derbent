@@ -52,18 +52,13 @@ public class CPageEntityService extends CProjectItemService<CPageEntity> {
 
 	@Override
 	public String checkDependencies(final CPageEntity entity) {
-		final String superCheck = super.checkDependencies(entity);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		return null;
+		return super.checkDependencies(entity);
 	}
 
 	@Override
 	public void initializeNewEntity(final CPageEntity entity) {
 		super.initializeNewEntity(entity);
-		tech.derbent.api.utils.Check.notNull(entity, "Entity cannot be null");
-		// Stub for future implementation
+		// Additional entity-specific initialization can be added here if needed
 	}
 
 	/** Get page hierarchy for project. */

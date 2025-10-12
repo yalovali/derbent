@@ -39,31 +39,17 @@ public class CActivityPriorityService extends CEntityOfProjectService<CActivityP
 	@Override
 	public void initializeNewEntity(final CActivityPriority entity) {
 		super.initializeNewEntity(entity);
-		tech.derbent.api.utils.Check.notNull(entity, "Activity priority cannot be null");
-		tech.derbent.api.utils.Check.notNull(sessionService, "Session service is required for activity priority initialization");
 		try {
-			java.util.Optional<tech.derbent.projects.domain.CProject> activeProject = sessionService.getActiveProject();
-			tech.derbent.api.utils.Check.isTrue(activeProject.isPresent(),
-					"No active project in session - project context is required to create activity priorities");
-			tech.derbent.projects.domain.CProject currentProject = activeProject.get();
-			entity.setProject(currentProject);
-			java.util.Optional<tech.derbent.users.domain.CUser> currentUser = sessionService.getActiveUser();
-			if (currentUser.isPresent()) {
-				entity.setCreatedBy(currentUser.get());
+			Optional<CProject> activeProject = sessionService.getActiveProject();
+			if (activeProject.isPresent()) {
+				long priorityCount = ((IActivityPriorityRepository) repository).countByProject(activeProject.get());
+				String autoName = String.format("ActivityPriority%02d", priorityCount + 1);
+				entity.setName(autoName);
 			}
-			long priorityCount = ((IActivityPriorityRepository) repository).countByProject(currentProject);
-			String autoName = String.format("ActivityPriority%02d", priorityCount + 1);
-			entity.setName(autoName);
-			entity.setDescription("");
-			entity.setColor("#ffc107");
-			entity.setSortOrder(100);
-			entity.setAttributeNonDeletable(false);
-			entity.setIsDefault(false);
-			entity.setPriorityLevel(3);
-			LOGGER.debug("Initialized new activity priority with auto-generated name: {}", autoName);
+			LOGGER.debug("Initialized new cactivitypriority");
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing new activity priority", e);
-			throw new IllegalStateException("Failed to initialize activity priority: " + e.getMessage(), e);
+			LOGGER.error("Error initializing new cactivitypriority", e);
+			throw new IllegalStateException("Failed to initialize cactivitypriority: " + e.getMessage(), e);
 		}
 	}
 }

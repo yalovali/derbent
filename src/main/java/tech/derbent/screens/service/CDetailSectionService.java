@@ -55,17 +55,12 @@ public class CDetailSectionService extends CEntityOfProjectService<CDetailSectio
 
 	@Override
 	public String checkDependencies(final CDetailSection entity) {
-		final String superCheck = super.checkDependencies(entity);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		return null;
+		return super.checkDependencies(entity);
 	}
 
 	@Override
 	public void initializeNewEntity(final CDetailSection entity) {
 		super.initializeNewEntity(entity);
-		tech.derbent.api.utils.Check.notNull(entity, "Entity cannot be null");
-		// Stub for future implementation
+		// Additional entity-specific initialization can be added here if needed
 	}
 }

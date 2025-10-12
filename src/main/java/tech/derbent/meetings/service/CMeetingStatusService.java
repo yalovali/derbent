@@ -75,35 +75,15 @@ public class CMeetingStatusService extends CEntityOfProjectService<CMeetingStatu
 	@Override
 	public void initializeNewEntity(final CMeetingStatus entity) {
 		super.initializeNewEntity(entity);
-		tech.derbent.api.utils.Check.notNull(entity, "Meeting status cannot be null");
-		tech.derbent.api.utils.Check.notNull(sessionService, "Session service is required for meeting status initialization");
 		try {
-			// Get current project from session
-			java.util.Optional<tech.derbent.projects.domain.CProject> activeProject = sessionService.getActiveProject();
-			tech.derbent.api.utils.Check.isTrue(activeProject.isPresent(),
-					"No active project in session - project context is required to create meeting statuses");
-			tech.derbent.projects.domain.CProject currentProject = activeProject.get();
-			entity.setProject(currentProject);
-			// Get current user from session for createdBy field
-			java.util.Optional<tech.derbent.users.domain.CUser> currentUser = sessionService.getActiveUser();
-			if (currentUser.isPresent()) {
-				entity.setCreatedBy(currentUser.get());
+			Optional<CProject> activeProject = sessionService.getActiveProject();
+			if (activeProject.isPresent()) {
+				long statusCount = ((IMeetingStatusRepository) repository).countByProject(activeProject.get());
+				String autoName = String.format("MeetingStatus%02d", statusCount + 1);
+				entity.setName(autoName);
 			}
-			// Auto-generate name based on count
-			long statusCount = ((IMeetingStatusRepository) repository).countByProject(currentProject);
-			String autoName = String.format("MeetingStatus%02d", statusCount + 1);
-			entity.setName(autoName);
-			// Set default description
-			entity.setDescription("");
-			// Set default color
-			entity.setColor(tech.derbent.meetings.domain.CMeetingStatus.DEFAULT_COLOR);
-			// Set default sort order
-			entity.setSortOrder(100);
-			// Set deletable by default (not system status)
-			entity.setAttributeNonDeletable(false);
-			// Set final status to false by default
 			entity.setFinalStatus(false);
-			LOGGER.debug("Initialized new meeting status with auto-generated name: {}", autoName);
+			LOGGER.debug("Initialized new meeting status");
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing new meeting status", e);
 			throw new IllegalStateException("Failed to initialize meeting status: " + e.getMessage(), e);

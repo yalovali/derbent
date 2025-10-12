@@ -92,20 +92,13 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 
 	@Override
 	public String checkDependencies(final CProject project) {
-		final String superCheck = super.checkDependencies(project);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		// Projects might have many dependencies - stub for future implementation
-		return null;
+		return super.checkDependencies(project);
 	}
 
 	@Override
 	public void initializeNewEntity(final CProject entity) {
 		super.initializeNewEntity(entity);
-		tech.derbent.api.utils.Check.notNull(entity, "Project cannot be null");
-		// CProject initialization - stub for now as it's a complex entity
-		LOGGER.debug("Initialized new project entity");
+		// Additional entity-specific initialization can be added here if needed
 	}
 
 	@PreAuthorize ("permitAll()")

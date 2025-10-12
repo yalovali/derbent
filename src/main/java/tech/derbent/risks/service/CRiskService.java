@@ -26,18 +26,12 @@ public class CRiskService extends CEntityOfProjectService<CRisk> {
 
 	@Override
 	public String checkDependencies(final CRisk risk) {
-		final String superCheck = super.checkDependencies(risk);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		return null;
+		return super.checkDependencies(risk);
 	}
 
 	@Override
 	public void initializeNewEntity(final CRisk entity) {
 		super.initializeNewEntity(entity);
-		tech.derbent.api.utils.Check.notNull(entity, "Risk cannot be null");
-		// CRisk initialization - stub for now as it's a complex entity with many fields
-		LOGGER.debug("Initialized new risk entity");
+		// Additional entity-specific initialization can be added here if needed
 	}
 }

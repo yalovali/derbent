@@ -24,18 +24,12 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> {
 
 	@Override
 	public String checkDependencies(final CDecision decision) {
-		final String superCheck = super.checkDependencies(decision);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		return null;
+		return super.checkDependencies(decision);
 	}
 
 	@Override
 	public void initializeNewEntity(final CDecision entity) {
 		super.initializeNewEntity(entity);
-		tech.derbent.api.utils.Check.notNull(entity, "Decision cannot be null");
-		// CDecision initialization - stub for now as it's a complex entity with many fields
-		LOGGER.debug("Initialized new decision entity");
+		// Additional entity-specific initialization can be added here if needed
 	}
 }

@@ -43,19 +43,13 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting> implement
 	}
 
 	@Override
-	public String checkDependencies(final CMeeting meeting) {
-		final String superCheck = super.checkDependencies(meeting);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		return null;
+	public String checkDependencies(final CMeeting entity) {
+		return super.checkDependencies(entity);
 	}
 
 	@Override
 	public void initializeNewEntity(final CMeeting entity) {
 		super.initializeNewEntity(entity);
-		tech.derbent.api.utils.Check.notNull(entity, "Meeting cannot be null");
-		// CMeeting initialization - stub for now as it's a complex entity with many fields
-		LOGGER.debug("Initialized new meeting entity");
+		// Additional meeting-specific initialization can be added here if needed
 	}
 }

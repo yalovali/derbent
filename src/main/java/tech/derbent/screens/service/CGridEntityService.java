@@ -40,18 +40,13 @@ public class CGridEntityService extends CEntityOfProjectService<CGridEntity> {
 
 	@Override
 	public String checkDependencies(final CGridEntity entity) {
-		final String superCheck = super.checkDependencies(entity);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		return null;
+		return super.checkDependencies(entity);
 	}
 
 	@Override
 	public void initializeNewEntity(final CGridEntity entity) {
 		super.initializeNewEntity(entity);
-		tech.derbent.api.utils.Check.notNull(entity, "Entity cannot be null");
-		// Stub for future implementation
+		// Additional entity-specific initialization can be added here if needed
 	}
 
 	public List<CGridEntity> listForComboboxSelectorByProjectId(final String projectId) {

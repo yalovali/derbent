@@ -68,19 +68,13 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 
 	@Override
 	public String checkDependencies(final CActivity activity) {
-		final String superCheck = super.checkDependencies(activity);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		return null;
+		return super.checkDependencies(activity);
 	}
 
 	@Override
 	public void initializeNewEntity(final CActivity entity) {
 		super.initializeNewEntity(entity);
-		tech.derbent.api.utils.Check.notNull(entity, "Activity cannot be null");
-		// CActivity initialization - stub for now as it's a complex entity with many fields
+		// Additional entity-specific initialization can be added here if needed
 		// The service should set defaults for activity-specific fields here
-		LOGGER.debug("Initialized new activity entity");
 	}
 }

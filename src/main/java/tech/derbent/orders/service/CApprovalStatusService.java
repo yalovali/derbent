@@ -1,5 +1,7 @@
 package tech.derbent.orders.service;
 
+import java.util.Optional;
+import tech.derbent.projects.domain.CProject;
 import java.time.Clock;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -36,29 +38,17 @@ public class CApprovalStatusService extends CEntityOfProjectService<CApprovalSta
 	@Override
 	public void initializeNewEntity(final CApprovalStatus entity) {
 		super.initializeNewEntity(entity);
-		tech.derbent.api.utils.Check.notNull(entity, "Approval status cannot be null");
-		tech.derbent.api.utils.Check.notNull(sessionService, "Session service is required for approval status initialization");
 		try {
-			java.util.Optional<tech.derbent.projects.domain.CProject> activeProject = sessionService.getActiveProject();
-			tech.derbent.api.utils.Check.isTrue(activeProject.isPresent(),
-					"No active project in session - project context is required to create approval statuses");
-			tech.derbent.projects.domain.CProject currentProject = activeProject.get();
-			entity.setProject(currentProject);
-			java.util.Optional<tech.derbent.users.domain.CUser> currentUser = sessionService.getActiveUser();
-			if (currentUser.isPresent()) {
-				entity.setCreatedBy(currentUser.get());
+			Optional<CProject> activeProject = sessionService.getActiveProject();
+			if (activeProject.isPresent()) {
+				long statusCount = ((IApprovalStatusRepository) repository).countByProject(activeProject.get());
+				String autoName = String.format("ApprovalStatus%02d", statusCount + 1);
+				entity.setName(autoName);
 			}
-			long statusCount = ((IApprovalStatusRepository) repository).countByProject(currentProject);
-			String autoName = String.format("ApprovalStatus%02d", statusCount + 1);
-			entity.setName(autoName);
-			entity.setDescription("");
-			entity.setColor(tech.derbent.orders.domain.CApprovalStatus.DEFAULT_COLOR);
-			entity.setSortOrder(100);
-			entity.setAttributeNonDeletable(false);
-			LOGGER.debug("Initialized new approval status with auto-generated name: {}", autoName);
+			LOGGER.debug("Initialized new capprovalstatus");
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing new approval status", e);
-			throw new IllegalStateException("Failed to initialize approval status: " + e.getMessage(), e);
+			LOGGER.error("Error initializing new capprovalstatus", e);
+			throw new IllegalStateException("Failed to initialize capprovalstatus: " + e.getMessage(), e);
 		}
 	}
 }

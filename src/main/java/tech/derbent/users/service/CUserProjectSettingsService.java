@@ -117,18 +117,13 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 
 	@Override
 	public String checkDependencies(final CUserProjectSettings entity) {
-		final String superCheck = super.checkDependencies(entity);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		return null;
+		return super.checkDependencies(entity);
 	}
 
 	@Override
 	public void initializeNewEntity(final CUserProjectSettings entity) {
 		super.initializeNewEntity(entity);
-		tech.derbent.api.utils.Check.notNull(entity, "Entity cannot be null");
-		// Stub for future implementation
+		// Additional entity-specific initialization can be added here if needed
 	}
 
 	/** Initialize lazy fields for a CUserProjectSettings entity within a transaction context. This method should be called when you need to access

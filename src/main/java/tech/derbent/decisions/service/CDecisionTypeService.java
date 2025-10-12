@@ -55,30 +55,17 @@ public class CDecisionTypeService extends CEntityOfProjectService<CDecisionType>
 	@Override
 	public void initializeNewEntity(final CDecisionType entity) {
 		super.initializeNewEntity(entity);
-		tech.derbent.api.utils.Check.notNull(entity, "Decision type cannot be null");
-		tech.derbent.api.utils.Check.notNull(sessionService, "Session service is required for decision type initialization");
 		try {
-			java.util.Optional<tech.derbent.projects.domain.CProject> activeProject = sessionService.getActiveProject();
-			tech.derbent.api.utils.Check.isTrue(activeProject.isPresent(),
-					"No active project in session - project context is required to create decision types");
-			tech.derbent.projects.domain.CProject currentProject = activeProject.get();
-			entity.setProject(currentProject);
-			java.util.Optional<tech.derbent.users.domain.CUser> currentUser = sessionService.getActiveUser();
-			if (currentUser.isPresent()) {
-				entity.setCreatedBy(currentUser.get());
+			Optional<CProject> activeProject = sessionService.getActiveProject();
+			if (activeProject.isPresent()) {
+				long typeCount = ((IDecisionTypeRepository) repository).countByProject(activeProject.get());
+				String autoName = String.format("DecisionType%02d", typeCount + 1);
+				entity.setName(autoName);
 			}
-			long typeCount = ((IDecisionTypeRepository) repository).countByProject(currentProject);
-			String autoName = String.format("DecisionType%02d", typeCount + 1);
-			entity.setName(autoName);
-			entity.setDescription("");
-			entity.setColor(tech.derbent.decisions.domain.CDecisionType.DEFAULT_COLOR);
-			entity.setSortOrder(100);
-			entity.setAttributeNonDeletable(false);
-			entity.setRequiresApproval(false);
-			LOGGER.debug("Initialized new decision type with auto-generated name: {}", autoName);
+			LOGGER.debug("Initialized new cdecisiontype");
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing new decision type", e);
-			throw new IllegalStateException("Failed to initialize decision type: " + e.getMessage(), e);
+			LOGGER.error("Error initializing new cdecisiontype", e);
+			throw new IllegalStateException("Failed to initialize cdecisiontype: " + e.getMessage(), e);
 		}
 	}
 }

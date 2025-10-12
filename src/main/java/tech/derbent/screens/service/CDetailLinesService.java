@@ -85,18 +85,13 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> {
 
 	@Override
 	public String checkDependencies(final CDetailLines entity) {
-		final String superCheck = super.checkDependencies(entity);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		return null;
+		return super.checkDependencies(entity);
 	}
 
 	@Override
 	public void initializeNewEntity(final CDetailLines entity) {
 		super.initializeNewEntity(entity);
-		tech.derbent.api.utils.Check.notNull(entity, "Entity cannot be null");
-		// Stub for future implementation
+		// Additional entity-specific initialization can be added here if needed
 	}
 
 	public Integer getNextLineOrder(final CDetailSection screen) {

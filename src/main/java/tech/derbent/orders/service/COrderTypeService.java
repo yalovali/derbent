@@ -1,5 +1,7 @@
 package tech.derbent.orders.service;
 
+import java.util.Optional;
+import tech.derbent.projects.domain.CProject;
 import java.time.Clock;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -34,29 +36,17 @@ public class COrderTypeService extends CEntityOfProjectService<COrderType> {
 	@Override
 	public void initializeNewEntity(final COrderType entity) {
 		super.initializeNewEntity(entity);
-		tech.derbent.api.utils.Check.notNull(entity, "Order type cannot be null");
-		tech.derbent.api.utils.Check.notNull(sessionService, "Session service is required for order type initialization");
 		try {
-			java.util.Optional<tech.derbent.projects.domain.CProject> activeProject = sessionService.getActiveProject();
-			tech.derbent.api.utils.Check.isTrue(activeProject.isPresent(),
-					"No active project in session - project context is required to create order types");
-			tech.derbent.projects.domain.CProject currentProject = activeProject.get();
-			entity.setProject(currentProject);
-			java.util.Optional<tech.derbent.users.domain.CUser> currentUser = sessionService.getActiveUser();
-			if (currentUser.isPresent()) {
-				entity.setCreatedBy(currentUser.get());
+			Optional<CProject> activeProject = sessionService.getActiveProject();
+			if (activeProject.isPresent()) {
+				long typeCount = ((IOrderTypeRepository) repository).countByProject(activeProject.get());
+				String autoName = String.format("OrderType%02d", typeCount + 1);
+				entity.setName(autoName);
 			}
-			long typeCount = ((IOrderTypeRepository) repository).countByProject(currentProject);
-			String autoName = String.format("OrderType%02d", typeCount + 1);
-			entity.setName(autoName);
-			entity.setDescription("");
-			entity.setColor(tech.derbent.orders.domain.COrderType.DEFAULT_COLOR);
-			entity.setSortOrder(100);
-			entity.setAttributeNonDeletable(false);
-			LOGGER.debug("Initialized new order type with auto-generated name: {}", autoName);
+			LOGGER.debug("Initialized new cordertype");
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing new order type", e);
-			throw new IllegalStateException("Failed to initialize order type: " + e.getMessage(), e);
+			LOGGER.error("Error initializing new cordertype", e);
+			throw new IllegalStateException("Failed to initialize cordertype: " + e.getMessage(), e);
 		}
 	}
 }

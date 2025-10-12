@@ -79,13 +79,9 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 	 * @return error message preventing deletion */
 	@Override
 	public String checkDependencies(final CSystemSettings systemSettings) {
-		// Call super class first to check common dependencies
-		final String superCheck = super.checkDependencies(systemSettings);
-		if (superCheck != null) {
-			return superCheck;
-		}
+		return super.checkDependencies(systemSettings);
 		// System settings should not be deleted - it's a singleton
-		return "System settings cannot be deleted. It is a required system configuration.";
+		// Uncomment to prevent deletion: return "System settings cannot be deleted. It is a required system configuration.";
 	}
 
 	/** Initializes a new system settings entity with default values.
@@ -93,10 +89,8 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 	@Override
 	public void initializeNewEntity(final CSystemSettings entity) {
 		super.initializeNewEntity(entity);
-		Check.notNull(entity, "System settings cannot be null");
 		// System settings initialization is handled by the domain class constructor
-		// No additional initialization needed here
-		LOGGER.debug("Initialized new system settings entity");
+		// Additional entity-specific initialization can be added here if needed
 	}
 
 	/** Gets the last visited view setting.

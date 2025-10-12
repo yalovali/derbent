@@ -74,20 +74,13 @@ public class CCommentService extends CAbstractService<CComment> {
 
 	@Override
 	public String checkDependencies(final CComment comment) {
-		final String superCheck = super.checkDependencies(comment);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		// Comments don't have dependencies - they are leaf entities
-		return null;
+		return super.checkDependencies(comment);
 	}
 
 	@Override
 	public void initializeNewEntity(final CComment entity) {
 		super.initializeNewEntity(entity);
-		Check.notNull(entity, "Comment cannot be null");
-		// CComment initialization - stub for now as it's typically initialized with activity and author
-		LOGGER.debug("Initialized new comment entity");
+		// Additional entity-specific initialization can be added here if needed
 	}
 
 	/** Updates comment text.
