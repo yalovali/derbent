@@ -11,9 +11,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import tech.derbent.activities.domain.CActivityPriority;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.domain.CActivityType;
 import tech.derbent.activities.service.CActivityInitializerService;
+import tech.derbent.activities.service.CActivityPriorityInitializerService;
+import tech.derbent.activities.service.CActivityPriorityService;
 import tech.derbent.activities.service.CActivityService;
 import tech.derbent.activities.service.CActivityStatusInitializerService;
 import tech.derbent.activities.service.CActivityStatusService;
@@ -124,6 +127,7 @@ public class CDataInitializer {
 	// User Login Names
 	private static final String USER_ADMIN = "admin";
 	private final CActivityService activityService;
+	private final CActivityPriorityService activityPriorityService;
 	private final CActivityStatusService activityStatusService;
 	private final CActivityTypeService activityTypeService;
 	private final CCommentPriorityService commentPriorityService;
@@ -166,6 +170,7 @@ public class CDataInitializer {
 		userService = CSpringContext.getBean(CUserService.class);
 		userProjectSettingsService = CSpringContext.getBean(CUserProjectSettingsService.class);
 		activityService = CSpringContext.getBean(CActivityService.class);
+		activityPriorityService = CSpringContext.getBean(CActivityPriorityService.class);
 		userTypeService = CSpringContext.getBean(CUserTypeService.class);
 		activityTypeService = CSpringContext.getBean(CActivityTypeService.class);
 		meetingTypeService = CSpringContext.getBean(CMeetingTypeService.class);
@@ -191,6 +196,7 @@ public class CDataInitializer {
 		userProjectRoleService = CSpringContext.getBean(CUserProjectRoleService.class);
 		userCompanyRoleService = CSpringContext.getBean(CUserCompanyRoleService.class);
 		Check.notNull(activityService, "ActivityService bean not found");
+		Check.notNull(activityPriorityService, "ActivityPriorityService bean not found");
 		Check.notNull(activityStatusService, "ActivityStatusService bean not found");
 		Check.notNull(activityTypeService, "ActivityTypeService bean not found");
 		Check.notNull(commentService, "CommentService bean not found");
@@ -263,6 +269,7 @@ public class CDataInitializer {
 			decisionStatusService.deleteAllInBatch();
 			// decisionTypeService.deleteAllInBatch(); // ekleyeceksen
 			activityService.deleteAllInBatch();
+			activityPriorityService.deleteAllInBatch();
 			activityStatusService.deleteAllInBatch();
 			activityTypeService.deleteAllInBatch();
 			riskService.deleteAllInBatch();
@@ -294,6 +301,15 @@ public class CDataInitializer {
 		status.setColor(color);
 		status.setSortOrder(sortOrder);
 		activityStatusService.save(status);
+	}
+
+	private void createActivityPriority(CProject project, final String name, final String description, final String color,
+			final Integer priorityLevel, final boolean isDefault, final int sortOrder) {
+		final CActivityPriority priority = new CActivityPriority(name, project, color, sortOrder);
+		priority.setDescription(description);
+		priority.setPriorityLevel(priorityLevel);
+		priority.setIsDefault(isDefault);
+		activityPriorityService.save(priority);
 	}
 	/** Creates additional activities for Customer Experience Enhancement project. */
 	// Additional meeting creation methods
@@ -548,6 +564,20 @@ public class CDataInitializer {
 		} catch (final Exception e) {
 			LOGGER.error("Error creating activity types", e);
 			throw new RuntimeException("Failed to initialize activity types", e);
+		}
+	}
+
+	private void initializeSampleActivityPriorities(final CProject project) {
+		try {
+			createActivityPriority(project, "Critical", "Critical priority - immediate attention required", CColorUtils.getRandomColor(true), 1,
+					false, 1);
+			createActivityPriority(project, "High", "High priority - urgent attention needed", CColorUtils.getRandomColor(true), 2, false, 2);
+			createActivityPriority(project, "Medium", "Medium priority - normal workflow", CColorUtils.getRandomColor(true), 3, true, 3);
+			createActivityPriority(project, "Low", "Low priority - can be scheduled later", CColorUtils.getRandomColor(true), 4, false, 4);
+			createActivityPriority(project, "Lowest", "Lowest priority - no immediate action needed", CColorUtils.getRandomColor(true), 5, false, 5);
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing activity priorities for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize activity priorities for project: " + project.getName(), e);
 		}
 	}
 
@@ -916,6 +946,7 @@ public class CDataInitializer {
 					// Type/Status InitializerServices
 					CActivityStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
 					CActivityTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
+					CActivityPriorityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
 					CApprovalStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
 					CCommentPriorityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
 					CCurrencyInitializerService.initialize(project, gridEntityService, screenService, pageEntityService, false);
@@ -941,6 +972,7 @@ public class CDataInitializer {
 					initializeSampleDecisionTypes(project);
 					initializeSampleOrderTypes(project);
 					initializeSampleActivityTypes(project);
+					initializeSampleActivityPriorities(project);
 					// Removed sample data entity creation methods (activities, meetings, decisions, orders, risks)
 					// to follow minimal sample data pattern
 					initializeSampleDecisionStatuses(project);
