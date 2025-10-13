@@ -90,6 +90,17 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 	@Override
 	protected Class<CProject> getEntityClass() { return CProject.class; }
 
+	@Override
+	public String checkDependencies(final CProject project) {
+		return super.checkDependencies(project);
+	}
+
+	@Override
+	public void initializeNewEntity(final CProject entity) {
+		super.initializeNewEntity(entity);
+		// Additional entity-specific initialization can be added here if needed
+	}
+
 	@PreAuthorize ("permitAll()")
 	public long getTotalProjectCount() { return repository.count(); }
 

@@ -66,39 +66,20 @@ public class CActivityStatusService extends CEntityOfProjectService<CActivitySta
 		}
 	}
 
-	/** Initializes a new activity status with default values based on current session and available data. Sets: - Project from current session - User
-	 * for creation tracking - Auto-generated name - Default color - Default sort order - Not marked as non-deletable
-	 * @param entity the newly created activity status to initialize
-	 * @throws IllegalStateException if required fields cannot be initialized */
+	/** Initializes a new activity status with default values. Most common fields are initialized by super class.
+	 * @param entity the newly created activity status to initialize */
 	@Override
 	public void initializeNewEntity(final CActivityStatus entity) {
 		super.initializeNewEntity(entity);
-		Check.notNull(entity, "Activity status cannot be null");
-		Check.notNull(sessionService, "Session service is required for activity status initialization");
 		try {
-			// Get current project from session
-			Optional<CProject> activeProject = sessionService.getActiveProject();
-			Check.isTrue(activeProject.isPresent(), "No active project in session - project context is required to create activity statuses");
-			CProject currentProject = activeProject.get();
-			entity.setProject(currentProject);
-			// Get current user from session for createdBy field
-			Optional<CUser> currentUser = sessionService.getActiveUser();
-			if (currentUser.isPresent()) {
-				entity.setCreatedBy(currentUser.get());
-			}
 			// Auto-generate name based on count
-			long statusCount = ((IActivityStatusRepository) repository).countByProject(currentProject);
-			String autoName = String.format("ActivityStatus%02d", statusCount + 1);
-			entity.setName(autoName);
-			// Set default description
-			entity.setDescription("");
-			// Set default color
-			entity.setColor("#4A90E2");
-			// Set default sort order
-			entity.setSortOrder(100);
-			// Set deletable by default (not system status)
-			entity.setAttributeNonDeletable(false);
-			LOGGER.debug("Initialized new activity status with auto-generated name: {}", autoName);
+			Optional<CProject> activeProject = sessionService.getActiveProject();
+			if (activeProject.isPresent()) {
+				long statusCount = ((IActivityStatusRepository) repository).countByProject(activeProject.get());
+				String autoName = String.format("ActivityStatus%02d", statusCount + 1);
+				entity.setName(autoName);
+			}
+			LOGGER.debug("Initialized new activity status");
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing new activity status", e);
 			throw new IllegalStateException("Failed to initialize activity status: " + e.getMessage(), e);

@@ -19,6 +19,8 @@ import tech.derbent.session.service.ISessionService;
 @PreAuthorize ("isAuthenticated()")
 public class CActivityService extends CProjectItemService<CActivity> implements IKanbanService<CActivity, CActivityStatus> {
 
+	private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CActivityService.class);
+
 	public CActivityService(final IActivityRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
@@ -62,5 +64,17 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 	public CActivity updateEntityStatus(final CActivity entity, final CActivityStatus newStatus) {
 		tech.derbent.api.utils.CKanbanUtils.updateEntityStatusSimple(entity, newStatus, CActivity::setStatus);
 		return save(entity);
+	}
+
+	@Override
+	public String checkDependencies(final CActivity activity) {
+		return super.checkDependencies(activity);
+	}
+
+	@Override
+	public void initializeNewEntity(final CActivity entity) {
+		super.initializeNewEntity(entity);
+		// Additional entity-specific initialization can be added here if needed
+		// The service should set defaults for activity-specific fields here
 	}
 }

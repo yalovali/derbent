@@ -21,4 +21,15 @@ public class CCurrencyService extends CEntityOfProjectService<CCurrency> {
 
 	@Override
 	protected Class<CCurrency> getEntityClass() { return CCurrency.class; }
+
+	@Override
+	public String checkDependencies(final CCurrency entity) {
+		return super.checkDependencies(entity);
+	}
+
+	@Override
+	public void initializeNewEntity(final CCurrency entity) {
+		super.initializeNewEntity(entity);
+		// Additional entity-specific initialization can be added here if needed
+	}
 }

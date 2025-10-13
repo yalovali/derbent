@@ -22,4 +22,15 @@ public class CMasterSectionService extends CEntityOfProjectService<CMasterSectio
 
 	@Override
 	protected Class<CMasterSection> getEntityClass() { return CMasterSection.class; }
+
+	@Override
+	public String checkDependencies(final CMasterSection entity) {
+		return super.checkDependencies(entity);
+	}
+
+	@Override
+	public void initializeNewEntity(final CMasterSection entity) {
+		super.initializeNewEntity(entity);
+		// Additional entity-specific initialization can be added here if needed
+	}
 }

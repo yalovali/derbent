@@ -50,6 +50,17 @@ public class CPageEntityService extends CProjectItemService<CPageEntity> {
 	@Override
 	protected Class<CPageEntity> getEntityClass() { return CPageEntity.class; }
 
+	@Override
+	public String checkDependencies(final CPageEntity entity) {
+		return super.checkDependencies(entity);
+	}
+
+	@Override
+	public void initializeNewEntity(final CPageEntity entity) {
+		super.initializeNewEntity(entity);
+		// Additional entity-specific initialization can be added here if needed
+	}
+
 	/** Get page hierarchy for project. */
 	public List<CPageEntity> getPageHierarchyForProject(CProject project) {
 		Check.notNull(project, "Project cannot be null");

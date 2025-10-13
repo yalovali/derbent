@@ -53,4 +53,40 @@ public class CMeetingStatusService extends CEntityOfProjectService<CMeetingStatu
 
 	@Override
 	protected Class<CMeetingStatus> getEntityClass() { return CMeetingStatus.class; }
+
+	/** Checks dependencies before allowing meeting status deletion. Prevents deletion if the status is being used by any meetings.
+	 * @param meetingStatus the meeting status entity to check
+	 * @return null if status can be deleted, error message otherwise */
+	@Override
+	public String checkDependencies(final CMeetingStatus meetingStatus) {
+		// Call super class first to check common dependencies
+		final String superCheck = super.checkDependencies(meetingStatus);
+		if (superCheck != null) {
+			return superCheck;
+		}
+		// No specific dependencies to check yet - stub for future implementation
+		return null;
+	}
+
+	/** Initializes a new meeting status with default values based on current session and available data. Sets: - Project from current session - User
+	 * for creation tracking - Auto-generated name - Default color - Default sort order - Not marked as non-deletable
+	 * @param entity the newly created meeting status to initialize
+	 * @throws IllegalStateException if required fields cannot be initialized */
+	@Override
+	public void initializeNewEntity(final CMeetingStatus entity) {
+		super.initializeNewEntity(entity);
+		try {
+			Optional<CProject> activeProject = sessionService.getActiveProject();
+			if (activeProject.isPresent()) {
+				long statusCount = ((IMeetingStatusRepository) repository).countByProject(activeProject.get());
+				String autoName = String.format("MeetingStatus%02d", statusCount + 1);
+				entity.setName(autoName);
+			}
+			entity.setFinalStatus(false);
+			LOGGER.debug("Initialized new meeting status");
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing new meeting status", e);
+			throw new IllegalStateException("Failed to initialize meeting status: " + e.getMessage(), e);
+		}
+	}
 }

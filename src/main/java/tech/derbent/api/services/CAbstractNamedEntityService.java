@@ -86,6 +86,9 @@ public abstract class CAbstractNamedEntityService<EntityClass extends CEntityNam
 	@Override
 	public void initializeNewEntity(final EntityClass entity) {
 		super.initializeNewEntity(entity);
-		Check.notNull(entity, "Entity cannot be null");
+		// Initialize description with default value if entity has this field
+		if (entity.getDescription() == null || entity.getDescription().isEmpty()) {
+			entity.setDescription("");
+		}
 	}
 }

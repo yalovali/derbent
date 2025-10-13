@@ -125,6 +125,17 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 	protected Class<CUserCompanySetting> getEntityClass() { return CUserCompanySetting.class; }
 
 	@Override
+	public String checkDependencies(final CUserCompanySetting entity) {
+		return super.checkDependencies(entity);
+	}
+
+	@Override
+	public void initializeNewEntity(final CUserCompanySetting entity) {
+		super.initializeNewEntity(entity);
+		// Additional entity-specific initialization can be added here if needed
+	}
+
+	@Override
 	@Transactional (readOnly = true)
 	public boolean relationshipExists(final Long userId, final Long companyId) {
 		return repository.existsByUserIdAndCompanyId(userId, companyId);

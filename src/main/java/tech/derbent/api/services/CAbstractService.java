@@ -19,7 +19,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.annotations.CSpringAuxillaries;
 import tech.derbent.api.domains.CEntityDB;
-import tech.derbent.api.interfaces.IDependencyChecker;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
@@ -27,7 +26,7 @@ import tech.derbent.session.service.ISessionService;
 
 /** CAbstractService - Abstract base service class for entity operations. Layer: Service (MVC) Provides common CRUD operations and lazy loading
  * support for all entity types. */
-public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass>> implements IDependencyChecker<EntityClass> {
+public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass>> {
 
 	protected final Clock clock;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
@@ -291,12 +290,16 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	 * checking rules for their entity type.
 	 * @param entity the entity to check for dependencies
 	 * @return null by default (entity can be deleted), or an error message if dependencies exist */
-	@Override
 	public String checkDependencies(final EntityClass entity) {
 		// Default implementation: allow deletion
 		// Subclasses should override to implement specific dependency checking
 		return null;
 	}
 
-	public void initializeNewEntity(final EntityClass entity) {}
+	/** Initializes a new entity with default values. Base implementation performs null check. Subclasses should call super.initializeNewEntity()
+	 * first, then add their own initialization logic.
+	 * @param entity the newly created entity to initialize */
+	public void initializeNewEntity(final EntityClass entity) {
+		tech.derbent.api.utils.Check.notNull(entity, "Entity cannot be null");
+	}
 }

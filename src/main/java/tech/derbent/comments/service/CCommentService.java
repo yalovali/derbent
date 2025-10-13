@@ -72,6 +72,17 @@ public class CCommentService extends CAbstractService<CComment> {
 	@Override
 	protected Class<CComment> getEntityClass() { return CComment.class; }
 
+	@Override
+	public String checkDependencies(final CComment comment) {
+		return super.checkDependencies(comment);
+	}
+
+	@Override
+	public void initializeNewEntity(final CComment entity) {
+		super.initializeNewEntity(entity);
+		// Additional entity-specific initialization can be added here if needed
+	}
+
 	/** Updates comment text.
 	 * @param comment the comment to update
 	 * @param newText the new comment text

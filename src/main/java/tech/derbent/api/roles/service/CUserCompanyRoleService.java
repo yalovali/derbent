@@ -73,6 +73,17 @@ public class CUserCompanyRoleService extends CAbstractNamedEntityService<CUserCo
 	protected Class<CUserCompanyRole> getEntityClass() { return CUserCompanyRole.class; }
 
 	@Override
+	public String checkDependencies(final CUserCompanyRole entity) {
+		return super.checkDependencies(entity);
+	}
+
+	@Override
+	public void initializeNewEntity(final CUserCompanyRole entity) {
+		super.initializeNewEntity(entity);
+		// Additional entity-specific initialization can be added here if needed
+	}
+
+	@Override
 	public CUserCompanyRole getRandom() {
 		Check.fail("Use getRandom(CCompany) instead to ensure company context");
 		return null;

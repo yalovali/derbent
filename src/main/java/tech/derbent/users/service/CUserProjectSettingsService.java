@@ -115,6 +115,17 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 	@Override
 	protected Class<CUserProjectSettings> getEntityClass() { return CUserProjectSettings.class; }
 
+	@Override
+	public String checkDependencies(final CUserProjectSettings entity) {
+		return super.checkDependencies(entity);
+	}
+
+	@Override
+	public void initializeNewEntity(final CUserProjectSettings entity) {
+		super.initializeNewEntity(entity);
+		// Additional entity-specific initialization can be added here if needed
+	}
+
 	/** Initialize lazy fields for a CUserProjectSettings entity within a transaction context. This method should be called when you need to access
 	 * lazy-loaded fields outside of the original Hibernate session. The repository queries already eagerly fetch common fields (user, project, role),
 	 * but this method can be used for additional fields if needed.

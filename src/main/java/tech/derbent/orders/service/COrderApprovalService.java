@@ -21,4 +21,15 @@ public class COrderApprovalService extends CAbstractNamedEntityService<COrderApp
 
 	@Override
 	protected Class<COrderApproval> getEntityClass() { return COrderApproval.class; }
+
+	@Override
+	public String checkDependencies(final COrderApproval entity) {
+		return super.checkDependencies(entity);
+	}
+
+	@Override
+	public void initializeNewEntity(final COrderApproval entity) {
+		super.initializeNewEntity(entity);
+		// Additional entity-specific initialization can be added here if needed
+	}
 }

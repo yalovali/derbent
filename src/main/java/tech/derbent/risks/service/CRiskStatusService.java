@@ -1,5 +1,7 @@
 package tech.derbent.risks.service;
 
+import java.util.Optional;
+import tech.derbent.projects.domain.CProject;
 import java.time.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,4 +33,31 @@ public class CRiskStatusService extends CEntityOfProjectService<CRiskStatus> {
 
 	@Override
 	protected Class<CRiskStatus> getEntityClass() { return CRiskStatus.class; }
+
+	@Override
+	public String checkDependencies(final CRiskStatus riskStatus) {
+		final String superCheck = super.checkDependencies(riskStatus);
+		if (superCheck != null) {
+			return superCheck;
+		}
+		return null;
+	}
+
+	@Override
+	public void initializeNewEntity(final CRiskStatus entity) {
+		super.initializeNewEntity(entity);
+		try {
+			Optional<CProject> activeProject = sessionService.getActiveProject();
+			if (activeProject.isPresent()) {
+				long statusCount = ((IRiskStatusRepository) repository).countByProject(activeProject.get());
+				String autoName = String.format("RiskStatus%02d", statusCount + 1);
+				entity.setName(autoName);
+			}
+			entity.setIsFinal(false);
+			LOGGER.debug("Initialized new risk status");
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing new risk status", e);
+			throw new IllegalStateException("Failed to initialize risk status: " + e.getMessage(), e);
+		}
+	}
 }

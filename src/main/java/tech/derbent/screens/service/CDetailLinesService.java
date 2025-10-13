@@ -83,6 +83,17 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> {
 	@Override
 	protected Class<CDetailLines> getEntityClass() { return CDetailLines.class; }
 
+	@Override
+	public String checkDependencies(final CDetailLines entity) {
+		return super.checkDependencies(entity);
+	}
+
+	@Override
+	public void initializeNewEntity(final CDetailLines entity) {
+		super.initializeNewEntity(entity);
+		// Additional entity-specific initialization can be added here if needed
+	}
+
 	public Integer getNextLineOrder(final CDetailSection screen) {
 		return detailLinesRepository.getNextLineOrder(screen);
 	}

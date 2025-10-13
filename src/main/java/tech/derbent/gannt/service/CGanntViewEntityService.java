@@ -23,4 +23,15 @@ public class CGanntViewEntityService extends CEntityOfProjectService<CGanntViewE
 
 	@Override
 	protected Class<CGanntViewEntity> getEntityClass() { return CGanntViewEntity.class; }
+
+	@Override
+	public String checkDependencies(final CGanntViewEntity entity) {
+		return super.checkDependencies(entity);
+	}
+
+	@Override
+	public void initializeNewEntity(final CGanntViewEntity entity) {
+		super.initializeNewEntity(entity);
+		// Additional entity-specific initialization can be added here if needed
+	}
 }

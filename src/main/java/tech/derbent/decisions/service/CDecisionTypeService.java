@@ -17,6 +17,8 @@ import tech.derbent.session.service.ISessionService;
 @PreAuthorize ("isAuthenticated()")
 public class CDecisionTypeService extends CEntityOfProjectService<CDecisionType> {
 
+	private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CDecisionTypeService.class);
+
 	public CDecisionTypeService(final IDecisionTypeRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
@@ -32,4 +34,38 @@ public class CDecisionTypeService extends CEntityOfProjectService<CDecisionType>
 
 	@Override
 	protected Class<CDecisionType> getEntityClass() { return CDecisionType.class; }
+
+	/** Checks dependencies before allowing decision type deletion.
+	 * @param decisionType the decision type entity to check
+	 * @return null if type can be deleted, error message otherwise */
+	@Override
+	public String checkDependencies(final CDecisionType decisionType) {
+		// Call super class first to check common dependencies
+		final String superCheck = super.checkDependencies(decisionType);
+		if (superCheck != null) {
+			return superCheck;
+		}
+		// No specific dependencies to check yet - stub for future implementation
+		return null;
+	}
+
+	/** Initializes a new decision type with default values based on current session and available data.
+	 * @param entity the newly created decision type to initialize
+	 * @throws IllegalStateException if required fields cannot be initialized */
+	@Override
+	public void initializeNewEntity(final CDecisionType entity) {
+		super.initializeNewEntity(entity);
+		try {
+			Optional<CProject> activeProject = sessionService.getActiveProject();
+			if (activeProject.isPresent()) {
+				long typeCount = ((IDecisionTypeRepository) repository).countByProject(activeProject.get());
+				String autoName = String.format("DecisionType%02d", typeCount + 1);
+				entity.setName(autoName);
+			}
+			LOGGER.debug("Initialized new cdecisiontype");
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing new cdecisiontype", e);
+			throw new IllegalStateException("Failed to initialize cdecisiontype: " + e.getMessage(), e);
+		}
+	}
 }

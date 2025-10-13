@@ -34,4 +34,15 @@ public class COrderService extends CEntityOfProjectService<COrder> {
 
 	@Override
 	protected Class<COrder> getEntityClass() { return COrder.class; }
+
+	@Override
+	public String checkDependencies(final COrder order) {
+		return super.checkDependencies(order);
+	}
+
+	@Override
+	public void initializeNewEntity(final COrder entity) {
+		super.initializeNewEntity(entity);
+		// Additional entity-specific initialization can be added here if needed
+	}
 }

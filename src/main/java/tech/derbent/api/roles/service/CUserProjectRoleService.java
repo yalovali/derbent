@@ -69,6 +69,17 @@ public class CUserProjectRoleService extends CEntityOfProjectService<CUserProjec
 	@Override
 	protected Class<CUserProjectRole> getEntityClass() { return CUserProjectRole.class; }
 
+	@Override
+	public String checkDependencies(final CUserProjectRole entity) {
+		return super.checkDependencies(entity);
+	}
+
+	@Override
+	public void initializeNewEntity(final CUserProjectRole entity) {
+		super.initializeNewEntity(entity);
+		// Additional entity-specific initialization can be added here if needed
+	}
+
 	/** Initialize default roles for a project if they don't exist. */
 	@Transactional
 	public void initializeDefaultRoles() {

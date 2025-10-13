@@ -52,4 +52,15 @@ public class CDetailSectionService extends CEntityOfProjectService<CDetailSectio
 
 	@Override
 	protected Class<CDetailSection> getEntityClass() { return CDetailSection.class; }
+
+	@Override
+	public String checkDependencies(final CDetailSection entity) {
+		return super.checkDependencies(entity);
+	}
+
+	@Override
+	public void initializeNewEntity(final CDetailSection entity) {
+		super.initializeNewEntity(entity);
+		// Additional entity-specific initialization can be added here if needed
+	}
 }
