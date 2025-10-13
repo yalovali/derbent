@@ -287,12 +287,14 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	}
 
 	/** Default implementation of dependency checking that allows deletion. Subclasses should override this method to implement specific dependency
-	 * checking rules for their entity type.
+	 * checking rules for their entity type. Always call super.checkDeleteAllowed() first in overriding methods.
 	 * @param entity the entity to check for dependencies
-	 * @return null by default (entity can be deleted), or an error message if dependencies exist */
+	 * @return null if entity can be deleted, or an error message if dependencies exist */
 	public String checkDeleteAllowed(final EntityClass entity) {
-		// Default implementation: allow deletion
-		// Subclasses should override to implement specific dependency checking
+		// Base validation: check for null entity and ID
+		Check.notNull(entity, "Entity cannot be null");
+		Check.notNull(entity.getId(), "Entity ID cannot be null");
+		// Default implementation: allow deletion at base level
 		return null;
 	}
 

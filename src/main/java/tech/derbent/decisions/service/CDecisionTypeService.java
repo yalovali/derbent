@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.services.CEntityOfProjectService;
+import tech.derbent.api.services.CTypeEntityService;
 import tech.derbent.decisions.domain.CDecisionType;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.ISessionService;
@@ -15,7 +15,7 @@ import tech.derbent.session.service.ISessionService;
  * decision type management including validation, creation, and status management. */
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CDecisionTypeService extends CEntityOfProjectService<CDecisionType> {
+public class CDecisionTypeService extends CTypeEntityService<CDecisionType> {
 
 	private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CDecisionTypeService.class);
 
@@ -35,13 +35,14 @@ public class CDecisionTypeService extends CEntityOfProjectService<CDecisionType>
 	@Override
 	protected Class<CDecisionType> getEntityClass() { return CDecisionType.class; }
 
-	/** Checks dependencies before allowing decision type deletion.
-	 * @param decisionType the decision type entity to check
+	/** Checks dependencies before allowing decision type deletion. Always calls super.checkDeleteAllowed() first to ensure all parent-level checks
+	 * (null validation, non-deletable flag) are performed.
+	 * @param entity the decision type entity to check
 	 * @return null if type can be deleted, error message otherwise */
 	@Override
-	public String checkDeleteAllowed(final CDecisionType decisionType) {
+	public String checkDeleteAllowed(final CDecisionType entity) {
 		// Call super class first to check common dependencies
-		final String superCheck = super.checkDeleteAllowed(decisionType);
+		final String superCheck = super.checkDeleteAllowed(entity);
 		if (superCheck != null) {
 			return superCheck;
 		}

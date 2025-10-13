@@ -31,26 +31,21 @@ public class CActivityTypeService extends CTypeEntityService<CActivityType> {
 		this.activityRepository = activityRepository;
 	}
 
-	/** Checks dependencies before allowing activity type deletion. Prevents deletion if the type is being used by any activities.
-	 * @param activityType the activity type entity to check
+	/** Checks dependencies before allowing activity type deletion. Prevents deletion if the type is being used by any activities. Always calls
+	 * super.checkDeleteAllowed() first to ensure all parent-level checks (null validation, non-deletable flag) are performed.
+	 * @param entity the activity type entity to check
 	 * @return null if type can be deleted, error message otherwise */
 	@Override
 	public String checkDeleteAllowed(final CActivityType entity) {
-		String superCheck = super.checkDeleteAllowed(entity);
+		final String superCheck = super.checkDeleteAllowed(entity);
 		if (superCheck != null) {
 			return superCheck;
 		}
-		Check.notNull(entity, "Activity type cannot be null");
-		Check.notNull(entity.getId(), "Activity type ID cannot be null");
 		try {
-			// Check if this type is marked as non-deletable
-			if (entity.getAttributeNonDeletable()) {
-				return "This activity type is marked as non-deletable and cannot be removed from the system.";
-			}
 			// Check if any activities are using this type
 			final long usageCount = activityRepository.countByActivityType(entity);
 			if (usageCount > 0) {
-				return String.format("Cannot delete activity type. It is being used by %d activit%s.", usageCount, usageCount == 1 ? "y" : "ies");
+				return String.format("Cannot delete. It is being used by %d activit%s.", usageCount, usageCount == 1 ? "y" : "ies");
 			}
 			return null; // Type can be deleted
 		} catch (final Exception e) {
