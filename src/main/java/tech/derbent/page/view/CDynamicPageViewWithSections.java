@@ -73,7 +73,7 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 			return;
 		}
 		// Check if page is active
-		if (!pageEntity.getIsActive()) {
+		if (!pageEntity.getActive()) {
 			event.rerouteToError(IllegalStateException.class, "Page not available");
 			return;
 		}

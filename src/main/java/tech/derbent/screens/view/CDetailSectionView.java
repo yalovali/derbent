@@ -49,7 +49,7 @@ public final class CDetailSectionView extends CGridViewBaseProject<CDetailSectio
 		grid.addDateTimeColumn(CEntityNamed::getCreatedDate, "Created", null);
 		grid.addShortTextColumn(CDetailSection::getEntityType, "Entity Type", "entityType");
 		grid.addShortTextColumn(CDetailSection::getScreenTitle, "Screen Title", "screenTitle");
-		grid.addColumn(screen -> screen.getIsActive() ? "Active" : "Inactive", "Status", null);
+		grid.addColumn(screen -> screen.getActive() ? "Active" : "Inactive", "Status", null);
 		grid.addColumn(screen -> {
 			try {
 				return String.valueOf(screenLinesService.countByScreen(screen));

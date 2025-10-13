@@ -45,9 +45,7 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 	public void initializeNewEntity(final EntityClass entity) {
 		super.initializeNewEntity(entity);
 		entity.setDescription("");
-		setCreatedDate(now());
-		setLastModifiedDate(now());
-		setName("Entity Name");
+		entity.setName("Entity Name");
 	}
 
 	@Transactional (readOnly = true)
