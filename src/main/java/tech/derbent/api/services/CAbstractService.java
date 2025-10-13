@@ -93,6 +93,12 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		return copy;
 	}
 
+	public String checkDeleteAllowed(final EntityClass entity) {
+		Check.notNull(entity, "Entity cannot be null");
+		Check.notNull(entity.getId(), "Entity ID cannot be null");
+		return null;
+	}
+
 	public long count() {
 		// LOGGER.debug("Counting entities in {}", getClass().getSimpleName());
 		return repository.count();
@@ -189,19 +195,6 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		return Map.of();
 	}
 
-	protected void initializeLazyRelationship(final Object relationshipEntity, final String relationshipName) {
-		if (relationshipEntity == null) {
-			return;
-		}
-		try {
-			final boolean success = CSpringAuxillaries.initializeLazily(relationshipEntity);
-			Check.isTrue(success, "Failed to initialize lazy relationship");
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing lazy relationship '{}': {}", relationshipName, CSpringAuxillaries.safeToString(relationshipEntity), e);
-			throw e;
-		}
-	}
-
 	/** Initialize all lazy fields of an entity within a transaction context. This method should be used when you need to access lazy-loaded fields
 	 * outside of the original Hibernate session. Call this from a @Transactional method in your service.
 	 * @param entity the entity to initialize
@@ -218,6 +211,24 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		// Access lazy fields to trigger loading within transaction
 		managed.initializeAllFields();
 		return managed;
+	}
+
+	protected void initializeLazyRelationship(final Object relationshipEntity, final String relationshipName) {
+		if (relationshipEntity == null) {
+			return;
+		}
+		try {
+			final boolean success = CSpringAuxillaries.initializeLazily(relationshipEntity);
+			Check.isTrue(success, "Failed to initialize lazy relationship");
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing lazy relationship '{}': {}", relationshipName, CSpringAuxillaries.safeToString(relationshipEntity), e);
+			throw e;
+		}
+	}
+
+	public void initializeNewEntity(final EntityClass entity) {
+		Check.notNull(entity, "Entity cannot be null");
+		entity.setActive(true);
 	}
 
 	@Transactional (readOnly = true)
@@ -284,24 +295,5 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	protected void validateEntity(final EntityClass entity) {
 		Check.notNull(entity, "Entity cannot be null");
 		// Add more validation logic in subclasses if needed
-	}
-
-	/** Default implementation of dependency checking that allows deletion. Subclasses should override this method to implement specific dependency
-	 * checking rules for their entity type. Always call super.checkDeleteAllowed() first in overriding methods.
-	 * @param entity the entity to check for dependencies
-	 * @return null if entity can be deleted, or an error message if dependencies exist */
-	public String checkDeleteAllowed(final EntityClass entity) {
-		// Base validation: check for null entity and ID
-		Check.notNull(entity, "Entity cannot be null");
-		Check.notNull(entity.getId(), "Entity ID cannot be null");
-		// Default implementation: allow deletion at base level
-		return null;
-	}
-
-	/** Initializes a new entity with default values. Base implementation performs null check. Subclasses should call super.initializeNewEntity()
-	 * first, then add their own initialization logic.
-	 * @param entity the newly created entity to initialize */
-	public void initializeNewEntity(final EntityClass entity) {
-		tech.derbent.api.utils.Check.notNull(entity, "Entity cannot be null");
 	}
 }

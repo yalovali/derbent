@@ -20,6 +20,11 @@ public class COrderService extends CEntityOfProjectService<COrder> {
 		super(repository, clock, sessionService);
 	}
 
+	@Override
+	public String checkDeleteAllowed(final COrder order) {
+		return super.checkDeleteAllowed(order);
+	}
+
 	public List<COrder> findByRequestor(final CUser requestor) {
 		LOGGER.info("findByRequestor called with requestor: {}", requestor != null ? requestor.getName() : "null");
 		Check.notNull(requestor, "Requestor cannot be null");
@@ -36,13 +41,15 @@ public class COrderService extends CEntityOfProjectService<COrder> {
 	protected Class<COrder> getEntityClass() { return COrder.class; }
 
 	@Override
-	public String checkDeleteAllowed(final COrder order) {
-		return super.checkDeleteAllowed(order);
-	}
-
-	@Override
 	public void initializeNewEntity(final COrder entity) {
 		super.initializeNewEntity(entity);
-		// Additional entity-specific initialization can be added here if needed
+		entity.setCurrency();
+		entity.setActualCost(0); // Default actual cost
+		entity.setEstimatedCost(0); // Default estimated cost
+		entity.setOrderDate(now());
+		entity.setDueDate(now().plusDays(7)); // Default due date one week from
+		entity.setRequestor(getCurrentUser());
+		entity.setResponsible(getCurrentUser());
+		entity.setStatus(); // Default status
 	}
 }

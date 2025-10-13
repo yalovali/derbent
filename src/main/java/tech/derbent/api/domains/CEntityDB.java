@@ -63,6 +63,8 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 		return (id != null) && id.equals(other.getId());
 	}
 
+	public Boolean getActive() { return isActive; }
+
 	/** Helper method to get all fields including inherited fields.
 	 * @param clazz the class to get fields from
 	 * @return array of all fields */
@@ -81,8 +83,6 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 
 	@Nullable
 	public Long getId() { return id; }
-
-	public Boolean getIsActive() { return isActive; }
 
 	@Override
 	public int hashCode() {
@@ -147,6 +147,8 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 			throw new RuntimeException("Failed to perform soft delete operation", e);
 		}
 	}
+
+	public void setActive(final Boolean isActive) { this.isActive = isActive; }
 
 	public void setIsActive(Boolean isActive) { this.isActive = isActive; }
 

@@ -106,27 +106,11 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	public void initializeNewEntity(final EntityClass entity) {
 		super.initializeNewEntity(entity);
 		Check.notNull(sessionService, "Session service is required for entity initialization");
-		// Initialize project from session
-		Optional<CProject> activeProject = sessionService.getActiveProject();
-		if (activeProject.isPresent()) {
-			entity.setProject(activeProject.get());
-		}
-		// Initialize createdBy from session
-		Optional<CUser> currentUser = sessionService.getActiveUser();
-		if (currentUser.isPresent()) {
-			entity.setCreatedBy(currentUser.get());
-		}
-		// If entity extends CTypeEntity, initialize common type fields
-		if (entity instanceof tech.derbent.api.domains.CTypeEntity) {
-			tech.derbent.api.domains.CTypeEntity<?> typeEntity = (tech.derbent.api.domains.CTypeEntity<?>) entity;
-			if (typeEntity.getColor() == null || typeEntity.getColor().isEmpty()) {
-				typeEntity.setColor("#4A90E2");
-			}
-			if (typeEntity.getSortOrder() == null) {
-				typeEntity.setSortOrder(100);
-			}
-			typeEntity.setAttributeNonDeletable(false);
-		}
+		CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
+		CUser currentUser = sessionService.getActiveUser().orElseThrow(() -> new IllegalStateException("No active user in session"));
+		entity.setProject(activeProject);
+		entity.setCreatedBy(currentUser);
+		entity.setAssignedTo(currentUser);
 	}
 
 	@Override

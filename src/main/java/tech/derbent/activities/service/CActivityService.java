@@ -66,8 +66,6 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 	@Override
 	public void initializeNewEntity(final CActivity entity) {
 		super.initializeNewEntity(entity);
-		// Additional entity-specific initialization can be added here if needed
-		// The service should set defaults for activity-specific fields here
 	}
 
 	@Override

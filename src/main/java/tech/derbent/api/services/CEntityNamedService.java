@@ -44,10 +44,10 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 	@Override
 	public void initializeNewEntity(final EntityClass entity) {
 		super.initializeNewEntity(entity);
-		// Initialize description with default value if entity has this field
-		if (entity.getDescription() == null || entity.getDescription().isEmpty()) {
-			entity.setDescription("");
-		}
+		entity.setDescription("");
+		setCreatedDate(now());
+		setLastModifiedDate(now());
+		setName("Entity Name");
 	}
 
 	@Transactional (readOnly = true)

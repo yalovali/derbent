@@ -10,4 +10,9 @@ public abstract class CProjectItemService<EntityClass extends CEntityOfProject<E
 	public CProjectItemService(final IEntityOfProjectRepository<EntityClass> repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
+
+	@Override
+	public void initializeNewEntity(final EntityClass entity) {
+		super.initializeNewEntity(entity);
+	}
 }
