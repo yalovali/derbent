@@ -20,12 +20,25 @@ import tech.derbent.session.service.ISessionService;
 @Transactional
 public class CMeetingStatusService extends CEntityOfProjectService<CMeetingStatus> {
 
-	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingStatusService.class);
 
 	@Autowired
 	public CMeetingStatusService(final IMeetingStatusRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
+	}
+
+	/** Checks dependencies before allowing meeting status deletion. Prevents deletion if the status is being used by any meetings.
+	 * @param meetingStatus the meeting status entity to check
+	 * @return null if status can be deleted, error message otherwise */
+	@Override
+	public String checkDependencies(final CMeetingStatus meetingStatus) {
+		// Call super class first to check common dependencies
+		final String superCheck = super.checkDependencies(meetingStatus);
+		if (superCheck != null) {
+			return superCheck;
+		}
+		// No specific dependencies to check yet - stub for future implementation
+		return null;
 	}
 
 	/** Create default meeting statuses if they don't exist. This method should be called during application startup. */
@@ -53,20 +66,6 @@ public class CMeetingStatusService extends CEntityOfProjectService<CMeetingStatu
 
 	@Override
 	protected Class<CMeetingStatus> getEntityClass() { return CMeetingStatus.class; }
-
-	/** Checks dependencies before allowing meeting status deletion. Prevents deletion if the status is being used by any meetings.
-	 * @param meetingStatus the meeting status entity to check
-	 * @return null if status can be deleted, error message otherwise */
-	@Override
-	public String checkDependencies(final CMeetingStatus meetingStatus) {
-		// Call super class first to check common dependencies
-		final String superCheck = super.checkDependencies(meetingStatus);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		// No specific dependencies to check yet - stub for future implementation
-		return null;
-	}
 
 	/** Initializes a new meeting status with default values based on current session and available data. Sets: - Project from current session - User
 	 * for creation tracking - Auto-generated name - Default color - Default sort order - Not marked as non-deletable

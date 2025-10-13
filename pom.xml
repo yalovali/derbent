@@ -179,9 +179,11 @@
 						<include>**/unit-tests/**/*Test.java</include>
 						<include>**/ui-tests/**/*Test.java</include>
 						<include>**/automated-tests/**/*Test.java</include>
+						<include>**/automated_tests/**/*Test.java</include>
 						<include>**/unit-tests/**/*Test*.java</include>
 						<include>**/ui-tests/**/*Test*.java</include>
 						<include>**/automated-tests/**/*Test*.java</include>
+						<include>**/automated_tests/**/*Test*.java</include>
 					</includes>
 				</configuration>
 			</plugin>

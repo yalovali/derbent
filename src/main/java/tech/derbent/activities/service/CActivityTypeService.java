@@ -13,7 +13,6 @@ import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.ISessionService;
-import tech.derbent.users.domain.CUser;
 
 /** CActivityTypeService - Service layer for CActivityType entity. Layer: Service (MVC) Handles business logic for project-aware activity type
  * operations. */
@@ -31,9 +30,6 @@ public class CActivityTypeService extends CEntityOfProjectService<CActivityType>
 		super(repository, clock, sessionService);
 		this.activityRepository = activityRepository;
 	}
-
-	@Override
-	protected Class<CActivityType> getEntityClass() { return CActivityType.class; }
 
 	/** Checks dependencies before allowing activity type deletion. Prevents deletion if the type is being used by any activities.
 	 * @param activityType the activity type entity to check
@@ -58,6 +54,9 @@ public class CActivityTypeService extends CEntityOfProjectService<CActivityType>
 			return "Error checking dependencies: " + e.getMessage();
 		}
 	}
+
+	@Override
+	protected Class<CActivityType> getEntityClass() { return CActivityType.class; }
 
 	/** Initializes a new activity type. Most common fields are initialized by super class.
 	 * @param entity the newly created activity type to initialize */

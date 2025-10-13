@@ -13,6 +13,7 @@ import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.ISessionService;
+import tech.derbent.users.domain.CUser;
 
 public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProject<EntityClass>> extends CAbstractNamedEntityService<EntityClass> {
 
@@ -90,6 +91,33 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		}
 		final int randomIndex = (int) (Math.random() * all.size());
 		return all.get(randomIndex);
+	}
+
+	@Override
+	public void initializeNewEntity(final EntityClass entity) {
+		super.initializeNewEntity(entity);
+		Check.notNull(sessionService, "Session service is required for entity initialization");
+		// Initialize project from session
+		Optional<CProject> activeProject = sessionService.getActiveProject();
+		if (activeProject.isPresent()) {
+			entity.setProject(activeProject.get());
+		}
+		// Initialize createdBy from session
+		Optional<CUser> currentUser = sessionService.getActiveUser();
+		if (currentUser.isPresent()) {
+			entity.setCreatedBy(currentUser.get());
+		}
+		// If entity extends CTypeEntity, initialize common type fields
+		if (entity instanceof tech.derbent.api.domains.CTypeEntity) {
+			tech.derbent.api.domains.CTypeEntity<?> typeEntity = (tech.derbent.api.domains.CTypeEntity<?>) entity;
+			if (typeEntity.getColor() == null || typeEntity.getColor().isEmpty()) {
+				typeEntity.setColor("#4A90E2");
+			}
+			if (typeEntity.getSortOrder() == null) {
+				typeEntity.setSortOrder(100);
+			}
+			typeEntity.setAttributeNonDeletable(false);
+		}
 	}
 
 	@Override
@@ -205,33 +233,6 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		} catch (final Exception e) {
 			LOGGER.error("save(entity={}) - Error saving entity: {}", entity.getId(), e.getMessage());
 			throw new RuntimeException("Failed to save entity", e);
-		}
-	}
-
-	@Override
-	public void initializeNewEntity(final EntityClass entity) {
-		super.initializeNewEntity(entity);
-		Check.notNull(sessionService, "Session service is required for entity initialization");
-		// Initialize project from session
-		Optional<CProject> activeProject = sessionService.getActiveProject();
-		if (activeProject.isPresent()) {
-			entity.setProject(activeProject.get());
-		}
-		// Initialize createdBy from session
-		Optional<tech.derbent.users.domain.CUser> currentUser = sessionService.getActiveUser();
-		if (currentUser.isPresent()) {
-			entity.setCreatedBy(currentUser.get());
-		}
-		// If entity extends CTypeEntity, initialize common type fields
-		if (entity instanceof tech.derbent.api.domains.CTypeEntity) {
-			tech.derbent.api.domains.CTypeEntity<?> typeEntity = (tech.derbent.api.domains.CTypeEntity<?>) entity;
-			if (typeEntity.getColor() == null || typeEntity.getColor().isEmpty()) {
-				typeEntity.setColor("#4A90E2");
-			}
-			if (typeEntity.getSortOrder() == null) {
-				typeEntity.setSortOrder(100);
-			}
-			typeEntity.setAttributeNonDeletable(false);
 		}
 	}
 }

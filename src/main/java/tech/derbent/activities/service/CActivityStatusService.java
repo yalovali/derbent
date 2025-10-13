@@ -12,7 +12,6 @@ import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.ISessionService;
-import tech.derbent.users.domain.CUser;
 
 /** CActivityStatusService - Service class for managing CActivityStatus entities. Layer: Service (MVC) Provides business logic for activity status
  * management including CRUD operations, validation, and workflow management. */
@@ -30,17 +29,6 @@ public class CActivityStatusService extends CEntityOfProjectService<CActivitySta
 		super(repository, clock, sessionService);
 		this.activityRepository = activityRepository;
 	}
-
-	/** Find the default status for new activities.
-	 * @return Optional containing the default status if found */
-	@Transactional (readOnly = true)
-	public Optional<CActivityStatus> findDefaultStatus(final CProject project) {
-		final Optional<CActivityStatus> status = ((CActivityStatusService) repository).findDefaultStatus(project);
-		return status;
-	}
-
-	@Override
-	protected Class<CActivityStatus> getEntityClass() { return CActivityStatus.class; }
 
 	/** Checks dependencies before allowing activity status deletion. Prevents deletion if the status is being used by any activities.
 	 * @param activityStatus the activity status entity to check
@@ -65,6 +53,17 @@ public class CActivityStatusService extends CEntityOfProjectService<CActivitySta
 			return "Error checking dependencies: " + e.getMessage();
 		}
 	}
+
+	/** Find the default status for new activities.
+	 * @return Optional containing the default status if found */
+	@Transactional (readOnly = true)
+	public Optional<CActivityStatus> findDefaultStatus(final CProject project) {
+		final Optional<CActivityStatus> status = ((CActivityStatusService) repository).findDefaultStatus(project);
+		return status;
+	}
+
+	@Override
+	protected Class<CActivityStatus> getEntityClass() { return CActivityStatus.class; }
 
 	/** Initializes a new activity status with default values. Most common fields are initialized by super class.
 	 * @param entity the newly created activity status to initialize */

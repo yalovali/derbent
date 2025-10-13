@@ -314,7 +314,7 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 			} else {
 				LOGGER.debug("Entity selected: {}", selectedEntity != null ? selectedEntity.toString() + " ID: " + selectedEntity.getId() : "null");
 				// Performance optimization: check if we can reuse existing components
-				if (currentEntityViewName == null || !selectedEntity.getClass().getField("VIEW_NAME").equals(currentEntityViewName)) {
+				if (currentEntityViewName == null || !selectedEntity.getClass().getField("VIEW_NAME").get(null).equals(currentEntityViewName)) {
 					rebuildEntityDetails(selectedEntity.getClass());
 				}
 				setCurrentEntity(selectedEntity);

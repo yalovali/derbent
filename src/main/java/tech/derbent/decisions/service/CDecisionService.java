@@ -13,19 +13,17 @@ import tech.derbent.session.service.ISessionService;
 @PreAuthorize ("isAuthenticated()")
 public class CDecisionService extends CEntityOfProjectService<CDecision> {
 
-	private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CDecisionService.class);
-
 	public CDecisionService(final IDecisionRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
 
 	@Override
-	protected Class<CDecision> getEntityClass() { return CDecision.class; }
-
-	@Override
 	public String checkDependencies(final CDecision decision) {
 		return super.checkDependencies(decision);
 	}
+
+	@Override
+	protected Class<CDecision> getEntityClass() { return CDecision.class; }
 
 	@Override
 	public void initializeNewEntity(final CDecision entity) {

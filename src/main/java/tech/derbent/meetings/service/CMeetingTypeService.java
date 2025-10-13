@@ -1,8 +1,7 @@
 package tech.derbent.meetings.service;
 
-import java.util.Optional;
-import tech.derbent.projects.domain.CProject;
 import java.time.Clock;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -10,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.meetings.domain.CMeetingType;
+import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.ISessionService;
 
 /** CMeetingTypeService - Service layer for CMeetingType entity. Layer: Service (MVC) Handles business logic for project-aware meeting type
@@ -19,15 +19,11 @@ import tech.derbent.session.service.ISessionService;
 @Transactional (readOnly = true)
 public class CMeetingTypeService extends CEntityOfProjectService<CMeetingType> {
 
-	@SuppressWarnings ("unused")
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingTypeService.class);
 
 	CMeetingTypeService(final IMeetingTypeRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
-
-	@Override
-	protected Class<CMeetingType> getEntityClass() { return CMeetingType.class; }
 
 	/** Checks dependencies before allowing meeting type deletion. Prevents deletion if the type is being used by any meetings.
 	 * @param meetingType the meeting type entity to check
@@ -42,6 +38,9 @@ public class CMeetingTypeService extends CEntityOfProjectService<CMeetingType> {
 		// No specific dependencies to check yet - stub for future implementation
 		return null;
 	}
+
+	@Override
+	protected Class<CMeetingType> getEntityClass() { return CMeetingType.class; }
 
 	/** Initializes a new meeting type with default values based on current session and available data. Sets: - Project from current session - User
 	 * for creation tracking - Auto-generated name - Default color and icon - Default sort order - Not marked as non-deletable

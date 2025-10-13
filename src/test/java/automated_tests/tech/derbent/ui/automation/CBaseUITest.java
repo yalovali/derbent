@@ -38,6 +38,15 @@ import tech.derbent.projects.domain.CProject;
 public abstract class CBaseUITest {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CBaseUITest.class);
+	static {
+		System.setProperty("vaadin.devmode.liveReload.enabled", "false");
+		System.setProperty("vaadin.launch-browser", "false");
+		System.setProperty("vaadin.devmode.enabled", "false");
+		System.setProperty("vaadin.devserver.enabled", "false");
+		System.setProperty("spring.devtools.restart.enabled", "false");
+		System.setProperty("spring.devtools.livereload.enabled", "false");
+		System.setProperty("spring.devtools.livereload.port", "35729");
+	}
 	protected static final String SCREENSHOT_SUCCESS_SUFFIX = "success";
 	protected static final String SCREENSHOT_FAILURE_SUFFIX = "failure";
 	private static final String FIELD_ID_PREFIX = "field";
