@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import tech.derbent.api.domains.CProjectItemService;
+import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.projects.domain.CProject;
@@ -13,13 +13,18 @@ import tech.derbent.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CPageEntityService extends CProjectItemService<CPageEntity> {
+public class CPageEntityService extends CEntityOfProjectService<CPageEntity> {
 
 	public CPageEntityService(final IPageEntityRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 		Check.notNull(repository, "CPageEntityRepository cannot be null");
 		Check.notNull(clock, "Clock cannot be null");
 		Check.notNull(sessionService, "CSessionService cannot be null");
+	}
+
+	@Override
+	public String checkDeleteAllowed(final CPageEntity entity) {
+		return super.checkDeleteAllowed(entity);
 	}
 
 	/** Find active pages by project. */
@@ -50,21 +55,16 @@ public class CPageEntityService extends CProjectItemService<CPageEntity> {
 	@Override
 	protected Class<CPageEntity> getEntityClass() { return CPageEntity.class; }
 
-	@Override
-	public String checkDeleteAllowed(final CPageEntity entity) {
-		return super.checkDeleteAllowed(entity);
+	/** Get page hierarchy for project. */
+	public List<CPageEntity> getPageHierarchyForProject(CProject project) {
+		Check.notNull(project, "Project cannot be null");
+		return listByProject(project);
 	}
 
 	@Override
 	public void initializeNewEntity(final CPageEntity entity) {
 		super.initializeNewEntity(entity);
 		// Additional entity-specific initialization can be added here if needed
-	}
-
-	/** Get page hierarchy for project. */
-	public List<CPageEntity> getPageHierarchyForProject(CProject project) {
-		Check.notNull(project, "Project cannot be null");
-		return listByProject(project);
 	}
 
 	public List<CPageEntity> listQuickAccess(CProject project) {

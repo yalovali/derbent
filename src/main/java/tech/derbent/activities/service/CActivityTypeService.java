@@ -1,7 +1,6 @@
 package tech.derbent.activities.service;
 
 import java.time.Clock;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.activities.domain.CActivityType;
 import tech.derbent.api.services.CTypeEntityService;
-import tech.derbent.api.utils.Check;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.ISessionService;
 
@@ -62,18 +60,9 @@ public class CActivityTypeService extends CTypeEntityService<CActivityType> {
 	@Override
 	public void initializeNewEntity(final CActivityType entity) {
 		super.initializeNewEntity(entity);
-		try {
-			// Auto-generate name based on count
-			Optional<CProject> activeProject = sessionService.getActiveProject();
-			if (activeProject.isPresent()) {
-				long typeCount = ((IActivityTypeRepository) repository).countByProject(activeProject.get());
-				String autoName = String.format("ActivityType%02d", typeCount + 1);
-				entity.setName(autoName);
-			}
-			LOGGER.debug("Initialized new activity type");
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing new activity type", e);
-			throw new IllegalStateException("Failed to initialize activity type: " + e.getMessage(), e);
-		}
+		CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
+		long typeCount = ((IActivityTypeRepository) repository).countByProject(activeProject);
+		String autoName = String.format("ActivityType %02d", typeCount + 1);
+		entity.setName(autoName);
 	}
 }

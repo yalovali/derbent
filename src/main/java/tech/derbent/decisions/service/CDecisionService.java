@@ -2,7 +2,6 @@ package tech.derbent.decisions.service;
 
 import java.math.BigDecimal;
 import java.time.Clock;
-import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -21,8 +20,8 @@ import tech.derbent.users.domain.CUser;
 @PreAuthorize ("isAuthenticated()")
 public class CDecisionService extends CEntityOfProjectService<CDecision> {
 
-	private final CDecisionTypeService decisionTypeService;
 	private final CDecisionStatusService decisionStatusService;
+	private final CDecisionTypeService decisionTypeService;
 
 	public CDecisionService(final IDecisionRepository repository, final Clock clock, final ISessionService sessionService,
 			final CDecisionTypeService decisionTypeService, final CDecisionStatusService decisionStatusService) {

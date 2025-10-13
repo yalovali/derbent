@@ -1,5 +1,6 @@
 package tech.derbent.activities.service;
 
+import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
@@ -9,27 +10,32 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.activities.domain.CActivity;
+import tech.derbent.activities.domain.CActivityPriority;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.domain.CActivityType;
-import tech.derbent.api.domains.CProjectItemService;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.interfaces.IKanbanService;
+import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.api.services.IEntityOfProjectRepository;
+import tech.derbent.api.utils.Check;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CActivityService extends CProjectItemService<CActivity> implements IKanbanService<CActivity, CActivityStatus> {
+public class CActivityService extends CEntityOfProjectService<CActivity> implements IKanbanService<CActivity, CActivityStatus> {
 
-	private final CActivityTypeService activityTypeService;
+	private final CActivityPriorityService activityPriorityService;
 	private final CActivityStatusService activityStatusService;
+	private final CActivityTypeService activityTypeService;
 
 	public CActivityService(final IActivityRepository repository, final Clock clock, final ISessionService sessionService,
-			final CActivityTypeService activityTypeService, final CActivityStatusService activityStatusService) {
+			final CActivityTypeService activityTypeService, final CActivityStatusService activityStatusService,
+			final CActivityPriorityService activityPriorityService) {
 		super(repository, clock, sessionService);
 		this.activityTypeService = activityTypeService;
 		this.activityStatusService = activityStatusService;
+		this.activityPriorityService = activityPriorityService;
 	}
 
 	@Override
@@ -78,23 +84,25 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 		// Get current project from session
 		final CProject currentProject = sessionService.getActiveProject()
 				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize activity"));
-		// Initialize date fields
-		entity.setStartDate(LocalDate.now(clock));
-		entity.setDueDate(LocalDate.now(clock).plusDays(7)); // Default due date one week from now
-		// Initialize activity type - get first available activity type for the project (optional field, don't throw if missing)
 		final List<CActivityType> availableTypes = activityTypeService.listByProject(currentProject);
-		if (!availableTypes.isEmpty()) {
-			entity.setActivityType(availableTypes.get(0));
-		}
-		// Note: If no activity type exists, the field will remain null (it's nullable)
-		// Initialize status - get first available activity status for the project (optional field, don't throw if missing)
+		Check.notEmpty(availableTypes, "No activity types available in project " + currentProject.getName() + " - cannot initialize new activity");
+		entity.setActivityType(availableTypes.get(0));
 		final List<CActivityStatus> availableStatuses = activityStatusService.listByProject(currentProject);
-		if (!availableStatuses.isEmpty()) {
-			entity.setStatus(availableStatuses.get(0));
-		}
-		// Note: If no status exists, the field will remain null (it's nullable)
-		// Note: numeric fields are already initialized in the domain class's initializeDefaults() method
-		// Note: priority is optional and can remain null
+		Check.notEmpty(availableStatuses,
+				"No activity statuses available in project " + currentProject.getName() + " - cannot initialize new activity with a status");
+		entity.setStatus(availableStatuses.get(0));
+		final List<CActivityPriority> priorities = activityPriorityService.listByProject(currentProject);
+		Check.notEmpty(priorities, "No activity priorities available in project " + currentProject.getName() + " - cannot initialize new activity");
+		entity.setPriority(priorities.get(0));
+		entity.setActualCost(BigDecimal.ZERO);
+		entity.setEstimatedCost(BigDecimal.ZERO);
+		entity.setActualHours(BigDecimal.ZERO);
+		entity.setStartDate(LocalDate.now(clock));
+		entity.setDueDate(LocalDate.now(clock).plusDays(7));
+		entity.setCompletionDate(null); // Not completed yet
+		entity.setHourlyRate(BigDecimal.ZERO);
+		entity.setProgressPercentage(0);
+		entity.setStartDate(LocalDate.now(clock));
 	}
 
 	@Override
