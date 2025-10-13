@@ -6,14 +6,14 @@ import java.time.Clock;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.services.CEntityOfProjectService;
+import tech.derbent.api.services.CStatusService;
 import tech.derbent.orders.domain.COrderStatus;
 import tech.derbent.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class COrderStatusService extends CEntityOfProjectService<COrderStatus> {
+public class COrderStatusService extends CStatusService<COrderStatus> {
 
 	private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(COrderStatusService.class);
 
@@ -24,9 +24,13 @@ public class COrderStatusService extends CEntityOfProjectService<COrderStatus> {
 	@Override
 	protected Class<COrderStatus> getEntityClass() { return COrderStatus.class; }
 
+	/** Checks dependencies before allowing order status deletion. Always calls super.checkDeleteAllowed() first to ensure all parent-level checks
+	 * (null validation, non-deletable flag) are performed.
+	 * @param entity the order status entity to check
+	 * @return null if status can be deleted, error message otherwise */
 	@Override
-	public String checkDeleteAllowed(final COrderStatus orderStatus) {
-		final String superCheck = super.checkDeleteAllowed(orderStatus);
+	public String checkDeleteAllowed(final COrderStatus entity) {
+		final String superCheck = super.checkDeleteAllowed(entity);
 		if (superCheck != null) {
 			return superCheck;
 		}

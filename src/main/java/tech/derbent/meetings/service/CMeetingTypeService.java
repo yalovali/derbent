@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.services.CEntityOfProjectService;
+import tech.derbent.api.services.CTypeEntityService;
 import tech.derbent.meetings.domain.CMeetingType;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.ISessionService;
@@ -17,7 +17,7 @@ import tech.derbent.session.service.ISessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CMeetingTypeService extends CEntityOfProjectService<CMeetingType> {
+public class CMeetingTypeService extends CTypeEntityService<CMeetingType> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingTypeService.class);
 
@@ -25,13 +25,14 @@ public class CMeetingTypeService extends CEntityOfProjectService<CMeetingType> {
 		super(repository, clock, sessionService);
 	}
 
-	/** Checks dependencies before allowing meeting type deletion. Prevents deletion if the type is being used by any meetings.
-	 * @param meetingType the meeting type entity to check
+	/** Checks dependencies before allowing meeting type deletion. Prevents deletion if the type is being used by any meetings. Always calls
+	 * super.checkDeleteAllowed() first to ensure all parent-level checks (null validation, non-deletable flag) are performed.
+	 * @param entity the meeting type entity to check
 	 * @return null if type can be deleted, error message otherwise */
 	@Override
-	public String checkDeleteAllowed(final CMeetingType meetingType) {
+	public String checkDeleteAllowed(final CMeetingType entity) {
 		// Call super class first to check common dependencies
-		final String superCheck = super.checkDeleteAllowed(meetingType);
+		final String superCheck = super.checkDeleteAllowed(entity);
 		if (superCheck != null) {
 			return superCheck;
 		}

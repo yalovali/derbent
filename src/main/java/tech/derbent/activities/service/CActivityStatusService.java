@@ -8,8 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.activities.domain.CActivityStatus;
-import tech.derbent.api.services.CEntityOfProjectService;
-import tech.derbent.api.utils.Check;
+import tech.derbent.api.services.CStatusService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.ISessionService;
 
@@ -17,7 +16,7 @@ import tech.derbent.session.service.ISessionService;
  * management including CRUD operations, validation, and workflow management. */
 @Service
 @Transactional
-public class CActivityStatusService extends CEntityOfProjectService<CActivityStatus> {
+public class CActivityStatusService extends CStatusService<CActivityStatus> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityStatusService.class);
 	@Autowired
@@ -30,26 +29,25 @@ public class CActivityStatusService extends CEntityOfProjectService<CActivitySta
 		this.activityRepository = activityRepository;
 	}
 
-	/** Checks dependencies before allowing activity status deletion. Prevents deletion if the status is being used by any activities.
-	 * @param activityStatus the activity status entity to check
+	/** Checks dependencies before allowing activity status deletion. Prevents deletion if the status is being used by any activities. Always calls
+	 * super.checkDeleteAllowed() first to ensure all parent-level checks (null validation, non-deletable flag) are performed.
+	 * @param entity the activity status entity to check
 	 * @return null if status can be deleted, error message otherwise */
 	@Override
-	public String checkDeleteAllowed(final CActivityStatus activityStatus) {
-		Check.notNull(activityStatus, "Activity status cannot be null");
-		Check.notNull(activityStatus.getId(), "Activity status ID cannot be null");
+	public String checkDeleteAllowed(final CActivityStatus entity) {
+		final String superCheck = super.checkDeleteAllowed(entity);
+		if (superCheck != null) {
+			return superCheck;
+		}
 		try {
-			// Check if this status is marked as non-deletable
-			if (activityStatus.getAttributeNonDeletable()) {
-				return "This activity status is marked as non-deletable and cannot be removed from the system.";
-			}
 			// Check if any activities are using this status
-			final long usageCount = activityRepository.countByActivityStatus(activityStatus);
+			final long usageCount = activityRepository.countByActivityStatus(entity);
 			if (usageCount > 0) {
-				return String.format("Cannot delete activity status. It is being used by %d activit%s.", usageCount, usageCount == 1 ? "y" : "ies");
+				return String.format("Cannot delete. It is being used by %d activit%s.", usageCount, usageCount == 1 ? "y" : "ies");
 			}
 			return null; // Status can be deleted
 		} catch (final Exception e) {
-			LOGGER.error("Error checking dependencies for activity status: {}", activityStatus.getName(), e);
+			LOGGER.error("Error checking dependencies for activity status: {}", entity.getName(), e);
 			return "Error checking dependencies: " + e.getMessage();
 		}
 	}

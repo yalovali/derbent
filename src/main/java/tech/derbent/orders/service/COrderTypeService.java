@@ -6,14 +6,14 @@ import java.time.Clock;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.services.CEntityOfProjectService;
+import tech.derbent.api.services.CTypeEntityService;
 import tech.derbent.orders.domain.COrderType;
 import tech.derbent.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class COrderTypeService extends CEntityOfProjectService<COrderType> {
+public class COrderTypeService extends CTypeEntityService<COrderType> {
 
 	private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(COrderTypeService.class);
 
@@ -24,9 +24,13 @@ public class COrderTypeService extends CEntityOfProjectService<COrderType> {
 	@Override
 	protected Class<COrderType> getEntityClass() { return COrderType.class; }
 
+	/** Checks dependencies before allowing order type deletion. Always calls super.checkDeleteAllowed() first to ensure all parent-level checks (null
+	 * validation, non-deletable flag) are performed.
+	 * @param entity the order type entity to check
+	 * @return null if type can be deleted, error message otherwise */
 	@Override
-	public String checkDeleteAllowed(final COrderType orderType) {
-		final String superCheck = super.checkDeleteAllowed(orderType);
+	public String checkDeleteAllowed(final COrderType entity) {
+		final String superCheck = super.checkDeleteAllowed(entity);
 		if (superCheck != null) {
 			return superCheck;
 		}

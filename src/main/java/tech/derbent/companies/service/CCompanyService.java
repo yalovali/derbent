@@ -112,26 +112,32 @@ public class CCompanyService extends CEntityNamedService<CCompany> {
 	 * 2. Company has associated users
 	 * @param company the company entity to check
 	 * @return null if company can be deleted, error message otherwise */
+	/** Checks dependencies before allowing company deletion. Prevents deletion of user's own company and companies with active users. Always calls
+	 * super.checkDeleteAllowed() first to ensure all parent-level checks (null validation) are performed.
+	 * @param entity the company entity to check
+	 * @return null if company can be deleted, error message otherwise */
 	@Override
-	public String checkDeleteAllowed(final CCompany company) {
-		Check.notNull(company, "Company cannot be null");
-		Check.notNull(company.getId(), "Company ID cannot be null");
+	public String checkDeleteAllowed(final CCompany entity) {
+		final String superCheck = super.checkDeleteAllowed(entity);
+		if (superCheck != null) {
+			return superCheck;
+		}
 		try {
 			// Rule 1: Check if current user belongs to this company (user cannot delete their own company)
 			if (sessionService != null && sessionService.getActiveUser().isPresent()) {
 				final CCompany currentUserCompany = sessionService.getCurrentCompany();
-				if (currentUserCompany != null && currentUserCompany.getId().equals(company.getId())) {
+				if (currentUserCompany != null && currentUserCompany.getId().equals(entity.getId())) {
 					return "You cannot delete your own company. Please switch to another company first.";
 				}
 			}
 			// Rule 2: Check if company has any users
-			final long userCount = userCompanySettingsRepository.countByCompanyId(company.getId());
+			final long userCount = userCompanySettingsRepository.countByCompanyId(entity.getId());
 			if (userCount > 0) {
 				return String.format("Cannot delete company. It is associated with %d user(s). Please remove all users first.", userCount);
 			}
 			return null; // Company can be deleted
 		} catch (final Exception e) {
-			LOGGER.error("Error checking dependencies for company: {}", company.getName(), e);
+			LOGGER.error("Error checking dependencies for company: {}", entity.getName(), e);
 			return "Error checking dependencies: " + e.getMessage();
 		}
 	}
