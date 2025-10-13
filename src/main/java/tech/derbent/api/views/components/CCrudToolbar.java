@@ -46,7 +46,7 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		addClassName("crud-toolbar");
 		setWidthFull(); // Make toolbar take full width
 		// Automatically set dependency checker from service if it implements IDependencyChecker
-		this.dependencyChecker = entityService::checkDependencies;
+		this.dependencyChecker = entityService::checkDeleteAllowed;
 		createToolbarButtons();
 		LOGGER.debug("Created CCrudToolbar for entity: {}", entityClass.getSimpleName());
 	}
@@ -275,7 +275,7 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		currentEntity = (EntityClass) entity;
 		// Automatically set dependency checker from service when entity changes
 		if (entityService != null) {
-			this.dependencyChecker = entityService::checkDependencies;
+			this.dependencyChecker = entityService::checkDeleteAllowed;
 		}
 		updateButtonStates();
 	}

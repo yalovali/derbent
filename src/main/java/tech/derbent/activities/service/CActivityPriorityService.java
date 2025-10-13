@@ -28,8 +28,8 @@ public class CActivityPriorityService extends CEntityOfProjectService<CActivityP
 	protected Class<CActivityPriority> getEntityClass() { return CActivityPriority.class; }
 
 	@Override
-	public String checkDependencies(final CActivityPriority activityPriority) {
-		final String superCheck = super.checkDependencies(activityPriority);
+	public String checkDeleteAllowed(final CActivityPriority activityPriority) {
+		final String superCheck = super.checkDeleteAllowed(activityPriority);
 		if (superCheck != null) {
 			return superCheck;
 		}

@@ -18,8 +18,8 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> {
 	}
 
 	@Override
-	public String checkDependencies(final CDecision decision) {
-		return super.checkDependencies(decision);
+	public String checkDeleteAllowed(final CDecision decision) {
+		return super.checkDeleteAllowed(decision);
 	}
 
 	@Override

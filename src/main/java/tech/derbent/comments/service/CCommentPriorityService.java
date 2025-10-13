@@ -26,8 +26,8 @@ public class CCommentPriorityService extends CEntityOfProjectService<CCommentPri
 	protected Class<CCommentPriority> getEntityClass() { return CCommentPriority.class; }
 
 	@Override
-	public String checkDependencies(final CCommentPriority commentPriority) {
-		final String superCheck = super.checkDependencies(commentPriority);
+	public String checkDeleteAllowed(final CCommentPriority commentPriority) {
+		final String superCheck = super.checkDeleteAllowed(commentPriority);
 		if (superCheck != null) {
 			return superCheck;
 		}

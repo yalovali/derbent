@@ -73,8 +73,8 @@ public class CCommentService extends CAbstractService<CComment> {
 	protected Class<CComment> getEntityClass() { return CComment.class; }
 
 	@Override
-	public String checkDependencies(final CComment comment) {
-		return super.checkDependencies(comment);
+	public String checkDeleteAllowed(final CComment comment) {
+		return super.checkDeleteAllowed(comment);
 	}
 
 	@Override

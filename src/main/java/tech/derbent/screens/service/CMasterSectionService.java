@@ -24,8 +24,8 @@ public class CMasterSectionService extends CEntityOfProjectService<CMasterSectio
 	protected Class<CMasterSection> getEntityClass() { return CMasterSection.class; }
 
 	@Override
-	public String checkDependencies(final CMasterSection entity) {
-		return super.checkDependencies(entity);
+	public String checkDeleteAllowed(final CMasterSection entity) {
+		return super.checkDeleteAllowed(entity);
 	}
 
 	@Override

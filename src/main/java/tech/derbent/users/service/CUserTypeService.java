@@ -41,7 +41,7 @@ public class CUserTypeService extends CEntityOfProjectService<CUserType> {
 	 * @param userType the user type entity to check
 	 * @return null if type can be deleted, error message otherwise */
 	@Override
-	public String checkDependencies(final CUserType userType) {
+	public String checkDeleteAllowed(final CUserType userType) {
 		Check.notNull(userType, "User type cannot be null");
 		Check.notNull(userType.getId(), "User type ID cannot be null");
 		try {

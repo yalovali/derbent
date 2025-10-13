@@ -116,8 +116,8 @@ public class CUserProjectSettingsService extends CAbstractEntityRelationService<
 	protected Class<CUserProjectSettings> getEntityClass() { return CUserProjectSettings.class; }
 
 	@Override
-	public String checkDependencies(final CUserProjectSettings entity) {
-		return super.checkDependencies(entity);
+	public String checkDeleteAllowed(final CUserProjectSettings entity) {
+		return super.checkDeleteAllowed(entity);
 	}
 
 	@Override

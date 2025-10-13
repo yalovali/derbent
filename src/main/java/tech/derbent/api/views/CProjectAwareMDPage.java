@@ -6,7 +6,7 @@ import com.vaadin.flow.component.DetachEvent;
 import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.domains.CEntityOfProject;
 import tech.derbent.api.interfaces.IProjectChangeListener;
-import tech.derbent.api.services.CAbstractNamedEntityService;
+import tech.derbent.api.services.CEntityNamedService;
 import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CVerticalLayout;
@@ -22,7 +22,7 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
 	private static final long serialVersionUID = 1L;
 	protected final ISessionService sessionService;
 
-	protected CProjectAwareMDPage(final Class<EntityClass> entityClass, final CAbstractNamedEntityService<EntityClass> entityService,
+	protected CProjectAwareMDPage(final Class<EntityClass> entityClass, final CEntityNamedService<EntityClass> entityService,
 			final ISessionService sessionService, final CDetailSectionService screenService) {
 		super(entityClass, entityService, sessionService, screenService);
 		this.sessionService = sessionService;

@@ -25,8 +25,8 @@ public class COrderStatusService extends CEntityOfProjectService<COrderStatus> {
 	protected Class<COrderStatus> getEntityClass() { return COrderStatus.class; }
 
 	@Override
-	public String checkDependencies(final COrderStatus orderStatus) {
-		final String superCheck = super.checkDependencies(orderStatus);
+	public String checkDeleteAllowed(final COrderStatus orderStatus) {
+		final String superCheck = super.checkDeleteAllowed(orderStatus);
 		if (superCheck != null) {
 			return superCheck;
 		}

@@ -11,19 +11,23 @@ import tech.derbent.session.service.ISessionService;
 
 /** CAbstractNamedEntityService - Abstract service class for entities that extend CEntityNamed. Layer: Service (MVC) Provides common business logic
  * operations for named entities including validation, creation, and name-based queries with consistent error handling and logging. */
-public abstract class CAbstractNamedEntityService<EntityClass extends CEntityNamed<EntityClass>> extends CAbstractService<EntityClass> {
+public abstract class CEntityNamedService<EntityClass extends CEntityNamed<EntityClass>> extends CAbstractService<EntityClass> {
 
-	public CAbstractNamedEntityService(final IAbstractNamedRepository<EntityClass> repository, final Clock clock) {
+	public CEntityNamedService(final IAbstractNamedRepository<EntityClass> repository, final Clock clock) {
 		super(repository, clock);
 	}
 
-	/** Constructor for CAbstractNamedEntityService.
-	 * @param repository     the repository for data access operations
-	 * @param clock          the Clock instance for time-related operations
-	 * @param sessionService */
-	public CAbstractNamedEntityService(final IAbstractNamedRepository<EntityClass> repository, final Clock clock,
-			final ISessionService sessionService) {
+	public CEntityNamedService(final IAbstractNamedRepository<EntityClass> repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
+	}
+
+	@Override
+	public String checkDeleteAllowed(final EntityClass entity) {
+		String superCheck = super.checkDeleteAllowed(entity);
+		if (superCheck != null) {
+			return superCheck;
+		}
+		return null; // No dependencies found by default
 	}
 
 	@Transactional
@@ -36,6 +40,15 @@ public abstract class CAbstractNamedEntityService<EntityClass extends CEntityNam
 	/** Varsayılan sıralama anahtarları. İstediğiniz entity servisinde override edebilirsiniz. */
 	@Override
 	protected Map<String, Function<EntityClass, ?>> getSortKeyExtractors() { return Map.of("name", e -> e.getName(), "id", e -> e.getId()); }
+
+	@Override
+	public void initializeNewEntity(final EntityClass entity) {
+		super.initializeNewEntity(entity);
+		// Initialize description with default value if entity has this field
+		if (entity.getDescription() == null || entity.getDescription().isEmpty()) {
+			entity.setDescription("");
+		}
+	}
 
 	@Transactional (readOnly = true)
 	public boolean isNameUnique(final String name, final Long currentId) {
@@ -81,14 +94,5 @@ public abstract class CAbstractNamedEntityService<EntityClass extends CEntityNam
 			return false;
 		}
 		return true;
-	}
-
-	@Override
-	public void initializeNewEntity(final EntityClass entity) {
-		super.initializeNewEntity(entity);
-		// Initialize description with default value if entity has this field
-		if (entity.getDescription() == null || entity.getDescription().isEmpty()) {
-			entity.setDescription("");
-		}
 	}
 }

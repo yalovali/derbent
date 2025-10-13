@@ -10,7 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.roles.domain.CUserCompanyRole;
-import tech.derbent.api.services.CAbstractNamedEntityService;
+import tech.derbent.api.services.CEntityNamedService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.session.service.ISessionService;
@@ -20,7 +20,7 @@ import tech.derbent.session.service.ISessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CUserCompanyRoleService extends CAbstractNamedEntityService<CUserCompanyRole> {
+public class CUserCompanyRoleService extends CEntityNamedService<CUserCompanyRole> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserCompanyRoleService.class);
 
@@ -73,8 +73,8 @@ public class CUserCompanyRoleService extends CAbstractNamedEntityService<CUserCo
 	protected Class<CUserCompanyRole> getEntityClass() { return CUserCompanyRole.class; }
 
 	@Override
-	public String checkDependencies(final CUserCompanyRole entity) {
-		return super.checkDependencies(entity);
+	public String checkDeleteAllowed(final CUserCompanyRole entity) {
+		return super.checkDeleteAllowed(entity);
 	}
 
 	@Override

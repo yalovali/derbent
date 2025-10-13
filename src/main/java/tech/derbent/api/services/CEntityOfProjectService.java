@@ -15,11 +15,20 @@ import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.ISessionService;
 import tech.derbent.users.domain.CUser;
 
-public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProject<EntityClass>> extends CAbstractNamedEntityService<EntityClass> {
+public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProject<EntityClass>> extends CEntityNamedService<EntityClass> {
 
 	public CEntityOfProjectService(final IEntityOfProjectRepository<EntityClass> repository, final Clock clock,
 			final ISessionService sessionService) {
 		super(repository, clock, sessionService);
+	}
+
+	@Override
+	public String checkDeleteAllowed(final EntityClass entity) {
+		String superCheck = super.checkDeleteAllowed(entity);
+		if (superCheck != null) {
+			return superCheck;
+		}
+		return null; // No dependencies found by default
 	}
 
 	@Override

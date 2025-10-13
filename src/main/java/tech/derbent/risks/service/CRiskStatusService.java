@@ -35,8 +35,8 @@ public class CRiskStatusService extends CEntityOfProjectService<CRiskStatus> {
 	protected Class<CRiskStatus> getEntityClass() { return CRiskStatus.class; }
 
 	@Override
-	public String checkDependencies(final CRiskStatus riskStatus) {
-		final String superCheck = super.checkDependencies(riskStatus);
+	public String checkDeleteAllowed(final CRiskStatus riskStatus) {
+		final String superCheck = super.checkDeleteAllowed(riskStatus);
 		if (superCheck != null) {
 			return superCheck;
 		}

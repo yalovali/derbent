@@ -29,9 +29,9 @@ public class CMeetingTypeService extends CEntityOfProjectService<CMeetingType> {
 	 * @param meetingType the meeting type entity to check
 	 * @return null if type can be deleted, error message otherwise */
 	@Override
-	public String checkDependencies(final CMeetingType meetingType) {
+	public String checkDeleteAllowed(final CMeetingType meetingType) {
 		// Call super class first to check common dependencies
-		final String superCheck = super.checkDependencies(meetingType);
+		final String superCheck = super.checkDeleteAllowed(meetingType);
 		if (superCheck != null) {
 			return superCheck;
 		}

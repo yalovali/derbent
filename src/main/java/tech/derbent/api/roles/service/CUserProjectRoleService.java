@@ -70,8 +70,8 @@ public class CUserProjectRoleService extends CEntityOfProjectService<CUserProjec
 	protected Class<CUserProjectRole> getEntityClass() { return CUserProjectRole.class; }
 
 	@Override
-	public String checkDependencies(final CUserProjectRole entity) {
-		return super.checkDependencies(entity);
+	public String checkDeleteAllowed(final CUserProjectRole entity) {
+		return super.checkDeleteAllowed(entity);
 	}
 
 	@Override

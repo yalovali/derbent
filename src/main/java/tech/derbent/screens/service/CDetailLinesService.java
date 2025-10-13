@@ -84,8 +84,8 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> {
 	protected Class<CDetailLines> getEntityClass() { return CDetailLines.class; }
 
 	@Override
-	public String checkDependencies(final CDetailLines entity) {
-		return super.checkDependencies(entity);
+	public String checkDeleteAllowed(final CDetailLines entity) {
+		return super.checkDeleteAllowed(entity);
 	}
 
 	@Override

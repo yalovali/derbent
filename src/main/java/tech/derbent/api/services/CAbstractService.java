@@ -290,7 +290,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	 * checking rules for their entity type.
 	 * @param entity the entity to check for dependencies
 	 * @return null by default (entity can be deleted), or an error message if dependencies exist */
-	public String checkDependencies(final EntityClass entity) {
+	public String checkDeleteAllowed(final EntityClass entity) {
 		// Default implementation: allow deletion
 		// Subclasses should override to implement specific dependency checking
 		return null;

@@ -9,7 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.activities.domain.CActivityType;
-import tech.derbent.api.services.CEntityOfProjectService;
+import tech.derbent.api.services.CTypeEntityService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.ISessionService;
@@ -19,7 +19,7 @@ import tech.derbent.session.service.ISessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CActivityTypeService extends CEntityOfProjectService<CActivityType> {
+public class CActivityTypeService extends CTypeEntityService<CActivityType> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityTypeService.class);
 	@Autowired
@@ -35,22 +35,26 @@ public class CActivityTypeService extends CEntityOfProjectService<CActivityType>
 	 * @param activityType the activity type entity to check
 	 * @return null if type can be deleted, error message otherwise */
 	@Override
-	public String checkDependencies(final CActivityType activityType) {
-		Check.notNull(activityType, "Activity type cannot be null");
-		Check.notNull(activityType.getId(), "Activity type ID cannot be null");
+	public String checkDeleteAllowed(final CActivityType entity) {
+		String superCheck = super.checkDeleteAllowed(entity);
+		if (superCheck != null) {
+			return superCheck;
+		}
+		Check.notNull(entity, "Activity type cannot be null");
+		Check.notNull(entity.getId(), "Activity type ID cannot be null");
 		try {
 			// Check if this type is marked as non-deletable
-			if (activityType.getAttributeNonDeletable()) {
+			if (entity.getAttributeNonDeletable()) {
 				return "This activity type is marked as non-deletable and cannot be removed from the system.";
 			}
 			// Check if any activities are using this type
-			final long usageCount = activityRepository.countByActivityType(activityType);
+			final long usageCount = activityRepository.countByActivityType(entity);
 			if (usageCount > 0) {
 				return String.format("Cannot delete activity type. It is being used by %d activit%s.", usageCount, usageCount == 1 ? "y" : "ies");
 			}
 			return null; // Type can be deleted
 		} catch (final Exception e) {
-			LOGGER.error("Error checking dependencies for activity type: {}", activityType.getName(), e);
+			LOGGER.error("Error checking dependencies for activity type: {}", entity.getName(), e);
 			return "Error checking dependencies: " + e.getMessage();
 		}
 	}

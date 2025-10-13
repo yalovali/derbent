@@ -23,8 +23,8 @@ public class CCurrencyService extends CEntityOfProjectService<CCurrency> {
 	protected Class<CCurrency> getEntityClass() { return CCurrency.class; }
 
 	@Override
-	public String checkDependencies(final CCurrency entity) {
-		return super.checkDependencies(entity);
+	public String checkDeleteAllowed(final CCurrency entity) {
+		return super.checkDeleteAllowed(entity);
 	}
 
 	@Override

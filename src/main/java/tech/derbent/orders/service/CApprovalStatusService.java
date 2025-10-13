@@ -27,8 +27,8 @@ public class CApprovalStatusService extends CEntityOfProjectService<CApprovalSta
 	protected Class<CApprovalStatus> getEntityClass() { return CApprovalStatus.class; }
 
 	@Override
-	public String checkDependencies(final CApprovalStatus approvalStatus) {
-		final String superCheck = super.checkDependencies(approvalStatus);
+	public String checkDeleteAllowed(final CApprovalStatus approvalStatus) {
+		final String superCheck = super.checkDeleteAllowed(approvalStatus);
 		if (superCheck != null) {
 			return superCheck;
 		}

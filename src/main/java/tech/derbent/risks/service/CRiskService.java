@@ -20,8 +20,8 @@ public class CRiskService extends CEntityOfProjectService<CRisk> {
 	}
 
 	@Override
-	public String checkDependencies(final CRisk risk) {
-		return super.checkDependencies(risk);
+	public String checkDeleteAllowed(final CRisk risk) {
+		return super.checkDeleteAllowed(risk);
 	}
 
 	@Override

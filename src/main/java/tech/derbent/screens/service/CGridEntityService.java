@@ -39,8 +39,8 @@ public class CGridEntityService extends CEntityOfProjectService<CGridEntity> {
 	protected Class<CGridEntity> getEntityClass() { return CGridEntity.class; }
 
 	@Override
-	public String checkDependencies(final CGridEntity entity) {
-		return super.checkDependencies(entity);
+	public String checkDeleteAllowed(final CGridEntity entity) {
+		return super.checkDeleteAllowed(entity);
 	}
 
 	@Override

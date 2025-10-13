@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.interfaces.ILayoutChangeListener;
-import tech.derbent.api.services.CAbstractNamedEntityService;
+import tech.derbent.api.services.CEntityNamedService;
 import tech.derbent.api.services.CDetailsBuilder;
 import tech.derbent.api.utils.Check;
 import tech.derbent.screens.domain.CDetailSection;
@@ -19,7 +19,7 @@ public abstract class CAbstractNamedEntityPage<EntityClass extends CEntityNamed<
 	protected final CDetailsBuilder detailsBuilder = new CDetailsBuilder();
 	protected final CDetailSectionService screenService;
 
-	protected CAbstractNamedEntityPage(final Class<EntityClass> entityClass, final CAbstractNamedEntityService<EntityClass> entityService,
+	protected CAbstractNamedEntityPage(final Class<EntityClass> entityClass, final CEntityNamedService<EntityClass> entityService,
 			final ISessionService sessionService, final CDetailSectionService screenService) {
 		super(entityClass, entityService, sessionService);
 		this.screenService = screenService;
@@ -40,7 +40,7 @@ public abstract class CAbstractNamedEntityPage<EntityClass extends CEntityNamed<
 	@Override
 	protected EntityClass createNewEntity() {
 		final String name = "New Item";
-		return ((CAbstractNamedEntityService<EntityClass>) entityService).newEntity(name);
+		return ((CEntityNamedService<EntityClass>) entityService).newEntity(name);
 	}
 
 	@Override

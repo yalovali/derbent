@@ -31,9 +31,9 @@ public class CMeetingStatusService extends CEntityOfProjectService<CMeetingStatu
 	 * @param meetingStatus the meeting status entity to check
 	 * @return null if status can be deleted, error message otherwise */
 	@Override
-	public String checkDependencies(final CMeetingStatus meetingStatus) {
+	public String checkDeleteAllowed(final CMeetingStatus meetingStatus) {
 		// Call super class first to check common dependencies
-		final String superCheck = super.checkDependencies(meetingStatus);
+		final String superCheck = super.checkDeleteAllowed(meetingStatus);
 		if (superCheck != null) {
 			return superCheck;
 		}

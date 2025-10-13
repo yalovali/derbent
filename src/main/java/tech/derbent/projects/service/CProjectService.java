@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
-import tech.derbent.api.services.CAbstractNamedEntityService;
+import tech.derbent.api.services.CEntityNamedService;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CComponentProjectUserSettings;
@@ -24,7 +24,7 @@ import tech.derbent.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CProjectService extends CAbstractNamedEntityService<CProject> {
+public class CProjectService extends CEntityNamedService<CProject> {
 
 	@Autowired
 	private ApplicationContext applicationContext;
@@ -91,8 +91,8 @@ public class CProjectService extends CAbstractNamedEntityService<CProject> {
 	protected Class<CProject> getEntityClass() { return CProject.class; }
 
 	@Override
-	public String checkDependencies(final CProject project) {
-		return super.checkDependencies(project);
+	public String checkDeleteAllowed(final CProject project) {
+		return super.checkDeleteAllowed(project);
 	}
 
 	@Override

@@ -4,7 +4,7 @@ import java.time.Clock;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.services.CAbstractNamedEntityService;
+import tech.derbent.api.services.CEntityNamedService;
 import tech.derbent.orders.domain.COrderApproval;
 import tech.derbent.session.service.ISessionService;
 
@@ -13,7 +13,7 @@ import tech.derbent.session.service.ISessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class COrderApprovalService extends CAbstractNamedEntityService<COrderApproval> {
+public class COrderApprovalService extends CEntityNamedService<COrderApproval> {
 
 	COrderApprovalService(final IOrderApprovalRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
@@ -23,8 +23,8 @@ public class COrderApprovalService extends CAbstractNamedEntityService<COrderApp
 	protected Class<COrderApproval> getEntityClass() { return COrderApproval.class; }
 
 	@Override
-	public String checkDependencies(final COrderApproval entity) {
-		return super.checkDependencies(entity);
+	public String checkDeleteAllowed(final COrderApproval entity) {
+		return super.checkDeleteAllowed(entity);
 	}
 
 	@Override

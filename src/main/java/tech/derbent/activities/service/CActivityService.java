@@ -24,8 +24,8 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 	}
 
 	@Override
-	public String checkDependencies(final CActivity activity) {
-		return super.checkDependencies(activity);
+	public String checkDeleteAllowed(final CActivity activity) {
+		return super.checkDeleteAllowed(activity);
 	}
 
 	/** Helper method to create a placeholder CActivityStatus for activities without a status.

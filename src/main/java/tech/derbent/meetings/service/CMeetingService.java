@@ -21,8 +21,8 @@ public class CMeetingService extends CEntityOfProjectService<CMeeting> implement
 	}
 
 	@Override
-	public String checkDependencies(final CMeeting entity) {
-		return super.checkDependencies(entity);
+	public String checkDeleteAllowed(final CMeeting entity) {
+		return super.checkDeleteAllowed(entity);
 	}
 
 	@Override

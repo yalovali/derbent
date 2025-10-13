@@ -51,8 +51,8 @@ public class CPageEntityService extends CProjectItemService<CPageEntity> {
 	protected Class<CPageEntity> getEntityClass() { return CPageEntity.class; }
 
 	@Override
-	public String checkDependencies(final CPageEntity entity) {
-		return super.checkDependencies(entity);
+	public String checkDeleteAllowed(final CPageEntity entity) {
+		return super.checkDeleteAllowed(entity);
 	}
 
 	@Override

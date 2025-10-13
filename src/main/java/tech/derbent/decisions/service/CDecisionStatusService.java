@@ -26,9 +26,9 @@ public class CDecisionStatusService extends CEntityOfProjectService<CDecisionSta
 	 * @param decisionStatus the decision status entity to check
 	 * @return null if status can be deleted, error message otherwise */
 	@Override
-	public String checkDependencies(final CDecisionStatus decisionStatus) {
+	public String checkDeleteAllowed(final CDecisionStatus decisionStatus) {
 		// Call super class first to check common dependencies
-		final String superCheck = super.checkDependencies(decisionStatus);
+		final String superCheck = super.checkDeleteAllowed(decisionStatus);
 		if (superCheck != null) {
 			return superCheck;
 		}

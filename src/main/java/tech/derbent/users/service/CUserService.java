@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import tech.derbent.api.roles.domain.CUserCompanyRole;
-import tech.derbent.api.services.CAbstractNamedEntityService;
+import tech.derbent.api.services.CEntityNamedService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CComponentUserProjectSettings;
 import tech.derbent.companies.domain.CCompany;
@@ -38,7 +38,7 @@ import tech.derbent.users.domain.CUser;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CUserService extends CAbstractNamedEntityService<CUser> implements UserDetailsService {
+public class CUserService extends CEntityNamedService<CUser> implements UserDetailsService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserService.class);
 	@Autowired
@@ -267,7 +267,7 @@ public class CUserService extends CAbstractNamedEntityService<CUser> implements 
 	 * @param user the user entity to check
 	 * @return null if user can be deleted, error message otherwise */
 	@Override
-	public String checkDependencies(final CUser user) {
+	public String checkDeleteAllowed(final CUser user) {
 		Check.notNull(user, "User cannot be null");
 		Check.notNull(user.getId(), "User ID cannot be null");
 		Check.notNull(user.getCompany(), "User company cannot be null");

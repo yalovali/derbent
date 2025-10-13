@@ -25,8 +25,8 @@ public class COrderTypeService extends CEntityOfProjectService<COrderType> {
 	protected Class<COrderType> getEntityClass() { return COrderType.class; }
 
 	@Override
-	public String checkDependencies(final COrderType orderType) {
-		final String superCheck = super.checkDependencies(orderType);
+	public String checkDeleteAllowed(final COrderType orderType) {
+		final String superCheck = super.checkDeleteAllowed(orderType);
 		if (superCheck != null) {
 			return superCheck;
 		}

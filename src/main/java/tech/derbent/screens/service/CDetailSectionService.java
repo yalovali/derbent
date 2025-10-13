@@ -54,8 +54,8 @@ public class CDetailSectionService extends CEntityOfProjectService<CDetailSectio
 	protected Class<CDetailSection> getEntityClass() { return CDetailSection.class; }
 
 	@Override
-	public String checkDependencies(final CDetailSection entity) {
-		return super.checkDependencies(entity);
+	public String checkDeleteAllowed(final CDetailSection entity) {
+		return super.checkDeleteAllowed(entity);
 	}
 
 	@Override

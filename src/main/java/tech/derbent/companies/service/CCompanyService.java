@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.services.CAbstractNamedEntityService;
+import tech.derbent.api.services.CEntityNamedService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.session.service.ISessionService;
@@ -18,7 +18,7 @@ import tech.derbent.users.service.IUserCompanySettingsRepository;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
+public class CCompanyService extends CEntityNamedService<CCompany> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCompanyService.class);
 	@Autowired
@@ -113,7 +113,7 @@ public class CCompanyService extends CAbstractNamedEntityService<CCompany> {
 	 * @param company the company entity to check
 	 * @return null if company can be deleted, error message otherwise */
 	@Override
-	public String checkDependencies(final CCompany company) {
+	public String checkDeleteAllowed(final CCompany company) {
 		Check.notNull(company, "Company cannot be null");
 		Check.notNull(company.getId(), "Company ID cannot be null");
 		try {

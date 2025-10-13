@@ -34,7 +34,7 @@ public class CActivityStatusService extends CEntityOfProjectService<CActivitySta
 	 * @param activityStatus the activity status entity to check
 	 * @return null if status can be deleted, error message otherwise */
 	@Override
-	public String checkDependencies(final CActivityStatus activityStatus) {
+	public String checkDeleteAllowed(final CActivityStatus activityStatus) {
 		Check.notNull(activityStatus, "Activity status cannot be null");
 		Check.notNull(activityStatus.getId(), "Activity status ID cannot be null");
 		try {

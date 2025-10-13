@@ -78,8 +78,8 @@ public class CSystemSettingsService extends CAbstractService<CSystemSettings> {
 	 * @param systemSettings the system settings entity to check
 	 * @return error message preventing deletion */
 	@Override
-	public String checkDependencies(final CSystemSettings systemSettings) {
-		return super.checkDependencies(systemSettings);
+	public String checkDeleteAllowed(final CSystemSettings systemSettings) {
+		return super.checkDeleteAllowed(systemSettings);
 		// System settings should not be deleted - it's a singleton
 		// Uncomment to prevent deletion: return "System settings cannot be deleted. It is a required system configuration.";
 	}

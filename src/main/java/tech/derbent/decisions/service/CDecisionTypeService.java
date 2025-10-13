@@ -39,9 +39,9 @@ public class CDecisionTypeService extends CEntityOfProjectService<CDecisionType>
 	 * @param decisionType the decision type entity to check
 	 * @return null if type can be deleted, error message otherwise */
 	@Override
-	public String checkDependencies(final CDecisionType decisionType) {
+	public String checkDeleteAllowed(final CDecisionType decisionType) {
 		// Call super class first to check common dependencies
-		final String superCheck = super.checkDependencies(decisionType);
+		final String superCheck = super.checkDeleteAllowed(decisionType);
 		if (superCheck != null) {
 			return superCheck;
 		}

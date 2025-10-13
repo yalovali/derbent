@@ -125,8 +125,8 @@ public class CUserCompanySettingsService extends CAbstractEntityRelationService<
 	protected Class<CUserCompanySetting> getEntityClass() { return CUserCompanySetting.class; }
 
 	@Override
-	public String checkDependencies(final CUserCompanySetting entity) {
-		return super.checkDependencies(entity);
+	public String checkDeleteAllowed(final CUserCompanySetting entity) {
+		return super.checkDeleteAllowed(entity);
 	}
 
 	@Override
