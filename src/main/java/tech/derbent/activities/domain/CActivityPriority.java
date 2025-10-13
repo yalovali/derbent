@@ -17,6 +17,9 @@ import tech.derbent.projects.domain.CProject;
 @AttributeOverride (name = "id", column = @Column (name = "cactivitypriority_id"))
 public class CActivityPriority extends CTypeEntity<CActivityPriority> {
 
+	public static final String DEFAULT_COLOR = "#10a2f8";
+	public static final String DEFAULT_ICON = "vaadin:tag";
+	public static final String VIEW_NAME = "Activity Priority Management";
 	/** Indicates if this is the default priority. */
 	@Column (name = "is_default", nullable = false)
 	@AMetaData (

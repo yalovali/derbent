@@ -138,18 +138,15 @@ public class CDynamicPageView extends CDynamicPageViewWithSections {
 	/** Initialize the page layout and content. */
 	@Override
 	protected void initializePage() {
-		setSizeFull();
-		// Set page title for browser tab only if pageTitle is not empty
+		LOGGER.debug("Initializing dynamic page view for page: {}", pageEntity != null ? pageEntity.getPageTitle() : "null");
+		Check.notNull(pageEntity, "pageEntity cannot be null");
+		// setSizeFull();
 		if (pageEntity.getPageTitle() != null && !pageEntity.getPageTitle().trim().isEmpty()) {
 			getElement().executeJs("document.title = $0", pageEntity.getPageTitle());
 		}
-		// Create page header
 		createPageHeader();
-		// Create page content
 		createGridAndDetailSections();
-		// Create page footer with metadata
 		createPageFooter();
-		LOGGER.debug("Dynamic page view initialized for: {}", pageEntity.getPageTitle());
 	}
 
 	/** Basic HTML sanitization for content. In a production system, use a proper HTML sanitization library. */

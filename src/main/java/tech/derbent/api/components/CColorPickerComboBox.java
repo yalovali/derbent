@@ -9,6 +9,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.utils.CAuxillaries;
+import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.views.components.CDiv;
 import tech.derbent.api.views.components.CHorizontalLayout;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
@@ -29,7 +30,7 @@ public class CColorPickerComboBox extends Composite<CHorizontalLayout>
 		colorField.setPlaceholder(fieldInfo.getPlaceholder().isEmpty() ? "#000000" : fieldInfo.getPlaceholder());
 		colorField.setReadOnly(fieldInfo.isReadOnly());
 		// Set up color items before setting initial value
-		List<String> colors = CAuxillaries.getWebColors();
+		List<String> colors = CColorUtils.getWebColors();
 		colorField.setItems(colors);
 		// Configure custom renderer for color display
 		colorField.setRenderer(new ComponentRenderer<>(this::createColorItemRenderer));

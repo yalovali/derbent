@@ -311,14 +311,7 @@ public class CDataInitializer {
 		priority.setIsDefault(isDefault);
 		activityPriorityService.save(priority);
 	}
-	/** Creates additional activities for Customer Experience Enhancement project. */
-	// Additional meeting creation methods
 
-	/** Creates additional activities for Digital Transformation Initiative project. */
-	/** Creates additional activities for Infrastructure Modernization project. */
-	/** Creates additional activities for Product Development Phase 2 project. */
-	/** Creates system administrator user for a specific company. Each company gets its own admin user with company-specific username.
-	 * @param company the company to create admin user for */
 	@Transactional (readOnly = false)
 	private void createUserForCompany(CCompany company) {
 		// Create unique admin username per company (e.g., admin-ofteknoloji, admin-ofdanismanlik)
@@ -333,6 +326,7 @@ public class CDataInitializer {
 		user.setLastname(company.getName() + " Yöneticisi");
 		user.setPhone("+90-462-751-1001");
 		user.setProfilePictureData(profilePictureBytes);
+		user.setUserType(userTypeService.getRandom());
 		userService.save(user);
 		LOGGER.info("Created admin user {} for company {}", uniqueAdminLogin, company.getName());
 	}
@@ -557,9 +551,10 @@ public class CDataInitializer {
 					}
 			};
 			for (final String[] typeData : activityTypes) {
-				final CActivityType item = activityTypeService.createEntity(typeData[0], project);
+				final CActivityType item = activityTypeService.newEntity(typeData[0], project);
 				item.setDescription(typeData[1]);
-				item.setColor(CColorUtils.getRandomColor(true));
+				item.setColor(CColorUtils.getRandomFromWebColors(true));
+				activityTypeService.save(item);
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error creating activity types", e);
@@ -677,9 +672,10 @@ public class CDataInitializer {
 					}
 			};
 			for (final String[] typeData : decisionTypes) {
-				final CDecisionType item = decisionTypeService.createEntity(typeData[0], project);
+				final CDecisionType item = decisionTypeService.newEntity(typeData[0], project);
 				item.setDescription(typeData[1]);
 				item.setColor(CColorUtils.getRandomColor(true));
+				decisionTypeService.save(item);
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error creating decision types for project: {}", project.getName(), e);
@@ -722,7 +718,7 @@ public class CDataInitializer {
 					}
 			};
 			for (final String[] typeData : meetingTypes) {
-				final CMeetingType meetingType = meetingTypeService.createEntity(typeData[0], project);
+				final CMeetingType meetingType = meetingTypeService.newEntity(typeData[0], project);
 				meetingType.setDescription(typeData[1]);
 				meetingType.setColor(CColorUtils.getRandomColor(true));
 				meetingTypeService.save(meetingType);
@@ -769,7 +765,7 @@ public class CDataInitializer {
 					}
 			};
 			for (final String[] typeData : orderTypes) {
-				final COrderType orderType = orderTypeService.createEntity(typeData[0], project);
+				final COrderType orderType = orderTypeService.newEntity(typeData[0], project);
 				orderType.setDescription(typeData[1]);
 				orderType.setColor(CColorUtils.getRandomColor(true));
 				orderTypeService.save(orderType);
@@ -855,7 +851,7 @@ public class CDataInitializer {
 					}
 			};
 			for (final String[] typeData : userTypes) {
-				final CUserType userType = userTypeService.createEntity(typeData[0], project);
+				final CUserType userType = userTypeService.newEntity(typeData[0], project);
 				userType.setDescription(typeData[1]);
 				userType.setColor(CColorUtils.getRandomColor(true));
 				userTypeService.save(userType);
@@ -863,12 +859,6 @@ public class CDataInitializer {
 		} catch (final Exception e) {
 			LOGGER.error("Error creating user types for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize user types for project: " + project.getName(), e);
-		}
-		// for each user distribute random user types
-		final List<CUser> users = userService.list(Pageable.unpaged()).getContent();
-		for (final CUser user : users) {
-			user.setUserType(userTypeService.getRandom());
-			userService.save(user);
 		}
 	}
 

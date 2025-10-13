@@ -10,8 +10,6 @@ import org.springframework.data.repository.query.Param;
 import tech.derbent.api.domains.CEntityOfProject;
 import tech.derbent.projects.domain.CProject;
 
-/** CEntityOfProjectRepository - Base repository interface for entities that extend CEntityOfProject. Layer: Service (MVC) - Repository interface
- * Provides common query methods for project-aware entities using standard pagination patterns. */
 @NoRepositoryBean
 public interface IEntityOfProjectRepository<EntityClass extends CEntityOfProject<EntityClass>> extends IAbstractNamedRepository<EntityClass> {
 

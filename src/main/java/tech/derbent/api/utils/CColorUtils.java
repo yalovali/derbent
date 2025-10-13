@@ -2,6 +2,8 @@ package tech.derbent.api.utils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -198,16 +200,13 @@ public final class CColorUtils {
 		return styleIcon(icon);
 	}
 
-	public static String getRandomColor(boolean dark) { // TODO Auto-generated method stub
-		// Generate a random color in hex format
-		if (dark) {
-			String color;
-			do {
-				color = String.format("#%06x", (int) (Math.random() * 0xFFFFFF));
-			} while (getContrastTextColor(color).equals(DEFAULT_DARK_TEXT)); // Ensure it's a dark color
-			return color;
-		}
-		String color = String.format("#%06x", (int) (Math.random() * 0xFFFFFF));
+	public static String getRandomColor(boolean dark) {
+		String color;
+		double brightness;
+		do {
+			color = String.format("#%06x", (int) (Math.random() * 0xFFFFFF));
+			brightness = getBrightness(color);
+		} while (dark ? brightness > 0.3 : brightness <= 1); // dark < 0.5, light >= 0.5
 		return color;
 	}
 
@@ -223,6 +222,75 @@ public final class CColorUtils {
 			LOGGER.error("Error getting static icon filename for class {}: {}", clazz.getSimpleName(), e.getMessage());
 			throw e;
 		}
+	}
+
+	public static String getRandomFromWebColors(boolean dark) {
+		final List<String> colors = getWebColors();
+		// Filter colors based on brightness
+		List<String> filtered = new ArrayList<>();
+		if (dark) {
+			for (String hex : colors) {
+				double brightness = getBrightness(hex);
+				if (dark && brightness < 0.7) { // dark colors
+					filtered.add(hex);
+				}
+			}
+		}
+		// fallback: if no filtered colors, use full list
+		if (filtered.isEmpty()) {
+			filtered = colors;
+		}
+		int index = (int) (Math.random() * filtered.size());
+		return filtered.get(index);
+	}
+
+	/** Helper to calculate brightness (0 = dark, 1 = bright) */
+	private static double getBrightness(String hex) {
+		int r = Integer.parseInt(hex.substring(1, 3), 16);
+		int g = Integer.parseInt(hex.substring(3, 5), 16);
+		int b = Integer.parseInt(hex.substring(5, 7), 16);
+		// relative luminance formula (per W3C)
+		return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255.0;
+	}
+
+	public static List<String> getWebColors() {
+		// Common hex color constants for color picker
+		final List<String> colors = new ArrayList<>();
+		colors.add("#F0F8FF"); // AliceBlue
+		colors.add("#FAEBD7"); // AntiqueWhite
+		colors.add("#00FFFF"); // Aqua
+		colors.add("#7FFFD4"); // Aquamarine
+		colors.add("#F0FFFF"); // Azure
+		colors.add("#F5F5DC"); // Beige
+		colors.add("#FFE4C4"); // Bisque
+		colors.add("#000000"); // Black
+		colors.add("#FFEBCD"); // BlanchedAlmond
+		colors.add("#0000FF"); // Blue
+		colors.add("#8A2BE2"); // BlueViolet
+		colors.add("#A52A2A"); // Brown
+		colors.add("#DEB887"); // BurlyWood
+		colors.add("#5F9EA0"); // CadetBlue
+		colors.add("#7FFF00"); // Chartreuse
+		colors.add("#D2691E"); // Chocolate
+		colors.add("#FF7F50"); // Coral
+		colors.add("#6495ED"); // CornflowerBlue
+		colors.add("#FFF8DC"); // Cornsilk
+		colors.add("#DC143C"); // Crimson
+		colors.add("#00FFFF"); // Cyan
+		colors.add("#00008B"); // DarkBlue
+		colors.add("#008B8B"); // DarkCyan
+		colors.add("#B8860B"); // DarkGoldenRod
+		colors.add("#A9A9A9"); // DarkGray
+		colors.add("#006400"); // DarkGreen
+		colors.add("#BDB76B"); // DarkKhaki
+		colors.add("#8B008B"); // DarkMagenta
+		colors.add("#556B2F"); // DarkOliveGreen
+		colors.add("#f39c12");
+		colors.add("#d012d7"); // DarkOrchid
+		colors.add("#e74c3c"); // DarkRed
+		colors.add("#27ae60"); // DarkSalmon
+		colors.add("#95a5a6"); // DarkSeaGreen
+		return colors;
 	}
 
 	public static String getStaticIconColorCode(final String className) throws Exception {
@@ -323,11 +391,6 @@ public final class CColorUtils {
 		return avatar;
 	}
 
-	/** Gets a generic entity display with icon - works for any named entity with icon support. This method creates a horizontal layout containing an
-	 * entity's icon and name.
-	 * @param entity the named entity to display (must not be null)
-	 * @return a HorizontalLayout containing the entity's icon and name
-	 * @throws IllegalArgumentException if entity is null */
 	public static HorizontalLayout getEntityWithIcon(final CEntityNamed<?> entity) {
 		Check.notNull(entity, "Entity cannot be null when creating entity with icon display");
 		final HorizontalLayout layout = new HorizontalLayout();

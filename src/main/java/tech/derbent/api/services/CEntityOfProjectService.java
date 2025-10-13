@@ -1,6 +1,7 @@
 package tech.derbent.api.services;
 
 import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -45,18 +46,6 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		} catch (final Exception e) {
 			LOGGER.error("Error counting entities by project '{}' in {}: {}", project.getName(), getClass().getSimpleName(), e.getMessage());
 			throw new RuntimeException("Failed to count entities by project", e);
-		}
-	}
-
-	public EntityClass createEntity(final String name, final CProject project) {
-		try {
-			Check.notNull(project, "Project cannot be null");
-			Check.notBlank(name, "Entity name cannot be null or empty");
-			final EntityClass entity = newEntity(name, project);
-			repository.saveAndFlush(entity);
-			return entity;
-		} catch (final Exception e) {
-			throw new RuntimeException("Failed to create instance of " + getEntityClass().getName(), e);
 		}
 	}
 
@@ -110,6 +99,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		CUser currentUser = sessionService.getActiveUser().orElseThrow(() -> new IllegalStateException("No active user in session"));
 		entity.setProject(activeProject);
 		entity.setCreatedBy(currentUser);
+		entity.setCreatedDate(LocalDateTime.now(clock));
 		entity.setAssignedTo(currentUser);
 	}
 

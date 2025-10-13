@@ -2,7 +2,6 @@ package tech.derbent.api.utils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -510,42 +509,6 @@ public class CAuxillaries {
 			LOGGER.error("Unknown entity type: " + simpleName + " dont forget to update CAuxillaries");
 			throw new IllegalArgumentException("Unknown entity type: " + simpleName);
 		}
-	}
-
-	public static List<String> getWebColors() {
-		// Common hex color constants for color picker
-		final List<String> colors = new ArrayList<>();
-		colors.add("#F0F8FF"); // AliceBlue
-		colors.add("#FAEBD7"); // AntiqueWhite
-		colors.add("#00FFFF"); // Aqua
-		colors.add("#7FFFD4"); // Aquamarine
-		colors.add("#F0FFFF"); // Azure
-		colors.add("#F5F5DC"); // Beige
-		colors.add("#FFE4C4"); // Bisque
-		colors.add("#000000"); // Black
-		colors.add("#FFEBCD"); // BlanchedAlmond
-		colors.add("#0000FF"); // Blue
-		colors.add("#8A2BE2"); // BlueViolet
-		colors.add("#A52A2A"); // Brown
-		colors.add("#DEB887"); // BurlyWood
-		colors.add("#5F9EA0"); // CadetBlue
-		colors.add("#7FFF00"); // Chartreuse
-		colors.add("#D2691E"); // Chocolate
-		colors.add("#FF7F50"); // Coral
-		colors.add("#6495ED"); // CornflowerBlue
-		colors.add("#FFF8DC"); // Cornsilk
-		colors.add("#DC143C"); // Crimson
-		colors.add("#00FFFF"); // Cyan
-		colors.add("#00008B"); // DarkBlue
-		colors.add("#008B8B"); // DarkCyan
-		colors.add("#B8860B"); // DarkGoldenRod
-		colors.add("#A9A9A9"); // DarkGray
-		colors.add("#006400"); // DarkGreen
-		colors.add("#BDB76B"); // DarkKhaki
-		colors.add("#8B008B"); // DarkMagenta
-		colors.add("#556B2F"); // DarkOliveGreen
-		colors.add("#FF8C00"); // DarkOrange
-		return colors;
 	}
 
 	public static String invokeMethodOfString(final Object entity, final String methodName) throws Exception {
