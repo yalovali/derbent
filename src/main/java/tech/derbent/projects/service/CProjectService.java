@@ -98,7 +98,12 @@ public class CProjectService extends CEntityNamedService<CProject> {
 	@Override
 	public void initializeNewEntity(final CProject entity) {
 		super.initializeNewEntity(entity);
-		// Additional entity-specific initialization can be added here if needed
+		// Get current company from session
+		final CCompany currentCompany = getCurrentCompany();
+		// Initialize company with current company
+		entity.setCompany(currentCompany);
+		// Note: CProject extends CEntityNamed, not CEntityOfProject, so it doesn't have project field
+		// The company field is the primary association for projects
 	}
 
 	@PreAuthorize ("permitAll()")
