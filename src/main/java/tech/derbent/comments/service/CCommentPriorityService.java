@@ -5,7 +5,7 @@ import tech.derbent.projects.domain.CProject;
 import java.time.Clock;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import tech.derbent.api.services.CEntityOfProjectService;
+import tech.derbent.api.services.CTypeEntityService;
 import tech.derbent.comments.domain.CCommentPriority;
 import tech.derbent.session.service.ISessionService;
 
@@ -14,7 +14,7 @@ import tech.derbent.session.service.ISessionService;
  * components */
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CCommentPriorityService extends CEntityOfProjectService<CCommentPriority> {
+public class CCommentPriorityService extends CTypeEntityService<CCommentPriority> {
 
 	private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CCommentPriorityService.class);
 
@@ -25,9 +25,13 @@ public class CCommentPriorityService extends CEntityOfProjectService<CCommentPri
 	@Override
 	protected Class<CCommentPriority> getEntityClass() { return CCommentPriority.class; }
 
+	/** Checks dependencies before allowing comment priority deletion. Always calls super.checkDeleteAllowed() first to ensure all parent-level checks
+	 * (null validation, non-deletable flag) are performed.
+	 * @param entity the comment priority entity to check
+	 * @return null if priority can be deleted, error message otherwise */
 	@Override
-	public String checkDeleteAllowed(final CCommentPriority commentPriority) {
-		final String superCheck = super.checkDeleteAllowed(commentPriority);
+	public String checkDeleteAllowed(final CCommentPriority entity) {
+		final String superCheck = super.checkDeleteAllowed(entity);
 		if (superCheck != null) {
 			return superCheck;
 		}

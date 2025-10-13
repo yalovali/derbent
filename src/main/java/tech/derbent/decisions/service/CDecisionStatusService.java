@@ -5,13 +5,13 @@ import tech.derbent.projects.domain.CProject;
 import java.time.Clock;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import tech.derbent.api.services.CEntityOfProjectService;
+import tech.derbent.api.services.CStatusService;
 import tech.derbent.decisions.domain.CDecisionStatus;
 import tech.derbent.session.service.ISessionService;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
-public class CDecisionStatusService extends CEntityOfProjectService<CDecisionStatus> {
+public class CDecisionStatusService extends CStatusService<CDecisionStatus> {
 
 	private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CDecisionStatusService.class);
 
@@ -22,13 +22,14 @@ public class CDecisionStatusService extends CEntityOfProjectService<CDecisionSta
 	@Override
 	protected Class<CDecisionStatus> getEntityClass() { return CDecisionStatus.class; }
 
-	/** Checks dependencies before allowing decision status deletion.
-	 * @param decisionStatus the decision status entity to check
+	/** Checks dependencies before allowing decision status deletion. Always calls super.checkDeleteAllowed() first to ensure all parent-level checks
+	 * (null validation, non-deletable flag) are performed.
+	 * @param entity the decision status entity to check
 	 * @return null if status can be deleted, error message otherwise */
 	@Override
-	public String checkDeleteAllowed(final CDecisionStatus decisionStatus) {
+	public String checkDeleteAllowed(final CDecisionStatus entity) {
 		// Call super class first to check common dependencies
-		final String superCheck = super.checkDeleteAllowed(decisionStatus);
+		final String superCheck = super.checkDeleteAllowed(entity);
 		if (superCheck != null) {
 			return superCheck;
 		}

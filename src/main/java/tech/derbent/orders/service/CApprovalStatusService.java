@@ -6,7 +6,7 @@ import java.time.Clock;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.services.CEntityOfProjectService;
+import tech.derbent.api.services.CStatusService;
 import tech.derbent.orders.domain.CApprovalStatus;
 import tech.derbent.session.service.ISessionService;
 
@@ -15,7 +15,7 @@ import tech.derbent.session.service.ISessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CApprovalStatusService extends CEntityOfProjectService<CApprovalStatus> {
+public class CApprovalStatusService extends CStatusService<CApprovalStatus> {
 
 	private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CApprovalStatusService.class);
 
@@ -26,9 +26,13 @@ public class CApprovalStatusService extends CEntityOfProjectService<CApprovalSta
 	@Override
 	protected Class<CApprovalStatus> getEntityClass() { return CApprovalStatus.class; }
 
+	/** Checks dependencies before allowing approval status deletion. Always calls super.checkDeleteAllowed() first to ensure all parent-level checks
+	 * (null validation, non-deletable flag) are performed.
+	 * @param entity the approval status entity to check
+	 * @return null if status can be deleted, error message otherwise */
 	@Override
-	public String checkDeleteAllowed(final CApprovalStatus approvalStatus) {
-		final String superCheck = super.checkDeleteAllowed(approvalStatus);
+	public String checkDeleteAllowed(final CApprovalStatus entity) {
+		final String superCheck = super.checkDeleteAllowed(entity);
 		if (superCheck != null) {
 			return superCheck;
 		}

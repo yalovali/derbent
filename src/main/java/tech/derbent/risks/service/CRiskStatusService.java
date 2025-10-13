@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.services.CEntityOfProjectService;
+import tech.derbent.api.services.CStatusService;
 import tech.derbent.risks.domain.CRiskStatus;
 import tech.derbent.session.service.ISessionService;
 
@@ -16,7 +16,7 @@ import tech.derbent.session.service.ISessionService;
  * including CRUD operations, validation, and workflow management. */
 @Service
 @Transactional
-public class CRiskStatusService extends CEntityOfProjectService<CRiskStatus> {
+public class CRiskStatusService extends CStatusService<CRiskStatus> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskStatusService.class);
 
@@ -34,9 +34,13 @@ public class CRiskStatusService extends CEntityOfProjectService<CRiskStatus> {
 	@Override
 	protected Class<CRiskStatus> getEntityClass() { return CRiskStatus.class; }
 
+	/** Checks dependencies before allowing risk status deletion. Always calls super.checkDeleteAllowed() first to ensure all parent-level checks
+	 * (null validation, non-deletable flag) are performed.
+	 * @param entity the risk status entity to check
+	 * @return null if status can be deleted, error message otherwise */
 	@Override
-	public String checkDeleteAllowed(final CRiskStatus riskStatus) {
-		final String superCheck = super.checkDeleteAllowed(riskStatus);
+	public String checkDeleteAllowed(final CRiskStatus entity) {
+		final String superCheck = super.checkDeleteAllowed(entity);
 		if (superCheck != null) {
 			return superCheck;
 		}

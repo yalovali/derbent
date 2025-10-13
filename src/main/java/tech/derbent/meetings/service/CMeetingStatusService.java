@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tech.derbent.api.services.CEntityOfProjectService;
+import tech.derbent.api.services.CStatusService;
 import tech.derbent.meetings.domain.CMeetingStatus;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.ISessionService;
@@ -18,7 +18,7 @@ import tech.derbent.session.service.ISessionService;
  * extends CEntityOfProject, this service must extend CEntityOfProjectService to enforce project-based queries. */
 @Service
 @Transactional
-public class CMeetingStatusService extends CEntityOfProjectService<CMeetingStatus> {
+public class CMeetingStatusService extends CStatusService<CMeetingStatus> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingStatusService.class);
 
@@ -27,13 +27,14 @@ public class CMeetingStatusService extends CEntityOfProjectService<CMeetingStatu
 		super(repository, clock, sessionService);
 	}
 
-	/** Checks dependencies before allowing meeting status deletion. Prevents deletion if the status is being used by any meetings.
-	 * @param meetingStatus the meeting status entity to check
+	/** Checks dependencies before allowing meeting status deletion. Prevents deletion if the status is being used by any meetings. Always calls
+	 * super.checkDeleteAllowed() first to ensure all parent-level checks (null validation, non-deletable flag) are performed.
+	 * @param entity the meeting status entity to check
 	 * @return null if status can be deleted, error message otherwise */
 	@Override
-	public String checkDeleteAllowed(final CMeetingStatus meetingStatus) {
+	public String checkDeleteAllowed(final CMeetingStatus entity) {
 		// Call super class first to check common dependencies
-		final String superCheck = super.checkDeleteAllowed(meetingStatus);
+		final String superCheck = super.checkDeleteAllowed(entity);
 		if (superCheck != null) {
 			return superCheck;
 		}
