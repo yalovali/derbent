@@ -179,6 +179,24 @@ public class CEnhancedBinder<BEAN> extends BeanValidationBinder<BEAN> {
 		}
 	}
 
+	@Override
+	public void setBean(final BEAN bean) {
+		try {
+			// Check for incomplete bindings before attempting to set the bean
+			// This prevents the "All bindings created with forField must be completed" error
+			validateBindingsComplete();
+			super.setBean(bean);
+		} catch (final Exception e) {
+			LOGGER.error("Error during setBean for bean type: {} - {}: {}", beanType.getSimpleName(), e.getClass().getSimpleName(), e.getMessage());
+			// Log additional context if available
+			if (bean != null) {
+				LOGGER.debug("Bean state: {}", bean.toString());
+			}
+			printBindingProperties();
+			throw e;
+		}
+	}
+
 	/** Validates that all field bindings are complete before readBean operation. This prevents the "All bindings created with forField must be
 	 * completed" error. */
 	private void validateBindingsComplete() {
