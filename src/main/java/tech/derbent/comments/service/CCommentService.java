@@ -80,7 +80,20 @@ public class CCommentService extends CAbstractService<CComment> {
 	@Override
 	public void initializeNewEntity(final CComment entity) {
 		super.initializeNewEntity(entity);
-		// Additional entity-specific initialization can be added here if needed
+		// Get current user from session
+		final CUser currentUser = sessionService.getActiveUser()
+				.orElseThrow(() -> new tech.derbent.api.exceptions.CInitializationException("No active user in session - cannot initialize comment"));
+		// Initialize author with current user if not already set
+		if (entity.getAuthor() == null) {
+			entity.setAuthor(currentUser);
+		}
+		// Initialize important flag if not set
+		if (entity.isImportant() == null) {
+			entity.setImportant(Boolean.FALSE);
+		}
+		// Note: activity is required and must be set before saving (typically done through createComment method)
+		// Note: commentText is required and must be set before saving
+		// Note: priority is optional and can remain null
 	}
 
 	/** Updates comment text.

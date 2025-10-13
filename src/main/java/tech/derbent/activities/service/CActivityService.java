@@ -1,6 +1,7 @@
 package tech.derbent.activities.service;
 
 import java.time.Clock;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -9,7 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.domain.CActivityStatus;
+import tech.derbent.activities.domain.CActivityType;
 import tech.derbent.api.domains.CProjectItemService;
+import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.interfaces.IKanbanService;
 import tech.derbent.api.services.IEntityOfProjectRepository;
 import tech.derbent.projects.domain.CProject;
@@ -19,8 +22,14 @@ import tech.derbent.session.service.ISessionService;
 @PreAuthorize ("isAuthenticated()")
 public class CActivityService extends CProjectItemService<CActivity> implements IKanbanService<CActivity, CActivityStatus> {
 
-	public CActivityService(final IActivityRepository repository, final Clock clock, final ISessionService sessionService) {
+	private final CActivityTypeService activityTypeService;
+	private final CActivityStatusService activityStatusService;
+
+	public CActivityService(final IActivityRepository repository, final Clock clock, final ISessionService sessionService,
+			final CActivityTypeService activityTypeService, final CActivityStatusService activityStatusService) {
 		super(repository, clock, sessionService);
+		this.activityTypeService = activityTypeService;
+		this.activityStatusService = activityStatusService;
 	}
 
 	@Override
@@ -66,6 +75,26 @@ public class CActivityService extends CProjectItemService<CActivity> implements 
 	@Override
 	public void initializeNewEntity(final CActivity entity) {
 		super.initializeNewEntity(entity);
+		// Get current project from session
+		final CProject currentProject = sessionService.getActiveProject()
+				.orElseThrow(() -> new CInitializationException("No active project in session - cannot initialize activity"));
+		// Initialize date fields
+		entity.setStartDate(LocalDate.now(clock));
+		entity.setDueDate(LocalDate.now(clock).plusDays(7)); // Default due date one week from now
+		// Initialize activity type - get first available activity type for the project (optional field, don't throw if missing)
+		final List<CActivityType> availableTypes = activityTypeService.listByProject(currentProject);
+		if (!availableTypes.isEmpty()) {
+			entity.setActivityType(availableTypes.get(0));
+		}
+		// Note: If no activity type exists, the field will remain null (it's nullable)
+		// Initialize status - get first available activity status for the project (optional field, don't throw if missing)
+		final List<CActivityStatus> availableStatuses = activityStatusService.listByProject(currentProject);
+		if (!availableStatuses.isEmpty()) {
+			entity.setStatus(availableStatuses.get(0));
+		}
+		// Note: If no status exists, the field will remain null (it's nullable)
+		// Note: numeric fields are already initialized in the domain class's initializeDefaults() method
+		// Note: priority is optional and can remain null
 	}
 
 	@Override

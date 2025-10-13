@@ -51,7 +51,7 @@ public class CDynamicPageView extends CDynamicPageViewWithSections {
 			return;
 		}
 		// Check if page is active
-		if (!pageEntity.getIsActive()) {
+		if (!pageEntity.getActive()) {
 			LOGGER.warn("Access attempted to inactive page: {}", pageEntity.getPageTitle());
 			event.rerouteToError(IllegalStateException.class, "Page not available");
 			return;
