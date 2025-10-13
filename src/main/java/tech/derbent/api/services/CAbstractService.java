@@ -227,6 +227,7 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	}
 
 	public void initializeNewEntity(final EntityClass entity) {
+		LOGGER.debug("Initializing new entity of type: {}", getEntityClass().getSimpleName());
 		Check.notNull(entity, "Entity cannot be null");
 		entity.setActive(true);
 	}
