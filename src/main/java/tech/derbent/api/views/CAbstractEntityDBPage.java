@@ -38,6 +38,7 @@ import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CButton;
+import tech.derbent.api.views.components.CCrudToolbar;
 import tech.derbent.api.views.components.CFlexLayout;
 import tech.derbent.api.views.components.CSearchToolbar;
 import tech.derbent.api.views.components.CVerticalLayout;
@@ -55,6 +56,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	ArrayList<CAccordionDBEntity<EntityClass>> AccordionList = new ArrayList<CAccordionDBEntity<EntityClass>>(); // List of accordions
 	private CFlexLayout baseDetailsLayout;
 	private final CEnhancedBinder<EntityClass> binder;
+	protected CCrudToolbar<EntityClass> crudToolbar;
 	private EntityClass currentEntity;
 	protected String currentSearchText = "";
 	// private final VerticalLayout baseDetailsLayout = new VerticalLayout();
@@ -77,6 +79,9 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		this.entityService = entityService;
 		this.sessionService = sessionService;
 		binder = new CEnhancedBinder<>(entityClass);
+		// Initialize CRUD toolbar
+		crudToolbar = new CCrudToolbar<>(entityService, entityClass);
+		initializeCrudToolbar();
 		createPageContent();
 	}
 
@@ -114,12 +119,115 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		// override this for additional custom buttons in the main content area
 	}
 
-	protected CButton createCancelButton(final String buttonText) {
-		final CButton cancel = CButton.createCancelButton(buttonText, e -> {
-			final Long lastSelectedId = sessionService.getActiveId(getClass().getSimpleName());
-			masterViewSection.selectLastOrFirst(entityService.getById(lastSelectedId).orElse(null));
+	/** Initializes the CRUD toolbar with necessary callbacks and listeners. */
+	private void initializeCrudToolbar() {
+		// Set new entity supplier
+		crudToolbar.setNewEntitySupplier(this::createNewEntity);
+		// Set refresh callback
+		crudToolbar.setRefreshCallback(entity -> {
+			refreshGrid();
 		});
-		return cancel;
+		// Set save callback with binder validation
+		crudToolbar.setSaveCallback(entity -> {
+			try {
+				// Ensure we have an entity to save
+				LOGGER.debug("Save callback invoked, current entity: {}", entity != null ? entity.getId() : "null");
+				if (entity == null) {
+					LOGGER.warn("No current entity for save operation");
+					return;
+				}
+				if (!onBeforeSaveEvent()) {
+					return;
+				}
+				// Write form data to entity
+				getBinder().writeBean(entity);
+				// Validate entity before saving
+				validateEntityForSave(entity);
+				// Save entity
+				final EntityClass savedEntity = entityService.save(entity);
+				LOGGER.info("Entity saved successfully with ID: {}", savedEntity.getId());
+				// Update current entity with saved version (includes generated ID)
+				setCurrentEntity(savedEntity);
+				// Notify listeners through toolbar
+				// (toolbar will call notifyListenersSaved which triggers our listener below)
+			} catch (final ObjectOptimisticLockingFailureException exception) {
+				LOGGER.error("Optimistic locking failure during save", exception);
+				if (notificationService != null) {
+					notificationService.showOptimisticLockingError();
+				} else {
+					showErrorNotification("Error updating the data. Somebody else has updated the record while you were making changes.");
+				}
+				throw new RuntimeException("Optimistic locking failure during save", exception);
+			} catch (final ValidationException validationException) {
+				LOGGER.error("Validation error during save", validationException);
+				new CWarningDialog("Failed to save the data. Please check that all required fields are filled and values are valid.").open();
+				throw new RuntimeException("Validation error during save", validationException);
+			} catch (final Exception exception) {
+				LOGGER.error("Unexpected error during save operation", exception);
+				new CWarningDialog("An unexpected error occurred while saving. Please try again.").open();
+				throw new RuntimeException("Unexpected error during save operation", exception);
+			}
+		});
+		// Set notification service if available
+		if (notificationService != null) {
+			crudToolbar.setNotificationService(notificationService);
+		}
+		// Add update listener to refresh grid on CRUD operations
+		crudToolbar.addUpdateListener(new tech.derbent.api.interfaces.IEntityUpdateListener() {
+
+			@Override
+			public void onEntitySaved(tech.derbent.api.domains.CEntityDB<?> entity) throws Exception {
+				LOGGER.debug("Entity saved, refreshing grid");
+				refreshGrid();
+				// Update current entity with saved version
+				@SuppressWarnings ("unchecked")
+				EntityClass savedEntity = (EntityClass) entity;
+				setCurrentEntity(savedEntity);
+				populateForm();
+				// Show success notification
+				if (notificationService != null) {
+					notificationService.showSaveSuccess();
+				} else {
+					showNotification("Data saved successfully");
+				}
+				navigateToClass();
+			}
+
+			@Override
+			public void onEntityDeleted(tech.derbent.api.domains.CEntityDB<?> entity) throws Exception {
+				LOGGER.debug("Entity deleted, refreshing grid");
+				masterViewSection.selectLastOrFirst(null);
+				refreshGrid();
+				// Show success notification
+				if (notificationService != null) {
+					notificationService.showDeleteSuccess();
+				} else {
+					showNotification("Item deleted successfully");
+				}
+			}
+
+			@Override
+			public void onEntityCreated(tech.derbent.api.domains.CEntityDB<?> entity) throws Exception {
+				LOGGER.debug("Entity created, populating form");
+				@SuppressWarnings ("unchecked")
+				EntityClass newEntity = (EntityClass) entity;
+				setCurrentEntity(newEntity);
+				populateForm();
+			}
+		});
+	}
+
+	/** Creates the button layout for the details tab. Uses CCrudToolbar for CRUD operations.
+	 * @return HorizontalLayout with action buttons */
+	protected HorizontalLayout createDetailsTabButtonLayout() {
+		final HorizontalLayout buttonLayout = new HorizontalLayout();
+		buttonLayout.setClassName("details-tab-button-layout");
+		buttonLayout.setSpacing(true);
+		// Add the CRUD toolbar
+		buttonLayout.add(crudToolbar);
+		// Add clone button separately as it's not part of standard CRUD operations
+		buttonLayout.add(createCloneButton("Clone"));
+		return buttonLayout;
 	}
 
 	protected CButton createCloneButton(final String buttonText) {
@@ -140,36 +248,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 			}
 		});
 		return cloneButton;
-	}
-
-	protected CButton createDeleteButton(final String buttonText) {
-		final CButton delete = CButton.createDeleteButton(buttonText, null);
-		delete.addClickListener(e -> {
-			if (currentEntity == null) {
-				new CWarningDialog("Please select an item to delete.").open();
-				return;
-			}
-			// Show confirmation dialog for delete operation
-			final String confirmMessage = String.format("Are you sure you want to delete this %s? This action cannot be undone.",
-					entityClass.getSimpleName().replace("C", "").toLowerCase());
-			new CConfirmationDialog(confirmMessage, () -> {
-				try {
-					LOGGER.info("Deleting entity: {} with ID: {}", entityClass.getSimpleName(), currentEntity.getId());
-					entityService.delete(currentEntity);
-					masterViewSection.selectLastOrFirst(null);
-					if (notificationService != null) {
-						notificationService.showDeleteSuccess();
-					} else {
-						showNotification("Item deleted successfully");
-					}
-				} catch (final Exception exception) {
-					LOGGER.error("Error deleting entity", exception);
-					new CWarningDialog("Failed to delete the item. Please try again.").open();
-					throw new RuntimeException("Error deleting entity", exception);
-				}
-			}).open();
-		});
-		return delete;
 	}
 
 	@PostConstruct
@@ -194,17 +272,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		initSplitLayout(detailsBase);
 		// Initial layout setup - will be updated when layout service is available
 		updateLayoutOrientation();
-	}
-
-	/** Creates the button layout for the details tab. Contains new, save, cancel, and delete buttons with consistent styling.
-	 * @return HorizontalLayout with action buttons */
-	protected HorizontalLayout createDetailsTabButtonLayout() {
-		final HorizontalLayout buttonLayout = new HorizontalLayout();
-		buttonLayout.setClassName("details-tab-button-layout");
-		buttonLayout.setSpacing(true);
-		buttonLayout.add(createNewButton("New"), createCloneButton("Clone"), createSaveButton("Save"), createCancelButton("Cancel"),
-				createDeleteButton("Delete"));
-		return buttonLayout;
 	}
 
 	/** Creates the left content of the details tab. Subclasses can override this to provide custom tab content.
@@ -270,83 +337,12 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	protected abstract void createMasterComponent();
 
-	protected CButton createNewButton(final String buttonText) {
-		final CButton newButton = CButton.createNewButton(buttonText, e -> {
-			LOGGER.debug("New button clicked, emptying bound fields");
-			try {
-				// Empty the bound fields by creating new entity and binding it
-				final EntityClass newEntityInstance = createNewEntity();
-				setCurrentEntity(newEntityInstance);
-				populateForm();
-				LOGGER.debug("Bound fields emptied for new entity: {}", newEntityInstance.getClass().getSimpleName());
-			} catch (final Exception exception) {
-				LOGGER.error("Error emptying bound fields", exception);
-				new CWarningDialog("Failed to empty fields. Please try again.").open();
-				throw new RuntimeException("Error emptying bound fields", exception);
-			}
-		});
-		return newButton;
-	}
-
 	protected EntityClass createNewEntity() {
 		return entityService.newEntity();
 	}
 
 	private void createPageContent() {
 		createDetailsSection();
-	}
-
-	protected CButton createSaveButton(final String buttonText) {
-		final CButton save = CButton.createSaveButton(buttonText, e -> {
-			try {
-				// Ensure we have an entity to save
-				LOGGER.debug("Save button clicked, current entity: {}", currentEntity != null ? currentEntity.getId() : "null");
-				if (currentEntity == null) {
-					LOGGER.warn("No current entity for save operation, creating new entity");
-					currentEntity = createNewEntity();
-					populateForm();
-				}
-				if (!onBeforeSaveEvent()) {
-					return;
-				}
-				// Write form data to entity
-				getBinder().writeBean(currentEntity);
-				// Validate entity before saving
-				validateEntityForSave(currentEntity);
-				// Save entity
-				final EntityClass savedEntity = entityService.save(currentEntity);
-				LOGGER.info("Entity saved successfully with ID: {}", savedEntity.getId());
-				// Update current entity with saved version (includes generated ID)
-				setCurrentEntity(savedEntity);
-				// Clear form and refresh grid
-				refreshGrid();
-				// Show success notification
-				if (notificationService != null) {
-					notificationService.showSaveSuccess();
-				} else {
-					showNotification("Data saved successfully");
-				}
-				// Navigate back to the current view (list mode)
-				navigateToClass();
-			} catch (final ObjectOptimisticLockingFailureException exception) {
-				LOGGER.error("Optimistic locking failure during save", exception);
-				if (notificationService != null) {
-					notificationService.showOptimisticLockingError();
-				} else {
-					showErrorNotification("Error updating the data. Somebody else has updated the record while you were making changes.");
-				}
-				throw new RuntimeException("Optimistic locking failure during save", exception);
-			} catch (final ValidationException validationException) {
-				LOGGER.error("Validation error during save", validationException);
-				new CWarningDialog("Failed to save the data. Please check that all required fields are filled and values are valid.").open();
-				throw new RuntimeException("Validation error during save", validationException);
-			} catch (final Exception exception) {
-				LOGGER.error("Unexpected error during save operation", exception);
-				new CWarningDialog("An unexpected error occurred while saving. Please try again.").open();
-				throw new RuntimeException("Unexpected error during save operation", exception);
-			}
-		});
-		return save;
 	}
 
 	public HasComponents getBaseDetailsLayout() { return baseDetailsLayout; }
@@ -462,6 +458,8 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		LOGGER.debug("Grid selection changed: {}", Optional.ofNullable(value).map(Object::toString).orElse("NULL"));
 		setCurrentEntity(value);
 		populateForm();
+		// Update CRUD toolbar with current entity
+		crudToolbar.setCurrentEntity(value);
 		if (value == null) {
 			sessionService.setActiveId(entityClass.getClass().getSimpleName(), null);
 		} else {

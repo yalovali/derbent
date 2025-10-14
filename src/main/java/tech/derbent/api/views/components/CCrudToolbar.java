@@ -36,6 +36,7 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	private CButton refreshButton;
 	private Consumer<EntityClass> refreshCallback;
 	private CButton saveButton;
+	private Consumer<EntityClass> saveCallback;
 	private final List<IEntityUpdateListener> updateListeners = new ArrayList<>();
 
 	public CCrudToolbar(final CAbstractService<EntityClass> entityService, final Class<EntityClass> entityClass) {
@@ -175,23 +176,26 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 				showErrorNotification("Cannot save: No entity selected.");
 				return;
 			}
-			// binder.writeBean(currentEntity);
-			// Save entity
-			final EntityClass savedEntity = entityService.save(currentEntity);
-			currentEntity = savedEntity;
-			// Re-bind the saved entity to refresh the form with updated data (like generated IDs, timestamps)
-			// binder.setBean(savedEntity);
-			updateButtonStates();
-			showSuccessNotification("Data saved successfully");
-			// Notify listeners
-			notifyListenersSaved(savedEntity);
+			// Use custom save callback if provided (for integration with binder validation)
+			if (saveCallback != null) {
+				saveCallback.accept(currentEntity);
+			} else {
+				// Default save behavior
+				final EntityClass savedEntity = entityService.save(currentEntity);
+				currentEntity = savedEntity;
+				updateButtonStates();
+				showSuccessNotification("Data saved successfully");
+				// Notify listeners
+				notifyListenersSaved(savedEntity);
+			}
 		} catch (Exception e) {
 			LOGGER.error("Error during save operation for entity: {}", entityClass.getSimpleName(), e);
 			if (notificationService != null) {
-				notificationService.showDeleteError();
+				notificationService.showSaveError();
 			} else {
-				showErrorNotification("An error occurred while attempting to delete the entity. Please try again.");
+				showErrorNotification("An error occurred while attempting to save the entity. Please try again.");
 			}
+			throw e;
 		}
 	}
 
@@ -300,6 +304,12 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		updateButtonStates();
 	}
 
+	/** Sets the callback for save operations. This allows custom save logic with binder validation.
+	 * @param saveCallback callback to execute when save is triggered */
+	public void setSaveCallback(final Consumer<EntityClass> saveCallback) {
+		this.saveCallback = saveCallback;
+	}
+
 	/** Sets the notification service. This is typically called via dependency injection or manually after construction. */
 	public void setNotificationService(final CNotificationService notificationService) {
 		this.notificationService = notificationService;
@@ -335,11 +345,12 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		boolean hasEntityId = hasEntity && (currentEntity.getId() != null);
 		boolean canCreate = (newEntitySupplier != null);
 		boolean canRefresh = (refreshCallback != null);
+		boolean canSave = hasEntity && (saveCallback != null || entityService != null);
 		if (createButton != null) {
 			createButton.setEnabled(canCreate);
 		}
 		if (saveButton != null) {
-			saveButton.setEnabled(hasEntity);
+			saveButton.setEnabled(canSave);
 		}
 		if (deleteButton != null) {
 			deleteButton.setEnabled(hasEntityId);
