@@ -46,6 +46,14 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 	private final PasswordEncoder passwordEncoder;
 	private ISessionService sessionService;
 
+	public CUserService() {
+		this(null, Clock.systemDefaultZone(), null);
+	}
+
+	public CUserService(final IUserRepository repository, final Clock clock) {
+		this(repository, clock, null);
+	}
+
 	public CUserService(final IUserRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 		passwordEncoder = new BCryptPasswordEncoder(); // BCrypt for secure password
