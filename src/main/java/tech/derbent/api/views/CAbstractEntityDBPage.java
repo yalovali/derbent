@@ -250,12 +250,10 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 			});
 		}
 		masterViewSection.setDataProvider(getMasterQuery());
-		// Create the grid container with search toolbar
 		final VerticalLayout gridContainer = new VerticalLayout();
 		gridContainer.setClassName("grid-container");
 		gridContainer.setPadding(false);
 		gridContainer.setSpacing(false);
-		// Add search toolbar if available
 		if (searchToolbar != null) {
 			gridContainer.add(searchToolbar);
 		}
@@ -409,6 +407,17 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		add(splitLayout);
 	}
 
+	/** Navigates to the view class. Throws exception if navigation fails. */
+	protected void navigateToClass() {
+		final UI currentUI = UI.getCurrent();
+		if (currentUI != null) {
+			currentUI.navigate(getClass());
+		} else {
+			LOGGER.error("UI not available for navigation to {}", getClass().getSimpleName());
+			throw new IllegalStateException("UI not available for navigation to " + getClass().getSimpleName());
+		}
+	}
+
 	// this method is called when the page is attached to the UI
 	@Override
 	protected void onAttach(final AttachEvent attachEvent) {
@@ -468,6 +477,17 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		});
 	}
 
+	@Override
+	public void populateForm() {
+		EntityClass value = getCurrentEntity();
+		LOGGER.debug("Populating form for entity: {}", value != null ? value.getId() : "null");
+		populateAccordionPanels(value);
+		getBinder().setBean(value);
+		if ((value == null) && (masterViewSection != null)) {
+			masterViewSection.select(null);
+		}
+	}
+
 	protected void refreshGrid() {
 		LOGGER.info("Refreshing grid for {}", getClass().getSimpleName());
 		// Store the currently selected entity ID to preserve selection after refresh
@@ -482,16 +502,32 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		}
 	}
 
-	/** Navigates to the view class. Throws exception if navigation fails. */
-	protected void navigateToClass() {
-		final UI currentUI = UI.getCurrent();
-		if (currentUI != null) {
-			currentUI.navigate(getClass());
-		} else {
-			LOGGER.error("UI not available for navigation to {}", getClass().getSimpleName());
-			throw new IllegalStateException("UI not available for navigation to " + getClass().getSimpleName());
-		}
+	@SuppressWarnings ("unchecked")
+	@Override
+	public void setCurrentEntity(final Object currentEntity) {
+		LOGGER.debug("Setting current entity: {}", currentEntity);
+		this.currentEntity = (EntityClass) currentEntity;
 	}
+
+	@Override
+	public void setId(final String id) {
+		throw new UnsupportedOperationException("Use initPageId instead to set page ID for testing purposes");
+	}
+
+	/** Sets the layout service. This is typically called via dependency injection or manually after construction. */
+	public void setLayoutService(final CLayoutService layoutService) {
+		this.layoutService = layoutService;
+		// Update layout based on current mode
+		updateLayoutOrientation();
+	}
+
+	/** Sets the notification service. This is typically called via dependency injection or manually after construction. */
+	public void setNotificationService(final CNotificationService notificationService) {
+		this.notificationService = notificationService;
+	}
+
+	@Override
+	protected void setupToolbar() {}
 
 	/** Shows an error notification. Uses CNotificationService if available, falls back to direct Vaadin call. */
 	protected void showErrorNotification(final String message) {
@@ -517,44 +553,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 			LOGGER.debug("Shown notification (fallback): {}", message);
 		}
 	}
-
-	@SuppressWarnings ("unchecked")
-	@Override
-	public void setCurrentEntity(final Object currentEntity) {
-		LOGGER.debug("Setting current entity: {}", currentEntity);
-		this.currentEntity = (EntityClass) currentEntity;
-	}
-
-	@Override
-	public void populateForm() {
-		EntityClass value = getCurrentEntity();
-		LOGGER.debug("Populating form for entity: {}", value != null ? value.getId() : "null");
-		populateAccordionPanels(value);
-		getBinder().setBean(value);
-		if ((value == null) && (masterViewSection != null)) {
-			masterViewSection.select(null);
-		}
-	}
-
-	@Override
-	public void setId(final String id) {
-		throw new UnsupportedOperationException("Use initPageId instead to set page ID for testing purposes");
-	}
-
-	/** Sets the layout service. This is typically called via dependency injection or manually after construction. */
-	public void setLayoutService(final CLayoutService layoutService) {
-		this.layoutService = layoutService;
-		// Update layout based on current mode
-		updateLayoutOrientation();
-	}
-
-	/** Sets the notification service. This is typically called via dependency injection or manually after construction. */
-	public void setNotificationService(final CNotificationService notificationService) {
-		this.notificationService = notificationService;
-	}
-
-	@Override
-	protected void setupToolbar() {}
 
 	protected abstract void updateDetailsComponent()
 			throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException, Exception;
