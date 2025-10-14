@@ -13,10 +13,6 @@ import tech.derbent.session.service.ISessionService;
  * operations for named entities including validation, creation, and name-based queries with consistent error handling and logging. */
 public abstract class CEntityNamedService<EntityClass extends CEntityNamed<EntityClass>> extends CAbstractService<EntityClass> {
 
-	public CEntityNamedService(final IAbstractNamedRepository<EntityClass> repository, final Clock clock) {
-		super(repository, clock);
-	}
-
 	public CEntityNamedService(final IAbstractNamedRepository<EntityClass> repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
@@ -28,13 +24,6 @@ public abstract class CEntityNamedService<EntityClass extends CEntityNamed<Entit
 			return superCheck;
 		}
 		return null; // No dependencies found by default
-	}
-
-	@Transactional
-	public EntityClass createEntity(final String name) {
-		final EntityClass entity = newEntity(name);
-		repository.saveAndFlush(entity);
-		return entity;
 	}
 
 	/** Varsayılan sıralama anahtarları. İstediğiniz entity servisinde override edebilirsiniz. */

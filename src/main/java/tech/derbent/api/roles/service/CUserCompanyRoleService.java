@@ -10,7 +10,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.roles.domain.CUserCompanyRole;
-import tech.derbent.api.services.CEntityNamedService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.session.service.ISessionService;
@@ -20,12 +19,17 @@ import tech.derbent.session.service.ISessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
-public class CUserCompanyRoleService extends CEntityNamedService<CUserCompanyRole> {
+public class CUserCompanyRoleService extends CNonProjectTypeService<CUserCompanyRole> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserCompanyRoleService.class);
 
 	public CUserCompanyRoleService(final IUserCompanyRoleRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
+	}
+
+	@Override
+	public String checkDeleteAllowed(final CUserCompanyRole entity) {
+		return super.checkDeleteAllowed(entity);
 	}
 
 	@Transactional
@@ -62,26 +66,7 @@ public class CUserCompanyRoleService extends CEntityNamedService<CUserCompanyRol
 	}
 
 	@Override
-	@Transactional (readOnly = true)
-	public Page<CUserCompanyRole> list(final Pageable pageable) {
-		final CCompany company = sessionService.getActiveCompany()
-				.orElseThrow(() -> new IllegalStateException("No active company selected, cannot list entities without company context"));
-		return ((IUserCompanyRoleRepository) repository).listByCompany(company, pageable);
-	}
-
-	@Override
 	protected Class<CUserCompanyRole> getEntityClass() { return CUserCompanyRole.class; }
-
-	@Override
-	public String checkDeleteAllowed(final CUserCompanyRole entity) {
-		return super.checkDeleteAllowed(entity);
-	}
-
-	@Override
-	public void initializeNewEntity(final CUserCompanyRole entity) {
-		super.initializeNewEntity(entity);
-		// Additional entity-specific initialization can be added here if needed
-	}
 
 	@Override
 	public CUserCompanyRole getRandom() {
@@ -108,5 +93,19 @@ public class CUserCompanyRoleService extends CEntityNamedService<CUserCompanyRol
 			createGuestRole(company);
 			LOGGER.info("Initialized default company roles for: {}", company.getName());
 		}
+	}
+
+	@Override
+	public void initializeNewEntity(final CUserCompanyRole entity) {
+		super.initializeNewEntity(entity);
+		// Additional entity-specific initialization can be added here if needed
+	}
+
+	@Override
+	@Transactional (readOnly = true)
+	public Page<CUserCompanyRole> list(final Pageable pageable) {
+		final CCompany company = sessionService.getActiveCompany()
+				.orElseThrow(() -> new IllegalStateException("No active company selected, cannot list entities without company context"));
+		return ((IUserCompanyRoleRepository) repository).listByCompany(company, pageable);
 	}
 }

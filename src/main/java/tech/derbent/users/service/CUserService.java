@@ -46,13 +46,40 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 	private final PasswordEncoder passwordEncoder;
 	private ISessionService sessionService;
 
-	public CUserService(final IUserRepository repository, final Clock clock) {
-		super(repository, clock);
+	public CUserService(final IUserRepository repository, final Clock clock, final ISessionService sessionService) {
+		super(repository, clock, sessionService);
 		passwordEncoder = new BCryptPasswordEncoder(); // BCrypt for secure password
 		// hashing
 		@SuppressWarnings ("unused")
 		final CharSequence newPlainPassword = "test123";
 		// final String encodedPassword = passwordEncoder.encode(newPlainPassword);
+	}
+
+	@Override
+	public String checkDeleteAllowed(final CUser entity) {
+		final String superCheck = super.checkDeleteAllowed(entity);
+		if (superCheck != null) {
+			return superCheck;
+		}
+		Check.notNull(entity.getCompany(), "User company cannot be null");
+		try {
+			// Rule 1: Check if this is the last user in the company
+			List<CUser> companyUsers = ((IUserRepository) repository).findByCompanyId(entity.getCompany().getId());
+			if (companyUsers.size() == 1) {
+				return "Cannot delete the last user in the company. At least one user must remain.";
+			}
+			// Rule 2: Check if user is trying to delete themselves (if session service is available)
+			if (sessionService != null) {
+				Optional<CUser> currentUser = sessionService.getActiveUser();
+				if (currentUser.isPresent() && currentUser.get().getId().equals(entity.getId())) {
+					return "You cannot delete your own user account while logged in.";
+				}
+			}
+			return null; // User can be deleted
+		} catch (final Exception e) {
+			LOGGER.error("Error checking dependencies for user: {}", entity.getLogin(), e);
+			return "Error checking dependencies: " + e.getMessage();
+		}
 	}
 
 	@PreAuthorize ("permitAll()")
@@ -165,6 +192,35 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 		return null;
 	}
 
+	/** Initializes a new user entity with default values based on current session and available data. Sets: - Company from current session - User
+	 * type (first available) - Company role (first available) - Auto-generated name and login - Enabled status - Default password prompt
+	 * @param user the newly created user to initialize
+	 * @throws IllegalStateException if required fields cannot be initialized */
+	@Override
+	public void initializeNewEntity(final CUser user) {
+		super.initializeNewEntity(user);
+		LOGGER.debug("Initializing new user entity with default values");
+		Check.notNull(user, "User cannot be null");
+		Check.notNull(sessionService, "Session service is required for user initialization");
+		try {
+			// Get current company from session
+			CCompany currentCompany = sessionService.getCurrentCompany();
+			Check.notNull(currentCompany, "No active company in session - company context is required to create users");
+			List<CUser> existingUsers = ((IUserRepository) repository).findByCompanyId(currentCompany.getId());
+			String autoName = String.format("User%02d", existingUsers.size() + 1);
+			user.setName(autoName);
+			user.setLogin(autoName.toLowerCase());
+			user.setLastname("");
+			user.setEmail("");
+			user.setPhone("");
+			user.setEnabled(true);
+			user.setPassword(""); // Empty - user must set password
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing new user", e);
+			throw new IllegalStateException("Failed to initialize user: " + e.getMessage(), e);
+		}
+	}
+
 	/** Override the default list method to filter users by active company when available. This allows CUserService to work with dynamic pages without
 	 * needing to implement special filtering. If no active company is available, returns all users (preserves existing behavior). */
 	@Override
@@ -260,69 +316,5 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 		super.validateEntity(user);
 		Check.notBlank(user.getLogin(), "User login cannot be null or empty");
 		Check.notBlank(user.getName(), "User name cannot be null or empty");
-	}
-
-	/** Checks dependencies before allowing user deletion. Prevents deletion if: 1. User is the last user in their company 2. User is trying to delete
-	 * themselves (requires session service)
-	 * @param user the user entity to check
-	 * @return null if user can be deleted, error message otherwise */
-	/** Checks dependencies before allowing user deletion. Prevents deletion of the last user in a company and self-deletion. Always calls
-	 * super.checkDeleteAllowed() first to ensure all parent-level checks (null validation) are performed.
-	 * @param entity the user entity to check
-	 * @return null if user can be deleted, error message otherwise */
-	@Override
-	public String checkDeleteAllowed(final CUser entity) {
-		final String superCheck = super.checkDeleteAllowed(entity);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		Check.notNull(entity.getCompany(), "User company cannot be null");
-		try {
-			// Rule 1: Check if this is the last user in the company
-			List<CUser> companyUsers = ((IUserRepository) repository).findByCompanyId(entity.getCompany().getId());
-			if (companyUsers.size() == 1) {
-				return "Cannot delete the last user in the company. At least one user must remain.";
-			}
-			// Rule 2: Check if user is trying to delete themselves (if session service is available)
-			if (sessionService != null) {
-				Optional<CUser> currentUser = sessionService.getActiveUser();
-				if (currentUser.isPresent() && currentUser.get().getId().equals(entity.getId())) {
-					return "You cannot delete your own user account while logged in.";
-				}
-			}
-			return null; // User can be deleted
-		} catch (final Exception e) {
-			LOGGER.error("Error checking dependencies for user: {}", entity.getLogin(), e);
-			return "Error checking dependencies: " + e.getMessage();
-		}
-	}
-
-	/** Initializes a new user entity with default values based on current session and available data. Sets: - Company from current session - User
-	 * type (first available) - Company role (first available) - Auto-generated name and login - Enabled status - Default password prompt
-	 * @param user the newly created user to initialize
-	 * @throws IllegalStateException if required fields cannot be initialized */
-	@Override
-	public void initializeNewEntity(final CUser user) {
-		super.initializeNewEntity(user);
-		LOGGER.debug("Initializing new user entity with default values");
-		Check.notNull(user, "User cannot be null");
-		Check.notNull(sessionService, "Session service is required for user initialization");
-		try {
-			// Get current company from session
-			CCompany currentCompany = sessionService.getCurrentCompany();
-			Check.notNull(currentCompany, "No active company in session - company context is required to create users");
-			List<CUser> existingUsers = ((IUserRepository) repository).findByCompanyId(currentCompany.getId());
-			String autoName = String.format("User%02d", existingUsers.size() + 1);
-			user.setName(autoName);
-			user.setLogin(autoName.toLowerCase());
-			user.setLastname("");
-			user.setEmail("");
-			user.setPhone("");
-			user.setEnabled(true);
-			user.setPassword(""); // Empty - user must set password
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing new user", e);
-			throw new IllegalStateException("Failed to initialize user: " + e.getMessage(), e);
-		}
 	}
 }
