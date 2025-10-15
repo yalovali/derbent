@@ -6,6 +6,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 /** CInformationDialog - Dialog for displaying informational messages to users. Layer: View (MVC) Used to provide helpful information or confirmation
  * of successful actions. */
 public final class CInformationDialog extends CBaseInfoDialog {
+
 	private static final long serialVersionUID = 1L;
 
 	/** @param message The information message to display

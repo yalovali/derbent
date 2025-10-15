@@ -24,6 +24,7 @@ import tech.derbent.users.service.CUserProjectSettingsService;
  * project->user panels. */
 public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<MasterClass>, RelationalClass extends CEntityDB<RelationalClass>>
 		extends CPanelRelationalBase<MasterClass, CUserProjectSettings> {
+
 	private static final long serialVersionUID = 1L;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected CUserProjectSettingsService userProjectSettingsService;
@@ -87,11 +88,9 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 
 	/** Abstract method to handle settings save events */
 	protected abstract void onSettingsSaved(final CUserProjectSettings settings);
-
 	/** Abstract method to open the add dialog
 	 * @throws Exception */
 	protected abstract void openAddDialog() throws Exception;
-
 	/** Abstract method to open the edit dialog
 	 * @throws Exception */
 	protected abstract void openEditDialog() throws Exception;

@@ -15,6 +15,7 @@ import tech.derbent.users.domain.CUserProjectSettings;
 
 /** Initializes default UI configuration for {@link CUserProjectSettings}. */
 public final class CUserProjectSettingsInitializerService extends CInitializerServiceBase {
+
 	public static final String BASE_PANEL_NAME = "Project Membership";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserProjectSettingsInitializerService.class);
 	private static final Class<?> ENTITY_CLASS = CUserProjectSettings.class;

@@ -56,6 +56,7 @@ public class CEntityFieldService {
 		private boolean setBackgroundFromColor = false;
 		private boolean useIcon = false;
 		private boolean useRadioButtons = false;
+		private boolean useDualListSelector = false;
 		private String width = "";
 
 		public String getCreateComponentMethod() { return createComponentMethod; }
@@ -121,6 +122,8 @@ public class CEntityFieldService {
 
 		public boolean isUseRadioButtons() { return useRadioButtons; }
 
+		public boolean isUseDualListSelector() { return useDualListSelector; }
+
 		public void setAllowCustomValue(final boolean allowCustomValue) { this.allowCustomValue = allowCustomValue; }
 
 		public void setAutoSelectFirst(final boolean autoSelectFirst) { this.autoSelectFirst = autoSelectFirst; }
@@ -181,6 +184,8 @@ public class CEntityFieldService {
 
 		public void setUseRadioButtons(final boolean useRadioButtons) { this.useRadioButtons = useRadioButtons; }
 
+		public void setUseDualListSelector(final boolean useDualListSelector) { this.useDualListSelector = useDualListSelector; }
+
 		public void setWidth(final String width) { this.width = width; }
 
 		// toString method for easy debugging
@@ -229,6 +234,7 @@ public class CEntityFieldService {
 			info.setDataUpdateMethod(metaData.dataUpdateMethod());
 			info.setPasswordRevealButton(metaData.passwordRevealButton());
 			info.setUseIcon(metaData.useIcon());
+			info.setUseDualListSelector(metaData.useDualListSelector());
 			return info;
 		} catch (final Exception e) {
 			throw e;
