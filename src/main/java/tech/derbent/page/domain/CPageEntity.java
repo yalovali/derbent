@@ -147,7 +147,7 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 	protected void initializeDefaults() {
 		super.initializeDefaults();
 		icon = DEFAULT_ICON;
-		menuOrder = "10.0";
+		menuOrder = "10.110";
 		menuTitle = "System.New Page";
 		pageTitle = "New Dynamic Page";
 		requiresAuthentication = true;

@@ -15,15 +15,16 @@ import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.screens.service.CInitializerServiceBase;
 
 public class CProjectInitializerService extends CInitializerServiceBase {
+
 	public static final String BASE_PANEL_NAME = "Project Information";
 	static final Class<?> clazz = CProject.class;
 	static Map<String, EntityFieldInfo> fields;
 	static EntityFieldInfo info;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectInitializerService.class);
-	private static final String menuTitle = "Project.Projects";
+	private static final String menuTitle = MenuTitle_PROJECT + ".Projects";
 	private static final String pageTitle = "Project Management";
 	private static final String pageDescription = "Comprehensive project management with full CRUD operations";
-	private static final String menuOrder = "1.1";
+	private static final String menuOrder = Menu_Order_PROJECT + ".1";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {

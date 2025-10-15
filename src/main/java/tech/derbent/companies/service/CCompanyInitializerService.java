@@ -17,10 +17,10 @@ public class CCompanyInitializerService extends CInitializerServiceBase {
 	public static final String BASE_PANEL_NAME = "Company Information";
 	static final Class<?> clazz = CCompany.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCompanyInitializerService.class);
-	private static final String menuTitle = "System.Companies";
+	private static final String menuTitle = MenuTitle_SYSTEM + ".Companies";
 	private static final String pageTitle = "Company Management";
 	private static final String pageDescription = "Company management with contact details";
-	private static final String menuOrder = "10.1";
+	private static final String menuOrder = Menu_Order_SYSTEM + ".1";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {

@@ -17,10 +17,10 @@ public class CUserCompanyRoleInitializerService extends CInitializerServiceBase 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserCompanyRoleInitializerService.class);
 	public static final String BASE_PANEL_NAME = "Company Role Information";
 	static final Class<?> clazz = CUserCompanyRole.class;
-	private static final String menuTitle = "Roles.User Company Roles";
+	private static final String menuTitle = MenuTitle_ROLES + ".User Company Roles";
 	private static final String pageTitle = "User Company Roles Management";
 	private static final String pageDescription = "Company Roles management";
-	private static final String menuOrder = "1.1";
+	private static final String menuOrder = Menu_Order_ROLES + ".1";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {

@@ -13,13 +13,14 @@ import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.screens.service.CInitializerServiceBase;
 
 public class CApprovalStatusInitializerService extends CInitializerServiceBase {
+
 	public static final String BASE_PANEL_NAME = "Approval Status Information";
 	private static final Class<?> clazz = CApprovalStatus.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CApprovalStatusInitializerService.class);
-	private static final String menuTitle = "Types.Approval Statuses";
+	private static final String menuTitle = MenuTitle_TYPES + ".Approval Statuses";
 	private static final String pageTitle = "Approval Status Management";
 	private static final String pageDescription = "Manage approval status definitions for projects";
-	private static final String menuOrder = "1.1";
+	private static final String menuOrder = Menu_Order_TYPES + ".1";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {

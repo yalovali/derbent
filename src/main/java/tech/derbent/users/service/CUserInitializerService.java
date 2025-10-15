@@ -18,10 +18,10 @@ public class CUserInitializerService extends CInitializerServiceBase {
 	public static final String BASE_PANEL_NAME = "User Information";
 	static final Class<?> clazz = CUser.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserInitializerService.class);
-	private static final String menuTitle = "System.Users";
+	private static final String menuTitle = MenuTitle_SYSTEM + ".Users";
 	private static final String pageTitle = "User Management";
 	private static final String pageDescription = "User management for system access and permissions";
-	private static final String menuOrder = "10.10";
+	private static final String menuOrder = Menu_Order_SYSTEM + ".10";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {

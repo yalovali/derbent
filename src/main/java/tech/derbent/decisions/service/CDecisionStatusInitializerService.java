@@ -17,10 +17,10 @@ public class CDecisionStatusInitializerService extends CInitializerServiceBase {
 	public static final String BASE_PANEL_NAME = "Decision Status Information";
 	private static final Class<?> clazz = CDecisionStatus.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDecisionStatusInitializerService.class);
-	private static final String menuTitle = "Types.Decision Status";
+	private static final String menuTitle = MenuTitle_TYPES + ".Decision Status";
 	private static final String pageTitle = "Decision Status Management";
 	private static final String pageDescription = "Manage decision status definitions for projects";
-	private static final String menuOrder = "1.6";
+	private static final String menuOrder = Menu_Order_TYPES + ".6";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) {

@@ -18,10 +18,10 @@ public class CGanntInitializerService extends CInitializerServiceBase {
 	public static final String BASE_PANEL_NAME = "Gantt View Information";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CGanntInitializerService.class);
 	private static final Class<?> clazz = CGanntViewEntity.class;
-	private static final String menuTitle = "Project.Gantt Views";
+	private static final String menuTitle = MenuTitle_PROJECT + ".Gantt Views";
 	private static final String pageTitle = "Gantt View Configuration";
 	private static final String pageDescription = "Manage project-specific Gantt view layouts";
-	private static final String menuOrder = "1.4";
+	private static final String menuOrder = Menu_Order_PROJECT + ".4";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) {

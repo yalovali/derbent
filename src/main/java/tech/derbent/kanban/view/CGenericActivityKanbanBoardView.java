@@ -18,7 +18,7 @@ import tech.derbent.session.service.ISessionService;
  * uses the new generic kanban base classes to provide drag-and-drop functionality and better organization. */
 @Route ("activities-kanban-generic")
 @PageTitle ("Activity Kanban Board (Generic)")
-@Menu (order = 1.3, icon = "class:tech.derbent.kanban.view.CGenericActivityKanbanBoardView", title = "Project.Generic Kanban")
+@Menu (order = 1.300, icon = "class:tech.derbent.kanban.view.CGenericActivityKanbanBoardView", title = "Project.Generic Kanban")
 @PermitAll
 public class CGenericActivityKanbanBoardView extends CBaseKanbanBoardView<CActivity, CActivityStatus> {
 

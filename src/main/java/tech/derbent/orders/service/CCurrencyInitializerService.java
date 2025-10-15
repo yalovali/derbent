@@ -17,10 +17,10 @@ public class CCurrencyInitializerService extends CInitializerServiceBase {
 	public static final String BASE_PANEL_NAME = "Currency Information";
 	private static final Class<?> clazz = CCurrency.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCurrencyInitializerService.class);
-	private static final String menuTitle = "Types.Currencies";
+	private static final String menuTitle = MenuTitle_TYPES + ".Currencies";
 	private static final String pageTitle = "Currencies Management";
 	private static final String pageDescription = "Currencies management";
-	private static final String menuOrder = "1.11";
+	private static final String menuOrder = Menu_Order_TYPES + ".11";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {

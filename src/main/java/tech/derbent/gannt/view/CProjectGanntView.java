@@ -17,7 +17,7 @@ import tech.derbent.session.service.ISessionService;
 
 @Route ("cprojectganntview")
 @PageTitle ("Project Gannt View")
-@Menu (order = 1.1, icon = "class:tech.derbent.gannt.domain.CGanntViewEntity", title = "Project.Project Gannt Chart")
+@Menu (order = 1.101, icon = "class:tech.derbent.gannt.domain.CGanntViewEntity", title = "Project.Project Gannt Chart")
 @PermitAll
 public class CProjectGanntView extends CGridViewBaseGannt<CGanntViewEntity> {
 

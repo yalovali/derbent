@@ -17,10 +17,10 @@ public class CDecisionTypeInitializerService extends CInitializerServiceBase {
 	public static final String BASE_PANEL_NAME = "Decision Type Information";
 	private static final Class<?> clazz = CDecisionType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDecisionTypeInitializerService.class);
-	private static final String menuTitle = "Types.Decision Types";
+	private static final String menuTitle = MenuTitle_TYPES + ".Decision Types";
 	private static final String pageTitle = "Decision Type Management";
 	private static final String pageDescription = "Manage decision type categories";
-	private static final String menuOrder = "1.7";
+	private static final String menuOrder = Menu_Order_TYPES + ".7";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) {
