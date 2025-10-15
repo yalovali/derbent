@@ -15,6 +15,7 @@ import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.screens.service.CInitializerServiceBase;
 
 public class CActivityInitializerService extends CInitializerServiceBase {
+
 	public static final String BASE_PANEL_NAME = "Activity Information";
 	static final Class<?> clazz = CActivity.class;
 	static Map<String, EntityFieldInfo> fields;
