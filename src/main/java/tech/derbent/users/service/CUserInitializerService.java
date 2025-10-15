@@ -2,7 +2,6 @@ package tech.derbent.users.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.utils.Check;
 import tech.derbent.page.service.CPageEntityService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CDetailLines;
@@ -19,6 +18,11 @@ public class CUserInitializerService extends CInitializerServiceBase {
 	public static final String BASE_PANEL_NAME = "User Information";
 	static final Class<?> clazz = CUser.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserInitializerService.class);
+	private static final String menuTitle = "System.Users";
+	private static final String pageTitle = "User Management";
+	private static final String pageDescription = "User management for system access and permissions";
+	private static final String menuOrder = "1.1";
+	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) {
 		try {
@@ -67,11 +71,10 @@ public class CUserInitializerService extends CInitializerServiceBase {
 	}
 
 	public static void initialize(CProject project, CGridEntityService gridEntityService, CDetailSectionService detailSectionService,
-			CPageEntityService pageEntityService, boolean showInQuickToolbar) throws Exception {
-		Check.notNull(project, "project cannot be null");
+			CPageEntityService pageEntityService, boolean showInQuickToolbarParam) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, "System.Users", "User Management",
-				"User management for system access and permissions", showInQuickToolbar);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
+				pageDescription, showInQuickToolbarParam, menuOrder);
 	}
 }

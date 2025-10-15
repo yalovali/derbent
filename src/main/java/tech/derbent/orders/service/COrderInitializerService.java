@@ -2,9 +2,7 @@ package tech.derbent.orders.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.utils.Check;
 import tech.derbent.orders.domain.COrder;
-import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.page.service.CPageEntityService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CDetailSection;
@@ -19,6 +17,11 @@ public class COrderInitializerService extends CInitializerServiceBase {
 	public static final String BASE_PANEL_NAME = "Order Information";
 	private static final Class<?> clazz = COrder.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(COrderInitializerService.class);
+	private static final String menuTitle = "Project.Orders";
+	private static final String pageTitle = "Order Management";
+	private static final String pageDescription = "Order management with approval workflow";
+	private static final String menuOrder = "1.1";
+	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) {
 		try {
@@ -68,18 +71,11 @@ public class COrderInitializerService extends CInitializerServiceBase {
 	}
 
 	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService, boolean showInQuickToolbar)
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService, boolean showInQuickToolbarParam)
 			throws Exception {
-		Check.notNull(project, "project cannot be null");
-		Check.notNull(gridEntityService, "gridEntityService cannot be null");
-		Check.notNull(detailSectionService, "detailSectionService cannot be null");
-		Check.notNull(pageEntityService, "pageEntityService cannot be null");
 		final CDetailSection detailSection = createBasicView(project);
-		detailSectionService.save(detailSection);
 		final CGridEntity grid = createGridEntity(project);
-		gridEntityService.save(grid);
-		final CPageEntity page = createPageEntity(clazz, project, grid, detailSection, "Project.Orders", "Order Management",
-				"Order management with approval workflow", "1.1");
-		pageEntityService.save(page);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
+				pageDescription, showInQuickToolbarParam, menuOrder);
 	}
 }

@@ -19,6 +19,11 @@ public class CActivityPriorityInitializerService extends CInitializerServiceBase
 	public static final String BASE_PANEL_NAME = "Activity Priority Information";
 	private static final Class<?> clazz = CActivityPriority.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityPriorityInitializerService.class);
+	private static final String menuTitle = "Types.Activity Priorities";
+	private static final String pageTitle = "Activity Priority Management";
+	private static final String pageDescription = "Manage activity priority definitions for projects";
+	private static final String menuOrder = "1.1";
+	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) {
 		Check.notNull(project, "Project cannot be null");
@@ -55,12 +60,12 @@ public class CActivityPriorityInitializerService extends CInitializerServiceBase
 	}
 
 	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService, boolean showInQuickToolbar)
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService, boolean showInQuickToolbarParam)
 			throws Exception {
 		Check.notNull(project, "project cannot be null");
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, "Types.Activity Priorities",
-				"Activity Priority Management", "Manage activity priority definitions for projects", showInQuickToolbar);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
+				pageDescription, showInQuickToolbarParam, menuOrder);
 	}
 }

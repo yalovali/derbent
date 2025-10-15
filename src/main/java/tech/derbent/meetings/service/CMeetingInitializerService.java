@@ -2,9 +2,7 @@ package tech.derbent.meetings.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.utils.Check;
 import tech.derbent.meetings.domain.CMeeting;
-import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.page.service.CPageEntityService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CDetailSection;
@@ -19,6 +17,11 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 	public static final String BASE_PANEL_NAME = "Meeting Information";
 	private static final Class<?> ENTITY_CLASS = CMeeting.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingInitializerService.class);
+	private static final String menuTitle = "Project.Meetings";
+	private static final String pageTitle = "Meeting Management";
+	private static final String pageDescription = "Meeting management with scheduling and participant tracking";
+	private static final String menuOrder = "1.1";
+	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) {
 		try {
@@ -64,18 +67,11 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 	}
 
 	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService, boolean showInQuickToolbar)
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService, boolean showInQuickToolbarParam)
 			throws Exception {
-		Check.notNull(project, "project cannot be null");
-		Check.notNull(gridEntityService, "gridEntityService cannot be null");
-		Check.notNull(detailSectionService, "detailSectionService cannot be null");
-		Check.notNull(pageEntityService, "pageEntityService cannot be null");
 		final CDetailSection detailSection = createBasicView(project);
-		detailSectionService.save(detailSection);
 		final CGridEntity grid = createGridEntity(project);
-		gridEntityService.save(grid);
-		final CPageEntity page = createPageEntity(ENTITY_CLASS, project, grid, detailSection, "Project.Meetings", "Meeting Management",
-				"Meeting management with scheduling and participant tracking", "1.1");
-		pageEntityService.save(page);
+		initBase(ENTITY_CLASS, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
+				pageDescription, showInQuickToolbarParam, menuOrder);
 	}
 }

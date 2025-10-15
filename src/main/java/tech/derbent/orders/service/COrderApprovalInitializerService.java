@@ -3,6 +3,7 @@ package tech.derbent.orders.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.utils.Check;
+import tech.derbent.orders.domain.COrderApproval;
 import tech.derbent.page.service.CPageEntityService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CDetailSection;
@@ -11,7 +12,6 @@ import tech.derbent.screens.service.CDetailLinesService;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.screens.service.CInitializerServiceBase;
-import tech.derbent.orders.domain.COrderApproval;
 
 /** Initializes UI metadata for {@link COrderApproval} entities. */
 public final class COrderApprovalInitializerService extends CInitializerServiceBase {
@@ -19,6 +19,11 @@ public final class COrderApprovalInitializerService extends CInitializerServiceB
 	public static final String BASE_PANEL_NAME = "Approval Details";
 	private static final Logger LOGGER = LoggerFactory.getLogger(COrderApprovalInitializerService.class);
 	private static final Class<?> ENTITY_CLASS = COrderApproval.class;
+	private static final String menuTitle = "Orders.Approvals";
+	private static final String pageTitle = "Order Approval Management";
+	private static final String pageDescription = "Track approvals and decision workflow for orders";
+	private static final String menuOrder = "1.1";
+	private static final boolean showInQuickToolbar = false;
 
 	private COrderApprovalInitializerService() {}
 
@@ -56,12 +61,12 @@ public final class COrderApprovalInitializerService extends CInitializerServiceB
 	}
 
 	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService, final boolean showInQuickToolbar)
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService, final boolean showInQuickToolbarParam)
 			throws Exception {
 		Check.notNull(project, "project cannot be null");
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(ENTITY_CLASS, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, "Orders.Approvals",
-				"Order Approval Management", "Track approvals and decision workflow for orders", showInQuickToolbar);
+		initBase(ENTITY_CLASS, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
+				pageDescription, showInQuickToolbarParam, menuOrder);
 	}
 }

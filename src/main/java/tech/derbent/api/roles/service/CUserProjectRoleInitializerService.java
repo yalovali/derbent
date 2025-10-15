@@ -3,7 +3,6 @@ package tech.derbent.api.roles.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.roles.domain.CUserProjectRole;
-import tech.derbent.api.utils.Check;
 import tech.derbent.page.service.CPageEntityService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CDetailSection;
@@ -18,6 +17,11 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 	public static final String BASE_PANEL_NAME = "Project Role Details";
 	private static final Class<?> ENTITY_CLASS = CUserProjectRole.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserProjectRoleInitializerService.class);
+	private static final String menuTitle = "Setup.Project Roles";
+	private static final String pageTitle = "Project Role Management";
+	private static final String pageDescription = "Manage project-specific roles and permissions";
+	private static final String menuOrder = "1.1";
+	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) {
 		try {
@@ -63,14 +67,10 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 	}
 
 	public static void initialize(CProject project, CGridEntityService gridEntityService, CDetailSectionService detailSectionService,
-			CPageEntityService pageEntityService, boolean showInQuickToolbar) throws Exception {
-		Check.notNull(project, "project cannot be null");
-		Check.notNull(gridEntityService, "gridEntityService cannot be null");
-		Check.notNull(detailSectionService, "detailSectionService cannot be null");
-		Check.notNull(pageEntityService, "pageEntityService cannot be null");
+			CPageEntityService pageEntityService, boolean showInQuickToolbarParam) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project, false);
-		initBase(ENTITY_CLASS, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, "Setup.Project Roles",
-				"Project Role Management", "Manage project-specific roles and permissions", showInQuickToolbar);
+		initBase(ENTITY_CLASS, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
+				pageDescription, showInQuickToolbarParam, menuOrder);
 	}
 }

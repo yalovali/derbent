@@ -2,7 +2,6 @@ package tech.derbent.orders.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.utils.Check;
 import tech.derbent.orders.domain.CCurrency;
 import tech.derbent.page.service.CPageEntityService;
 import tech.derbent.projects.domain.CProject;
@@ -18,6 +17,11 @@ public class CCurrencyInitializerService extends CInitializerServiceBase {
 	public static final String BASE_PANEL_NAME = "Currency Information";
 	private static final Class<?> clazz = CCurrency.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCurrencyInitializerService.class);
+	private static final String menuTitle = "Types.Currencies";
+	private static final String pageTitle = "Currencies Management";
+	private static final String pageDescription = "Currencies management";
+	private static final String menuOrder = "1.1";
+	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
@@ -48,12 +52,11 @@ public class CCurrencyInitializerService extends CInitializerServiceBase {
 	}
 
 	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService, boolean showInQuickToolbar)
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService, boolean showInQuickToolbarParam)
 			throws Exception {
-		Check.notNull(project, "project cannot be null");
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, "Types.Currencies",
-				"Currencies Management", "Currencies management", showInQuickToolbar);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
+				pageDescription, showInQuickToolbarParam, menuOrder);
 	}
 }

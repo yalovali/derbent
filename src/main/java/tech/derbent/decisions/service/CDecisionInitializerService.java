@@ -2,9 +2,7 @@ package tech.derbent.decisions.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.utils.Check;
 import tech.derbent.decisions.domain.CDecision;
-import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.page.service.CPageEntityService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CDetailSection;
@@ -17,8 +15,13 @@ import tech.derbent.screens.service.CInitializerServiceBase;
 public class CDecisionInitializerService extends CInitializerServiceBase {
 
 	public static final String BASE_PANEL_NAME = "Decisions Information";
-	private static Logger LOGGER = LoggerFactory.getLogger(CDecisionInitializerService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDecisionInitializerService.class);
 	private static final Class<?> clazz = CDecision.class;
+	private static final String menuTitle = "Project.Decisions";
+	private static final String pageTitle = "Decision Management";
+	private static final String pageDescription = "Decision tracking and accountability";
+	private static final String menuOrder = "1.1";
+	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) {
 		try {
@@ -56,18 +59,10 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 	}
 
 	public static void initialize(CProject project, CGridEntityService gridEntityService, CDetailSectionService detailSectionService,
-			CPageEntityService pageEntityService, boolean showInQuickToolbar) throws Exception {
-		Check.notNull(project, "project cannot be null");
-		Check.notNull(gridEntityService, "gridEntityService cannot be null");
-		Check.notNull(detailSectionService, "detailSectionService cannot be null");
-		Check.notNull(pageEntityService, "pageEntityService cannot be null");
-		CDetailSection detailSection = createBasicView(project);
-		detailSectionService.save(detailSection);
-		CGridEntity grid = createGridEntity(project);
-		gridEntityService.save(grid);
-		CPageEntity page = createPageEntity(clazz, project, grid, detailSection, "Project.Decisions", "Decision Management",
-				"Decision tracking and accountability", "1.1");
-		page.setAttributeShowInQuickToolbar(showInQuickToolbar);
-		pageEntityService.save(page);
+			CPageEntityService pageEntityService, boolean showInQuickToolbarParam) throws Exception {
+		final CDetailSection detailSection = createBasicView(project);
+		final CGridEntity grid = createGridEntity(project);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
+				pageDescription, showInQuickToolbarParam, menuOrder);
 	}
 }
