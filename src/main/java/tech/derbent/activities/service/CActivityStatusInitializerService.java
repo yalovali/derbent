@@ -52,11 +52,11 @@ public class CActivityStatusInitializerService extends CInitializerServiceBase {
 	}
 
 	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService, boolean showInQuickToolbarParam)
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
 			throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbarParam, menuOrder);
+				pageDescription, showInQuickToolbar, menuOrder);
 	}
 }

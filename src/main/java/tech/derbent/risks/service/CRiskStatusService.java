@@ -1,7 +1,5 @@
 package tech.derbent.risks.service;
 
-import java.util.Optional;
-import tech.derbent.projects.domain.CProject;
 import java.time.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,22 +15,12 @@ import tech.derbent.session.service.ISessionService;
 @Service
 @Transactional
 public class CRiskStatusService extends CStatusService<CRiskStatus> {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskStatusService.class);
 
 	@Autowired
 	public CRiskStatusService(final IRiskStatusRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
-
-	/** Create default risk statuses if they don't exist. This method should be called during application startup. */
-	public void createDefaultStatusesIfNotExist() {
-		LOGGER.debug("createDefaultStatusesIfNotExist() - Creating default risk statuses");
-		// TODO implement default statuses creation logic
-	}
-
-	@Override
-	protected Class<CRiskStatus> getEntityClass() { return CRiskStatus.class; }
 
 	/** Checks dependencies before allowing risk status deletion. Always calls super.checkDeleteAllowed() first to ensure all parent-level checks
 	 * (null validation, non-deletable flag) are performed.
@@ -47,21 +35,18 @@ public class CRiskStatusService extends CStatusService<CRiskStatus> {
 		return null;
 	}
 
+	/** Create default risk statuses if they don't exist. This method should be called during application startup. */
+	public void createDefaultStatusesIfNotExist() {
+		LOGGER.debug("createDefaultStatusesIfNotExist() - Creating default risk statuses");
+		// TODO implement default statuses creation logic
+	}
+
+	@Override
+	protected Class<CRiskStatus> getEntityClass() { return CRiskStatus.class; }
+
 	@Override
 	public void initializeNewEntity(final CRiskStatus entity) {
 		super.initializeNewEntity(entity);
-		try {
-			Optional<CProject> activeProject = sessionService.getActiveProject();
-			if (activeProject.isPresent()) {
-				long statusCount = ((IRiskStatusRepository) repository).countByProject(activeProject.get());
-				String autoName = String.format("RiskStatus%02d", statusCount + 1);
-				entity.setName(autoName);
-			}
-			entity.setIsFinal(false);
-			LOGGER.debug("Initialized new risk status");
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing new risk status", e);
-			throw new IllegalStateException("Failed to initialize risk status: " + e.getMessage(), e);
-		}
+		setNameOfEntity(entity, "Risk Status");
 	}
 }

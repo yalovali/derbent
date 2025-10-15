@@ -15,7 +15,6 @@ import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.screens.service.CInitializerServiceBase;
 
 public class CActivityInitializerService extends CInitializerServiceBase {
-
 	public static final String BASE_PANEL_NAME = "Activity Information";
 	static final Class<?> clazz = CActivity.class;
 	static Map<String, EntityFieldInfo> fields;
@@ -29,7 +28,7 @@ public class CActivityInitializerService extends CInitializerServiceBase {
 
 	public static CDetailSection createBasicView(final CProject project) {
 		try {
-			CDetailSection scr = createBaseScreenEntity(project, clazz);
+			final CDetailSection scr = createBaseScreenEntity(project, clazz);
 			// create screen lines
 			scr.addScreenLine(CDetailLinesService.createSection(CActivityInitializerService.BASE_PANEL_NAME));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
@@ -74,17 +73,17 @@ public class CActivityInitializerService extends CInitializerServiceBase {
 	}
 
 	public static CGridEntity createGridEntity(final CProject project) {
-		CGridEntity grid = createBaseGridEntity(project, clazz);
+		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setSelectedFields(
 				"name,activityType,assignedTo,createdBy,startDate,dueDate,completionDate,progressPercentage,estimatedHours,actualHours,remainingHours,status,priority,project,createdDate,lastModifiedDate");
 		return grid;
 	}
 
-	public static void initialize(CProject project, CGridEntityService gridEntityService, CDetailSectionService detailSectionService,
-			CPageEntityService pageEntityService, boolean showInQuickToolbarParam) throws Exception {
+	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbarParam, menuOrder);
+				pageDescription, showInQuickToolbar, menuOrder);
 	}
 }

@@ -92,13 +92,13 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 	}
 
 	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService, boolean showInQuickToolbarParam)
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
 			throws Exception {
 		Check.notNull(project, "project cannot be null");
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbarParam, menuOrder);
+				pageDescription, showInQuickToolbar, menuOrder);
 		// Create a single system settings page (like company single view)
 		CGridEntity singleGrid = createGridEntity(project, true);
 		singleGrid.setName("System Settings Single View");

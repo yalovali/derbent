@@ -17,10 +17,9 @@ import tech.derbent.session.service.ISessionService;
 @Service
 @Transactional
 public class CActivityStatusService extends CStatusService<CActivityStatus> {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityStatusService.class);
 	@Autowired
-	private IActivityRepository activityRepository;
+	private final IActivityRepository activityRepository;
 
 	@Autowired
 	public CActivityStatusService(final IActivityStatusRepository repository, final Clock clock, final ISessionService sessionService,
@@ -68,18 +67,6 @@ public class CActivityStatusService extends CStatusService<CActivityStatus> {
 	@Override
 	public void initializeNewEntity(final CActivityStatus entity) {
 		super.initializeNewEntity(entity);
-		try {
-			// Auto-generate name based on count
-			Optional<CProject> activeProject = sessionService.getActiveProject();
-			if (activeProject.isPresent()) {
-				long statusCount = ((IActivityStatusRepository) repository).countByProject(activeProject.get());
-				String autoName = String.format("ActivityStatus%02d", statusCount + 1);
-				entity.setName(autoName);
-			}
-			LOGGER.debug("Initialized new activity status");
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing new activity status", e);
-			throw new IllegalStateException("Failed to initialize activity status: " + e.getMessage(), e);
-		}
+		setNameOfEntity(entity, "Activity Status");
 	}
 }

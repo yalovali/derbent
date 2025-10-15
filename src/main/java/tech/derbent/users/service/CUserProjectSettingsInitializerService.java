@@ -63,7 +63,7 @@ public final class CUserProjectSettingsInitializerService extends CInitializerSe
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(ENTITY_CLASS, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbarParam, menuOrder);
+				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
 	private static void addOptionalField(final CDetailSection detailSection, final String fieldName) {

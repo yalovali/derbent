@@ -17,7 +17,6 @@ import tech.derbent.session.service.ISessionService;
 import tech.derbent.users.domain.CUser;
 
 public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProject<EntityClass>> extends CEntityNamedService<EntityClass> {
-
 	public CEntityOfProjectService(final IEntityOfProjectRepository<EntityClass> repository, final Clock clock,
 			final ISessionService sessionService) {
 		super(repository, clock, sessionService);
@@ -25,7 +24,7 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 
 	@Override
 	public String checkDeleteAllowed(final EntityClass entity) {
-		String superCheck = super.checkDeleteAllowed(entity);
+		final String superCheck = super.checkDeleteAllowed(entity);
 		if (superCheck != null) {
 			return superCheck;
 		}
@@ -95,8 +94,8 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	public void initializeNewEntity(final EntityClass entity) {
 		super.initializeNewEntity(entity);
 		Check.notNull(sessionService, "Session service is required for entity initialization");
-		CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
-		CUser currentUser = sessionService.getActiveUser().orElseThrow(() -> new IllegalStateException("No active user in session"));
+		final CProject activeProject = sessionService.getActiveProject().orElseThrow(() -> new IllegalStateException("No active project in session"));
+		final CUser currentUser = sessionService.getActiveUser().orElseThrow(() -> new IllegalStateException("No active user in session"));
 		entity.setProject(activeProject);
 		entity.setCreatedBy(currentUser);
 		entity.setCreatedDate(LocalDateTime.now(clock));
@@ -216,6 +215,20 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 		} catch (final Exception e) {
 			LOGGER.error("save(entity={}) - Error saving entity: {}", entity.getId(), e.getMessage());
 			throw new RuntimeException("Failed to save entity", e);
+		}
+	}
+
+	protected void setNameOfEntity(final EntityClass entity, final String prefix) {
+		try {
+			final Optional<CProject> activeProject = sessionService.getActiveProject();
+			if (activeProject.isPresent()) {
+				final long priorityCount = ((IEntityOfProjectRepository<?>) repository).countByProject(activeProject.get());
+				final String autoName = String.format(prefix + " %02d", priorityCount + 1);
+				entity.setName(autoName);
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error setting name of entity: {}", e.getMessage());
+			throw e;
 		}
 	}
 }

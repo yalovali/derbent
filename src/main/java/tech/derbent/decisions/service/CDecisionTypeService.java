@@ -16,24 +16,11 @@ import tech.derbent.session.service.ISessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CDecisionTypeService extends CTypeEntityService<CDecisionType> {
-
 	private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CDecisionTypeService.class);
 
 	public CDecisionTypeService(final IDecisionTypeRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
-
-	/** Finds all active decision types for a project.
-	 * @param project the project
-	 * @return list of active decision types for the project */
-	@Transactional (readOnly = true)
-	public List<CDecisionType> findAllActiveByProject(final CProject project) {
-		Optional.ofNullable(project).orElse(null);
-		return ((IDecisionTypeRepository) repository).findByProjectAndIsActiveTrue(project);
-	}
-
-	@Override
-	protected Class<CDecisionType> getEntityClass() { return CDecisionType.class; }
 
 	/** Checks dependencies before allowing decision type deletion. Always calls super.checkDeleteAllowed() first to ensure all parent-level checks
 	 * (null validation, non-deletable flag) are performed.
@@ -50,23 +37,24 @@ public class CDecisionTypeService extends CTypeEntityService<CDecisionType> {
 		return null;
 	}
 
+	/** Finds all active decision types for a project.
+	 * @param project the project
+	 * @return list of active decision types for the project */
+	@Transactional (readOnly = true)
+	public List<CDecisionType> findAllActiveByProject(final CProject project) {
+		Optional.ofNullable(project).orElse(null);
+		return ((IDecisionTypeRepository) repository).findByProjectAndIsActiveTrue(project);
+	}
+
+	@Override
+	protected Class<CDecisionType> getEntityClass() { return CDecisionType.class; }
+
 	/** Initializes a new decision type with default values based on current session and available data.
 	 * @param entity the newly created decision type to initialize
 	 * @throws IllegalStateException if required fields cannot be initialized */
 	@Override
 	public void initializeNewEntity(final CDecisionType entity) {
 		super.initializeNewEntity(entity);
-		try {
-			Optional<CProject> activeProject = sessionService.getActiveProject();
-			if (activeProject.isPresent()) {
-				long typeCount = ((IDecisionTypeRepository) repository).countByProject(activeProject.get());
-				String autoName = String.format("DecisionType%02d", typeCount + 1);
-				entity.setName(autoName);
-			}
-			LOGGER.debug("Initialized new cdecisiontype");
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing new cdecisiontype", e);
-			throw new IllegalStateException("Failed to initialize cdecisiontype: " + e.getMessage(), e);
-		}
+		setNameOfEntity(entity, "Decision Type");
 	}
 }

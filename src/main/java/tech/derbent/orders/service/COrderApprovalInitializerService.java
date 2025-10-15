@@ -67,6 +67,6 @@ public final class COrderApprovalInitializerService extends CInitializerServiceB
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(ENTITY_CLASS, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbarParam, menuOrder);
+				pageDescription, showInQuickToolbar, menuOrder);
 	}
 }

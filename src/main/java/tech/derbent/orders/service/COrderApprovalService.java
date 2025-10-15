@@ -17,12 +17,9 @@ import tech.derbent.users.domain.CUser;
 @Transactional (readOnly = true)
 public class COrderApprovalService extends CEntityNamedService<COrderApproval> {
 
-	private final CApprovalStatusService approvalStatusService;
-
 	COrderApprovalService(final IOrderApprovalRepository repository, final Clock clock, final ISessionService sessionService,
 			final CApprovalStatusService approvalStatusService) {
 		super(repository, clock, sessionService);
-		this.approvalStatusService = approvalStatusService;
 	}
 
 	@Override

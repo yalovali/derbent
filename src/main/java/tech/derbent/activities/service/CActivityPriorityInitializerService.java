@@ -15,7 +15,6 @@ import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.screens.service.CInitializerServiceBase;
 
 public class CActivityPriorityInitializerService extends CInitializerServiceBase {
-
 	public static final String BASE_PANEL_NAME = "Activity Priority Information";
 	private static final Class<?> clazz = CActivityPriority.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityPriorityInitializerService.class);
@@ -60,12 +59,11 @@ public class CActivityPriorityInitializerService extends CInitializerServiceBase
 	}
 
 	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService, boolean showInQuickToolbarParam)
-			throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		Check.notNull(project, "project cannot be null");
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
-				pageDescription, showInQuickToolbarParam, menuOrder);
+				pageDescription, showInQuickToolbar, menuOrder);
 	}
 }

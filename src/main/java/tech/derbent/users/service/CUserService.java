@@ -39,20 +39,11 @@ import tech.derbent.users.domain.CUser;
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class CUserService extends CEntityNamedService<CUser> implements UserDetailsService {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserService.class);
 	@Autowired
 	private ApplicationContext applicationContext;
 	private final PasswordEncoder passwordEncoder;
 	private ISessionService sessionService;
-
-	public CUserService() {
-		this(null, Clock.systemDefaultZone(), null);
-	}
-
-	public CUserService(final IUserRepository repository, final Clock clock) {
-		this(repository, clock, null);
-	}
 
 	public CUserService(final IUserRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
@@ -72,13 +63,13 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 		Check.notNull(entity.getCompany(), "User company cannot be null");
 		try {
 			// Rule 1: Check if this is the last user in the company
-			List<CUser> companyUsers = ((IUserRepository) repository).findByCompanyId(entity.getCompany().getId());
+			final List<CUser> companyUsers = ((IUserRepository) repository).findByCompanyId(entity.getCompany().getId());
 			if (companyUsers.size() == 1) {
 				return "Cannot delete the last user in the company. At least one user must remain.";
 			}
 			// Rule 2: Check if user is trying to delete themselves (if session service is available)
 			if (sessionService != null) {
-				Optional<CUser> currentUser = sessionService.getActiveUser();
+				final Optional<CUser> currentUser = sessionService.getActiveUser();
 				if (currentUser.isPresent() && currentUser.get().getId().equals(entity.getId())) {
 					return "You cannot delete your own user account while logged in.";
 				}
@@ -96,8 +87,8 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 	}
 
 	@Transactional // Write operation requires writable transaction
-	public CUser createLoginUser(final String username, final String plainPassword, final String name, final String email, CCompany company,
-			CUserCompanyRole role) {
+	public CUser createLoginUser(final String username, final String plainPassword, final String name, final String email, final CCompany company,
+			final CUserCompanyRole role) {
 		// Check if username already exists
 		if (((IUserRepository) repository).findByUsername(company.getId(), username).isPresent()) {
 			LOGGER.warn("Username already exists: {}", username);
@@ -116,9 +107,9 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 	public Component createUserProjectSettingsComponent() {
 		LOGGER.debug("Creating enhanced user project settings component");
 		try {
-			CComponentUserProjectSettings component = new CComponentUserProjectSettings(this, sessionService, applicationContext);
+			final CComponentUserProjectSettings component = new CComponentUserProjectSettings(this, sessionService, applicationContext);
 			return component;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to create user project settings component.");
 			// Fallback to simple div with error message
 			final Div errorDiv = new Div();
@@ -132,7 +123,7 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 	@Transactional (readOnly = true)
 	public List<CUser> findAll() {
 		// Enforce company requirement
-		CCompany currentCompany = getCurrentCompany();
+		final CCompany currentCompany = getCurrentCompany();
 		LOGGER.debug("Finding all users for company: {}", currentCompany.getName());
 		return ((IUserRepository) repository).findByCompanyId(currentCompany.getId());
 	}
@@ -181,7 +172,7 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 	 * @throws IllegalStateException if no company context is available */
 	private CCompany getCurrentCompany() {
 		Check.notNull(sessionService, "Session service must not be null");
-		CCompany currentCompany = sessionService.getCurrentCompany();
+		final CCompany currentCompany = sessionService.getCurrentCompany();
 		Check.notNull(currentCompany, "No active company in session - company context is required");
 		return currentCompany;
 	}
@@ -189,10 +180,10 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 	@Override
 	protected Class<CUser> getEntityClass() { return CUser.class; }
 
-	public CUser getRandomByCompany(CCompany company) {
-		List<CUser> users = ((IUserRepository) repository).findByCompanyId(company.getId());
+	public CUser getRandomByCompany(final CCompany company) {
+		final List<CUser> users = ((IUserRepository) repository).findByCompanyId(company.getId());
 		if (!users.isEmpty()) {
-			int randomIndex = (int) (Math.random() * users.size());
+			final int randomIndex = (int) (Math.random() * users.size());
 			return users.get(randomIndex);
 		} else {
 			LOGGER.warn("No users found for company: {}", company.getName());
@@ -212,10 +203,10 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 		Check.notNull(sessionService, "Session service is required for user initialization");
 		try {
 			// Get current company from session
-			CCompany currentCompany = sessionService.getCurrentCompany();
+			final CCompany currentCompany = sessionService.getCurrentCompany();
 			Check.notNull(currentCompany, "No active company in session - company context is required to create users");
-			List<CUser> existingUsers = ((IUserRepository) repository).findByCompanyId(currentCompany.getId());
-			String autoName = String.format("User%02d", existingUsers.size() + 1);
+			final List<CUser> existingUsers = ((IUserRepository) repository).findByCompanyId(currentCompany.getId());
+			final String autoName = String.format("User%02d", existingUsers.size() + 1);
 			user.setName(autoName);
 			user.setLogin(autoName.toLowerCase());
 			user.setLastname("");
@@ -234,7 +225,7 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 	@Override
 	@Transactional (readOnly = true)
 	public Page<CUser> list(final Pageable pageable) {
-		CCompany currentCompany = getCurrentCompany();
+		final CCompany currentCompany = getCurrentCompany();
 		LOGGER.debug("Listing users for company: {}", currentCompany.getName());
 		return ((IUserRepository) repository).findByCompanyId(currentCompany.getId(), pageable);
 	}
@@ -264,11 +255,11 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 		Check.notNull(project, "Project cannot be null");
 		Check.notNull(pageable, "Pageable cannot be null");
 		try {
-			List<CUser> allUsers = listByProject(project);
+			final List<CUser> allUsers = listByProject(project);
 			// Apply pagination
-			int start = (int) Math.min(pageable.getOffset(), allUsers.size());
-			int end = Math.min(start + pageable.getPageSize(), allUsers.size());
-			List<CUser> content = allUsers.subList(start, end);
+			final int start = (int) Math.min(pageable.getOffset(), allUsers.size());
+			final int end = Math.min(start + pageable.getPageSize(), allUsers.size());
+			final List<CUser> content = allUsers.subList(start, end);
 			return new PageImpl<>(content, pageable, allUsers.size());
 		} catch (final Exception e) {
 			LOGGER.error("Error listing users by project '{}' with pagination: {}", project.getName(), e.getMessage());
@@ -282,13 +273,13 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 		LOGGER.debug("Attempting to load user by username: {}", username);
 		// username syntax is username@company_id
 		// split login and company id
-		String[] parts = username.split("@");
+		final String[] parts = username.split("@");
 		Check.isTrue(parts.length == 2, "Username must be in the format username@company_id");
-		String login = parts[0];
+		final String login = parts[0];
 		Long companyId;
 		try {
 			companyId = Long.parseLong(parts[1]);
-		} catch (NumberFormatException e) {
+		} catch (final NumberFormatException e) {
 			LOGGER.warn("Invalid company ID in username: {}", parts[1]);
 			throw new UsernameNotFoundException("Invalid company ID in username: " + parts[1]);
 		}

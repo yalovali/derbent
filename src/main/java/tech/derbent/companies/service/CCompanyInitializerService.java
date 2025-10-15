@@ -2,9 +2,7 @@ package tech.derbent.companies.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.utils.Check;
 import tech.derbent.companies.domain.CCompany;
-import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.page.service.CPageEntityService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CDetailSection;
@@ -15,14 +13,18 @@ import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.screens.service.CInitializerServiceBase;
 
 public class CCompanyInitializerService extends CInitializerServiceBase {
-
 	public static final String BASE_PANEL_NAME = "Company Information";
 	static final Class<?> clazz = CCompany.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCompanyInitializerService.class);
+	private static final String menuTitle = "System.Companies";
+	private static final String pageTitle = "Company Management";
+	private static final String pageDescription = "Company management with contact details";
+	private static final String menuOrder = "1.1";
+	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) {
 		try {
-			CDetailSection scr = createBaseScreenEntity(project, clazz);
+			final CDetailSection scr = createBaseScreenEntity(project, clazz);
 			// Basic Company Information
 			scr.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
@@ -56,34 +58,22 @@ public class CCompanyInitializerService extends CInitializerServiceBase {
 		}
 	}
 
-	public static CGridEntity createGridEntity(final CProject project, boolean attributeNone) {
-		CGridEntity grid = createBaseGridEntity(project, clazz);
-		// hide grid actions for companies
-		grid.setAttributeNone(attributeNone);
+	public static CGridEntity createGridEntity(final CProject project) {
+		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setSelectedFields("id,name,description,address,phone,email,website,companyTheme,primaryColor,enableNotifications,enabled");
 		return grid;
 	}
 
-	public static void initialize(CProject project, CGridEntityService gridEntityService, CDetailSectionService detailSectionService,
-			CPageEntityService pageEntityService, boolean showInQuickToolbar) throws Exception {
-		Check.notNull(project, "project cannot be null");
-		Check.notNull(gridEntityService, "gridEntityService cannot be null");
-		Check.notNull(detailSectionService, "detailSectionService cannot be null");
-		Check.notNull(pageEntityService, "pageEntityService cannot be null");
-		CDetailSection detailSection = createBasicView(project);
-		detailSectionService.save(detailSection);
-		CGridEntity grid = createGridEntity(project, false);
-		gridEntityService.save(grid);
-		CPageEntity page = createPageEntity(clazz, project, grid, detailSection, "System.Companies", "Company Management",
-				"Company management with contact details", "1.1");
-		page.setAttributeShowInQuickToolbar(showInQuickToolbar);
-		pageEntityService.save(page);
+	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+		final CDetailSection detailSection = createBasicView(project);
+		CGridEntity grid = createGridEntity(project);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
+				pageDescription, showInQuickToolbar, menuOrder);
 		// create a single company page
-		grid = createGridEntity(project, true);
-		grid.setName("Company Single View");
-		gridEntityService.save(grid);
-		page = createPageEntity(clazz, project, grid, detailSection, "System.Current Company", "Company Management",
-				"Company management with contact details", "1.1");
-		pageEntityService.save(page);
+		grid = createGridEntity(project);
+		grid.setAttributeNone(true);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, "System.Current Company", pageTitle,
+				pageDescription, showInQuickToolbar, menuOrder);
 	}
 }

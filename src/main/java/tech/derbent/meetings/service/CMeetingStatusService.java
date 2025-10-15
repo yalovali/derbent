@@ -19,7 +19,6 @@ import tech.derbent.session.service.ISessionService;
 @Service
 @Transactional
 public class CMeetingStatusService extends CStatusService<CMeetingStatus> {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingStatusService.class);
 
 	@Autowired
@@ -75,18 +74,6 @@ public class CMeetingStatusService extends CStatusService<CMeetingStatus> {
 	@Override
 	public void initializeNewEntity(final CMeetingStatus entity) {
 		super.initializeNewEntity(entity);
-		try {
-			Optional<CProject> activeProject = sessionService.getActiveProject();
-			if (activeProject.isPresent()) {
-				long statusCount = ((IMeetingStatusRepository) repository).countByProject(activeProject.get());
-				String autoName = String.format("MeetingStatus%02d", statusCount + 1);
-				entity.setName(autoName);
-			}
-			entity.setFinalStatus(false);
-			LOGGER.debug("Initialized new meeting status");
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing new meeting status", e);
-			throw new IllegalStateException("Failed to initialize meeting status: " + e.getMessage(), e);
-		}
+		setNameOfEntity(entity, "Meeting Status");
 	}
 }

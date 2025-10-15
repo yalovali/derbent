@@ -1,7 +1,5 @@
 package tech.derbent.orders.service;
 
-import java.util.Optional;
-import tech.derbent.projects.domain.CProject;
 import java.time.Clock;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -14,15 +12,11 @@ import tech.derbent.session.service.ISessionService;
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class COrderTypeService extends CTypeEntityService<COrderType> {
-
 	private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(COrderTypeService.class);
 
 	COrderTypeService(final IOrderTypeRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
-
-	@Override
-	protected Class<COrderType> getEntityClass() { return COrderType.class; }
 
 	/** Checks dependencies before allowing order type deletion. Always calls super.checkDeleteAllowed() first to ensure all parent-level checks (null
 	 * validation, non-deletable flag) are performed.
@@ -38,19 +32,11 @@ public class COrderTypeService extends CTypeEntityService<COrderType> {
 	}
 
 	@Override
+	protected Class<COrderType> getEntityClass() { return COrderType.class; }
+
+	@Override
 	public void initializeNewEntity(final COrderType entity) {
 		super.initializeNewEntity(entity);
-		try {
-			Optional<CProject> activeProject = sessionService.getActiveProject();
-			if (activeProject.isPresent()) {
-				long typeCount = ((IOrderTypeRepository) repository).countByProject(activeProject.get());
-				String autoName = String.format("OrderType%02d", typeCount + 1);
-				entity.setName(autoName);
-			}
-			LOGGER.debug("Initialized new cordertype");
-		} catch (final Exception e) {
-			LOGGER.error("Error initializing new cordertype", e);
-			throw new IllegalStateException("Failed to initialize cordertype: " + e.getMessage(), e);
-		}
+		setNameOfEntity(entity, "Order Type");
 	}
 }
