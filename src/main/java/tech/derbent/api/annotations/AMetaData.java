@@ -73,5 +73,9 @@ public @interface AMetaData {
 
 	boolean useRadioButtons() default false;
 
+	/** When true, uses a dual list selector component (available/selected lists with add/remove/ordering buttons) instead of MultiSelectComboBox for
+	 * Set fields. This provides a better UX for selecting and ordering multiple items. */
+	boolean useDualListSelector() default false;
+
 	String width() default "";
 }

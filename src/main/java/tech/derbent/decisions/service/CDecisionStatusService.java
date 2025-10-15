@@ -10,6 +10,7 @@ import tech.derbent.session.service.ISessionService;
 @Service
 @PreAuthorize ("isAuthenticated()")
 public class CDecisionStatusService extends CStatusService<CDecisionStatus> {
+
 	public CDecisionStatusService(final IDecisionStatusRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}

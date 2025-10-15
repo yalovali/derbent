@@ -15,6 +15,7 @@ import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.screens.service.CInitializerServiceBase;
 
 public class CProjectInitializerService extends CInitializerServiceBase {
+
 	public static final String BASE_PANEL_NAME = "Project Information";
 	static final Class<?> clazz = CProject.class;
 	static Map<String, EntityFieldInfo> fields;

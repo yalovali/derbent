@@ -13,6 +13,7 @@ import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.screens.service.CInitializerServiceBase;
 
 public class CApprovalStatusInitializerService extends CInitializerServiceBase {
+
 	public static final String BASE_PANEL_NAME = "Approval Status Information";
 	private static final Class<?> clazz = CApprovalStatus.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CApprovalStatusInitializerService.class);

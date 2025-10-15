@@ -25,6 +25,7 @@ import tech.derbent.api.views.components.CButton;
  * @param <RelationEntity> The relationship entity type (e.g., CUserProjectSettings) */
 public abstract class CAbstractEntityRelationPanel<ParentEntity extends CEntityDB<ParentEntity>, RelationEntity extends CEntityDB<RelationEntity>>
 		extends CAccordionDBEntity<ParentEntity> {
+
 	private static final long serialVersionUID = 1L;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected final Grid<RelationEntity> grid = new Grid<>(getRelationEntityClass(), false);
@@ -81,10 +82,8 @@ public abstract class CAbstractEntityRelationPanel<ParentEntity extends CEntityD
 
 	/** Abstract method to handle relation save events */
 	protected abstract void onRelationSaved(final RelationEntity relation);
-
 	/** Abstract method to open the add dialog */
 	protected abstract void openAddDialog();
-
 	/** Abstract method to open the edit dialog */
 	protected abstract void openEditDialog();
 

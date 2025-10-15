@@ -14,6 +14,7 @@ import tech.derbent.session.service.ISessionService;
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class CMeetingTypeService extends CTypeEntityService<CMeetingType> {
+
 	CMeetingTypeService(final IMeetingTypeRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}

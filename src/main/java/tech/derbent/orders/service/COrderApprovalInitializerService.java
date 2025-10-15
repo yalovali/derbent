@@ -15,6 +15,7 @@ import tech.derbent.screens.service.CInitializerServiceBase;
 
 /** Initializes UI metadata for {@link COrderApproval} entities. */
 public final class COrderApprovalInitializerService extends CInitializerServiceBase {
+
 	public static final String BASE_PANEL_NAME = "Approval Details";
 	private static final Logger LOGGER = LoggerFactory.getLogger(COrderApprovalInitializerService.class);
 	private static final Class<?> ENTITY_CLASS = COrderApproval.class;

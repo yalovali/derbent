@@ -24,6 +24,7 @@ import tech.derbent.session.service.ISessionService;
  * @param <RelationalClass> The relationship entity type (e.g., CUserProjectSettings, CUserCompanySetting) */
 public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNamed<MasterClass>, RelationalClass extends CEntityDB<RelationalClass>>
 		extends CComponentRelationBase<MasterClass, RelationalClass> {
+
 	private static final long serialVersionUID = 1L;
 	private CButton addButton;
 	private CButton deleteButton;
@@ -120,7 +121,6 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 
 	/** Get delete confirmation message - subclasses can override. */
 	protected abstract String getDeleteConfirmationMessage(RelationalClass selected);
-
 	/** Gets display text for various field types - subclasses must implement. */
 	protected abstract String getDisplayText(RelationalClass settings, String fieldType);
 
@@ -138,9 +138,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 
 	/** Abstract methods that subclasses must implement */
 	protected abstract void onSettingsSaved(RelationalClass settings);
-
 	protected abstract void openAddDialog() throws Exception;
-
 	protected abstract void openEditDialog() throws Exception;
 
 	/** Sets up the action buttons (Add, Edit, Delete) with common behavior. */
