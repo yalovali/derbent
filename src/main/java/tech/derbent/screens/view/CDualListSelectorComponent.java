@@ -6,18 +6,23 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValueAndElement;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H4;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.ItemLabelGenerator;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.shared.Registration;
+import tech.derbent.api.domains.CEntityNamed;
+import tech.derbent.api.views.components.CEntityLabel;
 
 /** Generic dual list selector component for selecting and ordering items from a source list. This component provides a two-panel interface with
  * available items on the left and selected items on the right, with buttons for adding, removing, and reordering selections. Implements HasValue and
@@ -75,6 +80,9 @@ public class CDualListSelectorComponent<T> extends VerticalLayout
 		selectedList = new ListBox<>();
 		selectedList.setHeight("250px");
 		selectedList.setWidthFull();
+		// Set up color-aware rendering for entities
+		configureColorAwareRenderer(availableList);
+		configureColorAwareRenderer(selectedList);
 		// Control buttons
 		addButton = new Button("Add →", VaadinIcon.ARROW_RIGHT.create());
 		addButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -104,6 +112,32 @@ public class CDualListSelectorComponent<T> extends VerticalLayout
 		mainLayout.setWidthFull();
 		mainLayout.setSpacing(true);
 		add(mainLayout);
+	}
+
+	/** Configures color-aware rendering for entity items in ListBox. If the item is a CEntityNamed, it will be rendered with its color and icon using
+	 * CEntityLabel. Otherwise, it falls back to text rendering.
+	 * @param listBox The ListBox to configure */
+	private void configureColorAwareRenderer(ListBox<T> listBox) {
+		listBox.setRenderer(new ComponentRenderer<>(item -> {
+			try {
+				if (item == null) {
+					return new Span("N/A");
+				}
+				// Check if item is a CEntityNamed (has color and icon support)
+				if (item instanceof CEntityNamed) {
+					// Use CEntityLabel for colored rendering with icon
+					return new CEntityLabel((CEntityNamed<?>) item);
+				} else {
+					// Fall back to text rendering for non-entity types
+					String text = itemLabelGenerator != null ? itemLabelGenerator.apply(item) : item.toString();
+					return new Span(text);
+				}
+			} catch (Exception e) {
+				// Fall back to simple text rendering on error
+				String text = itemLabelGenerator != null ? itemLabelGenerator.apply(item) : item.toString();
+				return new Span(text);
+			}
+		}));
 	}
 
 	private void setupEventHandlers() {
@@ -218,12 +252,13 @@ public class CDualListSelectorComponent<T> extends VerticalLayout
 		refreshLists();
 	}
 
-	/** Sets the item label generator for displaying items.
+	/** Sets the item label generator for displaying items. This is used for non-entity items or as a fallback.
 	 * @param itemLabelGenerator Function to generate display text for items */
 	public void setItemLabelGenerator(ItemLabelGenerator<T> itemLabelGenerator) {
 		this.itemLabelGenerator = itemLabelGenerator != null ? itemLabelGenerator : Object::toString;
-		availableList.setRenderer(new TextRenderer<>(this.itemLabelGenerator));
-		selectedList.setRenderer(new TextRenderer<>(this.itemLabelGenerator));
+		// Refresh renderer to use new label generator
+		configureColorAwareRenderer(availableList);
+		configureColorAwareRenderer(selectedList);
 	}
 
 	/** Returns the currently selected items.

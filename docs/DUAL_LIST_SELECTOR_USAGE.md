@@ -4,36 +4,79 @@
 
 The Dual List Selector Component provides a better user experience for selecting and ordering multiple items compared to the standard MultiSelectComboBox. It displays available items on the left and selected items on the right, with buttons for adding, removing, and reordering selections.
 
+**NEW:** The component now supports color-aware rendering for entities! When used with `CEntityNamed` entities (such as statuses, types, activities, users, etc.), items are displayed with their associated colors and icons, providing the same visual experience as `CColorAwareComboBox`.
+
 ## Components
 
 ### 1. CDualListSelectorComponent<T>
 
-A generic component that can work with any type of data.
+A generic component that can work with any type of data, with special support for colored entity rendering.
 
 **Features:**
 - Two-panel interface (available items / selected items)
 - Add/Remove buttons for moving items between lists
 - Up/Down buttons for ordering selected items
+- **Color-aware rendering for CEntityNamed entities** (automatically displays colors and icons)
 - Implements `HasValue` and `HasValueAndElement` for Vaadin binder integration
-- Customizable item label generators
+- Customizable item label generators for non-entity types
 - Read-only mode support
 
-**Basic Usage:**
+**Basic Usage with Colored Entities:**
+
+```java
+// Create component with entity support
+CDualListSelectorComponent<CStatus> statusSelector = 
+    new CDualListSelectorComponent<>("Available Statuses", "Selected Statuses");
+
+// Set available items (colors and icons will be displayed automatically)
+List<CStatus> allStatuses = statusService.list();
+statusSelector.setItems(allStatuses);
+
+// Get selected items
+Set<CStatus> selectedStatuses = statusSelector.getValue();
+```
+
+**Basic Usage with Strings:**
 
 ```java
 // Create component
-CDualListSelectorComponent<CUser> userSelector = 
-    new CDualListSelectorComponent<>("Available Users", "Selected Users");
+CDualListSelectorComponent<String> stringSelector = 
+    new CDualListSelectorComponent<>("Available Options", "Selected Options");
 
 // Set available items
-List<CUser> allUsers = userService.list();
-userSelector.setItems(allUsers);
+List<String> options = Arrays.asList("Option 1", "Option 2", "Option 3");
+stringSelector.setItems(options);
 
-// Configure display
-userSelector.setItemLabelGenerator(user -> user.getName());
+// Configure display (optional for strings)
+stringSelector.setItemLabelGenerator(String::toUpperCase);
 
 // Get selected items
-Set<CUser> selectedUsers = userSelector.getValue();
+Set<String> selectedOptions = stringSelector.getValue();
+```
+
+### Color-Aware Rendering
+
+The component automatically detects when items are `CEntityNamed` entities (which include color and icon properties) and renders them with their associated visual styling:
+
+- **Entities with colors:** Status entities, type entities, activities, meetings, etc. are displayed with their configured background colors
+- **Automatic text contrast:** Text color is automatically adjusted (light/dark) for readability
+- **Icons:** Entity icons are displayed alongside the text
+- **Rounded corners:** Visual polish with rounded corner styling
+- **Fallback rendering:** Non-entity items (strings, numbers, etc.) are displayed as simple text
+
+**Example with colored entities:**
+
+```java
+// Works with any CEntityNamed entity type
+CDualListSelectorComponent<CActivityType> typeSelector = 
+    new CDualListSelectorComponent<>("Available Types", "Selected Types");
+typeSelector.setItems(activityTypeService.list());
+// Types will be displayed with their configured colors and icons
+
+CDualListSelectorComponent<CUser> userSelector = 
+    new CDualListSelectorComponent<>("Available Users", "Team Members");
+userSelector.setItems(userService.list());
+// Users will be displayed with their profile colors and icons
 ```
 
 ### 2. CFieldSelectionComponent
@@ -124,6 +167,15 @@ public class CTask extends CEntityDB<CTask> {
     
     @ManyToMany
     @AMetaData(
+        displayName = "Statuses",  
+        dataProviderBean = "statusService",
+        dataProviderMethod = "list",
+        useDualListSelector = true  // Status entities will display with colors
+    )
+    private Set<CStatus> applicableStatuses = new LinkedHashSet<>();
+    
+    @ManyToMany
+    @AMetaData(
         displayName = "Tags",
         dataProviderBean = "tagService",
         dataProviderMethod = "list",
@@ -142,7 +194,8 @@ public class CTask extends CEntityDB<CTask> {
 CFormBuilder<CTask> formBuilder = new CFormBuilder<>(this, CTask.class, binder);
 
 // The form will have:
-// - A CDualListSelectorComponent for "Assigned Users" 
+// - A CDualListSelectorComponent for "Assigned Users" (with profile colors)
+// - A CDualListSelectorComponent for "Statuses" (with status colors and icons)
 // - A MultiSelectComboBox for "Tags"
 ```
 
@@ -151,22 +204,39 @@ CFormBuilder<CTask> formBuilder = new CFormBuilder<>(this, CTask.class, binder);
 If you need to use the component outside of CFormBuilder:
 
 ```java
-// Create the component
-CDualListSelectorComponent<CUser> userSelector = 
-    new CDualListSelectorComponent<>("Available Users", "Team Members");
+// Create the component for colored entities
+CDualListSelectorComponent<CStatus> statusSelector = 
+    new CDualListSelectorComponent<>("Available Statuses", "Selected Statuses");
 
-// Configure
-userSelector.setItemLabelGenerator(user -> user.getName());
-userSelector.setItems(userService.list());
+// Set items (colors and icons will be displayed automatically)
+statusSelector.setItems(statusService.list());
 
 // Add value change listener
-userSelector.addValueChangeListener(event -> {
-    Set<CUser> selectedUsers = event.getValue();
-    System.out.println("Selected " + selectedUsers.size() + " users");
+statusSelector.addValueChangeListener(event -> {
+    Set<CStatus> selectedStatuses = event.getValue();
+    System.out.println("Selected " + selectedStatuses.size() + " statuses");
 });
 
 // Bind to binder (optional)
-binder.bind(userSelector, CTask::getAssignedUsers, CTask::setAssignedUsers);
+binder.bind(statusSelector, CTask::getApplicableStatuses, CTask::setApplicableStatuses);
+```
+
+**For non-entity types (strings, numbers, etc.):**
+
+```java
+// Create the component
+CDualListSelectorComponent<String> tagSelector = 
+    new CDualListSelectorComponent<>("Available Tags", "Selected Tags");
+
+// Configure display
+tagSelector.setItemLabelGenerator(tag -> "#" + tag);
+tagSelector.setItems(Arrays.asList("bug", "feature", "enhancement"));
+
+// Add value change listener
+tagSelector.addValueChangeListener(event -> {
+    Set<String> selectedTags = event.getValue();
+    System.out.println("Selected tags: " + String.join(", ", selectedTags));
+});
 ```
 
 ## CFieldSelectionDialog Updates
@@ -184,6 +254,8 @@ The `CFieldSelectionDialog` used for grid column selection has been updated to u
 4. **Flexibility**: Can be used with any data type
 5. **Integration**: Works seamlessly with CFormBuilder and Vaadin binders
 6. **Interchangeable**: Easy to switch between MultiSelectComboBox and DualListSelector via annotation
+7. **Color-Aware**: Automatically displays entities with their colors and icons (like CColorAwareComboBox)
+8. **Visual Clarity**: Status entities, types, and other colored entities are immediately recognizable
 
 ## Testing
 
