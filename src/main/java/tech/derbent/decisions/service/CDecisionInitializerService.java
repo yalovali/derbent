@@ -66,7 +66,7 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 		CGridEntity grid = createGridEntity(project);
 		gridEntityService.save(grid);
 		CPageEntity page = createPageEntity(clazz, project, grid, detailSection, "Project.Decisions", "Decision Management",
-				"Decision tracking and accountability");
+				"Decision tracking and accountability", "1.1");
 		page.setAttributeShowInQuickToolbar(showInQuickToolbar);
 		pageEntityService.save(page);
 	}

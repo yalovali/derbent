@@ -60,8 +60,8 @@ public class COrderTypeInitializerService extends CInitializerServiceBase {
 		detailSectionService.save(detailSection);
 		final CGridEntity grid = createGridEntity(project);
 		gridEntityService.save(grid);
-		final CPageEntity page =
-				createPageEntity(clazz, project, grid, detailSection, "Types.Order Types", "Order Type Management", "Manage order type categories");
+		final CPageEntity page = createPageEntity(clazz, project, grid, detailSection, "Types.Order Types", "Order Type Management",
+				"Manage order type categories", "1.1");
 		page.setAttributeShowInQuickToolbar(showInQuickToolbar);
 		pageEntityService.save(page);
 	}

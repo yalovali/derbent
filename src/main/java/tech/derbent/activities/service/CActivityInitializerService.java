@@ -4,7 +4,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.activities.domain.CActivity;
-import tech.derbent.api.utils.Check;
 import tech.derbent.page.service.CPageEntityService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CDetailSection;
@@ -78,10 +77,9 @@ public class CActivityInitializerService extends CInitializerServiceBase {
 
 	public static void initialize(CProject project, CGridEntityService gridEntityService, CDetailSectionService detailSectionService,
 			CPageEntityService pageEntityService, boolean showInQuickToolbar) throws Exception {
-		Check.notNull(project, "project cannot be null");
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, "Project.Activities",
-				"Activity Management", "Activity management for projects", showInQuickToolbar);
+				"Activity Management", "Activity management for projects", showInQuickToolbar, "1.1");
 	}
 }

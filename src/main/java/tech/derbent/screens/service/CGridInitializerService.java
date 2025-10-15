@@ -55,7 +55,7 @@ public class CGridInitializerService extends CInitializerServiceBase {
 		final CGridEntity grid = createGridEntity(project);
 		gridEntityService.save(grid);
 		final tech.derbent.page.domain.CPageEntity page = createPageEntity(clazz, project, grid, detailSection, "System.Grids",
-				"Grid Configuration Management", "Manage reusable grid metadata definitions");
+				"Grid Configuration Management", "Manage reusable grid metadata definitions", "1.1");
 		pageEntityService.save(page);
 	}
 

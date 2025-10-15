@@ -75,7 +75,7 @@ public class CCompanyInitializerService extends CInitializerServiceBase {
 		CGridEntity grid = createGridEntity(project, false);
 		gridEntityService.save(grid);
 		CPageEntity page = createPageEntity(clazz, project, grid, detailSection, "System.Companies", "Company Management",
-				"Company management with contact details");
+				"Company management with contact details", "1.1");
 		page.setAttributeShowInQuickToolbar(showInQuickToolbar);
 		pageEntityService.save(page);
 		// create a single company page
@@ -83,7 +83,7 @@ public class CCompanyInitializerService extends CInitializerServiceBase {
 		grid.setName("Company Single View");
 		gridEntityService.save(grid);
 		page = createPageEntity(clazz, project, grid, detailSection, "System.Current Company", "Company Management",
-				"Company management with contact details");
+				"Company management with contact details", "1.1");
 		pageEntityService.save(page);
 	}
 }

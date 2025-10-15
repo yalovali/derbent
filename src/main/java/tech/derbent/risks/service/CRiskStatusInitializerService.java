@@ -60,7 +60,7 @@ public class CRiskStatusInitializerService extends CInitializerServiceBase {
 		final CGridEntity grid = createGridEntity(project);
 		gridEntityService.save(grid);
 		final CPageEntity page = createPageEntity(clazz, project, grid, detailSection, "Types.Risk Statuses", "Risk Status Management",
-				"Manage risk status definitions for projects");
+				"Manage risk status definitions for projects", "1.1");
 		page.setAttributeShowInQuickToolbar(showInQuickToolbar);
 		pageEntityService.save(page);
 	}

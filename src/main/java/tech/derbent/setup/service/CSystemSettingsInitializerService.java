@@ -99,7 +99,7 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 		singleGrid.setName("System Settings Single View");
 		gridEntityService.save(singleGrid);
 		CPageEntity singlePage = createPageEntity(clazz, project, singleGrid, detailSection, "System.Current Settings", "System Settings",
-				"System-wide configuration settings");
+				"System-wide configuration settings", "1.1");
 		pageEntityService.save(singlePage);
 	}
 }

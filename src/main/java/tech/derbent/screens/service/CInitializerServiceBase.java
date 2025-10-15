@@ -49,7 +49,7 @@ public abstract class CInitializerServiceBase {
 	}
 
 	protected static CPageEntity createPageEntity(Class<?> entityClass, CProject project, CGridEntity grid, CDetailSection detailSection,
-			String menuLocation, String pageTitle, String description) throws Exception {
+			String menuLocation, String pageTitle, String description, String order) throws Exception {
 		CPageEntity page = new CPageEntity(grid.getName(), project);
 		page.setDescription(description);
 		page.setMenuTitle(menuLocation);
@@ -61,19 +61,22 @@ public abstract class CInitializerServiceBase {
 		page.setRequiresAuthentication(true);
 		page.setIcon(CColorUtils.getStaticIconFilename(entityClass));
 		page.setColor(CColorUtils.getStaticIconColorCode(entityClass));
+		page.setMenuOrder(order);
+		;
 		return page;
 	}
 
 	public static void initBase(Class<?> clazz, final CProject project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService, final CDetailSection detailSection,
-			final CGridEntity grid, String menuTitle, String pageTitle, String pageDescription, boolean showInQuickToolbar) throws Exception {
+			final CGridEntity grid, String menuTitle, String pageTitle, String pageDescription, boolean showInQuickToolbar, String order)
+			throws Exception {
 		Check.notNull(project, "project cannot be null");
 		Check.notNull(gridEntityService, "gridEntityService cannot be null");
 		Check.notNull(detailSectionService, "detailSectionService cannot be null");
 		Check.notNull(pageEntityService, "pageEntityService cannot be null");
 		detailSectionService.save(detailSection);
 		gridEntityService.save(grid);
-		final CPageEntity page = createPageEntity(clazz, project, grid, detailSection, menuTitle, pageTitle, pageDescription);
+		final CPageEntity page = createPageEntity(clazz, project, grid, detailSection, menuTitle, pageTitle, pageDescription, order);
 		page.setAttributeShowInQuickToolbar(showInQuickToolbar);
 		pageEntityService.save(page);
 	}

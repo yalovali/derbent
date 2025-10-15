@@ -55,7 +55,7 @@ public class CUserProjectRoleInitizerService extends CInitializerServiceBase {
 		CGridEntity grid = createGridEntity(project, false);
 		gridEntityService.save(grid);
 		CPageEntity page = createPageEntity(clazz, project, grid, detailSection, "Setup.Roles", "User Project Roles Management",
-				"User Projet Roles management with contact details");
+				"User Projet Roles management with contact details", "1.1");
 		page.setAttributeShowInQuickToolbar(showInQuickToolbar);
 		pageEntityService.save(page);
 	}

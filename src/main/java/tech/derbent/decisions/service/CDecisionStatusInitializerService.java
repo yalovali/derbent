@@ -59,7 +59,7 @@ public class CDecisionStatusInitializerService extends CInitializerServiceBase {
 		detailSectionService.save(detailSection);
 		final CGridEntity grid = createGridEntity(project);
 		gridEntityService.save(grid);
-		final CPageEntity page = createPageEntity(clazz, project, grid, detailSection, menuTitle, pageTitle, pageDescription);
+		final CPageEntity page = createPageEntity(clazz, project, grid, detailSection, menuTitle, pageTitle, pageDescription, "1.1");
 		pageEntityService.save(page);
 	}
 

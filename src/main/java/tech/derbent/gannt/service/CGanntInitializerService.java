@@ -2,9 +2,7 @@ package tech.derbent.gannt.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.utils.Check;
 import tech.derbent.gannt.domain.CGanntViewEntity;
-import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.page.service.CPageEntityService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CDetailSection;
@@ -20,6 +18,11 @@ public class CGanntInitializerService extends CInitializerServiceBase {
 	public static final String BASE_PANEL_NAME = "Gantt View Information";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CGanntInitializerService.class);
 	private static final Class<?> clazz = CGanntViewEntity.class;
+	private static final String menuTitle = "Project.Gantt Views";
+	private static final String pageTitle = "Gantt View Configuration";
+	private static final String pageDescription = "Manage project-specific Gantt view layouts";
+	private static final String menuOrder = "1.1";
+	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) {
 		try {
@@ -48,16 +51,9 @@ public class CGanntInitializerService extends CInitializerServiceBase {
 
 	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
-		Check.notNull(project, "project cannot be null");
-		Check.notNull(gridEntityService, "gridEntityService cannot be null");
-		Check.notNull(detailSectionService, "detailSectionService cannot be null");
-		Check.notNull(pageEntityService, "pageEntityService cannot be null");
 		final CDetailSection detailSection = createBasicView(project);
-		detailSectionService.save(detailSection);
 		final CGridEntity grid = createGridEntity(project);
-		gridEntityService.save(grid);
-		final CPageEntity page = createPageEntity(clazz, project, grid, detailSection, "Project.Gantt Views", "Gantt View Configuration",
-				"Manage project-specific Gantt view layouts");
-		pageEntityService.save(page);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
+				pageDescription, showInQuickToolbar, menuOrder);
 	}
 }

@@ -75,7 +75,7 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 		final CGridEntity grid = createGridEntity(project);
 		gridEntityService.save(grid);
 		final CPageEntity page = createPageEntity(ENTITY_CLASS, project, grid, detailSection, "Project.Meetings", "Meeting Management",
-				"Meeting management with scheduling and participant tracking");
+				"Meeting management with scheduling and participant tracking", "1.1");
 		pageEntityService.save(page);
 	}
 }

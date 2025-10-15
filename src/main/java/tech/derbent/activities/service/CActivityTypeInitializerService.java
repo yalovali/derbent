@@ -61,7 +61,7 @@ public class CActivityTypeInitializerService extends CInitializerServiceBase {
 		final CGridEntity grid = createGridEntity(project);
 		gridEntityService.save(grid);
 		final CPageEntity page = createPageEntity(clazz, project, grid, detailSection, "Types.Activity Types", "Activity Type Management",
-				"Manage activity type categories for planning");
+				"Manage activity type categories for planning", "1.1");
 		page.setAttributeShowInQuickToolbar(showInQuickToolbar);
 		pageEntityService.save(page);
 	}

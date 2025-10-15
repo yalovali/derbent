@@ -60,7 +60,7 @@ public class CMeetingStatusInitializerService extends CInitializerServiceBase {
 		final CGridEntity grid = createGridEntity(project);
 		gridEntityService.save(grid);
 		final CPageEntity page = createPageEntity(clazz, project, grid, detailSection, "Types.Meeting Statuses", "Meeting Status Management",
-				"Manage meeting status types across projects");
+				"Manage meeting status types across projects", "1.1");
 		page.setAttributeShowInQuickToolbar(showInQuickToolbar);
 		pageEntityService.save(page);
 	}

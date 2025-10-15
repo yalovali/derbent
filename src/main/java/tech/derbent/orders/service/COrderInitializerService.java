@@ -79,7 +79,7 @@ public class COrderInitializerService extends CInitializerServiceBase {
 		final CGridEntity grid = createGridEntity(project);
 		gridEntityService.save(grid);
 		final CPageEntity page = createPageEntity(clazz, project, grid, detailSection, "Project.Orders", "Order Management",
-				"Order management with approval workflow");
+				"Order management with approval workflow", "1.1");
 		pageEntityService.save(page);
 	}
 }

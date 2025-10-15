@@ -77,7 +77,7 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 			gridEntityService.save(gridEntity);
 			// Create and save page entity
 			final CPageEntity page = createPageEntity(clazz, project, gridEntity, detailSection, "User Management.Project Roles",
-					"Project Role Management", "Manage user roles within the project context");
+					"Project Role Management", "Manage user roles within the project context", "1.1");
 			page.setAttributeShowInQuickToolbar(false); // Don't show in quick toolbar by default
 			pageEntityService.save(page);
 			LOGGER.info("Successfully initialized CUserProjectRole for project: {}", project.getName());

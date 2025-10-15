@@ -67,7 +67,7 @@ public class CProjectInitializerService extends CInitializerServiceBase {
 		final CGridEntity grid = createGridEntity(project);
 		gridEntityService.save(grid);
 		final CPageEntity page = createPageEntity(clazz, project, grid, detailSection, "Project.Projects", "Project Management",
-				"Comprehensive project management with full CRUD operations");
+				"Comprehensive project management with full CRUD operations", "1.1");
 		page.setAttributeShowInQuickToolbar(showInQuickToolbar);
 		pageEntityService.save(page);
 	}

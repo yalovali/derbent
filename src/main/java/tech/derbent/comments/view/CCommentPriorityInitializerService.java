@@ -64,7 +64,7 @@ public class CCommentPriorityInitializerService extends CInitializerServiceBase 
 		final CGridEntity grid = createGridEntity(project);
 		gridEntityService.save(grid);
 		final CPageEntity page = createPageEntity(clazz, project, grid, detailSection, "Types.Comment Priority Types", "Comment Priority Management",
-				"Comment Priority type categories");
+				"Comment Priority type categories", "1.1");
 		page.setAttributeShowInQuickToolbar(showInQuickToolbar);
 		pageEntityService.save(page);
 	}

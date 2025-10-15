@@ -61,7 +61,7 @@ public class CUserCompanyRoleInitializerService extends CInitializerServiceBase 
 		CGridEntity grid = createGridEntity(project, false);
 		gridEntityService.save(grid);
 		CPageEntity page = createPageEntity(clazz, project, grid, detailSection, "Setup.Company Roles", "User Company Roles Management",
-				"User Company Roles management with role types and page access control");
+				"User Company Roles management with role types and page access control", "1.1");
 		page.setAttributeShowInQuickToolbar(showInQuickToolbar);
 		pageEntityService.save(page);
 	}

@@ -60,7 +60,7 @@ public class CRiskInitializerService extends CInitializerServiceBase {
 		final CGridEntity grid = createGridEntity(project);
 		gridEntityService.save(grid);
 		final CPageEntity page = createPageEntity(clazz, project, grid, detailSection, "Project.Risks", "Risk Management",
-				"Risk assessment and mitigation management");
+				"Risk assessment and mitigation management", "1.1");
 		pageEntityService.save(page);
 	}
 }

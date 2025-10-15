@@ -55,7 +55,7 @@ public class CMasterInitializerService extends CInitializerServiceBase {
 		final CGridEntity grid = createGridEntity(project);
 		gridEntityService.save(grid);
 		final CPageEntity page = createPageEntity(clazz, project, grid, detailSection, "System.Master Sections", "Master Section Management",
-				"Manage reusable master section templates");
+				"Manage reusable master section templates", "1.1");
 		pageEntityService.save(page);
 	}
 }

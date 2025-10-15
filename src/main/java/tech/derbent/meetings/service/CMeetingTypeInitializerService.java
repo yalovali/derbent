@@ -61,7 +61,7 @@ public class CMeetingTypeInitializerService extends CInitializerServiceBase {
 		final CGridEntity grid = createGridEntity(project);
 		gridEntityService.save(grid);
 		final CPageEntity page = createPageEntity(clazz, project, grid, detailSection, "Types.Meeting Types", "Meeting Type Management",
-				"Manage meeting type categories");
+				"Manage meeting type categories", "1.1");
 		page.setAttributeShowInQuickToolbar(showInQuickToolbar);
 		pageEntityService.save(page);
 	}

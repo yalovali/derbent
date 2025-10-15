@@ -63,7 +63,7 @@ public class CDecisionTypeInitializerService extends CInitializerServiceBase {
 		final CGridEntity grid = createGridEntity(project);
 		gridEntityService.save(grid);
 		final CPageEntity page = createPageEntity(clazz, project, grid, detailSection, "Types.Decision Types", "Decision Type Management",
-				"Manage decision type categories");
+				"Manage decision type categories", "1.1");
 		page.setAttributeShowInQuickToolbar(showInQuickToolbar);
 		pageEntityService.save(page);
 	}

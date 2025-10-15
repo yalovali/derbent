@@ -206,7 +206,7 @@ public class CPageEntityInitializerService extends CInitializerServiceBase {
 		gridEntityService.save(grid);
 		// Create the main page entity management page
 		final CPageEntity mainPage = createPageEntity(clazz, project, grid, detailSection, "System.Pages", "Dynamic Page Management",
-				"Manage dynamic page configurations and navigation metadata");
+				"Manage dynamic page configurations and navigation metadata", "1.1");
 		pageEntityService.save(mainPage);
 		// Create sample dashboard pages with good icons and organization
 		createSampleDashboardPages(project, pageEntityService);
