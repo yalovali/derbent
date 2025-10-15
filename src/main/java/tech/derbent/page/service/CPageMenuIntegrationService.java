@@ -38,19 +38,6 @@ public class CPageMenuIntegrationService {
 		if (icon == null || icon.trim().isEmpty()) {
 			icon = "vaadin:file-text-o";
 		}
-		// Parse menu order with fallback
-		Double order;
-		try {
-			String menuOrderStr = page.getMenuOrder();
-			if (menuOrderStr != null && !menuOrderStr.trim().isEmpty()) {
-				order = Double.parseDouble(menuOrderStr);
-			} else {
-				order = 50.0; // Default order
-			}
-		} catch (NumberFormatException e) {
-			LOGGER.warn("Invalid menu order for page {}: {}", page.getPageTitle(), page.getMenuOrder());
-			order = 50.0;
-		}
 		// Create menu title with tooltip-friendly formatting
 		String menuTitle = page.getMenuTitle();
 		if (menuTitle == null || menuTitle.trim().isEmpty()) {
@@ -58,8 +45,34 @@ public class CPageMenuIntegrationService {
 		} else {
 			menuTitle = "dynamic/" + menuTitle;
 		}
+		// Parse menu order - keep the full hierarchical order value
+		// For example, "4.1" becomes 4.1, which CHierarchicalSideMenu will parse
+		// to extract parent order (4) and child order (1)
+		Double order = parseMenuOrderToDouble(page.getMenuOrder());
 		// Create the menu entry with enhanced metadata
 		return new MenuEntry("dynamic." + page.getId(), menuTitle, order, icon, CDynamicPageRouter.class);
+	}
+
+	/** Parse menu order string to a Double value. For hierarchical menus, menuOrder is in format like "4.1" where: - "4" is the order of the parent
+	 * level - "1" is the order of the child level The string is converted to a Double (e.g., "4.1" → 4.1), which preserves the hierarchical
+	 * information. CHierarchicalSideMenu will parse this to extract orders for each level. Examples: - "5" → 5.0 - "4.1" → 4.1 - "4.1.2" → 4.12
+	 * (concatenated as decimal) - "" or null → 999.0 (default high order)
+	 * @param menuOrderStr The menu order string from CPageEntity
+	 * @return The parsed order value */
+	private Double parseMenuOrderToDouble(String menuOrderStr) {
+		// Default order for missing or invalid menuOrder
+		final Double DEFAULT_ORDER = 999.0;
+		// Check for null or empty menuOrder
+		if (menuOrderStr == null || menuOrderStr.trim().isEmpty()) {
+			return DEFAULT_ORDER;
+		}
+		try {
+			// Try to parse as a simple Double first
+			return Double.parseDouble(menuOrderStr.trim());
+		} catch (NumberFormatException e) {
+			LOGGER.warn("Invalid menu order format: '{}'. Using default order {}.", menuOrderStr, DEFAULT_ORDER);
+			return DEFAULT_ORDER;
+		}
 	}
 
 	/** Get menu entries for database-defined pages for the current project. These entries can be added to the existing menu system. */

@@ -48,12 +48,14 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		private final String iconName;
 		private final boolean isNavigation;
 		private final String name;
+		private final Double order;
 		private final String path;
 		private final String targetLevelKey;
 
 		public CMenuItem(final Class<? extends Component> clazz, final String name, final String iconName, final String path,
-				final String targetLevelKey, final boolean isNavigation) throws Exception {
+				final String targetLevelKey, final boolean isNavigation, final Double order) throws Exception {
 			this.name = name;
+			this.order = order != null ? order : 999.0; // Default order if not specified
 			if (iconName.startsWith("class:")) {
 				// get icon from class
 				try {
@@ -76,6 +78,8 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 				iconColor = CColorUtils.getStaticIconColorCode(clazz.getName());
 			}
 		}
+
+		public Double getOrder() { return order; }
 
 		public Component createComponent() {
 			final HorizontalLayout itemLayout = new HorizontalLayout();
@@ -165,15 +169,15 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			items = new ArrayList<>();
 		}
 
-		public void addMenuItem(final Class<? extends Component> clazz, final String name, final String iconName, final String path)
-				throws Exception {
-			final CMenuItem item = new CMenuItem(clazz, name, iconName, path, null, false);
+		public void addMenuItem(final Class<? extends Component> clazz, final String name, final String iconName, final String path,
+				final Double order) throws Exception {
+			final CMenuItem item = new CMenuItem(clazz, name, iconName, path, null, false, order);
 			items.add(item);
 		}
 
-		public void addNavigationItem(final Class<? extends Component> clazz, final String name, final String iconName, final String targetLevelKey)
-				throws Exception {
-			final CMenuItem item = new CMenuItem(clazz, name, iconName, null, targetLevelKey, true);
+		public void addNavigationItem(final Class<? extends Component> clazz, final String name, final String iconName, final String targetLevelKey,
+				final Double order) throws Exception {
+			final CMenuItem item = new CMenuItem(clazz, name, iconName, null, targetLevelKey, true, order);
 			items.add(item);
 		}
 
@@ -181,6 +185,8 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			final VerticalLayout levelLayout = new VerticalLayout();
 			levelLayout.addClassNames(Padding.NONE, Gap.SMALL);
 			levelLayout.setWidthFull();
+			// Sort items by order before adding to layout
+			items.sort((a, b) -> Double.compare(a.getOrder(), b.getOrder()));
 			for (final CMenuItem item : items) {
 				levelLayout.add(item.createComponent());
 			}
@@ -334,6 +340,7 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		String title = menuEntry.title();
 		final String path = menuEntry.path();
 		final String iconName = menuEntry.icon();
+		final Double entryOrder = menuEntry.order();
 		boolean isDynamic = title.startsWith("dynamic/");
 		if (isDynamic) {
 			title = title.replace("dynamic/", "");
@@ -342,6 +349,9 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 		// Split title by dots to get hierarchy levels (up to 4 levels)
 		final String[] titleParts = title.split("\\.");
 		final int levelCount = Math.min(titleParts.length, MAX_MENU_LEVELS);
+		// Parse hierarchical order components if order contains dots (e.g., "4.1" means parent order 4, child order 1)
+		// Otherwise, use the same order for all levels
+		Double[] orderComponents = parseHierarchicalOrder(entryOrder, levelCount);
 		// Ensure all parent levels exist
 		String currentLevelKey = "root";
 		for (int i = 0; i < (levelCount - 1); i++) {
@@ -351,19 +361,62 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 				final CMenuLevel parentLevel = menuLevels.get(currentLevelKey);
 				final CMenuLevel newLevel = new CMenuLevel(childLevelKey, levelName, parentLevel);
 				menuLevels.put(childLevelKey, newLevel);
-				// Add navigation item to parent level
-				parentLevel.addNavigationItem(menuEntry.menuClass(), levelName, iconName, childLevelKey);
+				// Add navigation item to parent level with appropriate order component
+				parentLevel.addNavigationItem(menuEntry.menuClass(), levelName, iconName, childLevelKey, orderComponents[i]);
 			}
 			currentLevelKey = childLevelKey;
 		}
-		// Add final menu item (leaf node) to the current level
+		// Add final menu item (leaf node) to the current level with its order component
 		if (levelCount > 0) {
 			final String itemName = titleParts[levelCount - 1].trim();
 			final CMenuLevel targetLevel = menuLevels.get(currentLevelKey);
 			if (targetLevel != null) {
-				targetLevel.addMenuItem(menuEntry.menuClass(), itemName, iconName, path);
+				targetLevel.addMenuItem(menuEntry.menuClass(), itemName, iconName, path, orderComponents[levelCount - 1]);
 			}
 		}
+	}
+
+	/** Parse hierarchical order from entry order. The order value encodes the hierarchy: - For order 4.1: integer part 4 is parent order, fractional
+	 * part 0.1 represents child order 1 - For order 5.0: top-level item with order 5 - For order 4.12: could represent 4.1.2 (three levels) This
+	 * method extracts the appropriate order component for each hierarchy level.
+	 * @param order      The order from MenuEntry (e.g., 4.1, 5.23)
+	 * @param levelCount Number of hierarchy levels
+	 * @return Array of order values for each level */
+	private Double[] parseHierarchicalOrder(Double order, int levelCount) {
+		Double[] orderComponents = new Double[levelCount];
+		if (order == null) {
+			// Use default order for all levels
+			for (int i = 0; i < levelCount; i++) {
+				orderComponents[i] = 999.0;
+			}
+			return orderComponents;
+		}
+		// Extract integer part (parent order) and fractional part (child orders)
+		int integerPart = (int) Math.floor(order);
+		double fractionalPart = order - integerPart;
+		if (levelCount == 1) {
+			// Single level - use the full order
+			orderComponents[0] = order;
+		} else if (levelCount == 2) {
+			// Two levels - integer part for parent, fractional part for child
+			orderComponents[0] = (double) integerPart;
+			// Fractional part 0.1 represents child order 1, 0.2 represents 2, etc.
+			orderComponents[1] = fractionalPart * 10.0;
+		} else {
+			// Three or more levels - distribute the fractional part
+			// For order 4.123: parent=4, child1=1, child2=2, child3=3
+			orderComponents[0] = (double) integerPart;
+			String fractionalStr = String.format("%.10f", fractionalPart).substring(2); // Remove "0."
+			for (int i = 1; i < levelCount; i++) {
+				if (i - 1 < fractionalStr.length()) {
+					char digit = fractionalStr.charAt(i - 1);
+					orderComponents[i] = (double) Character.getNumericValue(digit);
+				} else {
+					orderComponents[i] = 999.0; // Default for missing components
+				}
+			}
+		}
+		return orderComponents;
 	}
 
 	/** Refreshes the current level display to update highlighting. */
