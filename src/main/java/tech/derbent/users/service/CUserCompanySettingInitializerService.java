@@ -19,6 +19,11 @@ public final class CUserCompanySettingInitializerService extends CInitializerSer
 	public static final String BASE_PANEL_NAME = "Company Membership";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserCompanySettingInitializerService.class);
 	private static final Class<?> ENTITY_CLASS = CUserCompanySetting.class;
+	private static final String menuTitle = "Relations.Company Memberships";
+	private static final String pageTitle = "Company Membership Management";
+	private static final String pageDescription = "Manage user memberships and roles within companies";
+	private static final String menuOrder = "1.1";
+	private static final boolean showInQuickToolbar = false;
 
 	private CUserCompanySettingInitializerService() {}
 
@@ -55,14 +60,13 @@ public final class CUserCompanySettingInitializerService extends CInitializerSer
 	}
 
 	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService, final boolean showInQuickToolbar)
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService, final boolean showInQuickToolbarParam)
 			throws Exception {
 		Check.notNull(project, "project cannot be null");
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(ENTITY_CLASS, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid,
-				"Relations.Company Memberships", "Company Membership Management", "Manage user memberships and roles within companies",
-				showInQuickToolbar);
+		initBase(ENTITY_CLASS, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
+				pageDescription, showInQuickToolbarParam, menuOrder);
 	}
 
 	private static void addOptionalField(final CDetailSection detailSection, final String fieldName) {

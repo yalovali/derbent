@@ -22,6 +22,11 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 	public static final String BASE_PANEL_NAME = "System Settings Information";
 	static final Class<?> clazz = CSystemSettings.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSystemSettingsInitializerService.class);
+	private static final String menuTitle = "System.Settings";
+	private static final String pageTitle = "System Settings Management";
+	private static final String pageDescription = "System Settings";
+	private static final String menuOrder = "1.1";
+	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) {
 		try {
@@ -87,13 +92,13 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 	}
 
 	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService, boolean showInQuickToolbar)
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService, boolean showInQuickToolbarParam)
 			throws Exception {
 		Check.notNull(project, "project cannot be null");
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, "System.Settings",
-				"System Settings Management", "System Settings", showInQuickToolbar);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
+				pageDescription, showInQuickToolbarParam, menuOrder);
 		// Create a single system settings page (like company single view)
 		CGridEntity singleGrid = createGridEntity(project, true);
 		singleGrid.setName("System Settings Single View");
