@@ -13,7 +13,6 @@ import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.screens.service.CInitializerServiceBase;
 
 public class CCompanyInitializerService extends CInitializerServiceBase {
-
 	public static final String BASE_PANEL_NAME = "Company Information";
 	static final Class<?> clazz = CCompany.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCompanyInitializerService.class);
@@ -73,6 +72,7 @@ public class CCompanyInitializerService extends CInitializerServiceBase {
 				pageDescription, showInQuickToolbar, menuOrder);
 		// create a single company page
 		grid = createGridEntity(project);
+		grid.setName("Current Company Grid");
 		grid.setAttributeNone(true);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, "System.Current Company", pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder);
