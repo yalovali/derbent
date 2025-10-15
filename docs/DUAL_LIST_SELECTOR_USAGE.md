@@ -4,22 +4,38 @@
 
 The Dual List Selector Component provides a better user experience for selecting and ordering multiple items compared to the standard MultiSelectComboBox. It displays available items on the left and selected items on the right, with buttons for adding, removing, and reordering selections.
 
-**NEW:** The component now supports color-aware rendering for entities! When used with `CEntityNamed` entities (such as statuses, types, activities, users, etc.), items are displayed with their associated colors and icons, providing the same visual experience as `CColorAwareComboBox`.
+**Features:**
+- **Color-aware rendering** for entities with proper validation and error handling
+- **Comprehensive parameter validation** using Check utilities
+- **Clear button labels and tooltips** for better usability
+- **Robust exception handling** with detailed logging
+- **Icon-based buttons** for intuitive interface
 
 ## Components
 
 ### 1. CDualListSelectorComponent<T>
 
-A generic component that can work with any type of data, with special support for colored entity rendering.
+A generic component that can work with any type of data, with special support for colored entity rendering and comprehensive validation.
 
 **Features:**
 - Two-panel interface (available items / selected items)
-- Add/Remove buttons for moving items between lists
-- Up/Down buttons for ordering selected items
+- Add/Remove buttons with icons and tooltips for moving items between lists
+- Up/Down buttons with icons and tooltips for ordering selected items
 - **Color-aware rendering for CEntityNamed entities** (automatically displays colors and icons)
+- **Parameter validation** - All public methods validate inputs with Check.notNull/notBlank
+- **Exception handling** - Proper error handling with logging and meaningful exceptions
 - Implements `HasValue` and `HasValueAndElement` for Vaadin binder integration
 - Customizable item label generators for non-entity types
 - Read-only mode support
+
+**Validation and Error Handling:**
+
+The component includes comprehensive validation:
+- Title parameters are validated with `Check.notBlank`
+- Listener parameters are validated with `Check.notNull`
+- ListBox parameters are validated with `Check.notNull`
+- All exceptions are logged with SLF4J Logger
+- Meaningful error messages for all validation failures
 
 **Basic Usage with Colored Entities:**
 
