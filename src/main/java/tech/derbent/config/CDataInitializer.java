@@ -100,6 +100,7 @@ import tech.derbent.users.service.CUserTypeService;
  * @author Derbent Team
  * @version 2.0 - Refactored for better organization and maintainability */
 public class CDataInitializer {
+
 	private static final String ACTIVITY_TYPE_DESIGN = "Design";
 	// Activity Type Names
 	private static final String ACTIVITY_TYPE_DEVELOPMENT = "Development";

@@ -13,6 +13,7 @@ import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.screens.service.CInitializerServiceBase;
 
 public class CCompanyInitializerService extends CInitializerServiceBase {
+
 	public static final String BASE_PANEL_NAME = "Company Information";
 	static final Class<?> clazz = CCompany.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCompanyInitializerService.class);

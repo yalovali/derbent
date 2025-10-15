@@ -39,14 +39,15 @@ import tech.derbent.users.domain.CUser;
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class CUserService extends CEntityNamedService<CUser> implements UserDetailsService {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserService.class);
 	@Autowired
 	private ApplicationContext applicationContext;
 	private final PasswordEncoder passwordEncoder;
 	private ISessionService sessionService;
 
-	public CUserService(final IUserRepository repository, final Clock clock, final ISessionService sessionService) {
-		super(repository, clock, sessionService);
+	public CUserService(final IUserRepository repository, final Clock clock) {
+		super(repository, clock);
 		passwordEncoder = new BCryptPasswordEncoder(); // BCrypt for secure password
 		// hashing
 		@SuppressWarnings ("unused")
