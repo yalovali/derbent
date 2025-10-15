@@ -7,10 +7,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.AbstractField;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValueAndElement;
+import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H4;
@@ -19,9 +18,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.utils.Check;
@@ -46,9 +43,6 @@ public class CDualListSelectorComponent<T> extends VerticalLayout
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDualListSelectorComponent.class);
 	private static final long serialVersionUID = 1L;
-	// Default values
-	private static final String DEFAULT_AVAILABLE_TITLE = "Available Items";
-	private static final String DEFAULT_SELECTED_TITLE = "Selected Items";
 	private static final String DEFAULT_LIST_HEIGHT = "250px";
 	// UI Components
 	private ListBox<T> availableList;
