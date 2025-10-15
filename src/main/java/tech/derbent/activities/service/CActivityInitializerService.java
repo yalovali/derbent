@@ -24,7 +24,7 @@ public class CActivityInitializerService extends CInitializerServiceBase {
 	private static final String menuTitle = "Project.Activities";
 	private static final String pageTitle = "Activity Management";
 	private static final String pageDescription = "Activity management for projects";
-	private static final String menuOrder = "1.1";
+	private static final String menuOrder = "1.2";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {

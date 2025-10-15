@@ -18,13 +18,14 @@ import tech.derbent.setup.domain.CSystemSettings;
  * system-wide settings management, including grid and detail section definitions. Since system settings are global (not project-related), this
  * service extends CNonProjectInitializerServiceBase. */
 public class CSystemSettingsInitializerService extends CInitializerServiceBase {
+
 	public static final String BASE_PANEL_NAME = "System Settings Information";
 	static final Class<?> clazz = CSystemSettings.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSystemSettingsInitializerService.class);
 	private static final String menuTitle = "System.Settings";
 	private static final String pageTitle = "System Settings Management";
 	private static final String pageDescription = "System Settings";
-	private static final String menuOrder = "1.1";
+	private static final String menuOrder = "10.1";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {

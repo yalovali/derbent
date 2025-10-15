@@ -13,13 +13,14 @@ import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.screens.service.CInitializerServiceBase;
 
 public class CCommentPriorityInitializerService extends CInitializerServiceBase {
+
 	public static final String BASE_PANEL_NAME = "Comment Priority Information";
 	private static final Class<?> clazz = CCommentPriority.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCommentPriorityInitializerService.class);
 	private static final String menuTitle = "Types.Comment Priority Types";
 	private static final String pageTitle = "Comment Priority Management";
 	private static final String pageDescription = "Comment Priority type categories";
-	private static final String menuOrder = "1.1";
+	private static final String menuOrder = "1.15";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {

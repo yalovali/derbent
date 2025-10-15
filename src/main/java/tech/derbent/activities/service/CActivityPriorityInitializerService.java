@@ -22,7 +22,7 @@ public class CActivityPriorityInitializerService extends CInitializerServiceBase
 	private static final String menuTitle = "Types.Activity Priorities";
 	private static final String pageTitle = "Activity Priority Management";
 	private static final String pageDescription = "Manage activity priority definitions for projects";
-	private static final String menuOrder = "1.1";
+	private static final String menuOrder = "1.3";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) {

@@ -13,11 +13,12 @@ import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.screens.service.CInitializerServiceBase;
 
 public class CUserProjectRoleInitializerService extends CInitializerServiceBase {
+
 	public static final String BASE_PANEL_NAME = "Project Role Details";
 	private static final Class<?> ENTITY_CLASS = CUserProjectRole.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserProjectRoleInitializerService.class);
-	private static final String menuTitle = "Setup.Project Roles";
-	private static final String pageTitle = "Project Role Management";
+	private static final String menuTitle = "Roles.User Project Roles";
+	private static final String pageTitle = "User Project Role Management";
 	private static final String pageDescription = "Manage project-specific roles and permissions";
 	private static final String menuOrder = "1.1";
 	private static final boolean showInQuickToolbar = false;

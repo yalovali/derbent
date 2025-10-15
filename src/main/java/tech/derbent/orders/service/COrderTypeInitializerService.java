@@ -13,13 +13,14 @@ import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.screens.service.CInitializerServiceBase;
 
 public class COrderTypeInitializerService extends CInitializerServiceBase {
+
 	public static final String BASE_PANEL_NAME = "Order Type Information";
 	private static final Class<?> clazz = COrderType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(COrderTypeInitializerService.class);
 	private static final String menuTitle = "Types.Order Types";
 	private static final String pageTitle = "Order Type Management";
 	private static final String pageDescription = "Manage order type categories";
-	private static final String menuOrder = "1.1";
+	private static final String menuOrder = "1.14";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {

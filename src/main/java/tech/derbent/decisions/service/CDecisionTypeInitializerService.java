@@ -20,7 +20,7 @@ public class CDecisionTypeInitializerService extends CInitializerServiceBase {
 	private static final String menuTitle = "Types.Decision Types";
 	private static final String pageTitle = "Decision Type Management";
 	private static final String pageDescription = "Manage decision type categories";
-	private static final String menuOrder = "1.1";
+	private static final String menuOrder = "1.7";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) {

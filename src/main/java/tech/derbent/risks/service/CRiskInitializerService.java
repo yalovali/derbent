@@ -13,13 +13,14 @@ import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.screens.service.CInitializerServiceBase;
 
 public class CRiskInitializerService extends CInitializerServiceBase {
+
 	public static final String BASE_PANEL_NAME = "Risk Information";
 	private static final Class<?> clazz = CRisk.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskInitializerService.class);
 	private static final String menuTitle = "Project.Risks";
 	private static final String pageTitle = "Risk Management";
 	private static final String pageDescription = "Risk assessment and mitigation management";
-	private static final String menuOrder = "1.1";
+	private static final String menuOrder = "1.10";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {

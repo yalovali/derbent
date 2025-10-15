@@ -21,7 +21,7 @@ public class CGanntInitializerService extends CInitializerServiceBase {
 	private static final String menuTitle = "Project.Gantt Views";
 	private static final String pageTitle = "Gantt View Configuration";
 	private static final String pageDescription = "Manage project-specific Gantt view layouts";
-	private static final String menuOrder = "1.1";
+	private static final String menuOrder = "1.4";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) {

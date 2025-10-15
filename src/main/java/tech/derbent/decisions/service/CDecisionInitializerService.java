@@ -13,13 +13,14 @@ import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.screens.service.CInitializerServiceBase;
 
 public class CDecisionInitializerService extends CInitializerServiceBase {
+
 	public static final String BASE_PANEL_NAME = "Decisions Information";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDecisionInitializerService.class);
 	private static final Class<?> clazz = CDecision.class;
 	private static final String menuTitle = "Project.Decisions";
 	private static final String pageTitle = "Decision Management";
 	private static final String pageDescription = "Decision tracking and accountability";
-	private static final String menuOrder = "1.1";
+	private static final String menuOrder = "1.3";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {

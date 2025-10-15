@@ -13,13 +13,14 @@ import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.screens.service.CInitializerServiceBase;
 
 public class CMeetingStatusInitializerService extends CInitializerServiceBase {
+
 	public static final String BASE_PANEL_NAME = "Meeting Status Information";
 	private static final Class<?> clazz = CMeetingStatus.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingStatusInitializerService.class);
 	private static final String menuTitle = "Types.Meeting Statuses";
 	private static final String pageTitle = "Meeting Status Management";
 	private static final String pageDescription = "Manage meeting status types across projects";
-	private static final String menuOrder = "1.1";
+	private static final String menuOrder = "1.4";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {

@@ -20,7 +20,7 @@ public class CMeetingTypeInitializerService extends CInitializerServiceBase {
 	private static final String menuTitle = "Types.Meeting Types";
 	private static final String pageTitle = "Meeting Type Management";
 	private static final String pageDescription = "Manage meeting type categories";
-	private static final String menuOrder = "1.1";
+	private static final String menuOrder = "1.5";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) {

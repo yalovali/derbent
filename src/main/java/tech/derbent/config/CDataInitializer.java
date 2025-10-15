@@ -26,7 +26,7 @@ import tech.derbent.api.roles.domain.CUserCompanyRole;
 import tech.derbent.api.roles.domain.CUserProjectRole;
 import tech.derbent.api.roles.service.CUserCompanyRoleInitializerService;
 import tech.derbent.api.roles.service.CUserCompanyRoleService;
-import tech.derbent.api.roles.service.CUserProjectRoleInitizerService;
+import tech.derbent.api.roles.service.CUserProjectRoleInitializerService;
 import tech.derbent.api.roles.service.CUserProjectRoleService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
@@ -1091,7 +1091,7 @@ public class CDataInitializer {
 					COrderInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CProjectInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CRiskInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					CUserProjectRoleInitizerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CUserProjectRoleInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CUserCompanyRoleInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					// Type/Status InitializerServices
 					CActivityStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
@@ -1134,8 +1134,6 @@ public class CDataInitializer {
 					initializeSampleMeetings(project);
 				}
 			}
-			// Initialize company roles (non-project specific)
-			// createSampleOrders(); // Temporarily disabled due to missing dependencies
 			LOGGER.info("Sample data initialization completed successfully");
 		} catch (final Exception e) {
 			LOGGER.error("Error loading sample data", e);

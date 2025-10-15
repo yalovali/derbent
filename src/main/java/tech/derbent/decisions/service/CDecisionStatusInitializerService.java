@@ -20,7 +20,7 @@ public class CDecisionStatusInitializerService extends CInitializerServiceBase {
 	private static final String menuTitle = "Types.Decision Status";
 	private static final String pageTitle = "Decision Status Management";
 	private static final String pageDescription = "Manage decision status definitions for projects";
-	private static final String menuOrder = "1.1";
+	private static final String menuOrder = "1.6";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) {
