@@ -39,7 +39,7 @@ public class CCompanyService extends CEntityNamedService<CCompany> {
 			repository.saveAndFlush(company);
 		} catch (final Exception e) {
 			LOGGER.error("Error disabling company with id: {}", id, e);
-			throw new RuntimeException("Failed to disable company", e);
+			throw e;
 		}
 	}
 
@@ -54,7 +54,7 @@ public class CCompanyService extends CEntityNamedService<CCompany> {
 			repository.saveAndFlush(company);
 		} catch (final Exception e) {
 			LOGGER.error("Error enabling company with id: {}", id, e);
-			throw new RuntimeException("Failed to enable company", e);
+			throw e;
 		}
 	}
 
@@ -65,7 +65,7 @@ public class CCompanyService extends CEntityNamedService<CCompany> {
 			return company;
 		} catch (final Exception e) {
 			LOGGER.error("Error finding company by tax number: {}", taxNumber, e);
-			throw new RuntimeException("Failed to find company by tax number", e);
+			throw e;
 		}
 	}
 
@@ -77,7 +77,7 @@ public class CCompanyService extends CEntityNamedService<CCompany> {
 			return companies;
 		} catch (final Exception e) {
 			LOGGER.error("Error finding enabled companies", e);
-			throw new RuntimeException("Failed to retrieve enabled companies", e);
+			throw e;
 		}
 	}
 
@@ -104,7 +104,7 @@ public class CCompanyService extends CEntityNamedService<CCompany> {
 			return companies;
 		} catch (final Exception e) {
 			LOGGER.error("Error searching companies by name: {}", searchTerm, e);
-			throw new RuntimeException("Failed to search companies by name", e);
+			throw e;
 		}
 	}
 

@@ -12,8 +12,6 @@ import tech.derbent.session.service.ISessionService;
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class COrderStatusService extends CStatusService<COrderStatus> {
-	private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(COrderStatusService.class);
-
 	COrderStatusService(final IOrderStatusRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}

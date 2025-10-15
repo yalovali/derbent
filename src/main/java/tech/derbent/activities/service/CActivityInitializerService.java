@@ -26,7 +26,7 @@ public class CActivityInitializerService extends CInitializerServiceBase {
 	private static final String menuOrder = "1.1";
 	private static final boolean showInQuickToolbar = false;
 
-	public static CDetailSection createBasicView(final CProject project) {
+	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
 			final CDetailSection scr = createBaseScreenEntity(project, clazz);
 			// create screen lines
@@ -68,7 +68,7 @@ public class CActivityInitializerService extends CInitializerServiceBase {
 			return scr;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating activity view.");
-			throw new RuntimeException("Failed to create activity view", e);
+			throw e;
 		}
 	}
 

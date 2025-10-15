@@ -18,7 +18,6 @@ import tech.derbent.setup.domain.CSystemSettings;
  * system-wide settings management, including grid and detail section definitions. Since system settings are global (not project-related), this
  * service extends CNonProjectInitializerServiceBase. */
 public class CSystemSettingsInitializerService extends CInitializerServiceBase {
-
 	public static final String BASE_PANEL_NAME = "System Settings Information";
 	static final Class<?> clazz = CSystemSettings.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSystemSettingsInitializerService.class);
@@ -28,7 +27,7 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 	private static final String menuOrder = "1.1";
 	private static final boolean showInQuickToolbar = false;
 
-	public static CDetailSection createBasicView(final CProject project) {
+	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			// Application Info
@@ -71,7 +70,7 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 			return detailSection;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating system settings view.");
-			throw new RuntimeException("Failed to create system settings view", e);
+			throw e;
 		}
 	}
 
@@ -82,7 +81,7 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 		return grid;
 	}
 
-	public static CGridEntity createGridEntity(final CProject project, boolean attributeNone) {
+	public static CGridEntity createGridEntity(final CProject project, final boolean attributeNone) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		// Set attributeNone to hide grid for single entity display
 		grid.setAttributeNone(attributeNone);
@@ -92,18 +91,17 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 	}
 
 	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
-			throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		Check.notNull(project, "project cannot be null");
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder);
 		// Create a single system settings page (like company single view)
-		CGridEntity singleGrid = createGridEntity(project, true);
+		final CGridEntity singleGrid = createGridEntity(project, true);
 		singleGrid.setName("System Settings Single View");
 		gridEntityService.save(singleGrid);
-		CPageEntity singlePage = createPageEntity(clazz, project, singleGrid, detailSection, "System.Current Settings", "System Settings",
+		final CPageEntity singlePage = createPageEntity(clazz, project, singleGrid, detailSection, "System.Current Settings", "System Settings",
 				"System-wide configuration settings", "1.1");
 		pageEntityService.save(singlePage);
 	}

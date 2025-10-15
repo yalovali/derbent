@@ -37,7 +37,6 @@ import tech.derbent.setup.service.CSystemSettingsService;
 @Menu (order = 100.1, icon = "class:tech.derbent.setup.view.CSystemSettingsView", title = "Setup.System Settings")
 @PermitAll // When security is enabled, allow all authenticated users
 public class CSystemSettingsView extends CAbstractPage {
-
 	public static final String DEFAULT_COLOR = "#00495f";
 	public static final String DEFAULT_ICON = "vaadin:calendar";
 	private static final long serialVersionUID = 1L;
@@ -51,18 +50,11 @@ public class CSystemSettingsView extends CAbstractPage {
 	private final CSystemSettingsService systemSettingsService;
 	private ISessionService sessionService;
 
-	public CSystemSettingsView(final CSystemSettingsService systemSettingsService, ISessionService sessionService) {
+	public CSystemSettingsView(final CSystemSettingsService systemSettingsService, final ISessionService sessionService) {
 		this.systemSettingsService = systemSettingsService;
 		this.sessionService = sessionService;
 		binder = CBinderFactory.createBinder(CSystemSettings.class);
 		LOGGER.info("CSystemSettingsView constructor called with systemSettingsService: {}", systemSettingsService.getClass().getSimpleName());
-	}
-
-	/** Sets the session service. This is called after bean creation via configuration class.
-	 * @param sessionService the session service to set */
-	public void setSessionService(final ISessionService sessionService) {
-		this.sessionService = sessionService;
-		LOGGER.debug("SessionService injected into CSystemSettingsView via setter");
 	}
 
 	@Override
@@ -118,7 +110,14 @@ public class CSystemSettingsView extends CAbstractPage {
 		// Reset to Defaults button
 		final var resetButton = new CButton("Reset to Defaults", null, null);
 		resetButton.addClassName("error");
-		resetButton.addClickListener(event -> resetToDefaults());
+		resetButton.addClickListener(event -> {
+			try {
+				resetToDefaults();
+			} catch (final Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		});
 		// Test Configuration button
 		final var testButton = new CButton("Test Configuration", null, null);
 		testButton.addClassName("success");
@@ -293,7 +292,7 @@ public class CSystemSettingsView extends CAbstractPage {
 						final CDataInitializer init = new CDataInitializer(sessionService);
 						init.reloadForced(); // veya empty check’li bir metod yaz
 						Notification.show("Sample data yeniden yüklendi.", 4000, Notification.Position.MIDDLE);
-						CInformationDialog info = new CInformationDialog("Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
+						final CInformationDialog info = new CInformationDialog("Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
 						info.open();
 						// UI.getCurrent().getPage().reload();
 					} catch (final Exception ex) {
@@ -303,8 +302,9 @@ public class CSystemSettingsView extends CAbstractPage {
 		dialog.open();
 	}
 
-	/** Resets all settings to default values. Shows confirmation dialog before proceeding. */
-	private void resetToDefaults() {
+	/** Resets all settings to default values. Shows confirmation dialog before proceeding.
+	 * @throws Exception */
+	private void resetToDefaults() throws Exception {
 		LOGGER.debug("resetToDefaults called for CSystemSettings");
 		if (currentSettings == null) {
 			showWarningDialog("System settings could not be loaded. Please refresh the page.");
@@ -347,10 +347,35 @@ public class CSystemSettingsView extends CAbstractPage {
 		}
 	}
 
+	/** Sets the session service. This is called after bean creation via configuration class.
+	 * @param sessionService the session service to set */
+	public void setSessionService(final ISessionService sessionService) {
+		this.sessionService = sessionService;
+		LOGGER.debug("SessionService injected into CSystemSettingsView via setter");
+	}
+
 	@Override
 	protected void setupToolbar() {
 		LOGGER.debug("setupToolbar called for CSystemSettingsView");
 		// No specific toolbar needed for this view
+	}
+
+	/** Shows an error notification using the service if available, falls back to direct call */
+	private void showErrorNotification(final String message) {
+		if (notificationService != null) {
+			notificationService.showError(message);
+		} else {
+			Notification.show(message, 5000, Notification.Position.MIDDLE);
+		}
+	}
+
+	/** Shows a success notification using the service if available, falls back to direct call */
+	private void showSuccessNotification(final String message) {
+		if (notificationService != null) {
+			notificationService.showSuccess(message);
+		} else {
+			Notification.show(message, 3000, Notification.Position.TOP_CENTER);
+		}
 	}
 
 	/** Shows a warning dialog with the specified message.
@@ -400,24 +425,6 @@ public class CSystemSettingsView extends CAbstractPage {
 		} catch (final Exception e) {
 			LOGGER.error("Error testing configuration", e);
 			showErrorNotification("Error testing configuration: " + e.getMessage());
-		}
-	}
-
-	/** Shows an error notification using the service if available, falls back to direct call */
-	private void showErrorNotification(final String message) {
-		if (notificationService != null) {
-			notificationService.showError(message);
-		} else {
-			Notification.show(message, 5000, Notification.Position.MIDDLE);
-		}
-	}
-
-	/** Shows a success notification using the service if available, falls back to direct call */
-	private void showSuccessNotification(final String message) {
-		if (notificationService != null) {
-			notificationService.showSuccess(message);
-		} else {
-			Notification.show(message, 3000, Notification.Position.TOP_CENTER);
 		}
 	}
 }

@@ -12,8 +12,6 @@ import tech.derbent.session.service.ISessionService;
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class COrderTypeService extends CTypeEntityService<COrderType> {
-	private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(COrderTypeService.class);
-
 	COrderTypeService(final IOrderTypeRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}

@@ -24,7 +24,6 @@ import tech.derbent.session.service.ISessionService;
  * @param <RelationalClass> The relationship entity type (e.g., CUserProjectSettings, CUserCompanySetting) */
 public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNamed<MasterClass>, RelationalClass extends CEntityDB<RelationalClass>>
 		extends CComponentRelationBase<MasterClass, RelationalClass> {
-
 	private static final long serialVersionUID = 1L;
 	private CButton addButton;
 	private CButton deleteButton;
@@ -34,7 +33,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 
 	public CComponentRelationPanelBase(final String title, final Class<MasterClass> entityClass, final Class<RelationalClass> relationalClass,
 			final CAbstractService<MasterClass> entityService, final CAbstractEntityRelationService<RelationalClass> relationService,
-			ISessionService sessionService, final ApplicationContext applicationContext) {
+			final ISessionService sessionService, final ApplicationContext applicationContext) {
 		super(title, entityClass, relationalClass, sessionService, applicationContext);
 		Check.notNull(entityService, "Entity service cannot be null - relational component requires a valid entity service");
 		Check.notNull(relationService, "Relation service cannot be null - relational component requires a valid relation service");
@@ -46,7 +45,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 	/** Helper method to create standard data accessors pattern.
 	 * @param settingsSupplier Function to get the list of settings
 	 * @param entitySaver      Function to save the entity */
-	protected void createStandardDataAccessors(Supplier<List<RelationalClass>> settingsSupplier, Runnable entitySaver) {
+	protected void createStandardDataAccessors(final Supplier<List<RelationalClass>> settingsSupplier, final Runnable entitySaver) {
 		final Supplier<List<RelationalClass>> getterFunction = () -> {
 			final MasterClass entity = getCurrentEntity();
 			if (entity == null) {
@@ -72,15 +71,15 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 				entitySaver.run();
 			} catch (final Exception e) {
 				LOGGER.error("Error saving entity.");
-				throw new RuntimeException("Failed to save entity", e);
+				throw e;
 			}
 		};
 		setSettingsAccessors(getterFunction, saveEntityFunction);
 	}
 
 	/** Creates a consistently styled header with simple color coding. */
-	protected Span createStyledHeader(String text, String color) {
-		com.vaadin.flow.component.html.Span header = new com.vaadin.flow.component.html.Span(text);
+	protected Span createStyledHeader(final String text, final String color) {
+		final com.vaadin.flow.component.html.Span header = new com.vaadin.flow.component.html.Span(text);
 		header.getStyle().set("color", color);
 		header.getStyle().set("font-weight", "bold");
 		header.getStyle().set("font-size", "14px");
@@ -91,7 +90,8 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 	/** Delete the relation - subclasses must implement this. */
 	protected abstract void deleteRelation(RelationalClass selected) throws Exception;
 
-	/** Deletes the selected relationship. */
+	/** Deletes the selected relationship.
+	 * @throws Exception */
 	protected void deleteSelected() {
 		final RelationalClass selected = getSelectedSetting();
 		Check.notNull(selected, "Please select a setting to delete.");
@@ -104,10 +104,15 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 					LOGGER.info("Deleted relation: {}", selected);
 				} catch (final Exception e) {
 					LOGGER.error("Error deleting relation.");
-					new CWarningDialog("Failed to delete relation: " + e.getMessage()).open();
+					try {
+						new CWarningDialog("Failed to delete relation: " + e.getMessage()).open();
+					} catch (final Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				}
 			}).open();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to show delete confirmation.");
 			new CWarningDialog("Failed to delete relation").open();
 		}
@@ -115,6 +120,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 
 	/** Get delete confirmation message - subclasses can override. */
 	protected abstract String getDeleteConfirmationMessage(RelationalClass selected);
+
 	/** Gets display text for various field types - subclasses must implement. */
 	protected abstract String getDisplayText(RelationalClass settings, String fieldType);
 
@@ -124,15 +130,17 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 			super.initPanel();
 			setupDataAccessors();
 			openPanel();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to initialize panel.");
-			throw new RuntimeException("Failed to initialize panel", e);
+			throw e;
 		}
 	}
 
 	/** Abstract methods that subclasses must implement */
 	protected abstract void onSettingsSaved(RelationalClass settings);
+
 	protected abstract void openAddDialog() throws Exception;
+
 	protected abstract void openEditDialog() throws Exception;
 
 	/** Sets up the action buttons (Add, Edit, Delete) with common behavior. */
@@ -143,7 +151,12 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 					openAddDialog();
 				} catch (final Exception ex) {
 					LOGGER.error("Error opening add dialog: {}", ex.getMessage(), ex);
-					new CWarningDialog("Failed to open add dialog: " + ex.getMessage()).open();
+					try {
+						new CWarningDialog("Failed to open add dialog: " + ex.getMessage()).open();
+					} catch (final Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				}
 			});
 			editButton = new CButton("Edit", VaadinIcon.EDIT.create(), e -> {
@@ -155,14 +168,21 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 				}
 			});
 			editButton.setEnabled(false);
-			deleteButton = CButton.createError("Delete", VaadinIcon.TRASH.create(), e -> deleteSelected());
+			deleteButton = CButton.createError("Delete", VaadinIcon.TRASH.create(), e -> {
+				try {
+					deleteSelected();
+				} catch (final Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			});
 			deleteButton.setEnabled(false);
 			final HorizontalLayout buttonLayout = new HorizontalLayout(addButton, editButton, deleteButton);
 			buttonLayout.setSpacing(true);
 			add(buttonLayout);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to setup buttons.");
-			throw new RuntimeException("Failed to setup buttons", e);
+			throw e;
 		}
 	}
 

@@ -32,7 +32,6 @@ import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.ILayoutChangeListener;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.services.CAbstractService;
-import tech.derbent.api.ui.dialogs.CConfirmationDialog;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.api.ui.notifications.CNotificationService;
 import tech.derbent.api.utils.CPageableUtils;
@@ -51,7 +50,6 @@ import tech.derbent.session.service.ISessionService;
 
 public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<EntityClass>> extends CAbstractPage
 		implements ILayoutChangeListener, IContentOwner {
-
 	private static final long serialVersionUID = 1L;
 	ArrayList<CAccordionDBEntity<EntityClass>> AccordionList = new ArrayList<CAccordionDBEntity<EntityClass>>(); // List of accordions
 	private CFlexLayout baseDetailsLayout;
@@ -119,117 +117,6 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		// override this for additional custom buttons in the main content area
 	}
 
-	/** Initializes the CRUD toolbar with necessary callbacks and listeners. */
-	private void initializeCrudToolbar() {
-		// Set new entity supplier
-		crudToolbar.setNewEntitySupplier(this::createNewEntity);
-		// Set refresh callback
-		crudToolbar.setRefreshCallback(entity -> {
-			refreshGrid();
-		});
-		// Set save callback with binder validation
-		crudToolbar.setSaveCallback(entity -> {
-			try {
-				// Ensure we have an entity to save
-				LOGGER.debug("Save callback invoked, current entity: {}", entity != null ? entity.getId() : "null");
-				if (entity == null) {
-					LOGGER.warn("No current entity for save operation");
-					return;
-				}
-				if (!onBeforeSaveEvent()) {
-					return;
-				}
-				// Write form data to entity
-				getBinder().writeBean(entity);
-				// Validate entity before saving
-				validateEntityForSave(entity);
-				// Save entity
-				final EntityClass savedEntity = entityService.save(entity);
-				LOGGER.info("Entity saved successfully with ID: {}", savedEntity.getId());
-				// Update current entity with saved version (includes generated ID)
-				setCurrentEntity(savedEntity);
-				// Notify listeners through toolbar
-				// (toolbar will call notifyListenersSaved which triggers our listener below)
-			} catch (final ObjectOptimisticLockingFailureException exception) {
-				LOGGER.error("Optimistic locking failure during save", exception);
-				if (notificationService != null) {
-					notificationService.showOptimisticLockingError();
-				} else {
-					showErrorNotification("Error updating the data. Somebody else has updated the record while you were making changes.");
-				}
-				throw new RuntimeException("Optimistic locking failure during save", exception);
-			} catch (final ValidationException validationException) {
-				LOGGER.error("Validation error during save", validationException);
-				new CWarningDialog("Failed to save the data. Please check that all required fields are filled and values are valid.").open();
-				throw new RuntimeException("Validation error during save", validationException);
-			} catch (final Exception exception) {
-				LOGGER.error("Unexpected error during save operation", exception);
-				new CWarningDialog("An unexpected error occurred while saving. Please try again.").open();
-				throw new RuntimeException("Unexpected error during save operation", exception);
-			}
-		});
-		// Set notification service if available
-		if (notificationService != null) {
-			crudToolbar.setNotificationService(notificationService);
-		}
-		// Add update listener to refresh grid on CRUD operations
-		crudToolbar.addUpdateListener(new tech.derbent.api.interfaces.IEntityUpdateListener() {
-
-			@Override
-			public void onEntitySaved(tech.derbent.api.domains.CEntityDB<?> entity) throws Exception {
-				LOGGER.debug("Entity saved, refreshing grid");
-				refreshGrid();
-				// Update current entity with saved version
-				@SuppressWarnings ("unchecked")
-				EntityClass savedEntity = (EntityClass) entity;
-				setCurrentEntity(savedEntity);
-				populateForm();
-				// Show success notification
-				if (notificationService != null) {
-					notificationService.showSaveSuccess();
-				} else {
-					showNotification("Data saved successfully");
-				}
-				navigateToClass();
-			}
-
-			@Override
-			public void onEntityDeleted(tech.derbent.api.domains.CEntityDB<?> entity) throws Exception {
-				LOGGER.debug("Entity deleted, refreshing grid");
-				masterViewSection.selectLastOrFirst(null);
-				refreshGrid();
-				// Show success notification
-				if (notificationService != null) {
-					notificationService.showDeleteSuccess();
-				} else {
-					showNotification("Item deleted successfully");
-				}
-			}
-
-			@Override
-			public void onEntityCreated(tech.derbent.api.domains.CEntityDB<?> entity) throws Exception {
-				LOGGER.debug("Entity created, populating form");
-				@SuppressWarnings ("unchecked")
-				EntityClass newEntity = (EntityClass) entity;
-				setCurrentEntity(newEntity);
-				populateForm();
-			}
-		});
-	}
-
-	/** Creates the button layout for the details tab. Uses CCrudToolbar for CRUD operations.
-	 * @return HorizontalLayout with action buttons */
-	protected HorizontalLayout createDetailsTabButtonLayout() {
-		final HorizontalLayout buttonLayout = new HorizontalLayout();
-		buttonLayout.setClassName("details-tab-button-layout");
-		buttonLayout.setSpacing(true);
-		// Add the CRUD toolbar
-		buttonLayout.add(crudToolbar);
-		// Add clone button separately as it's not part of standard CRUD operations
-		buttonLayout.add(createCloneButton("Clone"));
-		return buttonLayout;
-	}
-
 	protected CButton createCloneButton(final String buttonText) {
 		final CButton cloneButton = CButton.createCloneButton(buttonText, e -> {
 			LOGGER.debug("Clone button clicked");
@@ -243,7 +130,12 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 				dialog.open();
 			} catch (final Exception exception) {
 				LOGGER.error("Error cloning entity", exception);
-				new CWarningDialog("Failed to clone the item. Please try again.").open();
+				try {
+					new CWarningDialog("Failed to clone the item. Please try again.").open();
+				} catch (final Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				throw new RuntimeException("Error cloning entity", exception);
 			}
 		});
@@ -272,6 +164,19 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		initSplitLayout(detailsBase);
 		// Initial layout setup - will be updated when layout service is available
 		updateLayoutOrientation();
+	}
+
+	/** Creates the button layout for the details tab. Uses CCrudToolbar for CRUD operations.
+	 * @return HorizontalLayout with action buttons */
+	protected HorizontalLayout createDetailsTabButtonLayout() {
+		final HorizontalLayout buttonLayout = new HorizontalLayout();
+		buttonLayout.setClassName("details-tab-button-layout");
+		buttonLayout.setSpacing(true);
+		// Add the CRUD toolbar
+		buttonLayout.add(crudToolbar);
+		// Add clone button separately as it's not part of standard CRUD operations
+		buttonLayout.add(createCloneButton("Clone"));
+		return buttonLayout;
 	}
 
 	/** Creates the left content of the details tab. Subclasses can override this to provide custom tab content.
@@ -388,6 +293,113 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		return searchToolbar;
 	}
 
+	/** Initializes the CRUD toolbar with necessary callbacks and listeners. */
+	private void initializeCrudToolbar() {
+		// Set new entity supplier
+		crudToolbar.setNewEntitySupplier(this::createNewEntity);
+		// Set refresh callback
+		crudToolbar.setRefreshCallback(entity -> {
+			refreshGrid();
+		});
+		// Set save callback with binder validation
+		crudToolbar.setSaveCallback(entity -> {
+			try {
+				// Ensure we have an entity to save
+				LOGGER.debug("Save callback invoked, current entity: {}", entity != null ? entity.getId() : "null");
+				if (entity == null) {
+					LOGGER.warn("No current entity for save operation");
+					return;
+				}
+				if (!onBeforeSaveEvent()) {
+					return;
+				}
+				// Write form data to entity
+				getBinder().writeBean(entity);
+				// Validate entity before saving
+				validateEntityForSave(entity);
+				// Save entity
+				final EntityClass savedEntity = entityService.save(entity);
+				LOGGER.info("Entity saved successfully with ID: {}", savedEntity.getId());
+				// Update current entity with saved version (includes generated ID)
+				setCurrentEntity(savedEntity);
+				// Notify listeners through toolbar
+				// (toolbar will call notifyListenersSaved which triggers our listener below)
+			} catch (final ObjectOptimisticLockingFailureException exception) {
+				LOGGER.error("Optimistic locking failure during save", exception);
+				if (notificationService != null) {
+					notificationService.showOptimisticLockingError();
+				} else {
+					showErrorNotification("Error updating the data. Somebody else has updated the record while you were making changes.");
+				}
+				throw new RuntimeException("Optimistic locking failure during save", exception);
+			} catch (final ValidationException validationException) {
+				LOGGER.error("Validation error during save", validationException);
+				try {
+					new CWarningDialog("Failed to save the data. Please check that all required fields are filled and values are valid.").open();
+				} catch (final Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				throw new RuntimeException("Validation error during save", validationException);
+			} catch (final Exception exception) {
+				LOGGER.error("Unexpected error during save operation", exception);
+				try {
+					new CWarningDialog("An unexpected error occurred while saving. Please try again.").open();
+				} catch (final Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				throw new RuntimeException("Unexpected error during save operation", exception);
+			}
+		});
+		// Set notification service if available
+		if (notificationService != null) {
+			crudToolbar.setNotificationService(notificationService);
+		}
+		// Add update listener to refresh grid on CRUD operations
+		crudToolbar.addUpdateListener(new tech.derbent.api.interfaces.IEntityUpdateListener() {
+			@Override
+			public void onEntityCreated(final tech.derbent.api.domains.CEntityDB<?> entity) throws Exception {
+				LOGGER.debug("Entity created, populating form");
+				@SuppressWarnings ("unchecked")
+				final EntityClass newEntity = (EntityClass) entity;
+				setCurrentEntity(newEntity);
+				populateForm();
+			}
+
+			@Override
+			public void onEntityDeleted(final tech.derbent.api.domains.CEntityDB<?> entity) throws Exception {
+				LOGGER.debug("Entity deleted, refreshing grid");
+				masterViewSection.selectLastOrFirst(null);
+				refreshGrid();
+				// Show success notification
+				if (notificationService != null) {
+					notificationService.showDeleteSuccess();
+				} else {
+					showNotification("Item deleted successfully");
+				}
+			}
+
+			@Override
+			public void onEntitySaved(final tech.derbent.api.domains.CEntityDB<?> entity) throws Exception {
+				LOGGER.debug("Entity saved, refreshing grid");
+				refreshGrid();
+				// Update current entity with saved version
+				@SuppressWarnings ("unchecked")
+				final EntityClass savedEntity = (EntityClass) entity;
+				setCurrentEntity(savedEntity);
+				populateForm();
+				// Show success notification
+				if (notificationService != null) {
+					notificationService.showSaveSuccess();
+				} else {
+					showNotification("Data saved successfully");
+				}
+				navigateToClass();
+			}
+		});
+	}
+
 	@PostConstruct
 	protected void initPageId() {
 		// set page ID in this syntax to check with playwright tests
@@ -477,7 +489,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 
 	@Override
 	public void populateForm() {
-		EntityClass value = getCurrentEntity();
+		final EntityClass value = getCurrentEntity();
 		LOGGER.debug("Populating form for entity: {}", value != null ? value.getId() : "null");
 		populateAccordionPanels(value);
 		getBinder().setBean(value);

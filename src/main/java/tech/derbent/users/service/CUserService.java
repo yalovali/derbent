@@ -242,7 +242,7 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 			return ((IUserRepository) repository).findByProject(project.getId());
 		} catch (final Exception e) {
 			LOGGER.error("Error listing users by project '{}': {}", project.getName(), e.getMessage());
-			throw new RuntimeException("Failed to list users by project", e);
+			throw e;
 		}
 	}
 
@@ -263,7 +263,7 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 			return new PageImpl<>(content, pageable, allUsers.size());
 		} catch (final Exception e) {
 			LOGGER.error("Error listing users by project '{}' with pagination: {}", project.getName(), e.getMessage());
-			throw new RuntimeException("Failed to list users by project with pagination", e);
+			throw e;
 		}
 	}
 

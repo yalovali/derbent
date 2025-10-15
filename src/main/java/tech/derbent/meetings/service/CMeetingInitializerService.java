@@ -13,7 +13,6 @@ import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.screens.service.CInitializerServiceBase;
 
 public class CMeetingInitializerService extends CInitializerServiceBase {
-
 	public static final String BASE_PANEL_NAME = "Meeting Information";
 	private static final Class<?> ENTITY_CLASS = CMeeting.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingInitializerService.class);
@@ -23,7 +22,7 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 	private static final String menuOrder = "1.1";
 	private static final boolean showInQuickToolbar = false;
 
-	public static CDetailSection createBasicView(final CProject project) {
+	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, ENTITY_CLASS);
 			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
@@ -54,7 +53,7 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 			return detailSection;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating meeting view.");
-			throw new RuntimeException("Failed to create meeting view", e);
+			throw e;
 		}
 	}
 
@@ -67,8 +66,7 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 	}
 
 	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
-			throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(ENTITY_CLASS, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,

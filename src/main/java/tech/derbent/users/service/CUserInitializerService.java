@@ -14,7 +14,6 @@ import tech.derbent.screens.service.CInitializerServiceBase;
 import tech.derbent.users.domain.CUser;
 
 public class CUserInitializerService extends CInitializerServiceBase {
-
 	public static final String BASE_PANEL_NAME = "User Information";
 	static final Class<?> clazz = CUser.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserInitializerService.class);
@@ -24,9 +23,9 @@ public class CUserInitializerService extends CInitializerServiceBase {
 	private static final String menuOrder = "1.1";
 	private static final boolean showInQuickToolbar = false;
 
-	public static CDetailSection createBasicView(final CProject project) {
+	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
-			CDetailSection scr = createBaseScreenEntity(project, clazz);
+			final CDetailSection scr = createBaseScreenEntity(project, clazz);
 			// create screen lines
 			scr.addScreenLine(CDetailLinesService.createSection(CUserInitializerService.BASE_PANEL_NAME));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
@@ -39,7 +38,7 @@ public class CUserInitializerService extends CInitializerServiceBase {
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "enabled"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "password"));
 			scr.addScreenLine(CDetailLinesService.createSection("Project & Company Relations"));
-			CDetailLines line = CDetailLinesService.createLineFromDefaults(clazz, "projectSettings");
+			final CDetailLines line = CDetailLinesService.createLineFromDefaults(clazz, "projectSettings");
 			line.setRelationFieldName("projectSettings");
 			line.setFieldCaption("projectSettings");
 			line.setProperty("Component:createUserProjectSettingsComponent");
@@ -60,18 +59,18 @@ public class CUserInitializerService extends CInitializerServiceBase {
 			return scr;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating user view.");
-			throw new RuntimeException("Failed to create user view", e);
+			throw e;
 		}
 	}
 
 	public static CGridEntity createGridEntity(final CProject project) {
-		CGridEntity grid = createBaseGridEntity(project, clazz);
+		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setSelectedFields("name,lastname,login,email,phone,userType,projectSettings,enabled,createdDate,lastModifiedDate");
 		return grid;
 	}
 
-	public static void initialize(CProject project, CGridEntityService gridEntityService, CDetailSectionService detailSectionService,
-			CPageEntityService pageEntityService) throws Exception {
+	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,

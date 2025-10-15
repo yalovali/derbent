@@ -16,15 +16,30 @@ import tech.derbent.screens.service.CInitializerServiceBase;
 
 /** CUserProjectRoleInitializer - Initializer for CUserProjectRole entities. Creates view pages and grids for user project role management. */
 public class CUserProjectRoleInitializerService extends CInitializerServiceBase {
-
 	public static final String BASE_PANEL_NAME = "Project Role Information";
 	private static final Class<?> clazz = CUserProjectRole.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserProjectRoleInitializerService.class);
 
+	/** Create basic grid for project roles.
+	 * @param project the project context
+	 * @return the grid entity */
+	public static CGridEntity createBasicGrid(final CProject project) {
+		try {
+			final CGridEntity gridEntity = createBaseGridEntity(project, clazz);
+			// Configure grid columns to show relevant role information including color
+			gridEntity.setSelectedFields("id,name,description,color,sortOrder,isAdmin,isUser,isGuest,attributeNonDeletable,project");
+			return gridEntity;
+		} catch (final Exception e) {
+			LOGGER.error("Error creating basic grid for CUserProjectRole", e);
+			throw e;
+		}
+	}
+
 	/** Create basic view for project roles.
 	 * @param project the project context
-	 * @return the detail section */
-	public static CDetailSection createBasicView(final CProject project) {
+	 * @return the detail section
+	 * @throws Exception */
+	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
@@ -40,29 +55,14 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
 			return detailSection;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error creating basic view for CUserProjectRole", e);
-			throw new RuntimeException("Failed to create basic view for CUserProjectRole", e);
-		}
-	}
-
-	/** Create basic grid for project roles.
-	 * @param project the project context
-	 * @return the grid entity */
-	public static CGridEntity createBasicGrid(final CProject project) {
-		try {
-			final CGridEntity gridEntity = createBaseGridEntity(project, clazz);
-			// Configure grid columns to show relevant role information including color
-			gridEntity.setSelectedFields("id,name,description,color,sortOrder,isAdmin,isUser,isGuest,attributeNonDeletable,project");
-			return gridEntity;
-		} catch (Exception e) {
-			LOGGER.error("Error creating basic grid for CUserProjectRole", e);
-			throw new RuntimeException("Failed to create basic grid for CUserProjectRole", e);
+			throw e;
 		}
 	}
 
 	public static void initialize(final CProject project, final CGridEntityService gridEntityService, final CDetailSectionService screenService,
-			final CPageEntityService pageEntityService, final boolean createSampleData) {
+			final CPageEntityService pageEntityService, final boolean createSampleData) throws Exception {
 		Check.notNull(project, "Project must not be null");
 		Check.notNull(gridEntityService, "GridEntityService must not be null");
 		Check.notNull(screenService, "ScreenService must not be null");
@@ -81,9 +81,9 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 			page.setAttributeShowInQuickToolbar(false); // Don't show in quick toolbar by default
 			pageEntityService.save(page);
 			LOGGER.info("Successfully initialized CUserProjectRole for project: {}", project.getName());
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error initializing CUserProjectRole for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize CUserProjectRole", e);
+			throw e;
 		}
 	}
 }

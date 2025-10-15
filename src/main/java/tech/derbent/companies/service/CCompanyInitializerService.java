@@ -22,7 +22,7 @@ public class CCompanyInitializerService extends CInitializerServiceBase {
 	private static final String menuOrder = "1.1";
 	private static final boolean showInQuickToolbar = false;
 
-	public static CDetailSection createBasicView(final CProject project) {
+	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
 			final CDetailSection scr = createBaseScreenEntity(project, clazz);
 			// Basic Company Information
@@ -54,7 +54,7 @@ public class CCompanyInitializerService extends CInitializerServiceBase {
 			return scr;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating company view.");
-			throw new RuntimeException("Failed to create company view", e);
+			throw e;
 		}
 	}
 

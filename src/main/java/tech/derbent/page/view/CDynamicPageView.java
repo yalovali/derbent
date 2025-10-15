@@ -131,7 +131,7 @@ public class CDynamicPageView extends CDynamicPageViewWithSections {
 			Check.isTrue(CEntityDB.class.isAssignableFrom(entityClass), "Entity class does not extend CEntityDB: " + entityClass);
 		} catch (Exception e) {
 			LOGGER.error("Failed to initialize entity service for entity type", e);
-			throw new RuntimeException("Failed to initialize entity service", e);
+			throw e;
 		}
 	}
 

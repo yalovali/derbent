@@ -27,7 +27,6 @@ import tech.derbent.session.service.ISessionService;
 /** CAbstractService - Abstract base service class for entity operations. Layer: Service (MVC) Provides common CRUD operations and lazy loading
  * support for all entity types. */
 public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass>> {
-
 	protected final Clock clock;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected final IAbstractRepository<EntityClass> repository;
@@ -135,9 +134,10 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	}
 
 	/** Enhanced delete method that attempts soft delete using reflection before hard delete.
-	 * @param entity the entity to delete */
+	 * @param entity the entity to delete
+	 * @throws Exception */
 	@Transactional
-	public void deleteWithReflection(final EntityClass entity) {
+	public void deleteWithReflection(final EntityClass entity) throws Exception {
 		Check.notNull(entity, "Entity cannot be null");
 		// Try soft delete first using reflection
 		if (entity.performSoftDelete()) {
@@ -152,9 +152,10 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 	}
 
 	/** Enhanced delete by ID method that attempts soft delete using reflection.
-	 * @param id the ID of the entity to delete */
+	 * @param id the ID of the entity to delete
+	 * @throws Exception */
 	@Transactional
-	public void deleteWithReflection(final Long id) {
+	public void deleteWithReflection(final Long id) throws Exception {
 		final EntityClass entity = repository.findById(id).orElseThrow(() -> new RuntimeException("Entity not found with ID: " + id));
 		deleteWithReflection(entity);
 	}

@@ -24,12 +24,11 @@ import tech.derbent.users.service.CUserProjectSettingsService;
  * project->user panels. */
 public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<MasterClass>, RelationalClass extends CEntityDB<RelationalClass>>
 		extends CPanelRelationalBase<MasterClass, CUserProjectSettings> {
-
 	private static final long serialVersionUID = 1L;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected CUserProjectSettingsService userProjectSettingsService;
 
-	public CPanelUserProjectBase(final String title, IContentOwner parentContent, final CEnhancedBinder<MasterClass> beanValidationBinder,
+	public CPanelUserProjectBase(final String title, final IContentOwner parentContent, final CEnhancedBinder<MasterClass> beanValidationBinder,
 			final Class<MasterClass> entityClass, final CAbstractService<MasterClass> entityService,
 			final CUserProjectSettingsService userProjectSettingsService) {
 		super(title, parentContent, beanValidationBinder, entityClass, entityService, CUserProjectSettings.class);
@@ -44,8 +43,9 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 		return String.format("Are you sure you want to delete the project setting for '%s'? This action cannot be undone.", projectName);
 	}
 
-	/** Deletes the selected user-project relationship */
-	protected void deleteSelected() {
+	/** Deletes the selected user-project relationship
+	 * @throws Exception */
+	protected void deleteSelected() throws Exception {
 		final CUserProjectSettings selected = grid.asSingleSelect().getValue();
 		if (selected == null) {
 			new CWarningDialog("Please select a relationship to delete.").open();
@@ -63,7 +63,7 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 			try {
 				userProjectSettingsService.deleteByUserProject(user, project);
 				LOGGER.debug("Successfully removed user {} from project {}", user, project);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOGGER.error("Error removing user from project.");
 				new CWarningDialog("Failed to remove user from project: " + e.getMessage()).open();
 				return;
@@ -87,9 +87,11 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 
 	/** Abstract method to handle settings save events */
 	protected abstract void onSettingsSaved(final CUserProjectSettings settings);
+
 	/** Abstract method to open the add dialog
 	 * @throws Exception */
 	protected abstract void openAddDialog() throws Exception;
+
 	/** Abstract method to open the edit dialog
 	 * @throws Exception */
 	protected abstract void openEditDialog() throws Exception;
@@ -114,7 +116,14 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 			}
 		});
 		editButton.setEnabled(false);
-		final CButton deleteButton = CButton.createError("Delete", VaadinIcon.TRASH.create(), e -> deleteSelected());
+		final CButton deleteButton = CButton.createError("Delete", VaadinIcon.TRASH.create(), e -> {
+			try {
+				deleteSelected();
+			} catch (final Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		});
 		deleteButton.setEnabled(false);
 		// Enable/disable edit and delete buttons based on selection
 		grid.addSelectionListener(selection -> {

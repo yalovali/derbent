@@ -15,7 +15,6 @@ import tech.derbent.users.domain.CUserCompanySetting;
 
 /** Initializes UI configuration for {@link CUserCompanySetting}. Creates default grid and detail views to manage company memberships. */
 public final class CUserCompanySettingInitializerService extends CInitializerServiceBase {
-
 	public static final String BASE_PANEL_NAME = "Company Membership";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserCompanySettingInitializerService.class);
 	private static final Class<?> ENTITY_CLASS = CUserCompanySetting.class;
@@ -25,9 +24,15 @@ public final class CUserCompanySettingInitializerService extends CInitializerSer
 	private static final String menuOrder = "1.1";
 	private static final boolean showInQuickToolbar = false;
 
-	private CUserCompanySettingInitializerService() {}
+	private static void addOptionalField(final CDetailSection detailSection, final String fieldName) {
+		try {
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, fieldName));
+		} catch (final NoSuchFieldException ex) {
+			LOGGER.debug("Skipping optional field {} for {}", fieldName, ENTITY_CLASS.getSimpleName());
+		}
+	}
 
-	public static CDetailSection createBasicView(final CProject project) {
+	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		Check.notNull(project, "project cannot be null");
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, ENTITY_CLASS);
@@ -49,7 +54,7 @@ public final class CUserCompanySettingInitializerService extends CInitializerSer
 			return detailSection;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating user company setting view.");
-			throw new RuntimeException("Failed to create user company setting view", e);
+			throw e;
 		}
 	}
 
@@ -69,11 +74,5 @@ public final class CUserCompanySettingInitializerService extends CInitializerSer
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
-	private static void addOptionalField(final CDetailSection detailSection, final String fieldName) {
-		try {
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, fieldName));
-		} catch (final NoSuchFieldException ex) {
-			LOGGER.debug("Skipping optional field {} for {}", fieldName, ENTITY_CLASS.getSimpleName());
-		}
-	}
+	private CUserCompanySettingInitializerService() {}
 }

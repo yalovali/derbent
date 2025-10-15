@@ -15,7 +15,6 @@ import tech.derbent.users.domain.CUserProjectSettings;
 
 /** Initializes default UI configuration for {@link CUserProjectSettings}. */
 public final class CUserProjectSettingsInitializerService extends CInitializerServiceBase {
-
 	public static final String BASE_PANEL_NAME = "Project Membership";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserProjectSettingsInitializerService.class);
 	private static final Class<?> ENTITY_CLASS = CUserProjectSettings.class;
@@ -25,9 +24,15 @@ public final class CUserProjectSettingsInitializerService extends CInitializerSe
 	private static final String menuOrder = "1.1";
 	private static final boolean showInQuickToolbar = false;
 
-	private CUserProjectSettingsInitializerService() {}
+	private static void addOptionalField(final CDetailSection detailSection, final String fieldName) {
+		try {
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, fieldName));
+		} catch (final NoSuchFieldException ex) {
+			LOGGER.debug("Skipping optional field {} for {}", fieldName, ENTITY_CLASS.getSimpleName());
+		}
+	}
 
-	public static CDetailSection createBasicView(final CProject project) {
+	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		Check.notNull(project, "project cannot be null");
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, ENTITY_CLASS);
@@ -46,7 +51,7 @@ public final class CUserProjectSettingsInitializerService extends CInitializerSe
 			return detailSection;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating user project settings view.");
-			throw new RuntimeException("Failed to create user project settings view", e);
+			throw e;
 		}
 	}
 
@@ -66,11 +71,5 @@ public final class CUserProjectSettingsInitializerService extends CInitializerSe
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
 
-	private static void addOptionalField(final CDetailSection detailSection, final String fieldName) {
-		try {
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, fieldName));
-		} catch (final NoSuchFieldException ex) {
-			LOGGER.debug("Skipping optional field {} for {}", fieldName, ENTITY_CLASS.getSimpleName());
-		}
-	}
+	private CUserProjectSettingsInitializerService() {}
 }

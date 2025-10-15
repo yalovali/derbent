@@ -13,7 +13,6 @@ import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.screens.service.CInitializerServiceBase;
 
 public class CApprovalStatusInitializerService extends CInitializerServiceBase {
-
 	public static final String BASE_PANEL_NAME = "Approval Status Information";
 	private static final Class<?> clazz = CApprovalStatus.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CApprovalStatusInitializerService.class);
@@ -23,7 +22,7 @@ public class CApprovalStatusInitializerService extends CInitializerServiceBase {
 	private static final String menuOrder = "1.1";
 	private static final boolean showInQuickToolbar = false;
 
-	public static CDetailSection createBasicView(final CProject project) {
+	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
@@ -40,7 +39,7 @@ public class CApprovalStatusInitializerService extends CInitializerServiceBase {
 			return detailSection;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating approval status view.");
-			throw new RuntimeException("Failed to create approval status view", e);
+			throw e;
 		}
 	}
 
@@ -51,8 +50,7 @@ public class CApprovalStatusInitializerService extends CInitializerServiceBase {
 	}
 
 	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService)
-			throws Exception {
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,

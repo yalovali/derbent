@@ -8,7 +8,6 @@ import tech.derbent.api.views.components.CButton;
 import tech.derbent.api.views.dialogs.CDialog;
 
 public abstract class CBaseInfoDialog extends CDialog {
-
 	private static final long serialVersionUID = 1L;
 	private final String message;
 	private final String title;
@@ -16,6 +15,7 @@ public abstract class CBaseInfoDialog extends CDialog {
 
 	/** @param title The dialog title
 	 * @param message The message to display to the user
+	 * @throws Exception
 	 * @throws InvocationTargetException
 	 * @throws IllegalAccessException
 	 * @throws SecurityException
@@ -33,7 +33,6 @@ public abstract class CBaseInfoDialog extends CDialog {
 			setupDialog();// call setupDialog() to initialize the dialog
 		} catch (final Exception e) {
 			LOGGER.error("Error setting up dialog.");
-			throw new RuntimeException("Failed to setup dialog", e);
 		}
 	}
 

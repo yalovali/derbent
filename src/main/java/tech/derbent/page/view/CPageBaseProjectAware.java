@@ -21,7 +21,6 @@ import tech.derbent.session.service.CLayoutService;
 import tech.derbent.session.service.ISessionService;
 
 public abstract class CPageBaseProjectAware extends CPageBase implements IProjectChangeListener, IContentOwner, IHasContentOwner {
-
 	private static final long serialVersionUID = 1L;
 	protected CFlexLayout baseDetailsLayout = CFlexLayout.forEntityPage();
 	protected CEnhancedBinder<CEntityDB<?>> currentBinder; // Store current binder for data binding
@@ -29,18 +28,18 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 	protected final CDetailsBuilder detailsBuilder = new CDetailsBuilder();
 	protected CLayoutService layoutService;
 	private IContentOwner parentContent;
-	private CDetailSectionService screenService;
+	private final CDetailSectionService screenService;
 	protected final ISessionService sessionService;
 	protected SplitLayout splitLayout = new SplitLayout();
 
-	protected CPageBaseProjectAware(final ISessionService sessionService, CDetailSectionService screenService) {
+	protected CPageBaseProjectAware(final ISessionService sessionService, final CDetailSectionService screenService) {
 		super();
 		this.screenService = screenService;
 		this.sessionService = sessionService;
 	}
 
 	@Override
-	public void beforeEnter(BeforeEnterEvent event) {
+	public void beforeEnter(final BeforeEnterEvent event) {
 		LOGGER.debug("Entering Sample Page");
 	}
 
@@ -65,7 +64,7 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 					baseViewName);
 			Check.notNull(screen, "Screen not found: " + baseViewName);
 			// Only create binder if not already set for this entity type or if no current binder exists
-			if (currentBinder == null || !currentBinder.getBeanType().equals(entityClass)) {
+			if ((currentBinder == null) || !currentBinder.getBeanType().equals(entityClass)) {
 				@SuppressWarnings ("unchecked")
 				final CEnhancedBinder<CEntityDB<?>> localBinder = new CEnhancedBinder<>((Class<CEntityDB<?>>) (Class<?>) entityClass);
 				currentBinder = localBinder;
@@ -80,12 +79,13 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 	}
 
 	/** Hook method for subclasses to configure the CRUD toolbar with specific behavior like dependency checking */
-	protected void configureCrudToolbar(CCrudToolbar<?> toolbar) {
+	protected void configureCrudToolbar(final CCrudToolbar<?> toolbar) {
 		// Default implementation does nothing - subclasses can override to add specific configuration
 	}
 
-	/** Abstract method to create a new entity instance with project set */
-	protected abstract <T extends CEntityDB<T>> T createNewEntity();
+	/** Abstract method to create a new entity instance with project set
+	 * @throws Exception */
+	protected abstract <T extends CEntityDB<T>> T createNewEntity() throws Exception;
 
 	public CFlexLayout getBaseDetailsLayout() { return baseDetailsLayout; }
 
@@ -124,7 +124,7 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 	public void populateForm() throws Exception {
 		try {
 			// Default implementation - populate current binder if available
-			if (currentBinder != null && getCurrentEntity() != null) {
+			if ((currentBinder != null) && (getCurrentEntity() != null)) {
 				LOGGER.debug("Populating form for entity: {}", getCurrentEntity());
 				currentBinder.setBean((CEntityDB<?>) getCurrentEntity());
 			} else if (currentBinder != null) {
@@ -142,10 +142,10 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 	}
 
 	@Override
-	public void setContentOwner(IContentOwner owner) { parentContent = owner; }
+	public void setContentOwner(final IContentOwner owner) { parentContent = owner; }
 
 	@Override
-	public void setCurrentEntity(Object entity) {
+	public void setCurrentEntity(final Object entity) {
 		try {
 			LOGGER.debug("Setting current entity: {}", entity);
 			currentEntity = entity;

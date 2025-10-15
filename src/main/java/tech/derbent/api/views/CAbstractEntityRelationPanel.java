@@ -25,7 +25,6 @@ import tech.derbent.api.views.components.CButton;
  * @param <RelationEntity> The relationship entity type (e.g., CUserProjectSettings) */
 public abstract class CAbstractEntityRelationPanel<ParentEntity extends CEntityDB<ParentEntity>, RelationEntity extends CEntityDB<RelationEntity>>
 		extends CAccordionDBEntity<ParentEntity> {
-
 	private static final long serialVersionUID = 1L;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected final Grid<RelationEntity> grid = new Grid<>(getRelationEntityClass(), false);
@@ -34,7 +33,7 @@ public abstract class CAbstractEntityRelationPanel<ParentEntity extends CEntityD
 	protected Runnable saveEntity;
 
 	/** Constructor for the relation panel */
-	public CAbstractEntityRelationPanel(final String title, IContentOwner parentContent, final ParentEntity currentEntity,
+	public CAbstractEntityRelationPanel(final String title, final IContentOwner parentContent, final ParentEntity currentEntity,
 			final CEnhancedBinder<ParentEntity> beanValidationBinder, final Class<ParentEntity> entityClass,
 			final CAbstractService<ParentEntity> entityService) {
 		super(title, parentContent, beanValidationBinder, entityClass, entityService);
@@ -52,11 +51,12 @@ public abstract class CAbstractEntityRelationPanel<ParentEntity extends CEntityD
 	}
 
 	/** Deletes the selected relationship
+	 * @throws Exception
 	 * @throws InvocationTargetException
 	 * @throws IllegalAccessException
 	 * @throws SecurityException
 	 * @throws NoSuchMethodException */
-	protected void deleteSelected() {
+	protected void deleteSelected() throws Exception {
 		final RelationEntity selected = grid.asSingleSelect().getValue();
 		Check.notNull(selected, "Selected relation cannot be null");
 		Check.notNull(getRelations, "Get relations supplier cannot be null");
@@ -81,8 +81,10 @@ public abstract class CAbstractEntityRelationPanel<ParentEntity extends CEntityD
 
 	/** Abstract method to handle relation save events */
 	protected abstract void onRelationSaved(final RelationEntity relation);
+
 	/** Abstract method to open the add dialog */
 	protected abstract void openAddDialog();
+
 	/** Abstract method to open the edit dialog */
 	protected abstract void openEditDialog();
 
@@ -109,7 +111,14 @@ public abstract class CAbstractEntityRelationPanel<ParentEntity extends CEntityD
 		final CButton addButton = CButton.createPrimary("Add", VaadinIcon.PLUS.create(), e -> openAddDialog());
 		final CButton editButton = new CButton("Edit", VaadinIcon.EDIT.create(), e -> openEditDialog());
 		editButton.setEnabled(false);
-		final CButton deleteButton = CButton.createError("Delete", VaadinIcon.TRASH.create(), e -> deleteSelected());
+		final CButton deleteButton = CButton.createError("Delete", VaadinIcon.TRASH.create(), e -> {
+			try {
+				deleteSelected();
+			} catch (final Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		});
 		deleteButton.setEnabled(false);
 		// Enable/disable edit and delete buttons based on selection
 		grid.addSelectionListener(selection -> {

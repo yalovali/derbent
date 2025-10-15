@@ -13,7 +13,6 @@ import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.screens.service.CInitializerServiceBase;
 
 public class CDecisionInitializerService extends CInitializerServiceBase {
-
 	public static final String BASE_PANEL_NAME = "Decisions Information";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDecisionInitializerService.class);
 	private static final Class<?> clazz = CDecision.class;
@@ -23,9 +22,9 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 	private static final String menuOrder = "1.1";
 	private static final boolean showInQuickToolbar = false;
 
-	public static CDetailSection createBasicView(final CProject project) {
+	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
-			CDetailSection scr = createBaseScreenEntity(project, clazz);
+			final CDetailSection scr = createBaseScreenEntity(project, clazz);
 			// create screen lines
 			scr.addScreenLine(CDetailLinesService.createSection(CDecisionInitializerService.BASE_PANEL_NAME));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
@@ -47,19 +46,19 @@ public class CDecisionInitializerService extends CInitializerServiceBase {
 			return scr;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating decision view.");
-			throw new RuntimeException("Failed to create decision view", e);
+			throw e;
 		}
 	}
 
 	public static CGridEntity createGridEntity(final CProject project) {
-		CGridEntity grid = createBaseGridEntity(project, clazz);
+		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setSelectedFields(
 				"name,description,project,decisionType,decisionStatus,accountableUser,assignedTo,createdBy,createdDate,implementationDate");
 		return grid;
 	}
 
-	public static void initialize(CProject project, CGridEntityService gridEntityService, CDetailSectionService detailSectionService,
-			CPageEntityService pageEntityService) throws Exception {
+	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,

@@ -15,7 +15,6 @@ import tech.derbent.screens.service.CInitializerServiceBase;
 
 /** Initializes UI metadata for {@link COrderApproval} entities. */
 public final class COrderApprovalInitializerService extends CInitializerServiceBase {
-
 	public static final String BASE_PANEL_NAME = "Approval Details";
 	private static final Logger LOGGER = LoggerFactory.getLogger(COrderApprovalInitializerService.class);
 	private static final Class<?> ENTITY_CLASS = COrderApproval.class;
@@ -25,9 +24,7 @@ public final class COrderApprovalInitializerService extends CInitializerServiceB
 	private static final String menuOrder = "1.1";
 	private static final boolean showInQuickToolbar = false;
 
-	private COrderApprovalInitializerService() {}
-
-	public static CDetailSection createBasicView(final CProject project) {
+	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		Check.notNull(project, "project cannot be null");
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, ENTITY_CLASS);
@@ -50,7 +47,7 @@ public final class COrderApprovalInitializerService extends CInitializerServiceB
 			return detailSection;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating order approval view.");
-			throw new RuntimeException("Failed to create order approval view", e);
+			throw e;
 		}
 	}
 
@@ -69,4 +66,6 @@ public final class COrderApprovalInitializerService extends CInitializerServiceB
 		initBase(ENTITY_CLASS, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder);
 	}
+
+	private COrderApprovalInitializerService() {}
 }

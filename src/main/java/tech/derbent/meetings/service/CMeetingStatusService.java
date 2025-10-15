@@ -3,8 +3,6 @@ package tech.derbent.meetings.service;
 import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,8 +17,6 @@ import tech.derbent.session.service.ISessionService;
 @Service
 @Transactional
 public class CMeetingStatusService extends CStatusService<CMeetingStatus> {
-	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingStatusService.class);
-
 	@Autowired
 	public CMeetingStatusService(final IMeetingStatusRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);

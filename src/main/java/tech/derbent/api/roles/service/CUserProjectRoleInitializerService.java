@@ -13,7 +13,6 @@ import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.screens.service.CInitializerServiceBase;
 
 public class CUserProjectRoleInitializerService extends CInitializerServiceBase {
-
 	public static final String BASE_PANEL_NAME = "Project Role Details";
 	private static final Class<?> ENTITY_CLASS = CUserProjectRole.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserProjectRoleInitializerService.class);
@@ -23,7 +22,7 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 	private static final String menuOrder = "1.1";
 	private static final boolean showInQuickToolbar = false;
 
-	public static CDetailSection createBasicView(final CProject project) {
+	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, ENTITY_CLASS);
 			// Basic role information
@@ -54,20 +53,20 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 			return detailSection;
 		} catch (final Exception e) {
 			LOGGER.error("Error creating user project role view.");
-			throw new RuntimeException("Failed to create user project role view", e);
+			throw e;
 		}
 	}
 
-	public static CGridEntity createGridEntity(final CProject project, boolean attributeNone) {
-		CGridEntity grid = createBaseGridEntity(project, ENTITY_CLASS);
+	public static CGridEntity createGridEntity(final CProject project, final boolean attributeNone) {
+		final CGridEntity grid = createBaseGridEntity(project, ENTITY_CLASS);
 		// hide grid actions when needed
 		grid.setAttributeNone(attributeNone);
 		grid.setSelectedFields("id,name,description,project,isAdmin,isUser,isGuest,color,sortOrder,isActive,attributeNonDeletable");
 		return grid;
 	}
 
-	public static void initialize(CProject project, CGridEntityService gridEntityService, CDetailSectionService detailSectionService,
-			CPageEntityService pageEntityService) throws Exception {
+	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project, false);
 		initBase(ENTITY_CLASS, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,

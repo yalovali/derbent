@@ -289,7 +289,7 @@ public class CDataInitializer {
 			LOGGER.info("Fallback JPA deleteAllInBatch completed.");
 		} catch (final Exception e) {
 			LOGGER.error("Error during sample data cleanup", e);
-			throw new RuntimeException("Failed to clear sample data", e);
+			throw e;
 		}
 	}
 
@@ -635,7 +635,7 @@ public class CDataInitializer {
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error creating activity types", e);
-			throw new RuntimeException("Failed to initialize activity types", e);
+			throw e;
 		}
 	}
 
@@ -984,7 +984,7 @@ public class CDataInitializer {
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample user project settings.");
-			throw new RuntimeException("Failed to initialize sample user project settings", e);
+			throw e;
 		}
 	}
 
@@ -1048,7 +1048,7 @@ public class CDataInitializer {
 		}
 	}
 
-	public void loadSampleData() {
+	public void loadSampleData() throws Exception {
 		try {
 			// ========== NON-PROJECT RELATED INITIALIZATION PHASE ==========
 			// **** CREATE COMPANY SAMPLES ****//
@@ -1138,11 +1138,11 @@ public class CDataInitializer {
 			LOGGER.info("Sample data initialization completed successfully");
 		} catch (final Exception e) {
 			LOGGER.error("Error loading sample data", e);
-			throw new RuntimeException("Failed to load sample data", e);
+			throw e;
 		}
 	}
 
-	public void reloadForced() {
+	public void reloadForced() throws Exception {
 		LOGGER.info("Sample data reload (forced) started");
 		clearSampleData(); // <<<<< ÖNCE TEMİZLE
 		loadSampleData(); // <<<<< SONRA YENİDEN OLUŞTUR

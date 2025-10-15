@@ -45,7 +45,7 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 			binder.readBean(null);
 		} catch (Exception e) {
 			LOGGER.error("Failed to clear form.");
-			throw new RuntimeException("Failed to clear form", e);
+			throw e;
 		}
 	}
 

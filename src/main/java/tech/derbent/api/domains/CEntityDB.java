@@ -17,7 +17,6 @@ import tech.derbent.api.annotations.AMetaData;
 
 @MappedSuperclass
 public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implements IEntityDBStatics {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityDB.class);
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
@@ -110,13 +109,14 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 			return (EntityClass) this;
 		} catch (final Exception e) {
 			LOGGER.error("Error during save operation using reflection", e);
-			throw new RuntimeException("Failed to perform save operation", e);
+			throw e;
 		}
 	}
 
 	/** Generic method to perform soft delete using reflection. Looks for common soft delete fields like 'deleted', 'active', 'enabled'.
-	 * @return true if soft delete was performed, false if hard delete should be used */
-	public boolean performSoftDelete() {
+	 * @return true if soft delete was performed, false if hard delete should be used
+	 * @throws Exception */
+	public boolean performSoftDelete() throws Exception {
 		try {
 			final Class<?> entityClass = ProxyUtils.getUserClass(this.getClass());
 			final Field[] fields = getAllFields(entityClass);
@@ -144,13 +144,13 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 			return false;
 		} catch (final Exception e) {
 			LOGGER.error("Error during soft delete operation using reflection", e);
-			throw new RuntimeException("Failed to perform soft delete operation", e);
+			throw e;
 		}
 	}
 
 	public void setActive(final Boolean isActive) { this.isActive = isActive; }
 
-	public void setIsActive(Boolean isActive) { this.isActive = isActive; }
+	public void setIsActive(final Boolean isActive) { this.isActive = isActive; }
 
 	@Override
 	public String toString() {

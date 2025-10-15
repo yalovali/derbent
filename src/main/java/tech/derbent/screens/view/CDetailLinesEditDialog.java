@@ -104,7 +104,7 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 			formEntity.getHorizontalLayout("entityProperty").add(divJavaType);
 		} catch (final NoSuchMethodException | SecurityException | IllegalAccessException | InvocationTargetException e) {
 			LOGGER.error("Error setting up dialog", e);
-			throw new RuntimeException("Failed to setup dialog", e);
+			throw e;
 		}
 	}
 
