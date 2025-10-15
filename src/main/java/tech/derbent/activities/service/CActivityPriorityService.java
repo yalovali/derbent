@@ -12,6 +12,7 @@ import tech.derbent.session.service.ISessionService;
 @Service
 @Transactional
 public class CActivityPriorityService extends CTypeEntityService<CActivityPriority> {
+
 	private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CActivityPriorityService.class);
 
 	public CActivityPriorityService(final IActivityPriorityRepository repository, final Clock clock, final ISessionService sessionService) {

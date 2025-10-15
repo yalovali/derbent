@@ -19,6 +19,7 @@ import tech.derbent.session.service.ISessionService;
 @Service
 @Transactional
 public class CMeetingStatusService extends CStatusService<CMeetingStatus> {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingStatusService.class);
 
 	@Autowired

@@ -17,6 +17,7 @@ import tech.derbent.session.service.ISessionService;
 @Service
 @Transactional
 public class CActivityStatusService extends CStatusService<CActivityStatus> {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityStatusService.class);
 	@Autowired
 	private final IActivityRepository activityRepository;

@@ -16,6 +16,7 @@ import tech.derbent.session.service.ISessionService;
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class CMeetingTypeService extends CTypeEntityService<CMeetingType> {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingTypeService.class);
 
 	CMeetingTypeService(final IMeetingTypeRepository repository, final Clock clock, final ISessionService sessionService) {

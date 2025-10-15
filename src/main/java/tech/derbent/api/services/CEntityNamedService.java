@@ -13,6 +13,12 @@ import tech.derbent.session.service.ISessionService;
  * operations for named entities including validation, creation, and name-based queries with consistent error handling and logging. */
 public abstract class CEntityNamedService<EntityClass extends CEntityNamed<EntityClass>> extends CAbstractService<EntityClass> {
 
+	/** Constructor without session service. Use this constructor when session service will be injected via setter method to avoid circular
+	 * dependencies. */
+	public CEntityNamedService(final IAbstractNamedRepository<EntityClass> repository, final Clock clock) {
+		super(repository, clock);
+	}
+
 	public CEntityNamedService(final IAbstractNamedRepository<EntityClass> repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}
