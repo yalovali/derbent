@@ -50,6 +50,7 @@ import tech.derbent.session.service.ISessionService;
 
 public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<EntityClass>> extends CAbstractPage
 		implements ILayoutChangeListener, IContentOwner {
+
 	private static final long serialVersionUID = 1L;
 	ArrayList<CAccordionDBEntity<EntityClass>> AccordionList = new ArrayList<CAccordionDBEntity<EntityClass>>(); // List of accordions
 	private CFlexLayout baseDetailsLayout;
@@ -358,6 +359,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		}
 		// Add update listener to refresh grid on CRUD operations
 		crudToolbar.addUpdateListener(new tech.derbent.api.interfaces.IEntityUpdateListener() {
+
 			@Override
 			public void onEntityCreated(final tech.derbent.api.domains.CEntityDB<?> entity) throws Exception {
 				LOGGER.debug("Entity created, populating form");

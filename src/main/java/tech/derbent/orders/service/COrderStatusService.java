@@ -12,6 +12,7 @@ import tech.derbent.session.service.ISessionService;
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class COrderStatusService extends CStatusService<COrderStatus> {
+
 	COrderStatusService(final IOrderStatusRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}

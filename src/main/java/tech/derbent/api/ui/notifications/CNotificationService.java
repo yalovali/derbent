@@ -16,6 +16,7 @@ import tech.derbent.api.utils.Check;
  * Service (MVC) Usage: Inject this service into views and components to show user messages */
 @Service
 public class CNotificationService {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CNotificationService.class);
 	// Standard durations in milliseconds
 	private static final int SHORT_DURATION = 2000;

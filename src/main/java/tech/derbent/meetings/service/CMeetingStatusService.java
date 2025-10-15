@@ -17,6 +17,7 @@ import tech.derbent.session.service.ISessionService;
 @Service
 @Transactional
 public class CMeetingStatusService extends CStatusService<CMeetingStatus> {
+
 	@Autowired
 	public CMeetingStatusService(final IMeetingStatusRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);

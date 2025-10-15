@@ -35,6 +35,7 @@ import tech.derbent.users.domain.CUser;
  * instances with configurable grid and detail sections. */
 @PermitAll
 public class CDynamicPageViewWithSections extends CPageBaseProjectAware implements BeforeEnterObserver, IEntityUpdateListener, IPageTitleProvider {
+
 	public static final String DEFAULT_COLOR = "#341b00";
 	public static final String DEFAULT_ICON = "vaadin:database";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicPageViewWithSections.class);

@@ -15,6 +15,7 @@ import tech.derbent.users.domain.CUserCompanySetting;
 
 /** Initializes UI configuration for {@link CUserCompanySetting}. Creates default grid and detail views to manage company memberships. */
 public final class CUserCompanySettingInitializerService extends CInitializerServiceBase {
+
 	public static final String BASE_PANEL_NAME = "Company Membership";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserCompanySettingInitializerService.class);
 	private static final Class<?> ENTITY_CLASS = CUserCompanySetting.class;

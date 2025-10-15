@@ -8,6 +8,7 @@ import tech.derbent.api.views.components.CButton;
 import tech.derbent.api.views.dialogs.CDialog;
 
 public abstract class CBaseInfoDialog extends CDialog {
+
 	private static final long serialVersionUID = 1L;
 	private final String message;
 	private final String title;

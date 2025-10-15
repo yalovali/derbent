@@ -12,6 +12,7 @@ import tech.derbent.session.service.ISessionService;
 @PreAuthorize ("isAuthenticated()")
 @Transactional (readOnly = true)
 public class COrderTypeService extends CTypeEntityService<COrderType> {
+
 	COrderTypeService(final IOrderTypeRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}

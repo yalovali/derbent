@@ -7,6 +7,7 @@ import tech.derbent.api.views.components.CButton;
 /** CConfirmationDialog - Dialog for user confirmations with Yes/No options. Layer: View (MVC) Used for dangerous operations that require user
  * confirmation like deletions. */
 public final class CConfirmationDialog extends CBaseInfoDialog {
+
 	private static final long serialVersionUID = 1L;
 	private final Runnable onConfirm;
 

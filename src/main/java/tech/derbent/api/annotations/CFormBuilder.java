@@ -57,6 +57,7 @@ import tech.derbent.api.views.components.CVerticalLayout;
 import tech.derbent.screens.domain.CDetailLines;
 import tech.derbent.screens.service.CEntityFieldService;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.screens.view.CDualListSelectorComponent;
 
 @org.springframework.stereotype.Component
 public final class CFormBuilder<EntityClass> implements ApplicationContextAware {
@@ -320,6 +321,46 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		return comboBox;
 	}
 
+	/** Creates a dual list selector component for Set fields. This provides a better UX for selecting and ordering multiple items compared to
+	 * MultiSelectComboBox.
+	 * @param <T>          The entity type
+	 * @param contentOwner The content owner for context
+	 * @param fieldInfo    Field information
+	 * @param binder       The binder to bind the component to
+	 * @return CDualListSelectorComponent instance
+	 * @throws Exception if creation fails */
+	@SuppressWarnings ("unchecked")
+	private static <T> CDualListSelectorComponent<T> createDualListSelector(IContentOwner contentOwner, final EntityFieldInfo fieldInfo,
+			final CEnhancedBinder<?> binder) throws Exception {
+		Check.notNull(fieldInfo, "FieldInfo for DualListSelector creation");
+		LOGGER.debug("Creating CDualListSelectorComponent for field: {}", fieldInfo.getFieldName());
+		final CDualListSelectorComponent<T> dualListSelector =
+				new CDualListSelectorComponent<>("Available " + fieldInfo.getDisplayName(), "Selected " + fieldInfo.getDisplayName());
+		// Set item label generator based on entity type
+		dualListSelector.setItemLabelGenerator(item -> {
+			if (item instanceof CEntityNamed<?>) {
+				return ((CEntityNamed<?>) item).getName();
+			}
+			if (item instanceof CEntityDB<?>) {
+				return CColorUtils.getDisplayTextFromEntity(item);
+			}
+			if (item instanceof String) {
+				return (String) item;
+			}
+			return "Unknown Item: " + String.valueOf(item);
+		});
+		// Data provider resolution using CDataProviderResolver
+		Check.notNull(dataProviderResolver, "DataProviderResolver for field " + fieldInfo.getFieldName());
+		final List<?> rawList = dataProviderResolver.resolveData(contentOwner, fieldInfo);
+		Check.notNull(rawList, "Items for field " + fieldInfo.getFieldName() + " of type " + fieldInfo.getJavaType());
+		// Set items as list (typed at runtime)
+		final List<T> items = rawList.stream().map(e -> (T) e).collect(Collectors.toList());
+		dualListSelector.setItems(items);
+		// Bind to the field
+		safeBindComponent(binder, dualListSelector, fieldInfo.getFieldName(), "DualListSelector");
+		return dualListSelector;
+	}
+
 	private static Component createComponentForField(IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder)
 			throws Exception {
 		try {
@@ -342,7 +383,12 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				// gets strings from a method in a spring bean
 				component = createStringComboBox(contentOwner, fieldInfo, binder);
 			} else if (hasDataProvider && fieldInfo.getJavaType().equals("Set")) {
-				component = createComboBoxMultiSelect(contentOwner, fieldInfo, binder);
+				// Check if should use dual list selector instead of multiselect combobox
+				if (fieldInfo.isUseDualListSelector()) {
+					component = createDualListSelector(contentOwner, fieldInfo, binder);
+				} else {
+					component = createComboBoxMultiSelect(contentOwner, fieldInfo, binder);
+				}
 			} else if (hasDataProvider || CEntityDB.class.isAssignableFrom(fieldType)) {
 				// it has a dataprovider or entity type
 				component = createComboBox(contentOwner, fieldInfo, binder);

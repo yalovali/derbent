@@ -13,6 +13,7 @@ import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.screens.service.CInitializerServiceBase;
 
 public class CRiskStatusInitializerService extends CInitializerServiceBase {
+
 	public static final String BASE_PANEL_NAME = "Risk Status Information";
 	private static final Class<?> clazz = CRiskStatus.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskStatusInitializerService.class);
