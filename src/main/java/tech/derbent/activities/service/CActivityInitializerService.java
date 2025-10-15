@@ -21,6 +21,11 @@ public class CActivityInitializerService extends CInitializerServiceBase {
 	static Map<String, EntityFieldInfo> fields;
 	static EntityFieldInfo info;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityInitializerService.class);
+	private static final String menuTitle = "Project.Activities";
+	private static final String pageTitle = "Activity Management";
+	private static final String pageDescription = "Activity management for projects";
+	private static final String menuOrder = "1.1";
+	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) {
 		try {
@@ -76,10 +81,10 @@ public class CActivityInitializerService extends CInitializerServiceBase {
 	}
 
 	public static void initialize(CProject project, CGridEntityService gridEntityService, CDetailSectionService detailSectionService,
-			CPageEntityService pageEntityService, boolean showInQuickToolbar) throws Exception {
+			CPageEntityService pageEntityService, boolean showInQuickToolbarParam) throws Exception {
 		final CDetailSection detailSection = createBasicView(project);
 		final CGridEntity grid = createGridEntity(project);
-		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, "Project.Activities",
-				"Activity Management", "Activity management for projects", showInQuickToolbar, "1.1");
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
+				pageDescription, showInQuickToolbarParam, menuOrder);
 	}
 }
