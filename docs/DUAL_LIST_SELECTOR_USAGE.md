@@ -10,6 +10,7 @@ The Dual List Selector Component provides a better user experience for selecting
 - **Clear button labels and tooltips** for better usability
 - **Robust exception handling** with detailed logging
 - **Icon-based buttons** for intuitive interface
+- **List-based ordering preservation** for fields with @OrderColumn annotation support
 
 ## Components
 
@@ -95,7 +96,77 @@ userSelector.setItems(userService.list());
 // Users will be displayed with their profile colors and icons
 ```
 
-### 2. CFieldSelectionComponent
+### 2. CComponentFieldSelection<MasterEntity, DetailEntity>
+
+A specialized component for selecting entity relationship fields with full ordering support. This component is used by CFormBuilder for fields with `useDualListSelector = true`.
+
+**Key Features:**
+- **List-based** instead of Set-based to preserve ordering
+- **@OrderColumn support** - maintains item order for JPA @OrderColumn fields
+- **Automatic separation** - splits source items into selected and available lists based on entity's current value
+- **Color-aware rendering** for CEntityNamed entities
+- **Full Vaadin binder integration** with List<DetailEntity> type
+
+**Important: List vs Set**
+
+As of the latest update, `CComponentFieldSelection` now uses `List<DetailEntity>` instead of `Set<DetailEntity>` for its value type. This change ensures proper ordering preservation for entity fields with `@OrderColumn` annotation.
+
+**Usage Pattern:**
+1. Call `setSourceItems(allAvailableItems)` to provide complete list of selectable items
+2. Binder automatically calls `setValue(entity.getFieldValue())` to set currently selected items
+3. Component separates items into selected and available lists
+4. Order of selected items is preserved from the entity's list field
+
+**Example with @OrderColumn:**
+
+```java
+@Entity
+public class CUser extends CEntityNamed<CUser> {
+    @OneToMany(fetch = FetchType.LAZY)
+    @OrderColumn(name = "item_index")  // Order matters!
+    @AMetaData(
+        displayName = "Activities", 
+        useDualListSelector = true,
+        dataProviderBean = "CActivityService",
+        dataProviderMethod = "listByUser"
+    )
+    private List<CActivity> activities;  // List, not Set!
+}
+```
+
+When CFormBuilder creates the component:
+```java
+// Automatically created by CFormBuilder
+CComponentFieldSelection<CUser, CActivity> activitySelector = 
+    new CComponentFieldSelection<>("Available Activities", "Selected Activities");
+
+// All available activities are set
+activitySelector.setSourceItems(activityService.listByUser());
+
+// Binder sets the user's current activities in order
+// Order is preserved: [Activity3, Activity1, Activity5]
+binder.bind(activitySelector, CUser::getActivities, CUser::setActivities);
+```
+
+**Manual Usage:**
+
+```java
+CComponentFieldSelection<CProject, CUser> teamSelector = 
+    new CComponentFieldSelection<>("Available Team Members", "Selected Team Members");
+
+// Set all available users
+teamSelector.setSourceItems(userService.list());
+
+// Manually set selected items in specific order
+List<CUser> orderedTeam = Arrays.asList(projectLead, developer1, developer2);
+teamSelector.setValue(orderedTeam);
+
+// Get value preserves order
+List<CUser> selectedTeam = teamSelector.getValue();
+// Returns: [projectLead, developer1, developer2]
+```
+
+### 3. CFieldSelectionComponent
 
 A specialized version for selecting entity fields used in grid configuration. Wraps CDualListSelectorComponent and provides field-specific functionality.
 
@@ -111,7 +182,7 @@ List<FieldSelection> selections = fieldSelector.getSelectedFields();
 
 ## Integration with CFormBuilder
 
-The Dual List Selector can be automatically used by CFormBuilder for Set fields when marked with the `useDualListSelector` annotation.
+The Dual List Selector can be automatically used by CFormBuilder for List or Set fields when marked with the `useDualListSelector` annotation.
 
 ### Using the Annotation
 
@@ -132,14 +203,35 @@ public class CProject extends CEntityDB<CProject> {
 }
 ```
 
+**For fields with ordering (@OrderColumn):**
+
+```java
+@Entity
+public class CUser extends CEntityNamed<CUser> {
+    
+    @OneToMany(fetch = FetchType.LAZY)
+    @OrderColumn(name = "item_index")  // JPA maintains order in this column
+    @AMetaData(
+        displayName = "Activities",
+        dataProviderBean = "CActivityService",
+        dataProviderMethod = "listByUser",
+        useDualListSelector = true  // Use CComponentFieldSelection for ordering support
+    )
+    private List<CActivity> activities;  // Must be List for @OrderColumn
+    
+    // getters and setters
+}
+```
+
 ### How It Works
 
 When CFormBuilder processes the entity:
 
-1. It detects the field is a `Set` type
+1. It detects the field is a `List` or `Set` type
 2. It checks if `useDualListSelector = true` in the `@AMetaData` annotation
-3. If true, it creates a `CDualListSelectorComponent` instead of `MultiSelectComboBox`
+3. If true, it creates a `CComponentFieldSelection` instead of `MultiSelectComboBox`
 4. The component is automatically bound to the field via the binder
+5. For `List` fields with `@OrderColumn`, the component preserves item order
 
 ### Choosing Between Components
 
@@ -275,7 +367,29 @@ The `CFieldSelectionDialog` used for grid column selection has been updated to u
 
 ## Testing
 
-Unit tests are provided in `CDualListSelectorComponentTest.java` covering:
+### CComponentFieldSelection Tests
+
+Comprehensive unit tests are provided in `CComponentFieldSelectionTest.java` covering:
+- Component initialization
+- Source items management
+- **Order preservation** for List-based values
+- Value setting with specific ordering
+- Clear operations
+- Read-only mode
+- Selected items retrieval
+- List separation (selected vs. available)
+- Null value handling
+
+Run tests with:
+```bash
+mvn test -Dtest=CComponentFieldSelectionTest
+```
+
+Key test: `testSetValuePreservesOrder()` verifies that when items are set in a specific order (e.g., "Item 3", "Item 1", "Item 4"), that exact order is maintained through `getValue()`, which is critical for `@OrderColumn` support.
+
+### CDualListSelectorComponent Tests
+
+Unit tests are also provided in `CDualListSelectorComponentTest.java` for the legacy Set-based component covering:
 - Component initialization
 - Item management
 - Value handling
@@ -285,4 +399,25 @@ Unit tests are provided in `CDualListSelectorComponentTest.java` covering:
 Run tests with:
 ```bash
 mvn test -Dtest=CDualListSelectorComponentTest
+```
+
+## Migration Notes
+
+If you have existing fields using `CComponentFieldSelection` or dual list selectors:
+
+1. **Set-based fields (no @OrderColumn)**: No changes needed. The component will work with Sets by converting to/from Lists internally.
+
+2. **List-based fields with @OrderColumn**: Ensure your entity field is declared as `List<DetailEntity>` not `Set<DetailEntity>`. The component now properly preserves order.
+
+3. **Binding**: The component now implements `HasValue<..., List<DetailEntity>>` instead of `HasValue<..., Set<DetailEntity>>`. Vaadin's binder handles type conversion automatically for compatible field types.
+
+Example migration:
+```java
+// Before (loses order)
+@OrderColumn(name = "item_index")
+private Set<CActivity> activities;  // Wrong! Set doesn't preserve order
+
+// After (preserves order)
+@OrderColumn(name = "item_index")  
+private List<CActivity> activities;  // Correct! List preserves order
 ```
