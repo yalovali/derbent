@@ -106,9 +106,13 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		availableList = new ListBox<>();
 		availableList.setHeight(DEFAULT_LIST_HEIGHT);
 		availableList.setWidthFull();
+		// Hide the checkmark/tick indicator by hiding the selected state styling
+		availableList.addClassName("no-selection-indicator");
 		selectedList = new ListBox<>();
 		selectedList.setHeight(DEFAULT_LIST_HEIGHT);
 		selectedList.setWidthFull();
+		// Hide the checkmark/tick indicator by hiding the selected state styling
+		selectedList.addClassName("no-selection-indicator");
 		// Set up color-aware rendering for entities
 		configureColorAwareRenderer(availableList);
 		configureColorAwareRenderer(selectedList);
