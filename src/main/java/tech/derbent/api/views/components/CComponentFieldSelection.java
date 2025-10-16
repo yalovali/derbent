@@ -30,14 +30,23 @@ import tech.derbent.api.utils.Check;
  * <li>Add/Remove buttons for moving items between lists</li>
  * <li>Up/Down buttons for reordering selected items</li>
  * <li>Double-click support for quick item movement</li>
- * <li>Full Vaadin binder integration</li>
+ * <li>Full Vaadin binder integration with List support for ordered fields</li>
  * <li>Read-only mode support</li>
+ * <li>Preserves ordering for fields with @OrderColumn annotation</li>
  * </ul>
+ * <p>
+ * Usage Pattern:
+ * <ol>
+ * <li>Call setSourceItems(allAvailableItems) to provide the complete list of items that can be selected</li>
+ * <li>Binder will call setValue(entity.getFieldValue()) to set currently selected items from the entity</li>
+ * <li>Component automatically separates items into selected and available lists</li>
+ * <li>Order of selected items is preserved for fields with @OrderColumn</li>
+ * </ol>
  * @param <MasterEntity> The master entity type (e.g., CUser)
  * @param <DetailEntity> The detail entity type to select (e.g., CActivity) */
 public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHorizontalLayout
-		implements HasValue<HasValue.ValueChangeEvent<Set<DetailEntity>>, Set<DetailEntity>>,
-		HasValueAndElement<HasValue.ValueChangeEvent<Set<DetailEntity>>, Set<DetailEntity>> {
+		implements HasValue<HasValue.ValueChangeEvent<List<DetailEntity>>, List<DetailEntity>>,
+		HasValueAndElement<HasValue.ValueChangeEvent<List<DetailEntity>>, List<DetailEntity>> {
 
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentFieldSelection.class);
@@ -51,10 +60,10 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	private final List<DetailEntity> sourceItems = new ArrayList<>();
 	private final List<DetailEntity> selectedItems = new ArrayList<>();
 	private final List<DetailEntity> notselectedItems = new ArrayList<>();
-	private Set<DetailEntity> currentValue = new LinkedHashSet<>();
+	private List<DetailEntity> currentValue = new ArrayList<>();
 	private boolean readOnly = false;
 	private ItemLabelGenerator<DetailEntity> itemLabelGenerator = Object::toString;
-	private final List<ValueChangeListener<? super ValueChangeEvent<Set<DetailEntity>>>> listeners = new ArrayList<>();
+	private final List<ValueChangeListener<? super ValueChangeEvent<List<DetailEntity>>>> listeners = new ArrayList<>();
 
 	/** Creates a new field selection component with default titles. */
 	public CComponentFieldSelection() {
@@ -290,12 +299,14 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		}
 	}
 
-	/** Refreshes both lists and fires value change event. */
+	/** Refreshes both lists and fires value change event. Separates source items into selected and available lists based on selectedItems. */
 	private void refreshLists() {
-		// Update available list - show items not in selected
-		List<DetailEntity> available = sourceItems.stream().filter(item -> !selectedItems.contains(item)).collect(Collectors.toList());
-		availableList.setItems(available);
-		// Update selected list
+		// Update notselectedItems - show items not in selected
+		notselectedItems.clear();
+		notselectedItems.addAll(sourceItems.stream().filter(item -> !selectedItems.contains(item)).collect(Collectors.toList()));
+		// Update available list with items not yet selected
+		availableList.setItems(notselectedItems);
+		// Update selected list - order is preserved from selectedItems
 		selectedList.setItems(selectedItems);
 		// Fire value change event
 		fireValueChangeEvent();
@@ -303,32 +314,41 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 
 	/** Fires a value change event to listeners. */
 	private void fireValueChangeEvent() {
-		Set<DetailEntity> oldValue = currentValue;
-		Set<DetailEntity> newValue = getValue();
-		currentValue = newValue;
+		List<DetailEntity> oldValue = currentValue;
+		List<DetailEntity> newValue = getValue();
+		currentValue = new ArrayList<>(newValue);
 		if (!oldValue.equals(newValue)) {
-			ValueChangeEvent<Set<DetailEntity>> event = new ValueChangeEvent<Set<DetailEntity>>() {
+			ValueChangeEvent<List<DetailEntity>> event = new ValueChangeEvent<List<DetailEntity>>() {
 
 				private static final long serialVersionUID = 1L;
 
 				@Override
-				public HasValue<?, Set<DetailEntity>> getHasValue() { return CComponentFieldSelection.this; }
+				public HasValue<?, List<DetailEntity>> getHasValue() { return CComponentFieldSelection.this; }
 
 				@Override
 				public boolean isFromClient() { return true; }
 
 				@Override
-				public Set<DetailEntity> getOldValue() { return oldValue; }
+				public List<DetailEntity> getOldValue() { return oldValue; }
 
 				@Override
-				public Set<DetailEntity> getValue() { return newValue; }
+				public List<DetailEntity> getValue() { return newValue; }
 			};
 			listeners.forEach(listener -> listener.valueChanged(event));
 		}
 	}
 
 	// Public API methods
-	/** Sets the available items to choose from.
+	/** Sets the available items to choose from. This is the complete list of items that can be selected. The component will automatically separate
+	 * these into selected and available lists based on the current value (set by binder).
+	 * <p>
+	 * Usage Pattern:
+	 * <ol>
+	 * <li>Call this method with all available items (e.g., all activities in the system)</li>
+	 * <li>Binder will subsequently call setValue() with the entity's current field value</li>
+	 * <li>Component separates items into selected (from entity) and available (not selected)</li>
+	 * <li>Order of selected items is preserved from the entity's list field</li>
+	 * </ol>
 	 * @param items List of items (can be null, will be treated as empty list)
 	 * @throws IllegalStateException if refresh fails */
 	public void setSourceItems(List<DetailEntity> items) {
@@ -363,13 +383,14 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	 * @return List of selected items in order (never null) */
 	public List<DetailEntity> getSelectedItems() { return new ArrayList<>(selectedItems); }
 
-	/** Sets the selected items.
-	 * @param items List of items to mark as selected (can be null, will be treated as empty)
+	/** Sets the selected items. This method preserves the order of items in the list, which is important for fields with @OrderColumn annotation.
+	 * @param items List of items to mark as selected in the specified order (can be null, will be treated as empty)
 	 * @throws IllegalStateException if refresh fails */
 	public void setSelectedItems(List<DetailEntity> items) {
 		try {
 			selectedItems.clear();
 			if (items != null) {
+				// Preserve the order from the incoming list
 				selectedItems.addAll(items);
 			}
 			refreshLists();
@@ -380,19 +401,22 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	}
 
 	// HasValue implementation
-	/** Returns the current value as a set of selected items.
-	 * @return Set of selected items (never null) */
+	/** Returns the current value as a list of selected items. The order is preserved from the selectedItems list, which is critical for fields with
+	 * @OrderColumn annotation.
+	 * @return List of selected items in order (never null) */
 	@Override
-	public Set<DetailEntity> getValue() { return new LinkedHashSet<>(selectedItems); }
+	public List<DetailEntity> getValue() { return new ArrayList<>(selectedItems); }
 
-	/** Sets the value from a set of items.
-	 * @param value Set of items to select (can be null, will be treated as empty)
+	/** Sets the value from a list of items. This is called by Vaadin binder when loading entity data. The order of items in the list is preserved,
+	 * which is essential for fields with @OrderColumn annotation.
+	 * @param value List of items to select in order (can be null, will be treated as empty)
 	 * @throws IllegalStateException if refresh fails */
 	@Override
-	public void setValue(Set<DetailEntity> value) {
+	public void setValue(List<DetailEntity> value) {
 		try {
 			selectedItems.clear();
 			if (value != null) {
+				// Preserve the order from the entity's list field
 				selectedItems.addAll(value);
 			}
 			refreshLists();
@@ -407,7 +431,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	 * @return Registration for removing the listener
 	 * @throws IllegalArgumentException if listener is null */
 	@Override
-	public Registration addValueChangeListener(ValueChangeListener<? super ValueChangeEvent<Set<DetailEntity>>> listener) {
+	public Registration addValueChangeListener(ValueChangeListener<? super ValueChangeEvent<List<DetailEntity>>> listener) {
 		Check.notNull(listener, "ValueChangeListener cannot be null");
 		listeners.add(listener);
 		return () -> listeners.remove(listener);
