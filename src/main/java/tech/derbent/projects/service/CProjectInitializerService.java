@@ -21,11 +21,11 @@ public class CProjectInitializerService extends CInitializerServiceBase {
 	static Map<String, EntityFieldInfo> fields;
 	static EntityFieldInfo info;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CProjectInitializerService.class);
-	private static final String menuTitle = MenuTitle_PROJECT + ".Projects";
-	private static final String pageTitle = "Project Management";
-	private static final String pageDescription = "Comprehensive project management with full CRUD operations";
 	private static final String menuOrder = Menu_Order_PROJECT + ".1";
-	private static final boolean showInQuickToolbar = false;
+	private static final String menuTitle = MenuTitle_PROJECT + ".Projects";
+	private static final String pageDescription = "Comprehensive project management with full CRUD operations";
+	private static final String pageTitle = "Project Management";
+	private static final boolean showInQuickToolbar = true;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {

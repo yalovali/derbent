@@ -17,11 +17,11 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 	public static final String BASE_PANEL_NAME = "Meeting Information";
 	private static final Class<?> ENTITY_CLASS = CMeeting.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingInitializerService.class);
-	private static final String menuTitle = MenuTitle_PROJECT + ".Meetings";
-	private static final String pageTitle = "Meeting Management";
-	private static final String pageDescription = "Meeting management with scheduling and participant tracking";
 	private static final String menuOrder = Menu_Order_PROJECT + ".5";
-	private static final boolean showInQuickToolbar = false;
+	private static final String menuTitle = MenuTitle_PROJECT + ".Meetings";
+	private static final String pageDescription = "Meeting management with scheduling and participant tracking";
+	private static final String pageTitle = "Meeting Management";
+	private static final boolean showInQuickToolbar = true;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {

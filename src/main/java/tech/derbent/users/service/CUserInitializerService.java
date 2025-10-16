@@ -18,17 +18,19 @@ public class CUserInitializerService extends CInitializerServiceBase {
 	public static final String BASE_PANEL_NAME = "User Information";
 	static final Class<?> clazz = CUser.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CUserInitializerService.class);
-	private static final String menuTitle = MenuTitle_SYSTEM + ".Users";
-	private static final String pageTitle = "User Management";
-	private static final String pageDescription = "User management for system access and permissions";
 	private static final String menuOrder = Menu_Order_SYSTEM + ".10";
-	private static final boolean showInQuickToolbar = false;
+	private static final String menuTitle = MenuTitle_SYSTEM + ".Users";
+	private static final String pageDescription = "User management for system access and permissions";
+	private static final String pageTitle = "User Management";
+	private static final boolean showInQuickToolbar = true;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
 		try {
 			final CDetailSection scr = createBaseScreenEntity(project, clazz);
 			// create screen lines
 			scr.addScreenLine(CDetailLinesService.createSection(CUserInitializerService.BASE_PANEL_NAME));
+			// for test purposes only
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "activities"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastname"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "login"));

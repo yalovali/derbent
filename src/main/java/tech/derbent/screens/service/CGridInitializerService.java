@@ -2,7 +2,6 @@ package tech.derbent.screens.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.api.utils.Check;
 import tech.derbent.page.service.CPageEntityService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CDetailSection;
@@ -11,8 +10,13 @@ import tech.derbent.screens.domain.CGridEntity;
 public class CGridInitializerService extends CInitializerServiceBase {
 
 	public static final String BASE_PANEL_NAME = "Grid Information";
-	private static final Logger LOGGER = LoggerFactory.getLogger(CGridInitializerService.class);
 	private static final Class<?> clazz = CGridEntity.class;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CGridInitializerService.class);
+	private static final String menuOrder = Menu_Order_SYSTEM + ".10";
+	private static final String menuTitle = MenuTitle_SYSTEM + ".Grids";
+	private static final String pageDescription = "Grid management for system ";
+	private static final String pageTitle = "Grid Management";
+	private static final boolean showInQuickToolbar = true;
 
 	public static CDetailSection createBasicView(final CProject project) {
 		try {
@@ -44,22 +48,26 @@ public class CGridInitializerService extends CInitializerServiceBase {
 		return grid;
 	}
 
-	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
-			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
-		Check.notNull(project, "project cannot be null");
-		Check.notNull(gridEntityService, "gridEntityService cannot be null");
-		Check.notNull(detailSectionService, "detailSectionService cannot be null");
-		Check.notNull(pageEntityService, "pageEntityService cannot be null");
-		final CDetailSection detailSection = createBasicView(project);
-		detailSectionService.save(detailSection);
-		final CGridEntity grid = createGridEntity(project);
-		gridEntityService.save(grid);
-		final tech.derbent.page.domain.CPageEntity page = createPageEntity(clazz, project, grid, detailSection, "System.Grids",
-				"Grid Configuration Management", "Manage reusable grid metadata definitions", "1.1");
-		pageEntityService.save(page);
-	}
-
 	public static CGridEntity createMasterView(final CProject project) {
 		return createGridEntity(project);
+	}
+
+	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
+			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
+		final CDetailSection detailSection = createBasicView(project);
+		final CGridEntity grid = createGridEntity(project);
+		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
+				pageDescription, showInQuickToolbar, menuOrder);
+		// Check.notNull(project, "project cannot be null");
+		// Check.notNull(gridEntityService, "gridEntityService cannot be null");
+		// Check.notNull(detailSectionService, "detailSectionService cannot be null");
+		// Check.notNull(pageEntityService, "pageEntityService cannot be null");
+		// final CDetailSection detailSection = createBasicView(project);
+		// detailSectionService.save(detailSection);
+		// final CGridEntity grid = createGridEntity(project);
+		// gridEntityService.save(grid);
+		// final tech.derbent.page.domain.CPageEntity page = createPageEntity(clazz, project, grid, detailSection, "System.Grids",
+		// "Grid Configuration Management", "Manage reusable grid metadata definitions", "1.1");
+		// pageEntityService.save(page);
 	}
 }

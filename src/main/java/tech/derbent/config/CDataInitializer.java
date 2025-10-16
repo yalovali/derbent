@@ -80,6 +80,7 @@ import tech.derbent.risks.service.CRiskStatusService;
 import tech.derbent.screens.service.CDetailLinesService;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.screens.service.CGridEntityService;
+import tech.derbent.screens.service.CGridInitializerService;
 import tech.derbent.session.service.ISessionService;
 import tech.derbent.setup.service.CSystemSettingsInitializerService;
 import tech.derbent.users.domain.CUser;
@@ -126,8 +127,8 @@ public class CDataInitializer {
 	private static final String STATUS_ON_HOLD = "On Hold";
 	// User Login Names
 	private static final String USER_ADMIN = "admin";
-	private final CActivityService activityService;
 	private final CActivityPriorityService activityPriorityService;
+	private final CActivityService activityService;
 	private final CActivityStatusService activityStatusService;
 	private final CActivityTypeService activityTypeService;
 	private final CCommentPriorityService commentPriorityService;
@@ -1108,6 +1109,7 @@ public class CDataInitializer {
 					COrderTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CRiskStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CUserTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CGridInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					// TODO: Add similar calls for all other InitializerServices (user types, priorities, etc.)
 					// Project-specific type and configuration entities
 					initializeSampleMeetingStatuses(project);

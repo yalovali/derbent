@@ -50,6 +50,7 @@ import tech.derbent.api.interfaces.IHasContentOwner;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.views.components.CComponentFieldSelection;
 import tech.derbent.api.views.components.CDiv;
 import tech.derbent.api.views.components.CHorizontalLayout;
 import tech.derbent.api.views.components.CPictureSelector;
@@ -71,6 +72,29 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	private static CDataProviderResolver dataProviderResolver;
 	protected static final String LabelMinWidth_210PX = "210px";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CFormBuilder.class);
+
+	private static void assignDeterministicComponentId(final Component component, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
+		if ((component == null) || (fieldInfo == null)) {
+			return;
+		}
+		String entityPart = "entity";
+		if (binder != null) {
+			try {
+				final Class<?> beanType = binder.getBeanType();
+				if (beanType != null) {
+					entityPart = beanType.getSimpleName();
+				}
+			} catch (final Exception e) {
+				LOGGER.debug("Could not resolve binder bean type for deterministic ID: {}", e.getMessage());
+			}
+		}
+		final String rawId = String.format("field-%s-%s", entityPart, fieldInfo.getFieldName());
+		final String normalized = rawId.replaceAll("([a-z])([A-Z])", "$1-$2").replaceAll("[^a-zA-Z0-9-]", "-").replaceAll("-{2,}", "-")
+				.replaceAll("(^-|-$)", "").toLowerCase();
+		if (!normalized.isEmpty()) {
+			component.setId(normalized);
+		}
+	}
 
 	@SuppressWarnings ("unchecked")
 	public static <EntityClass> CVerticalLayout buildEnhancedForm(final Class<?> entityClass) throws Exception {
@@ -321,46 +345,6 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		return comboBox;
 	}
 
-	/** Creates a dual list selector component for Set fields. This provides a better UX for selecting and ordering multiple items compared to
-	 * MultiSelectComboBox.
-	 * @param <T>          The entity type
-	 * @param contentOwner The content owner for context
-	 * @param fieldInfo    Field information
-	 * @param binder       The binder to bind the component to
-	 * @return CDualListSelectorComponent instance
-	 * @throws Exception if creation fails */
-	@SuppressWarnings ("unchecked")
-	private static <T> CDualListSelectorComponent<T> createDualListSelector(IContentOwner contentOwner, final EntityFieldInfo fieldInfo,
-			final CEnhancedBinder<?> binder) throws Exception {
-		Check.notNull(fieldInfo, "FieldInfo for DualListSelector creation");
-		LOGGER.debug("Creating CDualListSelectorComponent for field: {}", fieldInfo.getFieldName());
-		final CDualListSelectorComponent<T> dualListSelector =
-				new CDualListSelectorComponent<>("Available " + fieldInfo.getDisplayName(), "Selected " + fieldInfo.getDisplayName());
-		// Set item label generator based on entity type
-		dualListSelector.setItemLabelGenerator(item -> {
-			if (item instanceof CEntityNamed<?>) {
-				return ((CEntityNamed<?>) item).getName();
-			}
-			if (item instanceof CEntityDB<?>) {
-				return CColorUtils.getDisplayTextFromEntity(item);
-			}
-			if (item instanceof String) {
-				return (String) item;
-			}
-			return "Unknown Item: " + String.valueOf(item);
-		});
-		// Data provider resolution using CDataProviderResolver
-		Check.notNull(dataProviderResolver, "DataProviderResolver for field " + fieldInfo.getFieldName());
-		final List<?> rawList = dataProviderResolver.resolveData(contentOwner, fieldInfo);
-		Check.notNull(rawList, "Items for field " + fieldInfo.getFieldName() + " of type " + fieldInfo.getJavaType());
-		// Set items as list (typed at runtime)
-		final List<T> items = rawList.stream().map(e -> (T) e).collect(Collectors.toList());
-		dualListSelector.setItems(items);
-		// Bind to the field
-		safeBindComponent(binder, dualListSelector, fieldInfo.getFieldName(), "DualListSelector");
-		return dualListSelector;
-	}
-
 	private static Component createComponentForField(IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder)
 			throws Exception {
 		try {
@@ -385,7 +369,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			} else if (hasDataProvider && fieldInfo.getJavaType().equals("Set")) {
 				// Check if should use dual list selector instead of multiselect combobox
 				if (fieldInfo.isUseDualListSelector()) {
-					component = createDualListSelector(contentOwner, fieldInfo, binder);
+					component = createDualListSelector2(contentOwner, fieldInfo, binder);
 				} else {
 					component = createComboBoxMultiSelect(contentOwner, fieldInfo, binder);
 				}
@@ -440,6 +424,31 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		}
 	}
 
+	/** Creates a custom component by invoking the method specified in createComponentMethod. Supports comma-separated method names and will try each
+	 * method until one succeeds.
+	 * @param contentOwner the content owner (page) for context
+	 * @param fieldInfo    field information containing the method name(s)
+	 * @param binder       the enhanced binder for form binding
+	 * @return the custom component or null if creation fails
+	 * @throws Exception */
+	private static Component createCustomComponent(IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder)
+			throws Exception {
+		try {
+			Check.notNull(fieldInfo, "FieldInfo for custom component creation");
+			Check.notNull(fieldInfo.getCreateComponentMethod(), "CreateComponentMethod for custom component creation");
+			Check.notNull(fieldInfo.getDataProviderBean(), "DataProviderBean for custom component creation");
+			// Check.notNull(contentOwner, "ContentOwner for custom component creation");
+			// use first method only
+			final String methodName = fieldInfo.getCreateComponentMethod().split(",")[0].trim();
+			final Component component = invokeCustomComponentMethod(contentOwner, methodName, fieldInfo, binder);
+			Check.notNull(component, "Custom component created by method " + methodName + " for field " + fieldInfo.getFieldName());
+			return component;
+		} catch (final Exception e) {
+			LOGGER.error("Error creating custom component for field {}: {}", fieldInfo.getFieldName(), e.getMessage());
+			throw e;
+		}
+	}
+
 	private static DatePicker createDatePicker(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
 		final DatePicker datePicker = new DatePicker();
 		CAuxillaries.setId(datePicker);
@@ -452,6 +461,78 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		CAuxillaries.setId(dateTimePicker);
 		safeBindComponent(binder, dateTimePicker, fieldInfo.getFieldName(), "DateTimePicker");
 		return dateTimePicker;
+	}
+
+	/** Creates a dual list selector component for Set fields. This provides a better UX for selecting and ordering multiple items compared to
+	 * MultiSelectComboBox.
+	 * @param <T>          The entity type
+	 * @param contentOwner The content owner for context
+	 * @param fieldInfo    Field information
+	 * @param binder       The binder to bind the component to
+	 * @return CDualListSelectorComponent instance
+	 * @throws Exception if creation fails */
+	@SuppressWarnings ("unchecked")
+	private static <T> CDualListSelectorComponent<T> createDualListSelector(IContentOwner contentOwner, final EntityFieldInfo fieldInfo,
+			final CEnhancedBinder<?> binder) throws Exception {
+		Check.notNull(fieldInfo, "FieldInfo for DualListSelector creation");
+		LOGGER.debug("Creating CDualListSelectorComponent for field: {}", fieldInfo.getFieldName());
+		final CDualListSelectorComponent<T> dualListSelector =
+				new CDualListSelectorComponent<>("Available " + fieldInfo.getDisplayName(), "Selected " + fieldInfo.getDisplayName());
+		// Set item label generator based on entity type
+		dualListSelector.setItemLabelGenerator(item -> {
+			if (item instanceof CEntityNamed<?>) {
+				return ((CEntityNamed<?>) item).getName();
+			}
+			if (item instanceof CEntityDB<?>) {
+				return CColorUtils.getDisplayTextFromEntity(item);
+			}
+			if (item instanceof String) {
+				return (String) item;
+			}
+			return "Unknown Item: " + String.valueOf(item);
+		});
+		// Data provider resolution using CDataProviderResolver
+		Check.notNull(dataProviderResolver, "DataProviderResolver for field " + fieldInfo.getFieldName());
+		final List<?> rawList = dataProviderResolver.resolveData(contentOwner, fieldInfo);
+		Check.notNull(rawList, "Items for field " + fieldInfo.getFieldName() + " of type " + fieldInfo.getJavaType());
+		// Set items as list (typed at runtime)
+		final List<T> items = rawList.stream().map(e -> (T) e).collect(Collectors.toList());
+		dualListSelector.setItems(items);
+		// Bind to the field
+		safeBindComponent(binder, dualListSelector, fieldInfo.getFieldName(), "DualListSelector");
+		return dualListSelector;
+	}
+
+	@SuppressWarnings ("unchecked")
+	private static <EntityClass, DetailClass> CComponentFieldSelection<EntityClass, DetailClass> createDualListSelector2(IContentOwner contentOwner,
+			final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) throws Exception {
+		Check.notNull(fieldInfo, "FieldInfo for DualListSelector creation");
+		LOGGER.debug("Creating CDualListSelectorComponent for field: {}", fieldInfo.getFieldName());
+		final CComponentFieldSelection<EntityClass, DetailClass> dualListSelector = new CComponentFieldSelection<EntityClass, DetailClass>(
+				"Available " + fieldInfo.getDisplayName(), "Selected " + fieldInfo.getDisplayName());
+		// Set item label generator based on entity type
+		dualListSelector.setItemLabelGenerator(item -> {
+			if (item instanceof CEntityNamed<?>) {
+				return ((CEntityNamed<?>) item).getName();
+			}
+			if (item instanceof CEntityDB<?>) {
+				return CColorUtils.getDisplayTextFromEntity(item);
+			}
+			if (item instanceof String) {
+				return (String) item;
+			}
+			return "Unknown Item: " + String.valueOf(item);
+		});
+		// Data provider resolution using CDataProviderResolver
+		Check.notNull(dataProviderResolver, "DataProviderResolver for field " + fieldInfo.getFieldName());
+		final List<?> rawList = dataProviderResolver.resolveData(contentOwner, fieldInfo);
+		Check.notNull(rawList, "Items for field " + fieldInfo.getFieldName() + " of type " + fieldInfo.getJavaType());
+		// Set items as list (typed at runtime)
+		final List<DetailClass> items = rawList.stream().map(e -> (DetailClass) e).collect(Collectors.toList());
+		dualListSelector.setItems(items);
+		// Bind to the field
+		// safeBindComponent(binder, dualListSelector, fieldInfo.getFieldName(), "DualListSelector");
+		return dualListSelector;
 	}
 
 	@SuppressWarnings ("unchecked")
@@ -763,6 +844,38 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		return iconNames;
 	}
 
+	/** Invokes a single custom component method.
+	 * @param contentOwner the content owner (page) for context
+	 * @param methodName   the method name to invoke
+	 * @param fieldInfo    field information
+	 * @param binder       the enhanced binder
+	 * @return the custom component or null if method fails
+	 * @throws Exception */
+	private static Component invokeCustomComponentMethod(IContentOwner contentOwner, final String methodName, final EntityFieldInfo fieldInfo,
+			final CEnhancedBinder<?> binder) throws Exception {
+		try {
+			// contentowner can be null
+			String sourceClassName = fieldInfo.getDataProviderBean();
+			Check.isTrue(applicationContext.containsBean(sourceClassName),
+					"Data provider bean '" + sourceClassName + "' not found for field '" + fieldInfo.getFieldName() + "'");
+			final Object serviceBean = applicationContext.getBean(sourceClassName);
+			Check.notNull(serviceBean, "Service bean '" + sourceClassName + "' for field '" + fieldInfo.getFieldName() + "'");
+			final Method method = serviceBean.getClass().getMethod(methodName);
+			Check.notNull(method, "Method '" + methodName + "' on service bean for field '" + fieldInfo.getFieldName() + "'");
+			Object result = method.invoke(serviceBean);
+			Check.notNull(result, "Result of custom component method " + methodName + " for field " + fieldInfo.getFieldName());
+			Check.instanceOf(result, Component.class, "Result of method " + methodName + " is not a Component for field " + fieldInfo.getFieldName());
+			final Component component = (Component) result;
+			if (component instanceof IHasContentOwner) {
+				((IHasContentOwner) component).setContentOwner(contentOwner);
+			}
+			return component;
+		} catch (final Exception e) {
+			LOGGER.error("Failed to invoke custom component method {}: {}", methodName, e.getMessage());
+			throw e;
+		}
+	}
+
 	public static <EntityClass> Component processField(final IContentOwner contentOwner, final CEnhancedBinder<EntityClass> binder,
 			final VerticalLayout formLayout, final Map<String, CHorizontalLayout> mapHorizontalLayouts, final EntityFieldInfo fieldInfo,
 			final Map<String, Component> mapComponents) throws Exception {
@@ -778,29 +891,6 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			mapComponents.put(fieldInfo.getFieldName(), component);
 		}
 		return component;
-	}
-
-	private static void assignDeterministicComponentId(final Component component, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
-		if ((component == null) || (fieldInfo == null)) {
-			return;
-		}
-		String entityPart = "entity";
-		if (binder != null) {
-			try {
-				final Class<?> beanType = binder.getBeanType();
-				if (beanType != null) {
-					entityPart = beanType.getSimpleName();
-				}
-			} catch (final Exception e) {
-				LOGGER.debug("Could not resolve binder bean type for deterministic ID: {}", e.getMessage());
-			}
-		}
-		final String rawId = String.format("field-%s-%s", entityPart, fieldInfo.getFieldName());
-		final String normalized = rawId.replaceAll("([a-z])([A-Z])", "$1-$2").replaceAll("[^a-zA-Z0-9-]", "-").replaceAll("-{2,}", "-")
-				.replaceAll("(^-|-$)", "").toLowerCase();
-		if (!normalized.isEmpty()) {
-			component.setId(normalized);
-		}
 	}
 
 	/** Recursively searches for ComboBox components and resets them to their first item. */
@@ -949,6 +1039,55 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		CFormBuilder.buildForm(entityClass, binder, entityFields, componentMap, horizontalLayoutMap, formLayout, contentOwner);
 	}
 
+	public Component addFieldLine(final EntityFieldInfo fieldInfo) throws Exception {
+		return CFormBuilder.processField(null, binder, formLayout, horizontalLayoutMap, fieldInfo, componentMap);
+	}
+
+	public Component addFieldLine(IContentOwner contentOwner, final String screenClassType, final CDetailLines line, final VerticalLayout layout,
+			Map<String, Component> componentMap2, Map<String, CHorizontalLayout> horizontalLayoutMap2) throws Exception {
+		final EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(screenClassType, line);
+		return CFormBuilder.processField(contentOwner, binder, layout, horizontalLayoutMap, fieldInfo, componentMap);
+	}
+
+	public CVerticalLayout build(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder, final List<String> entityFields)
+			throws Exception {
+		return CFormBuilder.buildForm(entityClass, binder, entityFields, componentMap, horizontalLayoutMap, formLayout);
+	}
+
+	/** Gets the internal binder for this form builder.
+	 * @return the enhanced binder */
+	public CEnhancedBinder<?> getBinder() { return binder; }
+
+	public Component getComponent(final String fieldName) {
+		Check.notNull(fieldName, "Field name for component retrieval");
+		final Component component = componentMap.get(fieldName);
+		Check.notNull(component, "Component for field " + fieldName + " not found in form builder map");
+		return component;
+	}
+
+	public CVerticalLayout getFormLayout() { return formLayout; }
+
+	public CHorizontalLayout getHorizontalLayout(final String fieldName) {
+		Check.notNull(fieldName, "Field name for horizontal layout retrieval");
+		final CHorizontalLayout layout = horizontalLayoutMap.get(fieldName);
+		Check.notNull(layout, "HorizontalLayout for field " + fieldName + " not found in form builder map");
+		return layout;
+	}
+
+	/** Clears the form by setting the binder bean to null. */
+	public void populateForm() {
+		// go through all components and call populate if available
+		componentMap.values().forEach(component -> {
+			if (component instanceof IContentOwner) {
+				try {
+					((IContentOwner) component).populateForm();
+				} catch (final Exception e) {
+					LOGGER.error("Error populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage());
+				}
+			}
+		});
+	}
+
 	/** Populates the form with entity data using the internal binder.
 	 * @param entity the entity to populate the form with */
 	@SuppressWarnings ("unchecked")
@@ -967,112 +1106,6 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				}
 			}
 		});
-	}
-
-	/** Clears the form by setting the binder bean to null. */
-	public void populateForm() {
-		// go through all components and call populate if available
-		componentMap.values().forEach(component -> {
-			if (component instanceof IContentOwner) {
-				try {
-					((IContentOwner) component).populateForm();
-				} catch (final Exception e) {
-					LOGGER.error("Error populating form component {}: {}", component.getClass().getSimpleName(), e.getMessage());
-				}
-			}
-		});
-	}
-
-	/** Gets the internal binder for this form builder.
-	 * @return the enhanced binder */
-	public CEnhancedBinder<?> getBinder() { return binder; }
-
-	public Component addFieldLine(final EntityFieldInfo fieldInfo) throws Exception {
-		return CFormBuilder.processField(null, binder, formLayout, horizontalLayoutMap, fieldInfo, componentMap);
-	}
-
-	public Component addFieldLine(IContentOwner contentOwner, final String screenClassType, final CDetailLines line, final VerticalLayout layout,
-			Map<String, Component> componentMap2, Map<String, CHorizontalLayout> horizontalLayoutMap2) throws Exception {
-		final EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(screenClassType, line);
-		return CFormBuilder.processField(contentOwner, binder, layout, horizontalLayoutMap, fieldInfo, componentMap);
-	}
-
-	public CVerticalLayout build(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder, final List<String> entityFields)
-			throws Exception {
-		return CFormBuilder.buildForm(entityClass, binder, entityFields, componentMap, horizontalLayoutMap, formLayout);
-	}
-
-	public Component getComponent(final String fieldName) {
-		Check.notNull(fieldName, "Field name for component retrieval");
-		final Component component = componentMap.get(fieldName);
-		Check.notNull(component, "Component for field " + fieldName + " not found in form builder map");
-		return component;
-	}
-
-	public CVerticalLayout getFormLayout() { return formLayout; }
-
-	public CHorizontalLayout getHorizontalLayout(final String fieldName) {
-		Check.notNull(fieldName, "Field name for horizontal layout retrieval");
-		final CHorizontalLayout layout = horizontalLayoutMap.get(fieldName);
-		Check.notNull(layout, "HorizontalLayout for field " + fieldName + " not found in form builder map");
-		return layout;
-	}
-
-	/** Creates a custom component by invoking the method specified in createComponentMethod. Supports comma-separated method names and will try each
-	 * method until one succeeds.
-	 * @param contentOwner the content owner (page) for context
-	 * @param fieldInfo    field information containing the method name(s)
-	 * @param binder       the enhanced binder for form binding
-	 * @return the custom component or null if creation fails
-	 * @throws Exception */
-	private static Component createCustomComponent(IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder)
-			throws Exception {
-		try {
-			Check.notNull(fieldInfo, "FieldInfo for custom component creation");
-			Check.notNull(fieldInfo.getCreateComponentMethod(), "CreateComponentMethod for custom component creation");
-			Check.notNull(fieldInfo.getDataProviderBean(), "DataProviderBean for custom component creation");
-			// Check.notNull(contentOwner, "ContentOwner for custom component creation");
-			// use first method only
-			final String methodName = fieldInfo.getCreateComponentMethod().split(",")[0].trim();
-			final Component component = invokeCustomComponentMethod(contentOwner, methodName, fieldInfo, binder);
-			Check.notNull(component, "Custom component created by method " + methodName + " for field " + fieldInfo.getFieldName());
-			return component;
-		} catch (final Exception e) {
-			LOGGER.error("Error creating custom component for field {}: {}", fieldInfo.getFieldName(), e.getMessage());
-			throw e;
-		}
-	}
-
-	/** Invokes a single custom component method.
-	 * @param contentOwner the content owner (page) for context
-	 * @param methodName   the method name to invoke
-	 * @param fieldInfo    field information
-	 * @param binder       the enhanced binder
-	 * @return the custom component or null if method fails
-	 * @throws Exception */
-	private static Component invokeCustomComponentMethod(IContentOwner contentOwner, final String methodName, final EntityFieldInfo fieldInfo,
-			final CEnhancedBinder<?> binder) throws Exception {
-		try {
-			// contentowner can be null
-			String sourceClassName = fieldInfo.getDataProviderBean();
-			Check.isTrue(applicationContext.containsBean(sourceClassName),
-					"Data provider bean '" + sourceClassName + "' not found for field '" + fieldInfo.getFieldName() + "'");
-			final Object serviceBean = applicationContext.getBean(sourceClassName);
-			Check.notNull(serviceBean, "Service bean '" + sourceClassName + "' for field '" + fieldInfo.getFieldName() + "'");
-			final Method method = serviceBean.getClass().getMethod(methodName);
-			Check.notNull(method, "Method '" + methodName + "' on service bean for field '" + fieldInfo.getFieldName() + "'");
-			Object result = method.invoke(serviceBean);
-			Check.notNull(result, "Result of custom component method " + methodName + " for field " + fieldInfo.getFieldName());
-			Check.instanceOf(result, Component.class, "Result of method " + methodName + " is not a Component for field " + fieldInfo.getFieldName());
-			final Component component = (Component) result;
-			if (component instanceof IHasContentOwner) {
-				((IHasContentOwner) component).setContentOwner(contentOwner);
-			}
-			return component;
-		} catch (final Exception e) {
-			LOGGER.error("Failed to invoke custom component method {}: {}", methodName, e.getMessage());
-			throw e;
-		}
 	}
 
 	/** Sets the application context and initializes the data provider resolver. This method is called automatically by Spring.

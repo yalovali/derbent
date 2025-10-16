@@ -35,7 +35,7 @@ import tech.derbent.users.domain.CUser;
 public class CActivity extends CProjectItem<CActivity> implements IKanbanEntity {
 
 	public static final String DEFAULT_COLOR = "#DC143C";
-	public static final String DEFAULT_ICON = "vaadin:tasks";
+	public static final String DEFAULT_ICON = "vaadin:file-o";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivity.class);
 	public final static String VIEW_NAME = "Activities View";
 	// Additional Information
@@ -247,6 +247,31 @@ public class CActivity extends CProjectItem<CActivity> implements IKanbanEntity 
 	@Override
 	public IKanbanType getType() { return activityType; }
 
+	@Override
+	public void initializeAllFields() {
+		// Initialize lazy-loaded entity relationships
+		if (activityType != null) {
+			activityType.getName(); // Trigger activity type loading
+		}
+		if (priority != null) {
+			priority.getName(); // Trigger priority loading
+		}
+		if (status != null) {
+			status.getName(); // Trigger status loading
+		}
+		// Parent class relationships (from CEntityOfProject)
+		if (getProject() != null) {
+			getProject().getName(); // Trigger project loading
+		}
+		if (getAssignedTo() != null) {
+			getAssignedTo().getLogin(); // Trigger assigned user loading
+		}
+		if (getCreatedBy() != null) {
+			getCreatedBy().getLogin(); // Trigger creator loading
+		}
+		// Note: comments collection will be initialized if accessed
+	}
+
 	/** Initialize default values for the activity. */
 	@Override
 	protected void initializeDefaults() {
@@ -435,30 +460,5 @@ public class CActivity extends CProjectItem<CActivity> implements IKanbanEntity 
 		if (status instanceof CActivityStatus) {
 			setStatus((CActivityStatus) status);
 		}
-	}
-
-	@Override
-	public void initializeAllFields() {
-		// Initialize lazy-loaded entity relationships
-		if (activityType != null) {
-			activityType.getName(); // Trigger activity type loading
-		}
-		if (priority != null) {
-			priority.getName(); // Trigger priority loading
-		}
-		if (status != null) {
-			status.getName(); // Trigger status loading
-		}
-		// Parent class relationships (from CEntityOfProject)
-		if (getProject() != null) {
-			getProject().getName(); // Trigger project loading
-		}
-		if (getAssignedTo() != null) {
-			getAssignedTo().getLogin(); // Trigger assigned user loading
-		}
-		if (getCreatedBy() != null) {
-			getCreatedBy().getLogin(); // Trigger creator loading
-		}
-		// Note: comments collection will be initialized if accessed
 	}
 }

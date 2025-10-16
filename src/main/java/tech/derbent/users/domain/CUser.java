@@ -12,6 +12,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
+import tech.derbent.activities.domain.CActivity;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.domains.CEntityNamed;
@@ -29,9 +30,15 @@ import tech.derbent.companies.domain.CCompany;
 public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInfoGenerator {
 
 	public static final String DEFAULT_COLOR = "#00546d";
-	public static final String DEFAULT_ICON = "vaadin:book";
+	public static final String DEFAULT_ICON = "vaadin:user";
 	public static final int MAX_LENGTH_NAME = 255;
 	public static final String VIEW_NAME = "Users View";
+	@OneToMany (fetch = FetchType.LAZY)
+	@AMetaData (
+			displayName = "Activities", required = false, readOnly = true, description = "" + "List of activities created by this user",
+			hidden = true, order = 100, dataProviderBean = "content", dataProviderMethod = "getActivitiesForCurrentUser"
+	)
+	private List<CActivity> activities;
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "company_id", nullable = true)
 	@AMetaData (
@@ -140,6 +147,8 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 		return super.equals(o);
 	}
 
+	public List<CActivity> getActivities() { return activities; }
+
 	@Override
 	public Class<?> getClassName() { // TODO Auto-generated method stub
 		return CUser.class;
@@ -240,6 +249,8 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 			projectSettings.setUser(null);
 		}
 	}
+
+	public void setActivities(List<CActivity> activities) { this.activities = activities; }
 
 	public void setCompany(final CCompany company, CUserCompanyRole companyRole) {
 		this.company = company;
