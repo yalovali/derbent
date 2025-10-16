@@ -110,7 +110,10 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 	private List<CUserProjectSettings> projectSettings = new ArrayList<>();
 	@ManyToOne (fetch = FetchType.EAGER)
 	@JoinColumn (name = "cusertype_id", nullable = true)
-	@AMetaData (displayName = "User Type", required = false, readOnly = false, description = "Type category of the user", hidden = false, order = 9)
+	@AMetaData (
+			displayName = "User Type", required = false, readOnly = false, description = "Type category of the user", hidden = false, order = 9,
+			dataProviderBean = "CUserTypeService"
+	)
 	private CUserType userType;
 
 	/** Default constructor for JPA. */
