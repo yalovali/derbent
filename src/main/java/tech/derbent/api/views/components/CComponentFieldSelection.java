@@ -12,13 +12,11 @@ import com.vaadin.flow.component.HasValueAndElement;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.domains.CEntityNamed;
-import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 
 /** Generic field selection component for selecting and ordering items from a source list. This component provides a two-panel interface with
@@ -44,21 +42,18 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentFieldSelection.class);
 	private static final String DEFAULT_LIST_HEIGHT = "250px";
-	// UI Components
 	private CButton addButton;
 	private ListBox<DetailEntity> availableList;
 	private CButton downButton;
 	private CButton removeButton;
 	private ListBox<DetailEntity> selectedList;
 	private CButton upButton;
-	// Data
 	private final List<DetailEntity> sourceItems = new ArrayList<>();
 	private final List<DetailEntity> selectedItems = new ArrayList<>();
+	private final List<DetailEntity> notselectedItems = new ArrayList<>();
 	private Set<DetailEntity> currentValue = new LinkedHashSet<>();
 	private boolean readOnly = false;
-	// Display configuration
 	private ItemLabelGenerator<DetailEntity> itemLabelGenerator = Object::toString;
-	// Event handling
 	private final List<ValueChangeListener<? super ValueChangeEvent<Set<DetailEntity>>>> listeners = new ArrayList<>();
 
 	/** Creates a new field selection component with default titles. */
@@ -336,7 +331,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	/** Sets the available items to choose from.
 	 * @param items List of items (can be null, will be treated as empty list)
 	 * @throws IllegalStateException if refresh fails */
-	public void setItems(List<DetailEntity> items) {
+	public void setSourceItems(List<DetailEntity> items) {
 		try {
 			sourceItems.clear();
 			if (items != null) {
@@ -344,8 +339,8 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			}
 			refreshLists();
 		} catch (Exception e) {
-			LOGGER.error("Failed to set items in field selection", e);
-			throw new IllegalStateException("Failed to set items", e);
+			LOGGER.error("Failed to set source items:" + e.getMessage());
+			throw e;
 		}
 	}
 
@@ -359,8 +354,8 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			configureColorAwareRenderer(availableList);
 			configureColorAwareRenderer(selectedList);
 		} catch (Exception e) {
-			LOGGER.error("Failed to set item label generator", e);
-			throw new IllegalStateException("Failed to set item label generator", e);
+			LOGGER.error("Failed to set item label generator:" + e.getMessage());
+			throw e;
 		}
 	}
 
@@ -379,8 +374,8 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			}
 			refreshLists();
 		} catch (Exception e) {
-			LOGGER.error("Failed to set selected items", e);
-			throw new IllegalStateException("Failed to set selected items", e);
+			LOGGER.error("Failed to set selected items:" + e.getMessage());
+			throw e;
 		}
 	}
 
@@ -402,8 +397,8 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			}
 			refreshLists();
 		} catch (Exception e) {
-			LOGGER.error("Failed to set value", e);
-			throw new IllegalStateException("Failed to set value", e);
+			LOGGER.error("Failed to set value:" + e.getMessage());
+			throw e;
 		}
 	}
 
@@ -466,8 +461,8 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			selectedItems.clear();
 			refreshLists();
 		} catch (Exception e) {
-			LOGGER.error("Failed to clear selected items", e);
-			throw new IllegalStateException("Failed to clear items", e);
+			LOGGER.error("Failed to clear selected items:" + e.getMessage());
+			throw e;
 		}
 	}
 }

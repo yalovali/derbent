@@ -10,6 +10,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import tech.derbent.activities.domain.CActivity;
@@ -34,9 +35,10 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 	public static final int MAX_LENGTH_NAME = 255;
 	public static final String VIEW_NAME = "Users View";
 	@OneToMany (fetch = FetchType.LAZY)
+	@OrderColumn (name = "item_index")
 	@AMetaData (
 			displayName = "Activities", required = false, readOnly = true, description = "" + "List of activities created by this user",
-			hidden = true, order = 100, dataProviderBean = "content", dataProviderMethod = "getActivitiesForCurrentUser"
+			hidden = true, order = 100, useDualListSelector = true, dataProviderBean = "CActivityService", dataProviderMethod = "listByUser"
 	)
 	private List<CActivity> activities;
 	@ManyToOne (fetch = FetchType.LAZY)

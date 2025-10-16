@@ -373,6 +373,13 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				} else {
 					component = createComboBoxMultiSelect(contentOwner, fieldInfo, binder);
 				}
+			} else if (hasDataProvider && fieldType == List.class) {
+				// Check if should use dual list selector instead of multiselect combobox
+				if (fieldInfo.isUseDualListSelector()) {
+					component = createDualListSelector2(contentOwner, fieldInfo, binder);
+				} else {
+					component = createComboBoxMultiSelect(contentOwner, fieldInfo, binder);
+				}
 			} else if (hasDataProvider || CEntityDB.class.isAssignableFrom(fieldType)) {
 				// it has a dataprovider or entity type
 				component = createComboBox(contentOwner, fieldInfo, binder);
@@ -529,7 +536,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		Check.notNull(rawList, "Items for field " + fieldInfo.getFieldName() + " of type " + fieldInfo.getJavaType());
 		// Set items as list (typed at runtime)
 		final List<DetailClass> items = rawList.stream().map(e -> (DetailClass) e).collect(Collectors.toList());
-		dualListSelector.setItems(items);
+		dualListSelector.setSourceItems(items);
 		// Bind to the field - the component now implements HasValue
 		safeBindComponent(binder, dualListSelector, fieldInfo.getFieldName(), "CComponentFieldSelection");
 		return dualListSelector;

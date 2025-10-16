@@ -20,6 +20,7 @@ import tech.derbent.api.services.IEntityOfProjectRepository;
 import tech.derbent.api.utils.Check;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.session.service.ISessionService;
+import tech.derbent.users.domain.CUser;
 
 @Service
 @PreAuthorize ("isAuthenticated()")
@@ -109,5 +110,11 @@ public class CActivityService extends CEntityOfProjectService<CActivity> impleme
 	public CActivity updateEntityStatus(final CActivity entity, final CActivityStatus newStatus) {
 		tech.derbent.api.utils.CKanbanUtils.updateEntityStatusSimple(entity, newStatus, CActivity::setStatus);
 		return save(entity);
+	}
+
+	public List<CActivity> listByUser() {
+		CUser currentUser =
+				sessionService.getActiveUser().orElseThrow(() -> new CInitializationException("No active user in session - cannot list activities"));
+		return ((IActivityRepository) repository).listByUser(currentUser);
 	}
 }

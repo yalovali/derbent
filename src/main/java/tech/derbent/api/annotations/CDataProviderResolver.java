@@ -1,7 +1,6 @@
 package tech.derbent.api.annotations;
 
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -146,10 +145,6 @@ public final class CDataProviderResolver {
 		return String.format("CDataProviderResolver - Method cache: %d entries, Bean cache: %d entries", methodCache.size(), beanCache.size());
 	}
 
-	/** Retrieves a method from cache or computes it using the supplier.
-	 * @param cacheKey       the cache key
-	 * @param methodSupplier supplier to compute the method if not cached
-	 * @return the method or null if not found */
 	private Method getMethodFromCache(final String cacheKey, final java.util.function.Supplier<Method> methodSupplier) {
 		return methodCache.computeIfAbsent(cacheKey, k -> {
 			final Method method = methodSupplier.get();
@@ -160,17 +155,6 @@ public final class CDataProviderResolver {
 		});
 	}
 
-	/** Resolves and retrieves data for a ComboBox field based on its AMetaData annotation.
-	 * <p>
-	 * This method analyzes the AMetaData annotation to determine the appropriate data source and method to call. It supports various configuration
-	 * options and fallback mechanisms.
-	 * </p>
-	 * @param <T>        the entity type for the ComboBox items
-	 * @param entityType the class type of entities to retrieve
-	 * @param metaData   the AMetaData annotation containing provider configuration
-	 * @return list of entities for the ComboBox, never null but may be empty
-	 * @throws Exception
-	 * @throws IllegalArgumentException if parameters are null */
 	public <T extends CEntityDB<T>> List<T> resolveData(IContentOwner contentOwner, final Class<T> entityType, final AMetaData metaData)
 			throws Exception {
 		Check.notNull(entityType, "Entity");
@@ -189,9 +173,9 @@ public final class CDataProviderResolver {
 		if ((metaData.dataProviderClass() != null) && (metaData.dataProviderClass() != Object.class)) {
 			return resolveDataFromClass(entityType, metaData.dataProviderClass(), metaData.dataProviderMethod());
 		}
-		// Strategy 4: Automatic resolution by naming convention
-		LOGGER.debug("Attempting automatic resolution for entity type: {}", entityType.getSimpleName());
-		return resolveDataAutomatically(entityType, metaData.dataProviderMethod());
+		throw new IllegalArgumentException(
+				"AMetaData must specify at least one of dataProviderBean, dataProviderClass, or dataProviderOwner for entity type: "
+						+ entityType.getSimpleName());
 	}
 
 	@SuppressWarnings ("unchecked")
@@ -208,81 +192,30 @@ public final class CDataProviderResolver {
 			return resolveDataFromBean((Class<T>) fieldInfo.getFieldTypeClass(), fieldInfo.getDataProviderBean(), fieldInfo.getDataProviderMethod(),
 					fieldInfo.getDataProviderParamMethod());
 		}
-		// Strategy 3: Automatic resolution by naming convention
-		LOGGER.debug("Attempting automatic resolution for entity type: {}", fieldInfo.getFieldName());
-		return resolveDataAutomatically((Class<T>) fieldInfo.getFieldTypeClass(), fieldInfo.getDataProviderMethod());
+		throw new IllegalArgumentException(
+				"EntityFieldInfo must specify at least one of dataProviderBean or dataProviderOwner for field: " + fieldInfo.getFieldName());
 	}
 
-	/** Attempts automatic resolution using naming conventions.
-	 * <p>
-	 * This method tries to find a service bean using common naming patterns:
-	 * </p>
-	 * <ul>
-	 * <li>EntityNameService (e.g., CActivityTypeService for CActivityType)</li>
-	 * <li>entityNameService (camelCase version)</li>
-	 * </ul>
-	 * @param <T>        the entity type
-	 * @param entityType the class type of entities to retrieve
-	 * @param methodName the method name to call on the bean
-	 * @return list of entities from automatically resolved service */
-	private <T extends CEntityDB<T>> List<T> resolveDataAutomatically(final Class<T> entityType, final String methodName) {
-		final String entityName = entityType.getSimpleName();
-		// Try different naming conventions for service beans
-		final String[] possibleBeanNames = {
-				entityName + "Service", Character.toLowerCase(entityName.charAt(0)) + entityName.substring(1) + "Service",
-				entityName.toLowerCase() + "Service"
-		};
-		for (final String beanName : possibleBeanNames) {
-			if (applicationContext.containsBean(beanName)) {
-				return resolveDataFromBean(entityType, beanName, methodName);
-			}
-		}
-		LOGGER.warn("No suitable service bean found for entity type: {} using automatic resolution", entityName);
-		return Collections.emptyList();
-	}
-
-	/** Resolves data using a specific Spring bean name (overload without param method).
-	 * @param <T>        the entity type
-	 * @param entityType the class type of entities to retrieve
-	 * @param beanName   the Spring bean name to use
-	 * @param methodName the method name to call on the bean
-	 * @return list of entities from the specified bean */
-	private <T extends CEntityDB<T>> List<T> resolveDataFromBean(final Class<T> entityType, final String beanName, final String methodName) {
-		return resolveDataFromBean(entityType, beanName, methodName, null);
-	}
-
-	/** Resolves data using a specific Spring bean name.
-	 * @param <T>        the entity type
-	 * @param entityType the class type of entities to retrieve
-	 * @param beanName   the Spring bean name to use
-	 * @param methodName the method name to call on the bean
-	 * @return list of entities from the specified bean */
 	private <T extends CEntityDB<T>> List<T> resolveDataFromBean(final Class<T> entityType, final String beanName, final String methodName,
-			final String paramMethodName) {
-		LOGGER.debug("Resolving data from bean '{}' using method '{}' for entity type: {}", beanName, methodName, entityType.getSimpleName());
-		Check.notBlank(beanName, "Bean name cannot be empty");
-		// Get bean from Spring context with caching
-		final Object serviceBean = getBeanFromCache(beanName, () -> {
-			Check.isTrue(applicationContext.containsBean(beanName),
-					"Bean '" + beanName + "' not found in application context of beans:" + getAvailableServiceBeans());
-			return applicationContext.getBean(beanName);
-		});
-		Check.notNull(serviceBean, "Service bean cannot be null for bean name: " + beanName);
+			final String paramMethodName) throws Exception {
 		try {
+			LOGGER.debug("Resolving data from class '{}' using method '{}' for entity type: {}", beanName, methodName, entityType.getSimpleName());
+			Check.notBlank(beanName, "Bean name cannot be empty");
+			// Get bean from Spring context with caching
+			final Object serviceBean = getBeanFromCache(beanName, () -> {
+				Check.isTrue(applicationContext.containsBean(beanName),
+						"Bean '" + beanName + "' not found in application context of beans:" + getAvailableServiceBeans());
+				return applicationContext.getBean(beanName);
+			});
+			Check.notNull(serviceBean, "Service bean cannot be null for bean name: " + beanName);
 			return callDataMethod(serviceBean, methodName, entityType, paramMethodName);
 		} catch (final Exception e) {
 			LOGGER.error("Error resolving data from bean '{}': {}", beanName, e.getMessage());
-			return Collections.emptyList();
+			throw e;
+			// return Collections.emptyList();
 		}
 	}
 
-	/** Resolves data using a specific Spring bean class type.
-	 * @param <T>          the entity type
-	 * @param entityType   the class type of entities to retrieve
-	 * @param serviceClass the Spring bean class type to use
-	 * @param methodName   the method name to call on the bean
-	 * @return list of entities from the specified bean type
-	 * @throws Exception */
 	private <T extends CEntityDB<T>> List<T> resolveDataFromClass(final Class<T> entityType, final Class<?> serviceClass, final String methodName)
 			throws Exception {
 		LOGGER.debug("Resolving data from bean class '{}' using method '{}' for entity type: {}", serviceClass.getSimpleName(), methodName,
@@ -302,24 +235,13 @@ public final class CDataProviderResolver {
 		}
 	}
 
-	/** Resolves data from the content owner (current page/context) instead of a service bean.
-	 * @param <T>             the entity type
-	 * @param entityType      the class type of entities to retrieve
-	 * @param methodName      the method name to call on the content owner
-	 * @param paramMethodName optional parameter method name
-	 * @return list of entities from the content owner method
-	 * @throws Exception */
 	private <T extends CEntityDB<T>> List<T> resolveDataFromContentOwner(IContentOwner contentOwner, final Class<T> entityType,
 			final String methodName, final String paramMethodName) throws Exception {
-		Check.notNull(entityType, "Entity type cannot be null");
-		LOGGER.debug("Resolving data from content owner {} using method '{}' for entity type: {}", contentOwner, methodName,
-				entityType.getSimpleName());
-		// Handle null content owner gracefully by returning empty list
-		if (contentOwner == null) {
-			LOGGER.error("Content owner is null, returning empty list for entity type: {}", entityType.getSimpleName());
-			return Collections.emptyList();
-		}
 		try {
+			Check.notNull(entityType, "Entity type cannot be null");
+			LOGGER.debug("Resolving data from content owner {} using method '{}' for entity type: {}", contentOwner, methodName,
+					entityType.getSimpleName());
+			Check.notNull(contentOwner, "Content owner cannot be null");
 			return callDataMethod(contentOwner, methodName, entityType, paramMethodName);
 		} catch (final Exception e) {
 			LOGGER.error("Error resolving data from content owner.");
@@ -327,14 +249,6 @@ public final class CDataProviderResolver {
 		}
 	}
 
-	/** Attempts to call a method with Pageable parameter.
-	 * @param <T>         the entity type
-	 * @param serviceBean the service bean
-	 * @param methodName  the method name to call
-	 * @param entityType  the entity type for caching
-	 * @param param       optional parameter to pass to the method
-	 * @return list of entities or null if method not found/failed
-	 * @throws Exception */
 	@SuppressWarnings ("unchecked")
 	private <T extends CEntityDB<T>> List<T> tryMethodWithPageable(final Object serviceBean, final String methodName, final Class<T> entityType,
 			final String param) throws Exception {
@@ -422,6 +336,7 @@ public final class CDataProviderResolver {
 			LOGGER.debug("Failed to call method '{}' with no parameters: {}", methodName, e.getMessage());
 			throw e;
 		}
+		Check.fail("No suitable method found for bean: " + serviceBean.getClass().getSimpleName() + " with method name: " + methodName);
 		return null;
 	}
 }
