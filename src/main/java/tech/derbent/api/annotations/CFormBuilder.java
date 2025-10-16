@@ -507,7 +507,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	private static <EntityClass, DetailClass> CComponentFieldSelection<EntityClass, DetailClass> createDualListSelector2(IContentOwner contentOwner,
 			final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) throws Exception {
 		Check.notNull(fieldInfo, "FieldInfo for DualListSelector creation");
-		LOGGER.debug("Creating CDualListSelectorComponent for field: {}", fieldInfo.getFieldName());
+		LOGGER.debug("Creating CComponentFieldSelection for field: {}", fieldInfo.getFieldName());
 		final CComponentFieldSelection<EntityClass, DetailClass> dualListSelector = new CComponentFieldSelection<EntityClass, DetailClass>(
 				"Available " + fieldInfo.getDisplayName(), "Selected " + fieldInfo.getDisplayName());
 		// Set item label generator based on entity type
@@ -530,8 +530,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		// Set items as list (typed at runtime)
 		final List<DetailClass> items = rawList.stream().map(e -> (DetailClass) e).collect(Collectors.toList());
 		dualListSelector.setItems(items);
-		// Bind to the field
-		// safeBindComponent(binder, dualListSelector, fieldInfo.getFieldName(), "DualListSelector");
+		// Bind to the field - the component now implements HasValue
+		safeBindComponent(binder, dualListSelector, fieldInfo.getFieldName(), "CComponentFieldSelection");
 		return dualListSelector;
 	}
 
