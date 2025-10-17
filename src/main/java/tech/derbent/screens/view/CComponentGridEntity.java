@@ -293,7 +293,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 							colorCell.getStyle().set("font-style", "italic");
 						}
 						return colorCell;
-					}).setHeader(displayName).setWidth("150px").setFlexGrow(0).setSortable(true).setKey(fieldName);
+					}).setHeader(CColorUtils.createStyledHeader(displayName, "#2a61Cf")).setWidth("150px").setFlexGrow(0).setSortable(true)
+							.setKey(fieldName);
 				} else {
 					// Short text fields - use addShortTextColumn
 					ValueProvider valueProvider = entity -> {
@@ -480,7 +481,8 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 				LOGGER.debug("Using regular service to load data (no project filtering)");
 				data = serviceBean.list(pageRequest).getContent();
 			}
-			grid.setItems(data != null ? data : Collections.emptyList());
+			Check.notNull(data, "Data loaded from service is null");
+			grid.setItems(data);
 		} catch (Exception e) {
 			LOGGER.error("Error loading data from service {}: {}", serviceBeanName, e.getMessage());
 			grid.setItems(Collections.emptyList());

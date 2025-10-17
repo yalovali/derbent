@@ -32,10 +32,10 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 			final CAbstractService<MasterClass> entityService, ISessionService sessionService, final ApplicationContext applicationContext) {
 		super(title, entityClass, CUserProjectSettings.class, entityService, applicationContext.getBean(CUserProjectSettingsService.class),
 				sessionService, applicationContext);
-		this.userProjectSettingsService = applicationContext.getBean(CUserProjectSettingsService.class);
-		this.projectService = applicationContext.getBean(CProjectService.class);
-		this.userTypeService = applicationContext.getBean(CUserTypeService.class);
-		this.companyService = applicationContext.getBean(CCompanyService.class);
+		userProjectSettingsService = applicationContext.getBean(CUserProjectSettingsService.class);
+		projectService = applicationContext.getBean(CProjectService.class);
+		userTypeService = applicationContext.getBean(CUserTypeService.class);
+		companyService = applicationContext.getBean(CCompanyService.class);
 	}
 
 	@Override
@@ -120,7 +120,7 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 						LOGGER.error("Failed to create project component.");
 						return new com.vaadin.flow.component.html.Span(getDisplayText(settings, "project"));
 					}
-				}).setHeader(createStyledHeader("Project", "#2E7D32")).setAutoWidth(true).setSortable(true);
+				}).setHeader(CColorUtils.createStyledHeader("Project", "#2E7D32")).setAutoWidth(true).setSortable(true);
 			} else {
 				// Project-centric: Project->User
 				grid.addComponentColumn(settings -> {
@@ -130,11 +130,11 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 						LOGGER.error("Failed to create user component.");
 						return new com.vaadin.flow.component.html.Span(getDisplayText(settings, "user"));
 					}
-				}).setHeader(createStyledHeader("User", "#1565C0")).setAutoWidth(true).setSortable(true);
+				}).setHeader(CColorUtils.createStyledHeader("User", "#1565C0")).setAutoWidth(true).setSortable(true);
 			}
-			grid.addColumn(settings -> getDisplayText(settings, "role")).setHeader(createStyledHeader("Role", "#F57F17")).setAutoWidth(true)
-					.setSortable(true);
-			grid.addColumn(settings -> getDisplayText(settings, "permission")).setHeader(createStyledHeader("Permissions", "#8E24AA"))
+			grid.addColumn(settings -> getDisplayText(settings, "role")).setHeader(CColorUtils.createStyledHeader("Role", "#F57F17"))
+					.setAutoWidth(true).setSortable(true);
+			grid.addColumn(settings -> getDisplayText(settings, "permission")).setHeader(CColorUtils.createStyledHeader("Permissions", "#8E24AA"))
 					.setAutoWidth(true).setSortable(true);
 		} catch (Exception e) {
 			LOGGER.error("Failed to setup grid.");

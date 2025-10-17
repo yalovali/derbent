@@ -15,8 +15,6 @@ import tech.derbent.session.service.ISessionService;
 @Transactional (readOnly = true)
 public class CApprovalStatusService extends CStatusService<CApprovalStatus> {
 
-	private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CApprovalStatusService.class);
-
 	CApprovalStatusService(final IApprovalStatusRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 	}

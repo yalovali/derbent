@@ -24,8 +24,6 @@ import tech.derbent.users.domain.CUser;
 
 public final class CColorUtils {
 
-	private static final String DEFAULT_ICON_MARGIN = "6px";
-	private static final String DEFAULT_ICON_SIZE = "16px";
 	/** Color for Cancel buttons */
 	public static final String CRUD_CANCEL_COLOR = "#6c757d";
 	/** Icon for Cancel buttons */
@@ -64,9 +62,20 @@ public final class CColorUtils {
 	public static final String DEFAULT_COLOR = "#95a5a6";
 	/** Default text color for light backgrounds */
 	public static final String DEFAULT_DARK_TEXT = "black";
+	private static final String DEFAULT_ICON_MARGIN = "6px";
+	private static final String DEFAULT_ICON_SIZE = "16px";
 	/** Default text color for dark backgrounds */
 	public static final String DEFAULT_LIGHT_TEXT = "white";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CColorUtils.class);
+
+	public static Span createStyledHeader(String text, String color) {
+		Span header = new Span(text);
+		header.getStyle().set("color", color);
+		header.getStyle().set("font-weight", "bold");
+		header.getStyle().set("font-size", "14px");
+		header.getStyle().set("text-transform", "uppercase");
+		return header;
+	}
 
 	public static Icon createStyledIcon(final String iconString) {
 		Check.notBlank(iconString, "Icon string cannot be null or blank");
@@ -80,32 +89,6 @@ public final class CColorUtils {
 		Check.notNull(icon, "Icon cannot be null");
 		Check.notBlank(color, "Color cannot be null or blank");
 		icon.getStyle().set("color", color);
-		return icon;
-	}
-
-	public static Icon setIconClassSize(Icon icon, String iconSizeClass) {
-		if (icon == null) {
-			return null;
-		}
-		// clear old styles
-		icon.getStyle().remove("width");
-		icon.getStyle().remove("height");
-		icon.getStyle().remove("min-width");
-		icon.getStyle().remove("min-height");
-		switch (iconSizeClass) {
-		case IconSize.MEDIUM:
-			icon.getStyle().set("min-width", "24px").set("min-height", "24px");
-			break;
-		case IconSize.LARGE:
-			icon.getStyle().set("min-width", "32px").set("min-height", "32px");
-			break;
-		case IconSize.SMALL:
-			icon.getStyle().set("min-width", "16px").set("min-height", "16px");
-			break;
-		default:
-			throw new IllegalArgumentException("Invalid icon size class: " + iconSizeClass);
-		}
-		icon.addClassNames(iconSizeClass);
 		return icon;
 	}
 
@@ -123,6 +106,15 @@ public final class CColorUtils {
 			String value = component.getElement().getStyle().get(style);
 			LOGGER.debug("  Style: {} = {}", style, value);
 		});
+	}
+
+	/** Helper to calculate brightness (0 = dark, 1 = bright) */
+	private static double getBrightness(String hex) {
+		int r = Integer.parseInt(hex.substring(1, 3), 16);
+		int g = Integer.parseInt(hex.substring(3, 5), 16);
+		int b = Integer.parseInt(hex.substring(5, 7), 16);
+		// relative luminance formula (per W3C)
+		return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255.0;
 	}
 
 	public static String getColorFromEntity(final CEntity<?> entity) throws Exception {
@@ -185,6 +177,33 @@ public final class CColorUtils {
 		return item.toString();
 	}
 
+	public static HorizontalLayout getEntityWithIcon(final CEntityNamed<?> entity) {
+		Check.notNull(entity, "Entity cannot be null when creating entity with icon display");
+		final HorizontalLayout layout = new HorizontalLayout();
+		layout.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
+		layout.setSpacing(true);
+		try {
+			// Get the entity's icon using the existing infrastructure
+			final Icon icon = getIconForEntity(entity);
+			if (icon != null) {
+				icon.setSize("24px");
+				layout.add(icon);
+			}
+		} catch (final Exception e) {
+			LOGGER.warn("Could not create icon for entity {}: {}", entity.getClass().getSimpleName(), e.getMessage());
+			// Continue without icon rather than failing completely
+		}
+		// Add entity name - for Users, include lastname if available
+		String displayName = entity.getName();
+		if (entity instanceof CUser) {
+			final CUser user = (CUser) entity;
+			displayName = user.getName() + " " + (user.getLastname() != null ? user.getLastname() : "");
+		}
+		final Span entityName = new Span(displayName);
+		layout.add(entityName);
+		return layout;
+	}
+
 	public static Icon getIconForEntity(final CEntityDB<?> entity) throws Exception {
 		Icon icon = new Icon(getStaticIconFilename(entity.getClass().getName()));
 		return styleIcon(icon);
@@ -210,20 +229,6 @@ public final class CColorUtils {
 		return color;
 	}
 
-	public static String getRouteForView(final Class<? extends CAbstractNamedEntityPage<?>> clazz) {
-		return Optional.ofNullable(clazz.getAnnotation(Route.class)).map(Route::value).filter(s -> !s.isBlank()) // boş string durumunu da kontrol et
-				.orElseThrow(() -> new IllegalArgumentException("Missing @Route on " + clazz.getSimpleName()));
-	}
-
-	public static String getStaticIconColorCode(final Class<?> clazz) throws Exception {
-		try {
-			return getStaticStringValue(clazz, "DEFAULT_COLOR");
-		} catch (Exception e) {
-			LOGGER.error("Error getting static icon filename for class {}: {}", clazz.getSimpleName(), e.getMessage());
-			throw e;
-		}
-	}
-
 	public static String getRandomFromWebColors(boolean dark) {
 		final List<String> colors = getWebColors();
 		// Filter colors based on brightness
@@ -244,53 +249,18 @@ public final class CColorUtils {
 		return filtered.get(index);
 	}
 
-	/** Helper to calculate brightness (0 = dark, 1 = bright) */
-	private static double getBrightness(String hex) {
-		int r = Integer.parseInt(hex.substring(1, 3), 16);
-		int g = Integer.parseInt(hex.substring(3, 5), 16);
-		int b = Integer.parseInt(hex.substring(5, 7), 16);
-		// relative luminance formula (per W3C)
-		return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255.0;
+	public static String getRouteForView(final Class<? extends CAbstractNamedEntityPage<?>> clazz) {
+		return Optional.ofNullable(clazz.getAnnotation(Route.class)).map(Route::value).filter(s -> !s.isBlank()) // boş string durumunu da kontrol et
+				.orElseThrow(() -> new IllegalArgumentException("Missing @Route on " + clazz.getSimpleName()));
 	}
 
-	public static List<String> getWebColors() {
-		// Common hex color constants for color picker
-		final List<String> colors = new ArrayList<>();
-		colors.add("#F0F8FF"); // AliceBlue
-		colors.add("#FAEBD7"); // AntiqueWhite
-		colors.add("#00FFFF"); // Aqua
-		colors.add("#7FFFD4"); // Aquamarine
-		colors.add("#F0FFFF"); // Azure
-		colors.add("#F5F5DC"); // Beige
-		colors.add("#FFE4C4"); // Bisque
-		colors.add("#000000"); // Black
-		colors.add("#FFEBCD"); // BlanchedAlmond
-		colors.add("#0000FF"); // Blue
-		colors.add("#8A2BE2"); // BlueViolet
-		colors.add("#A52A2A"); // Brown
-		colors.add("#DEB887"); // BurlyWood
-		colors.add("#5F9EA0"); // CadetBlue
-		colors.add("#7FFF00"); // Chartreuse
-		colors.add("#D2691E"); // Chocolate
-		colors.add("#FF7F50"); // Coral
-		colors.add("#6495ED"); // CornflowerBlue
-		colors.add("#FFF8DC"); // Cornsilk
-		colors.add("#DC143C"); // Crimson
-		colors.add("#00FFFF"); // Cyan
-		colors.add("#00008B"); // DarkBlue
-		colors.add("#008B8B"); // DarkCyan
-		colors.add("#B8860B"); // DarkGoldenRod
-		colors.add("#A9A9A9"); // DarkGray
-		colors.add("#006400"); // DarkGreen
-		colors.add("#BDB76B"); // DarkKhaki
-		colors.add("#8B008B"); // DarkMagenta
-		colors.add("#556B2F"); // DarkOliveGreen
-		colors.add("#f39c12");
-		colors.add("#d012d7"); // DarkOrchid
-		colors.add("#e74c3c"); // DarkRed
-		colors.add("#27ae60"); // DarkSalmon
-		colors.add("#95a5a6"); // DarkSeaGreen
-		return colors;
+	public static String getStaticIconColorCode(final Class<?> clazz) throws Exception {
+		try {
+			return getStaticStringValue(clazz, "DEFAULT_COLOR");
+		} catch (Exception e) {
+			LOGGER.error("Error getting static icon filename for class {}: {}", clazz.getSimpleName(), e.getMessage());
+			throw e;
+		}
 	}
 
 	public static String getStaticIconColorCode(final String className) throws Exception {
@@ -342,6 +312,46 @@ public final class CColorUtils {
 				.orElseThrow(() -> new IllegalArgumentException("Missing @PageTitle on " + clazz.getSimpleName()));
 	}
 
+	public static List<String> getWebColors() {
+		// Common hex color constants for color picker
+		final List<String> colors = new ArrayList<>();
+		colors.add("#F0F8FF"); // AliceBlue
+		colors.add("#FAEBD7"); // AntiqueWhite
+		colors.add("#00FFFF"); // Aqua
+		colors.add("#7FFFD4"); // Aquamarine
+		colors.add("#F0FFFF"); // Azure
+		colors.add("#F5F5DC"); // Beige
+		colors.add("#FFE4C4"); // Bisque
+		colors.add("#000000"); // Black
+		colors.add("#FFEBCD"); // BlanchedAlmond
+		colors.add("#0000FF"); // Blue
+		colors.add("#8A2BE2"); // BlueViolet
+		colors.add("#A52A2A"); // Brown
+		colors.add("#DEB887"); // BurlyWood
+		colors.add("#5F9EA0"); // CadetBlue
+		colors.add("#7FFF00"); // Chartreuse
+		colors.add("#D2691E"); // Chocolate
+		colors.add("#FF7F50"); // Coral
+		colors.add("#6495ED"); // CornflowerBlue
+		colors.add("#FFF8DC"); // Cornsilk
+		colors.add("#DC143C"); // Crimson
+		colors.add("#00FFFF"); // Cyan
+		colors.add("#00008B"); // DarkBlue
+		colors.add("#008B8B"); // DarkCyan
+		colors.add("#B8860B"); // DarkGoldenRod
+		colors.add("#A9A9A9"); // DarkGray
+		colors.add("#006400"); // DarkGreen
+		colors.add("#BDB76B"); // DarkKhaki
+		colors.add("#8B008B"); // DarkMagenta
+		colors.add("#556B2F"); // DarkOliveGreen
+		colors.add("#f39c12");
+		colors.add("#d012d7"); // DarkOrchid
+		colors.add("#e74c3c"); // DarkRed
+		colors.add("#27ae60"); // DarkSalmon
+		colors.add("#95a5a6"); // DarkSeaGreen
+		return colors;
+	}
+
 	public static boolean isStatusEntity(final Class<?> entityType) {
 		Check.notNull(entityType, "entityType cannot be null");
 		try {
@@ -365,17 +375,48 @@ public final class CColorUtils {
 		}
 	}
 
-	/** Gets user initials for avatar */
-	private String getInitials(final CUser user) {
-		Check.notNull(user, "User cannot be null when generating initials");
-		final StringBuilder initials = new StringBuilder();
-		if ((user.getName() != null) && !user.getName().isEmpty()) {
-			initials.append(user.getName().charAt(0));
+	public static Icon setIconClassSize(Icon icon, String iconSizeClass) {
+		if (icon == null) {
+			return null;
 		}
-		if ((user.getLastname() != null) && !user.getLastname().isEmpty()) {
-			initials.append(user.getLastname().charAt(0));
+		// clear old styles
+		icon.getStyle().remove("width");
+		icon.getStyle().remove("height");
+		icon.getStyle().remove("min-width");
+		icon.getStyle().remove("min-height");
+		switch (iconSizeClass) {
+		case IconSize.MEDIUM:
+			icon.getStyle().set("min-width", "24px").set("min-height", "24px");
+			break;
+		case IconSize.LARGE:
+			icon.getStyle().set("min-width", "32px").set("min-height", "32px");
+			break;
+		case IconSize.SMALL:
+			icon.getStyle().set("min-width", "16px").set("min-height", "16px");
+			break;
+		default:
+			throw new IllegalArgumentException("Invalid icon size class: " + iconSizeClass);
 		}
-		return initials.length() > 0 ? initials.toString().toUpperCase() : "?";
+		icon.addClassNames(iconSizeClass);
+		return icon;
+	}
+
+	/** Applies icon styling with consistent sizing and spacing.
+	 * @param icon the icon to style */
+	public static Icon styleIcon(final Icon icon) {
+		if (icon == null) {
+			return null;
+		}
+		icon.getStyle().set("margin-right", DEFAULT_ICON_MARGIN);
+		icon.getStyle().set("width", DEFAULT_ICON_SIZE);
+		icon.getStyle().set("height", DEFAULT_ICON_SIZE);
+		icon.getStyle().set("flex-shrink", "0"); // Prevent icon from shrinking
+		return icon;
+	}
+
+	/** Private constructor to prevent instantiation. */
+	private CColorUtils() {
+		// Utility class - no instantiation
 	}
 
 	/** Creates a user avatar with profile picture if available */
@@ -391,48 +432,16 @@ public final class CColorUtils {
 		return avatar;
 	}
 
-	public static HorizontalLayout getEntityWithIcon(final CEntityNamed<?> entity) {
-		Check.notNull(entity, "Entity cannot be null when creating entity with icon display");
-		final HorizontalLayout layout = new HorizontalLayout();
-		layout.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
-		layout.setSpacing(true);
-		try {
-			// Get the entity's icon using the existing infrastructure
-			final Icon icon = getIconForEntity(entity);
-			if (icon != null) {
-				icon.setSize("24px");
-				layout.add(icon);
-			}
-		} catch (final Exception e) {
-			LOGGER.warn("Could not create icon for entity {}: {}", entity.getClass().getSimpleName(), e.getMessage());
-			// Continue without icon rather than failing completely
+	/** Gets user initials for avatar */
+	private String getInitials(final CUser user) {
+		Check.notNull(user, "User cannot be null when generating initials");
+		final StringBuilder initials = new StringBuilder();
+		if ((user.getName() != null) && !user.getName().isEmpty()) {
+			initials.append(user.getName().charAt(0));
 		}
-		// Add entity name - for Users, include lastname if available
-		String displayName = entity.getName();
-		if (entity instanceof CUser) {
-			final CUser user = (CUser) entity;
-			displayName = user.getName() + " " + (user.getLastname() != null ? user.getLastname() : "");
+		if ((user.getLastname() != null) && !user.getLastname().isEmpty()) {
+			initials.append(user.getLastname().charAt(0));
 		}
-		final Span entityName = new Span(displayName);
-		layout.add(entityName);
-		return layout;
-	}
-
-	/** Private constructor to prevent instantiation. */
-	private CColorUtils() {
-		// Utility class - no instantiation
-	}
-
-	/** Applies icon styling with consistent sizing and spacing.
-	 * @param icon the icon to style */
-	public static Icon styleIcon(final Icon icon) {
-		if (icon == null) {
-			return null;
-		}
-		icon.getStyle().set("margin-right", DEFAULT_ICON_MARGIN);
-		icon.getStyle().set("width", DEFAULT_ICON_SIZE);
-		icon.getStyle().set("height", DEFAULT_ICON_SIZE);
-		icon.getStyle().set("flex-shrink", "0"); // Prevent icon from shrinking
-		return icon;
+		return initials.length() > 0 ? initials.toString().toUpperCase() : "?";
 	}
 }

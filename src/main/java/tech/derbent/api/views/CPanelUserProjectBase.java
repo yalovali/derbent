@@ -138,9 +138,11 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 	protected void setupGrid() {
 		// Add columns for project name, roles, and permissions
 		grid.addColumn(CUserProjectSettings::getId).setHeader("ID").setAutoWidth(true);
-		grid.addComponentColumn(settings -> CColorUtils.getEntityWithIcon(settings.getUser())).setHeader("User").setAutoWidth(true);
-		grid.addColumn(CUserProjectSettings::getProjectName).setHeader("Project Name").setAutoWidth(true).setSortable(true);
-		grid.addColumn(this::getPermissionAsString).setHeader("Permission").setAutoWidth(true);
+		grid.addComponentColumn(settings -> CColorUtils.getEntityWithIcon(settings.getUser()))
+				.setHeader(CColorUtils.createStyledHeader("User", "#1565C0")).setAutoWidth(true);
+		grid.addColumn(CUserProjectSettings::getProjectName).setHeader(CColorUtils.createStyledHeader("Project Name", "#1a65C0")).setAutoWidth(true)
+				.setSortable(true);
+		grid.addColumn(this::getPermissionAsString).setHeader(CColorUtils.createStyledHeader("Permission", "#1a65Cf")).setAutoWidth(true);
 		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
 		addToContent(grid);
 	}

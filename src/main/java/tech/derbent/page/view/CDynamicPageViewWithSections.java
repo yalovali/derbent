@@ -191,7 +191,7 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 			}
 			return newEntity;
 		} catch (final Exception e) {
-			LOGGER.error("Error creating new entity instance for type: {}", entityClass.getSimpleName(), e);
+			LOGGER.error("Error creating new entity instance for type: {} - {}", entityClass.getSimpleName(), e.getMessage());
 			throw e;
 		}
 	}
@@ -231,7 +231,7 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 			Check.notNull(entityClass, "Entity class not found for type: " + detailSection.getEntityType());
 			Check.isTrue(CEntityDB.class.isAssignableFrom(entityClass), "Entity class does not extend CEntityDB: " + entityClass);
 		} catch (final Exception e) {
-			LOGGER.error("Failed to initialize entity service for entity type", e);
+			LOGGER.error("Failed to initialize entity service for entity type: {}", e.getMessage());
 			throw e;
 		}
 	}
@@ -255,7 +255,7 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 			splitBottomLayout.addComponentAsFirst(crudToolbar);
 			grid.selectNextItem();
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing dynamic page view", e);
+			LOGGER.error("Error initializing dynamic page view:" + e.getMessage());
 			throw e;
 		}
 	}
@@ -274,7 +274,7 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 			setCurrentEntity(entity);
 			populateForm();
 		} catch (final Exception e) {
-			LOGGER.error("Error handling entity created notification");
+			LOGGER.error("Error handling entity created notification:" + e.getMessage());
 			throw e;
 		}
 	}
@@ -290,7 +290,7 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 			clearEntityDetails();
 			grid.selectNextItem();
 		} catch (final Exception e) {
-			LOGGER.error("Error handling entity deleted notification", e);
+			LOGGER.error("Error handling entity deleted notification:" + e.getMessage());
 			throw e;
 		}
 	}
@@ -304,7 +304,7 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 			refreshGrid();
 			grid.selectEntity(entity);
 		} catch (final Exception e) {
-			LOGGER.error("Error handling entity saved notification", e);
+			LOGGER.error("Error handling entity saved notification:" + e.getMessage());
 			throw e;
 		}
 	}
@@ -330,7 +330,7 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 				populateForm();
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error handling entity selection", e);
+			LOGGER.error("Error handling entity selection:" + e.getMessage());
 			throw e;
 		}
 	}
@@ -372,7 +372,7 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 				crudToolbar.setCurrentEntity(entity);
 			}
 		} catch (final Exception e) {
-			LOGGER.error("Error setting current entity in toolbar", e);
+			LOGGER.error("Error setting current entity in toolbar:" + e.getMessage());
 			throw e;
 		}
 	}
