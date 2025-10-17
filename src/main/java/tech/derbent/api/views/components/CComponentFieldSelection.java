@@ -215,6 +215,21 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		return grid;
 	}
 
+	/** Creates a consistently styled header with color coding. Follows the same pattern as CComponentRelationPanelBase for visual consistency across
+	 * the application.
+	 * @param text  The header text
+	 * @param color The color for the header (hex format like "#1976D2")
+	 * @return Styled Span component */
+	private Span createStyledHeader(String text, String color) {
+		Span header = new Span(text);
+		header.getStyle().set("color", color);
+		header.getStyle().set("font-weight", "bold");
+		header.getStyle().set("font-size", "14px");
+		header.getStyle().set("text-transform", "uppercase");
+		header.getStyle().set("margin-bottom", "8px");
+		return header;
+	}
+
 	/** Initializes the UI components with proper validation and configuration.
 	 * @param availableTitle Title for available items panel
 	 * @param selectedTitle  Title for selected items panel */
@@ -229,11 +244,9 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		CVerticalLayout rightLayout = new CVerticalLayout(false, false, false);
 		leftLayout.setWidth("50%");
 		rightLayout.setWidth("50%");
-		// Add titles
-		CDiv availableHeader = new CDiv(availableTitle);
-		availableHeader.getStyle().set("font-weight", "bold").set("margin-bottom", "8px");
-		CDiv selectedHeader = new CDiv(selectedTitle);
-		selectedHeader.getStyle().set("font-weight", "bold").set("margin-bottom", "8px");
+		// Add styled headers with colors (consistent with CComponentRelationPanelBase pattern)
+		Span availableHeader = createStyledHeader(availableTitle, "#1976D2");
+		Span selectedHeader = createStyledHeader(selectedTitle, "#388E3C");
 		leftLayout.add(availableHeader);
 		rightLayout.add(selectedHeader);
 		// Create and configure grids using common setup method
