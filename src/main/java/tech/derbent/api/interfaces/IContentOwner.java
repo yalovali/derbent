@@ -7,6 +7,7 @@ package tech.derbent.api.interfaces;
 public interface IContentOwner {
 
 	Object getCurrentEntity();
-	void setCurrentEntity(Object entity);
+	String getCurrentEntityIdString();
 	void populateForm() throws Exception;
+	void setCurrentEntity(Object entity);
 }

@@ -21,17 +21,19 @@ public @interface AMetaData {
 
 	boolean comboboxReadOnly() default false;
 
+	String createComponentMethod() default "";
+
 	String dataProviderBean() default "";
 
 	Class<?> dataProviderClass() default Object.class;
 
 	String dataProviderMethod() default "list";
 
-	String dataProviderParamMethod() default "";
-
-	/** Indicates that the data provider should call a method on the content owner (page) instead of a service bean. Use "content" to call methods on
-	 * the current page/context. */
 	String dataProviderOwner() default "";
+
+	String dataProviderParamBean() default "";
+
+	String dataProviderParamMethod() default "";
 
 	String dataUpdateMethod() default "";
 
@@ -42,8 +44,6 @@ public @interface AMetaData {
 	String displayName() default "Field";
 
 	String filterMethod() default "";
-
-	String createComponentMethod() default "";
 
 	boolean hidden() default false;
 
@@ -69,13 +69,13 @@ public @interface AMetaData {
 
 	boolean setBackgroundFromColor() default false;
 
-	boolean useIcon() default false;
-
-	boolean useRadioButtons() default false;
-
 	/** When true, uses a dual list selector component (available/selected lists with add/remove/ordering buttons) instead of MultiSelectComboBox for
 	 * Set fields. This provides a better UX for selecting and ordering multiple items. */
 	boolean useDualListSelector() default false;
+
+	boolean useIcon() default false;
+
+	boolean useRadioButtons() default false;
 
 	String width() default "";
 }

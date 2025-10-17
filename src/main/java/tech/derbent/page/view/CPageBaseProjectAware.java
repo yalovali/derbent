@@ -100,6 +100,19 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 	public Object getCurrentEntity() { return currentEntity; }
 
 	@Override
+	public String getCurrentEntityIdString() {
+		LOGGER.debug("Getting current entity ID string for page.");
+		if (currentEntity == null) {
+			return null;
+		}
+		if (currentEntity instanceof CEntityDB<?>) {
+			final CEntityDB<?> entity = (CEntityDB<?>) currentEntity;
+			return entity.getId().toString();
+		}
+		return null;
+	}
+
+	@Override
 	protected void onAttach(final AttachEvent attachEvent) {
 		super.onAttach(attachEvent);
 		// Register this component to receive project change notifications

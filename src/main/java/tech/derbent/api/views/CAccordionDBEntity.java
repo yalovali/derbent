@@ -12,10 +12,10 @@ import tech.derbent.api.views.components.CAccordion;
 public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityClass>> extends CAccordion implements IContentOwner {
 
 	private static final long serialVersionUID = 1L;
-	protected final Class<EntityClass> entityClass;
 	private final CEnhancedBinder<EntityClass> binder;
-	protected CAbstractService<EntityClass> entityService;
+	protected final Class<EntityClass> entityClass;
 	private List<String> EntityFields = null;
+	protected CAbstractService<EntityClass> entityService;
 	private boolean isPanelInitialized = false;
 	protected IContentOwner parentContent;
 
@@ -23,7 +23,7 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 			final Class<EntityClass> entityClass, final CAbstractService<EntityClass> entityService) {
 		super(title);
 		this.entityClass = entityClass;
-		this.binder = beanValidationBinder;
+		binder = beanValidationBinder;
 		this.entityService = entityService;
 		this.parentContent = parentContent;
 	}
@@ -48,17 +48,12 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 	public EntityClass getCurrentEntity() { return (EntityClass) parentContent.getCurrentEntity(); }
 
 	@Override
-	public void setCurrentEntity(Object entity) {
-		// NOT USED
+	public String getCurrentEntityIdString() {
+		LOGGER.debug("Getting current entity ID string for accordion: {}", getAccordionTitle());
+		return getCurrentEntity() != null ? getCurrentEntity().getId().toString() : null;
 	}
 
-	@Override
-	public void populateForm() throws Exception {
-		// Delegate to parent content owner
-		if (parentContent != null) {
-			parentContent.populateForm();
-		}
-	}
+	public List<String> getEntityFields() { return EntityFields; }
 
 	/** Override this method in subclasses to provide local context values specific to this accordion panel.
 	 * @param contextName the context name to resolve
@@ -68,13 +63,19 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 		return null;
 	}
 
-	public List<String> getEntityFields() { return EntityFields; }
-
 	protected void initPanel() throws Exception {
 		updatePanelEntityFields();
 		createPanelContent();
 		openPanel();
 		isPanelInitialized = true;
+	}
+
+	@Override
+	public void populateForm() throws Exception {
+		// Delegate to parent content owner
+		if (parentContent != null) {
+			parentContent.populateForm();
+		}
 	}
 
 	public void populateForm(final EntityClass entity) {
@@ -91,6 +92,11 @@ public abstract class CAccordionDBEntity<EntityClass extends CEntityDB<EntityCla
 
 	// used if there is a specific save logic for the entity
 	public void saveEventHandler() {}
+
+	@Override
+	public void setCurrentEntity(Object entity) {
+		// NOT USED
+	}
 
 	protected void setEntityFields(final List<String> fields) { EntityFields = fields; }
 

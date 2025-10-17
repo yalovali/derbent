@@ -258,6 +258,13 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	@Override
 	public EntityClass getCurrentEntity() { return currentEntity; }
 
+	@Override
+	public String getCurrentEntityIdString() {
+		LOGGER.debug("Getting current entity ID string for entity class: {}", entityClass.getSimpleName());
+		final EntityClass entity = getCurrentEntity();
+		return entity != null ? entity.getId().toString() : null;
+	}
+
 	public Div getDetailsTabLayout() { return detailsTabLayout; }
 
 	public Class<EntityClass> getEntityClass() { return entityClass; }

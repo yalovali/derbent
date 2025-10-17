@@ -61,6 +61,13 @@ public abstract class CComponentDBEntity<EntityClass extends CEntityDB<EntityCla
 	@Override
 	public EntityClass getCurrentEntity() { return currentEntity; }
 
+	@Override
+	public String getCurrentEntityIdString() {
+		LOGGER.debug("Getting current entity ID string for entity class: {}", entityClass.getSimpleName());
+		final EntityClass entity = getCurrentEntity();
+		return entity != null ? entity.getId().toString() : null;
+	}
+
 	public Class<EntityClass> getEntityClass() { return entityClass; }
 
 	public List<String> getEntityFields() {

@@ -35,6 +35,7 @@ public class CEntityFieldService {
 		private String dataProviderBean = "";
 		private String dataProviderMethod = "";
 		private String dataProviderOwner = "";
+		private String dataProviderParamBean = "";
 		private String dataProviderParamMethod = "";
 		private String dataUpdateMethod = "";
 		private String defaultValue = "";
@@ -67,6 +68,8 @@ public class CEntityFieldService {
 		public String getDataProviderMethod() { return dataProviderMethod; }
 
 		public String getDataProviderOwner() { return dataProviderOwner; }
+
+		public String getDataProviderParamBean() { return dataProviderParamBean; }
 
 		public String getDataProviderParamMethod() { return dataProviderParamMethod; }
 
@@ -144,6 +147,8 @@ public class CEntityFieldService {
 		public void setDataProviderMethod(final String dataProviderMethod) { this.dataProviderMethod = dataProviderMethod; }
 
 		public void setDataProviderOwner(final String dataProviderOwner) { this.dataProviderOwner = dataProviderOwner; }
+
+		public void setDataProviderParamBean(final String dataProviderParamBean) { this.dataProviderParamBean = dataProviderParamBean; }
 
 		public void setDataProviderParamMethod(final String dataProviderParamMethod) { this.dataProviderParamMethod = dataProviderParamMethod; }
 
@@ -225,6 +230,7 @@ public class CEntityFieldService {
 			info.setDataProviderOwner(metaData.dataProviderOwner());
 			info.setDataProviderMethod(metaData.dataProviderMethod());
 			info.setDataProviderParamMethod(metaData.dataProviderParamMethod());
+			info.setDataProviderParamBean(metaData.dataProviderParamBean());
 			info.setAutoSelectFirst(metaData.autoSelectFirst());
 			info.setPlaceholder(metaData.placeholder());
 			info.setAllowCustomValue(metaData.allowCustomValue());
