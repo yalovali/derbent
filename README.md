@@ -123,6 +123,7 @@ mvn spring-boot:run -Dspring.profiles.active=h2
 | **[🔧 Utility Patterns](docs/utility-patterns.md)** | Helper classes and common patterns | All Developers |
 | **[🔐 Company Login Pattern](docs/implementation/COMPANY_LOGIN_PATTERN.md)** | Multi-tenant authentication implementation | Backend/Security |
 | **[🎭 Playwright Test Guide](docs/implementation/PLAYWRIGHT_TEST_GUIDE.md)** | Comprehensive UI testing framework | QA/Test Engineers |
+| **[🔍 Database Query Debugging](docs/DATABASE_QUERY_DEBUGGING.md)** | SQL query monitoring and debugging guide | Backend Developers |
 
 <div align="center">
 
