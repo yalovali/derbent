@@ -53,6 +53,15 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 		}
 	}
 
+	public static <T> void setupGrid(final Grid<T> grid) {
+		Check.notNull(grid, "Grid cannot be null when setting up relational component");
+		grid.setSelectionMode(Grid.SelectionMode.SINGLE);
+		grid.getStyle().set("border-radius", "8px");
+		grid.getStyle().set("border", "1px solid #E0E0E0");
+		grid.setWidthFull();
+		CAuxillaries.setId(grid);
+	}
+
 	/** Constructor for CGrid with entity class.
 	 * @param entityClass The entity class for the grid */
 	Class<EntityClass> clazz;
@@ -185,6 +194,39 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 		return addCustomColumn(valueProvider, header, WIDTH_DECIMAL, key, 0);
 	}
 
+	/** Adds an editable image column using CPictureSelector in icon mode. Clicking on the profile picture opens a dialog for editing.
+	 * @param imageDataProvider Provider that returns byte array of image data
+	 * @param imageDataSetter   Setter function to update the image data when changed
+	 * @param header            Column header text
+	 * @param fieldDisplayName  Display name for the field (used in edit dialog)
+	 * @return The created column */
+	public Column<EntityClass> addEditableImageColumn(final ValueProvider<EntityClass, byte[]> imageDataProvider,
+			final java.util.function.BiConsumer<EntityClass, byte[]> imageDataSetter, final String header, final String fieldDisplayName) {
+		final Column<EntityClass> column = addComponentColumn(entity -> {
+			// Create field info for the picture selector
+			EntityFieldInfo fieldInfo = new EntityFieldInfo();
+			fieldInfo.setFieldName("imageData");
+			fieldInfo.setDisplayName(fieldDisplayName);
+			fieldInfo.setDescription("Click to edit " + fieldDisplayName.toLowerCase());
+			fieldInfo.setImageData(true);
+			fieldInfo.setWidth("40px");
+			fieldInfo.setReadOnly(false);
+			// Create CPictureSelector in icon mode
+			CPictureSelector selector = new CPictureSelector(fieldInfo, true);
+			// Set current value
+			final byte[] imageData = imageDataProvider.apply(entity);
+			selector.setValue(imageData);
+			// Add value change listener to update the entity
+			selector.addValueChangeListener(event -> {
+				if (imageDataSetter != null) {
+					imageDataSetter.accept(entity, event.getValue());
+				}
+			});
+			return selector;
+		}).setHeader(header).setWidth(WIDTH_IMAGE).setFlexGrow(0).setSortable(false);
+		return column;
+	}
+
 	@SuppressWarnings ("unchecked")
 	public Column<EntityClass> addEntityColumn(final ValueProvider<EntityClass, ?> valueProvider, final String header, final String key) {
 		Check.notNull(valueProvider, "Value provider cannot be null");
@@ -276,39 +318,6 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 				image.setSrc(CImageUtils.getDefaultProfilePictureDataUrl());
 			}
 			return image;
-		}).setHeader(header).setWidth(WIDTH_IMAGE).setFlexGrow(0).setSortable(false);
-		return column;
-	}
-
-	/** Adds an editable image column using CPictureSelector in icon mode. Clicking on the profile picture opens a dialog for editing.
-	 * @param imageDataProvider Provider that returns byte array of image data
-	 * @param imageDataSetter   Setter function to update the image data when changed
-	 * @param header            Column header text
-	 * @param fieldDisplayName  Display name for the field (used in edit dialog)
-	 * @return The created column */
-	public Column<EntityClass> addEditableImageColumn(final ValueProvider<EntityClass, byte[]> imageDataProvider,
-			final java.util.function.BiConsumer<EntityClass, byte[]> imageDataSetter, final String header, final String fieldDisplayName) {
-		final Column<EntityClass> column = addComponentColumn(entity -> {
-			// Create field info for the picture selector
-			EntityFieldInfo fieldInfo = new EntityFieldInfo();
-			fieldInfo.setFieldName("imageData");
-			fieldInfo.setDisplayName(fieldDisplayName);
-			fieldInfo.setDescription("Click to edit " + fieldDisplayName.toLowerCase());
-			fieldInfo.setImageData(true);
-			fieldInfo.setWidth("40px");
-			fieldInfo.setReadOnly(false);
-			// Create CPictureSelector in icon mode
-			CPictureSelector selector = new CPictureSelector(fieldInfo, true);
-			// Set current value
-			final byte[] imageData = imageDataProvider.apply(entity);
-			selector.setValue(imageData);
-			// Add value change listener to update the entity
-			selector.addValueChangeListener(event -> {
-				if (imageDataSetter != null) {
-					imageDataSetter.accept(entity, event.getValue());
-				}
-			});
-			return selector;
 		}).setHeader(header).setWidth(WIDTH_IMAGE).setFlexGrow(0).setSortable(false);
 		return column;
 	}

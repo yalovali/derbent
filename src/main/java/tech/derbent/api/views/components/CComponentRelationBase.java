@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.component.grid.Grid;
 import tech.derbent.api.domains.CEntityDB;
-import tech.derbent.api.utils.Check;
+import tech.derbent.api.views.grids.CGrid;
 import tech.derbent.session.service.ISessionService;
 
 public abstract class CComponentRelationBase<MasterClass extends CEntityDB<MasterClass>, RelationalClass extends CEntityDB<RelationalClass>>
@@ -35,8 +35,7 @@ public abstract class CComponentRelationBase<MasterClass extends CEntityDB<Maste
 
 	@Override
 	protected void initPanel() throws Exception {
-		// super is abstract, stop here
-		// super.initPanel();
+		CGrid.setupGrid(grid);
 		setupGrid(grid);
 	}
 
@@ -55,12 +54,7 @@ public abstract class CComponentRelationBase<MasterClass extends CEntityDB<Maste
 		this.saveEntity = saveEntity;
 	}
 
-	protected void setupGrid(final Grid<RelationalClass> grid) {
-		Check.notNull(grid, "Grid cannot be null when setting up relational component");
-		grid.setSelectionMode(Grid.SelectionMode.SINGLE);
-		grid.getStyle().set("border-radius", "8px");
-		grid.getStyle().set("border", "1px solid #E0E0E0");
-		grid.setWidthFull();
+	protected void setupGrid(Grid<RelationalClass> grid) {
 		grid.setHeight("300px");
 		add(grid);
 	}
