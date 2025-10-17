@@ -296,13 +296,20 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 	}
 
 	@Override
+	@SuppressWarnings ({
+			"unchecked", "rawtypes"
+	})
 	public void onEntitySaved(final CEntityDB<?> entity) {
 		try {
 			LOGGER.debug("Entity saved notification received: {}", entity != null ? entity.getClass().getSimpleName() : "null");
 			Check.notNull(grid, "Grid component is not initialized");
 			Check.notNull(entity, "Saved entity cannot be null");
 			refreshGrid();
-			grid.selectEntity(entity);
+			// Reload the entity from database to ensure all lazy-loaded fields are initialized
+			// This prevents BindingException when populating form with entities that have lazy relationships
+			final CAbstractService service = entityService;
+			final CEntityDB<?> reloadedEntity = (CEntityDB<?>) service.getById(entity.getId()).orElse(entity);
+			grid.selectEntity(reloadedEntity);
 		} catch (final Exception e) {
 			LOGGER.error("Error handling entity saved notification:" + e.getMessage());
 			throw e;
