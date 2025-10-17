@@ -11,35 +11,37 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValueAndElement;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.utils.Check;
+import tech.derbent.api.views.grids.CGrid;
 
 /** Generic field selection component for selecting and ordering items from a source list. This component provides a two-panel interface with
  * available items on the left and selected items on the right, with buttons for adding, removing, and reordering selections. Implements HasValue and
- * HasValueAndElement to integrate with Vaadin binders.
+ * HasValueAndElement to integrate with Vaadin binders. Uses CGrid for better selection handling and consistency with the rest of the application.
  * <p>
  * Features:
  * <ul>
  * <li>Color-aware rendering for CEntityNamed entities (displays with colors and icons)</li>
  * <li>Text rendering for non-entity types (strings, numbers, etc.)</li>
- * <li>Add/Remove buttons for moving items between lists</li>
+ * <li>Add/Remove buttons for moving items between grids</li>
  * <li>Up/Down buttons for reordering selected items</li>
  * <li>Double-click support for quick item movement</li>
  * <li>Full Vaadin binder integration with List support for ordered fields</li>
  * <li>Read-only mode support</li>
  * <li>Preserves ordering for fields with @OrderColumn annotation</li>
+ * <li>Uses CGrid for better selection change triggers and consistency</li>
  * </ul>
  * <p>
  * Usage Pattern:
  * <ol>
  * <li>Call setSourceItems(allAvailableItems) to provide the complete list of items that can be selected</li>
  * <li>Binder will call setValue(entity.getFieldValue()) to set currently selected items from the entity</li>
- * <li>Component automatically separates items into selected and available lists</li>
+ * <li>Component automatically separates items into selected and available grids</li>
  * <li>Order of selected items is preserved for fields with @OrderColumn</li>
  * </ol>
  * @param <MasterEntity> The master entity type (e.g., CUser)
@@ -50,12 +52,12 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentFieldSelection.class);
-	private static final String DEFAULT_LIST_HEIGHT = "250px";
+	private static final String DEFAULT_GRID_HEIGHT = "250px";
 	private CButton addButton;
-	private ListBox<DetailEntity> availableList;
+	private Grid<DetailEntity> availableGrid;
 	private CButton downButton;
 	private CButton removeButton;
-	private ListBox<DetailEntity> selectedList;
+	private Grid<DetailEntity> selectedGrid;
 	private CButton upButton;
 	private final List<DetailEntity> sourceItems = new ArrayList<>();
 	private final List<DetailEntity> selectedItems = new ArrayList<>();
@@ -102,32 +104,21 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		selectedHeader.getStyle().set("font-weight", "bold").set("margin-bottom", "8px");
 		leftLayout.add(availableHeader);
 		rightLayout.add(selectedHeader);
-		// Create list boxes
-		availableList = new ListBox<>();
-		availableList.setHeight(DEFAULT_LIST_HEIGHT);
-		availableList.setWidthFull();
-		// Hide the checkmark/tick indicator by hiding the selected state styling
-		availableList.addClassName("no-selection-indicator");
-		// Ensure value changes are synchronized to server for button state updates
-		availableList.getElement().addEventListener("selected-changed", e -> {
-			// This listener ensures the server is notified of selection changes
-			// which triggers the addValueChangeListener to enable/disable buttons
-		}).synchronizeProperty("selected");
-		selectedList = new ListBox<>();
-		selectedList.setHeight(DEFAULT_LIST_HEIGHT);
-		selectedList.setWidthFull();
-		// Hide the checkmark/tick indicator by hiding the selected state styling
-		selectedList.addClassName("no-selection-indicator");
-		// Ensure value changes are synchronized to server for button state updates
-		selectedList.getElement().addEventListener("selected-changed", e -> {
-			// This listener ensures the server is notified of selection changes
-			// which triggers the addValueChangeListener to enable/disable buttons
-		}).synchronizeProperty("selected");
-		// Set up color-aware rendering for entities
-		configureColorAwareRenderer(availableList);
-		configureColorAwareRenderer(selectedList);
-		leftLayout.add(availableList);
-		rightLayout.add(selectedList);
+		// Create grids
+		availableGrid = new Grid<>();
+		availableGrid.setHeight(DEFAULT_GRID_HEIGHT);
+		availableGrid.setWidthFull();
+		availableGrid.setSelectionMode(Grid.SelectionMode.SINGLE);
+		// Configure the single column for available items
+		configureGridColumn(availableGrid, "Available Items");
+		selectedGrid = new Grid<>();
+		selectedGrid.setHeight(DEFAULT_GRID_HEIGHT);
+		selectedGrid.setWidthFull();
+		selectedGrid.setSelectionMode(Grid.SelectionMode.SINGLE);
+		// Configure the single column for selected items
+		configureGridColumn(selectedGrid, "Selected Items");
+		leftLayout.add(availableGrid);
+		rightLayout.add(selectedGrid);
 		// Control buttons with icons
 		addButton = new CButton("Add", VaadinIcon.ARROW_RIGHT.create());
 		addButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -154,16 +145,17 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		this.add(leftLayout, rightLayout);
 	}
 
-	/** Configures color-aware rendering for entity items in ListBox. If the item is a CEntityNamed, it will be rendered with its color and icon using
-	 * CEntityLabel. Otherwise, it falls back to text rendering.
-	 * @param listBox The ListBox to configure (must not be null)
-	 * @throws IllegalArgumentException if listBox is null */
-	private void configureColorAwareRenderer(ListBox<DetailEntity> listBox) {
-		Check.notNull(listBox, "ListBox cannot be null");
-		listBox.setRenderer(new ComponentRenderer<>(item -> {
+	/** Configures a single column for the grid with color-aware rendering. If the item is a CEntityNamed, it will be rendered with its color and icon
+	 * using CEntityLabel. Otherwise, it falls back to text rendering.
+	 * @param grid   The Grid to configure (must not be null)
+	 * @param header The column header text
+	 * @throws IllegalArgumentException if grid is null */
+	private void configureGridColumn(Grid<DetailEntity> grid, String header) {
+		Check.notNull(grid, "Grid cannot be null");
+		grid.addComponentColumn(item -> {
 			try {
 				if (item == null) {
-					LOGGER.warn("Rendering null item in list - returning N/A placeholder");
+					LOGGER.warn("Rendering null item in grid - returning N/A placeholder");
 					return new Span("N/A");
 				}
 				// Check if item is a CEntityNamed (has color and icon support)
@@ -186,17 +178,17 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 				String fallbackText = item != null ? item.toString() : "Error";
 				return new Span(fallbackText);
 			}
-		}));
+		}).setHeader(header).setAutoWidth(true).setFlexGrow(1);
 	}
 
-	/** Sets up event handlers for buttons and list selections. */
+	/** Sets up event handlers for buttons and grid selections. */
 	private void setupEventHandlers() {
-		// Enable/disable buttons based on selection
-		availableList.addValueChangeListener(e -> {
+		// Enable/disable buttons based on selection - Grid provides better selection triggers
+		availableGrid.asSingleSelect().addValueChangeListener(e -> {
 			boolean hasSelection = e.getValue() != null && !readOnly;
 			addButton.setEnabled(hasSelection);
 		});
-		selectedList.addValueChangeListener(e -> {
+		selectedGrid.asSingleSelect().addValueChangeListener(e -> {
 			boolean hasSelection = e.getValue() != null && !readOnly;
 			removeButton.setEnabled(hasSelection);
 			upButton.setEnabled(hasSelection);
@@ -207,7 +199,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			try {
 				addSelectedItem();
 			} catch (Exception ex) {
-				LOGGER.error("Error adding item to selected list", ex);
+				LOGGER.error("Error adding item to selected grid", ex);
 				throw new IllegalStateException("Failed to add item", ex);
 			}
 		});
@@ -215,7 +207,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			try {
 				removeSelectedItem();
 			} catch (Exception ex) {
-				LOGGER.error("Error removing item from selected list", ex);
+				LOGGER.error("Error removing item from selected grid", ex);
 				throw new IllegalStateException("Failed to remove item", ex);
 			}
 		});
@@ -235,94 +227,95 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 				throw new IllegalStateException("Failed to move item down", ex);
 			}
 		});
-		// Double-click support for quick movement using DOM events
+		// Double-click support for quick movement
 		setupDoubleClickSupport();
 	}
 
-	/** Sets up double-click support on list boxes using DOM events. */
+	/** Sets up double-click support on grids for quick item movement. */
 	private void setupDoubleClickSupport() {
-		// Add double-click listener to available list
-		// Use addListener with synchronizeProperty to ensure server knows about selections
-		availableList.getElement().addEventListener("dblclick", e -> {
+		// Add double-click listener to available grid
+		availableGrid.addItemDoubleClickListener(event -> {
 			try {
-				DetailEntity selected = availableList.getValue();
-				if (selected != null && !readOnly) {
+				DetailEntity item = event.getItem();
+				if (item != null && !readOnly) {
+					availableGrid.asSingleSelect().setValue(item);
 					addSelectedItem();
 				}
 			} catch (Exception ex) {
-				LOGGER.error("Error handling double-click on available list", ex);
+				LOGGER.error("Error handling double-click on available grid", ex);
 			}
-		}).synchronizeProperty("value");
-		// Add double-click listener to selected list
-		selectedList.getElement().addEventListener("dblclick", e -> {
+		});
+		// Add double-click listener to selected grid
+		selectedGrid.addItemDoubleClickListener(event -> {
 			try {
-				DetailEntity selected = selectedList.getValue();
-				if (selected != null && !readOnly) {
+				DetailEntity item = event.getItem();
+				if (item != null && !readOnly) {
+					selectedGrid.asSingleSelect().setValue(item);
 					removeSelectedItem();
 				}
 			} catch (Exception ex) {
-				LOGGER.error("Error handling double-click on selected list", ex);
+				LOGGER.error("Error handling double-click on selected grid", ex);
 			}
-		}).synchronizeProperty("value");
+		});
 	}
 
-	/** Adds the selected item from availableList to selectedItems. */
+	/** Adds the selected item from availableGrid to selectedItems. */
 	private void addSelectedItem() {
-		DetailEntity selected = availableList.getValue();
+		DetailEntity selected = availableGrid.asSingleSelect().getValue();
 		if (selected != null && !selectedItems.contains(selected)) {
 			selectedItems.add(selected);
 			refreshLists();
-			availableList.clear();
+			availableGrid.asSingleSelect().clear();
 		}
 	}
 
 	/** Removes the selected item from selectedItems. */
 	private void removeSelectedItem() {
-		DetailEntity selected = selectedList.getValue();
+		DetailEntity selected = selectedGrid.asSingleSelect().getValue();
 		if (selected != null) {
 			selectedItems.remove(selected);
 			refreshLists();
-			selectedList.clear();
+			selectedGrid.asSingleSelect().clear();
 		}
 	}
 
 	/** Moves the selected item up in the order. */
 	private void moveUp() {
-		DetailEntity selected = selectedList.getValue();
+		DetailEntity selected = selectedGrid.asSingleSelect().getValue();
 		if (selected != null) {
 			int index = selectedItems.indexOf(selected);
 			if (index > 0) {
 				selectedItems.remove(index);
 				selectedItems.add(index - 1, selected);
 				refreshLists();
-				selectedList.setValue(selected);
+				selectedGrid.asSingleSelect().setValue(selected);
 			}
 		}
 	}
 
 	/** Moves the selected item down in the order. */
 	private void moveDown() {
-		DetailEntity selected = selectedList.getValue();
+		DetailEntity selected = selectedGrid.asSingleSelect().getValue();
 		if (selected != null) {
 			int index = selectedItems.indexOf(selected);
 			if (index < selectedItems.size() - 1) {
 				selectedItems.remove(index);
 				selectedItems.add(index + 1, selected);
 				refreshLists();
-				selectedList.setValue(selected);
+				selectedGrid.asSingleSelect().setValue(selected);
 			}
 		}
 	}
 
-	/** Refreshes both lists and fires value change event. Separates source items into selected and available lists based on selectedItems. */
+	/** Refreshes both grids and fires value change event. Separates source items into selected and available grids based on selectedItems. */
 	private void refreshLists() {
 		// Update notselectedItems - show items not in selected
 		notselectedItems.clear();
 		notselectedItems.addAll(sourceItems.stream().filter(item -> !selectedItems.contains(item)).collect(Collectors.toList()));
-		// Update available list with items not yet selected
-		availableList.setItems(notselectedItems);
-		// Update selected list - order is preserved from selectedItems
-		selectedList.setItems(selectedItems);
+		// Update available grid with items not yet selected
+		availableGrid.setItems(notselectedItems);
+		// Update selected grid - order is preserved from selectedItems
+		selectedGrid.setItems(selectedItems);
 		// Fire value change event
 		fireValueChangeEvent();
 	}
@@ -385,9 +378,14 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	public void setItemLabelGenerator(ItemLabelGenerator<DetailEntity> itemLabelGenerator) {
 		try {
 			this.itemLabelGenerator = itemLabelGenerator != null ? itemLabelGenerator : Object::toString;
-			// Refresh renderer to use new label generator
-			configureColorAwareRenderer(availableList);
-			configureColorAwareRenderer(selectedList);
+			// Refresh grids to use new label generator
+			// Note: We need to reconfigure the columns
+			availableGrid.getColumns().forEach(availableGrid::removeColumn);
+			selectedGrid.getColumns().forEach(selectedGrid::removeColumn);
+			configureGridColumn(availableGrid, "Available Items");
+			configureGridColumn(selectedGrid, "Selected Items");
+			// Refresh data
+			refreshLists();
 		} catch (Exception e) {
 			LOGGER.error("Failed to set item label generator:" + e.getMessage());
 			throw e;
@@ -463,16 +461,25 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	public void setReadOnly(boolean readOnly) {
 		this.readOnly = readOnly;
 		updateButtonStates();
-		availableList.setReadOnly(readOnly);
-		selectedList.setReadOnly(readOnly);
+		availableGrid.setSelectionMode(readOnly ? Grid.SelectionMode.NONE : Grid.SelectionMode.SINGLE);
+		selectedGrid.setSelectionMode(readOnly ? Grid.SelectionMode.NONE : Grid.SelectionMode.SINGLE);
 	}
 
 	/** Updates button enabled states based on current selections and read-only mode. */
 	private void updateButtonStates() {
-		addButton.setEnabled(!readOnly && availableList.getValue() != null);
-		removeButton.setEnabled(!readOnly && selectedList.getValue() != null);
-		upButton.setEnabled(!readOnly && selectedList.getValue() != null);
-		downButton.setEnabled(!readOnly && selectedList.getValue() != null);
+		if (readOnly) {
+			// If read-only, disable all buttons
+			addButton.setEnabled(false);
+			removeButton.setEnabled(false);
+			upButton.setEnabled(false);
+			downButton.setEnabled(false);
+		} else {
+			// Update based on selection state
+			addButton.setEnabled(availableGrid.getSelectionModel().getFirstSelectedItem().isPresent());
+			removeButton.setEnabled(selectedGrid.getSelectionModel().getFirstSelectedItem().isPresent());
+			upButton.setEnabled(selectedGrid.getSelectionModel().getFirstSelectedItem().isPresent());
+			downButton.setEnabled(selectedGrid.getSelectionModel().getFirstSelectedItem().isPresent());
+		}
 	}
 
 	/** Returns whether the selected items list is empty.
