@@ -1,6 +1,7 @@
 package tech.derbent.screens.domain;
 
 import java.lang.reflect.Field;
+import java.util.List;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -67,11 +68,14 @@ public class CGridEntity extends CEntityOfProject<CGridEntity> {
 			description = "This grid is not displayed, use for details only one pagers", hidden = false, order = 4
 	)
 	private boolean attributeNone = false;
-
-	public boolean getAttributeNone() { return attributeNone; }
-
-	public void setAttributeNone(boolean attributeNone) { this.attributeNone = attributeNone; }
-
+	@Column (name = "column_fields", nullable = true, length = 1000)
+	@Size (max = 100)
+	@AMetaData (
+			displayName = "Column Fields", required = false, readOnly = false, description = "List of fields with order", hidden = false, order = 300,
+			maxLength = 100, useDualListSelector = true, dataProviderBean = "CGridEntityService", dataProviderMethod = "getFieldNames",
+			dataProviderOwner = "context"
+	)
+	private List<String> columnFields;
 	@Column (name = "data_service_bean_name", nullable = false, length = 100)
 	@Size (max = 100)
 	@AMetaData (
@@ -99,15 +103,13 @@ public class CGridEntity extends CEntityOfProject<CGridEntity> {
 
 	public boolean getAttributeNonDeletable() { return attributeNonDeletable; }
 
+	public boolean getAttributeNone() { return attributeNone; }
+
+	public List<String> getColumnFields() { return columnFields; }
+
 	public String getDataServiceBeanName() { return dataServiceBeanName; }
 
 	public String getSelectedFields() { return selectedFields; }
-
-	public void setAttributeNonDeletable(boolean attributeNonDeletable) { this.attributeNonDeletable = attributeNonDeletable; }
-
-	public void setDataServiceBeanName(final String dataServiceBeanName) { this.dataServiceBeanName = dataServiceBeanName; }
-
-	public void setSelectedFields(final String selectedFields) { this.selectedFields = selectedFields; }
 
 	@Override
 	public void initializeAllFields() {
@@ -122,4 +124,14 @@ public class CGridEntity extends CEntityOfProject<CGridEntity> {
 			getCreatedBy().getLogin(); // Trigger creator loading
 		}
 	}
+
+	public void setAttributeNonDeletable(boolean attributeNonDeletable) { this.attributeNonDeletable = attributeNonDeletable; }
+
+	public void setAttributeNone(boolean attributeNone) { this.attributeNone = attributeNone; }
+
+	public void setColumnFields(List<String> columnFields) { this.columnFields = columnFields; }
+
+	public void setDataServiceBeanName(final String dataServiceBeanName) { this.dataServiceBeanName = dataServiceBeanName; }
+
+	public void setSelectedFields(final String selectedFields) { this.selectedFields = selectedFields; }
 }

@@ -22,6 +22,7 @@ public class CGridInitializerService extends CInitializerServiceBase {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "columnFields"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
@@ -58,16 +59,5 @@ public class CGridInitializerService extends CInitializerServiceBase {
 		final CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder);
-		// Check.notNull(project, "project cannot be null");
-		// Check.notNull(gridEntityService, "gridEntityService cannot be null");
-		// Check.notNull(detailSectionService, "detailSectionService cannot be null");
-		// Check.notNull(pageEntityService, "pageEntityService cannot be null");
-		// final CDetailSection detailSection = createBasicView(project);
-		// detailSectionService.save(detailSection);
-		// final CGridEntity grid = createGridEntity(project);
-		// gridEntityService.save(grid);
-		// final tech.derbent.page.domain.CPageEntity page = createPageEntity(clazz, project, grid, detailSection, "System.Grids",
-		// "Grid Configuration Management", "Manage reusable grid metadata definitions", "1.1");
-		// pageEntityService.save(page);
 	}
 }
