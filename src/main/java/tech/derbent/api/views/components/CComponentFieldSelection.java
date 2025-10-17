@@ -299,6 +299,12 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		availableGrid.setItems(notselectedItems);
 		// Update selected grid - order is preserved from selectedItems
 		selectedGrid.setItems(selectedItems);
+		// Ensure selection mode is maintained after setItems() - this is critical for grid interaction
+		// setItems() creates a new DataProvider which can affect selection behavior
+		if (!readOnly) {
+			availableGrid.setSelectionMode(Grid.SelectionMode.SINGLE);
+			selectedGrid.setSelectionMode(Grid.SelectionMode.SINGLE);
+		}
 		// Fire value change event
 		fireValueChangeEvent();
 	}
@@ -423,11 +429,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 
 	/** Sets up event handlers for buttons and grid selections. */
 	private void setupEventHandlers() {
-		// Enable/disable buttons based on selection - Grid provides better selection triggers
-		availableGrid.addSelectionListener(selection -> {
-			final boolean hasSelection = !selection.getAllSelectedItems().isEmpty();
-			addButton.setEnabled(hasSelection);
-		});
+		// Enable/disable buttons based on selection - Use asSingleSelect() for consistent behavior
 		availableGrid.asSingleSelect().addValueChangeListener(e -> {
 			boolean hasSelection = e.getValue() != null && !readOnly;
 			addButton.setEnabled(hasSelection);
