@@ -301,10 +301,10 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		selectedGrid.setItems(selectedItems);
 		// Ensure selection mode is maintained after setItems() - this is critical for grid interaction
 		// setItems() creates a new DataProvider which can affect selection behavior
-		if (!readOnly) {
-			availableGrid.setSelectionMode(Grid.SelectionMode.SINGLE);
-			selectedGrid.setSelectionMode(Grid.SelectionMode.SINGLE);
-		}
+		// Respect read-only state: NONE if read-only, SINGLE if editable
+		Grid.SelectionMode mode = readOnly ? Grid.SelectionMode.NONE : Grid.SelectionMode.SINGLE;
+		availableGrid.setSelectionMode(mode);
+		selectedGrid.setSelectionMode(mode);
 		// Fire value change event
 		fireValueChangeEvent();
 	}
