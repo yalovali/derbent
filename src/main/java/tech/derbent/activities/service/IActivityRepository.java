@@ -32,8 +32,8 @@ public interface IActivityRepository extends IProjectItemRespository<CActivity> 
 	@Query ("SELECT COUNT(a) FROM #{#entityName} a WHERE a.status = :status")
 	long countByActivityStatus(@Param ("status") CActivityStatus status);
 	// find all activities of projects where the user's company owns the project
-	@Query(
-	    "SELECT a FROM #{#entityName} a LEFT JOIN FETCH a.project p WHERE p IN (SELECT us.project FROM CUserProjectSettings us WHERE us.user = :user)"
+	@Query (
+		"SELECT a FROM #{#entityName} a LEFT JOIN FETCH a.project p WHERE p IN (SELECT us.project FROM CUserProjectSettings us WHERE us.user = :user)"
 	)
-	List<CActivity> listByUser(@Param("user") CUser user);
+	List<CActivity> listByUser(@Param ("user") CUser user);
 }

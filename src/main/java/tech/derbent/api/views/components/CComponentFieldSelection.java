@@ -106,9 +106,23 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		availableList = new ListBox<>();
 		availableList.setHeight(DEFAULT_LIST_HEIGHT);
 		availableList.setWidthFull();
+		// Hide the checkmark/tick indicator by hiding the selected state styling
+		availableList.addClassName("no-selection-indicator");
+		// Ensure value changes are synchronized to server for button state updates
+		availableList.getElement().addEventListener("selected-changed", e -> {
+			// This listener ensures the server is notified of selection changes
+			// which triggers the addValueChangeListener to enable/disable buttons
+		}).synchronizeProperty("selected");
 		selectedList = new ListBox<>();
 		selectedList.setHeight(DEFAULT_LIST_HEIGHT);
 		selectedList.setWidthFull();
+		// Hide the checkmark/tick indicator by hiding the selected state styling
+		selectedList.addClassName("no-selection-indicator");
+		// Ensure value changes are synchronized to server for button state updates
+		selectedList.getElement().addEventListener("selected-changed", e -> {
+			// This listener ensures the server is notified of selection changes
+			// which triggers the addValueChangeListener to enable/disable buttons
+		}).synchronizeProperty("selected");
 		// Set up color-aware rendering for entities
 		configureColorAwareRenderer(availableList);
 		configureColorAwareRenderer(selectedList);
@@ -228,6 +242,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	/** Sets up double-click support on list boxes using DOM events. */
 	private void setupDoubleClickSupport() {
 		// Add double-click listener to available list
+		// Use addListener with synchronizeProperty to ensure server knows about selections
 		availableList.getElement().addEventListener("dblclick", e -> {
 			try {
 				DetailEntity selected = availableList.getValue();
@@ -237,7 +252,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			} catch (Exception ex) {
 				LOGGER.error("Error handling double-click on available list", ex);
 			}
-		});
+		}).synchronizeProperty("value");
 		// Add double-click listener to selected list
 		selectedList.getElement().addEventListener("dblclick", e -> {
 			try {
@@ -248,7 +263,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			} catch (Exception ex) {
 				LOGGER.error("Error handling double-click on selected list", ex);
 			}
-		});
+		}).synchronizeProperty("value");
 	}
 
 	/** Adds the selected item from availableList to selectedItems. */
