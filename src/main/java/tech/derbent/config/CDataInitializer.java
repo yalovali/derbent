@@ -111,9 +111,6 @@ public class CDataInitializer {
 	// Company Names
 	private static final String COMPANY_OF_TEKNOLOJI = "Of Teknoloji Çözümleri";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDataInitializer.class);
-	// Profile picture filenames mapping for users
-	private static final java.util.Map<String, String> PROFILE_PICTURE_MAPPING = java.util.Map.of("admin", "admin.svg", "admin2", "admin.svg",
-			"mkaradeniz", "michael_chen.svg", "msahin", "sophia_brown.svg", "bozkan", "david_kim.svg", "ademir", "emma_wilson.svg");
 	// Standard password for all users as per coding guidelines
 	private static final String STANDARD_PASSWORD = "test123";
 	private static final String STATUS_CANCELLED = "Cancelled";
@@ -539,24 +536,25 @@ public class CDataInitializer {
 	}
 
 	/** Creates a single user for a company with specified username and details.
-	 * @param company   The company to create user for
-	 * @param username  The username for the user
-	 * @param firstname The first name for the user
-	 * @param phone     The phone number for the user */
+	 * @param company            The company to create user for
+	 * @param username           The username for the user
+	 * @param firstname          The first name for the user
+	 * @param phone              The phone number for the user
+	 * @param profilePictureFile The filename of the profile picture (e.g., "admin.svg") */
 	@Transactional (readOnly = false)
-	private void createSingleUserForCompany(final CCompany company, final String username, final String firstname, final String phone) {
+	private void createSingleUserForCompany(final CCompany company, final String username, final String firstname, final String phone,
+			final String profilePictureFile) {
 		final String companyShortName = company.getName().toLowerCase().replaceAll("[^a-z0-9]", "");
 		final String userEmail = username + "@" + companyShortName + ".com.tr";
 		final CUserCompanyRole companyRole = userCompanyRoleService.getRandom(company);
 		final CUser user = userService.createLoginUser(username, STANDARD_PASSWORD, firstname, userEmail, company, companyRole);
 		// Set user profile directly on entity
-		final String profilePictureFile = PROFILE_PICTURE_MAPPING.getOrDefault(username, "default.svg");
 		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
 		user.setLastname(company.getName() + " Yöneticisi");
 		user.setPhone(phone);
 		user.setProfilePictureData(profilePictureBytes);
 		userService.save(user);
-		LOGGER.info("Created user {} for company {}", username, company.getName());
+		LOGGER.info("Created user {} for company {} with profile picture {}", username, company.getName(), profilePictureFile);
 	}
 
 	/** Creates technology startup company. */
@@ -585,9 +583,9 @@ public class CDataInitializer {
 	@Transactional (readOnly = false)
 	private void createUserForCompany(final CCompany company) {
 		// Create first admin user
-		createSingleUserForCompany(company, USER_ADMIN, "Admin", "+90-462-751-1001");
+		createSingleUserForCompany(company, USER_ADMIN, "Admin", "+90-462-751-1001", "admin.svg");
 		// Create second admin user
-		createSingleUserForCompany(company, USER_ADMIN2, USER_ADMIN2, "+90-462-751-1002");
+		createSingleUserForCompany(company, USER_ADMIN2, USER_ADMIN2, "+90-462-751-1002", "admin.svg");
 		LOGGER.info("Created 2 admin users for company {}", company.getName());
 	}
 
