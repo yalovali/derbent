@@ -80,14 +80,28 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		initializeUI(availableTitle, selectedTitle);
 	}
 
-	/** Adds the selected item from availableGrid to selectedItems. */
+	/** Adds the selected item from availableGrid to selectedItems. If there's a selection in the selected grid, the new item is inserted below it.
+	 * Otherwise, it's added to the end of the list. */
 	private void addSelectedItem() {
 		LOGGER.debug("Adding selected item from available grid");
 		DetailEntity selected = availableGrid.asSingleSelect().getValue();
 		if (selected != null && !selectedItems.contains(selected)) {
-			selectedItems.add(selected);
+			// Check if there's a current selection in the selected grid
+			DetailEntity currentSelection = selectedGrid.asSingleSelect().getValue();
+			if (currentSelection != null) {
+				// Insert below the current selection
+				int insertIndex = selectedItems.indexOf(currentSelection) + 1;
+				selectedItems.add(insertIndex, selected);
+				LOGGER.debug("Inserted item below selection at index: {}", insertIndex);
+			} else {
+				// Add to end if no selection
+				selectedItems.add(selected);
+				LOGGER.debug("Added item to end of list");
+			}
 			refreshLists();
 			availableGrid.asSingleSelect().clear();
+			// Select the newly added item in the selected grid
+			selectedGrid.asSingleSelect().setValue(selected);
 		}
 	}
 
@@ -190,6 +204,32 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	@Override
 	public List<DetailEntity> getValue() { return new ArrayList<>(selectedItems); }
 
+	/** Creates and configures a grid for field selection with common styling and behavior.
+	 * @param header The header text for the grid column
+	 * @return Configured Grid instance */
+	private Grid<DetailEntity> createAndSetupGrid(String header) {
+		Grid<DetailEntity> grid = new Grid<>();
+		CGrid.setupGrid(grid);
+		grid.setHeight(DEFAULT_GRID_HEIGHT);
+		configureGridColumn(grid, header);
+		return grid;
+	}
+
+	/** Creates a consistently styled header with color coding. Follows the same pattern as CComponentRelationPanelBase for visual consistency across
+	 * the application.
+	 * @param text  The header text
+	 * @param color The color for the header (hex format like "#1976D2")
+	 * @return Styled Span component */
+	private Span createStyledHeader(String text, String color) {
+		Span header = new Span(text);
+		header.getStyle().set("color", color);
+		header.getStyle().set("font-weight", "bold");
+		header.getStyle().set("font-size", "14px");
+		header.getStyle().set("text-transform", "uppercase");
+		header.getStyle().set("margin-bottom", "8px");
+		return header;
+	}
+
 	/** Initializes the UI components with proper validation and configuration.
 	 * @param availableTitle Title for available items panel
 	 * @param selectedTitle  Title for selected items panel */
@@ -204,30 +244,20 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		CVerticalLayout rightLayout = new CVerticalLayout(false, false, false);
 		leftLayout.setWidth("50%");
 		rightLayout.setWidth("50%");
-		// Add titles
-		CDiv availableHeader = new CDiv(availableTitle);
-		availableHeader.getStyle().set("font-weight", "bold").set("margin-bottom", "8px");
-		CDiv selectedHeader = new CDiv(selectedTitle);
-		selectedHeader.getStyle().set("font-weight", "bold").set("margin-bottom", "8px");
+		// Add styled headers with colors (consistent with CComponentRelationPanelBase pattern)
+		Span availableHeader = createStyledHeader(availableTitle, "#1976D2");
+		Span selectedHeader = createStyledHeader(selectedTitle, "#388E3C");
 		leftLayout.add(availableHeader);
 		rightLayout.add(selectedHeader);
-		// Create grids
-		availableGrid = new Grid<DetailEntity>();
-		CGrid.setupGrid(availableGrid);
-		availableGrid.setHeight(DEFAULT_GRID_HEIGHT);
-		// Configure the single column for available items
-		configureGridColumn(availableGrid, "Available Items");
-		selectedGrid = new Grid<DetailEntity>();
-		CGrid.setupGrid(selectedGrid);
-		selectedGrid.setHeight(DEFAULT_GRID_HEIGHT);
-		// Configure the single column for selected items
-		configureGridColumn(selectedGrid, "Selected Items");
+		// Create and configure grids using common setup method
+		availableGrid = createAndSetupGrid("Available Items");
+		selectedGrid = createAndSetupGrid("Selected Items");
 		leftLayout.add(availableGrid);
 		rightLayout.add(selectedGrid);
 		// Control buttons with icons
 		addButton = new CButton("Add", VaadinIcon.ARROW_RIGHT.create());
 		addButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		addButton.setEnabled(true);
+		addButton.setEnabled(false);
 		addButton.setTooltipText("Add selected item to the list");
 		removeButton = new CButton("Remove", VaadinIcon.ARROW_LEFT.create());
 		removeButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
