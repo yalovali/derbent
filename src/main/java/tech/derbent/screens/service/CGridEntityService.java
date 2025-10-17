@@ -10,6 +10,7 @@ import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.screens.domain.CGridEntity;
+import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.session.service.ISessionService;
 
 @Service
@@ -53,5 +54,15 @@ public class CGridEntityService extends CEntityOfProjectService<CGridEntity> {
 		Check.notBlank(projectId, "Project must not be null");
 		Long id = Long.valueOf(projectId);
 		return ((IGridEntityRepository) repository).listByProjectId(id);
+	}
+
+	public List<String> getFieldNames(final CGridEntity entity) {
+		Check.notNull(entity, "Grid Entity must not be null");
+		LOGGER.debug("Getting field names for entity: {}", entity.getName());
+		String beanName = entity.getDataServiceBeanName();
+		String entityType = CEntityFieldService.extractEntityTypeFromBeanName(beanName);
+		Check.notNull(entityType, "Extracted entity type cannot be null");
+		List<EntityFieldInfo> allFields = CEntityFieldService.getEntityFields(entityType);
+		return allFields.stream().map(EntityFieldInfo::getFieldName).toList();
 	}
 }

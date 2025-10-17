@@ -383,7 +383,7 @@ public class CAuxillaries {
 			method.setAccessible(true);
 			return method;
 		} catch (final NoSuchMethodException e) {
-			LOGGER.debug("Method not found: {}.{}", clazz.getSimpleName(), methodName);
+			LOGGER.info("Method not found: {}.{}", clazz.getSimpleName(), methodName);
 			return null;
 		}
 	}
@@ -527,29 +527,28 @@ public class CAuxillaries {
 	 * @param target     the target object
 	 * @param methodName the method name
 	 * @param args       the method arguments
-	 * @return the method result or null if invocation failed */
-	public static Object invokeMethod(final Object target, final String methodName, final Object... args) {
-		if (target == null) {
-			return null;
-		}
+	 * @return the method result or null if invocation failed
+	 * @throws Exception */
+	public static Object invokeMethod(final Object target, final String methodName, final Object... args) throws Exception {
 		try {
 			Check.notBlank(methodName, "methodName is blank");
+			Check.notNull(target, "target is null");
 			Class<?>[] paramTypes = new Class<?>[args.length];
 			for (int i = 0; i < args.length; i++) {
 				paramTypes[i] = args[i] != null ? args[i].getClass() : Object.class;
 			}
 			Method method = getMethod(target.getClass(), methodName, paramTypes);
-			if (method == null) {
-				// Try with no parameters if parameter matching failed
-				method = getMethod(target.getClass(), methodName);
-			}
 			if (method != null) {
 				return method.invoke(target, args);
 			}
+			// Try with no parameters if parameter matching failed
+			method = getMethod(target.getClass(), methodName);
+			Check.notNull(method, "Method " + methodName + " not found in class " + target.getClass().getName());
+			return method.invoke(target);
 		} catch (final Exception e) {
-			LOGGER.debug("Failed to invoke method {}.{}: {}", target.getClass().getSimpleName(), methodName, e.getMessage());
+			LOGGER.error("Failed to invoke method {}.{}: {}", target.getClass().getSimpleName(), methodName, e.getMessage());
+			throw e;
 		}
-		return null;
 	}
 
 	public static String invokeMethodOfString(final Object entity, final String methodName) throws Exception {

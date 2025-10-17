@@ -27,9 +27,7 @@ public @interface AMetaData {
 
 	Class<?> dataProviderClass() default Object.class;
 
-	String dataProviderMethod() default "list";
-
-	String dataProviderOwner() default "";
+	String dataProviderMethod() default "findAll";
 
 	String dataProviderParamBean() default "";
 

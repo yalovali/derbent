@@ -31,7 +31,7 @@ public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 	@JoinColumn (name = "project_id", nullable = false)
 	@AMetaData (
 			displayName = "Project", required = false, readOnly = false, description = "User's project", hidden = false, order = 5,
-			setBackgroundFromColor = true, useIcon = true, dataProviderOwner = "content", dataProviderMethod = "getAvailableProjects"
+			setBackgroundFromColor = true, useIcon = true, dataProviderBean = "content", dataProviderMethod = "getAvailableProjects"
 	)
 	private CProject project;
 	@ManyToOne (fetch = FetchType.LAZY)
@@ -45,7 +45,7 @@ public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 	@JoinColumn (name = "user_id", nullable = false)
 	@AMetaData (
 			displayName = "User", required = false, readOnly = false, description = "Project user", hidden = false, order = 3,
-			setBackgroundFromColor = true, useIcon = true, dataProviderOwner = "content", dataProviderMethod = "getAvailableUsers"
+			setBackgroundFromColor = true, useIcon = true, dataProviderBean = "content", dataProviderMethod = "getAvailableUsers"
 	)
 	private CUser user;
 

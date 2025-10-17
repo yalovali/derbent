@@ -322,10 +322,10 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 			LOGGER.debug("Handling entity selection event");
 			Check.notNull(event, "Selection change event cannot be null");
 			final CEntityDB<?> selectedEntity = event.getSelectedItem();
+			setCurrentEntity(selectedEntity);
 			if (selectedEntity == null) {
 				// No selection - clear details
 				clearEntityDetails();
-				setCurrentEntity(null);
 				populateForm();
 			} else {
 				LOGGER.debug("Entity selected: {}", selectedEntity != null ? selectedEntity.toString() + " ID: " + selectedEntity.getId() : "null");
@@ -333,7 +333,6 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 				if ((currentEntityViewName == null) || !selectedEntity.getClass().getField("VIEW_NAME").get(null).equals(currentEntityViewName)) {
 					rebuildEntityDetails(selectedEntity.getClass());
 				}
-				setCurrentEntity(selectedEntity);
 				populateForm();
 			}
 		} catch (final Exception e) {

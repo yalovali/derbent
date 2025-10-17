@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityOfProject;
+import tech.derbent.api.interfaces.IGanttDisplayable;
+import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.users.domain.CUser;
 
 /** CGanttItem - Data transfer object for Gantt chart representation of project entities. This class wraps project entities to provide a unified
@@ -19,8 +21,9 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	private final LocalDate startDate;
 
 	/** Constructor for CGanttItem.
-	 * @param entity The project entity to wrap */
-	public CGanttItem(final CEntityOfProject<?> entity) {
+	 * @param entity The project entity to wrap
+	 * @throws Exception */
+	public CGanttItem(final CEntityOfProject<?> entity) throws Exception {
 		this.entity = entity;
 		entityType = entity.getClass().getSimpleName();
 		startDate = extractStartDate(entity);
@@ -32,8 +35,9 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 
 	/** Constructor with hierarchy level.
 	 * @param entity         The project entity to wrap
-	 * @param hierarchyLevel The level in the hierarchy (0 = top level) */
-	public CGanttItem(final CEntityOfProject<?> entity, final int hierarchyLevel) {
+	 * @param hierarchyLevel The level in the hierarchy (0 = top level)
+	 * @throws Exception */
+	public CGanttItem(final CEntityOfProject<?> entity, final int hierarchyLevel) throws Exception {
 		this.entity = entity;
 		entityType = entity.getClass().getSimpleName();
 		startDate = extractStartDate(entity);
@@ -73,27 +77,29 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 
 	/** Extract parent ID from entity using interface or fallback to reflection.
 	 * @param entity The entity to extract from
-	 * @return The parent ID or null */
-	private Long extractParentId(final CEntityOfProject<?> entity) {
+	 * @return The parent ID or null
+	 * @throws Exception */
+	private Long extractParentId(final CEntityOfProject<?> entity) throws Exception {
 		// First try the interface approach
-		if (entity instanceof tech.derbent.api.interfaces.IGanttDisplayable) {
-			return ((tech.derbent.api.interfaces.IGanttDisplayable) entity).getGanttParentId();
+		if (entity instanceof IGanttDisplayable) {
+			return ((IGanttDisplayable) entity).getGanttParentId();
 		}
 		// Fallback to reflection for backward compatibility
-		Object result = tech.derbent.api.utils.CAuxillaries.invokeMethod(entity, "getParentId");
+		Object result = CAuxillaries.invokeMethod(entity, "getParentId");
 		return result instanceof Long ? (Long) result : null;
 	}
 
 	/** Extract parent type from entity using interface or fallback to reflection.
 	 * @param entity The entity to extract from
-	 * @return The parent type or null */
-	private String extractParentType(final CEntityOfProject<?> entity) {
+	 * @return The parent type or null
+	 * @throws Exception */
+	private String extractParentType(final CEntityOfProject<?> entity) throws Exception {
 		// First try the interface approach
-		if (entity instanceof tech.derbent.api.interfaces.IGanttDisplayable) {
-			return ((tech.derbent.api.interfaces.IGanttDisplayable) entity).getGanttParentType();
+		if (entity instanceof IGanttDisplayable) {
+			return ((IGanttDisplayable) entity).getGanttParentType();
 		}
 		// Fallback to reflection for backward compatibility
-		Object result = tech.derbent.api.utils.CAuxillaries.invokeMethod(entity, "getParentType");
+		Object result = CAuxillaries.invokeMethod(entity, "getParentType");
 		return result instanceof String ? (String) result : null;
 	}
 
@@ -102,8 +108,8 @@ public class CGanttItem extends CEntityDB<CGanttItem> {
 	 * @return The start date or null */
 	private LocalDate extractStartDate(final CEntityOfProject<?> entity) {
 		// First try the interface approach
-		if (entity instanceof tech.derbent.api.interfaces.IGanttDisplayable) {
-			return ((tech.derbent.api.interfaces.IGanttDisplayable) entity).getGanttStartDate();
+		if (entity instanceof IGanttDisplayable) {
+			return ((IGanttDisplayable) entity).getGanttStartDate();
 		}
 		// Fallback to reflection for backward compatibility
 		try {

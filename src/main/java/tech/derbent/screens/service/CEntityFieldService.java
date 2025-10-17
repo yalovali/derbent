@@ -34,7 +34,6 @@ public class CEntityFieldService {
 		private String createComponentMethod = "";
 		private String dataProviderBean = "";
 		private String dataProviderMethod = "";
-		private String dataProviderOwner = "";
 		private String dataProviderParamBean = "";
 		private String dataProviderParamMethod = "";
 		private String dataUpdateMethod = "";
@@ -66,8 +65,6 @@ public class CEntityFieldService {
 		public String getDataProviderBean() { return dataProviderBean; }
 
 		public String getDataProviderMethod() { return dataProviderMethod; }
-
-		public String getDataProviderOwner() { return dataProviderOwner; }
 
 		public String getDataProviderParamBean() { return dataProviderParamBean; }
 
@@ -145,8 +142,6 @@ public class CEntityFieldService {
 		public void setDataProviderBean(final String dataProviderBean) { this.dataProviderBean = dataProviderBean; }
 
 		public void setDataProviderMethod(final String dataProviderMethod) { this.dataProviderMethod = dataProviderMethod; }
-
-		public void setDataProviderOwner(final String dataProviderOwner) { this.dataProviderOwner = dataProviderOwner; }
 
 		public void setDataProviderParamBean(final String dataProviderParamBean) { this.dataProviderParamBean = dataProviderParamBean; }
 
@@ -227,7 +222,6 @@ public class CEntityFieldService {
 			info.setMaxLength(metaData.maxLength());
 			info.setDefaultValue(metaData.defaultValue());
 			info.setDataProviderBean(metaData.dataProviderBean());
-			info.setDataProviderOwner(metaData.dataProviderOwner());
 			info.setDataProviderMethod(metaData.dataProviderMethod());
 			info.setDataProviderParamMethod(metaData.dataProviderParamMethod());
 			info.setDataProviderParamBean(metaData.dataProviderParamBean());
@@ -358,6 +352,16 @@ public class CEntityFieldService {
 			}
 		}
 		return customMethods;
+	}
+
+	public static String extractEntityTypeFromBeanName(String beanName) {
+		Check.notNull(beanName, "Bean name cannot be null");
+		Check.notBlank(beanName, "Bean name cannot be empty");
+		// Convert service bean name to entity class name
+		// E.g., CActivityService -> CActivity
+		Check.isTrue(beanName.length() > "Service".length(), "Bean name is too short to extract entity type");
+		Check.isTrue(beanName.endsWith("Service"), "Bean name must end with 'Service'");
+		return beanName.substring(0, beanName.length() - "Service".length());
 	}
 
 	/** Get data provider beans for reference fields.
