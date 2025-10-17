@@ -314,7 +314,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			final CEnhancedBinder<?> binder) throws Exception {
 		Check.notNull(fieldInfo, "FieldInfo for ComboBox creation");
 		LOGGER.debug("Creating MultiSelectComboBox for field: {}", fieldInfo.getFieldName());
-		final MultiSelectComboBox<T> comboBox = new MultiSelectComboBox<T>(fieldInfo.getDisplayName());
+		final MultiSelectComboBox<T> comboBox = new MultiSelectComboBox<T>(fieldInfo.getIsCaptionVisible() ? fieldInfo.getDisplayName() : "");
 		comboBox.setItemLabelGenerator(item -> {
 			if (item instanceof CEntityNamed<?>) {
 				return ((CEntityNamed<?>) item).getName();
@@ -540,7 +540,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		Check.notNull(fieldInfo, "AMetaData for field layout");
 		Check.notNull(component, "Component for field layout" + fieldInfo.getFieldName());
 		final CHorizontalLayout horizontalLayout = CHorizontalLayout.forForm();
-		if (!fieldInfo.getDisplayName().isBlank()) {
+		if (fieldInfo.getIsCaptionVisible() && !fieldInfo.getDisplayName().isBlank()) {
 			// if label is empty, we do not show it
 			final CDiv labelDiv = new CDiv(fieldInfo.getDisplayName());
 			labelDiv.setClassName("form-field-label");
@@ -572,7 +572,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		Check.notNull(fieldInfo, "Field for Icon ComboBox creation");
 		final ComboBox<String> comboBox = new ComboBox<>();
 		// Configure basic properties from metadata
-		comboBox.setLabel(fieldInfo.getDisplayName());
+		comboBox.setLabel(fieldInfo.getIsCaptionVisible() ? fieldInfo.getDisplayName() : "");
 		comboBox.setPlaceholder(fieldInfo.getPlaceholder().isEmpty() ? "Select an icon" : fieldInfo.getPlaceholder());
 		comboBox.setAllowCustomValue(fieldInfo.isAllowCustomValue());
 		comboBox.setReadOnly(fieldInfo.isComboboxReadOnly() || fieldInfo.isReadOnly());
@@ -669,7 +669,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		Check.notNull(fieldInfo, "Field for String ComboBox creation");
 		final ComboBox<String> comboBox = new ComboBox<>();
 		// Configure basic properties from metadata
-		comboBox.setLabel(fieldInfo.getDisplayName());
+		comboBox.setLabel(fieldInfo.getIsCaptionVisible() ? fieldInfo.getDisplayName() : "");
 		comboBox.setPlaceholder(fieldInfo.getPlaceholder());
 		comboBox.setAllowCustomValue(fieldInfo.isAllowCustomValue());
 		comboBox.setReadOnly(fieldInfo.isComboboxReadOnly() || fieldInfo.isReadOnly());

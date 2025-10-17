@@ -73,6 +73,12 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 			hidden = false, order = 4, maxLength = 500
 	)
 	private String fieldDescription;
+	@Column (name = "is_caption_visible", nullable = false)
+	@AMetaData (
+			displayName = "Caption Visible", required = false, readOnly = false, description = "Whether the caption is visible", hidden = false,
+			order = 10, defaultValue = "false"
+	)
+	private Boolean isCaptionVisible = true;
 	@Column (name = "is_hidden", nullable = false)
 	@AMetaData (
 			displayName = "Hidden", required = false, readOnly = false, description = "Whether this field is hidden", hidden = false, order = 8,
@@ -81,7 +87,7 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 	private Boolean isHidden = false;
 	@Column (name = "is_readonly", nullable = false)
 	@AMetaData (
-			displayName = "Read Only", required = false, readOnly = false, description = "Whether this field is read-only", hidden = false, order = 7,
+			displayName = "Read Only", required = false, readOnly = false, description = "Whether this field is read-only", hidden = false, order = 9,
 			defaultValue = "false"
 	)
 	private Boolean isReadonly = false;
@@ -100,12 +106,12 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 	)
 	private Integer lineOrder = 0;
 	@Column (name = "max_length", nullable = true)
-	@Min (value = 1, message = "Max length must be at least 1")
+	@Min (value = 0, message = "Max length must be at least 1")
 	@Max (value = 10000, message = "Max length cannot exceed 10000")
 	@AMetaData (
 			displayName = "Max Length", required = false, readOnly = false, description = "Maximum length for text fields", hidden = false, order = 12
 	)
-	private Integer maxLength;
+	private Integer maxLength = 0;
 	@Column (name = "related_entity_type", nullable = true, length = 100)
 	@Size (max = 100, message = "Related entity type cannot exceed 100 characters")
 	@AMetaData (
@@ -153,6 +159,8 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 
 	public String getFieldDescription() { return fieldDescription; }
 
+	public Boolean getIsCaptionVisible() { return isCaptionVisible; }
+
 	public Boolean getIsHidden() { return isHidden; }
 
 	public Boolean getIsReadonly() { return isReadonly; }
@@ -169,6 +177,14 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 
 	public String getSectionName() { return sectionName; }
 
+	@Override
+	public void initializeAllFields() {
+		// Initialize lazy-loaded entity relationships
+		if (detailSection != null) {
+			detailSection.getName(); // Trigger detail section loading
+		}
+	}
+
 	public void printLine() {
 		System.out.println(
 				"CDetailLines{" + "id=" + getId() + ", lineOrder=" + lineOrder + ", fieldCaption='" + fieldCaption + '\'' + ", entityProperty='"
@@ -184,6 +200,8 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 	public void setDetailSection(final CDetailSection screen) { detailSection = screen; }
 
 	public void setFieldCaption(final String fieldCaption) { this.fieldCaption = fieldCaption; }
+
+	public void setIsCaptionVisible(Boolean isCaptionVisible) { this.isCaptionVisible = isCaptionVisible; }
 
 	public void setIsHidden(final Boolean isHidden) { this.isHidden = isHidden; }
 
@@ -210,13 +228,5 @@ public class CDetailLines extends CEntityDB<CDetailLines> {
 	public String toString() {
 		return String.format("CDetailLines{id=%d, lineOrder=%d, fieldCaption='%s', entityProperty='%s'}", getId(), lineOrder, fieldCaption,
 				entityProperty);
-	}
-
-	@Override
-	public void initializeAllFields() {
-		// Initialize lazy-loaded entity relationships
-		if (detailSection != null) {
-			detailSection.getName(); // Trigger detail section loading
-		}
 	}
 }

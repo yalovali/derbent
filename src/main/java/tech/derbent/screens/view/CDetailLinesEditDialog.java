@@ -28,34 +28,34 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 
 	private static final long serialVersionUID = 1L;
 	private final CEnhancedBinder<CDetailLines> binder;
-	private final CDetailSection screen;
-	private final CFormBuilder<CDetailLines> formEntity;
-	private final CFormBuilder<CDetailLines> formSection;
-	private final CFormBuilder<CDetailLines> formClassType;
-	private final CDiv divScreenType = new CDiv();
-	private final CDiv divJavaType = new CDiv();
+	private ComboBox<String> cmbFieldClass;
 	// Div to
 	private ComboBox<String> cmbFieldProperties;
-	private ComboBox<String> cmbFieldClass;
-	Tab tabSection;
+	private final CDiv divJavaType = new CDiv();
+	private final CDiv divScreenType = new CDiv();
+	private final CFormBuilder<CDetailLines> formClassType;
+	private final CFormBuilder<CDetailLines> formEntity;
+	private final CFormBuilder<CDetailLines> formSection;
+	private final CDetailSection screen;
 	Tab tabEntity;
-	Span tabSectionSpan;
 	Span tabEntitySpan;
+	Tab tabSection;
+	Span tabSectionSpan;
 	TabSheet tabsOfDialog;
 
 	public CDetailLinesEditDialog(final CDetailLines entity, final Consumer<CDetailLines> onSave, final boolean isNew, final CDetailSection screen)
 			throws Exception {
 		super(entity, onSave, isNew);
-		this.binder = CBinderFactory.createEnhancedBinder(CDetailLines.class);
+		binder = CBinderFactory.createEnhancedBinder(CDetailLines.class);
 		this.screen = screen;
-		this.formEntity = new CFormBuilder<CDetailLines>();
-		this.formSection = new CFormBuilder<CDetailLines>();
-		this.formClassType = new CFormBuilder<CDetailLines>();
-		this.tabsOfDialog = new TabSheet();
-		this.tabEntitySpan = new Span();
-		this.tabSectionSpan = new Span();
-		this.tabSection = tabsOfDialog.add("X", tabSectionSpan);
-		this.tabEntity = tabsOfDialog.add("Y", tabEntitySpan);
+		formEntity = new CFormBuilder<CDetailLines>();
+		formSection = new CFormBuilder<CDetailLines>();
+		formClassType = new CFormBuilder<CDetailLines>();
+		tabsOfDialog = new TabSheet();
+		tabEntitySpan = new Span();
+		tabSectionSpan = new Span();
+		tabSection = tabsOfDialog.add("X", tabSectionSpan);
+		tabEntity = tabsOfDialog.add("Y", tabEntitySpan);
 		tabsOfDialog.getElement().executeJs("this.querySelector('vaadin-tabs').style.display='none';");
 		setupDialog();
 		populateForm();
@@ -70,8 +70,9 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 			// add tab here
 			getDialogLayout().add(tabsOfDialog);
 			// BUILD ENTITY TAB
-			tabEntitySpan.add(formEntity.build(CDetailLines.class, binder, List.of("entityProperty", "lineOrder", "fieldCaption", "fieldDescription",
-					"isRequired", "isReadonly", "isHidden", "defaultValue", "relatedEntityType", "dataProviderBean", "maxLength", "isActive")));
+			tabEntitySpan.add(formEntity.build(CDetailLines.class, binder,
+					List.of("entityProperty", "lineOrder", "fieldCaption", "fieldDescription", "isRequired", "isReadonly", "isHidden",
+							"isCaptionVisible", "defaultValue", "relatedEntityType", "dataProviderBean", "maxLength", "isActive")));
 			// BUILD SECTION TAB
 			tabSectionSpan.add(formSection.build(CDetailLines.class, binder, List.of("sectionName", "fieldCaption", "isActive")));
 			// SETUP ENTITY TAB COMBOXBOXES
@@ -239,7 +240,7 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 		} else if (selectedProperty.startsWith(CEntityFieldService.COMPONENT + ":")) {
 			getEntity().setProperty(selectedProperty);
 			getEntity().setDefaultValue(null);
-			getEntity().setMaxLength(null);
+			getEntity().setMaxLength(0);
 			getEntity().setDataProviderBean(null);
 			getEntity().setDescription(selectedProperty);
 			getEntity().setRelatedEntityType(null);
@@ -248,6 +249,7 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 			getEntity().setIsRequired(false);
 			getEntity().setIsHidden(false);
 			getEntity().setIsActive(true);
+			getEntity().setIsCaptionVisible(true);
 			getEntity().setFieldCaption(relationFieldName);
 			getEntity().setDataProviderBean(CAuxillaries.getEntityServiceClasses(screen.getEntityType()).getSimpleName());
 			binder.readBean(getEntity());
@@ -264,12 +266,9 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 		divJavaType.setText("Java type: " + info.getJavaType());
 	}
 
+	// java
 	@Override
 	protected void validateForm() {
-		if (!binder.isValid()) {
-			throw new IllegalStateException("Please fill in all required fields correctly");
-		}
-		// Write bean data back to entity
-		binder.writeBeanIfValid(getEntity());
+		binder.validateBean(getEntity());
 	}
 }

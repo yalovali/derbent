@@ -34,8 +34,8 @@ public class CEntityFieldService {
 		private String createComponentMethod = "";
 		private String dataProviderBean = "";
 		private String dataProviderMethod = "";
-		private String dataProviderParamMethod = "";
 		private String dataProviderOwner = "";
+		private String dataProviderParamMethod = "";
 		private String dataUpdateMethod = "";
 		private String defaultValue = "";
 		private String description = "description";
@@ -45,6 +45,7 @@ public class CEntityFieldService {
 		private Class<?> fieldTypeClass;
 		private boolean hidden = false;
 		private boolean imageData = false;
+		private Boolean isCaptionVisible = true;
 		private String javaType;
 		private int maxLength = 255;
 		private int order = 999;
@@ -54,9 +55,9 @@ public class CEntityFieldService {
 		private boolean readOnly = false;
 		private boolean required = false;
 		private boolean setBackgroundFromColor = false;
+		private boolean useDualListSelector = false;
 		private boolean useIcon = false;
 		private boolean useRadioButtons = false;
-		private boolean useDualListSelector = false;
 		private String width = "";
 
 		public String getCreateComponentMethod() { return createComponentMethod; }
@@ -83,6 +84,8 @@ public class CEntityFieldService {
 		public String getFieldType() { return fieldType; }
 
 		public Class<?> getFieldTypeClass() { return fieldTypeClass; }
+
+		public Boolean getIsCaptionVisible() { return isCaptionVisible; }
 
 		public String getJavaType() { return javaType; }
 
@@ -118,11 +121,11 @@ public class CEntityFieldService {
 
 		public boolean isSetBackgroundFromColor() { return setBackgroundFromColor; }
 
+		public boolean isUseDualListSelector() { return useDualListSelector; }
+
 		public boolean isUseIcon() { return useIcon; }
 
 		public boolean isUseRadioButtons() { return useRadioButtons; }
-
-		public boolean isUseDualListSelector() { return useDualListSelector; }
 
 		public void setAllowCustomValue(final boolean allowCustomValue) { this.allowCustomValue = allowCustomValue; }
 
@@ -162,6 +165,8 @@ public class CEntityFieldService {
 
 		public void setImageData(final boolean imageData) { this.imageData = imageData; }
 
+		public void setIsCaptionVisible(Boolean isCaptionVisible) { this.isCaptionVisible = isCaptionVisible; }
+
 		public void setJavaType(final String javaType) { this.javaType = javaType; }
 
 		public void setMaxLength(final int maxLength) { this.maxLength = maxLength; }
@@ -180,11 +185,11 @@ public class CEntityFieldService {
 
 		public void setSetBackgroundFromColor(final boolean setBackgroundFromColor) { this.setBackgroundFromColor = setBackgroundFromColor; }
 
+		public void setUseDualListSelector(final boolean useDualListSelector) { this.useDualListSelector = useDualListSelector; }
+
 		public void setUseIcon(final boolean useIcon) { this.useIcon = useIcon; }
 
 		public void setUseRadioButtons(final boolean useRadioButtons) { this.useRadioButtons = useRadioButtons; }
-
-		public void setUseDualListSelector(final boolean useDualListSelector) { this.useDualListSelector = useDualListSelector; }
 
 		public void setWidth(final String width) { this.width = width; }
 
@@ -195,10 +200,10 @@ public class CEntityFieldService {
 		}
 	}
 
+	public static final String COMPONENT = "Component";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityFieldService.class);
 	public static final String SECTION = "Section";
 	public static final String THIS_CLASS = "This Class";
-	public static final String COMPONENT = "Component";
 
 	public static EntityFieldInfo createFieldInfo(final AMetaData metaData) {
 		try {
@@ -270,6 +275,7 @@ public class CEntityFieldService {
 				sectionInfo.setDisplayName(line.getSectionName());
 				sectionInfo.setDescription(line.getSectionName());
 				sectionInfo.setFieldTypeClass(CEntityFieldService.class);
+				sectionInfo.setIsCaptionVisible(line.getIsCaptionVisible());
 				return sectionInfo;
 			} else if (line.getEntityProperty().startsWith(CEntityFieldService.COMPONENT + ":")) {
 				final EntityFieldInfo sectionInfo = new EntityFieldInfo();
@@ -281,6 +287,7 @@ public class CEntityFieldService {
 				sectionInfo.setDisplayName("");
 				sectionInfo.setDescription("");
 				sectionInfo.setFieldTypeClass(CEntityFieldService.class);
+				sectionInfo.setIsCaptionVisible(line.getIsCaptionVisible());
 				return sectionInfo;
 			} else {
 				field = getEntityField(screenClassName, relationFieldName);
@@ -290,6 +297,13 @@ public class CEntityFieldService {
 			}
 			// get field of class
 			final EntityFieldInfo info = createFieldInfo(field);
+			// copy non problematic properties from line to info
+			info.setIsCaptionVisible(line.getIsCaptionVisible());
+			info.setDisplayName(line.getFieldCaption());
+			info.setDescription(line.getFieldCaption());
+			info.setRequired(line.getIsRequired());
+			info.setReadOnly(line.getIsReadonly());
+			info.setHidden(line.getIsHidden());
 			Check.notNull(info, "Field info not found for field: " + line.getEntityProperty() + " in class " + field.getType().getSimpleName());
 			return info;
 		} catch (final Exception e) {
@@ -345,7 +359,7 @@ public class CEntityFieldService {
 	public static List<String> getDataProviderBeans() {
 		return List.of("CActivityService", "CActivityTypeService", "CActivityStatusService", "CActivityPriorityService", "CMeetingService",
 				"CMeetingTypeService", "CMeetingStatusService", "CRiskService", "CRiskTypeService", "CRiskStatusService", "CRiskPriorityService",
-				"CProjectService", "CUserService", "CUserTypeService", "CCompanyService", "CDetailSectionService", "CDetailLinesService");
+				"CProjectService", "CUserService", "CCompanyService", "CDetailSectionService", "CDetailLinesService");
 	}
 
 	public static Field getEntityField(Class<?> type, final String fieldName) throws NoSuchFieldException {

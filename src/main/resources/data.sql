@@ -47,7 +47,6 @@ DELETE FROM cactivitypriority;
 DELETE FROM ccommentpriority;
 DELETE FROM cmeetingtype;
 DELETE FROM cmeetingstatus;
-DELETE FROM cusertype;
 DELETE FROM cdecisiontype;
 DELETE FROM cdecisionstatus;
 DELETE FROM cordertype;

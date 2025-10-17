@@ -108,13 +108,6 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 			order = 20, createComponentMethod = "createUserProjectSettingsComponent"
 	)
 	private List<CUserProjectSettings> projectSettings = new ArrayList<>();
-	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "cusertype_id", nullable = true)
-	@AMetaData (
-			displayName = "User Type", required = false, readOnly = false, description = "Type category of the user", hidden = false, order = 9,
-			dataProviderBean = "CUserTypeService"
-	)
-	private CUserType userType;
 
 	/** Default constructor for JPA. */
 	public CUser() {
@@ -191,8 +184,6 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 		return getLogin(); // Convenience method to get username for authentication
 	}
 
-	public CUserType getUserType() { return userType; }
-
 	@Override
 	public void initializeAllFields() {
 		// Initialize lazy-loaded entity relationships
@@ -202,10 +193,6 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 		if (companyRole != null) {
 			companyRole.getName(); // Trigger company role loading
 		}
-		if (userType != null) {
-			userType.getName(); // Trigger user type loading
-		}
-		// Note: projectSettings collection will be initialized if accessed
 	}
 
 	public Boolean isEnabled() {
@@ -290,12 +277,6 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 		this.projectSettings = projectSettings != null ? projectSettings : new ArrayList<>();
 	}
 
-	public void setUserType(final CUserType userType) { this.userType = userType; }
-
-	/** Returns a comprehensive string representation of the user including all key fields. Note: This method is used for debugging and logging
-	 * purposes. For ComboBox display in the UI, the CEntityFormBuilder now uses getName() method automatically to show only the user's name instead
-	 * of all fields. This resolves the combobox display issue where users were listed with complete text with all fields.
-	 * @return detailed string representation of the user */
 	@Override
 	public String toString() {
 		// Return user-friendly representation for UI display

@@ -11,9 +11,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.BinderValidationStatus;
 import com.vaadin.flow.data.binder.BindingValidationStatus;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.binder.ValidationResult;
@@ -24,8 +26,8 @@ import com.vaadin.flow.data.binder.ValidationResult;
  * @param <BEAN> the bean type */
 public class CEnhancedBinder<BEAN> extends BeanValidationBinder<BEAN> {
 
-	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEnhancedBinder.class);
+	private static final long serialVersionUID = 1L;
 	private final Class<BEAN> beanType;
 	private final Map<String, String> lastValidationErrors = new HashMap<>();
 
@@ -36,11 +38,6 @@ public class CEnhancedBinder<BEAN> extends BeanValidationBinder<BEAN> {
 		this.beanType = beanType;
 		LOGGER.debug("Created CEnhancedBinder for bean type: {}", beanType.getSimpleName());
 	}
-
-	/** Returns the bean type this binder is configured for.
-	 * @return the bean class */
-	public Class<BEAN> getBeanType() { return beanType; }
-	// Overload bind methods to add detailed logging
 
 	@Override
 	public <FIELDVALUE> Binding<BEAN, FIELDVALUE> bind(final HasValue<?, FIELDVALUE> field, final String propertyName) {
@@ -65,6 +62,11 @@ public class CEnhancedBinder<BEAN> extends BeanValidationBinder<BEAN> {
 			}
 		}
 	}
+
+	/** Returns the bean type this binder is configured for.
+	 * @return the bean class */
+	public Class<BEAN> getBeanType() { return beanType; }
+	// Overload bind methods to add detailed logging
 
 	/** Gets the validation error for a specific field.
 	 * @param fieldName the field name
@@ -195,6 +197,55 @@ public class CEnhancedBinder<BEAN> extends BeanValidationBinder<BEAN> {
 			printBindingProperties();
 			throw e;
 		}
+	}
+
+	public void validateBean(BEAN entity) {
+		final BinderValidationStatus<BEAN> status = validate();
+		if (!status.isOk()) {
+			final StringBuilder sb = new StringBuilder();
+			sb.append("Validation failed:");
+			// Bean-level messages
+			status.getBeanValidationErrors().forEach(err -> sb.append("\n- bean: ").append(err.getErrorMessage()));
+			// Field-level messages
+			for (final BindingValidationStatus<?> fieldStatus : status.getFieldValidationErrors()) {
+				final String message = fieldStatus.getMessage().orElse("validation error");
+				String fieldIdOrName = "unknown";
+				String extra = "";
+				Object fieldObj = null;
+				try {
+					final Object f = fieldStatus.getField();
+					if (f instanceof java.util.Optional) {
+						final java.util.Optional<?> opt = (java.util.Optional<?>) f;
+						if (opt.isPresent()) {
+							fieldObj = opt.get();
+						}
+					} else {
+						fieldObj = f;
+					}
+				} catch (final Exception ignored) {
+					// safe fallback
+				}
+				if (fieldObj instanceof Component) {
+					final Component comp = (Component) fieldObj;
+					fieldIdOrName = comp.getId().orElse(comp.getClass().getSimpleName());
+					extra = " (visible=" + comp.isVisible();
+					if (comp instanceof HasValue) {
+						try {
+							final Object value = ((HasValue<?, ?>) comp).getValue();
+							extra += ", value=" + String.valueOf(value);
+						} catch (final Exception ignored) {
+							// ignore value retrieval issues
+						}
+					}
+					extra += ")";
+				} else if (fieldObj != null) {
+					fieldIdOrName = String.valueOf(fieldObj);
+				}
+				sb.append("\n- field ").append(fieldIdOrName).append(extra).append(": ").append(message);
+			}
+			throw new IllegalStateException(sb.toString());
+		}
+		writeBeanIfValid(entity);
 	}
 
 	/** Validates that all field bindings are complete before readBean operation. This prevents the "All bindings created with forField must be

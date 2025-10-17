@@ -13,7 +13,6 @@ import tech.derbent.session.service.ISessionService;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.domain.CUserProjectSettings;
 import tech.derbent.users.service.CUserProjectSettingsService;
-import tech.derbent.users.service.CUserTypeService;
 
 /** Generic base class for User-Project relationship components. This class provides common functionality for both User->Project and Project->User
  * relationship components, reducing code duplication while maintaining flexibility for specific implementations.
@@ -26,7 +25,6 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 	protected final CCompanyService companyService;
 	protected final CProjectService projectService;
 	protected final CUserProjectSettingsService userProjectSettingsService;
-	protected final CUserTypeService userTypeService;
 
 	public CComponentUserProjectRelationBase(final String title, final Class<MasterClass> entityClass,
 			final CAbstractService<MasterClass> entityService, ISessionService sessionService, final ApplicationContext applicationContext) {
@@ -34,7 +32,6 @@ public abstract class CComponentUserProjectRelationBase<MasterClass extends CEnt
 				sessionService, applicationContext);
 		userProjectSettingsService = applicationContext.getBean(CUserProjectSettingsService.class);
 		projectService = applicationContext.getBean(CProjectService.class);
-		userTypeService = applicationContext.getBean(CUserTypeService.class);
 		companyService = applicationContext.getBean(CCompanyService.class);
 	}
 

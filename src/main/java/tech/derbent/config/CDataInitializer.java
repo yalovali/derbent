@@ -84,12 +84,9 @@ import tech.derbent.screens.service.CGridInitializerService;
 import tech.derbent.session.service.ISessionService;
 import tech.derbent.setup.service.CSystemSettingsInitializerService;
 import tech.derbent.users.domain.CUser;
-import tech.derbent.users.domain.CUserType;
 import tech.derbent.users.service.CUserInitializerService;
 import tech.derbent.users.service.CUserProjectSettingsService;
 import tech.derbent.users.service.CUserService;
-import tech.derbent.users.service.CUserTypeInitializerService;
-import tech.derbent.users.service.CUserTypeService;
 
 /** CSampleDataInitializer - System Bootstrap and Sample Data Initialization This class serves dual purposes: 1. SYSTEM INITIALIZATION: Creates
  * essential base entities required for system operation - Companies, Projects, Users (core business entities) - Status entities (Activity, Meeting,
@@ -127,7 +124,7 @@ public class CDataInitializer {
 	private static final String STATUS_ON_HOLD = "On Hold";
 	// User Login Names
 	private static final String USER_ADMIN = "admin";
-	private static final String USER_ADMIN2 = "admin2";
+	private static final String USER_ADMIN2 = "yasin";
 	private final CActivityPriorityService activityPriorityService;
 	private final CActivityService activityService;
 	private final CActivityStatusService activityStatusService;
@@ -162,7 +159,6 @@ public class CDataInitializer {
 	private final CUserProjectRoleService userProjectRoleService;
 	private final CUserProjectSettingsService userProjectSettingsService;
 	private final CUserService userService;
-	private final CUserTypeService userTypeService;
 
 	public CDataInitializer(final ISessionService sessionService) {
 		LOGGER.info("DataInitializer starting - obtaining service beans from application context");
@@ -173,7 +169,6 @@ public class CDataInitializer {
 		userProjectSettingsService = CSpringContext.getBean(CUserProjectSettingsService.class);
 		activityService = CSpringContext.getBean(CActivityService.class);
 		activityPriorityService = CSpringContext.getBean(CActivityPriorityService.class);
-		userTypeService = CSpringContext.getBean(CUserTypeService.class);
 		activityTypeService = CSpringContext.getBean(CActivityTypeService.class);
 		meetingTypeService = CSpringContext.getBean(CMeetingTypeService.class);
 		orderService = CSpringContext.getBean(COrderService.class);
@@ -221,7 +216,6 @@ public class CDataInitializer {
 		Check.notNull(screenService, "ScreenService bean not found");
 		Check.notNull(screenLinesService, "ScreenLinesService bean not found");
 		Check.notNull(userService, "UserService bean not found");
-		Check.notNull(userTypeService, "UserTypeService bean not found");
 		Check.notNull(userProjectRoleService, "UserProjectRoleService bean not found");
 		Check.notNull(userCompanyRoleService, "UserCompanyRoleService bean not found");
 		Check.notNull(userProjectSettingsService, "UserProjectSettingsService bean not found");
@@ -281,7 +275,6 @@ public class CDataInitializer {
 			orderTypeService.deleteAllInBatch();
 			orderStatusService.deleteAllInBatch();
 			userService.deleteAllInBatch();
-			userTypeService.deleteAllInBatch();
 			companyService.deleteAllInBatch();
 			projectService.deleteAllInBatch();
 			pageEntityService.deleteAllInBatch();
@@ -545,6 +538,27 @@ public class CDataInitializer {
 		}
 	}
 
+	/** Creates a single user for a company with specified username and details.
+	 * @param company   The company to create user for
+	 * @param username  The username for the user
+	 * @param firstname The first name for the user
+	 * @param phone     The phone number for the user */
+	@Transactional (readOnly = false)
+	private void createSingleUserForCompany(final CCompany company, final String username, final String firstname, final String phone) {
+		final String companyShortName = company.getName().toLowerCase().replaceAll("[^a-z0-9]", "");
+		final String userEmail = username + "@" + companyShortName + ".com.tr";
+		final CUserCompanyRole companyRole = userCompanyRoleService.getRandom(company);
+		final CUser user = userService.createLoginUser(username, STANDARD_PASSWORD, firstname, userEmail, company, companyRole);
+		// Set user profile directly on entity
+		final String profilePictureFile = PROFILE_PICTURE_MAPPING.getOrDefault(username, "default.svg");
+		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
+		user.setLastname(company.getName() + " Yöneticisi");
+		user.setPhone(phone);
+		user.setProfilePictureData(profilePictureBytes);
+		userService.save(user);
+		LOGGER.info("Created user {} for company {}", username, company.getName());
+	}
+
 	/** Creates technology startup company. */
 	private void createTechCompany() {
 		final CCompany techStartup = new CCompany(COMPANY_OF_TEKNOLOJI);
@@ -573,30 +587,8 @@ public class CDataInitializer {
 		// Create first admin user
 		createSingleUserForCompany(company, USER_ADMIN, "Admin", "+90-462-751-1001");
 		// Create second admin user
-		createSingleUserForCompany(company, USER_ADMIN2, "Admin 2", "+90-462-751-1002");
+		createSingleUserForCompany(company, USER_ADMIN2, USER_ADMIN2, "+90-462-751-1002");
 		LOGGER.info("Created 2 admin users for company {}", company.getName());
-	}
-
-	/** Creates a single user for a company with specified username and details.
-	 * @param company   The company to create user for
-	 * @param username  The username for the user
-	 * @param firstname The first name for the user
-	 * @param phone     The phone number for the user */
-	@Transactional (readOnly = false)
-	private void createSingleUserForCompany(final CCompany company, final String username, final String firstname, final String phone) {
-		final String companyShortName = company.getName().toLowerCase().replaceAll("[^a-z0-9]", "");
-		final String userEmail = username + "@" + companyShortName + ".com.tr";
-		final CUserCompanyRole companyRole = userCompanyRoleService.getRandom(company);
-		final CUser user = userService.createLoginUser(username, STANDARD_PASSWORD, firstname, userEmail, company, companyRole);
-		// Set user profile directly on entity
-		final String profilePictureFile = PROFILE_PICTURE_MAPPING.getOrDefault(username, "default.svg");
-		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
-		user.setLastname(company.getName() + " Yöneticisi");
-		user.setPhone(phone);
-		user.setProfilePictureData(profilePictureBytes);
-		user.setUserType(userTypeService.getRandom());
-		userService.save(user);
-		LOGGER.info("Created user {} for company {}", username, company.getName());
 	}
 
 	private void initializeSampleActivityPriorities(final CProject project) {
@@ -1003,39 +995,6 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleUserTypes(final CProject project) {
-		try {
-			final String[][] userTypes = {
-					{
-							"Administrator", "System administrators with full access"
-					}, {
-							"Project Manager", "Project managers responsible for project coordination"
-					}, {
-							"Team Lead", "Team leaders responsible for team management"
-					}, {
-							"Developer", "Software developers and engineers"
-					}, {
-							"Analyst", "Business and system analysts"
-					}, {
-							"Tester", "Quality assurance and testing specialists"
-					}, {
-							"Designer", "UI/UX designers and architects"
-					}, {
-							"Stakeholder", "Project stakeholders and decision makers"
-					}
-			};
-			for (final String[] typeData : userTypes) {
-				final CUserType userType = userTypeService.newEntity(typeData[0], project);
-				userType.setDescription(typeData[1]);
-				userType.setColor(CColorUtils.getRandomColor(true));
-				userTypeService.save(userType);
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Error creating user types for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize user types for project: " + project.getName(), e);
-		}
-	}
-
 	public boolean isDatabaseEmpty() {
 		final long cnt = userService.count();
 		LOGGER.info("User count = {}", cnt);
@@ -1121,7 +1080,6 @@ public class CDataInitializer {
 					COrderStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					COrderTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CRiskStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
-					CUserTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CGridInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					// TODO: Add similar calls for all other InitializerServices (user types, priorities, etc.)
 					// Project-specific type and configuration entities
@@ -1131,7 +1089,6 @@ public class CDataInitializer {
 					initializeSampleApprovalStatuses(project);
 					initializeSampleRiskStatuses(project);
 					// types
-					initializeSampleUserTypes(project);
 					initializeSampleProjectRoles(project);
 					initializeSampleMeetingTypes(project);
 					initializeSampleDecisionTypes(project);

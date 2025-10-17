@@ -1,5 +1,7 @@
 package tech.derbent.users.view;
 
+import java.util.Collections;
+import java.util.List;
 import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.annotations.CFormBuilder.IComboBoxDataProvider;
 import tech.derbent.api.components.CEnhancedBinder;
@@ -9,16 +11,13 @@ import tech.derbent.api.views.CAccordionDBEntity;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
 import tech.derbent.users.domain.CUser;
-import tech.derbent.users.domain.CUserType;
 import tech.derbent.users.service.CUserService;
-import tech.derbent.users.service.CUserTypeService;
 
 /** CPanelUserBase - Abstract base class for all CUser-related accordion panels. Layer: View (MVC) Provides common functionality for user entity
  * panels following the same pattern as CPanelActivityBase. */
 public abstract class CPanelUserBase extends CAccordionDBEntity<CUser> {
 
 	private static final long serialVersionUID = 1L;
-	private final CUserTypeService userTypeService;
 	private final CCompanyService companyService;
 
 	/** Constructor with custom panel title.
@@ -27,10 +26,8 @@ public abstract class CPanelUserBase extends CAccordionDBEntity<CUser> {
 	 * @param beanValidationBinder validation binder
 	 * @param entityService        user service */
 	public CPanelUserBase(final String title, IContentOwner parentContent, final CUser currentEntity,
-			final CEnhancedBinder<CUser> beanValidationBinder, final CUserService entityService, final CUserTypeService userTypeService,
-			final CCompanyService companyService) {
+			final CEnhancedBinder<CUser> beanValidationBinder, final CUserService entityService, final CCompanyService companyService) {
 		super(title, parentContent, beanValidationBinder, CUser.class, entityService);
-		this.userTypeService = userTypeService;
 		this.companyService = companyService;
 	}
 
@@ -40,19 +37,15 @@ public abstract class CPanelUserBase extends CAccordionDBEntity<CUser> {
 
 			@Override
 			@SuppressWarnings ("unchecked")
-			public <T extends CEntityDB<T>> java.util.List<T> getItems(final Class<T> entityType) {
+			public <T extends CEntityDB<T>> List<T> getItems(final Class<T> entityType) {
 				LOGGER.debug("Getting items for entity type: {}", entityType.getSimpleName());
-				if (entityType == CUserType.class) {
-					final java.util.List<T> userTypes = (java.util.List<T>) userTypeService.list(org.springframework.data.domain.Pageable.unpaged());
-					LOGGER.debug("Retrieved {} user types", userTypes.size());
-					return userTypes;
-				} else if (entityType == CCompany.class) {
-					final java.util.List<T> companies = (java.util.List<T>) companyService.findEnabledCompanies();
+				if (entityType == CCompany.class) {
+					final List<T> companies = (List<T>) companyService.findEnabledCompanies();
 					LOGGER.debug("Retrieved {} enabled companies", companies.size());
 					return companies;
 				}
 				LOGGER.warn("No data provider available for entity type: {}", entityType.getSimpleName());
-				return java.util.Collections.emptyList();
+				return Collections.emptyList();
 			}
 		};
 		return dataProvider;

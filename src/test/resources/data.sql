@@ -53,10 +53,6 @@ ALTER SEQUENCE cproject_project_id_seq RESTART WITH 1;
 -- ESSENTIAL LOOKUP TABLES (2 examples each for types, statuses, etc.)
 -- =====================================================================
 
--- User types (2 essential types)
-INSERT INTO cusertype (name, description) VALUES 
-('Administrator', 'System administrators with full access'),
-('Developer', 'Software developers and team members');
 
 -- Activity types (2 essential types)
 INSERT INTO cactivitytype (name, description) VALUES 
@@ -134,12 +130,12 @@ INSERT INTO ccompany (
 -- =====================================================================
 INSERT INTO cuser (
     created_date, email, enabled, lastname, login, name, password, phone, roles, 
-    last_modified_date, cusertype_id
+    last_modified_date
 ) VALUES 
 -- System Administrator with full enrichment
 ('2025-01-15 08:00:00', 'admin@derbent.tech', TRUE, 'Administrator', 'admin', 'System', 
  '$2a$10$eBLr1ru7O8ZYEaAnRaNIMeQQf.eb7O/h3wW43bC7Z9ZxVusUdCVXu', '+1-555-0001',  
- '2025-01-15 08:00:00', 1, 'TEAM_MEMBER'),
+ '2025-01-15 08:00:00'),
 
 -- Senior Developer with full enrichment
 ('2025-01-15 10:00:00', 'sarah.developer@derbent.tech', TRUE, 'Johnson', 'sarah.johnson', 'Sarah', 
