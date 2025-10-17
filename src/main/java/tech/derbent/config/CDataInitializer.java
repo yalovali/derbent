@@ -115,8 +115,8 @@ public class CDataInitializer {
 	private static final String COMPANY_OF_TEKNOLOJI = "Of Teknoloji Çözümleri";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDataInitializer.class);
 	// Profile picture filenames mapping for users
-	private static final java.util.Map<String, String> PROFILE_PICTURE_MAPPING = java.util.Map.of("admin", "admin.svg", "mkaradeniz",
-			"michael_chen.svg", "msahin", "sophia_brown.svg", "bozkan", "david_kim.svg", "ademir", "emma_wilson.svg");
+	private static final java.util.Map<String, String> PROFILE_PICTURE_MAPPING = java.util.Map.of("admin", "admin.svg", "admin2", "admin.svg",
+			"mkaradeniz", "michael_chen.svg", "msahin", "sophia_brown.svg", "bozkan", "david_kim.svg", "ademir", "emma_wilson.svg");
 	// Standard password for all users as per coding guidelines
 	private static final String STANDARD_PASSWORD = "test123";
 	private static final String STATUS_CANCELLED = "Cancelled";
@@ -127,6 +127,7 @@ public class CDataInitializer {
 	private static final String STATUS_ON_HOLD = "On Hold";
 	// User Login Names
 	private static final String USER_ADMIN = "admin";
+	private static final String USER_ADMIN2 = "admin2";
 	private final CActivityPriorityService activityPriorityService;
 	private final CActivityService activityService;
 	private final CActivityStatusService activityStatusService;
@@ -569,21 +570,33 @@ public class CDataInitializer {
 
 	@Transactional (readOnly = false)
 	private void createUserForCompany(final CCompany company) {
-		// Create unique admin username per company (e.g., admin-ofteknoloji, admin-ofdanismanlik)
+		// Create first admin user
+		createSingleUserForCompany(company, USER_ADMIN, "Admin", "+90-462-751-1001");
+		// Create second admin user
+		createSingleUserForCompany(company, USER_ADMIN2, "Admin 2", "+90-462-751-1002");
+		LOGGER.info("Created 2 admin users for company {}", company.getName());
+	}
+
+	/** Creates a single user for a company with specified username and details.
+	 * @param company   The company to create user for
+	 * @param username  The username for the user
+	 * @param firstname The first name for the user
+	 * @param phone     The phone number for the user */
+	@Transactional (readOnly = false)
+	private void createSingleUserForCompany(final CCompany company, final String username, final String firstname, final String phone) {
 		final String companyShortName = company.getName().toLowerCase().replaceAll("[^a-z0-9]", "");
-		final String uniqueAdminLogin = USER_ADMIN;
-		final String adminEmail = USER_ADMIN + "@" + companyShortName + ".com.tr";
+		final String userEmail = username + "@" + companyShortName + ".com.tr";
 		final CUserCompanyRole companyRole = userCompanyRoleService.getRandom(company);
-		final CUser user = userService.createLoginUser(uniqueAdminLogin, STANDARD_PASSWORD, "Admin", adminEmail, company, companyRole);
+		final CUser user = userService.createLoginUser(username, STANDARD_PASSWORD, firstname, userEmail, company, companyRole);
 		// Set user profile directly on entity
-		final String profilePictureFile = PROFILE_PICTURE_MAPPING.getOrDefault(USER_ADMIN, "default.svg");
+		final String profilePictureFile = PROFILE_PICTURE_MAPPING.getOrDefault(username, "default.svg");
 		final byte[] profilePictureBytes = loadProfilePictureData(profilePictureFile);
 		user.setLastname(company.getName() + " Yöneticisi");
-		user.setPhone("+90-462-751-1001");
+		user.setPhone(phone);
 		user.setProfilePictureData(profilePictureBytes);
 		user.setUserType(userTypeService.getRandom());
 		userService.save(user);
-		LOGGER.info("Created admin user {} for company {}", uniqueAdminLogin, company.getName());
+		LOGGER.info("Created user {} for company {}", username, company.getName());
 	}
 
 	private void initializeSampleActivityPriorities(final CProject project) {
