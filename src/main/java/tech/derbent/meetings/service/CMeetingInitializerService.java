@@ -63,7 +63,8 @@ public class CMeetingInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, ENTITY_CLASS);
-		grid.setColumnFields(List.of("id", "name", "description", "meetingType", "project", "meetingDate", "endDate", "createdBy", "createdDate", "status", "location"));
+		grid.setColumnFields(List.of("id", "name", "description", "meetingType", "project", "meetingDate", "endDate", "createdBy", "createdDate",
+				"status", "location"));
 		return grid;
 	}
 

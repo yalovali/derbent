@@ -62,7 +62,8 @@ public class CCompanyInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "address", "phone", "email", "website", "companyTheme", "primaryColor", "enableNotifications", "enabled"));
+		grid.setColumnFields(List.of("id", "name", "description", "address", "phone", "email", "website", "companyTheme", "primaryColor",
+				"enableNotifications", "enabled"));
 		return grid;
 	}
 

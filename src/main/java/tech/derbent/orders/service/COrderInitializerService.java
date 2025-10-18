@@ -1,7 +1,6 @@
 package tech.derbent.orders.service;
 
 import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.orders.domain.COrder;
@@ -68,7 +67,8 @@ public class COrderInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("name", "orderType", "status", "orderDate", "requiredDate", "deliveryDate", "providerCompanyName", "estimatedCost", "actualCost", "project"));
+		grid.setColumnFields(List.of("name", "orderType", "status", "orderDate", "requiredDate", "deliveryDate", "providerCompanyName",
+				"estimatedCost", "actualCost", "project"));
 		return grid;
 	}
 
