@@ -180,14 +180,12 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 
 	/** Fires a value change event to listeners. */
 	private void fireValueChangeEvent() {
-		LOGGER.debug("Firing value change event - old value size: {}, new value size: {}", 
-				currentValue.size(), selectedItems.size());
+		LOGGER.debug("Firing value change event - old value size: {}, new value size: {}", currentValue.size(), selectedItems.size());
 		List<DetailEntity> oldValue = currentValue;
 		List<DetailEntity> newValue = getValue();
 		currentValue = new ArrayList<>(newValue);
 		if (!oldValue.equals(newValue)) {
-			LOGGER.info("Value changed from {} to {} selected items - notifying {} listeners", 
-					oldValue.size(), newValue.size(), listeners.size());
+			LOGGER.info("Value changed from {} to {} selected items - notifying {} listeners", oldValue.size(), newValue.size(), listeners.size());
 			ValueChangeEvent<List<DetailEntity>> event = new ValueChangeEvent<List<DetailEntity>>() {
 
 				private static final long serialVersionUID = 1L;
@@ -302,8 +300,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	}
 
 	private void populateForm() {
-		LOGGER.debug("Refreshing available and selected item lists - {} selected, {} total source items", 
-				selectedItems.size(), sourceItems.size());
+		LOGGER.debug("Refreshing available and selected item lists - {} selected, {} total source items", selectedItems.size(), sourceItems.size());
 		notselectedItems.clear();
 		notselectedItems.addAll(sourceItems.stream().filter(item -> !selectedItems.contains(item)).collect(Collectors.toList()));
 		LOGGER.debug("After filtering: {} available items (not selected)", notselectedItems.size());
@@ -449,13 +446,13 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	@Override
 	public void setValue(List<DetailEntity> value) {
 		try {
-			LOGGER.info("Binder triggered setValue on CComponentFieldSelection - reading {} selected items from entity field", 
+			LOGGER.info("Binder triggered setValue on CComponentFieldSelection - reading {} selected items from entity field",
 					value != null ? value.size() : 0);
 			selectedItems.clear();
 			if (value != null) {
 				// Preserve the order from the entity's list field
 				selectedItems.addAll(value);
-				LOGGER.debug("Selected items loaded from binder: {}", 
+				LOGGER.debug("Selected items loaded from binder: {}",
 						selectedItems.stream().map(Object::toString).collect(java.util.stream.Collectors.joining(", ")));
 			}
 			populateForm();
