@@ -1,5 +1,6 @@
 package tech.derbent.meetings.service;
 
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.meetings.domain.CMeetingType;
@@ -48,7 +49,7 @@ public class CMeetingTypeInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields("id,name,description,color,sortOrder,isActive,project");
+		grid.setColumnFields(List.of("id", "name", "description", "color", "sortOrder", "isActive", "project"));
 		return grid;
 	}
 

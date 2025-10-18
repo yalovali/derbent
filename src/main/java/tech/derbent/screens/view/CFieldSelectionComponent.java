@@ -13,15 +13,14 @@ import tech.derbent.screens.service.CEntityFieldService;
 import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
 /** Field selection component for selecting and ordering entity fields. This component uses CDualListSelectorComponent and provides specialized
- * handling for FieldSelection objects used in grid configuration. Integrates with binders and provides string-based value for backwards
- * compatibility. */
-public class CFieldSelectionComponent extends VerticalLayout implements HasValue<HasValue.ValueChangeEvent<String>, String> {
+ * handling for FieldSelection objects used in grid configuration. Integrates with binders and provides List<String> value. */
+public class CFieldSelectionComponent extends VerticalLayout implements HasValue<HasValue.ValueChangeEvent<List<String>>, List<String>> {
 
 	private static final long serialVersionUID = 1L;
-	private String currentValue = "";
+	private List<String> currentValue = new ArrayList<>();
 	private final CDualListSelectorComponent<EntityFieldInfo> dualListSelector;
 	private String entityType;
-	private final List<ValueChangeListener<? super ValueChangeEvent<String>>> listeners = new ArrayList<>();
+	private final List<ValueChangeListener<? super ValueChangeEvent<List<String>>>> listeners = new ArrayList<>();
 	private List<FieldSelection> selections = new ArrayList<>();
 
 	/** Constructor with enhanced binder and property name.
@@ -44,31 +43,31 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 		add(dualListSelector);
 	}
 
-	/** Adds a value change listener for string values. */
+	/** Adds a value change listener for List<String> values. */
 	@Override
-	public Registration addValueChangeListener(ValueChangeListener<? super ValueChangeEvent<String>> listener) {
+	public Registration addValueChangeListener(ValueChangeListener<? super ValueChangeEvent<List<String>>> listener) {
 		listeners.add(listener);
 		return () -> listeners.remove(listener);
 	}
 
-	/** Fires a value change event to string listeners for legacy compatibility. */
-	private void fireStringValueChangeEvent() {
-		String oldValue = currentValue;
-		String newValue = getValue();
-		currentValue = newValue;
+	/** Fires a value change event to listeners. */
+	private void fireValueChangeEvent() {
+		List<String> oldValue = new ArrayList<>(currentValue);
+		List<String> newValue = getValue();
+		currentValue = new ArrayList<>(newValue);
 		if (!oldValue.equals(newValue)) {
-			ValueChangeEvent<String> event = new ValueChangeEvent<String>() {
+			ValueChangeEvent<List<String>> event = new ValueChangeEvent<List<String>>() {
 
 				private static final long serialVersionUID = 1L;
 
 				@Override
-				public HasValue<?, String> getHasValue() { return CFieldSelectionComponent.this; }
+				public HasValue<?, List<String>> getHasValue() { return CFieldSelectionComponent.this; }
 
 				@Override
-				public String getOldValue() { return oldValue; }
+				public List<String> getOldValue() { return oldValue; }
 
 				@Override
-				public String getValue() { return newValue; }
+				public List<String> getValue() { return newValue; }
 
 				@Override
 				public boolean isFromClient() { return true; }
@@ -85,11 +84,11 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 		return new ArrayList<>(selections);
 	}
 
-	/** Returns the selected fields as a string. */
+	/** Returns the selected fields as a list of strings. */
 	public List<String> getSelectedFieldsAsString() { return getValue(); }
 
-	// HasValue<String> implementation for legacy compatibility
-	/** Returns the current value as a string (fieldName:order,fieldName:order,...). */
+	// HasValue<List<String>> implementation
+	/** Returns the current value as a list of field names. */
 	@Override
 	public List<String> getValue() { return selections.stream().map(fs -> fs.getFieldInfo().getFieldName()).collect(Collectors.toList()); }
 
@@ -110,8 +109,8 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 		for (int i = 0; i < orderedFields.size(); i++) {
 			selections.add(new FieldSelection(orderedFields.get(i), i + 1));
 		}
-		// Fire string value change event for legacy compatibility
-		fireStringValueChangeEvent();
+		// Fire value change event
+		fireValueChangeEvent();
 	}
 
 	/** Sets the entity type and loads available fields. */
@@ -171,9 +170,9 @@ public class CFieldSelectionComponent extends VerticalLayout implements HasValue
 		// No-op for simplicity
 	}
 
-	/** Sets the value from a string. */
+	/** Sets the value from a list of field names. */
 	@Override
-	public void setValue(String value) {
+	public void setValue(List<String> value) {
 		setColumnFieldsFromString(value);
 	}
 }

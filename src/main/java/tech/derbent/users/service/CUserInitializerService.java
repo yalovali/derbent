@@ -1,5 +1,7 @@
 package tech.derbent.users.service;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.page.service.CPageEntityService;
@@ -67,7 +69,7 @@ public class CUserInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields("name,lastname,login,email,phone,projectSettings,enabled,createdDate,lastModifiedDate");
+		grid.setColumnFields(List.of("name", "lastname", "login", "email", "phone", "projectSettings", "enabled", "createdDate", "lastModifiedDate"));
 		return grid;
 	}
 

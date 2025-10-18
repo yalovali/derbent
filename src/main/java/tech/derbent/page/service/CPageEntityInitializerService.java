@@ -1,5 +1,7 @@
 package tech.derbent.page.service;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.utils.Check;
@@ -75,8 +77,8 @@ public class CPageEntityInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(
-				"id,name,menuTitle,pageTitle,menuOrder,requiresAuthentication,showInQuickToolbar,attributeReadonly,attributeNonDeletable");
+		grid.setColumnFields(List.of("id", "name", "menuTitle", "pageTitle", "menuOrder", "requiresAuthentication", "showInQuickToolbar",
+				"attributeReadonly", "attributeNonDeletable"));
 		return grid;
 	}
 

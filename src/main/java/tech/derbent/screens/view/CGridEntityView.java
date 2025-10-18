@@ -1,5 +1,6 @@
 package tech.derbent.screens.view;
 
+import java.util.ArrayList;
 import java.util.List;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
@@ -78,7 +79,7 @@ public class CGridEntityView extends CGridViewBaseProject<CGridEntity> {
 		Check.notNull(bean, "No entity is bound to the binder");
 		Check.notNull(fieldSelectionComponent, "Field selection component is not initialized");
 		final List<String> selected = fieldSelectionComponent.getSelectedFieldsAsString();
-		bean.setColumnFields(selected != null ? selected : "");
+		bean.setColumnFields(selected != null ? selected : new ArrayList<>());
 		return true;
 	}
 

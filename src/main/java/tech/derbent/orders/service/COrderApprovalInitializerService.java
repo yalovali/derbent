@@ -1,5 +1,7 @@
 package tech.derbent.orders.service;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.utils.Check;
@@ -54,7 +56,7 @@ public final class COrderApprovalInitializerService extends CInitializerServiceB
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, ENTITY_CLASS);
-		grid.setColumnFields("id,name,order,approvalStatus,approvalLevel,approver,approvalDate,isActive");
+		grid.setColumnFields(List.of("id", "name", "order", "approvalStatus", "approvalLevel", "approver", "approvalDate", "isActive"));
 		return grid;
 	}
 

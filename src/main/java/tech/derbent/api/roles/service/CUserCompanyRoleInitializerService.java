@@ -1,5 +1,6 @@
 package tech.derbent.api.roles.service;
 
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.roles.domain.CUserCompanyRole;
@@ -47,7 +48,7 @@ public class CUserCompanyRoleInitializerService extends CInitializerServiceBase 
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields("id,name,description,isAdmin,isUser,isGuest,color,sortOrder");
+		grid.setColumnFields(List.of("id", "name", "description", "isAdmin", "isUser", "isGuest", "color", "sortOrder"));
 		return grid;
 	}
 
