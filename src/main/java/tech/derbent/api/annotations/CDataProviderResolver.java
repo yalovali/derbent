@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
-import com.vaadin.flow.server.VaadinSession;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.utils.CAuxillaries;
@@ -133,6 +132,14 @@ public final class CDataProviderResolver {
 			if ("context".equals(beanName)) {
 				// just the content owner
 				bean = contentOwner;
+			} else if ("session".equals(beanName)) {
+				// session service must be ISessionService of CSessionService or CWebSessionService
+				// Get the actual session service bean from Spring context
+				bean = getBeanFromCache("CSessionService", () -> {
+					Check.isTrue(applicationContext.containsBean("CSessionService"),
+							"Session service bean 'CSessionService' not found in application context of beans:" + getAvailableServiceBeans());
+					return applicationContext.getBean("CSessionService");
+				});
 			} else {
 				// Get bean from Spring context with caching
 				bean = getBeanFromCache(beanName, () -> {
@@ -167,7 +174,12 @@ public final class CDataProviderResolver {
 			paramBean = contentOwner;
 		} else if ("session".equals(paramBeanName)) {
 			// session service must be ISessionService of CSessionService or CWebSessionService
-			paramBean = VaadinSession.getCurrent();
+			// Get the actual session service bean from Spring context
+			paramBean = getBeanFromCache("CSessionService", () -> {
+				Check.isTrue(applicationContext.containsBean("CSessionService"),
+						"Session service bean 'CSessionService' not found in application context of beans:" + getAvailableServiceBeans());
+				return applicationContext.getBean("CSessionService");
+			});
 		} else {
 			// Get bean from Spring context with caching
 			paramBean = getBeanFromCache(paramBeanName, () -> {
