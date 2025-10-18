@@ -99,7 +99,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 				selectedItems.add(selected);
 				LOGGER.debug("Added item to end of list");
 			}
-			refreshLists();
+			populateForm();
 			availableGrid.asSingleSelect().clear();
 			// Select the newly added item in the selected grid
 			selectedGrid.asSingleSelect().setValue(selected);
@@ -124,7 +124,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		try {
 			LOGGER.debug("Clearing all selected items");
 			selectedItems.clear();
-			refreshLists();
+			populateForm();
 		} catch (Exception e) {
 			LOGGER.error("Failed to clear selected items:" + e.getMessage());
 			throw e;
@@ -216,14 +216,6 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	@Override
 	public List<DetailEntity> getValue() { return new ArrayList<>(selectedItems); }
 
-	/** Creates a consistently styled header with color coding. Follows the same pattern as CComponentRelationPanelBase for visual consistency across
-	 * the application.
-	 * @param text  The header text
-	 * @param color The color for the header (hex format like "#1976D2")
-	 * @return Styled Span component */
-	/** Initializes the UI components with proper validation and configuration.
-	 * @param availableTitle Title for available items panel
-	 * @param selectedTitle  Title for selected items panel */
 	private void initializeUI(String availableTitle, String selectedTitle) {
 		LOGGER.debug("Initializing field selection UI with titles: '{}' and '{}'", availableTitle, selectedTitle);
 		Check.notBlank(availableTitle, "Available title cannot be null or blank");
@@ -266,18 +258,12 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		setupEventHandlers();
 	}
 
-	/** Returns whether the selected items list is empty.
-	 * @return true if no items are selected, false otherwise */
 	@Override
 	public boolean isEmpty() { return selectedItems.isEmpty(); }
 
-	/** Returns whether the component is in read-only mode.
-	 * @return true if read-only, false otherwise */
 	@Override
 	public boolean isReadOnly() { return readOnly; }
 
-	/** Returns whether the required indicator is visible.
-	 * @return false (not implemented) */
 	@Override
 	public boolean isRequiredIndicatorVisible() { return false; }
 
@@ -290,13 +276,12 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			if (index < selectedItems.size() - 1) {
 				selectedItems.remove(index);
 				selectedItems.add(index + 1, selected);
-				refreshLists();
+				populateForm();
 				selectedGrid.asSingleSelect().setValue(selected);
 			}
 		}
 	}
 
-	/** Moves the selected item up in the order. */
 	private void moveUp() {
 		LOGGER.debug("Moving selected item up in order");
 		DetailEntity selected = selectedGrid.asSingleSelect().getValue();
@@ -305,14 +290,13 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			if (index > 0) {
 				selectedItems.remove(index);
 				selectedItems.add(index - 1, selected);
-				refreshLists();
+				populateForm();
 				selectedGrid.asSingleSelect().setValue(selected);
 			}
 		}
 	}
 
-	/** Refreshes both grids and fires value change event. Separates source items into selected and available grids based on selectedItems. */
-	private void refreshLists() {
+	private void populateForm() {
 		LOGGER.debug("Refreshing available and selected item lists");
 		notselectedItems.clear();
 		notselectedItems.addAll(sourceItems.stream().filter(item -> !selectedItems.contains(item)).collect(Collectors.toList()));
@@ -321,19 +305,15 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		fireValueChangeEvent();
 	}
 
-	/** Removes the selected item from selectedItems. */
 	private void removeSelectedItem() {
 		LOGGER.debug("Removing selected item from selected grid");
 		DetailEntity selected = selectedGrid.asSingleSelect().getValue();
 		Check.notNull(selected, "No item selected to remove");
 		selectedItems.remove(selected);
-		refreshLists();
+		populateForm();
 		selectedGrid.asSingleSelect().clear();
 	}
 
-	/** Sets the item label generator for displaying items. This is used for non-entity items or as a fallback.
-	 * @param itemLabelGenerator Function to generate display text for items (if null, uses Object::toString)
-	 * @throws IllegalStateException if renderer configuration fails */
 	public void setItemLabelGenerator(ItemLabelGenerator<DetailEntity> itemLabelGenerator) {
 		try {
 			this.itemLabelGenerator = itemLabelGenerator != null ? itemLabelGenerator : Object::toString;
@@ -344,15 +324,13 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			configureGridColumn(availableGrid, "Available Items");
 			configureGridColumn(selectedGrid, "Selected Items");
 			// Refresh data
-			refreshLists();
+			populateForm();
 		} catch (Exception e) {
 			LOGGER.error("Failed to set item label generator:" + e.getMessage());
 			throw e;
 		}
 	}
 
-	/** Sets the read-only mode of the component.
-	 * @param readOnly true to make read-only, false to make editable */
 	@Override
 	public void setReadOnly(boolean readOnly) {
 		LOGGER.debug("Setting read-only mode to: {}", readOnly);
@@ -360,50 +338,18 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		updateButtonStates();
 	}
 
-	/** Sets whether the required indicator should be visible.
-	 * @param requiredIndicatorVisible true to show indicator, false to hide */
 	@Override
 	public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
 		// Could be implemented if needed
 	}
 
-	/** Sets the selected items. This method preserves the order of items in the list, which is important for fields with @OrderColumn annotation.
-	 * @param items List of items to mark as selected in the specified order (can be null, will be treated as empty)
-	 * @throws IllegalStateException if refresh fails */
-	public void setSelectedItems(List<DetailEntity> items) {
-		try {
-			LOGGER.debug("Setting selected items");
-			selectedItems.clear();
-			Check.notNull(items, "Selected items list cannot be null");
-			// Preserve the order from the incoming list
-			selectedItems.addAll(items);
-			refreshLists();
-		} catch (Exception e) {
-			LOGGER.error("Failed to set selected items:" + e.getMessage());
-			throw e;
-		}
-	}
-
-	// Public API methods
-	/** Sets the available items to choose from. This is the complete list of items that can be selected. The component will automatically separate
-	 * these into selected and available lists based on the current value (set by binder).
-	 * <p>
-	 * Usage Pattern:
-	 * <ol>
-	 * <li>Call this method with all available items (e.g., all activities in the system)</li>
-	 * <li>Binder will subsequently call setValue() with the entity's current field value</li>
-	 * <li>Component separates items into selected (from entity) and available (not selected)</li>
-	 * <li>Order of selected items is preserved from the entity's list field</li>
-	 * </ol>
-	 * @param items List of items (can be null, will be treated as empty list)
-	 * @throws IllegalStateException if refresh fails */
 	public void setSourceItems(List<DetailEntity> items) {
 		try {
 			LOGGER.debug("Setting source items for selection component");
 			sourceItems.clear();
 			Check.notNull(items, "Source items list cannot be null");
 			sourceItems.addAll(items);
-			refreshLists();
+			populateForm();
 		} catch (Exception e) {
 			LOGGER.error("Failed to set source items:" + e.getMessage());
 			throw e;
@@ -493,10 +439,6 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		setupDoubleClickSupport();
 	}
 
-	/** Sets the value from a list of items. This is called by Vaadin binder when loading entity data. The order of items in the list is preserved,
-	 * which is essential for fields with @OrderColumn annotation.
-	 * @param value List of items to select in order (can be null, will be treated as empty)
-	 * @throws IllegalStateException if refresh fails */
 	@Override
 	public void setValue(List<DetailEntity> value) {
 		try {
@@ -506,7 +448,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 				// Preserve the order from the entity's list field
 				selectedItems.addAll(value);
 			}
-			refreshLists();
+			populateForm();
 		} catch (Exception e) {
 			LOGGER.error("Failed to set value:" + e.getMessage());
 			throw e;
