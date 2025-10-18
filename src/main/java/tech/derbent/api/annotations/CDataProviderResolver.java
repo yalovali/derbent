@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
+import com.vaadin.flow.server.VaadinSession;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.utils.CAuxillaries;
@@ -117,11 +118,44 @@ public final class CDataProviderResolver {
 		return String.format("CDataProviderResolver - Method cache: %d entries, Bean cache: %d entries", methodCache.size(), beanCache.size());
 	}
 
+	@SuppressWarnings ("unchecked")
+	public <T extends CEntityDB<T>> List<T> resolveData(IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
+		try {
+			Check.notNull(fieldInfo, "Field info cannot be null");
+			Object paramValue = null;
+			if (!fieldInfo.getDataProviderParamMethod().isEmpty()) {
+				paramValue = resolveParamValue(contentOwner, fieldInfo);
+			}
+			final String beanName = fieldInfo.getDataProviderBean();
+			Check.notBlank(beanName, "Data provider owner or bean name cannot be empty");
+			Object bean;
+			// paramBeanName is ok now
+			if ("context".equals(beanName)) {
+				// just the content owner
+				bean = contentOwner;
+			} else {
+				// Get bean from Spring context with caching
+				bean = getBeanFromCache(beanName, () -> {
+					Check.isTrue(applicationContext.containsBean(beanName),
+							"Parameter Bean '" + beanName + "' not found in application context of beans:" + getAvailableServiceBeans());
+					return applicationContext.getBean(beanName);
+				});
+			}
+			Object result = CAuxillaries.invokeMethod(bean, fieldInfo.getDataProviderMethod(), paramValue);
+			Check.notNull(result, "Result from data provider method cannot be null");
+			return (List<T>) result;
+		} catch (Exception e) {
+			LOGGER.error("Error resolving data for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
+			throw e;
+		}
+	}
+
 	Object resolveParamValue(IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
 		Check.notNull(fieldInfo, "Field info cannot be null");
 		Object paramValue = null;
 		Object paramBean = null;
 		String bName = fieldInfo.getDataProviderParamBean();
+		String paramMethod = fieldInfo.getDataProviderParamMethod();
 		if (bName.isEmpty()) {
 			bName = fieldInfo.getDataProviderBean();
 		}
@@ -131,6 +165,9 @@ public final class CDataProviderResolver {
 		if ("context".equals(paramBeanName)) {
 			// just the content owner
 			paramBean = contentOwner;
+		} else if ("session".equals(paramBeanName)) {
+			// session service must be ISessionService of CSessionService or CWebSessionService
+			paramBean = VaadinSession.getCurrent();
 		} else {
 			// Get bean from Spring context with caching
 			paramBean = getBeanFromCache(paramBeanName, () -> {
@@ -141,34 +178,7 @@ public final class CDataProviderResolver {
 		}
 		// param bean must be ok now
 		Check.notNull(paramBean, "Parameter Service bean cannot be null for bean name: " + paramBeanName);
-		paramValue = CAuxillaries.invokeMethod(contentOwner, fieldInfo.getDataProviderParamMethod());
+		paramValue = CAuxillaries.invokeMethod(contentOwner, paramMethod);
 		return paramValue;
-	}
-
-	@SuppressWarnings ("unchecked")
-	public <T extends CEntityDB<T>> List<T> resolveData(IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
-		Check.notNull(fieldInfo, "Field info cannot be null");
-		Object paramValue = null;
-		if (!fieldInfo.getDataProviderParamMethod().isEmpty()) {
-			paramValue = resolveParamValue(contentOwner, fieldInfo);
-		}
-		final String beanName = fieldInfo.getDataProviderBean();
-		Check.notBlank(beanName, "Data provider owner or bean name cannot be empty");
-		Object bean;
-		// paramBeanName is ok now
-		if ("context".equals(beanName)) {
-			// just the content owner
-			bean = contentOwner;
-		} else {
-			// Get bean from Spring context with caching
-			bean = getBeanFromCache(beanName, () -> {
-				Check.isTrue(applicationContext.containsBean(beanName),
-						"Parameter Bean '" + beanName + "' not found in application context of beans:" + getAvailableServiceBeans());
-				return applicationContext.getBean(beanName);
-			});
-		}
-		Object result = CAuxillaries.invokeMethod(bean, fieldInfo.getDataProviderMethod(), paramValue);
-		Check.notNull(result, "Result from data provider method cannot be null");
-		return (List<T>) result;
 	}
 }

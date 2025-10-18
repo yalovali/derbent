@@ -10,7 +10,6 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityOfProject;
 import tech.derbent.api.services.CAbstractService;
-import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CComponentDetailsMasterToolbar;
 import tech.derbent.api.views.components.CCrudToolbar;
@@ -18,8 +17,6 @@ import tech.derbent.api.views.components.CFlexLayout;
 import tech.derbent.api.views.components.CVerticalLayout;
 import tech.derbent.page.domain.CPageEntity;
 import tech.derbent.projects.domain.CProject;
-import tech.derbent.screens.domain.CDetailSection;
-import tech.derbent.screens.domain.CGridEntity;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.screens.view.CComponentGridEntity;
@@ -91,7 +88,6 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 		final Scroller detailsScroller = new Scroller();
 		splitBottomLayout.add(detailsScroller);
 		detailsScroller.setContent(baseDetailsLayout);
-		baseDetailsLayout.setSizeFull();
 		detailsScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
 		detailsScroller.setSizeFull();
 	}
@@ -251,9 +247,9 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 			LOGGER.debug("Handling entity selection event");
 			Check.notNull(event, "Selection change event cannot be null");
 			final CEntityDB<?> selectedEntity = event.getSelectedItem();
-			setCurrentEntity(selectedEntity);
 			if (selectedEntity == null) {
 				// No selection - clear details
+				setCurrentEntity(selectedEntity);
 				clearEntityDetails();
 				populateForm();
 			} else {
@@ -262,6 +258,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 				if ((currentEntityViewName == null) || !selectedEntity.getClass().getField("VIEW_NAME").get(null).equals(currentEntityViewName)) {
 					rebuildEntityDetails(selectedEntity.getClass());
 				}
+				setCurrentEntity(selectedEntity);
 				populateForm();
 			}
 		} catch (final Exception e) {
@@ -281,12 +278,10 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 		try {
 			super.setCurrentEntity(entity);
 			if (entity == null) {
-				currentEntityType = null;
 				if (crudToolbar != null) {
 					crudToolbar.setCurrentEntity(null);
 				}
 			} else {
-				currentEntityType = entity.getClass();
 				crudToolbar.setCurrentEntity(entity);
 			}
 		} catch (final Exception e) {

@@ -112,5 +112,10 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 	@Override
 	public void setCurrentEntity(final Object entity) {
 		super.setCurrentEntity(entity);
+		if (entity == null) {
+			currentEntityType = null;
+		} else {
+			currentEntityType = entity.getClass();
+		}
 	}
 }

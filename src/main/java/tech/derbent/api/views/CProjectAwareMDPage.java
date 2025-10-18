@@ -81,7 +81,7 @@ public abstract class CProjectAwareMDPage<EntityClass extends CEntityOfProject<E
 	@Override
 	protected void updateDetailsComponent()
 			throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException, Exception {
-		final CVerticalLayout formLayout = CFormBuilder.buildForm(entityClass, getBinder());
+		final CVerticalLayout formLayout = CFormBuilder.buildForm(entityClass, getBinder(), null, this);
 		getBaseDetailsLayout().add(formLayout);
 	}
 }

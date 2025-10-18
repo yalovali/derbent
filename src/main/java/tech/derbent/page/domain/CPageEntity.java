@@ -67,7 +67,7 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 	@JoinColumn (name = "grid_entity_id")
 	@AMetaData (
 			displayName = "Grid Entity", required = false, readOnly = false, description = "Grid entity configuration for this page", hidden = false,
-			dataProviderMethod = "listForComboboxSelectorByProjectId", dataProviderBean = "CGridEntityService",
+			dataProviderMethod = "listForComboboxSelectorByProjectId", dataProviderBean = "CGridEntityService", dataProviderParamBean = "session",
 			dataProviderParamMethod = "getProjectId", order = 98
 	)
 	private CGridEntity gridEntity;
@@ -144,6 +144,27 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 	public String getRoute() { return "cdynamicpagerouter/" + getId(); }
 
 	@Override
+	public void initializeAllFields() {
+		// Initialize lazy-loaded entity relationships
+		if (detailSection != null) {
+			detailSection.getName(); // Trigger detail section loading
+		}
+		if (gridEntity != null) {
+			gridEntity.getName(); // Trigger grid entity loading
+		}
+		// Parent class relationships (from CEntityOfProject)
+		if (getProject() != null) {
+			getProject().getName(); // Trigger project loading
+		}
+		if (getAssignedTo() != null) {
+			getAssignedTo().getLogin(); // Trigger assigned user loading
+		}
+		if (getCreatedBy() != null) {
+			getCreatedBy().getLogin(); // Trigger creator loading
+		}
+	}
+
+	@Override
 	protected void initializeDefaults() {
 		super.initializeDefaults();
 		icon = DEFAULT_ICON;
@@ -186,25 +207,4 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 	public void setPageTitle(String pageTitle) { this.pageTitle = pageTitle; }
 
 	public void setRequiresAuthentication(boolean requiresAuthentication) { this.requiresAuthentication = requiresAuthentication; }
-
-	@Override
-	public void initializeAllFields() {
-		// Initialize lazy-loaded entity relationships
-		if (detailSection != null) {
-			detailSection.getName(); // Trigger detail section loading
-		}
-		if (gridEntity != null) {
-			gridEntity.getName(); // Trigger grid entity loading
-		}
-		// Parent class relationships (from CEntityOfProject)
-		if (getProject() != null) {
-			getProject().getName(); // Trigger project loading
-		}
-		if (getAssignedTo() != null) {
-			getAssignedTo().getLogin(); // Trigger assigned user loading
-		}
-		if (getCreatedBy() != null) {
-			getCreatedBy().getLogin(); // Trigger creator loading
-		}
-	}
 }

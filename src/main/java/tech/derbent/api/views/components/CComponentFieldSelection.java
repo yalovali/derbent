@@ -542,13 +542,19 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	}
 
 	private void updateSourceItems() throws Exception {
-		sourceItems.clear();
-		Check.notNull(dataProviderResolver, "DataProviderResolver for field " + fieldInfo.getFieldName());
-		final List<?> rawList = dataProviderResolver.resolveData(contentOwner, fieldInfo);
-		Check.notNull(rawList, "Items for field " + fieldInfo.getFieldName() + " of type " + fieldInfo.getJavaType());
-		// Set items as list (typed at runtime)
-		@SuppressWarnings ("unchecked")
-		final List<DetailEntity> items = rawList.stream().map(e -> (DetailEntity) e).collect(Collectors.toList());
-		setSourceItems(items);
+		try {
+			LOGGER.debug("Updating source items using DataProviderResolver for field: {}", fieldInfo.getFieldName());
+			sourceItems.clear();
+			Check.notNull(dataProviderResolver, "DataProviderResolver for field " + fieldInfo.getFieldName());
+			final List<?> rawList = dataProviderResolver.resolveData(contentOwner, fieldInfo);
+			Check.notNull(rawList, "Items for field " + fieldInfo.getFieldName() + " of type " + fieldInfo.getJavaType());
+			// Set items as list (typed at runtime)
+			@SuppressWarnings ("unchecked")
+			final List<DetailEntity> items = rawList.stream().map(e -> (DetailEntity) e).collect(Collectors.toList());
+			setSourceItems(items);
+		} catch (final Exception e) {
+			LOGGER.error("Failed to update source items for field {}: {}", fieldInfo.getFieldName(), e.getMessage());
+			throw e;
+		}
 	}
 }

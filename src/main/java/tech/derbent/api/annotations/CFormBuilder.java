@@ -116,14 +116,6 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		return buildForm(entityClass, binder, entityFields, null, null, new CVerticalLayout(false, false, false));
 	}
 
-	/** Builds a form with content owner support and specific entity fields.
-	 * @param <EntityClass> the entity class type
-	 * @param entityClass   the entity class
-	 * @param binder        the enhanced binder
-	 * @param entityFields  the list of field names to include
-	 * @param contentOwner  the content owner (page) for context-aware data providers
-	 * @return the form layout
-	 * @throws Exception if form building fails */
 	public static <EntityClass> CVerticalLayout buildForm(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
 			final List<String> entityFields, final IContentOwner contentOwner) throws Exception {
 		return buildForm(entityClass, binder, entityFields, null, null, new CVerticalLayout(false, false, false), contentOwner);
@@ -472,7 +464,6 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		return dateTimePicker;
 	}
 
-	@SuppressWarnings ("unchecked")
 	private static <EntityClass, DetailClass> CComponentFieldSelection<EntityClass, DetailClass> createDualListSelector2(IContentOwner contentOwner,
 			final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) throws Exception {
 		Check.notNull(fieldInfo, "FieldInfo for DualListSelector creation");
@@ -492,14 +483,6 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			}
 			return "Unknown Item: " + String.valueOf(item);
 		});
-		// Data provider resolution using CDataProviderResolver
-		Check.notNull(dataProviderResolver, "DataProviderResolver for field " + fieldInfo.getFieldName());
-		final List<?> rawList = dataProviderResolver.resolveData(contentOwner, fieldInfo);
-		Check.notNull(rawList, "Items for field " + fieldInfo.getFieldName() + " of type " + fieldInfo.getJavaType());
-		// Set items as list (typed at runtime)
-		final List<DetailClass> items = rawList.stream().map(e -> (DetailClass) e).collect(Collectors.toList());
-		dualListSelector.setSourceItems(items);
-		// Bind to the field - the component now implements HasValue
 		safeBindComponent(binder, dualListSelector, fieldInfo.getFieldName(), "CComponentFieldSelection");
 		return dualListSelector;
 	}

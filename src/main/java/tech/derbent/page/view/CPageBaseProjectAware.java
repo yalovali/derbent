@@ -37,6 +37,7 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 		super();
 		this.screenService = screenService;
 		this.sessionService = sessionService;
+		baseDetailsLayout.setSizeFull();
 	}
 
 	@Override

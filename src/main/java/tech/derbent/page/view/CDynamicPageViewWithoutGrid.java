@@ -10,7 +10,6 @@ import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.utils.Check;
 import tech.derbent.page.domain.CPageEntity;
-import tech.derbent.screens.domain.CDetailSection;
 import tech.derbent.screens.service.CDetailSectionService;
 import tech.derbent.session.service.ISessionService;
 
@@ -23,33 +22,38 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicPageViewWithoutGrid.class);
 	private static final long serialVersionUID = 1L;
 
-	public CDynamicPageViewWithoutGrid(final CPageEntity pageEntity, final ISessionService sessionService,
-			final CDetailSectionService detailSectionService, final ApplicationContext applicationContext) {
+	public CDynamicPageViewWithoutGrid(CEntityDB<?> entity, final CPageEntity pageEntity, final ISessionService sessionService,
+			final CDetailSectionService detailSectionService, final ApplicationContext applicationContext) throws Exception {
 		super(pageEntity, sessionService, detailSectionService, applicationContext);
-		initializePage();
 		LOGGER.debug("Creating dynamic page view for: {}", pageEntity.getPageTitle());
+		initializePage();
+		if (entity != null) {
+			setCurrentEntity(entity);
+		} else {
+			locateFirstEntity();
+		}
+		populateForm();
 	}
 
-	/** Create the main page content area. */
-	private void createDetailSection() {
-		LOGGER.debug("Creating detail section for page: {}", pageEntity.getPageTitle());
-		Check.notNull(pageEntity, "pageEntity cannot be null");
-		Check.notNull(pageEntity.getDetailSection(), "pageEntity detail section cannot be null");
-		
-		// Initialize entity service and build the detail section
-		initializeEntityService();
-		
-		// Build the detail section using the inherited baseDetailsLayout and buildScreen method
+	/** Create the main page content area.
+	 * @throws Exception */
+	private void createDetailsSection() throws Exception {
 		try {
-			final CDetailSection detailSection = pageEntity.getDetailSection();
-			final String entityViewName = detailSection.getName();
-			LOGGER.debug("Building detail section for view: {}", entityViewName);
-			buildScreen(entityViewName, entityClass, baseDetailsLayout);
+			LOGGER.debug("Creating detail section for page: {}", pageEntity.getPageTitle());
+			Check.notNull(pageEntity, "pageEntity cannot be null");
+			Check.notNull(pageEntity.getDetailSection(), "pageEntity detail section cannot be null");
 			add(baseDetailsLayout);
-		} catch (final Exception e) {
-			LOGGER.error("Error creating detail section for page '{}': {}", pageEntity.getPageTitle(), e.getMessage());
+			initializeEntityService();
+		} catch (Exception e) {
+			LOGGER.error("Error creating detail section for page: {}: {}", pageEntity.getPageTitle(), e.getMessage());
 			throw e;
 		}
+	}
+
+	@Override
+	protected <T extends CEntityDB<T>> T createNewEntity() throws Exception {
+		// This view doesn't support entity creation since it has no grid/CRUD toolbar
+		throw new UnsupportedOperationException("Entity creation not supported in view without grid");
 	}
 
 	/** Create page footer with metadata. */
@@ -74,23 +78,27 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 		}
 	}
 
-	/** Initialize the page layout and content. */
-	@Override
-	protected void initializePage() {
-		LOGGER.debug("Initializing dynamic page view for page: {}", pageEntity != null ? pageEntity.getPageTitle() : "null");
-		Check.notNull(pageEntity, "pageEntity cannot be null");
-		// setSizeFull();
-		if (pageEntity.getPageTitle() != null && !pageEntity.getPageTitle().trim().isEmpty()) {
-			getElement().executeJs("document.title = $0", pageEntity.getPageTitle());
+	protected void initializePage() throws Exception {
+		try {
+			LOGGER.debug("Initializing dynamic page view for page: {}", pageEntity != null ? pageEntity.getPageTitle() : "null");
+			Check.notNull(pageEntity, "pageEntity cannot be null");
+			// setSizeFull();
+			if (pageEntity.getPageTitle() != null && !pageEntity.getPageTitle().trim().isEmpty()) {
+				getElement().executeJs("document.title = $0", pageEntity.getPageTitle());
+			}
+			createPageHeader();
+			createDetailsSection();
+			createPageFooter();
+			rebuildEntityDetails(entityClass);
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing dynamic page view for page '{}': {}", pageEntity != null ? pageEntity.getPageTitle() : "null",
+					e.getMessage());
+			throw e;
 		}
-		createPageHeader();
-		createDetailSection();
-		createPageFooter();
 	}
 
-	@Override
-	protected <T extends CEntityDB<T>> T createNewEntity() throws Exception {
-		// This view doesn't support entity creation since it has no grid/CRUD toolbar
-		throw new UnsupportedOperationException("Entity creation not supported in view without grid");
+	void locateFirstEntity() {
+		Check.notNull(entityService, "Entity service is not initialized");
+		entityService.findAll().stream().findFirst().ifPresent(this::setCurrentEntity);
 	}
 }
