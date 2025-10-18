@@ -316,15 +316,49 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	}
 
 	private void populateForm() {
-		LOGGER.debug("Refreshing available and selected item lists - {} selected, {} total source items", selectedItems.size(), sourceItems.size());
-		notselectedItems.clear();
-		notselectedItems.addAll(sourceItems.stream().filter(item -> !selectedItems.contains(item)).collect(Collectors.toList()));
-		LOGGER.debug("After filtering: {} available items (not selected)", notselectedItems.size());
-		availableGrid.setItems(notselectedItems);
-		selectedGrid.setItems(selectedItems);
-		availableGrid.asSingleSelect().setValue(notselectedItems.isEmpty() ? null : notselectedItems.get(0));
-		selectedGrid.asSingleSelect().setValue(selectedItems.isEmpty() ? null : selectedItems.get(0));
-		fireValueChangeEvent();
+		try {
+			Check.notNull(sourceItems, "Source items list cannot be null");
+			Check.notNull(selectedItems, "Selected items list cannot be null");
+			Check.notNull(notselectedItems, "Not selected items list cannot be null");
+			LOGGER.debug("Refreshing available and selected item lists - {} selected, {} total source items", selectedItems.size(),
+					sourceItems.size());
+			notselectedItems.clear();
+			// Use robust comparison: filter out items that are present in selectedItems
+			// This uses equals() method which should work correctly for both entities and primitives (like String)
+			notselectedItems.addAll(sourceItems.stream().filter(item -> {
+				try {
+					Check.notNull(item, "Source item cannot be null during filtering");
+					// For each item in sourceItems, check if it exists in selectedItems
+					// This uses equals() for comparison which handles String properly
+					final boolean isSelected = selectedItems.stream().anyMatch(selectedItem -> {
+						try {
+							if (selectedItem == null || item == null) {
+								return selectedItem == item; // Both null or reference equality
+							}
+							// Use equals() for proper comparison - works for String, entities with proper equals(), etc.
+							return item.equals(selectedItem);
+						} catch (final Exception compareEx) {
+							LOGGER.error("Error comparing items during filtering: {} vs {}", item, selectedItem, compareEx);
+							return false; // On error, assume not equal
+						}
+					});
+					LOGGER.trace("Item {} is {}selected", item, isSelected ? "" : "not ");
+					return !isSelected; // Include in notselectedItems if NOT selected
+				} catch (final Exception filterEx) {
+					LOGGER.error("Error filtering item: {}", item, filterEx);
+					return true; // On error, include the item in available list
+				}
+			}).collect(Collectors.toList()));
+			LOGGER.debug("After filtering: {} available items (not selected)", notselectedItems.size());
+			availableGrid.setItems(notselectedItems);
+			selectedGrid.setItems(selectedItems);
+			availableGrid.asSingleSelect().setValue(notselectedItems.isEmpty() ? null : notselectedItems.get(0));
+			selectedGrid.asSingleSelect().setValue(selectedItems.isEmpty() ? null : selectedItems.get(0));
+			fireValueChangeEvent();
+		} catch (final Exception e) {
+			LOGGER.error("Error populating form in field selection component: {}", e.getMessage(), e);
+			throw new IllegalStateException("Failed to populate field selection form", e);
+		}
 	}
 
 	private void removeSelectedItem() {

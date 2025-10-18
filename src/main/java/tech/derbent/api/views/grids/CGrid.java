@@ -120,30 +120,55 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 		return column;
 	}
 
-	public Column<EntityClass> addColumnEntityCollection(final ValueProvider<EntityClass, ? extends Collection<? extends CEntityDB<?>>> valueProvider,
+	public Column<EntityClass> addColumnEntityCollection(final ValueProvider<EntityClass, ? extends Collection<?>> valueProvider,
 			final String header) {
-		Check.notNull(valueProvider, "Value provider cannot be null");
+		Check.notNull(valueProvider, "Value provider cannot be null for header: " + header);
 		Check.notBlank(header, "Header cannot be null or blank");
-		// compute display string from the collection
+		// compute display string from the collection - now supports both CEntityDB and other types (e.g., String)
 		final ValueProvider<EntityClass, String> namesProvider = entity -> {
-			final Collection<? extends CEntityDB<?>> refs = valueProvider.apply(entity);
-			// Check if collection is null or not initialized (lazy loading)
-			if (refs == null || !Hibernate.isInitialized(refs)) {
-				return "No " + header.toLowerCase(); // e.g. "No participants"
+			try {
+				Check.notNull(entity, "Entity cannot be null when rendering collection column for header: " + header);
+				final Collection<?> items = valueProvider.apply(entity);
+				// Check if collection is null or not initialized (lazy loading)
+				if (items == null || !Hibernate.isInitialized(items)) {
+					LOGGER.debug("Collection for header '{}' is null or not initialized for entity ID: {}", header, entity.getId());
+					return "No " + header.toLowerCase(); // e.g. "No participants"
+				}
+				// Safe to call isEmpty() now since collection is initialized
+				if (items.isEmpty()) {
+					LOGGER.debug("Collection for header '{}' is empty for entity ID: {}", header, entity.getId());
+					return "No " + header.toLowerCase();
+				}
+				// Handle different collection item types
+				return items.stream().map(item -> {
+					try {
+						Check.notNull(item, "Collection item cannot be null in header: " + header);
+						// If item is a CEntityDB, use entityName to get the name
+						if (item instanceof CEntityDB<?>) {
+							final CEntityDB<?> ref = (CEntityDB<?>) item;
+							final String name = entityName(ref);
+							return ((name != null) && !name.isBlank()) ? name : "Entity#" + ref.getId();
+						}
+						// For non-entity types (e.g., String), use toString()
+						final String value = item.toString();
+						Check.notBlank(value, "Collection item string representation cannot be blank in header: " + header);
+						return value;
+					} catch (final Exception itemEx) {
+						LOGGER.error("Error rendering collection item for header '{}': {}", header, itemEx.getMessage(), itemEx);
+						return "[Error: " + (item != null ? item.getClass().getSimpleName() : "null") + "]";
+					}
+				}).collect(Collectors.joining(", "));
+			} catch (final Exception e) {
+				LOGGER.error("Error rendering collection column for header '{}' on entity ID {}: {}", header,
+						entity != null ? entity.getId() : "null", e.getMessage(), e);
+				return "[Error rendering collection]";
 			}
-			// Safe to call isEmpty() now since collection is initialized
-			if (refs.isEmpty()) {
-				return "No " + header.toLowerCase();
-			}
-			return refs.stream().map(ref -> {
-				final String name = entityName(ref);
-				return ((name != null) && !name.isBlank()) ? name : "Entity#" + ref.getId();
-			}).collect(Collectors.joining(", "));
 		};
 		final Column<EntityClass> column = addColumn(namesProvider).setHeader(header).setAutoWidth(true).setSortable(false) // usually collection
-																															// columns aren’t sortable
+																															// columns aren't sortable
 				.setFlexGrow(1);
 		Check.notNull(column, "Column creation failed for header: " + header);
+		LOGGER.debug("Successfully created collection column for header: {}", header);
 		return column;
 	}
 
