@@ -69,12 +69,14 @@ public class CCompanyInitializerService extends CInitializerServiceBase {
 
 	public static void initialize(final CProject project, final CGridEntityService gridEntityService,
 			final CDetailSectionService detailSectionService, final CPageEntityService pageEntityService) throws Exception {
-		final CDetailSection detailSection = createBasicView(project);
+		CDetailSection detailSection = createBasicView(project);
 		CGridEntity grid = createGridEntity(project);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, menuTitle, pageTitle,
 				pageDescription, showInQuickToolbar, menuOrder);
 		// create a single company page
 		grid = createGridEntity(project);
+		detailSection = createBasicView(project);
+		detailSection.setName("Current Company Detail Section");
 		grid.setName("Current Company Grid");
 		grid.setAttributeNone(true);
 		initBase(clazz, project, gridEntityService, detailSectionService, pageEntityService, detailSection, grid, "System.Current Company", pageTitle,

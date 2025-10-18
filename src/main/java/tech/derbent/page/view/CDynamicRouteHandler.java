@@ -44,7 +44,7 @@ public class CDynamicRouteHandler {
 			return Optional.empty();
 		}
 		// Create page instance
-		CDynamicPageView pageView = new CDynamicPageView(pageEntity.get(), sessionService);
+		CDynamicPageViewWithoutGrid pageView = new CDynamicPageViewWithoutGrid(pageEntity.get(), sessionService);
 		return Optional.of(pageView);
 	}
 

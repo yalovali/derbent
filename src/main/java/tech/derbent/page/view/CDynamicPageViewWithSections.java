@@ -1,19 +1,14 @@
 package tech.derbent.page.view;
 
-import java.lang.reflect.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityOfProject;
-import tech.derbent.api.interfaces.IEntityUpdateListener;
-import tech.derbent.api.interfaces.IPageTitleProvider;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
@@ -34,23 +29,18 @@ import tech.derbent.users.domain.CUser;
 /** Enhanced dynamic page view that supports grid and detail sections for database-defined pages. This view displays content stored in CPageEntity
  * instances with configurable grid and detail sections. */
 @PermitAll
-public class CDynamicPageViewWithSections extends CPageBaseProjectAware implements BeforeEnterObserver, IEntityUpdateListener, IPageTitleProvider {
+public class CDynamicPageViewWithSections extends CDynamicPageBase {
 
 	public static final String DEFAULT_COLOR = "#341b00";
 	public static final String DEFAULT_ICON = "vaadin:database";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicPageViewWithSections.class);
 	private static final long serialVersionUID = 1L;
-	protected final ApplicationContext applicationContext;
 	private CCrudToolbar<?> crudToolbar;
-	private Class<?> currentEntityType = null;
 	// State tracking for performance optimization
-	private String currentEntityViewName = null;
-	protected Class<?> entityClass;
 	// Services for dynamic entity management
 	protected CAbstractService<?> entityService;
 	protected CComponentGridEntity grid;
 	private final CGridEntityService gridEntityService;
-	protected final CPageEntity pageEntity;
 	private final CVerticalLayout splitBottomLayout = new CVerticalLayout(false, false, false);
 	// Layout components
 	protected final SplitLayout splitLayout = new SplitLayout();
@@ -59,36 +49,9 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 	public CDynamicPageViewWithSections(final CPageEntity pageEntity, final ISessionService sessionService,
 			final CDetailSectionService detailSectionService, final CGridEntityService gridEntityService,
 			final ApplicationContext applicationContext) {
-		super(sessionService, detailSectionService);
-		this.pageEntity = pageEntity;
-		this.applicationContext = applicationContext;
+		super(pageEntity, sessionService, detailSectionService, applicationContext);
 		this.gridEntityService = gridEntityService;
 		initializePage();
-	}
-
-	@Override
-	public void beforeEnter(final BeforeEnterEvent event) {
-		LOGGER.debug("Before enter event for dynamic page: {}", pageEntity.getPageTitle());
-		// Security check
-		if (pageEntity.getRequiresAuthentication() && sessionService.getActiveUser().isEmpty()) {
-			event.rerouteToError(IllegalAccessException.class, "Authentication required");
-			return;
-		}
-		// Check if page is active
-		if (!pageEntity.getActive()) {
-			event.rerouteToError(IllegalStateException.class, "Page not available");
-			return;
-		}
-	}
-
-	/** Clear entity details and reset state. */
-	private void clearEntityDetails() {
-		if (baseDetailsLayout != null) {
-			baseDetailsLayout.removeAll();
-		}
-		currentBinder = null;
-		currentEntityViewName = null;
-		currentEntityType = null;
 	}
 
 	@SuppressWarnings ({
@@ -203,13 +166,6 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 
 	@Override
 	public CFlexLayout getBaseDetailsLayout() { return baseDetailsLayout; }
-
-	/** Get the page entity this view represents. */
-	public CPageEntity getPageEntity() { return pageEntity; }
-
-	/** Implementation of IPageTitleProvider - provides the page title from the CPageEntity */
-	@Override
-	public String getPageTitle() { return pageEntity != null ? pageEntity.getPageTitle() : null; }
 
 	/** Initialize the entity service based on the configured entity type. */
 	protected void initializeEntityService() {
@@ -338,23 +294,6 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error handling entity selection:" + e.getMessage());
-			throw e;
-		}
-	}
-
-	@SuppressWarnings ({
-			"unchecked", "rawtypes"
-	})
-	private void rebuildEntityDetails(final Class<?> clazz) throws Exception {
-		try {
-			final Field viewNameField = clazz.getField("VIEW_NAME");
-			final String entityViewName = (String) viewNameField.get(null);
-			LOGGER.debug("Rebuilding entity details for view: {}", entityViewName);
-			clearEntityDetails();
-			currentEntityViewName = entityViewName;
-			buildScreen(entityViewName, (Class) entityClass, baseDetailsLayout);
-		} catch (final Exception e) {
-			LOGGER.error("Error rebuilding entity details for view '{}': {}", clazz.getField("VIEW_NAME"), e.getMessage());
 			throw e;
 		}
 	}

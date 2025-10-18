@@ -42,7 +42,7 @@ class CProjectOverviewPage extends Div implements BeforeEnterObserver {
 		String targetRoute = "project-overview-" + activeProject.getId();
 		CPageEntity pageEntity = pageEntityService.findByRoute(targetRoute)
 				.orElseThrow(() -> new IllegalStateException("No project overview page found for this project"));
-		CDynamicPageView dynamicPage = new CDynamicPageView(pageEntity, sessionService);
+		CDynamicPageViewWithoutGrid dynamicPage = new CDynamicPageViewWithoutGrid(pageEntity, sessionService);
 		removeAll();
 		add(dynamicPage);
 		LOGGER.info("Loaded project overview page for project: {}", activeProject.getName());
@@ -76,7 +76,7 @@ class CResourceLibraryPage extends Div implements BeforeEnterObserver {
 		String targetRoute = "resource-library-" + activeProject.getId();
 		CPageEntity pageEntity = pageEntityService.findByRoute(targetRoute)
 				.orElseThrow(() -> new IllegalStateException("No resource library page found for this project"));
-		CDynamicPageView dynamicPage = new CDynamicPageView(pageEntity, sessionService);
+		CDynamicPageViewWithoutGrid dynamicPage = new CDynamicPageViewWithoutGrid(pageEntity, sessionService);
 		removeAll();
 		add(dynamicPage);
 		LOGGER.info("Loaded resource library page for project: {}", activeProject.getName());
@@ -110,7 +110,7 @@ class CTeamDirectoryPage extends Div implements BeforeEnterObserver {
 		String targetRoute = "team-directory-" + activeProject.getId();
 		CPageEntity pageEntity = pageEntityService.findByRoute(targetRoute)
 				.orElseThrow(() -> new IllegalStateException("No team directory page found for this project"));
-		CDynamicPageView dynamicPage = new CDynamicPageView(pageEntity, sessionService);
+		CDynamicPageViewWithoutGrid dynamicPage = new CDynamicPageViewWithoutGrid(pageEntity, sessionService);
 		removeAll();
 		add(dynamicPage);
 		LOGGER.info("Loaded team directory page for project: {}", activeProject.getName());

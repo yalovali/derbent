@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -57,8 +58,7 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 
 	@Override
 	public void beforeEnter(BeforeEnterEvent event) {
-		// If we have a page entity ID, try to load that specific page
-		loadSpecificPage(pageEntityId, event);
+		loadSpecificPage(pageEntityId);
 	}
 
 	/** Implementation of IPageTitleProvider - provides the page title from the current CPageEntity */
@@ -72,40 +72,36 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 	}
 
 	/** Load a specific page by entity ID. */
-	private void loadSpecificPage(Long pageEntityId, BeforeEnterEvent event) {
+	private void loadSpecificPage(Long pageEntityId) {
 		Check.notNull(pageEntityId, "Page entity ID cannot be null");
 		LOGGER.debug("Loading specific page for entity ID: {}", pageEntityId);
-		CPageEntity pageEntity =
+		currentPageEntity =
 				pageEntityService.getById(pageEntityId).orElseThrow(() -> new IllegalStateException("No page found for ID: " + pageEntityId));
-		// Store the current page entity for title provider
-		currentPageEntity = pageEntity;
-		if (pageEntity.getRequiresAuthentication()) {
+		if (currentPageEntity.getRequiresAuthentication()) {
 			sessionService.getActiveUser().orElseThrow(() -> new IllegalStateException("No active user found"));
 		}
 		try {
+			CDynamicPageViewWithSections page = null;
 			// Check if this page has grid and detail sections configured
-			if (hasGridAndDetailConfiguration(pageEntity)) {
-				LOGGER.debug("Creating dynamic page with grid and detail sections for: {}", pageEntity.getPageTitle());
-				CDynamicPageViewWithSections dynamicPageViewWithSections =
-						new CDynamicPageViewWithSections(pageEntity, sessionService, detailSectionService, gridEntityService, applicationContext);
-				Check.notNull(dynamicPageViewWithSections, "Dynamic page view with sections cannot be null");
-				removeAll();
-				add(dynamicPageViewWithSections);
+			if (currentPageEntity.getGridEntity().getAttributeNone() == false) {
+				LOGGER.debug("Creating dynamic page with grid and detail sections for: {}", currentPageEntity.getPageTitle());
+				page = new CDynamicPageViewWithSections(currentPageEntity, sessionService, detailSectionService, gridEntityService,
+						applicationContext);
 			} else {
-				LOGGER.debug("Creating standard dynamic page view for: {}", pageEntity.getPageTitle());
-				CDynamicPageView dynamicPageView = new CDynamicPageView(pageEntity, sessionService, detailSectionService);
-				Check.notNull(dynamicPageView, "Dynamic page view cannot be null");
-				removeAll();
-				add(dynamicPageView);
+				LOGGER.debug("Creating standard dynamic page view for: {}", currentPageEntity.getPageTitle());
+				page = new CDynamicPageViewWithoutGrid(currentPageEntity, sessionService, detailSectionService);
 			}
+			Check.notNull(page, "Dynamic page view with sections cannot be null");
+			removeAll();
+			add(page);
 		} catch (Exception e) {
-			LOGGER.error("Failed to create dynamic page view for: {}", pageEntity.getPageTitle(), e);
+			LOGGER.error("Failed to create dynamic page view for: {}", currentPageEntity.getPageTitle(), e);
 			throw e;
 		}
 	}
 
 	@Override
-	public void setParameter(com.vaadin.flow.router.BeforeEvent event, Long parameter) {
+	public void setParameter(BeforeEvent event, Long parameter) {
 		pageEntityId = parameter;
 	}
 

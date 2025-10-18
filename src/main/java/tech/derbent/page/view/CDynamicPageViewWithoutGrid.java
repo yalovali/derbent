@@ -2,6 +2,7 @@ package tech.derbent.page.view;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -19,23 +20,17 @@ import tech.derbent.session.service.ISessionService;
 
 /** Dynamic page view for rendering database-defined pages. This view displays content stored in CPageEntity instances. */
 @PermitAll
-public class CDynamicPageView extends CDynamicPageViewWithSections {
+public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 
 	public static final String DEFAULT_COLOR = "#4b2900";
 	public static final String DEFAULT_ICON = "vaadin:dashboard";
-	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicPageView.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicPageViewWithoutGrid.class);
 	private static final long serialVersionUID = 1L;
-	private final ISessionService sessionService;
 
-	// Backward compatibility constructor - gets services from Spring context
-	public CDynamicPageView(final CPageEntity pageEntity, final ISessionService sessionService) {
-		this(pageEntity, sessionService, null);
-	}
-
-	public CDynamicPageView(final CPageEntity pageEntity, final ISessionService sessionService, final CDetailSectionService detailSectionService) {
+	public CDynamicPageViewWithoutGrid(final CPageEntity pageEntity, final ISessionService sessionService,
+			final CDetailSectionService detailSectionService, final ApplicationContext applicationContext) {
 		// For backward compatibility, we need to create the missing services
-		super(pageEntity, sessionService, detailSectionService, null, null);
-		this.sessionService = sessionService;
+		super(pageEntity, sessionService, detailSectionService, applicationContext);
 		initializePage();
 		LOGGER.debug("Creating dynamic page view for: {}", pageEntity.getPageTitle());
 	}
@@ -59,16 +54,10 @@ public class CDynamicPageView extends CDynamicPageViewWithSections {
 
 	/** Create the main page content area. */
 	private void createGridAndDetailSections() {
-		// NO GRID!
+		LOGGER.debug("Creating page content area for page: {}", pageEntity.getPageTitle());
 		Check.notNull(pageEntity, "pageEntity cannot be null");
 		Check.notNull(pageEntity.getContent(), "pageEntity content cannot be null");
-		// Only create content area if there is actual content
-		Div contentArea = new Div();
-		contentArea.addClassNames("page-content");
-		contentArea.setSizeFull();
-		// Render content as HTML
-		contentArea.getElement().setProperty("innerHTML", sanitizeContent(pageEntity.getContent()));
-		add(contentArea);
+		// add(pageEntity.getContent());
 	}
 
 	/** Create page footer with metadata. */
@@ -87,15 +76,9 @@ public class CDynamicPageView extends CDynamicPageViewWithSections {
 	private void createPageHeader() {
 		// Only create header if pageTitle is not empty
 		if (pageEntity.getPageTitle() != null && !pageEntity.getPageTitle().trim().isEmpty()) {
-			H1 pageTitle = new H1(pageEntity.getPageTitle());
+			H1 pageTitle = new H1("x:" + pageEntity.getPageTitle());
 			pageTitle.addClassNames("page-title");
 			add(pageTitle);
-		}
-		// Only create description if it exists and is not empty
-		if (pageEntity.getDescription() != null && !pageEntity.getDescription().trim().isEmpty()) {
-			Paragraph description = new Paragraph(pageEntity.getDescription());
-			description.addClassNames("page-description");
-			add(description);
 		}
 	}
 
@@ -108,7 +91,6 @@ public class CDynamicPageView extends CDynamicPageViewWithSections {
 	public String getPageTitle() { return pageEntity != null ? pageEntity.getPageTitle() : null; }
 
 	/** Initialize the entity service based on the configured entity type. */
-	@Override
 	protected void initializeEntityService() {
 		try {
 			// Try to get the service bean from the configured grid entity
@@ -145,14 +127,5 @@ public class CDynamicPageView extends CDynamicPageViewWithSections {
 		createPageHeader();
 		createGridAndDetailSections();
 		createPageFooter();
-	}
-
-	/** Basic HTML sanitization for content. In a production system, use a proper HTML sanitization library. */
-	private String sanitizeContent(String content) {
-		if (content == null) {
-			return "";
-		}
-		// Very basic sanitization - remove script tags
-		return content.replaceAll("(?i)<script[^>]*>.*?</script>", "").replaceAll("(?i)<script[^>]*/>", "");
 	}
 }
