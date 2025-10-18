@@ -31,7 +31,6 @@ public class CUserInitializerService extends CInitializerServiceBase {
 			// create screen lines
 			scr.addScreenLine(CDetailLinesService.createSection(CUserInitializerService.BASE_PANEL_NAME));
 			// for test purposes only
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "activities"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastname"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "login"));
@@ -58,6 +57,7 @@ public class CUserInitializerService extends CInitializerServiceBase {
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "activities"));
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {

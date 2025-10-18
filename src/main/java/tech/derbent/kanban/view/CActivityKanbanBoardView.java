@@ -28,7 +28,7 @@ import tech.derbent.session.service.ISessionService;
  * project awareness and real-time updates. */
 @Route ("activities-kanban")
 @PageTitle ("Activity Kanban Board")
-@Menu (order = 1.211, icon = "class:tech.derbent.kanban.view.CActivityKanbanBoardView", title = "Project.Kanban")
+@Menu (order = 3.1211, icon = "class:tech.derbent.kanban.view.CActivityKanbanBoardView", title = "Project.Kanban")
 @PermitAll
 public class CActivityKanbanBoardView extends VerticalLayout implements IProjectChangeListener {
 

@@ -18,7 +18,7 @@ import tech.derbent.session.service.ISessionService;
  * the generic kanban system can be used for different entity types like meetings. */
 @Route ("meetings-kanban")
 @PageTitle ("Meeting Kanban Board")
-@Menu (order = 3.1, icon = "class:tech.derbent.kanban.view.CMeetingKanbanBoardView", title = "Management.MeetingsKanban")
+@Menu (order = 3.1001, icon = "class:tech.derbent.kanban.view.CMeetingKanbanBoardView", title = "Project.MeetingsKanban")
 @PermitAll
 public class CMeetingKanbanBoardView extends CBaseKanbanBoardView<CMeeting, CMeetingStatus> {
 

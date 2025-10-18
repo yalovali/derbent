@@ -325,31 +325,25 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			notselectedItems.clear();
 			// Use robust comparison: filter out items that are present in selectedItems
 			// This uses equals() method which should work correctly for both entities and primitives (like String)
-			notselectedItems.addAll(sourceItems.stream().filter(item -> {
+			notselectedItems.addAll(sourceItems);
+			notselectedItems.removeIf(nulledItem -> {
 				try {
-					Check.notNull(item, "Source item cannot be null during filtering");
-					// For each item in sourceItems, check if it exists in selectedItems
-					// This uses equals() for comparison which handles String properly
-					final boolean isSelected = selectedItems.stream().anyMatch(selectedItem -> {
+					String labelA = itemLabelGenerator != null ? itemLabelGenerator.apply(nulledItem) : nulledItem.toString();
+					boolean isSelected = selectedItems.stream().anyMatch(searchItem -> {
 						try {
-							if (selectedItem == null || item == null) {
-								return selectedItem == item; // Both null or reference equality
-							}
-							// Use equals() for proper comparison - works for String, entities with proper equals(), etc.
-							return item.equals(selectedItem);
+							String labelB = itemLabelGenerator != null ? itemLabelGenerator.apply(searchItem) : searchItem.toString();
+							return labelA.equals(labelB);
 						} catch (final Exception compareEx) {
-							LOGGER.error("Error comparing items during filtering: {} vs {}", item, selectedItem, compareEx);
+							LOGGER.error("Error comparing items during removal: {} vs {}", nulledItem, searchItem, compareEx);
 							return false; // On error, assume not equal
 						}
 					});
-					LOGGER.trace("Item {} is {}selected", item, isSelected ? "" : "not ");
-					return !isSelected; // Include in notselectedItems if NOT selected
-				} catch (final Exception filterEx) {
-					LOGGER.error("Error filtering item: {}", item, filterEx);
-					return true; // On error, include the item in available list
+					return isSelected; // Remove if selected
+				} catch (final Exception removeEx) {
+					LOGGER.error("Error removing nulled item: {}", nulledItem, removeEx);
+					return false; // On error, keep the item in available list
 				}
-			}).collect(Collectors.toList()));
-			LOGGER.debug("After filtering: {} available items (not selected)", notselectedItems.size());
+			});
 			availableGrid.setItems(notselectedItems);
 			selectedGrid.setItems(selectedItems);
 			availableGrid.asSingleSelect().setValue(notselectedItems.isEmpty() ? null : notselectedItems.get(0));
@@ -407,6 +401,16 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			LOGGER.info("Setting {} source items for selection component", items.size());
 			sourceItems.clear();
 			sourceItems.addAll(items);
+			sourceItems.sort((a, b) -> {
+				try {
+					String labelA = itemLabelGenerator != null ? itemLabelGenerator.apply(a) : a.toString();
+					String labelB = itemLabelGenerator != null ? itemLabelGenerator.apply(b) : b.toString();
+					return labelA.compareToIgnoreCase(labelB);
+				} catch (Exception e) {
+					LOGGER.error("Error comparing items for sorting: {} vs {}", a, b, e);
+					return 0; // Treat as equal on error
+				}
+			});
 			populateForm();
 		} catch (Exception e) {
 			LOGGER.error("Failed to set source items: {}", e.getMessage(), e);

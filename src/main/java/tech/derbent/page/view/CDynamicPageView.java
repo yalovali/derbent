@@ -25,7 +25,6 @@ public class CDynamicPageView extends CDynamicPageViewWithSections {
 	public static final String DEFAULT_ICON = "vaadin:dashboard";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CDynamicPageView.class);
 	private static final long serialVersionUID = 1L;
-	private final CPageEntity pageEntity;
 	private final ISessionService sessionService;
 
 	// Backward compatibility constructor - gets services from Spring context
@@ -36,7 +35,6 @@ public class CDynamicPageView extends CDynamicPageViewWithSections {
 	public CDynamicPageView(final CPageEntity pageEntity, final ISessionService sessionService, final CDetailSectionService detailSectionService) {
 		// For backward compatibility, we need to create the missing services
 		super(pageEntity, sessionService, detailSectionService, null, null);
-		this.pageEntity = pageEntity;
 		this.sessionService = sessionService;
 		initializePage();
 		LOGGER.debug("Creating dynamic page view for: {}", pageEntity.getPageTitle());

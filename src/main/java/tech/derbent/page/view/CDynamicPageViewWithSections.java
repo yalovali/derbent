@@ -50,7 +50,7 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 	protected CAbstractService<?> entityService;
 	protected CComponentGridEntity grid;
 	private final CGridEntityService gridEntityService;
-	private final CPageEntity pageEntity;
+	protected final CPageEntity pageEntity;
 	private final CVerticalLayout splitBottomLayout = new CVerticalLayout(false, false, false);
 	// Layout components
 	protected final SplitLayout splitLayout = new SplitLayout();
@@ -64,11 +64,11 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 		this.applicationContext = applicationContext;
 		this.gridEntityService = gridEntityService;
 		initializePage();
-		LOGGER.debug("Creating dynamic page view with sections for: {}", pageEntity.getPageTitle());
 	}
 
 	@Override
 	public void beforeEnter(final BeforeEnterEvent event) {
+		LOGGER.debug("Before enter event for dynamic page: {}", pageEntity.getPageTitle());
 		// Security check
 		if (pageEntity.getRequiresAuthentication() && sessionService.getActiveUser().isEmpty()) {
 			event.rerouteToError(IllegalAccessException.class, "Authentication required");
@@ -79,7 +79,6 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 			event.rerouteToError(IllegalStateException.class, "Page not available");
 			return;
 		}
-		LOGGER.debug("User accessing page: {}", pageEntity.getPageTitle());
 	}
 
 	/** Clear entity details and reset state. */
