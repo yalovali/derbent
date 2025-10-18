@@ -469,7 +469,10 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			LOGGER.info("Binder triggered setValue on CComponentFieldSelection - reading {} selected items from entity field",
 					value != null ? value.size() : 0);
 			selectedItems.clear();
-			updateSourceItems();
+			// Only update source items if dataProviderResolver is available
+			if (dataProviderResolver != null && fieldInfo != null) {
+				updateSourceItems();
+			}
 			if (value != null) {
 				// Preserve the order from the entity's list field
 				selectedItems.addAll(value);
