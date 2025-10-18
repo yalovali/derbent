@@ -87,8 +87,9 @@ public class CFieldSelectionDialog extends CDBEditDialog<List<FieldSelection>> {
 			// Get all available fields
 			List<EntityFieldInfo> allFields = CEntityFieldService.getEntityFields(entityType);
 			// Filter to get selected fields in order
-			List<EntityFieldInfo> selectedFields = currentSelections.stream().map(fieldName -> allFields.stream()
-					.filter(f -> f.getFieldName().equals(fieldName)).findFirst().orElse(null)).filter(f -> f != null).collect(Collectors.toList());
+			List<EntityFieldInfo> selectedFields = currentSelections.stream()
+					.map(fieldName -> allFields.stream().filter(f -> f.getFieldName().equals(fieldName)).findFirst().orElse(null))
+					.filter(f -> f != null).collect(Collectors.toList());
 			LOGGER.debug("Populating form with {} selected fields", selectedFields.size());
 			fieldSelectionComponent.setValue(selectedFields);
 		}
