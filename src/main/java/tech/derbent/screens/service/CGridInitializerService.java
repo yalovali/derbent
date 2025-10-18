@@ -23,7 +23,6 @@ public class CGridInitializerService extends CInitializerServiceBase {
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "columnFields"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
@@ -31,7 +30,7 @@ public class CGridInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNone"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Data Provider"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dataServiceBeanName"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "selectedFields"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "columnFields"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
@@ -46,7 +45,7 @@ public class CGridInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "dataServiceBeanName", "selectedFields", "attributeNonDeletable", "project"));
+		grid.setColumnFields(List.of("id", "name", "description", "dataServiceBeanName", "attributeNonDeletable", "project"));
 		return grid;
 	}
 
