@@ -81,7 +81,7 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 			sessionService.getActiveUser().orElseThrow(() -> new IllegalStateException("No active user found"));
 		}
 		try {
-			CDynamicPageViewWithSections page = null;
+			CDynamicPageBase page = null;
 			// Check if this page has grid and detail sections configured
 			if (currentPageEntity.getGridEntity().getAttributeNone() == false) {
 				LOGGER.debug("Creating dynamic page with grid and detail sections for: {}", currentPageEntity.getPageTitle());
@@ -89,9 +89,9 @@ public class CDynamicPageRouter extends CAbstractPage implements BeforeEnterObse
 						applicationContext);
 			} else {
 				LOGGER.debug("Creating standard dynamic page view for: {}", currentPageEntity.getPageTitle());
-				page = new CDynamicPageViewWithoutGrid(currentPageEntity, sessionService, detailSectionService);
+				page = new CDynamicPageViewWithoutGrid(currentPageEntity, sessionService, detailSectionService, applicationContext);
 			}
-			Check.notNull(page, "Dynamic page view with sections cannot be null");
+			Check.notNull(page, "Dynamic page view cannot be null");
 			removeAll();
 			add(page);
 		} catch (Exception e) {
