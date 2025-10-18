@@ -147,4 +147,93 @@ public class CComponentFieldSelectionTest {
 		assertTrue(component.isEmpty());
 		assertEquals(0, component.getValue().size());
 	}
+
+	@Test
+	public void testBinderIntegration_SimulateEntitySwitch() {
+		// This test simulates how the binder behaves when switching between entities
+		CComponentFieldSelection<Object, String> component = new CComponentFieldSelection<>("Available", "Selected");
+		// Setup: Set source items (this would typically be done once by FormBuilder)
+		List<String> allItems = Arrays.asList("Activity 1", "Activity 2", "Activity 3", "Activity 4", "Activity 5");
+		component.setSourceItems(allItems);
+		// Simulate binder.setBean(entity1) - entity1 has activities [Activity 1, Activity 3]
+		component.setValue(Arrays.asList("Activity 1", "Activity 3"));
+		assertEquals(2, component.getValue().size());
+		assertTrue(component.getValue().contains("Activity 1"));
+		assertTrue(component.getValue().contains("Activity 3"));
+		// Simulate binder.setBean(entity2) - entity2 has activities [Activity 2, Activity 4, Activity 5]
+		component.setValue(Arrays.asList("Activity 2", "Activity 4", "Activity 5"));
+		assertEquals(3, component.getValue().size());
+		assertTrue(component.getValue().contains("Activity 2"));
+		assertTrue(component.getValue().contains("Activity 4"));
+		assertTrue(component.getValue().contains("Activity 5"));
+		assertFalse(component.getValue().contains("Activity 1"));
+		assertFalse(component.getValue().contains("Activity 3"));
+		// Simulate binder.setBean(entity3) - entity3 has no activities
+		component.setValue(Arrays.asList());
+		assertEquals(0, component.getValue().size());
+		assertTrue(component.isEmpty());
+		// Simulate binder.setBean(entity4) - entity4 has all activities
+		component.setValue(allItems);
+		assertEquals(5, component.getValue().size());
+		assertEquals(allItems, component.getValue());
+	}
+
+	@Test
+	public void testBinderIntegration_ValueChangeListener() {
+		// Test that value change listeners are notified when binder triggers setValue
+		CComponentFieldSelection<Object, String> component = new CComponentFieldSelection<>("Available", "Selected");
+		List<String> allItems = Arrays.asList("Item 1", "Item 2", "Item 3");
+		component.setSourceItems(allItems);
+		// Track value changes
+		final int[] changeCount = {
+				0
+		};
+		final List<String>[] lastOldValue = new List[1];
+		final List<String>[] lastNewValue = new List[1];
+		component.addValueChangeListener(event -> {
+			changeCount[0]++;
+			lastOldValue[0] = event.getOldValue();
+			lastNewValue[0] = event.getValue();
+		});
+		// First setValue - should trigger listener
+		component.setValue(Arrays.asList("Item 1"));
+		assertEquals(1, changeCount[0], "Should have one value change");
+		assertEquals(0, lastOldValue[0].size(), "Old value should be empty");
+		assertEquals(1, lastNewValue[0].size(), "New value should have one item");
+		// Second setValue with different value - should trigger listener
+		component.setValue(Arrays.asList("Item 1", "Item 2"));
+		assertEquals(2, changeCount[0], "Should have two value changes");
+		assertEquals(1, lastOldValue[0].size(), "Old value should have one item");
+		assertEquals(2, lastNewValue[0].size(), "New value should have two items");
+		// Third setValue with same value - should NOT trigger listener (no change)
+		component.setValue(Arrays.asList("Item 1", "Item 2"));
+		assertEquals(2, changeCount[0], "Should still have two value changes (no change)");
+	}
+
+	@Test
+	public void testBinderIntegration_OrderPreservationAcrossEntitySwitch() {
+		// Test that order is preserved when switching between entities
+		CComponentFieldSelection<Object, String> component = new CComponentFieldSelection<>("Available", "Selected");
+		List<String> allItems = Arrays.asList("A", "B", "C", "D", "E");
+		component.setSourceItems(allItems);
+		// Entity 1: Items in order [C, A, E]
+		component.setValue(Arrays.asList("C", "A", "E"));
+		List<String> entity1Order = component.getValue();
+		assertEquals("C", entity1Order.get(0));
+		assertEquals("A", entity1Order.get(1));
+		assertEquals("E", entity1Order.get(2));
+		// Entity 2: Items in order [B, D] - different selection and order
+		component.setValue(Arrays.asList("B", "D"));
+		List<String> entity2Order = component.getValue();
+		assertEquals(2, entity2Order.size());
+		assertEquals("B", entity2Order.get(0));
+		assertEquals("D", entity2Order.get(1));
+		// Switch back to Entity 1: Should restore [C, A, E] in that exact order
+		component.setValue(Arrays.asList("C", "A", "E"));
+		List<String> entity1OrderRestored = component.getValue();
+		assertEquals(3, entity1OrderRestored.size());
+		assertEquals("C", entity1OrderRestored.get(0));
+		assertEquals("A", entity1OrderRestored.get(1));
+		assertEquals("E", entity1OrderRestored.get(2));
+	}
 }

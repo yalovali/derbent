@@ -180,11 +180,12 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 
 	/** Fires a value change event to listeners. */
 	private void fireValueChangeEvent() {
-		LOGGER.debug("Firing value change event");
+		LOGGER.debug("Firing value change event - old value size: {}, new value size: {}", currentValue.size(), selectedItems.size());
 		List<DetailEntity> oldValue = currentValue;
 		List<DetailEntity> newValue = getValue();
 		currentValue = new ArrayList<>(newValue);
 		if (!oldValue.equals(newValue)) {
+			LOGGER.info("Value changed from {} to {} selected items - notifying {} listeners", oldValue.size(), newValue.size(), listeners.size());
 			ValueChangeEvent<List<DetailEntity>> event = new ValueChangeEvent<List<DetailEntity>>() {
 
 				private static final long serialVersionUID = 1L;
@@ -202,6 +203,8 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 				public boolean isFromClient() { return true; }
 			};
 			listeners.forEach(listener -> listener.valueChanged(event));
+		} else {
+			LOGGER.debug("Value unchanged, not firing event to listeners");
 		}
 	}
 
@@ -297,9 +300,10 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	}
 
 	private void populateForm() {
-		LOGGER.debug("Refreshing available and selected item lists");
+		LOGGER.debug("Refreshing available and selected item lists - {} selected, {} total source items", selectedItems.size(), sourceItems.size());
 		notselectedItems.clear();
 		notselectedItems.addAll(sourceItems.stream().filter(item -> !selectedItems.contains(item)).collect(Collectors.toList()));
+		LOGGER.debug("After filtering: {} available items (not selected)", notselectedItems.size());
 		availableGrid.setItems(notselectedItems);
 		selectedGrid.setItems(selectedItems);
 		fireValueChangeEvent();
@@ -345,13 +349,13 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 
 	public void setSourceItems(List<DetailEntity> items) {
 		try {
-			LOGGER.debug("Setting source items for selection component");
-			sourceItems.clear();
 			Check.notNull(items, "Source items list cannot be null");
+			LOGGER.info("Setting {} source items for selection component", items.size());
+			sourceItems.clear();
 			sourceItems.addAll(items);
 			populateForm();
 		} catch (Exception e) {
-			LOGGER.error("Failed to set source items:" + e.getMessage());
+			LOGGER.error("Failed to set source items: {}", e.getMessage(), e);
 			throw e;
 		}
 	}
@@ -442,15 +446,18 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	@Override
 	public void setValue(List<DetailEntity> value) {
 		try {
-			LOGGER.debug("Setting value for field selection component");
+			LOGGER.info("Binder triggered setValue on CComponentFieldSelection - reading {} selected items from entity field",
+					value != null ? value.size() : 0);
 			selectedItems.clear();
 			if (value != null) {
 				// Preserve the order from the entity's list field
 				selectedItems.addAll(value);
+				LOGGER.debug("Selected items loaded from binder: {}",
+						selectedItems.stream().map(Object::toString).collect(java.util.stream.Collectors.joining(", ")));
 			}
 			populateForm();
 		} catch (Exception e) {
-			LOGGER.error("Failed to set value:" + e.getMessage());
+			LOGGER.error("Failed to set value in CComponentFieldSelection: {}", e.getMessage(), e);
 			throw e;
 		}
 	}
