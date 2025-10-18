@@ -190,7 +190,7 @@ public final class CDataProviderResolver {
 		}
 		// param bean must be ok now
 		Check.notNull(paramBean, "Parameter Service bean cannot be null for bean name: " + paramBeanName);
-		paramValue = CAuxillaries.invokeMethod(contentOwner, paramMethod);
+		paramValue = CAuxillaries.invokeMethod(paramBean, paramMethod);
 		return paramValue;
 	}
 }
