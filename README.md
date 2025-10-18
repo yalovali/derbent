@@ -1,17 +1,19 @@
 <div align="center">
 
-# 🌟 Derbent - Collaborative Project Management System
+# 🌟 Derbent - Java Vaadin Project Management System
 
-<img src="https://img.shields.io/badge/Java-17+-orange?style=for-the-badge&logo=java" alt="Java 17+">
+<img src="https://img.shields.io/badge/Java-21+-orange?style=for-the-badge&logo=openjdk" alt="Java 21+">
 <img src="https://img.shields.io/badge/Spring_Boot-3.5-green?style=for-the-badge&logo=spring" alt="Spring Boot 3.5">
-<img src="https://img.shields.io/badge/Vaadin-24.8-blue?style=for-the-badge&logo=vaadin" alt="Vaadin 24.8">
+<img src="https://img.shields.io/badge/Vaadin_Flow-24.8-blue?style=for-the-badge&logo=vaadin" alt="Vaadin Flow 24.8">
 <img src="https://img.shields.io/badge/PostgreSQL-Compatible-blue?style=for-the-badge&logo=postgresql" alt="PostgreSQL">
 <img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" alt="MIT License">
 
-**🚀 A sophisticated, enterprise-grade project management solution**  
-*Designed for small to medium-sized development teams*
+**🚀 Open-Source Project Management System Built with Pure Java & Vaadin Flow**  
+*No JavaScript Required • Full-Stack Java Development • Enterprise-Grade PM Solution*
 
-**✨ Inspired by Jira and ProjeQtOr • Built with modern Java ecosystem • Server-side rendering excellence ✨**
+**✨ Jira Alternative • Vaadin Flow Showcase • Pure Java Web Development • GitHub Copilot Optimized ✨**
+
+**Keywords**: Java project management, Vaadin application, open source PM tool, Java web framework, server-side rendering, full-stack Java, Jira alternative, agile project management, kanban board Java, Spring Boot Vaadin
 
 ---
 
@@ -19,28 +21,80 @@
 
 ## 🎯 **Project Vision & Mission**
 
-**Derbent** revolutionizes project management by combining enterprise-level capabilities with developer-friendly architecture. Our mission is to provide teams with a **type-safe**, **metadata-driven**, and **highly maintainable** project management platform that scales from startup to enterprise.
+**Derbent** revolutionizes project management by combining enterprise-level capabilities with developer-friendly architecture. Our mission is to provide teams with a **type-safe**, **metadata-driven**, and **highly maintainable** project management platform that scales from startup to enterprise - all built with **pure Java and Vaadin Flow**.
 
 ### 🌟 **Core Philosophy**
 - **🏗️ Architecture-First**: Clean, consistent patterns that promote long-term maintainability
 - **🎨 Developer Experience**: AI-assisted development with GitHub Copilot optimization
 - **🔒 Type Safety**: Compile-time guarantees and runtime reliability
 - **📈 Scalable Design**: Multi-tenant architecture ready for growth
+- **☕ Pure Java**: Full-stack web development without JavaScript complexity
+
+### 💼 **Ideal Use Cases**
+
+**🏢 Software Development Teams**
+- Agile sprint planning and tracking
+- Bug tracking and issue management
+- Feature development workflows
+- Code review coordination
+
+**📊 Consulting Firms**
+- Client project management
+- Time tracking and billing
+- Resource allocation
+- Multi-client isolation (multi-tenancy)
+
+**🎓 Educational Projects**
+- Learn enterprise Java patterns
+- Study Vaadin Flow best practices
+- Understand multi-tenant architecture
+- Practice full-stack Java development
+
+**🏭 Internal IT Teams**
+- Service desk ticketing
+- Infrastructure project tracking
+- Compliance tracking
+- Audit trail requirements
+
+**🚀 Startups & SMBs**
+- Self-hosted PM solution
+- Customizable to business needs
+- No licensing fees
+- Full control over data
 
 ## 🎯 **Project Overview**
 
 ### 🚀 **What Makes Derbent Special**
+
+**Derbent is the ideal choice for teams seeking:**
+- 🎨 **Pure Java Development**: No JavaScript required - Build complete web apps with Java
+- ⚡ **Vaadin Flow Excellence**: Server-side rendering with full type safety and hot reload
+- 🏢 **Enterprise-Ready PM Tool**: Jira-inspired features without the complexity
+- 🤖 **AI-Optimized Architecture**: Patterns specifically designed for GitHub Copilot
+- 📊 **Complete PM Solution**: Activities, risks, meetings, Kanban boards, Gantt charts
 
 <div align="center">
 
 | 🏢 **Enterprise Features** | 🛠️ **Developer Excellence** | 🎨 **User Experience** |
 |:---:|:---:|:---:|
 | Multi-tenant Architecture | C-Prefix Convention | Server-side Rendering |
-| Role-based Access Control | Metadata-driven Development | Rich UI Components |
+| Role-based Access Control | Metadata-driven Development | Rich Vaadin Components |
 | Audit Trail & Compliance | Type-safe Inheritance | Responsive Design |
 | Scalable Performance | GitHub Copilot Optimized | Intuitive Navigation |
 
 </div>
+
+### 🎯 **Perfect For**
+
+**Vaadin Developers**: Complete reference implementation showcasing Vaadin Flow best practices
+
+**Java Backend Developers**: Full-stack development without leaving Java ecosystem
+
+**Project Management Teams**: Open-source alternative to Jira, Linear, or Asana
+
+**Startups & SMBs**: Ready-to-deploy PM solution with customizable features
+
+**Learning & Education**: Well-documented patterns for enterprise Java development
 
 ### 🌟 **Key Challenges Solved**
 
@@ -52,13 +106,33 @@
 - **Challenge**: Runtime errors and data inconsistencies in large applications
 - **Solution**: Comprehensive inheritance hierarchies with compile-time type checking
 
-#### **🎨 UI Development Productivity**
-- **Challenge**: Complex UI development and maintenance
-- **Solution**: Metadata-driven form generation and component inheritance patterns
+#### **🎨 UI Development Productivity with Vaadin**
+- **Challenge**: Complex frontend development, JavaScript fatigue, API synchronization
+- **Solution**: Pure Java development with Vaadin Flow - server-side rendering, automatic state management, type-safe components
 
 #### **🧪 Quality Assurance & Testing**
 - **Challenge**: Ensuring UI consistency across complex workflows
 - **Solution**: Comprehensive Playwright-based UI automation with screenshot testing
+
+### 📊 **Derbent vs Other PM Tools**
+
+<div align="center">
+
+| Feature | Derbent | Jira | Asana | Open Project |
+|:--------|:-------:|:----:|:-----:|:------------:|
+| **Open Source** | ✅ MIT | ❌ | ❌ | ✅ GPL |
+| **Pure Java** | ✅ | ❌ | ❌ | ❌ Ruby |
+| **Vaadin UI** | ✅ | ❌ React | ❌ | ❌ Rails |
+| **Multi-tenant** | ✅ | ✅ | ✅ | ❌ |
+| **Self-hosted** | ✅ | ⚠️ Limited | ❌ | ✅ |
+| **Kanban** | ✅ | ✅ | ✅ | ✅ |
+| **Gantt** | ✅ | ✅ | ⚠️ Paid | ✅ |
+| **Time Tracking** | ✅ | ⚠️ Paid | ⚠️ Paid | ✅ |
+| **Easy Customization** | ✅ | ❌ | ❌ | ⚠️ |
+| **AI-Assisted Dev** | ✅ | N/A | N/A | N/A |
+| **Learning Curve** | Low | High | Medium | Medium |
+
+</div>
 
 ---
 
@@ -116,11 +190,13 @@ mvn spring-boot:run -Dspring.profiles.active=h2
 
 | **📖 Documentation** | **🎯 Purpose** | **👥 Audience** |
 |:---|:---|:---|
-| **[🤖 GitHub Copilot Guidelines](docs/copilot-guidelines.md)** | AI assistance patterns and coding standards | All Developers |
-| **[🏗️ Entity Class Patterns](docs/entity-inheritance.md)** | Inheritance hierarchies and entity design | Backend Developers |
-| **[⚙️ Service Class Patterns](docs/service-patterns.md)** | Business logic and repository patterns | Backend Developers |
-| **[🎨 View Class Patterns](docs/view-patterns.md)** | UI component and page patterns | Frontend Developers |
-| **[🔧 Utility Patterns](docs/utility-patterns.md)** | Helper classes and common patterns | All Developers |
+| **[🚀 Getting Started Guide](docs/development/getting-started.md)** | Quick setup and first steps | All Developers |
+| **[📁 Project Structure](docs/development/project-structure.md)** | Package organization and architecture | All Developers |
+| **[🤖 GitHub Copilot Guidelines](docs/development/copilot-guidelines.md)** | AI-assisted development patterns | All Developers |
+| **[🏗️ Entity Inheritance Patterns](docs/architecture/entity-inheritance-patterns.md)** | Complete entity hierarchy and best practices | Backend Developers |
+| **[⚙️ Service Layer Patterns](docs/architecture/service-layer-patterns.md)** | Business logic and repository patterns | Backend Developers |
+| **[🎨 View Layer Patterns](docs/architecture/view-layer-patterns.md)** | UI component and Vaadin patterns | Frontend Developers |
+| **[📝 Coding Standards](docs/architecture/coding-standards.md)** | C-prefix convention and best practices | All Developers |
 | **[🔐 Company Login Pattern](docs/implementation/COMPANY_LOGIN_PATTERN.md)** | Multi-tenant authentication implementation | Backend/Security |
 | **[🎭 Playwright Test Guide](docs/implementation/PLAYWRIGHT_TEST_GUIDE.md)** | Comprehensive UI testing framework | QA/Test Engineers |
 | **[🔍 Database Query Debugging](docs/DATABASE_QUERY_DEBUGGING.md)** | SQL query monitoring and debugging guide | Backend Developers |
@@ -288,20 +364,72 @@ public class CActivityView extends CGridViewBaseProject<CActivity> {
 
 ## ⚡ **Technical Superiorities & Style Advantages**
 
-### 🎨 **Vaadin Flow Excellence**
+### 🎨 **Why Vaadin Flow? The Java Developer's Dream**
+
 <div align="center">
 
-**🌟 Server-Side Rendering Superiority 🌟**
+**🚀 Build Full-Stack Web Apps Without Leaving Java 🚀**
 
 </div>
 
+Derbent showcases why Vaadin Flow is the best choice for Java developers building web applications:
+
+#### **Pure Java Development** 
+```java
+// NO JavaScript, NO TypeScript, NO React/Angular/Vue
+// Just clean, type-safe Java code:
+
+@Route("activities")
+public class CActivityView extends CAbstractPage {
+    
+    public CActivityView(CActivityService service) {
+        // Create UI with Java
+        Grid<CActivity> grid = new Grid<>(CActivity.class);
+        grid.addColumn(CActivity::getName).setHeader("Name");
+        grid.setItems(service.findAll());
+        
+        // Add event handlers with Java
+        grid.addSelectionListener(e -> {
+            e.getFirstSelectedItem().ifPresent(this::showDetails);
+        });
+        
+        add(grid);  // Type-safe component composition
+    }
+}
+```
+
+#### **Vaadin Flow Advantages**
+
+<div align="center">
+
 | **Traditional SPA Challenges** | **Derbent's Vaadin Solution** |
 |:---|:---|
-| ❌ Complex state management | ✅ Server-side state management |
-| ❌ API synchronization issues | ✅ Automatic server synchronization |
-| ❌ SEO and accessibility concerns | ✅ Native HTML rendering |
-| ❌ Bundle size optimization | ✅ Progressive loading |
-| ❌ Browser compatibility issues | ✅ Java ecosystem reliability |
+| ❌ Complex state management | ✅ Server-side state management - no Redux/MobX needed |
+| ❌ API synchronization issues | ✅ Automatic server synchronization - no REST/GraphQL complexity |
+| ❌ SEO and accessibility concerns | ✅ Native HTML rendering - perfect SEO out of box |
+| ❌ Bundle size optimization | ✅ Progressive loading - only what you need |
+| ❌ Browser compatibility issues | ✅ Java ecosystem reliability - works everywhere |
+| ❌ Separate frontend/backend teams | ✅ Full-stack Java - one team, one language |
+| ❌ Context switching | ✅ Stay in Java IDE - IntelliJ, Eclipse, VS Code |
+| ❌ Learning curve (JS ecosystem) | ✅ Use existing Java skills |
+
+</div>
+
+#### **Real Vaadin Flow Benefits in Derbent**
+
+✅ **Instant Hot Reload**: Change Java code, see results immediately (no npm rebuild)
+
+✅ **Type Safety Everywhere**: Compile-time checks from database to UI
+
+✅ **Secure by Default**: No exposed APIs, all business logic on server
+
+✅ **Rich Component Library**: 40+ production-ready components
+
+✅ **Mobile Responsive**: Automatic mobile optimization
+
+✅ **Themeable**: Easy customization with Lumo theme
+
+✅ **Testable**: Standard JUnit tests for UI logic
 
 ### 🔒 **Type Safety & Compile-Time Guarantees**
 
