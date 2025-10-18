@@ -1,5 +1,6 @@
 package tech.derbent.orders.service;
 
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.orders.domain.CCurrency;
@@ -47,7 +48,7 @@ public class CCurrencyInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields("id,name,currencyCode,currencySymbol,description,isActive,project");
+		grid.setColumnFields(List.of("id", "name", "currencyCode", "currencySymbol", "description", "isActive", "project"));
 		return grid;
 	}
 

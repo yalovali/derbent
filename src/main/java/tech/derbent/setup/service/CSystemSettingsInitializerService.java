@@ -1,5 +1,6 @@
 package tech.derbent.setup.service;
 
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.utils.Check;
@@ -77,8 +78,8 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(
-				"applicationName,applicationVersion,accountLockoutDurationMinutes,enableAutomaticBackups,enableCaching,defaultSystemTheme,isActive");
+		grid.setColumnFields(List.of("applicationName", "applicationVersion", "accountLockoutDurationMinutes", "enableAutomaticBackups",
+				"enableCaching", "defaultSystemTheme", "isActive"));
 		return grid;
 	}
 
@@ -86,8 +87,8 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		// Set attributeNone to hide grid for single entity display
 		grid.setAttributeNone(attributeNone);
-		grid.setColumnFields(
-				"applicationName,applicationVersion,accountLockoutDurationMinutes,enableAutomaticBackups,enableCaching,defaultSystemTheme,isActive");
+		grid.setColumnFields(List.of("applicationName", "applicationVersion", "accountLockoutDurationMinutes", "enableAutomaticBackups",
+				"enableCaching", "defaultSystemTheme", "isActive"));
 		return grid;
 	}
 

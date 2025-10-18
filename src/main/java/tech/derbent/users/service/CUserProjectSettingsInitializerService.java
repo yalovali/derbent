@@ -1,5 +1,6 @@
 package tech.derbent.users.service;
 
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.utils.Check;
@@ -58,7 +59,7 @@ public final class CUserProjectSettingsInitializerService extends CInitializerSe
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, ENTITY_CLASS);
-		grid.setColumnFields("id,user,project,role,permission,isActive");
+		grid.setColumnFields(List.of("id", "user", "project", "role", "permission", "isActive"));
 		return grid;
 	}
 

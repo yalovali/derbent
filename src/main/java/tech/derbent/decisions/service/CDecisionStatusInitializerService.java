@@ -1,5 +1,6 @@
 package tech.derbent.decisions.service;
 
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.decisions.domain.CDecisionStatus;
@@ -47,7 +48,7 @@ public class CDecisionStatusInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields("id,name,description,color,sortOrder,isFinal,requiresApproval,project");
+		grid.setColumnFields(List.of("id", "name", "description", "color", "sortOrder", "isFinal", "requiresApproval", "project"));
 		return grid;
 	}
 

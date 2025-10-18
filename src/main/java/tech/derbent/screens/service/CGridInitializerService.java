@@ -1,5 +1,6 @@
 package tech.derbent.screens.service;
 
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.page.service.CPageEntityService;
@@ -45,7 +46,7 @@ public class CGridInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields("id,name,description,dataServiceBeanName,selectedFields,attributeNonDeletable,project");
+		grid.setColumnFields(List.of("id", "name", "description", "dataServiceBeanName", "selectedFields", "attributeNonDeletable", "project"));
 		return grid;
 	}
 

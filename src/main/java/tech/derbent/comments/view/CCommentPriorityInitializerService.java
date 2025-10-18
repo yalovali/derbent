@@ -1,5 +1,6 @@
 package tech.derbent.comments.view;
 
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.comments.domain.CCommentPriority;
@@ -51,7 +52,7 @@ public class CCommentPriorityInitializerService extends CInitializerServiceBase 
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields("id,name,description,priorityLevel,isDefault,color,sortOrder,isActive,project");
+		grid.setColumnFields(List.of("id", "name", "description", "priorityLevel", "isDefault", "color", "sortOrder", "isActive", "project"));
 		return grid;
 	}
 

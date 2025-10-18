@@ -118,7 +118,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		}
 		populateForm();
 		availableGrid.asSingleSelect().setValue(selectionIndex < notselectedItems.size() ? notselectedItems.get(selectionIndex)
-				: notselectedItems.isEmpty() ? null : notselectedItems.getLast());
+				: notselectedItems.isEmpty() ? null : notselectedItems.get(notselectedItems.size() - 1));
 		selectedGrid.asSingleSelect().setValue(selected);
 	}
 
@@ -322,8 +322,8 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		LOGGER.debug("After filtering: {} available items (not selected)", notselectedItems.size());
 		availableGrid.setItems(notselectedItems);
 		selectedGrid.setItems(selectedItems);
-		availableGrid.asSingleSelect().setValue(notselectedItems.isEmpty() ? null : notselectedItems.getFirst());
-		selectedGrid.asSingleSelect().setValue(selectedItems.isEmpty() ? null : selectedItems.getFirst());
+		availableGrid.asSingleSelect().setValue(notselectedItems.isEmpty() ? null : notselectedItems.get(0));
+		selectedGrid.asSingleSelect().setValue(selectedItems.isEmpty() ? null : selectedItems.get(0));
 		fireValueChangeEvent();
 	}
 
@@ -335,7 +335,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		selectedItems.remove(selected);
 		populateForm();
 		selectedGrid.asSingleSelect().setValue(selectionIndex < selectedItems.size() ? selectedItems.get(selectionIndex)
-				: (selectedItems.isEmpty() ? null : selectedItems.getLast()));
+				: (selectedItems.isEmpty() ? null : selectedItems.get(selectedItems.size() - 1)));
 	}
 
 	public void setItemLabelGenerator(ItemLabelGenerator<DetailEntity> itemLabelGenerator) {

@@ -1,5 +1,6 @@
 package tech.derbent.projects.service;
 
+import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +55,7 @@ public class CProjectInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields("id,name,description,isActive,createdDate,lastModifiedDate");
+		grid.setColumnFields(List.of("id", "name", "description", "isActive", "createdDate", "lastModifiedDate"));
 		return grid;
 	}
 

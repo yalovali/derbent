@@ -1,5 +1,6 @@
 package tech.derbent.gannt.service;
 
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.gannt.domain.CGanntViewEntity;
@@ -45,7 +46,7 @@ public class CGanntInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields("id,name,description,project,isActive");
+		grid.setColumnFields(List.of("id", "name", "description", "project", "isActive"));
 		return grid;
 	}
 

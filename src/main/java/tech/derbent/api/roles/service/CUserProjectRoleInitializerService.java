@@ -1,5 +1,6 @@
 package tech.derbent.api.roles.service;
 
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.roles.domain.CUserProjectRole;
@@ -62,7 +63,8 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 		final CGridEntity grid = createBaseGridEntity(project, ENTITY_CLASS);
 		// hide grid actions when needed
 		grid.setAttributeNone(attributeNone);
-		grid.setColumnFields("id,name,description,project,isAdmin,isUser,isGuest,color,sortOrder,isActive,attributeNonDeletable");
+		grid.setColumnFields(List.of("id", "name", "description", "project", "isAdmin", "isUser", "isGuest", "color", "sortOrder", "isActive",
+				"attributeNonDeletable"));
 		return grid;
 	}
 
