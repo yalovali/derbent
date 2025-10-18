@@ -345,29 +345,35 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			Check.notNull(entityClass, "Could not determine entity class from service: " + serviceBeanName);
 			grid = new CGrid(entityClass);
 			grid.asSingleSelect().addValueChangeListener(this::onSelectionChange);
-			// Add ID column first
-			// grid.addIdColumn(CEntityDB::getId, "#", "id");
-			// Parse selected fields and create columns
-			List<FieldConfig> fieldConfigs = parseSelectedFields(gridEntity.getColumnFields(), entityClass);
-			// create all
-			fieldConfigs.forEach(fc -> createColumnForField(fc));
-			// Configure sorting - sort by first column (ID) initially
-			try {
-				// Get the first column (ID column) and sort by it
-				if (grid.getColumns().size() > 0) {
-					Grid.Column<?> firstColumn = grid.getColumns().get(0);
-					// Make it sortable and set as sorted
-					firstColumn.setSortable(true);
-				}
-			} catch (Exception e) {
-				LOGGER.warn("Could not configure sorting on first column: {}", e.getMessage());
-			}
+			createGridColumns();
 			// Load data from the service
 			loadDataFromService(serviceBeanName, gridEntity.getProject());
 			this.add(grid);
 		} catch (Exception e) {
 			LOGGER.error("Error creating grid content.");
 			add(new Div("Error creating grid: " + e.getMessage()));
+		}
+	}
+
+	public void createGridColumns() throws Exception {
+		try {
+			// clear existing columns
+			grid.removeAllColumns();
+			String serviceBeanName = gridEntity.getDataServiceBeanName();
+			Class<?> entityClass = getEntityClassFromService(serviceBeanName);
+			Check.notNull(entityClass, "Could not determine entity class from service: " + serviceBeanName);
+			List<FieldConfig> fieldConfigs = parseSelectedFields(gridEntity.getColumnFields(), entityClass);
+			fieldConfigs.forEach(fc -> createColumnForField(fc));
+			// Configure sorting - sort by first column (ID) initially
+			// Get the first column (ID column) and sort by it
+			if (grid.getColumns().size() > 0) {
+				Grid.Column<?> firstColumn = grid.getColumns().get(0);
+				// Make it sortable and set as sorted
+				firstColumn.setSortable(true);
+			}
+		} catch (Exception e) {
+			LOGGER.warn("Could not configure sorting on first column: {}", e.getMessage());
+			throw e;
 		}
 	}
 

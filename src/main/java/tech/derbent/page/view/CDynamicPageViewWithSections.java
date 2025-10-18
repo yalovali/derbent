@@ -49,8 +49,9 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 	// Services for dynamic entity management
 	protected CAbstractService<?> entityService;
 	protected CComponentGridEntity grid;
+	private final CGridEntityService gridEntityService;
 	private final CPageEntity pageEntity;
-	private final CVerticalLayout splitBottomLayout = new CVerticalLayout(false, false, false);;
+	private final CVerticalLayout splitBottomLayout = new CVerticalLayout(false, false, false);
 	// Layout components
 	protected final SplitLayout splitLayout = new SplitLayout();
 
@@ -61,6 +62,7 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 		super(sessionService, detailSectionService);
 		this.pageEntity = pageEntity;
 		this.applicationContext = applicationContext;
+		this.gridEntityService = gridEntityService;
 		initializePage();
 		LOGGER.debug("Creating dynamic page view with sections for: {}", pageEntity.getPageTitle());
 	}
@@ -151,7 +153,7 @@ public class CDynamicPageViewWithSections extends CPageBaseProjectAware implemen
 		// Create grid layout with toolbar
 		final CVerticalLayout gridLayout = new CVerticalLayout();
 		gridLayout.setSizeFull();
-		gridLayout.add(new CComponentDetailsMasterToolbar(grid));
+		gridLayout.add(new CComponentDetailsMasterToolbar(grid, gridEntityService));
 		gridLayout.add(grid);
 		// Allow the grid layout to expand
 		gridLayout.getStyle().remove("max-height");

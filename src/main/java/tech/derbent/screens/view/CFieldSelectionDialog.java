@@ -8,8 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import tech.derbent.api.domains.CEntityNamed;
-import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CComponentFieldSelection;
 import tech.derbent.api.views.dialogs.CDBEditDialog;
@@ -20,11 +18,11 @@ import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 /** Dialog for selecting and ordering grid column fields. Uses CComponentFieldSelection with FormBuilder patterns for the selection interface. */
 public class CFieldSelectionDialog extends CDBEditDialog<List<FieldSelection>> {
 
-	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CFieldSelectionDialog.class);
+	private static final long serialVersionUID = 1L;
 	private List<String> currentSelections;
 	private String entityType;
-	private CComponentFieldSelection<Object, EntityFieldInfo> fieldSelectionComponent;
+	private CComponentFieldSelection<Object, EntityFieldInfo> componentFieldSelection;
 
 	/** Creates a new field selection dialog.
 	 * @param entityType          The entity type to show fields for
@@ -42,9 +40,9 @@ public class CFieldSelectionDialog extends CDBEditDialog<List<FieldSelection>> {
 	private void createFormFields() throws Exception {
 		// Create the field selection component directly without FormBuilder
 		// Using null for dataProviderResolver and contentOwner since we'll set items manually
-		fieldSelectionComponent = new CComponentFieldSelection<>(null, null, null, "Available Fields", "Selected Fields");
+		componentFieldSelection = new CComponentFieldSelection<>(null, null, null, "Available Fields", "Selected Fields");
 		// Set item label generator for EntityFieldInfo
-		fieldSelectionComponent.setItemLabelGenerator(item -> {
+		componentFieldSelection.setItemLabelGenerator(item -> {
 			if (item instanceof EntityFieldInfo fieldInfo) {
 				return fieldInfo.getDisplayName() + " (" + fieldInfo.getFieldName() + ")";
 			}
@@ -55,8 +53,8 @@ public class CFieldSelectionDialog extends CDBEditDialog<List<FieldSelection>> {
 		Check.notNull(allFields, "Failed to get entity fields for type: " + entityType);
 		LOGGER.debug("Loaded {} fields for entity type '{}'", allFields.size(), entityType);
 		// Set source items directly
-		fieldSelectionComponent.setSourceItems(allFields);
-		getDialogLayout().add(fieldSelectionComponent);
+		componentFieldSelection.setSourceItems(allFields);
+		getDialogLayout().add(componentFieldSelection);
 	}
 
 	@Override
@@ -64,7 +62,7 @@ public class CFieldSelectionDialog extends CDBEditDialog<List<FieldSelection>> {
 
 	@Override
 	public List<FieldSelection> getEntity() {
-		List<EntityFieldInfo> selectedFields = fieldSelectionComponent.getValue();
+		List<EntityFieldInfo> selectedFields = componentFieldSelection.getValue();
 		List<FieldSelection> result = new ArrayList<>();
 		for (int i = 0; i < selectedFields.size(); i++) {
 			result.add(new FieldSelection(selectedFields.get(i), i));
@@ -91,7 +89,7 @@ public class CFieldSelectionDialog extends CDBEditDialog<List<FieldSelection>> {
 					.map(fieldName -> allFields.stream().filter(f -> f.getFieldName().equals(fieldName)).findFirst().orElse(null))
 					.filter(f -> f != null).collect(Collectors.toList());
 			LOGGER.debug("Populating form with {} selected fields", selectedFields.size());
-			fieldSelectionComponent.setValue(selectedFields);
+			componentFieldSelection.setValue(selectedFields);
 		}
 	}
 

@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.stream.Collectors;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -137,7 +138,7 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 			return refs.stream().map(ref -> {
 				final String name = entityName(ref);
 				return ((name != null) && !name.isBlank()) ? name : "Entity#" + ref.getId();
-			}).collect(java.util.stream.Collectors.joining(", "));
+			}).collect(Collectors.joining(", "));
 		};
 		final Column<EntityClass> column = addColumn(namesProvider).setHeader(header).setAutoWidth(true).setSortable(false) // usually collection
 																															// columns aren’t sortable

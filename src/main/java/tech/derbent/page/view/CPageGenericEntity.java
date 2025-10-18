@@ -135,7 +135,7 @@ public abstract class CPageGenericEntity<EntityClass extends CEntityDB<EntityCla
 			}
 		});
 		CVerticalLayout gridLayout = new CVerticalLayout();
-		gridLayout.add(new CComponentDetailsMasterToolbar(grid));
+		gridLayout.add(new CComponentDetailsMasterToolbar(grid, gridEntityService));
 		gridLayout.add(grid);
 		// Add grid to the primary (left) section
 		splitLayout.addToPrimary(gridLayout);

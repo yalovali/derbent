@@ -119,7 +119,10 @@ public class CGridEntity extends CEntityOfProject<CGridEntity> {
 
 	public void setAttributeNone(boolean attributeNone) { this.attributeNone = attributeNone; }
 
-	public void setColumnFields(List<String> columnFields) { this.columnFields = columnFields; }
+	public void setColumnFields(List<String> columnFields) {
+		// make sure the string are unique and filter out empty strings
+		this.columnFields = columnFields.stream().distinct().filter(s -> s != null && !s.trim().isEmpty()).toList();
+	}
 
 	public void setDataServiceBeanName(final String dataServiceBeanName) { this.dataServiceBeanName = dataServiceBeanName; }
 }

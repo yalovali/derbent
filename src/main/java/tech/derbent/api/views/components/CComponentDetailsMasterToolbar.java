@@ -9,6 +9,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import tech.derbent.api.ui.notifications.CNotifications;
 import tech.derbent.api.utils.Check;
 import tech.derbent.screens.domain.CGridEntity;
+import tech.derbent.screens.service.CGridEntityService;
 import tech.derbent.screens.view.CComponentGridEntity;
 import tech.derbent.screens.view.CFieldSelectionDialog;
 
@@ -18,10 +19,12 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 	private static final long serialVersionUID = 1L;
 	private CButton btnEditGrid;
 	private final CComponentGridEntity grid;
+	private final CGridEntityService gridEntityService;
 	private TextField searchField;
 
-	public CComponentDetailsMasterToolbar(final CComponentGridEntity grid) {
+	public CComponentDetailsMasterToolbar(final CComponentGridEntity grid, CGridEntityService gridEntityService) {
 		this.grid = grid;
+		this.gridEntityService = gridEntityService;
 		setSpacing(true);
 		setPadding(true);
 		addClassName("crud-toolbar");
@@ -78,12 +81,20 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 			final List<String> currentColumnFields = gridEntity.getColumnFields();
 			// Open field selection dialog
 			final CFieldSelectionDialog dialog = new CFieldSelectionDialog(entityType, currentColumnFields, selectedFields -> {
-				// Update grid entity with new field selection
-				final List<String> newSelectionString = selectedFields.stream().map(fs -> fs.getFieldInfo().getFieldName()).toList();
-				gridEntity.setColumnFields(newSelectionString);
-				// Refresh grid
-				grid.refreshGrid();
-				CNotifications.showSuccess("Grid columns updated successfully");
+				try {
+					// Update grid entity with new field selection
+					final List<String> newSelectionString = selectedFields.stream().map(fs -> fs.getFieldInfo().getFieldName()).toList();
+					gridEntity.setColumnFields(newSelectionString);
+					gridEntityService.save(gridEntity);
+					// Refresh grid
+					grid.createGridColumns();
+					grid.refreshGrid();
+					CNotifications.showSuccess("Grid columns updated successfully");
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					CNotifications.showError("Error saving grid columns: " + e.getMessage());
+				}
 			});
 			dialog.open();
 		} catch (final Exception e) {
