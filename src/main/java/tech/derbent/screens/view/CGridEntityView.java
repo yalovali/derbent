@@ -77,8 +77,8 @@ public class CGridEntityView extends CGridViewBaseProject<CGridEntity> {
 		CGridEntity bean = binder.getBean();
 		Check.notNull(bean, "No entity is bound to the binder");
 		Check.notNull(fieldSelectionComponent, "Field selection component is not initialized");
-		final String selected = fieldSelectionComponent.getSelectedFieldsAsString();
-		bean.setSelectedFields(selected != null ? selected : "");
+		final List<String> selected = fieldSelectionComponent.getSelectedFieldsAsString();
+		bean.setColumnFields(selected != null ? selected : "");
 		return true;
 	}
 
@@ -138,9 +138,6 @@ public class CGridEntityView extends CGridViewBaseProject<CGridEntity> {
 		String entityType = extractEntityTypeFromBeanName(beanName);
 		Check.notBlank(entityType, "Extracted entity type cannot be null or empty");
 		fieldSelectionComponent.setEntityType(entityType);
-		// Load existing selection
-		String existingSelection = currentEntity.getSelectedFields();
-		Check.notNull(existingSelection, "Existing selection cannot be null");
-		fieldSelectionComponent.setSelectedFieldsFromString(existingSelection);
+		// fieldSelectionComponent.setColumnFieldsFromString(existingSelection);
 	}
 }

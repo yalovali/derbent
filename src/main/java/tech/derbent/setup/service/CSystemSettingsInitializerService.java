@@ -77,7 +77,7 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setSelectedFields(
+		grid.setColumnFields(
 				"applicationName,applicationVersion,accountLockoutDurationMinutes,enableAutomaticBackups,enableCaching,defaultSystemTheme,isActive");
 		return grid;
 	}
@@ -86,7 +86,7 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		// Set attributeNone to hide grid for single entity display
 		grid.setAttributeNone(attributeNone);
-		grid.setSelectedFields(
+		grid.setColumnFields(
 				"applicationName,applicationVersion,accountLockoutDurationMinutes,enableAutomaticBackups,enableCaching,defaultSystemTheme,isActive");
 		return grid;
 	}

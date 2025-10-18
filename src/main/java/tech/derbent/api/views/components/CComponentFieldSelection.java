@@ -13,10 +13,13 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.shared.Registration;
+import tech.derbent.api.annotations.CDataProviderResolver;
 import tech.derbent.api.domains.CEntityNamed;
+import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.grids.CGrid;
+import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
 
 /** Generic field selection component for selecting and ordering items from a source list. This component provides a two-panel interface with
  * available items on the left and selected items on the right, with buttons for adding, removing, and reordering selections. Implements HasValue and
@@ -53,8 +56,11 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	private static final long serialVersionUID = 1L;
 	private CButton addButton;
 	private Grid<DetailEntity> availableGrid;
+	IContentOwner contentOwner;
 	private List<DetailEntity> currentValue = new ArrayList<>();
+	CDataProviderResolver dataProviderResolver;
 	private CButton downButton;
+	EntityFieldInfo fieldInfo;
 	private ItemLabelGenerator<DetailEntity> itemLabelGenerator = Object::toString;
 	private final List<ValueChangeListener<? super ValueChangeEvent<List<DetailEntity>>>> listeners = new ArrayList<>();
 	private final List<DetailEntity> notselectedItems = new ArrayList<>();
@@ -65,19 +71,30 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	private final List<DetailEntity> sourceItems = new ArrayList<>();
 	private CButton upButton;
 
-	/** Creates a new field selection component with default titles. */
+	/** Creates a new field selection component with default titles.
+	 * @param string2
+	 * @param string
+	 * @param fieldInfo2
+	 * @param contentOwner2
+	 * @param dataProviderResolver */
 	public CComponentFieldSelection() {
-		this("Available Items", "Selected Items");
+		this(null, null, null, "Available Items", "Selected Items");
 	}
 
 	/** Creates a new field selection component with custom titles.
+	 * @param fieldInfo
+	 * @param contentOwner
 	 * @param availableTitle Title for available items panel (must not be null or blank)
 	 * @param selectedTitle  Title for selected items panel (must not be null or blank)
 	 * @throws IllegalArgumentException if titles are null or blank */
-	public CComponentFieldSelection(String availableTitle, String selectedTitle) {
+	public CComponentFieldSelection(CDataProviderResolver dataProviderResolver, IContentOwner contentOwner, EntityFieldInfo fieldInfo,
+			String availableTitle, String selectedTitle) {
 		super();
 		Check.notBlank(availableTitle, "Available title cannot be null or blank");
 		Check.notBlank(selectedTitle, "Selected title cannot be null or blank");
+		this.contentOwner = contentOwner;
+		this.fieldInfo = fieldInfo;
+		this.dataProviderResolver = dataProviderResolver;
 		initializeUI(availableTitle, selectedTitle);
 	}
 
@@ -86,24 +103,23 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	private void addSelectedItem() {
 		LOGGER.debug("Adding selected item from available grid");
 		DetailEntity selected = availableGrid.asSingleSelect().getValue();
-		if (selected != null && !selectedItems.contains(selected)) {
-			// Check if there's a current selection in the selected grid
-			DetailEntity currentSelection = selectedGrid.asSingleSelect().getValue();
-			if (currentSelection != null) {
-				// Insert below the current selection
-				int insertIndex = selectedItems.indexOf(currentSelection) + 1;
-				selectedItems.add(insertIndex, selected);
-				LOGGER.debug("Inserted item below selection at index: {}", insertIndex);
-			} else {
-				// Add to end if no selection
-				selectedItems.add(selected);
-				LOGGER.debug("Added item to end of list");
-			}
-			populateForm();
-			availableGrid.asSingleSelect().clear();
-			// Select the newly added item in the selected grid
-			selectedGrid.asSingleSelect().setValue(selected);
+		Check.notNull(selected, "No item selected to add");
+		int selectionIndex = notselectedItems.indexOf(selected);
+		DetailEntity currentSelection = selectedGrid.asSingleSelect().getValue();
+		if (currentSelection != null) {
+			// Insert below the current selection
+			int insertIndex = selectedItems.indexOf(currentSelection) + 1;
+			selectedItems.add(insertIndex, selected);
+			LOGGER.debug("Inserted item below selection at index: {}", insertIndex);
+		} else {
+			// Add to end if no selection
+			selectedItems.add(selected);
+			LOGGER.debug("Added item to end of list");
 		}
+		populateForm();
+		availableGrid.asSingleSelect().setValue(selectionIndex < notselectedItems.size() ? notselectedItems.get(selectionIndex)
+				: notselectedItems.isEmpty() ? null : notselectedItems.getLast());
+		selectedGrid.asSingleSelect().setValue(selected);
 	}
 
 	/** Adds a value change listener.
@@ -239,11 +255,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		addButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		addButton.setEnabled(false);
 		addButton.setTooltipText("Add selected item to the list");
-		removeButton = new CButton("Remove", VaadinIcon.ARROW_LEFT.create());
-		removeButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
-		removeButton.setEnabled(false);
-		removeButton.setTooltipText("Remove selected item from the list");
-		CHorizontalLayout controlButtons = new CHorizontalLayout(addButton, removeButton);
+		CHorizontalLayout controlButtons = new CHorizontalLayout(addButton);
 		controlButtons.setSpacing(true);
 		leftLayout.add(controlButtons);
 		// Order buttons with icons
@@ -253,7 +265,11 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		downButton = new CButton("Move Down", VaadinIcon.ARROW_DOWN.create());
 		downButton.setEnabled(false);
 		downButton.setTooltipText("Move selected item down in the order");
-		CHorizontalLayout orderButtons = new CHorizontalLayout(upButton, downButton);
+		removeButton = new CButton("Remove", VaadinIcon.ARROW_LEFT.create());
+		removeButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
+		removeButton.setEnabled(false);
+		removeButton.setTooltipText("Remove selected item from the list");
+		CHorizontalLayout orderButtons = new CHorizontalLayout(removeButton, upButton, downButton);
 		orderButtons.setSpacing(true);
 		rightLayout.add(orderButtons);
 		// Add layouts to main component
@@ -306,6 +322,8 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		LOGGER.debug("After filtering: {} available items (not selected)", notselectedItems.size());
 		availableGrid.setItems(notselectedItems);
 		selectedGrid.setItems(selectedItems);
+		availableGrid.asSingleSelect().setValue(notselectedItems.isEmpty() ? null : notselectedItems.getFirst());
+		selectedGrid.asSingleSelect().setValue(selectedItems.isEmpty() ? null : selectedItems.getFirst());
 		fireValueChangeEvent();
 	}
 
@@ -313,9 +331,11 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		LOGGER.debug("Removing selected item from selected grid");
 		DetailEntity selected = selectedGrid.asSingleSelect().getValue();
 		Check.notNull(selected, "No item selected to remove");
+		int selectionIndex = selectedItems.indexOf(selected);
 		selectedItems.remove(selected);
 		populateForm();
-		selectedGrid.asSingleSelect().clear();
+		selectedGrid.asSingleSelect().setValue(selectionIndex < selectedItems.size() ? selectedItems.get(selectionIndex)
+				: (selectedItems.isEmpty() ? null : selectedItems.getLast()));
 	}
 
 	public void setItemLabelGenerator(ItemLabelGenerator<DetailEntity> itemLabelGenerator) {
@@ -449,6 +469,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			LOGGER.info("Binder triggered setValue on CComponentFieldSelection - reading {} selected items from entity field",
 					value != null ? value.size() : 0);
 			selectedItems.clear();
+			updateSourceItems();
 			if (value != null) {
 				// Preserve the order from the entity's list field
 				selectedItems.addAll(value);
@@ -458,7 +479,6 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			populateForm();
 		} catch (Exception e) {
 			LOGGER.error("Failed to set value in CComponentFieldSelection: {}", e.getMessage(), e);
-			throw e;
 		}
 	}
 
@@ -478,5 +498,16 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			upButton.setEnabled(selectedGrid.getSelectionModel().getFirstSelectedItem().isPresent());
 			downButton.setEnabled(selectedGrid.getSelectionModel().getFirstSelectedItem().isPresent());
 		}
+	}
+
+	private void updateSourceItems() throws Exception {
+		sourceItems.clear();
+		Check.notNull(dataProviderResolver, "DataProviderResolver for field " + fieldInfo.getFieldName());
+		final List<?> rawList = dataProviderResolver.resolveData(contentOwner, fieldInfo);
+		Check.notNull(rawList, "Items for field " + fieldInfo.getFieldName() + " of type " + fieldInfo.getJavaType());
+		// Set items as list (typed at runtime)
+		@SuppressWarnings ("unchecked")
+		final List<DetailEntity> items = rawList.stream().map(e -> (DetailEntity) e).collect(Collectors.toList());
+		setSourceItems(items);
 	}
 }

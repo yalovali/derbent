@@ -348,8 +348,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			// Add ID column first
 			// grid.addIdColumn(CEntityDB::getId, "#", "id");
 			// Parse selected fields and create columns
-			String selectedFields = gridEntity.getSelectedFields();
-			List<FieldConfig> fieldConfigs = parseSelectedFields(selectedFields, entityClass);
+			List<FieldConfig> fieldConfigs = parseSelectedFields(gridEntity.getColumnFields(), entityClass);
 			// create all
 			fieldConfigs.forEach(fc -> createColumnForField(fc));
 			// Configure sorting - sort by first column (ID) initially
@@ -573,32 +572,20 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 		fireEvent(new SelectionChangeEvent(this, selectedEntity));
 	}
 
-	private List<FieldConfig> parseSelectedFields(String selectedFields, Class<?> entityClass) {
+	private List<FieldConfig> parseSelectedFields(List<String> list, Class<?> entityClass) {
 		List<FieldConfig> fieldConfigs = new ArrayList<>();
 		Check.notNull(entityClass, "Entity class is null for parsing selected fields");
-		Check.notNull(selectedFields, "Selected fields string is null");
-		if (selectedFields.trim().isEmpty()) {
+		Check.notNull(list, "Selected fields string is null");
+		if (list.isEmpty()) {
 			return fieldConfigs;
 		}
-		String[] fieldPairs = selectedFields.split(",");
 		int order = 0;
-		for (String fieldPair : fieldPairs) {
-			String[] parts = fieldPair.trim().split(":");
-			String fieldName = parts[0].trim();
-			if (parts.length == 2) {
-				try {
-					order = Integer.parseInt(parts[1].trim());
-				} catch (NumberFormatException e) {
-					LOGGER.warn("Invalid order number for field {}: {}", fieldName, parts[1]);
-				}
-			} else {
-				order++;
-			}
-			// Get field information using reflection
+		for (String fieldName : list) {
 			Field field = findField(entityClass, fieldName);
 			Check.notNull(field, "Field not found in entity class: " + fieldName);
 			EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(field);
 			fieldConfigs.add(new FieldConfig(fieldInfo, order, field));
+			order++;
 		}
 		// Sort by order
 		fieldConfigs.sort((a, b) -> Integer.compare(a.getOrder(), b.getOrder()));

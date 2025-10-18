@@ -1,5 +1,6 @@
 package tech.derbent.activities.service;
 
+import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,8 +76,9 @@ public class CActivityInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setSelectedFields(
-				"name,activityType,assignedTo,createdBy,startDate,dueDate,completionDate,progressPercentage,estimatedHours,actualHours,remainingHours,status,priority,project,createdDate,lastModifiedDate");
+		grid.setColumnFields(
+				List.of("name", "activityType", "assignedTo", "createdBy", "startDate", "dueDate", "completionDate", "progressPercentage",
+						"estimatedHours", "actualHours", "remainingHours", "status", "priority", "project", "createdDate", "lastModifiedDate"));
 		return grid;
 	}
 

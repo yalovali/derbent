@@ -54,7 +54,7 @@ public final class COrderApprovalInitializerService extends CInitializerServiceB
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, ENTITY_CLASS);
-		grid.setSelectedFields("id,name,order,approvalStatus,approvalLevel,approver,approvalDate,isActive");
+		grid.setColumnFields("id,name,order,approvalStatus,approvalLevel,approver,approvalDate,isActive");
 		return grid;
 	}
 

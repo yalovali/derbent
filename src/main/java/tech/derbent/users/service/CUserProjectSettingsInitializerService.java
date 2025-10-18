@@ -58,7 +58,7 @@ public final class CUserProjectSettingsInitializerService extends CInitializerSe
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, ENTITY_CLASS);
-		grid.setSelectedFields("id,user,project,role,permission,isActive");
+		grid.setColumnFields("id,user,project,role,permission,isActive");
 		return grid;
 	}
 

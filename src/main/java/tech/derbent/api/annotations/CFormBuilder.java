@@ -478,7 +478,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		Check.notNull(fieldInfo, "FieldInfo for DualListSelector creation");
 		LOGGER.debug("Creating CComponentFieldSelection for field: {}", fieldInfo.getFieldName());
 		final CComponentFieldSelection<EntityClass, DetailClass> dualListSelector = new CComponentFieldSelection<EntityClass, DetailClass>(
-				"Available " + fieldInfo.getDisplayName(), "Selected " + fieldInfo.getDisplayName());
+				dataProviderResolver, contentOwner, fieldInfo, "Available " + fieldInfo.getDisplayName(), "Selected " + fieldInfo.getDisplayName());
 		// Set item label generator based on entity type
 		dualListSelector.setItemLabelGenerator(item -> {
 			if (item instanceof CEntityNamed<?>) {

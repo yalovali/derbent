@@ -47,7 +47,7 @@ public class CRiskInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setSelectedFields("id,name,description,riskSeverity,status,project,assignedTo,createdBy,createdDate");
+		grid.setColumnFields("id,name,description,riskSeverity,status,project,assignedTo,createdBy,createdDate");
 		return grid;
 	}
 

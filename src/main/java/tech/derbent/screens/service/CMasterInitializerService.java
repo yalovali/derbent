@@ -40,7 +40,7 @@ public class CMasterInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setSelectedFields("id,name,sectionType,sectionDBName,project,isActive");
+		grid.setColumnFields("id,name,sectionType,sectionDBName,project,isActive");
 		return grid;
 	}
 

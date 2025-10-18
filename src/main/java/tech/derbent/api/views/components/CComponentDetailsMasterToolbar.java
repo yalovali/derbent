@@ -1,5 +1,6 @@
 package tech.derbent.api.views.components;
 
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -16,8 +17,8 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CComponentDetailsMasterToolbar.class);
 	private static final long serialVersionUID = 1L;
 	private CButton btnEditGrid;
-	private TextField searchField;
 	private final CComponentGridEntity grid;
+	private TextField searchField;
 
 	public CComponentDetailsMasterToolbar(final CComponentGridEntity grid) {
 		this.grid = grid;
@@ -74,13 +75,12 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 			final CGridEntity gridEntity = getCurrentGridEntity();
 			Check.notNull(gridEntity, "No grid entity found for the current grid");
 			final String entityType = extractEntityTypeFromService(gridEntity.getDataServiceBeanName());
-			final String currentSelections = gridEntity.getSelectedFields();
+			final List<String> currentColumnFields = gridEntity.getColumnFields();
 			// Open field selection dialog
-			final CFieldSelectionDialog dialog = new CFieldSelectionDialog(entityType, currentSelections, selectedFields -> {
+			final CFieldSelectionDialog dialog = new CFieldSelectionDialog(entityType, currentColumnFields, selectedFields -> {
 				// Update grid entity with new field selection
-				final String newSelectionString = selectedFields.stream().map(fs -> fs.getFieldInfo().getFieldName() + ":" + fs.getOrder())
-						.reduce((a, b) -> a + "," + b).orElse("");
-				gridEntity.setSelectedFields(newSelectionString);
+				final List<String> newSelectionString = selectedFields.stream().map(fs -> fs.getFieldInfo().getFieldName()).toList();
+				gridEntity.setColumnFields(newSelectionString);
 				// Refresh grid
 				grid.refreshGrid();
 				CNotifications.showSuccess("Grid columns updated successfully");

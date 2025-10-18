@@ -9,7 +9,7 @@ public class CComponentFieldSelectionManualTest {
 
 	public static void main(String[] args) {
 		// Create a test component
-		CComponentFieldSelection<Object, String> component = new CComponentFieldSelection<>("Available Items", "Selected Items");
+		CComponentFieldSelection<Object, String> component = new CComponentFieldSelection<>(null, null, null, "Available Items", "Selected Items");
 		// Set some test data
 		List<String> items = Arrays.asList("Item 1", "Item 2", "Item 3", "Item 4", "Item 5");
 		component.setSourceItems(items);

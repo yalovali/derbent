@@ -47,7 +47,7 @@ public class CMeetingStatusInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setSelectedFields("id,name,description,color,sortOrder,finalStatus,isActive,project");
+		grid.setColumnFields("id,name,description,color,sortOrder,finalStatus,isActive,project");
 		return grid;
 	}
 

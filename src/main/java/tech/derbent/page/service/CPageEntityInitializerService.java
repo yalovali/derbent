@@ -75,7 +75,7 @@ public class CPageEntityInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setSelectedFields(
+		grid.setColumnFields(
 				"id,name,menuTitle,pageTitle,menuOrder,requiresAuthentication,showInQuickToolbar,attributeReadonly,attributeNonDeletable");
 		return grid;
 	}

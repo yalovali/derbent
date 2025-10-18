@@ -11,31 +11,49 @@ import tech.derbent.screens.domain.CGridEntity.FieldSelection;
 public class CFieldSelectionDialog extends CDBEditDialog<List<FieldSelection>> {
 
 	private static final long serialVersionUID = 1L;
-	private CFieldSelectionComponent fieldSelectionComponent;
+	private List<String> currentSelections;
 	private String entityType;
-	private String currentSelections;
+	private CFieldSelectionComponent fieldSelectionComponent;
 
 	/** Creates a new field selection dialog.
-	 * @param entityType        The entity type to show fields for
-	 * @param currentSelections Current field selections as string
-	 * @param onSave            Callback when selection is saved
+	 * @param entityType          The entity type to show fields for
+	 * @param currentColumnFields Current field selections as string
+	 * @param onSave              Callback when selection is saved
 	 * @throws Exception */
-	public CFieldSelectionDialog(String entityType, String currentSelections, Consumer<List<FieldSelection>> onSave) throws Exception {
+	public CFieldSelectionDialog(String entityType, List<String> currentColumnFields, Consumer<List<FieldSelection>> onSave) throws Exception {
 		super(null, onSave, false);
 		this.entityType = entityType;
-		this.currentSelections = currentSelections;
+		this.currentSelections = currentColumnFields;
 		setupDialog();
 		populateForm();
+	}
+
+	private void createFormFields() {
+		fieldSelectionComponent = new CFieldSelectionComponent("Available Fields", entityType);
+		getDialogLayout().add(fieldSelectionComponent);
 	}
 
 	@Override
 	public String getDialogTitleString() { return "Select Grid Columns"; }
 
 	@Override
+	public List<FieldSelection> getEntity() { return fieldSelectionComponent.getSelectedFields(); }
+
+	@Override
 	protected Icon getFormIcon() { return VaadinIcon.GRID_V.create(); }
 
 	@Override
 	protected String getFormTitleString() { return "Select and Order Grid Columns"; }
+
+	@Override
+	protected String getSuccessUpdateMessage() { return "Grid columns updated successfully"; }
+
+	@Override
+	protected void populateForm() {
+		if (currentSelections != null && !currentSelections.isEmpty()) {
+			fieldSelectionComponent.setColumnFieldsFromString(currentSelections);
+		}
+	}
 
 	@Override
 	protected void setupContent() throws Exception {
@@ -46,26 +64,8 @@ public class CFieldSelectionDialog extends CDBEditDialog<List<FieldSelection>> {
 		createFormFields();
 	}
 
-	private void createFormFields() {
-		fieldSelectionComponent = new CFieldSelectionComponent("Available Fields", entityType);
-		getDialogLayout().add(fieldSelectionComponent);
-	}
-
-	@Override
-	protected void populateForm() {
-		if (currentSelections != null && !currentSelections.trim().isEmpty()) {
-			fieldSelectionComponent.setSelectedFieldsFromString(currentSelections);
-		}
-	}
-
 	@Override
 	protected void validateForm() {
 		// No specific validation needed for field selection
 	}
-
-	@Override
-	public List<FieldSelection> getEntity() { return fieldSelectionComponent.getSelectedFields(); }
-
-	@Override
-	protected String getSuccessUpdateMessage() { return "Grid columns updated successfully"; }
 }

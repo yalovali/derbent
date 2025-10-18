@@ -47,7 +47,7 @@ public class CDecisionStatusInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setSelectedFields("id,name,description,color,sortOrder,isFinal,requiresApproval,project");
+		grid.setColumnFields("id,name,description,color,sortOrder,isFinal,requiresApproval,project");
 		return grid;
 	}
 

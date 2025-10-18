@@ -45,7 +45,7 @@ public class CGridInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setSelectedFields("id,name,description,dataServiceBeanName,selectedFields,attributeNonDeletable,project");
+		grid.setColumnFields("id,name,description,dataServiceBeanName,selectedFields,attributeNonDeletable,project");
 		return grid;
 	}
 

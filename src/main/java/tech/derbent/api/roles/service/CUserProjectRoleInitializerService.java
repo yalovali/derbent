@@ -62,7 +62,7 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 		final CGridEntity grid = createBaseGridEntity(project, ENTITY_CLASS);
 		// hide grid actions when needed
 		grid.setAttributeNone(attributeNone);
-		grid.setSelectedFields("id,name,description,project,isAdmin,isUser,isGuest,color,sortOrder,isActive,attributeNonDeletable");
+		grid.setColumnFields("id,name,description,project,isAdmin,isUser,isGuest,color,sortOrder,isActive,attributeNonDeletable");
 		return grid;
 	}
 

@@ -83,14 +83,6 @@ public class CGridEntity extends CEntityOfProject<CGridEntity> {
 			maxLength = 100, dataProviderBean = "CViewsService", dataProviderMethod = "getAvailableBeans"
 	)
 	private String dataServiceBeanName;
-	@Column (name = "selected_fields", nullable = true, length = 1000)
-	@Size (max = 1000)
-	@AMetaData (
-			displayName = "Selected Fields", required = false, readOnly = false,
-			description = "Comma-separated list of selected fields with order (e.g., fieldName:1,otherField:2)", hidden = false, order = 3,
-			maxLength = 1000
-	)
-	private String selectedFields;
 
 	public CGridEntity() {
 		super();
@@ -108,8 +100,6 @@ public class CGridEntity extends CEntityOfProject<CGridEntity> {
 	public List<String> getColumnFields() { return columnFields; }
 
 	public String getDataServiceBeanName() { return dataServiceBeanName; }
-
-	public String getSelectedFields() { return selectedFields; }
 
 	@Override
 	public void initializeAllFields() {
@@ -132,6 +122,4 @@ public class CGridEntity extends CEntityOfProject<CGridEntity> {
 	public void setColumnFields(List<String> columnFields) { this.columnFields = columnFields; }
 
 	public void setDataServiceBeanName(final String dataServiceBeanName) { this.dataServiceBeanName = dataServiceBeanName; }
-
-	public void setSelectedFields(final String selectedFields) { this.selectedFields = selectedFields; }
 }

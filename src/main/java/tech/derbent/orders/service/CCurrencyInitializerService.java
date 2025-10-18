@@ -47,7 +47,7 @@ public class CCurrencyInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setSelectedFields("id,name,currencyCode,currencySymbol,description,isActive,project");
+		grid.setColumnFields("id,name,currencyCode,currencySymbol,description,isActive,project");
 		return grid;
 	}
 

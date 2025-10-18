@@ -19,10 +19,10 @@ public class CActivityPriorityInitializerService extends CInitializerServiceBase
 	public static final String BASE_PANEL_NAME = "Activity Priority Information";
 	private static final Class<?> clazz = CActivityPriority.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityPriorityInitializerService.class);
-	private static final String menuTitle = MenuTitle_TYPES + ".Activity Priorities";
-	private static final String pageTitle = "Activity Priority Management";
-	private static final String pageDescription = "Manage activity priority definitions for projects";
 	private static final String menuOrder = Menu_Order_TYPES + ".3";
+	private static final String menuTitle = MenuTitle_TYPES + ".Activity Priorities";
+	private static final String pageDescription = "Manage activity priority definitions for projects";
+	private static final String pageTitle = "Activity Priority Management";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) {
@@ -55,7 +55,7 @@ public class CActivityPriorityInitializerService extends CInitializerServiceBase
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setSelectedFields("id,name,description,priorityLevel,isDefault,color,sortOrder,isActive,project");
+		grid.setColumnFields("id,name,description,priorityLevel,isDefault,color,sortOrder,isActive,project");
 		return grid;
 	}
 
