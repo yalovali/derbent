@@ -123,8 +123,8 @@ public final class CHierarchicalSideMenu extends Div implements AfterNavigationO
 			// Add hover effects (only if not current page to avoid conflicts)
 			if (!isCurrentPage) {
 				itemLayout.getElement().addEventListener("mouseenter",
-						e -> itemLayout.getElement().getStyle().set("background-color", "var(--lumo-contrast-5pct)"));
-				itemLayout.getElement().addEventListener("mouseleave", e -> itemLayout.getElement().getStyle().remove("background-color"));
+						_ -> itemLayout.getElement().getStyle().set("background-color", "var(--lumo-contrast-5pct)"));
+				itemLayout.getElement().addEventListener("mouseleave", _ -> itemLayout.getElement().getStyle().remove("background-color"));
 			}
 			return itemLayout;
 		}

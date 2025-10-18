@@ -107,7 +107,7 @@ public class CButton extends Button {
 	 * @param icon          the button icon
 	 * @param clickListener the click event listener */
 	public CButton(final String text, final Icon icon, final ComponentEventListener<ClickEvent<Button>> clickListener) {
-		super(text, CColorUtils.setIconClassSize(icon, IconSize.MEDIUM), clickListener == null ? e -> {} : clickListener);
+		super(text, CColorUtils.setIconClassSize(icon, IconSize.MEDIUM), clickListener == null ? _ -> {} : clickListener);
 		initializeButton();
 	}
 

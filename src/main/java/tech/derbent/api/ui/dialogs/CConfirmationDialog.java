@@ -26,14 +26,14 @@ public final class CConfirmationDialog extends CBaseInfoDialog {
 
 	@Override
 	protected void setupButtons() {
-		final CButton yesButton = CButton.createPrimary("Yes", null, e -> {
+		final CButton yesButton = CButton.createPrimary("Yes", null, _ -> {
 			if (onConfirm != null) {
 				onConfirm.run();
 			}
 			close();
 		});
 		yesButton.setAutofocus(false);
-		final CButton noButton = CButton.createTertiary("No", null, e -> close());
+		final CButton noButton = CButton.createTertiary("No", null, _ -> close());
 		noButton.setAutofocus(true);
 		buttonLayout.add(yesButton, noButton);
 	}

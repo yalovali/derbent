@@ -8,19 +8,19 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
-import tech.derbent.api.utils.Check;
 import tech.derbent.activities.domain.CActivity;
+import tech.derbent.api.utils.Check;
 
 /** CActivityCard - UI component representing a single activity card in the Kanban board. Layer: View (MVC) Displays activity information including
  * name, description/summary, and status. Used within CActivityKanbanColumn to represent individual activities. */
 public class CActivityCard extends Div {
 
-	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityCard.class);
+	private static final long serialVersionUID = 1L;
 	private final CActivity activity;
-	private H4 titleElement;
 	private Paragraph descriptionElement;
 	private Span statusElement;
+	private H4 titleElement;
 
 	/** Constructor for CActivityCard.
 	 * @param activity the activity to display in the card */
@@ -66,7 +66,7 @@ public class CActivityCard extends Div {
 		// Add components to card
 		add(titleElement, descriptionElement, statusElement);
 		// Add click listener for potential navigation
-		addClickListener(event -> {
+		addClickListener(_ -> {
 			LOGGER.debug("Activity card clicked for: {}", activity.getName());
 			// Can be extended to navigate to activity details
 		});
@@ -94,12 +94,12 @@ public class CActivityCard extends Div {
 		dragSource.setEffectAllowed(EffectAllowed.MOVE);
 		dragSource.setDragData(activity);
 		// Add drag start listener for visual feedback
-		dragSource.addDragStartListener(event -> {
+		dragSource.addDragStartListener(_ -> {
 			LOGGER.debug("Drag started for activity: {}", activity.getName());
 			addClassName("kanban-card-dragging");
 		});
 		// Add drag end listener to remove visual feedback
-		dragSource.addDragEndListener(event -> {
+		dragSource.addDragEndListener(_ -> {
 			LOGGER.debug("Drag ended for activity: {}", activity.getName());
 			removeClassName("kanban-card-dragging");
 		});

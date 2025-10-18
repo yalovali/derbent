@@ -161,13 +161,13 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		header.addClassNames(Display.FLEX, Padding.MEDIUM, Gap.MEDIUM, AlignItems.CENTER);
 		// Make the header clickable to navigate to dashboard
 		header.getStyle().set("cursor", "pointer");
-		header.addClickListener(event -> {
+		header.addClickListener(_ -> {
 			LOGGER.debug("Header clicked - navigating to dashboard");
 			com.vaadin.flow.component.UI.getCurrent().navigate("dashboard");
 		});
 		// Add hover effects
-		header.getElement().addEventListener("mouseenter", e -> header.getStyle().set("background-color", "var(--lumo-contrast-5pct)"));
-		header.getElement().addEventListener("mouseleave", e -> header.getStyle().remove("background-color"));
+		header.getElement().addEventListener("mouseenter", _ -> header.getStyle().set("background-color", "var(--lumo-contrast-5pct)"));
+		header.getElement().addEventListener("mouseleave", _ -> header.getStyle().remove("background-color"));
 		return header;
 	}
 
@@ -224,9 +224,9 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		final var userMenuItem = userMenu.addItem(avatar);
 		userMenuItem.add(user.getUsername());
 		userMenuItem.setId("user-menu-item");
-		userMenuItem.getSubMenu().addItem("Edit Profile", event -> openUserProfileDialog());
+		userMenuItem.getSubMenu().addItem("Edit Profile", _ -> openUserProfileDialog());
 		// Additional user menu items could be added here (preferences, settings, etc.)
-		final MenuItem menuItem = userMenuItem.getSubMenu().addItem("Logout", event -> authenticationContext.logout());
+		final MenuItem menuItem = userMenuItem.getSubMenu().addItem("Logout", _ -> authenticationContext.logout());
 		menuItem.setId("logout-menu-item");
 		return userMenu;
 	}

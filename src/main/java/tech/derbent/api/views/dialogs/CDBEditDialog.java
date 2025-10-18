@@ -57,14 +57,14 @@ public abstract class CDBEditDialog<EntityClass> extends CDialog {
 	/** Sets up Save and Cancel buttons. */
 	@Override
 	protected void setupButtons() {
-		final CButton saveButton = CButton.createSaveButton("Save", e -> {
+		final CButton saveButton = CButton.createSaveButton("Save", _ -> {
 			try {
 				save();
 			} catch (Exception e1) {
 				e1.printStackTrace();
 			}
 		});
-		final CButton cancelButton = CButton.createCancelButton("Cancel", e -> close());
+		final CButton cancelButton = CButton.createCancelButton("Cancel", _ -> close());
 		buttonLayout.add(saveButton, cancelButton);
 	}
 

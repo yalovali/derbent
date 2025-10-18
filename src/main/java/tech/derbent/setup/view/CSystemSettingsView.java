@@ -95,23 +95,23 @@ public class CSystemSettingsView extends CAbstractPage {
 		buttonLayout.addClassName("button-layout");
 		final var resetDbButton = new CButton("Reset Database", null, null);
 		resetDbButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
-		resetDbButton.addClickListener(e -> resetDatabase());
+		resetDbButton.addClickListener(_ -> resetDatabase());
 		// Save Settings button
 		final var saveButton = new CButton("Save Settings", null, null);
 		saveButton.addClassName("primary");
-		saveButton.addClickListener(event -> saveSettings());
+		saveButton.addClickListener(_ -> saveSettings());
 		// Cancel button - to reject changes and revert to original state
 		final var cancelButton = new CButton("Cancel", null, null);
 		cancelButton.addClassName("tertiary");
-		cancelButton.addClickListener(event -> cancelChanges());
+		cancelButton.addClickListener(_ -> cancelChanges());
 		// Reload Settings button
 		final var reloadButton = new CButton("Reload Settings", null, null);
 		reloadButton.addClassName("tertiary");
-		reloadButton.addClickListener(event -> reloadSettings());
+		reloadButton.addClickListener(_ -> reloadSettings());
 		// Reset to Defaults button
 		final var resetButton = new CButton("Reset to Defaults", null, null);
 		resetButton.addClassName("error");
-		resetButton.addClickListener(event -> {
+		resetButton.addClickListener(_ -> {
 			try {
 				resetToDefaults();
 			} catch (final Exception e1) {
@@ -122,7 +122,7 @@ public class CSystemSettingsView extends CAbstractPage {
 		// Test Configuration button
 		final var testButton = new CButton("Test Configuration", null, null);
 		testButton.addClassName("success");
-		testButton.addClickListener(event -> testConfiguration());
+		testButton.addClickListener(_ -> testConfiguration());
 		buttonLayout.add(resetDbButton, saveButton, cancelButton, reloadButton, resetButton, testButton);
 		return buttonLayout;
 	}
@@ -288,7 +288,7 @@ public class CSystemSettingsView extends CAbstractPage {
 	/** Reloads the system settings from the database. */
 	private void resetDatabase() {
 		final ConfirmDialog dialog =
-				new ConfirmDialog("Onay", "Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?", "Evet, sıfırla", ev -> {
+				new ConfirmDialog("Onay", "Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?", "Evet, sıfırla", _ -> {
 					try {
 						final CDataInitializer init = new CDataInitializer(sessionService);
 						init.reloadForced(); // veya empty check’li bir metod yaz
@@ -299,7 +299,7 @@ public class CSystemSettingsView extends CAbstractPage {
 					} catch (final Exception ex) {
 						Notification.show("Hata: " + ex.getMessage(), 6000, Notification.Position.MIDDLE);
 					}
-				}, "Vazgeç", ev -> {});
+				}, "Vazgeç", _ -> {});
 		dialog.open();
 	}
 

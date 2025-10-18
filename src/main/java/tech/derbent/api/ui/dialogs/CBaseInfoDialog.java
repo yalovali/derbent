@@ -49,7 +49,7 @@ public abstract class CBaseInfoDialog extends CDialog {
 	/** Sets up the OK button. */
 	@Override
 	protected void setupButtons() {
-		final CButton okButton = CButton.createPrimary("OK", null, e -> close());
+		final CButton okButton = CButton.createPrimary("OK", null, _ -> close());
 		okButton.setAutofocus(true);
 		buttonLayout.add(okButton);
 	}

@@ -168,14 +168,14 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 		// Add hover effect
 		final String originalColor = iconColor;
 		final String hoverColor = iconColor + "99"; // Add transparency for hover
-		button.getElement().addEventListener("mouseenter", e -> {
+		button.getElement().addEventListener("mouseenter", _ -> {
 			icon.getStyle().set("color", hoverColor);
 		});
-		button.getElement().addEventListener("mouseleave", e -> {
+		button.getElement().addEventListener("mouseleave", _ -> {
 			icon.getStyle().set("color", originalColor);
 		});
 		// Navigate to route
-		button.addClickListener(event -> {
+		button.addClickListener(_ -> {
 			LOGGER.info("{} button clicked, navigating to {}", tooltip, route);
 			UI.getCurrent().navigate(route);
 		});
@@ -222,10 +222,10 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 		homeButton.getElement().setAttribute("title", "Go to Dashboard");
 		homeButton.addClassNames(Margin.NONE);
 		// Add hover effect for better UX
-		homeButton.getElement().addEventListener("mouseenter", e -> homeIcon.getStyle().set("color", "var(--lumo-primary-color-50pct)"));
-		homeButton.getElement().addEventListener("mouseleave", e -> homeIcon.getStyle().set("color", "var(--lumo-primary-color)"));
+		homeButton.getElement().addEventListener("mouseenter", _ -> homeIcon.getStyle().set("color", "var(--lumo-primary-color-50pct)"));
+		homeButton.getElement().addEventListener("mouseleave", _ -> homeIcon.getStyle().set("color", "var(--lumo-primary-color)"));
 		// Handle home button click - navigate to dashboard
-		homeButton.addClickListener(event -> {
+		homeButton.addClickListener(_ -> {
 			LOGGER.info("Home button clicked, navigating to dashboard");
 			com.vaadin.flow.component.UI.getCurrent().navigate("home");
 		});
@@ -240,14 +240,14 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 		lastVisitedButton.getElement().setAttribute("title", "Go to Last Visited Page");
 		lastVisitedButton.addClassNames(Margin.NONE);
 		// Add hover effect
-		lastVisitedButton.getElement().addEventListener("mouseenter", e -> {
+		lastVisitedButton.getElement().addEventListener("mouseenter", _ -> {
 			icon.getStyle().set("color", "#e67e2299");
 		});
-		lastVisitedButton.getElement().addEventListener("mouseleave", e -> {
+		lastVisitedButton.getElement().addEventListener("mouseleave", _ -> {
 			icon.getStyle().set("color", "#e67e22");
 		});
 		// Handle click - navigate to last visited page
-		lastVisitedButton.addClickListener(event -> {
+		lastVisitedButton.addClickListener(_ -> {
 			try {
 				String lastVisitedRoute = getLastVisitedRoute();
 				if (lastVisitedRoute != null && !lastVisitedRoute.trim().isEmpty()) {
@@ -274,7 +274,7 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 		// Set initial icon based on current layout mode
 		updateLayoutToggleIcon();
 		// Handle layout toggle
-		layoutToggleButton.addClickListener(event -> {
+		layoutToggleButton.addClickListener(_ -> {
 			LOGGER.info("Layout toggle button clicked");
 			Check.notNull(layoutService, "LayoutService is null, cannot toggle layout mode");
 			final CLayoutService.LayoutMode oldMode = layoutService.getCurrentLayoutMode();

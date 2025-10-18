@@ -54,9 +54,9 @@ public class CCommentView extends Div {
 		this.editTextArea = new TextArea();
 		this.editButtonsLayout = new HorizontalLayout();
 		// Create buttons
-		this.editButton = CButton.createTertiary("Edit", null, event -> startEditing());
-		this.saveButton = CButton.createPrimary("Save", null, event -> saveChanges());
-		this.cancelButton = CButton.createTertiary("Cancel", null, event -> cancelEditing());
+		this.editButton = CButton.createTertiary("Edit", null, _ -> startEditing());
+		this.saveButton = CButton.createPrimary("Save", null, _ -> saveChanges());
+		this.cancelButton = CButton.createTertiary("Cancel", null, _ -> cancelEditing());
 		setupLayout();
 		setupEditComponents();
 		updateContent();
@@ -82,9 +82,9 @@ public class CCommentView extends Div {
 		this.editTextArea = new TextArea();
 		this.editButtonsLayout = new HorizontalLayout();
 		// Create buttons
-		this.editButton = CButton.createTertiary("Edit", null, event -> startEditing());
-		this.saveButton = CButton.createPrimary("Save", null, event -> saveChanges());
-		this.cancelButton = CButton.createTertiary("Cancel", null, event -> cancelEditing());
+		this.editButton = CButton.createTertiary("Edit", null, _ -> startEditing());
+		this.saveButton = CButton.createPrimary("Save", null, _ -> saveChanges());
+		this.cancelButton = CButton.createTertiary("Cancel", null, _ -> cancelEditing());
 		setupLayout();
 		setupEditComponents();
 		updateContent();

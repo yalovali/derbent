@@ -169,13 +169,13 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		passwordField.setRequiredIndicatorVisible(true);
 		passwordField.setId("custom-password-input");
 		// Add click listener to login button
-		loginButton.addClickListener(e -> handleLogin());
+		loginButton.addClickListener(_ -> handleLogin());
 		// Add enter key listener to password field
-		passwordField.addKeyPressListener(com.vaadin.flow.component.Key.ENTER, e -> handleLogin());
+		passwordField.addKeyPressListener(com.vaadin.flow.component.Key.ENTER, _ -> handleLogin());
 		// Database reset button setup
-		resetDbButton.addClickListener(e -> {
+		resetDbButton.addClickListener(_ -> {
 			final ConfirmDialog dialog = new ConfirmDialog("Onay", "Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?",
-					"Evet, sıfırla", ev -> {
+					"Evet, sıfırla", _ -> {
 						try {
 							final CDataInitializer init = new CDataInitializer(sessionService);
 							init.reloadForced(); // veya empty check’li bir metod yaz
@@ -187,7 +187,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 						} catch (final Exception ex) {
 							Notification.show("Hata: " + ex.getMessage(), 6000, Notification.Position.MIDDLE);
 						}
-					}, "Vazgeç", ev -> {});
+					}, "Vazgeç", _ -> {});
 			dialog.open();
 		});
 		// Error message display

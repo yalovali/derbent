@@ -118,7 +118,7 @@ public class CPictureSelectorDialog extends Dialog {
 		imageUpload.setMaxFileSize((int) MAX_FILE_SIZE);
 		imageUpload.setDropLabel(dropLabel);
 		imageUpload.setUploadButton(CButton.createTertiary("Choose File", null, null));
-		imageUpload.addAllFinishedListener(event -> {
+		imageUpload.addAllFinishedListener(_ -> {
 			LOGGER.info("Image upload completed");
 		});
 	}

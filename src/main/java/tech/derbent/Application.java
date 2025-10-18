@@ -7,7 +7,6 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryAutoConfiguration;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
@@ -51,7 +50,7 @@ public class Application implements AppShellConfigurator {
 			CTimer.stamp();
 			final SpringApplication app = new SpringApplication(Application.class);
 			// Note: ApplicationListener for startup time measurement
-			app.addListeners((final ApplicationReadyEvent event) -> {
+			app.addListeners(_ -> {
 				final long endTime = System.nanoTime();
 				final long durationMs = (endTime - startTime) / 1_000_000;
 				LOGGER.info("Application started in {} ms", durationMs);
@@ -81,7 +80,7 @@ public class Application implements AppShellConfigurator {
 	 * @return ApplicationRunner that handles data initialization */
 	@Bean
 	public ApplicationRunner dataInitializer(final JdbcTemplate jdbcTemplate) {
-		return args -> {
+		return _ -> {
 			try {
 				final Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cuser", Integer.class);
 				// Data initialization is currently disabled (count < 0 condition)
