@@ -14,7 +14,7 @@ public class CGridInitializerService extends CInitializerServiceBase {
 	private static final Class<?> clazz = CGridEntity.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CGridInitializerService.class);
 	private static final String menuOrder = Menu_Order_SYSTEM + ".10";
-	private static final String menuTitle = MenuTitle_SYSTEM + ".Grids";
+	private static final String menuTitle = MenuTitle_SETUP + ".UI.Grids";
 	private static final String pageDescription = "Grid management for system ";
 	private static final String pageTitle = "Grid Management";
 	private static final boolean showInQuickToolbar = true;
@@ -26,7 +26,7 @@ public class CGridInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz,"active"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNone"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Data Provider"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "dataServiceBeanName"));

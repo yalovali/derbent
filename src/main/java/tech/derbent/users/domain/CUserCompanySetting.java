@@ -126,6 +126,6 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 	public String toString() {
 		return String.format("UserCompanySettings[user=%s, company=%s, ownership=%s, role=%s, active=%s]",
 				user != null ? CSpringAuxillaries.safeToString(user) : "null", company != null ? CSpringAuxillaries.safeToString(company) : "null",
-				getOwnershipLevel(), role != null ? CSpringAuxillaries.safeToString(role) : "null", isActive());
+				getOwnershipLevel(), role != null ? CSpringAuxillaries.safeToString(role) : "null", getActive());
 	}
 }

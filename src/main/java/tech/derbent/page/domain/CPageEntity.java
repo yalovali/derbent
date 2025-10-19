@@ -92,6 +92,13 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 			description = "Use like, Project.Page, separate parent with . ", hidden = false, order = 70, maxLength = 100
 	)
 	private String menuTitle;
+	@Column (name = "page_service", nullable = true, length = 200)
+	@AMetaData (
+			displayName = "Page Service", required = false, readOnly = false, defaultValue = "",
+			description = "Backend service associated with this page", hidden = true, order = 100, maxLength = 200,
+			dataProviderMethod = "getPageServiceList", dataProviderBean = "CPageServiceUtility"
+	)
+	private String pageService;
 	@Column (nullable = false, length = 100)
 	@Size (max = 100)
 	@AMetaData (

@@ -433,7 +433,7 @@ public interface IEntityOfProjectRepository<EntityClass extends CEntityOfProject
     Optional<EntityClass> findByNameAndProject(String name, CProject project);
     
     @Query("SELECT e FROM #{#entityName} e WHERE e.project = :project " +
-           "AND e.isActive = true ORDER BY e.name")
+           "AND e.active = true ORDER BY e.name")
     List<EntityClass> findActiveByProject(@Param("project") CProject project);
 }
 ```

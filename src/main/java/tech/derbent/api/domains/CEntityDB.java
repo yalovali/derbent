@@ -19,26 +19,26 @@ import tech.derbent.api.annotations.AMetaData;
 public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implements IEntityDBStatics {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CEntityDB.class);
-	@Id
-	@GeneratedValue (strategy = GenerationType.IDENTITY)
-	@AMetaData (displayName = "#", required = false, readOnly = true, description = "No", hidden = false, order = 0)
-	private Long id;
-	@Column (name = "is_active", nullable = false)
+	@Column (name = "active", nullable = false)
 	@AMetaData (
 			displayName = "Active", required = false, readOnly = false, description = "Whether this entity definition is active", hidden = false,
 			order = 20, defaultValue = "true"
 	)
-	private Boolean isActive = true;
+	private Boolean active = true;
+	@Id
+	@GeneratedValue (strategy = GenerationType.IDENTITY)
+	@AMetaData (displayName = "#", required = false, readOnly = true, description = "No", hidden = false, order = 0)
+	private Long id;
 
 	/** Default constructor for JPA. */
 	protected CEntityDB() {
 		super();
-		isActive = true;
+		active = true;
 	}
 
 	public CEntityDB(final Class<EntityClass> clazz) {
 		super(clazz);
-		isActive = true;
+		active = true;
 	}
 
 	@SuppressWarnings ("unchecked")
@@ -63,7 +63,7 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 		return (id != null) && id.equals(other.getId());
 	}
 
-	public Boolean getActive() { return isActive; }
+	public Boolean getActive() { return active; }
 
 	/** Helper method to get all fields including inherited fields.
 	 * @param clazz the class to get fields from
@@ -149,9 +149,7 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 		}
 	}
 
-	public void setActive(final Boolean isActive) { this.isActive = isActive; }
-
-	public void setIsActive(final Boolean isActive) { this.isActive = isActive; }
+	public void setActive(final Boolean active) { this.active = active; }
 
 	@Override
 	public String toString() {

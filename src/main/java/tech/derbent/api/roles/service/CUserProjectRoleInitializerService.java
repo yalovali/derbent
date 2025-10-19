@@ -49,7 +49,7 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "lastModifiedDate"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "isActive"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "id"));
 			detailSection.debug_printScreenInformation();
 			return detailSection;
@@ -63,7 +63,7 @@ public class CUserProjectRoleInitializerService extends CInitializerServiceBase 
 		final CGridEntity grid = createBaseGridEntity(project, ENTITY_CLASS);
 		// hide grid actions when needed
 		grid.setAttributeNone(attributeNone);
-		grid.setColumnFields(List.of("id", "name", "description", "project", "isAdmin", "isUser", "isGuest", "color", "sortOrder", "isActive",
+		grid.setColumnFields(List.of("id", "name", "description", "project", "isAdmin", "isUser", "isGuest", "color", "sortOrder", "active",
 				"attributeNonDeletable"));
 		return grid;
 	}

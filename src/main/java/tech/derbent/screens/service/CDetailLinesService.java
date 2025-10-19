@@ -3,6 +3,8 @@ package tech.derbent.screens.service;
 import java.lang.reflect.Field;
 import java.time.Clock;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,35 +19,55 @@ import tech.derbent.session.service.ISessionService;
 @PreAuthorize ("isAuthenticated()")
 public class CDetailLinesService extends CAbstractService<CDetailLines> {
 
+	private static Logger LOGGER = LoggerFactory.getLogger(CDetailLinesService.class);
+
 	public static CDetailLines createLineFromDefaults(final Class<?> entityClass, final String fieldName) throws NoSuchFieldException {
-		final Field field = CEntityFieldService.getEntityField(entityClass, fieldName);
-		Check.notNull(field, "Field not found: " + fieldName + " in class " + entityClass.getSimpleName());
-		final EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(field);
-		Check.notNull(fieldInfo, "Field info not found for field: " + fieldName + " in class " + entityClass.getSimpleName());
-		final CDetailLines line = new CDetailLines();
-		line.setProperty(fieldInfo.getFieldName());
-		line.setDescription(fieldInfo.getDescription());
-		line.setFieldCaption(fieldInfo.getDisplayName());
-		line.setRelationFieldName(CEntityFieldService.THIS_CLASS);
-		return line;
+		try {
+			final Field field = CEntityFieldService.getEntityField(entityClass, fieldName);
+			Check.notNull(field, "Field not found: " + fieldName + " in class " + entityClass.getSimpleName());
+			final EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(field);
+			Check.notNull(fieldInfo, "Field info not found for field: " + fieldName + " in class " + entityClass.getSimpleName());
+			final CDetailLines line = new CDetailLines();
+			line.setProperty(fieldInfo.getFieldName());
+			line.setDescription(fieldInfo.getDescription());
+			line.setFieldCaption(fieldInfo.getDisplayName());
+			line.setRelationFieldName(CEntityFieldService.THIS_CLASS);
+			return line;
+		} catch (Exception e) {
+			LOGGER.error("Error creating line from defaults for field: {} in class {}: {}", fieldName, entityClass.getSimpleName(), e.getMessage());
+			throw new NoSuchFieldException(
+					"Error creating line from defaults for field: " + fieldName + " in class " + entityClass.getSimpleName() + ". " + e.getMessage());
+		}
 	}
 
 	public static CDetailLines createLineFromDefaults(final Class<?> entityClass, final String fieldName, final String propertyName)
 			throws NoSuchFieldException {
-		final Field field = CEntityFieldService.getEntityField(entityClass, fieldName);
-		Check.notNull(field, "Field not found: " + fieldName + " in class " + entityClass.getSimpleName());
-		final CDetailLines line = CDetailLinesService.createLineFromDefaults(field.getType(), propertyName);
-		Check.notNull(line, "Line not created for property: " + propertyName + " in class " + field.getType().getSimpleName());
-		line.setRelationFieldName(fieldName);
-		return line;
+		try {
+			final Field field = CEntityFieldService.getEntityField(entityClass, fieldName);
+			Check.notNull(field, "Field not found: " + fieldName + " in class " + entityClass.getSimpleName());
+			final CDetailLines line = CDetailLinesService.createLineFromDefaults(field.getType(), propertyName);
+			Check.notNull(line, "Line not created for property: " + propertyName + " in class " + field.getType().getSimpleName());
+			line.setRelationFieldName(fieldName);
+			return line;
+		} catch (Exception e) {
+			LOGGER.error("Error creating line from defaults for property: {} in class {}: {}", propertyName, entityClass.getSimpleName(),
+					e.getMessage());
+			throw new NoSuchFieldException("Error creating line from defaults for property: " + propertyName + " in class "
+					+ entityClass.getSimpleName() + ". " + e.getMessage());
+		}
 	}
 
 	public static CDetailLines createSection(final String sectionName) {
-		final CDetailLines line = new CDetailLines();
-		line.setRelationFieldName(CEntityFieldService.SECTION);
-		line.setProperty(CEntityFieldService.SECTION);
-		line.setSectionName(sectionName);
-		return line;
+		try {
+			final CDetailLines line = new CDetailLines();
+			line.setRelationFieldName(CEntityFieldService.SECTION);
+			line.setProperty(CEntityFieldService.SECTION);
+			line.setSectionName(sectionName);
+			return line;
+		} catch (Exception e) {
+			LOGGER.error("Error creating section line for section: {}: {}", sectionName, e.getMessage());
+			throw new RuntimeException("Error creating section line for section: " + sectionName + ". " + e.getMessage());
+		}
 	}
 
 	private final IDetailLinesRepository detailLinesRepository;
@@ -53,6 +75,11 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> {
 	public CDetailLinesService(final IDetailLinesRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
 		detailLinesRepository = repository;
+	}
+
+	@Override
+	public String checkDeleteAllowed(final CDetailLines entity) {
+		return super.checkDeleteAllowed(entity);
 	}
 
 	/** Count the number of lines for a screen.
@@ -83,19 +110,14 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> {
 	@Override
 	protected Class<CDetailLines> getEntityClass() { return CDetailLines.class; }
 
-	@Override
-	public String checkDeleteAllowed(final CDetailLines entity) {
-		return super.checkDeleteAllowed(entity);
+	public Integer getNextLineOrder(final CDetailSection screen) {
+		return detailLinesRepository.getNextLineOrder(screen);
 	}
 
 	@Override
 	public void initializeNewEntity(final CDetailLines entity) {
 		super.initializeNewEntity(entity);
 		// Additional entity-specific initialization can be added here if needed
-	}
-
-	public Integer getNextLineOrder(final CDetailSection screen) {
-		return detailLinesRepository.getNextLineOrder(screen);
 	}
 
 	@Transactional
@@ -146,7 +168,7 @@ public class CDetailLinesService extends CAbstractService<CDetailLines> {
 		final CDetailLines screenLine = new CDetailLines(screen, relationFieldName, entityProperty);
 		screenLine.setLineOrder(getNextLineOrder(screen));
 		screenLine.setMaxLength(255); // Default max length for text fields
-		screenLine.setIsActive(true);
+		screenLine.setActive(true);
 		return screenLine;
 	}
 

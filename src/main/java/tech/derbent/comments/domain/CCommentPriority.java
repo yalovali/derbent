@@ -55,19 +55,6 @@ public class CCommentPriority extends CTypeEntity<CCommentPriority> {
 
 	public Integer getPriorityLevel() { return priorityLevel; }
 
-	public boolean isDefault() { return Boolean.TRUE.equals(isDefault); }
-
-	public void setDefault(final Boolean isDefault) { this.isDefault = isDefault; }
-
-	public void setPriorityLevel(final Integer priorityLevel) { this.priorityLevel = priorityLevel; }
-
-	@Override
-	public String toString() {
-		return String.format("CCommentPriority{id=%d, name='%s', color='%s', sortOrder=%d, isActive=%s, project=%s, priorityLevel=%d, isDefault=%s}",
-				getId(), getName(), getColor(), getSortOrder(), getActive(), getProject() != null ? getProject().getName() : "null", priorityLevel,
-				isDefault);
-	}
-
 	@Override
 	public void initializeAllFields() {
 		// Initialize lazy-loaded entity relationships from parent class (CEntityOfProject)
@@ -80,5 +67,18 @@ public class CCommentPriority extends CTypeEntity<CCommentPriority> {
 		if (getCreatedBy() != null) {
 			getCreatedBy().getLogin(); // Trigger creator loading
 		}
+	}
+
+	public boolean isDefault() { return Boolean.TRUE.equals(isDefault); }
+
+	public void setDefault(final Boolean isDefault) { this.isDefault = isDefault; }
+
+	public void setPriorityLevel(final Integer priorityLevel) { this.priorityLevel = priorityLevel; }
+
+	@Override
+	public String toString() {
+		return String.format("CCommentPriority{id=%d, name='%s', color='%s', sortOrder=%d, active=%s, project=%s, priorityLevel=%d, isDefault=%s}",
+				getId(), getName(), getColor(), getSortOrder(), getActive(), getProject() != null ? getProject().getName() : "null", priorityLevel,
+				isDefault);
 	}
 }

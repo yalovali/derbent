@@ -67,23 +67,6 @@ public class CActivityPriority extends CTypeEntity<CActivityPriority> {
 
 	public Integer getPriorityLevel() { return priorityLevel; }
 
-	/** Convenience method to check if this is the default priority.
-	 * @return true if this is the default priority, false otherwise */
-	public boolean isDefault() { return Boolean.TRUE.equals(isDefault); }
-
-	/** Sets the default status of this priority.
-	 * @param isDefault true to set as default, false otherwise */
-	public void setIsDefault(final Boolean isDefault) { this.isDefault = isDefault; }
-
-	public void setPriorityLevel(final Integer priorityLevel) { this.priorityLevel = priorityLevel; }
-
-	@Override
-	public String toString() {
-		return String.format("CActivityPriority{id=%d, name='%s', color='%s', sortOrder=%d, isActive=%s, project=%s, priorityLevel=%d, isDefault=%s}",
-				getId(), getName(), getColor(), getSortOrder(), getActive(), getProject() != null ? getProject().getName() : "null", priorityLevel,
-				isDefault);
-	}
-
 	@Override
 	public void initializeAllFields() {
 		// Initialize lazy-loaded entity relationships from parent class (CEntityOfProject)
@@ -96,5 +79,22 @@ public class CActivityPriority extends CTypeEntity<CActivityPriority> {
 		if (getCreatedBy() != null) {
 			getCreatedBy().getLogin(); // Trigger creator loading
 		}
+	}
+
+	/** Convenience method to check if this is the default priority.
+	 * @return true if this is the default priority, false otherwise */
+	public boolean isDefault() { return Boolean.TRUE.equals(isDefault); }
+
+	/** Sets the default status of this priority.
+	 * @param isDefault true to set as default, false otherwise */
+	public void setIsDefault(final Boolean isDefault) { this.isDefault = isDefault; }
+
+	public void setPriorityLevel(final Integer priorityLevel) { this.priorityLevel = priorityLevel; }
+
+	@Override
+	public String toString() {
+		return String.format("CActivityPriority{id=%d, name='%s', color='%s', sortOrder=%d, active=%s, project=%s, priorityLevel=%d, isDefault=%s}",
+				getId(), getName(), getColor(), getSortOrder(), getActive(), getProject() != null ? getProject().getName() : "null", priorityLevel,
+				isDefault);
 	}
 }

@@ -57,12 +57,12 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 
 	@Override
 	public String checkDeleteAllowed(final CUser entity) {
-		final String superCheck = super.checkDeleteAllowed(entity);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		Check.notNull(entity.getCompany(), "User company cannot be null");
 		try {
+			final String superCheck = super.checkDeleteAllowed(entity);
+			if (superCheck != null) {
+				return superCheck;
+			}
+			Check.notNull(entity.getCompany(), "User company cannot be null");
 			// Rule 1: Check if this is the last user in the company
 			final List<CUser> companyUsers = ((IUserRepository) repository).findByCompanyId(entity.getCompany().getId());
 			if (companyUsers.size() == 1) {
@@ -95,19 +95,15 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 			LOGGER.warn("Username already exists: {}", username);
 			throw new IllegalArgumentException("Username already exists: " + username);
 		}
-		// Encode the password
 		final String encodedPassword = passwordEncoder.encode(plainPassword);
-		// Create new login user
 		final CUser loginUser = new CUser(username, encodedPassword, name, email, company, role);
-		loginUser.setEnabled(true);
-		// Save to database
 		final CUser savedUser = repository.saveAndFlush(loginUser);
 		return savedUser;
 	}
 
 	public Component createUserProjectSettingsComponent() {
-		LOGGER.debug("Creating enhanced user project settings component");
 		try {
+			LOGGER.debug("Creating enhanced user project settings component");
 			final CComponentUserProjectSettings component = new CComponentUserProjectSettings(this, sessionService, applicationContext);
 			return component;
 		} catch (final Exception e) {
@@ -199,10 +195,10 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 	@Override
 	public void initializeNewEntity(final CUser user) {
 		super.initializeNewEntity(user);
-		LOGGER.debug("Initializing new user entity with default values");
-		Check.notNull(user, "User cannot be null");
-		Check.notNull(sessionService, "Session service is required for user initialization");
 		try {
+			LOGGER.debug("Initializing new user entity with default values");
+			Check.notNull(user, "User cannot be null");
+			Check.notNull(sessionService, "Session service is required for user initialization");
 			// Get current company from session
 			final CCompany currentCompany = sessionService.getCurrentCompany();
 			Check.notNull(currentCompany, "No active company in session - company context is required to create users");
@@ -213,11 +209,10 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 			user.setLastname("");
 			user.setEmail("");
 			user.setPhone("");
-			user.setEnabled(true);
 			user.setPassword(""); // Empty - user must set password
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing new user", e);
-			throw new IllegalStateException("Failed to initialize user: " + e.getMessage(), e);
+			LOGGER.error("Error initializing new user: {}", e.getMessage());
+			throw e;
 		}
 	}
 
@@ -271,31 +266,36 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 	@Override
 	// overloaded for spring security
 	public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
-		LOGGER.debug("Attempting to load user by username: {}", username);
-		// username syntax is username@company_id
-		// split login and company id
-		final String[] parts = username.split("@");
-		Check.isTrue(parts.length == 2, "Username must be in the format username@company_id");
-		final String login = parts[0];
-		Long companyId;
 		try {
-			companyId = Long.parseLong(parts[1]);
-		} catch (final NumberFormatException e) {
-			LOGGER.warn("Invalid company ID in username: {}", parts[1]);
-			throw new UsernameNotFoundException("Invalid company ID in username: " + parts[1]);
+			LOGGER.debug("Attempting to load user by username: {}", username);
+			// username syntax is username@company_id
+			// split login and company id
+			final String[] parts = username.split("@");
+			Check.isTrue(parts.length == 2, "Username must be in the format username@company_id");
+			final String login = parts[0];
+			Long companyId;
+			try {
+				companyId = Long.parseLong(parts[1]);
+			} catch (final NumberFormatException e) {
+				LOGGER.warn("Invalid company ID in username: {}", parts[1]);
+				throw new UsernameNotFoundException("Invalid company ID in username: " + parts[1]);
+			}
+			final CUser loginUser = ((IUserRepository) repository).findByUsername(companyId, login).orElseThrow(() -> {
+				LOGGER.warn("User not found with username: {}", username);
+				return new UsernameNotFoundException("User not found with username: " + username);
+			});
+			// Step 2: Convert user roles to Spring Security authorities
+			// fix this next line!!!!!
+			final Collection<GrantedAuthority> authorities = getAuthorities("ADMIN,USER");
+			// Step 3: Create and return Spring Security UserDetails
+			// return
+			// User.builder().username(loginUser.getUsername()).password(loginUser.getPassword()).authorities(authorities).accountExpired(false).accountLocked(false).credentialsExpired(false).disabled(!loginUser.isEnabled()).build();
+			return User.builder().username(username).password(loginUser.getPassword()).authorities(authorities).accountExpired(false)
+					.accountLocked(false).credentialsExpired(false).disabled(!loginUser.getActive()).build();
+		} catch (final Exception e) {
+			LOGGER.error("Error loading user by username '{}': {}", username, e.getMessage());
+			throw e;
 		}
-		final CUser loginUser = ((IUserRepository) repository).findByUsername(companyId, login).orElseThrow(() -> {
-			LOGGER.warn("User not found with username: {}", username);
-			return new UsernameNotFoundException("User not found with username: " + username);
-		});
-		// Step 2: Convert user roles to Spring Security authorities
-		// fix this next line!!!!!
-		final Collection<GrantedAuthority> authorities = getAuthorities("ADMIN,USER");
-		// Step 3: Create and return Spring Security UserDetails
-		// return
-		// User.builder().username(loginUser.getUsername()).password(loginUser.getPassword()).authorities(authorities).accountExpired(false).accountLocked(false).credentialsExpired(false).disabled(!loginUser.isEnabled()).build();
-		return User.builder().username(username).password(loginUser.getPassword()).authorities(authorities).accountExpired(false).accountLocked(false)
-				.credentialsExpired(false).disabled(!loginUser.isEnabled()).build();
 	}
 
 	@Override

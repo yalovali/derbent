@@ -11,6 +11,18 @@ import tech.derbent.api.annotations.AMetaData;
 @MappedSuperclass
 public abstract class CAbstractEntityRelationship<RelationshipClass> extends CEntityDB<RelationshipClass> {
 
+	@Column (name = "active", nullable = false)
+	@AMetaData (
+			displayName = "Active", required = true, readOnly = false, defaultValue = "true",
+			description = "Whether this relationship is currently active", hidden = false, order = 102
+	)
+	private Boolean active = Boolean.TRUE;
+	@Column (name = "granted_by_user_id", nullable = true)
+	@AMetaData (
+			displayName = "Granted By", required = false, readOnly = true, description = "ID of the user who granted this relationship",
+			hidden = false, order = 103
+	)
+	private Long grantedByUserId;
 	@Column (name = "ownership_level", nullable = false, length = 50)
 	@Size (max = 50)
 	@AMetaData (
@@ -25,18 +37,6 @@ public abstract class CAbstractEntityRelationship<RelationshipClass> extends CEn
 			description = "Comma-separated list of specific privileges", hidden = false, order = 101
 	)
 	private String privileges;
-	@Column (name = "is_active", nullable = false)
-	@AMetaData (
-			displayName = "Active", required = true, readOnly = false, defaultValue = "true",
-			description = "Whether this relationship is currently active", hidden = false, order = 102
-	)
-	private Boolean isActive = Boolean.TRUE;
-	@Column (name = "granted_by_user_id", nullable = true)
-	@AMetaData (
-			displayName = "Granted By", required = false, readOnly = true, description = "ID of the user who granted this relationship",
-			hidden = false, order = 103
-	)
-	private Long grantedByUserId;
 
 	public CAbstractEntityRelationship() {
 		super();
@@ -44,35 +44,6 @@ public abstract class CAbstractEntityRelationship<RelationshipClass> extends CEn
 
 	public CAbstractEntityRelationship(Class<RelationshipClass> clazz) {
 		super(clazz);
-	}
-
-	// Getters and Setters
-	public String getOwnershipLevel() { return ownershipLevel; }
-
-	public void setOwnershipLevel(String ownershipLevel) { this.ownershipLevel = ownershipLevel != null ? ownershipLevel : "MEMBER"; }
-
-	public String getPrivileges() { return privileges; }
-
-	public void setPrivileges(String privileges) { this.privileges = privileges; }
-
-	public Boolean getIsActive() { return isActive; }
-
-	public void setIsActive(Boolean isActive) { this.isActive = isActive != null ? isActive : Boolean.TRUE; }
-
-	public Boolean isActive() { return isActive; }
-
-	public Long getGrantedByUserId() { return grantedByUserId; }
-
-	public void setGrantedByUserId(Long grantedByUserId) { this.grantedByUserId = grantedByUserId; }
-
-	/** Check if this relationship has a specific privilege.
-	 * @param privilege The privilege to check for
-	 * @return true if the relationship includes this privilege */
-	public boolean hasPrivilege(String privilege) {
-		if (privilege == null || privileges == null) {
-			return false;
-		}
-		return privileges.contains(privilege.toUpperCase());
 	}
 
 	/** Add a privilege to this relationship.
@@ -88,6 +59,42 @@ public abstract class CAbstractEntityRelationship<RelationshipClass> extends CEn
 			privileges += "," + privilege;
 		}
 	}
+
+	@Override
+	public Boolean getActive() { return active; }
+
+	public Long getGrantedByUserId() { return grantedByUserId; }
+
+	// Getters and Setters
+	public String getOwnershipLevel() { return ownershipLevel; }
+
+	public String getPrivileges() { return privileges; }
+
+	/** Check if this relationship has a specific privilege.
+	 * @param privilege The privilege to check for
+	 * @return true if the relationship includes this privilege */
+	public boolean hasPrivilege(String privilege) {
+		if (privilege == null || privileges == null) {
+			return false;
+		}
+		return privileges.contains(privilege.toUpperCase());
+	}
+
+	/** Check if this relationship grants admin privileges (OWNER or ADMIN level).
+	 * @return true if ownership level is OWNER or ADMIN */
+	public boolean isAdmin() {
+		return "OWNER".equals(ownershipLevel) || "ADMIN".equals(ownershipLevel);
+	}
+
+	/** Check if this relationship grants member privileges (OWNER, ADMIN, or MEMBER level).
+	 * @return true if ownership level is OWNER, ADMIN, or MEMBER */
+	public boolean isMember() {
+		return "OWNER".equals(ownershipLevel) || "ADMIN".equals(ownershipLevel) || "MEMBER".equals(ownershipLevel);
+	}
+
+	/** Check if this relationship grants ownership (OWNER level).
+	 * @return true if ownership level is OWNER */
+	public boolean isOwner() { return "OWNER".equals(ownershipLevel); }
 
 	/** Remove a privilege from this relationship.
 	 * @param privilege The privilege to remove */
@@ -110,19 +117,12 @@ public abstract class CAbstractEntityRelationship<RelationshipClass> extends CEn
 		privileges = newPrivileges.toString();
 	}
 
-	/** Check if this relationship grants ownership (OWNER level).
-	 * @return true if ownership level is OWNER */
-	public boolean isOwner() { return "OWNER".equals(ownershipLevel); }
+	@Override
+	public void setActive(Boolean active) { this.active = active != null ? active : Boolean.TRUE; }
 
-	/** Check if this relationship grants admin privileges (OWNER or ADMIN level).
-	 * @return true if ownership level is OWNER or ADMIN */
-	public boolean isAdmin() {
-		return "OWNER".equals(ownershipLevel) || "ADMIN".equals(ownershipLevel);
-	}
+	public void setGrantedByUserId(Long grantedByUserId) { this.grantedByUserId = grantedByUserId; }
 
-	/** Check if this relationship grants member privileges (OWNER, ADMIN, or MEMBER level).
-	 * @return true if ownership level is OWNER, ADMIN, or MEMBER */
-	public boolean isMember() {
-		return "OWNER".equals(ownershipLevel) || "ADMIN".equals(ownershipLevel) || "MEMBER".equals(ownershipLevel);
-	}
+	public void setOwnershipLevel(String ownershipLevel) { this.ownershipLevel = ownershipLevel != null ? ownershipLevel : "MEMBER"; }
+
+	public void setPrivileges(String privileges) { this.privileges = privileges; }
 }

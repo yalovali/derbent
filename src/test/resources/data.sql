@@ -85,7 +85,7 @@ INSERT INTO ccommentpriority (name, description, priority_level, color, is_defau
 ('NORMAL', 'Normal priority comment', 2, '#2196F3', TRUE);
 
 -- Decision types with colors (2 essential types)
-INSERT INTO cdecisiontype (name, description, color, sort_order, requires_approval, is_active) VALUES 
+INSERT INTO cdecisiontype (name, description, color, sort_order, requires_approval,active) VALUES 
 ('Technical', 'Technical architecture and implementation decisions', '#2196F3', 1, TRUE, TRUE),
 ('Strategic', 'High-level strategic decisions affecting project direction', '#FF5722', 2, TRUE, TRUE);
 

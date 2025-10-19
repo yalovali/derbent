@@ -44,7 +44,7 @@ public final class CUserProjectSettingsInitializerService extends CInitializerSe
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "role"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Permissions"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "permission"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "isActive"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			addOptionalField(detailSection, "createdDate");
 			addOptionalField(detailSection, "lastModifiedDate");
@@ -59,7 +59,7 @@ public final class CUserProjectSettingsInitializerService extends CInitializerSe
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, ENTITY_CLASS);
-		grid.setColumnFields(List.of("id", "user", "project", "role", "permission", "isActive"));
+		grid.setColumnFields(List.of("id", "user", "project", "role", "permission", "active"));
 		return grid;
 	}
 

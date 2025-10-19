@@ -195,22 +195,22 @@ public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProje
 	@Override
 	@Transactional
 	public EntityClass save(final EntityClass entity) {
-		Check.notNull(entity, "Entity cannot be null");
-		Check.notNull(entity.getProject(), "Entity's project cannot be null");
-		final String trimmedName = entity.getName().trim();
-		// search with same name and same project exclude self if updating
-		final Optional<EntityClass> existing = ((IEntityOfProjectRepository<EntityClass>) repository)
-				.findByNameAndProject(trimmedName, entity.getProject()).filter(existingStatus -> {
-					// Exclude self if updating
-					return (entity.getId() == null) || !existingStatus.getId().equals(entity.getId());
-				});
-		if (existing.isPresent()) {
-			LOGGER.error("save(entity={}) - Entity with name '{}' already exists in project {}", entity.getId(), trimmedName,
-					entity.getProject().getName());
-			throw new IllegalArgumentException(
-					"Entity with name '" + trimmedName + "' already exists in project '" + entity.getProject().getName() + "'");
-		}
 		try {
+			Check.notNull(entity, "Entity cannot be null");
+			Check.notNull(entity.getProject(), "Entity's project cannot be null");
+			final String trimmedName = entity.getName().trim();
+			// search with same name and same project exclude self if updating
+			final Optional<EntityClass> existing = ((IEntityOfProjectRepository<EntityClass>) repository)
+					.findByNameAndProject(trimmedName, entity.getProject()).filter(existingStatus -> {
+						// Exclude self if updating
+						return (entity.getId() == null) || !existingStatus.getId().equals(entity.getId());
+					});
+			if (existing.isPresent()) {
+				LOGGER.error("save(entity={}) - Entity with name '{}' already exists in project {}", entity.getId(), trimmedName,
+						entity.getProject().getName());
+				throw new IllegalArgumentException(
+						"Entity with name '" + trimmedName + "' already exists in project '" + entity.getProject().getName() + "'");
+			}
 			final EntityClass savedStatus = repository.save(entity);
 			return savedStatus;
 		} catch (final Exception e) {

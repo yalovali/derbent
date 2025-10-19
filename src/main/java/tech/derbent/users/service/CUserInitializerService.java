@@ -37,7 +37,6 @@ public class CUserInitializerService extends CInitializerServiceBase {
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "email"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "phone"));
 			scr.addScreenLine(CDetailLinesService.createSection("System Access"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "enabled"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "password"));
 			scr.addScreenLine(CDetailLinesService.createSection("Project & Company Relations"));
 			final CDetailLines line = CDetailLinesService.createLineFromDefaults(clazz, "projectSettings");
@@ -56,7 +55,7 @@ public class CUserInitializerService extends CInitializerServiceBase {
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "activities"));
 			scr.debug_printScreenInformation();
 			return scr;

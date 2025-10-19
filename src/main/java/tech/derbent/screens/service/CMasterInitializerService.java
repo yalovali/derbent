@@ -24,7 +24,7 @@ public class CMasterInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz,"active"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Configuration"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sectionType"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sectionDBName"));
@@ -41,7 +41,7 @@ public class CMasterInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "sectionType", "sectionDBName", "project", "isActive"));
+		grid.setColumnFields(List.of("id", "name", "sectionType", "sectionDBName", "project", "active"));
 		return grid;
 	}
 

@@ -11,16 +11,16 @@ import tech.derbent.screens.domain.CGridEntity;
 
 public abstract class CInitializerServiceBase {
 
-	protected static final String MenuTitle_PROJECT = "Project";
-	protected static final String MenuTitle_SYSTEM = "System";
-	protected static final String MenuTitle_SETUP = "Setup";
-	protected static final String MenuTitle_TYPES = "Types";
-	protected static final String MenuTitle_ROLES = "Roles";
 	protected static final String Menu_Order_PROJECT = "1";
-	protected static final String Menu_Order_SYSTEM = "10";
-	protected static final String Menu_Order_SETUP = "20";
-	protected static final String Menu_Order_TYPES = "30";
 	protected static final String Menu_Order_ROLES = "40";
+	protected static final String Menu_Order_SETUP = "20";
+	protected static final String Menu_Order_SYSTEM = "10";
+	protected static final String Menu_Order_TYPES = "30";
+	protected static final String MenuTitle_PROJECT = "Project";
+	protected static final String MenuTitle_ROLES = "Roles";
+	protected static final String MenuTitle_SETUP = "Setup";
+	protected static final String MenuTitle_SYSTEM = "System";
+	protected static final String MenuTitle_TYPES = "Types";
 
 	protected static CGridEntity createBaseGridEntity(CProject project, Class<?> clazz) {
 		String baseViewName;
@@ -52,7 +52,7 @@ public abstract class CInitializerServiceBase {
 		scr.setProject(project);
 		scr.setEntityType(clazz.getSimpleName());
 		scr.setHeaderText(baseViewName);
-		scr.setIsActive(Boolean.TRUE);
+		scr.setActive(Boolean.TRUE);
 		scr.setScreenTitle(baseViewName);
 		scr.setName(baseViewName);
 		scr.setDescription(baseViewName);

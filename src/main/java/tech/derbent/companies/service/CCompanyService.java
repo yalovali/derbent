@@ -28,33 +28,37 @@ public class CCompanyService extends CEntityNamedService<CCompany> {
 		super(repository, clock, sessionService);
 	}
 
-	@Transactional
-	public void disableCompany(final Long id) {
-		Check.notNull(id, "Company ID cannot be null");
-		try {
-			final Optional<CCompany> companyOptional = repository.findById(id);
-			Check.isTrue(companyOptional.isPresent(), "Company not found with id: " + id);
-			final CCompany company = companyOptional.get();
-			company.setEnabled(false);
-			repository.saveAndFlush(company);
-		} catch (final Exception e) {
-			LOGGER.error("Error disabling company with id: {}", id, e);
-			throw e;
+	/** Checks dependencies before allowing company deletion. Prevents deletion if: 1. Current user belongs to the company (cannot delete own company)
+	 * 2. Company has associated users
+	 * @param company the company entity to check
+	 * @return null if company can be deleted, error message otherwise */
+	/** Checks dependencies before allowing company deletion. Prevents deletion of user's own company and companies with active users. Always calls
+	 * super.checkDeleteAllowed() first to ensure all parent-level checks (null validation) are performed.
+	 * @param entity the company entity to check
+	 * @return null if company can be deleted, error message otherwise */
+	@Override
+	public String checkDeleteAllowed(final CCompany entity) {
+		final String superCheck = super.checkDeleteAllowed(entity);
+		if (superCheck != null) {
+			return superCheck;
 		}
-	}
-
-	@Transactional
-	public void enableCompany(final Long id) {
-		Check.notNull(id, "Company ID cannot be null");
 		try {
-			final Optional<CCompany> companyOptional = repository.findById(id);
-			Check.isTrue(companyOptional.isPresent(), "Company not found with id: " + id);
-			final CCompany company = companyOptional.get();
-			company.setEnabled(true);
-			repository.saveAndFlush(company);
+			// Rule 1: Check if current user belongs to this company (user cannot delete their own company)
+			if (sessionService != null && sessionService.getActiveUser().isPresent()) {
+				final CCompany currentUserCompany = sessionService.getCurrentCompany();
+				if (currentUserCompany != null && currentUserCompany.getId().equals(entity.getId())) {
+					return "You cannot delete your own company. Please switch to another company first.";
+				}
+			}
+			// Rule 2: Check if company has any users
+			final long userCount = userCompanySettingsRepository.countByCompanyId(entity.getId());
+			if (userCount > 0) {
+				return String.format("Cannot delete company. It is associated with %d user(s). Please remove all users first.", userCount);
+			}
+			return null; // Company can be deleted
 		} catch (final Exception e) {
-			LOGGER.error("Error enabling company with id: {}", id, e);
-			throw e;
+			LOGGER.error("Error checking dependencies for company: {}", entity.getName(), e);
+			return "Error checking dependencies: " + e.getMessage();
 		}
 	}
 
@@ -92,6 +96,12 @@ public class CCompanyService extends CEntityNamedService<CCompany> {
 	@Override
 	protected Class<CCompany> getEntityClass() { return CCompany.class; }
 
+	@Override
+	public void initializeNewEntity(final CCompany entity) {
+		super.initializeNewEntity(entity);
+		Check.notNull(entity, "Entity cannot be null");
+	}
+
 	public List<CCompany> searchCompaniesByName(final String searchTerm) {
 		LOGGER.debug("searchCompaniesByName called with searchTerm: {}", searchTerm);
 		if ((searchTerm == null) || searchTerm.trim().isEmpty()) {
@@ -106,45 +116,5 @@ public class CCompanyService extends CEntityNamedService<CCompany> {
 			LOGGER.error("Error searching companies by name: {}", searchTerm, e);
 			throw e;
 		}
-	}
-
-	/** Checks dependencies before allowing company deletion. Prevents deletion if: 1. Current user belongs to the company (cannot delete own company)
-	 * 2. Company has associated users
-	 * @param company the company entity to check
-	 * @return null if company can be deleted, error message otherwise */
-	/** Checks dependencies before allowing company deletion. Prevents deletion of user's own company and companies with active users. Always calls
-	 * super.checkDeleteAllowed() first to ensure all parent-level checks (null validation) are performed.
-	 * @param entity the company entity to check
-	 * @return null if company can be deleted, error message otherwise */
-	@Override
-	public String checkDeleteAllowed(final CCompany entity) {
-		final String superCheck = super.checkDeleteAllowed(entity);
-		if (superCheck != null) {
-			return superCheck;
-		}
-		try {
-			// Rule 1: Check if current user belongs to this company (user cannot delete their own company)
-			if (sessionService != null && sessionService.getActiveUser().isPresent()) {
-				final CCompany currentUserCompany = sessionService.getCurrentCompany();
-				if (currentUserCompany != null && currentUserCompany.getId().equals(entity.getId())) {
-					return "You cannot delete your own company. Please switch to another company first.";
-				}
-			}
-			// Rule 2: Check if company has any users
-			final long userCount = userCompanySettingsRepository.countByCompanyId(entity.getId());
-			if (userCount > 0) {
-				return String.format("Cannot delete company. It is associated with %d user(s). Please remove all users first.", userCount);
-			}
-			return null; // Company can be deleted
-		} catch (final Exception e) {
-			LOGGER.error("Error checking dependencies for company: {}", entity.getName(), e);
-			return "Error checking dependencies: " + e.getMessage();
-		}
-	}
-
-	@Override
-	public void initializeNewEntity(final CCompany entity) {
-		super.initializeNewEntity(entity);
-		Check.notNull(entity, "Entity cannot be null");
 	}
 }

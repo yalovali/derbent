@@ -68,6 +68,7 @@ import tech.derbent.orders.service.COrderStatusInitializerService;
 import tech.derbent.orders.service.COrderStatusService;
 import tech.derbent.orders.service.COrderTypeInitializerService;
 import tech.derbent.orders.service.COrderTypeService;
+import tech.derbent.page.service.CPageEntityInitializerService;
 import tech.derbent.page.service.CPageEntityService;
 import tech.derbent.projects.domain.CProject;
 import tech.derbent.projects.service.CProjectInitializerService;
@@ -332,8 +333,6 @@ public class CDataInitializer {
 		consulting.setEmail("merhaba@ofdanismanlik.com.tr");
 		consulting.setWebsite("https://www.ofdanismanlik.com.tr");
 		consulting.setTaxNumber("TR-456789123");
-		consulting.setEnabled(true);
-		// Company Configuration Settings
 		consulting.setCompanyTheme("lumo-light");
 		consulting.setCompanyLogoUrl("/assets/logos/consulting-logo.svg");
 		consulting.setPrimaryColor("#4caf50");
@@ -380,8 +379,6 @@ public class CDataInitializer {
 		healthcare.setEmail("iletisim@ofsaglik.com.tr");
 		healthcare.setWebsite("https://www.ofsaglik.com.tr");
 		healthcare.setTaxNumber("TR-789123456");
-		healthcare.setEnabled(true);
-		// Company Configuration Settings
 		healthcare.setCompanyTheme("lumo-light");
 		healthcare.setCompanyLogoUrl("/assets/logos/healthcare-logo.svg");
 		healthcare.setPrimaryColor("#f44336");
@@ -403,8 +400,6 @@ public class CDataInitializer {
 		manufacturing.setEmail("bilgi@ofendüstri.com.tr");
 		manufacturing.setWebsite("https://www.ofendüstri.com.tr");
 		manufacturing.setTaxNumber("TR-987654321");
-		manufacturing.setEnabled(true);
-		// Company Configuration Settings
 		manufacturing.setCompanyTheme("lumo-dark");
 		manufacturing.setCompanyLogoUrl("/assets/logos/manufacturing-logo.svg");
 		manufacturing.setPrimaryColor("#ff9800");
@@ -446,7 +441,7 @@ public class CDataInitializer {
 	private void createProjectDigitalTransformation(final CCompany company) {
 		final CProject project = new CProject("Digital Transformation Initiative", company);
 		project.setDescription("Comprehensive digital transformation for enhanced customer experience");
-		project.setIsActive(true);
+		project.setActive(true);
 		projectService.save(project);
 	}
 
@@ -566,8 +561,6 @@ public class CDataInitializer {
 		techStartup.setEmail("iletisim@ofteknoloji.com.tr");
 		techStartup.setWebsite("https://www.ofteknoloji.com.tr");
 		techStartup.setTaxNumber("TR-123456789");
-		techStartup.setEnabled(true);
-		// Company Configuration Settings
 		techStartup.setCompanyTheme("lumo-dark");
 		techStartup.setCompanyLogoUrl("/assets/logos/tech-logo.svg");
 		techStartup.setPrimaryColor("#1976d2");
@@ -1079,6 +1072,7 @@ public class CDataInitializer {
 					COrderTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CRiskStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CGridInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CPageEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					// TODO: Add similar calls for all other InitializerServices (user types, priorities, etc.)
 					// Project-specific type and configuration entities
 					initializeSampleMeetingStatuses(project);
@@ -1106,7 +1100,7 @@ public class CDataInitializer {
 			}
 			LOGGER.info("Sample data initialization completed successfully");
 		} catch (final Exception e) {
-			LOGGER.error("Error loading sample data", e);
+			LOGGER.error("Error loading sample data: {}", e.getMessage());
 			throw e;
 		}
 	}

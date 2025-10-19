@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValueAndElement;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -237,103 +238,110 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	}
 
 	private static Checkbox createCheckbox(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
-		Check.notNull(fieldInfo, "FieldInfo for checkbox creation");
-		final Checkbox checkbox = new Checkbox();
-		// Set ID for better test automation
-		CAuxillaries.setId(checkbox);
-		// Safe null checking and parsing for default value
-		if ((fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty()) {
-			try {
-				checkbox.setValue(Boolean.parseBoolean(fieldInfo.getDefaultValue()));
-				// LOGGER.debug("Set default value for checkbox '{}': {}",
-				// field.getName(), meta.defaultValue());
-			} catch (final Exception e) {
-				LOGGER.error("Invalid boolean default value '{}' for field '{}': {}", fieldInfo.getDefaultValue(), fieldInfo.getFieldName(),
-						e.getMessage());
-				throw new IllegalArgumentException("Invalid boolean default value: " + fieldInfo.getDefaultValue(), e);
-			}
-		}
 		try {
+			Check.notNull(fieldInfo, "FieldInfo for checkbox creation");
+			final Checkbox checkbox = new Checkbox();
+			// Set ID for better test automation
+			CAuxillaries.setId(checkbox);
+			// Safe null checking and parsing for default value
+			if ((fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty()) {
+				checkbox.setValue(Boolean.parseBoolean(fieldInfo.getDefaultValue()));
+			}
 			safeBindComponent(binder, checkbox, fieldInfo.getFieldName(), "Checkbox");
+			return checkbox;
 		} catch (final Exception e) {
-			LOGGER.error("Failed to bind checkbox for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
-			throw new RuntimeException("Failed to bind checkbox for field: " + fieldInfo.getFieldName(), e);
+			LOGGER.error("Failed to create or bind checkbox for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
+			throw e;
 		}
-		return checkbox;
 	}
 
 	private static Component createColorPicker(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
-		CColorPickerComboBox colorPicker = new CColorPickerComboBox(fieldInfo);
-		safeBindComponent(binder, colorPicker, fieldInfo.getFieldName(), "ColorPicker");
-		return colorPicker;
+		try {
+			CColorPickerComboBox colorPicker = new CColorPickerComboBox(fieldInfo);
+			safeBindComponent(binder, colorPicker, fieldInfo.getFieldName(), "ColorPicker");
+			return colorPicker;
+		} catch (final Exception e) {
+			LOGGER.error("Failed to create or bind color picker for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
+			throw e;
+		}
 	}
 
 	public static <T extends CEntityDB<T>> ComboBox<T> createComboBox(IContentOwner contentOwner, final EntityFieldInfo fieldInfo,
 			final CEnhancedBinder<?> binder) throws Exception {
-		Check.notNull(fieldInfo, "FieldInfo for ComboBox creation");
-		LOGGER.debug("Creating CColorAwareComboBox for field: {}", fieldInfo.getFieldName());
-		final ComboBox<T> comboBox = new CColorAwareComboBox<>(fieldInfo);
-		comboBox.setItemLabelGenerator(item -> CColorUtils.getDisplayTextFromEntity(item));
-		// Data provider resolution using CDataProviderResolver
-		List<T> items = null;
-		Check.notNull(dataProviderResolver, "DataProviderResolver for field " + fieldInfo.getFieldName());
-		items = dataProviderResolver.resolveData(contentOwner, fieldInfo);
-		Check.notNull(items, "Items for field " + fieldInfo.getFieldName() + " of type " + fieldInfo.getJavaType());
-		if (fieldInfo.isClearOnEmptyData() && items.isEmpty()) {
-			comboBox.setValue(null);
-		}
-		comboBox.setItems(items);
-		if (!items.isEmpty()) {
-			if ((fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty()) {
-				// For entity types, try to find by name or toString match
-				final T defaultItem = items.stream().filter(item -> {
-					final String itemDisplay = CColorUtils.getDisplayTextFromEntity(item);
-					return fieldInfo.getDefaultValue().equals(itemDisplay);
-				}).findFirst().orElse(null);
-				if (defaultItem != null) {
-					comboBox.setValue(defaultItem);
-				}
-			} else if (fieldInfo.isAutoSelectFirst()) {
-				comboBox.setValue(items.get(0));
+		try {
+			Check.notNull(fieldInfo, "FieldInfo for ComboBox creation");
+			LOGGER.debug("Creating CColorAwareComboBox for field: {}", fieldInfo.getFieldName());
+			final ComboBox<T> comboBox = new CColorAwareComboBox<>(fieldInfo);
+			comboBox.setItemLabelGenerator(item -> CColorUtils.getDisplayTextFromEntity(item));
+			// Data provider resolution using CDataProviderResolver
+			List<T> items = null;
+			Check.notNull(dataProviderResolver, "DataProviderResolver for field " + fieldInfo.getFieldName());
+			items = dataProviderResolver.resolveData(contentOwner, fieldInfo);
+			Check.notNull(items, "Items for field " + fieldInfo.getFieldName() + " of type " + fieldInfo.getJavaType());
+			if (fieldInfo.isClearOnEmptyData() && items.isEmpty()) {
+				comboBox.setValue(null);
 			}
+			comboBox.setItems(items);
+			if (!items.isEmpty()) {
+				if ((fieldInfo.getDefaultValue() != null) && !fieldInfo.getDefaultValue().trim().isEmpty()) {
+					// For entity types, try to find by name or toString match
+					final T defaultItem = items.stream().filter(item -> {
+						final String itemDisplay = CColorUtils.getDisplayTextFromEntity(item);
+						return fieldInfo.getDefaultValue().equals(itemDisplay);
+					}).findFirst().orElse(null);
+					if (defaultItem != null) {
+						comboBox.setValue(defaultItem);
+					}
+				} else if (fieldInfo.isAutoSelectFirst()) {
+					comboBox.setValue(items.get(0));
+				}
+			}
+			safeBindComponent(binder, comboBox, fieldInfo.getFieldName(), "ComboBox");
+			return comboBox;
+		} catch (final Exception e) {
+			LOGGER.error("Failed to create or bind ComboBox for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
+			throw e;
 		}
-		safeBindComponent(binder, comboBox, fieldInfo.getFieldName(), "ComboBox");
-		return comboBox;
 	}
 
 	@SuppressWarnings ("unchecked")
 	private static <T> MultiSelectComboBox<T> createComboBoxMultiSelect(IContentOwner contentOwner, final EntityFieldInfo fieldInfo,
 			final CEnhancedBinder<?> binder) throws Exception {
-		Check.notNull(fieldInfo, "FieldInfo for ComboBox creation");
-		LOGGER.debug("Creating MultiSelectComboBox for field: {}", fieldInfo.getFieldName());
-		final MultiSelectComboBox<T> comboBox = new MultiSelectComboBox<T>(fieldInfo.getIsCaptionVisible() ? fieldInfo.getDisplayName() : "");
-		comboBox.setItemLabelGenerator(item -> {
-			if (item instanceof CEntityNamed<?>) {
-				return ((CEntityNamed<?>) item).getName();
+		try {
+			Check.notNull(fieldInfo, "FieldInfo for ComboBox creation");
+			LOGGER.debug("Creating MultiSelectComboBox for field: {}", fieldInfo.getFieldName());
+			final MultiSelectComboBox<T> comboBox = new MultiSelectComboBox<T>(fieldInfo.getIsCaptionVisible() ? fieldInfo.getDisplayName() : "");
+			comboBox.setItemLabelGenerator(item -> {
+				if (item instanceof CEntityNamed<?>) {
+					return ((CEntityNamed<?>) item).getName();
+				}
+				if (item instanceof CEntityDB<?>) {
+					return CColorUtils.getDisplayTextFromEntity(item);
+				}
+				if (item instanceof String) {
+					return (String) item;
+				}
+				return "Unknown Item: " + String.valueOf(item);
+			});
+			// --- Data provider ---
+			Check.notNull(dataProviderResolver, "DataProviderResolver for field " + fieldInfo.getFieldName());
+			// DİKKAT: Diziye çevirip Set.of(...) kullanmıyoruz — bu, Set<CEntityDB[]> üretip tür çıkarımını bozuyordu.
+			final List<?> rawList = dataProviderResolver.resolveData(contentOwner, fieldInfo);
+			Check.notNull(rawList, "Items for field " + fieldInfo.getFieldName() + " of type " + fieldInfo.getJavaType());
+			// Tip güvenli toplama: LinkedHashSet ile sıralı ve benzersiz
+			final LinkedHashSet<T> items = rawList.stream().map(e -> (T) e) // runtime cast; provider sözleşmesine güveniyoruz
+					.collect(java.util.stream.Collectors.toCollection(java.util.LinkedHashSet::new));
+			if (fieldInfo.isClearOnEmptyData() && items.isEmpty()) {
+				comboBox.clear(); // Set.of() vermek yerine clear()
 			}
-			if (item instanceof CEntityDB<?>) {
-				return CColorUtils.getDisplayTextFromEntity(item);
-			}
-			if (item instanceof String) {
-				return (String) item;
-			}
-			return "Unknown Item: " + String.valueOf(item);
-		});
-		// --- Data provider ---
-		Check.notNull(dataProviderResolver, "DataProviderResolver for field " + fieldInfo.getFieldName());
-		// DİKKAT: Diziye çevirip Set.of(...) kullanmıyoruz — bu, Set<CEntityDB[]> üretip tür çıkarımını bozuyordu.
-		final List<?> rawList = dataProviderResolver.resolveData(contentOwner, fieldInfo);
-		Check.notNull(rawList, "Items for field " + fieldInfo.getFieldName() + " of type " + fieldInfo.getJavaType());
-		// Tip güvenli toplama: LinkedHashSet ile sıralı ve benzersiz
-		final LinkedHashSet<T> items = rawList.stream().map(e -> (T) e) // runtime cast; provider sözleşmesine güveniyoruz
-				.collect(java.util.stream.Collectors.toCollection(java.util.LinkedHashSet::new));
-		if (fieldInfo.isClearOnEmptyData() && items.isEmpty()) {
-			comboBox.clear(); // Set.of() vermek yerine clear()
+			comboBox.setItems(items);
+			// (İsteğe bağlı) Varsayılan değer atama burada yapılabilir.
+			safeBindComponent(binder, comboBox, fieldInfo.getFieldName(), "ComboBox(MultiSelect)");
+			return comboBox;
+		} catch (final Exception e) {
+			LOGGER.error("Failed to create or bind MultiSelectComboBox for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
+			throw e;
 		}
-		comboBox.setItems(items);
-		// (İsteğe bağlı) Varsayılan değer atama burada yapılabilir.
-		safeBindComponent(binder, comboBox, fieldInfo.getFieldName(), "ComboBox(MultiSelect)");
-		return comboBox;
 	}
 
 	private static Component createComponentForField(IContentOwner contentOwner, final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder)
@@ -831,18 +839,23 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	public static <EntityClass> Component processField(final IContentOwner contentOwner, final CEnhancedBinder<EntityClass> binder,
 			final VerticalLayout formLayout, final Map<String, CHorizontalLayout> mapHorizontalLayouts, final EntityFieldInfo fieldInfo,
 			final Map<String, Component> mapComponents) throws Exception {
-		Check.notNull(fieldInfo, "field");
-		final Component component = createComponentForField(contentOwner, fieldInfo, binder);
-		assignDeterministicComponentId(component, fieldInfo, binder);
-		final CHorizontalLayout horizontalLayout = createFieldLayout(fieldInfo, component);
-		formLayout.add(horizontalLayout);
-		if (mapHorizontalLayouts != null) {
-			mapHorizontalLayouts.put(fieldInfo.getFieldName(), horizontalLayout);
+		try {
+			Check.notNull(fieldInfo, "field");
+			final Component component = createComponentForField(contentOwner, fieldInfo, binder);
+			assignDeterministicComponentId(component, fieldInfo, binder);
+			final CHorizontalLayout horizontalLayout = createFieldLayout(fieldInfo, component);
+			formLayout.add(horizontalLayout);
+			if (mapHorizontalLayouts != null) {
+				mapHorizontalLayouts.put(fieldInfo.getFieldName(), horizontalLayout);
+			}
+			if ((component != null) && (mapComponents != null)) {
+				mapComponents.put(fieldInfo.getFieldName(), component);
+			}
+			return component;
+		} catch (final Exception e) {
+			LOGGER.error("Error processing field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
+			throw e;
 		}
-		if ((component != null) && (mapComponents != null)) {
-			mapComponents.put(fieldInfo.getFieldName(), component);
-		}
-		return component;
 	}
 
 	/** Recursively searches for ComboBox components and resets them to their first item. */
@@ -917,38 +930,37 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	 * must be completed" error. */
 	private static void safeBindComponent(final CEnhancedBinder<?> binder, final HasValueAndElement<?, ?> component, final String fieldName,
 			final String componentType) {
-		if (binder == null) {
-			LOGGER.warn("Binder is null, wont bind component of type '{}' for field '{}'", componentType, fieldName);
-			return;
-		}
-		Check.notNull(component, "Component for safe binding");
-		Check.notNull(fieldName, "Field name for safe binding");
 		try {
+			if (binder == null) {
+				LOGGER.warn("Binder is null, wont bind component of type '{}' for field '{}'", componentType, fieldName);
+				return;
+			}
+			Check.notNull(component, "Component for safe binding");
+			Check.notNull(fieldName, "Field name for safe binding");
 			binder.bind(component, fieldName);
 		} catch (final Exception e) {
 			LOGGER.error("Failed to bind {} for field '{}': {} - this may cause incomplete bindings", componentType, fieldName, e.getMessage());
-			// Don't throw - just log the error to prevent form generation failure
-			// The incomplete binding will be handled by CEnhancedBinder's validateBindingsComplete() method
+			throw e;
 		}
 	}
 
 	private static void setComponentWidth(final Component component, final String width) {
-		if ((component == null) || (width == null)) {
-			return;
-		}
-		if (component instanceof com.vaadin.flow.component.HasSize) {
-			final com.vaadin.flow.component.HasSize hasSize = (com.vaadin.flow.component.HasSize) component;
-			if ((width != null) && !width.trim().isEmpty()) {
-				try {
-					hasSize.setWidth(width);
-				} catch (final Exception e) {
-					LOGGER.warn("Failed to set component width '{}': {}", width, e.getMessage());
-					// Fall back to full width
-					hasSize.setWidthFull();
-				}
-			} else {
-				hasSize.setWidthFull();
+		try {
+			Check.notNull(width, "Width for component width setting");
+			Check.isTrue(!width.trim().isEmpty() || width.trim().isEmpty(), "Width format for component width setting");
+			Check.notNull(component, "Component for width setting");
+			if (!(component instanceof HasSize)) {
+				return;
 			}
+			final HasSize hasSize = (HasSize) component;
+			if (width.trim().isEmpty()) {
+				hasSize.setWidthFull();
+			} else {
+				hasSize.setWidth(width);
+			}
+		} catch (final Exception e) {
+			LOGGER.warn("Failed to set component width '{}': {}", width, e.getMessage());
+			throw e;
 		}
 	}
 
@@ -1044,10 +1056,10 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	 * @param entity the entity to populate the form with */
 	@SuppressWarnings ("unchecked")
 	public void populateForm(Object entity) {
-		if (binder != null) {
-			LOGGER.debug("Populating form with entity: {}", entity);
-			((CEnhancedBinder<Object>) binder).setBean(entity);
-		}
+		Check.notNull(entity, "Entity for form population");
+		Check.notNull(binder, "Binder for form population");
+		LOGGER.debug("Populating form with entity: {}", entity);
+		((CEnhancedBinder<Object>) binder).setBean(entity);
 		componentMap.values().forEach(component -> {
 			if (component instanceof IContentOwner) {
 				try {
@@ -1064,9 +1076,9 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	 * @param context the Spring application context */
 	@Override
 	public void setApplicationContext(final ApplicationContext context) {
-		// Store the application context for String data provider resolution
-		CFormBuilder.applicationContext = context;
 		try {
+			// Store the application context for String data provider resolution
+			CFormBuilder.applicationContext = context;
 			CFormBuilder.dataProviderResolver = context.getBean(CDataProviderResolver.class);
 		} catch (final Exception e) {
 			LOGGER.warn("Failed to initialize CDataProviderResolver - annotation-based providers will not work: {}", e.getMessage());

@@ -64,6 +64,7 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 	@SuppressWarnings ("unchecked")
 	private void createFormFields() throws Exception {
 		try {
+			LOGGER.debug("Setting up detail lines edit dialog form fields");
 			// create the combobox to select the field class
 			getDialogLayout().add(divScreenType);
 			getDialogLayout().add(formClassType.build(CDetailLines.class, binder, List.of("relationFieldName")));
@@ -72,9 +73,9 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 			// BUILD ENTITY TAB
 			tabEntitySpan.add(formEntity.build(CDetailLines.class, binder,
 					List.of("entityProperty", "lineOrder", "fieldCaption", "fieldDescription", "isRequired", "isReadonly", "isHidden",
-							"isCaptionVisible", "defaultValue", "relatedEntityType", "dataProviderBean", "maxLength", "isActive")));
+							"isCaptionVisible", "defaultValue", "relatedEntityType", "dataProviderBean", "maxLength", "active")));
 			// BUILD SECTION TAB
-			tabSectionSpan.add(formSection.build(CDetailLines.class, binder, List.of("sectionName", "fieldCaption", "isActive")));
+			tabSectionSpan.add(formSection.build(CDetailLines.class, binder, List.of("sectionName", "fieldCaption", "active")));
 			// SETUP ENTITY TAB COMBOXBOXES
 			cmbFieldClass = ((ComboBox<String>) formClassType.getComponent("relationFieldName"));
 			cmbFieldClass.addValueChangeListener(event -> {
@@ -169,56 +170,62 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 
 	@SuppressWarnings ("unchecked")
 	private void updateEntityPropertyBasedOnClass() {
-		final String relationFieldName = getEntity().getRelationFieldName();
-		Check.notBlank(relationFieldName, "Relation field name must not be blank");
-		LOGGER.debug("Selected field class: {}", relationFieldName);
-		List<EntityFieldInfo> fieldProperties = null;
-		// this class is a special case, we need to get all fields of the screen's entity
-		if (relationFieldName.equals(CEntityFieldService.SECTION)) {
-			cmbFieldProperties.setItems(List.of(CEntityFieldService.SECTION));
-			getEntity().setProperty(CEntityFieldService.SECTION);
-			return;
-		} else if (relationFieldName.equals(CEntityFieldService.THIS_CLASS)) {
-			fieldProperties = CEntityFieldService.getEntitySimpleFields(screen.getEntityType(), null);
-		} else {
-			// Get field properties for the selected class of relation
-			final EntityFieldInfo info = CEntityFieldService.getEntityFieldInfo(screen.getEntityType().toString(), relationFieldName);
-			Check.notNull(info, "Field info must not be null for field class: " + relationFieldName);
-			// if the field is a collection, we cannot reference any item, so skip fields all...
-			// no item can be referenced it is a collection, skip fields all...
-			if (Collection.class.isAssignableFrom(info.getFieldTypeClass())) {
-				// Initialize empty list for collections since no fields can be referenced
-				fieldProperties = new ArrayList<>();
+		try {
+			LOGGER.debug("Updating entity property based on selected class");
+			final String relationFieldName = getEntity().getRelationFieldName();
+			Check.notBlank(relationFieldName, "Relation field name must not be blank");
+			LOGGER.debug("Selected field class: {}", relationFieldName);
+			List<EntityFieldInfo> fieldProperties = null;
+			// this class is a special case, we need to get all fields of the screen's entity
+			if (relationFieldName.equals(CEntityFieldService.SECTION)) {
+				cmbFieldProperties.setItems(List.of(CEntityFieldService.SECTION));
+				getEntity().setProperty(CEntityFieldService.SECTION);
+				return;
+			} else if (relationFieldName.equals(CEntityFieldService.THIS_CLASS)) {
+				fieldProperties = CEntityFieldService.getEntitySimpleFields(screen.getEntityType(), null);
 			} else {
-				// single object types
-				fieldProperties = CEntityFieldService.getEntitySimpleFields(info.getJavaType(), null);
+				// Get field properties for the selected class of relation
+				final EntityFieldInfo info = CEntityFieldService.getEntityFieldInfo(screen.getEntityType().toString(), relationFieldName);
+				Check.notNull(info, "Field info must not be null for field class: " + relationFieldName);
+				// if the field is a collection, we cannot reference any item, so skip fields all...
+				// no item can be referenced it is a collection, skip fields all...
+				if (Collection.class.isAssignableFrom(info.getFieldTypeClass())) {
+					// Initialize empty list for collections since no fields can be referenced
+					fieldProperties = new ArrayList<>();
+				} else {
+					// single object types
+					fieldProperties = CEntityFieldService.getEntitySimpleFields(info.getJavaType(), null);
+				}
 			}
-		}
-		if (!relationFieldName.equals(CEntityFieldService.SECTION) && !relationFieldName.equals(CEntityFieldService.THIS_CLASS)) {
-			// Ensure fieldProperties is not null before proceeding
-			Check.notNull(fieldProperties, "Field properties list must not be null");
-			final EntityFieldInfo info_data = CEntityFieldService.getEntityFieldInfo(screen.getEntityType().toString(), relationFieldName);
-			Check.notNull(info_data, "Entity field info must not be null for relation field: " + relationFieldName);
-			final String createComponentMethod = info_data.getCreateComponentMethod();
-			if ((createComponentMethod != null) && !createComponentMethod.trim().isEmpty()) {
-				// if the components methods are not empty add them to list
-				final String[] methods = createComponentMethod.split(",");
-				for (final String method : methods) {
-					if ((method != null) && !method.trim().isEmpty()) {
-						final String trimmedMethod = method.trim();
-						// create a fake EntityFieldInfo to hold the method name
-						final EntityFieldInfo componentField = new EntityFieldInfo();
-						componentField.setDisplayName(relationFieldName);
-						componentField.setFieldName(CEntityFieldService.COMPONENT + ":" + trimmedMethod);
-						componentField.setJavaType(CEntityFieldService.COMPONENT);
-						fieldProperties.add(componentField);
+			if (!relationFieldName.equals(CEntityFieldService.SECTION) && !relationFieldName.equals(CEntityFieldService.THIS_CLASS)) {
+				// Ensure fieldProperties is not null before proceeding
+				Check.notNull(fieldProperties, "Field properties list must not be null");
+				final EntityFieldInfo info_data = CEntityFieldService.getEntityFieldInfo(screen.getEntityType().toString(), relationFieldName);
+				Check.notNull(info_data, "Entity field info must not be null for relation field: " + relationFieldName);
+				final String createComponentMethod = info_data.getCreateComponentMethod();
+				if ((createComponentMethod != null) && !createComponentMethod.trim().isEmpty()) {
+					// if the components methods are not empty add them to list
+					final String[] methods = createComponentMethod.split(",");
+					for (final String method : methods) {
+						if ((method != null) && !method.trim().isEmpty()) {
+							final String trimmedMethod = method.trim();
+							// create a fake EntityFieldInfo to hold the method name
+							final EntityFieldInfo componentField = new EntityFieldInfo();
+							componentField.setDisplayName(relationFieldName);
+							componentField.setFieldName(CEntityFieldService.COMPONENT + ":" + trimmedMethod);
+							componentField.setJavaType(CEntityFieldService.COMPONENT);
+							fieldProperties.add(componentField);
+						}
 					}
 				}
 			}
+			final ComboBox<String> cmbFieldProperties = ((ComboBox<String>) formEntity.getComponent("entityProperty"));
+			Check.notNull(cmbFieldProperties, "Entity property combobox must not be null");
+			cmbFieldProperties.setItems(fieldProperties.stream().map(CEntityFieldService.EntityFieldInfo::getFieldName).toList());
+		} catch (final Exception e) {
+			LOGGER.error("Error updating entity property based on class:{}", e.getMessage());
+			throw e;
 		}
-		final ComboBox<String> cmbFieldProperties = ((ComboBox<String>) formEntity.getComponent("entityProperty"));
-		Check.notNull(cmbFieldProperties, "Entity property combobox must not be null");
-		cmbFieldProperties.setItems(fieldProperties.stream().map(CEntityFieldService.EntityFieldInfo::getFieldName).toList());
 	}
 
 	private void updatePropertyDefaultValues(final String selectedProperty) {
@@ -248,7 +255,7 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 			getEntity().setIsReadonly(false);
 			getEntity().setIsRequired(false);
 			getEntity().setIsHidden(false);
-			getEntity().setIsActive(true);
+			getEntity().setActive(true);
 			getEntity().setIsCaptionVisible(true);
 			getEntity().setFieldCaption(relationFieldName);
 			getEntity().setDataProviderBean(CAuxillaries.getEntityServiceClasses(screen.getEntityType()).getSimpleName());
