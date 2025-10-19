@@ -34,7 +34,7 @@ public class CProjectInitializerService extends CInitializerServiceBase {
 			scr.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "company"));
 			scr.addScreenLine(CDetailLinesService.createSection("Audit"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
@@ -55,7 +55,7 @@ public class CProjectInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(List.of("id", "name", "description", "isActive", "createdDate", "lastModifiedDate"));
+		grid.setColumnFields(List.of("id", "name", "description", "active", "createdDate", "lastModifiedDate"));
 		return grid;
 	}
 

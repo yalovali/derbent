@@ -115,11 +115,11 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 
 	private void populateForm() {
 		try {
-			List<CCompany> enabledCompanies = companyService.findEnabledCompanies();
-			companyField.setItems(enabledCompanies);
+			List<CCompany> activeCompanies = companyService.findActiveCompanies();
+			companyField.setItems(activeCompanies);
 			// Auto-select first company as default
-			if (!enabledCompanies.isEmpty()) {
-				companyField.setValue(enabledCompanies.get(0));
+			if (!activeCompanies.isEmpty()) {
+				companyField.setValue(activeCompanies.get(0));
 			}
 		} catch (Exception e) {
 			LOGGER.error("Error loading companies.");

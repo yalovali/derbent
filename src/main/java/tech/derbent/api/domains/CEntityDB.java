@@ -28,17 +28,17 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 			displayName = "Active", required = false, readOnly = false, description = "Whether this entity definition is active", hidden = false,
 			order = 20, defaultValue = "true"
 	)
-	private Boolean isActive = true;
+	private Boolean active = true;
 
 	/** Default constructor for JPA. */
 	protected CEntityDB() {
 		super();
-		isActive = true;
+		active = true;
 	}
 
 	public CEntityDB(final Class<EntityClass> clazz) {
 		super(clazz);
-		isActive = true;
+		active = true;
 	}
 
 	@SuppressWarnings ("unchecked")
@@ -63,7 +63,7 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 		return (id != null) && id.equals(other.getId());
 	}
 
-	public Boolean getActive() { return isActive; }
+	public Boolean getActive() { return active; }
 
 	/** Helper method to get all fields including inherited fields.
 	 * @param clazz the class to get fields from
@@ -114,7 +114,7 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 		}
 	}
 
-	/** Generic method to perform soft delete using reflection. Looks for common soft delete fields like 'deleted', 'active', 'enabled'.
+	/** Generic method to perform soft delete using reflection. Looks for common soft delete fields like 'deleted', 'active'.
 	 * @return true if soft delete was performed, false if hard delete should be used
 	 * @throws Exception */
 	public boolean performSoftDelete() throws Exception {
@@ -134,11 +134,6 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 					field.set(this, Boolean.FALSE);
 					LOGGER.debug("Performed soft delete using 'active' field for: {}", this.getClass().getSimpleName());
 					return true;
-				} else if ("enabled".equals(fieldName) && (field.getType() == Boolean.class)) {
-					field.setAccessible(true);
-					field.set(this, Boolean.FALSE);
-					LOGGER.debug("Performed soft delete using 'enabled' field for: {}", this.getClass().getSimpleName());
-					return true;
 				}
 			}
 			LOGGER.debug("No soft delete field found for: {}, hard delete should be used", this.getClass().getSimpleName());
@@ -149,9 +144,9 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 		}
 	}
 
-	public void setActive(final Boolean isActive) { this.isActive = isActive; }
+	public void setActive(final Boolean active) { this.active = active; }
 
-	public void setIsActive(final Boolean isActive) { this.isActive = isActive; }
+	public void setIsActive(final Boolean active) { this.active = active; }
 
 	@Override
 	public String toString() {

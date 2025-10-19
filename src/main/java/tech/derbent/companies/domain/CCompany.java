@@ -62,12 +62,12 @@ public class CCompany extends CEntityNamed<CCompany> {
 			order = 5, maxLength = CEntityConstants.MAX_LENGTH_NAME
 	)
 	private String email;
-	@Column (name = "enabled", nullable = false)
+	@Column (name = "active", nullable = false)
 	@AMetaData (
 			displayName = "Active", required = true, readOnly = false, defaultValue = "true", description = "Is company active?", hidden = false,
 			order = 8
 	)
-	private Boolean enabled = Boolean.TRUE;
+	private Boolean active = Boolean.TRUE;
 	@Column (name = "enable_notifications", nullable = false)
 	@AMetaData (
 			displayName = "Enable Notifications", required = true, readOnly = false, defaultValue = "false",
@@ -128,7 +128,7 @@ public class CCompany extends CEntityNamed<CCompany> {
 	public CCompany() {
 		super();
 		// Initialize with default values for JPA
-		enabled = true;
+		active = true;
 		initializeDefaults();
 	}
 
@@ -148,7 +148,7 @@ public class CCompany extends CEntityNamed<CCompany> {
 
 	public String getEmail() { return email; }
 
-	public Boolean getEnabled() { return enabled; }
+	public Boolean getActive() { return active; }
 
 	public Boolean getEnableNotifications() { return enableNotifications; }
 
@@ -197,7 +197,7 @@ public class CCompany extends CEntityNamed<CCompany> {
 		}
 	}
 
-	public Boolean isEnabled() { return enabled; }
+	public Boolean isActive() { return active; }
 
 	public Boolean isEnableNotifications() { return enableNotifications; }
 
@@ -213,7 +213,7 @@ public class CCompany extends CEntityNamed<CCompany> {
 
 	public void setEmail(final String email) { this.email = email; }
 
-	public void setEnabled(final Boolean enabled) { this.enabled = enabled; }
+	public void setActive(final Boolean active) { this.active = active; }
 
 	public void setEnableNotifications(final Boolean enableNotifications) { this.enableNotifications = enableNotifications; }
 
@@ -234,8 +234,8 @@ public class CCompany extends CEntityNamed<CCompany> {
 	@Override
 	public String toString() {
 		return "CCompany{" + "name='" + getName() + '\'' + ", description='" + getDescription() + '\'' + ", address='" + address + '\'' + ", phone='"
-				+ phone + '\'' + ", email='" + email + '\'' + ", website='" + website + '\'' + ", taxNumber='" + taxNumber + '\'' + ", enabled="
-				+ enabled + ", companyTheme='" + companyTheme + '\'' + ", primaryColor='" + primaryColor + '\'' + ", workingHoursStart='"
+				+ phone + '\'' + ", email='" + email + '\'' + ", website='" + website + '\'' + ", taxNumber='" + taxNumber + '\'' + ", active="
+				+ active + ", companyTheme='" + companyTheme + '\'' + ", primaryColor='" + primaryColor + '\'' + ", workingHoursStart='"
 				+ workingHoursStart + '\'' + ", workingHoursEnd='" + workingHoursEnd + '\'' + ", companyTimezone='" + companyTimezone + '\''
 				+ ", defaultLanguage='" + defaultLanguage + '\'' + ", enableNotifications=" + enableNotifications + '}';
 	}

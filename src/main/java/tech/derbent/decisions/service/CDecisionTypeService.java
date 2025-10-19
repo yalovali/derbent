@@ -42,7 +42,7 @@ public class CDecisionTypeService extends CTypeEntityService<CDecisionType> {
 	@Transactional (readOnly = true)
 	public List<CDecisionType> findAllActiveByProject(final CProject project) {
 		Optional.ofNullable(project).orElse(null);
-		return ((IDecisionTypeRepository) repository).findByProjectAndIsActiveTrue(project);
+		return ((IDecisionTypeRepository) repository).findByProjectAndActiveTrue(project);
 	}
 
 	@Override

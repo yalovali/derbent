@@ -30,7 +30,7 @@ public abstract class CAbstractEntityRelationship<RelationshipClass> extends CEn
 			displayName = "Active", required = true, readOnly = false, defaultValue = "true",
 			description = "Whether this relationship is currently active", hidden = false, order = 102
 	)
-	private Boolean isActive = Boolean.TRUE;
+	private Boolean active = Boolean.TRUE;
 	@Column (name = "granted_by_user_id", nullable = true)
 	@AMetaData (
 			displayName = "Granted By", required = false, readOnly = true, description = "ID of the user who granted this relationship",
@@ -55,11 +55,11 @@ public abstract class CAbstractEntityRelationship<RelationshipClass> extends CEn
 
 	public void setPrivileges(String privileges) { this.privileges = privileges; }
 
-	public Boolean getIsActive() { return isActive; }
+	public Boolean getIsActive() { return active; }
 
-	public void setIsActive(Boolean isActive) { this.isActive = isActive != null ? isActive : Boolean.TRUE; }
+	public void setIsActive(Boolean active) { this.active = active != null ? active : Boolean.TRUE; }
 
-	public Boolean isActive() { return isActive; }
+	public Boolean isActive() { return active; }
 
 	public Long getGrantedByUserId() { return grantedByUserId; }
 

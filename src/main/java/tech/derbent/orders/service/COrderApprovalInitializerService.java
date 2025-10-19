@@ -40,7 +40,7 @@ public final class COrderApprovalInitializerService extends CInitializerServiceB
 			detailSection.addScreenLine(CDetailLinesService.createSection("Decision"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "approvalDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "comments"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "isActive"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "lastModifiedDate"));
@@ -55,7 +55,7 @@ public final class COrderApprovalInitializerService extends CInitializerServiceB
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, ENTITY_CLASS);
-		grid.setColumnFields(List.of("id", "name", "order", "approvalStatus", "approvalLevel", "approver", "approvalDate", "isActive"));
+		grid.setColumnFields(List.of("id", "name", "order", "approvalStatus", "approvalLevel", "approver", "approvalDate", "active"));
 		return grid;
 	}
 

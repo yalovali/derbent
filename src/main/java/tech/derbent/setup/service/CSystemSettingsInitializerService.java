@@ -67,7 +67,7 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 			// Additional
 			detailSection.addScreenLine(CDetailLinesService.createSection("Additional Information"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.debug_printScreenInformation();
 			return detailSection;
 		} catch (final Exception e) {
@@ -79,7 +79,7 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
 		grid.setColumnFields(List.of("applicationName", "applicationVersion", "accountLockoutDurationMinutes", "enableAutomaticBackups",
-				"enableCaching", "defaultSystemTheme", "isActive"));
+				"enableCaching", "defaultSystemTheme", "active"));
 		return grid;
 	}
 
@@ -88,7 +88,7 @@ public class CSystemSettingsInitializerService extends CInitializerServiceBase {
 		// Set attributeNone to hide grid for single entity display
 		grid.setAttributeNone(attributeNone);
 		grid.setColumnFields(List.of("applicationName", "applicationVersion", "accountLockoutDurationMinutes", "enableAutomaticBackups",
-				"enableCaching", "defaultSystemTheme", "isActive"));
+				"enableCaching", "defaultSystemTheme", "active"));
 		return grid;
 	}
 

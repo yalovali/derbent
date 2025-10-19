@@ -63,11 +63,11 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 	@Size (max = CEntityConstants.MAX_LENGTH_NAME)
 	private String email;
 	@AMetaData (
-			displayName = "Enabled", required = true, readOnly = false, defaultValue = "true", description = "Is user account enabled?",
-			hidden = false, order = 8
+			displayName = "Active", required = true, readOnly = false, defaultValue = "true", description = "Is user account active?", hidden = false,
+			order = 8
 	)
-	@Column (name = "enabled", nullable = false)
-	private Boolean enabled = Boolean.TRUE; // User account status, default is enabled
+	@Column (name = "active", nullable = false)
+	private Boolean active = Boolean.TRUE; // User account status, default is active
 	@Column (name = "lastname", nullable = true, length = CEntityConstants.MAX_LENGTH_NAME, unique = false)
 	@AMetaData (
 			displayName = "Last Name", required = true, readOnly = false, defaultValue = "", description = "User's last name", hidden = false,
@@ -113,7 +113,7 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 	public CUser() {
 		super();
 		// Initialize with default values for JPA
-		enabled = true;
+		active = true;
 	}
 
 	public CUser(final String username, final String password, final String name, final String email, CCompany company,
@@ -158,8 +158,8 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 
 	public String getEmail() { return email; }
 
-	public Boolean getEnabled() {
-		return enabled; // Return the enabled status
+	public Boolean getActive() {
+		return active; // Return the active status
 	}
 
 	public String getLastname() { return lastname; }
@@ -195,8 +195,8 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 		}
 	}
 
-	public Boolean isEnabled() {
-		return enabled; // Return the enabled status
+	public Boolean isActive() {
+		return active; // Return the active status
 	}
 
 	@Override
@@ -251,8 +251,8 @@ public class CUser extends CEntityNamed<CUser> implements ISearchable, IFieldInf
 
 	public void setEmail(final String email) { this.email = email; }
 
-	public void setEnabled(final Boolean enabled) {
-		this.enabled = enabled; // Set the enabled status
+	public void setActive(final Boolean active) {
+		this.active = active; // Set the active status
 	}
 
 	public void setLastname(final String lastname) { this.lastname = lastname; }
