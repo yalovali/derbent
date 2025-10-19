@@ -19,6 +19,6 @@ public class CPanelDetailSectionBasicInfo extends CPanelDetailSectionBase {
 	@Override
 	protected void updatePanelEntityFields() {
 		// setEntityFields(List.of("entityType"));
-		setEntityFields(List.of("name", "description", "entityType", "screenTitle", "headerText", "isActive"));
+		setEntityFields(List.of("name", "description", "entityType", "screenTitle", "headerText", "active"));
 	}
 }

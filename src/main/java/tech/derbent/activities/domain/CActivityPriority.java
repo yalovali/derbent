@@ -79,7 +79,7 @@ public class CActivityPriority extends CTypeEntity<CActivityPriority> {
 
 	@Override
 	public String toString() {
-		return String.format("CActivityPriority{id=%d, name='%s', color='%s', sortOrder=%d, isActive=%s, project=%s, priorityLevel=%d, isDefault=%s}",
+		return String.format("CActivityPriority{id=%d, name='%s', color='%s', sortOrder=%d, active=%s, project=%s, priorityLevel=%d, isDefault=%s}",
 				getId(), getName(), getColor(), getSortOrder(), getActive(), getProject() != null ? getProject().getName() : "null", priorityLevel,
 				isDefault);
 	}

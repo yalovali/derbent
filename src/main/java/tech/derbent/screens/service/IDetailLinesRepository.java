@@ -11,7 +11,7 @@ public interface IDetailLinesRepository extends IAbstractRepository<CDetailLines
 
 	@Query ("SELECT COUNT(sl) FROM CDetailLines sl " + "WHERE sl.detailSection = :detailSection")
 	Long countByScreen(@Param ("detailSection") CDetailSection detailSection);
-	@Query ("SELECT sl FROM CDetailLines sl " + "WHERE sl.detailSection = :detailSection AND sl.isActive = true " + "ORDER BY sl.lineOrder ASC")
+	@Query ("SELECT sl FROM CDetailLines sl " + "WHERE sl.detailSection = :detailSection AND sl.active = true " + "ORDER BY sl.lineOrder ASC")
 	List<CDetailLines> findActiveByScreen(@Param ("detailSection") CDetailSection detailSection);
 	@Query ("SELECT sl FROM CDetailLines sl " + "WHERE sl.detailSection = :detailSection " + "ORDER BY sl.lineOrder ASC")
 	List<CDetailLines> findByMaster(@Param ("detailSection") CDetailSection detailSection);

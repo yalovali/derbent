@@ -72,9 +72,9 @@ public class CDetailLinesEditDialog extends CDBEditDialog<CDetailLines> {
 			// BUILD ENTITY TAB
 			tabEntitySpan.add(formEntity.build(CDetailLines.class, binder,
 					List.of("entityProperty", "lineOrder", "fieldCaption", "fieldDescription", "isRequired", "isReadonly", "isHidden",
-							"isCaptionVisible", "defaultValue", "relatedEntityType", "dataProviderBean", "maxLength", "isActive")));
+							"isCaptionVisible", "defaultValue", "relatedEntityType", "dataProviderBean", "maxLength", "active")));
 			// BUILD SECTION TAB
-			tabSectionSpan.add(formSection.build(CDetailLines.class, binder, List.of("sectionName", "fieldCaption", "isActive")));
+			tabSectionSpan.add(formSection.build(CDetailLines.class, binder, List.of("sectionName", "fieldCaption", "active")));
 			// SETUP ENTITY TAB COMBOXBOXES
 			cmbFieldClass = ((ComboBox<String>) formClassType.getComponent("relationFieldName"));
 			cmbFieldClass.addValueChangeListener(event -> {

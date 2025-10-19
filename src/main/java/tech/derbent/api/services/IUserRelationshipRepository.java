@@ -13,7 +13,7 @@ public interface IUserRelationshipRepository<EntityClass extends CEntityDB<Entit
 
 	@Query ("SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.user WHERE r.user.id = :userId")
 	List<EntityClass> findByUserIdWithUser(@Param ("userId") Long userId);
-	@Query ("SELECT r FROM #{#entityName} r WHERE r.user.id = :userId AND r.isActive = true")
+	@Query ("SELECT r FROM #{#entityName} r WHERE r.user.id = :userId AND r.active = true")
 	List<EntityClass> findActiveByUserId(@Param ("userId") Long userId);
 	@Modifying
 	@Transactional

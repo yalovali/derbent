@@ -99,7 +99,7 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 		final String encodedPassword = passwordEncoder.encode(plainPassword);
 		// Create new login user
 		final CUser loginUser = new CUser(username, encodedPassword, name, email, company, role);
-		loginUser.setEnabled(true);
+		loginUser.setActive(true);
 		// Save to database
 		final CUser savedUser = repository.saveAndFlush(loginUser);
 		return savedUser;
@@ -213,7 +213,7 @@ public class CUserService extends CEntityNamedService<CUser> implements UserDeta
 			user.setLastname("");
 			user.setEmail("");
 			user.setPhone("");
-			user.setEnabled(true);
+			user.setActive(true);
 			user.setPassword(""); // Empty - user must set password
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing new user", e);

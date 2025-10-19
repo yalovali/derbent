@@ -63,7 +63,7 @@ public class CCommentPriority extends CTypeEntity<CCommentPriority> {
 
 	@Override
 	public String toString() {
-		return String.format("CCommentPriority{id=%d, name='%s', color='%s', sortOrder=%d, isActive=%s, project=%s, priorityLevel=%d, isDefault=%s}",
+		return String.format("CCommentPriority{id=%d, name='%s', color='%s', sortOrder=%d, active=%s, project=%s, priorityLevel=%d, isDefault=%s}",
 				getId(), getName(), getColor(), getSortOrder(), getActive(), getProject() != null ? getProject().getName() : "null", priorityLevel,
 				isDefault);
 	}

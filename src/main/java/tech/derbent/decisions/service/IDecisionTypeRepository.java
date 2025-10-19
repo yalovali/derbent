@@ -15,9 +15,9 @@ public interface IDecisionTypeRepository extends IEntityOfProjectRepository<CDec
 	@Override
 	@Query ("SELECT dt FROM CDecisionType dt " + "LEFT JOIN FETCH dt.project " + "WHERE dt.id = :id")
 	Optional<CDecisionType> findById(@Param ("id") Long id);
-	@Query ("SELECT dt FROM CDecisionType dt WHERE dt.project = :project AND dt.isActive = false")
+	@Query ("SELECT dt FROM CDecisionType dt WHERE dt.project = :project AND dt.active = false")
 	List<CDecisionType> findByProjectAndIsActiveFalse(@Param ("project") CProject project);
-	@Query ("SELECT dt FROM CDecisionType dt WHERE dt.project = :project AND dt.isActive = true")
+	@Query ("SELECT dt FROM CDecisionType dt WHERE dt.project = :project AND dt.active = true")
 	List<CDecisionType> findByProjectAndIsActiveTrue(@Param ("project") CProject project);
 	@Query ("SELECT dt FROM CDecisionType dt WHERE dt.project = :project AND dt.requiresApproval = true")
 	List<CDecisionType> findByProjectAndRequiresApprovalTrue(@Param ("project") CProject project);

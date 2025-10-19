@@ -45,7 +45,7 @@ public final class CUserCompanySettingInitializerService extends CInitializerSer
 			detailSection.addScreenLine(CDetailLinesService.createSection("Ownership & Privileges"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "ownershipLevel"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "privileges"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "isActive"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Administration"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "grantedByUserId"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
@@ -62,7 +62,7 @@ public final class CUserCompanySettingInitializerService extends CInitializerSer
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, ENTITY_CLASS);
-		grid.setColumnFields(List.of("id", "user", "company", "role", "ownershipLevel", "privileges", "isActive", "grantedByUserId"));
+		grid.setColumnFields(List.of("id", "user", "company", "role", "ownershipLevel", "privileges", "active", "grantedByUserId"));
 		return grid;
 	}
 

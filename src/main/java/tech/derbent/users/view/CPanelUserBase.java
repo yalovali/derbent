@@ -40,8 +40,8 @@ public abstract class CPanelUserBase extends CAccordionDBEntity<CUser> {
 			public <T extends CEntityDB<T>> List<T> getItems(final Class<T> entityType) {
 				LOGGER.debug("Getting items for entity type: {}", entityType.getSimpleName());
 				if (entityType == CCompany.class) {
-					final List<T> companies = (List<T>) companyService.findEnabledCompanies();
-					LOGGER.debug("Retrieved {} enabled companies", companies.size());
+					final List<T> companies = (List<T>) companyService.findActiveCompanies();
+					LOGGER.debug("Retrieved {} active companies", companies.size());
 					return companies;
 				}
 				LOGGER.warn("No data provider available for entity type: {}", entityType.getSimpleName());
