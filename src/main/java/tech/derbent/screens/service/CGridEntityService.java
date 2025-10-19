@@ -22,6 +22,11 @@ public class CGridEntityService extends CEntityOfProjectService<CGridEntity> {
 	}
 
 	@Override
+	public String checkDeleteAllowed(final CGridEntity entity) {
+		return super.checkDeleteAllowed(entity);
+	}
+
+	@Override
 	@Transactional (readOnly = true)
 	public Optional<CGridEntity> findByNameAndProject(final String name, final CProject project) {
 		Check.notBlank(name, "Name must not be blank");
@@ -39,23 +44,6 @@ public class CGridEntityService extends CEntityOfProjectService<CGridEntity> {
 	@Override
 	protected Class<CGridEntity> getEntityClass() { return CGridEntity.class; }
 
-	@Override
-	public String checkDeleteAllowed(final CGridEntity entity) {
-		return super.checkDeleteAllowed(entity);
-	}
-
-	@Override
-	public void initializeNewEntity(final CGridEntity entity) {
-		super.initializeNewEntity(entity);
-		// Additional entity-specific initialization can be added here if needed
-	}
-
-	public List<CGridEntity> listForComboboxSelectorByProjectId(final String projectId) {
-		Check.notBlank(projectId, "Project must not be null");
-		Long id = Long.valueOf(projectId);
-		return ((IGridEntityRepository) repository).listByProjectId(id);
-	}
-
 	public List<String> getFieldNames(final CGridEntity entity) {
 		Check.notNull(entity, "Grid Entity must not be null");
 		LOGGER.debug("Getting field names for entity: {}", entity.getName());
@@ -64,5 +52,17 @@ public class CGridEntityService extends CEntityOfProjectService<CGridEntity> {
 		Check.notNull(entityType, "Extracted entity type cannot be null");
 		List<EntityFieldInfo> allFields = CEntityFieldService.getEntityFields(entityType);
 		return allFields.stream().map(EntityFieldInfo::getFieldName).toList();
+	}
+
+	@Override
+	public void initializeNewEntity(final CGridEntity entity) {
+		super.initializeNewEntity(entity);
+		// Additional entity-specific initialization can be added here if needed
+	}
+
+	public List<CGridEntity> listForComboboxSelectorByProject(final Optional<CProject> project) {
+		LOGGER.debug("Listing Grid Entities for ComboBox selector by project: {}", project);
+		Long id = project.map(CProject::getId).orElseThrow(() -> new IllegalArgumentException("Project must be provided"));
+		return ((IGridEntityRepository) repository).listByProjectId(id);
 	}
 }

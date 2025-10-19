@@ -67,8 +67,8 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 	@JoinColumn (name = "grid_entity_id")
 	@AMetaData (
 			displayName = "Grid Entity", required = false, readOnly = false, description = "Grid entity configuration for this page", hidden = false,
-			dataProviderMethod = "listForComboboxSelectorByProjectId", dataProviderBean = "CGridEntityService", dataProviderParamBean = "session",
-			dataProviderParamMethod = "getProjectId", order = 98
+			dataProviderMethod = "listForComboboxSelectorByProject", dataProviderBean = "CGridEntityService", dataProviderParamBean = "session",
+			dataProviderParamMethod = "getActiveProject", order = 98
 	)
 	private CGridEntity gridEntity;
 	@Column (nullable = true, length = 100)

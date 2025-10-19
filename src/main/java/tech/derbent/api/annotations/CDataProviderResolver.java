@@ -76,31 +76,22 @@ public final class CDataProviderResolver {
 	/** Cache for resolved methods to improve performance. Key format: "beanName:methodName:entityType" */
 	private final Map<String, Method> methodCache = new ConcurrentHashMap<>();
 
-	/** Constructor with Spring's application context for bean resolution.
-	 * @param applicationContext the Spring application context for bean lookup */
 	@Autowired
 	public CDataProviderResolver(final ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
 
-	/** Clears all caches. Useful for testing or when bean configuration changes. */
 	public void clearCaches() {
 		methodCache.clear();
 		beanCache.clear();
 		LOGGER.info("CDataProviderResolver caches cleared");
 	}
 
-	/** Debug method to list all available service beans in the application context. Useful for troubleshooting data provider resolution issues.
-	 * @return list of all bean names that end with "Service" */
 	public List<String> getAvailableServiceBeans() {
 		return Arrays.stream(applicationContext.getBeanDefinitionNames()).filter(name -> name.toLowerCase().contains("service")).sorted()
 				.collect(Collectors.toList());
 	}
 
-	/** Retrieves a bean from cache or computes it using the supplier.
-	 * @param cacheKey     the cache key
-	 * @param beanSupplier supplier to compute the bean if not cached
-	 * @return the bean or null if not found */
 	private Object getBeanFromCache(final String cacheKey, final Supplier<Object> beanSupplier) {
 		return beanCache.computeIfAbsent(cacheKey, _ -> {
 			final Object bean = beanSupplier.get();
@@ -111,8 +102,6 @@ public final class CDataProviderResolver {
 		});
 	}
 
-	/** Gets cache statistics for monitoring purposes.
-	 * @return string representation of cache sizes */
 	public String getCacheStats() {
 		return String.format("CDataProviderResolver - Method cache: %d entries, Bean cache: %d entries", methodCache.size(), beanCache.size());
 	}
@@ -133,8 +122,6 @@ public final class CDataProviderResolver {
 				// just the content owner
 				bean = contentOwner;
 			} else if ("session".equals(beanName)) {
-				// session service must be ISessionService of CSessionService or CWebSessionService
-				// Get the actual session service bean from Spring context
 				bean = getBeanFromCache("CSessionService", () -> {
 					Check.isTrue(applicationContext.containsBean("CSessionService"),
 							"Session service bean 'CSessionService' not found in application context of beans:" + getAvailableServiceBeans());
