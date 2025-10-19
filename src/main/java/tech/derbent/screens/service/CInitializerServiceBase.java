@@ -131,6 +131,8 @@ public abstract class CInitializerServiceBase {
 			return "CPageServiceOrderStatus";
 		case "COrderType":
 			return "CPageServiceOrderType";
+		case "COrderApproval":
+			return "CPageServiceOrderApproval";
 		case "CApprovalStatus":
 			return "CPageServiceApprovalStatus";
 		case "CCurrency":
@@ -139,8 +141,17 @@ public abstract class CInitializerServiceBase {
 			return "CPageServiceRiskStatus";
 		case "CUserCompanyRole":
 			return "CPageServiceUserCompanyRole";
+		case "CUserCompanySetting":
+			return "CPageServiceUserCompanySetting";
 		case "CUserProjectRole":
 			return "CPageServiceUserProjectRole";
+		case "CUserProjectSettings":
+			return "CPageServiceUserProjectSettings";
+		// System entities
+		case "CPageEntity":
+			return "CPageServicePageEntity";
+		case "CGridEntity":
+			return "CPageServiceGridEntity";
 		default:
 			// Return null for entities that don't have a PageService yet
 			return null;
