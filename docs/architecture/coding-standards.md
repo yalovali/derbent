@@ -709,4 +709,162 @@ private CProject project;
 - [Entity Inheritance Patterns](entity-inheritance-patterns.md)
 - [Service Layer Patterns](service-layer-patterns.md)
 - [View Layer Patterns](view-layer-patterns.md)
+- [Multi-User Singleton Advisory](multi-user-singleton-advisory.md) - **CRITICAL for service development**
+- [Multi-User Development Checklist](../development/multi-user-development-checklist.md)
 - [GitHub Copilot Guidelines](../development/copilot-guidelines.md)
+
+## Multi-User Web Application Patterns (CRITICAL)
+
+### 4. **Stateless Service Pattern** (Mandatory for Multi-User Safety)
+
+All services MUST be stateless to support multiple concurrent users.
+
+#### ✅ Correct: Stateless Service
+
+```java
+@Service
+public class CActivityService extends CEntityOfProjectService<CActivity> {
+    // ✅ GOOD: Only dependencies, no user-specific state
+    private final IActivityRepository repository;
+    private final Clock clock;
+    private final ISessionService sessionService;
+    
+    public CActivityService(IActivityRepository repository, Clock clock, ISessionService sessionService) {
+        super(repository, clock, sessionService);
+        this.repository = repository;
+        this.sessionService = sessionService;
+    }
+    
+    @Transactional(readOnly = true)
+    public List<CActivity> getUserActivities() {
+        // ✅ GOOD: Get user from session each time
+        CUser currentUser = sessionService.getActiveUser()
+            .orElseThrow(() -> new IllegalStateException("No active user"));
+        return repository.findByUserId(currentUser.getId());
+    }
+}
+```
+
+#### ❌ Incorrect: Service with User-Specific State
+
+```java
+@Service
+public class CBadActivityService {
+    // ❌ WRONG: User state stored in service (shared across ALL users!)
+    private CUser currentUser;
+    private List<CActivity> cachedActivities;
+    
+    public void setCurrentUser(CUser user) {
+        // ❌ WRONG: This will be overwritten by other users' requests
+        this.currentUser = user;
+    }
+    
+    public List<CActivity> getActivities() {
+        // ❌ WRONG: Returns wrong data when multiple users access simultaneously
+        return cachedActivities;
+    }
+}
+```
+
+### Service Field Rules
+
+| Field Type | Allowed? | Example | Notes |
+|------------|----------|---------|-------|
+| Repository dependency | ✅ Yes | `private final IUserRepository repository` | Injected via constructor |
+| Clock dependency | ✅ Yes | `private final Clock clock` | Injected via constructor |
+| Session service | ✅ Yes | `private final ISessionService sessionService` | Injected via constructor |
+| Logger | ✅ Yes | `private static final Logger LOGGER` | Thread-safe, immutable |
+| Constants | ✅ Yes | `private static final String MENU_TITLE` | Immutable |
+| User context | ❌ No | `private CUser currentUser` | **WRONG! Shared across users** |
+| User data cache | ❌ No | `private List<CEntity> userCache` | **WRONG! Shared across users** |
+| Mutable static collections | ❌ No | `private static Map<Long, CUser> cache` | **WRONG! Not thread-safe** |
+
+### Session State Management Rules
+
+#### ✅ DO: Use VaadinSession for User-Specific State
+
+```java
+@Service
+public class CPreferenceService {
+    private static final String PREFERENCE_KEY = "userPreference";
+    
+    public void savePreference(String preference) {
+        // ✅ GOOD: Each user has their own VaadinSession
+        VaadinSession.getCurrent().setAttribute(PREFERENCE_KEY, preference);
+    }
+    
+    public String getPreference() {
+        // ✅ GOOD: Retrieved from user's own session
+        return (String) VaadinSession.getCurrent().getAttribute(PREFERENCE_KEY);
+    }
+}
+```
+
+#### ✅ DO: Retrieve Context from Session Per-Request
+
+```java
+@Service
+public class CActivityService extends CAbstractService<CActivity> {
+    
+    @Transactional(readOnly = true)
+    public List<CActivity> findAll() {
+        // ✅ GOOD: Get company from session each time method is called
+        CCompany currentCompany = getCurrentCompany();
+        return repository.findByCompanyId(currentCompany.getId());
+    }
+    
+    private CCompany getCurrentCompany() {
+        Check.notNull(sessionService, "Session service required");
+        CCompany company = sessionService.getCurrentCompany();
+        Check.notNull(company, "No active company");
+        return company;
+    }
+}
+```
+
+#### ❌ DON'T: Cache User Context in Service
+
+```java
+@Service
+public class CBadService {
+    private CCompany cachedCompany;  // ❌ WRONG!
+    
+    public void initializeService() {
+        // ❌ WRONG: Caching company in service instance
+        this.cachedCompany = sessionService.getCurrentCompany();
+    }
+    
+    public List<CActivity> findAll() {
+        // ❌ WRONG: Will return wrong company for other users
+        return repository.findByCompanyId(cachedCompany.getId());
+    }
+}
+```
+
+### Quick Multi-User Safety Check
+
+Before committing service code, verify:
+
+1. **No instance fields storing user data** ✓
+2. **No instance fields storing collections of user data** ✓
+3. **No static mutable collections** ✓
+4. **All user context retrieved from sessionService** ✓
+5. **No caching of user-specific data in service** ✓
+
+### For Detailed Patterns and Examples
+
+See **[Multi-User Singleton Advisory](multi-user-singleton-advisory.md)** for:
+- Complete do's and don'ts
+- Code examples
+- Migration guides
+- Testing strategies
+- Debugging tips
+
+### Development Checklist
+
+Use **[Multi-User Development Checklist](../development/multi-user-development-checklist.md)** when:
+- Creating new services
+- Modifying existing services
+- Reviewing pull requests
+- Testing multi-user scenarios
+

@@ -203,6 +203,21 @@ mvn spring-boot:run -Dspring.profiles.active=h2
 
 <div align="center">
 
+### 🔒 **Multi-User & Concurrency** 🔒
+
+</div>
+
+| **📖 Documentation** | **🎯 Purpose** | **👥 Audience** |
+|:---|:---|:---|
+| **[✅ Multi-User Readiness Report](MULTI_USER_READINESS_REPORT.md)** | Production readiness assessment | Tech Leads/Architects |
+| **[🛡️ Multi-User Singleton Advisory](docs/architecture/multi-user-singleton-advisory.md)** | Complete thread-safety patterns and anti-patterns | **ALL Developers** |
+| **[📋 Multi-User Development Checklist](docs/development/multi-user-development-checklist.md)** | Step-by-step development checklist | All Developers |
+| **[⚡ Multi-User Quick Reference](docs/development/MULTI_USER_QUICK_REFERENCE.md)** | Quick reference card for daily development | All Developers |
+
+**🚨 IMPORTANT:** All developers MUST review the multi-user documentation before creating or modifying services. Services are singletons shared by all users - improper state management can cause data leakage between users.
+
+<div align="center">
+
 ### 🏗️ **Advanced Architecture Details** 🏗️
 
 </div>
