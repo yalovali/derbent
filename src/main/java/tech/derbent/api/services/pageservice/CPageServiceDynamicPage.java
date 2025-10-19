@@ -1,7 +1,16 @@
 package tech.derbent.api.services.pageservice;
 
-import org.springframework.stereotype.Service;
+import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.page.view.CDynamicPageBase;
 
-@Service
-public class CPageServiceDynamicPage extends CPageService {
+public abstract class CPageServiceDynamicPage<EntityClass extends CEntityDB<EntityClass>> extends CPageService<EntityClass> {
+
+	public CPageServiceDynamicPage(CDynamicPageBase view) {
+		super(view);
+	}
+
+	@Override
+	public void bind() {
+		super.bind();
+	}
 }

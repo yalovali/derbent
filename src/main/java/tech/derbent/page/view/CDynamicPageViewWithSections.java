@@ -46,7 +46,12 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 			final ApplicationContext applicationContext) {
 		super(pageEntity, sessionService, detailSectionService, applicationContext);
 		this.gridEntityService = gridEntityService;
-		initializePage();
+		try {
+			initializePage();
+		} catch (Exception e) {
+			LOGGER.error("Failed to initialize dynamic page view with sections for: {}: {}", pageEntity.getPageTitle(), e.getMessage());
+			e.printStackTrace();
+		}
 	}
 
 	@SuppressWarnings ({
@@ -161,9 +166,12 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 	@Override
 	public CFlexLayout getBaseDetailsLayout() { return baseDetailsLayout; }
 
-	/** Initialize the page layout and content. */
-	protected void initializePage() {
+	/** Initialize the page layout and content.
+	 * @throws Exception */
+	@Override
+	protected void initializePage() throws Exception {
 		try {
+			super.initializePage();
 			LOGGER.debug("Initializing dynamic page view with sections for: {}", pageEntity.getPageTitle());
 			setSizeFull();
 			if ((pageEntity.getPageTitle() != null) && !pageEntity.getPageTitle().trim().isEmpty()) {

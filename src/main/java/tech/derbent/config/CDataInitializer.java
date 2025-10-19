@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import tech.derbent.activities.domain.CActivity;
 import tech.derbent.activities.domain.CActivityPriority;
 import tech.derbent.activities.domain.CActivityStatus;
 import tech.derbent.activities.domain.CActivityType;
@@ -30,6 +31,7 @@ import tech.derbent.api.roles.service.CUserProjectRoleInitializerService;
 import tech.derbent.api.roles.service.CUserProjectRoleService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
+import tech.derbent.comments.domain.CComment;
 import tech.derbent.comments.domain.CCommentPriority;
 import tech.derbent.comments.service.CCommentPriorityService;
 import tech.derbent.comments.service.CCommentService;
@@ -37,6 +39,7 @@ import tech.derbent.comments.view.CCommentPriorityInitializerService;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyInitializerService;
 import tech.derbent.companies.service.CCompanyService;
+import tech.derbent.decisions.domain.CDecision;
 import tech.derbent.decisions.domain.CDecisionStatus;
 import tech.derbent.decisions.domain.CDecisionType;
 import tech.derbent.decisions.service.CDecisionInitializerService;
@@ -499,15 +502,15 @@ public class CDataInitializer {
 	}
 
 	/** Create sample comments for a meeting.
-	 * @param meeting the meeting to create comments for */
-	private void createSampleCommentsForMeeting(final tech.derbent.meetings.domain.CMeeting meeting) {
+	 * @param meeting the meeting to create comments for
+	 * @param minimal */
+	private void createSampleCommentsForMeeting(final tech.derbent.meetings.domain.CMeeting meeting, boolean minimal) {
 		try {
 			// Comments require an activity - create a simple activity related to this meeting
 			final CActivityType activityType = activityTypeService.getRandom(meeting.getProject());
 			final CActivityStatus activityStatus = activityStatusService.getRandom(meeting.getProject());
 			final CUser user = userService.getRandom();
-			final tech.derbent.activities.domain.CActivity activity =
-					new tech.derbent.activities.domain.CActivity("Follow-up: " + meeting.getName(), meeting.getProject());
+			final CActivity activity = new CActivity("Follow-up: " + meeting.getName(), meeting.getProject());
 			activity.setDescription("Activity to track action items from meeting");
 			activity.setActivityType(activityType);
 			activity.setStatus(activityStatus);
@@ -515,13 +518,16 @@ public class CDataInitializer {
 			activityService.save(activity);
 			// Create 2 comments for this activity
 			final CCommentPriority priority1 = commentPriorityService.getRandom(meeting.getProject());
-			final CCommentPriority priority2 = commentPriorityService.getRandom(meeting.getProject());
 			final CUser commenter1 = userService.getRandom();
-			final CUser commenter2 = userService.getRandom();
-			final tech.derbent.comments.domain.CComment comment1 = new tech.derbent.comments.domain.CComment(
-					"Meeting was productive. Action items are clearly defined.", activity, commenter1, priority1);
+			final CComment comment1 = new tech.derbent.comments.domain.CComment("Meeting was productive. Action items are clearly defined.", activity,
+					commenter1, priority1);
 			commentService.save(comment1);
-			final tech.derbent.comments.domain.CComment comment2 = new tech.derbent.comments.domain.CComment(
+			if (minimal) {
+				return;
+			}
+			final CUser commenter2 = userService.getRandom();
+			final CCommentPriority priority2 = commentPriorityService.getRandom(meeting.getProject());
+			final CComment comment2 = new tech.derbent.comments.domain.CComment(
 					"I'll take ownership of the first two action items. Expected completion in 2 weeks.", activity, commenter2, priority2);
 			commentService.save(comment2);
 			LOGGER.debug("Created sample activity and comments for meeting ID: {}", meeting.getId());
@@ -582,10 +588,13 @@ public class CDataInitializer {
 		LOGGER.info("Created 2 admin users for company {}", company.getName());
 	}
 
-	private void initializeSampleActivityPriorities(final CProject project) {
+	private void initializeSampleActivityPriorities(final CProject project, boolean minimal) {
 		try {
 			createActivityPriority(project, "Critical", "Critical priority - immediate attention required", CColorUtils.getRandomColor(true), 1,
 					false, 1);
+			if (minimal) {
+				return;
+			}
 			createActivityPriority(project, "High", "High priority - urgent attention needed", CColorUtils.getRandomColor(true), 2, false, 2);
 			createActivityPriority(project, "Medium", "Medium priority - normal workflow", CColorUtils.getRandomColor(true), 3, true, 3);
 			createActivityPriority(project, "Low", "Low priority - can be scheduled later", CColorUtils.getRandomColor(true), 4, false, 4);
@@ -597,9 +606,12 @@ public class CDataInitializer {
 	}
 
 	/** Initializes comprehensive activity data with available fields populated. */
-	private void initializeSampleActivityStatuses(final CProject project) {
+	private void initializeSampleActivityStatuses(final CProject project, boolean minimal) {
 		try {
 			createActivityStatus(STATUS_NOT_STARTED, project, "Activity has not been started yet", "#95a5a6", false, 1);
+			if (minimal) {
+				return;
+			}
 			createActivityStatus(STATUS_IN_PROGRESS, project, "Activity is currently in progress", "#3498db", false, 2);
 			createActivityStatus(STATUS_ON_HOLD, project, "Activity is temporarily on hold", "#f39c12", false, 3);
 			createActivityStatus(STATUS_COMPLETED, project, "Activity has been completed", "#27ae60", true, 4);
@@ -610,7 +622,7 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleActivityTypes(final CProject project) {
+	private void initializeSampleActivityTypes(final CProject project, boolean minimal) {
 		try {
 			final String[][] activityTypes = {
 					{
@@ -630,6 +642,9 @@ public class CDataInitializer {
 				item.setDescription(typeData[1]);
 				item.setColor(CColorUtils.getRandomFromWebColors(true));
 				activityTypeService.save(item);
+				if (minimal) {
+					return;
+				}
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error creating activity types", e);
@@ -637,9 +652,12 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleApprovalStatuses(final CProject project) {
+	private void initializeSampleApprovalStatuses(final CProject project, boolean minimal) {
 		try {
 			createApprovalStatus("Draft", project, "Approval is in draft state", CColorUtils.getRandomColor(true), false, 1);
+			if (minimal) {
+				return;
+			}
 			createApprovalStatus("Submitted", project, "Approval has been submitted", CColorUtils.getRandomColor(true), false, 2);
 			createApprovalStatus("Approved", project, "Approval has been approved", CColorUtils.getRandomColor(true), true, 3);
 			createApprovalStatus("Rejected", project, "Approval has been rejected", CColorUtils.getRandomColor(true), true, 4);
@@ -649,9 +667,12 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleCommentPriorities(final CProject project) {
+	private void initializeSampleCommentPriorities(final CProject project, boolean minimal) {
 		try {
 			createCommentPriority(project, "Low", "Low priority comment", CColorUtils.getRandomColor(true), 1, false, 1);
+			if (minimal) {
+				return;
+			}
 			createCommentPriority(project, "Medium", "Medium priority comment", CColorUtils.getRandomColor(true), 2, true, 2);
 			createCommentPriority(project, "High", "High priority comment", CColorUtils.getRandomColor(true), 3, false, 3);
 		} catch (final Exception e) {
@@ -660,7 +681,7 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleCompanyRoles(final CCompany company) {
+	private void initializeSampleCompanyRoles(final CCompany company, boolean minimal) {
 		try {
 			// Create three company roles: Admin, User, Guest (one for each role type)
 			final String[][] companyRoles = {
@@ -680,6 +701,9 @@ public class CDataInitializer {
 				role.setIsGuest(Boolean.parseBoolean(roleData[4]));
 				role.setColor(CColorUtils.getRandomColor(true));
 				userCompanyRoleService.save(role);
+				if (minimal) {
+					return;
+				}
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error creating company roles for company: {}", company.getName(), e);
@@ -687,9 +711,12 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleCurrencies(final CProject project) {
+	private void initializeSampleCurrencies(final CProject project, boolean minimal) {
 		try {
 			createCurrency(project, "USD", "US Dollar", "$ ");
+			if (minimal) {
+				return;
+			}
 			createCurrency(project, "EUR", "Euro", "€");
 			createCurrency(project, "TRY", "Turkish Lira", "₺");
 		} catch (final Exception e) {
@@ -700,32 +727,33 @@ public class CDataInitializer {
 
 	/** Initialize 2 sample decisions per project with all fields populated.
 	 * @param project the project to create decisions for */
-	private void initializeSampleDecisions(final CProject project) {
+	private void initializeSampleDecisions(final CProject project, boolean minimal) {
 		try {
 			// Get random values from database for dependencies
 			final CDecisionType type1 = decisionTypeService.getRandom(project);
-			final CDecisionType type2 = decisionTypeService.getRandom(project);
 			final CDecisionStatus status1 = decisionStatusService.getRandom(project);
-			final CDecisionStatus status2 = decisionStatusService.getRandom(project);
 			final CUser user1 = userService.getRandom();
-			final CUser user2 = userService.getRandom();
 			// Create first decision
-			final tech.derbent.decisions.domain.CDecision decision1 =
-					new tech.derbent.decisions.domain.CDecision("Adopt Cloud-Native Architecture", project);
+			final CDecision decision1 = new CDecision("Adopt Cloud-Native Architecture", project);
 			decision1.setDescription("Strategic decision to migrate to cloud-native architecture for improved scalability");
 			decision1.setDecisionType(type1);
 			decision1.setDecisionStatus(status1);
 			decision1.setAssignedTo(user1);
-			decision1.setAccountableUser(user2);
+			decision1.setAccountableUser(user1);
 			decision1.setEstimatedCost(new java.math.BigDecimal("50000.00"));
 			decision1.setImplementationDate(java.time.LocalDateTime.now().plusDays(30));
 			decision1.setReviewDate(java.time.LocalDateTime.now().plusDays(90));
 			decisionService.save(decision1);
 			// Create first decision comments
 			createSampleCommentsForDecision(decision1);
+			if (minimal) {
+				return;
+			}
 			// Create second decision
-			final tech.derbent.decisions.domain.CDecision decision2 =
-					new tech.derbent.decisions.domain.CDecision("Implement Agile Methodology", project);
+			final CDecisionType type2 = decisionTypeService.getRandom(project);
+			final CDecisionStatus status2 = decisionStatusService.getRandom(project);
+			final CUser user2 = userService.getRandom();
+			final CDecision decision2 = new CDecision("Implement Agile Methodology", project);
 			decision2.setDescription("Operational decision to transition from waterfall to agile development methodology");
 			decision2.setDecisionType(type2);
 			decision2.setDecisionStatus(status2);
@@ -744,9 +772,12 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleDecisionStatuses(final CProject project) {
+	private void initializeSampleDecisionStatuses(final CProject project, boolean minimal) {
 		try {
 			createDecisionStatus("Draft", project, "Decision is in draft state", CColorUtils.getRandomColor(true), false, 1);
+			if (minimal) {
+				return;
+			}
 			createDecisionStatus("Under Review", project, "Decision is under review", CColorUtils.getRandomColor(true), false, 2);
 			createDecisionStatus("Approved", project, "Decision has been approved", CColorUtils.getRandomColor(true), true, 3);
 			createDecisionStatus("Implemented", project, "Decision has been implemented", CColorUtils.getRandomColor(true), true, 4);
@@ -757,7 +788,7 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleDecisionTypes(final CProject project) {
+	private void initializeSampleDecisionTypes(final CProject project, boolean minimal) {
 		try {
 			final String[][] decisionTypes = {
 					{
@@ -783,6 +814,9 @@ public class CDataInitializer {
 				item.setDescription(typeData[1]);
 				item.setColor(CColorUtils.getRandomColor(true));
 				decisionTypeService.save(item);
+				if (minimal) {
+					return;
+				}
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error creating decision types for project: {}", project.getName(), e);
@@ -792,14 +826,14 @@ public class CDataInitializer {
 
 	/** Initialize 2 sample meetings per project with all fields populated.
 	 * @param project the project to create meetings for */
-	private void initializeSampleMeetings(final CProject project) {
+	private void initializeSampleMeetings(final CProject project, boolean minimal) {
 		try {
 			// Get random values from database for dependencies
 			final CMeetingType type1 = meetingTypeService.getRandom(project);
-			final CMeetingType type2 = meetingTypeService.getRandom(project);
 			final CMeetingStatus status1 = meetingStatusService.getRandom(project);
-			final CMeetingStatus status2 = meetingStatusService.getRandom(project);
 			final CUser user1 = userService.getRandom();
+			final CMeetingType type2 = meetingTypeService.getRandom(project);
+			final CMeetingStatus status2 = meetingStatusService.getRandom(project);
 			final CUser user2 = userService.getRandom();
 			// Create first meeting
 			final tech.derbent.meetings.domain.CMeeting meeting1 = new tech.derbent.meetings.domain.CMeeting("Q1 Planning Session", project, type1);
@@ -815,7 +849,10 @@ public class CDataInitializer {
 			meeting1.addParticipant(user2);
 			meetingService.save(meeting1);
 			// Create first meeting comments
-			createSampleCommentsForMeeting(meeting1);
+			createSampleCommentsForMeeting(meeting1, minimal);
+			if (minimal) {
+				return;
+			}
 			// Create second meeting
 			final tech.derbent.meetings.domain.CMeeting meeting2 =
 					new tech.derbent.meetings.domain.CMeeting("Technical Architecture Review", project, type2);
@@ -832,7 +869,7 @@ public class CDataInitializer {
 			meeting2.addParticipant(user2);
 			meetingService.save(meeting2);
 			// Create second meeting comments
-			createSampleCommentsForMeeting(meeting2);
+			createSampleCommentsForMeeting(meeting2, minimal);
 			LOGGER.info("Created 2 sample meetings with comments for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample meetings for project: {}", project.getName(), e);
@@ -840,9 +877,12 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleMeetingStatuses(final CProject project) {
+	private void initializeSampleMeetingStatuses(final CProject project, boolean minimal) {
 		try {
 			createMeetingStatus("Scheduled", project, "Meeting is scheduled but not yet started", "#3498db", false, 1);
+			if (minimal) {
+				return;
+			}
 			createMeetingStatus("In Progress", project, "Meeting is currently in progress", "#f39c12", false, 2);
 			createMeetingStatus("Completed", project, "Meeting has been completed successfully", "#27ae60", true, 3);
 			createMeetingStatus("Cancelled", project, "Meeting has been cancelled", "#e74c3c", true, 4);
@@ -853,7 +893,7 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleMeetingTypes(final CProject project) {
+	private void initializeSampleMeetingTypes(final CProject project, boolean minimal) {
 		try {
 			final String[][] meetingTypes = {
 					{
@@ -879,6 +919,9 @@ public class CDataInitializer {
 				meetingType.setDescription(typeData[1]);
 				meetingType.setColor(CColorUtils.getRandomColor(true));
 				meetingTypeService.save(meetingType);
+				if (minimal) {
+					return;
+				}
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error creating meeting types for project: {}", project.getName(), e);
@@ -886,21 +929,24 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleOrderStatuses(final CProject project) {
+	private void initializeSampleOrderStatuses(final CProject project, boolean minimal) {
 		try {
 			createOrderStatus("Draft", project, "Order is in draft state", "#95a5a6", false, 1);
+			if (minimal) {
+				return;
+			}
 			createOrderStatus("Submitted", project, "Order has been submitted for approval", "#3498db", false, 2);
 			createOrderStatus("Approved", project, "Order has been approved", "#27ae60", false, 3);
 			createOrderStatus("Processing", project, "Order is being processed", "#f39c12", false, 4);
 			createOrderStatus("Delivered", project, "Order has been delivered", "#2ecc71", true, 5);
 			createOrderStatus("Cancelled", project, "Order has been cancelled", "#e74c3c", true, 6);
 		} catch (final Exception e) {
-			LOGGER.error("Error initializing order statuses for project: {}", project.getName(), e);
-			throw new RuntimeException("Failed to initialize order statuses for project: " + project.getName(), e);
+			LOGGER.error("Error initializing order statuses for project: {} {}", project.getName(), e.getMessage());
+			throw e;
 		}
 	}
 
-	private void initializeSampleOrderTypes(final CProject project) {
+	private void initializeSampleOrderTypes(final CProject project, boolean minimal) {
 		try {
 			final String[][] orderTypes = {
 					{
@@ -926,6 +972,9 @@ public class CDataInitializer {
 				orderType.setDescription(typeData[1]);
 				orderType.setColor(CColorUtils.getRandomColor(true));
 				orderTypeService.save(orderType);
+				if (minimal) {
+					return;
+				}
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error creating order types for project: {}", project.getName(), e);
@@ -933,7 +982,7 @@ public class CDataInitializer {
 		}
 	}
 
-	private void initializeSampleProjectRoles(final CProject project) {
+	private void initializeSampleProjectRoles(final CProject project, boolean minimal) {
 		try {
 			// Create three project roles: Admin, User, Guest (one for each role type)
 			final String[][] projectRoles = {
@@ -953,6 +1002,9 @@ public class CDataInitializer {
 				role.setIsGuest(Boolean.parseBoolean(roleData[4]));
 				role.setColor(CColorUtils.getRandomColor(true));
 				userProjectRoleService.save(role);
+				if (minimal) {
+					return;
+				}
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error creating project roles for project: {}", project.getName(), e);
@@ -961,9 +1013,12 @@ public class CDataInitializer {
 	}
 
 	/** Creates high priority technical risk. */
-	private void initializeSampleRiskStatuses(final CProject project) {
+	private void initializeSampleRiskStatuses(final CProject project, boolean minimal) {
 		try {
 			createRiskStatus("Identified", project, "Risk has been identified", CColorUtils.getRandomColor(true), false, 1);
+			if (minimal) {
+				return;
+			}
 			createRiskStatus("Assessed", project, "Risk has been assessed", CColorUtils.getRandomColor(true), false, 2);
 			createRiskStatus("Mitigated", project, "Risk mitigation actions taken", CColorUtils.getRandomColor(true), false, 3);
 			createRiskStatus("Closed", project, "Risk is closed", CColorUtils.getRandomColor(true), true, 4);
@@ -975,10 +1030,13 @@ public class CDataInitializer {
 
 	/** Initialize sample user project settings to demonstrate user-project relationships. This creates one user per role type per project.
 	 * @param project2 */
-	private void initializeSampleUserProjectSettings(final CProject project) {
+	private void initializeSampleUserProjectSettings(final CProject project, boolean minimal) {
 		try {
 			for (final CUser user : userService.findAll()) {
 				userProjectSettingsService.addUserToProject(user, project, userProjectRoleService.getRandom(project), "write");
+				if (minimal) {
+					return;
+				}
 			}
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample user project settings.");
@@ -1013,21 +1071,28 @@ public class CDataInitializer {
 		}
 	}
 
-	public void loadSampleData() throws Exception {
+	public void loadSampleData(boolean minimal) throws Exception {
 		try {
 			// ========== NON-PROJECT RELATED INITIALIZATION PHASE ==========
 			// **** CREATE COMPANY SAMPLES ****//
 			createTechCompany();
-			createConsultingCompany();
-			createHealthcareCompany();
-			createManufacturingCompany();
+			if (!minimal) {
+				createConsultingCompany();
+				createHealthcareCompany();
+				createManufacturingCompany();
+			}
 			/* create sample projects */
 			for (final CCompany company : companyService.list(Pageable.unpaged()).getContent()) {
-				initializeSampleCompanyRoles(company);
+				initializeSampleCompanyRoles(company, minimal);
 				createProjectDigitalTransformation(company);
-				createProjectInfrastructureUpgrade(company);
-				createProjectProductDevelopment(company);
+				if (!minimal) {
+					createProjectInfrastructureUpgrade(company);
+					createProjectProductDevelopment(company);
+				}
 				createUserForCompany(company);
+				if (minimal) {
+					break;
+				}
 				// createUserFor(company);
 			}
 			// ========== PROJECT-SPECIFIC INITIALIZATION PHASE ==========
@@ -1075,27 +1140,33 @@ public class CDataInitializer {
 					CPageEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					// TODO: Add similar calls for all other InitializerServices (user types, priorities, etc.)
 					// Project-specific type and configuration entities
-					initializeSampleMeetingStatuses(project);
-					initializeSampleActivityStatuses(project);
-					initializeSampleOrderStatuses(project);
-					initializeSampleApprovalStatuses(project);
-					initializeSampleRiskStatuses(project);
+					initializeSampleMeetingStatuses(project, minimal);
+					initializeSampleActivityStatuses(project, minimal);
+					initializeSampleOrderStatuses(project, minimal);
+					initializeSampleApprovalStatuses(project, minimal);
+					initializeSampleRiskStatuses(project, minimal);
 					// types
-					initializeSampleProjectRoles(project);
-					initializeSampleMeetingTypes(project);
-					initializeSampleDecisionTypes(project);
-					initializeSampleOrderTypes(project);
-					initializeSampleActivityTypes(project);
-					initializeSampleActivityPriorities(project);
+					initializeSampleProjectRoles(project, minimal);
+					initializeSampleMeetingTypes(project, minimal);
+					initializeSampleDecisionTypes(project, minimal);
+					initializeSampleOrderTypes(project, minimal);
+					initializeSampleActivityTypes(project, minimal);
+					initializeSampleActivityPriorities(project, minimal);
 					// Removed sample data entity creation methods (activities, meetings, decisions, orders, risks)
 					// to follow minimal sample data pattern
-					initializeSampleDecisionStatuses(project);
-					initializeSampleCommentPriorities(project);
-					initializeSampleCurrencies(project);
-					initializeSampleUserProjectSettings(project);
+					initializeSampleDecisionStatuses(project, minimal);
+					initializeSampleCommentPriorities(project, minimal);
+					initializeSampleCurrencies(project, minimal);
+					initializeSampleUserProjectSettings(project, minimal);
 					// Create sample entities (decisions and meetings with comments)
-					initializeSampleDecisions(project);
-					initializeSampleMeetings(project);
+					initializeSampleDecisions(project, minimal);
+					initializeSampleMeetings(project, minimal);
+					if (minimal) {
+						break;
+					}
+				}
+				if (minimal) {
+					break;
 				}
 			}
 			LOGGER.info("Sample data initialization completed successfully");
@@ -1105,13 +1176,10 @@ public class CDataInitializer {
 		}
 	}
 
-	public void reloadForced() throws Exception {
+	public void reloadForced(boolean minimal) throws Exception {
 		LOGGER.info("Sample data reload (forced) started");
 		clearSampleData(); // <<<<< ÖNCE TEMİZLE
-		loadSampleData(); // <<<<< SONRA YENİDEN OLUŞTUR
+		loadSampleData(minimal); // <<<<< SONRA YENİDEN OLUŞTUR
 		LOGGER.info("Sample data reload (forced) finished");
 	}
-	// ========================================================================
-	// SYSTEM INITIALIZATION METHODS - Base entities required for operation
-	// ========================================================================
 }

@@ -78,8 +78,10 @@ public class CDynamicPageViewWithoutGrid extends CDynamicPageBase {
 		}
 	}
 
+	@Override
 	protected void initializePage() throws Exception {
 		try {
+			super.initializePage();
 			LOGGER.debug("Initializing dynamic page view for page: {}", pageEntity != null ? pageEntity.getPageTitle() : "null");
 			Check.notNull(pageEntity, "pageEntity cannot be null");
 			// setSizeFull();

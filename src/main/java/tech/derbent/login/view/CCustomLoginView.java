@@ -30,6 +30,7 @@ import tech.derbent.api.ui.dialogs.CInformationDialog;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CButton;
+import tech.derbent.api.views.components.CDiv;
 import tech.derbent.api.views.components.CHorizontalLayout;
 import tech.derbent.companies.domain.CCompany;
 import tech.derbent.companies.service.CCompanyService;
@@ -43,16 +44,18 @@ import tech.derbent.setup.service.CSystemSettingsService;
 @AnonymousAllowed
 public class CCustomLoginView extends Main implements BeforeEnterObserver {
 
-	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCustomLoginView.class);
+	private static final long serialVersionUID = 1L;
+	private final ComboBox<CCompany> companyField = new ComboBox<CCompany>();
+	private final CCompanyService companyService;
 	private final Div errorMessage = new Div();
 	private final Button loginButton = new CButton("Login", CColorUtils.createStyledIcon("vaadin:sign-in", CColorUtils.CRUD_SAVE_COLOR));
 	private final PasswordField passwordField = new PasswordField();
-	private final Button resetDbButton = new CButton("Reset Database", CColorUtils.createStyledIcon("vaadin:refresh", CColorUtils.CRUD_UPDATE_COLOR));
-	private final ComboBox<CCompany> companyField = new ComboBox<CCompany>();
-	private final TextField usernameField = new TextField();
+	private final Button resetDbButton = new CButton("DB Full", CColorUtils.createStyledIcon("vaadin:refresh", CColorUtils.CRUD_UPDATE_COLOR));
+	private final Button resetDbMinimalButton =
+			new CButton("DB Minimal", CColorUtils.createStyledIcon("vaadin:refresh", CColorUtils.CRUD_UPDATE_COLOR));
 	private final ISessionService sessionService;
-	private final CCompanyService companyService;
+	private final TextField usernameField = new TextField();
 
 	/** Constructor sets up the custom login form with basic Vaadin components. */
 	@Autowired
@@ -136,7 +139,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		final VerticalLayout formCard = new VerticalLayout();
 		formCard.addClassNames(LumoUtility.Background.BASE, LumoUtility.BorderRadius.MEDIUM, LumoUtility.BoxShadow.SMALL, LumoUtility.Padding.SMALL);
 		formCard.setSpacing(false);
-		formCard.setWidth("500px");
+		formCard.setWidth("550px");
 		// Application icon - using a simple Vaadin icon instead of image
 		final HorizontalLayout headerlayout = new CHorizontalLayout();
 		final var icon = VaadinIcon.BUILDING.create();
@@ -178,7 +181,24 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 					"Evet, sıfırla", _ -> {
 						try {
 							final CDataInitializer init = new CDataInitializer(sessionService);
-							init.reloadForced(); // veya empty check’li bir metod yaz
+							init.reloadForced(false); // veya empty check’li bir metod yaz
+							Notification.show("Sample data yeniden yüklendi.", 4000, Notification.Position.MIDDLE);
+							CInformationDialog info = new CInformationDialog("Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
+							info.open();
+							populateForm();
+							// UI.getCurrent().getPage().reload();
+						} catch (final Exception ex) {
+							Notification.show("Hata: " + ex.getMessage(), 6000, Notification.Position.MIDDLE);
+						}
+					}, "Vazgeç", _ -> {});
+			dialog.open();
+		});
+		resetDbMinimalButton.addClickListener(_ -> {
+			final ConfirmDialog dialog = new ConfirmDialog("Onay", "Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?",
+					"Evet, sıfırla", _ -> {
+						try {
+							final CDataInitializer init = new CDataInitializer(sessionService);
+							init.reloadForced(true); // veya empty check’li bir metod yaz
 							Notification.show("Sample data yeniden yüklendi.", 4000, Notification.Position.MIDDLE);
 							CInformationDialog info = new CInformationDialog("Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
 							info.open();
@@ -207,9 +227,12 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		final HorizontalLayout buttonsLayout = new CHorizontalLayout();
 		buttonsLayout.setAlignItems(Alignment.CENTER);
 		//
-		buttonsLayout.add(passwordHint, resetDbButton, loginButton);
+		buttonsLayout.add(passwordHint, resetDbMinimalButton, resetDbButton);
+		final HorizontalLayout loginButtonLayout = new CHorizontalLayout();
+		loginButtonLayout.setAlignItems(Alignment.END);
+		loginButtonLayout.add(new CDiv(), loginButton);
 		// Add components to form card
-		formCard.add(headerlayout, usernameLayout, passwordLayout, companyLayout, errorMessage, buttonsLayout);
+		formCard.add(headerlayout, usernameLayout, passwordLayout, companyLayout, errorMessage, loginButtonLayout, buttonsLayout);
 		container.add(formCard);
 		add(container);
 		populateForm();

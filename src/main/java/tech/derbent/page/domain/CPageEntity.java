@@ -144,6 +144,8 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 
 	public String getMenuTitle() { return menuTitle; }
 
+	public String getPageService() { return pageService; }
+
 	public String getPageTitle() { return pageTitle; }
 
 	public boolean getRequiresAuthentication() { return requiresAuthentication; }
@@ -210,6 +212,8 @@ public class CPageEntity extends CProjectItem<CPageEntity> {
 	public void setMenuOrder(String menuOrder) { this.menuOrder = menuOrder; }
 
 	public void setMenuTitle(String title) { menuTitle = title; }
+
+	public void setPageService(String pageService) { this.pageService = pageService; }
 
 	public void setPageTitle(String pageTitle) { this.pageTitle = pageTitle; }
 

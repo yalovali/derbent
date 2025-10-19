@@ -48,8 +48,8 @@ public class CSystemSettingsView extends CAbstractPage {
 	private VerticalLayout mainLayout;
 	@Autowired (required = false)
 	private CNotificationService notificationService; // Optional injection
-	private final CSystemSettingsService systemSettingsService;
 	private ISessionService sessionService;
+	private final CSystemSettingsService systemSettingsService;
 
 	public CSystemSettingsView(final CSystemSettingsService systemSettingsService, final ISessionService sessionService) {
 		this.systemSettingsService = systemSettingsService;
@@ -93,6 +93,11 @@ public class CSystemSettingsView extends CAbstractPage {
 	private Div createButtonLayout() {
 		final var buttonLayout = new Div();
 		buttonLayout.addClassName("button-layout");
+		// reset database for developer
+		final var resetDbMinimal = new CButton("Reset DB (Dev)", null, null);
+		resetDbMinimal.addThemeVariants(ButtonVariant.LUMO_SMALL);
+		resetDbMinimal.addClickListener(_ -> resetDatabaseMinimal());
+		// Reset Database button
 		final var resetDbButton = new CButton("Reset Database", null, null);
 		resetDbButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
 		resetDbButton.addClickListener(_ -> resetDatabase());
@@ -123,7 +128,7 @@ public class CSystemSettingsView extends CAbstractPage {
 		final var testButton = new CButton("Test Configuration", null, null);
 		testButton.addClassName("success");
 		testButton.addClickListener(_ -> testConfiguration());
-		buttonLayout.add(resetDbButton, saveButton, cancelButton, reloadButton, resetButton, testButton);
+		buttonLayout.add(resetDbButton, saveButton, cancelButton, reloadButton, resetDbMinimal, resetButton, testButton);
 		return buttonLayout;
 	}
 
@@ -291,9 +296,26 @@ public class CSystemSettingsView extends CAbstractPage {
 				new ConfirmDialog("Onay", "Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?", "Evet, sıfırla", _ -> {
 					try {
 						final CDataInitializer init = new CDataInitializer(sessionService);
-						init.reloadForced(); // veya empty check’li bir metod yaz
+						init.reloadForced(false);
 						Notification.show("Sample data yeniden yüklendi.", 4000, Notification.Position.MIDDLE);
 						final CInformationDialog info = new CInformationDialog("Örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
+						info.open();
+						// UI.getCurrent().getPage().reload();
+					} catch (final Exception ex) {
+						Notification.show("Hata: " + ex.getMessage(), 6000, Notification.Position.MIDDLE);
+					}
+				}, "Vazgeç", _ -> {});
+		dialog.open();
+	}
+
+	private void resetDatabaseMinimal() {
+		final ConfirmDialog dialog = new ConfirmDialog("Onay",
+				"Veritabanı SIFIRLANACAK ve minimum örnek veriler yeniden yüklenecek. Devam edilsin mi?", "Evet, sıfırla", _ -> {
+					try {
+						final CDataInitializer init = new CDataInitializer(sessionService);
+						init.reloadForced(true);
+						Notification.show("Minimum örnek veri yeniden yüklendi.", 4000, Notification.Position.MIDDLE);
+						final CInformationDialog info = new CInformationDialog("Minimum örnek veriler ve varsayılan veriler yeniden oluşturuldu.");
 						info.open();
 						// UI.getCurrent().getPage().reload();
 					} catch (final Exception ex) {

@@ -34,10 +34,10 @@ public class DbResetApplication {
 				// Check if database needs reset
 				if (initializer.isDatabaseEmpty()) {
 					LOGGER.info("Database is empty, loading sample data...");
-					initializer.loadSampleData();
+					initializer.loadSampleData(false);
 				} else {
 					LOGGER.info("Database has data, performing forced reset...");
-					initializer.reloadForced();
+					initializer.reloadForced(false);
 				}
 				LOGGER.info("Database reset completed successfully!");
 			} catch (Exception e) {
