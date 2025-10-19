@@ -731,4 +731,259 @@ class CActivityServiceIntegrationTest {
 - [Entity Inheritance Patterns](entity-inheritance-patterns.md) - Entity design patterns
 - [View Layer Patterns](view-layer-patterns.md) - UI component patterns
 - [Coding Standards](coding-standards.md) - Naming conventions and best practices
+- [Multi-User Singleton Advisory](multi-user-singleton-advisory.md) - **CRITICAL: Multi-user safety patterns**
+- [Multi-User Development Checklist](../development/multi-user-development-checklist.md) - Development checklist
 - [Dependency Checking System](../implementation/DEPENDENCY_CHECKING_SYSTEM.md) - Deletion protection patterns
+
+## Multi-User Safety and Thread Safety (CRITICAL)
+
+### Service Scope and Statefulness
+
+**CRITICAL RULE:** All services in Derbent are Spring `@Service` singletons, meaning there is ONE instance shared by ALL users.
+
+#### Why This Matters
+
+```java
+@Service  // ← Creates SINGLE instance for entire application
+public class CActivityService {
+    // Any instance field here is shared by ALL users simultaneously!
+    private CUser currentUser;  // ❌ WRONG! All users will overwrite this
+}
+```
+
+When User A and User B access the application simultaneously:
+
+1. User A's request: `service.currentUser = userA`
+2. User B's request: `service.currentUser = userB` ← Overwrites User A's data!
+3. User A's next request: reads `userB` instead of `userA` ← Data leak!
+
+### Correct Pattern: Stateless Services
+
+```java
+@Service
+public class CActivityService extends CEntityOfProjectService<CActivity> {
+    // ✅ GOOD: Only dependencies (thread-safe)
+    private final IActivityRepository repository;
+    private final Clock clock;
+    private final ISessionService sessionService;
+    
+    public CActivityService(
+            IActivityRepository repository,
+            Clock clock,
+            ISessionService sessionService) {
+        super(repository, clock, sessionService);
+        this.repository = repository;
+        this.sessionService = sessionService;
+    }
+    
+    @Transactional(readOnly = true)
+    public List<CActivity> getUserActivities() {
+        // ✅ GOOD: Get user from session each time
+        CUser currentUser = sessionService.getActiveUser()
+            .orElseThrow(() -> new IllegalStateException("No active user"));
+        
+        // ✅ GOOD: Filter data by user
+        return repository.findByUserId(currentUser.getId());
+    }
+}
+```
+
+### Session Service Integration
+
+The `ISessionService` provides thread-safe access to user context via Vaadin's session storage:
+
+```java
+@Service
+public class CActivityService extends CAbstractService<CActivity> {
+    
+    @Transactional(readOnly = true)
+    public List<CActivity> findAll() {
+        // Retrieve user context from session
+        CCompany currentCompany = getCurrentCompany();
+        CProject currentProject = getCurrentProject();
+        
+        // Filter data by user's company and project
+        return repository.findByCompanyAndProject(
+            currentCompany.getId(),
+            currentProject.getId()
+        );
+    }
+    
+    private CCompany getCurrentCompany() {
+        Check.notNull(sessionService, "Session service required");
+        CCompany company = sessionService.getCurrentCompany();
+        Check.notNull(company, "No active company in session");
+        return company;
+    }
+    
+    private CProject getCurrentProject() {
+        Check.notNull(sessionService, "Session service required");
+        CProject project = sessionService.getActiveProject()
+            .orElseThrow(() -> new IllegalStateException("No active project"));
+        return project;
+    }
+}
+```
+
+### Common Multi-User Pitfalls
+
+#### ❌ Pitfall 1: Caching User Data
+
+```java
+@Service
+public class CBadCacheService {
+    // ❌ WRONG: Cache is shared across all users!
+    private Map<Long, List<CActivity>> userActivitiesCache = new HashMap<>();
+    
+    public List<CActivity> getActivities(Long userId) {
+        // User B can see User A's cached data!
+        if (!userActivitiesCache.containsKey(userId)) {
+            userActivitiesCache.put(userId, repository.findByUserId(userId));
+        }
+        return userActivitiesCache.get(userId);
+    }
+}
+```
+
+**Solution:** Use proper caching with isolation:
+```java
+@Service
+public class CGoodCacheService {
+    // ✅ GOOD: Spring's @Cacheable with proper key isolation
+    @Cacheable(value = "userActivities", key = "#userId")
+    public List<CActivity> getActivities(Long userId) {
+        return repository.findByUserId(userId);
+    }
+}
+```
+
+#### ❌ Pitfall 2: Static Mutable Collections
+
+```java
+@Service
+public class CBadStaticService {
+    // ❌ WRONG: Static mutable state, not thread-safe!
+    private static List<CActivity> recentActivities = new ArrayList<>();
+    private static Map<Long, CUser> userCache = new HashMap<>();
+    
+    // Multiple users accessing simultaneously = race conditions!
+}
+```
+
+**Solution:** Use constants or session storage:
+```java
+@Service
+public class CGoodStaticService {
+    // ✅ GOOD: Static immutable constants
+    private static final String DEFAULT_STATUS = "Open";
+    private static final int MAX_RESULTS = 100;
+    private static final Logger LOGGER = LoggerFactory.getLogger(CGoodStaticService.class);
+    
+    // For user-specific data, use session:
+    public void saveRecentActivities(List<CActivity> activities) {
+        VaadinSession.getCurrent().setAttribute("recentActivities", activities);
+    }
+}
+```
+
+#### ❌ Pitfall 3: Lazy Initialization of Shared State
+
+```java
+@Service
+public class CBadLazyService {
+    private CCompany defaultCompany;  // ❌ WRONG!
+    
+    public CCompany getDefaultCompany() {
+        if (defaultCompany == null) {
+            // ❌ WRONG: First user sets it, all users see same company!
+            defaultCompany = companyRepository.findById(1L).orElse(null);
+        }
+        return defaultCompany;
+    }
+}
+```
+
+**Solution:** Use method-local variables or proper initialization:
+```java
+@Service
+public class CGoodLazyService {
+    
+    public CCompany getUserDefaultCompany() {
+        // ✅ GOOD: Get user's company from session
+        CUser currentUser = sessionService.getActiveUser()
+            .orElseThrow(() -> new IllegalStateException("No user"));
+        return currentUser.getCompany();
+    }
+}
+```
+
+### Multi-User Testing
+
+Always test services with concurrent users:
+
+```java
+@SpringBootTest
+class CServiceMultiUserTest {
+    
+    @Autowired
+    private CActivityService activityService;
+    
+    @Test
+    void testConcurrentUserAccess() throws Exception {
+        ExecutorService executor = Executors.newFixedThreadPool(10);
+        List<Future<List<CActivity>>> futures = new ArrayList<>();
+        
+        // Simulate 10 concurrent users
+        for (int i = 0; i < 10; i++) {
+            final long userId = i;
+            futures.add(executor.submit(() -> {
+                // Mock session for this user
+                mockSessionForUser(userId);
+                return activityService.findAll();
+            }));
+        }
+        
+        // Verify each user got their own isolated data
+        Set<Long> userIds = new HashSet<>();
+        for (Future<List<CActivity>> future : futures) {
+            List<CActivity> activities = future.get();
+            // Verify data isolation
+            assertNotNull(activities);
+        }
+        
+        executor.shutdown();
+    }
+}
+```
+
+### Service Development Checklist
+
+Before committing any service:
+
+- [ ] Service extends appropriate base class
+- [ ] No mutable instance fields (except injected dependencies)
+- [ ] No static mutable fields
+- [ ] All user context retrieved from `sessionService` per-method-call
+- [ ] No caching of user-specific data in service instance
+- [ ] `@Transactional` annotations properly placed
+- [ ] Thread-safety verified for any shared resources
+
+### For Complete Multi-User Patterns
+
+See these documents for comprehensive guidance:
+
+- **[Multi-User Singleton Advisory](multi-user-singleton-advisory.md)** - Complete patterns, examples, and migration guides
+- **[Multi-User Development Checklist](../development/multi-user-development-checklist.md)** - Step-by-step checklist for development
+- **[Coding Standards](coding-standards.md)** - General coding standards including multi-user rules
+
+### Summary
+
+**Golden Rules:**
+1. Services are singletons (ONE instance for ALL users)
+2. Never store user-specific data in service instance fields
+3. Always retrieve user context from `sessionService` per-request
+4. Use VaadinSession for user-specific temporary state
+5. Use database for persistent user data
+6. Test with concurrent users
+
+**Remember:** If you're storing anything in a service instance field, ask yourself: "What happens when 100 users access this simultaneously?" If the answer involves data corruption or leakage, you need to redesign.

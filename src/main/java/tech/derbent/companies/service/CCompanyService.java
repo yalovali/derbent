@@ -73,14 +73,14 @@ public class CCompanyService extends CEntityNamedService<CCompany> {
 		}
 	}
 
-	public List<CCompany> findEnabledCompanies() {
-		LOGGER.debug("findEnabledCompanies called");
+	public List<CCompany> findActiveCompanies() {
+		LOGGER.debug("findActiveCompanies called");
 		try {
-			final List<CCompany> companies = ((ICompanyRepository) repository).findByEnabled(true);
-			LOGGER.debug("Found {} enabled companies", companies.size());
+			final List<CCompany> companies = ((ICompanyRepository) repository).findByActive(true);
+			LOGGER.debug("Found {} active companies", companies.size());
 			return companies;
 		} catch (final Exception e) {
-			LOGGER.error("Error finding enabled companies", e);
+			LOGGER.error("Error finding active companies", e);
 			throw e;
 		}
 	}

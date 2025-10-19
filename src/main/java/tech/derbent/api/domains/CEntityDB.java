@@ -114,7 +114,7 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 		}
 	}
 
-	/** Generic method to perform soft delete using reflection. Looks for common soft delete fields like 'deleted', 'active', 'enabled'.
+	/** Generic method to perform soft delete using reflection. Looks for common soft delete fields like 'deleted', 'active'.
 	 * @return true if soft delete was performed, false if hard delete should be used
 	 * @throws Exception */
 	public boolean performSoftDelete() throws Exception {
@@ -133,11 +133,6 @@ public abstract class CEntityDB<EntityClass> extends CEntity<EntityClass> implem
 					field.setAccessible(true);
 					field.set(this, Boolean.FALSE);
 					LOGGER.debug("Performed soft delete using 'active' field for: {}", this.getClass().getSimpleName());
-					return true;
-				} else if ("enabled".equals(fieldName) && (field.getType() == Boolean.class)) {
-					field.setAccessible(true);
-					field.set(this, Boolean.FALSE);
-					LOGGER.debug("Performed soft delete using 'enabled' field for: {}", this.getClass().getSimpleName());
 					return true;
 				}
 			}

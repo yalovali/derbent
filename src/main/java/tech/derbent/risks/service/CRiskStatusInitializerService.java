@@ -18,10 +18,10 @@ public class CRiskStatusInitializerService extends CInitializerServiceBase {
 	public static final String BASE_PANEL_NAME = "Risk Status Information";
 	private static final Class<?> clazz = CRiskStatus.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CRiskStatusInitializerService.class);
-	private static final String menuTitle = MenuTitle_TYPES + ".Risk Statuses";
-	private static final String pageTitle = "Risk Status Management";
-	private static final String pageDescription = "Manage risk status definitions for projects";
 	private static final String menuOrder = Menu_Order_TYPES + ".1";
+	private static final String menuTitle = MenuTitle_TYPES + ".Risk Statuses";
+	private static final String pageDescription = "Manage risk status definitions for projects";
+	private static final String pageTitle = "Risk Status Management";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
@@ -33,7 +33,7 @@ public class CRiskStatusInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isFinal"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz,"active"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));

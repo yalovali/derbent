@@ -18,10 +18,10 @@ public class CActivityStatusInitializerService extends CInitializerServiceBase {
 	public static final String BASE_PANEL_NAME = "Activity Status Information";
 	private static final Class<?> clazz = CActivityStatus.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityStatusInitializerService.class);
-	private static final String menuTitle = MenuTitle_TYPES + ".Activity Statuses";
-	private static final String pageTitle = "Activity Status Management";
-	private static final String pageDescription = "Manage activity status definitions for projects";
 	private static final String menuOrder = Menu_Order_TYPES + ".2";
+	private static final String menuTitle = MenuTitle_TYPES + ".Activity Statuses";
+	private static final String pageDescription = "Manage activity status definitions for projects";
+	private static final String pageTitle = "Activity Status Management";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
@@ -33,7 +33,7 @@ public class CActivityStatusInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "finalStatus"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz,"active"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));

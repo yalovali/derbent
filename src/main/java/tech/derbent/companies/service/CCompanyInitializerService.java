@@ -36,6 +36,7 @@ public class CCompanyInitializerService extends CInitializerServiceBase {
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "email"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "website"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "taxNumber"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			// Company Branding & UI Settings
 			scr.addScreenLine(CDetailLinesService.createSection("Company Branding & UI"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "companyTheme"));
@@ -61,8 +62,8 @@ public class CCompanyInitializerService extends CInitializerServiceBase {
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, clazz);
-		grid.setColumnFields(
-				List.of("id", "name", "description", "address", "phone", "email", "website", "companyTheme", "primaryColor", "enableNotifications"));
+		grid.setColumnFields(List.of("id", "name", "description", "address", "phone", "email", "website", "companyTheme", "primaryColor",
+				"enableNotifications", "active"));
 		return grid;
 	}
 

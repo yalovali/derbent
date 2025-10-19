@@ -32,7 +32,7 @@ public class CPageEntityInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz,"active"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Navigation"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "menuTitle"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "menuOrder"));

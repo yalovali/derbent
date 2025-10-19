@@ -220,9 +220,9 @@ public class CCompany extends CEntityNamed<CCompany> {
 	@Override
 	public String toString() {
 		return "CCompany{" + "name='" + getName() + '\'' + ", description='" + getDescription() + '\'' + ", address='" + address + '\'' + ", phone='"
-				+ phone + '\'' + ", email='" + email + '\'' + ", website='" + website + '\'' + ", taxNumber='" + taxNumber + '\'' + ", companyTheme='"
-				+ companyTheme + '\'' + ", primaryColor='" + primaryColor + '\'' + ", workingHoursStart='" + workingHoursStart + '\''
-				+ ", workingHoursEnd='" + workingHoursEnd + '\'' + ", companyTimezone='" + companyTimezone + '\'' + ", defaultLanguage='"
-				+ defaultLanguage + '\'' + ", enableNotifications=" + enableNotifications + '}';
+				+ phone + '\'' + ", email='" + email + '\'' + ", website='" + website + '\'' + ", taxNumber='" + taxNumber + '\'' + ", active="
+				+ getActive() + ", companyTheme='" + companyTheme + '\'' + ", primaryColor='" + primaryColor + '\'' + ", workingHoursStart='"
+				+ workingHoursStart + '\'' + ", workingHoursEnd='" + workingHoursEnd + '\'' + ", companyTimezone='" + companyTimezone + '\''
+				+ ", defaultLanguage='" + defaultLanguage + '\'' + ", enableNotifications=" + enableNotifications + '}';
 	}
 }

@@ -17,12 +17,12 @@ import tech.derbent.screens.service.CInitializerServiceBase;
 public class CGanntInitializerService extends CInitializerServiceBase {
 
 	public static final String BASE_PANEL_NAME = "Gantt View Information";
-	private static final Logger LOGGER = LoggerFactory.getLogger(CGanntInitializerService.class);
 	private static final Class<?> clazz = CGanntViewEntity.class;
-	private static final String menuTitle = MenuTitle_PROJECT + ".Gantt Views";
-	private static final String pageTitle = "Gantt View Configuration";
-	private static final String pageDescription = "Manage project-specific Gantt view layouts";
+	private static final Logger LOGGER = LoggerFactory.getLogger(CGanntInitializerService.class);
 	private static final String menuOrder = Menu_Order_PROJECT + ".4";
+	private static final String menuTitle = MenuTitle_PROJECT + ".Gantt Views";
+	private static final String pageDescription = "Manage project-specific Gantt view layouts";
+	private static final String pageTitle = "Gantt View Configuration";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) {
@@ -32,7 +32,8 @@ public class CGanntInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz,"active"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));

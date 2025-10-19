@@ -669,7 +669,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			comboBox.setWidth(fieldInfo.getWidth());
 		}
 		// Resolve String data using data provider
-		final List<String> items = resolveStringData(fieldInfo);
+		// final List<String> items = resolveStringData(fieldInfo);
+		final List<String> items = dataProviderResolver.<String>resolveData(contentOwner, fieldInfo);
 		comboBox.setItems(items);
 		// Handle clearOnEmptyData configuration
 		if (fieldInfo.isClearOnEmptyData() && items.isEmpty()) {
@@ -893,41 +894,6 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		resetComboBoxesRecursively(container);
 	}
 
-	private static List<String> resolveStringData(final EntityFieldInfo fieldInfo) throws Exception {
-		Check.notNull(fieldInfo, "EntityFieldInfo for String data resolution");
-		// Try to resolve data provider bean
-		final String sourceClassName = fieldInfo.getDataProviderBean();
-		final String methodName = fieldInfo.getDataProviderMethod();
-		if (sourceClassName.equals("none")) {
-			return List.of(); // No data provider configured, return empty list
-		}
-		if (applicationContext.containsBean(sourceClassName)) {
-			final Object serviceBean = applicationContext.getBean(sourceClassName);
-			// IT is a BEAN!
-			if ((fieldInfo.getDataProviderParamMethod() != null) && (fieldInfo.getDataProviderParamMethod().trim().length() > 0)) {
-				Object param = null;
-				try {
-					// call dataprovider param method, returning Object as result
-					final String methodstr = fieldInfo.getDataProviderParamMethod();
-					final Method method = serviceBean.getClass().getMethod(methodstr);
-					Check.notNull(method, "Method '" + methodName + "' on service bean for field '" + fieldInfo.getFieldName() + "'");
-					param = method.invoke(serviceBean);
-				} catch (final NoSuchMethodException e) {
-					LOGGER.error("Data provider method '{}' not found on service bean for field '{}': {}", fieldInfo.getDataProviderParamMethod(),
-							fieldInfo.getFieldName(), e.getMessage());
-					throw e;
-				}
-				return callStringDataMethod(serviceBean, methodName, fieldInfo.getFieldName(), param);
-			} else {
-				return callStringDataMethod(serviceBean, methodName, fieldInfo.getFieldName());
-			}
-		} else {
-			return CAuxillaries.invokeStaticMethodOfList(sourceClassName, methodName);
-		}
-	}
-
-	/** Safely binds a component to a field, ensuring no incomplete bindings are left. This method prevents the "All bindings created with forField
-	 * must be completed" error. */
 	private static void safeBindComponent(final CEnhancedBinder<?> binder, final HasValueAndElement<?, ?> component, final String fieldName,
 			final String componentType) {
 		try {

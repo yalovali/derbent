@@ -14,8 +14,8 @@ import tech.derbent.screens.domain.CMasterSection;
 public class CMasterInitializerService extends CInitializerServiceBase {
 
 	public static final String BASE_PANEL_NAME = "Master Section Information";
-	private static final Logger LOGGER = LoggerFactory.getLogger(CMasterInitializerService.class);
 	private static final Class<?> clazz = CMasterSection.class;
+	private static final Logger LOGGER = LoggerFactory.getLogger(CMasterInitializerService.class);
 
 	public static CDetailSection createBasicView(final CProject project) {
 		try {
@@ -24,7 +24,7 @@ public class CMasterInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz,"active"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Configuration"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sectionType"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sectionDBName"));

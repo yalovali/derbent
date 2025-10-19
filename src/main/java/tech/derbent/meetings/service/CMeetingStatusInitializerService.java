@@ -18,10 +18,10 @@ public class CMeetingStatusInitializerService extends CInitializerServiceBase {
 	public static final String BASE_PANEL_NAME = "Meeting Status Information";
 	private static final Class<?> clazz = CMeetingStatus.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingStatusInitializerService.class);
-	private static final String menuTitle = MenuTitle_TYPES + ".Meeting Statuses";
-	private static final String pageTitle = "Meeting Status Management";
-	private static final String pageDescription = "Manage meeting status types across projects";
 	private static final String menuOrder = Menu_Order_TYPES + ".4";
+	private static final String menuTitle = MenuTitle_TYPES + ".Meeting Statuses";
+	private static final String pageDescription = "Manage meeting status types across projects";
+	private static final String pageTitle = "Meeting Status Management";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
@@ -33,7 +33,7 @@ public class CMeetingStatusInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "finalStatus"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz,"active"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));

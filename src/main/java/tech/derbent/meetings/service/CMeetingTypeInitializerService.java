@@ -18,10 +18,10 @@ public class CMeetingTypeInitializerService extends CInitializerServiceBase {
 	public static final String BASE_PANEL_NAME = "Meeting Type Information";
 	private static final Class<?> clazz = CMeetingType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMeetingTypeInitializerService.class);
-	private static final String menuTitle = MenuTitle_TYPES + ".Meeting Types";
-	private static final String pageTitle = "Meeting Type Management";
-	private static final String pageDescription = "Manage meeting type categories";
 	private static final String menuOrder = Menu_Order_TYPES + ".5";
+	private static final String menuTitle = MenuTitle_TYPES + ".Meeting Types";
+	private static final String pageDescription = "Manage meeting type categories";
+	private static final String pageTitle = "Meeting Type Management";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) {
@@ -35,7 +35,7 @@ public class CMeetingTypeInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz,"active"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));

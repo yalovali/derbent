@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
-import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
@@ -107,7 +106,7 @@ public final class CDataProviderResolver {
 	}
 
 	@SuppressWarnings ("unchecked")
-	public <T extends CEntityDB<T>> List<T> resolveData(IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
+	public <T> List<T> resolveData(IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
 		try {
 			Check.notNull(fieldInfo, "Field info cannot be null");
 			Object paramValue = null;

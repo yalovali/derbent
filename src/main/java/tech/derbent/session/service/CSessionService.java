@@ -18,13 +18,18 @@ import tech.derbent.projects.service.IProjectRepository;
 import tech.derbent.users.domain.CUser;
 import tech.derbent.users.service.IUserRepository;
 
-/** Simple session service implementation for non-web applications like database reset. This provides basic functionality without Vaadin
- * dependencies. */
+/** Simple session service implementation for non-web applications like database reset. This provides basic functionality without Vaadin dependencies.
+ * MULTI-USER WARNING: This implementation stores user state in instance fields, which would NOT be safe for multi-user web applications. This is ONLY
+ * acceptable because: 1. It's used exclusively for single-user database reset operations (@Profile("reset-db")) 2. It's never active in production
+ * web environments (mutually exclusive with web profile) 3. Database reset is always a single-threaded, single-user operation For web applications,
+ * use CWebSessionService which properly stores state in VaadinSession. See docs/architecture/multi-user-singleton-advisory.md for patterns. */
 @Profile ("reset-db")
 @Service
 public class CSessionService implements ISessionService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSessionService.class);
+	// MULTI-USER NOTE: These instance fields are acceptable ONLY for reset-db profile (single-user scenario)
+	// For web applications, state MUST be stored in VaadinSession - see CWebSessionService
 	private tech.derbent.companies.domain.CCompany activeCompany;
 	private CProject activeProject;
 	// Simple in-memory storage for reset operations

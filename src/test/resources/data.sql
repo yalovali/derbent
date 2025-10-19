@@ -118,7 +118,7 @@ INSERT INTO capprovalstatus (name, description) VALUES
 -- COMPANIES (2 examples with full enrichment)
 -- =====================================================================
 INSERT INTO ccompany (
-    name, description, address, phone, email, website, tax_number, enabled
+    name, description, address, phone, email, website, tax_number, active
 ) VALUES 
 ('TechCorp Solutions Ltd.', 'Leading enterprise software development company specializing in web and mobile applications', 
  '456 Innovation Plaza, Silicon Valley, CA 94087', '+1-555-0101', 'info@techcorp-solutions.com', 'https://www.techcorp-solutions.com', 'US-TAX-2025-001', TRUE),
@@ -129,7 +129,7 @@ INSERT INTO ccompany (
 -- USERS (2 examples with full enrichment including profile pictures)
 -- =====================================================================
 INSERT INTO cuser (
-    created_date, email, enabled, lastname, login, name, password, phone, roles, 
+    created_date, email, active, lastname, login, name, password, phone, roles, 
     last_modified_date
 ) VALUES 
 -- System Administrator with full enrichment

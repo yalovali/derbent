@@ -65,7 +65,7 @@ public class CActivityInitializerService extends CInitializerServiceBase {
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
 			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "id"));
-			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz,"active"));
+			scr.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			scr.debug_printScreenInformation();
 			return scr;
 		} catch (final Exception e) {

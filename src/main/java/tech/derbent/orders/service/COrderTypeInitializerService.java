@@ -18,10 +18,10 @@ public class COrderTypeInitializerService extends CInitializerServiceBase {
 	public static final String BASE_PANEL_NAME = "Order Type Information";
 	private static final Class<?> clazz = COrderType.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(COrderTypeInitializerService.class);
-	private static final String menuTitle = MenuTitle_TYPES + ".Order Types";
-	private static final String pageTitle = "Order Type Management";
-	private static final String pageDescription = "Manage order type categories";
 	private static final String menuOrder = Menu_Order_TYPES + ".14";
+	private static final String menuTitle = MenuTitle_TYPES + ".Order Types";
+	private static final String pageDescription = "Manage order type categories";
+	private static final String pageTitle = "Order Type Management";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
@@ -35,7 +35,7 @@ public class COrderTypeInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz,"active"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));

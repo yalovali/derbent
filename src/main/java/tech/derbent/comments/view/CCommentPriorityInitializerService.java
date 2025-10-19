@@ -18,10 +18,10 @@ public class CCommentPriorityInitializerService extends CInitializerServiceBase 
 	public static final String BASE_PANEL_NAME = "Comment Priority Information";
 	private static final Class<?> clazz = CCommentPriority.class;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CCommentPriorityInitializerService.class);
-	private static final String menuTitle = MenuTitle_TYPES + ".Comment Priority Types";
-	private static final String pageTitle = "Comment Priority Management";
-	private static final String pageDescription = "Comment Priority type categories";
 	private static final String menuOrder = Menu_Order_TYPES + ".15";
+	private static final String menuTitle = MenuTitle_TYPES + ".Comment Priority Types";
+	private static final String pageDescription = "Comment Priority type categories";
+	private static final String pageTitle = "Comment Priority Management";
 	private static final boolean showInQuickToolbar = false;
 
 	public static CDetailSection createBasicView(final CProject project) throws Exception {
@@ -38,7 +38,7 @@ public class CCommentPriorityInitializerService extends CInitializerServiceBase 
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz,"active"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));

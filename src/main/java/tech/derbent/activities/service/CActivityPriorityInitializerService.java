@@ -41,7 +41,7 @@ public class CActivityPriorityInitializerService extends CInitializerServiceBase
 			detailSection.addScreenLine(CDetailLinesService.createSection("Behavior"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isDefault"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "attributeNonDeletable"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz,"active"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "lastModifiedDate"));
