@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
-import tech.derbent.api.screens.view.CDualListSelectorComponent;
 
 /** Unit tests for CDualListSelectorComponent to verify basic functionality. */
 public class CDualListSelectorComponentTest {

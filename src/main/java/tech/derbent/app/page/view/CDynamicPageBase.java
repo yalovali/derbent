@@ -7,15 +7,15 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IEntityUpdateListener;
 import tech.derbent.api.interfaces.IPageTitleProvider;
+import tech.derbent.api.screens.domain.CDetailSection;
+import tech.derbent.api.screens.domain.CGridEntity;
+import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.services.pageservice.CPageService;
 import tech.derbent.api.services.pageservice.service.CPageServiceUtility;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.domain.CPageEntity;
-import tech.derbent.api.screens.domain.CDetailSection;
-import tech.derbent.api.screens.domain.CGridEntity;
-import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CDynamicPageBase extends CPageBaseProjectAware implements BeforeEnterObserver, IEntityUpdateListener, IPageTitleProvider {
@@ -58,7 +58,9 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 			event.rerouteToError(IllegalStateException.class, "Page not available");
 			return;
 		}
-		pageService.bind();
+		if (pageService != null) {
+			pageService.bind();
+		}
 	}
 
 	/** Clear entity details and reset state. */

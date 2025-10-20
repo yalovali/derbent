@@ -11,8 +11,8 @@ import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.annotations.CSpringAuxillaries;
 import tech.derbent.api.domains.CEntityDB;
-import tech.derbent.app.roles.domain.CUserProjectRole;
 import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.roles.domain.CUserProjectRole;
 
 @Entity
 @Table (name = "cuserprojectsettings", uniqueConstraints = @UniqueConstraint (columnNames = {
@@ -31,7 +31,7 @@ public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 	@JoinColumn (name = "project_id", nullable = false)
 	@AMetaData (
 			displayName = "Project", required = false, readOnly = false, description = "User's project", hidden = false, order = 5,
-			setBackgroundFromColor = true, useIcon = true, dataProviderBean = "content", dataProviderMethod = "getAvailableProjects"
+			setBackgroundFromColor = true, useIcon = true, dataProviderBean = "context", dataProviderMethod = "getAvailableProjects"
 	)
 	private CProject project;
 	@ManyToOne (fetch = FetchType.LAZY)
@@ -45,7 +45,7 @@ public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 	@JoinColumn (name = "user_id", nullable = false)
 	@AMetaData (
 			displayName = "User", required = false, readOnly = false, description = "Project user", hidden = false, order = 3,
-			setBackgroundFromColor = true, useIcon = true, dataProviderBean = "content", dataProviderMethod = "getAvailableUsers"
+			setBackgroundFromColor = true, useIcon = true, dataProviderBean = "context", dataProviderMethod = "getAvailableUsers"
 	)
 	private CUser user;
 

@@ -21,6 +21,7 @@ import tech.derbent.app.projects.domain.CProject;
 public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 
 	public static final String DEFAULT_COLOR = "#6c757d";
+	public static final String DEFAULT_ICON = "vaadin:file-o";
 	public static final String VIEW_NAME = "Workflow View";
 	@Column (name = "is_active", nullable = false)
 	@AMetaData (

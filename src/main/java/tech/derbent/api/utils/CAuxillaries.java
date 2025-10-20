@@ -6,40 +6,11 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
-import tech.derbent.app.companies.domain.CCompany;
-import tech.derbent.app.companies.service.CCompanyInitializerService;
-import tech.derbent.app.companies.service.CCompanyService;
-import tech.derbent.app.decisions.domain.CDecision;
-import tech.derbent.app.decisions.domain.CDecisionStatus;
-import tech.derbent.app.decisions.domain.CDecisionType;
-import tech.derbent.app.decisions.service.CDecisionInitializerService;
-import tech.derbent.app.decisions.service.CDecisionService;
-import tech.derbent.app.decisions.service.CDecisionStatusInitializerService;
-import tech.derbent.app.decisions.service.CDecisionStatusService;
-import tech.derbent.app.decisions.service.CDecisionTypeInitializerService;
-import tech.derbent.app.decisions.service.CDecisionTypeService;
 import tech.derbent.api.domains.CEntity;
-import tech.derbent.app.orders.domain.CApprovalStatus;
-import tech.derbent.app.orders.domain.CCurrency;
-import tech.derbent.app.orders.domain.COrder;
-import tech.derbent.app.orders.domain.COrderStatus;
-import tech.derbent.app.orders.domain.COrderType;
-import tech.derbent.app.orders.service.CApprovalStatusInitializerService;
-import tech.derbent.app.orders.service.CApprovalStatusService;
-import tech.derbent.app.orders.service.CCurrencyInitializerService;
-import tech.derbent.app.orders.service.CCurrencyService;
-import tech.derbent.app.orders.service.COrderInitializerService;
-import tech.derbent.app.orders.service.COrderService;
-import tech.derbent.app.orders.service.COrderStatusInitializerService;
-import tech.derbent.app.orders.service.COrderStatusService;
-import tech.derbent.app.orders.service.COrderTypeInitializerService;
-import tech.derbent.app.orders.service.COrderTypeService;
-import tech.derbent.app.roles.domain.CUserCompanyRole;
-import tech.derbent.app.roles.domain.CUserProjectRole;
-import tech.derbent.app.roles.service.CUserCompanyRoleInitializerService;
-import tech.derbent.app.roles.service.CUserCompanyRoleService;
-import tech.derbent.app.roles.service.CUserProjectRoleInitializerService;
-import tech.derbent.app.roles.service.CUserProjectRoleService;
+import tech.derbent.api.screens.domain.CDetailSection;
+import tech.derbent.api.screens.domain.CGridEntity;
+import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.app.activities.domain.CActivity;
 import tech.derbent.app.activities.domain.CActivityPriority;
 import tech.derbent.app.activities.domain.CActivityStatus;
@@ -55,6 +26,18 @@ import tech.derbent.app.activities.service.CActivityTypeService;
 import tech.derbent.app.comments.domain.CCommentPriority;
 import tech.derbent.app.comments.service.CCommentPriorityService;
 import tech.derbent.app.comments.view.CCommentPriorityInitializerService;
+import tech.derbent.app.companies.domain.CCompany;
+import tech.derbent.app.companies.service.CCompanyInitializerService;
+import tech.derbent.app.companies.service.CCompanyService;
+import tech.derbent.app.decisions.domain.CDecision;
+import tech.derbent.app.decisions.domain.CDecisionStatus;
+import tech.derbent.app.decisions.domain.CDecisionType;
+import tech.derbent.app.decisions.service.CDecisionInitializerService;
+import tech.derbent.app.decisions.service.CDecisionService;
+import tech.derbent.app.decisions.service.CDecisionStatusInitializerService;
+import tech.derbent.app.decisions.service.CDecisionStatusService;
+import tech.derbent.app.decisions.service.CDecisionTypeInitializerService;
+import tech.derbent.app.decisions.service.CDecisionTypeService;
 import tech.derbent.app.gannt.view.CProjectGanntView;
 import tech.derbent.app.meetings.domain.CMeeting;
 import tech.derbent.app.meetings.domain.CMeetingStatus;
@@ -65,6 +48,21 @@ import tech.derbent.app.meetings.service.CMeetingStatusInitializerService;
 import tech.derbent.app.meetings.service.CMeetingStatusService;
 import tech.derbent.app.meetings.service.CMeetingTypeInitializerService;
 import tech.derbent.app.meetings.service.CMeetingTypeService;
+import tech.derbent.app.orders.domain.CApprovalStatus;
+import tech.derbent.app.orders.domain.CCurrency;
+import tech.derbent.app.orders.domain.COrder;
+import tech.derbent.app.orders.domain.COrderStatus;
+import tech.derbent.app.orders.domain.COrderType;
+import tech.derbent.app.orders.service.CApprovalStatusInitializerService;
+import tech.derbent.app.orders.service.CApprovalStatusService;
+import tech.derbent.app.orders.service.CCurrencyInitializerService;
+import tech.derbent.app.orders.service.CCurrencyService;
+import tech.derbent.app.orders.service.COrderInitializerService;
+import tech.derbent.app.orders.service.COrderService;
+import tech.derbent.app.orders.service.COrderStatusInitializerService;
+import tech.derbent.app.orders.service.COrderStatusService;
+import tech.derbent.app.orders.service.COrderTypeInitializerService;
+import tech.derbent.app.orders.service.COrderTypeService;
 import tech.derbent.app.page.domain.CPageEntity;
 import tech.derbent.app.page.service.CPageEntityInitializerService;
 import tech.derbent.app.page.service.CPageEntityService;
@@ -77,10 +75,15 @@ import tech.derbent.app.risks.service.CRiskInitializerService;
 import tech.derbent.app.risks.service.CRiskService;
 import tech.derbent.app.risks.service.CRiskStatusInitializerService;
 import tech.derbent.app.risks.service.CRiskStatusService;
-import tech.derbent.api.screens.domain.CDetailSection;
-import tech.derbent.api.screens.domain.CGridEntity;
-import tech.derbent.api.screens.service.CDetailSectionService;
-import tech.derbent.api.screens.service.CGridEntityService;
+import tech.derbent.app.roles.domain.CUserCompanyRole;
+import tech.derbent.app.roles.domain.CUserProjectRole;
+import tech.derbent.app.roles.service.CUserCompanyRoleInitializerService;
+import tech.derbent.app.roles.service.CUserCompanyRoleService;
+import tech.derbent.app.roles.service.CUserProjectRoleInitializerService;
+import tech.derbent.app.roles.service.CUserProjectRoleService;
+import tech.derbent.app.workflow.domain.CWorkflowEntity;
+import tech.derbent.app.workflow.service.CWorkflowEntityInitializerService;
+import tech.derbent.app.workflow.service.CWorkflowEntityService;
 import tech.derbent.base.setup.domain.CSystemSettings;
 import tech.derbent.base.setup.service.CSystemSettingsInitializerService;
 import tech.derbent.base.setup.service.CSystemSettingsService;
@@ -232,6 +235,8 @@ public class CAuxillaries {
 			return CUserProjectRole.class;
 		case "CUserCompanyRole":
 			return CUserCompanyRole.class;
+		case "CWorkflowEntity":
+			return CWorkflowEntity.class;
 		// ... add
 		default:
 			LOGGER.error("Unknown entity type: " + simpleName + " dont forget to update (CAuxillaries.java:234)");
@@ -296,6 +301,8 @@ public class CAuxillaries {
 			return CUserProjectRoleService.class;
 		case "CUserCompanyRole":
 			return CUserCompanyRoleService.class;
+		case "CWorkflowEntity":
+			return CWorkflowEntityService.class;
 		// ... add more as needed ...
 		default:
 			LOGGER.error("Unknown entity type: " + simpleName + " dont forget to update CAuxillaries");
@@ -358,6 +365,8 @@ public class CAuxillaries {
 			return CUserProjectRoleInitializerService.class;
 		} else if (entityClass == CUserCompanyRole.class) {
 			return CUserCompanyRoleInitializerService.class;
+		} else if (entityClass == CWorkflowEntity.class) {
+			return CWorkflowEntityService.class;
 		} else {
 			LOGGER.error("Unknown entity type: " + entityClass.getSimpleName() + " dont forget to update CAuxillaries");
 			throw new IllegalArgumentException("Unknown entity type: " + entityClass.getSimpleName());
@@ -443,6 +452,8 @@ public class CAuxillaries {
 			return CUserProjectRoleInitializerService.class;
 		} else if (entityClass == CUserCompanyRole.class) {
 			return CUserCompanyRoleInitializerService.class;
+		} else if (entityClass == CWorkflowEntity.class) {
+			return CWorkflowEntityInitializerService.class;
 		} else {
 			LOGGER.error("Unknown entity type: " + entityClass.getSimpleName() + " dont forget to update CAuxillaries");
 			throw new IllegalArgumentException("Unknown entity type: " + entityClass.getSimpleName());
@@ -506,6 +517,8 @@ public class CAuxillaries {
 			return CUserProjectRoleService.class;
 		case "CUserCompanyRoleService":
 			return CUserCompanyRoleService.class;
+		case "CWorkflowEntityService":
+			return CWorkflowEntityService.class;
 		default:
 			LOGGER.error("Unknown service type: " + simpleName + " dont forget to update CAuxillaries");
 			throw new IllegalArgumentException("Unknown service type: " + simpleName);

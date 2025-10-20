@@ -13,9 +13,9 @@ import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.annotations.CSpringAuxillaries;
 import tech.derbent.api.domains.CAbstractEntityRelationship;
-import tech.derbent.app.roles.domain.CUserCompanyRole;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.companies.domain.CCompany;
+import tech.derbent.app.roles.domain.CUserCompanyRole;
 
 /** Entity representing the relationship between a user and a company with ownership privileges. This entity manages company membership, roles, and
  * ownership levels for users. */
@@ -45,21 +45,21 @@ public class CUserCompanySetting extends CAbstractEntityRelationship<CUserCompan
 	@OnDelete (action = OnDeleteAction.CASCADE)
 	@AMetaData (
 			displayName = "Company", required = true, readOnly = false, description = "Company in this relationship", hidden = false, order = 2,
-			dataProviderBean = "content", dataProviderMethod = "getAvailableCompanyForUser"
+			dataProviderBean = "context", dataProviderMethod = "getAvailableCompanyForUser"
 	)
 	private CCompany company;
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "role_id", nullable = true)
 	@AMetaData (
 			displayName = "Role", required = false, readOnly = false, description = "User's role within the company", hidden = false, order = 3,
-			dataProviderBean = "content", dataProviderMethod = "getAvailableCompanyRolesForUser", setBackgroundFromColor = true, useIcon = true
+			dataProviderBean = "context", dataProviderMethod = "getAvailableCompanyRolesForUser", setBackgroundFromColor = true, useIcon = true
 	)
 	private CUserCompanyRole role;
 	@ManyToOne
 	@JoinColumn (name = "user_id", nullable = false)
 	@AMetaData (
 			displayName = "User", required = true, readOnly = false, description = "User in this company relationship", hidden = false, order = 1,
-			dataProviderBean = "content", dataProviderMethod = "getAvailableUsersForCompany"
+			dataProviderBean = "context", dataProviderMethod = "getAvailableUsersForCompany"
 	)
 	private CUser user;
 
