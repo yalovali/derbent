@@ -4,9 +4,13 @@ import java.time.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.html.Div;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
+import tech.derbent.app.workflow.view.CComponentWorkflowStatusRelations;
 import tech.derbent.base.session.service.ISessionService;
 
 /** CWorkflowEntityService - Service class for managing CWorkflowEntity entities. Layer: Service (MVC) Provides business logic for workflow entity
@@ -16,10 +20,26 @@ import tech.derbent.base.session.service.ISessionService;
 public class CWorkflowEntityService extends CWorkflowBaseService<CWorkflowEntity> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CWorkflowEntityService.class);
+	@Autowired
+	private ApplicationContext applicationContext;
 
 	@Autowired
 	public CWorkflowEntityService(final IWorkflowEntityRepository repository, final Clock clock, final ISessionService sessionService) {
 		super(repository, clock, sessionService);
+	}
+
+	public Component createWorkflowStatusRelationsComponent() {
+		try {
+			CComponentWorkflowStatusRelations component = new CComponentWorkflowStatusRelations(this, sessionService, applicationContext);
+			return component;
+		} catch (Exception e) {
+			LOGGER.error("Failed to create workflow status relations component.");
+			// Fallback to simple div with error message
+			final Div errorDiv = new Div();
+			errorDiv.setText("Error loading workflow status relations component: " + e.getMessage());
+			errorDiv.addClassName("error-message");
+			return errorDiv;
+		}
 	}
 
 	/** Checks dependencies before allowing workflow entity deletion. Always calls super.checkDeleteAllowed() first to ensure all parent-level checks

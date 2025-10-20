@@ -1,12 +1,18 @@
 package tech.derbent.app.workflow.domain;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
+import tech.derbent.api.utils.Check;
 import tech.derbent.app.projects.domain.CProject;
 
 /** CWorkflowEntity - Domain entity representing workflow definitions. Layer: Domain (MVC) Inherits from CWorkflowBase to provide workflow
@@ -29,6 +35,13 @@ public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 			description = "Indicates if this workflow is currently active", hidden = false, order = 3
 	)
 	private Boolean isActive = Boolean.TRUE;
+	// lets keep it layzily loaded to avoid loading all status relations at once
+	@OneToMany (mappedBy = "workflow", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@AMetaData (
+			displayName = "Status Transitions", required = false, readOnly = false, description = "Status transitions for this workflow",
+			hidden = false, order = 10, createComponentMethod = "createWorkflowStatusRelationsComponent"
+	)
+	private final List<CWorkflowStatusRelation> statusRelations = new ArrayList<>();
 
 	/** Default constructor for JPA. */
 	public CWorkflowEntity() {
@@ -55,11 +68,35 @@ public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 		return super.equals(o);
 	}
 
+	/** Add a status relation to this workflow and maintain bidirectional relationship.
+	 * @param relation the status relation to add */
+	public void addStatusRelation(final CWorkflowStatusRelation relation) {
+		if (relation == null) {
+			return;
+		}
+		if (!this.statusRelations.contains(relation)) {
+			this.statusRelations.add(relation);
+			relation.setWorkflow(this);
+		}
+	}
+
 	public Boolean getIsActive() { return isActive; }
+
+	/** Gets the list of status relations for this workflow. */
+	public List<CWorkflowStatusRelation> getStatusRelations() { return statusRelations; }
 
 	@Override
 	public int hashCode() {
 		return Objects.hash(super.hashCode(), isActive);
+	}
+
+	/** Remove a status relation from this workflow and maintain bidirectional relationship.
+	 * @param relation the status relation to remove */
+	public void removeStatusRelation(final CWorkflowStatusRelation relation) {
+		Check.notNull(relation, "Status relation cannot be null");
+		if (this.statusRelations.remove(relation)) {
+			relation.setWorkflow(null);
+		}
 	}
 
 	public void setIsActive(final Boolean isActive) { this.isActive = isActive; }

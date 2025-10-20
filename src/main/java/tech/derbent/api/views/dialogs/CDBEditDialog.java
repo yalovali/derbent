@@ -54,7 +54,7 @@ public abstract class CDBEditDialog<EntityClass> extends CDialog {
 		}
 	}
 
-	/** Sets up Save and Cancel buttons. */
+	/** Sets up Save and Cancel buttons with keyboard shortcuts. */
 	@Override
 	protected void setupButtons() {
 		final CButton saveButton = CButton.createSaveButton("Save", e -> {
@@ -64,7 +64,10 @@ public abstract class CDBEditDialog<EntityClass> extends CDialog {
 				e1.printStackTrace();
 			}
 		});
+		// Add Enter key shortcut for save button
+		saveButton.addClickShortcut(com.vaadin.flow.component.Key.ENTER);
 		final CButton cancelButton = CButton.createCancelButton("Cancel", e -> close());
+		// Esc key is already handled by setCloseOnEsc(true) in dialog setup
 		buttonLayout.add(saveButton, cancelButton);
 	}
 
