@@ -36,7 +36,7 @@ public class CEnhancedBinder<BEAN> extends BeanValidationBinder<BEAN> {
 	public CEnhancedBinder(final Class<BEAN> beanType) {
 		super(beanType);
 		this.beanType = beanType;
-		LOGGER.debug("Created CEnhancedBinder for bean type: {}", beanType.getSimpleName());
+		// LOGGER.debug("Created CEnhancedBinder for bean type: {}", beanType.getSimpleName());
 	}
 
 	@Override

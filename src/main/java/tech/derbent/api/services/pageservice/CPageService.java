@@ -7,7 +7,6 @@ import tech.derbent.page.view.CDynamicPageBase;
 
 public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 
-	private static final long serialVersionUID = 1L;
 	final protected CDynamicPageBase view;
 
 	public CPageService(CDynamicPageBase view) {

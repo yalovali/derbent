@@ -58,33 +58,38 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 			"unchecked", "rawtypes"
 	})
 	protected CCrudToolbar<?> createCrudToolbar() {
-		LOGGER.debug("Creating CRUD toolbar for entity type: {}", entityClass != null ? entityClass.getSimpleName() : "null");
-		// Use static factory method to create toolbar
-		final CCrudToolbar toolbar = new CCrudToolbar(entityService, entityClass);
-		toolbar.setCurrentEntity(null);
-		toolbar.setNewEntitySupplier(() -> {
-			try {
-				return createNewEntityInstance();
-			} catch (final Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return toolbar;
-		});
-		toolbar.setRefreshCallback((currentEntity) -> {
-			refreshGrid();
-			if ((currentEntity != null) && (((CEntityDB<?>) currentEntity).getId() != null)) {
+		try {
+			LOGGER.debug("Creating CRUD toolbar for entity type: {}", entityClass != null ? entityClass.getSimpleName() : "null");
+			// Use static factory method to create toolbar
+			final CCrudToolbar toolbar = new CCrudToolbar(entityService, entityClass);
+			toolbar.setCurrentEntity(null);
+			toolbar.setNewEntitySupplier(() -> {
 				try {
-					final CEntityDB<?> reloadedEntity = entityService.getById(((CEntityDB<?>) currentEntity).getId()).orElse(null);
-					setCurrentEntity(reloadedEntity);
-					populateForm();
+					return createNewEntityInstance();
 				} catch (final Exception e) {
-					LOGGER.error("Error reloading entity: {}", e.getMessage());
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-			}
-		});
-		toolbar.addUpdateListener(this);
-		return toolbar;
+				return toolbar;
+			});
+			toolbar.setRefreshCallback((currentEntity) -> {
+				refreshGrid();
+				if ((currentEntity != null) && (((CEntityDB<?>) currentEntity).getId() != null)) {
+					try {
+						final CEntityDB<?> reloadedEntity = entityService.getById(((CEntityDB<?>) currentEntity).getId()).orElse(null);
+						setCurrentEntity(reloadedEntity);
+						populateForm();
+					} catch (final Exception e) {
+						LOGGER.error("Error reloading entity: {}", e.getMessage());
+					}
+				}
+			});
+			toolbar.addUpdateListener(this);
+			return toolbar;
+		} catch (final Exception e) {
+			LOGGER.error("Error creating CRUD toolbar:" + e.getMessage());
+			throw e;
+		}
 	}
 
 	/** Create the details section. */
@@ -99,27 +104,32 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 
 	/** Create the master (grid) section. */
 	private void createMasterSection() {
-		LOGGER.debug("Creating master section with grid entity");
-		Check.notNull(pageEntity.getGridEntity(), "Grid entity cannot be null");
-		// Create the grid component using the configured grid entity
-		grid = new CComponentGridEntity(pageEntity.getGridEntity());
-		// Listen for selection changes from the grid
-		grid.addSelectionChangeListener(event -> {
-			try {
-				onEntitySelected(event);
-			} catch (final Exception e) {
-				LOGGER.error("Error handling entity selection", e);
-			}
-		});
-		// Create grid layout with toolbar
-		final CVerticalLayout gridLayout = new CVerticalLayout();
-		gridLayout.setSizeFull();
-		gridLayout.add(new CComponentDetailsMasterToolbar(grid, gridEntityService));
-		gridLayout.add(grid);
-		// Allow the grid layout to expand
-		gridLayout.getStyle().remove("max-height");
-		// Add grid to the primary (top) section
-		splitLayout.addToPrimary(gridLayout);
+		try {
+			// LOGGER.debug("Creating master section with grid entity");
+			Check.notNull(pageEntity.getGridEntity(), "Grid entity cannot be null");
+			// Create the grid component using the configured grid entity
+			grid = new CComponentGridEntity(pageEntity.getGridEntity());
+			// Listen for selection changes from the grid
+			grid.addSelectionChangeListener(event -> {
+				try {
+					onEntitySelected(event);
+				} catch (final Exception e) {
+					LOGGER.error("Error handling entity selection", e);
+				}
+			});
+			// Create grid layout with toolbar
+			final CVerticalLayout gridLayout = new CVerticalLayout();
+			gridLayout.setSizeFull();
+			gridLayout.add(new CComponentDetailsMasterToolbar(grid, gridEntityService));
+			gridLayout.add(grid);
+			// Allow the grid layout to expand
+			gridLayout.getStyle().remove("max-height");
+			// Add grid to the primary (top) section
+			splitLayout.addToPrimary(gridLayout);
+		} catch (final Exception e) {
+			LOGGER.error("Error creating master section with grid entity:" + e.getMessage());
+			throw e;
+		}
 	}
 
 	/** Creates a new entity instance of the current entity type.
@@ -128,10 +138,10 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 	@Override
 	@SuppressWarnings ("unchecked")
 	protected <T extends CEntityDB<T>> T createNewEntity() throws Exception {
-		if (entityClass == null) {
-			throw new IllegalStateException("Entity class not initialized");
-		}
 		try {
+			if (entityClass == null) {
+				throw new IllegalStateException("Entity class not initialized");
+			}
 			// Create new instance using reflection
 			final T newEntity = (T) entityClass.getDeclaredConstructor().newInstance();
 			// Set project if the entity supports it (check for CEntityOfProject)
@@ -252,7 +262,7 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 	/** Handle entity selection events from the grid. */
 	private void onEntitySelected(final CComponentGridEntity.SelectionChangeEvent event) throws Exception {
 		try {
-			LOGGER.debug("Handling entity selection event");
+			// LOGGER.debug("Handling entity selection event");
 			Check.notNull(event, "Selection change event cannot be null");
 			final CEntityDB<?> selectedEntity = event.getSelectedItem();
 			if (selectedEntity == null) {
@@ -261,7 +271,8 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 				clearEntityDetails();
 				populateForm();
 			} else {
-				LOGGER.debug("Entity selected: {}", selectedEntity != null ? selectedEntity.toString() + " ID: " + selectedEntity.getId() : "null");
+				// LOGGER.debug("Entity selected: {}", selectedEntity != null ? selectedEntity.toString() + " ID: " + selectedEntity.getId() :
+				// "null");
 				// Performance optimization: check if we can reuse existing components
 				if ((currentEntityViewName == null) || !selectedEntity.getClass().getField("VIEW_NAME").get(null).equals(currentEntityViewName)) {
 					rebuildEntityDetails(selectedEntity.getClass());

@@ -95,7 +95,7 @@ public final class CDataProviderResolver {
 		return beanCache.computeIfAbsent(cacheKey, _ -> {
 			final Object bean = beanSupplier.get();
 			if (bean != null) {
-				LOGGER.debug("Cached bean for key: {}", cacheKey);
+				// LOGGER.debug("Cached bean for key: {}", cacheKey);
 			}
 			return bean;
 		});

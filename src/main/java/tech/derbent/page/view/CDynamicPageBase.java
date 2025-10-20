@@ -28,21 +28,21 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 	// Services for dynamic entity management
 	protected CAbstractService<?> entityService;
 	protected final CPageEntity pageEntity;
-	protected final CPageService pageService;
+	protected final CPageService<?> pageService;
 
 	public CDynamicPageBase(CPageEntity pageEntity, ISessionService sessionService, CDetailSectionService detailSectionService,
 			ApplicationContext applicationContext) {
 		super(sessionService, detailSectionService);
 		this.applicationContext = applicationContext;
 		this.pageEntity = pageEntity;
-		CPageService pageServiceX = null;
+		CPageService<?> pageServiceX = null;
 		try {
 			pageServiceX = getPageService();
 		} catch (Exception e) {
 			LOGGER.error("Failed to initialize page service for dynamic page: {}", e.getMessage());
 			e.printStackTrace();
 		}
-		this.pageService = pageServiceX;
+		pageService = pageServiceX;
 	}
 
 	@Override
@@ -78,12 +78,12 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 	/** Get the page entity this view represents. */
 	public CPageEntity getPageEntity() { return pageEntity; }
 
-	public CPageService getPageService() throws Exception {
+	public CPageService<?> getPageService() throws Exception {
 		// this creates a page service instance per page. this may be memory inefficient.
 		try {
 			Class<?> clazz = CPageServiceUtility.getPageServiceClassByName(pageEntity.getPageService());
 			var constructor = clazz.getDeclaredConstructor(CDynamicPageBase.class);
-			CPageService page = (CPageService) constructor.newInstance(this);
+			CPageService<?> page = (CPageService<?>) constructor.newInstance(this);
 			return page;
 		} catch (final Exception e) {
 			LOGGER.error("Failed to get CPageService bean: {}", e.getMessage());

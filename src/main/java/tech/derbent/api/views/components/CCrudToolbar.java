@@ -47,7 +47,7 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		addClassName("crud-toolbar");
 		setWidthFull(); // Make toolbar take full width
 		// Automatically set dependency checker from service if it implements IDependencyChecker
-		this.dependencyChecker = entityService::checkDeleteAllowed;
+		dependencyChecker = entityService::checkDeleteAllowed;
 		createToolbarButtons();
 		LOGGER.debug("Created CCrudToolbar for entity: {}", entityClass.getSimpleName());
 	}
@@ -199,6 +199,19 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		}
 	}
 
+	/** Notifies all listeners that an entity was created. */
+	private void notifyListenersCreated(final EntityClass entity) {
+		LOGGER.debug("Notifying listeners of entity creation: {}", entityClass.getSimpleName());
+		updateListeners.forEach(listener -> {
+			try {
+				listener.onEntityCreated(entity);
+			} catch (final Exception e) {
+				LOGGER.error("Error notifying listener of entity creation", e);
+				e.printStackTrace();
+			}
+		});
+	}
+
 	/** Notifies all listeners that an entity was deleted. */
 	private void notifyListenersDeleted(final EntityClass entity) {
 		LOGGER.debug("Notifying listeners of entity deletion: {}", entityClass.getSimpleName());
@@ -220,19 +233,6 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 				listener.onEntitySaved(entity);
 			} catch (final Exception e) {
 				LOGGER.error("Error notifying listener of entity save", e);
-				e.printStackTrace();
-			}
-		});
-	}
-
-	/** Notifies all listeners that an entity was created. */
-	private void notifyListenersCreated(final EntityClass entity) {
-		LOGGER.debug("Notifying listeners of entity creation: {}", entityClass.getSimpleName());
-		updateListeners.forEach(listener -> {
-			try {
-				listener.onEntityCreated(entity);
-			} catch (final Exception e) {
-				LOGGER.error("Error notifying listener of entity creation", e);
 				e.printStackTrace();
 			}
 		});
@@ -275,11 +275,11 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	 * @param entity the current entity */
 	@SuppressWarnings ("unchecked")
 	public void setCurrentEntity(final Object entity) {
-		LOGGER.debug("Setting current entity in toolbar: {}", entity != null ? entityClass.getSimpleName() : "null");
+		// LOGGER.debug("Setting current entity in toolbar: {}", entity != null ? entityClass.getSimpleName() : "null");
 		currentEntity = (EntityClass) entity;
 		// Automatically set dependency checker from service when entity changes
 		if (entityService != null) {
-			this.dependencyChecker = entityService::checkDeleteAllowed;
+			dependencyChecker = entityService::checkDeleteAllowed;
 		}
 		updateButtonStates();
 	}
@@ -297,6 +297,11 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		updateButtonStates();
 	}
 
+	/** Sets the notification service. This is typically called via dependency injection or manually after construction. */
+	public void setNotificationService(final CNotificationService notificationService) {
+		this.notificationService = notificationService;
+	}
+
 	/** Sets the callback for refresh operations.
 	 * @param refreshCallback callback to execute when refresh is triggered */
 	public void setRefreshCallback(final Consumer<EntityClass> refreshCallback) {
@@ -308,11 +313,6 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	 * @param saveCallback callback to execute when save is triggered */
 	public void setSaveCallback(final Consumer<EntityClass> saveCallback) {
 		this.saveCallback = saveCallback;
-	}
-
-	/** Sets the notification service. This is typically called via dependency injection or manually after construction. */
-	public void setNotificationService(final CNotificationService notificationService) {
-		this.notificationService = notificationService;
 	}
 
 	/** Shows an error notification. Uses CNotificationService if available, falls back to direct Vaadin call. */
@@ -340,7 +340,7 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 
 	/** Updates button enabled/disabled states based on current context. */
 	private void updateButtonStates() {
-		LOGGER.debug("Updating button states in toolbar for entity.");
+		// LOGGER.debug("Updating button states in toolbar for entity.");
 		boolean hasEntity = (currentEntity != null);
 		boolean hasEntityId = hasEntity && (currentEntity.getId() != null);
 		boolean canCreate = (newEntitySupplier != null);

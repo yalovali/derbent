@@ -49,12 +49,7 @@ public class Application implements AppShellConfigurator {
 		try {
 			CTimer.stamp();
 			final SpringApplication app = new SpringApplication(Application.class);
-			// Note: ApplicationListener for startup time measurement
-			app.addListeners(_ -> {
-				final long endTime = System.nanoTime();
-				final long durationMs = (endTime - startTime) / 1_000_000;
-				LOGGER.info("Application started in {} ms", durationMs);
-			});
+			CTimer.print("application created");
 			app.run(args);
 			CTimer.print();
 		} catch (final Throwable e) {

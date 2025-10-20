@@ -61,7 +61,7 @@ public class CGridEntityService extends CEntityOfProjectService<CGridEntity> {
 	}
 
 	public List<CGridEntity> listForComboboxSelectorByProject(final Optional<CProject> project) {
-		LOGGER.debug("Listing Grid Entities for ComboBox selector by project: {}", project);
+		// LOGGER.debug("Listing Grid Entities for ComboBox selector by project: {}", project);
 		Long id = project.map(CProject::getId).orElseThrow(() -> new IllegalArgumentException("Project must be provided"));
 		return ((IGridEntityRepository) repository).listByProjectId(id);
 	}

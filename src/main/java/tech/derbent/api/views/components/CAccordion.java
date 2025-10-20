@@ -11,16 +11,16 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 public class CAccordion extends Accordion {
 
 	private static final long serialVersionUID = 1L;
+	private final String accordionTitle;
 	private final VerticalLayout baseLayout = new VerticalLayout();
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
-	private final String accordionTitle;
 
 	/** Constructor for CAccordion.
 	 * @param title the title of the accordion panel */
 	public CAccordion(final String title) {
 		super();
-		LOGGER.debug("Creating CAccordion with title: {}", title);
-		this.accordionTitle = title;
+		// LOGGER.debug("Creating CAccordion with title: {}", title);
+		accordionTitle = title;
 		addClassName("c-accordion");
 		// getStyle().("min-width", "300px"); setWidthFull(); setMin
 		add(title, baseLayout);

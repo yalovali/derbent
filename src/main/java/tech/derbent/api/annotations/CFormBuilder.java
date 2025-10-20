@@ -1,7 +1,6 @@
 package tech.derbent.api.annotations;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
@@ -131,27 +130,32 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	public static <EntityClass> CVerticalLayout buildForm(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
 			List<String> entityFields, final Map<String, Component> mapComponents, final Map<String, CHorizontalLayout> mapHorizontalLayouts,
 			final CVerticalLayout formLayout, final IContentOwner contentOwner) throws Exception {
-		Check.notNull(entityClass, "Entity class cannot be null");
-		// Set content owner in data provider resolver context
-		// final FormLayout formLayout = new FormLayout();
-		final List<Field> allFields = new ArrayList<>();
-		getListOfAllFields(entityClass, allFields);
-		final List<Field> sortedFields = getSortedFilteredFieldsList(allFields);
-		LOGGER.info("Processing {} visible fields for form generation", sortedFields.size());
-		// Create components with enhanced error handling and logging
-		if (entityFields == null) {
-			entityFields = sortedFields.stream().map(Field::getName).collect(Collectors.toList());
-		}
-		for (final String fieldName : entityFields) {
-			final Field field = sortedFields.stream().filter(f -> f.getName().equals(fieldName)).findFirst().orElse(null);
-			if (field == null) {
-				LOGGER.warn("Field '{}' not found in entity class {}", fieldName, entityClass.getSimpleName());
+		try {
+			Check.notNull(entityClass, "Entity class cannot be null");
+			// Set content owner in data provider resolver context
+			// final FormLayout formLayout = new FormLayout();
+			final List<Field> allFields = new ArrayList<>();
+			getListOfAllFields(entityClass, allFields);
+			final List<Field> sortedFields = getSortedFilteredFieldsList(allFields);
+			LOGGER.info("Processing {} visible fields for form generation", sortedFields.size());
+			// Create components with enhanced error handling and logging
+			if (entityFields == null) {
+				entityFields = sortedFields.stream().map(Field::getName).collect(Collectors.toList());
 			}
-			Check.notNull(field, "Field '" + fieldName + "' not found in entity class " + entityClass.getSimpleName());
-			final EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(field);
-			processField(contentOwner, binder, formLayout, mapHorizontalLayouts, fieldInfo, mapComponents);
+			for (final String fieldName : entityFields) {
+				final Field field = sortedFields.stream().filter(f -> f.getName().equals(fieldName)).findFirst().orElse(null);
+				if (field == null) {
+					LOGGER.warn("Field '{}' not found in entity class {}", fieldName, entityClass.getSimpleName());
+				}
+				Check.notNull(field, "Field '" + fieldName + "' not found in entity class " + entityClass.getSimpleName());
+				final EntityFieldInfo fieldInfo = CEntityFieldService.createFieldInfo(field);
+				processField(contentOwner, binder, formLayout, mapHorizontalLayouts, fieldInfo, mapComponents);
+			}
+			return formLayout;
+		} catch (final Exception e) {
+			LOGGER.error("Error building form for entity class '{}': {}", entityClass.getSimpleName(), e.getMessage());
+			throw e;
 		}
-		return formLayout;
 	}
 
 	/** Builds a form with content owner support for context-aware data providers.
@@ -164,45 +168,6 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	public static <EntityClass> CVerticalLayout buildFormWithOwner(final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
 			final IContentOwner contentOwner) throws Exception {
 		return buildForm(entityClass, binder, null, contentOwner);
-	}
-
-	private static List<String> callStringDataMethod(final Object serviceBean, final String methodName, final String fieldName)
-			throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
-		// Try to find and call the method
-		try {
-			final Method method = serviceBean.getClass().getMethod(methodName);
-			Check.notNull(method, "Method '" + methodName + "' on service bean for field '" + fieldName + "'");
-			final Object result = method.invoke(serviceBean);
-			Check.notNull(result, "Result of method '" + methodName + "' on service bean for field '" + fieldName + "'");
-			Check.instanceOf(result, List.class, "Method '" + methodName + "' on service bean for field '" + fieldName + "' did not return a List");
-			final List<?> rawList = (List<?>) result;
-			// Convert to List<String> if possible
-			final List<String> stringList = rawList.stream().filter(item -> item instanceof String).map(item -> (String) item).toList();
-			return stringList;
-		} catch (final Exception e) {
-			LOGGER.error("Failed to call method '{}' on service bean for field '{}': {}", methodName, fieldName, e.getMessage());
-			throw e;
-		}
-	}
-
-	// call stringdatamethod with one parameter
-	private static List<String> callStringDataMethod(final Object serviceBean, final String methodName, final String fieldName,
-			final Object parameter) throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
-		try {
-			// Try to find and call the method with one parameter
-			final Method method = serviceBean.getClass().getMethod(methodName, Object.class);
-			Check.notNull(method, "Method '" + methodName + "' on service bean for field '" + fieldName + "'");
-			final Object result = method.invoke(serviceBean, parameter);
-			Check.notNull(result, "Result of method '" + methodName + "' on service bean for field '" + fieldName + "'");
-			Check.instanceOf(result, List.class, "Method '" + methodName + "' on service bean for field '" + fieldName + "' did not return a List");
-			final List<?> rawList = (List<?>) result;
-			// Convert to List<String> if possible
-			final List<String> stringList = rawList.stream().filter(item -> item instanceof String).map(item -> (String) item).toList();
-			return stringList;
-		} catch (final Exception e) {
-			LOGGER.error("Failed to call method '{}' on service bean for field '{}': {}", methodName, fieldName, e.getMessage());
-			throw e;
-		}
 	}
 
 	private static NumberField createBigDecimalField(final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) {
@@ -270,7 +235,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			final CEnhancedBinder<?> binder) throws Exception {
 		try {
 			Check.notNull(fieldInfo, "FieldInfo for ComboBox creation");
-			LOGGER.debug("Creating CColorAwareComboBox for field: {}", fieldInfo.getFieldName());
+			// LOGGER.debug("Creating CColorAwareComboBox for field: {}", fieldInfo.getFieldName());
 			final ComboBox<T> comboBox = new CColorAwareComboBox<>(fieldInfo);
 			comboBox.setItemLabelGenerator(item -> CColorUtils.getDisplayTextFromEntity(item));
 			// Data provider resolution using CDataProviderResolver

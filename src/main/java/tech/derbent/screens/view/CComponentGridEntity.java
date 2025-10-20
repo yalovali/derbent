@@ -573,7 +573,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 
 	/** Handles grid selection changes and fires SelectionChangeEvent */
 	protected void onSelectionChange(ValueChangeEvent<?> event) {
-		LOGGER.debug("Grid selection changed: {}", event.getValue() != null ? event.getValue().toString() : "null");
+		// LOGGER.debug("Grid selection changed: {}", event.getValue() != null ? event.getValue().toString() : "null");
 		CEntityDB<?> selectedEntity = (CEntityDB<?>) event.getValue();
 		fireEvent(new SelectionChangeEvent(this, selectedEntity));
 	}

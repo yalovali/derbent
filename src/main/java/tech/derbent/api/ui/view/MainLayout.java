@@ -101,23 +101,6 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		addToDrawer(createUserMenu()); // Add the user menu to the navbar
 	}
 
-	private void setSessionUserFromContext() {
-		LOGGER.info("Setting session user from authentication context");
-		Check.notNull(currentUser, "No authenticated user found in security context");
-		Check.notNull(currentUser.getUsername(), "Authenticated user must have a username");
-		Check.notNull(sessionService, "Session service cannot be null");
-		String loginname = currentUser.getUsername();
-		Check.notNull(loginname, "Authenticated user login name cannot be null");
-		Check.isTrue(loginname.contains("@"), "Login name must contain '@' with format 'login@companyID'");
-		// split loginname at @
-		String login = loginname.split("@")[0];
-		String companyIDStr = loginname.split("@")[1];
-		Long companyID = Long.parseLong(companyIDStr);
-		CUser user = userService.findByLogin(login, companyID);
-		Check.notNull(user, "No user found for login: " + login + " and company ID: " + companyID);
-		sessionService.setActiveUser(user);
-	}
-
 	@Override
 	public void afterNavigation(final AfterNavigationEvent event) {
 		// Update the view title in the toolbar after navigation
@@ -126,11 +109,11 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		Component content = getContent();
 		if (content instanceof IPageTitleProvider) {
 			pageTitle = ((IPageTitleProvider) content).getPageTitle();
-			LOGGER.debug("Using page title from IPageTitleProvider: {}", pageTitle);
+			// LOGGER.debug("Using page title from IPageTitleProvider: {}", pageTitle);
 		} else if (pageTitle == null || pageTitle.trim().isEmpty()) {
 			// Fall back to MenuConfiguration if no custom title is provided
 			pageTitle = MenuConfiguration.getPageHeader(content).orElse("Main Layout");
-			LOGGER.debug("Using page title from MenuConfiguration: {}", pageTitle);
+			// LOGGER.debug("Using page title from MenuConfiguration: {}", pageTitle);
 		}
 		mainToolbar.setPageTitle(pageTitle); // Set the page title in the toolbar
 	}
@@ -299,6 +282,23 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 		}
 		// Fall back to user initials if no profile picture is available
 		setupAvatarInitials(avatar, user);
+	}
+
+	private void setSessionUserFromContext() {
+		LOGGER.info("Setting session user from authentication context");
+		Check.notNull(currentUser, "No authenticated user found in security context");
+		Check.notNull(currentUser.getUsername(), "Authenticated user must have a username");
+		Check.notNull(sessionService, "Session service cannot be null");
+		String loginname = currentUser.getUsername();
+		Check.notNull(loginname, "Authenticated user login name cannot be null");
+		Check.isTrue(loginname.contains("@"), "Login name must contain '@' with format 'login@companyID'");
+		// split loginname at @
+		String login = loginname.split("@")[0];
+		String companyIDStr = loginname.split("@")[1];
+		Long companyID = Long.parseLong(companyIDStr);
+		CUser user = userService.findByLogin(login, companyID);
+		Check.notNull(user, "No user found for login: " + login + " and company ID: " + companyID);
+		sessionService.setActiveUser(user);
 	}
 
 	/** Sets up avatar with user initials when no profile picture is available.
