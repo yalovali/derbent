@@ -73,8 +73,89 @@ public abstract class CInitializerServiceBase {
 		page.setIcon(CColorUtils.getStaticIconFilename(entityClass));
 		page.setColor(CColorUtils.getStaticIconColorCode(entityClass));
 		page.setMenuOrder(order);
-		;
+		// Set the pageService based on entity class
+		String pageServiceName = getPageServiceNameForEntityClass(entityClass);
+		if (pageServiceName != null) {
+			page.setPageService(pageServiceName);
+		}
 		return page;
+	}
+
+	/**
+	 * Maps entity class to corresponding PageService class name
+	 * @param entityClass The entity class
+	 * @return The PageService class name, or null if not mapped
+	 */
+	protected static String getPageServiceNameForEntityClass(Class<?> entityClass) {
+		String className = entityClass.getSimpleName();
+		switch (className) {
+		// Main entities
+		case "CActivity":
+			return "CPageServiceActivity";
+		case "CComment":
+			return "CPageServiceComment";
+		case "CCompany":
+			return "CPageServiceCompany";
+		case "CDecision":
+			return "CPageServiceDecision";
+		case "CMeeting":
+			return "CPageServiceMeeting";
+		case "COrder":
+			return "CPageServiceOrder";
+		case "CProject":
+			return "CPageServiceProject";
+		case "CRisk":
+			return "CPageServiceRisk";
+		case "CUser":
+			return "CPageServiceUser";
+		case "CSystemSettings":
+			return "CPageServiceSystemSettings";
+		// Type/Status entities
+		case "CActivityPriority":
+			return "CPageServiceActivityPriority";
+		case "CActivityStatus":
+			return "CPageServiceActivityStatus";
+		case "CActivityType":
+			return "CPageServiceActivityType";
+		case "CCommentPriority":
+			return "CPageServiceCommentPriority";
+		case "CDecisionStatus":
+			return "CPageServiceDecisionStatus";
+		case "CDecisionType":
+			return "CPageServiceDecisionType";
+		case "CMeetingStatus":
+			return "CPageServiceMeetingStatus";
+		case "CMeetingType":
+			return "CPageServiceMeetingType";
+		case "COrderStatus":
+			return "CPageServiceOrderStatus";
+		case "COrderType":
+			return "CPageServiceOrderType";
+		case "COrderApproval":
+			return "CPageServiceOrderApproval";
+		case "CApprovalStatus":
+			return "CPageServiceApprovalStatus";
+		case "CCurrency":
+			return "CPageServiceCurrency";
+		case "CRiskStatus":
+			return "CPageServiceRiskStatus";
+		case "CUserCompanyRole":
+			return "CPageServiceUserCompanyRole";
+		case "CUserCompanySetting":
+			return "CPageServiceUserCompanySetting";
+		case "CUserProjectRole":
+			return "CPageServiceUserProjectRole";
+		case "CUserProjectSettings":
+			return "CPageServiceUserProjectSettings";
+		// System entities
+		case "CPageEntity":
+			return "CPageServicePageEntity";
+		case "CGridEntity":
+			return "CPageServiceGridEntity";
+		default:
+			// Return null for entities that don't have a PageService yet
+			return null;
+		}
 	}
 
 	public static void initBase(Class<?> clazz, final CProject project, final CGridEntityService gridEntityService,

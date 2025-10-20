@@ -82,8 +82,8 @@ public abstract class CDynamicPageBase extends CPageBaseProjectAware implements 
 		// this creates a page service instance per page. this may be memory inefficient.
 		try {
 			Class<?> clazz = CPageServiceUtility.getPageServiceClassByName(pageEntity.getPageService());
-			var constructor = clazz.getDeclaredConstructor();
-			CPageService page = (CPageService) constructor.newInstance();
+			var constructor = clazz.getDeclaredConstructor(CDynamicPageBase.class);
+			CPageService page = (CPageService) constructor.newInstance(this);
 			return page;
 		} catch (final Exception e) {
 			LOGGER.error("Failed to get CPageService bean: {}", e.getMessage());
