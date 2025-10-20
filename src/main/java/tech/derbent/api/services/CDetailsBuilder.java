@@ -15,13 +15,13 @@ import jakarta.persistence.PersistenceUtil;
 import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.interfaces.IContentOwner;
-import tech.derbent.api.utils.CAuxillaries;
-import tech.derbent.api.utils.CPanelDetails;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.screens.domain.CDetailLines;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CEntityFieldService;
+import tech.derbent.api.utils.CAuxillaries;
+import tech.derbent.api.utils.CPanelDetails;
+import tech.derbent.api.utils.Check;
 
 @org.springframework.stereotype.Component
 public final class CDetailsBuilder implements ApplicationContextAware {
@@ -112,7 +112,6 @@ public final class CDetailsBuilder implements ApplicationContextAware {
 	/** Clears the details form by setting the form builder bean to null. */
 	public void populateForm() {
 		if (formBuilder != null) {
-			LOGGER.debug("Clearing details form");
 			formBuilder.populateForm();
 		}
 	}

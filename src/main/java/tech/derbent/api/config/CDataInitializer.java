@@ -11,6 +11,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import tech.derbent.api.screens.service.CDetailLinesService;
+import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CGridEntityService;
+import tech.derbent.api.screens.service.CGridInitializerService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.activities.domain.CActivity;
@@ -42,6 +46,7 @@ import tech.derbent.app.decisions.service.CDecisionStatusInitializerService;
 import tech.derbent.app.decisions.service.CDecisionStatusService;
 import tech.derbent.app.decisions.service.CDecisionTypeInitializerService;
 import tech.derbent.app.decisions.service.CDecisionTypeService;
+import tech.derbent.app.gannt.service.CGanntViewEntityService;
 import tech.derbent.app.meetings.domain.CMeetingStatus;
 import tech.derbent.app.meetings.domain.CMeetingType;
 import tech.derbent.app.meetings.service.CMeetingInitializerService;
@@ -83,11 +88,6 @@ import tech.derbent.app.roles.service.CUserProjectRoleService;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.service.CWorkflowEntityInitializerService;
 import tech.derbent.app.workflow.service.CWorkflowEntityService;
-import tech.derbent.app.gannt.service.CGanntViewEntityService;
-import tech.derbent.api.screens.service.CDetailLinesService;
-import tech.derbent.api.screens.service.CDetailSectionService;
-import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.service.CGridInitializerService;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.setup.service.CSystemSettingsInitializerService;
 import tech.derbent.base.users.domain.CUser;
@@ -770,7 +770,7 @@ public class CDataInitializer {
 			decisionService.save(decision2);
 			// Create second decision comments
 			createSampleCommentsForDecision(decision2);
-			LOGGER.info("Created 2 sample decisions with comments for project: {}", project.getName());
+			LOGGER.debug("Created 2 sample decisions with comments for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample decisions for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample decisions for project: " + project.getName(), e);
@@ -876,7 +876,6 @@ public class CDataInitializer {
 			meetingService.save(meeting2);
 			// Create second meeting comments
 			createSampleCommentsForMeeting(meeting2, minimal);
-			LOGGER.info("Created 2 sample meetings with comments for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample meetings for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample meetings for project: " + project.getName(), e);
@@ -1073,7 +1072,7 @@ public class CDataInitializer {
 			decisionWorkflow.setDescription("Defines approval workflow for strategic decisions");
 			decisionWorkflow.setIsActive(true);
 			workflowEntityService.save(decisionWorkflow);
-			LOGGER.info("Created sample workflow entities for project: {}", project.getName());
+			LOGGER.debug("Created sample workflow entities for project: {}", project.getName());
 		} catch (final Exception e) {
 			LOGGER.error("Error initializing sample workflow entities for project: {}", project.getName(), e);
 			throw new RuntimeException("Failed to initialize sample workflow entities for project: " + project.getName(), e);

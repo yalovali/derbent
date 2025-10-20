@@ -38,7 +38,7 @@ public class CUserProjectSettings extends CEntityDB<CUserProjectSettings> {
 	@JoinColumn (name = "role_id", nullable = true)
 	@AMetaData (
 			displayName = "Project Role", required = false, readOnly = false, description = "User's role in this project", hidden = false, order = 5,
-			dataProviderClass = tech.derbent.app.roles.service.CUserProjectRoleService.class, setBackgroundFromColor = true, useIcon = true
+			dataProviderBean = "CUserProjectRoleService", setBackgroundFromColor = true, useIcon = true
 	)
 	private CUserProjectRole role;
 	@ManyToOne (fetch = FetchType.LAZY)

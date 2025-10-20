@@ -62,6 +62,16 @@ public class CCompanyService extends CEntityNamedService<CCompany> {
 		}
 	}
 
+	public List<CCompany> findActiveCompanies() {
+		try {
+			final List<CCompany> companies = ((ICompanyRepository) repository).findByActive(true);
+			return companies;
+		} catch (final Exception e) {
+			LOGGER.error("Error finding active companies", e);
+			throw e;
+		}
+	}
+
 	public Optional<CCompany> findByTaxNumber(final String taxNumber) {
 		Check.notBlank(taxNumber, "Tax number cannot be null or empty");
 		try {
@@ -69,18 +79,6 @@ public class CCompanyService extends CEntityNamedService<CCompany> {
 			return company;
 		} catch (final Exception e) {
 			LOGGER.error("Error finding company by tax number: {}", taxNumber, e);
-			throw e;
-		}
-	}
-
-	public List<CCompany> findActiveCompanies() {
-		LOGGER.debug("findActiveCompanies called");
-		try {
-			final List<CCompany> companies = ((ICompanyRepository) repository).findByActive(true);
-			LOGGER.debug("Found {} active companies", companies.size());
-			return companies;
-		} catch (final Exception e) {
-			LOGGER.error("Error finding active companies", e);
 			throw e;
 		}
 	}
@@ -103,7 +101,6 @@ public class CCompanyService extends CEntityNamedService<CCompany> {
 	}
 
 	public List<CCompany> searchCompaniesByName(final String searchTerm) {
-		LOGGER.debug("searchCompaniesByName called with searchTerm: {}", searchTerm);
 		if ((searchTerm == null) || searchTerm.trim().isEmpty()) {
 			LOGGER.debug("Empty search term, returning all companies");
 			return ((ICompanyRepository) repository).findAllOrderByName();

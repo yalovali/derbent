@@ -24,8 +24,7 @@ public class CWorkflowStatusRelationDialog extends CDBRelationDialog<CWorkflowSt
 	public CWorkflowStatusRelationDialog(IContentOwner parentContent, final CWorkflowEntityService workflowService,
 			final CActivityStatusService statusService, final CWorkflowStatusRelationService workflowStatusRelationService,
 			final CWorkflowStatusRelation relation, final CWorkflowEntity workflow, final Consumer<CWorkflowStatusRelation> onSave) throws Exception {
-		super(parentContent, relation != null ? relation : new CWorkflowStatusRelation(), workflow,
-				(tech.derbent.api.services.CAbstractService) workflowService, (tech.derbent.api.services.CAbstractService) statusService,
+		super(parentContent, relation != null ? relation : new CWorkflowStatusRelation(), workflow, workflowService, statusService,
 				workflowStatusRelationService, onSave, relation == null);
 		// Store services for easy access
 		this.workflowService = workflowService;
@@ -39,13 +38,13 @@ public class CWorkflowStatusRelationDialog extends CDBRelationDialog<CWorkflowSt
 	}
 
 	@Override
-	protected List<String> getFormFields() { return List.of("fromStatus", "toStatus", "role"); }
-
-	@Override
 	protected String getEditDialogTitle() { return "Edit Workflow Status Transition"; }
 
 	@Override
 	protected String getEditFormTitle() { return "Edit Status Transition"; }
+
+	@Override
+	protected List<String> getFormFields() { return List.of("fromStatus", "toStatus", "role"); }
 
 	@Override
 	protected String getNewDialogTitle() { return "Add Workflow Status Transition"; }

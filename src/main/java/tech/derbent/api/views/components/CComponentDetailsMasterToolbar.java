@@ -6,12 +6,12 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import tech.derbent.api.ui.notifications.CNotifications;
-import tech.derbent.api.utils.Check;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.view.CComponentGridEntity;
 import tech.derbent.api.screens.view.CFieldSelectionDialog;
+import tech.derbent.api.ui.notifications.CNotifications;
+import tech.derbent.api.utils.Check;
 
 public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 
@@ -23,29 +23,45 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 	private TextField searchField;
 
 	public CComponentDetailsMasterToolbar(final CComponentGridEntity grid, CGridEntityService gridEntityService) {
-		this.grid = grid;
-		this.gridEntityService = gridEntityService;
-		setSpacing(true);
-		setPadding(true);
-		addClassName("crud-toolbar");
-		setWidthFull(); // Make toolbar take full width
-		createToolbarButtons();
+		try {
+			this.grid = grid;
+			this.gridEntityService = gridEntityService;
+			setSpacing(true);
+			setPadding(true);
+			addClassName("crud-toolbar");
+			setWidthFull(); // Make toolbar take full width
+			createToolbarButtons();
+		} catch (Exception e) {
+			LOGGER.error("Error initializing toolbar {}", e.getMessage());
+			throw e;
+		}
 	}
 
 	/** Creates all the CRUD toolbar buttons. */
 	private void createToolbarButtons() {
-		// Search field for grid filtering
-		searchField = new TextField();
-		searchField.setPlaceholder("Search...");
-		searchField.setPrefixComponent(VaadinIcon.SEARCH.create());
-		searchField.setClearButtonVisible(true);
-		searchField.setValueChangeMode(com.vaadin.flow.data.value.ValueChangeMode.LAZY);
-		searchField.addValueChangeListener(e -> handleSearch(e.getValue()));
-		// Edit Grid Columns Button
-		btnEditGrid = CButton.createPrimary("Edit Columns", VaadinIcon.GRID_V.create(), e -> handleEditGridEntity());
-		btnEditGrid.getElement().setAttribute("title", "Edit Grid Columns");
-		add(searchField, btnEditGrid);
-		updateButtonStates();
+		try {
+			// Search field for grid filtering
+			searchField = new TextField();
+			searchField.setPlaceholder("Search...");
+			searchField.setPrefixComponent(VaadinIcon.SEARCH.create());
+			searchField.setClearButtonVisible(true);
+			searchField.setValueChangeMode(com.vaadin.flow.data.value.ValueChangeMode.LAZY);
+			searchField.addValueChangeListener(e -> handleSearch(e.getValue()));
+			// Edit Grid Columns Button
+			btnEditGrid = CButton.createPrimary("Edit Columns", VaadinIcon.GRID_V.create(), e1 -> {
+				try {
+					handleEditGridEntity();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			});
+			btnEditGrid.getElement().setAttribute("title", "Edit Grid Columns");
+			add(searchField, btnEditGrid);
+			updateButtonStates();
+		} catch (final Exception e) {
+			LOGGER.error("Error creating toolbar buttons {}", e.getMessage());
+			throw e;
+		}
 	}
 
 	/** Extracts entity type from service bean name */
@@ -71,7 +87,7 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 		return grid != null ? grid.getGridEntity() : null;
 	}
 
-	private void handleEditGridEntity() {
+	private void handleEditGridEntity() throws Exception {
 		try {
 			Check.notNull(grid, "Grid component is not set");
 			// Get current grid entity information
@@ -99,7 +115,7 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 			dialog.open();
 		} catch (final Exception e) {
 			LOGGER.error("Error opening grid editor", e);
-			CNotifications.showError("Error opening grid editor: " + e.getMessage());
+			throw e;
 		}
 	}
 

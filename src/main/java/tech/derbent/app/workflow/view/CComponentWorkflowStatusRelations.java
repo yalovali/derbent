@@ -8,7 +8,6 @@ import tech.derbent.app.activities.service.CActivityStatusService;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
 import tech.derbent.app.workflow.domain.CWorkflowStatusRelation;
 import tech.derbent.app.workflow.service.CWorkflowEntityService;
-import tech.derbent.app.workflow.service.CWorkflowStatusRelationService;
 import tech.derbent.base.session.service.ISessionService;
 
 /** Component for managing status transitions within a workflow (Workflow->Status direction). This component displays all status transitions defined

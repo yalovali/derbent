@@ -25,6 +25,10 @@ import com.vaadin.hilla.ApplicationContextProvider;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.interfaces.IProjectChangeListener;
+import tech.derbent.api.screens.domain.CGridEntity;
+import tech.derbent.api.screens.domain.CGridEntity.FieldConfig;
+import tech.derbent.api.screens.service.CEntityFieldService;
+import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.api.utils.CColorUtils;
@@ -33,10 +37,6 @@ import tech.derbent.api.views.components.CDiv;
 import tech.derbent.api.views.components.CGridCell;
 import tech.derbent.api.views.grids.CGrid;
 import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.api.screens.domain.CGridEntity;
-import tech.derbent.api.screens.domain.CGridEntity.FieldConfig;
-import tech.derbent.api.screens.service.CEntityFieldService;
-import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.base.session.service.ISessionService;
 
 public class CComponentGridEntity extends CDiv implements IProjectChangeListener {
@@ -63,14 +63,19 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 
 	public CComponentGridEntity(CGridEntity gridEntity) {
 		super();
-		this.gridEntity = gridEntity;
-		// Set size to full so the grid can expand properly
-		setSizeFull();
-		// Get session service for project change notifications
-		if (ApplicationContextProvider.getApplicationContext() != null) {
-			sessionService = ApplicationContextProvider.getApplicationContext().getBean(ISessionService.class);
+		try {
+			this.gridEntity = gridEntity;
+			// Set size to full so the grid can expand properly
+			setSizeFull();
+			// Get session service for project change notifications
+			if (ApplicationContextProvider.getApplicationContext() != null) {
+				sessionService = ApplicationContextProvider.getApplicationContext().getBean(ISessionService.class);
+			}
+			createContent();
+		} catch (Exception e) {
+			LOGGER.error("Error initializing CComponentGridEntity: {}", e.getMessage());
+			add(new Div("Error initializing grid component: " + e.getMessage()));
 		}
-		createContent();
 	}
 
 	/** Adds a selection change listener to receive notifications when the grid selection changes */
@@ -674,7 +679,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			CGrid rawGrid = grid;
 			grid.getDataProvider().fetch(new Query<>()).findFirst().ifPresent(entity -> {
 				rawGrid.select(entity);
-				LOGGER.debug("Selected first item in grid");
+				// LOGGER.debug("Selected first item in grid");
 			});
 		} catch (Exception e) {
 			LOGGER.error("Error selecting first item in grid: {}", e.getMessage());

@@ -82,7 +82,6 @@ import tech.derbent.app.roles.service.CUserCompanyRoleService;
 import tech.derbent.app.roles.service.CUserProjectRoleInitializerService;
 import tech.derbent.app.roles.service.CUserProjectRoleService;
 import tech.derbent.app.workflow.domain.CWorkflowEntity;
-import tech.derbent.app.workflow.service.CWorkflowEntityInitializerService;
 import tech.derbent.app.workflow.service.CWorkflowEntityService;
 import tech.derbent.base.setup.domain.CSystemSettings;
 import tech.derbent.base.setup.service.CSystemSettingsInitializerService;
@@ -447,13 +446,13 @@ public class CAuxillaries {
 		} else if (entityClass == CGridEntity.class) {
 			return CGridEntityService.class;
 		} else if (entityClass == CSystemSettings.class) {
-			return CSystemSettingsInitializerService.class;
+			return CSystemSettingsService.class;
 		} else if (entityClass == CUserProjectRole.class) {
-			return CUserProjectRoleInitializerService.class;
+			return CUserProjectRoleService.class;
 		} else if (entityClass == CUserCompanyRole.class) {
-			return CUserCompanyRoleInitializerService.class;
+			return CUserCompanyRoleService.class;
 		} else if (entityClass == CWorkflowEntity.class) {
-			return CWorkflowEntityInitializerService.class;
+			return CWorkflowEntityService.class;
 		} else {
 			LOGGER.error("Unknown entity type: " + entityClass.getSimpleName() + " dont forget to update CAuxillaries");
 			throw new IllegalArgumentException("Unknown entity type: " + entityClass.getSimpleName());

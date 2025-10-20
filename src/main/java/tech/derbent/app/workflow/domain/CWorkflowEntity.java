@@ -39,7 +39,7 @@ public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 	@OneToMany (mappedBy = "workflow", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@AMetaData (
 			displayName = "Status Transitions", required = false, readOnly = false, description = "Status transitions for this workflow",
-			hidden = false, order = 10, createComponentMethod = "createWorkflowStatusRelationsComponent"
+			hidden = false, order = 10, dataProviderBean = "CWorkflowEntityService", createComponentMethod = "createWorkflowStatusRelationsComponent"
 	)
 	private final List<CWorkflowStatusRelation> statusRelations = new ArrayList<>();
 
@@ -57,17 +57,6 @@ public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 		isActive = Boolean.TRUE;
 	}
 
-	@Override
-	public boolean equals(final Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (!(o instanceof CWorkflowEntity)) {
-			return false;
-		}
-		return super.equals(o);
-	}
-
 	/** Add a status relation to this workflow and maintain bidirectional relationship.
 	 * @param relation the status relation to add */
 	public void addStatusRelation(final CWorkflowStatusRelation relation) {
@@ -78,6 +67,17 @@ public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 			this.statusRelations.add(relation);
 			relation.setWorkflow(this);
 		}
+	}
+
+	@Override
+	public boolean equals(final Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof CWorkflowEntity)) {
+			return false;
+		}
+		return super.equals(o);
 	}
 
 	public Boolean getIsActive() { return isActive; }

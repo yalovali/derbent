@@ -21,38 +21,34 @@ import tech.derbent.app.roles.domain.CUserProjectRole;
 @AttributeOverride (name = "id", column = @Column (name = "cworkflowstatusrelation_id"))
 public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> {
 
-	public static final String VIEW_NAME = "Workflow Status Relations View";
 	private static final long serialVersionUID = 1L;
+	public static final String VIEW_NAME = "Workflow Status Relations View";
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "from_status_id", nullable = false)
 	@AMetaData (
 			displayName = "From Status", required = true, readOnly = false, description = "The status from which the transition starts",
-			hidden = false, order = 1, setBackgroundFromColor = true, useIcon = true,
-			dataProviderClass = tech.derbent.app.activities.service.CActivityStatusService.class
+			hidden = false, order = 1, setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CActivityStatusService"
 	)
 	private CActivityStatus fromStatus;
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "role_id", nullable = true)
 	@AMetaData (
 			displayName = "User Role", required = false, readOnly = false, description = "The user role allowed to make this transition",
-			hidden = false, order = 4, setBackgroundFromColor = true, useIcon = true,
-			dataProviderClass = tech.derbent.app.roles.service.CUserProjectRoleService.class
+			hidden = false, order = 4, setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CUserProjectRoleService"
 	)
 	private CUserProjectRole role;
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "to_status_id", nullable = false)
 	@AMetaData (
 			displayName = "To Status", required = true, readOnly = false, description = "The status to which the transition goes", hidden = false,
-			order = 2, setBackgroundFromColor = true, useIcon = true,
-			dataProviderClass = tech.derbent.app.activities.service.CActivityStatusService.class
+			order = 2, setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CActivityStatusService"
 	)
 	private CActivityStatus toStatus;
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "workflow_id", nullable = false)
 	@AMetaData (
 			displayName = "Workflow", required = true, readOnly = false, description = "The workflow this status relation belongs to", hidden = false,
-			order = 3, setBackgroundFromColor = true, useIcon = true,
-			dataProviderClass = tech.derbent.app.workflow.service.CWorkflowEntityService.class
+			order = 3, setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CWorkflowEntityService"
 	)
 	private CWorkflowEntity workflow;
 

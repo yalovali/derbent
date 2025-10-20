@@ -36,6 +36,7 @@ import tech.derbent.api.services.pageservice.implementations.CPageServiceUserCom
 import tech.derbent.api.services.pageservice.implementations.CPageServiceUserCompanySetting;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceUserProjectRole;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceUserProjectSettings;
+import tech.derbent.api.services.pageservice.implementations.CPageServiceWorkflowEntity;
 
 @Service
 public class CPageServiceUtility {
@@ -112,6 +113,8 @@ public class CPageServiceUtility {
 			return CPageServicePageEntity.class;
 		case "CPageServiceGridEntity":
 			return CPageServiceGridEntity.class;
+		case "CPageServiceWorkflowEntity":
+			return CPageServiceWorkflowEntity.class;
 		default:
 			LOGGER.error("Page service '{}' not implemented", serviceName);
 			throw new IllegalArgumentException("Page service not implemented: " + serviceName);

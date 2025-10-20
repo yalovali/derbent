@@ -1,13 +1,13 @@
 package tech.derbent.api.screens.service;
 
+import tech.derbent.api.screens.domain.CDetailSection;
+import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.app.page.domain.CPageEntity;
 import tech.derbent.app.page.service.CPageEntityService;
 import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.api.screens.domain.CDetailSection;
-import tech.derbent.api.screens.domain.CGridEntity;
 
 public abstract class CInitializerServiceBase {
 
@@ -150,6 +150,8 @@ public abstract class CInitializerServiceBase {
 			return "CPageServicePageEntity";
 		case "CGridEntity":
 			return "CPageServiceGridEntity";
+		case "CWorkflowEntity":
+			return "CPageServiceWorkflowEntity";
 		default:
 			// Return null for entities that don't have a PageService yet
 			return null;

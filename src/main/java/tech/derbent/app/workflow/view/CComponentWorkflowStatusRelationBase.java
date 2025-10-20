@@ -22,8 +22,8 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 		RelationalClass extends CEntityDB<RelationalClass>> extends CComponentRelationPanelBase<MasterClass, CWorkflowStatusRelation> {
 
 	private static final long serialVersionUID = 1L;
-	protected final CActivityStatusService statusService;
 	protected final CUserProjectRoleService roleService;
+	protected final CActivityStatusService statusService;
 	protected final CWorkflowStatusRelationService workflowStatusRelationService;
 
 	public CComponentWorkflowStatusRelationBase(final String title, final Class<MasterClass> entityClass,
@@ -78,12 +78,12 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 		}
 	}
 
+	protected CWorkflowStatusRelation getSelectedRelation() { return getSelectedSetting(); }
+
 	protected boolean isWorkflowMaster() {
 		// return true if MasterClass is CWorkflowEntity
 		return CWorkflowEntity.class.equals(getEntityClass());
 	}
-
-	protected CWorkflowStatusRelation getSelectedRelation() { return getSelectedSetting(); }
 
 	/** Abstract methods that subclasses must implement */
 	@Override

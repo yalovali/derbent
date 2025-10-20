@@ -3,15 +3,15 @@ package tech.derbent.app.workflow.service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.app.workflow.domain.CWorkflowEntity;
-import tech.derbent.app.page.service.CPageEntityService;
-import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.api.screens.domain.CDetailSection;
 import tech.derbent.api.screens.domain.CGridEntity;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.screens.service.CGridEntityService;
 import tech.derbent.api.screens.service.CInitializerServiceBase;
+import tech.derbent.app.page.service.CPageEntityService;
+import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.workflow.domain.CWorkflowEntity;
 
 /** CWorkflowEntityInitializerService - Initializer service for workflow entity screens. Layer: Service (MVC) Provides screen and grid configurations
  * for workflow entity management. */
@@ -31,6 +31,7 @@ public class CWorkflowEntityInitializerService extends CInitializerServiceBase {
 			final CDetailSection detailSection = createBaseScreenEntity(project, clazz);
 			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "name"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "statusRelations"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "isActive"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
