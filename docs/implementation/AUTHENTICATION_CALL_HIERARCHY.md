@@ -268,8 +268,8 @@ Login Form → Custom Filter → Custom Provider → loadUserByUsernameAndCompan
 
 Enable debug logging to see the flow:
 ```properties
-logging.level.tech.derbent.login=DEBUG
-logging.level.tech.derbent.users=DEBUG
+logging.level.tech.derbent.base.login=DEBUG
+logging.level.tech.derbent.base.users=DEBUG
 logging.level.org.springframework.security=DEBUG
 ```
 

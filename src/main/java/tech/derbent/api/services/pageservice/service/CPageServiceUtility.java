@@ -35,7 +35,7 @@ import tech.derbent.api.services.pageservice.implementations.CPageServiceUserCom
 import tech.derbent.api.services.pageservice.implementations.CPageServiceUserCompanySetting;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceUserProjectRole;
 import tech.derbent.api.services.pageservice.implementations.CPageServiceUserProjectSettings;
-import tech.derbent.screens.service.CViewsService;
+import tech.derbent.api.screens.service.CViewsService;
 
 @Service
 public class CPageServiceUtility {

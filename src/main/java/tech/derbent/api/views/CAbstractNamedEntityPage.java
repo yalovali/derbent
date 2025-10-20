@@ -7,9 +7,9 @@ import tech.derbent.api.interfaces.ILayoutChangeListener;
 import tech.derbent.api.services.CEntityNamedService;
 import tech.derbent.api.services.CDetailsBuilder;
 import tech.derbent.api.utils.Check;
-import tech.derbent.screens.domain.CDetailSection;
-import tech.derbent.screens.service.CDetailSectionService;
-import tech.derbent.session.service.ISessionService;
+import tech.derbent.api.screens.domain.CDetailSection;
+import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CAbstractNamedEntityPage<EntityClass extends CEntityNamed<EntityClass>> extends CAbstractEntityDBPage<EntityClass>
 		implements ILayoutChangeListener {

@@ -3,13 +3,13 @@ package tech.derbent.api.views.components;
 import java.util.List;
 import org.springframework.context.ApplicationContext;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
-import tech.derbent.projects.domain.CProject;
-import tech.derbent.projects.service.CProjectService;
-import tech.derbent.session.service.ISessionService;
-import tech.derbent.users.domain.CUser;
-import tech.derbent.users.domain.CUserProjectSettings;
-import tech.derbent.users.service.CUserService;
-import tech.derbent.users.view.CUserProjectSettingsDialog;
+import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.projects.service.CProjectService;
+import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.base.users.domain.CUser;
+import tech.derbent.base.users.domain.CUserProjectSettings;
+import tech.derbent.base.users.service.CUserService;
+import tech.derbent.base.users.view.CUserProjectSettingsDialog;
 
 /** Component for managing a user's project assignments (User->Project direction). This component displays all projects assigned to a specific user
  * and allows: - Adding new project assignments - Editing existing project roles/permissions - Removing project assignments The component

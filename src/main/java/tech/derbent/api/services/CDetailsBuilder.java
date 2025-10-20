@@ -18,10 +18,10 @@ import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CPanelDetails;
 import tech.derbent.api.utils.Check;
-import tech.derbent.screens.domain.CDetailLines;
-import tech.derbent.screens.domain.CDetailSection;
-import tech.derbent.screens.service.CDetailSectionService;
-import tech.derbent.screens.service.CEntityFieldService;
+import tech.derbent.api.screens.domain.CDetailLines;
+import tech.derbent.api.screens.domain.CDetailSection;
+import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CEntityFieldService;
 
 @org.springframework.stereotype.Component
 public final class CDetailsBuilder implements ApplicationContextAware {

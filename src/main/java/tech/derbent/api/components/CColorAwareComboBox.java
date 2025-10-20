@@ -12,7 +12,7 @@ import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CEntityLabel;
-import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 
 public class CColorAwareComboBox<T extends CEntityDB<T>> extends ComboBox<T> {
 

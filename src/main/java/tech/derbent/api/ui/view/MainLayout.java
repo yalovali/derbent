@@ -40,13 +40,13 @@ import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CAbstractNamedEntityPage;
-import tech.derbent.page.service.CPageMenuIntegrationService;
-import tech.derbent.session.service.CLayoutService;
-import tech.derbent.session.service.ISessionService;
-import tech.derbent.setup.service.CSystemSettingsService;
-import tech.derbent.users.domain.CUser;
-import tech.derbent.users.service.CUserService;
-import tech.derbent.users.view.CUserProfileDialog;
+import tech.derbent.app.page.service.CPageMenuIntegrationService;
+import tech.derbent.base.session.service.CLayoutService;
+import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.base.setup.service.CSystemSettingsService;
+import tech.derbent.base.users.domain.CUser;
+import tech.derbent.base.users.service.CUserService;
+import tech.derbent.base.users.view.CUserProfileDialog;
 
 /** The main layout is a top-level placeholder for other views. It provides a side navigation menu and a user menu. */
 // vaadin applayout is used to create a layout with a side navigation menu it consists of

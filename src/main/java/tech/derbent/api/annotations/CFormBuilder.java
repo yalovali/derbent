@@ -55,9 +55,9 @@ import tech.derbent.api.views.components.CDiv;
 import tech.derbent.api.views.components.CHorizontalLayout;
 import tech.derbent.api.views.components.CPictureSelector;
 import tech.derbent.api.views.components.CVerticalLayout;
-import tech.derbent.screens.domain.CDetailLines;
-import tech.derbent.screens.service.CEntityFieldService;
-import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.screens.domain.CDetailLines;
+import tech.derbent.api.screens.service.CEntityFieldService;
+import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 
 @org.springframework.stereotype.Component
 public final class CFormBuilder<EntityClass> implements ApplicationContextAware {

@@ -22,7 +22,7 @@ import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.session.service.ISessionService;
+import tech.derbent.base.session.service.ISessionService;
 
 /** CAbstractService - Abstract base service class for entity operations. Layer: Service (MVC) Provides common CRUD operations and lazy loading
  * support for all entity types. */

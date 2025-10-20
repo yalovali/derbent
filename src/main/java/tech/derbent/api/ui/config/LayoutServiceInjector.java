@@ -5,8 +5,8 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.stereotype.Component;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CAbstractNamedEntityPage;
-import tech.derbent.page.view.CPageGenericEntity;
-import tech.derbent.session.service.CLayoutService;
+import tech.derbent.app.page.view.CPageGenericEntity;
+import tech.derbent.base.session.service.CLayoutService;
 
 /** BeanPostProcessor that automatically injects LayoutService into all CAbstractNamedEntityPage and CPageGenericEntity instances. This ensures that
  * all views that extend these base classes can respond to layout changes. */

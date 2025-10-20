@@ -6,7 +6,7 @@ import com.vaadin.flow.component.icon.Icon;
 import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.utils.CColorUtils;
-import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 
 public class CDialogClone<EntityClass extends CEntityDB<EntityClass>> extends CDBEditDialog<EntityClass> {
 

@@ -16,12 +16,12 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.PermitAll;
-import tech.derbent.activities.service.CActivityService;
 import tech.derbent.api.ui.component.CDashboardStatCard;
 import tech.derbent.api.views.CAbstractPage;
-import tech.derbent.projects.domain.CProject;
-import tech.derbent.projects.service.CProjectService;
-import tech.derbent.users.service.CUserService;
+import tech.derbent.app.activities.service.CActivityService;
+import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.projects.service.CProjectService;
+import tech.derbent.base.users.service.CUserService;
 
 /** CDashboardView - System summary dashboard that serves as the default landing page. Layer: View (MVC) Displays key system metrics including total
  * projects, users per project, and activities per project. This view responds to the default route ("") and provides an overview of the application

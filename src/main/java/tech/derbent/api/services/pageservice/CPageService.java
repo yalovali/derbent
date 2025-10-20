@@ -3,7 +3,7 @@ package tech.derbent.api.services.pageservice;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.utils.Check;
-import tech.derbent.page.view.CDynamicPageBase;
+import tech.derbent.app.page.view.CDynamicPageBase;
 
 public abstract class CPageService<EntityClass extends CEntityDB<EntityClass>> {
 

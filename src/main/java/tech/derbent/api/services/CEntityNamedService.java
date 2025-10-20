@@ -7,7 +7,7 @@ import java.util.function.Function;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.utils.Check;
-import tech.derbent.session.service.ISessionService;
+import tech.derbent.base.session.service.ISessionService;
 
 /** CAbstractNamedEntityService - Abstract service class for entities that extend CEntityNamed. Layer: Service (MVC) Provides common business logic
  * operations for named entities including validation, creation, and name-based queries with consistent error handling and logging. */

@@ -15,7 +15,7 @@ import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.ui.dialogs.CConfirmationDialog;
 import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.api.utils.Check;
-import tech.derbent.session.service.ISessionService;
+import tech.derbent.base.session.service.ISessionService;
 
 /** Generic base class for relationship panel components. This class provides common functionality for managing bidirectional entity relationships
  * (e.g., User-Project, User-Company) in both directions. It eliminates code duplication between similar relationship management patterns.

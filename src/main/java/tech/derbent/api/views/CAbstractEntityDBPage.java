@@ -45,8 +45,8 @@ import tech.derbent.api.views.dialogs.CDialogClone;
 import tech.derbent.api.views.grids.CGrid;
 import tech.derbent.api.views.grids.CMasterViewSectionBase;
 import tech.derbent.api.views.grids.CMasterViewSectionGrid;
-import tech.derbent.session.service.CLayoutService;
-import tech.derbent.session.service.ISessionService;
+import tech.derbent.base.session.service.CLayoutService;
+import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<EntityClass>> extends CAbstractPage
 		implements ILayoutChangeListener, IContentOwner {

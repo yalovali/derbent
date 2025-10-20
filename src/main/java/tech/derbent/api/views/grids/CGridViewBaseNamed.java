@@ -3,8 +3,8 @@ package tech.derbent.api.views.grids;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.services.CEntityNamedService;
 import tech.derbent.api.views.CAbstractNamedEntityPage;
-import tech.derbent.screens.service.CDetailSectionService;
-import tech.derbent.session.service.ISessionService;
+import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CGridViewBaseNamed<EntityClass extends CEntityNamed<EntityClass>> extends CAbstractNamedEntityPage<EntityClass> {
 

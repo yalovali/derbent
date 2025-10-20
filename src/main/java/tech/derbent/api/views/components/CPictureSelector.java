@@ -19,7 +19,7 @@ import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.ui.notifications.CNotifications;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CImageUtils;
-import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 
 /** Custom picture selector component that handles byte[] image data fields. Provides functionality to display, upload, and delete image data. This
  * component is reusable and can be used anywhere in forms for byte[] fields marked with ImageData=true. Supports two modes: - Full mode (default):

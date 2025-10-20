@@ -93,7 +93,7 @@ The `CSessionService` (reset-db profile) stores user state in instance fields:
 @Service
 public class CSessionService implements ISessionService {
     // ⚠️ CAUTION: Instance fields storing user state
-    private tech.derbent.companies.domain.CCompany activeCompany;
+    private tech.derbent.app.companies.domain.CCompany activeCompany;
     private CProject activeProject;
     private CUser activeUser;
     

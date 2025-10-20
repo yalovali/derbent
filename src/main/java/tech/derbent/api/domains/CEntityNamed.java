@@ -9,7 +9,7 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.utils.Check;
-import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 
 @MappedSuperclass
 public abstract class CEntityNamed<EntityClass> extends CEntityDB<EntityClass> {

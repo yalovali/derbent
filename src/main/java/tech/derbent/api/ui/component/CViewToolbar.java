@@ -38,15 +38,15 @@ import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.CAbstractNamedEntityPage;
 import tech.derbent.api.views.components.CButton;
 import tech.derbent.api.views.components.CDiv;
-import tech.derbent.gannt.view.CProjectGanntView;
-import tech.derbent.page.domain.CPageEntity;
-import tech.derbent.page.service.CPageMenuIntegrationService;
-import tech.derbent.projects.domain.CProject;
-import tech.derbent.screens.view.CDetailSectionView;
-import tech.derbent.session.service.CLayoutService;
-import tech.derbent.session.service.ISessionService;
-import tech.derbent.setup.service.CSystemSettingsService;
-import tech.derbent.users.domain.CUser;
+import tech.derbent.app.gannt.view.CProjectGanntView;
+import tech.derbent.app.page.domain.CPageEntity;
+import tech.derbent.app.page.service.CPageMenuIntegrationService;
+import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.screens.view.CDetailSectionView;
+import tech.derbent.base.session.service.CLayoutService;
+import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.base.setup.service.CSystemSettingsService;
+import tech.derbent.base.users.domain.CUser;
 
 /* CViewToolbar.java This class defines a toolbar for views in the application, providing a consistent header with a title and optional action
  * components. It extends Composite to allow for easy composition of the toolbar's content. */

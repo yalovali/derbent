@@ -10,9 +10,9 @@ import tech.derbent.api.services.CEntityNamedService;
 import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CVerticalLayout;
-import tech.derbent.projects.domain.CProject;
-import tech.derbent.screens.service.CDetailSectionService;
-import tech.derbent.session.service.ISessionService;
+import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.base.session.service.ISessionService;
 
 /** Abstract project-aware MD page that filters entities by the currently active project. Implements CProjectChangeListener to receive immediate
  * notifications when the active project changes. */

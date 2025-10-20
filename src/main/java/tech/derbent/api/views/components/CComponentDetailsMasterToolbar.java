@@ -8,10 +8,10 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import tech.derbent.api.ui.notifications.CNotifications;
 import tech.derbent.api.utils.Check;
-import tech.derbent.screens.domain.CGridEntity;
-import tech.derbent.screens.service.CGridEntityService;
-import tech.derbent.screens.view.CComponentGridEntity;
-import tech.derbent.screens.view.CFieldSelectionDialog;
+import tech.derbent.api.screens.domain.CGridEntity;
+import tech.derbent.api.screens.service.CGridEntityService;
+import tech.derbent.api.screens.view.CComponentGridEntity;
+import tech.derbent.api.screens.view.CFieldSelectionDialog;
 
 public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 

@@ -16,8 +16,8 @@ import tech.derbent.api.interfaces.IKanbanService;
 import tech.derbent.api.interfaces.IKanbanStatus;
 import tech.derbent.api.interfaces.IProjectChangeListener;
 import tech.derbent.api.utils.Check;
-import tech.derbent.projects.domain.CProject;
-import tech.derbent.session.service.ISessionService;
+import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.base.session.service.ISessionService;
 
 /** CBaseKanbanBoardView - Abstract base class for Kanban board views. Layer: Base View (MVC) Provides common functionality for any kanban board
  * implementation. Handles project awareness, layout setup, and basic kanban operations.

@@ -16,7 +16,7 @@ echo ""
 
 echo "🚀 Working Commands:"
 echo "   # Database reset using DbResetApplication:"
-echo "   mvn spring-boot:run -Dspring-boot.run.main-class=tech.derbent.DbResetApplication -Dspring-boot.run.profiles=reset-db"
+echo "   mvn spring-boot:run -Dspring-boot.run.main-class=tech.derbent.api.dbResetApplication -Dspring-boot.run.profiles=reset-db"
 echo ""
 echo "   # Alternative using maven profile:"
 echo "   mvn -Preset-db spring-boot:run"

@@ -12,9 +12,9 @@ import tech.derbent.api.domains.CEntityOfProject;
 import tech.derbent.api.interfaces.ISearchable;
 import tech.derbent.api.utils.CPageableUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.projects.domain.CProject;
-import tech.derbent.session.service.ISessionService;
-import tech.derbent.users.domain.CUser;
+import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.base.users.domain.CUser;
 
 public abstract class CEntityOfProjectService<EntityClass extends CEntityOfProject<EntityClass>> extends CEntityNamedService<EntityClass> {
 

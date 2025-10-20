@@ -2,7 +2,7 @@ package tech.derbent.api.services;
 
 import java.time.Clock;
 import tech.derbent.api.domains.CTypeEntity;
-import tech.derbent.session.service.ISessionService;
+import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CTypeEntityService<EntityClass extends CTypeEntity<EntityClass>> extends CEntityOfProjectService<EntityClass> {
 

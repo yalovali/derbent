@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
-import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 
 /** CDataProviderResolver - Service for automatically resolving data providers for ComboBox components based on AMetaData annotations. This service
  * integrates with Spring's application context to find appropriate service beans and call their data retrieval methods.

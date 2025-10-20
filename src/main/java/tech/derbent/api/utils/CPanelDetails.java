@@ -9,8 +9,8 @@ import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.views.components.CAccordion;
 import tech.derbent.api.views.components.CHorizontalLayout;
-import tech.derbent.screens.domain.CDetailLines;
-import tech.derbent.screens.domain.CDetailSection;
+import tech.derbent.api.screens.domain.CDetailLines;
+import tech.derbent.api.screens.domain.CDetailSection;
 
 public class CPanelDetails extends CAccordion {
 

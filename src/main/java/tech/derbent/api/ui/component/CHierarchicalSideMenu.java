@@ -32,9 +32,9 @@ import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CButton;
 import tech.derbent.api.views.components.CDiv;
-import tech.derbent.page.domain.CPageEntity;
-import tech.derbent.page.service.CPageMenuIntegrationService;
-import tech.derbent.page.view.CDynamicPageRouter;
+import tech.derbent.app.page.domain.CPageEntity;
+import tech.derbent.app.page.service.CPageMenuIntegrationService;
+import tech.derbent.app.page.view.CDynamicPageRouter;
 
 /** CHierarchicalSideMenu - A hierarchical side menu component with up to 4 levels of navigation. Layer: View (MVC) Features: - Supports up to 4
  * levels of menu hierarchy - Sliding animations between levels - Back button navigation - Parses menu entries from route annotations in format:

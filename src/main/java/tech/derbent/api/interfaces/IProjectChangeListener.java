@@ -1,6 +1,6 @@
 package tech.derbent.api.interfaces;
 
-import tech.derbent.projects.domain.CProject;
+import tech.derbent.app.projects.domain.CProject;
 
 /** Interface for components that need to be notified when the active project changes. Components implementing this interface will receive immediate
  * notifications when the user selects a different project. */

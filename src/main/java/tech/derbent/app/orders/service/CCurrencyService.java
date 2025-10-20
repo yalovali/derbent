@@ -1,0 +1,35 @@
+package tech.derbent.app.orders.service;
+
+import java.time.Clock;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.services.CEntityOfProjectService;
+import tech.derbent.app.orders.domain.CCurrency;
+import tech.derbent.base.session.service.ISessionService;
+
+/** CCurrencyService - Service layer for CCurrency entity. Layer: Service (MVC) Handles business logic for currency operations including creation,
+ * validation, and management of currency entities with currency code and symbol support. */
+@Service
+@PreAuthorize ("isAuthenticated()")
+@Transactional (readOnly = true)
+public class CCurrencyService extends CEntityOfProjectService<CCurrency> {
+
+	CCurrencyService(final ICurrencyRepository repository, final Clock clock, final ISessionService sessionService) {
+		super(repository, clock, sessionService);
+	}
+
+	@Override
+	protected Class<CCurrency> getEntityClass() { return CCurrency.class; }
+
+	@Override
+	public String checkDeleteAllowed(final CCurrency entity) {
+		return super.checkDeleteAllowed(entity);
+	}
+
+	@Override
+	public void initializeNewEntity(final CCurrency entity) {
+		super.initializeNewEntity(entity);
+		// Additional entity-specific initialization can be added here if needed
+	}
+}

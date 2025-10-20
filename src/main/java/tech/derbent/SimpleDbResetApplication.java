@@ -20,17 +20,17 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 		org.springframework.boot.autoconfigure.websocket.servlet.WebSocketServletAutoConfiguration.class
 }, scanBasePackages = {
 		// Only include essential service packages for database operations
-		"tech.derbent.config",
+		"tech.derbent.api.config",
 		// Core entity services needed for database reset
-		"tech.derbent.activities.service", "tech.derbent.comments.service", "tech.derbent.companies.service", "tech.derbent.decisions.service",
-		"tech.derbent.meetings.service", "tech.derbent.orders.service", "tech.derbent.projects.service", "tech.derbent.risks.service",
-		"tech.derbent.users.service",
+		"tech.derbent.activities.service", "tech.derbent.app.comments.service", "tech.derbent.app.companies.service", "tech.derbent.app.decisions.service",
+		"tech.derbent.app.meetings.service", "tech.derbent.app.orders.service", "tech.derbent.app.projects.service", "tech.derbent.app.risks.service",
+		"tech.derbent.base.users.service",
 		// Additional services that might be needed by CDataInitializer
-		"tech.derbent.page.service", "tech.derbent.screens.service", "tech.derbent.gannt.service", "tech.derbent.administration.service",
-		"tech.derbent.setup.service",
+		"tech.derbent.app.page.service", "tech.derbent.api.screens.service", "tech.derbent.app.gannt.service", "tech.derbent.administration.service",
+		"tech.derbent.base.setup.service",
 		// Session service is needed by activity priority service
-		"tech.derbent.session.service"
-		// Explicitly exclude: tech.derbent.login, tech.derbent.api.ui, tech.derbent.api.services
+		"tech.derbent.base.session.service"
+		// Explicitly exclude: tech.derbent.base.login, tech.derbent.api.ui, tech.derbent.api.services
 })
 @EntityScan ("tech.derbent")
 @EnableJpaRepositories ("tech.derbent")

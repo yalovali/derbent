@@ -3,8 +3,8 @@ package tech.derbent.api.interfaces;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.derbent.screens.service.CEntityFieldService;
-import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.screens.service.CEntityFieldService;
+import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 
 public interface IFieldInfoGenerator {
 

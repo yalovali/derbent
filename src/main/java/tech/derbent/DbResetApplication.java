@@ -9,13 +9,13 @@ import org.springframework.boot.SpringApplication;
 // ./mvnw clean compile spring-boot:run -Preset-db
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
-import tech.derbent.config.CDataInitializer;
-import tech.derbent.session.service.ISessionService;
+import tech.derbent.api.config.CDataInitializer;
+import tech.derbent.base.session.service.ISessionService;
 
 @SpringBootApplication (scanBasePackages = {
-		"tech.derbent.abstracts", "tech.derbent.activities", "tech.derbent.comments", "tech.derbent.companies", "tech.derbent.decisions",
-		"tech.derbent.gannt", "tech.derbent.meetings", "tech.derbent.orders", "tech.derbent.page", "tech.derbent.projects", "tech.derbent.risks",
-		"tech.derbent.screens", "tech.derbent.users", "tech.derbent.config", "tech.derbent.session"
+		"tech.derbent.abstracts", "tech.derbent.activities", "tech.derbent.app.comments", "tech.derbent.app.companies", "tech.derbent.app.decisions",
+		"tech.derbent.app.gannt", "tech.derbent.app.meetings", "tech.derbent.app.orders", "tech.derbent.app.page", "tech.derbent.app.projects", "tech.derbent.app.risks",
+		"tech.derbent.api.screens", "tech.derbent.base.users", "tech.derbent.api.config", "tech.derbent.session"
 })
 public class DbResetApplication {
 

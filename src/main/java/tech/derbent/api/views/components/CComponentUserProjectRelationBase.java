@@ -7,12 +7,12 @@ import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
-import tech.derbent.companies.service.CCompanyService;
-import tech.derbent.projects.service.CProjectService;
-import tech.derbent.session.service.ISessionService;
-import tech.derbent.users.domain.CUser;
-import tech.derbent.users.domain.CUserProjectSettings;
-import tech.derbent.users.service.CUserProjectSettingsService;
+import tech.derbent.app.companies.service.CCompanyService;
+import tech.derbent.app.projects.service.CProjectService;
+import tech.derbent.base.session.service.ISessionService;
+import tech.derbent.base.users.domain.CUser;
+import tech.derbent.base.users.domain.CUserProjectSettings;
+import tech.derbent.base.users.service.CUserProjectSettingsService;
 
 /** Generic base class for User-Project relationship components. This class provides common functionality for both User->Project and Project->User
  * relationship components, reducing code duplication while maintaining flexibility for specific implementations.

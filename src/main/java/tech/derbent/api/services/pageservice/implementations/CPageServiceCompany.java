@@ -2,10 +2,10 @@ package tech.derbent.api.services.pageservice.implementations;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.utils.Check;
-import tech.derbent.companies.domain.CCompany;
-import tech.derbent.page.view.CDynamicPageBase;
+import tech.derbent.app.page.view.CDynamicPageBase;
 
 public class CPageServiceCompany extends CPageServiceDynamicPage<CCompany> {
 

@@ -3,7 +3,7 @@ package tech.derbent.api.views.grids;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.views.CAbstractEntityDBPage;
-import tech.derbent.session.service.ISessionService;
+import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CGridViewBaseDBEntity<EntityClass extends CEntityDB<EntityClass>> extends CAbstractEntityDBPage<EntityClass> {
 

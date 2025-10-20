@@ -4,8 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.derbent.api.services.pageservice.CPageServiceDynamicPage;
 import tech.derbent.api.utils.Check;
-import tech.derbent.orders.domain.COrderStatus;
-import tech.derbent.page.view.CDynamicPageBase;
+import tech.derbent.app.orders.domain.COrderStatus;
+import tech.derbent.app.page.view.CDynamicPageBase;
 
 public class CPageServiceOrderStatus extends CPageServiceDynamicPage<COrderStatus> {
 

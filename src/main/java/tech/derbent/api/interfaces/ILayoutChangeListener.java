@@ -1,6 +1,6 @@
 package tech.derbent.api.interfaces;
 
-import tech.derbent.session.service.CLayoutService.LayoutMode;
+import tech.derbent.base.session.service.CLayoutService.LayoutMode;
 
 /** Interface for components that want to be notified when the layout mode changes between horizontal and vertical orientations. */
 public interface ILayoutChangeListener {

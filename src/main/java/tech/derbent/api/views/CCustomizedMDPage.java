@@ -6,7 +6,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.services.CAbstractService;
-import tech.derbent.session.service.ISessionService;
+import tech.derbent.base.session.service.ISessionService;
 
 /** Example implementation showing how to customize the details view tab while maintaining consistent button placement and styling. */
 public abstract class CCustomizedMDPage<EntityClass extends CEntityDB<EntityClass>> extends CAbstractEntityDBPage<EntityClass> {

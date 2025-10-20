@@ -7,7 +7,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.users.domain.CUser;
+import tech.derbent.base.users.domain.CUser;
 
 /** CEvent - Abstract base class for event-based entities in the system. Layer: Domain (MVC) Provides common fields and functionality for event-like
  * entities such as: - Comments - Notifications - Activity logs - Status changes This class extends CEntityOfProject to maintain project context for

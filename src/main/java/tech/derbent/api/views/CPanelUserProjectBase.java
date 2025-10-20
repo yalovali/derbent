@@ -15,10 +15,10 @@ import tech.derbent.api.ui.dialogs.CWarningDialog;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CButton;
-import tech.derbent.projects.domain.CProject;
-import tech.derbent.users.domain.CUser;
-import tech.derbent.users.domain.CUserProjectSettings;
-import tech.derbent.users.service.CUserProjectSettingsService;
+import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.base.users.domain.CUser;
+import tech.derbent.base.users.domain.CUserProjectSettings;
+import tech.derbent.base.users.service.CUserProjectSettingsService;
 
 /** Base class for managing user-project relationships in both directions. This class provides common functionality for both user->project and
  * project->user panels. */

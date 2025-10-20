@@ -3,7 +3,7 @@ package tech.derbent.api.domains;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.projects.domain.CProject;
+import tech.derbent.app.projects.domain.CProject;
 
 @MappedSuperclass
 public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityClass> {

@@ -20,7 +20,7 @@ import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.domains.CStatus;
 import tech.derbent.api.domains.CTypeEntity;
 import tech.derbent.api.views.CAbstractNamedEntityPage;
-import tech.derbent.users.domain.CUser;
+import tech.derbent.base.users.domain.CUser;
 
 public final class CColorUtils {
 

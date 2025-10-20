@@ -3,8 +3,8 @@ package tech.derbent.api.views.grids;
 import tech.derbent.api.domains.CEntityOfProject;
 import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.api.views.CProjectAwareMDPage;
-import tech.derbent.screens.service.CDetailSectionService;
-import tech.derbent.session.service.ISessionService;
+import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CGridViewBaseProject<EntityClass extends CEntityOfProject<EntityClass>> extends CProjectAwareMDPage<EntityClass> {
 

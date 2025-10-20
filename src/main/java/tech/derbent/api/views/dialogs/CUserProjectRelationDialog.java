@@ -3,10 +3,10 @@ package tech.derbent.api.views.dialogs;
 import java.util.function.Consumer;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
-import tech.derbent.projects.service.CProjectService;
-import tech.derbent.users.domain.CUserProjectSettings;
-import tech.derbent.users.service.CUserProjectSettingsService;
-import tech.derbent.users.service.CUserService;
+import tech.derbent.app.projects.service.CProjectService;
+import tech.derbent.base.users.domain.CUserProjectSettings;
+import tech.derbent.base.users.service.CUserProjectSettingsService;
+import tech.derbent.base.users.service.CUserService;
 
 /** Generic base class for User-Project relationship dialogs. This class provides common functionality for both User->Project and Project->User
  * relationship dialogs, reducing code duplication while maintaining flexibility for specific implementations.

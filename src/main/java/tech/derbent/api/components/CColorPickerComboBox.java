@@ -12,7 +12,7 @@ import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.views.components.CDiv;
 import tech.derbent.api.views.components.CHorizontalLayout;
-import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 
 /** Custom color picker component that properly implements HasValueAndElement */
 public class CColorPickerComboBox extends Composite<CHorizontalLayout>

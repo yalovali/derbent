@@ -19,7 +19,7 @@ import com.vaadin.flow.server.streams.UploadMetadata;
 import tech.derbent.api.ui.notifications.CNotifications;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CImageUtils;
-import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 
 /** Dialog that contains the full picture selector functionality. Used when CPictureSelector is in icon mode and user clicks on the icon. */
 public class CPictureSelectorDialog extends Dialog {

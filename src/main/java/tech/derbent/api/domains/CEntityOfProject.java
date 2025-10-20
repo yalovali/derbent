@@ -7,8 +7,8 @@ import jakarta.persistence.MappedSuperclass;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.projects.domain.CProject;
-import tech.derbent.users.domain.CUser;
+import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.base.users.domain.CUser;
 
 // @FilterDef (name = "byProject", parameters = @ParamDef (name = "projectId", type = Long.class))
 // @Filters (@Filter (name = "byProject", condition = "project_id = :projectId"))

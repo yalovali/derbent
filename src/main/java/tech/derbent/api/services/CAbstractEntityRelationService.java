@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.utils.Check;
-import tech.derbent.session.service.ISessionService;
+import tech.derbent.base.session.service.ISessionService;
 
 /** Abstract service class for managing entity-to-entity relationships. Provides common operations for relationship entities.
  * @param <RelationEntity> The relationship entity type */

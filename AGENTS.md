@@ -8,7 +8,7 @@ The project runs on Maven, Spring Boot, and Vaadin. Shared framework code lives 
 - `./mvnw clean verify` compiles, runs tests, and builds Vaadin assets.
 - `./run-playwright-tests.sh [menu|login|comprehensive|all]` runs headless UI flows with automatic browser management.
 - `./run-playwright-visible-postgres.sh` replays the menu navigation suite against a live PostgreSQL database with a visible browser.
-- `mvn spring-boot:run -Dspring-boot.run.main-class=tech.derbent.DbResetApplication -Dspring-boot.run.profiles=reset-db` repopulates sample data via the reset profile.
+- `mvn spring-boot:run -Dspring-boot.run.main-class=tech.derbent.api.dbResetApplication -Dspring-boot.run.profiles=reset-db` repopulates sample data via the reset profile.
 
 ## Coding Style & Naming Conventions
 Indent Java with four spaces and keep the C-prefix convention (`CProjectView`, `CActivityService`) so custom code is immediately recognizable. Extend the generic base classes in `api/` rather than duplicating logic, and preserve the `domain/` → `service/` → `view/` structure in each module. Maintain `VIEW_NAME` constants and expose deterministic element IDs (`#custom-…`) for Playwright. Run `./mvnw spotless:apply` prior to review to apply the shared Eclipse formatter and Prettier rules.

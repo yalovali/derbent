@@ -9,7 +9,7 @@ import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.component.grid.Grid;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.views.grids.CGrid;
-import tech.derbent.session.service.ISessionService;
+import tech.derbent.base.session.service.ISessionService;
 
 public abstract class CComponentRelationBase<MasterClass extends CEntityDB<MasterClass>, RelationalClass extends CEntityDB<RelationalClass>>
 		extends CComponentDBEntity<MasterClass> {

@@ -1,13 +1,13 @@
 package tech.derbent.api.views.grids;
 
-import tech.derbent.activities.service.CActivityService;
 import tech.derbent.api.domains.CEntityOfProject;
 import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.api.views.CProjectAwareMDPage;
-import tech.derbent.gannt.view.CMasterViewSectionGannt;
-import tech.derbent.meetings.service.CMeetingService;
-import tech.derbent.screens.service.CDetailSectionService;
-import tech.derbent.session.service.ISessionService;
+import tech.derbent.app.activities.service.CActivityService;
+import tech.derbent.app.gannt.view.CMasterViewSectionGannt;
+import tech.derbent.app.meetings.service.CMeetingService;
+import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.base.session.service.ISessionService;
 
 /* display a Gannt chart for any entity of project type */
 public abstract class CGridViewBaseGannt<EntityClass extends CEntityOfProject<EntityClass>> extends CProjectAwareMDPage<EntityClass> {

@@ -5,7 +5,7 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
-import tech.derbent.projects.domain.CProject;
+import tech.derbent.app.projects.domain.CProject;
 
 /** CTypeEntity - Abstract base class for all type entities in the system. Provides common fields for type management including color, sort order, and
  * active status. Layer: Domain (MVC)

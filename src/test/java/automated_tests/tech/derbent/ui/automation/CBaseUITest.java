@@ -27,7 +27,7 @@ import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.PlaywrightException;
 import com.vaadin.flow.router.Route;
 import tech.derbent.api.utils.Check;
-import tech.derbent.projects.domain.CProject;
+import tech.derbent.app.projects.domain.CProject;
 
 /** Enhanced base UI test class that provides common functionality for Playwright tests. This class includes 25+ auxiliary methods for testing all
  * views and business functions. The base class follows strict coding guidelines and provides comprehensive testing utilities for: - Login and
@@ -1547,7 +1547,7 @@ public abstract class CBaseUITest {
 				}
 			}
 			// Fallback: try direct navigation using navigateToFirstPage
-			return navigateToFirstPage(null, tech.derbent.users.domain.CUser.class);
+			return navigateToFirstPage(null, tech.derbent.base.users.domain.CUser.class);
 		} catch (Exception e) {
 			LOGGER.error("❌ Failed to test navigation to user page: {}", e.getMessage());
 			return false;
@@ -1582,7 +1582,7 @@ public abstract class CBaseUITest {
 				}
 			}
 			// Fallback: try direct navigation using navigateToFirstPage
-			return navigateToFirstPage(null, tech.derbent.companies.domain.CCompany.class);
+			return navigateToFirstPage(null, tech.derbent.app.companies.domain.CCompany.class);
 		} catch (Exception e) {
 			LOGGER.error("❌ Failed to test navigation to company page: {}", e.getMessage());
 			return false;

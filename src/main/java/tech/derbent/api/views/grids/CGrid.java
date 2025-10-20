@@ -23,8 +23,8 @@ import tech.derbent.api.utils.CImageUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CGridCell;
 import tech.derbent.api.views.components.CPictureSelector;
-import tech.derbent.screens.service.CEntityFieldService;
-import tech.derbent.screens.service.CEntityFieldService.EntityFieldInfo;
+import tech.derbent.api.screens.service.CEntityFieldService;
+import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 
 /** CGrid - Base grid class for consistent field width management based on data types. Layer: View (MVC) Follows the project's coding guidelines by
  * providing a base class for all grids to ensure consistent column widths based on field types: - ID fields: Very small width (80px) - Integer
