@@ -80,6 +80,9 @@ import tech.derbent.app.roles.service.CUserCompanyRoleInitializerService;
 import tech.derbent.app.roles.service.CUserCompanyRoleService;
 import tech.derbent.app.roles.service.CUserProjectRoleInitializerService;
 import tech.derbent.app.roles.service.CUserProjectRoleService;
+import tech.derbent.app.workflow.domain.CWorkflowEntity;
+import tech.derbent.app.workflow.service.CWorkflowEntityInitializerService;
+import tech.derbent.app.workflow.service.CWorkflowEntityService;
 import tech.derbent.app.gannt.service.CGanntViewEntityService;
 import tech.derbent.api.screens.service.CDetailLinesService;
 import tech.derbent.api.screens.service.CDetailSectionService;
@@ -160,6 +163,7 @@ public class CDataInitializer {
 	private final CUserProjectRoleService userProjectRoleService;
 	private final CUserProjectSettingsService userProjectSettingsService;
 	private final CUserService userService;
+	private final CWorkflowEntityService workflowEntityService;
 
 	public CDataInitializer(final ISessionService sessionService) {
 		LOGGER.info("DataInitializer starting - obtaining service beans from application context");
@@ -193,6 +197,7 @@ public class CDataInitializer {
 		riskStatusService = CSpringContext.getBean(CRiskStatusService.class);
 		userProjectRoleService = CSpringContext.getBean(CUserProjectRoleService.class);
 		userCompanyRoleService = CSpringContext.getBean(CUserCompanyRoleService.class);
+		workflowEntityService = CSpringContext.getBean(CWorkflowEntityService.class);
 		Check.notNull(activityService, "ActivityService bean not found");
 		Check.notNull(activityPriorityService, "ActivityPriorityService bean not found");
 		Check.notNull(activityStatusService, "ActivityStatusService bean not found");
@@ -220,6 +225,7 @@ public class CDataInitializer {
 		Check.notNull(userProjectRoleService, "UserProjectRoleService bean not found");
 		Check.notNull(userCompanyRoleService, "UserCompanyRoleService bean not found");
 		Check.notNull(userProjectSettingsService, "UserProjectSettingsService bean not found");
+		Check.notNull(workflowEntityService, "WorkflowEntityService bean not found");
 		LOGGER.info("All service beans obtained successfully");
 		final DataSource ds = CSpringContext.getBean(DataSource.class);
 		jdbcTemplate = new JdbcTemplate(ds);
@@ -1044,6 +1050,36 @@ public class CDataInitializer {
 		}
 	}
 
+	/** Initialize sample workflow entities to demonstrate workflow management.
+	 * @param project the project to create workflow entities for
+	 * @param minimal whether to create minimal sample data */
+	private void initializeSampleWorkflowEntities(final CProject project, boolean minimal) {
+		try {
+			// Create a basic workflow for activity status transitions
+			final CWorkflowEntity activityWorkflow = new CWorkflowEntity("Activity Status Workflow", project);
+			activityWorkflow.setDescription("Defines status transitions for activities based on user roles");
+			activityWorkflow.setIsActive(true);
+			workflowEntityService.save(activityWorkflow);
+			if (minimal) {
+				return;
+			}
+			// Create workflow for meeting status transitions
+			final CWorkflowEntity meetingWorkflow = new CWorkflowEntity("Meeting Status Workflow", project);
+			meetingWorkflow.setDescription("Defines status transitions for meetings based on user roles");
+			meetingWorkflow.setIsActive(true);
+			workflowEntityService.save(meetingWorkflow);
+			// Create workflow for decision approval process
+			final CWorkflowEntity decisionWorkflow = new CWorkflowEntity("Decision Approval Workflow", project);
+			decisionWorkflow.setDescription("Defines approval workflow for strategic decisions");
+			decisionWorkflow.setIsActive(true);
+			workflowEntityService.save(decisionWorkflow);
+			LOGGER.info("Created sample workflow entities for project: {}", project.getName());
+		} catch (final Exception e) {
+			LOGGER.error("Error initializing sample workflow entities for project: {}", project.getName(), e);
+			throw new RuntimeException("Failed to initialize sample workflow entities for project: " + project.getName(), e);
+		}
+	}
+
 	public boolean isDatabaseEmpty() {
 		final long cnt = userService.count();
 		LOGGER.info("User count = {}", cnt);
@@ -1136,6 +1172,7 @@ public class CDataInitializer {
 					COrderStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					COrderTypeInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CRiskStatusInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
+					CWorkflowEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CGridInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					CPageEntityInitializerService.initialize(project, gridEntityService, screenService, pageEntityService);
 					// TODO: Add similar calls for all other InitializerServices (user types, priorities, etc.)
@@ -1158,6 +1195,7 @@ public class CDataInitializer {
 					initializeSampleCommentPriorities(project, minimal);
 					initializeSampleCurrencies(project, minimal);
 					initializeSampleUserProjectSettings(project, minimal);
+					initializeSampleWorkflowEntities(project, minimal);
 					// Create sample entities (decisions and meetings with comments)
 					initializeSampleDecisions(project, minimal);
 					initializeSampleMeetings(project, minimal);

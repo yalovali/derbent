@@ -42,7 +42,7 @@ public class CComponentDetailsMasterToolbar extends HorizontalLayout {
 		searchField.setValueChangeMode(com.vaadin.flow.data.value.ValueChangeMode.LAZY);
 		searchField.addValueChangeListener(e -> handleSearch(e.getValue()));
 		// Edit Grid Columns Button
-		btnEditGrid = CButton.createPrimary("Edit Columns", VaadinIcon.GRID_V.create(), _ -> handleEditGridEntity());
+		btnEditGrid = CButton.createPrimary("Edit Columns", VaadinIcon.GRID_V.create(), e -> handleEditGridEntity());
 		btnEditGrid.getElement().setAttribute("title", "Edit Grid Columns");
 		add(searchField, btnEditGrid);
 		updateButtonStates();

@@ -52,7 +52,7 @@ public class CPanelDetailLines extends CPanelDetailSectionBase {
 		toolbar.setSpacing(true);
 		final Button addButton = new Button("Add Screen Field Description", VaadinIcon.PLUS.create());
 		addButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		addButton.addClickListener(_ -> {
+		addButton.addClickListener(e -> {
 			try {
 				openAddFieldDialog();
 			} catch (NoSuchMethodException | SecurityException | IllegalAccessException | InvocationTargetException e1) {
@@ -65,13 +65,13 @@ public class CPanelDetailLines extends CPanelDetailSectionBase {
 		});
 		final Button deleteButton = new Button("Delete", VaadinIcon.TRASH.create());
 		deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
-		deleteButton.addClickListener(_ -> deleteSelectedLine());
+		deleteButton.addClickListener(e -> deleteSelectedLine());
 		deleteButton.setEnabled(false);
 		final Button moveUpButton = new Button("Move Up", VaadinIcon.ARROW_UP.create());
-		moveUpButton.addClickListener(_ -> moveLineUp());
+		moveUpButton.addClickListener(e -> moveLineUp());
 		moveUpButton.setEnabled(false);
 		final Button moveDownButton = new Button("Move Down", VaadinIcon.ARROW_DOWN.create());
-		moveDownButton.addClickListener(_ -> moveLineDown());
+		moveDownButton.addClickListener(e -> moveLineDown());
 		moveDownButton.setEnabled(false);
 		// Enable/disable buttons based on selection
 		grid.asSingleSelect().addValueChangeListener(e -> {

@@ -125,7 +125,7 @@ public class CProjectService extends CEntityNamedService<CProject> {
 		final Pageable safePage = CPageableUtils.validateAndFix(pageable);
 		// Apply company filter to the specification
 		CCompany company = getCurrentCompany();
-		Specification<CProject> companySpec = (root, _, criteriaBuilder) -> criteriaBuilder.equal(root.get("company").get("id"), company.getId());
+		Specification<CProject> companySpec = (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("company").get("id"), company.getId());
 		Specification<CProject> combinedSpec = filter != null ? companySpec.and(filter) : companySpec;
 		final Page<CProject> page = repository.findAll(combinedSpec, safePage);
 		return page;

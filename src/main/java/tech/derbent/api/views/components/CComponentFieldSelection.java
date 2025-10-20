@@ -465,7 +465,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			downButton.setEnabled(hasSelection);
 		});
 		// Button actions
-		addButton.addClickListener(_ -> {
+		addButton.addClickListener(e -> {
 			try {
 				addSelectedItem();
 			} catch (Exception ex) {
@@ -473,7 +473,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 				throw new IllegalStateException("Failed to add item", ex);
 			}
 		});
-		removeButton.addClickListener(_ -> {
+		removeButton.addClickListener(e -> {
 			try {
 				removeSelectedItem();
 			} catch (Exception ex) {
@@ -481,7 +481,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 				throw new IllegalStateException("Failed to remove item", ex);
 			}
 		});
-		upButton.addClickListener(_ -> {
+		upButton.addClickListener(e -> {
 			try {
 				moveUp();
 			} catch (Exception ex) {
@@ -489,7 +489,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 				throw new IllegalStateException("Failed to move item up", ex);
 			}
 		});
-		downButton.addClickListener(_ -> {
+		downButton.addClickListener(e -> {
 			try {
 				moveDown();
 			} catch (Exception ex) {

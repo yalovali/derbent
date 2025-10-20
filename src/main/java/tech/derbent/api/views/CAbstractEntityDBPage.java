@@ -119,7 +119,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 	}
 
 	protected CButton createCloneButton(final String buttonText) {
-		final CButton cloneButton = CButton.createCloneButton(buttonText, _ -> {
+		final CButton cloneButton = CButton.createCloneButton(buttonText, e -> {
 			LOGGER.debug("Clone button clicked");
 			try {
 				if (currentEntity == null) {
@@ -288,7 +288,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 			final String term = (currentSearchText == null) ? "" : currentSearchText.trim();
 			// *** TEK KAYNAK: her zaman search'lü metodu kullan ***
 			return entityService.list(pageable, term).stream();
-		}, _ -> {
+		}, e -> {
 			final String term = (currentSearchText == null) ? "" : currentSearchText.trim();
 			final long total = entityService.list(PageRequest.of(0, 1), term).getTotalElements();
 			return (int) Math.min(total, Integer.MAX_VALUE);
@@ -306,7 +306,7 @@ public abstract class CAbstractEntityDBPage<EntityClass extends CEntityDB<Entity
 		// Set new entity supplier
 		crudToolbar.setNewEntitySupplier(this::createNewEntity);
 		// Set refresh callback
-		crudToolbar.setRefreshCallback(_ -> {
+		crudToolbar.setRefreshCallback(e -> {
 			refreshGrid();
 		});
 		// Set save callback with binder validation

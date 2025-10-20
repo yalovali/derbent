@@ -19,8 +19,7 @@ public class CPageServiceUserCompanySetting extends CPageServiceDynamicPage<CUse
 	@Override
 	public void bind() {
 		try {
-			LOGGER.debug("Binding {} to dynamic page for entity {}.", this.getClass().getSimpleName(),
-					CUserCompanySetting.class.getSimpleName());
+			LOGGER.debug("Binding {} to dynamic page for entity {}.", this.getClass().getSimpleName(), CUserCompanySetting.class.getSimpleName());
 			Check.notNull(view, "View must not be null to bind page service.");
 			super.bind();
 		} catch (Exception e) {

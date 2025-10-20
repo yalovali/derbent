@@ -1,3 +1,9 @@
 package tech.derbent.app.workflow.service;
-public interface IWorkflowRepository<EntityClass> extends IProjectItemRepository<EntityClass> {
+
+import org.springframework.data.repository.NoRepositoryBean;
+import tech.derbent.api.services.IEntityOfProjectRepository;
+import tech.derbent.app.workflow.domain.CWorkflowBase;
+
+@NoRepositoryBean
+public interface IWorkflowRepository<EntityClass extends CWorkflowBase<EntityClass>> extends IEntityOfProjectRepository<EntityClass> {
 }

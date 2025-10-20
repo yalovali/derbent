@@ -32,7 +32,7 @@ public class CApprovalStatusInitializerService extends CInitializerServiceBase {
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "description"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "color"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "sortOrder"));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz,"active"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "active"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "project"));
 			detailSection.addScreenLine(CDetailLinesService.createSection("Audit"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(clazz, "createdDate"));

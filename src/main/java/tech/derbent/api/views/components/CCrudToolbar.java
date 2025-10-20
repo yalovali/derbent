@@ -63,10 +63,10 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 	/** Creates all the CRUD toolbar buttons. */
 	private void createToolbarButtons() {
 		// Create (New) Button
-		createButton = CButton.createNewButton("New", _ -> handleCreate());
+		createButton = CButton.createNewButton("New", e -> handleCreate());
 		createButton.getElement().setAttribute("title", "Create new " + entityClass.getSimpleName());
 		// Save (Update) Button
-		saveButton = CButton.createSaveButton("Save", _ -> {
+		saveButton = CButton.createSaveButton("Save", e -> {
 			try {
 				handleSave();
 			} catch (Exception e1) {
@@ -76,10 +76,10 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 		});
 		saveButton.getElement().setAttribute("title", "Save current " + entityClass.getSimpleName());
 		// Delete Button
-		deleteButton = CButton.createDeleteButton("Delete", _ -> handleDelete());
+		deleteButton = CButton.createDeleteButton("Delete", e -> handleDelete());
 		deleteButton.getElement().setAttribute("title", "Delete current " + entityClass.getSimpleName());
 		// Refresh Button
-		refreshButton = CButton.createTertiary("Refresh", VaadinIcon.REFRESH.create(), _ -> handleRefresh());
+		refreshButton = CButton.createTertiary("Refresh", VaadinIcon.REFRESH.create(), e -> handleRefresh());
 		refreshButton.getElement().setAttribute("title", "Refresh data");
 		add(createButton, saveButton, deleteButton, refreshButton);
 		updateButtonStates();

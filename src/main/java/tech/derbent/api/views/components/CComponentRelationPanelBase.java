@@ -133,7 +133,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 	/** Sets up the action buttons (Add, Edit, Delete) with common behavior. */
 	private void setupButtons() {
 		try {
-			addButton = CButton.createPrimary("Add", VaadinIcon.PLUS.create(), _ -> {
+			addButton = CButton.createPrimary("Add", VaadinIcon.PLUS.create(), e -> {
 				try {
 					openAddDialog();
 				} catch (final Exception ex) {
@@ -146,7 +146,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 					}
 				}
 			});
-			editButton = new CButton("Edit", VaadinIcon.EDIT.create(), _ -> {
+			editButton = new CButton("Edit", VaadinIcon.EDIT.create(), e -> {
 				try {
 					openEditDialog();
 				} catch (final Exception ex) {
@@ -155,7 +155,7 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 				}
 			});
 			editButton.setEnabled(false);
-			deleteButton = CButton.createError("Delete", VaadinIcon.TRASH.create(), _ -> {
+			deleteButton = CButton.createError("Delete", VaadinIcon.TRASH.create(), e -> {
 				try {
 					deleteSelected();
 				} catch (final Exception e1) {

@@ -61,11 +61,11 @@ public abstract class CBaseKanbanColumn<T extends IKanbanEntity, S extends IKanb
 		final DragSource<Div> dragSource = DragSource.configure(wrapper);
 		dragSource.setEffectAllowed(EffectAllowed.MOVE);
 		dragSource.setDragData(entity);
-		dragSource.addDragStartListener(_ -> {
+		dragSource.addDragStartListener(e -> {
 			LOGGER.debug("Started dragging entity: {}", entity.getName());
 			wrapper.addClassName("kanban-card-dragging");
 		});
-		dragSource.addDragEndListener(_ -> {
+		dragSource.addDragEndListener(e -> {
 			LOGGER.debug("Finished dragging entity: {}", entity.getName());
 			wrapper.removeClassName("kanban-card-dragging");
 		});

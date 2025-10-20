@@ -66,7 +66,7 @@ public class CActivityCard extends Div {
 		// Add components to card
 		add(titleElement, descriptionElement, statusElement);
 		// Add click listener for potential navigation
-		addClickListener(_ -> {
+		addClickListener(e -> {
 			LOGGER.debug("Activity card clicked for: {}", activity.getName());
 			// Can be extended to navigate to activity details
 		});
@@ -94,12 +94,12 @@ public class CActivityCard extends Div {
 		dragSource.setEffectAllowed(EffectAllowed.MOVE);
 		dragSource.setDragData(activity);
 		// Add drag start listener for visual feedback
-		dragSource.addDragStartListener(_ -> {
+		dragSource.addDragStartListener(e -> {
 			LOGGER.debug("Drag started for activity: {}", activity.getName());
 			addClassName("kanban-card-dragging");
 		});
 		// Add drag end listener to remove visual feedback
-		dragSource.addDragEndListener(_ -> {
+		dragSource.addDragEndListener(e -> {
 			LOGGER.debug("Drag ended for activity: {}", activity.getName());
 			removeClassName("kanban-card-dragging");
 		});
