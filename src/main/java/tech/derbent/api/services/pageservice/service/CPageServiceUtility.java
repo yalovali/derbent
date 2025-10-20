@@ -42,40 +42,16 @@ public class CPageServiceUtility {
 
 	private static final List<String> availablePageServices = List.of(
 			// Main entities
-			"CPageServiceActivity",
-			"CPageServiceComment",
-			"CPageServiceCompany",
-			"CPageServiceDecision",
-			"CPageServiceMeeting",
-			"CPageServiceOrder",
-			"CPageServiceProject",
-			"CPageServiceRisk",
-			"CPageServiceUser",
-			"CPageServiceSystemSettings",
+			"CPageServiceActivity", "CPageServiceComment", "CPageServiceCompany", "CPageServiceDecision", "CPageServiceMeeting", "CPageServiceOrder",
+			"CPageServiceProject", "CPageServiceRisk", "CPageServiceUser", "CPageServiceSystemSettings",
 			// Type/Status entities
-			"CPageServiceActivityPriority",
-			"CPageServiceActivityStatus",
-			"CPageServiceActivityType",
-			"CPageServiceCommentPriority",
-			"CPageServiceDecisionStatus",
-			"CPageServiceDecisionType",
-			"CPageServiceMeetingStatus",
-			"CPageServiceMeetingType",
-			"CPageServiceOrderStatus",
-			"CPageServiceOrderType",
-			"CPageServiceOrderApproval",
-			"CPageServiceApprovalStatus",
-			"CPageServiceCurrency",
-			"CPageServiceRiskStatus",
-			"CPageServiceUserCompanyRole",
-			"CPageServiceUserCompanySetting",
-			"CPageServiceUserProjectRole",
+			"CPageServiceActivityPriority", "CPageServiceActivityStatus", "CPageServiceActivityType", "CPageServiceCommentPriority",
+			"CPageServiceDecisionStatus", "CPageServiceDecisionType", "CPageServiceMeetingStatus", "CPageServiceMeetingType",
+			"CPageServiceOrderStatus", "CPageServiceOrderType", "CPageServiceOrderApproval", "CPageServiceApprovalStatus", "CPageServiceCurrency",
+			"CPageServiceRiskStatus", "CPageServiceUserCompanyRole", "CPageServiceUserCompanySetting", "CPageServiceUserProjectRole",
 			"CPageServiceUserProjectSettings",
 			// System entities
-			"CPageServicePageEntity",
-			"CPageServiceGridEntity"
-	);
-
+			"CPageServicePageEntity", "CPageServiceGridEntity");
 	private static Logger LOGGER = LoggerFactory.getLogger(CPageServiceUtility.class);
 
 	public static Class<?> getPageServiceClassByName(String serviceName) {
@@ -157,7 +133,5 @@ public class CPageServiceUtility {
 		this.viewsService = viewsService;
 	}
 
-	public List<String> getPageServiceList() {
-		return CPageServiceUtility.availablePageServices;
-	}
+	public List<String> getPageServiceList() { return CPageServiceUtility.availablePageServices; }
 }

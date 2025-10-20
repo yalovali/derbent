@@ -23,8 +23,8 @@ public class CPageServicePageEntity extends CPageServiceDynamicPage<CPageEntity>
 			Check.notNull(view, "View must not be null to bind page service.");
 			super.bind();
 		} catch (Exception e) {
-			LOGGER.error("Error binding {} to dynamic page for entity {}: {}", this.getClass().getSimpleName(),
-					CPageEntity.class.getSimpleName(), e.getMessage());
+			LOGGER.error("Error binding {} to dynamic page for entity {}: {}", this.getClass().getSimpleName(), CPageEntity.class.getSimpleName(),
+					e.getMessage());
 			throw e;
 		}
 	}
