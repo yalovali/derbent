@@ -418,7 +418,7 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 		setHeightFull();
 		CAuxillaries.setId(this);
 		// Ensure grid always has a selected row when data is available
-		getDataProvider().addDataProviderListener(_ -> {
+		getDataProvider().addDataProviderListener(e -> {
 			ensureSelectionWhenDataAvailable();
 		});
 	}

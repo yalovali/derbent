@@ -75,7 +75,7 @@ public class Application implements AppShellConfigurator {
 	 * @return ApplicationRunner that handles data initialization */
 	@Bean
 	public ApplicationRunner dataInitializer(final JdbcTemplate jdbcTemplate) {
-		return _ -> {
+		return e -> {
 			try {
 				final Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cuser", Integer.class);
 				// Data initialization is currently disabled (count < 0 condition)
@@ -84,9 +84,9 @@ public class Application implements AppShellConfigurator {
 					jdbcTemplate.execute(sql);
 					LOGGER.info("Initial data loaded successfully");
 				}
-			} catch (final Exception e) {
+			} catch (final Exception ex) {
 				// Table might not exist yet if Hibernate hasn't created it
-				LOGGER.debug("Could not query cuser table - table may not exist yet: {}", e.getMessage());
+				LOGGER.debug("Could not query cuser table - table may not exist yet: {}", ex.getMessage());
 			}
 		};
 	}

@@ -43,7 +43,8 @@ public class CFieldSelectionDialog extends CDBEditDialog<List<FieldSelection>> {
 		componentFieldSelection = new CComponentFieldSelection<>(null, null, null, "Available Fields", "Selected Fields");
 		// Set item label generator for EntityFieldInfo
 		componentFieldSelection.setItemLabelGenerator(item -> {
-			if (item instanceof EntityFieldInfo fieldInfo) {
+			if (item instanceof EntityFieldInfo) {
+				EntityFieldInfo fieldInfo = (EntityFieldInfo) item;
 				return fieldInfo.getDisplayName() + " (" + fieldInfo.getFieldName() + ")";
 			}
 			return item != null ? item.toString() : "N/A";

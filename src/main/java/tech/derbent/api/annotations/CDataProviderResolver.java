@@ -92,7 +92,7 @@ public final class CDataProviderResolver {
 	}
 
 	private Object getBeanFromCache(final String cacheKey, final Supplier<Object> beanSupplier) {
-		return beanCache.computeIfAbsent(cacheKey, _ -> {
+		return beanCache.computeIfAbsent(cacheKey, e -> {
 			final Object bean = beanSupplier.get();
 			if (bean != null) {
 				// LOGGER.debug("Cached bean for key: {}", cacheKey);

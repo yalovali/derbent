@@ -83,11 +83,11 @@ public final class CDashboardStatCard extends Div {
 		// Add hover effect
 		getStyle().set("transition", "all 0.2s ease-in-out");
 		getStyle().set("cursor", "default");
-		getElement().addEventListener("mouseenter", _ -> {
+		getElement().addEventListener("mouseenter", e -> {
 			getStyle().set("transform", "translateY(-2px)");
 			addClassName(BoxShadow.MEDIUM);
 		});
-		getElement().addEventListener("mouseleave", _ -> {
+		getElement().addEventListener("mouseleave", e -> {
 			getStyle().set("transform", "translateY(0)");
 			removeClassName(BoxShadow.MEDIUM);
 		});

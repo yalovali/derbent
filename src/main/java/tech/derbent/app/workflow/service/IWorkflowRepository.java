@@ -1,3 +1,6 @@
 package tech.derbent.app.workflow.service;
-public interface IWorkflowRepository<EntityClass> extends IProjectItemRepository<EntityClass> {
+
+import tech.derbent.api.services.IEntityOfProjectRepository;
+
+public interface IWorkflowRepository<EntityClass> extends IEntityOfProjectRepository<EntityClass> {
 }

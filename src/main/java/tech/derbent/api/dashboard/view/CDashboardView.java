@@ -153,12 +153,12 @@ public final class CDashboardView extends CAbstractPage {
 		card.getStyle().set("box-shadow", "0 2px 4px rgba(0,0,0,0.1)").set("transition", "transform 0.2s ease, box-shadow 0.2s ease")
 				.set("min-height", "150px").set("flex", "1");
 		// Add hover effect
-		card.getElement().addEventListener("mouseenter", _ -> {
+		card.getElement().addEventListener("mouseenter", e -> {
 			if (card.getStyle() != null) {
 				card.getStyle().set("transform", "translateY(-2px)").set("box-shadow", "0 4px 8px rgba(0,0,0,0.15)");
 			}
 		});
-		card.getElement().addEventListener("mouseleave", _ -> {
+		card.getElement().addEventListener("mouseleave", e -> {
 			if (card.getStyle() != null) {
 				card.getStyle().set("transform", "translateY(0)").set("box-shadow", "0 2px 4px rgba(0,0,0,0.1)");
 			}

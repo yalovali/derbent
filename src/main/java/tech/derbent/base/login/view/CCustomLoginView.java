@@ -172,13 +172,13 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		passwordField.setRequiredIndicatorVisible(true);
 		passwordField.setId("custom-password-input");
 		// Add click listener to login button
-		loginButton.addClickListener(_ -> handleLogin());
+		loginButton.addClickListener(e -> handleLogin());
 		// Add enter key listener to password field
-		passwordField.addKeyPressListener(com.vaadin.flow.component.Key.ENTER, _ -> handleLogin());
+		passwordField.addKeyPressListener(com.vaadin.flow.component.Key.ENTER, e -> handleLogin());
 		// Database reset button setup
-		resetDbButton.addClickListener(_ -> {
+		resetDbButton.addClickListener(e -> {
 			final ConfirmDialog dialog = new ConfirmDialog("Onay", "Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?",
-					"Evet, sıfırla", _ -> {
+					"Evet, sıfırla", evt -> {
 						try {
 							final CDataInitializer init = new CDataInitializer(sessionService);
 							init.reloadForced(false); // veya empty check’li bir metod yaz
@@ -190,12 +190,12 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 						} catch (final Exception ex) {
 							Notification.show("Hata: " + ex.getMessage(), 6000, Notification.Position.MIDDLE);
 						}
-					}, "Vazgeç", _ -> {});
+					}, "Vazgeç", evt -> {});
 			dialog.open();
 		});
-		resetDbMinimalButton.addClickListener(_ -> {
+		resetDbMinimalButton.addClickListener(e -> {
 			final ConfirmDialog dialog = new ConfirmDialog("Onay", "Veritabanı SIFIRLANACAK ve örnek veriler yeniden yüklenecek. Devam edilsin mi?",
-					"Evet, sıfırla", _ -> {
+					"Evet, sıfırla", evt -> {
 						try {
 							final CDataInitializer init = new CDataInitializer(sessionService);
 							init.reloadForced(true); // veya empty check’li bir metod yaz
@@ -207,7 +207,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 						} catch (final Exception ex) {
 							Notification.show("Hata: " + ex.getMessage(), 6000, Notification.Position.MIDDLE);
 						}
-					}, "Vazgeç", _ -> {});
+					}, "Vazgeç", evt -> {});
 			dialog.open();
 		});
 		// Error message display

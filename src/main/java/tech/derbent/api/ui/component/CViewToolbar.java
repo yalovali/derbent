@@ -170,14 +170,14 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 		// Add hover effect
 		final String originalColor = iconColor;
 		final String hoverColor = iconColor + "99"; // Add transparency for hover
-		button.getElement().addEventListener("mouseenter", _ -> {
+		button.getElement().addEventListener("mouseenter", e -> {
 			icon.getStyle().set("color", hoverColor);
 		});
-		button.getElement().addEventListener("mouseleave", _ -> {
+		button.getElement().addEventListener("mouseleave", e -> {
 			icon.getStyle().set("color", originalColor);
 		});
 		// Navigate to route
-		button.addClickListener(_ -> {
+		button.addClickListener(e -> {
 			LOGGER.info("{} button clicked, navigating to {}", tooltip, route);
 			UI.getCurrent().navigate(route);
 		});
@@ -224,10 +224,10 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 		homeButton.getElement().setAttribute("title", "Go to Dashboard");
 		homeButton.addClassNames(Margin.NONE);
 		// Add hover effect for better UX
-		homeButton.getElement().addEventListener("mouseenter", _ -> homeIcon.getStyle().set("color", "var(--lumo-primary-color-50pct)"));
-		homeButton.getElement().addEventListener("mouseleave", _ -> homeIcon.getStyle().set("color", "var(--lumo-primary-color)"));
+		homeButton.getElement().addEventListener("mouseenter", e -> homeIcon.getStyle().set("color", "var(--lumo-primary-color-50pct)"));
+		homeButton.getElement().addEventListener("mouseleave", e -> homeIcon.getStyle().set("color", "var(--lumo-primary-color)"));
 		// Handle home button click - navigate to dashboard
-		homeButton.addClickListener(_ -> {
+		homeButton.addClickListener(e -> {
 			LOGGER.info("Home button clicked, navigating to dashboard");
 			com.vaadin.flow.component.UI.getCurrent().navigate("home");
 		});
@@ -242,14 +242,14 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 		lastVisitedButton.getElement().setAttribute("title", "Go to Last Visited Page");
 		lastVisitedButton.addClassNames(Margin.NONE);
 		// Add hover effect
-		lastVisitedButton.getElement().addEventListener("mouseenter", _ -> {
+		lastVisitedButton.getElement().addEventListener("mouseenter", e -> {
 			icon.getStyle().set("color", "#e67e2299");
 		});
-		lastVisitedButton.getElement().addEventListener("mouseleave", _ -> {
+		lastVisitedButton.getElement().addEventListener("mouseleave", e -> {
 			icon.getStyle().set("color", "#e67e22");
 		});
 		// Handle click - navigate to last visited page
-		lastVisitedButton.addClickListener(_ -> {
+		lastVisitedButton.addClickListener(e -> {
 			try {
 				String lastVisitedRoute = getLastVisitedRoute();
 				if (lastVisitedRoute != null && !lastVisitedRoute.trim().isEmpty()) {
@@ -259,8 +259,8 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 					LOGGER.info("No last visited route found, navigating to home");
 					UI.getCurrent().navigate("home");
 				}
-			} catch (Exception e) {
-				LOGGER.error("Error navigating to last visited page: {}", e.getMessage());
+			} catch (Exception ex) {
+				LOGGER.error("Error navigating to last visited page: {}", ex.getMessage());
 				UI.getCurrent().navigate("home");
 			}
 		});
@@ -276,7 +276,7 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 		// Set initial icon based on current layout mode
 		updateLayoutToggleIcon();
 		// Handle layout toggle
-		layoutToggleButton.addClickListener(_ -> {
+		layoutToggleButton.addClickListener(e -> {
 			LOGGER.info("Layout toggle button clicked");
 			Check.notNull(layoutService, "LayoutService is null, cannot toggle layout mode");
 			final CLayoutService.LayoutMode oldMode = layoutService.getCurrentLayoutMode();
@@ -292,14 +292,14 @@ public final class CViewToolbar<EntityClass extends CAbstractNamedEntityPage<?>>
 				try {
 					ui.get().push();
 					LOGGER.debug("UI push successful after layout toggle");
-				} catch (final IllegalStateException e) {
-					if (e.getMessage() != null && e.getMessage().contains("Push not enabled")) {
+				} catch (final IllegalStateException ex) {
+					if (ex.getMessage() != null && ex.getMessage().contains("Push not enabled")) {
 						LOGGER.debug("Push not enabled, layout change will be reflected on next user interaction");
 					} else {
-						LOGGER.warn("Error during UI push in toolbar: {}", e.getMessage());
+						LOGGER.warn("Error during UI push in toolbar: {}", ex.getMessage());
 					}
-				} catch (final Exception e) {
-					LOGGER.warn("Error during UI push in toolbar: {}", e.getMessage());
+				} catch (final Exception ex) {
+					LOGGER.warn("Error during UI push in toolbar: {}", ex.getMessage());
 				}
 			});
 		});
