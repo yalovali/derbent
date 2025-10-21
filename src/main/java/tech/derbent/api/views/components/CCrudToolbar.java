@@ -176,6 +176,12 @@ public class CCrudToolbar<EntityClass extends CEntityDB<EntityClass>> extends Ho
 				showErrorNotification("Cannot save: No entity selected.");
 				return;
 			}
+			// Check if save is allowed (validation)
+			final String saveError = entityService.checkSaveAllowed(currentEntity);
+			if (saveError != null) {
+				showErrorNotification(saveError);
+				return;
+			}
 			// Use custom save callback if provided (for integration with binder validation)
 			if (saveCallback != null) {
 				saveCallback.accept(currentEntity);
