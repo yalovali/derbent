@@ -44,6 +44,12 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 			setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CUserProjectRoleService", useGridSelection = true
 	)
 	private List<CUserProjectRole> roles = new ArrayList<>();
+	// transient field to indicate if this is a start status relation
+	@AMetaData (
+			displayName = "Is Start Status", required = false, readOnly = true,
+			description = "Indicates if this relation represents a start status transition", hidden = true, order = 5
+	)
+	private Boolean startStatus;
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "to_status_id", nullable = false)
 	@AMetaData (
@@ -66,6 +72,8 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 	public CActivityStatus getFromStatus() { return fromStatus; }
 
 	public List<CUserProjectRole> getRoles() { return roles; }
+
+	public Boolean getStartStatus() { return startStatus; }
 
 	public CActivityStatus getToStatus() { return toStatus; }
 
@@ -91,6 +99,8 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 	public void setFromStatus(final CActivityStatus fromStatus) { this.fromStatus = fromStatus; }
 
 	public void setRoles(final List<CUserProjectRole> roles) { this.roles = roles != null ? roles : new ArrayList<>(); }
+
+	public void setStartStatus(Boolean startStatus) { this.startStatus = startStatus; }
 
 	public void setToStatus(final CActivityStatus toStatus) { this.toStatus = toStatus; }
 

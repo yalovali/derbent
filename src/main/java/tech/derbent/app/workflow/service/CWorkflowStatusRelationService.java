@@ -57,6 +57,21 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 	}
 
 	@Override
+	public String checkSaveAllowed(final CWorkflowStatusRelation entity) {
+		String result = super.checkSaveAllowed(entity);
+		if (result != null) {
+			return result;
+		}
+		// Additional checks can be added here if needed
+		if (entity.getFromStatus() == entity.getToStatus()) {
+			String string =
+					"From status and To status cannot be the same. " + entity.getFromStatus().getName() + " -> " + entity.getToStatus().getName();
+			return string;
+		}
+		return null;
+	}
+
+	@Override
 	protected CWorkflowStatusRelation createRelationshipInstance(final Long workflowId, final Long statusId) {
 		// Note: In a real implementation, you would fetch the actual entities from their
 		// services This method should not be used directly - instead use the service

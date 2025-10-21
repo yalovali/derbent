@@ -99,6 +99,12 @@ public abstract class CAbstractService<EntityClass extends CEntityDB<EntityClass
 		return null;
 	}
 
+	public String checkSaveAllowed(final EntityClass entity) {
+		Check.notNull(entity, "Entity cannot be null");
+		Check.notNull(entity.getId(), "Entity ID cannot be null");
+		return null;
+	}
+
 	public long count() {
 		// LOGGER.debug("Counting entities in {}", getClass().getSimpleName());
 		return repository.count();
