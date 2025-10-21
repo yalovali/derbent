@@ -184,5 +184,16 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 			editButton.setEnabled(hasSelection);
 			deleteButton.setEnabled(hasSelection);
 		});
+		// Add double-click listener to open edit dialog
+		grid.addItemDoubleClickListener(e -> {
+			if (e.getItem() != null) {
+				try {
+					openEditDialog();
+				} catch (final Exception ex) {
+					LOGGER.error("Error opening edit dialog on double-click: {}", ex.getMessage(), ex);
+					new CWarningDialog("Failed to open edit dialog: " + ex.getMessage()).open();
+				}
+			}
+		});
 	}
 }
