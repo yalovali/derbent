@@ -129,6 +129,55 @@ When making UI or business logic changes, ALWAYS manually test these workflows:
 4. Test time tracking functionality
 5. Verify all changes persist
 
+#### 5. Screenshot Documentation for UI Changes
+**CRITICAL: For ALL UI-related changes, ALWAYS provide screenshot evidence in PRs:**
+
+**Using Playwright Browser Automation:**
+```bash
+# The application provides Playwright browser integration for testing
+# This approach is PREFERRED for consistent, reproducible screenshots
+
+# 1. Start the application with H2 database (async mode recommended)
+mvn spring-boot:run -Dspring.profiles.active=h2 &
+APP_PID=$!
+
+# 2. Wait for application startup (12-15 seconds)
+sleep 20
+
+# 3. Use playwright-browser tools to capture screenshots
+# - Navigate to the page: playwright-browser_navigate(url)
+# - Take snapshots: playwright-browser_snapshot()
+# - Interact with elements: playwright-browser_click(), playwright-browser_fill_form()
+# - Capture screenshots: playwright-browser_take_screenshot(filename)
+
+# 4. Example workflow for testing delete prevention:
+#    a. Navigate to login page
+#    b. Click "DB Minimal" button to load sample data
+#    c. Login with admin/test123
+#    d. Navigate to the entity management page
+#    e. Try to delete an entity that should be protected
+#    f. Capture screenshot showing the error message
+#    g. Save screenshot with descriptive name: "delete-status-error.png"
+
+# 5. Stop the application when done
+kill $APP_PID
+```
+
+**Screenshot Best Practices:**
+- **Capture at key moments**: Before action, during action, after action (showing result)
+- **Use descriptive filenames**: `feature-state-description.png` (e.g., `delete-status-error.png`)
+- **Show error messages**: Always capture screenshots of validation/error messages
+- **Document workflows**: Capture each step of multi-step operations
+- **Include in PR**: Embed screenshots in PR description using markdown image syntax
+- **Verify screenshots**: Review captured images to ensure they show relevant content
+
+**When to Capture Screenshots:**
+1. **Error Messages**: Always capture validation errors, delete restrictions, save failures
+2. **New Features**: Show the feature in action with sample data
+3. **UI Changes**: Before/after screenshots showing the visual changes
+4. **Workflow Changes**: Step-by-step screenshots of the entire workflow
+5. **Bug Fixes**: Screenshot showing the bug is fixed
+
 ## Build Configuration and Timing
 
 ### Maven Build Phases and Expected Times:

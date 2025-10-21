@@ -1,7 +1,9 @@
 package tech.derbent.app.activities.service;
 
 import java.time.Clock;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.derbent.api.services.CStatusService;
 import tech.derbent.app.activities.domain.CActivityStatus;
 import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.workflow.domain.CWorkflowStatusRelation;
+import tech.derbent.app.workflow.service.IWorkflowStatusRelationRepository;
 import tech.derbent.base.session.service.ISessionService;
 
 /** CActivityStatusService - Service class for managing CActivityStatus entities. Layer: Service (MVC) Provides business logic for activity status
@@ -21,16 +25,19 @@ public class CActivityStatusService extends CStatusService<CActivityStatus> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CActivityStatusService.class);
 	@Autowired
 	private final IActivityRepository activityRepository;
+	@Autowired
+	private final IWorkflowStatusRelationRepository workflowStatusRelationRepository;
 
 	@Autowired
 	public CActivityStatusService(final IActivityStatusRepository repository, final Clock clock, final ISessionService sessionService,
-			final IActivityRepository activityRepository) {
+			final IActivityRepository activityRepository, final IWorkflowStatusRelationRepository workflowStatusRelationRepository) {
 		super(repository, clock, sessionService);
 		this.activityRepository = activityRepository;
+		this.workflowStatusRelationRepository = workflowStatusRelationRepository;
 	}
 
-	/** Checks dependencies before allowing activity status deletion. Prevents deletion if the status is being used by any activities. Always calls
-	 * super.checkDeleteAllowed() first to ensure all parent-level checks (null validation, non-deletable flag) are performed.
+	/** Checks dependencies before allowing activity status deletion. Prevents deletion if the status is being used by any activities or workflows.
+	 * Always calls super.checkDeleteAllowed() first to ensure all parent-level checks (null validation, non-deletable flag) are performed.
 	 * @param entity the activity status entity to check
 	 * @return null if status can be deleted, error message otherwise */
 	@Override
@@ -44,6 +51,23 @@ public class CActivityStatusService extends CStatusService<CActivityStatus> {
 			final long usageCount = activityRepository.countByActivityStatus(entity);
 			if (usageCount > 0) {
 				return String.format("Cannot delete. It is being used by %d activit%s.", usageCount, usageCount == 1 ? "y" : "ies");
+			}
+			// Check if the status is used in any workflows
+			final List<CWorkflowStatusRelation> fromStatusRelations = workflowStatusRelationRepository.findByFromStatusId(entity.getId());
+			final List<CWorkflowStatusRelation> toStatusRelations = workflowStatusRelationRepository.findByToStatusId(entity.getId());
+			if (!fromStatusRelations.isEmpty() || !toStatusRelations.isEmpty()) {
+				// Collect unique workflow names
+				final List<String> workflowNames =
+						fromStatusRelations.stream().map(r -> r.getWorkflow().getName()).distinct().collect(Collectors.toList());
+				final List<String> toWorkflowNames =
+						toStatusRelations.stream().map(r -> r.getWorkflow().getName()).distinct().collect(Collectors.toList());
+				workflowNames.addAll(toWorkflowNames);
+				final List<String> uniqueWorkflowNames = workflowNames.stream().distinct().collect(Collectors.toList());
+				if (uniqueWorkflowNames.size() == 1) {
+					return String.format("Cannot delete. This status is used in workflow: %s.", uniqueWorkflowNames.get(0));
+				} else {
+					return String.format("Cannot delete. This status is used in workflows: %s.", String.join(", ", uniqueWorkflowNames));
+				}
 			}
 			return null; // Status can be deleted
 		} catch (final Exception e) {
