@@ -111,11 +111,58 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 	@Override
 	protected abstract void setupDataAccessors();
 
+	/** Sets up the grid with enhanced visual styling including colors, icons and consistent headers. Uses entity decorations with colors and icons
+	 * for better visual representation of workflow status transitions. */
 	@Override
 	protected void setupGrid(final Grid<CWorkflowStatusRelation> grid) {
 		try {
 			super.setupGrid(grid);
-			LOGGER.debug("Setting up grid for User-Project relationship component.");
+			LOGGER.debug("Setting up grid for Workflow Status Relation component.");
+			// Add workflow column if workflow is not the master entity (only show in status-centric view)
+			if (!isWorkflowMaster()) {
+				grid.addComponentColumn(relation -> {
+					try {
+						return CColorUtils.getEntityWithIcon(relation.getWorkflow());
+					} catch (Exception e) {
+						LOGGER.error("Failed to create workflow component.");
+						return new com.vaadin.flow.component.html.Span(getDisplayText(relation, "workflow"));
+					}
+				}).setHeader(CColorUtils.createStyledHeader("Workflow", "#2E7D32")).setAutoWidth(true).setSortable(true);
+			}
+			// Add From Status column with color and icon
+			grid.addComponentColumn(relation -> {
+				try {
+					return CColorUtils.getEntityWithIcon(relation.getFromStatus());
+				} catch (Exception e) {
+					LOGGER.error("Failed to create from status component.");
+					return new com.vaadin.flow.component.html.Span(getDisplayText(relation, "fromStatus"));
+				}
+			}).setHeader(CColorUtils.createStyledHeader("From Status", "#1565C0")).setAutoWidth(true).setSortable(true);
+			// Add To Status column with color and icon
+			grid.addComponentColumn(relation -> {
+				try {
+					return CColorUtils.getEntityWithIcon(relation.getToStatus());
+				} catch (Exception e) {
+					LOGGER.error("Failed to create to status component.");
+					return new com.vaadin.flow.component.html.Span(getDisplayText(relation, "toStatus"));
+				}
+			}).setHeader(CColorUtils.createStyledHeader("To Status", "#F57F17")).setAutoWidth(true).setSortable(true);
+			// Add Role column with color and icon (can be null for "All Roles")
+			grid.addComponentColumn(relation -> {
+				try {
+					if (relation.getRole() != null) {
+						return CColorUtils.getEntityWithIcon(relation.getRole());
+					} else {
+						com.vaadin.flow.component.html.Span span = new com.vaadin.flow.component.html.Span("All Roles");
+						span.getStyle().set("font-style", "italic");
+						span.getStyle().set("color", "#666");
+						return span;
+					}
+				} catch (Exception e) {
+					LOGGER.error("Failed to create role component.");
+					return new com.vaadin.flow.component.html.Span(getDisplayText(relation, "role"));
+				}
+			}).setHeader(CColorUtils.createStyledHeader("Role", "#8E24AA")).setAutoWidth(true).setSortable(true);
 		} catch (Exception e) {
 			LOGGER.error("Failed to setup grid.");
 			throw e;
