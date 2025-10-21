@@ -28,25 +28,25 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 		this.repository = repository;
 	}
 
-	/** Add status transition to workflow with specific role */
+	/** Add status transition to workflow with specific roles */
 	@Transactional
 	public CWorkflowStatusRelation addStatusTransition(final CWorkflowEntity workflow, final CActivityStatus fromStatus,
-			final CActivityStatus toStatus, final CUserProjectRole role) {
-		LOGGER.debug("Adding status transition to workflow {} from {} to {} for role {}", workflow, fromStatus, toStatus, role);
+			final CActivityStatus toStatus, final List<CUserProjectRole> roles) {
+		LOGGER.debug("Adding status transition to workflow {} from {} to {} for roles {}", workflow, fromStatus, toStatus, roles);
 		Check.notNull(workflow, "Workflow must not be null");
 		Check.notNull(fromStatus, "From status must not be null");
 		Check.notNull(toStatus, "To status must not be null");
 		if ((workflow.getId() == null) || (fromStatus.getId() == null) || (toStatus.getId() == null)) {
 			throw new IllegalArgumentException("Workflow and statuses must have valid IDs");
 		}
-		if (relationshipExists(workflow.getId(), fromStatus.getId(), toStatus.getId(), role != null ? role.getId() : null)) {
-			throw new IllegalArgumentException("This status transition is already defined for this workflow and role");
+		if (relationshipExists(workflow.getId(), fromStatus.getId(), toStatus.getId())) {
+			throw new IllegalArgumentException("This status transition is already defined for this workflow");
 		}
 		final CWorkflowStatusRelation relation = new CWorkflowStatusRelation();
 		relation.setWorkflow(workflow);
 		relation.setFromStatus(fromStatus);
 		relation.setToStatus(toStatus);
-		relation.setRole(role);
+		relation.setRoles(roles);
 		validateRelationship(relation);
 		return save(relation);
 	}
@@ -67,18 +67,16 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 
 	/** Remove status transition from workflow */
 	@Transactional
-	public void deleteByWorkflowAndStatuses(final CWorkflowEntity workflow, final CActivityStatus fromStatus, final CActivityStatus toStatus,
-			final CUserProjectRole role) {
+	public void deleteByWorkflowAndStatuses(final CWorkflowEntity workflow, final CActivityStatus fromStatus, final CActivityStatus toStatus) {
 		Check.notNull(workflow, "Workflow cannot be null");
 		Check.notNull(fromStatus, "From status cannot be null");
 		Check.notNull(toStatus, "To status cannot be null");
 		Check.notNull(workflow.getId(), "Workflow must have a valid ID");
 		Check.notNull(fromStatus.getId(), "From status must have a valid ID");
 		Check.notNull(toStatus.getId(), "To status must have a valid ID");
-		repository.deleteByWorkflowIdAndFromStatusIdAndToStatusIdAndRoleId(workflow.getId(), fromStatus.getId(), toStatus.getId(),
-				role != null ? role.getId() : null);
-		LOGGER.debug("Successfully removed status transition from workflow {} from status {} to status {} for role {}", workflow.getId(),
-				fromStatus.getId(), toStatus.getId(), role != null ? role.getId() : null);
+		repository.deleteByWorkflowIdAndFromStatusIdAndToStatusId(workflow.getId(), fromStatus.getId(), toStatus.getId());
+		LOGGER.debug("Successfully removed status transition from workflow {} from status {} to status {}", workflow.getId(), fromStatus.getId(),
+				toStatus.getId());
 	}
 
 	@Override
@@ -125,16 +123,14 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 	@Transactional (readOnly = true)
 	public Optional<CWorkflowStatusRelation> findRelationship(final Long workflowId, final Long fromStatusId) {
 		// This method is part of the abstract interface but doesn't fully capture our needs
-		// Use findRelationshipWithRole instead
-		throw new UnsupportedOperationException(
-				"Use findRelationshipWithRole(Long workflowId, Long fromStatusId, Long toStatusId, Long roleId) method instead");
+		// Use findRelationshipByStatuses instead
+		throw new UnsupportedOperationException("Use findRelationshipByStatuses(Long workflowId, Long fromStatusId, Long toStatusId) method instead");
 	}
 
-	/** Find a specific workflow status relation by workflow, from status, to status, and role */
+	/** Find a specific workflow status relation by workflow, from status, and to status */
 	@Transactional (readOnly = true)
-	public Optional<CWorkflowStatusRelation> findRelationshipWithRole(final Long workflowId, final Long fromStatusId, final Long toStatusId,
-			final Long roleId) {
-		return repository.findByWorkflowIdAndFromStatusIdAndToStatusIdAndRoleId(workflowId, fromStatusId, toStatusId, roleId);
+	public Optional<CWorkflowStatusRelation> findRelationshipByStatuses(final Long workflowId, final Long fromStatusId, final Long toStatusId) {
+		return repository.findByWorkflowIdAndFromStatusIdAndToStatusId(workflowId, fromStatusId, toStatusId);
 	}
 
 	@Override
@@ -170,29 +166,27 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 	@Transactional (readOnly = true)
 	public boolean relationshipExists(final Long workflowId, final Long fromStatusId) {
 		// This method is part of the abstract interface but doesn't fully capture our needs
-		// Use relationshipExistsWithRole instead
-		throw new UnsupportedOperationException(
-				"Use relationshipExists(Long workflowId, Long fromStatusId, Long toStatusId, Long roleId) method instead");
+		// Use relationshipExists(Long workflowId, Long fromStatusId, Long toStatusId) method instead
+		throw new UnsupportedOperationException("Use relationshipExists(Long workflowId, Long fromStatusId, Long toStatusId) method instead");
 	}
 
-	/** Check if a relationship exists between workflow, statuses, and role */
+	/** Check if a relationship exists between workflow and statuses */
 	@Transactional (readOnly = true)
-	public boolean relationshipExists(final Long workflowId, final Long fromStatusId, final Long toStatusId, final Long roleId) {
-		return repository.existsByWorkflowIdAndFromStatusIdAndToStatusIdAndRoleId(workflowId, fromStatusId, toStatusId, roleId);
+	public boolean relationshipExists(final Long workflowId, final Long fromStatusId, final Long toStatusId) {
+		return repository.existsByWorkflowIdAndFromStatusIdAndToStatusId(workflowId, fromStatusId, toStatusId);
 	}
 
 	/** Update workflow status relation */
 	@Transactional
 	public CWorkflowStatusRelation updateStatusTransition(final CWorkflowEntity workflow, final CActivityStatus fromStatus,
-			final CActivityStatus toStatus, final CUserProjectRole oldRole, final CUserProjectRole newRole) {
-		LOGGER.debug("Updating workflow {} status transition from {} to {} role from {} to {}", workflow, fromStatus, toStatus, oldRole, newRole);
-		final Optional<CWorkflowStatusRelation> relationOpt =
-				findRelationshipWithRole(workflow.getId(), fromStatus.getId(), toStatus.getId(), oldRole != null ? oldRole.getId() : null);
+			final CActivityStatus toStatus, final List<CUserProjectRole> newRoles) {
+		LOGGER.debug("Updating workflow {} status transition from {} to {} roles to {}", workflow, fromStatus, toStatus, newRoles);
+		final Optional<CWorkflowStatusRelation> relationOpt = findRelationshipByStatuses(workflow.getId(), fromStatus.getId(), toStatus.getId());
 		if (relationOpt.isEmpty()) {
 			throw new IllegalArgumentException("This status transition does not exist for this workflow");
 		}
 		final CWorkflowStatusRelation relation = relationOpt.get();
-		relation.setRole(newRole);
+		relation.setRoles(newRoles);
 		return updateRelationship(relation);
 	}
 

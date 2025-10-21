@@ -1,10 +1,14 @@
 package tech.derbent.app.workflow.domain;
 
+import java.util.ArrayList;
+import java.util.List;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -16,7 +20,7 @@ import tech.derbent.app.roles.domain.CUserProjectRole;
 
 @Entity
 @Table (name = "cworkflowstatusrelation", uniqueConstraints = @UniqueConstraint (columnNames = {
-		"workflow_id", "from_status_id", "to_status_id", "role_id"
+		"workflow_id", "from_status_id", "to_status_id"
 })) // table name for the entity
 @AttributeOverride (name = "id", column = @Column (name = "cworkflowstatusrelation_id"))
 public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> {
@@ -29,13 +33,17 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 			hidden = false, order = 1, setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CActivityStatusService"
 	)
 	private CActivityStatus fromStatus;
-	@ManyToOne (fetch = FetchType.LAZY)
-	@JoinColumn (name = "role_id", nullable = true)
-	@AMetaData (
-			displayName = "User Role", required = false, readOnly = false, description = "The user role allowed to make this transition",
-			hidden = false, order = 4, setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CUserProjectRoleService"
+	@ManyToMany (fetch = FetchType.LAZY)
+	@JoinTable (
+			name = "cworkflowstatusrelation_roles", joinColumns = @JoinColumn (name = "cworkflowstatusrelation_id"),
+			inverseJoinColumns = @JoinColumn (name = "role_id")
 	)
-	private CUserProjectRole role;
+	@AMetaData (
+			displayName = "User Roles", required = false, readOnly = false,
+			description = "The user roles allowed to make this transition (allowed transition roles)", hidden = false, order = 4,
+			setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CUserProjectRoleService", useGridSelection = true
+	)
+	private List<CUserProjectRole> roles = new ArrayList<>();
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "to_status_id", nullable = false)
 	@AMetaData (
@@ -57,7 +65,7 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 
 	public CActivityStatus getFromStatus() { return fromStatus; }
 
-	public CUserProjectRole getRole() { return role; }
+	public List<CUserProjectRole> getRoles() { return roles; }
 
 	public CActivityStatus getToStatus() { return toStatus; }
 
@@ -75,14 +83,14 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 		if (toStatus != null) {
 			toStatus.getName();
 		}
-		if (role != null) {
-			role.getName();
+		if (roles != null) {
+			roles.forEach(role -> role.getName());
 		}
 	}
 
 	public void setFromStatus(final CActivityStatus fromStatus) { this.fromStatus = fromStatus; }
 
-	public void setRole(final CUserProjectRole role) { this.role = role; }
+	public void setRoles(final List<CUserProjectRole> roles) { this.roles = roles != null ? roles : new ArrayList<>(); }
 
 	public void setToStatus(final CActivityStatus toStatus) { this.toStatus = toStatus; }
 
@@ -90,9 +98,10 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 
 	@Override
 	public String toString() {
-		return String.format("WorkflowStatusRelation[workflow id=%s, from status id=%s, to status id=%s, role=%s]",
+		return String.format("WorkflowStatusRelation[workflow id=%s, from status id=%s, to status id=%s, roles=%s]",
 				workflow != null ? CSpringAuxillaries.safeGetId(workflow) : null,
 				fromStatus != null ? CSpringAuxillaries.safeGetId(fromStatus) : null,
-				toStatus != null ? CSpringAuxillaries.safeGetId(toStatus) : null, CSpringAuxillaries.safeToString(role));
+				toStatus != null ? CSpringAuxillaries.safeGetId(toStatus) : null,
+				roles != null ? roles.stream().map(CSpringAuxillaries::safeToString).collect(java.util.stream.Collectors.joining(", ")) : "[]");
 	}
 }
