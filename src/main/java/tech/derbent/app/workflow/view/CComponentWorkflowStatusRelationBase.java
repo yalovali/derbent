@@ -49,8 +49,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 		final String fromStatusName = selected.getFromStatus().getName();
 		final String toStatusName = selected.getToStatus().getName();
 		final String rolesText = selected.getRoles() != null && !selected.getRoles().isEmpty()
-				? selected.getRoles().stream().map(r -> r.getName()).collect(java.util.stream.Collectors.joining(", "))
-				: "All Roles";
+				? selected.getRoles().stream().map(r -> r.getName()).collect(java.util.stream.Collectors.joining(", ")) : "All Roles";
 		return String.format("Are you sure you want to delete the transition from '%s' to '%s' for roles: %s? This action cannot be undone.",
 				fromStatusName, toStatusName, rolesText);
 	}
@@ -70,10 +69,8 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 				Check.notNull(relation.getToStatus(), "To status cannot be null");
 				return CColorUtils.getDisplayTextFromEntity(relation.getToStatus());
 			case "roles":
-				return relation.getRoles() != null && !relation.getRoles().isEmpty()
-						? relation.getRoles().stream().map(r -> CColorUtils.getDisplayTextFromEntity(r))
-								.collect(java.util.stream.Collectors.joining(", "))
-						: "All Roles";
+				return relation.getRoles() != null && !relation.getRoles().isEmpty() ? relation.getRoles().stream()
+						.map(r -> CColorUtils.getDisplayTextFromEntity(r)).collect(java.util.stream.Collectors.joining(", ")) : "All Roles";
 			default:
 				return "";
 			}
