@@ -125,6 +125,12 @@ public abstract class CAbstractEntityRelationPanel<ParentEntity extends CEntityD
 			editButton.setEnabled(hasSelection);
 			deleteButton.setEnabled(hasSelection);
 		});
+		// Add double-click listener to open edit dialog
+		grid.addItemDoubleClickListener(e -> {
+			if (e.getItem() != null) {
+				openEditDialog();
+			}
+		});
 		final HorizontalLayout buttonLayout = new HorizontalLayout(addButton, editButton, deleteButton);
 		buttonLayout.setSpacing(true);
 		addToContent(buttonLayout);
