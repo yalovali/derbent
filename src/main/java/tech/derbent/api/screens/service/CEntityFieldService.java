@@ -56,6 +56,7 @@ public class CEntityFieldService {
 		private boolean required = false;
 		private boolean setBackgroundFromColor = false;
 		private boolean useDualListSelector = false;
+		private boolean useGridSelection = false;
 		private boolean useIcon = false;
 		private boolean useRadioButtons = false;
 		private String width = "";
@@ -123,6 +124,8 @@ public class CEntityFieldService {
 
 		public boolean isUseDualListSelector() { return useDualListSelector; }
 
+		public boolean isUseGridSelection() { return useGridSelection; }
+
 		public boolean isUseIcon() { return useIcon; }
 
 		public boolean isUseRadioButtons() { return useRadioButtons; }
@@ -187,6 +190,8 @@ public class CEntityFieldService {
 
 		public void setUseDualListSelector(final boolean useDualListSelector) { this.useDualListSelector = useDualListSelector; }
 
+		public void setUseGridSelection(final boolean useGridSelection) { this.useGridSelection = useGridSelection; }
+
 		public void setUseIcon(final boolean useIcon) { this.useIcon = useIcon; }
 
 		public void setUseRadioButtons(final boolean useRadioButtons) { this.useRadioButtons = useRadioButtons; }
@@ -240,6 +245,7 @@ public class CEntityFieldService {
 			info.setPasswordRevealButton(metaData.passwordRevealButton());
 			info.setUseIcon(metaData.useIcon());
 			info.setUseDualListSelector(metaData.useDualListSelector());
+			info.setUseGridSelection(metaData.useGridSelection());
 			return info;
 		} catch (final Exception e) {
 			throw e;

@@ -69,6 +69,11 @@ public @interface AMetaData {
 	 * Set fields. This provides a better UX for selecting and ordering multiple items. */
 	boolean useDualListSelector() default false;
 
+	/** When true, uses a grid-based list selector component (single grid with checkmarks for selected items) instead of MultiSelectComboBox for
+	 * List/Set fields. This provides a simpler selection UX without ordering controls. If both useDualListSelector and useGridSelection are true,
+	 * useGridSelection takes precedence. */
+	boolean useGridSelection() default false;
+
 	boolean useIcon() default false;
 
 	boolean useRadioButtons() default false;

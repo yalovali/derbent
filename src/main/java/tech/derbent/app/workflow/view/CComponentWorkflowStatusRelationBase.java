@@ -38,8 +38,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 
 	@Override
 	protected void deleteRelation(CWorkflowStatusRelation selected) throws Exception {
-		workflowStatusRelationService.deleteByWorkflowAndStatuses(selected.getWorkflow(), selected.getFromStatus(), selected.getToStatus(),
-				selected.getRole());
+		workflowStatusRelationService.deleteByWorkflowAndStatuses(selected.getWorkflow(), selected.getFromStatus(), selected.getToStatus());
 	}
 
 	@Override
@@ -49,9 +48,11 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 		Check.notNull(selected.getToStatus(), "To status cannot be null");
 		final String fromStatusName = selected.getFromStatus().getName();
 		final String toStatusName = selected.getToStatus().getName();
-		final String roleName = selected.getRole() != null ? selected.getRole().getName() : "All Roles";
-		return String.format("Are you sure you want to delete the transition from '%s' to '%s' for %s? This action cannot be undone.", fromStatusName,
-				toStatusName, roleName);
+		final String rolesText = selected.getRoles() != null && !selected.getRoles().isEmpty()
+				? selected.getRoles().stream().map(r -> r.getName()).collect(java.util.stream.Collectors.joining(", "))
+				: "All Roles";
+		return String.format("Are you sure you want to delete the transition from '%s' to '%s' for roles: %s? This action cannot be undone.",
+				fromStatusName, toStatusName, rolesText);
 	}
 
 	@Override
@@ -68,8 +69,11 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 			case "toStatus":
 				Check.notNull(relation.getToStatus(), "To status cannot be null");
 				return CColorUtils.getDisplayTextFromEntity(relation.getToStatus());
-			case "role":
-				return relation.getRole() != null ? CColorUtils.getDisplayTextFromEntity(relation.getRole()) : "All Roles";
+			case "roles":
+				return relation.getRoles() != null && !relation.getRoles().isEmpty()
+						? relation.getRoles().stream().map(r -> CColorUtils.getDisplayTextFromEntity(r))
+								.collect(java.util.stream.Collectors.joining(", "))
+						: "All Roles";
 			default:
 				return "";
 			}
@@ -94,7 +98,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 			LOGGER.debug("Saving workflow status relation: {}", relation);
 			final CWorkflowStatusRelation savedRelation =
 					relation.getId() == null ? workflowStatusRelationService.addStatusTransition(relation.getWorkflow(), relation.getFromStatus(),
-							relation.getToStatus(), relation.getRole()) : workflowStatusRelationService.save(relation);
+							relation.getToStatus(), relation.getRoles()) : workflowStatusRelationService.save(relation);
 			LOGGER.info("Successfully saved workflow status relation: {}", savedRelation);
 			populateForm();
 		} catch (final Exception e) {
@@ -147,11 +151,21 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 					return new com.vaadin.flow.component.html.Span(getDisplayText(relation, "toStatus"));
 				}
 			}).setHeader(CColorUtils.createStyledHeader("To Status", "#F57F17")).setAutoWidth(true).setSortable(true);
-			// Add Role column with color and icon (can be null for "All Roles")
+			// Add Roles column with color and icon (can be empty for "All Roles")
 			grid.addComponentColumn(relation -> {
 				try {
-					if (relation.getRole() != null) {
-						return CColorUtils.getEntityWithIcon(relation.getRole());
+					if (relation.getRoles() != null && !relation.getRoles().isEmpty()) {
+						// Display roles as comma-separated list with icons
+						com.vaadin.flow.component.orderedlayout.HorizontalLayout rolesLayout =
+								new com.vaadin.flow.component.orderedlayout.HorizontalLayout();
+						rolesLayout.setSpacing(true);
+						for (int i = 0; i < relation.getRoles().size(); i++) {
+							rolesLayout.add(CColorUtils.getEntityWithIcon(relation.getRoles().get(i)));
+							if (i < relation.getRoles().size() - 1) {
+								rolesLayout.add(new com.vaadin.flow.component.html.Span(", "));
+							}
+						}
+						return rolesLayout;
 					} else {
 						com.vaadin.flow.component.html.Span span = new com.vaadin.flow.component.html.Span("All Roles");
 						span.getStyle().set("font-style", "italic");
@@ -159,10 +173,10 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 						return span;
 					}
 				} catch (Exception e) {
-					LOGGER.error("Failed to create role component.");
-					return new com.vaadin.flow.component.html.Span(getDisplayText(relation, "role"));
+					LOGGER.error("Failed to create roles component.");
+					return new com.vaadin.flow.component.html.Span(getDisplayText(relation, "roles"));
 				}
-			}).setHeader(CColorUtils.createStyledHeader("Role", "#8E24AA")).setAutoWidth(true).setSortable(true);
+			}).setHeader(CColorUtils.createStyledHeader("Roles", "#8E24AA")).setAutoWidth(true).setSortable(true);
 		} catch (Exception e) {
 			LOGGER.error("Failed to setup grid.");
 			throw e;

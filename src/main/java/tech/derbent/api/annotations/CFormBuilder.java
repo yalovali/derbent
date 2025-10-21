@@ -54,6 +54,7 @@ import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CComponentFieldSelection;
+import tech.derbent.api.views.components.CComponentListSelection;
 import tech.derbent.api.views.components.CDiv;
 import tech.derbent.api.views.components.CHorizontalLayout;
 import tech.derbent.api.views.components.CPictureSelector;
@@ -331,15 +332,19 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 				// gets strings from a method in a spring bean
 				component = createStringComboBox(contentOwner, fieldInfo, binder);
 			} else if (hasDataProvider && fieldInfo.getJavaType().equals("Set")) {
-				// Check if should use dual list selector instead of multiselect combobox
-				if (fieldInfo.isUseDualListSelector()) {
+				// Check if should use grid selection, dual list selector, or multiselect combobox
+				if (fieldInfo.isUseGridSelection()) {
+					component = createGridListSelector(contentOwner, fieldInfo, binder);
+				} else if (fieldInfo.isUseDualListSelector()) {
 					component = createDualListSelector2(contentOwner, fieldInfo, binder);
 				} else {
 					component = createComboBoxMultiSelect(contentOwner, fieldInfo, binder);
 				}
 			} else if (hasDataProvider && fieldType == List.class) {
-				// Check if should use dual list selector instead of multiselect combobox
-				if (fieldInfo.isUseDualListSelector()) {
+				// Check if should use grid selection, dual list selector, or multiselect combobox
+				if (fieldInfo.isUseGridSelection()) {
+					component = createGridListSelector(contentOwner, fieldInfo, binder);
+				} else if (fieldInfo.isUseDualListSelector()) {
 					component = createDualListSelector2(contentOwner, fieldInfo, binder);
 				} else {
 					component = createComboBoxMultiSelect(contentOwner, fieldInfo, binder);
@@ -461,6 +466,29 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		});
 		safeBindComponent(binder, dualListSelector, fieldInfo.getFieldName(), "CComponentFieldSelection");
 		return dualListSelector;
+	}
+
+	private static <EntityClass, DetailClass> CComponentListSelection<EntityClass, DetailClass> createGridListSelector(IContentOwner contentOwner,
+			final EntityFieldInfo fieldInfo, final CEnhancedBinder<?> binder) throws Exception {
+		Check.notNull(fieldInfo, "FieldInfo for GridListSelector creation");
+		LOGGER.debug("Creating CComponentListSelection for field: {}", fieldInfo.getFieldName());
+		final CComponentListSelection<EntityClass, DetailClass> gridListSelector =
+				new CComponentListSelection<EntityClass, DetailClass>(dataProviderResolver, contentOwner, fieldInfo, fieldInfo.getDisplayName());
+		// Set item label generator based on entity type
+		gridListSelector.setItemLabelGenerator(item -> {
+			if (item instanceof CEntityNamed<?>) {
+				return ((CEntityNamed<?>) item).getName();
+			}
+			if (item instanceof CEntityDB<?>) {
+				return CColorUtils.getDisplayTextFromEntity(item);
+			}
+			if (item instanceof String) {
+				return (String) item;
+			}
+			return "Unknown Item: " + String.valueOf(item);
+		});
+		safeBindComponent(binder, gridListSelector, fieldInfo.getFieldName(), "CComponentListSelection");
+		return gridListSelector;
 	}
 
 	@SuppressWarnings ("unchecked")

@@ -14,49 +14,47 @@ import tech.derbent.app.workflow.domain.CWorkflowStatusRelation;
 @Repository
 public interface IWorkflowStatusRelationRepository extends IAbstractRepository<CWorkflowStatusRelation> {
 
-	/** Find all workflow status relations for a specific workflow with eager loading of workflow, statuses, and role. */
+	/** Find all workflow status relations for a specific workflow with eager loading of workflow, statuses, and roles. */
 	@Query (
-		"SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.workflow LEFT JOIN FETCH r.fromStatus LEFT JOIN FETCH r.toStatus LEFT JOIN FETCH r.role WHERE r.workflow.id = :workflowId"
+		"SELECT DISTINCT r FROM #{#entityName} r LEFT JOIN FETCH r.workflow LEFT JOIN FETCH r.fromStatus LEFT JOIN FETCH r.toStatus LEFT JOIN FETCH r.roles WHERE r.workflow.id = :workflowId"
 	)
 	List<CWorkflowStatusRelation> findByWorkflowId(@Param ("workflowId") Long workflowId);
 	/** Find all workflow status relations for a specific status (as from status) with eager loading */
 	@Query (
-		"SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.workflow LEFT JOIN FETCH r.fromStatus LEFT JOIN FETCH r.toStatus LEFT JOIN FETCH r.role WHERE r.fromStatus.id = :statusId"
+		"SELECT DISTINCT r FROM #{#entityName} r LEFT JOIN FETCH r.workflow LEFT JOIN FETCH r.fromStatus LEFT JOIN FETCH r.toStatus LEFT JOIN FETCH r.roles WHERE r.fromStatus.id = :statusId"
 	)
 	List<CWorkflowStatusRelation> findByFromStatusId(@Param ("statusId") Long statusId);
 	/** Find all workflow status relations for a specific status (as to status) with eager loading */
 	@Query (
-		"SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.workflow LEFT JOIN FETCH r.fromStatus LEFT JOIN FETCH r.toStatus LEFT JOIN FETCH r.role WHERE r.toStatus.id = :statusId"
+		"SELECT DISTINCT r FROM #{#entityName} r LEFT JOIN FETCH r.workflow LEFT JOIN FETCH r.fromStatus LEFT JOIN FETCH r.toStatus LEFT JOIN FETCH r.roles WHERE r.toStatus.id = :statusId"
 	)
 	List<CWorkflowStatusRelation> findByToStatusId(@Param ("statusId") Long statusId);
-	/** Find a specific workflow status relation by workflow, from status, to status, and role */
+	/** Find a specific workflow status relation by workflow, from status, and to status */
 	@Query (
-		"SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.workflow LEFT JOIN FETCH r.fromStatus LEFT JOIN FETCH r.toStatus LEFT JOIN FETCH r.role WHERE r.workflow.id = :workflowId AND r.fromStatus.id = :fromStatusId AND r.toStatus.id = :toStatusId AND (r.role.id = :roleId OR (r.role IS NULL AND :roleId IS NULL))"
+		"SELECT DISTINCT r FROM #{#entityName} r LEFT JOIN FETCH r.workflow LEFT JOIN FETCH r.fromStatus LEFT JOIN FETCH r.toStatus LEFT JOIN FETCH r.roles WHERE r.workflow.id = :workflowId AND r.fromStatus.id = :fromStatusId AND r.toStatus.id = :toStatusId"
 	)
-	Optional<CWorkflowStatusRelation> findByWorkflowIdAndFromStatusIdAndToStatusIdAndRoleId(@Param ("workflowId") Long workflowId,
-			@Param ("fromStatusId") Long fromStatusId, @Param ("toStatusId") Long toStatusId, @Param ("roleId") Long roleId);
+	Optional<CWorkflowStatusRelation> findByWorkflowIdAndFromStatusIdAndToStatusId(@Param ("workflowId") Long workflowId,
+			@Param ("fromStatusId") Long fromStatusId, @Param ("toStatusId") Long toStatusId);
 	/** Check if a relationship exists between workflow and statuses */
 	@Query (
-		"SELECT COUNT(r) > 0 FROM #{#entityName} r WHERE r.workflow.id = :workflowId AND r.fromStatus.id = :fromStatusId AND r.toStatus.id = :toStatusId AND (r.role.id = :roleId OR (r.role IS NULL AND :roleId IS NULL))"
+		"SELECT COUNT(r) > 0 FROM #{#entityName} r WHERE r.workflow.id = :workflowId AND r.fromStatus.id = :fromStatusId AND r.toStatus.id = :toStatusId"
 	)
-	boolean existsByWorkflowIdAndFromStatusIdAndToStatusIdAndRoleId(@Param ("workflowId") Long workflowId, @Param ("fromStatusId") Long fromStatusId,
-			@Param ("toStatusId") Long toStatusId, @Param ("roleId") Long roleId);
-	/** Find all relations by role using generic pattern */
+	boolean existsByWorkflowIdAndFromStatusIdAndToStatusId(@Param ("workflowId") Long workflowId, @Param ("fromStatusId") Long fromStatusId,
+			@Param ("toStatusId") Long toStatusId);
+	/** Find all relations that include a specific role using generic pattern */
 	@Query (
-		"SELECT r FROM #{#entityName} r LEFT JOIN FETCH r.workflow LEFT JOIN FETCH r.fromStatus LEFT JOIN FETCH r.toStatus LEFT JOIN FETCH r.role WHERE r.role.id = :roleId"
+		"SELECT DISTINCT r FROM #{#entityName} r LEFT JOIN FETCH r.workflow LEFT JOIN FETCH r.fromStatus LEFT JOIN FETCH r.toStatus LEFT JOIN FETCH r.roles role WHERE role.id = :roleId"
 	)
 	List<CWorkflowStatusRelation> findByRoleId(@Param ("roleId") Long roleId);
 	/** Count relations for a specific workflow using generic pattern */
 	@Query ("SELECT COUNT(r) FROM #{#entityName} r WHERE r.workflow.id = :workflowId")
 	long countByWorkflowId(@Param ("workflowId") Long workflowId);
-	/** Delete a specific workflow-status relationship by workflow, from status, to status, and role IDs using generic pattern */
+	/** Delete a specific workflow-status relationship by workflow, from status, and to status IDs using generic pattern */
 	@Modifying
 	@Transactional
-	@Query (
-		"DELETE FROM #{#entityName} r WHERE r.workflow.id = :workflowId AND r.fromStatus.id = :fromStatusId AND r.toStatus.id = :toStatusId AND (r.role.id = :roleId OR (r.role IS NULL AND :roleId IS NULL))"
-	)
-	void deleteByWorkflowIdAndFromStatusIdAndToStatusIdAndRoleId(@Param ("workflowId") Long workflowId, @Param ("fromStatusId") Long fromStatusId,
-			@Param ("toStatusId") Long toStatusId, @Param ("roleId") Long roleId);
+	@Query ("DELETE FROM #{#entityName} r WHERE r.workflow.id = :workflowId AND r.fromStatus.id = :fromStatusId AND r.toStatus.id = :toStatusId")
+	void deleteByWorkflowIdAndFromStatusIdAndToStatusId(@Param ("workflowId") Long workflowId, @Param ("fromStatusId") Long fromStatusId,
+			@Param ("toStatusId") Long toStatusId);
 	/** Delete all workflow-status relationships for a specific workflow using generic pattern */
 	@Modifying
 	@Transactional

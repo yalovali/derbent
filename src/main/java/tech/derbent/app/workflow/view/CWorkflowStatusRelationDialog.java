@@ -43,7 +43,7 @@ public class CWorkflowStatusRelationDialog extends CDBRelationDialog<CWorkflowSt
 	protected String getEditFormTitle() { return "Edit Status Transition"; }
 
 	@Override
-	protected List<String> getFormFields() { return List.of("fromStatus", "toStatus", "role"); }
+	protected List<String> getFormFields() { return List.of("fromStatus", "toStatus", "roles"); }
 
 	@Override
 	protected String getNewDialogTitle() { return "Add Workflow Status Transition"; }
