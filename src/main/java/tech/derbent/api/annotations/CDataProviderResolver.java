@@ -12,59 +12,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
+import com.vaadin.flow.component.Component;
 import tech.derbent.api.interfaces.IContentOwner;
+import tech.derbent.api.interfaces.IHasContentOwner;
+import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.Check;
-import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 
-/** CDataProviderResolver - Service for automatically resolving data providers for ComboBox components based on AMetaData annotations. This service
- * integrates with Spring's application context to find appropriate service beans and call their data retrieval methods.
- * <p>
- * The resolver supports multiple ways to specify data providers:
- * </p>
- * <ul>
- * <li><strong>Bean Name:</strong> Uses {@code @AMetaData(dataProviderBean = "serviceName")}</li>
- * <li><strong>Bean Type:</strong> Uses {@code @AMetaData(dataProviderClass = ServiceClass.class)}</li>
- * <li><strong>Automatic:</strong> Automatically finds service by entity type naming convention</li>
- * </ul>
- * <p>
- * <strong>Method Resolution:</strong> The resolver tries to find methods in the following order:
- * </p>
- * <ol>
- * <li>Custom method specified in {@code dataProviderMethod}</li>
- * <li>Standard method "list(Pageable)" for paginated results</li>
- * <li>Standard method "list()" for simple lists</li>
- * <li>Standard method "findAll()" for JPA repositories</li>
- * </ol>
- * <p>
- * <strong>Caching:</strong> The resolver caches method lookups for performance but not the actual data, ensuring fresh data is always retrieved from
- * services.
- * </p>
- * <p>
- * <strong>Usage Examples:</strong>
- * </p>
- *
- * <pre>
- *
- * {
- * 	&#64;code
- * 	// Using bean name
- * 	&#64;AMetaData (displayName = "Activity Type", dataProviderBean = "activityTypeService")
- * 	private CActivityType activityType;
- * 	// Using bean class
- * 	&#64;AMetaData (displayName = "Project", dataProviderClass = CProjectService.class)
- * 	private CProject project;
- * 	// Using custom method
- * 	@AMetaData (displayName = "Active Users", dataProviderBean = "userService", dataProviderMethod = "findAllActive")
- * 	private CUser assignedUser;
- * }
- * </pre>
- *
- * Layer: Service (MVC)
- * @author Derbent Framework
- * @since 1.0
- * @see tech.derbent.api.annotations.AMetaData
- * @see tech.derbent.api.annotations.CFormBuilder */
 @Service
 public final class CDataProviderResolver {
 
@@ -105,8 +59,32 @@ public final class CDataProviderResolver {
 		return String.format("CDataProviderResolver - Method cache: %d entries, Bean cache: %d entries", methodCache.size(), beanCache.size());
 	}
 
+	public Component resolveDataComponent(IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
+		try {
+			Object result = resolveMethodAnnotations(contentOwner, fieldInfo);
+			final Component component = (Component) result;
+			if (component instanceof IHasContentOwner) {
+				((IHasContentOwner) component).setContentOwner(contentOwner);
+			}
+			return component;
+		} catch (Exception e) {
+			LOGGER.error("Error resolving data for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
+			throw e;
+		}
+	}
+
 	@SuppressWarnings ("unchecked")
-	public <T> List<T> resolveData(IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
+	public <T> List<T> resolveDataList(IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
+		try {
+			Object result = resolveMethodAnnotations(contentOwner, fieldInfo);
+			return (List<T>) result;
+		} catch (Exception e) {
+			LOGGER.error("Error resolving data for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
+			throw e;
+		}
+	}
+
+	public Object resolveMethodAnnotations(IContentOwner contentOwner, final EntityFieldInfo fieldInfo) throws Exception {
 		try {
 			Check.notNull(fieldInfo, "Field info cannot be null");
 			Object paramValue = null;
@@ -136,9 +114,9 @@ public final class CDataProviderResolver {
 			}
 			Object result = CAuxillaries.invokeMethod(bean, fieldInfo.getDataProviderMethod(), paramValue);
 			Check.notNull(result, "Result from data provider method cannot be null");
-			return (List<T>) result;
+			return result;
 		} catch (Exception e) {
-			LOGGER.error("Error resolving data for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
+			LOGGER.error("Error resolving method annotations for field '{}': {}", fieldInfo.getFieldName(), e.getMessage());
 			throw e;
 		}
 	}

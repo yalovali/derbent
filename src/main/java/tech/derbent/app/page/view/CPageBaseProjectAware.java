@@ -9,14 +9,14 @@ import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IHasContentOwner;
 import tech.derbent.api.interfaces.IProjectChangeListener;
+import tech.derbent.api.screens.domain.CDetailSection;
+import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.api.services.CDetailsBuilder;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CCrudToolbar;
 import tech.derbent.api.views.components.CDiv;
 import tech.derbent.api.views.components.CFlexLayout;
 import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.api.screens.domain.CDetailSection;
-import tech.derbent.api.screens.service.CDetailSectionService;
 import tech.derbent.base.session.service.CLayoutService;
 import tech.derbent.base.session.service.ISessionService;
 
@@ -138,6 +138,7 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 	@Override
 	public void populateForm() throws Exception {
 		try {
+			detailsBuilder.setCurrentEntity(currentEntity);
 			// Default implementation - populate current binder if available
 			if ((currentBinder != null) && (getCurrentEntity() != null)) {
 				LOGGER.debug("Populating form for entity: {}", getCurrentEntity());
@@ -164,7 +165,6 @@ public abstract class CPageBaseProjectAware extends CPageBase implements IProjec
 		try {
 			LOGGER.debug("Setting current entity: {}", entity);
 			currentEntity = entity;
-			detailsBuilder.setCurrentEntity(entity);
 		} catch (final Exception e) {
 			LOGGER.error("Error setting current entity.");
 			throw e;

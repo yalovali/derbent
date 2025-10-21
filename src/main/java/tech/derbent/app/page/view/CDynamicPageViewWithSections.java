@@ -9,6 +9,9 @@ import com.vaadin.flow.component.splitlayout.SplitLayout;
 import jakarta.annotation.security.PermitAll;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityOfProject;
+import tech.derbent.api.screens.service.CDetailSectionService;
+import tech.derbent.api.screens.service.CGridEntityService;
+import tech.derbent.api.screens.view.CComponentGridEntity;
 import tech.derbent.api.services.CAbstractService;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CComponentDetailsMasterToolbar;
@@ -17,9 +20,6 @@ import tech.derbent.api.views.components.CFlexLayout;
 import tech.derbent.api.views.components.CVerticalLayout;
 import tech.derbent.app.page.domain.CPageEntity;
 import tech.derbent.app.projects.domain.CProject;
-import tech.derbent.api.screens.service.CDetailSectionService;
-import tech.derbent.api.screens.service.CGridEntityService;
-import tech.derbent.api.screens.view.CComponentGridEntity;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
 
@@ -265,19 +265,16 @@ public class CDynamicPageViewWithSections extends CDynamicPageBase {
 			// LOGGER.debug("Handling entity selection event");
 			Check.notNull(event, "Selection change event cannot be null");
 			final CEntityDB<?> selectedEntity = event.getSelectedItem();
+			setCurrentEntity(selectedEntity);
 			if (selectedEntity == null) {
 				// No selection - clear details
-				setCurrentEntity(selectedEntity);
 				clearEntityDetails();
 				populateForm();
 			} else {
-				// LOGGER.debug("Entity selected: {}", selectedEntity != null ? selectedEntity.toString() + " ID: " + selectedEntity.getId() :
-				// "null");
-				// Performance optimization: check if we can reuse existing components
+				setCurrentEntity(selectedEntity);
 				if ((currentEntityViewName == null) || !selectedEntity.getClass().getField("VIEW_NAME").get(null).equals(currentEntityViewName)) {
 					rebuildEntityDetails(selectedEntity.getClass());
 				}
-				setCurrentEntity(selectedEntity);
 				populateForm();
 			}
 		} catch (final Exception e) {

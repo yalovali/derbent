@@ -28,20 +28,6 @@ public class CWorkflowEntityService extends CWorkflowBaseService<CWorkflowEntity
 		super(repository, clock, sessionService);
 	}
 
-	public Component createWorkflowStatusRelationsComponent() {
-		try {
-			CComponentWorkflowStatusRelations component = new CComponentWorkflowStatusRelations(this, sessionService, applicationContext);
-			return component;
-		} catch (Exception e) {
-			LOGGER.error("Failed to create workflow status relations component.");
-			// Fallback to simple div with error message
-			final Div errorDiv = new Div();
-			errorDiv.setText("Error loading workflow status relations component: " + e.getMessage());
-			errorDiv.addClassName("error-message");
-			return errorDiv;
-		}
-	}
-
 	/** Checks dependencies before allowing workflow entity deletion. Always calls super.checkDeleteAllowed() first to ensure all parent-level checks
 	 * are performed.
 	 * @param entity the workflow entity to check
@@ -58,6 +44,20 @@ public class CWorkflowEntityService extends CWorkflowBaseService<CWorkflowEntity
 		} catch (final Exception e) {
 			LOGGER.error("Error checking dependencies for workflow entity: {}", entity.getName(), e);
 			return "Error checking dependencies: " + e.getMessage();
+		}
+	}
+
+	public Component createWorkflowStatusRelationsComponent(CWorkflowEntity workflowEntity) {
+		try {
+			CComponentWorkflowStatusRelations component = new CComponentWorkflowStatusRelations(this, sessionService, applicationContext);
+			return component;
+		} catch (Exception e) {
+			LOGGER.error("Failed to create workflow status relations component.");
+			// Fallback to simple div with error message
+			final Div errorDiv = new Div();
+			errorDiv.setText("Error loading workflow status relations component: " + e.getMessage());
+			errorDiv.addClassName("error-message");
+			return errorDiv;
 		}
 	}
 

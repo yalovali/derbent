@@ -47,7 +47,7 @@ public class Application implements AppShellConfigurator {
 	 * @param args command line arguments passed to the application */
 	public static void main(final String[] args) {
 		try {
-			CTimer.stamp();
+			CTimer.print("starting application");
 			final SpringApplication app = new SpringApplication(Application.class);
 			CTimer.print("application created");
 			app.run(args);

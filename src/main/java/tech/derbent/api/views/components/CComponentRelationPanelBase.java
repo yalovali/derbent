@@ -53,12 +53,12 @@ public abstract class CComponentRelationPanelBase<MasterClass extends CEntityNam
 				return List.of();
 			}
 			try {
-				final List<RelationalClass> settings = settingsSupplier.get();
+				final List<RelationalClass> relations = settingsSupplier.get();
 				// Note: Lazy fields should be eagerly fetched by repository queries using LEFT JOIN FETCH
 				// to avoid LazyInitializationException. Do not call initializeAllFields() here as it
 				// happens outside the Hibernate session context.
-				LOGGER.debug("Retrieved {} settings for entity: {}", settings.size(), entity.getName());
-				return settings;
+				LOGGER.debug("Retrieved {} settings for entity: {}", relations.size(), entity.getName());
+				return relations;
 			} catch (final Exception e) {
 				LOGGER.error("Error retrieving settings for entity.");
 				return List.of();

@@ -546,7 +546,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 			LOGGER.debug("Updating source items using DataProviderResolver for field: {}", fieldInfo.getFieldName());
 			sourceItems.clear();
 			Check.notNull(dataProviderResolver, "DataProviderResolver for field " + fieldInfo.getFieldName());
-			final List<?> rawList = dataProviderResolver.resolveData(contentOwner, fieldInfo);
+			final List<?> rawList = dataProviderResolver.resolveDataList(contentOwner, fieldInfo);
 			Check.notNull(rawList, "Items for field " + fieldInfo.getFieldName() + " of type " + fieldInfo.getJavaType());
 			// Set items as list (typed at runtime)
 			@SuppressWarnings ("unchecked")

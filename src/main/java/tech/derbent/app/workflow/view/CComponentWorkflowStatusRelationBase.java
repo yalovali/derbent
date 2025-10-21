@@ -1,6 +1,7 @@
 package tech.derbent.app.workflow.view;
 
 import org.springframework.context.ApplicationContext;
+import com.vaadin.flow.component.grid.Grid;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.services.CAbstractService;
@@ -109,4 +110,15 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 	/** Abstract method for setting up data accessors - subclasses provide specific implementations */
 	@Override
 	protected abstract void setupDataAccessors();
+
+	@Override
+	protected void setupGrid(final Grid<CWorkflowStatusRelation> grid) {
+		try {
+			super.setupGrid(grid);
+			LOGGER.debug("Setting up grid for User-Project relationship component.");
+		} catch (Exception e) {
+			LOGGER.error("Failed to setup grid.");
+			throw e;
+		}
+	}
 }

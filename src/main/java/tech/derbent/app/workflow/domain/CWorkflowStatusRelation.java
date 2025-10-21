@@ -21,7 +21,6 @@ import tech.derbent.app.roles.domain.CUserProjectRole;
 @AttributeOverride (name = "id", column = @Column (name = "cworkflowstatusrelation_id"))
 public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> {
 
-	private static final long serialVersionUID = 1L;
 	public static final String VIEW_NAME = "Workflow Status Relations View";
 	@ManyToOne (fetch = FetchType.LAZY)
 	@JoinColumn (name = "from_status_id", nullable = false)

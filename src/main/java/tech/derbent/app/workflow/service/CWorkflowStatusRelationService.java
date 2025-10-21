@@ -3,7 +3,6 @@ package tech.derbent.app.workflow.service;
 import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,6 +52,11 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 	}
 
 	@Override
+	public String checkDeleteAllowed(final CWorkflowStatusRelation entity) {
+		return super.checkDeleteAllowed(entity);
+	}
+
+	@Override
 	protected CWorkflowStatusRelation createRelationshipInstance(final Long workflowId, final Long statusId) {
 		// Note: In a real implementation, you would fetch the actual entities from their
 		// services This method should not be used directly - instead use the service
@@ -83,24 +87,24 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 		return repository.findByFromStatusId(statusId);
 	}
 
+	/** Find workflow status relations by from status */
+	@Transactional (readOnly = true)
+	public List<CWorkflowStatusRelation> findByFromStatus(final CActivityStatus fromStatus) {
+		Check.notNull(fromStatus, "From status cannot be null");
+		return findByChildEntityId(fromStatus.getId());
+	}
+
 	@Override
 	@Transactional (readOnly = true)
 	public List<CWorkflowStatusRelation> findByParentEntityId(final Long workflowId) {
 		return repository.findByWorkflowId(workflowId);
 	}
 
-	/** Find workflow status relations by workflow */
+	/** Find workflow status relations by role */
 	@Transactional (readOnly = true)
-	public List<CWorkflowStatusRelation> findByWorkflow(final CWorkflowEntity workflow) {
-		Check.notNull(workflow, "Workflow cannot be null");
-		return findByParentEntityId(workflow.getId());
-	}
-
-	/** Find workflow status relations by from status */
-	@Transactional (readOnly = true)
-	public List<CWorkflowStatusRelation> findByFromStatus(final CActivityStatus fromStatus) {
-		Check.notNull(fromStatus, "From status cannot be null");
-		return findByChildEntityId(fromStatus.getId());
+	public List<CWorkflowStatusRelation> findByRole(final CUserProjectRole role) {
+		Check.notNull(role, "Role cannot be null");
+		return repository.findByRoleId(role.getId());
 	}
 
 	/** Find workflow status relations by to status */
@@ -110,11 +114,11 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 		return repository.findByToStatusId(toStatus.getId());
 	}
 
-	/** Find workflow status relations by role */
+	/** Find workflow status relations by workflow */
 	@Transactional (readOnly = true)
-	public List<CWorkflowStatusRelation> findByRole(final CUserProjectRole role) {
-		Check.notNull(role, "Role cannot be null");
-		return repository.findByRoleId(role.getId());
+	public List<CWorkflowStatusRelation> findByWorkflow(final CWorkflowEntity workflow) {
+		Check.notNull(workflow, "Workflow cannot be null");
+		return repository.findByWorkflowId(workflow.getId());
 	}
 
 	@Override
@@ -136,17 +140,6 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 	@Override
 	protected Class<CWorkflowStatusRelation> getEntityClass() { return CWorkflowStatusRelation.class; }
 
-	@Override
-	public String checkDeleteAllowed(final CWorkflowStatusRelation entity) {
-		return super.checkDeleteAllowed(entity);
-	}
-
-	@Override
-	public void initializeNewEntity(final CWorkflowStatusRelation entity) {
-		super.initializeNewEntity(entity);
-		// Additional entity-specific initialization can be added here if needed
-	}
-
 	/** Initialize lazy fields for a CWorkflowStatusRelation entity within a transaction context. This method should be called when you need to access
 	 * lazy-loaded fields outside of the original Hibernate session. The repository queries already eagerly fetch common fields (workflow, statuses,
 	 * role), but this method can be used for additional fields if needed.
@@ -165,6 +158,12 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 		// Access lazy fields to trigger loading within transaction
 		managed.initializeAllFields();
 		return managed;
+	}
+
+	@Override
+	public void initializeNewEntity(final CWorkflowStatusRelation entity) {
+		super.initializeNewEntity(entity);
+		// Additional entity-specific initialization can be added here if needed
 	}
 
 	@Override

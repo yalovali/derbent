@@ -47,6 +47,9 @@ import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.interfaces.IHasContentOwner;
+import tech.derbent.api.screens.domain.CDetailLines;
+import tech.derbent.api.screens.service.CEntityFieldService;
+import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
@@ -55,9 +58,6 @@ import tech.derbent.api.views.components.CDiv;
 import tech.derbent.api.views.components.CHorizontalLayout;
 import tech.derbent.api.views.components.CPictureSelector;
 import tech.derbent.api.views.components.CVerticalLayout;
-import tech.derbent.api.screens.domain.CDetailLines;
-import tech.derbent.api.screens.service.CEntityFieldService;
-import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 
 @org.springframework.stereotype.Component
 public final class CFormBuilder<EntityClass> implements ApplicationContextAware {
@@ -241,7 +241,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			// Data provider resolution using CDataProviderResolver
 			List<T> items = null;
 			Check.notNull(dataProviderResolver, "DataProviderResolver for field " + fieldInfo.getFieldName());
-			items = dataProviderResolver.resolveData(contentOwner, fieldInfo);
+			items = dataProviderResolver.resolveDataList(contentOwner, fieldInfo);
 			Check.notNull(items, "Items for field " + fieldInfo.getFieldName() + " of type " + fieldInfo.getJavaType());
 			if (fieldInfo.isClearOnEmptyData() && items.isEmpty()) {
 				comboBox.setValue(null);
@@ -291,7 +291,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			// --- Data provider ---
 			Check.notNull(dataProviderResolver, "DataProviderResolver for field " + fieldInfo.getFieldName());
 			// DİKKAT: Diziye çevirip Set.of(...) kullanmıyoruz — bu, Set<CEntityDB[]> üretip tür çıkarımını bozuyordu.
-			final List<?> rawList = dataProviderResolver.resolveData(contentOwner, fieldInfo);
+			final List<?> rawList = dataProviderResolver.resolveDataList(contentOwner, fieldInfo);
 			Check.notNull(rawList, "Items for field " + fieldInfo.getFieldName() + " of type " + fieldInfo.getJavaType());
 			// Tip güvenli toplama: LinkedHashSet ile sıralı ve benzersiz
 			final LinkedHashSet<T> items = rawList.stream().map(e -> (T) e) // runtime cast; provider sözleşmesine güveniyoruz
@@ -414,7 +414,10 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 			// Check.notNull(contentOwner, "ContentOwner for custom component creation");
 			// use first method only
 			final String methodName = fieldInfo.getCreateComponentMethod().split(",")[0].trim();
-			final Component component = invokeCustomComponentMethod(contentOwner, methodName, fieldInfo, binder);
+			String oldBeanMethod = fieldInfo.getDataProviderMethod();
+			fieldInfo.setDataProviderMethod(methodName); // geçici olarak method adını değiştir
+			final Component component = dataProviderResolver.resolveDataComponent(contentOwner, fieldInfo);
+			fieldInfo.setDataProviderMethod(oldBeanMethod); // orijinal method adına geri dön
 			Check.notNull(component, "Custom component created by method " + methodName + " for field " + fieldInfo.getFieldName());
 			return component;
 		} catch (final Exception e) {
@@ -635,7 +638,7 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		}
 		// Resolve String data using data provider
 		// final List<String> items = resolveStringData(fieldInfo);
-		final List<String> items = dataProviderResolver.<String>resolveData(contentOwner, fieldInfo);
+		final List<String> items = dataProviderResolver.<String>resolveDataList(contentOwner, fieldInfo);
 		comboBox.setItems(items);
 		// Handle clearOnEmptyData configuration
 		if (fieldInfo.isClearOnEmptyData() && items.isEmpty()) {
@@ -777,8 +780,8 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 	 * @param binder       the enhanced binder
 	 * @return the custom component or null if method fails
 	 * @throws Exception */
-	private static Component invokeCustomComponentMethod(IContentOwner contentOwner, final String methodName, final EntityFieldInfo fieldInfo,
-			final CEnhancedBinder<?> binder) throws Exception {
+	private static Component invokeCustomComponentMethodX(IContentOwner contentOwner, final String methodName, final EntityFieldInfo fieldInfo,
+			final CEnhancedBinder<?> binders) throws Exception {
 		try {
 			// contentowner can be null
 			String sourceClassName = fieldInfo.getDataProviderBean();
@@ -919,12 +922,6 @@ public final class CFormBuilder<EntityClass> implements ApplicationContextAware 
 		this(contentOwner, entityClass, binder, List.of());
 	}
 
-	/** Constructor with content owner support for context-aware data providers.
-	 * @param entityClass  the entity class
-	 * @param binder       the enhanced binder
-	 * @param entityFields the list of field names to include
-	 * @param contentOwner the content owner for context-aware data providers
-	 * @throws Exception if form building fails */
 	public CFormBuilder(IContentOwner contentOwner, final Class<?> entityClass, final CEnhancedBinder<EntityClass> binder,
 			final List<String> entityFields) throws Exception {
 		componentMap = new HashMap<>();

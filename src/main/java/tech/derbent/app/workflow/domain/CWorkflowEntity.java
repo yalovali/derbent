@@ -39,7 +39,8 @@ public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 	@OneToMany (mappedBy = "workflow", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@AMetaData (
 			displayName = "Status Transitions", required = false, readOnly = false, description = "Status transitions for this workflow",
-			hidden = false, order = 10, dataProviderBean = "CWorkflowEntityService", createComponentMethod = "createWorkflowStatusRelationsComponent"
+			hidden = false, order = 10, dataProviderBean = "CWorkflowEntityService", createComponentMethod = "createWorkflowStatusRelationsComponent",
+			dataProviderParamBean = "context", dataProviderParamMethod = "getCurrentEntity"
 	)
 	private final List<CWorkflowStatusRelation> statusRelations = new ArrayList<>();
 
@@ -63,8 +64,8 @@ public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 		if (relation == null) {
 			return;
 		}
-		if (!this.statusRelations.contains(relation)) {
-			this.statusRelations.add(relation);
+		if (!statusRelations.contains(relation)) {
+			statusRelations.add(relation);
 			relation.setWorkflow(this);
 		}
 	}
@@ -94,7 +95,7 @@ public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 	 * @param relation the status relation to remove */
 	public void removeStatusRelation(final CWorkflowStatusRelation relation) {
 		Check.notNull(relation, "Status relation cannot be null");
-		if (this.statusRelations.remove(relation)) {
+		if (statusRelations.remove(relation)) {
 			relation.setWorkflow(null);
 		}
 	}

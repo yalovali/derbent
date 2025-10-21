@@ -20,7 +20,6 @@ public class CWorkflowStatusRelationDialog extends CDBRelationDialog<CWorkflowSt
 	protected final CWorkflowEntityService workflowService;
 	protected final CWorkflowStatusRelationService workflowStatusRelationService;
 
-	@SuppressWarnings ("unchecked")
 	public CWorkflowStatusRelationDialog(IContentOwner parentContent, final CWorkflowEntityService workflowService,
 			final CActivityStatusService statusService, final CWorkflowStatusRelationService workflowStatusRelationService,
 			final CWorkflowStatusRelation relation, final CWorkflowEntity workflow, final Consumer<CWorkflowStatusRelation> onSave) throws Exception {
