@@ -17,8 +17,6 @@ public abstract class CDialog extends Dialog {
 	private H3 formTitle;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 	protected VerticalLayout mainLayout;
-	@SuppressWarnings ("unused")
-	private boolean setupDone = false;
 
 	/** Constructor for CDialog. Initializes the dialog with a default layout. */
 	public CDialog() {
@@ -79,6 +77,5 @@ public abstract class CDialog extends Dialog {
 		getElement().getStyle().set("box-shadow", "0 4px 20px rgba(25, 118, 210, 0.3)");
 		// Set a subtle gradient background
 		getElement().getStyle().set("background", "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)");
-		setupDone = true;
 	}
 }

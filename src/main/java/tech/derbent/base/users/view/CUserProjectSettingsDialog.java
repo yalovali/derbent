@@ -37,9 +37,4 @@ public class CUserProjectSettingsDialog extends CUserProjectRelationDialog<CUser
 
 	@Override
 	protected String getNewFormTitle() { return "Assign User to Project"; }
-
-	@Override
-	protected void setupEntityRelation(CUser user) {
-		getEntity().setUser(user);
-	}
 }
