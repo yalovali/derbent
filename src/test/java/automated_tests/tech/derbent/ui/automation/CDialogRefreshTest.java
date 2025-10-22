@@ -202,8 +202,7 @@ public class CDialogRefreshTest extends CBaseUITest {
 		LOGGER.info("🔍 Looking for status transitions section");
 		// Look for tabs or sections that might contain status transitions
 		String[] possibleSelectors = {
-				"vaadin-tab:has-text('Status Transitions')", "vaadin-tab:has-text('Transitions')", "text='Status Transitions'",
-				"text='Transitions'"
+				"vaadin-tab:has-text('Status Transitions')", "vaadin-tab:has-text('Transitions')", "text='Status Transitions'", "text='Transitions'"
 		};
 		for (String selector : possibleSelectors) {
 			Locator element = page.locator(selector);
