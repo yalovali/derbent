@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValueAndElement;
 import com.vaadin.flow.component.ItemLabelGenerator;
@@ -111,14 +112,20 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 		Check.notNull(grid, "Grid cannot be null");
 		// Selection indicator column (checkmark for selected items)
 		grid.addComponentColumn(item -> {
+			final String width = "20px";
+			Component checkmark;
 			if (selectedItems.contains(item)) {
-				Span checkmark = new Span("✓");
-				checkmark.getStyle().set("color", "#4CAF50").set("font-weight", "bold").set("font-size", "18px");
-				return checkmark;
+				// checkmark = new Span(CColorUtils.Symbol_BoxChecked);
+				checkmark = CColorUtils.createStyledIcon("vaadin:check-square-o", "#7CAF50");
 			} else {
-				return new Span("");
+				checkmark = CColorUtils.createStyledIcon("vaadin:thin-square", "#1CFFa0");
+				// checkmark = new Span(CColorUtils.Symbol_BoxUnchecked);
 			}
-		}).setHeader("").setWidth("60px").setFlexGrow(0);
+			// checkmark.getStyle().set("color", "#4CAF50").set("font-weight", "bold").set("font-size", "24px").set("text-align", "right")
+			// .set("width", width).set("display", "block").setMargin("0 auto").setPadding("0");
+			checkmark.getStyle().set("width", width).set("display", "block").setMargin("0 auto").setPadding("0");
+			return checkmark;
+		}).setHeader("").setWidth("30px").setFlexGrow(0).setPartNameGenerator(item -> "check-column-cell");
 		// Item display column (with color and icon for CEntityNamed)
 		grid.addComponentColumn(item -> {
 			try {
@@ -147,6 +154,7 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 				return new Span(fallbackText);
 			}
 		}).setHeader(CColorUtils.createStyledHeader(header, "#1565C0")).setAutoWidth(true).setFlexGrow(1);
+		grid.addClassName("first-column-checkbox-grid");
 	}
 
 	/** Creates and configures a grid for list selection with common styling and behavior.

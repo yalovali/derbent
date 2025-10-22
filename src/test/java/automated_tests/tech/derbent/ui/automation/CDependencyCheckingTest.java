@@ -19,28 +19,28 @@ public class CDependencyCheckingTest extends CBaseUITest {
 		try {
 			// Step 1: Login
 			loginToApplication("admin", "test123");
-			LOGGER.info("✓ Logged in successfully");
+			LOGGER.info("Logged in successfully");
 			wait_afterlogin();
 			// Step 2: Navigate to Activity Status
 			navigateToViewByText("Activity Status");
 			wait_1000();
-			LOGGER.info("✓ Navigated to Activity Status view");
+			LOGGER.info("Navigated to Activity Status view");
 			// Step 3: Select first status in grid
 			clickFirstGridRow();
 			wait_500();
-			LOGGER.info("✓ Selected first activity status");
+			LOGGER.info("Selected first activity status");
 			// Step 4: Click Delete button
 			clickDelete();
 			wait_500();
-			LOGGER.info("✓ Clicked Delete button");
+			LOGGER.info("Clicked Delete button");
 			// Step 5: Check for error notification
 			boolean hasErrorNotification = page.locator("vaadin-notification-card").count() > 0;
 			if (hasErrorNotification) {
 				String notificationText = page.locator("vaadin-notification-card").textContent();
-				LOGGER.info("✓ Error notification appeared: {}", notificationText);
+				LOGGER.info("Error notification appeared: {}", notificationText);
 				if (notificationText.contains("being used") || notificationText.contains("cannot delete")
 						|| notificationText.contains("non-deletable")) {
-					LOGGER.info("✓ Dependency check working correctly for activity status");
+					LOGGER.info("Dependency check working correctly for activity status");
 					takeScreenshot("activity-status-dependency-check-success", true);
 				}
 			} else {
@@ -68,31 +68,31 @@ public class CDependencyCheckingTest extends CBaseUITest {
 		try {
 			// Step 1: Login
 			loginToApplication("admin", "test123");
-			LOGGER.info("✓ Logged in successfully");
+			LOGGER.info("Logged in successfully");
 			wait_afterlogin();
 			// Step 2: Navigate to Activity Types
 			navigateToViewByText("Activity Types");
 			wait_1000();
-			LOGGER.info("✓ Navigated to Activity Types view");
+			LOGGER.info("Navigated to Activity Types view");
 			// Step 3: Select first activity type in grid
 			clickFirstGridRow();
 			wait_500();
-			LOGGER.info("✓ Selected first activity type");
+			LOGGER.info("Selected first activity type");
 			// Step 4: Click Delete button
 			clickDelete();
 			wait_500();
-			LOGGER.info("✓ Clicked Delete button");
+			LOGGER.info("Clicked Delete button");
 			// Step 5: Check if error notification appears
 			// Note: If the type is in use, we should see an error notification
 			// If not in use, confirmation dialog will appear
 			boolean hasErrorNotification = page.locator("vaadin-notification-card").count() > 0;
 			if (hasErrorNotification) {
 				String notificationText = page.locator("vaadin-notification-card").textContent();
-				LOGGER.info("✓ Error notification appeared: {}", notificationText);
+				LOGGER.info("Error notification appeared: {}", notificationText);
 				// Verify the notification mentions usage or dependencies
 				if (notificationText.contains("being used") || notificationText.contains("cannot delete")
 						|| notificationText.contains("non-deletable")) {
-					LOGGER.info("✓ Dependency check working correctly");
+					LOGGER.info("Dependency check working correctly");
 					takeScreenshot("activity-type-dependency-check-success", true);
 				} else {
 					LOGGER.warn("⚠ Notification text does not mention dependencies: {}", notificationText);
@@ -122,12 +122,12 @@ public class CDependencyCheckingTest extends CBaseUITest {
 		try {
 			// Step 1: Login
 			loginToApplication("admin", "test123");
-			LOGGER.info("✓ Logged in successfully");
+			LOGGER.info("Logged in successfully");
 			wait_afterlogin();
 			// Step 2: Navigate to Users view
 			navigateToViewByText("Users");
 			wait_1000();
-			LOGGER.info("✓ Navigated to Users view");
+			LOGGER.info("Navigated to Users view");
 			// Step 3: Count users in grid
 			Locator gridRows = page.locator("vaadin-grid-cell-content");
 			int userCount = gridRows.count();
@@ -135,19 +135,19 @@ public class CDependencyCheckingTest extends CBaseUITest {
 			// Step 4: Select first user
 			clickFirstGridRow();
 			wait_500();
-			LOGGER.info("✓ Selected first user");
+			LOGGER.info("Selected first user");
 			// Step 5: Click Delete button
 			clickDelete();
 			wait_500();
-			LOGGER.info("✓ Clicked Delete button");
+			LOGGER.info("Clicked Delete button");
 			// Step 6: Check for error notification
 			boolean hasErrorNotification = page.locator("vaadin-notification-card").count() > 0;
 			if (hasErrorNotification) {
 				String notificationText = page.locator("vaadin-notification-card").textContent();
-				LOGGER.info("✓ Error notification appeared: {}", notificationText);
+				LOGGER.info("Error notification appeared: {}", notificationText);
 				// Check if it's about last user or self-deletion
 				if (notificationText.contains("last user") || notificationText.contains("your own")) {
-					LOGGER.info("✓ User deletion protection working correctly");
+					LOGGER.info("User deletion protection working correctly");
 					takeScreenshot("user-deletion-protection-success", true);
 				} else {
 					LOGGER.info("ℹ Different error: {}", notificationText);

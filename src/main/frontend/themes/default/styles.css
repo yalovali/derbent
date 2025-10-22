@@ -5,6 +5,7 @@
 @import url("project-details.css");
 @import url("accordion.css");
 @import url("basedetails.css");
+@import url("grid.css");
 
 /* Hide checkmark indicator in CComponentFieldSelection ListBox items */
 .no-selection-indicator vaadin-list-box vaadin-item::before {

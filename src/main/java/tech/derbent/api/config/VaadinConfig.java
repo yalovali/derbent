@@ -32,7 +32,6 @@ public class VaadinConfig {
 		System.setProperty("org.atmosphere.runtime.webSocketEngine", "false");
 		// Force the use of blocking servlet container support only
 		System.setProperty("org.atmosphere.container.servlet", "org.atmosphere.container.BlockingIOCometSupport");
-		LOGGER.info("✅ Atmosphere configured to use blocking I/O transport only - WebSocket protocol disabled");
 		LOGGER.debug("Atmosphere system properties: JSR356={}, blocking={}, autoDetect={}",
 				System.getProperty("org.atmosphere.container.JSR356AsyncSupport.force"), System.getProperty("org.atmosphere.useBlocking"),
 				System.getProperty("org.atmosphere.cpr.AtmosphereFramework.autoDetectHandlers"));

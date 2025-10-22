@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -67,6 +68,8 @@ public final class CColorUtils {
 	/** Default text color for dark backgrounds */
 	public static final String DEFAULT_LIGHT_TEXT = "white";
 	private static final Logger LOGGER = LoggerFactory.getLogger(CColorUtils.class);
+	public static String Symbol_BoxChecked = "☒";
+	public static String Symbol_BoxUnchecked = "☐";
 
 	public static Span createStyledHeader(String text, String color) {
 		Span header = new Span(text);
@@ -92,7 +95,7 @@ public final class CColorUtils {
 		return icon;
 	}
 
-	public static void debugStyleOfComponent(com.vaadin.flow.component.Component component) {
+	public static void debugStyleOfComponent(Component component) {
 		if (component == null) {
 			LOGGER.debug("Component is null, cannot debug style");
 			return;

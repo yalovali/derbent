@@ -21,32 +21,6 @@ import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.grids.CGrid;
 
-/** Generic field selection component for selecting and ordering items from a source list. This component provides a two-panel interface with
- * available items on the left and selected items on the right, with buttons for adding, removing, and reordering selections. Implements HasValue and
- * HasValueAndElement to integrate with Vaadin binders. Uses CGrid for better selection handling and consistency with the rest of the application.
- * <p>
- * Features:
- * <ul>
- * <li>Color-aware rendering for CEntityNamed entities (displays with colors and icons)</li>
- * <li>Text rendering for non-entity types (strings, numbers, etc.)</li>
- * <li>Add/Remove buttons for moving items between grids</li>
- * <li>Up/Down buttons for reordering selected items</li>
- * <li>Double-click support for quick item movement</li>
- * <li>Full Vaadin binder integration with List support for ordered fields</li>
- * <li>Read-only mode support</li>
- * <li>Preserves ordering for fields with @OrderColumn annotation</li>
- * <li>Uses CGrid for better selection change triggers and consistency</li>
- * </ul>
- * <p>
- * Usage Pattern:
- * <ol>
- * <li>Call setSourceItems(allAvailableItems) to provide the complete list of items that can be selected</li>
- * <li>Binder will call setValue(entity.getFieldValue()) to set currently selected items from the entity</li>
- * <li>Component automatically separates items into selected and available grids</li>
- * <li>Order of selected items is preserved for fields with @OrderColumn</li>
- * </ol>
- * @param <MasterEntity> The master entity type (e.g., CUser)
- * @param <DetailEntity> The detail entity type to select (e.g., CActivity) */
 public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHorizontalLayout
 		implements HasValue<HasValue.ValueChangeEvent<List<DetailEntity>>, List<DetailEntity>>,
 		HasValueAndElement<HasValue.ValueChangeEvent<List<DetailEntity>>, List<DetailEntity>> {
@@ -71,22 +45,10 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	private final List<DetailEntity> sourceItems = new ArrayList<>();
 	private CButton upButton;
 
-	/** Creates a new field selection component with default titles.
-	 * @param string2
-	 * @param string
-	 * @param fieldInfo2
-	 * @param contentOwner2
-	 * @param dataProviderResolver */
 	public CComponentFieldSelection() {
 		this(null, null, null, "Available Items", "Selected Items");
 	}
 
-	/** Creates a new field selection component with custom titles.
-	 * @param fieldInfo
-	 * @param contentOwner
-	 * @param availableTitle Title for available items panel (must not be null or blank)
-	 * @param selectedTitle  Title for selected items panel (must not be null or blank)
-	 * @throws IllegalArgumentException if titles are null or blank */
 	public CComponentFieldSelection(CDataProviderResolver dataProviderResolver, IContentOwner contentOwner, EntityFieldInfo fieldInfo,
 			String availableTitle, String selectedTitle) {
 		super();
@@ -98,8 +60,6 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		initializeUI(availableTitle, selectedTitle);
 	}
 
-	/** Adds the selected item from availableGrid to selectedItems. If there's a selection in the selected grid, the new item is inserted below it.
-	 * Otherwise, it's added to the end of the list. */
 	private void addSelectedItem() {
 		LOGGER.debug("Adding selected item from available grid");
 		DetailEntity selected = availableGrid.asSingleSelect().getValue();
@@ -122,10 +82,6 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		selectedGrid.asSingleSelect().setValue(selected);
 	}
 
-	/** Adds a value change listener.
-	 * @param listener The listener to add (must not be null)
-	 * @return Registration for removing the listener
-	 * @throws IllegalArgumentException if listener is null */
 	@Override
 	public Registration addValueChangeListener(ValueChangeListener<? super ValueChangeEvent<List<DetailEntity>>> listener) {
 		Check.notNull(listener, "ValueChangeListener cannot be null");
@@ -133,8 +89,6 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 		return () -> listeners.remove(listener);
 	}
 
-	/** Clears all selected items.
-	 * @throws IllegalStateException if refresh fails */
 	@Override
 	public void clear() {
 		try {
