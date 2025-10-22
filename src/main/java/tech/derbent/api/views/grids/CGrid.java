@@ -61,6 +61,26 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 		grid.getStyle().set("border", "1px solid #E0E0E0");
 		grid.setWidthFull();
 		CAuxillaries.setId(grid);
+		// Prevent deselection when clicking on already-selected item
+		preventDeselection(grid);
+	}
+
+	/** Prevents a selected item from being deselected when clicked again. This is important for double-click scenarios where the user might
+	 * accidentally click the grid again after double-clicking, causing the selected item to become null before the dialog opens.
+	 * @param <T>  the entity type
+	 * @param grid the grid to configure */
+	private static <T> void preventDeselection(final Grid<T> grid) {
+		final java.util.concurrent.atomic.AtomicReference<T> lastSelection = new java.util.concurrent.atomic.AtomicReference<>();
+		grid.asSingleSelect().addValueChangeListener(event -> {
+			// If selection is being cleared and we had a previous selection, restore it
+			if (event.getValue() == null && lastSelection.get() != null) {
+				// Restore the previous selection to prevent accidental deselection
+				grid.asSingleSelect().setValue(lastSelection.get());
+			} else {
+				// Update the last selection
+				lastSelection.set(event.getValue());
+			}
+		});
 	}
 
 	/** Constructor for CGrid with entity class.
@@ -417,6 +437,8 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 		getColumns().forEach(this::removeColumn);
 		setHeightFull();
 		CAuxillaries.setId(this);
+		// Prevent deselection when clicking on already-selected item
+		preventDeselection(this);
 		// Ensure grid always has a selected row when data is available
 		getDataProvider().addDataProviderListener(e -> {
 			ensureSelectionWhenDataAvailable();
