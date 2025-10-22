@@ -30,8 +30,8 @@ public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> 
 		public T getSelectedItem() { return selectedItem; }
 	}
 
-	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CMasterViewSectionGrid.class);
+	private static final long serialVersionUID = 1L;
 	protected CGrid<EntityClass> grid;
 
 	public CMasterViewSectionGrid(final Class<EntityClass> entityClass, final CAbstractEntityDBPage<EntityClass> page) {
@@ -70,6 +70,14 @@ public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> 
 	protected void onSelectionChange(final ValueChangeEvent<?> event) {
 		LOGGER.debug("Grid selection changed: {}", event.getValue() != null ? event.getValue().toString() : "null");
 		final EntityClass value = (EntityClass) event.getValue();
+		// reselect the old one, if new selection is null
+		// if (value == null && event.getOldValue() != null) {
+		// final EntityClass oldValue = (EntityClass) event.getOldValue();
+		// final SingleSelect<?, ?> rawSelect = grid.asSingleSelect();
+		// rawSelect.setValue(oldValue);
+		// // dont fire event
+		// return;
+		// }
 		fireEvent(new SelectionChangeEvent<>(this, value));
 	}
 
@@ -79,6 +87,7 @@ public class CMasterViewSectionGrid<EntityClass extends CEntityDB<EntityClass>> 
 	}
 
 	/** Select a specific item (null clears). */
+	@Override
 	public void select(final EntityClass item) {
 		grid.asSingleSelect().setValue(item);
 	}

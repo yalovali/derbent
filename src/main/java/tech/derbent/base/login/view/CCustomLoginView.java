@@ -25,6 +25,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import tech.derbent.api.config.CDataInitializer;
 import tech.derbent.api.services.CRouteDiscoveryService;
 import tech.derbent.api.ui.dialogs.CInformationDialog;
 import tech.derbent.api.utils.CColorUtils;
@@ -34,7 +35,6 @@ import tech.derbent.api.views.components.CDiv;
 import tech.derbent.api.views.components.CHorizontalLayout;
 import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.companies.service.CCompanyService;
-import tech.derbent.api.config.CDataInitializer;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.setup.service.CSystemSettingsService;
 
@@ -52,8 +52,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 	private final Button loginButton = new CButton("Login", CColorUtils.createStyledIcon("vaadin:sign-in", CColorUtils.CRUD_SAVE_COLOR));
 	private final PasswordField passwordField = new PasswordField();
 	private final Button resetDbButton = new CButton("DB Full", CColorUtils.createStyledIcon("vaadin:refresh", CColorUtils.CRUD_UPDATE_COLOR));
-	private final Button resetDbMinimalButton =
-			new CButton("DB Minimal", CColorUtils.createStyledIcon("vaadin:refresh", CColorUtils.CRUD_UPDATE_COLOR));
+	private final Button resetDbMinimalButton = new CButton("DB Min", CColorUtils.createStyledIcon("vaadin:refresh", CColorUtils.CRUD_UPDATE_COLOR));
 	private final ISessionService sessionService;
 	private final TextField usernameField = new TextField();
 
@@ -173,6 +172,7 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		passwordField.setId("custom-password-input");
 		// Add click listener to login button
 		loginButton.addClickListener(e -> handleLogin());
+		loginButton.setMinWidth("120px");
 		// Add enter key listener to password field
 		passwordField.addKeyPressListener(com.vaadin.flow.component.Key.ENTER, e -> handleLogin());
 		// Database reset button setup
@@ -219,7 +219,8 @@ public class CCustomLoginView extends Main implements BeforeEnterObserver {
 		errorMessage.setWidthFull();
 		// set min height for error message
 		errorMessage.getStyle().set("min-height", "20px");
-		// Password hint
+		resetDbButton.setMinWidth("120px");
+		resetDbButton.setMinWidth("120px");
 		final Paragraph passwordHint = new Paragraph("Default: admin/test123");
 		passwordHint.addClassNames(LumoUtility.TextColor.SECONDARY, LumoUtility.FontSize.SMALL);
 		passwordHint.setWidthFull();

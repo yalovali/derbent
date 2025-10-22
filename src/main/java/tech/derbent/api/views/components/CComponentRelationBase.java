@@ -27,7 +27,7 @@ public abstract class CComponentRelationBase<MasterClass extends CEntityDB<Maste
 		super(title, entityClass, applicationContext);
 		this.relationalClass = relationalClass;
 		this.sessionService = sessionService;
-		grid = new Grid<>(relationalClass, false);
+		grid = new CGrid<>(relationalClass);
 		getSettings = () -> List.of();
 	}
 

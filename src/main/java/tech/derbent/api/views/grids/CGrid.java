@@ -12,25 +12,27 @@ import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridSingleSelectionModel;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.function.ValueProvider;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.domains.CEntityConstants;
 import tech.derbent.api.domains.CEntityDB;
+import tech.derbent.api.screens.service.CEntityFieldService;
+import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.utils.CAuxillaries;
 import tech.derbent.api.utils.CImageUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.components.CGridCell;
 import tech.derbent.api.views.components.CPictureSelector;
-import tech.derbent.api.screens.service.CEntityFieldService;
-import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 
 /** CGrid - Base grid class for consistent field width management based on data types. Layer: View (MVC) Follows the project's coding guidelines by
  * providing a base class for all grids to ensure consistent column widths based on field types: - ID fields: Very small width (80px) - Integer
  * fields: Small width (100px) - BigDecimal fields: Medium width (120px) - Date fields: Medium width (150px) - Boolean/Status fields: Small-Medium
  * width (100px) - Short text fields: Medium width (200px) - Long text fields: Large width (300px+) - Reference fields: Medium width (200px) */
-public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<EntityClass> {
+// public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<EntityClass> {
+public class CGrid<EntityClass> extends Grid<EntityClass> {
 
 	private static final long serialVersionUID = 1L;
 	public static final String WIDTH_BOOLEAN = "100px";
@@ -54,17 +56,6 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 		}
 	}
 
-	public static <T> void setupGrid(final Grid<T> grid) {
-		Check.notNull(grid, "Grid cannot be null when setting up relational component");
-		grid.setSelectionMode(Grid.SelectionMode.SINGLE);
-		grid.getStyle().set("border-radius", "8px");
-		grid.getStyle().set("border", "1px solid #E0E0E0");
-		grid.setWidthFull();
-		CAuxillaries.setId(grid);
-		// Prevent deselection when clicking on already-selected item
-		preventDeselection(grid);
-	}
-
 	/** Prevents a selected item from being deselected when clicked again. This is important for double-click scenarios where the user might
 	 * accidentally click the grid again after double-clicking, causing the selected item to become null before the dialog opens.
 	 * @param <T>  the entity type
@@ -81,6 +72,19 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 				lastSelection.set(event.getValue());
 			}
 		});
+	}
+
+	public static <T> void setupGrid(final Grid<T> grid) {
+		Check.notNull(grid, "Grid cannot be null when setting up relational component");
+		grid.setSelectionMode(Grid.SelectionMode.SINGLE);
+		GridSingleSelectionModel<T> sm = (GridSingleSelectionModel<T>) grid.getSelectionModel();
+		sm.setDeselectAllowed(false);
+		grid.getStyle().set("border-radius", "8px");
+		grid.getStyle().set("border", "1px solid #E0E0E0");
+		grid.setWidthFull();
+		CAuxillaries.setId(grid);
+		// Prevent deselection when clicking on already-selected item
+		// preventDeselection(grid);
 	}
 
 	/** Constructor for CGrid with entity class.
@@ -151,12 +155,12 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 				final Collection<?> items = valueProvider.apply(entity);
 				// Check if collection is null or not initialized (lazy loading)
 				if (items == null || !Hibernate.isInitialized(items)) {
-					LOGGER.debug("Collection for header '{}' is null or not initialized for entity ID: {}", header, entity.getId());
+					LOGGER.debug("Collection for header '{}' is null or not initialized for entity ID: {}", header, entity.toString());
 					return "No " + header.toLowerCase(); // e.g. "No participants"
 				}
 				// Safe to call isEmpty() now since collection is initialized
 				if (items.isEmpty()) {
-					LOGGER.debug("Collection for header '{}' is empty for entity ID: {}", header, entity.getId());
+					LOGGER.debug("Collection for header '{}' is empty for entity ID: {}", header, entity.toString());
 					return "No " + header.toLowerCase();
 				}
 				// Handle different collection item types
@@ -180,7 +184,7 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 				}).collect(Collectors.joining(", "));
 			} catch (final Exception e) {
 				LOGGER.error("Error rendering collection column for header '{}' on entity ID {}: {}", header,
-						entity != null ? entity.getId() : "null", e.getMessage(), e);
+						entity != null ? entity.toString() : "null", e.getMessage(), e);
 				return "[Error rendering collection]";
 			}
 		};
@@ -418,7 +422,7 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 			// Only auto-select if no current selection and data is available
 			if (asSingleSelect().getValue() == null) {
 				getDataProvider().fetch(new com.vaadin.flow.data.provider.Query<>()).findFirst().ifPresent(entity -> {
-					LOGGER.debug("Auto-selecting first entity: {}", entity.getId());
+					LOGGER.debug("Auto-selecting first entity: {}", entity.toString());
 					select(entity);
 				});
 			}
@@ -443,13 +447,15 @@ public class CGrid<EntityClass extends CEntityDB<EntityClass>> extends Grid<Enti
 		getDataProvider().addDataProviderListener(e -> {
 			ensureSelectionWhenDataAvailable();
 		});
+		GridSingleSelectionModel<EntityClass> sm = (GridSingleSelectionModel<EntityClass>) getSelectionModel();
+		sm.setDeselectAllowed(false);
 	}
 
 	public boolean isShowIconInStatusColumns() { return showIconInStatusColumns; }
 
 	@Override
 	public void select(final EntityClass entity) {
-		LOGGER.debug("Selecting entity: {}", entity != null ? entity.getId() : "null");
+		LOGGER.debug("Selecting entity: {}", entity != null ? entity.toString() : "null");
 		if (entity == getSelectedItems().stream().findFirst().orElse(null)) {
 			// LOGGER.debug("Entity is already selected, skipping.");
 			return;

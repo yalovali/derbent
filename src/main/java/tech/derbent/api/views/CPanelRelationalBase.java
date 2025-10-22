@@ -7,6 +7,7 @@ import tech.derbent.api.components.CEnhancedBinder;
 import tech.derbent.api.domains.CEntityDB;
 import tech.derbent.api.interfaces.IContentOwner;
 import tech.derbent.api.services.CAbstractService;
+import tech.derbent.api.views.grids.CGrid;
 
 public abstract class CPanelRelationalBase<MasterClass extends CEntityDB<MasterClass>, RelationalClass extends CEntityDB<RelationalClass>>
 		extends CAccordionDBEntity<MasterClass> {
@@ -21,7 +22,7 @@ public abstract class CPanelRelationalBase<MasterClass extends CEntityDB<MasterC
 			final Class<MasterClass> entityClass, final CAbstractService<MasterClass> masterService, final Class<RelationalClass> relationalClass) {
 		super(title, parentContent, beanValidationBinder, entityClass, masterService);
 		this.relationalClass = relationalClass;
-		this.grid = new Grid<>(relationalClass, false);
+		this.grid = new CGrid<>(relationalClass);
 		this.getSettings = () -> List.of();
 	}
 

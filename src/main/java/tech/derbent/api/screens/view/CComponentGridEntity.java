@@ -428,7 +428,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	/** Gets the currently selected item from the grid */
 	public CEntityDB<?> getSelectedItem() {
 		if (grid != null) {
-			return grid.asSingleSelect().getValue();
+			return (CEntityDB<?>) grid.asSingleSelect().getValue();
 		}
 		return null;
 	}
@@ -577,9 +577,18 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 	}
 
 	/** Handles grid selection changes and fires SelectionChangeEvent */
+	@SuppressWarnings ({
+			"rawtypes", "unchecked"
+	})
 	protected void onSelectionChange(ValueChangeEvent<?> event) {
-		// LOGGER.debug("Grid selection changed: {}", event.getValue() != null ? event.getValue().toString() : "null");
 		CEntityDB<?> selectedEntity = (CEntityDB<?>) event.getValue();
+		// reselect the old one, if new selection is null
+		// if (selectedEntity == null && event.getOldValue() != null) {
+		// SingleSelect rawSelect = grid.asSingleSelect();
+		// rawSelect.setValue(event.getOldValue());
+		// // dont fire event
+		// return;
+		// }
 		fireEvent(new SelectionChangeEvent(this, selectedEntity));
 	}
 
@@ -712,7 +721,7 @@ public class CComponentGridEntity extends CDiv implements IProjectChangeListener
 			// Select next item, or first item if we were at the end
 			int nextIndex = (currentIndex + 1) < items.size() ? (currentIndex + 1) : 0;
 			Object nextItem = items.get(nextIndex);
-			rawGrid.select((CEntityDB) nextItem);
+			rawGrid.select(nextItem);
 			// LOGGER.debug("Selected next item at index: {}", nextIndex);
 		} else {
 			// No current selection, select first item

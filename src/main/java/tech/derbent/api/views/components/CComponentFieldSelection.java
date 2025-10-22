@@ -16,10 +16,10 @@ import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.annotations.CDataProviderResolver;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.interfaces.IContentOwner;
+import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.grids.CGrid;
-import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 
 /** Generic field selection component for selecting and ordering items from a source list. This component provides a two-panel interface with
  * available items on the left and selected items on the right, with buttons for adding, removing, and reordering selections. Implements HasValue and
@@ -187,7 +187,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	 * @param header The header text for the grid column
 	 * @return Configured Grid instance */
 	private Grid<DetailEntity> createAndSetupGrid(String header) {
-		Grid<DetailEntity> grid = new Grid<>();
+		CGrid<DetailEntity> grid = new CGrid<>(DetailEntity);
 		CGrid.setupGrid(grid);
 		grid.setHeight(DEFAULT_GRID_HEIGHT);
 		configureGridColumn(grid, header);
