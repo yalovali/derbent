@@ -1,6 +1,7 @@
 package tech.derbent.api.utils;
 
 import java.util.Collection;
+import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +15,8 @@ public class Check {
 	private static final String DEFAULT_EMPTY_MESSAGE = "Collection cannot be empty";
 	/** Default error message for blank string checks */
 	private static final String DEFAULT_BLANK_MESSAGE = "String cannot be null or blank";
+	/** Default error message for uninitialized entity checks */
+	private static final String DEFAULT_UNINITIALIZED_MESSAGE = "Entity must be initialized (not a lazy-loaded Hibernate proxy)";
 	private static final Logger LOGGER = LoggerFactory.getLogger(Check.class);
 	/* ============================== */
 	/* Common caller/location helpers */
@@ -458,6 +461,33 @@ public class Check {
 		final int size = collection.size();
 		if ((size < minSize) || (size > maxSize)) {
 			final String def = String.format("Collection size %d is not between %d and %d (inclusive)", size, minSize, maxSize);
+			final String m = msg(message, def);
+			logFail(m);
+			throw new IllegalArgumentException(m);
+		}
+	}
+
+	/** Validates that a Hibernate entity is fully initialized (not a lazy-loaded proxy). This check helps prevent bugs where uninitialized
+	 * lazy-loaded entities are used in contexts that require fully loaded objects, such as form binding or ComboBox value matching.
+	 * @param entity the entity to validate
+	 * @throws IllegalArgumentException if entity is an uninitialized Hibernate proxy */
+	public static void isInitialized(final Object entity) {
+		isInitialized(entity, DEFAULT_UNINITIALIZED_MESSAGE);
+	}
+
+	/** Validates that a Hibernate entity is fully initialized (not a lazy-loaded proxy). This check helps prevent bugs where uninitialized
+	 * lazy-loaded entities are used in contexts that require fully loaded objects, such as form binding or ComboBox value matching.
+	 * @param entity  the entity to validate
+	 * @param message custom error message, or null for default
+	 * @throws IllegalArgumentException if entity is an uninitialized Hibernate proxy */
+	public static void isInitialized(final Object entity, final String message) {
+		if (entity == null) {
+			return; // Null entities are considered "initialized" (no proxy)
+		}
+		if (!Hibernate.isInitialized(entity)) {
+			final String entityInfo = entity.getClass().getSimpleName();
+			final String def =
+					String.format("Entity '%s' is not initialized. Call initializeAllFields() or access a property before use.", entityInfo);
 			final String m = msg(message, def);
 			logFail(m);
 			throw new IllegalArgumentException(m);
