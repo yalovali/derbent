@@ -38,9 +38,18 @@ public abstract class CAbstractEntityRelationPanel<ParentEntity extends CEntityD
 			final CEnhancedBinder<ParentEntity> beanValidationBinder, final Class<ParentEntity> entityClass,
 			final CAbstractService<ParentEntity> entityService) {
 		super(title, parentContent, beanValidationBinder, entityClass, entityService);
+		initializeGrid();
 		setupGrid();
 		setupButtons();
 		closePanel();
+	}
+
+	/** Initialize grid with common settings */
+	private void initializeGrid() {
+		grid.setSelectionMode(Grid.SelectionMode.SINGLE);
+		com.vaadin.flow.component.grid.GridSingleSelectionModel<RelationEntity> sm =
+				(com.vaadin.flow.component.grid.GridSingleSelectionModel<RelationEntity>) grid.getSelectionModel();
+		sm.setDeselectAllowed(false);
 	}
 
 	/** Abstract method to create delete confirmation message */
