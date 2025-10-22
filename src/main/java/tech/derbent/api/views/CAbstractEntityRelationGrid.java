@@ -32,6 +32,9 @@ public class CAbstractEntityRelationGrid<RelationEntity extends CEntityDB<Relati
 		addThemeVariants(GridVariant.LUMO_COMPACT);
 		setHeightFull();
 		setSelectionMode(SelectionMode.SINGLE);
+		com.vaadin.flow.component.grid.GridSingleSelectionModel<RelationEntity> sm =
+				(com.vaadin.flow.component.grid.GridSingleSelectionModel<RelationEntity>) getSelectionModel();
+		sm.setDeselectAllowed(false);
 		CAuxillaries.setId(this);
 	}
 

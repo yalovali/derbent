@@ -144,6 +144,9 @@ public abstract class CPanelUserProjectBase<MasterClass extends CEntityNamed<Mas
 				.setSortable(true);
 		grid.addColumn(this::getPermissionAsString).setHeader(CColorUtils.createStyledHeader("Permission", "#1a65Cf")).setAutoWidth(true);
 		grid.setSelectionMode(com.vaadin.flow.component.grid.Grid.SelectionMode.SINGLE);
+		com.vaadin.flow.component.grid.GridSingleSelectionModel<CUserProjectSettings> sm =
+				(com.vaadin.flow.component.grid.GridSingleSelectionModel<CUserProjectSettings>) grid.getSelectionModel();
+		sm.setDeselectAllowed(false);
 		addToContent(grid);
 	}
 
