@@ -38,7 +38,7 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 
 	@Override
 	protected void deleteRelation(CWorkflowStatusRelation selected) throws Exception {
-		workflowStatusRelationService.deleteByWorkflowAndStatuses(selected.getWorkflow(), selected.getFromStatus(), selected.getToStatus());
+		workflowStatusRelationService.deleteByWorkflowAndStatuses(selected.getWorkflowEntity(), selected.getFromStatus(), selected.getToStatus());
 	}
 
 	@Override
@@ -59,9 +59,9 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 		Check.notNull(relation, "Relation cannot be null when getting display text");
 		try {
 			switch (type) {
-			case "workflow":
-				Check.notNull(relation.getWorkflow(), "Workflow cannot be null");
-				return CColorUtils.getDisplayTextFromEntity(relation.getWorkflow());
+			case "workflowentity":
+				Check.notNull(relation.getWorkflowEntity(), "Workflow cannot be null");
+				return CColorUtils.getDisplayTextFromEntity(relation.getWorkflowEntity());
 			case "fromStatus":
 				Check.notNull(relation.getFromStatus(), "From status cannot be null");
 				return CColorUtils.getDisplayTextFromEntity(relation.getFromStatus());
@@ -94,8 +94,8 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 			Check.notNull(relation, "Relation cannot be null when saving");
 			LOGGER.debug("Saving workflow status relation: {}", relation);
 			final CWorkflowStatusRelation savedRelation =
-					relation.getId() == null ? workflowStatusRelationService.addStatusTransition(relation.getWorkflow(), relation.getFromStatus(),
-							relation.getToStatus(), relation.getRoles()) : workflowStatusRelationService.save(relation);
+					relation.getId() == null ? workflowStatusRelationService.addStatusTransition(relation.getWorkflowEntity(),
+							relation.getFromStatus(), relation.getToStatus(), relation.getRoles()) : workflowStatusRelationService.save(relation);
 			LOGGER.info("Successfully saved workflow status relation: {}", savedRelation);
 			populateForm();
 		} catch (final Exception e) {
@@ -123,10 +123,10 @@ public abstract class CComponentWorkflowStatusRelationBase<MasterClass extends C
 			if (!isWorkflowMaster()) {
 				grid.addComponentColumn(relation -> {
 					try {
-						return CColorUtils.getEntityWithIcon(relation.getWorkflow());
+						return CColorUtils.getEntityWithIcon(relation.getWorkflowEntity());
 					} catch (Exception e) {
 						LOGGER.error("Failed to create workflow component.");
-						return new com.vaadin.flow.component.html.Span(getDisplayText(relation, "workflow"));
+						return new com.vaadin.flow.component.html.Span(getDisplayText(relation, "workflowentity"));
 					}
 				}).setHeader(CColorUtils.createStyledHeader("Workflow", "#2E7D32")).setAutoWidth(true).setSortable(true);
 			}

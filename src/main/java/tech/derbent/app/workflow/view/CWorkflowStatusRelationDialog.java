@@ -74,7 +74,7 @@ public class CWorkflowStatusRelationDialog extends CDBRelationDialog<CWorkflowSt
 					getEntity().getFromStatus().getName()));
 		}
 		// Check for duplicate transition (only for new entities or if statuses changed)
-		final CWorkflowEntity workflow = getEntity().getWorkflow();
+		final CWorkflowEntity workflow = getEntity().getWorkflowEntity();
 		if (workflow != null && workflow.getId() != null && getEntity().getFromStatus().getId() != null
 				&& getEntity().getToStatus().getId() != null) {
 			// For new entities, check if transition already exists

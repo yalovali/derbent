@@ -58,9 +58,9 @@ public class CActivityStatusService extends CStatusService<CActivityStatus> {
 			if (!fromStatusRelations.isEmpty() || !toStatusRelations.isEmpty()) {
 				// Collect unique workflow names
 				final List<String> workflowNames =
-						fromStatusRelations.stream().map(r -> r.getWorkflow().getName()).distinct().collect(Collectors.toList());
+						fromStatusRelations.stream().map(r -> r.getWorkflowEntity().getName()).distinct().collect(Collectors.toList());
 				final List<String> toWorkflowNames =
-						toStatusRelations.stream().map(r -> r.getWorkflow().getName()).distinct().collect(Collectors.toList());
+						toStatusRelations.stream().map(r -> r.getWorkflowEntity().getName()).distinct().collect(Collectors.toList());
 				workflowNames.addAll(toWorkflowNames);
 				final List<String> uniqueWorkflowNames = workflowNames.stream().distinct().collect(Collectors.toList());
 				if (uniqueWorkflowNames.size() == 1) {

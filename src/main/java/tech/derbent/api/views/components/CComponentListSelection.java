@@ -13,10 +13,10 @@ import com.vaadin.flow.shared.Registration;
 import tech.derbent.api.annotations.CDataProviderResolver;
 import tech.derbent.api.domains.CEntityNamed;
 import tech.derbent.api.interfaces.IContentOwner;
+import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 import tech.derbent.api.utils.CColorUtils;
 import tech.derbent.api.utils.Check;
 import tech.derbent.api.views.grids.CGrid;
-import tech.derbent.api.screens.service.CEntityFieldService.EntityFieldInfo;
 
 /** Generic list selection component for selecting items from a source list with colorful icons and checkmarks. This component displays items in a
  * single grid with a checkbox-style selection (showing a tick for selected items). Unlike CComponentFieldSelection, this component does NOT support
@@ -308,6 +308,8 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 	@Override
 	public void setValue(List<DetailEntity> value) {
 		try {
+			Check.notNull(fieldInfo, "Field info cannot be null before setting value");
+			Check.notNull(dataProviderResolver, "Data provider resolver cannot be null before setting value");
 			LOGGER.info("Binder triggered setValue on CComponentListSelection - reading {} selected items from entity field",
 					value != null ? value.size() : 0);
 			selectedItems.clear();

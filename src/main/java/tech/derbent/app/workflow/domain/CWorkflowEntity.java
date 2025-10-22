@@ -36,7 +36,7 @@ public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 	)
 	private Boolean isActive = Boolean.TRUE;
 	// lets keep it layzily loaded to avoid loading all status relations at once
-	@OneToMany (mappedBy = "workflow", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@OneToMany (mappedBy = "workflowentity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@AMetaData (
 			displayName = "Status Transitions", required = false, readOnly = false, description = "Status transitions for this workflow",
 			hidden = false, order = 10, dataProviderBean = "CWorkflowEntityService", createComponentMethod = "createWorkflowStatusRelationsComponent",
@@ -66,7 +66,7 @@ public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 		}
 		if (!statusRelations.contains(relation)) {
 			statusRelations.add(relation);
-			relation.setWorkflow(this);
+			relation.setWorkflowEntity(this);
 		}
 	}
 
@@ -96,7 +96,7 @@ public class CWorkflowEntity extends CWorkflowBase<CWorkflowEntity> {
 	public void removeStatusRelation(final CWorkflowStatusRelation relation) {
 		Check.notNull(relation, "Status relation cannot be null");
 		if (statusRelations.remove(relation)) {
-			relation.setWorkflow(null);
+			relation.setWorkflowEntity(null);
 		}
 	}
 

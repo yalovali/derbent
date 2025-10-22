@@ -18,12 +18,12 @@ import tech.derbent.app.workflow.domain.CWorkflowStatusRelation;
 public final class CWorkflowStatusRelationInitializerService extends CInitializerServiceBase {
 
 	public static final String BASE_PANEL_NAME = "Workflow Status Transitions";
-	private static final Logger LOGGER = LoggerFactory.getLogger(CWorkflowStatusRelationInitializerService.class);
 	private static final Class<?> ENTITY_CLASS = CWorkflowStatusRelation.class;
-	private static final String menuTitle = "Relations.Workflow Status Transitions";
-	private static final String pageTitle = "Workflow Status Transition Management";
-	private static final String pageDescription = "Manage workflow status transitions and role permissions";
+	private static final Logger LOGGER = LoggerFactory.getLogger(CWorkflowStatusRelationInitializerService.class);
 	private static final String menuOrder = "1.2";
+	private static final String menuTitle = "Relations.Workflow Status Transitions";
+	private static final String pageDescription = "Manage workflow status transitions and role permissions";
+	private static final String pageTitle = "Workflow Status Transition Management";
 	private static final boolean showInQuickToolbar = false;
 
 	private static void addOptionalField(final CDetailSection detailSection, final String fieldName) {
@@ -39,7 +39,7 @@ public final class CWorkflowStatusRelationInitializerService extends CInitialize
 		try {
 			final CDetailSection detailSection = createBaseScreenEntity(project, ENTITY_CLASS);
 			detailSection.addScreenLine(CDetailLinesService.createSection(BASE_PANEL_NAME));
-			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "workflow"));
+			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "workflowentity"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "fromStatus"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "toStatus"));
 			detailSection.addScreenLine(CDetailLinesService.createLineFromDefaults(ENTITY_CLASS, "role"));
@@ -59,7 +59,7 @@ public final class CWorkflowStatusRelationInitializerService extends CInitialize
 
 	public static CGridEntity createGridEntity(final CProject project) {
 		final CGridEntity grid = createBaseGridEntity(project, ENTITY_CLASS);
-		grid.setColumnFields(List.of("id", "workflow", "fromStatus", "toStatus", "role", "active"));
+		grid.setColumnFields(List.of("id", "workflowentity", "fromStatus", "toStatus", "role", "active"));
 		return grid;
 	}
 

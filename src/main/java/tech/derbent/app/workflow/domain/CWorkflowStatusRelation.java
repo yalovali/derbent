@@ -63,7 +63,7 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 			displayName = "Workflow", required = true, readOnly = false, description = "The workflow this status relation belongs to", hidden = false,
 			order = 3, setBackgroundFromColor = true, useIcon = true, dataProviderBean = "CWorkflowEntityService"
 	)
-	private CWorkflowEntity workflow;
+	private CWorkflowEntity workflowentity;
 
 	public CWorkflowStatusRelation() {
 		super(CWorkflowStatusRelation.class);
@@ -77,13 +77,13 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 
 	public CActivityStatus getToStatus() { return toStatus; }
 
-	public CWorkflowEntity getWorkflow() { return workflow; }
+	public CWorkflowEntity getWorkflowEntity() { return workflowentity; }
 
 	@Override
 	public void initializeAllFields() {
 		// initialize lazily loaded fields
-		if (workflow != null) {
-			workflow.getName();
+		if (workflowentity != null) {
+			workflowentity.getName();
 		}
 		if (fromStatus != null) {
 			fromStatus.getName();
@@ -104,12 +104,12 @@ public class CWorkflowStatusRelation extends CEntityDB<CWorkflowStatusRelation> 
 
 	public void setToStatus(final CActivityStatus toStatus) { this.toStatus = toStatus; }
 
-	public void setWorkflow(final CWorkflowEntity workflow) { this.workflow = workflow; }
+	public void setWorkflowEntity(final CWorkflowEntity workflowentity) { this.workflowentity = workflowentity; }
 
 	@Override
 	public String toString() {
 		return String.format("WorkflowStatusRelation[workflow id=%s, from status id=%s, to status id=%s, roles=%s]",
-				workflow != null ? CSpringAuxillaries.safeGetId(workflow) : null,
+				workflowentity != null ? CSpringAuxillaries.safeGetId(workflowentity) : null,
 				fromStatus != null ? CSpringAuxillaries.safeGetId(fromStatus) : null,
 				toStatus != null ? CSpringAuxillaries.safeGetId(toStatus) : null,
 				roles != null ? roles.stream().map(CSpringAuxillaries::safeToString).collect(java.util.stream.Collectors.joining(", ")) : "[]");

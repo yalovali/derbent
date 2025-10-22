@@ -37,15 +37,6 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 	private final IContentOwner parentContent;
 	private final CAbstractEntityRelationService<RelationshipClass> relationService;
 
-	/** Constructor for relationship dialogs.
-	 * @param parentContent   The parent content owner for context access
-	 * @param relationship    The relationship entity to edit, or null for new
-	 * @param mainEntity      The main entity that owns the relationship
-	 * @param masterService   Service for the main entity
-	 * @param detailService   Service for the related entity
-	 * @param relationService
-	 * @param onSave          Callback executed when relationship is saved
-	 * @param isNew           True for new relationships, false for editing existing ones */
 	public CDBRelationDialog(final IContentOwner parentContent, final RelationshipClass relationship, final MainEntityClass mainEntity,
 			final CAbstractService<MainEntityClass> masterService, final CAbstractService<RelatedEntityClass> detailService,
 			final CAbstractEntityRelationService<RelationshipClass> relationService, final Consumer<RelationshipClass> onSave, final boolean isNew) {
@@ -110,15 +101,14 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 		Check.notNull(binder, "Binder must be initialized before populating the form");
 		binder.readBean(getEntity());
 		// Refresh ComboBox values to ensure they display correctly
-		refreshComboBoxValues();
+		// refreshComboBoxValues();
 	}
 
 	/** Refreshes ComboBox values for all form fields using reflection. This ensures that ComboBox components display the current entity values
 	 * correctly after binder.readBean() is called. */
 	protected void refreshComboBoxValues() {
-		if (formBuilder == null || getEntity() == null) {
-			return;
-		}
+		Check.notNull(formBuilder, "FormBuilder must be initialized before refreshing ComboBox values");
+		Check.notNull(getEntity(), "Entity must not be null when refreshing ComboBox values");
 		// Get all form fields and refresh their ComboBox values
 		final List<String> fields = getFormFields();
 		for (final String fieldName : fields) {
@@ -149,11 +139,11 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 	protected void save() throws Exception {
 		try {
 			LOGGER.debug("Saving relationship data: {}", getEntity());
-			validateForm();
 			// Write form data to entity using the binder
 			if (binder != null) {
 				binder.writeBean(getEntity());
 			}
+			validateForm();
 			// Delegate to service-specific or callback-based saving
 			performSave();
 			close();

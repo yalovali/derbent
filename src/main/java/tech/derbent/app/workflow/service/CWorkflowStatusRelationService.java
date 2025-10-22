@@ -30,20 +30,20 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 
 	/** Add status transition to workflow with specific roles */
 	@Transactional
-	public CWorkflowStatusRelation addStatusTransition(final CWorkflowEntity workflow, final CActivityStatus fromStatus,
+	public CWorkflowStatusRelation addStatusTransition(final CWorkflowEntity workflowentity, final CActivityStatus fromStatus,
 			final CActivityStatus toStatus, final List<CUserProjectRole> roles) {
-		LOGGER.debug("Adding status transition to workflow {} from {} to {} for roles {}", workflow, fromStatus, toStatus, roles);
-		Check.notNull(workflow, "Workflow must not be null");
+		LOGGER.debug("Adding status transition to workflow {} from {} to {} for roles {}", workflowentity, fromStatus, toStatus, roles);
+		Check.notNull(workflowentity, "Workflow must not be null");
 		Check.notNull(fromStatus, "From status must not be null");
 		Check.notNull(toStatus, "To status must not be null");
-		if ((workflow.getId() == null) || (fromStatus.getId() == null) || (toStatus.getId() == null)) {
+		if ((workflowentity.getId() == null) || (fromStatus.getId() == null) || (toStatus.getId() == null)) {
 			throw new IllegalArgumentException("Workflow and statuses must have valid IDs");
 		}
-		if (relationshipExists(workflow.getId(), fromStatus.getId(), toStatus.getId())) {
+		if (relationshipExists(workflowentity.getId(), fromStatus.getId(), toStatus.getId())) {
 			throw new IllegalArgumentException("This status transition is already defined for this workflow");
 		}
 		final CWorkflowStatusRelation relation = new CWorkflowStatusRelation();
-		relation.setWorkflow(workflow);
+		relation.setWorkflowEntity(workflowentity);
 		relation.setFromStatus(fromStatus);
 		relation.setToStatus(toStatus);
 		relation.setRoles(roles);
@@ -209,7 +209,7 @@ public class CWorkflowStatusRelationService extends CAbstractEntityRelationServi
 	protected void validateRelationship(final CWorkflowStatusRelation relationship) {
 		super.validateRelationship(relationship);
 		Check.notNull(relationship, "Relationship cannot be null");
-		Check.notNull(relationship.getWorkflow(), "Workflow cannot be null");
+		Check.notNull(relationship.getWorkflowEntity(), "Workflow cannot be null");
 		Check.notNull(relationship.getFromStatus(), "From status cannot be null");
 		Check.notNull(relationship.getToStatus(), "To status cannot be null");
 	}
