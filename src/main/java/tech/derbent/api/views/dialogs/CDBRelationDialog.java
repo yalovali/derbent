@@ -93,17 +93,61 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 		}
 	}
 
-	/** Default implementation of populateForm using the binder. Child classes can override. This implementation ensures entity fields are initialized
-	 * before binding to prevent issues with lazy-loaded Hibernate proxies. */
+	/** Default implementation of populateForm using the binder. Child classes can override. This implementation refreshes ComboBox components after
+	 * binding to ensure they display the correct values. */
 	@Override
 	protected void populateForm() {
 		Check.notNull(binder, "Binder must be initialized before populating the form");
-		// Initialize lazy-loaded entity fields before reading into binder
-		// This ensures ComboBoxes can properly match entity values with their items
-		if (getEntity() != null) {
-			getEntity().initializeAllFields();
-		}
 		binder.readBean(getEntity());
+		// Force refresh of all ComboBox components after binding
+		// This is necessary because ComboBox components don't automatically update their display
+		// when binder.readBean() is called - they need explicit refresh
+		refreshComboBoxComponents();
+	}
+
+	/** Refreshes all ComboBox components in the form to ensure they display the current bound values. This method iterates through all form
+	 * components and for each ComboBox, gets the current value and sets it again, which forces the ComboBox to update its display. */
+	private void refreshComboBoxComponents() {
+		if (formBuilder == null) {
+			return;
+		}
+		try {
+			final var formLayout = formBuilder.getFormLayout();
+			if (formLayout == null) {
+				return;
+			}
+			// Recursively find and refresh all ComboBox components
+			refreshComboBoxesInComponent(formLayout);
+		} catch (final Exception e) {
+			LOGGER.error("Error refreshing ComboBox components: {}", e.getMessage());
+		}
+	}
+
+	/** Recursively finds and refreshes ComboBox components within a component tree.
+	 * @param component The component to search */
+	private void refreshComboBoxesInComponent(final com.vaadin.flow.component.Component component) {
+		if (component instanceof com.vaadin.flow.component.combobox.ComboBox) {
+			try {
+				@SuppressWarnings ("unchecked")
+				final com.vaadin.flow.component.combobox.ComboBox<Object> comboBox = (com.vaadin.flow.component.combobox.ComboBox<Object>) component;
+				// Get current value and set it again to force UI refresh
+				final Object currentValue = comboBox.getValue();
+				if (currentValue != null) {
+					comboBox.setValue(null); // Clear first
+					comboBox.setValue(currentValue); // Set again to trigger refresh
+					LOGGER.debug("Refreshed ComboBox with value: {}", currentValue);
+				}
+			} catch (final Exception e) {
+				LOGGER.warn("Failed to refresh ComboBox component: {}", e.getMessage());
+			}
+		} else if (component instanceof com.vaadin.flow.component.HasComponents) {
+			// Recursively process child components using element children
+			component.getElement().getChildren().forEach(element -> {
+				if (element.getComponent().isPresent()) {
+					refreshComboBoxesInComponent(element.getComponent().get());
+				}
+			});
+		}
 	}
 
 	/** Override the save method to use unified relationship save functionality with binder support.
