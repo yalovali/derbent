@@ -1,9 +1,11 @@
 package tech.derbent.api.views.dialogs;
 
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.icon.Icon;
 import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.components.CEnhancedBinder;
@@ -101,11 +103,44 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 		}
 	}
 
-	/** Default implementation of populateForm using the binder. Child classes can override. */
+	/** Default implementation of populateForm using the binder. Child classes can override. This implementation also refreshes ComboBox values to
+	 * ensure they display current entity values. */
 	@Override
 	protected void populateForm() {
 		Check.notNull(binder, "Binder must be initialized before populating the form");
 		binder.readBean(getEntity());
+		// Refresh ComboBox values to ensure they display correctly
+		refreshComboBoxValues();
+	}
+
+	/** Refreshes ComboBox values for all form fields using reflection. This ensures that ComboBox components display the current entity values
+	 * correctly after binder.readBean() is called. */
+	protected void refreshComboBoxValues() {
+		if (formBuilder == null || getEntity() == null) {
+			return;
+		}
+		// Get all form fields and refresh their ComboBox values
+		final List<String> fields = getFormFields();
+		for (final String fieldName : fields) {
+			try {
+				// Get the component from the form builder
+				final Object component = formBuilder.getComponent(fieldName);
+				if (component instanceof ComboBox) {
+					// Get the corresponding getter method for this field
+					final String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+					final Method getter = getEntity().getClass().getMethod(getterName);
+					final Object value = getter.invoke(getEntity());
+					if (value != null) {
+						@SuppressWarnings ("unchecked")
+						final ComboBox<Object> comboBox = (ComboBox<Object>) component;
+						comboBox.setValue(value);
+						LOGGER.debug("Refreshed ComboBox '{}' with value: {}", fieldName, value);
+					}
+				}
+			} catch (final Exception e) {
+				LOGGER.debug("Could not refresh ComboBox '{}': {}", fieldName, e.getMessage());
+			}
+		}
 	}
 
 	/** Override the save method to use unified relationship save functionality with binder support.
@@ -138,6 +173,34 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 		final Class<RelationshipClass> entityClass = (Class<RelationshipClass>) getEntity().getClass();
 		formBuilder = new CFormBuilder<>(parentContent, entityClass, binder, getFormFields());
 		getDialogLayout().add(formBuilder.getFormLayout());
+	}
+
+	/** Sets up the entity relation by calling the appropriate setter method on the relationship entity using reflection. This method automatically
+	 * determines the correct setter based on the master entity's class name. For example, if mainEntity is a CProject, it will call
+	 * setProject(mainEntity) on the relationship entity.
+	 * @param mainEntity The main entity to set on the relationship */
+	protected void setupEntityRelation(MainEntityClass mainEntity) {
+		if (mainEntity == null) {
+			LOGGER.warn("Cannot setup entity relation: mainEntity is null");
+			return;
+		}
+		try {
+			// Get the simple class name without the 'C' prefix (e.g., "CProject" -> "Project")
+			String className = mainEntity.getClass().getSimpleName();
+			if (className.startsWith("C") && className.length() > 1) {
+				className = className.substring(1);
+			}
+			// Build the setter method name (e.g., "setProject")
+			final String setterName = "set" + className;
+			// Find and invoke the setter method
+			final Method setter = getEntity().getClass().getMethod(setterName, mainEntity.getClass());
+			setter.invoke(getEntity(), mainEntity);
+			LOGGER.debug("Successfully set {} relation using reflection", className);
+		} catch (final Exception e) {
+			LOGGER.error("Failed to setup entity relation using reflection for entity {}: {}", mainEntity.getClass().getSimpleName(), e.getMessage());
+			// Fall back to subclass implementation if reflection fails
+			throw new RuntimeException("Failed to setup entity relation. Subclass must override setupEntityRelation() method.", e);
+		}
 	}
 
 	@Override

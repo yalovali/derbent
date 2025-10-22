@@ -24,11 +24,6 @@ public class CProjectUserSettingsDialog extends CUserProjectRelationDialog<CProj
 	}
 
 	@Override
-	protected void setupEntityRelation(CProject project) {
-		getEntity().setProject(project);
-	}
-
-	@Override
 	protected List<String> getFormFields() { return List.of("user", "role", "permission"); }
 
 	@Override

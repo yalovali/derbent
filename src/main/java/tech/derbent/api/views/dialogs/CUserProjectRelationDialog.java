@@ -31,7 +31,7 @@ public abstract class CUserProjectRelationDialog<MasterEntity extends CEntityDB<
 		userService = masterService instanceof CUserService ? (CUserService) masterService : (CUserService) detailService;
 		projectService = masterService instanceof CProjectService ? (CProjectService) masterService : (CProjectService) detailService;
 		this.userProjectSettingsService = userProjectSettingsService;
-		// Set the appropriate entity reference
+		// Set the appropriate entity reference using reflection-based method from parent
 		setupEntityRelation(masterEntity);
 		// Apply colorful styling to make the dialog more visually appealing
 		setupDialog();
@@ -56,6 +56,4 @@ public abstract class CUserProjectRelationDialog<MasterEntity extends CEntityDB<
 	protected abstract String getNewDialogTitle();
 	@Override
 	protected abstract String getNewFormTitle();
-	/** Sets up the entity relation based on the master entity type. Subclasses can override this for custom behavior. */
-	protected abstract void setupEntityRelation(MasterEntity masterEntity);
 }
