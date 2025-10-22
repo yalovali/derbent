@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.icon.Icon;
 import tech.derbent.api.annotations.CFormBuilder;
 import tech.derbent.api.components.CEnhancedBinder;
@@ -94,43 +93,17 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 		}
 	}
 
-	/** Default implementation of populateForm using the binder. Child classes can override. This implementation also refreshes ComboBox values to
-	 * ensure they display current entity values. */
+	/** Default implementation of populateForm using the binder. Child classes can override. This implementation ensures entity fields are initialized
+	 * before binding to prevent issues with lazy-loaded Hibernate proxies. */
 	@Override
 	protected void populateForm() {
 		Check.notNull(binder, "Binder must be initialized before populating the form");
-		binder.readBean(getEntity());
-		// Refresh ComboBox values to ensure they display correctly
-		// refreshComboBoxValues();
-	}
-
-	/** Refreshes ComboBox values for all form fields using reflection. This ensures that ComboBox components display the current entity values
-	 * correctly after binder.readBean() is called. */
-	protected void refreshComboBoxValues() {
-		Check.notNull(formBuilder, "FormBuilder must be initialized before refreshing ComboBox values");
-		Check.notNull(getEntity(), "Entity must not be null when refreshing ComboBox values");
-		// Get all form fields and refresh their ComboBox values
-		final List<String> fields = getFormFields();
-		for (final String fieldName : fields) {
-			try {
-				// Get the component from the form builder
-				final Object component = formBuilder.getComponent(fieldName);
-				if (component instanceof ComboBox) {
-					// Get the corresponding getter method for this field
-					final String getterName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-					final Method getter = getEntity().getClass().getMethod(getterName);
-					final Object value = getter.invoke(getEntity());
-					if (value != null) {
-						@SuppressWarnings ("unchecked")
-						final ComboBox<Object> comboBox = (ComboBox<Object>) component;
-						comboBox.setValue(value);
-						LOGGER.debug("Refreshed ComboBox '{}' with value: {}", fieldName, value);
-					}
-				}
-			} catch (final Exception e) {
-				LOGGER.debug("Could not refresh ComboBox '{}': {}", fieldName, e.getMessage());
-			}
+		// Initialize lazy-loaded entity fields before reading into binder
+		// This ensures ComboBoxes can properly match entity values with their items
+		if (getEntity() != null) {
+			getEntity().initializeAllFields();
 		}
+		binder.readBean(getEntity());
 	}
 
 	/** Override the save method to use unified relationship save functionality with binder support.
