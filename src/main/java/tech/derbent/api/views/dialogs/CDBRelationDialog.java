@@ -93,21 +93,21 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 		}
 	}
 
-	/** Default implementation of populateForm using the binder. Child classes can override. This implementation refreshes ComboBox components after
-	 * binding to ensure they display the correct values. */
+	/** Default implementation of populateForm using the binder. Child classes can override. This implementation ensures ComboBox components display
+	 * correctly by matching entity values with items from the ComboBox's data provider. */
 	@Override
 	protected void populateForm() {
 		Check.notNull(binder, "Binder must be initialized before populating the form");
 		binder.readBean(getEntity());
-		// Force refresh of all ComboBox components after binding
-		// This is necessary because ComboBox components don't automatically update their display
-		// when binder.readBean() is called - they need explicit refresh
-		refreshComboBoxComponents();
+		// After binding, ensure ComboBox values are matched with items from their data providers
+		// This is necessary because the bound entity value might be a different instance than the items
+		refreshComboBoxValues();
 	}
 
-	/** Refreshes all ComboBox components in the form to ensure they display the current bound values. This method iterates through all form
-	 * components and for each ComboBox, gets the current value and sets it again, which forces the ComboBox to update its display. */
-	private void refreshComboBoxComponents() {
+	/** Ensures ComboBox components display correctly by matching bound entity values with items from the ComboBox's data provider. When
+	 * binder.readBean() sets a value on a ComboBox, it might use a different instance of the entity than what's in the ComboBox's items list. This
+	 * method finds the matching item from the items list and sets it explicitly, ensuring the ComboBox displays the value correctly. */
+	private void refreshComboBoxValues() {
 		if (formBuilder == null) {
 			return;
 		}
@@ -119,29 +119,41 @@ public abstract class CDBRelationDialog<RelationshipClass extends CEntityDB<Rela
 			// Recursively find and refresh all ComboBox components
 			refreshComboBoxesInComponent(formLayout);
 		} catch (final Exception e) {
-			LOGGER.error("Error refreshing ComboBox components: {}", e.getMessage());
+			LOGGER.error("Error refreshing ComboBox values: {}", e.getMessage());
 		}
 	}
 
-	/** Recursively finds and refreshes ComboBox components within a component tree.
+	/** Recursively finds and refreshes ComboBox components within a component tree. For each ComboBox, if it has a value from binding, this method
+	 * finds the matching item from the ComboBox's items list and sets it explicitly. This ensures the ComboBox displays the value correctly even if
+	 * the bound entity instance is different from the items list instance.
 	 * @param component The component to search */
+	@SuppressWarnings ("unchecked")
 	private void refreshComboBoxesInComponent(final com.vaadin.flow.component.Component component) {
 		if (component instanceof com.vaadin.flow.component.combobox.ComboBox) {
 			try {
-				@SuppressWarnings ("unchecked")
 				final com.vaadin.flow.component.combobox.ComboBox<Object> comboBox = (com.vaadin.flow.component.combobox.ComboBox<Object>) component;
-				// Get current value and set it again to force UI refresh
-				final Object currentValue = comboBox.getValue();
-				if (currentValue != null) {
-					comboBox.setValue(null); // Clear first
-					comboBox.setValue(currentValue); // Set again to trigger refresh
-					LOGGER.debug("Refreshed ComboBox with value: {}", currentValue);
+				final Object boundValue = comboBox.getValue();
+				if (boundValue != null && boundValue instanceof CEntityDB) {
+					final CEntityDB<?> boundEntity = (CEntityDB<?>) boundValue;
+					final Long id = boundEntity.getId();
+					if (id != null) {
+						// Find matching item from ComboBox's data provider items
+						final java.util.Optional<Object> matchingItem = comboBox.getListDataView().getItems()
+								.filter(item -> item instanceof CEntityDB && id.equals(((CEntityDB<?>) item).getId())).findFirst();
+						if (matchingItem.isPresent()) {
+							// Set the value to the exact instance from the items list
+							comboBox.setValue(matchingItem.get());
+							LOGGER.debug("Matched and set ComboBox value for entity ID: {}", id);
+						} else {
+							LOGGER.warn("Could not find matching item in ComboBox for entity ID: {}", id);
+						}
+					}
 				}
 			} catch (final Exception e) {
 				LOGGER.warn("Failed to refresh ComboBox component: {}", e.getMessage());
 			}
 		} else if (component instanceof com.vaadin.flow.component.HasComponents) {
-			// Recursively process child components using element children
+			// Recursively process child components
 			component.getElement().getChildren().forEach(element -> {
 				if (element.getComponent().isPresent()) {
 					refreshComboBoxesInComponent(element.getComponent().get());
