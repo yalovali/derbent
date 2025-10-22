@@ -153,7 +153,7 @@ public class CComponentListSelection<MasterEntity, DetailEntity> extends CVertic
 	 * @param header The header text for the grid column
 	 * @return Configured Grid instance */
 	private Grid<DetailEntity> createAndSetupGrid(String header) {
-		CGrid<DetailEntity> grid = new CGrid<DetailEntity>(DetailEntity.class);
+		Grid<DetailEntity> grid = new Grid<>();
 		CGrid.setupGrid(grid);
 		grid.setHeight(DEFAULT_GRID_HEIGHT);
 		configureGridColumns(grid, header);

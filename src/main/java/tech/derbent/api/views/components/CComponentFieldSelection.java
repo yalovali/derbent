@@ -187,7 +187,7 @@ public class CComponentFieldSelection<MasterEntity, DetailEntity> extends CHoriz
 	 * @param header The header text for the grid column
 	 * @return Configured Grid instance */
 	private Grid<DetailEntity> createAndSetupGrid(String header) {
-		CGrid<DetailEntity> grid = new CGrid<>(DetailEntity);
+		Grid<DetailEntity> grid = new Grid<>();
 		CGrid.setupGrid(grid);
 		grid.setHeight(DEFAULT_GRID_HEIGHT);
 		configureGridColumn(grid, header);
