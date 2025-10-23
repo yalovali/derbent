@@ -40,11 +40,10 @@ public class CActivityKanbanColumn extends Div {
 	}
 
 	/** Constructor for CActivityKanbanColumn with drop handler.
-	 * @param status    the activity status this column represents
+	 * @param status            the activity status this column represents
 	 * @param activities        the list of activities for this status
 	 * @param onActivityDropped callback function to handle dropped activities */
-	public CActivityKanbanColumn(final CProjectItemStatus status, final List<CActivity> activities,
-			final Consumer<CActivity> onActivityDropped) {
+	public CActivityKanbanColumn(final CProjectItemStatus status, final List<CActivity> activities, final Consumer<CActivity> onActivityDropped) {
 		Check.notNull(status, "Activity status cannot be null");
 		this.activityStatus = status;
 		this.activities = activities != null ? activities : List.of();

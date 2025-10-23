@@ -3,17 +3,19 @@ package tech.derbent.api.domains;
 import java.util.Objects;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.api.interfaces.IKanbanStatus;
 import tech.derbent.app.projects.domain.CProject;
 
+@Entity
 @Table (name = "cprojectitemstatus", uniqueConstraints = @UniqueConstraint (columnNames = {
 		"name", "project_id"
 }))
 @AttributeOverride (name = "id", column = @Column (name = "cprojectitemstatus_id"))
-public class CProjectItemStatus extends CStatus<CProjectItem> implements IKanbanStatus {
+public class CProjectItemStatus extends CStatus<CProjectItemStatus> implements IKanbanStatus {
 
 	public static final String DEFAULT_COLOR = "#28a745";
 	public static final String DEFAULT_ICON = "vaadin:flag";
@@ -34,7 +36,7 @@ public class CProjectItemStatus extends CStatus<CProjectItem> implements IKanban
 	}
 
 	public CProjectItemStatus(final String name, final CProject project) {
-		super(CProjectItem.class, name, project);
+		super(CProjectItemStatus.class, name, project);
 		setColor(DEFAULT_COLOR);
 	}
 

@@ -27,7 +27,6 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 			dataProviderBean = "CProjectItemStatusService", setBackgroundFromColor = true, useIcon = true
 	)
 	protected CProjectItemStatus status;
-	protected CWorkflowEntity workflow;
 
 	/** Default constructor for JPA. */
 	protected CProjectItem() {

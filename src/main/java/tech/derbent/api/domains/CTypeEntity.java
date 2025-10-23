@@ -1,11 +1,15 @@
 package tech.derbent.api.domains;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import tech.derbent.api.annotations.AMetaData;
 import tech.derbent.app.projects.domain.CProject;
+import tech.derbent.app.workflow.domain.CWorkflowEntity;
 
 /** CTypeEntity - Abstract base class for all type entities in the system. Provides common fields for type management including color, sort order, and
  * active status. Layer: Domain (MVC)
@@ -34,6 +38,13 @@ public abstract class CTypeEntity<EntityClass> extends CEntityOfProject<EntityCl
 			hidden = false, order = 4
 	)
 	private Integer sortOrder = 100;
+	@ManyToOne (fetch = FetchType.EAGER)
+	@JoinColumn (name = "workflow_id", nullable = true)
+	@AMetaData (
+			displayName = "Workflow", required = false, readOnly = false, description = "Workflow for this type", hidden = false, order = 5,
+			dataProviderBean = "CWorkflowEntityService"
+	)
+	private CWorkflowEntity workflow;
 
 	/** Default constructor for JPA. */
 	protected CTypeEntity() {
@@ -71,6 +82,10 @@ public abstract class CTypeEntity<EntityClass> extends CEntityOfProject<EntityCl
 	 * @return the sort order */
 	public Integer getSortOrder() { return sortOrder; }
 
+	/** Gets the workflow for this type.
+	 * @return the workflow entity */
+	public CWorkflowEntity getWorkflow() { return workflow; }
+
 	@Override
 	public int hashCode() {
 		// Use the superclass hashCode method for consistency with equals method
@@ -90,6 +105,10 @@ public abstract class CTypeEntity<EntityClass> extends CEntityOfProject<EntityCl
 	/** Sets the sort order for this type.
 	 * @param sortOrder the sort order to set */
 	public void setSortOrder(final Integer sortOrder) { this.sortOrder = sortOrder; }
+
+	/** Sets the workflow for this type.
+	 * @param workflow the workflow entity to set */
+	public void setWorkflow(final CWorkflowEntity workflow) { this.workflow = workflow; }
 
 	@Override
 	public String toString() {

@@ -38,6 +38,7 @@ import tech.derbent.app.companies.domain.CCompany;
 import tech.derbent.app.companies.service.CCompanyInitializerService;
 import tech.derbent.app.companies.service.CCompanyService;
 import tech.derbent.app.decisions.domain.CDecision;
+import tech.derbent.app.decisions.domain.CDecisionStatus;
 import tech.derbent.app.decisions.domain.CDecisionType;
 import tech.derbent.app.decisions.service.CDecisionInitializerService;
 import tech.derbent.app.decisions.service.CDecisionService;
@@ -425,6 +426,17 @@ public class CDataInitializer {
 			LOGGER.error("Error creating order status: {} for project: {}", name, project.getName(), e);
 			throw new RuntimeException("Failed to create order status: " + name, e);
 		}
+	}
+
+	/** Create decision status entity. */
+	private void createDecisionStatus(final String name, final CProject project, final String description, final String color, final boolean isFinal,
+			final int sortOrder) {
+		final CDecisionStatus status = new CDecisionStatus(name, project);
+		status.setDescription(description);
+		status.setColor(color);
+		status.setFinalStatus(isFinal);
+		status.setSortOrder(sortOrder);
+		decisionStatusService.save(status);
 	}
 
 	private void createProjectDigitalTransformation(final CCompany company) {
