@@ -720,7 +720,7 @@ public class CDataInitializer {
 		try {
 			// Get random values from database for dependencies
 			final CDecisionType type1 = decisionTypeService.getRandom(project);
-			final CDecisionStatus status1 = decisionStatusService.getRandom(project);
+			final CProjectItemStatus status1 = activityStatusService.getRandom(project);
 			final CUser user1 = userService.getRandom();
 			// Create first decision
 			final CDecision decision1 = new CDecision("Adopt Cloud-Native Architecture", project);
@@ -740,7 +740,7 @@ public class CDataInitializer {
 			}
 			// Create second decision
 			final CDecisionType type2 = decisionTypeService.getRandom(project);
-			final CDecisionStatus status2 = decisionStatusService.getRandom(project);
+			final CProjectItemStatus status2 = activityStatusService.getRandom(project);
 			final CUser user2 = userService.getRandom();
 			final CDecision decision2 = new CDecision("Implement Agile Methodology", project);
 			decision2.setDescription("Operational decision to transition from waterfall to agile development methodology");

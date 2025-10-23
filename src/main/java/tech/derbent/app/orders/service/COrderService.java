@@ -7,13 +7,14 @@ import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.exceptions.CInitializationException;
-import tech.derbent.app.orders.domain.CCurrency;
-import tech.derbent.app.orders.domain.COrder;
-import tech.derbent.app.orders.domain.COrderStatus;
-import tech.derbent.app.orders.domain.COrderType;
 import tech.derbent.api.services.CEntityOfProjectService;
 import tech.derbent.api.utils.Check;
+import tech.derbent.app.activities.service.CProjectItemStatusService;
+import tech.derbent.app.orders.domain.CCurrency;
+import tech.derbent.app.orders.domain.COrder;
+import tech.derbent.app.orders.domain.COrderType;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
 import tech.derbent.base.users.domain.CUser;
@@ -24,15 +25,15 @@ import tech.derbent.base.users.domain.CUser;
 public class COrderService extends CEntityOfProjectService<COrder> {
 
 	private final CCurrencyService currencyService;
-	private final COrderStatusService orderStatusService;
+	private final CProjectItemStatusService statusService;
 	private final COrderTypeService orderTypeService;
 
 	COrderService(final IOrderRepository repository, final Clock clock, final ISessionService sessionService, final CCurrencyService currencyService,
-			final COrderTypeService orderTypeService, final COrderStatusService orderStatusService) {
+			final COrderTypeService orderTypeService, final CProjectItemStatusService statusService) {
 		super(repository, clock, sessionService);
 		this.currencyService = currencyService;
 		this.orderTypeService = orderTypeService;
-		this.orderStatusService = orderStatusService;
+		this.statusService = statusService;
 	}
 
 	@Override
@@ -74,8 +75,8 @@ public class COrderService extends CEntityOfProjectService<COrder> {
 		final List<COrderType> availableOrderTypes = orderTypeService.listByProject(currentProject);
 		Check.notEmpty(availableOrderTypes, "No order types available for project " + currentProject.getName());
 		entity.setOrderType(availableOrderTypes.get(0));
-		final List<COrderStatus> availableStatuses = orderStatusService.listByProject(currentProject);
-		Check.notEmpty(availableStatuses, "No order statuses available for project " + currentProject.getName());
+		final List<CProjectItemStatus> availableStatuses = statusService.listByProject(currentProject);
+		Check.notEmpty(availableStatuses, "No statuses available for project " + currentProject.getName());
 		entity.setStatus(availableStatuses.get(0));
 	}
 }

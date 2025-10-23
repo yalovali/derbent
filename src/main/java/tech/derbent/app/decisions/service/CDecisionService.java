@@ -5,10 +5,11 @@ import java.time.Clock;
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import tech.derbent.api.domains.CProjectItemStatus;
 import tech.derbent.api.exceptions.CInitializationException;
 import tech.derbent.api.services.CEntityOfProjectService;
+import tech.derbent.app.activities.service.CProjectItemStatusService;
 import tech.derbent.app.decisions.domain.CDecision;
-import tech.derbent.app.decisions.domain.CDecisionStatus;
 import tech.derbent.app.decisions.domain.CDecisionType;
 import tech.derbent.app.projects.domain.CProject;
 import tech.derbent.base.session.service.ISessionService;
@@ -20,14 +21,14 @@ import tech.derbent.base.users.domain.CUser;
 @PreAuthorize ("isAuthenticated()")
 public class CDecisionService extends CEntityOfProjectService<CDecision> {
 
-	private final CDecisionStatusService decisionStatusService;
+	private final CProjectItemStatusService statusService;
 	private final CDecisionTypeService decisionTypeService;
 
 	public CDecisionService(final IDecisionRepository repository, final Clock clock, final ISessionService sessionService,
-			final CDecisionTypeService decisionTypeService, final CDecisionStatusService decisionStatusService) {
+			final CDecisionTypeService decisionTypeService, final CProjectItemStatusService statusService) {
 		super(repository, clock, sessionService);
 		this.decisionTypeService = decisionTypeService;
-		this.decisionStatusService = decisionStatusService;
+		this.statusService = statusService;
 	}
 
 	@Override
@@ -56,8 +57,8 @@ public class CDecisionService extends CEntityOfProjectService<CDecision> {
 			entity.setDecisionType(availableTypes.get(0));
 		}
 		// Note: If no decision type exists, the field will remain null (it's nullable)
-		// Initialize status - get first available decision status for the project (optional field, don't throw if missing)
-		final List<CDecisionStatus> availableStatuses = decisionStatusService.listByProject(currentProject);
+		// Initialize status - get first available status for the project (optional field, don't throw if missing)
+		final List<CProjectItemStatus> availableStatuses = statusService.listByProject(currentProject);
 		if (!availableStatuses.isEmpty()) {
 			entity.setDecisionStatus(availableStatuses.get(0));
 		}
