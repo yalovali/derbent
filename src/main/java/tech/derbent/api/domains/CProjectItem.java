@@ -29,7 +29,7 @@ public abstract class CProjectItem<EntityClass> extends CEntityOfProject<EntityC
 	protected CProjectItemStatus status;
 	// Workflow Management
 	@ManyToOne (fetch = FetchType.EAGER)
-	@JoinColumn (name = "cworkflowentity_id", nullable = true)
+	@JoinColumn (name = "workflow_id", nullable = true)
 	@AMetaData (
 			displayName = "Workflow", required = false, readOnly = false, description = "Workflow definition for status transitions", hidden = false,
 			order = 29, dataProviderBean = "CWorkflowEntityService", setBackgroundFromColor = true, useIcon = true
